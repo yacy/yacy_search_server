@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: Index Control</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Index Administration</h2>
+
+<p>
+The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references<br>
+<form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
+<table border="0" cellpadding="5" cellspacing="0">
+<tr valign="top" class="TableCellDark">
+<td width="70">Word</td>
+<td><input type="text" name="keystring" value="#[keystring]#" size="40" maxlength="80"></td>
+<td width="250"><input type="submit" name="keystringsearch" value="Show URL Entries for Word"></td>
+</tr>
+<tr valign="top" class="TableCellLight">
+<td>Word-Hash:</td>
+<td><input type="text" name="keyhash" value="#[keyhash]#" size="16" maxlength="12">
+<input type="submit" name="keyhashsimilar" value="Generate List"></td>
+<td><input type="submit" name="keyhashsearch" value="Show URL Entries for Word-Hash">
+</td>
+</tr>
+<tr valign="top" class="TableCellLight">
+<td></td><td></td>
+<td><input type="submit" name="keyhashtransfer" value="Transfer to other peer">
+<select name="hostHash">
+#{hosts}#
+<option value="#[hosthash]#">#[hostname]#</option>
+#{/hosts}#
+</select>
+</td>
+</tr>
+</table></p>
+
+<p><table border="0" cellpadding="5" cellspacing="0">
+<tr valign="top" class="TableCellDark">
+<td width="70">URL</td>
+<td><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250"></td>
+<td width="250"><input type="submit" name="urlstringsearch" value="Show Details for URL"></td>
+</tr>
+<tr valign="top" class="TableCellLight">
+<td>URL-Hash:</td>
+<td><input type="text" name="urlhash" value="#[urlhash]#" size="16" maxlength="12">
+<input type="submit" name="urlhashsimilar" value="Generate List"></td>
+<td><input type="submit" name="urlhashsearch" value="Show Details for URL-Hash">
+</td>
+</tr>
+</table><p>
+
+<table border="0" cellpadding="5" cellspacing="0">
+
+<tr valign="top" class="TableCellDark">
+<td width="100">Index Distribution:</td>
+<td><input type="checkbox" name="indexDistribute" align="top" #[indexDistributeChecked]#>
+This enables automated, DHT-ruled Index Transmission to other peers. This is currently only activated for junior peers.</td>
+<td><input type="submit" name="setIndexDistribute" value="set"></td>
+</tr>
+
+<tr valign="top" class="TableCellLight">
+<td width="100">Index Receive:</td>
+<td><input type="checkbox" name="indexReceive" align="top" #[indexReceiveChecked]#>
+Accept remote Index Transmissions. This works only if you are a senior peer. The DHT-rules do not work without this function.</td>
+<td><input type="submit" name="setIndexReceive" value="set"></td>
+</tr>
+</table>
+</form>
+</p>
+
+#[result]#
+
+#[footer]#
+</body>
+</html>

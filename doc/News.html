@@ -1,0 +1,577 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy: News</title>
+<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+<!-- <meta name="Content-Language" content="German, Deutsch, de, at, ch"> -->
+<meta name="Content-Language" content="English, Englisch">
+<meta name="keywords" content="YACY HTTP Proxy search engine spider indexer java network open free download Mac Windwos Software development">
+<meta name="description" content="YACY Software HTTP Proxy Freeware Home Page">
+<meta name="copyright" content="Michael Christen">
+<script src="navigation.js" type="text/javascript"></script>
+<link rel="stylesheet" media="all" href="style.css">
+<!-- Realisation: Michael Christen; Contact: mc<at>anomic.de-->
+</head>
+<body bgcolor="#fefefe" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+<SCRIPT LANGUAGE="JavaScript1.1"><!--
+globalheader();
+//--></SCRIPT>
+<!-- ----- HERE STARTS CONTENT PART ----- -->
+
+<h2>News</h2>
+
+<p>This is essentially the release change-log. We have a <a href="roadmap.txt">release roadmap</a> and releases published here will (hopefully) match the milestones from the roadmap's vision.
+
+<p>Release list in reverse order:
+
+<!--
+<br><p>
+<ul>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+</ul>
+-->
+
+
+<br><p>v0.36_build20050326
+<ul>
+<li>Enhanced thread control and added performance menu: this can be used to steer scheduling tasks and for profiling.</li>
+<li>Enhanced search result ranking.</li>
+</ul>
+
+<br><p>v0.35_build20050306
+<ul>
+
+<li>new Features</li>
+  <ul>
+  <li>new user-profile management and remote access of profiles through the network-page</li>
+  <li>new cookie-monitor. Will be used to manage cookie-filter</li>
+  <li>new template engine and re-design of many administration pages as preparation for upcoming localization</li>
+  <li>now permanent storage of passive peers</li>
+  <li>enabled switch-of of proxy-cache</li>
+  <li>new proxy-indexing monitor and moved proxy-indexing configuration to that new page</li>
+  <li>more functions to DHT-management:</li>
+    <ul>
+    <li>remote indexing tagets now selected by DHT rule</li>
+    <li>remote search now selects hierarchically with DHT-rule</li>
+    </ul>
+  <li>enhanced access control to YaCy administration</li>
+    <ul>
+    <li>passwords are now encoded to MD5-Hashes before stored to httpProxy.conf</li>
+    <li>brute-force password-hack prevention by additional delay's</li>
+    <li>added new 'steering' servlets for automated processes that need authorization</li>
+    </ul>
+  <li>re-design</li>
+    <ul>
+    <li>re-designed main menu: new sub-menu for proxy functions</li>
+    <li>re-design of Network Monitor page</li>
+    <li>re-design of seed database management and implementation of seed-action interface</li>
+    </ul>
+  </ul>
+<li>fixed bugs:</li>
+  <ul>
+  <li>fixed a bug with cache-control</li>
+  <li>fixed a bug with peer-list uploading</li>
+  <li>fixed a bug that provoked indexing of YaCy's own web pages</li>
+  <li>fixed a bug that prevented loading of some web pages: (JavaScript bug) doublequote/singlequote mixture removed</li>
+  <li>better binary-check on files before indexing</li>
+  <li>fixed misbehavior of Network-Page: re-design of enumeration method and auto-heal function in kelondroTree</li>
+  </ul>
+</ul>
+
+
+<br><p>v0.34_build20050208
+<ul>
+<li>Remote transmission of index (RWI) information to other peers with correct DHT position</li>
+  <ul>
+  <li>implemented two new yacy-protocol - commands: yacy/transferRWI and yacy/transferURL for RWI partition transfer</li>
+  <li>selection of DHT positions and selection of correct RWI partitions for transmission</li>
+  <li>performing full flush of index if peer is running in junior mode: now these juniors can contribute to the global index.</li>
+  <li>default full receive of index transmission in senior peers; these peers will currently not transfer indexes. This is a test configuration and senior2senior RWI transmission will be enabled in future releases.</li>
+  <li>Configuration flags (grant/do not grant) in 'Index Control' menu.</li>
+  </ul>
+<li>Enhanced remote search</li>
+  <ul>
+  <li>selelction of less result values: less traffic, faster response.</li>
+  <li>pre-sorting of results in remote peers before transmission: better results</li>
+  </ul>
+<li>more properties in seeds</li>
+  <ul>
+  <li>Flags for "accept remote crawls" and "accept remote indexes"</li>
+  <li>Flags for "grant index distribution" and "grant index receive"</li>
+  <li>Control values for received/send RWI/URL</li>
+  <li>All flag values are shown on Network page</li>
+  </ul>
+<li>Bug-fixes:</li>
+  <ul>
+  <li>no re-set of remote crawl delay after re-connect</li>
+  <li>proxy fail (shows white pages) fixed: better timeout value</li>
+  <li>local indexing = off did not work, fixed.</li>
+  <li>auto-heal of seed.db - fail</li>
+  <li>many minor bug fixed</li>
+  </ul>
+<li>new <a href="http://www.yacy-forum.de">german forum at http://www.yacy-forum.de</a>, provided by Roland Ramthun</li>
+</ul>
+
+<br><p>v0.33_build20050107
+<ul>
+<li>Support for Stop-Words; default stopwords are included; stopwords are excluded for indexing and in search query results</li>
+<li>Skin support</li>
+<li>New start/stop-script for unix/linux daemon init process</li>
+<li>File-Share entries can now have description entries</li>
+<li>Enhanced File-Sharing Menu</li>
+  <ul>
+  <li>Every entry can have a comment attached</li>
+  <li>Comments or picture preview visible in file list</li>
+  <li>File name and comment field can be indexed and globaly searched</li>
+  <li>Files found with search interface are dynamically linked to the actual IP of the peer hosting the file</li>
+  </ul>
+</ul>
+
+<br><p>v0.32_build20041221
+<ul>
+<li>New Crawling-Profiles for Crawl-Threads
+  <ul>
+  <li>every crawl start now defines it's own crawl job; new crawls do not interfere with previously started and still running jobs; all started jobs may run concurrently</li>
+  <li>new crawl properties: accept url's containing '?'; flag for storage of pages in proxy cache; flags for local and remote indexing</li>
+  </ul>
+</li>
+<li>New Design, new documentation, new mascot 'Kaskelix' (appears on search page), new home page location <a href="http://www.yacy.net/yacy">http://www.yacy.net/yacy</a></li>
+<li>Promotion-String on search page</li>
+<li>New shutdown-trigger (no more file polling, new stop scripts)</li>
+<li>Principal-peer gaining after file generation</li>
+<li>New 'Log'-menu: view the application log on the web interface</li>
+<li>Bug-fixes
+  <ul>
+  <li>Termination process should succeed now.</li>
+  <li>Cross-Site-Scripting bug removed</li>
+  <li>Removed deadlock occurred during concurrent crawl job starts</li>
+  </ul>
+</li>
+</ul>
+
+
+<br><p>v0.31_build20041209
+<ul>
+<li>Integrated url filter for crawl jobs (Index Creation - page) and search requests (Search Page).</li>
+<li>Removed a bug that caused sudden termination when a not-valid url was crawled.</li>
+<li>Massively enhanced indexing speed by implementation of an additional word index cache.</li>
+<li>Added button to delete/empty the crawl url stack.</li>
+<li>Many minor changes.</li>
+</ul>
+
+<br><p>v0.30_build20041125
+<ul>
+<li>Implemented Remote Crawling
+  <ul>
+  <li>Every Senior and Principal Peer may now start Remote Crawls: The initiating peer starts with the crawl and may assign URL's to qualified other peers. Those peers load the assigned resource, index them and return the index statistics back to the initiator. Executing peer may only be a Senior or Principal peer.</li>
+  <li>Extended URL management: URL's are now organized in three different sets: Noticed-URL's (not loaded but possibly queued for crawling), Error-URL's (not loaded but may be re-loaded to avoid index loss in case of temporary target server downtime or network problems) and Loaded-URL's. The Loaded-URL's are again divided into six categories:</li>
+<ol>
+<li>remote index: retrieved by other peers</li>
+<li>partly remote/local index: result of search queries</li>
+<li>partly remote/local index: result of index transfer (to be implemented soon)</li>
+<li>local index: result of proxy fetch/prefetch</li>
+<li>local index: result of local crawling</li>
+<li>local index: result of remote crawling requests</li>
+</ol>
+  <li>New monitoring pages: Local Index Monitor for results of LURL's (see above), cases 1-5 and the Global Index Monitor for case 6. Because the results of global crawls are not personal to the peer owner, the monitor page is not protected.</li>
+  <li>Options to allow or disallow remote crawling; either as initiating or executing peer.</li>
+  <li>Idle/Due-Time - management for each peer: to organize remote-crawl load-balancing, a delay time is used to schedule remote crawls. The seed management was extended to store and maintain these delay times.</li>
+  </ul>
+</li>
+<li>Proxy Performance Enhancements
+  <ul>
+  <li>changed+enhanced caching algorithm; re-implemented routines</li>
+  <li>process enhancements in httpc and httpd classes</li>
+  <li>gzip-load mode in httpc fixed</li>
+  <li>removed DNS bottleneck (the java DNS blocks while accessed simultanously)</li>
+  <li>integrated DNS-prefetch</li>
+  </ul>
+</li>
+<li>Implemented Shut-Down Procedure
+  <ul>
+  <li>Integrated notifier procedure in all threads.</li>
+  <li>The application now creates a file 'yacyProxy.control' after start-up.</li>
+  <li>To stop the yacyProxy, remove the control file.</li>
+  <li>Integrated a 'Shutdown' - button on the 'Status'-page which also triggers shut-down</li>
+  <li>After shut-down is initiated the application first processes all scheduled crawling- and indexing tasks which may last some minutes in the worst case.</li>
+  </ul>
+</li>
+<li>Removed bugs
+  <ul>
+  <li>URL normalization</li>
+  <li>many minor bugs</li>
+  </ul>
+</li>
+</ul>
+
+
+<br><p>v0.29_build20041022
+<ul>
+<li>New option to start explicit crawling jobs: a start url and a crawling depth
+(differently from the prefetch depth) can be set.</li>
+<li>Integrated monitoring interface for prefetch/crawling activities.
+The user can now observe the crawling and indexing activity in detail.
+There is also a report page that lists all newly indexed pages with the option
+to delete these indexes again. The interface also reports the initiator
+of the crawling/indexing tasks which can be currently either the prefetch mechanism
+or explicit crawling requests. In future releases the initiator may also refer to
+remote crawling requests.
+</li>
+<li>New caching procedure for database requests on file-system level.
+</li>
+<li>Extended blacklist url matching: parts of a domain may now be matched with wildcards '*'. (the url's path may be matched with regular expressions)</li>
+<li>The application will be re-named. Many parts now refer to the new application name 'yacy', but not all.</li>
+</ul>
+
+<br><p>v0.28_build20041001
+<ul>
+<li>Search results are now searched again for characteristic word patterns.
+The patterns are statistically evaluated and are used to generate
+"search associations",
+shown as hints for further combined search.
+</li>
+<li>Parallelized peer propagation process. This results in very rapid bootstraping.
+</li>
+<li>Integrated new 'score' library for rapid element sorting - used for search
+patterns and rapid bootstraping. May help in future releases to speed up indexing.
+</li>
+<li>Minor bug-fixes.</li>
+</ul>
+
+<br><p>v0.27_build20040924
+<ul>
+<li>Bug fix in remote search result preparation.</li>
+<li>Speed enhancements on search client when doing remote search.</li>
+<li>Small changes in file sharing interface.</li>
+</ul>
+
+<br><p>v0.26_build20040916
+<ul>
+<li>Introduced new 'virtual' TLD (top-level-domain) '.yacy' that the proxy resolves into the peers IP and port numbers:</li>
+  <ul>
+  <li>Every yacy-peer can now be contacted using the peer's name as domain name:
+    Proxies users can obtain any other proxy-hosted pages using the url 'http://&lt;peer-name&gt;.yacy'.</li>
+  <li>Implemented sub-level domains for yacy TLD's: they are matched to subdirectories of the peer's individual web root HTDOCS. (see below)</li>
+  </ul>
+<li>Support for individual web pages:</li>
+  <ul>
+  <li>Every proxy host can serve it's individual web page. We implemented two paths for each server: one default path pointing to &lt;application-root&gt;/htroot for administrative pages and an alternative path for individual use at &lt;application-root&gt;/DATA/HTDOCS.</li>
+  <li>The individual web pages may be accessed either using the new '.yacy' TLD's through another proxy, or optionaly by using the peer's IP:port address. The recommended default address of a proxy is 'http://www.&lt;peer-name&gt;.yacy', which is mapped to &lt;application-root&gt;/DATA/HTDOCS/www/. </li>
+  <li>Integrated an upload/download interface for individial web pages: additional accounts for uploaders and downloaders ensure appropriate authorization. The file-sharing web space can be browsed with an directory servlet. A default sub-domain is assigned to 'http://share.[peer-name].yacy', which is mapped into &lt;application-root&gt;/DATA/HTDOCS/share/.</li>
+  <li>Web clients not using the proxy may contact the new individual default subdomains using the URLs http://&lt;peer-IP&gt;:&lt;peer-port&gt;/www/ and http://&lt;peer-IP&gt;:&lt;peer-port&gt;/share/.
+  </ul>
+<li>Several Bug-fixes:</li>
+  <ul>
+  <li>Date bug appearing when accessing the proxy httpd with the proxy.</li>
+  <li>Additional Time-out catch-up at httpc when a file is submitted without length tag. Also extended general retrieve - time.out.</li>
+  <li>Terminal line restriction of 1000 bytes was too tight (cookies may have 4kb length).</li>
+  <li>Introduced global general time measurement for peer synchronization and balanced hello - round-robin.</li>
+  </ul>
+<li>Enhanced proxy-proxy - mode: 'no-proxy' settings as list of patterns to exceptional dis-allow usage of remote proxies.</li>
+<li>Implemented multiple default-paths for urls pointing to directories.</li>
+<li>Re-design of front-end menu structure.</li>
+<li>Integrated Interface for principal configuration in Settings page</li>
+<li>Re-named the release: integrated YACY name to emphasize that the proxy is mutating into the YACY Search Engine Node</li>
+</ul>
+
+<br><p>v0.25_build20040822
+<ul>
+<li>New Index Administration Menu Item: RWI's (Reverse Word Indexes) may now be inspected.
+Each reference in a word index can be displayed in detail, and optionally be deleted.</li>
+<li>Minor bug fixes in Bootstraping. Major Bug fixes in Index Storage (better Normal Form of URL's).</li>
+<li>Better display of cache content in the Cache Administration.</li>
+</ul>
+
+<br><p>v0.24_build20040816
+<ul>
+<li>New 'Cache' Menu item: The proxy cache can now be inspected. It shows a directory list with http response headers and content to each file in the proxy cache.</li>
+<li>Faster Bootstraping: The connection policy was changed: as long as the proxy status is 'virgin', the most recent known connection is used for bootstraping; then later the least recent for peer distribution.</li>
+<li>Better Formatting in Network Menu.</li>
+</ul>
+
+<br><p>v0.23_build20040808
+<ul>
+<li>Blacklists now provide management of several lists and more import options.</li>
+<li>code cleanup + many minor bugs</li>
+<ul>
+  <li>Messages now work (corrected POST implementation, this also cleaned the way to index distribution); improved message sending, displaying etc.</li>
+  <li>double links / unchecked '#', headlines wrong</li>
+  <li>httpd-speedup (no more temporary files, template prefetch without double-load)</li>
+  <li>much better Bootstraping and more intelligent yacy-peer updating</li>
+  <li>auto-migration of new settings from httpProxy.init</li>
+  <li>much better logging; extensive log configuration options for all parts of the application now in httpProxy.init</li>
+  <li>better search requesting (more results)</li>
+  <li>yacy protocol may now also use other proxies in proxy-proxy-mode</li>
+</ul>
+<li>more documentation</li>
+<ul>
+  <li>permanent demo-page at yacy.net/home.html with wiki</li>
+  <li>new FAQ at http://www.yacy.net/yacy/FAQ.html</li>
+  <li>first step to move YACY to new home http://sourceforge.net/projects/yacy/</li>
+</ul>
+</ul>
+
+<br><p>v0.22_build20040711
+<ul>
+<li>More security bug fixes (dementia accountia, '..' usage in server path, server blacklist too tight for local clients)</li>
+<li>Another advance in better peer distribution and recognition (distinguishes between 'real' disconnected peers and 'hearsay' disconnected peers. Keeps track of online time. No preferences of principal peers in link distribution)</li>
+<li>An option to switch the peer to online mode without using the proxy. This makes life much easier for newbie's.</li>
+<li>A new message function. Within the Network page, one can hit the 'm' and may then send a message to the other peer. The owner of that
+peer can read the message in his/her private message inbox. This function is only in alpha statdium; it works only in rare cases and
+we don't know why. Only for testing.</li>
+<li>Cleaned up the mess of different database and configuration files. All run-time data is now accumulated in the new folder 'DATA'. If you previously generated an index and want to migrate, you simply need to put your old PLASMADB folder into the new DATA folder.</li>
+<li>Clean up of the source mess and partition of them into separate packages</li>
+<li>Some design enhancements of the online interface</li>
+</ul>
+
+<br><p>v0.21_build20040627
+<p>After an announcement on freshmeat.net we got many hits in the newly build p2p-network. We learned from the p2p-propagation behavior and
+implemented a lot of new routines to stabilize the YACY network.
+<ul>
+<li>Better peer analysis, statistics, propagation/distribution (more properties and bug fixes).</li>
+<li>No more JavaScript in online Interface. New template logic for httpd and new online interface look-and-feel, using the new features.</li>
+<li>New FAQ in documentation.</li>
+<li>Protection against hacker and virus attacks: new self-configuring client-IP blocking in serverCore.java</li>
+<li>More information and warnings about security settings to the operator to protect the own peer</li>
+<li>Network statistics and monitor shows status of remote peers and the distributed index</li>
+</ul>
+
+<br><p>v0.20_build20040614
+<p>The first step into the p2p-world: introduction the YACY (yet another cyberspace) p2p network propagation and information wares distribution system. YACY enables in this release a rudimentary index exchange so that you can use YACY to bootstrap a world-wide distributed search engine.</p>
+<ul>
+<li>Added status page on web interface and automatic opening of web browser on status page. Can be switched off on the satus page.</li>
+<li>Implemented still missing element removal and AVL balancing for element insterts in the kelondro database. This ensures logarithmic efforts on database access, which influences the proxy and the search service. Now only AVL balancing after removal must be implented, but it's missing is not critical.</li>
+<li>Added blacklist enhancements and web interface for blacklist editing from Alexander Schier.</li>
+<li>More and better documentation.</li>
+<li>Many minor bug fixes, i.e. non-cacheabilty of web interface, exception catch-up on startup when proxy is used before coloured lists are loaded.</li>
+<li>First p2p elements implemented: every peer on startup looks for other peers and announces it's own startup. The function does not yet actively implement an index exchange, but can repond to remote index queries.</li>
+</ul>
+
+<br><p>v0.16_build20040503
+<p>This release is a major step to make the proxy enterprise-ready: we introduced several security mechanism and access
+restrictions for the proxy and the server. Every security setting can be configured through a web page. Thanks to the new
+HTTPS proxy, the proxy can now be considered as 'complete'.
+<ul>
+<li>implemented a HTTPS proxy, sharing the same proxy port with http;
+    this does not help for more/better indexing since the SSL data is simply passed through.
+    But we can now state to be a 'full' http and https proxy, usable in enterprise environments and internet cafe's.</li>
+<li>two security layers for web server and proxy access: implemented Client-IP - filtering, which adds a virtual Firewall to
+    the application. Every client that does not match the client-IP-filter is blocked. The second layer is a PROXY password
+    protection. All attributes can be configured through a new web page at http://localhost:8080 (standard configuration).</li>
+<li>to protect the configuration pages of the web server, we introduced a password protection for special pages on the web server.
+    Every page that ends with '_p.html' has a protection; the corresponding account can also be set through the local web server.
+    Users shall be encouraged to set this administration account first.</li>
+</ul>
+
+<br><p>v0.15_build20040318
+<ul>
+<li>Extensive code re-engineering</li>
+  <ul>
+  <li>Inserted and further generalized the proxy's genericServer into the AnomicFTPD project. After further enhancements within that project,
+      it was re-inserted in the HTTPProxy. The Switchboard interface now belongs to the genericServer, which is now called the serverCore.</li>
+  <li>Removed the old html parser and replaced it by the new htmlFilter library, which now parses the html files during reading from
+      the remote server. Real-time parsing during streaming html pages is done extremely fast and does not slow down file passing through
+      the proxy. The new htmlFile provides a filter interface, which is now used to filter out content that is defined by keywords.
+      Currently the bluelist 'httpProxy.blue' is used to define these words.</li>
+  <li>Re-engineered the crawler interface and implemented a crawler. Since the crawler does not work in all cases, it is still
+      disabled in this release. You can switch it on by setting the prefetchDepth in the configuration file httpProxy.init</li>
+  </ul>
+<li>Implemented a 304 response. This speeds up all responses in the case of a cache hit combined with a conditional request.
+    Since this combination is fairly common, it noticeable speeds up the proxy.</li>
+<li>New documentation design</li>
+<li>New Search Page design</li>
+</ul>
+
+
+<br><p>v0.14-build20040213
+<ul>
+<li>More Structure to the whole system to lay the basis for the Crawler</li>
+  <ul>
+  <li>The new structure will distinguish between the <i>httpd</i> with it's servlets, the file-servlet and proxy-servlet;
+      the <i>crawler</i> which also holds responsibility for the http cache that is used by the http proxy and the <i>indexing</i>
+      engine 'PLASMA', which is again accessed by the http file server. But even with the crawler concept on board here, we still don't have prefetch now.</li>
+  <li>Moved plasmaTextProvider to httpCrawlerScraper, httpdProxyCache to httpCrawlerCache and httpdSwitchboard to httpCrawlerSwitchboard</li>
+  <li>New configuration value proxyCacheSize: limits the memory amount of the cache; if the cache exceeds this value the oldest entries are deleted</li>
+  </ul>
+  <li>Bug fixes:</li>
+  <ul>
+  <li>Found and eliminated nasty bug that prevented using yahoo mail. (they send several cookies at once)</li>
+  <li>No more indexing of url's with 'cgi' in name or ending with '.js', '.ico', or '.css' (checking content-type for 'text' is not enough; some servers do not transfer right value)</li>
+  <li>Fixed search for words containing numbers and german Umlaute</li>
+  <li>adopted acrypt.java to no using javax.crypt, this was not supported by debian blackdown java 1.3.1. Furthermore, removed -server - flag from httpProxy.sh, that also made blackdown to crash. (you probably want to insert that flag again in your installation)</li>
+  </ul>
+<li>The proxy can now be configured to access another proxy</li>
+</ul>
+
+<br><p>v0.13-build20040210
+<ul>
+<li>Bug fixes:</li>
+  <ul>
+  <li>removed forced unzipping for special cases: either if the file to be transported is 'naturally' in gzip format (.gz, .tgz and .zip) or if zipping would not make sense because it would not yield any compression, as for images. Now the 'Accept-Encoding', created by the browser and send to the server has omitted gzip attributes in this cases. This should lead to less overhead (no gzip en/de-coding) and thus to more speed.</li>
+  <li>now transport of httpc failure response body (especially 404; seemed to be unneccesary, but is not)</li>
+  <li>search result bug (mixed up appearence) removed</li>
+  </ul>
+<li>Performance and structure enhancements:</li>
+  <ul>
+  <li>Extended database capabilities to hold content of dynamic size; new files kelondroRA.java, kelondroAbstractRA.java, kelondroFileRA.java, kelondroDyn.java</li>
+  <li>Used new database features to store the response header information for all files in the cache into one database file. This saves 50% of the number of files in the cache (no more need for the .header - files)</li>
+  <li>Implemented a scheduling that moved the time of cache creation into an proxy-idle - time. This reduces the file operation on a single user system by 50% during web page retrievement.</li>
+  </ul>
+</ul>
+
+<br><p>v0.12-build20040204
+<ul>
+<li>now a <a href="roadmap.txt">release roadmap</a> exists</li>
+<li>enhanced proxy and caching:</li>
+  <ul>
+  <li>integrated blacklist 'httpProxy.black' idea and data from Alexander Schier: forced 404 response for blacklisted hosts. This can be used to 'switch off' specific domains, especially AGIS servers. Can also be used for child protection/parental control. Does not filter content!</li>
+  <li>cache write bug if same file and directory name is used (can be done in URL, but not in cache file system) removed. </li>
+  <li>detailed 404 debugging response in case of failure</li>
+  <li>new config value maxSessions for limit the number of concurrent connections to the proxy</li>
+  <li>Host property bug in httpc for HTTP/1.1 servers removed: now better access to more servers</li>
+  </ul>
+<li>enhanced indexing and searching:</li>
+  <ul>
+  <li>implemented rudimentary ranking and ordering of search results either by quality or by date</li>
+  <li>implemented bluelist 'httpProxy.blue': filtering of all blue-listed words in search expression, result-url and result-description</li>
+  <li>bugfix for combined search, fixed date attached to search results</li>
+  </ul>
+<li>first contact with <a href="http://gnugle.sourceforge.net">Gnugle</a> project and knowledge exchange</li>
+</ul>
+
+<br><p>v0.11-build20040124
+<ul>
+<li>non-empty field servlet bug in index.java</li>
+<li>greatly enhanced indexing</li>
+  <ul>
+  <li>better structure: new classes plasmaIndexEntry, plasmaSearch, plasmaIndex, plasmaIndexCache, plasmaURL</li>
+  <li>index entry caching and transparent flushing implemented</li>
+  </ul>
+<li>catch-up of sleeping connections, enhanced idle check in genericServer.java</li>
+</ul>
+
+<br><p>v0.1-build20040119
+<ul>
+<li>first time published on www.anomic.de!</li>
+<li>client user agent forwarding according to 'yellow'-list</li>
+<li>plasma database</li>
+  <ul>
+  <li>new database sub-path DATABASE</li>
+  <li>new file kelondroRecords.java + kelondroTree.java</li>
+  <li>plasmaStore now saves and retrieves transparently urls in the kelondro database</li>
+  <li>no more XSUMP path, was not necessary for condenser; url attributes will be stored in new DB</li>
+  <li>indexing implemented; still imperformant since that needs caching (later)</li>
+  <li>rudimentary index access through new web page index.html and servlet index.java</li>
+  </ul>
+<li>better client timeout -> better idle check -> no job queue blocking</li>
+<li>new interface genericServerHandler.java</li>
+</ul>
+
+<br><p>build20040110
+<ul>
+<li>blackboard as global configuration set for all threads with global function scheduler</li>
+  <ul>
+  <li>new files httpdSwitchboard.java and plasmaSwitchboard with job control and global config</li>
+  <li>new file plasmaStore.java</li>
+  <li>the plasma blackboard saves its data into plasmaBlackboard.conf</li>
+  <li>cgi control over blackboard (try http://proxy/test.html)</li>
+  <li>new test file HTROOT/switchboard.[html,java]; try http://proxy/switchboard.html</li>
+  </ul>
+<li>condensement on cache (indexing pre-process)</li>
+  <li>renamed file htmlParser to plasmaTextProvider</li>
+  <li>new file plasmaCondenser.java</li>
+  <li>test output of word list per page</li>
+  </ul>
+</ul>
+
+<br><p>build20040107
+<ul>
+<li>better/more configuration</li>
+  <ul>
+  <li>moved httpd.conf to httpProxy.conf</li>
+  <li>new loglevel attribute for server and proxy in httpProxy.conf</li>
+  <li>new clientTimeout attribute for client-proxy connections in httpProxy.conf</li>
+  </ul>
+<li>advanced cache-control</li>
+  <ul>
+  <li>transparent gunzip upon loading of gzip-encoded streams in httpc, all cache files are now unzipped</li>
+  <li>much better cache control, according to RFC standards and recommendations, really usable now</li>
+  </ul>
+<li>implemented scheduler</li>
+  <ul>
+  <li>idle check in genericServer as scheduler trigger</li>
+  <li>new experimental scheduler in httpProxy for new cache arrivals</li>
+  <li>added acrypt.java for different encoding tools</li>
+  <li>added htmlParser.java and implemented scheduled parsing of selected html resources</li>
+  <li>a subdirectory XSUMP is now filled with to-be-indexed text files</li>
+  </ul>
+</ul>
+
+<br><p>build20040105
+<ul>
+<li>advanced header transport transparency</li>
+  <ul>
+  <li>added CaseInsensitiveMap.java, a TreeMap with case-insensitive comparator</li>
+  <li>management of reverse mapping of header symbols</li>
+  <li>better handling of cookies (the yahoo-bug was attacked, but still not eliminated)</li>
+  </ul>
+<li>advanced error case behavior</li>
+  <ul>
+  <li>implemented 404 response when server or files unreachable</li>
+  <li>fixed behavior when file download is interrupted and broken file is in cache</li>
+  <li>fixed session termination bug</li>
+  </ul>
+<li>advanced cache behavior</li>
+  <ul>
+  <li>fixed loading of stale files from cache in some cases</li>
+  <li>203 response instead 200 for files that come from cache</li>
+  </ul>
+</ul>
+
+<br><p>build20031229
+<ul>
+<li>minor bugs ("#!/bin/sh" in shell scripts; +%Y instead +%y; 755, 644 acc rigths)</li>
+<li>major changes in caching load/transport</li>
+<li>added wishlist.txt</li>
+<li>added changelog.txt</li>
+<li>implemented automatic webinterface access if no host given</li>
+  <ul>
+  <li>extended httpd.java to access FileServlets from httpdFileServlet.java</li>
+  </ul>
+<li>file servlet with examples, parameter hand-over via get and post, text and multipart</li>
+  <ul>
+  <li>added GPL lib 'Template.java' from JavaBY Template Engine from Alexey Popov</li>
+  <li>made changes in Template.java</li>
+  <li>added httpdFileServlet.java and classProvider.java to implement template-based CGI file serving</li>
+  <li>added subdir HTROOT with example files test.{java,http}</li>
+  </ul>
+</ul>
+
+<br><p>build20031218
+<ul>
+<li>first public release of YACY as AnomicHTTPProxy_20031218.tar.gz</li>
+<li>basic httpd proxy functions only</li>
+<li>first alpha-tester Alexander</li>
+</ul>
+
+<br><p>build20031215
+<ul>
+<li>first public announcement of project idea on<br>
+<a href="http://www.heise.de/newsticker/foren/go.shtml?read=1&msg_id=4744034&forum_id=50682">
+<font size="1">http://www.heise.de/newsticker/foren/go.shtml?read=1&msg_id=4744034&forum_id=50682</font>
+</a><br>
+by Michael Christen</li>
+</ul>
+
+
+<!-- ----- HERE ENDS CONTENT PART ----- -->
+<SCRIPT LANGUAGE="JavaScript1.1"><!--
+globalfooter();
+//--></SCRIPT>
+</body>
+</html>

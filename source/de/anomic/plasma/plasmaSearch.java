@@ -1,0 +1,446 @@
+// plasmaSearch.java 
+// -----------------------
+// part of YACY
+// (C) by Michael Peter Christen; mc@anomic.de
+// first published on http://www.anomic.de
+// Frankfurt, Germany, 2004
+// last major change: 11.06.2004
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+// Using this software in any meaning (reading, learning, copying, compiling,
+// running) means that you agree that the Author(s) is (are) not responsible
+// for cost, loss of data or any harm that may be caused directly or indirectly
+// by usage of this softare or this documentation. The usage of this software
+// is on your own risk. The installation and usage (starting/running) of this
+// software may allow other people or application to access your computer and
+// any attached devices and is highly dependent on the configuration of the
+// software which must be done by the user of the software; the author(s) is
+// (are) also not responsible for proper configuration and usage of the
+// software, even if provoked by documentation provided together with
+// the software.
+//
+// Any changes to this file according to the GPL as documented in the file
+// gpl.txt aside this file in the shipment you received can be done to the
+// lines that follows this copyright notice here, but changes must not be
+// done inside the copyright notive above. A re-distribution must contain
+// the intact and unchanged copyright notice.
+// Contributions and changes to the program code must be marked as such.
+
+
+package de.anomic.plasma;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import de.anomic.server.*;
+import de.anomic.kelondro.*;
+
+public class plasmaSearch {
+
+    public static final char O_QUALITY = 'q';
+    public static final char O_AGE     = 'a';
+    public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
+    
+    private plasmaCrawlLURL urlStore;
+    private plasmaWordIndex wordIndex;
+
+    public plasmaSearch(plasmaCrawlLURL urlStore, plasmaWordIndex wordIndex) {
+	this.urlStore = urlStore;
+        this.wordIndex = wordIndex;
+    }
+
+    public static int calcVirtualAge(Date modified) {
+	// this calculates a virtual age from a given date
+	// the purpose is to have an age in days of a given modified date
+	// from a fixed standpoint in the past
+	//if (modified == null) return 0;
+	// this is milliseconds. we need days
+	// one day has 60*60*24 seconds = 86400 seconds
+	// we take mod 64**3 = 262144, this is the mask of the storage
+	return (int) ((modified.getTime() / 86400000) % 262144);
+    }
+
+    public synchronized void addWordIndex(URL url, String urlHash, Date urlModified, int quality, String wordHash, int wordCount, int posintext, int posinphrase, int posofphraseint, String language, char doctype, boolean local) {
+        // this is called by the remote search procedure when a new index arrives from remote
+	plasmaWordIndexEntry entry = new plasmaWordIndexEntry(urlHash, wordCount, posintext, posinphrase, posofphraseint, 
+                                                      calcVirtualAge(urlModified), quality, language, doctype, local);
+	try {
+	    wordIndex.addEntry(wordHash, entry);
+	} catch (IOException e) {}
+	// System.out.println("* received one index entry for URL: " + url); // debug
+    }
+    
+    public synchronized int addPageIndex(URL url, String urlHash, Date urlModified, plasmaCondenser condenser,
+			 String language, char doctype) {
+        // this is called by the switchboard to put in a new page into the index
+	// use all the words in one condenser object to simultanous create index entries
+	int age = calcVirtualAge(urlModified);
+	int quality = 0;
+	try {
+	    quality = Integer.parseInt(condenser.getAnalysis().getProperty("INFORMATION_VALUE","0"), 16);
+	} catch (NumberFormatException e) {
+	    System.out.println("INTERNAL ERROR WITH CONDENSER.INFORMATION_VALUE: " + e.toString() + ": in URL " + url.toString());
+	}
+
+        // iterate over all words
+	Iterator i = condenser.getWords().iterator();
+	String word;
+	int count;
+	plasmaWordIndexEntry entry;
+	String wordHash;
+	int c = 0;
+        int p = 0;
+	while (i.hasNext()) {
+	    word = (String) i.next();
+	    count = condenser.wordCount(word);
+	    //if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ": " + c);
+	    wordHash = plasmaWordIndexEntry.word2hash(word);
+	    entry = new plasmaWordIndexEntry(urlHash, count, p++, 0, 0,
+                                         age, quality, language, doctype, true);
+	    try {
+		c += wordIndex.addEntry(wordHash, entry);
+	    } catch (IOException e) {}
+	}
+	//System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
+        return condenser.getWords().size();
+    }
+    
+
+    public static Set words2hashes(String[] words) {
+	HashSet hashes = new HashSet();
+        for (int i = 0; i < words.length; i++) hashes.add(plasmaWordIndexEntry.word2hash(words[i]));
+        return hashes;
+    }
+
+    public static Set words2hashes(Set words) {
+	Iterator i = words.iterator();
+	HashSet hashes = new HashSet();
+	while (i.hasNext()) hashes.add(plasmaWordIndexEntry.word2hash((String) i.next()));
+        return hashes;
+    }
+
+    public synchronized plasmaWordIndexEntity searchWords(Set words, long time) throws IOException {
+	// search for the set of words and return an array of urlEntry elements
+        return searchHashes(words2hashes(words), time);
+    }
+
+    public synchronized plasmaWordIndexEntity searchHashes(Set hashes, long time) throws IOException {
+	// search for the set of hashes and return an array of urlEntry elements
+
+        long stamp = System.currentTimeMillis();
+	TreeMap map = new TreeMap();
+	String singleHash;
+	plasmaWordIndexEntity singleResult;
+        Iterator i = hashes.iterator();
+	while (i.hasNext()) {
+	    // get next hash:
+	    singleHash = (String) i.next();
+
+	    // retrieve index
+	    singleResult = wordIndex.getEntity(singleHash, true);
+
+	    // check result
+	    if (singleResult.size() == 0) return new plasmaWordIndexEntity(null); // as this is a cunjunction of searches, we have no result if any word is not known
+
+	    // store result in order of result size
+	    map.put(serverCodings.enhancedCoder.encodeHex(singleResult.size(), 8) + singleHash, singleResult);
+	}
+
+	// check if there is any result
+	if (map.size() == 0) return new plasmaWordIndexEntity(null); // no result, nothing found
+	
+	// the map now holds the search results in order of number of hits per word
+	// we now must pairwise build up a conjunction of these sets
+	String k = (String) map.firstKey(); // the smallest, which means, the one with the least entries
+	plasmaWordIndexEntity searchResult = (plasmaWordIndexEntity) map.remove(k);
+	while ((map.size() > 0) && (searchResult.size() > 0) && (time > 0)) {
+	    // take the first element of map which is a result and combine it with result
+	    k = (String) map.firstKey(); // the next smallest...
+            time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
+            searchResult = joinConstructive(searchResult, (plasmaWordIndexEntity) map.remove(k), 2 * time / (map.size() + 1));
+	}
+
+	// in 'searchResult' is now the combined search result
+	if (searchResult.size() == 0) return new plasmaWordIndexEntity(null);
+	return searchResult;
+    }
+
+    private static int log2(int x) {
+        int l = 0;
+        while (x > 0) {x = x >> 1; l++;}
+        return l;
+    }
+        
+    private synchronized plasmaWordIndexEntity joinConstructive(plasmaWordIndexEntity i1, plasmaWordIndexEntity i2, long time) throws IOException {
+        if ((i1 == null) || (i2 == null)) return null;
+	if ((i1.size() == 0) || (i2.size() == 0)) return new plasmaWordIndexEntity(null);
+
+	// decide which method to use
+	int high = ((i1.size() > i2.size()) ? i1.size() : i2.size());
+	int low  = ((i1.size() > i2.size()) ? i2.size() : i1.size());
+	int stepsEnum = 10 * (high + low - 1);
+	int stepsTest = 12 * log2(high) * low;
+
+	// start most efficient method
+	if (stepsEnum > stepsTest) {
+	    if (i1.size() < i2.size())
+                return joinConstructiveByTest(i1, i2, time);
+            else
+                return joinConstructiveByTest(i2, i1, time);
+	} else {
+	    return joinConstructiveByEnumeration(i1, i2, time);
+        }
+    }
+    
+    private synchronized plasmaWordIndexEntity joinConstructiveByTest(plasmaWordIndexEntity small, plasmaWordIndexEntity large, long time) throws IOException {
+        System.out.println("DEBUG: JOIN METHOD BY TEST");
+        plasmaWordIndexEntity conj = new plasmaWordIndexEntity(null); // start with empty search result
+        Enumeration se = small.elements(true);
+        plasmaWordIndexEntry ie;
+        long stamp = System.currentTimeMillis();
+        while ((se.hasMoreElements()) && ((System.currentTimeMillis() - stamp) < time)) {
+            ie = (plasmaWordIndexEntry) se.nextElement();
+            if (large.contains(ie)) conj.addEntry(ie);
+        }
+        return conj;
+    }
+    
+    private synchronized plasmaWordIndexEntity joinConstructiveByEnumeration(plasmaWordIndexEntity i1, plasmaWordIndexEntity i2, long time) throws IOException {
+        System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
+        plasmaWordIndexEntity conj = new plasmaWordIndexEntity(null); // start with empty search result
+        Enumeration e1 = i1.elements(true);
+        Enumeration e2 = i2.elements(true);
+        int c;
+        if ((e1.hasMoreElements()) && (e2.hasMoreElements())) {
+            plasmaWordIndexEntry ie1 = (plasmaWordIndexEntry) e1.nextElement();
+            plasmaWordIndexEntry ie2 = (plasmaWordIndexEntry) e2.nextElement();
+            long stamp = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - stamp) < time) {
+                c = ie1.getUrlHash().compareTo(ie2.getUrlHash());
+                if (c < 0) {
+                    if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
+                } else if (c > 0) {
+                    if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
+                } else {
+                    // we have found the same urls in different searches!
+                    conj.addEntry(ie1);
+                    if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
+                    if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
+                }
+            }
+        }
+        return conj;
+    }
+    
+    public synchronized plasmaSearch.result order(plasmaWordIndexEntity searchResult, Set searchhashes, Set stopwords, char[] priority, long maxTime, int minEntries) throws IOException {
+	// we collect the urlhashes from it and construct a List with urlEntry objects
+	plasmaSearch.result acc = new result(searchhashes, stopwords, priority);
+
+	if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
+
+	Enumeration e = searchResult.elements(true);
+	plasmaWordIndexEntry entry;
+        long startTime = System.currentTimeMillis();
+        //String headline;
+	while ((e.hasMoreElements()) && ((acc.sizeFetched() < minEntries) || (System.currentTimeMillis() - startTime < maxTime))) {
+	    entry = (plasmaWordIndexEntry) e.nextElement();
+            //headline = entry.
+	    acc.addResult(entry);
+	}
+        acc.sortResults();
+        System.out.println("plasmaSearch.order: minEntries = " + minEntries + ", effectiveEntries = " + acc.sizeOrdered() + ", demanded Time = " + maxTime + ", effectiveTime = " + (System.currentTimeMillis() - startTime));
+	return acc;
+    }
+    
+    public class result /*implements Enumeration*/ {
+        
+        TreeMap pageAcc; // key = order hash; value = plasmaLURL.entry
+        kelondroMScoreCluster ref;
+        Set searchhashes;
+        Set stopwords;
+        char[] order;
+        ArrayList results;
+        
+        public result(Set searchhashes, Set stopwords, char[] order) {
+            this.pageAcc = new TreeMap();
+            ref = new kelondroMScoreCluster();
+            this.searchhashes = searchhashes;
+            this.stopwords = stopwords;
+            this.order = order;
+            this.results = new ArrayList();
+        }
+        
+        public int sizeOrdered() {
+            return pageAcc.size();
+        }
+        
+        public int sizeFetched() {
+            return results.size();
+        }
+                
+        public boolean hasMoreElements() {
+            return pageAcc.size() > 0;
+        }
+        
+        public plasmaCrawlLURL.entry nextElement() {
+            Object top = pageAcc.lastKey();
+            return (plasmaCrawlLURL.entry) pageAcc.remove(top);
+        }
+        /*
+        protected void putElement(plasmaWordIndexEntry indexEntry) {
+            // find the url entry
+            plasmaCrawlLURL.entry page = urlStore.getEntry(indexEntry.getUrlHash());
+            // check if the url exists; the url may not exist in case it was deleted
+            // somewhere else (i.e. manually through interface etc.)
+            if (page == null) return;
+            URL url = page.url();
+            String descr = page.descr();
+            if ((url == null) || (descr == null)) return;
+            
+            // apply pre-calculated order attributes
+            long ranking = 0;
+            if (order[0] == O_QUALITY)  ranking  = 4096 * indexEntry.getQuality();
+            else if (order[0] == O_AGE) ranking  = 4096 * indexEntry.getVirtualAge();
+            if (order[1] == O_QUALITY)  ranking += indexEntry.getQuality();
+            else if (order[1] == O_AGE) ranking += indexEntry.getVirtualAge();
+
+            // apply query-in-result matching
+            long inc = 4096 * 4096;
+            
+            String[] urlcomps = url.toString().split(splitrex);
+            //printSplitLog(url.toString(), urlcomps);
+            Set urlcomph = words2hashes(urlcomps);
+            String[] descrcomps = descr.split(splitrex);
+            //printSplitLog(descr, descrcomps);
+            Set descrcomph = words2hashes(descrcomps);
+            Iterator i = searchhashes.iterator();
+            String queryhash;
+            while (i.hasNext()) {
+                queryhash = (String) i.next();
+                if (urlcomph.contains(queryhash)) ranking += inc;
+                if (descrcomph.contains(queryhash)) ranking += 10 * inc;
+            }
+            
+            // insert value
+            //System.out.println("Ranking " + ranking + " for url " + url.toString());
+            pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), page);
+            
+            addScoreFiltered(urlcomps);
+            addScoreFiltered(descrcomps);
+        }
+        */
+        protected void addResult(plasmaWordIndexEntry indexEntry) {
+            // this does 3 things:
+            // 1. simply store indexEntry and page to a cache
+            // 2. calculate references and store them to cache
+            // 2. add reference to reference sorting table
+            
+            // find the url entry
+            plasmaCrawlLURL.entry page = urlStore.getEntry(indexEntry.getUrlHash());
+            
+            // take out relevant information for reference computation
+            URL url = page.url();
+            String descr = page.descr();
+            if ((url == null) || (descr == null)) return;
+
+            String[] urlcomps = url.toString().split(splitrex);
+            //printSplitLog(url.toString(), urlcomps);
+
+            String[] descrcomps = descr.split(splitrex);
+            //printSplitLog(descr, descrcomps);
+            
+            // store everything
+            Object[] resultVector = new Object[] {indexEntry, page, urlcomps, descrcomps};
+            results.add(resultVector);
+            
+            // add references
+            addScoreFiltered(urlcomps);
+            addScoreFiltered(descrcomps);
+        }
+        
+        protected void sortResults() {
+            Object[] references = getReferences(16);
+            Set commonSense = new HashSet();
+            for (int i = 0; i < references.length; i++) commonSense.add((String) references[i]);
+            
+            Object[] resultVector;
+            plasmaWordIndexEntry indexEntry;
+            plasmaCrawlLURL.entry page;
+            String[] urlcomps;
+            String[] descrcomps;
+            long ranking;
+            long inc = 4096 * 4096;
+            String queryhash;
+            for (int i = 0; i < results.size(); i++) {
+                // take out values from result array
+                resultVector = (Object[]) results.get(i);
+                indexEntry = (plasmaWordIndexEntry) resultVector[0];
+                page = (plasmaCrawlLURL.entry) resultVector[1];
+                urlcomps = (String[]) resultVector[2];
+                descrcomps = (String[]) resultVector[3];
+                
+                // apply pre-calculated order attributes
+                ranking = 0;
+                if (order[0] == O_QUALITY)  ranking  = 4096 * indexEntry.getQuality();
+                else if (order[0] == O_AGE) ranking  = 4096 * indexEntry.getVirtualAge();
+                if (order[1] == O_QUALITY)  ranking += indexEntry.getQuality();
+                else if (order[1] == O_AGE) ranking += indexEntry.getVirtualAge();
+
+                // apply 'common-sense' heuristic using references
+                for (int j = 0; j < urlcomps.length; j++) if (commonSense.contains(urlcomps[j])) ranking += inc;
+                for (int j = 0; j < descrcomps.length; j++) if (commonSense.contains(descrcomps[j])) ranking += inc;
+                
+                // apply query-in-result matching
+                Set urlcomph = words2hashes(urlcomps);
+                Set descrcomph = words2hashes(descrcomps);
+                Iterator shi = searchhashes.iterator();
+                while (shi.hasNext()) {
+                    queryhash = (String) shi.next();
+                    if (urlcomph.contains(queryhash)) ranking += 10 * inc;
+                    if (descrcomph.contains(queryhash)) ranking += 100 * inc;
+                }
+            
+                // insert value
+                //System.out.println("Ranking " + ranking + " for url " + url.toString());
+                pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), page);
+            }
+        }
+                
+        public Object[] getReferences(int count) {
+            return ref.getScores(count, false, 2, Integer.MAX_VALUE);
+        }
+        
+        private void addScoreFiltered(String[] words) {
+            String word;
+            for (int i = 0; i < words.length; i++) {
+                word = words[i].toLowerCase();
+                if ((word.length() > 2) &&
+                    (!(stopwords.contains(word))) &&
+                    ("http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0) &&
+                    (!(searchhashes.contains(plasmaWordIndexEntry.word2hash(word)))))
+                    ref.incScore(word);
+            }
+        }
+            
+        private void printSplitLog(String x, String[] y) {
+            String s = "";
+            for (int i = 0; i < y.length; i++) s = s + ", " + y[i];
+            if (s.length() > 0) s = s.substring(2);
+            System.out.println("Split '" + x + "' = {" + s + "}");
+        }
+    }
+    
+}

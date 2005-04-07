@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy: Network Overview</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="SubMenu">
+<tr height="10"><td colspan="7" class="MenuHeader">&nbsp;Network Menu</td></tr>
+<tr height="2"><td colspan="7"></td></tr>
+<tr class="TableHeader">
+<td width="25%" class="MenuSubItem">&nbsp;&nbsp;<a href="/Network.html" class="MenuItemLink">Network&nbsp;Overview</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="25%" class="MenuSubItem">&nbsp;&nbsp;<a href="/Network.html?page=1" class="MenuItemLink">Active&nbsp;Peers</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="25%" class="MenuSubItem">&nbsp;&nbsp;<a href="/Network.html?page=2" class="MenuItemLink">Passive&nbsp;Peers</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="25%" class="MenuSubItem">&nbsp;&nbsp;<a href="/Network.html?page=3" class="MenuItemLink">Potential&nbsp;Peers</a>&nbsp;</td>
+</tr>
+</table>
+<br>
+#(page)#
+<h2>Network Overview</h2>
+::
+<h2>Active Peers</h2>
+::
+<h2>Passive Peers</h2>
+::
+<h2>Potential Peers</h2>
+#(/page)#
+<p>
+#(table)#
+<p>no remote #[peertype]# peer for this list known</p>
+::
+<p>Showing #[num]# entries from a total of #[total]# peers.<br>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small">Profile<br>&nbsp;</td>
+<td class="small">Message<br>&nbsp;</td>
+<td class="small">Name*<br>&nbsp;</td>
+#(complete)#::
+<td class="small">Address<br>&nbsp;</td>
+<td class="small">Hash<br>&nbsp;</td>
+#(/complete)#
+<td class="small">Type<br>&nbsp;</td>
+<td class="small">Version<br>&nbsp;</td>
+<td class="small">Contact<br>&nbsp;</td>
+<td class="small">Last Seen<br>#min ago<br>&nbsp;<br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=LastSeen&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=LastSeen&order=down">&gt;</a></td>
+<td class="small">Uptime<br>#minutes<br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=Uptime&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=Uptime&order=down">&gt;</a></td>
+<td class="small">#Links<br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=LCount&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=LCount&order=down">&gt;</a></td>
+<td class="small">#RWI's<br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=ICount&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=ICount&order=down">&gt;</a></td>
+<td class="small">Accept<br>Crawl<br>&nbsp;</td>
+<td class="small">Accept<br>Index<br>&nbsp;</td>
+<td class="small">Sent<br>Words<br>&nbsp;</td>
+<td class="small">Sent<br>URL's<br>&nbsp;</td>
+<td class="small">Received<br>Words<br>&nbsp;</td>
+<td class="small">Received<br>URL's<br>&nbsp;</td>
+<td class="small">#Seeds<br>&nbsp;</td>
+<td class="small">#Connects<br>per hour<br>&nbsp;</td></tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+<td class="small"><a href="ViewProfile.html?hash=#[hash]#" class="small">view</a></td>
+<td class="small"><a href="MessageSend_p.html?hash=#[hash]#" class="small">send</a></td>
+<td class="small"><a href="http://www.#[fullname]#.yacy" class="small">#[shortname]#</a></td>
+#(complete)#
+::
+<td class="small"><a href="http://#[ip]#:#[port]#/NetworkActive.html?ip=" class="small">http://#[ip]#:#[port]#</a></td>
+<td class=small>#[hash]#</td>
+#(/complete)#
+<td class="small">#(type)#junior::senior::<a href="#[url]#" class="small">principal</a>#(/type)#</td>
+<td class="small" align="right">#[version]#</td>
+<td class="small" align="right">#(contact)#passive::direct#(/contact)#</td>
+<td class="small" align="right">#[lastSeen]#</td>
+<td class="small" align="right">#[uptime]#</td>
+<td class="small" align="right">#[links]#</td>
+<td class="small" align="right">#[words]#</td>
+<td class="small" align="right">#(acceptcrawl)#no::yes#(/acceptcrawl)#</td>
+<td class="small" align="right">#(acceptindex)#no::yes#(/acceptindex)#</td>
+<td class="small" align="right">#[sI]#</td>
+<td class="small" align="right">#[sU]#</td>
+<td class="small" align="right">#[rI]#</td>
+<td class="small" align="right">#[rU]#</td>
+<td class="small" align="right">#[seeds]#</td>
+<td class="small" align="right">#[connects]#</td>
+</tr>
+#{/list}#
+</table>
+</p>
+::
+<p><font size="1">All Peers:<br>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader">
+<td class="small">Branch</td>
+<td class="small">#Peers</td>
+<td class="small">#All Links</td>
+<td class="small">#All Words</td>
+</tr>
+<tr class="TableCellDark">
+<td class="small" align="left">Active (connected Senior and Principal)</td>
+<td class="small" align="right">#[active-count]#</td>
+<td class="small" align="right">#[active-links]#</td>
+<td class="small" align="right">#[active-words]#</td>
+</tr>
+<tr class="TableCellDark">
+<td class="small" align="left">Passive (disconnected Senior and Principal)</td>
+<td class="small" align="right">#[passive-count]#</td>
+<td class="small" align="right">#[passive-links]#</td>
+<td class="small" align="right">#[passive-words]#</td>
+</tr>
+<tr class="TableCellDark">
+<td class="small" align="left">Potential (Junior)</td>
+<td class="small" align="right">#[potential-count]#</td>
+<td class="small" align="right">#[potential-links]#</td>
+<td class="small" align="right">#[potential-words]#</td>
+</tr>
+<tr class="TableCellSummary">
+<td class="small" align="left">Network Total</td>
+<td class="small" align="right">#[all-count]#</td>
+<td class="small" align="right">#[all-links]#</td>
+<td class="small" align="right">#[all-words]#</td>
+</tr>
+</table>
+</p>
+<p>Your Peer:<br>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader">
+<td class="small">Name</td>
+<td class="small">Type</td>
+<td class="small">Version</td>
+<td class="small">Uptime<br>#minutes</td>
+<td class="small">#Links</td>
+<td class="small">#RWI's</td>
+<td class="small">Accept<br>Crawl</td>
+<td class="small">Accept<br>Index</td>
+<td class="small">Sent<br>Words</td>
+<td class="small">Sent<br>URL's</td>
+<td class="small">Received<br>Words</td>
+<td class="small">Received<br>URL's</td>
+<td class="small">#Seeds</td>
+<td class="small">#Connects<br>per hour</td>
+</tr>
+<tr class="TableCellDark">
+<td class="small">#[my-name]#</td>
+<td class="small">#(my-type)#virgin::junior::senior::principal#(/my-type)#</td>
+<td class="small" align="right">#[my-version]#</td>
+<td class="small" align="right">#[my-uptime]#</td>
+<td class="small" align="right">#[my-links]#</td>
+<td class="small" align="right">#[my-words]#</td>
+<td class="small" align="right">#(my-acceptcrawl)#no::yes#(/my-acceptcrawl)#</td>
+<td class="small" align="right">#(my-acceptindex)#no::yes#(/my-acceptindex)#</td>
+<td class="small" align="right">#[my-sI]#</td>
+<td class="small" align="right">#[my-sU]#</td>
+<td class="small" align="right">#[my-rI]#</td>
+<td class="small" align="right">#[my-rU]#</td>
+<td class="small" align="right">#[my-seeds]#</td>
+<td class="small" align="right">#[my-connects]#</td>
+</tr>
+</table>
+</p>
+<p>
+#(comment)#
+::
+You are in online mode, but probably no internet resource is available. Please check you internet connection.
+::
+You are either not in online mode or you do not use the proxy option.
+To get connection to the YACY network, you must use the proxy by setting your browsers settings
+('on-demand - mode', see <a href="http://www.anomic.de/AnomicHTTPProxy/Installation.html#wininst">here</a>
+for an installation guide) or you can go online by activating the permanent online mode.
+To do this, press this button:
+<form action="SettingsAck_p.html" method="get">
+<input type="submit" name="pmode" value="go online">
+</form>
+#(/comment)#
+</p></font>
+#(/table)#
+#[footer]#
+</body>
+</html>

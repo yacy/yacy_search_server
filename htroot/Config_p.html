@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY advanced Config</title>
+#[metas]#
+<script>
+<!--
+function element_clicked(element){
+document.getElementById("key").value=element.id;
+document.getElementById("value").value=element.value;
+}
+-->
+</script>
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>advanced Config</h2>
+<p>
+Here are all Config Options from YaCy.<br>
+You can change anything, but some Options need a restart, and some Options can crash YaCy, when wrong values are used.
+</p>
+<select name="options" size="25" style="width: 600">
+#{options}#<option id="#[key]#" value="#[value]#" onclick="element_clicked(this)">#[key]#: #[value]#</option>
+#{/options}#
+</select><br>
+<form action="Config_p.html" method="POST">
+<input type="text" id="key" name="key" size="40">:<input type="text" id="value" name="value" size="40">
+<input type="Submit" value="Save">
+</form>
+
+
+
+#[footer]#
+</body>
+</html>

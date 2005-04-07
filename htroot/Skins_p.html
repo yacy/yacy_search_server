@@ -1,0 +1,44 @@
+<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: Skins</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Skin selection</h2>
+<p>
+You can change the appearance of YACY with skins. Select one of the defaultskins, download new Skins, or create your own skin.</p>
+
+<b>Current Skin: #[currentskin]#</b>
+<p>
+
+<form action="Skins_p.html">
+Skins:<br>
+<select size="10" name="skin">
+#{skinlist}#
+<option value="#[file]#">#[name]#</option>
+#{/skinlist}#
+</select>
+<br>
+<input type="submit" name="use" value="Use">
+<input type="submit" name="delete" value="Delete"><br>
+</form>
+
+<form action="Skins_p.html">
+Install new Skin from URL:<br>
+<input type="text" name="url" size="30"><input type="checkbox" name="use" value="on">Use this Skin<br>
+<input type="submit" value="install">
+</form>
+
+<b>#(status)#
+::
+Unable to get URL: #[url]#
+::
+Error saving the Skin.
+#(status)#</b>
+
+#[footer]#
+</body>
+</html>

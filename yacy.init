@@ -1,0 +1,406 @@
+###
+### YACY Init File
+###
+# These properties will be loaded upon installation.
+# They are used only once for set-up.
+# If you make changes to this file and want these to make any effect,
+# you must delete the httpProxy.conf file in DATA/SETTINGS
+
+# ----------------------------------------------------------------------------
+# the http service configurations
+
+# port number of server
+port = 8080
+
+# shutdown time limit
+# this is the time that a peer takes at most for shutdown
+# the shutdown-procedure is difficult since there are many
+# caches that must be flushed first
+# measured in seconds
+shutdownWaiting = 120
+
+# time-out of client control socket in milliseconds
+# since this applies only to the client-proxy connection,
+# it can be rather short
+# milliseconds
+clientTimeout = 8000
+
+# maximal number of httpd sessions
+# a client may open several connections at one, and the maxSessions value sets
+# a limit on the number of concurrent connections
+httpdMaxSessions = 150
+
+# default root path for the file server
+# may be overridden by the htdocs parameter
+# users shall be encouraged to use the htdocs path for individual content,
+# not this path defined here
+htRootPath = htroot
+htTemplatePath = htroot/env/templates
+
+# individual htroot folder
+# every user may publicise her/his own web pages
+# these pages shall be placed in the path defined here
+# the htdocs path shares its content with the htroot path
+htDocsPath = DATA/HTDOCS
+
+# the default files (typically index.html), if no file name is given
+# The complete path to this file is created by combination with the rootPath
+# you can set a list of defaults, separated by comma
+# the first one is priorized
+defaultFiles = index.html,default.html,search.html,console.html,control.html,welcome.html,wiki.html,forum.html,blog.html,email.html,content.html,monitor.html,share.html,dir.html,readme.txt
+
+# virtual host for httpdFileServlet access
+# for example http://<fileHost>/ shall access the file servlet and
+# return the defaultFile at rootPath
+# either way, http://<fileHost>/ denotes the same as http://localhost:<port>/
+# for the preconfigured value 'localpeer', the url is:
+# http://localpeer/
+fileHost = localpeer
+
+# root path for message files
+messPath = C:/AnomicServer
+
+# specify the path to the MIME matching file table
+mimeConfig = httpd.mime
+
+# specify the path to message resource file
+messConfig = httpd.messages
+
+# proxy use. This server can also act as an caching proxy.
+# to enable that function, set proxy=true
+proxy=true
+
+# a path to the proxy's file cache.
+# This will be used if the server is addressed as a proxy
+proxyCache = DATA/HTCACHE
+
+# the proxy's maximum disc cache size in megabytes
+# there should be enough space for the browsing load of an internet caffee
+# running at 56kbit/s modem speed (this time not unusual)
+# during 3 days, 8 hours a day
+# necessary space = 3 * 8 * 60 * 60 * 56 / 8 = 604800 KB = ca. 590 MB
+# since 600 MB is not much these days (it's below one GB!)
+# we recommend using that space
+#proxyCacheSize = 600
+#for testing:
+proxyCacheSize = 200
+
+# the following mime-types are the whitelist for indexing
+parseableMime=application/xhtml+xml,text/html,text/plain
+
+# media extension string
+# a comma-separated list of extensions that denote media file formats
+# this is important to recognize <a href> - tags as not-html reference
+# These files will be excluded from indexing
+mediaExt=swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar,sit,hqx,img,dmg,tar,gz,ps,pdf,doc,xls,ppt,ram,bz2,arj,jar,deb,torrent,ogg,iso,bin,ace,tgz,rpm
+
+# the proxy's and indexing maximum ram cache size in megabytes
+ramCacheSize = 12
+# ram cache is partitioned into different separate caches
+# we define percentual shares of the complete ram cache
+# values here are computed from usage profiles and should not be changed
+# it is not computed if the complete sum of percentages computes to 100
+ramCachePercentRWI     = 85
+ramCachePercentHTTP    =  6
+ramCachePercentLURL    =  4
+ramCachePercentDHT     =  3
+ramCachePercentMessage =  1
+ramCachePercentWiki    =  1
+
+# Promotion Strings
+# These strings appear in the Web Mask of the YACY search client
+# Set these Strings to cusomize your peer and give any message to
+# other peer users
+promoteSearchPageGreeting =
+
+# the log level, each for a specific software part
+# loglevels are:
+# NULL    = 0: no output at all
+# FAILURE = 1: system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
+# ERROR   = 2: exceptional error, catcheable and non-critical (i.e. file error)
+# WARNING = 3: uncritical service failure, may require user activity (i.e. input required, wrong authorization)
+# SYSTEM  = 4: regular system status information (i.e. start-up messages)
+# INFO    = 5: regular action information (i.e. any httpd request URL)
+# DEBUG   = 6: in-function status debug output
+httpdLoglevel=4
+proxyLoglevel=5
+plasmaLoglevel=5
+yacyLoglevel=5
+
+# the path to the PLASMA database, especially the reverse word index
+dbPath=DATA/PLASMADB
+
+# the path to the LISTS files. Most lists are used to filter web content
+listsPath=DATA/LISTS
+
+# the path to the SKINS files.
+skinPath=DATA/SKINS
+
+# the yellow-list; url's elements
+# (the core of an url; like 'yahoo' in 'de.yahoo.com')
+# appearing in this list will not get a manipulated user agent string
+proxyYellowList=yacy.yellow
+
+# the black-list; url's appearing in this list will not be loaded;
+# instead always a 404 is returned
+# all these files will be placed in the listsPath
+proxyBlackLists=url.default.black
+proxyBlackListsActive=url.default.black
+proxyBlackListsShared=url.default.black
+proxyCookieBlackList=cookie.default.black
+proxyCookieWhiteList=cookie.default.black
+
+# the blue-list; 
+# no search result is locally presented that has any word of the bluelist
+# in the search words, the url or the url's description
+plasmaBlueList=yacy.blue
+
+# this proxy may in turn again access another proxy
+# if you wish to do that, specify it here
+# if you want to switch on the proxy use, set remoteProxyUse=true
+# remoteProxyNoProxy is a no-proxy pattern list for the remote proxy
+remoteProxyHost=192.168.2.2
+remoteProxyPort=4239
+remoteProxyNoProxy=192.*,10.*,127.*,localhost
+remoteProxyUse=false
+#remoteProxyUse=true
+
+# the proxy may filter the content of transferred web pages
+# this is archieved using a special filtering class that can be
+# exchanged like a transformation plug-in
+# If you want to do this, you must implement the htmlFilterTransformer
+# -Interface and set the name of the implementing class here.
+# As a default, we use a filtering Transformer that takes a blacklist
+# and blocks all text fragments where a word from the blacklist appears
+# as the blacklist, we use the search-engine's blue-list
+# please see that class as an implementation example for your own transformers
+pageTransformerClass=htmlFilterContentTransformer
+pageTransformerArg=yacy.blue
+
+# security settigns
+# we provide proxy and server security through a 2-stage security gate:
+# 1st stage: firewall-like access control trough ip filter for clients
+# 2nd stage: password settings for proxy, server and server administrators
+# by default, these settings are weak to simplify set-up and testing
+# every user/adiministrator shall be encouraged to change these settings
+# your can change them also online during run-time on
+# http://localhost:8080/
+
+# proxyClient: client-ip's that may connect the proxy for proxy service
+# if several ip's are allowed then they must be separated by a ','
+# any ip may contain the wildcard-sign '*'
+#proxyClient=192.168.0.4
+proxyClient=localhost,127.0.0.1,192.168*,10*
+
+# serverClient: client-ip's that may connect to the web server,
+# thus are allowed to use the search service
+# if you set this to another value, search requst from others
+# are blocked, but you will also be blocked from using others
+# search services.
+serverClient=*
+
+# proxyAccount: a user:password - pair for proxy authentification
+# leave empty for no authenication
+# example:
+#proxyAccount=jim:knopf
+proxyAccount=
+proxyAccountBase64MD5=
+
+# serverAccount: a user:password - pair for web server access
+# this is the access to the 'public' pages on the server
+# should be always open, but you get the option here
+# if set to a user:password, you get a conflict with the administration account
+# future versions will check if the server is unprotected,
+# because the p2p-index-sharing function will use the http server for
+# data exchange.
+# example
+#serverAccount=dicke:berta
+serverAccount=
+serverAccountBase64MD5=
+
+# adminAccount: a user:password - pair for administration of
+# settings through the web interface
+# should be set to a secret. By default it is without a password
+# but you are encouraged to set it to another value on the page
+# http://localhost:8080/
+#adminAccount=admin:anomic
+adminAccount=
+adminAccountBase64MD5=
+
+# peer-to-peer construction for distributed search
+# we have several stages:
+# 1st: a file within every distribution that has a list of URL's:
+#      -> this is the superseed file
+# 2nd: the files that can be retrieved by the superseed's URL's
+#      are called seed list-files.
+#      -> the seed list-files contain IP/port combinations of running
+#         AnomicHTTPProxies
+# 3rd: the peers that are targeted within the seed files are called superpeers
+# 4th: the superpeers hold and share a list of all client/search/crawl peers
+#
+# some superpeers should be able to create again seed list-files.
+# These superpeers must upload their IP or their list of peer-IP's to a
+# ftp location to create the seed list-file.
+# Everyone who do so should mail his/her new seed location to mc<at>anomic.de
+# The seed list-file location will then be included in the superseed file.
+# This superseed file is available then at two localtions:
+# - it is included in every distribution and
+# - updated through a specific URL-location
+# we see the file name and the url of the superseed here:
+superseedFile=superseed.txt
+superseedLocation=http://www.yacy.net/superseed.txt
+
+# if you are running a principal peer, you must update the following variables
+# This is an ftp account with all relevant information
+# the cycle parameter is the update period in minutes.
+# The update is only made if there had been changes in between.
+seedFTPServer=
+seedFTPAccount=
+seedFTPPassword=
+seedFTPPath=
+seedURL=
+
+# alternatively to an FTP account, a peer can also become a principal peer
+# if the seed-list can be generated as a file and that file is also accessible from
+# the internet. In this case, omit any ftp settings and set this path here.
+# if this path stays empty, an ftp account is considered
+# however, you must always set a seedURL because it is used to check if the
+# file is actually accessible from the internet
+seedFilePath=
+
+# every peer should have a name. inded, we try to give every peer an unique ID,
+# which is necessary for internal organization of the index sharing, but the
+# peer's name is purely informal. No function but information is applied.
+# please change this at your pleasure
+peerName=nameless
+
+# every peer periodically scans for other peers. you can set the time
+# of the period here (minutes)
+peerCycle=2
+
+# The p2p maintenance can run in either of two online modes:
+# - process any job only if we are online, which is technically only the case
+#   if the proxy is used -> mode 1
+# - process jobs periodically, with periodes according to peerCycle -> mode 2
+#onlineMode=1
+onlineMode=2
+
+# Debug mode for YACY network: this will trigger that also local ip's are
+# accepted as peer addresses
+yacyDebugMode=false
+
+# if the process is running behind a NAT or ROUTER, we cannot easily identify
+# the public IP of the process. We can ask a public IP responder, but cannot
+# rely on it. Therefore, AnomicHTTPProxy includes it's own responder.
+# But for the first running peer this is not an option.
+# The author uses a DI-604 router, which can be
+# asked for the public IP. If you own a DI-604 as well, please set the
+# DI604use to true and put in your router password, it will not be used for any
+# other purpose of asking for the IP
+#DI604use=true
+DI604use=false
+DI604pw=
+
+# each time the proxy starts up, it can trigger the local browser to show the
+# status page. This is active by default, to make it easier for first-time
+# users to understand what this application does. You can disable browser
+# pop-up here or set a different start page, like the search page
+# the browser type is optional and works only under certain conditions
+#browserPopUpTrigger=false
+browserPopUpTrigger=true
+#browserPopUpPage=index.html
+browserPopUpPage=Status.html
+browserPopUpApplication=netscape
+
+# the proxy saves it's own seed information. It is positive for the network if
+# the seed does not change it's configuration often (or not at all).
+# The reason for that is that the seed hash is the target for the
+# distributed hash table distribution function.
+# The following file will contain the saved seed:
+yacyOwnSeedFile=DATA/YACYDB/mySeed.txt
+yacyDB=DATA/YACYDB
+
+# index sharing attributes
+# by default, sharing is on. If you want to use the proxy only for
+# local indexing, you may switch this off
+allowDistributeIndex=true
+allowReceiveIndex=true
+
+# the frequency is the number of links per minute, that the peer allowes
+# _every_ other peer to send to this peer
+defaultWordReceiveFrequency=100
+defaultLinkReceiveFrequency=30
+# the default may be overridden for each peer individually, these
+# settings are only available through the online interface
+
+# prefetch parameters
+# the prefetch depth assigns a specific depth to the prefetch mechanism
+# prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all
+# embedded url's, but since embedded image links are loaded by the browser
+# this means that only embedded anchors are prefetched additionally
+# a prefetch of 2 would result in loading of all images and anchor pages
+# of all embedded anchors. Be careful with this value, since even a prefetch
+# of 2 would result in hundreds of prefetched urls for each single proxy fill.
+proxyPrefetchDepth=0
+proxyStoreHTCache=true
+
+# From the 'IndexCreate' menu point you can also define a crawling start point.
+# The crawling works the same way as the prefetch, but it is possible to
+# assign a different crawling depth.
+# Be careful with this number. Consider a branching factor of average 20;
+# A prefect-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
+crawlingDepth=2
+localIndexing=true
+
+# Filter for crawlinig; may be used to restrict a crawl to a specific domain
+# URL's are only indexed and further crawled if they match this filter
+crawlingFilter=.*
+crawlingQ=false
+storeHTCache=false
+storeTXCache=true
+
+# peers may initiate remote crawling tasks.
+# every peer may allow or disallow to be used as crawling-peer;
+# you can also set a maximum crawl depth that can be requested or accepted
+# order=parameters for requester; response=parameters for responder
+# these values apply only for senior-senior - communication
+# The delay value is number of seconds bewteen two separate orders
+crawlOrder=true
+crawlOrderDepth=0
+crawlOrderDelay=8
+crawlResponse=true
+crawlResponseDepth=0
+crawlResponseDelay=30
+
+# indexing-exclusion - rules
+# There rules are important to reduce the number of words that are indexed
+# We distinguish three different sets of stop-words:
+# static   - excludes all words given in the file yacy.stopwords from indexing,
+# dynamic  - excludes all words from indexing which are listed by statistic rules,
+# parental - excludes all words from indexing which had been indexed in the parent web page.
+xsstopw=true
+xdstopw=true
+xpstopw=true
+
+
+# performance-settings
+# delay-times for permanent loops (milliseconds)
+# the idlesleep is the pause that an proces sleeps if the last call to the
+# process job was without execution of anything;
+# the busysleep is the pause after a full job execution
+20_dhtdistribution_idlesleep=20000
+20_dhtdistribution_busysleep=5000
+30_peerping_idlesleep=120000
+30_peerping_busysleep=120000
+40_peerseedcycle_idlesleep=1800000
+40_peerseedcycle_busysleep=1200000
+50_localcrawl_idlesleep=5000
+50_localcrawl_busysleep=1000
+60_globalcrawl_idlesleep=60000
+60_globalcrawl_busysleep=5000
+70_cachemanager_idlesleep=10000
+70_cachemanager_busysleep=4000
+80_dequeue_idlesleep=4000
+80_dequeue_busysleep=1000
+90_cleanup_idlesleep=300000
+90_cleanup_busysleep=300000

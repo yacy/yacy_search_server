@@ -1,0 +1,322 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: Index Creation</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Index Creation</h2>
+
+<p>
+<div class=small><b>
+You can define url's as start points for Web page crawling and start that crawling here.
+</b></div>
+<table border="0" cellpadding="5" cellspacing="0" width="100%">
+<form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+  <tr valign="top" class="TableCellDark">
+    <td width="120"></td>
+    <td></td>
+    <td width="120"></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Crawling Depth:</td>
+    <td class=small><input name="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#"></td>
+    <td class=small colspan="3">
+    A minimum of 1 is recommended.
+    Be careful with the prefetch number. Consider a branching factor of average 20;
+    A prefect-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Crawling Filter:</td>
+    <td class=small><input name="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#"></td>
+    <td class=small colspan="3">
+    This is an emacs-like regular expression that must match with the crawled url.
+    Use this i.e. to crawl a single domain. If you set this filter is would make sense to increase
+    the crawl depth.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Accept URL's with '?' / dynamic URL's:</td>
+    <td class=small><input type="checkbox" name="crawlingQ" align="top" #(crawlingQChecked)#::checked#(/crawlingQChecked)#></td>
+    <td class=small colspan="3">
+    URL's pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
+    is accessed with URL's containing question marks. If you are unshure, do not check this to avoid crawl loops.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Store to Proxy Cache:</td>
+    <td class=small><input type="checkbox" name="storeHTCache" align="top" #(storeHTCacheChecked)#::checked#(/storeHTCacheChecked)#></td>
+    <td class=small colspan="3">
+    This option is used by default for proxy prefetch, but is not needed for explicit crawling.
+    We recommend to leave this switched off unless you want to control the crawl results with the
+    <a href="CacheAdmin_p.html" class=small>Cache Monitor</a>.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Do Local Indexing:</td>
+    <td class=small><input type="checkbox" name="localIndexing" align="top" #(localIndexingChecked)#::checked#(/localIndexingChecked)#></td>
+    <td class=small colspan="3">
+    This should be switched on by default, unless you want to crawl only to fill the
+    <a href="CacheAdmin_p.html" class=small>Proxy Cache</a> without indexing.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Do Remote Indexing</td>
+    <td class=small><input type="checkbox" name="crawlOrder" align="top" #(crawlOrderChecked)#::checked#(/crawlOrderChecked)#></td>
+    <td class=small colspan="3">
+    If checked, the crawl will try to assign the leaf nodes of the search tree to remote peers.
+    If you need your crawling results locally, you must switch this off.
+    Only senior and principal peers can initiate or receive remote crawls.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Exclude <i>static</i> Stop-Words</td>
+    <td class=small><input type="checkbox" name="xsstopw" align="top" #(xsstopwChecked)#::checked#(/xsstopwChecked)#></td>
+    <td class=small colspan="3">
+    To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,
+    check this box.
+    </td>
+  </tr>
+  <!--
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Exclude <i>dynamic</i> Stop-Words</td>
+    <td class=small><input type="checkbox" name="xdstopw" align="top" #(xdstopwChecked)#::checked#(/xdstopwChecked)#></td>
+    <td class=small colspan="3">
+    Excludes all words from indexing which are listed by statistic rules.
+    <i>THIS IS NOT YET FUNCTIONAL</i>
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Exclude <i>parent-indexed</i> words</td>
+    <td class=small><input type="checkbox" name="xpstopw" align="top" #(xpstopwChecked)#::checked#(/xpstopwChecked)#></td>
+    <td class=small colspan="3">
+    Excludes all words from indexing which had been indexed in the parent web page.
+    <i>THIS IS NOT YET FUNCTIONAL</i>
+    </td>
+  </tr>
+  -->
+  <tr valign="top" class="TableCellLight">
+    <td class=small>Start Point:</td>
+    <td class=small colspan="2"><input name="crawlingURL" type="text" size="42" maxlength="256" value="http://"></td>
+    <td class=small><input type="submit" name="crawlingstart" value="Start New Crawl"></td>
+    <td class=small>Existing start url's are re-crawled.
+    Other already visited url's are sorted out as 'double'.
+    A complete re-crawl will be available soon.
+    </td>
+  </tr>
+</form>
+</table>
+</p>
+
+<p><form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+<div class=small><b>Distributed Indexing: </b>
+Crawling and indexing can be done by remote peers.
+Your peer can search and index for other peers and they can search for you.</div>
+<table border="0" cellpadding="5" cellspacing="0" width="100%">
+  <tr valign="top" class="TableCellDark">
+    <td width="30%">
+        <input type="checkbox" name="crawlResponse" align="top" #(crawlResponseChecked)#::checked#(/crawlResponseChecked)#>
+        Accept remote crawling requests</td>
+    <td>
+        <input type="submit" name="distributedcrawling" value="set"></td>
+</table>
+</form></p>
+
+
+<p>
+#(error)#
+::
+Error with profile management. Please stop yacy, delete the File DATA/PLASMADB/crawlProfiles0.db and restart.
+::
+Error: #[errmsg]#
+::
+Application not yet initialized. Sorry. Please wait some seconds and repeat the request.
+::
+<b>ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</b> Please try again with different filter</p><br>
+::
+Crawling of "#[crawlingURL]#" failed. Reason: #[reasonString]#<br>
+::
+Error with url input "#[crawlingStart]#": #[error]#
+#(/error)#
+<br>
+#(info)#
+::
+Set new prefetch depth to "#[newproxyPrefetchDepth]#"
+::
+Crawling of "#[crawlingURL]#" started.
+You can monitor the crawling progress with this page.
+<b>Please wait some seconds before refresh of this page, because the request is enqueued and delayed until the http server is idle for a certain time.</b>
+The indexing result is presented on the
+<a href="IndexLMonitor_p.html">Index Monitor</a>-page.
+<b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>
+If you crawl any un-wanted pages, you can delete them <a href="IndexDelete_p.html">here</a>.<br>
+::
+Removed #[numEntries]# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty
+#(/info)#
+<br>
+#(refreshbutton)#
+::
+<form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+<input type="submit" name="refreshpage" value="refresh">
+</form>
+<br>
+#(/refreshbutton)#
+Crawl Profile List:<br>
+<table border="0" cellpadding="2" cellspacing="1" width="100%">
+  <tr class="TableHeader">
+    <td width="120" class="small"><b>Crawl Thread</b></td>
+    <td class="small"><b>Start URL</b></td>
+	<td width="16" class="small"><b>Depth</b></td>
+	<td width="60" class="small"><b>Filter</b></td>
+	<td width="10" class="small"><b>Accept '?'</b></td>
+	<td width="10" class="small"><b>Fill Proxy Cache</b></td>
+	<td width="10" class="small"><b>Local Indexing</b></td>
+	<td width="10" class="small"><b>Remote Indexing</b></td>
+  </tr>
+#{crawlProfiles}#
+  <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+    <td class="small">#[name]#</td>
+    <td class="small">#[startURL]#</td>
+    <td class="small">#[depth]#</td>
+    <td class="small">#[filter]#</td>
+    <td class="small">#(withQuery)#no::yes#(/withQuery)#</td>
+    <td class="small">#(storeCache)#no::yes#(/storeCache)#</td>
+    <td class="small">#(localIndexing)#no::yes#(/localIndexing)#</td>
+    <td class="small">#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
+  </tr>
+#{/crawlProfiles}#
+</table>
+<br>
+#(remoteCrawlPeers)#
+No remote crawl peers availible.<br>
+::
+#[num]# peers available for remote crawling.
+<table border="0" cellpadding="2" cellspacing="1" width="100%">
+<tr class="TableCellDark">
+  <th width="60" class="small">Idle Peers</th>
+  <td class="small">
+    #{available}##[name]# (#[due]# seconds due)&nbsp;&nbsp; #{/available}#
+  </td>
+</tr>
+<tr class="TableCellLight">
+  <th width="60" class="small">Busy Peers</th>
+  <td class="small">
+    #{busy}##[name]# (#[due]# seconds due)&nbsp;&nbsp;#{/busy}#
+  </td>
+</tr>
+</table>
+#(/remoteCrawlPeers)#
+<br>
+#(rejected)#
+::
+<form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+There are #[num]# entries in the rejected-urls list.
+#(only-latest)#
+::
+Showing latest #[num]# entries.
+<input type="hidden" name="showRejected" value="#[newnum]#">
+<input type="submit" name="moreRejected" value="show more">&nbsp;
+#(/only-latest)#
+<input type="submit" name="clearRejected" value="clear list">
+</form>
+There are #[num]# entries in the rejected-queue:<br>
+<table border="0" cellpadding="2" cellspacing="1" width="100%">
+<tr class="TableHeader">
+  <th class="small">Initiator</th>
+  <th class="small">Executor</th>
+  <th class="small">URL</th>
+  <th class="small">Fail-Reason</th>
+</tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+<td width="60" class="small">#[initiator]#</td>
+<td width="60" class="small">#[executor]#</td>
+<td class="small">#[url]#</td>
+<td class="small">#[failreason]#</td>
+</tr>
+#{/list}#
+</table>
+#(/rejected)#
+<br>
+#(indexing-queue)#
+The indexing queue is empty<br>
+::
+There are #[num]# entries in the indexing queue:<br>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader">
+<th class="small">Initiator</th>
+<th class="small">Depth</th>
+<th class="small">Modified Date</th>
+<th class="small">#HREF</th>
+<td class="small">Anchor Name</th>
+<th class="small">URL</th>
+</tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+<td width="60" class="small">#[initiator]#</td>
+<td width="10" class="small">#[depth]#</td>
+<td width="80" class="small">#[modified]#</td>
+<td width="10" class="small">#[href]#</td>
+<td width="180" class="small">#[anchor]#</td>
+<td class="small">#[url]#</td>
+</tr>
+#{/list}#
+</table>
+#(/indexing-queue)#
+<br>
+#(loader-set)#
+The loader set is empty<br>
+::
+There are #[num]# entries in the loader set:<br>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader">
+<th class="small">Initiator</th>
+<th class="small">Depth</td>
+<th class="small">URL</th>
+</tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+<td width="60" class="small">#[initiator]#</td>
+<td width="10" class="small">#[depth]#</td>
+<td class="small">#[url]#</td>
+</tr>
+#{/list}#
+</table>
+#(/loader-set)#
+<br>
+#(crawler-queue)#
+The crawler queue is empty<br><br>
+::
+There are #[num]# entries in the crawler queue. Showing #[show-num]# most recent entries:
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader">
+<th class="small">Initiator</th>
+<th class="small">Depth</th>
+<th class="small">Modified Date</th>
+<th class="small">Anchor Name</th>
+<th class="small">URL</th>
+</tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+<td width="60" class="small">#[initiator]#</td>
+<td width="10" class="small">#[depth]#</td>
+<td width="80" class="small">#[modified]#</td>
+<td width="180" class="small">#[anchor]#</td>
+<td class="small">#[url]#</td>
+</tr>
+#{/list}#
+</table>
+<br>
+<form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+<input type="submit" name="clearcrawlqueue" value="clear crawl queue">
+</form>
+#(/crawler-queue)#
+</p>
+#[footer]#
+</body>
+</html>

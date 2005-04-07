@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy: Proxy Index Monitor</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Index Monitor for Proxy Indexing</h2>
+<p>
+This is the control page for web pages that your peer has indexed during the current application run-time
+as result of proxy fetch/prefetch.
+<b>No personal or protected page is indexed</b>;
+those pages are detected by Cookie-Use or POST-Parameters (either in URL or as HTTP protocol)
+and automatically excluded from indexing.
+</p>
+
+<p><form action="ProxyIndexingMonitor_p.html" method="post" enctype="multipart/form-data">
+<div class=small><b>Proxy pre-fetch setting:</b>
+this is an automated html page loading procedure that takes actual proxy-requested
+url's as crawling start points for crawling.</div>
+<table border="0" cellpadding="5" cellspacing="0" width="100%">
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Prefetch Depth:</td>
+    <td class=small><input name="proxyPrefetchDepth" type="text" size="2" maxlength="2" value="#[proxyPrefetchDepth]#"></td>
+    <td class=small>
+        A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all
+        embedded url's, but since embedded image links are loaded by the browser
+        this means that only embedded href-anchors are prefetched additionally.</td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Store to Cache:</td>
+    <td class=small><input type="checkbox" name="proxyStoreHTCache" align="top" #(proxyStoreHTCacheChecked)#::checked#(/proxyStoreHTCacheChecked)#></td>
+    <td class=small>It is almost always recommendet to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.</td>
+  </tr>
+  <tr valign="top" class="TableCellLight">
+    <td class=small></td>
+    <td class=small></td>
+    <td class=small><input type="submit" name="proxyprofileset" value="set proxy profile"></td>
+  </tr>
+</table>
+</form></p>
+
+#(info)#
+::
+<br><b>The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.
+Please delete that file and restart.</b><br>
+::
+<br>
+<b>Proxy pre-fetch is now set to depth-#[message]#.</b><br>
+<b>Proxy caching is now set #(caching)#off::on#(/caching)#.</b><br>
+::
+<br><b>An error has occurred: #[error]#.</b><br>
+#(/info)#
+
+<p>Snapshot of recently indexed web pages that passed the proxy:<br>
+#(table4)#
+<i>The stack is empty.</i>
+::
+<i>
+#(size)#
+Showing all #[all]# entries in this stack.
+::
+Showing latest #[count]# lines from a stack of #[all]# entries.
+#(/size)#
+</i>
+<table border="0" cellpadding="2" cellspacing="1" width="100%">
+<tr class="TableHeader">
+<td class="small"><form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
+<input type="submit" name="clearlist#[tabletype]#" value="clear list"></form></td>
+#(showInit)#::<td class="small"><b>Initiator</b></td>#(/showInit)#
+#(showExec)#::<td class="small"><b>Executor</b></td>#(/showExec)#
+<td class="small"><b>Modified Date</b></td>
+<td class="small"><b>#Words</b></td>
+<td class="small"><b>Title</b></td>
+<td class="small"><b>URL</b></td>
+</tr>
+#{indexed}#
+<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+<td width="30" class="small">
+<form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
+<input type="submit" name="deleteentry" value="delete" class="small">
+<input type="hidden" name="table" value="#[tabletype]#">
+<input type="hidden" name="hash" value="#[urlhash]#">
+</form></td>
+#(showInit)#::<td width="60" class="small">#[initiatorSeed]#</td>#(/showInit)#
+#(showExec)#::<td width="60" class="small">#[executorSeed]#</td>#(/showExec)#
+<td width="80" class="small">#[moddate]#</td>
+<td width="40" class="small">#[wordcount]#</td>
+<td width="180" class="small">#[urldescr]#</td>
+<td class="small">#[url]#</td>
+</tr>
+#{/indexed}#
+</table><br>
+#(/table4)#
+</p>
+
+#[footer]#
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: Remote Peer Profile</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Remote Peer Profile:</h2>
+<p>
+#(success)#
+Wrong access of this page
+::
+The requested peer is not known
+::
+The peer #[peername]# is not online.
+::
+<br><h3>This is #[peername]#'s Profile:</h3>
+<table border="1">
+<tr>
+<td>Name</td>
+<td>#(name)#&nbsp;::#[value]##(/name)#</td>
+</tr>
+<tr>
+<td>Nick Name</td>
+<td>#(nickname)#&nbsp;::#[value]##(/nickname)#</td>
+</tr>
+<tr>
+<td>Homepage</td>
+<td>#(homepage)#&nbsp;::#[value]##(/homepage)#</td>
+</tr>
+<tr>
+<td>EMail</td>
+<td>#(email)#&nbsp;::#[value]##(/email)#</td>
+</tr>
+
+<tr>
+<td colspan="2">&nbsp;</td>
+</tr>
+
+<tr>
+<td>ICQ</td>
+<td>#(icq)#&nbsp;::<img src=http://web.icq.com/whitepages/online?icq=#[value]#&img=5">#[value]##(/icq)#</td>
+</tr>
+<tr>
+<td>Jabber</td>
+<td>#(jabber)#&nbsp;::#[value]##(/jabber)#</td>
+</tr>
+<tr>
+<td>Yahoo!</td>
+<td>#(yahoo)#&nbsp;::#[value]##(/yahoo)#</td>
+</tr>
+<tr>
+<td>MSN</td>
+<td>#(msn)#&nbsp;::#[value]##(/msn)#</td>
+</tr>
+
+<tr>
+<td colspan="2">&nbsp;</td>
+</tr>
+
+<tr>
+<td>Comment</td>
+<td><textarea name="comment" cols="40" rows="10" readonly>#(comment)#::#[value]##(/comment)#</textarea></td>
+</tr>
+#{other}#
+<tr>
+<td>#[key]#</td>
+<td>#[value]#</td>
+</tr>
+#{/other}#
+</table>
+#(/success)#
+#[footer]#
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: Settings</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Settings</h2>
+
+<p>This is the configuration page for the AnomicHTTPProxy. Access to this page should be limited to an administration person only.
+To restrict the access to this page, please set an administrator account and password below.</p>
+<p>If you want to restore all settings to the default values,
+but <b>forgot your administration password</b>, you must stop the proxy,
+delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.
+
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend>Administration Account Settings</legend>
+<p>This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:
+<p><table border="0" cellspacing="5">
+<tr valign="top">
+<td>Account Name:</td><td><input name="adminuser" type="text" size="16" maxlength="16" value="#[adminuser]#"></td>
+<td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="adminaccount" value="Submit"></td></tr>
+<tr valign="top"><td>Password:</td><td><input name="adminpw1" type="password" size="16" maxlength="16" value=""></td></tr>
+<tr valign="top"><td>Password (repeat same as above):</td><td><input name="adminpw2" type="password" size="16" maxlength="16" value=""></td></tr>
+</table>
+</fieldset>
+</form><br>
+
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend>General Settings</legend>
+<p>
+<table border="0" cellspacing="5">
+  <tr valign="top">
+    <td>Proxy and Administration Port:</td>
+    <td><input name="port" type="text" size="5" maxlength="5" value="#[port]#"></td>
+    <td><i>Changes will take effect after restart only.</i></td>
+  </tr>
+  <tr valign="top">
+    <td>Shutdown Time Limit:</td>
+    <td><input name="shutdownWaiting" type="text" size="5" maxlength="4" value="#[shutdownWaiting]#"></td>
+    <td>This is the time that a peer takes at most for shutdown.
+        The shutdown-procedure is difficult since there are many caches that must be flushed
+        first (seconds)
+   </td>
+  </tr>
+  <tr valign="top">
+    <td>Peer Name:</td>
+    <td><input name="peername" type="text" size="32" maxlength="32" value="#[peerName]#"></td>
+    <td><b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.
+           Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.</b><br>
+    <i>(hint: choose a name that appears on a web page that tells something about you, vistit the page, get the 'senior' status, and you can be found..)</i></td>
+  </tr>
+  <tr>
+    <td><input type="submit" name="generalsettings" value="submit"></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+</fieldset>
+</form><br>
+
+
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend>Remote Proxy (optional)</legend>
+<p>YaCy can use another proxy to connect to the internet. You can enter the address for a remote proxy here:</p>
+<p><table border="0" cellspacing="5">
+  <tr valign="top">
+    <td>remote Proxy Host:</td>
+    <td><input name="remoteProxyHost" type="text" size="32" maxlength="128" value="#[remoteProxyHost]#"></td>
+  </tr>
+  <tr valign="top">
+    <td>remote Proxy Port:</td>
+    <td><input name="remoteProxyPort" type="text" size="5" maxlength="5" value="#[remoteProxyPort]#"></td>
+  </tr>
+  <tr valign="top">
+    <td>no-Proxy Adresses:</td>
+    <td><input name="remoteProxyNoProxy" type="text" size="32" maxlength="128" value="#[remoteProxyNoProxy]#"></td>
+  </tr>
+  <tr valign="top">
+    <td>use remote Proxy:</td>
+    <td><input type="checkbox" name="remoteProxyUse" align="top" #(remoteProxyUseChecked)#::checked#(/remoteProxyUseChecked)#></td>
+  </tr>
+  <tr valign="top">
+    <td></td>
+    <td><input type="submit" name="proxysettings" value="submit"></td>
+  </tr>
+</table>
+</fieldset>
+</form><br>
+
+<p>You can restrict the access to this proxy using a two-stage security barrier:
+<ul>
+<li>define an <i>access domain</i> with a list of granted client IP-Numbers or with wild cards</li>
+<li>define an <i>user account</i> with a user:password - pair</li>
+</ul><br>
+
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend>Proxy Access Settings</legend>
+<p>This is the account that restricts access to the proxy function. You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet. The default setting should be right in most cases. If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.</p>
+<p><table border="0" cellspacing="5">
+<tr valign="top"><td>IP-Number filter:</td><td colspan ="2"><input name="proxyfilter" type="text" size="50" maxlength="1000" value="#[proxyfilter]#"></td></tr>
+<tr valign="top"><td>Account Name:</td><td><input name="proxyuser" type="text" size="16" maxlength="16" value="#[proxyuser]#"></td>
+<td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="proxyaccount" value="Submit"></td></tr>
+<tr valign="top"><td>Password:</td><td><input name="proxypw1" type="password" size="16" maxlength="16" value=""></td></tr>
+<tr valign="top"><td>Password (repeat same as above):</td><td><input name="proxypw2" type="password" size="16" maxlength="16" value=""></td></tr>
+</table>
+</fieldset>
+</form><br>
+
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend>Server Access Settings</legend>
+<p>Here you can restrict access to the server. By default, the access is not limited, because this function is needed to spawn the p2p index-sharing function. If you block access to your server (setting anything else than '*'), then you will also be blocked from using other peer's indexes for search service. However, blocking access may be correct in enterprise environments where you only want to index your company own web pages.</p>
+<p>ATTENTION: your current IP is recognized as "#[clientIP]#". If the value you enter here does not match with this IP, you will not be able to access the server pages any more</p>
+<p><table border="0" cellspacing="5">
+<tr valign="top"><td>IP-Number filter:</td><td colspan ="2"><input name="serverfilter" type="text" size="50" maxlength="1000" value="#[serverfilter]#"></td></tr>
+<tr valign="top"><td><!--Account Name:</td><td><input name="serveruser" type="text" size="16" maxlength="16" value="#[serveruser]#">--></td>
+<td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="serveraccount" value="Submit"></td></tr>
+<!--
+<tr valign="top"><td>Password:</td><td><input name="serverpw1" type="password" size="16" maxlength="16" value=""></td></tr>
+<tr valign="top"><td>Password (repeat same as above):</td><td><input name="serverpw2" type="password" size="16" maxlength="16" value=""></td></tr>
+-->
+</table>
+</fieldset>
+</form><br>
+
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend>System Behaviour Settings</legend>
+<table>
+<tr><td>Auto pop-up of status page on start-up:</td>
+<td><input type="submit" name="enpop" value="enable"> / <input type="submit" name="dispop" value="disable"></td></tr>
+</table>
+</fieldset>
+</form><br>
+
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset>
+<legend>Seed Upload Settings</legend>
+<p>This is the account for an ftp server where you can host a seed-list file.
+If you set this, you will become a principal peer.
+Your peer will then upload the seed-bootstrap information periodically,
+but only if there had been changes to the seed-list.
+</p>
+<p>
+<table border="0" cellspacing="5">
+  <tr valign="top">
+    <td>Server:</td>
+    <td><input name="seedFTPServer" type="text" size="40" value="#[seedFTPServer]#"></td>
+    <td><i>The host where you have an FTP account, like 'ftp.&lt;my-host&gt;.net'</i></td>
+  </tr>
+  <tr valign="top">
+    <td>Path:</td>
+    <td><input name="seedFTPPath" type="text" size="40" value="#[seedFTPPath]#"></td>
+    <td><i>The remote path on the ftp server, like 'yacy/seed.txt'.
+           Missing sub-directories are NOT created automatically.</i></td>
+  </tr>
+  <tr valign="top">
+    <td>Username:</td>
+    <td><input name="seedFTPAccount" type="text" size="40" value="#[seedFTPAccount]#"></td>
+    <td><i>Your log-in at the ftp server</i></td>
+  </tr>
+  <tr valign="top">
+    <td>Password:</td>
+    <td><input name="seedFTPPassword" type="password" size="40" value="#[seedFTPPassword]#"></td>
+    <td><i>The password</i></td>
+  </tr>
+  <tr>
+  <tr valign="top">
+    <td>URL:</td>
+    <td><input name="seedURL" type="text" size="40" value="#[seedURL]#"></td>
+    <td><i>The URL that can be used to retrieve the uploaded seed file, like
+           http://www.&lt;my-host&gt;.net/yacy/seed.txt'</i></td>
+  </tr>
+  <tr>
+    <td><input type="submit" name="seedFTPsettings" value="submit"></td>
+  </tr>
+</table>
+</fieldset>
+</form><br>
+
+
+#[footer]#
+</body>
+</html>

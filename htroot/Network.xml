@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+#(table)#
+::
+::
+<peers>
+  <active>
+    <count>#[active-count]#</count>
+    <links>#[active-links]#</links>
+    <words>#[active-words]#</words>
+  </active>
+  <passive>
+    <count>#[passive-count]#</count>
+    <links>#[passive-links]#</links>
+    <words>#[passive-words]#</words>
+  </passive>
+  <potential>
+    <count>#[potential-count]#</count>
+    <links>#[potential-links]#</links>
+    <words>#[potential-words]#</words>
+  </potential>
+  <all>
+    <count>#[all-count]#</count>
+    <links>#[all-links]#</links>
+    <words>#[all-words]#</words>
+  </all>
+  <your>
+        <name>#[my-name]#</name>
+        <type>#(my-type)#virgin::junior::senior::principal#(/my-type)#</type>
+        <version>#[my-version]#</version>
+        <uptime>#[my-uptime]#</uptime>
+        <links>#[my-links]#</links>
+        <acceptcrawl>#[my-acceptcrawl]#</acceptcrawl>
+        <acceptindex>#[my-acceptindex]#</acceptindex>
+        <sentwords>#[my-sI]#</sentwords>
+        <senturls>#[my-sU]#</senturls>
+        <receivedwords>#[my-rI]#</receivedwords>
+        <receivedurls>#[my-rU]#</receivedurls>
+        <seeds>#[my-seeds]#</seeds>
+        <connects>#[my-connects]#</connects>
+  </your>
+  <status>#[comment]#</status>
+  <!--
+  0 - nothing
+  1 - online Mode, but no Internet availible
+  2 - not in online Mode
+  -->
+</peers>
+#(/table)#

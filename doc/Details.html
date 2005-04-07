@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY Proxy: details</title>
+<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+<!-- <meta name="Content-Language" content="German, Deutsch, de, at, ch"> -->
+<meta name="Content-Language" content="English, Englisch">
+<meta name="keywords" content="YACY HTTP Proxy search engine spider indexer java network open free download Mac Windwos Software development">
+<meta name="description" content="YACY Software HTTP Proxy Freeware Home Page">
+<meta name="copyright" content="Michael Christen">
+<script src="navigation.js" type="text/javascript"></script>
+<link rel="stylesheet" media="all" href="style.css">
+<!-- Realisation: Michael Christen; Contact: mc<at>anomic.de-->
+</head>
+<body bgcolor="#fefefe" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+<SCRIPT LANGUAGE="JavaScript1.1"><!--
+globalheader();
+//--></SCRIPT>
+<!-- ----- HERE STARTS CONTENT PART ----- -->
+
+
+<h2>Details</h2>
+
+YACY supports the following features:<br>
+<table border="0" cellspacing="1" cellpadding="3" width="100%">
+
+</td></tr><tr><td valign="top"><b>Built-in Indexing and Search Engine</b></td><td>
+The proxy 'scrapes' the content that it passes and creates an index that can be shared between every YACY Proxy daemons.
+You can use the indexing feature for intranet indexing:
+you instantly have a search service at hand to index all intranet-served web pages.
+You don't need to set up a separated search service. And the used <a href="http://www.anomic.de/AnomicPlasma/index.html">PLASMA</a>
+indexing is not a naive quick-hack but an <a href="Technology.html">properly engineered and extremely fast algorithm</a>;
+it is capable of indexing a nearly unlimited number of pages, without slowing down the search process.
+
+</td></tr><tr><td valign="top"><b>p2p-Based Global Search Engine</b></td><td>
+The proxy contains an index-sharing p2p-based algorithm which creates a global distributed search engine.
+This spawns a world-wide global search index.
+The current release is a minimum implementation of this concept and shall prove it's functionality.
+
+</td></tr><tr><td valign="top"><b>Caching HTTP and transparent HTTPS Proxy</b></td><td>
+With optional pre-fetching. HTTP 1.1 with GET/HEAD/POST/CONNECT is supported. This is sufficient for nearly all public web pages.
+HTTP headers are transparently forwarded. HTTPS connections through target port 443 are transparently forwarded, non-443 connections are suppressed to enhance security. Both (HTTP and HTTPS) proxies share the same proxy port, which is by default port 8080.
+
+</td></tr><tr><td valign="top"><b>Privacy</b></td><td>
+The proxy protects your privacy, even with index sharing switched on. Please see the
+<a href="Technology.html">privacy secion in the documentation.</a>;
+
+</td></tr><tr><td valign="top"><b>Security</b></td><td>
+The proxy can block unwanted access by setting IP filters and http passwords.
+You can also enhance security by inspecting the source code, which is completely included.
+Check the code and re-build your own proxy.
+
+</td></tr><tr><td valign="top"><b>Web/HTTP server</b></td><td>
+The built-in HTTP server is the interface to the local and global search service;
+the server may not only be used to administrate the proxy, but also to serve as an intranet/internet web server.
+
+</td></tr><tr><td valign="top"><b>Ideal Internet Cafe Proxy Solution</b></td><td>
+Every Internet Cafe needs a caching proxy instead only a NAT to route the cafe's client traffic from the internet to maximize bandwidth.
+This can only be done using a <i>caching</i> proxy. This is naturally provided by the YACY Proxy. Future versions may also include
+billing support functions.
+
+</td></tr><tr><td valign="top"><b>Terminal-Based</b></td><td>
+the proxy does not need to have a window-based environment and can run on a screen-less router; therefore you may run the proxy on your already existing servers, whatever they are since YACY Proxy is written in java and will run also on your platform.
+
+</td></tr><tr><td valign="top"><b>Open-Source</b></td><td>
+This is a simple necessity for an application that implements a server.
+Don't use any other server software that does not come with the source code.
+<a href="Volunteers.html">Volunteers</a> to extent the proxy are welcome!
+If you think you have a great idea how to extend/enhance/fix the proxy, please let me know.
+
+</td></tr><tr><td valign="top"><b>Easy Installation</b></td><td>
+You just need to decompress the release containter with your favourite decompressor (zip, rar, sit, tar etc. will do)
+and double-click the application wrapper for your OS. No restart necessary.
+Just double-click the application wrapper.
+
+<tr><td width="30%" valign="top"><b>Licence Model</b></td><td width="70%">
+This is GPL-based freeware/open-source software! The release comes with complete source code. See <a href="License.html">the license</a> for details.
+If you like the software, you <a href="Contact.html">may like to hire me<a> for professional consultancy, customizations or integrations.
+
+</td></tr></table>
+
+<!-- ----- HERE ENDS CONTENT PART ----- -->
+<SCRIPT LANGUAGE="JavaScript1.1"><!--
+globalfooter();
+//--></SCRIPT>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: shared Blacklist</title>
+#[metas]#
+<script>
+<!--
+function selectall(){
+	for(i = 1; i<= document.getElementsByName("num")[0].value; i++){
+		document.getElementsByName(i)[0].checked = true;
+	}
+}
+-->
+</script>
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Add Items to Blacklist</h2>
+
+<p>This are all new Blacklist Entries from "#[name]#":</p>
+<p>#[status]#</p>
+
+<form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="num" value="#[num]#">
+<input type="hidden" name="filename" value="#[filename]#">
+<p><table border="1" cellspacing="1" cellpadding="3">
+<tr><th>Hostname/File/URL</th><th width="100%" align="left">Blocked Server</th><th>&nbsp;</th></tr>
+#[table]#
+<tr><td colspan="3"><input type="button" onclick="selectall()" value="select all"><br><input type="submit" value="add" name="add"></td></tr>
+</table></p>
+</form>
+
+#[footer]#
+</body>
+</html>

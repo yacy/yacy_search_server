@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: Index Sharing</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Index Sharing</h2>
+
+<p>
+The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references<br>
+<form action="IndexShare_p.html" method="get">
+<table border="0" cellpadding="6" cellspacing="0">
+<tr valign="top" bgcolor="#CCDDCC">
+<td>Index:&nbsp;</td>
+<td>
+<input type="checkbox" name="distribute" value="" align="top" #[distributecheck]#>distribute&nbsp;<br>
+<input type="checkbox" name="receive" value="" align="top" #[receivecheck]#>receive
+</td><td>
+&nbsp;&nbsp;&nbsp;receive&nbsp;grant&nbsp;default:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;for each remote peer&nbsp;
+</td><td>
+&nbsp;<input type="text" name="linkfreq" value="#[linkfreq]#" size="4" maxlength="4">&nbsp;links/minute&nbsp;<br>
+&nbsp;<input type="text" name="wordfreq" value="#[wordfreq]#" size="4" maxlength="4">&nbsp;words/minute&nbsp;
+</td><td>
+&nbsp;<input type="submit" name="indexsharesetting" value="Set">
+</td>
+</tr></table>
+</form>
+<br>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr valign="top">
+<td width="240"><center>#[dtable]#</center></td>
+<td bgcolor="#889988" width="1px"></td>
+<td width="240"><center>#[rtable]#</center></td>
+</tr>
+</table>
+</p>
+#[footer]#
+</body>
+</html>

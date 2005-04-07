@@ -1,0 +1,127 @@
+// crypt.java 
+// -------------------------------------
+// (C) by Michael Peter Christen; mc@anomic.de
+// first published on http://www.anomic.de
+// Frankfurt, Germany, 2004
+// last major change: 13.05.2004
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+// Using this software in any meaning (reading, learning, copying, compiling,
+// running) means that you agree that the Author(s) is (are) not responsible
+// for cost, loss of data or any harm that may be caused directly or indirectly
+// by usage of this softare or this documentation. The usage of this software
+// is on your own risk. The installation and usage (starting/running) of this
+// software may allow other people or application to access your computer and
+// any attached devices and is highly dependent on the configuration of the
+// software which must be done by the user of the software; the author(s) is
+// (are) also not responsible for proper configuration and usage of the
+// software, even if provoked by documentation provided together with
+// the software.
+//
+// Any changes to this file according to the GPL as documented in the file
+// gpl.txt aside this file in the shipment you received can be done to the
+// lines that follows this copyright notice here, but changes must not be
+// done inside the copyright notive above. A re-distribution must contain
+// the intact and unchanged copyright notice.
+// Contributions and changes to the program code must be marked as such.
+
+package de.anomic.tools;
+
+import java.util.*;
+import java.text.*;
+import de.anomic.server.*;
+
+public class crypt {
+
+    // --------------------------------------------------------
+    // Section: random salt generation
+    // --------------------------------------------------------
+
+    private static long saltcounter = 0;
+    private static Random saltrandom = new Random(System.currentTimeMillis());
+
+    public static String randomSalt() {
+	// generate robust 48-bit random number
+	long salt =
+	    (saltrandom.nextLong() & 0XffffffffffffL) + 
+	    (System.currentTimeMillis() & 0XffffffffffffL) +
+	    ((1001 * saltcounter) & 0XffffffffffffL);
+	saltcounter++;
+	// we generate 48-bit salt values, that are represented as 8-character b64-encoded strings
+	return serverCodings.standardCoder.encodeBase64Long(salt & 0XffffffffffffL, 8);
+    }
+
+    // --------------------------------------------------------
+    // Section: PBE + PublicKey based on passwords encryption
+    // --------------------------------------------------------
+
+    public static final String vDATE = "20030925";
+    public static final String copyright = "[ 'crypt' v" + vDATE + " by Michael Christen / www.anomic.de ]";
+    public static final String magicString = "crypt|anomic.de|0"; // magic identifier inside every '.crypt' - file
+    public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.ENGLISH);
+
+    String cryptMethod; // one of ["TripleDES", "Blowfish", "DESede", "DES"]
+    private static final String defaultMethod = "PBEWithMD5AndDES"; //"DES";
+    
+    public crypt(String pbe) {
+	// this is possible, but not recommended
+	this(pbe, (pbe + "XXXXXXXX").substring(0, 8));
+    }
+
+    public crypt(String pbe, String salt) {
+	this(pbe, salt, defaultMethod);
+    }
+    private crypt(String pbe, String salt, String method) {
+	// a Password-Based Encryption. The SecretKey is created on the fly
+	    if (salt.length() > 8) salt = salt.substring(0,8);
+	    if (salt.length() < 8) salt = (salt + "XXXXXXXX").substring(0,8);
+	            
+	    // Create a cipher and initialize it for encrypting end decrypting
+	    cryptMethod = method;
+    }
+
+    // --------------------------------------------------------
+    // Section: simple Codings
+    // --------------------------------------------------------
+
+    public static String simpleEncode(String content) {
+	return simpleEncode(content, null, 'b');
+    }
+
+    public static String simpleEncode(String content, String key) {
+	return simpleEncode(content, key, 'b');
+    }
+
+    public static String simpleEncode(String content, String key, char method) {
+	if (key == null) key = "NULL";
+	if (method == 'p') return "p|" + content;
+	if (method == 'b') return "b|" + serverCodings.enhancedCoder.encodeBase64String(content);
+	if (method == 'z') return "z|" + serverCodings.enhancedCoder.encodeBase64(gzip.gzipString(content));
+	return null;
+    }
+
+    public static String simpleDecode(String encoded, String key) {
+	if ((encoded == null) || (encoded.length() < 3)) return null;
+	if (encoded.charAt(1) != '|') return encoded; // not encoded
+	char method = encoded.charAt(0);
+	encoded = encoded.substring(2);
+	if (method == 'p') return encoded;
+	if (method == 'b') return serverCodings.enhancedCoder.decodeBase64String(encoded);
+	if (method == 'z') return gzip.gunzipString(serverCodings.enhancedCoder.decodeBase64(encoded));
+	return null;
+    }
+
+}

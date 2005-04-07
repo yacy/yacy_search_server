@@ -1,0 +1,35 @@
+yacyInit.sh - start/stop script
+provided by Matthias Kempka, 26.12.2004
+
+INSTALLATION:
+This installation is tested on Debian systems. It is likely that other
+distributions have other paths.
+
+1. copy yacyInit.sh (the init skript) to /etc/init.d
+2. edit /etc/init.d/yacyInit.sh and set the variables
+   DAEMON_DIR - the installation directory of yacy (the direcory
+		  where the file startYACY.sh is).
+   USER - the user whose rights the proxy should have. This should not
+		  be root. The user must have write access to DAEMON_DIR.
+   PATH - The default path should be ok for most systems. Ensure that java is
+		  in the path, though.
+3. Link /etc/init.d in the runlevel-directories, these are the
+   directories where the scripts reside that are called when entering
+   a runlevel. On Debian systems, these are /etc/rc0.d, /etc/rc1.d and
+   so on. I.e., as root issue the following commands. Note, that these
+   settings are ok for Debian systems and most likely have to be
+   adapted to work on other systems. Please write to lists@mkempka.de
+   for comments on that.
+
+ln -s /etc/init.d/yacyInit.sh /etc/rc0.d/K05yacyInit.sh
+ln -s /etc/init.d/yacyInit.sh /etc/rc1.d/K05yacyInit.sh
+ln -s /etc/init.d/yacyInit.sh /etc/rc2.d/S95yacyInit.sh
+ln -s /etc/init.d/yacyInit.sh /etc/rc3.d/S95yacyInit.sh
+ln -s /etc/init.d/yacyInit.sh /etc/rc4.d/S95yacyInit.sh
+ln -s /etc/init.d/yacyInit.sh /etc/rc5.d/S95yacyInit.sh
+ln -s /etc/init.d/yacyInit.sh /etc/rc6.d/K05yacyInit.sh
+
+
+TODO: 
+- find log possibility when starting via the start-skript
+- create concept which user should start yacy

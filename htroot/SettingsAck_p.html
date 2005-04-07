@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: Settings Acknowledge</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Settings Receipt:</h2>
+
+<p>
+#(info)#
+<b>No information has been submitted</b><br>
+Nothing changed
+::
+<b>Error with submitted information.</b><br>
+Nothing changed.
+::
+<b>The user name must be given.</b><br>
+Your request cannot be processed.<br>Nothing changed.
+::
+<b>The password redundancy check failed. You have probably misstyped your password.</b><br>
+Your request cannot be processed.<br>Nothing changed.
+::
+<b>Shutting down.</b><br>Application will terminate after working off all crawling tasks.
+::
+<b>Your administration account setting has been made.</b><br>
+Your new administration account name is #[user]#. The password has been accepted.<br>If you go back to the Settings page, you must log-in again.
+::
+<b>Your proxy account setting has been changed.<br>
+Your proxy account check has been disabled, since you did not supply a password.</b><br>
+The new proxy IP filter is set to #[filter]#
+::
+<b>Your proxy account setting has been changed.</b><br>
+Your new proxy account name is #[user]#. The password has been accepted.<br>
+If you open any public web page through the proxy, you must log-in then.<br>
+The new proxy IP filter is set to #[filter]#.
+::
+<b>Your server access filter is now set to #[filter]#</b><br>
+<!--Your new server account name is #[user]#. The password has been accepted.<br>
+If you go back to the Settings page, you must log-in again.-->
+::
+Auto pop-up of the Status page is now <b>disabled</b><br>
+::
+Auto pop-up of the Status page is now <b>enabled</b><br>
+::
+You are now permanently <b>online</b>. After a short while you should see the effect on the <a href="Status.html">status</a> page.<br>
+::
+<b>Port is: #[port]#</b><br>
+<b>PeerName is: #[peerName]#</b><br>
+<b>Shutdown time is: #[shutdownWaiting]# seconds</b><br>
+<u>if you changed the Port, you need to restart the Proxy.</u>
+::
+<b>SeedFTP Server Settings changed. You are now a principal peer.</b><br>
+::
+<b>SeedFTP Server Settings changed, but something is wrong. Please return to the settings page and modify the data.</b><br>
+::
+<b>The remote-proxy setting has been changed</b><br>
+The new setting is effective immediately, you don't need to re-start.
+#(/info)#
+</p>
+<p>You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.</p>
+
+#[footer]#
+</body>
+</html>

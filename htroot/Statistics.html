@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy: Statistics</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="SubMenu">
+<tr height="10"><td colspan="7" class="MenuHeader">&nbsp;Statistics Menu</td></tr>
+<tr height="2"><td colspan="7"></td></tr>
+<tr class="TableHeader">
+<td width="50%" class="MenuSubItem">&nbsp;&nbsp;<a href="/Statistics.html" class="MenuItemLink">Backlinks</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="50%" class="MenuSubItem">&nbsp;&nbsp;<a href="/Statistics.html?page=1" class="MenuItemLink">Zeitgeist</a>&nbsp;</td>
+</tr>
+</table>
+<br>
+#(page)#
+<h2>Backlinks</h2>
+#(backlinks)#
+<p>no backlinks so far (another web page must link to your peer's search page
+and someone must have clicked on that link; then the referrer pages appears here).</p>
+::
+<p>Showing #[num]# entries from a total of #[total]# backlinks:<br>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small">Url<br>&nbsp;</td>
+<td class="small">Time<br>&nbsp;</td>
+<td class="small">Client IP<br>&nbsp;</td>
+<td class="small">Client User Agent<br>&nbsp;</td>
+</tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+<td class="small" align="right"><a href="#[url]#">#[url]#</a></td>
+<td class="small" align="right">#[date]#</td>
+<td class="small" align="right">#[clientip]#</td>
+<td class="small" align="right">#[useragent]#</td>
+</tr>
+#{/list}#
+</table>
+</p>
+#(/backlinks)#
+::
+<h2>Zeitgeist</h2>
+#(/page)#
+#[footer]#
+</body>
+</html>

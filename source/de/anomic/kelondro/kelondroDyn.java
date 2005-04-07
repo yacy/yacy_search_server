@@ -1,0 +1,469 @@
+// kelondroDyn.java
+// -----------------------
+// part of The Kelondro Database
+// (C) by Michael Peter Christen; mc@anomic.de
+// first published on http://www.anomic.de
+// Frankfurt, Germany, 2004
+// last major change: 09.02.2004
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+// Using this software in any meaning (reading, learning, copying, compiling,
+// running) means that you agree that the Author(s) is (are) not responsible
+// for cost, loss of data or any harm that may be caused directly or indirectly
+// by usage of this softare or this documentation. The usage of this software
+// is on your own risk. The installation and usage (starting/running) of this
+// software may allow other people or application to access your computer and
+// any attached devices and is highly dependent on the configuration of the
+// software which must be done by the user of the software; the author(s) is
+// (are) also not responsible for proper configuration and usage of the
+// software, even if provoked by documentation provided together with
+// the software.
+//
+// Any changes to this file according to the GPL as documented in the file
+// gpl.txt aside this file in the shipment you received can be done to the
+// lines that follows this copyright notice here, but changes must not be
+// done inside the copyright notive above. A re-distribution must contain
+// the intact and unchanged copyright notice.
+// Contributions and changes to the program code must be marked as such.
+
+/*
+  This class extends the kelondroTree and adds dynamic data handling
+  A dynamic content is created, by using several tree nodes and
+  combining them over a set of associated keys.
+  Example: a byte[] of length 1000 shall be stored in a kelondroTree
+  with node size 256. The key for the entry is 'entry'.
+  Then kelondroDyn stores the first part of four into the entry
+  'entry00', the second into 'entry01', and so on.
+
+*/
+
+package de.anomic.kelondro;
+
+import java.io.*;
+import java.util.*;
+import de.anomic.server.*;
+
+public class kelondroDyn extends kelondroTree {
+
+    private static final int counterlen = 8;
+
+    private byte[] segmentCacheKey, segmentCacheContent;
+    private int keylen;
+    private int reclen;
+    private int segmentCount;
+
+    public kelondroDyn(File file, long buffersize /*bytes*/, int key, int nodesize) throws IOException {
+	// creates a new dynamic tree
+	super(file, buffersize, new int[] {key + counterlen, nodesize}, 1, 8);
+	this.keylen = columnSize(0) - counterlen;
+	this.reclen = columnSize(1);
+	this.segmentCacheKey = null;
+        this.segmentCacheContent = null;
+        // init counter: write into text field
+        this.segmentCount = 0;
+        writeSegmentCount();
+    }
+
+    public kelondroDyn(File file, long buffersize) throws IOException{
+	// this opens a file with an existing dynamic tree
+	super(file, buffersize);
+	this.keylen = columnSize(0) - counterlen;
+	this.reclen = columnSize(1);
+	this.segmentCacheKey = null;
+        this.segmentCacheContent = null;
+        this.segmentCount = 0;
+        //Iterator i = keys(true); while (i.hasNext()) segmentCount++;
+        //writeSegmentCount();
+        //readSegmentCount();
+    }
+
+    private void writeSegmentCount() {
+        try {
+            setText(0, serverCodings.enhancedCoder.encodeBase64Long((long) segmentCount, 8).getBytes());
+        } catch (Exception e) {
+            
+        }
+    }
+    
+    private void readSegmentCount() {
+        try {
+            segmentCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(getText(0)));
+        } catch (Exception e) {
+            segmentCount = 0;
+            writeSegmentCount();
+        }
+    }
+    
+    public synchronized int sizeDyn() {
+        //this.segmentCount = 0;
+        //Iterator i = keys(true); while (i.hasNext()) segmentCount++;
+        //return segmentCount;
+        return super.size();
+    }
+    
+    private static String counter(int c) {
+	String s = Integer.toHexString(c);
+	while (s.length() < counterlen) s = "0" + s;
+	return s;
+    }
+
+    private byte[] dynKey(String key, int record) {
+	if (key.length() > keylen) throw new RuntimeException("key len out of limit:" + key.length());
+	while (key.length() < keylen) key = key + "_";
+	key = key + counter(record);
+	return key.getBytes();
+    }
+
+    private String origKey(byte[] rawKey) {
+	int n = keylen - 1;
+	if (n >= rawKey.length) n = rawKey.length - 1;
+	while ((n > 0) && (rawKey[n] == (byte) '_')) n--;
+	return new String(rawKey, 0, n + 1);
+    }
+
+    public class dynKeyIterator implements Iterator {
+	// the iterator iterates all keys, which are byte[] objects
+	Iterator ri;
+	String nextKey;
+	public dynKeyIterator(Iterator iter) {
+	    ri = iter;
+	    nextKey = n();
+	}
+	public boolean hasNext() {
+	    return nextKey != null;
+	}
+	public Object next() {
+	    String result = nextKey;
+	    nextKey = n();
+	    return origKey(result.getBytes());
+	}
+	public void remove() {
+	    throw new UnsupportedOperationException("no remove in RawKeyIterator");
+	}
+	private String n() {
+	    byte[] g;
+	    String k;
+	    String v;
+	    int c;
+	    while (ri.hasNext()) {
+		g = ((byte[][]) ri.next())[0];
+		if (g == null) return null;
+		k = new String(g, 0, keylen);
+		v = new String(g, keylen, counterlen);
+		try {c = Integer.parseInt(v, 16);} catch (NumberFormatException e) {c = -1;}
+		if (c == 0) return k;
+	    }
+	    return null;
+	}
+    }
+
+    public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating) throws IOException {
+	// iterates only the keys of the Nodes
+	// enumerated objects are of type String
+	return new dynKeyIterator(super.rows(up, rotating));
+    }
+
+    public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+	return new dynKeyIterator(super.rows(up, rotating, firstKey));
+    }
+    
+    private byte[] getValueCached(byte[] key) throws IOException {
+
+        if ((segmentCacheKey != null) && (serverByteBuffer.equals(key, segmentCacheKey))) {
+            // use cache
+            return segmentCacheContent;
+        } else {
+            // read from db
+            byte[][] r = get(key);
+            if (r == null) return null;
+
+            // update cache
+            segmentCacheKey = key;
+            segmentCacheContent = r[1];
+
+            // return result
+            return r[1];
+        }
+    }
+
+    private synchronized void setValueCached(byte[] key, byte[] value) throws IOException {
+	
+	// update cache
+	segmentCacheKey = key;
+        segmentCacheContent = value;
+
+	// update storage
+	put(key, value);
+    }
+
+    public synchronized byte[] getDyn(String key, int pos, int len) throws IOException {
+	int recpos = pos % reclen;
+	int reccnt = pos / reclen;
+	byte[] segment1;
+	// read first within a single record
+	if ((recpos == 0) && (reclen == len)) {
+	    segment1 = getValueCached(dynKey(key, reccnt));
+	    if (segment1 == null) return null;
+	} else {
+	    byte[] buf = getValueCached(dynKey(key, reccnt));
+	    if (buf == null) return null;
+	    //System.out.println("read: buf.length="+buf.length+",recpos="+recpos+",len="+len);
+	    if (len < (reclen - recpos)) {
+		segment1 = new byte[len];
+		System.arraycopy(buf, recpos, segment1, 0, len);
+	    } else {
+		segment1 = new byte[reclen - recpos];
+		System.arraycopy(buf, recpos, segment1, 0, reclen - recpos);
+	    }
+	}
+	// if this is all, return
+	if (recpos + len <= reclen) return segment1;
+	// read from several records
+	// we combine recursively all participating records
+	// we have two segments: the one in the starting record, and the remaining
+	// segment 1 in record <reccnt>  :  start = recpos, length = reclen - recpos
+	// segment 2 in record <reccnt>+1:  start = 0, length = len - reclen + recpos
+	// recursively step further
+	byte[] segment2 = getDyn(key, pos + segment1.length, len - segment1.length);
+	if (segment2 == null) return null;
+	// now combine the two segments into the result
+	byte[] result = new byte[len];
+	System.arraycopy(segment1, 0, result, 0, segment1.length);
+	System.arraycopy(segment2, 0, result, segment1.length, segment2.length);
+	return result;
+    }
+
+    public synchronized void putDyn(String key, int pos, byte[] b, int off, int len) throws IOException {
+	int recpos = pos % reclen;
+	int reccnt = pos / reclen;
+	byte[] buf;
+	// first write current record
+	if ((recpos == 0) && (reclen == len)) {
+	    if (off == 0) {
+		setValueCached(dynKey(key, reccnt), b);
+	    } else {
+		buf = new byte[len];
+		System.arraycopy(b, off, buf, 0, len);
+		setValueCached(dynKey(key, reccnt), b);
+	    }
+	} else {
+	    buf = getValueCached(dynKey(key, reccnt));
+	    if (buf == null) buf = new byte[reclen];
+	    //System.out.println("write: b.length="+b.length+",off="+off+",len="+(reclen-recpos));
+	    if (len < (reclen - recpos))
+		System.arraycopy(b, off, buf, recpos, len);
+	    else
+		System.arraycopy(b, off, buf, recpos, reclen - recpos);
+	    setValueCached(dynKey(key, reccnt), buf);
+	}
+	// if more records are necessary, write to them also recursively
+	if (recpos + len > reclen) {
+	    putDyn(key, pos + reclen - recpos, b, off + reclen - recpos, len - reclen + recpos);
+	}
+    }
+
+    public synchronized void remove(String key) throws IOException {
+	// remove value in cache and tree
+        if (key == null) return;
+	int recpos = 0;
+	byte[] k;
+        while (super.get(k = dynKey(key, recpos)) != null) {
+            segmentCacheKey = null;
+            segmentCacheContent = null;
+            super.remove(k);
+            recpos++;
+	}
+        //segmentCount--; writeSegmentCount();
+    }
+
+    public synchronized boolean existsDyn(String key) throws IOException {
+	return (getValueCached(dynKey(key, 0)) != null);
+    }
+
+    public synchronized kelondroRA getRA(String filekey) throws IOException {
+	// this returns always a RARecord, even if no existed bevore
+	return new RARecord(filekey);
+    }
+
+    public class RARecord extends kelondroAbstractRA implements kelondroRA {
+
+	int seekpos = 0;
+	String filekey;
+
+	public RARecord(String filekey) {
+	    this.filekey = filekey;
+	}
+
+	public int read() throws IOException {
+	    byte[] b = getDyn(filekey, seekpos++, 1);
+            return (b == null) ? -1 : b[0] & 0xFF;
+	}
+
+	public void write(int i) throws IOException {
+	    byte[] b = new byte[1];
+	    b[0] = (byte) i;
+	    putDyn(filekey, seekpos++, b, 0, 1);
+	}
+
+	public int read(byte[] b, int off, int len) throws IOException {
+	    byte[] buf = getDyn(filekey, seekpos, len);
+            if (buf == null) return 0;
+	    System.arraycopy(buf, 0, b, off, len);
+	    seekpos += len;
+	    return len;
+	}
+	
+	public void write(byte[] b, int off, int len) throws IOException {
+	    putDyn(filekey, seekpos, b, off, len);
+	    seekpos += len;
+	}
+	
+	public void seek(long pos) throws IOException {
+	    seekpos = (int) pos;
+	}
+	
+	public void close() throws IOException {
+	    // no need to do anything here
+	}
+
+    }
+    
+    public synchronized void writeFile(String key, File f) throws IOException {
+	// reads a file from the FS and writes it into the database
+	kelondroRA kra = getRA(key);
+	byte[] buffer = new byte[1024];
+	byte[] result = new byte[(int) f.length()];
+	FileInputStream fis = new FileInputStream(f);
+	int i;
+	int pos = 0;
+	while ((i = fis.read(buffer)) > 0) {
+	    System.arraycopy(buffer, 0, result, pos, i);
+	    pos += i;
+	}
+	fis.close();
+	kra.writeArray(result);
+	kra.close();
+    }
+
+    public synchronized void readFile(String key, File f) throws IOException {
+	// reads a file from the DB and writes it to the FS
+	kelondroRA kra = getRA(key);
+	byte[] result = kra.readArray();
+	FileOutputStream fos = new FileOutputStream(f);
+	fos.write(result);
+	fos.close();
+	kra.close();
+    }
+
+    public static void main(String[] args) {
+	// test app for DB functions
+	// reads/writes files to a database table
+	// arguments:
+	// {-f2db/-db2f} <db-name> <key> <filename>
+        
+        if (args.length == 0) {
+            randomtest(20);
+        } else if (args.length == 1) {
+	    // open a db and list keys
+	    try {
+		kelondroDyn kd = new kelondroDyn(new File(args[0]), 0x100000);
+		System.out.println(kd.size() + " elements in DB");
+		Iterator i = kd.dynKeys(true, false);
+		while (i.hasNext()) System.out.println((String) i.next());
+		kd.close();
+	    } catch (IOException e) {
+		e.printStackTrace();
+	    }
+	}
+	if (args.length == 4) {
+	    boolean writeFile = (args[0].equals("-db2f"));
+	    File db = new File(args[1]);
+	    String key = args[2];
+	    File f = new File(args[3]);
+	    kelondroDyn kd;
+	    try {
+		if (db.exists()) kd = new kelondroDyn(db, 0x100000); else kd = new kelondroDyn(db, 0x100000, 80, 200);
+		if (writeFile) kd.readFile(key, f); else kd.writeFile(key, f);
+	    } catch (IOException e) {
+		System.out.println("ERROR: " + e.toString());
+	    }
+	}
+    }
+    
+    public static void randomtest(int elements) {
+        System.out.println("random " + elements + ":");
+        String s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(0, elements);
+        String t, d;
+        char c;
+        kelondroDyn tt;
+        File testFile = new File("test.db");
+        byte[] b;
+        byte[] cont;
+        try {
+            int steps = 0;
+            while (true) {
+                if (testFile.exists()) testFile.delete();
+                tt = new kelondroDyn(testFile, 0, 4 ,100);
+                steps = ((int) System.currentTimeMillis() % 7) * (((int) System.currentTimeMillis() + 17) % 11);
+                t = s;
+                d = "";
+                System.out.println("NEW SESSION");
+                for (int i = 0; i < steps; i++) {
+                    if ((d.length() < 3) || ((t.length() > 0) && (((int) System.currentTimeMillis() % 7) < 3))) {
+                        // add one
+                        c = t.charAt((int) (System.currentTimeMillis() % (long) t.length()));
+                        b = testWord(c);
+                        cont = new byte[(int) (System.currentTimeMillis() % (long) 777)];
+                        tt.putDyn(new String(b), 0, cont, 0, cont.length);
+                        d = d + c;
+                        t = t.substring(0, t.indexOf(c)) + t.substring(t.indexOf(c) + 1);
+                        System.out.println("added " + new String(b) + ", " + cont.length + " bytes");
+                    } else {
+                        // delete one
+                        c = d.charAt((int) (System.currentTimeMillis() % (long) d.length()));
+                        b = testWord(c);
+                        tt.remove(new String(b));
+                        d = d.substring(0, d.indexOf(c)) + d.substring(d.indexOf(c) + 1);
+                        t = t + c;
+                        System.out.println("removed " + new String(b));
+                    }
+                    if (countElementsDyn(tt) != tt.sizeDyn()) {
+                        System.out.println("wrong size: count=" + countElementsDyn(tt) + ", size=" + tt.sizeDyn() + "; Tree:");
+                        //tt.print();
+                        //break;
+                    }
+                }
+                //tt.print();
+                tt.close();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("TERMINATED");
+        }
+    }
+    
+    public static int countElementsDyn(kelondroDyn t) {
+        int count = 0;
+        try {
+            Iterator iter = t.dynKeys(true, false);
+            while (iter.hasNext()) {count++; if (iter.next() == null) System.out.println("ERROR! null element found");}
+            return count;
+        } catch (IOException e) {
+            return -1;
+        }
+    }
+}

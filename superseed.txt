@@ -1,0 +1,2 @@
+http://www.yacy.net/yacy/seed.txt
+http://www.suma-lab.de/yacy/seed.txt

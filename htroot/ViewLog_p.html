@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: Log</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Log</h2><br>
+
+<iframe src="Log_p.html" width="100%" height="480" name="logFrame">
+<a href="Log_p.html">Log</a>
+</iframe>
+<form action="Log_p.html" method="GET" target="logFrame">
+<table border="0"><tr>
+<td><input type="text" name="lines" size ="4" value="50"> Lines</td>
+<td><input type="checkbox" name="mode" value="reversed">reversed order</td>
+<td><input type="submit" value="refresh"></td>
+</tr></table>
+</form>
+
+#[footer]#
+</body>
+</html>

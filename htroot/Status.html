@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: Status</title>
+#[metas]#
+<meta http-equiv="REFRESH" content="30">
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>System, Index and Peer Status</h2>
+
+<p>Welcome to YACY!</p>
+
+<form action="Steering.html" method="get">
+<table border="0" cellpadding="5" cellspacing="0" width="100%">
+  <tr valign="top" bgcolor="#DDEEDD">
+    <td class="TableCellLight" align="right">
+      <input type="submit" name="shutdown" value="shutdown">
+    </td>
+  </tr>
+</table>
+</form>
+
+<p>
+<!-- <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#000000"><tr><td> -->
+<table border="0" cellpadding="2" cellspacing="1" width="100%">
+<tr class="TableHeader"><td colspan="2"><b>System Properties</b></td></tr>
+<tr class="TableCellDark"><td width="150">protection</td><td>
+#(protection)#
+<b>your settings are not protected!</b> please go to the <a href="Settings_p.html">settings</a> page <b>immediately</b> and set an administration password.
+::
+your settings are protected by a password
+#(/protection)#
+</td></tr>
+<tr class="TableCellLight"><td>system version</td><td>
+#[version]##(versioncomment)#:: - the latest public version is #[latestVersion]#. Click here to <a href="http://www.anomic.de/AnomicHTTPProxy/Download.html">download</a> it.#(/versioncomment)#
+</td></tr>
+<tr class="TableCellDark"><td>proxy host</td><td>#[host]#:#[port]#</td></tr>
+<tr class="TableCellLight"><td>remote proxy</td><td>#(remoteProxy)#not used::#[host]#:#[port]##(/remoteProxy)#</td></tr>
+<tr class="TableCellDark"><td>this peer address</td><td>
+#(peerAddress)#
+not assigned
+::
+not assigned. The peer must go online to get an address.
+The peer does not go online until you use the proxy to surf the internet,
+thus proving that you <i>want</i> to go online.
+If you don't know how to configure your system to use a proxy,
+see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.
+::
+#[address]#; your '.yacy' home at http://www.#[peername]#.yacy
+#(/peerAddress)#
+</td></tr>
+<tr class="TableCellLight"><td>this peer name</td><td>#[peerName]#/#[hash]#</td></tr>
+<tr class="TableCellDark"><td>this peer statistics</td><td>
+#(peerStatistics)#
+unknown
+::
+uptime = #[uptime]#, href# = #[links]#, rwi# = #[words]#, 
+connects(#[juniorConnects]#|#[seniorConnects]#|#[principalConnects]#|#[disconnects]#) #[connects]# peers/hour
+#(/peerStatistics)#
+</td></tr>
+<tr class="TableCellLight"><td>this peer status</td><td>
+#(peerStatus)#
+virgin - you have not yet published your peer, because you have not yet used the proxy. If you configured your proxy setting (see above: <a href="http://www.anomic.de/AnomicHTTPProxy/Installation.html#wininst">configure your browser's proxy settings</a> and go online by browsing the internet) you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers.
+::
+junior - you cannot be reached. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers global index on your own search page. We encourage you to open your firewall for port 8080, or set a 'virtual server' in your router settings. Please be fair, contribute your own index to the global index.
+::
+senior - you are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!
+::
+principal - you are senior and you publish your seed-list to a ftp account which can be retrieved at #[seedURL]#. You can of course <a href="index.html">search the internet</a> using the other peers global index on your own search page.
+#(/peerStatus)#
+</td></tr>
+<tr class="TableCellDark"><td>other peers</td><td>#(otherPeers)#not online.::#[num]# other peers online.#(/otherPeers)#</td></tr>
+<tr class="TableCellLight"><td>seed server</td><td>
+#(seedServer)#
+disabled. To enable this you need a ftp account where you can upload files to a web space. If you do that, you become a YACY root server. You can configure your account details on the <a href="Settings_p.html">Settings page</a>.
+::
+enabled: updating periodically to server #[seedFTPServer]#
+#(/seedServer)#
+</td></tr>
+<tr class="TableCellDark"><td>auto-popup on start-up</td><td>
+#(popup)#
+disabled. To enable this again please use the <a href="Settings_p.html">Settings</a> page
+::
+<form action="Status.html" method="get">
+enabled<input type="submit" name="dispop" value="disable pop-up">
+</form>
+#(/popup)#
+</td></tr>
+<tr class="TableCellLight"><td>online-mode</td><td>
+#(omode)#
+<!-- online Mode 0 -->
+::
+you are in event-based online mode.
+The yacy p2p network will boot when you start using the proxy or you switch to permanent mode.
+Attention: using the proxy in permanent mode will keep your internet connection online forever.
+Use this only if you have a flatrate or you have an always-on connection.
+To start permanent mode, press this button:
+<form action="SettingsAck_p.html" method="get">
+<input type="submit" name="pmode" value="go online">
+</form>
+::
+You are in permanent mode. Attention: if you don't have a flatrate or are always-on,
+you must switch off the proxy to go off-line.
+#(/omode)#
+</td></tr>
+</table>
+<!-- </td></tr></table> -->
+</p>
+
+#[footer]#
+</body>
+</html>

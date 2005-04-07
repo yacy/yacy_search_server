@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YACY: Default Page for Individual Peer Content</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="Content-Language" content="English, Englisch">
+<meta name="keywords" content="yacy individual html content">
+<meta name="description" content="YACY www default page">
+<meta name="copyright" content="Michael Christen">
+<link rel="stylesheet" media="all" href="/env/style.css">
+<!-- (C), Architecture and Realisation: Michael Peter Christen; Contact: mc <at> anomic.de -->
+
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr><td>
+  <table class="Heading" border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr height="36">
+    <td width="240">
+	<a href="http://www.yacy.net">
+	<img width="52" height="33" border="0" src="/env/grafics/yacy.gif" align="top">
+	</a>
+    </td>
+    <td width="50%" align="center">
+		<div class="Headline">Individual&nbsp;Web&nbsp;Page</div>
+    </td>
+    <td width="240" align="right">
+        <form action="http://#[peerdomain]#.yacy" method="get">
+          <input type="submit" value="#[peername]#'s Console" class="small">
+        </form>
+    </td>
+  </tr>
+  </table>
+</td></tr>
+</table>
+<br><br>
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+<td width="80"></td>
+<td>
+<h2>Welcome to your own web page<br>in the <b>YACY Network</b>!</h2><br>
+
+<p>
+THIS IS A DEMONSTRATION PAGE FOUR YOUR OWN INDIVIDUAL WEB SERVER!
+PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH
+&lt;your-application-home&gt;<b>#[wwwpath]#</b>
+</p>
+
+<p>
+This is peer '<b>#[peername]#</b>', running on host <b>#[hostname]#</b>.<br>
+Your are accessing this page from the host '#[clientip]#'.<br>
+<!--, IP <b>#[hostip]#</b>, port <b>#[port]#</b>-->
+Every user of YaCy #[couldcan]# access this page
+using the URL <a href="http://#[peeraddress]#/www/"><b>http://#[peeraddress]#/www/</b></a>
+or <a href="http://www.#[peerdomain]#.yacy"><b>http://www.#[peerdomain]#.yacy</b></a> from within the YACY network.</p>
+
+<p>#[seniorinfo]#</p>
+
+<p>We integrated an easy mechanism for web page authoring
+which can also be used for simple file-sharing.
+Please open the sample page <a href="http://share.#[peerdomain]#.yacy"><b>http://share.#[peerdomain]#.yacy</b></a>
+and set upload/download accounts to author and access content on this peer.</p>
+
+</td>
+<td width="80"></td>
+</tr></table>
+</body>
+</html>

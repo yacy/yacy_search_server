@@ -1,0 +1,129 @@
+// crawlReceipt.java 
+// -----------------------
+// part of the AnomicHTTPD caching proxy
+// (C) by Michael Peter Christen; mc@anomic.de
+// first published on http://www.anomic.de
+// Frankfurt, Germany, 2004
+// last change: 02.05.2004
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+// Using this software in any meaning (reading, learning, copying, compiling,
+// running) means that you agree that the Author(s) is (are) not responsible
+// for cost, loss of data or any harm that may be caused directly or indirectly
+// by usage of this softare or this documentation. The usage of this software
+// is on your own risk. The installation and usage (starting/running) of this
+// software may allow other people or application to access your computer and
+// any attached devices and is highly dependent on the configuration of the
+// software which must be done by the user of the software; the author(s) is
+// (are) also not responsible for proper configuration and usage of the
+// software, even if provoked by documentation provided together with
+// the software.
+//
+// Any changes to this file according to the GPL as documented in the file
+// gpl.txt aside this file in the shipment you received can be done to the
+// lines that follows this copyright notice here, but changes must not be
+// done inside the copyright notive above. A re-distribution must contain
+// the intact and unchanged copyright notice.
+// Contributions and changes to the program code must be marked as such.
+
+// you must compile this file with
+// javac -classpath .:../classes crawlOrder.java
+
+
+import de.anomic.server.*;
+import de.anomic.http.*;
+import de.anomic.plasma.*;
+import de.anomic.yacy.*;
+import de.anomic.tools.*;
+import java.util.*;
+import java.net.*;
+
+public class crawlReceipt {
+
+    
+    /*
+     * this is used to respond on a remote crawling request
+     */
+
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+	// return variable that accumulates replacements
+        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+	serverObjects prop = new serverObjects();
+        
+	if ((post == null) || (env == null)) return prop;
+
+	int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
+	int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
+
+	// request values
+	String iam        = (String) post.get("iam", "");      // seed hash of requester
+        String youare     = (String) post.get("youare", "");    // seed hash of the target peer, needed for network stability
+	String process    = (String) post.get("process", "");  // process type
+	String key        = (String) post.get("key", "");      // transmission key
+	String urlhash    = (String) post.get("urlhash", "");  // the url hash that has been crawled
+        String result     = (String) post.get("result", "");   // the result; either "ok" or "fail"
+        String reason     = (String) post.get("reason", "");   // the reason for that result
+        String words      = (String) post.get("wordh", "");    // priority word hashes
+        String propStr    = crypt.simpleDecode((String) post.get("lurlEntry", ""), key);
+        
+        /*
+         the result can have one of the following values:
+         negative cases, no retry
+           unavailable - the resource is not available (a broken link); not found or interrupted
+           exception   - an exception occurred
+           robot       - a robot-file has denied to crawl that resource
+
+         negative cases, retry possible
+           rejected    - the peer has rejected to load the resource
+           dequeue     - peer too busy - rejected to crawl
+         
+         positive cases with crawling
+           fill        - the resource was loaded and processed
+           update      - the resource was already in database but re-loaded and processed
+	 
+         positive cases without crawling	 
+           known       - the resource is already in database, believed to be fresh and not reloaded
+           stale       - the resource was reloaded but not processed because source had no changes
+
+        */
+        
+        if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
+            // no yacy connection / unknown peers
+            prop.put("delay", "3600");
+        } else if (propStr == null) {
+            // error with url / wrong key
+            prop.put("delay", "3600");
+        } else if (result.equals("fill")) {
+            // put new data into database
+            switchboard.loadedURL.newEntry(propStr, true, youare, iam, 1);
+            switchboard.noticeURL.remove(urlhash);
+            
+            // ready for more
+            prop.put("delay", "10");
+        } else {
+            plasmaCrawlNURL.entry en = switchboard.noticeURL.getEntry(urlhash);
+            if (en != null) {
+                switchboard.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(plasmaURL.urlFlagLength), false);
+                switchboard.noticeURL.remove(urlhash);
+            }
+            prop.put("delay", "100"); // what shall we do with that???
+        }
+	
+	// return rewrite properties
+	return prop;
+    }
+
+}

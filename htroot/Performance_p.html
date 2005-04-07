@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy: Performace</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Performance</h2>
+<p>
+You can manipulate some performance attributes here.<br>
+<form action="Performance_p.html" method="post" enctype="multipart/form-data">
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small">Thread</td>
+<td class="small">Queue Size</td>
+<td class="small" colspan="2">Total<br>Block Time</td>
+<td class="small" colspan="2">Total<br>Sleep Time</td>
+<td class="small" colspan="2">Total<br>Exec Time</td>
+<td class="small">Total<br>Cycles</td>
+<td class="small">Idle<br>Cycles</td>
+<td class="small">Busy<br>Cycles</td>
+<td class="small">Sleep Time<br>per Cycle<br>(milliseconds)</td>
+<td class="small">Exec Time<br>per Busy-Cycle<br>(milliseconds)</td>
+<td class="small">Delay between<br>idle loops</td>
+<td class="small">Delay between<br>busy loops</td>
+<td class="small">Full Description</td>
+</tr>
+#{table}#
+<tr class="TableCellDark">
+<td class="small" align="left">#[shortdescr]#</td>
+<td class="small" align="right">#[queuesize]#</td>
+<td class="small" align="right">#[blocktime]#&nbsp;sec</td>
+<td class="small" align="right">#[blockpercent]#%</td>
+<td class="small" align="right">#[sleeptime]#&nbsp;sec</td>
+<td class="small" align="right">#[sleeppercent]#%</td>
+<td class="small" align="right">#[exectime]#&nbsp;sec</td>
+<td class="small" align="right">#[execpercent]#%</td>
+<td class="small" align="right">#[totalcycles]#</td>
+<td class="small" align="right">#[idlecycles]#</td>
+<td class="small" align="right">#[busycycles]#</td>
+<td class="small" align="right">#[sleeppercycle]#</td>
+<td class="small" align="right">#[execpercycle]#</td>
+<td class="small" align="right"><input name="#[threadname]#_idlesleep" type="text" size="4" maxlength="4" value="#[idlesleep]#"> sec</td>
+<td class="small" align="right"><input name="#[threadname]#_busysleep" type="text" size="4" maxlength="4" value="#[busysleep]#"> sec</td>
+<td class="small" align="left">#[longdescr]#</td>
+</tr>
+#{/table}#
+</table><br>
+<input type="submit" name="delaysubmit" value="Submit New Delay Values">
+Changes take effect immidiately
+</p></form>
+#[footer]#
+</body>
+</html>
