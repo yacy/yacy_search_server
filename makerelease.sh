@@ -59,19 +59,8 @@ mkdir $release
 
 # clean up
 rm -Rf $target &> /dev/null
-rm -Rf $classes/*.class &> /dev/null
+rm -Rf $classes &> /dev/null
 rm $doc/release.txt &> /dev/null
-
-rm $classes/*.class &> /dev/null
-rm $classes/de/anomic/kelondro/*.class &> /dev/null
-rm $classes/de/anomic/tools/*.class &> /dev/null
-rm $classes/de/anomic/data/*.class &> /dev/null
-rm $classes/de/anomic/htmlFilter/*.class &> /dev/null
-rm $classes/de/anomic/http/*.class &> /dev/null
-rm $classes/de/anomic/net/*.class &> /dev/null
-rm $classes/de/anomic/plasma/*.class &> /dev/null
-rm $classes/de/anomic/server/*.class &> /dev/null
-rm $classes/de/anomic/yacy/*.class &> /dev/null
 
 rm $source/*.class &> /dev/null
 rm $source/de/anomic/kelondro/*.class &> /dev/null
@@ -103,6 +92,8 @@ rm htroot/env/*~ &> /dev/null
 rm htroot/env/grafics/*~ &> /dev/null
 rm htroot/env/templates/*~ &> /dev/null
 
+# make classes directory
+mkdir $classes
 
 # make release directory
 mkdir $target
