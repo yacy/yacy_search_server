@@ -191,15 +191,35 @@ public class SettingsAck_p {
             String port = (String) post.get("port");
             String peerName = (String) post.get("peername");
             String shutdownWaiting = (String) post.get("shutdownWaiting");
-            String info = "";
-            env.setConfig("port", port);
-            env.setConfig("peerName", peerName);
-            env.setConfig("shutdownWaiting", shutdownWaiting);
             
-            prop.put("info", 12);//port or peername changed
-            prop.put("info_port", port);
-            prop.put("info_peerName", peerName);
-            prop.put("info_shutdownWaiting", shutdownWaiting);
+            // check if peer name already exists
+            yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
+            
+            if (oldSeed == null) {
+                // the name is new
+                boolean nameOK = (peerName.length() <= 80);
+                for (int i = 0; i < peerName.length(); i++) {
+                    if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_".indexOf(peerName.charAt(i)) < 0) nameOK = false;
+                }
+                if (!(nameOK)) {
+                    // deny change
+                    prop.put("info", 17);//peer name is wrong
+                } else {
+                    
+                    // set values
+                    env.setConfig("port", port);
+                    env.setConfig("peerName", peerName);
+                    env.setConfig("shutdownWaiting", shutdownWaiting);
+                    
+                    prop.put("info", 12);//port or peername changed
+                    prop.put("info_port", port);
+                    prop.put("info_peerName", peerName);
+                    prop.put("info_shutdownWaiting", shutdownWaiting);
+                }
+            } else {
+                // deny change
+                prop.put("info", 16);//peer name is already used by another peer
+            }
             return prop;
         }
         
