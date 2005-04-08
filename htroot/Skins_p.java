@@ -102,7 +102,7 @@ public class Skins_p {
 	
 	if (post != null){
 		//change skin
-		if(post.containsKey("use")){
+		if(post.containsKey("use_button")){
 			changeSkin(env, skinPath, (String)post.get("skin"));
 			
 		//delete skin
@@ -134,7 +134,7 @@ public class Skins_p {
 				prop.put("status", 2);//error saving the skin
 				return prop;
 			}
-			if(post.containsKey("use") && ((String)post.get("use")).equals("on")){
+			if(post.containsKey("use_skin") && ((String)post.get("use_skin")).equals("on")){
 				changeSkin(env, skinPath, url.substring(url.lastIndexOf("/"), url.length()));
 			}
 		}
