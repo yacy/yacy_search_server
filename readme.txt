@@ -20,7 +20,7 @@ Startup of YaCy:
 - on Windows      : double-click startYACY.bat
 - on Mac OS X     : double-click startYACY.command (alias possible!)
 - on any other OS : set your classpath to the 'classes' folder
-                    and execute YaCy.class, while your current system
+                    and execute yacy.class, while your current system
 		        path must target the release directory to access the
                     configuration files.
 
