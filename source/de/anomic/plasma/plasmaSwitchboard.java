@@ -204,6 +204,9 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 	// make crawl profiles database and default profiles
         profiles = new plasmaCrawlProfile(new File(plasmaPath, "crawlProfiles0.db"));
 
+        //System.out.println("profiles.size=" + profiles.size());
+        //System.out.println("profile-config=" + getConfig("defaultProxyProfile", "").length());
+	//System.out.println("profile-entry=" + profiles.getEntry(getConfig("defaultProxyProfile", "")).toString());
         if ((profiles.size() == 0) ||
             (getConfig("defaultProxyProfile", "").length() == 0) ||
             (profiles.getEntry(getConfig("defaultProxyProfile", "")) == null)) {
@@ -278,24 +281,25 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         long[] testresult = facilityDB.selectLong("statistik", "yyyyMMddHHm");
         testresult = facilityDB.selectLong("statistik", (new serverDate()).toShortString(false).substring(0, 11));
         
+        // start yacy core
+        yacyCore yc = new yacyCore(this);
+        serverInstantThread.oneTimeJob(yc, "loadSeeds", yc.log, 3000);
+        
         // deploy threads
-        deployThread("70_cachemanager", "Proxy Cache Enqueue", "job takes new proxy files from RAM stack, stores them, and hands over to the Indexing Stack",
-                     new serverInstantThread(cacheManager, "job", "size"), log, 10000);
-        deployThread("50_localcrawl", "Local Crawl", "thread that performes a single crawl step from the local crawl queue",
-                     new serverInstantThread(this, "localCrawlJob", "localCrawlJobSize"), log, 20000);
-        deployThread("60_globalcrawl", "Global Crawl", "thread that performes a single crawl/indexing step of a web page for global crawling",
-                     new serverInstantThread(this, "globalCrawlJob", "globalCrawlJobSize"), log, 30000);
         deployThread("90_cleanup", "Cleanup", "simple cleaning process for monitoring information" ,
                      new serverInstantThread(this, "cleanupJob", "cleanupJobSize"), log, 10000); // all 5 Minutes
         deployThread("80_dequeue", "Indexing Dequeue", "thread that creates database entries from scraped web content and performes indexing" ,
                      new serverInstantThread(this, "deQueue", "queueSize"), log, 10000);
-        // start yacy core
-        yacyCore yc = new yacyCore(this);
-        serverInstantThread.oneTimeJob(yc, "loadSeeds", yc.log, 3000);
-        deployThread("30_peerping", "YaCy Core", "this is the p2p-control and peer-ping task",
-                     new serverInstantThread(yc, "peerPing", null), yc.log, 6000);
+        deployThread("70_cachemanager", "Proxy Cache Enqueue", "job takes new proxy files from RAM stack, stores them, and hands over to the Indexing Stack",
+                     new serverInstantThread(cacheManager, "job", "size"), log, 10000);
+        deployThread("60_globalcrawl", "Global Crawl", "thread that performes a single crawl/indexing step of a web page for global crawling",
+                     new serverInstantThread(this, "globalCrawlJob", "globalCrawlJobSize"), log, 30000);
+        deployThread("50_localcrawl", "Local Crawl", "thread that performes a single crawl step from the local crawl queue",
+                     new serverInstantThread(this, "localCrawlJob", "localCrawlJobSize"), log, 20000);
         deployThread("40_peerseedcycle", "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account",
                      new serverInstantThread(yc, "publishSeedList", null), yc.log, 180000);
+        deployThread("30_peerping", "YaCy Core", "this is the p2p-control and peer-ping task",
+                     new serverInstantThread(yc, "peerPing", null), yc.log, 4000);
         indexDistribution = new distributeIndex(100 /*indexCount*/, 8000, 1 /*peerCount*/);
         deployThread("20_dhtdistribution", "DHT Distribution (currently by juniors only)", "selection, transfer and deletion of index entries that are not searched on your peer, but on others",
                      new serverInstantThread(indexDistribution, "job", null), log, 120000);
@@ -680,7 +684,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         }
         log.logDebug("plasmaSwitchboard.processCrawling: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
 		     ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter() +
-		     ", permission=" + (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false"));
+		     ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
 
         boolean tryRemote = 
             (profile.remoteIndexing()) /* granted */ &&
