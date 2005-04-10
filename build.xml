@@ -1,0 +1,33 @@
+<project name="YaCy" default="dist" basedir=".">
+	<description>
+		YaCy - a Peer to Peer search Engine
+	</description>
+	
+<property name="src" location="source"/>
+<property name="build" location="classes"/>
+<property name="htroot" location="htroot"/>
+
+<target name="init">
+<tstamp/>
+<mkdir dir="${build}/de/anomic/data"/>
+<mkdir dir="${build}/de/anomic/htmlFilter"/>
+<mkdir dir="${build}/de/anomic/http"/>
+<mkdir dir="${build}/de/anomic/kelondro"/>
+<mkdir dir="${build}/de/anomic/net"/>
+<mkdir dir="${build}/de/anomic/plasma"/>
+<mkdir dir="${build}/de/anomic/server"/>
+<mkdir dir="${build}/de/anomic/tools"/>
+<mkdir dir="${build}/de/anomic/yacy"/>
+</target>
+
+
+<target name="compile" depends="init" description="compiles the source">
+<javac srcdir="${src}/" destdir="${build}"/>
+<javac srcdir="${htroot}/" destdir="${htroot}" classpath="${build}"/>
+</target>
+
+
+<target name="dist" depends="compile">
+</target>
+
+</project>
