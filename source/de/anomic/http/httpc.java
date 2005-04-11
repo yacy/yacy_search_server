@@ -92,7 +92,13 @@ public class httpc {
     private static HashMap nameCacheHit = new HashMap();
     //private static HashSet nameCacheMiss = new HashSet();
     
-    public static String dnsResolve(String host) {
+    static {
+	// set time-out of InetAddress.getByName cache ttl
+	java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
+        java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
+    }
+
+    private static String dnsResolveX(String host) {
         // looks for the ip of host <host> and returns ip number as string
         String ip = (String) nameCacheHit.get(host);
         if (ip != null) return ip;
@@ -111,6 +117,18 @@ public class httpc {
         return null;
     }
     
+    public static String dnsResolve(String host) {
+        String ip = null;
+        for (int i = 0; i < 50; i++) {
+            ip = dnsResolveX(host);
+            if (ip != null) {
+                //if (i > 0) System.out.println(i + " attempts for " + host);
+                return ip;
+            }
+        }
+        return ip;
+    }
+
     public static boolean dnsFetch(String host) {
         // looks for the ip of host <host> and returns false if the host was in the cache
         // if it is not in the cache the ip is fetched and this resturns true

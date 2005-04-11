@@ -96,6 +96,7 @@ public class kelondroMap {
             Map map;
             while (it.hasNext()) {
                 key = (String) it.next();
+		//System.out.println("kelondroMap: enumerating key " + key);
                 map = get(key);
                 
                 if (sortfields != null) for (int i = 0; i < sortfields.length; i++) {
@@ -422,6 +423,7 @@ public class kelondroMap {
             }
             try {
                 Map map = get(nextKey);
+                if (map == null) return null;
                 map.put("key", nextKey);
                 return map;
             } catch (IOException e) {

@@ -251,12 +251,14 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	Node nextNode = null;
         boolean up, rot;
         LinkedList nodeStack;
+	int count;
         
 	public nodeIterator(boolean up, boolean rotating) throws IOException {
             this(up, rotating, (up) ? firstNode() : lastNode());
 	}
         
 	public nodeIterator(boolean up, boolean rotating, Node start) throws IOException {
+	    this.count = 0;
             this.up = up;
             this.rot = rotating;
             this.nextNode = start;
@@ -289,7 +291,9 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	}
 
         public Object next() {
+	    count++;
             if (nextNode == null) return null;
+	    if (count > size()) return null;
             Object ret = nextNode;
             
             // middle-case
@@ -890,7 +894,9 @@ public class kelondroTree extends kelondroRecords implements Comparator {
         
         public Object next() {
             try {
-                return ((Node) nodeIterator.next()).getValues();
+		Node nextNode = (Node) nodeIterator.next();
+		if (nextNode == null) return null; // this is an error case of the nodeIterator
+                return nextNode.getValues();
             } catch (IOException e) {
                 return null;
             }
