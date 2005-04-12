@@ -149,13 +149,15 @@ public class CacheAdmin_p {
         return out;
     }
     
-    private static String formatAnchor(Properties a) {
+    private static String formatAnchor(Map a) {
         String out = "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">";
-        Enumeration e = a.keys();
+        Iterator i = a.entrySet().iterator();
         String url, descr;
-        while (e.hasMoreElements()) {
-            url = (String) e.nextElement();
-            descr = a.getProperty(url).trim();
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            url = (String) entry.getKey();
+            descr = ((String) entry.getValue()).trim();
             if (descr.length() == 0) descr = "-";
             out += "<tr valign=\"top\"><td><span class=\"small\">" + descr + "&nbsp;</span></td><td class=\"tt\">" + url + "</td></tr>";            
         }

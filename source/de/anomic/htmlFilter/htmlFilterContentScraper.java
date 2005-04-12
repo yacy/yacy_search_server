@@ -161,25 +161,70 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 	return image;
     }
 
-    public Properties getHyperlinks() {
+    public Map getHyperlinks() {
 	if (hyperlinks == null) resortLinks();
 	return hyperlinks;
     }
 
-    public Properties getMedialinks() {
+    public Map getMedialinks() {
 	if (medialinks == null) resortLinks();
 	return medialinks;
     }
 
-    public Properties getEmaillinks() {
+    public Map getEmaillinks() {
 	if (emaillinks == null) resortLinks();
 	return emaillinks;
     }
 
-    Properties hyperlinks = null;
-    Properties medialinks = null;
-    Properties emaillinks = null;
+    HashMap hyperlinks = null;
+    HashMap medialinks = null;
+    HashMap emaillinks = null;
 
+            private synchronized void resortLinks() {
+            Iterator i;
+            String url;
+            int extpos;
+            String ext;
+            i = anchor.entrySet().iterator();
+            hyperlinks = new HashMap();
+            medialinks = new HashMap();
+            emaillinks = new HashMap();
+            Map.Entry entry;
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                url = (String) entry.getKey();
+                if ((url != null) && (url.startsWith("mailto:"))) {
+                    emaillinks.put(url.substring(7), entry.getValue());
+                } else {
+                    extpos = url.lastIndexOf(".");
+                    String normal;
+                    if (extpos > 0) {
+                        ext = url.substring(extpos).toLowerCase();
+                        normal = urlNormalform(url);
+                        if (normal != null) {
+                            if (mediaExt.indexOf(ext.substring(1)) >= 0) {
+                                // this is not an normal anchor, its a media link
+                                medialinks.put(normal, entry.getValue());
+                            } else {
+                                hyperlinks.put(normal, entry.getValue());
+                            }
+                        }
+                    }
+                }
+            }
+            // finally add the images to the medialinks
+            i = image.entrySet().iterator();
+            String normal;
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                url = (String) entry.getKey();
+                normal = urlNormalform(url);
+                if (normal != null) medialinks.put(normal, entry.getValue()); // avoid NullPointerException
+            }
+            expandHyperlinks();
+        }
+        
+            /*
     private synchronized void resortLinks() {
 	Enumeration e;
 	String url;
@@ -219,7 +264,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 	    if (normal != null) medialinks.setProperty(normal, image.getProperty(url)); // avoid NullPointerException
 	}
     }
-
+*/
 
     public synchronized void expandHyperlinks() {
 	// we add artificial hyperlinks to the hyperlink set that can be calculated from

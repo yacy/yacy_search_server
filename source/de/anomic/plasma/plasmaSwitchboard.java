@@ -482,19 +482,21 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
             // put anchors on crawl stack
             if (((processCase == 4) || (processCase == 5)) &&
                              (entry.depth < entry.profile.generalDepth())) {
-                Properties hl = entry.scraper.getHyperlinks();
-                Enumeration e = hl.propertyNames();
+                Map hl = entry.scraper.getHyperlinks();
+                Iterator i = hl.entrySet().iterator();
                 String nexturlstring;
                 String rejectReason;
                 int c = 0;
-                while (e.hasMoreElements()) {
-                    nexturlstring = (String) e.nextElement();
-                    rejectReason = stackCrawl(nexturlstring, entry.urlString, initiatorHash, hl.getProperty(nexturlstring), entry.lastModified, entry.depth + 1, entry.profile);
+                Map.Entry e;
+                while (i.hasNext()) {
+                    e = (Map.Entry) i.next();
+                    nexturlstring = (String) e.getKey();
+                    rejectReason = stackCrawl(nexturlstring, entry.urlString, initiatorHash, (String) e.getValue(), entry.lastModified, entry.depth + 1, entry.profile);
                     if (rejectReason == null) {
                         c++;
                     } else {
                         errorURL.newEntry(new URL(nexturlstring), entry.urlString, entry.initiator(), yacyCore.seedDB.mySeed.hash,
-				       hl.getProperty(nexturlstring), rejectReason, new bitfield(plasmaURL.urlFlagLength), false);
+				       (String) e.getValue(), rejectReason, new bitfield(plasmaURL.urlFlagLength), false);
                     }
                 }
                 log.logInfo("CRAWL: ADDED " + c + " LINKS FROM " + entry.url.toString() +
