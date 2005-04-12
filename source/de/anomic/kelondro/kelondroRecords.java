@@ -100,7 +100,7 @@ public class kelondroRecords {
     // POS_NODES : (USEDC + FREEC) * (overhead + sum(all: COLWIDTHS)) : Node Objects
 
     // values that are only present at run-time
-    private   String     filename;     // the database's file name
+    protected   String     filename;     // the database's file name
     protected kelondroRA entryFile;    // the database file
     private   int        overhead;     // OHBYTEC + 4 * OHHANDLEC = size of additional control bytes
     private   int        recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record
@@ -429,15 +429,15 @@ public class kelondroRecords {
             // the parentNode can be given if an auto-fix in the following case is wanted
             if (handle.index > 	USEDC + FREEC) {
                 if (parentNode == null) {
-                    throw new IllegalArgumentException("INTERNAL ERROR: node handle index exceeds size. No auto-fix node was submitted. This is a serious failure.");  
+                    throw new kelondroException(filename, "INTERNAL ERROR: node handle index exceeds size. No auto-fix node was submitted. This is a serious failure.");  
                 } else {
                     try {
                         Handle[] handles = parentNode.getOHHandle();
                         handles[referenceInParent] = null;
                         parentNode.setOHHandle(handles);
-                        throw new IllegalArgumentException("INTERNAL ERROR: node handle index exceeds size. The bad node has been auto-fixed");
+                        throw new kelondroException(filename, "INTERNAL ERROR: node handle index exceeds size. The bad node has been auto-fixed");
                     } catch (IOException ee) {
-                        throw new IllegalArgumentException("INTERNAL ERROR: node handle index exceeds size. It was tried to fix the bad node, but failed with an IOException: " + ee.getMessage());
+                        throw new kelondroException(filename, "INTERNAL ERROR: node handle index exceeds size. It was tried to fix the bad node, but failed with an IOException: " + ee.getMessage());
                     }
                 }
             }
@@ -451,13 +451,13 @@ public class kelondroRecords {
 	}
 	protected Handle handle() {
 	    // if this entry has an index, return it
-	    if (this.handle.index == NUL) throw new IllegalStateException("the entry has no index assigned");
+	    if (this.handle.index == NUL) throw new kelondroException(filename, "the entry has no index assigned");
 	    return new Handle(this.handle.index);
 	}
 	protected synchronized void setOHByte(byte[] b) throws IOException {
 	    if (b == null) throw new IllegalArgumentException("setOHByte: setting null value does not make any sense");
 	    if (b.length != OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong array size");
-	    if (this.handle.index == NUL) throw new IllegalStateException("setOHByte: no handle assigned");
+	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
 	    if (this.ohBytes == null) this.ohBytes = new byte[OHBYTEC];
             entryFile.seek(seekpos(this.handle));
 	    for (int j = 0; j < ohBytes.length; j++) {
@@ -469,7 +469,7 @@ public class kelondroRecords {
 	protected synchronized void setOHHandle(Handle[] i) throws IOException {
 	    if (i == null) throw new IllegalArgumentException("setOHint: setting null value does not make any sense");
 	    if (i.length != OHHANDLEC) throw new IllegalArgumentException("setOHHandle: wrong array size");
-	    if (this.handle.index == NUL) throw new IllegalStateException("setOHHandle: no handle assigned");
+	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHHandle: no handle assigned");
 	    if (this.ohHandle == null) this.ohHandle = new Handle[OHHANDLEC];
             entryFile.seek(seekpos(this.handle) + OHBYTEC);
 	    for (int j = 0; j < ohHandle.length; j++) {
@@ -483,7 +483,7 @@ public class kelondroRecords {
 	}
 	protected synchronized byte[] getOHByte() throws IOException {
 	    if (ohBytes == null) {
-		if (this.handle.index == NUL) throw new IllegalStateException("Cannot load OH values");
+		if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
 		ohBytes = new byte[OHBYTEC];
 		entryFile.seek(seekpos(this.handle));
 		for (int j = 0; j < ohBytes.length; j++) {
@@ -495,7 +495,7 @@ public class kelondroRecords {
 	}
 	protected synchronized Handle[] getOHHandle() throws IOException {
 	    if (ohHandle == null) {
-		if (this.handle.index == NUL) throw new IllegalStateException("Cannot load OH values");
+		if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
 		ohHandle = new Handle[OHHANDLEC];
 		entryFile.seek(seekpos(this.handle) + OHBYTEC);
 		int i;
@@ -539,7 +539,7 @@ public class kelondroRecords {
 	    if ((values == null) || (values[0] == null)) {
 		// load from database, but ONLY the key!
 		if (this.handle.index == NUL) {
-		    throw new IllegalStateException("Cannot load Key");
+		    throw new kelondroException(filename, "Cannot load Key");
 		} else {
 		    values = new byte[COLWIDTHS.length][];
 		    entryFile.seek(seekpos(this.handle) + overhead);
@@ -558,7 +558,7 @@ public class kelondroRecords {
 	    if ((values == null) || (values[0] == null)) {
 		// load ALL values from database
 		if (this.handle.index == NUL) {
-		    throw new IllegalStateException("Cannot load values");
+		    throw new kelondroException(filename, "Cannot load values");
 		} else {
 		    values = new byte[COLWIDTHS.length][];
 		    long seek = seekpos(this.handle) + overhead;
@@ -592,7 +592,7 @@ public class kelondroRecords {
 	    // then writing to the file is done here
 	    // can only be called if the index has not been defined yet
 	    if (this.handle.index != NUL) {
-		throw new IllegalStateException("double assignement of handles");
+		throw new kelondroException(filename, "double assignement of handles");
 	    }
 	    // create new index by expanding the file at the end
 	    // or by recycling used records
@@ -600,7 +600,7 @@ public class kelondroRecords {
 	    // place the data to the file
 	    if ((values == null) || ((values != null) && (values.length > 1) && (values[1] == null))) {
 		// there is nothing to save
-		throw new IllegalStateException("no values to save");
+		throw new kelondroException(filename, "no values to save");
 	    }
 	    entryFile.seek(seekpos(this.handle));
 	    if (ohBytes  == null) {for (int i = 0; i < OHBYTEC; i++) entryFile.writeByte(0);}

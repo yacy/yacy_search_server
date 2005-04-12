@@ -256,21 +256,21 @@ public class yacySeedDB {
         int searchcount = 1000;
         if (searchcount > sizeConnected()) searchcount = sizeConnected();
         try {
-	while ((s.hasMoreElements()) && (searchcount-- > 0)) {
-	    ys = (yacySeed) s.nextElement();
-	    if ((ys != null) && ((t = ys.get("LastSeen", "")).length() > 10)) try {
-		absage = Math.abs(yacyCore.universalTime() -  yacyCore.shortFormatter.parse(t).getTime());
-                seedScore.addScore(ys.hash, (int) absage);
-	    } catch (Exception e) {}
-	}
-        
-        // result is now in the score object; create a result vector
-        yacySeed[] result = new yacySeed[count];
-        Iterator it = seedScore.scores(up);
-        int c = 0;
-        while ((c < count) && (it.hasNext())) result[c++] = getConnected((String) it.next());
-        return result;
-        } catch (NullPointerException e) {
+            while ((s.hasMoreElements()) && (searchcount-- > 0)) {
+                ys = (yacySeed) s.nextElement();
+                if ((ys != null) && ((t = ys.get("LastSeen", "")).length() > 10)) try {
+                    absage = Math.abs(yacyCore.universalTime() -  yacyCore.shortFormatter.parse(t).getTime());
+                    seedScore.addScore(ys.hash, (int) absage);
+                } catch (Exception e) {}
+            }
+            
+            // result is now in the score object; create a result vector
+            yacySeed[] result = new yacySeed[count];
+            Iterator it = seedScore.scores(up);
+            int c = 0;
+            while ((c < count) && (it.hasNext())) result[c++] = getConnected((String) it.next());
+            return result;
+        } catch (kelondroException e) {
             seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
             System.out.println("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage());
             e.printStackTrace();
@@ -320,9 +320,16 @@ public class yacySeedDB {
 	    seedActiveDB.set(seed.hash, seed.getMap());
             seedPassiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
-	} catch (IOException e) {
-	} catch (IllegalArgumentException e) {
-	    System.out.println("ERROR add: seed.db corrupt; resetting seed.db");
+	} catch (IOException e){
+	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
+	    e.printStackTrace();
+	    seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);            
+	} catch (kelondroException e){
+	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
+	    e.printStackTrace();
+	    seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);            
+        } catch (IllegalArgumentException e) {
+	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
 	    e.printStackTrace();
 	    seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
 	}
@@ -337,8 +344,15 @@ public class yacySeedDB {
             seedActiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
 	} catch (IOException e) {
-	} catch (IllegalArgumentException e) {
-	    System.out.println("ERROR add: seed.db corrupt; resetting seed.db");
+	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
+	    e.printStackTrace();
+	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
+	} catch (kelondroException e) {
+	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
+	    e.printStackTrace();
+	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
+        } catch (IllegalArgumentException e) {
+	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
 	    e.printStackTrace();
 	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 	}
@@ -353,8 +367,15 @@ public class yacySeedDB {
             seedActiveDB.remove(seed.hash);
             seedPassiveDB.remove(seed.hash);
 	} catch (IOException e) {
+	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
+	    e.printStackTrace();
+	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
+	} catch (kelondroException e) {
+	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
+	    e.printStackTrace();
+	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 	} catch (IllegalArgumentException e) {
-	    System.out.println("ERROR add: seed.db corrupt; resetting seed.db");
+	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
 	    e.printStackTrace();
 	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 	}
@@ -567,8 +588,14 @@ public class yacySeedDB {
 	    try {
 		it = (firstKey == null) ? database.maps(up, rot) : database.maps(up, rot, firstKey);
 		nextSeed = internalNext();
-	    } catch (Exception e) {
-		System.out.println("ERROR seedLinEnum: seed.db corrupt; resetting seed.db");
+	    } catch (IOException e) {
+		System.out.println("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
+		e.printStackTrace();
+                if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
+                if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
+		it = null;
+	    } catch (kelondroException e) {
+		System.out.println("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
 		e.printStackTrace();
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
@@ -581,14 +608,13 @@ public class yacySeedDB {
 	    try {
 		it = database.maps(up, field);
 		nextSeed = internalNext();
-	    } catch (Exception e) {
-		System.out.println("ERROR seedLinEnum: seed.db corrupt; resetting seed.db");
+	    } catch (kelondroException e) {
+		System.out.println("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
 		e.printStackTrace();
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 		it = null;
-	    }
-	}
+	    }	}
                 
 	public boolean hasMoreElements() {
 	    return (nextSeed != null);

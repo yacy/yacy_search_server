@@ -279,9 +279,9 @@ public class kelondroTree extends kelondroRecords implements Comparator {
                 
                 // go to next node
                 searchHandle = searchNode.getOHHandle()[ct];
-                if (searchHandle == null) throw new IllegalArgumentException("start node does not exist (handle null)");
+                if (searchHandle == null) throw new kelondroException(filename, "start node does not exist (handle null)");
                 searchNode = getNode(searchHandle, searchNode, ct);
-                if (searchNode == null) throw new IllegalArgumentException("start node does not exist (node null)");
+                if (searchNode == null) throw new kelondroException(filename, "start node does not exist (node null)");
             }
             // now every parent node to the start node is on the stack
 	}
@@ -292,8 +292,8 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 
         public Object next() {
 	    count++;
-            if (nextNode == null) return null;
-	    if (count > size()) return null;
+            if (nextNode == null) throw new kelondroException(filename, "no more entries available");
+	    if (count > size()) throw new kelondroException(filename, "internal loopback; database corrupted");
             Object ret = nextNode;
             
             // middle-case
@@ -390,7 +390,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	    // a node with this key does not exist and there is no node at all
 	    // this therefore creates the root node if an only if there was no root Node yet
 	    if (getHandle(root) != null) 
-		throw new IllegalArgumentException("tried to create root node twice");
+		throw new kelondroException(filename, "tried to create root node twice");
 	    // we dont have any Nodes in the file, so start here to create one
 	    Node e = newNode(newrow);
 	    e.save();
@@ -420,13 +420,13 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	    // check consistency and link new node to parent node
 	    parentOHHandle = parentNode.getOHHandle(); // {parent, leftchild, rightchild}
 	    if (searchResult.isLeft()) {
-		if (parentOHHandle[leftchild] != null) throw new IllegalArgumentException("tried to create leftchild node twice");
+		if (parentOHHandle[leftchild] != null) throw new kelondroException(filename, "tried to create leftchild node twice");
 		parentOHHandle[leftchild] = theNode.handle();
 	    } else if (searchResult.isRight()) {
-		if (parentOHHandle[rightchild] != null) throw new IllegalArgumentException("tried to create rightchild node twice");
+		if (parentOHHandle[rightchild] != null) throw new kelondroException(filename, "tried to create rightchild node twice");
 		parentOHHandle[rightchild] = theNode.handle();
 	    } else {
-                throw new IllegalArgumentException("neither left nor right child");
+                throw new kelondroException(filename, "neither left nor right child");
             }
 	    parentNode.setOHHandle(parentOHHandle);
 
@@ -895,10 +895,10 @@ public class kelondroTree extends kelondroRecords implements Comparator {
         public Object next() {
             try {
 		Node nextNode = (Node) nodeIterator.next();
-		if (nextNode == null) return null; // this is an error case of the nodeIterator
+		if (nextNode == null) throw new kelondroException(filename, "no more elements available");
                 return nextNode.getValues();
             } catch (IOException e) {
-                return null;
+                throw new kelondroException(filename, "io-error: " + e.getMessage());
             }
         }
         
@@ -1170,7 +1170,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 		return compare(((Node) a).getKey(), ((Node) b).getKey());
 	    } else throw new IllegalArgumentException("Object type or Object type combination not supported");
 	} catch (IOException e) {
-	    throw new IllegalStateException("IOException: " + e.getMessage());
+	    throw new kelondroException(filename, "IOException: " + e.getMessage());
 	}
     }
   

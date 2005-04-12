@@ -117,7 +117,13 @@ public class plasmaWordIndexFileCache {
 
     
     protected Iterator wordHashes(String wordHash, boolean up) throws IOException {
-        return indexCache.rows(up, false, (wordHash == null) ? null : wordHash.getBytes());
+        try {
+            return indexCache.rows(up, false, (wordHash == null) ? null : wordHash.getBytes());
+        } catch (kelondroException e) {
+            de.anomic.server.serverLog.logError("PLASMA", "kelondro error in plasmaWordIndexFileCache: " + e.getMessage() + "; deleting index for " + wordHash);
+            deleteComplete(wordHash);
+            return new HashSet().iterator();
+        }
     }
 
     protected plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty) throws IOException {
@@ -154,10 +160,10 @@ public class plasmaWordIndexFileCache {
 	    row[1][0] = (byte) entries;
             try {
                 indexCache.put(row);
-            } catch (IllegalArgumentException e) {
+            } catch (kelondroException e) {
                 // this is a very bad case; a database inconsistency occurred
                 deleteComplete(wordHash);
-                System.out.println("fatal error in plasmaWordIndexFileCacle.addEntriesToIndex: write to word hash file " + wordHash + " failed - " + e.getMessage());
+                System.out.println("fatal error in plasmaWordIndexFileCacle.addEntriesToIndex: write to word hash file " + wordHash + " failed - " + e.getMessage() + " - index deleted.");
             }
         }
 	// finished!

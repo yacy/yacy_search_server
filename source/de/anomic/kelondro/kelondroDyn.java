@@ -161,7 +161,7 @@ public class kelondroDyn extends kelondroTree {
 	    byte[][] nt;
 	    while (ri.hasNext()) {
 		nt = (byte[][]) ri.next();
-		if (nt == null) return null;
+		if (nt == null) throw new kelondroException(filename, "no more elements available");
 		g = nt[0];
 		if (g == null) return null;
 		k = new String(g, 0, keylen);

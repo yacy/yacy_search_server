@@ -423,7 +423,7 @@ public class kelondroMap {
             }
             try {
                 Map map = get(nextKey);
-                if (map == null) return null;
+                if (map == null) throw new kelondroException(dyn.filename, "no more elements available");
                 map.put("key", nextKey);
                 return map;
             } catch (IOException e) {
