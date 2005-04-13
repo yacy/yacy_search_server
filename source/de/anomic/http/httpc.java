@@ -98,7 +98,7 @@ public class httpc {
         java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
     }
 
-    private static String dnsResolveX(String host) {
+    public static String dnsResolve(String host) {
         // looks for the ip of host <host> and returns ip number as string
         String ip = (String) nameCacheHit.get(host);
         if (ip != null) return ip;
@@ -115,18 +115,6 @@ public class httpc {
             //nameCacheMiss.add(host);
         }
         return null;
-    }
-    
-    public static String dnsResolve(String host) {
-        String ip = null;
-        for (int i = 0; i < 50; i++) {
-            ip = dnsResolveX(host);
-            if (ip != null) {
-                //if (i > 0) System.out.println(i + " attempts for " + host);
-                return ip;
-            }
-        }
-        return ip;
     }
 
     public static boolean dnsFetch(String host) {

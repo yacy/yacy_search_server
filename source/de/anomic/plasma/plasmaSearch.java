@@ -211,9 +211,15 @@ public class plasmaSearch {
         Enumeration se = small.elements(true);
         plasmaWordIndexEntry ie;
         long stamp = System.currentTimeMillis();
-        while ((se.hasMoreElements()) && ((System.currentTimeMillis() - stamp) < time)) {
-            ie = (plasmaWordIndexEntry) se.nextElement();
-            if (large.contains(ie)) conj.addEntry(ie);
+        try {
+            while ((se.hasMoreElements()) && ((System.currentTimeMillis() - stamp) < time)) {
+                ie = (plasmaWordIndexEntry) se.nextElement();
+                if (large.contains(ie)) conj.addEntry(ie);
+            }
+        }  catch (kelondroException e) {
+            serverLog.logError("PLASMA", "joinConstructiveByTest: Database corrupt (" + e.getMessage() + "), deleting index");
+            small.deleteComplete();
+            return conj;
         }
         return conj;
     }
@@ -225,20 +231,58 @@ public class plasmaSearch {
         Enumeration e2 = i2.elements(true);
         int c;
         if ((e1.hasMoreElements()) && (e2.hasMoreElements())) {
-            plasmaWordIndexEntry ie1 = (plasmaWordIndexEntry) e1.nextElement();
-            plasmaWordIndexEntry ie2 = (plasmaWordIndexEntry) e2.nextElement();
+            plasmaWordIndexEntry ie1;
+            plasmaWordIndexEntry ie2;
+            try {
+                ie1 = (plasmaWordIndexEntry) e1.nextElement();
+            }  catch (kelondroException e) {
+                serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database corrupt 1 (" + e.getMessage() + "), deleting index");
+                i1.deleteComplete();
+                return conj;
+            }
+            try {
+                ie2 = (plasmaWordIndexEntry) e2.nextElement();
+            }  catch (kelondroException e) {
+                serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database corrupt 2 (" + e.getMessage() + "), deleting index");
+                i2.deleteComplete();
+                return conj;
+            }
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
                 c = ie1.getUrlHash().compareTo(ie2.getUrlHash());
                 if (c < 0) {
-                    if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
+                    try {
+                        if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
+                    } catch (kelondroException e) {
+                        serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
+                        i1.deleteComplete();
+                        break;
+                    }
                 } else if (c > 0) {
-                    if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
+                    try {
+                        if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
+                    } catch (kelondroException e) {
+                        serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
+                        i2.deleteComplete();
+                        break;
+                    }
                 } else {
                     // we have found the same urls in different searches!
                     conj.addEntry(ie1);
-                    if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
-                    if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
+                    try {
+                        if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
+                    } catch (kelondroException e) {
+                        serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
+                        i1.deleteComplete();
+                        break;
+                    }
+                    try {
+                        if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
+                    }  catch (kelondroException e) {
+                        serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
+                        i2.deleteComplete();
+                        break;
+                    }
                 }
             }
         }

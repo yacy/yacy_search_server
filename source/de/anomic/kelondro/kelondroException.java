@@ -49,7 +49,7 @@ public class kelondroException extends java.lang.RuntimeException {
     }
     
     public kelondroException(String database, String message) {
-        super(message + " in database '" + database + "'");
+        super(message + " in db '" + database + "'");
     }
     
 }
