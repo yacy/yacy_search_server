@@ -59,17 +59,25 @@ public class plasmaParser {
         
     }
     
-    public document parse(URL location, String mimeType, byte[] source) {
+    public document parseSource(URL location, String mimeType, byte[] source) {
         // make a scraper and transformer
         htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
         OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
         try {
             hfos.write(source);
+            return transformScraper(location, mimeType, scraper);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+    
+    public document transformScraper(URL location, String mimeType, htmlFilterContentScraper scraper) {
+        try {
             return new document(new URL(urlNormalform(location)),
-            mimeType, null, null, scraper.getHeadline(),
-            null, null,
-            scraper.getText(), scraper.getAnchor(), scraper.getImage());
-        } catch (Exception e) {
+                                mimeType, null, null, scraper.getHeadline(),
+                                null, null,
+                                scraper.getText(), scraper.getAnchors(), scraper.getImages());
+        } catch (MalformedURLException e) {
             return null;
         }
     }
@@ -88,8 +96,6 @@ public class plasmaParser {
         if (((us.endsWith("/")) && (us.lastIndexOf('/', us.length() - 2) < 8))) us = us.substring(0, us.length() - 1);
         return us;
     }   
-    
-    
     
     public class document {
         

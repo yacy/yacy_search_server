@@ -62,6 +62,7 @@ package de.anomic.plasma;
 
 import java.io.*;
 import java.util.*;
+import de.anomic.server.*;
 import de.anomic.kelondro.*;
 
 public class plasmaWordIndexFileCache {
@@ -72,24 +73,43 @@ public class plasmaWordIndexFileCache {
     // class variables
     private File         databaseRoot;
     private kelondroTree indexCache;
+    private int          bufferkb;
 
     public plasmaWordIndexFileCache(File databaseRoot, int bufferkb) throws IOException {
 	this.databaseRoot = databaseRoot;
+        this.bufferkb = bufferkb;
 	File indexCacheFile = new File(databaseRoot, indexCacheFileName);
         if (indexCacheFile.exists()) {
 	    // simply open the file
 	    indexCache = new kelondroTree(indexCacheFile, bufferkb * 0x400);
 	} else {
-	    // create a new file
-            int[] columns = new int[buffers + 2];
-            columns[0] = plasmaWordIndexEntry.wordHashLength;
-            columns[1] = 1;
-            for (int i = 0; i < buffers; i++) columns[i + 2] = plasmaCrawlLURL.urlHashLength + plasmaWordIndexEntry.attrSpaceShort;
-            indexCache = new kelondroTree(indexCacheFile, bufferkb * 0x400, columns);
+            createCacheFile(indexCacheFile);
 	}
     }
 
-
+    private void resetCacheFile() {
+        // this has to be used in emergencies only
+        // it can happen that there is a serious db inconsistency; in that case we re-create the indexCache
+        try { indexCache.close(); } catch (IOException e) {}
+        File indexCacheFile = new File(databaseRoot, indexCacheFileName);
+        if (indexCacheFile.exists()) indexCacheFile.delete();
+        try {
+            createCacheFile(indexCacheFile);
+        } catch (IOException e) {
+            de.anomic.server.serverLog.logError("PLASMA", "plasmaWordIndexFileCache.resetCacheFile: serious failure creating the cache file: " + e.getMessage());
+            indexCache = null;
+        }
+    }
+    
+    private void createCacheFile(File indexCacheFile) throws IOException {
+        // create a new file
+        int[] columns = new int[buffers + 2];
+        columns[0] = plasmaWordIndexEntry.wordHashLength;
+        columns[1] = 1;
+        for (int i = 0; i < buffers; i++) columns[i + 2] = plasmaCrawlLURL.urlHashLength + plasmaWordIndexEntry.attrSpaceShort;
+        indexCache = new kelondroTree(indexCacheFile, bufferkb * 0x400, columns);
+    }
+    
     protected void close() throws IOException {
 	indexCache.close();
 	indexCache = null;
@@ -162,8 +182,12 @@ public class plasmaWordIndexFileCache {
                 indexCache.put(row);
             } catch (kelondroException e) {
                 // this is a very bad case; a database inconsistency occurred
-                deleteComplete(wordHash);
-                System.out.println("fatal error in plasmaWordIndexFileCacle.addEntriesToIndex: write to word hash file " + wordHash + " failed - " + e.getMessage() + " - index deleted.");
+                serverLog.logError("PLASMA", "fatal error in plasmaWordIndexFileCache.addEntriesToIndex: write of " + wordHash + " to index cache failed - " + e.getMessage() + " - indexCache.db deleted");
+                resetCacheFile();
+            } catch (IOException e) {
+                // this is a very bad case; a database inconsistency occurred
+                serverLog.logError("PLASMA", "fatal error in plasmaWordIndexFileCache.addEntriesToIndex: write of " + wordHash + " to index cache failed - " + e.getMessage() + " - indexCache.db deleted");
+                resetCacheFile();
             }
         }
 	// finished!

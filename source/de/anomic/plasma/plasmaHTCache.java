@@ -427,11 +427,10 @@ public class plasmaHTCache {
     public Entry newEntry(Date initDate, int depth, URL url,
 			  httpHeader requestHeader,
 			  String responseStatus, httpHeader responseHeader,
-			  htmlFilterContentScraper scraper,
                           String initiator,
                           plasmaCrawlProfile.entry profile) {
         //System.out.println("NEW ENTRY: " + url.toString()); // DEBUG
-	return new Entry(initDate, depth, url, requestHeader, responseStatus, responseHeader, scraper, initiator, profile);
+	return new Entry(initDate, depth, url, requestHeader, responseStatus, responseHeader, initiator, profile);
     }
 
     public class Entry {
@@ -449,15 +448,17 @@ public class plasmaHTCache {
 	public String                   urlString;
 	public int                      status;         // cache load/hit/stale etc status
 	public Date                     lastModified;
-	public htmlFilterContentScraper scraper;
 	public char                     doctype;
 	public String                   language;
         public plasmaCrawlProfile.entry profile;
         private String                  initiator;
+        public ByteArrayOutputStream    content;
+        public htmlFilterContentScraper scraper;
+
+	
 	public Entry(Date initDate, int depth, URL url,
 		     httpHeader requestHeader,
 		     String responseStatus, httpHeader responseHeader,
-		     htmlFilterContentScraper scraper,
                      String initiator,
                      plasmaCrawlProfile.entry profile) {
 
@@ -478,7 +479,7 @@ public class plasmaHTCache {
 	    this.requestHeader  = requestHeader;
 	    this.responseStatus = responseStatus;
 	    this.responseHeader = responseHeader;
-	    this.scraper        = scraper;
+	    this.content        = new ByteArrayOutputStream();
 	    this.profile        = profile;
             this.initiator      = (initiator == null) ? null : ((initiator.length() == 0) ? null: initiator);
 
@@ -503,8 +504,16 @@ public class plasmaHTCache {
 	    // to be defined later:
 	    this.cacheArray     = null;
 	    this.status         = CACHE_UNFILLED;
+            this.scraper        = null;
 	}
 	
+        public OutputStream getContentOutputStream() {
+            return (OutputStream) content;
+        }
+        public byte[] getContentBytes() {
+            try { content.flush(); } catch (IOException e) {}
+            return content.toByteArray();
+        }
         public String initiator() {
             return initiator;
         }
@@ -614,126 +623,8 @@ public class plasmaHTCache {
 	    
 	    return null;
 	}
-	
-	public String shallIndexCache() {
-	    // decide upon header information if a specific file should be indexed
-	    // this method returns null if the answer is 'YES'!
-	    // if the answer is 'NO' (do not index), it returns a string with the reason
-	    // to reject the crawling demand in clear text
-	    
-            // check profile
-            if (!(profile.localIndexing())) return "Indexing_Not_Allowed";
-            
-	    // -CGI access in request
-	    // CGI access makes the page very individual, and therefore not usable in caches
-	     if ((isPOST(urlString)) && (!(profile.crawlingQ()))) return "Dynamic_(POST)";
-             if ((isCGI(urlString)) && (!(profile.crawlingQ()))) return "Dynamic_(CGI)";
-	    
-	    // -authorization cases in request
-	    // we checked that in shallStoreCache
-	    
-	    // -ranges in request
-	    // we checked that in shallStoreCache
-	    
-	    // a picture cannot be indexed
-	    if (isPicture(responseHeader)) return "Media_Content_(Picture)";
-	    if (!(isText(responseHeader))) return "Media_Content_(not_text)";
-	    if (noIndexingURL(urlString)) return "Media_Content_(forbidden)";
 
-	    
-	    // -if-modified-since in request
-	    // if the page is fresh at the very moment we can index it
-	    if ((requestHeader != null) &&
-                (requestHeader.containsKey("IF-MODIFIED-SINCE")) &&
-                (responseHeader.containsKey("Last-Modified"))) {
-		// parse date
-                Date d1, d2;
-		d2 = responseHeader.lastModified(); if (d2 == null) d2 = new Date();
-		d1 = requestHeader.ifModifiedSince(); if (d1 == null) d1 = new Date();
-		// finally, we shall treat the cache as stale if the modification time is after the if-.. time
-		if (d2.after(d1)) {
-		    //System.out.println("***not indexed because if-modified-since");
-		    return "Stale_(Last-Modified>Modified-Since)";
-		}
-	    }
-	    
-	    // -cookies in request
-	    // unfortunately, we cannot index pages which have been requested with a cookie
-	    // because the returned content may be special for the client
-	    if ((requestHeader != null) && (requestHeader.containsKey("COOKIE"))) {
-		//System.out.println("***not indexed because cookie");
-		return "Dynamic_(Requested_With_Cookie)";
-	    }
-
-	    // -set-cookie in response
-	    // the set-cookie from the server does not indicate that the content is special
-	    // thus we do not care about it here for indexing
-
-	    // -pragma in cached response
-            /*
-	    if ((responseHeader.containsKey("PRAGMA")) &&
-		(((String) responseHeader.get("Pragma")).toUpperCase().equals("NO-CACHE"))) return "Denied_(pragma_no_cache)";
-            */
-            
-	    // see for documentation also:
-	    // http://www.web-caching.com/cacheability.html
-	    
-	    // calculate often needed values for freshness attributes
-	    Date date           = responseHeader.date();
-	    Date expires        = responseHeader.expires();
-	    Date lastModified   = responseHeader.lastModified();
-	    String cacheControl = (String) responseHeader.get("Cache-Control");
-	    
-	    // look for freshnes information
-	    
-	    // -expires in cached response
-	    // the expires value gives us a very easy hint when the cache is stale
-	    // sometimes, the expires date is set to the past to prevent that a page is cached
-	    // we use that information to see if we should index it
-	    if (expires != null) {
-		Date yesterday = new Date((new Date()).getTime() - oneday);
-		if (expires.before(yesterday)) return "Stale_(Expired)";
-	    }
-	    
-	    // -lastModified in cached response
-	    // this information is too weak to use it to prevent indexing
-	    // even if we can apply a TTL heuristic for cache usage
-	    
- 	    // -cache-control in cached response
-	    // the cache-control has many value options.
-	    if (cacheControl != null) {
-                cacheControl = cacheControl.trim().toUpperCase();
-                /* we have the following cases for cache-control:
-                "public" -- can be indexed
-                "private", "no-cache", "no-store" -- cannot be indexed
-                "max-age=<delta-seconds>" -- stale/fresh dependent on date
-                */
-                if (cacheControl.startsWith("PUBLIC")) {
-                    // ok, do nothing
-                } else if ((cacheControl.startsWith("PRIVATE")) ||
-                           (cacheControl.startsWith("NO-CACHE")) ||
-                           (cacheControl.startsWith("NO-STORE"))) {
-                    // easy case
-                    return "Stale_(denied_by_cache-control=" + cacheControl+ ")";
-                } else if (cacheControl.startsWith("MAX-AGE=")) {
-                    // we need also the load date
-                    if (date == null) return "Stale_(no_date_given_in_response)";
-                    try {
-                        long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                        if ((new Date()).getTime() - date.getTime() > ttl) {
-                            //System.out.println("***not indexed because cache-control");
-                            return "Stale_(expired_by_cache-control)";
-                        }
-                    } catch (Exception e) {
-                        return "Error_(" + e.getMessage() + ")";
-                    }
-                }
-	    }
-	    
-	    return null;
-	}
-
-    	public boolean shallUseCache() {
+        public boolean shallUseCache() {
 	    // decide upon header information if a specific file should be taken from the cache or not
 	    
 	    //System.out.println("SHALL READ CACHE: requestHeader = " + requestHeader.toString() + ", responseHeader = " + responseHeader.toString());
@@ -852,6 +743,186 @@ public class plasmaHTCache {
 	    
 	    return true;
 	}
+        
+        	
+	public String shallIndexCacheForProxy() {
+	    // decide upon header information if a specific file should be indexed
+	    // this method returns null if the answer is 'YES'!
+	    // if the answer is 'NO' (do not index), it returns a string with the reason
+	    // to reject the crawling demand in clear text
+	    
+            // check profile
+            if (!(profile.localIndexing())) return "Indexing_Not_Allowed";
+            
+	    // -CGI access in request
+	    // CGI access makes the page very individual, and therefore not usable in caches
+	     if ((isPOST(urlString)) && (!(profile.crawlingQ()))) return "Dynamic_(POST)";
+             if ((isCGI(urlString)) && (!(profile.crawlingQ()))) return "Dynamic_(CGI)";
+	    
+	    // -authorization cases in request
+	    // we checked that in shallStoreCache
+	    
+	    // -ranges in request
+	    // we checked that in shallStoreCache
+	    
+	    // a picture cannot be indexed
+	    if (isPicture(responseHeader)) return "Media_Content_(Picture)";
+	    if (!(isText(responseHeader))) return "Media_Content_(not_text)";
+	    if (noIndexingURL(urlString)) return "Media_Content_(forbidden)";
+
+	    
+	    // -if-modified-since in request
+	    // if the page is fresh at the very moment we can index it
+	    if ((requestHeader != null) &&
+                (requestHeader.containsKey("IF-MODIFIED-SINCE")) &&
+                (responseHeader.containsKey("Last-Modified"))) {
+		// parse date
+                Date d1, d2;
+		d2 = responseHeader.lastModified(); if (d2 == null) d2 = new Date();
+		d1 = requestHeader.ifModifiedSince(); if (d1 == null) d1 = new Date();
+		// finally, we shall treat the cache as stale if the modification time is after the if-.. time
+		if (d2.after(d1)) {
+		    //System.out.println("***not indexed because if-modified-since");
+		    return "Stale_(Last-Modified>Modified-Since)";
+		}
+	    }
+	    
+	    // -cookies in request
+	    // unfortunately, we cannot index pages which have been requested with a cookie
+	    // because the returned content may be special for the client
+	    if ((requestHeader != null) && (requestHeader.containsKey("COOKIE"))) {
+		//System.out.println("***not indexed because cookie");
+		return "Dynamic_(Requested_With_Cookie)";
+	    }
+
+	    // -set-cookie in response
+	    // the set-cookie from the server does not indicate that the content is special
+	    // thus we do not care about it here for indexing
+
+	    // -pragma in cached response
+	    if ((responseHeader.containsKey("PRAGMA")) &&
+		(((String) responseHeader.get("Pragma")).toUpperCase().equals("NO-CACHE"))) return "Denied_(pragma_no_cache)";
+            
+	    // see for documentation also:
+	    // http://www.web-caching.com/cacheability.html
+	    
+	    // calculate often needed values for freshness attributes
+	    Date date           = responseHeader.date();
+	    Date expires        = responseHeader.expires();
+	    Date lastModified   = responseHeader.lastModified();
+	    String cacheControl = (String) responseHeader.get("Cache-Control");
+	    
+	    // look for freshnes information
+	    
+	    // -expires in cached response
+	    // the expires value gives us a very easy hint when the cache is stale
+	    // sometimes, the expires date is set to the past to prevent that a page is cached
+	    // we use that information to see if we should index it
+	    if (expires != null) {
+		Date yesterday = new Date((new Date()).getTime() - oneday);
+		if (expires.before(yesterday)) return "Stale_(Expired)";
+	    }
+	    
+	    // -lastModified in cached response
+	    // this information is too weak to use it to prevent indexing
+	    // even if we can apply a TTL heuristic for cache usage
+	    
+ 	    // -cache-control in cached response
+	    // the cache-control has many value options.
+	    if (cacheControl != null) {
+                cacheControl = cacheControl.trim().toUpperCase();
+                /* we have the following cases for cache-control:
+                "public" -- can be indexed
+                "private", "no-cache", "no-store" -- cannot be indexed
+                "max-age=<delta-seconds>" -- stale/fresh dependent on date
+                */
+                if (cacheControl.startsWith("PUBLIC")) {
+                    // ok, do nothing
+                } else if ((cacheControl.startsWith("PRIVATE")) ||
+                           (cacheControl.startsWith("NO-CACHE")) ||
+                           (cacheControl.startsWith("NO-STORE"))) {
+                    // easy case
+                    return "Stale_(denied_by_cache-control=" + cacheControl+ ")";
+                } else if (cacheControl.startsWith("MAX-AGE=")) {
+                    // we need also the load date
+                    if (date == null) return "Stale_(no_date_given_in_response)";
+                    try {
+                        long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
+                        if ((new Date()).getTime() - date.getTime() > ttl) {
+                            //System.out.println("***not indexed because cache-control");
+                            return "Stale_(expired_by_cache-control)";
+                        }
+                    } catch (Exception e) {
+                        return "Error_(" + e.getMessage() + ")";
+                    }
+                }
+	    }
+	    
+	    return null;
+	}
+        
+        	
+	public String shallIndexCacheForCrawler() {
+	    // decide upon header information if a specific file should be indexed
+	    // this method returns null if the answer is 'YES'!
+	    // if the answer is 'NO' (do not index), it returns a string with the reason
+	    // to reject the crawling demand in clear text
+	    
+            // check profile
+            if (!(profile.localIndexing())) return "Indexing_Not_Allowed";
+            
+	    // -CGI access in request
+	    // CGI access makes the page very individual, and therefore not usable in caches
+	     if ((isPOST(urlString)) && (!(profile.crawlingQ()))) return "Dynamic_(POST)";
+             if ((isCGI(urlString)) && (!(profile.crawlingQ()))) return "Dynamic_(CGI)";
+	    
+	    // -authorization cases in request
+	    // we checked that in shallStoreCache
+	    
+	    // -ranges in request
+	    // we checked that in shallStoreCache
+	    
+	    // a picture cannot be indexed
+	    if (isPicture(responseHeader)) return "Media_Content_(Picture)";
+	    if (!(isText(responseHeader))) return "Media_Content_(not_text)";
+	    if (noIndexingURL(urlString)) return "Media_Content_(forbidden)";
+
+	    // -if-modified-since in request
+	    // if the page is fresh at the very moment we can index it
+            // -> this does not apply for the crawler
+	    
+	    // -cookies in request
+	    // unfortunately, we cannot index pages which have been requested with a cookie
+	    // because the returned content may be special for the client
+            // -> this does not apply for a crawler
+
+	    // -set-cookie in response
+	    // the set-cookie from the server does not indicate that the content is special
+	    // thus we do not care about it here for indexing
+            // -> this does not apply for a crawler
+
+	    // -pragma in cached response
+            // -> in the crawler we ignore this
+            
+	    // look for freshnes information
+	    
+	    // -expires in cached response
+	    // the expires value gives us a very easy hint when the cache is stale
+	    // sometimes, the expires date is set to the past to prevent that a page is cached
+	    // we use that information to see if we should index it
+	    // -> this does not apply for a crawler
+	    
+	    // -lastModified in cached response
+	    // this information is too weak to use it to prevent indexing
+	    // even if we can apply a TTL heuristic for cache usage
+	    
+ 	    // -cache-control in cached response
+	    // the cache-control has many value options.
+	    // -> in the crawler we ignore this
+	    
+	    return null;
+	}
+        
     }
     
 }

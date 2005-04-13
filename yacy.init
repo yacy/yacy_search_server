@@ -166,16 +166,8 @@ remoteProxyUse=false
 #remoteProxyUse=true
 
 # the proxy may filter the content of transferred web pages
-# this is archieved using a special filtering class that can be
-# exchanged like a transformation plug-in
-# If you want to do this, you must implement the htmlFilterTransformer
-# -Interface and set the name of the implementing class here.
-# As a default, we use a filtering Transformer that takes a blacklist
-# and blocks all text fragments where a word from the blacklist appears
-# as the blacklist, we use the search-engine's blue-list
-# please see that class as an implementation example for your own transformers
-pageTransformerClass=htmlFilterContentTransformer
-pageTransformerArg=yacy.blue
+# the bluelist removes specific keywords from web pages
+proxyBlueList=yacy.blue
 
 # security settigns
 # we provide proxy and server security through a 2-stage security gate:

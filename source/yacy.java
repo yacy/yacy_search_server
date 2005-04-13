@@ -208,7 +208,7 @@ public class yacy {
 	    }
 
             // init parser
-            de.anomic.htmlFilter.htmlFilterContentScraper.mediaExt = sb.getConfig("mediaExt","");
+            de.anomic.plasma.plasmaParser.mediaExt = sb.getConfig("mediaExt","");
             
 	    // start main threads
 	    try {

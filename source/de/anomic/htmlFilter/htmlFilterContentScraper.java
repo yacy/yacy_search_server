@@ -52,10 +52,6 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     private static HashSet linkTags0;
     private static HashSet linkTags1;
 
-    public static String mediaExt =
-        "swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar," +
-        "sit,hqx,img,dmg,tar,gz,ps,pdf,doc,xls,ppt,ram,bz2,arj";
-    
     static {
 	linkTags0 = new HashSet();
 	linkTags0.add("img");
@@ -67,8 +63,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     // class variables: collectors for links
-    private Properties anchor;
-    private Properties image;
+    private HashMap anchors;
+    private HashMap images;
     private String title;
     private String headline;
     private serverByteBuffer text;
@@ -79,8 +75,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // it is only the reference for relative links
 	super(linkTags0, linkTags1);
 	this.root = root;
-	this.anchor = new Properties();
-	this.image = new Properties();
+	this.anchors = new HashMap();
+	this.images = new HashMap();
 	this.title = "";
 	this.headline = "";
 	this.text = new serverByteBuffer();
@@ -117,12 +113,12 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public void scrapeTag0(String tagname, Properties tagopts) {
-	if (tagname.equals("img")) image.setProperty(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("alt",""));
+	if (tagname.equals("img")) images.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("alt",""));
     }
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
 	//System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
-	if (tagname.equals("a")) anchor.setProperty(absolutePath(tagopts.getProperty("href", "")),
+	if (tagname.equals("a")) anchors.put(absolutePath(tagopts.getProperty("href", "")),
 						    new serverByteBuffer(super.stripAll(new serverByteBuffer(text)).getBytes()).trim().toString());
 	if (tagname.equals("h1")) headline = new String(super.stripAll(new serverByteBuffer(text)).getBytes());
 	if (tagname.equals("title")) title = new String(super.stripAll(new serverByteBuffer(text)).getBytes());
@@ -153,179 +149,19 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 	return text.getBytes();
     }
     
-    public Properties getAnchor() {
-	return anchor;
+    public Map getAnchors() {
+	return anchors;
     }
 
-    public Properties getImage() {
-	return image;
+    public Map getImages() {
+	return images;
     }
-
-    public Map getHyperlinks() {
-	if (hyperlinks == null) resortLinks();
-	return hyperlinks;
-    }
-
-    public Map getMedialinks() {
-	if (medialinks == null) resortLinks();
-	return medialinks;
-    }
-
-    public Map getEmaillinks() {
-	if (emaillinks == null) resortLinks();
-	return emaillinks;
-    }
-
-    HashMap hyperlinks = null;
-    HashMap medialinks = null;
-    HashMap emaillinks = null;
-
-            private synchronized void resortLinks() {
-            Iterator i;
-            String url;
-            int extpos;
-            String ext;
-            i = anchor.entrySet().iterator();
-            hyperlinks = new HashMap();
-            medialinks = new HashMap();
-            emaillinks = new HashMap();
-            Map.Entry entry;
-            while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                url = (String) entry.getKey();
-                if ((url != null) && (url.startsWith("mailto:"))) {
-                    emaillinks.put(url.substring(7), entry.getValue());
-                } else {
-                    extpos = url.lastIndexOf(".");
-                    String normal;
-                    if (extpos > 0) {
-                        ext = url.substring(extpos).toLowerCase();
-                        normal = urlNormalform(url);
-                        if (normal != null) {
-                            if (mediaExt.indexOf(ext.substring(1)) >= 0) {
-                                // this is not an normal anchor, its a media link
-                                medialinks.put(normal, entry.getValue());
-                            } else {
-                                hyperlinks.put(normal, entry.getValue());
-                            }
-                        }
-                    }
-                }
-            }
-            // finally add the images to the medialinks
-            i = image.entrySet().iterator();
-            String normal;
-            while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                url = (String) entry.getKey();
-                normal = urlNormalform(url);
-                if (normal != null) medialinks.put(normal, entry.getValue()); // avoid NullPointerException
-            }
-            expandHyperlinks();
-        }
-        
-            /*
-    private synchronized void resortLinks() {
-	Enumeration e;
-	String url;
-	int extpos;
-	String ext;
-	e = anchor.propertyNames();
-	hyperlinks = new Properties();
-	medialinks = new Properties();
-	emaillinks = new Properties();
-	while (e.hasMoreElements()) {
-	    url = (String) e.nextElement();
-	    if ((url != null) && (url.startsWith("mailto:"))) {
-		emaillinks.setProperty(url.substring(7), anchor.getProperty(url));
-	    } else {
-		extpos = url.lastIndexOf(".");
-		String normal;
-		if (extpos > 0) {
-		    ext = url.substring(extpos).toLowerCase();
-		    normal = urlNormalform(url);
-		    if (normal != null) {
-			if (mediaExt.indexOf(ext.substring(1)) >= 0) {
-			    // this is not an normal anchor, its a media link
-			    medialinks.setProperty(normal, anchor.getProperty(url));
-			} else {
-			    hyperlinks.setProperty(normal, anchor.getProperty(url));
-			}
-		    }
-		}
-	    }
-	}
-	// finally add the images to the medialinks
-	e = image.propertyNames();
-	String normal;
-	while (e.hasMoreElements()) {
-	    url = (String) e.nextElement();
-	    normal = urlNormalform(url);
-	    if (normal != null) medialinks.setProperty(normal, image.getProperty(url)); // avoid NullPointerException
-	}
-    }
-*/
-
-    public synchronized void expandHyperlinks() {
-	// we add artificial hyperlinks to the hyperlink set that can be calculated from
-	// given hyperlinks and imagelinks
-	hyperlinks.putAll(allReflinks(hyperlinks));
-	hyperlinks.putAll(allReflinks(medialinks));
-	hyperlinks.putAll(allSubpaths(hyperlinks));
-	hyperlinks.putAll(allSubpaths(medialinks));
-    }
-
-    private static Map allReflinks(Map links) {
-	// we find all links that are part of a reference inside a url
-	HashMap v = new HashMap();
-	Iterator i = links.keySet().iterator();
-	String s;
-	int pos;
-	loop: while (i.hasNext()) {
-	    s = (String) i.next();
-	    if ((pos = s.toLowerCase().indexOf("http://",7)) > 0) {
-		i.remove();
-		s = s.substring(pos);
-		while ((pos = s.toLowerCase().indexOf("http://",7)) > 0) s = s.substring(pos);
-		if (!(v.containsKey(s))) v.put(s, "ref");
-		continue loop;
-	    }
-	    if ((pos = s.toLowerCase().indexOf("/www.",7)) > 0) {
-		i.remove();
-		s = "http:/" + s.substring(pos);
-		while ((pos = s.toLowerCase().indexOf("/www.",7)) > 0) s = "http:/" + s.substring(pos);
-		if (!(v.containsKey(s))) v.put(s, "ref");
-		continue loop;
-	    }
-	}
-	return v;
-    }
-
-    private static Map allSubpaths(Map links) {
-	HashMap v = new HashMap();
-	Iterator i = links.keySet().iterator();
-	String s;
-	int pos;
-	while (i.hasNext()) {
-	    s = (String) i.next();
-	    if (s.endsWith("/")) s = s.substring(0, s.length() - 1);
-	    pos = s.lastIndexOf("/");
-	    while (pos > 8) {
-		s = s.substring(0, pos + 1);
-		if (!(v.containsKey(s))) v.put(s, "sub");
-		s = s.substring(0, pos);
-		pos = s.lastIndexOf("/");
-	    }
-	}
-	return v;
-    }
-
 
     public void print() {
 	System.out.println("TITLE   :" + title);
 	System.out.println("HEADLINE:" + headline);
-	System.out.println("ANCHORS :" + anchor.toString());
-	System.out.println("IMAGES  :" + image.toString());
+	System.out.println("ANCHORS :" + anchors.toString());
+	System.out.println("IMAGES  :" + images.toString());
 	System.out.println("TEXT    :" + new String(text.getBytes()));
     }
 

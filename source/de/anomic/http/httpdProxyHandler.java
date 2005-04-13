@@ -125,15 +125,9 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
                 if (!(htRootPath.exists())) htRootPath.mkdir();
             }
             
-	    // load a transformer
-	    try {
-		ClassLoader cp = new serverClassLoader(this.getClass().getClassLoader());
-		Class transformerClass = cp.loadClass(switchboard.getConfig("pageTransformerClass", ""));
-		transformer = (htmlFilterTransformer) transformerClass.newInstance();
-		transformer.init(switchboard.getConfig("pageTransformerArg", "")); // this is usually the blueList
-	    } catch (Exception e) {
-		transformer = null;
-	    }
+            // load a transformer
+            transformer = new htmlFilterContentTransformer();
+            transformer.init(new File(switchboard.getRootPath(), switchboard.getConfig("plasmaBlueList", "")).toString());
 
 	    String f;
 	    // load the yellow-list
@@ -396,7 +390,7 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
 	if (cacheExists) {
 	    // we respond on the request by using the cache
 
-            hpc = cacheManager.newEntry(requestDate, 0, url, requestHeader, "200 OK", cachedResponseHeader, null, null, switchboard.defaultProxyProfile);
+            hpc = cacheManager.newEntry(requestDate, 0, url, requestHeader, "200 OK", cachedResponseHeader, null, switchboard.defaultProxyProfile);
 
 	    if (hpc.shallUseCache()) {
 		// the cache is fresh
@@ -426,7 +420,8 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
 			respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
 			
 			// make a transformer
-			if (((ext == null) || (!(switchboard.extensionBlack.contains(ext)))) &&
+			if ((!(transformer.isIdentityTransformer())) &&
+                            ((ext == null) || (!(switchboard.extensionBlack.contains(ext)))) &&
                             ((cachedResponseHeader == null) || (httpd.isTextMime(cachedResponseHeader.mime(), switchboard.mimeWhite)))) {
 			    hfos = new htmlFilterOutputStream(respond, null, transformer, (ext.length() == 0));
 			} else {
@@ -472,23 +467,29 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
 		    res = remote.GET(remotePath, requestHeader);
 		    long contentLength = res.responseHeader.contentLength();
 
-		    // make a scraper and transformer
+		    // reserver cache entry
+		    hpc = cacheManager.newEntry(requestDate, 0, url, requestHeader, res.status, res.responseHeader, null, switchboard.defaultProxyProfile);
+                    
+                    // make a scraper and transformer
                     if (((ext == null) || (!(switchboard.extensionBlack.contains(ext)))) &&
                         (httpd.isTextMime(res.responseHeader.mime(), switchboard.mimeWhite))) {
-			scraper = new htmlFilterContentScraper(url);
-			hfos = new htmlFilterOutputStream(respond, scraper, transformer, (ext.length() == 0));
-                        if (((htmlFilterOutputStream) hfos).binarySuspect()) {
-                            scraper = null; // forget it, may be rubbish
-                            log.logDebug("Content of " + url + " is probably binary. deleted scraper.");
+                        if (transformer.isIdentityTransformer()) {
+                            hfos = hpc.getContentOutputStream();
+                        } else {
+                            scraper = new htmlFilterContentScraper(url);
+                            hfos = new htmlFilterOutputStream(respond, scraper, transformer, (ext.length() == 0));
+                            if (((htmlFilterOutputStream) hfos).binarySuspect()) {
+                                scraper = null; // forget it, may be rubbish
+                                log.logDebug("Content of " + url + " is probably binary. deleted scraper.");
+                            }
+                            hpc.scraper = scraper;
                         }
 		    } else {
                         log.logDebug("Resource " + url + " has wrong extension (" + ext + ") or wrong mime-type (" + res.responseHeader.mime() + "). not scraped");
 			scraper = null;
 			hfos = respond;
+                        hpc.scraper = scraper;
 		    }
-
-		    // reserver cache entry
-		    hpc = cacheManager.newEntry(requestDate, 0, url, requestHeader, res.status, res.responseHeader, scraper, null, switchboard.defaultProxyProfile);
 
                     // handle incoming cookies
                     handleIncomingCookies(res.responseHeader, host, ip);
@@ -502,7 +503,13 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
 			    if ((contentLength > 0) && // known
                                 (contentLength < 1048576)) // 1 MB
                             {
-				byte[] cacheArray = res.writeContent(hfos);
+				byte[] cacheArray;
+                                if (transformer.isIdentityTransformer()) {
+                                    res.writeContentX(hfos, respond);
+                                    cacheArray = hpc.getContentBytes();
+                                } else {
+                                    cacheArray = res.writeContent(hfos);
+                                }
 				if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
 				// before we came here we deleted a cache entry
 				if (sizeBeforeDelete == cacheArray.length) {
@@ -514,8 +521,16 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
 				    cacheManager.stackProcess(hpc, cacheArray); // necessary update, write response header to cache
 				}
 			    } else {
+                                // the file is too big to cache it in the ram, write to file
 				cacheFile.getParentFile().mkdirs();
-				res.writeContent(hfos, cacheFile);
+                                if (transformer.isIdentityTransformer()) {
+                                    res.writeContent(respond, cacheFile);
+                                    if (contentLength < 10485760) { // 10 mb
+                                        serverFileUtils.copy(cacheFile, hfos);
+                                    } // else hfos is empty and that means: no work afterwards with it
+                                } else {
+                                    res.writeContent(hfos, cacheFile);
+                                }
 				if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
 				// before we came here we deleted a cache entry
 				if (sizeBeforeDelete == cacheFile.length()) {
@@ -579,23 +594,29 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
 		httpc.response res = remote.GET(remotePath, requestHeader);
 		long contentLength = res.responseHeader.contentLength();
 
-		// make a scraper and transformer
+		// reserve cache entry
+		hpc = cacheManager.newEntry(requestDate, 0, url, requestHeader, res.status, res.responseHeader, null, switchboard.defaultProxyProfile);
+                
+                // make a scraper and transformer
                 if (((ext == null) || (!(switchboard.extensionBlack.contains(ext)))) &&
                     (httpd.isTextMime(res.responseHeader.mime(), switchboard.mimeWhite))) {
-                    scraper = new htmlFilterContentScraper(url);
-		    hfos = new htmlFilterOutputStream(respond, scraper, transformer, (ext.length() == 0));
-                    if (((htmlFilterOutputStream) hfos).binarySuspect()) {
-                        scraper = null; // forget it, may be rubbish
-                        log.logDebug("Content of " + url + " is probably binary. deleted scraper.");
+                    if (transformer.isIdentityTransformer()) {
+                        hfos = hpc.getContentOutputStream();
+                    } else {
+                        scraper = new htmlFilterContentScraper(url);
+                        hfos = new htmlFilterOutputStream(respond, scraper, transformer, (ext.length() == 0));
+                        if (((htmlFilterOutputStream) hfos).binarySuspect()) {
+                            scraper = null; // forget it, may be rubbish
+                            log.logDebug("Content of " + url + " is probably binary. deleted scraper.");
+                        }
+                        hpc.scraper = scraper;
                     }
-		} else {
+                } else {
                     log.logDebug("Resource " + url + " has wrong extension (" + ext + ") or wrong mime-type (" + res.responseHeader.mime() + "). not scraped");
 		    scraper = null;
 		    hfos = respond;
+                    hpc.scraper = scraper;
 		}
-
-		// reserve cache entry
-		hpc = cacheManager.newEntry(requestDate, 0, url, requestHeader, res.status, res.responseHeader, scraper, null, switchboard.defaultProxyProfile);
 
                 // handle incoming cookies
                 handleIncomingCookies(res.responseHeader, host, ip);
@@ -608,16 +629,29 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
                     if ((storeError = hpc.shallStoreCache()) == null) {
 			// we write a new cache entry
 			if ((contentLength > 0) && (contentLength < 1048576)) {
-			    // write to buffer
-			    byte[] cacheArray = res.writeContent(hfos);
-			    if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
+			// write to buffer
+                            byte[] cacheArray;
+                            if (transformer.isIdentityTransformer()) {
+                                res.writeContentX(hfos, respond);
+                                cacheArray = hpc.getContentBytes();
+                            } else {
+                                cacheArray = res.writeContent(hfos);
+                            }
+                            if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
 			    // enQueue new entry with response header and file as byte[]
                             hpc.status = plasmaHTCache.CACHE_FILL;
 			    cacheManager.stackProcess(hpc, cacheArray);
 			} else try {
 			    // write to file system directly
 			    cacheFile.getParentFile().mkdirs();
-			    res.writeContent(hfos, cacheFile);
+                            if (transformer.isIdentityTransformer()) {
+                                res.writeContent(respond, cacheFile);
+                                if (contentLength < 10485760) { // 10 mb
+                                    serverFileUtils.copy(cacheFile, hfos);
+                                } // else hfos is empty and that means: no work afterwards with it
+                            } else {
+                                res.writeContent(hfos, cacheFile);
+                            }
 			    if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
 			    // enQueue new entry with response header
 			    hpc.status = plasmaHTCache.CACHE_FILL;
@@ -711,9 +745,6 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
         }
     }
 
-    
-
-    
     public void doHead(Properties conProp, httpHeader requestHeader, OutputStream respond) throws IOException {
 	String method = conProp.getProperty("METHOD");
 	String host = conProp.getProperty("HOST");
@@ -833,8 +864,6 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
 	}
 	respond.flush();
     }
-
-
 
     public void doConnect(Properties conProp, de.anomic.http.httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) throws IOException {
         String host = conProp.getProperty("HOST");

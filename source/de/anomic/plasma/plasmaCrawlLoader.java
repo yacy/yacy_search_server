@@ -88,7 +88,7 @@ public class plasmaCrawlLoader {
                     // we kill that thread
                     thread.interrupt(); // hopefully this wakes him up.
                     slots.remove(i);
-                    System.out.println("CRAWLER: IGNORING SLEEPING DOWNLOAD SLOT " + thread.url.toString());
+                    log.logDebug("IGNORING SLEEPING DOWNLOAD SLOT " + thread.url.toString());
                 }
             } else {
                 // thread i is dead, remove it
@@ -198,31 +198,26 @@ public class plasmaCrawlLoader {
                     // the transfer is ok
                     long contentLength = res.responseHeader.contentLength();
                     
-                    // make a scraper and transformer
-                    htmlFilterContentScraper scraper = new htmlFilterContentScraper(url);
-                    OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
-                    
                     // reserve cache entry
-                    plasmaHTCache.Entry htCache = cacheManager.newEntry(requestDate, depth, url, requestHeader, res.status, res.responseHeader, scraper, initiator, profile);
+                    plasmaHTCache.Entry htCache = cacheManager.newEntry(requestDate, depth, url, requestHeader, res.status, res.responseHeader, initiator, profile);
                     
                     // request has been placed and result has been returned. work off response
                     File cacheFile = cacheManager.getCachePath(url);
                     try {
                         if (!(httpd.isTextMime(res.responseHeader.mime().toLowerCase(), acceptMimeTypes))) {
                             // if the response has not the right file type then reject file
-                            hfos.close();
                             remote.close();
-                            System.out.println("REJECTED WRONG MIME TYPE " + res.responseHeader.mime() + " for url " + url.toString());
+                            log.logInfo("REJECTED WRONG MIME TYPE " + res.responseHeader.mime() + " for url " + url.toString());
                             htCache.status = plasmaHTCache.CACHE_UNFILLED;
                         } else if ((profile.storeHTCache()) && ((error = htCache.shallStoreCache()) == null)) {
                             // we write the new cache entry to file system directly
                             cacheFile.getParentFile().mkdirs();
-                            res.writeContent(hfos, cacheFile); // writes in content scraper and cache file
+                            res.writeContent(htCache.getContentOutputStream(), cacheFile); // writes in content scraper and cache file
                             htCache.status = plasmaHTCache.CACHE_FILL;
                         } else {
                             if (error != null) log.logDebug("CRAWLER NOT STORED RESOURCE " + url.toString() + ": " + error);
                             // anyway, the content still lives in the content scraper
-                            res.writeContent(hfos, null); // writes only into content scraper
+                            res.writeContent(htCache.getContentOutputStream(), null); // writes only into content scraper
                             htCache.status = plasmaHTCache.CACHE_PASSING;
                         }
                         // enQueue new entry with response header
@@ -240,18 +235,18 @@ public class plasmaCrawlLoader {
                         // but we clean the cache also, since it may be only partial
                         // and most possible corrupted
                         if (cacheFile.exists()) cacheFile.delete();
-                        System.out.println("CRAWLER LOADER ERROR1: with url=" + url.toString() + ": " + e.toString());
+                        log.logError("CRAWLER LOADER ERROR1: with url=" + url.toString() + ": " + e.toString());
                     }
                 } else {
                     // if the response has not the right response type then reject file
-                    System.out.println("REJECTED WRONG STATUS TYPE '" + res.status + "' for url " + url.toString());
+                    log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for url " + url.toString());
                     // not processed any further
                 }
                 remote.close();
             } catch (Exception e) {
                 // this may happen if the targeted host does not exist or anything with the
                 // remote server was wrong.
-                System.out.println("CRAWLER LOADER ERROR2 with url=" + url.toString() + ": " + e.toString());
+                log.logError("CRAWLER LOADER ERROR2 with url=" + url.toString() + ": " + e.toString());
                 e.printStackTrace();
             }
         }

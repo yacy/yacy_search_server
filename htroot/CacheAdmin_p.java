@@ -114,11 +114,12 @@ public class CacheAdmin_p {
                     else {
                         htmlFilterContentScraper scraper = new htmlFilterContentScraper(url);
                         OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
+                        plasmaParser.document document = switchboard.parser.transformScraper(url, "text/html", scraper);
                         serverFileUtils.copy(file, os);
                         info += "<b>HEADLINE:</b><br>" + scraper.getHeadline() + "<br><br>";
-                        info += "<b>HREF:</b><br>" + formatAnchor(scraper.getHyperlinks()) + "<br>";
-                        info += "<b>MEDIA:</b><br>" + formatAnchor(scraper.getMedialinks()) + "<br>";
-                        info += "<b>EMAIL:</b><br>" + formatAnchor(scraper.getEmaillinks()) + "<br>";
+                        info += "<b>HREF:</b><br>" + formatAnchor(document.getHyperlinks()) + "<br>";
+                        info += "<b>MEDIA:</b><br>" + formatAnchor(document.getMedialinks()) + "<br>";
+                        info += "<b>EMAIL:</b><br>" + formatAnchor(document.getEmaillinks()) + "<br>";
                         info += "<b>TEXT:</b><br><span class=\"small\">" + new String(scraper.getText()) + "</span><br>";
                     }
                 } catch (Exception e) {

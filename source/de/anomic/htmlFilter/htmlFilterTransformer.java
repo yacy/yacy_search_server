@@ -49,6 +49,11 @@ public interface htmlFilterTransformer {
     // more specific transformation rules
     public void init(String initarg);
 
+    // ask if this transformer will do any transformation whatsoever
+    // this may return true if the initialization resultet in a status
+    // that does not allow any transformation
+    public boolean isIdentityTransformer();
+    
     // tests, if a given body-less tag (i.e. <br> shall be supervised)
     // only tags that are defined here will be cached and not streamed
     public boolean isTag0(String tag);

@@ -147,6 +147,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     public  HashSet                extensionBlack;
     public  HashMap                outgoingCookies, incomingCookies;
     public  kelondroTables         facilityDB;
+    public  plasmaParser           parser;
     public  int                    serverJobs;
     public boolean terminate = false;
     
@@ -203,28 +204,10 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         
 	// make crawl profiles database and default profiles
         profiles = new plasmaCrawlProfile(new File(plasmaPath, "crawlProfiles0.db"));
-
-        //System.out.println("profiles.size=" + profiles.size());
-        //System.out.println("profile-config=" + getConfig("defaultProxyProfile", "").length());
-	//System.out.println("profile-entry=" + profiles.getEntry(getConfig("defaultProxyProfile", "")).toString());
-        if ((profiles.size() == 0) ||
-            (getConfig("defaultProxyProfile", "").length() == 0) ||
-            (profiles.getEntry(getConfig("defaultProxyProfile", "")) == null)) {
-            // generate new default entry for proxy crawling
-            defaultProxyProfile = profiles.newEntry("proxy", "", ".*", ".*", Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), false, true, true, true, false, true, true, true);
-            setConfig("defaultProxyProfile", defaultProxyProfile.handle());
-        } else {
-            defaultProxyProfile = profiles.getEntry(getConfig("defaultProxyProfile", ""));
-        }
-        if ((profiles.size() == 1) ||
-            (getConfig("defaultRemoteProfile", "").length() == 0) ||
-            (profiles.getEntry(getConfig("defaultRemoteProfile", "")) == null)) {
-            // generate new default entry for proxy crawling
-            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, false, false, true, true, false, true, true, false);
-            setConfig("defaultRemoteProfile", defaultRemoteProfile.handle());
-        } else {
-            defaultRemoteProfile = profiles.getEntry(getConfig("defaultRemoteProfile", ""));
-        }
+        initProfiles();
+        
+        // make parser
+        parser = new plasmaParser(new File(""));
         
         // start indexing management
         loadedURL = new plasmaCrawlLURL(new File(plasmaPath, "urlHash.db"), ramLURL);
@@ -309,14 +292,46 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         this.serverJobs = jobs;
     }
     
+    private void initProfiles() throws IOException {
+        if ((profiles.size() == 0) ||
+            (getConfig("defaultProxyProfile", "").length() == 0) ||
+            (profiles.getEntry(getConfig("defaultProxyProfile", "")) == null)) {
+            // generate new default entry for proxy crawling
+            defaultProxyProfile = profiles.newEntry("proxy", "", ".*", ".*", Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), false, true, true, true, false, true, true, true);
+            setConfig("defaultProxyProfile", defaultProxyProfile.handle());
+        } else {
+            defaultProxyProfile = profiles.getEntry(getConfig("defaultProxyProfile", ""));
+        }
+        if ((profiles.size() == 1) ||
+            (getConfig("defaultRemoteProfile", "").length() == 0) ||
+            (profiles.getEntry(getConfig("defaultRemoteProfile", "")) == null)) {
+            // generate new default entry for proxy crawling
+            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, false, false, true, true, false, true, true, false);
+            setConfig("defaultRemoteProfile", defaultRemoteProfile.handle());
+        } else {
+            defaultRemoteProfile = profiles.getEntry(getConfig("defaultRemoteProfile", ""));
+        }
+    }
+    private void resetProfiles() {
+        File pdb = new File(plasmaPath, "crawlProfiles0.db");
+        if (pdb.exists()) pdb.delete();
+        try {
+            profiles = new plasmaCrawlProfile(pdb);
+            initProfiles();
+        } catch (IOException e) {}
+    }
     private void cleanProfiles() {
         if (totalSize() > 0) return;
 	Iterator i = profiles.profiles(true);
 	plasmaCrawlProfile.entry entry;
-	while (i.hasNext()) {
-	    entry = (plasmaCrawlProfile.entry) i.next();
-	    if (!((entry.name().equals("proxy")) || (entry.name().equals("remote")))) i.remove();
-	}
+        try {
+            while (i.hasNext()) {
+                entry = (plasmaCrawlProfile.entry) i.next();
+                if (!((entry.name().equals("proxy")) || (entry.name().equals("remote")))) i.remove();
+            }
+        } catch (kelondroException e) {
+            resetProfiles();
+        }
     }
 
     public plasmaHTCache getCacheManager() {
@@ -454,7 +469,8 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         
     private synchronized void processResourceStack(plasmaHTCache.Entry entry) {
         // work off one stack entry with a fresh resource (scraped web page)
-        if (entry.scraper != null) try {
+        byte[] content;
+        if (((content = entry.getContentBytes()).length > 0) || (entry.scraper != null)) try {
             // we must distinguish the following cases: resource-load was initiated by
             // 1) global crawling: the index is extern, not here (not possible here)
             // 2) result of search queries, some indexes are here (not possible here)
@@ -479,10 +495,20 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 
 	    log.logDebug("processResourceStack: processCase=" + processCase + ", depth=" + entry.depth + ", maxDepth=" + entry.profile.generalDepth() + ", filter=" + entry.profile.generalFilter() + ", initiatorHash=" + initiatorHash + ", status=" + entry.status + ", url=" + entry.url); // DEBUG
 
+            // parse content
+            plasmaParser.document document;
+            if (entry.scraper != null) {
+                log.logDebug("(Parser) '" + entry.urlString + "' is pre-parsed by scraper");
+                document = parser.transformScraper(entry.url, entry.responseHeader.mime(), entry.scraper);
+            } else {
+                log.logDebug("(Parser) '" + entry.urlString + "' is not parsed, parsing now");
+                document = parser.parseSource(entry.url, entry.responseHeader.mime(), content);
+            }
+            
             // put anchors on crawl stack
             if (((processCase == 4) || (processCase == 5)) &&
                              (entry.depth < entry.profile.generalDepth())) {
-                Map hl = entry.scraper.getHyperlinks();
+                Map hl = document.getHyperlinks();
                 Iterator i = hl.entrySet().iterator();
                 String nexturlstring;
                 String rejectReason;
@@ -500,18 +526,26 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                     }
                 }
                 log.logInfo("CRAWL: ADDED " + c + " LINKS FROM " + entry.url.toString() +
-                ", NEW CRAWL STACK SIZE IS " + noticeURL.localStackSize());
+                            ", NEW CRAWL STACK SIZE IS " + noticeURL.localStackSize());
             }
             
             // create index
-            String noIndexReason;
-            String descr = entry.scraper.getHeadline();
+            
+            String descr = document.getMainLongTitle();
             URL referrerURL = entry.referrerURL();
             String referrerHash = (referrerURL == null) ? plasmaURL.dummyHash : plasmaURL.urlHash(referrerURL);
-            if ((noIndexReason = entry.shallIndexCache()) == null ) {
+            String noIndexReason = "unspecified";
+            if (processCase == 4) {
+                // proxy-load
+                noIndexReason = entry.shallIndexCacheForProxy();
+            } else {
+                // normal crawling
+                noIndexReason = entry.shallIndexCacheForCrawler();
+            }
+            if (noIndexReason == null) {
                 // strip out words
                 log.logDebug("(Profile) Condensing for '" + entry.urlString + "'");
-                plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(entry.scraper.getText()));
+                plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(document.getText()));
  
                 //log.logInfo("INDEXING HEADLINE:" + descr);
                 try {
@@ -573,7 +607,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
             }
             
             // explicit delete/free resources
-            entry.scraper = null; entry = null;
+            document = null; entry = null;
         } catch (IOException e) {
             log.logError("ERROR in plasmaSwitchboard.process(): " + e.toString());
         }
@@ -1308,6 +1342,10 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
             return indexEntities;
         } catch (IOException e) {
             log.logError("selectTransferIndexes IO-Error (hash=" + nexthash + "): " + e.getMessage());
+            e.printStackTrace();
+            return new plasmaWordIndexEntity[0];
+        } catch (kelondroException e) {
+            log.logError("selectTransferIndexes database corrupted: " + e.getMessage());
             e.printStackTrace();
             return new plasmaWordIndexEntity[0];
         }
