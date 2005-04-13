@@ -43,7 +43,7 @@ package de.anomic.server;
 import java.io.*;
 import java.util.*;
 
-public class serverByteBuffer {
+public class serverByteBuffer extends OutputStream {
     
     public static final byte singlequote = (byte) 39;
     public static final byte doublequote = (byte) 34;
@@ -119,20 +119,37 @@ public class serverByteBuffer {
 	offset = 0;
     }
 
-    public serverByteBuffer append(byte b) {
-	if (offset + length + 1 > buffer.length) grow();
+    public void write(int b) {
+        write((byte) (b & 0xff));
+    }
+    
+    public void write(byte b) {
+        if (offset + length + 1 > buffer.length) grow();
 	buffer[offset + length++] = b;
+    }
+    
+    public void write(byte[] bb) {
+        write(bb, 0, bb.length);
+    }
+    
+    public void write(byte[] bb, int of, int le) {
+        while (offset + length + le > buffer.length) grow();
+	System.arraycopy(bb, of, buffer, offset + length, le);
+	length += le;
+    }
+    
+    public serverByteBuffer append(byte b) {
+	write(b);
 	return this;
     }
 
     public serverByteBuffer append(byte[] bb) {
-	return append(bb, 0, bb.length);
+        write(bb);
+        return this;
     }
 
     public serverByteBuffer append(byte[] bb, int of, int le) {
-	while (offset + length + le > buffer.length) grow();
-	System.arraycopy(bb, of, buffer, offset + length, le);
-	length += le;
+	write(bb, of, le);
 	return this;
     }
 

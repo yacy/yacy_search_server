@@ -469,8 +469,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         
     private synchronized void processResourceStack(plasmaHTCache.Entry entry) {
         // work off one stack entry with a fresh resource (scraped web page)
-        byte[] content;
-        if (((content = entry.getContentBytes()).length > 0) || (entry.scraper != null)) try {
+        if ((entry.cacheArray != null) || (entry.scraper != null)) try {
             // we must distinguish the following cases: resource-load was initiated by
             // 1) global crawling: the index is extern, not here (not possible here)
             // 2) result of search queries, some indexes are here (not possible here)
@@ -502,7 +501,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                 document = parser.transformScraper(entry.url, entry.responseHeader.mime(), entry.scraper);
             } else {
                 log.logDebug("(Parser) '" + entry.urlString + "' is not parsed, parsing now");
-                document = parser.parseSource(entry.url, entry.responseHeader.mime(), content);
+                document = parser.parseSource(entry.url, entry.responseHeader.mime(), entry.cacheArray);
             }
             
             // put anchors on crawl stack

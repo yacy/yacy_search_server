@@ -315,10 +315,9 @@ public class httpc {
 	}
 
 	public byte[] writeContent(OutputStream procOS) throws IOException {
-	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	    writeContentX(procOS, bos);
-	    bos.flush();
-	    return bos.toByteArray();
+	    serverByteBuffer sbb = new serverByteBuffer();
+	    writeContentX(procOS, sbb);
+	    return sbb.getBytes();
 	}
 
 	public void writeContent(OutputStream procOS, File file) throws IOException {

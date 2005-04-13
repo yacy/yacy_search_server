@@ -65,7 +65,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     }
 
     public void init(String initarg) {
-        System.out.println("Transformer init: " + initarg);
+        //System.out.println("Transformer init: " + initarg);
 	if (bluelist == null) {
 	    // here, the initarg is used to load a list of bluelisted words
 	    bluelist = new Vector();
@@ -79,7 +79,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
 		r.close();
 	    } catch (Exception e) {
 	    }
-            if (bluelist.size() == 0) System.out.println("BLUELIST is empty");
+            //if (bluelist.size() == 0) System.out.println("BLUELIST is empty");
 	}
     }
 

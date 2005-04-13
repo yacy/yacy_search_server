@@ -452,7 +452,6 @@ public class plasmaHTCache {
 	public String                   language;
         public plasmaCrawlProfile.entry profile;
         private String                  initiator;
-        public ByteArrayOutputStream    content;
         public htmlFilterContentScraper scraper;
 
 	
@@ -479,7 +478,6 @@ public class plasmaHTCache {
 	    this.requestHeader  = requestHeader;
 	    this.responseStatus = responseStatus;
 	    this.responseHeader = responseHeader;
-	    this.content        = new ByteArrayOutputStream();
 	    this.profile        = profile;
             this.initiator      = (initiator == null) ? null : ((initiator.length() == 0) ? null: initiator);
 
@@ -507,13 +505,6 @@ public class plasmaHTCache {
             this.scraper        = null;
 	}
 	
-        public OutputStream getContentOutputStream() {
-            return (OutputStream) content;
-        }
-        public byte[] getContentBytes() {
-            try { content.flush(); } catch (IOException e) {}
-            return content.toByteArray();
-        }
         public String initiator() {
             return initiator;
         }
