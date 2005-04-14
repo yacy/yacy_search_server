@@ -24,6 +24,8 @@
 <target name="compile" depends="init" description="compiles the source">
 <javac srcdir="${src}/" destdir="${build}"/>
 <javac srcdir="${htroot}/" destdir="${htroot}" classpath="${build}"/>
+<javac srcdir="${htroot}/htdocsdefault" destdir="${htroot}/htdocsdefault" classpath="${build}"/>	
+<javac srcdir="${htroot}/yacy" destdir="${htroot}/yacy" classpath="${build}"/>	
 </target>
 
 
