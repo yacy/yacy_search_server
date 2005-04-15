@@ -80,7 +80,7 @@ import java.text.*;
 import java.lang.reflect.*;
 import de.anomic.server.*;
 
-public class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
+public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
 
     // class variables   
     private Properties mimeTable = null;
@@ -349,7 +349,11 @@ public class httpdFileHandler extends httpdAbstractHandler implements httpdHandl
 		filedate = new Date(file.lastModified());
                 String mimeType = mimeTable.getProperty(conProp.getProperty("EXT",""),"text/html");
                 byte[] result;
-		if (path.endsWith("html") || path.endsWith("xml") || path.endsWith("rss") || path.endsWith("csv")) {
+		if (path.endsWith("html") || 
+            path.endsWith("xml") || 
+            path.endsWith("rss") || 
+            path.endsWith("csv") ||
+            path.endsWith("pac")) {
 		    rc = rewriteClassFile(file);
 		    if (rc != null) {
 			// CGI-class: call the class to create a property for rewriting
