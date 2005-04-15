@@ -63,7 +63,6 @@ public class yacyDHTAction implements yacyPeerAction {
         }
     }
    
-    
     public Enumeration getDHTSeeds(boolean up, String firstHash) {
         // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
 	return new seedDHTEnum(up, firstHash);
@@ -104,9 +103,7 @@ public class yacyDHTAction implements yacyPeerAction {
                 return e2.nextElement();
             }
         }
-
     }
-    
     
     public Enumeration getAcceptRemoteIndexSeeds(String starthash) {
         // returns an enumeration of yacySeed-Objects
@@ -131,10 +128,16 @@ public class yacyDHTAction implements yacyPeerAction {
 
         private yacySeed nextInternal() {
             yacySeed s;
-            while (se.hasMoreElements()) {
-                s = (yacySeed) se.nextElement();
-		if (s == null) return null;
-                if (s.getFlagAcceptRemoteIndex()) return s;
+            try {
+                while (se.hasMoreElements()) {
+                    s = (yacySeed) se.nextElement();
+                    if (s == null) return null;
+                    if (s.getFlagAcceptRemoteIndex()) return s;
+                }
+            } catch (kelondroException e) {
+                yacyCore.log.logError("database inconsistency (" + e.getMessage() + "), re-set of db.");
+                seedDB.resetActiveTable();
+                return null;
             }
             return null;
         }
@@ -146,7 +149,6 @@ public class yacyDHTAction implements yacyPeerAction {
 	}
 
     }
-    
     
     public Enumeration getAcceptRemoteCrawlSeeds(String starthash, boolean available) {
         return new acceptRemoteCrawlSeedEnum(starthash, available);

@@ -393,7 +393,6 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     public synchronized void deQueue() {
         if (serverJobs < 5) {
             if (processStack.size() > 0) {
-                log.logDebug("DEQUEUE: dequeueing one step (processStack=" + processStack.size() + ", localStackSize=" + noticeURL.localStackSize() + ", remoteStackSize=" + noticeURL.remoteStackSize() + ")");
                 processResourceStack((plasmaHTCache.Entry) processStack.removeFirst());
             }
         } else {
@@ -469,7 +468,13 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         
     private synchronized void processResourceStack(plasmaHTCache.Entry entry) {
         // work off one stack entry with a fresh resource (scraped web page)
-        if ((entry.cacheArray != null) || (entry.scraper != null)) try {
+        String stats = "DEQUEUE: dequeueing one step (processStack=" + processStack.size() + ", localStackSize=" + noticeURL.localStackSize() + ", remoteStackSize=" + noticeURL.remoteStackSize() + ")";
+        if ((entry.cacheArray == null) && (entry.scraper == null)) {
+            log.logDebug(stats + " entry for " + entry.nomalizedURLString + " has no content -- skipped");
+            return;
+        }   
+        try {
+    
             // we must distinguish the following cases: resource-load was initiated by
             // 1) global crawling: the index is extern, not here (not possible here)
             // 2) result of search queries, some indexes are here (not possible here)
@@ -492,15 +497,15 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                 processCase = 6;
             }
 
-	    log.logDebug("processResourceStack: processCase=" + processCase + ", depth=" + entry.depth + ", maxDepth=" + entry.profile.generalDepth() + ", filter=" + entry.profile.generalFilter() + ", initiatorHash=" + initiatorHash + ", status=" + entry.status + ", url=" + entry.url); // DEBUG
+	    log.logDebug(stats + " processCase=" + processCase + ", depth=" + entry.depth + ", maxDepth=" + entry.profile.generalDepth() + ", filter=" + entry.profile.generalFilter() + ", initiatorHash=" + initiatorHash + ", status=" + entry.status + ", source=" + ((entry.cacheArray == null) ? "scraper" : "byte[]") + ", url=" + entry.nomalizedURLString); // DEBUG
 
             // parse content
             plasmaParser.document document;
             if (entry.scraper != null) {
-                log.logDebug("(Parser) '" + entry.urlString + "' is pre-parsed by scraper");
+                log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is pre-parsed by scraper");
                 document = parser.transformScraper(entry.url, entry.responseHeader.mime(), entry.scraper);
             } else {
-                log.logDebug("(Parser) '" + entry.urlString + "' is not parsed, parsing now");
+                log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is not parsed, parsing now");
                 document = parser.parseSource(entry.url, entry.responseHeader.mime(), entry.cacheArray);
             }
             
@@ -516,11 +521,11 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                 while (i.hasNext()) {
                     e = (Map.Entry) i.next();
                     nexturlstring = (String) e.getKey();
-                    rejectReason = stackCrawl(nexturlstring, entry.urlString, initiatorHash, (String) e.getValue(), entry.lastModified, entry.depth + 1, entry.profile);
+                    rejectReason = stackCrawl(nexturlstring, entry.nomalizedURLString, initiatorHash, (String) e.getValue(), entry.lastModified, entry.depth + 1, entry.profile);
                     if (rejectReason == null) {
                         c++;
                     } else {
-                        errorURL.newEntry(new URL(nexturlstring), entry.urlString, entry.initiator(), yacyCore.seedDB.mySeed.hash,
+                        errorURL.newEntry(new URL(nexturlstring), entry.nomalizedURLString, entry.initiator(), yacyCore.seedDB.mySeed.hash,
 				       (String) e.getValue(), rejectReason, new bitfield(plasmaURL.urlFlagLength), false);
                     }
                 }
@@ -543,12 +548,12 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
             }
             if (noIndexReason == null) {
                 // strip out words
-                log.logDebug("(Profile) Condensing for '" + entry.urlString + "'");
+                log.logDebug("(Profile) Condensing for '" + entry.nomalizedURLString + "'");
                 plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(document.getText()));
  
                 //log.logInfo("INDEXING HEADLINE:" + descr);
                 try {
-                    log.logDebug("(Profile) Create LURL-Entry for '" + entry.urlString + "'");
+                    log.logDebug("(Profile) Create LURL-Entry for '" + entry.nomalizedURLString + "'");
                     plasmaCrawlLURL.entry newEntry = loadedURL.newEntry(
                                         entry.url, descr, entry.lastModified, new Date(),
                                         initiatorHash,
@@ -563,28 +568,28 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                                      );
                     
                     String urlHash = newEntry.hash();
-                    log.logDebug("(Profile) Remove NURL for '" + entry.urlString + "'");
+                    log.logDebug("(Profile) Remove NURL for '" + entry.nomalizedURLString + "'");
                     noticeURL.remove(urlHash); // worked-off
                     
                     if (((processCase == 4) || (processCase == 5) || (processCase == 6)) &&
 			(entry.profile.localIndexing())) {
                         // remove stopwords
-                        log.logDebug("(Profile) Exclude Stopwords for '" + entry.urlString + "'");
+                        log.logDebug("(Profile) Exclude Stopwords for '" + entry.nomalizedURLString + "'");
                         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + entry.url);
                         //System.out.println("DEBUG: words left to be indexed: " + condenser.getWords());
                         
                         // do indexing
-                        log.logDebug("(Profile) Create Index for '" + entry.urlString + "'");
+                        log.logDebug("(Profile) Create Index for '" + entry.nomalizedURLString + "'");
                         int words = searchManager.addPageIndex(entry.url, urlHash, entry.lastModified, condenser, entry.language, entry.doctype);
                         log.logInfo("Indexed " + words + " words in URL " + entry.url + " (" + descr + ")");
                         
                         // if this was performed for a remote crawl request, notify requester
                         if ((processCase == 6) && (initiator != null)) {
-                            log.logInfo("Sending crawl receipt for '" + entry.urlString + "' to " + initiator.getName());
+                            log.logInfo("Sending crawl receipt for '" + entry.nomalizedURLString + "' to " + initiator.getName());
                             yacyClient.crawlReceipt(initiator, "crawl", "fill", "indexed", newEntry, "");
                         }
                     } else {
-                        log.logDebug("Resource '" + entry.urlString + "' not indexed (indexing is off)");
+                        log.logDebug("Resource '" + entry.nomalizedURLString + "' not indexed (indexing is off)");
                     }
                 } catch (Exception ee) {
                     log.logError("Could not index URL " + entry.url + ": " + ee.getMessage());
@@ -831,11 +836,12 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 
     }
 
+    
     private static SimpleDateFormat DateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy");
     public static String dateString(Date date) {
 	if (date == null) return ""; else return DateFormatter.format(date);
     }
-
+    
     
     public serverObjects searchFromLocal(Set querywords, String order1, String order2, int count, boolean global, long time /*milliseconds*/, String urlmask) {
         
@@ -911,7 +917,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                         filename = url.getFile();
                         if ((seed == null) || ((address = seed.getAddress()) == null)) {
                             // seed is not known from here
-                            removeReferences(urlentry.hash(), getWords(("yacyshare " + filename.replace('?', ' ') + " " + urlentry.descr()).getBytes()));
+                            removeReferences(urlentry.hash(), plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + urlentry.descr()).getBytes()));
                             loadedURL.remove(urlentry.hash()); // clean up
                             continue; // next result
                         }
@@ -1062,28 +1068,6 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 	// actually it is used there for testing purpose
 	return "PROPS: " + super.toString() + "; QUEUE: " + processStack.toString();
     }
-
-    /*
-    private void addScoreForked(kelondroMScoreCluster ref, String no, String[] words) {
-        String s;
-        if (words != null) for (int i = 0; i < words.length; i++) {
-            s = words[i].trim().toLowerCase();
-            if (s.indexOf(".") >= 0) addScoreForked(ref, no, s.split("\\."));
-            else if (s.indexOf(",") >= 0) addScoreForked(ref, no, s.split(","));
-            else if (s.indexOf(":") >= 0) addScoreForked(ref, no, s.split(":"));
-            else if (s.indexOf("-") >= 0) addScoreForked(ref, no, s.split("-"));
-            else if (s.indexOf("/") >= 0) addScoreForked(ref, no, s.split("/"));
-            else if (s.indexOf('"') >= 0) addScoreForked(ref, no, s.split(new String(new byte[] {(char)'"'})));
-            else addScoreFiltered(ref, no, s);
-        }
-    }
-    private void addScoreFiltered(kelondroMScoreCluster ref, String no, String word) {
-        if ((word.length() > 2) &&
-            ("http_html_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0) &&
-            (no.indexOf(word) < 0))
-            ref.incScore(word);
-    }
-    */
     
     // method for index deletion
     public int removeAllUrlReferences(URL url, boolean fetchOnline) {
@@ -1099,7 +1083,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         URL url = entry.url();
         if (url == null) return 0;
         // get set of words
-        Set words = getWords(getText(getResource(url, fetchOnline)));
+        Set words = plasmaCondenser.getWords(getText(getResource(url, fetchOnline)));
         // delete all word references
         int count = removeReferences(urlhash, words);
         // finally delete the url entry itself
@@ -1172,17 +1156,6 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         }
     }
     
-    public static Set getWords(byte[] text) {
-	if (text == null) return null;
-        ByteArrayInputStream buffer = new ByteArrayInputStream(text);
-        try {
-            plasmaCondenser condenser = new plasmaCondenser(buffer);
-            return condenser.getWords();
-        } catch (IOException e) {
-            return null;
-        }
-    }
-    
     public class distributeIndex {
         // distributes parts of the index to other peers
         // stops as soon as an error occurrs
@@ -1214,6 +1187,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                 ((transferred = performTransferIndex(indexCount, peerCount, true)) > 0)) {
                     indexCount = transferred;
                     if ((System.currentTimeMillis() - starttime) > (maxTime * peerCount)) indexCount--; else indexCount++;
+                    if (indexCount < 30) indexCount = 30;
                     return true;
                 } else {
                     // make a long pause
@@ -1230,6 +1204,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 
         public void setCounts(int indexCount, int peerCount, long pause) {
             this.indexCount = indexCount;
+            if (indexCount < 30) indexCount = 30;
             this.peerCount = peerCount;
             this.pause = pause;
         }

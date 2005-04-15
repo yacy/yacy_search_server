@@ -142,7 +142,7 @@ public class yacySeedDB {
     private synchronized kelondroMap resetSeedTable(kelondroMap seedDB, File seedDBFile) {
         // this is an emergency function that should only be used if any problem with the
         // seed.db is detected
-	yacyCore.log.logError("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
+	yacyCore.log.logDebug("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
         try {
             seedDB.close();
             seedDBFile.delete();
@@ -153,6 +153,10 @@ public class yacySeedDB {
         }
         return seedDB;
     }
+    
+    public synchronized void resetActiveTable() { seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile); }
+    public synchronized void resetPassiveTable() { seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile); }
+    public synchronized void resetPotentialTable() { seedPotentialDB = resetSeedTable(seedPotentialDB, seedPotentialDBFile); }
     
     public void close() {
         try {

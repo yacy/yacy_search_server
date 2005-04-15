@@ -307,7 +307,7 @@ public class IndexCreate_p {
                             prop.put("indexing-queue_list_"+i+"_modified", daydate(pcentry.lastModified));
                             prop.put("indexing-queue_list_"+i+"_href",((pcentry.scraper == null) ? "0" : ("" + pcentry.scraper.getAnchors().size())));
                             prop.put("indexing-queue_list_"+i+"_anchor", ((pcentry.scraper == null) ? "-" : pcentry.scraper.getHeadline()) );
-                            prop.put("indexing-queue_list_"+i+"_url", pcentry.urlString);
+                            prop.put("indexing-queue_list_"+i+"_url", pcentry.nomalizedURLString);
                             dark = !dark;
                         }
                     }

@@ -238,7 +238,7 @@ public class plasmaHTCache {
 	if ((entry.status == CACHE_FILL) ||
 	    (entry.status == CACHE_STALE_RELOAD_GOOD) ||
 	    (entry.status == CACHE_STALE_RELOAD_BAD)) {
-	    responseHeaderDB.set(entry.urlHash, entry.responseHeader);
+	    responseHeaderDB.set(entry.nomalizedURLHash, entry.responseHeader);
 	}
 
 	// work off unwritten files and undone parsing
@@ -254,7 +254,7 @@ public class plasmaHTCache {
                 }
 		entry.cacheFile.getParentFile().mkdirs();
                 serverFileUtils.write(entry.cacheArray, entry.cacheFile);
-		entry.cacheArray = null;
+		//entry.cacheArray = null;
 	    } catch (FileNotFoundException e) {
 		// this is the case of a "(Not a directory)" error, which should be prohibited
 		// by the shallStoreCache() property. However, sometimes the error still occurs
@@ -444,8 +444,8 @@ public class plasmaHTCache {
 	public File                     cacheFile;      // the cache file
 	public byte[]                   cacheArray;     // or the cache as byte-array
 	public URL                      url;
-	public String                   urlHash;
-	public String                   urlString;
+	public String                   nomalizedURLHash;
+	public String                   nomalizedURLString;
 	public int                      status;         // cache load/hit/stale etc status
 	public Date                     lastModified;
 	public char                     doctype;
@@ -462,15 +462,15 @@ public class plasmaHTCache {
                      plasmaCrawlProfile.entry profile) {
 
             // normalize url
-            this.urlString      = htmlFilterContentScraper.urlNormalform(url);
+            this.nomalizedURLString = htmlFilterContentScraper.urlNormalform(url);
             try {
-	    this.url            = new URL(urlString);
+                this.url            = new URL(nomalizedURLString);
             } catch (MalformedURLException e) {
                 System.out.println("internal error at httpdProxyCache.Entry: " + e);
                 System.exit(-1);
             }
 	    this.cacheFile      = getCachePath(this.url);
-	    this.urlHash        = plasmaCrawlLURL.urlHash(urlString);
+	    this.nomalizedURLHash        = plasmaCrawlLURL.urlHash(nomalizedURLString);
 	                 
 	    // assigned:
 	    this.initDate       = initDate;
@@ -496,7 +496,7 @@ public class plasmaHTCache {
 		lastModified = responseHeader.lastModified();
                 if (lastModified == null) lastModified = new Date(); // does not exist in header
 	    }
-	    this.doctype = plasmaWordIndexEntry.docType(urlString);
+	    this.doctype = plasmaWordIndexEntry.docType(nomalizedURLString);
 	    this.language = plasmaWordIndexEntry.language(url);
 
 	    // to be defined later:
@@ -554,8 +554,8 @@ public class plasmaHTCache {
             
 	    // -CGI access in request
 	    // CGI access makes the page very individual, and therefore not usable in caches
-	    if ((isPOST(urlString)) && (!(profile.crawlingQ()))) return "dynamic_post";
-            if (isCGI(urlString)) return "dynamic_cgi";
+	    if ((isPOST(nomalizedURLString)) && (!(profile.crawlingQ()))) return "dynamic_post";
+            if (isCGI(nomalizedURLString)) return "dynamic_cgi";
 	    
 	    // -authorization cases in request
 	    // authorization makes pages very individual, and therefore we cannot use the
@@ -622,8 +622,8 @@ public class plasmaHTCache {
 	    
 	    // -CGI access in request
 	    // CGI access makes the page very individual, and therefore not usable in caches
-	    if (isPOST(urlString)) return false;
-	    if (isCGI(urlString)) return false;
+	    if (isPOST(nomalizedURLString)) return false;
+	    if (isCGI(nomalizedURLString)) return false;
 	    
 	    // -authorization cases in request
 	    if (requestHeader.containsKey("AUTHORIZATION")) return false;
@@ -747,8 +747,8 @@ public class plasmaHTCache {
             
 	    // -CGI access in request
 	    // CGI access makes the page very individual, and therefore not usable in caches
-	     if ((isPOST(urlString)) && (!(profile.crawlingQ()))) return "Dynamic_(POST)";
-             if ((isCGI(urlString)) && (!(profile.crawlingQ()))) return "Dynamic_(CGI)";
+	     if ((isPOST(nomalizedURLString)) && (!(profile.crawlingQ()))) return "Dynamic_(POST)";
+             if ((isCGI(nomalizedURLString)) && (!(profile.crawlingQ()))) return "Dynamic_(CGI)";
 	    
 	    // -authorization cases in request
 	    // we checked that in shallStoreCache
@@ -759,7 +759,7 @@ public class plasmaHTCache {
 	    // a picture cannot be indexed
 	    if (isPicture(responseHeader)) return "Media_Content_(Picture)";
 	    if (!(isText(responseHeader))) return "Media_Content_(not_text)";
-	    if (noIndexingURL(urlString)) return "Media_Content_(forbidden)";
+	    if (noIndexingURL(nomalizedURLString)) return "Media_Content_(forbidden)";
 
 	    
 	    // -if-modified-since in request
@@ -864,8 +864,8 @@ public class plasmaHTCache {
             
 	    // -CGI access in request
 	    // CGI access makes the page very individual, and therefore not usable in caches
-	     if ((isPOST(urlString)) && (!(profile.crawlingQ()))) return "Dynamic_(POST)";
-             if ((isCGI(urlString)) && (!(profile.crawlingQ()))) return "Dynamic_(CGI)";
+	     if ((isPOST(nomalizedURLString)) && (!(profile.crawlingQ()))) return "Dynamic_(POST)";
+             if ((isCGI(nomalizedURLString)) && (!(profile.crawlingQ()))) return "Dynamic_(CGI)";
 	    
 	    // -authorization cases in request
 	    // we checked that in shallStoreCache
@@ -876,7 +876,7 @@ public class plasmaHTCache {
 	    // a picture cannot be indexed
 	    if (isPicture(responseHeader)) return "Media_Content_(Picture)";
 	    if (!(isText(responseHeader))) return "Media_Content_(not_text)";
-	    if (noIndexingURL(urlString)) return "Media_Content_(forbidden)";
+	    if (noIndexingURL(nomalizedURLString)) return "Media_Content_(forbidden)";
 
 	    // -if-modified-since in request
 	    // if the page is fresh at the very moment we can index it

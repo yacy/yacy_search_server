@@ -583,6 +583,17 @@ public class plasmaCondenser {
 	}
     }
 
+    public static Set getWords(byte[] text) {
+	if (text == null) return null;
+        ByteArrayInputStream buffer = new ByteArrayInputStream(text);
+        try {
+            plasmaCondenser condenser = new plasmaCondenser(buffer);
+            return condenser.getWords();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+        
     public static void main(String[] args) {
 	if ((args.length == 0) || (args.length > 3)) System.out.println("wrong number of arguments: plasmaCondenser -text|-html <infile> <outfile>"); else try {
 
