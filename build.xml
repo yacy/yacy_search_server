@@ -18,6 +18,15 @@
 <mkdir dir="${build}/de/anomic/server"/>
 <mkdir dir="${build}/de/anomic/tools"/>
 <mkdir dir="${build}/de/anomic/yacy"/>
+
+<move file="${src}/yacy.java" tofile="${src}/yacy.java.orig" />
+<tstamp>
+	<format property="REPL_DATE_FORMAT" pattern="yyyymmdd" />
+</tstamp>
+<!-- <property name="REPL_DATE" value="${DSTAMP}" /> -->
+
+<filter token="REPL_DATE" value="${DSTAMP}"/>
+<copy file="${src}/yacy.java.orig" tofile="${src}/yacy.java" filtering="true" />
 </target>
 
 
@@ -30,6 +39,8 @@
 
 
 <target name="dist" depends="compile">
+<delete file="${src}/yacy.java" />
+<move file="${src}/yacy.java.orig" tofile="${src}/yacy.java" />
 </target>
 
 </project>
