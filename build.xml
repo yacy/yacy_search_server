@@ -4,37 +4,46 @@
 	</description>
 	
 <property name="src" location="source"/>
+<property name="lib" location="lib"/>
 <property name="build" location="classes"/>
 <property name="htroot" location="htroot"/>
 
 <target name="init">
-<tstamp/>
-<mkdir dir="${build}/de/anomic/data"/>
-<mkdir dir="${build}/de/anomic/htmlFilter"/>
-<mkdir dir="${build}/de/anomic/http"/>
-<mkdir dir="${build}/de/anomic/kelondro"/>
-<mkdir dir="${build}/de/anomic/net"/>
-<mkdir dir="${build}/de/anomic/plasma"/>
-<mkdir dir="${build}/de/anomic/server"/>
-<mkdir dir="${build}/de/anomic/tools"/>
-<mkdir dir="${build}/de/anomic/yacy"/>
-
-<move file="${src}/yacy.java" tofile="${src}/yacy.java.orig" />
-<tstamp>
-	<format property="REPL_DATE_FORMAT" pattern="yyyymmdd" />
-</tstamp>
-<!-- <property name="REPL_DATE" value="${DSTAMP}" /> -->
-
-<filter token="REPL_DATE" value="${DSTAMP}"/>
-<copy file="${src}/yacy.java.orig" tofile="${src}/yacy.java" filtering="true" />
+	<tstamp/>
+	<mkdir dir="${build}/de/anomic/data"/>
+	<mkdir dir="${build}/de/anomic/htmlFilter"/>
+	<mkdir dir="${build}/de/anomic/http"/>
+	<mkdir dir="${build}/de/anomic/kelondro"/>
+	<mkdir dir="${build}/de/anomic/net"/>
+	<mkdir dir="${build}/de/anomic/plasma"/>
+	<mkdir dir="${build}/de/anomic/server"/>
+	<mkdir dir="${build}/de/anomic/tools"/>
+	<mkdir dir="${build}/de/anomic/yacy"/>
+	
+	<move file="${src}/yacy.java" tofile="${src}/yacy.java.orig" />
+	<tstamp>
+		<format property="REPL_DATE_FORMAT" pattern="yyyymmdd" />
+	</tstamp>
+	<!-- <property name="REPL_DATE" value="${DSTAMP}" /> -->
+	
+	<filter token="REPL_DATE" value="${DSTAMP}"/>
+	<copy file="${src}/yacy.java.orig" tofile="${src}/yacy.java" filtering="true" />
 </target>
 
 
 <target name="compile" depends="init" description="compiles the source">
-<javac srcdir="${src}/" destdir="${build}"/>
-<javac srcdir="${htroot}/" destdir="${htroot}" classpath="${build}"/>
-<javac srcdir="${htroot}/htdocsdefault" destdir="${htroot}/htdocsdefault" classpath="${build}"/>	
-<javac srcdir="${htroot}/yacy" destdir="${htroot}/yacy" classpath="${build}"/>	
+	<javac srcdir="${src}/" destdir="${build}">
+        <classpath>
+          	<pathelement location="${build}" />
+        	
+        	<!-- libs needed for the yacy thread/object-pools -->
+          	<pathelement location="${lib}/commons-collections.jar" />
+        	<pathelement location="${lib}/commons-pool-1.2.jar" />        	
+        </classpath>		
+	</javac>	
+	<javac srcdir="${htroot}/" destdir="${htroot}" classpath="${build}"/>
+	<javac srcdir="${htroot}/htdocsdefault" destdir="${htroot}/htdocsdefault" classpath="${build}"/>	
+	<javac srcdir="${htroot}/yacy" destdir="${htroot}/yacy" classpath="${build}"/>	
 </target>
 
 
@@ -43,4 +52,11 @@
 <move file="${src}/yacy.java.orig" tofile="${src}/yacy.java" />
 </target>
 
+<target name="clean" description="make clean">	
+    <delete>
+      	<fileset dir="${build}" includes="**/*.class" />
+    	<fileset dir="${htroot}" includes="**/*.class" />
+    </delete>	
+</target>
+	
 </project>
