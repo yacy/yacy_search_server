@@ -456,8 +456,7 @@ public class dir {
     public static void deletePhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr) {
         try {
             String urlhash = plasmaURL.urlHash(new URL(urlstring));
-            //Set words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes());
-            Set words = plasmaCondenser.getWords();
+            Set words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes());
             switchboard.removeReferences(urlhash, words);
             switchboard.loadedURL.remove(urlhash);
         } catch (Exception e) {
