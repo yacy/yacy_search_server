@@ -5,6 +5,8 @@
 // Frankfurt, Germany, 2002-2004
 // last major change: 09.03.2004
 //
+// ThreadPool
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -54,7 +56,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
-
 import java.util.Hashtable;
 
 // needed for ssl
@@ -80,18 +81,14 @@ public final class serverCore extends serverAbstractThread implements serverThre
     private int port;                      // the listening port
     private ServerSocket socket;           // listener
     private int maxSessions = 0;           // max. number of sessions; 0=unlimited
-    serverLog log;                 // log object
-    //private serverSwitch switchboard;      // external values
+    serverLog log;                         // log object
     private int timeout;                   // connection time-out of the socket
-    
-//    private Hashtable activeThreads;       // contains the active threads
-//    private Hashtable sleepingThreads;     // contains the threads that are alive since the sleepthreashold
     
     private boolean termSleepingThreads;   // if true then threads over sleepthreashold are killed
     private int thresholdActive = 5000;    // after that time a thread should have got a command line
-    private int thresholdSleep = 30000;     // after that time a thread is considered as beeing sleeping (30 seconds)
-    private int thresholdDead = 3600000;     // after that time a thread is considered as beeing dead-locked (1 hour)
-    serverHandler handlerPrototype;// the command class (a serverHandler) 
+    private int thresholdSleep = 30000;    // after that time a thread is considered as beeing sleeping (30 seconds)
+    private int thresholdDead = 3600000;   // after that time a thread is considered as beeing dead-locked (1 hour)
+    serverHandler handlerPrototype;        // the command class (a serverHandler) 
     private Class[] initHandlerClasses;    // the init's methods arguments
     private Class[] initSessionClasses;    // the init's methods arguments
     private serverSwitch switchboard;      // the command class switchboard
@@ -327,7 +324,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
 
     public void close() {
         try {
-            // consuming the isInterrupted Flag. Otherwise we could not properly colse the session pool
+            // consuming the isInterrupted Flag. Otherwise we could not properly close the session pool
             Thread.interrupted();
             
             // close the session pool
@@ -348,89 +345,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
         // idleThreadCheck();
         return (this.theSessionPool.getNumActive() == 0);
     }
-    
-//    public void idleThreadCheck() {
-//	// a 'garbage collector' for session threads
-//	Enumeration threadEnum;
-//	Session session;
-//        
-//	// look for sleeping threads
-//	threadEnum = activeThreads.keys();
-//        long time;
-//	while (threadEnum.hasMoreElements()) {
-//	    session = (Session) (threadEnum.nextElement());
-//            //if (session.request == null) session.interrupt();
-//	    if (session.isAlive()) {
-//                // check if socket still exists
-//                time = System.currentTimeMillis() - ((Long) activeThreads.get(session)).longValue();
-//                if (/*(session.controlSocket.isClosed()) || */
-//                    (!(session.controlSocket.isBound())) ||
-//                    (!(session.controlSocket.isConnected())) ||
-//                    ((session.request == null) && (time > 1000))) {
-//                    // kick it
-//                    try {
-//                        session.out.close();
-//                        session.in.close();
-//                        session.controlSocket.close();
-//                    } catch (IOException e) {}
-//                    session.interrupt(); // hopefully this wakes him up.
-//                    activeThreads.remove(session);
-//                    String reason = "";
-//                    if (session.controlSocket.isClosed()) reason = "control socked closed";
-//                    if (!(session.controlSocket.isBound())) reason = "control socked unbound";
-//                    if (!(session.controlSocket.isConnected())) reason = "control socked not connected";
-//                    if (session.request == null) reason = "no request placed";
-//                    log.logDebug("* canceled disconnected connection (" + reason + ") '" + session.request + "'");
-//                } else if (time > thresholdSleep) {
-//		    // move thread from the active threads to the sleeping
-//		    sleepingThreads.put(session, activeThreads.remove(session));
-//                    log.logDebug("* sleeping connection '" + session.request + "'");
-//		} else if ((time > thresholdActive) && (session.request == null)) {
-//		    // thread is not in use (or too late). kickk it.
-//		    try {
-//                        session.out.close();
-//                        session.in.close();
-//                        session.controlSocket.close();
-//                    } catch (IOException e) {}
-//                    session.interrupt(); // hopefully this wakes him up.
-//                    activeThreads.remove(session);
-//                    log.logDebug("* canceled inactivated connection");
-//		}
-//	    } else {
-//		// the thread is dead, remove it
-//                log.logDebug("* normal close of connection to '" + session.request + "', time=" + session.getTime());
-//		activeThreads.remove(session);
-//	    }
-//	}
-//
-//	// look for dead threads
-//	threadEnum = sleepingThreads.keys();
-//	while (threadEnum.hasMoreElements()) {
-//	    session = (Session) (threadEnum.nextElement());
-//	    if (session.isAlive()) {
-//		// check the age of the thread
-//		if (System.currentTimeMillis() - ((Long) sleepingThreads.get(session)).longValue() > thresholdDead) {
-//		    // kill the thread
-//		    if (termSleepingThreads) {
-//                        try {
-//                            session.out.close();
-//                            session.in.close();
-//                            session.controlSocket.close();
-//                        } catch (IOException e) {}
-//                        session.interrupt(); // hopefully this wakes him up.
-//                    }
-//		    sleepingThreads.remove(session);
-//                    log.logDebug("* out-timed connection '" + session.request + "'");
-//		}
-//	    } else {
-//		// the thread is dead, remove it
-//		sleepingThreads.remove(session);
-//                log.logDebug("* dead connection '" + session.request + "'");
-//	    }
-//	}
-//
-//    }
-
     
     public final class SessionPool extends GenericObjectPool 
     {

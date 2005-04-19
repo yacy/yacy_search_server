@@ -45,18 +45,18 @@
 # Contributions and changes to the program code must be marked as such.
 
 # define variables
-version='0.361'
+version='0.363'
 datestr=`date +%Y%m%d`
 #release='yacy_v'$version'_'$datestr
 release='yacy_dev_v'$version'_'$datestr
 target='RELEASE'
 classes='classes'
-source='source'
 lib='lib'
+source='source'
 doc='doc'
 data='DATA'
 mainclass='yacy.java'
-classpath='$classes:$lib'
+classpath='$classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar'
 
 mkdir $release
 
@@ -103,8 +103,8 @@ mkdir $target
 
 # compile core
 mv -f $source/$mainclass $source/$mainclass.orig
-sed `echo 's/<<REPL_DATE>>/'$datestr'/'` $source/$mainclass.orig > $source/$mainclass.sed1
-sed `echo 's/<<REPL_VERSION>>/'$version'/'` $source/$mainclass.sed1 > $source/$mainclass
+sed `echo 's/@REPL_DATE@/'$datestr'/'` $source/$mainclass.orig > $source/$mainclass.sed1
+sed `echo 's/@REPL_VERSION@/'$version'/'` $source/$mainclass.sed1 > $source/$mainclass
 rm $source/$mainclass.sed1
 #javac -classpath $classpath -sourcepath $source -d $classes -g:none $source/httpd.java
 #javac -classpath $classpath -sourcepath $source -d $classes -g:none $source/$mainclass
@@ -130,11 +130,15 @@ javac -classpath $classes -sourcepath htroot/htdocsdefault -d htroot/htdocsdefau
 mkdir $release/$classes
 cp -R $classes/* $release/$classes/
 
+# copy libs
+mkdir $release/$lib
+cp -R $lib/* $release/$lib/
+
 # copy configuration files
 cp yacy.init $release
 cp yacy.yellow $release
 #cp yacy.black $release
-#cp yacy.blue $release
+cp yacy.blue $release
 cp yacy.stopwords $release
 cp httpd.mime $release
 cp superseed.txt $release
@@ -239,6 +243,8 @@ chmod 644 $release/$classes/de/anomic/net/*.class
 chmod 644 $release/$classes/de/anomic/plasma/*.class
 chmod 644 $release/$classes/de/anomic/server/*.class
 chmod 644 $release/$classes/de/anomic/yacy/*.class
+chmod 755 $release/$lib
+chmod 644 $release/$lib/*
 chmod 755 $release/$doc
 chmod 644 $release/$doc/*
 chmod 755 $release/$doc/grafics

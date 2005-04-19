@@ -391,7 +391,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     }
 
     public synchronized void deQueue() {
-        if (serverJobs < 5) {
+        if (serverJobs < 6) {
             if (processStack.size() > 0) {
                 processResourceStack((plasmaHTCache.Entry) processStack.removeFirst());
             }
