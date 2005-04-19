@@ -394,7 +394,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 
                 // maybe the content length is missing
                 if (!(cachedResponseHeader.containsKey("CONTENT-LENGTH")))
-                    cachedResponseHeader.put("CONTENT-LENGTH", (String) ("" + cacheFile.length()));
+                    cachedResponseHeader.put("CONTENT-LENGTH", Long.toString(cacheFile.length()));
                 
                 // check if we can send a 304 instead the complete content
                 if (requestHeader.containsKey("IF-MODIFIED-SINCE")) {

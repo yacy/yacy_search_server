@@ -105,6 +105,7 @@ public final class httpc {
     }
     
     private static final httpcPool theHttpcPool;
+    boolean removedFromPool = false;
     static {
         // implementation of session thread pool
         GenericObjectPool.Config config = new GenericObjectPool.Config();
@@ -129,17 +130,18 @@ public final class httpc {
     public static httpc getInstance(String server, int port, int timeout, boolean ssl,
             String remoteProxyHost,  int remoteProxyPort) throws IOException {
         
+        httpc newHttpc;
         try {
             // fetching a new httpc from the object pool
-            httpc newHttpc = (httpc) httpc.theHttpcPool.borrowObject();
-            
-            // initialize it
-            newHttpc.init(server,port,timeout,ssl,remoteProxyHost, remoteProxyPort);        
-            return newHttpc;
+            newHttpc = (httpc) httpc.theHttpcPool.borrowObject();
             
         } catch (Exception e) {
             throw new IOException("Unable to initialize a new httpc. " + e.getMessage());
-        }
+        }            
+            
+        // initialize it
+        newHttpc.init(server,port,timeout,ssl,remoteProxyHost, remoteProxyPort);        
+        return newHttpc;
     }
     
     public static httpc getInstance(String server, int port, int timeout, boolean ssl) throws IOException {
@@ -167,7 +169,7 @@ public final class httpc {
     }
 
     protected void finalize() throws Throwable {
-        System.err.println("Httpc object was not returned to object pool.");
+        if (!this.removedFromPool) System.err.println("Httpc object was not returned to object pool.");
         this.reset();
         httpc.theHttpcPool.invalidateObject(this);
     }
@@ -240,7 +242,7 @@ public final class httpc {
     // http client
     
     void init(String server, int port, int timeout, boolean ssl,
-		 String remoteProxyHost,  int remoteProxyPort) throws IOException {
+		String remoteProxyHost,  int remoteProxyPort) throws IOException {
     	this.init(remoteProxyHost, remoteProxyPort, timeout, ssl);
     	this.remoteProxyUse = true;
     	this.savedRemoteHost = server + ((port == 80) ? "" : (":" + port));
@@ -417,7 +419,7 @@ public final class httpc {
 
 	public byte[] writeContent(OutputStream procOS) throws IOException {
 	    serverByteBuffer sbb = new serverByteBuffer();
-	    writeContentX(procOS, sbb);
+	    writeContentX(procOS, sbb, httpc.this.clientInput);
 	    return sbb.getBytes();
 	}
 
@@ -426,14 +428,14 @@ public final class httpc {
 	    // a file or both.
 	    FileOutputStream bufferOS = null;
 	    if (file != null) bufferOS = new FileOutputStream(file);
-	    writeContentX(procOS, bufferOS);
+	    writeContentX(procOS, bufferOS, httpc.this.clientInput);
 	    if (bufferOS != null) {
 		bufferOS.close();
 		if (file.length() == 0) file.delete();
 	    }
 	}
 
-	public void writeContentX(OutputStream procOS, OutputStream bufferOS) throws IOException {
+	public void writeContentX(OutputStream procOS, OutputStream bufferOS, InputStream clientInput) throws IOException {
 	    // we write length bytes, but if length == -1 (or < 0) then we
 	    // write until the input stream closes
 	    // procOS == null -> no write to procOS
@@ -442,7 +444,7 @@ public final class httpc {
 	    // and change the Content-Encoding and Content-Length attributes in the header
 	    byte[] buffer = new byte[2048];
 	    int l;
-            long len = 0;
+        long len = 0;
                 
 	    // find out length
 	    long length = responseHeader.contentLength();
@@ -473,7 +475,7 @@ public final class httpc {
                 }
                 baos.flush();
                 // now uncompress
-                InputStream dis = (InputStream) new GZIPInputStream(new ByteArrayInputStream(baos.toByteArray()));
+                InputStream dis = new GZIPInputStream(new ByteArrayInputStream(baos.toByteArray()));
                 try {
                     while ((l = dis.read(buffer)) > 0) {
                         if (procOS != null) procOS.write(buffer, 0, l);
@@ -489,18 +491,18 @@ public final class httpc {
                 }
                 baos.close(); baos = null;
 	    } else {
-		// no content-length was given, thus we read until the connection closes
-		InputStream dis = (gzip) ? (InputStream) new GZIPInputStream(clientInput) : (InputStream) clientInput;
-		try {
-		    while ((l = dis.read(buffer, 0, buffer.length)) >= 0) {
-			if (procOS != null) procOS.write(buffer, 0, l);
-			if (bufferOS != null) bufferOS.write(buffer, 0, l);
-		    }
-		} catch (java.net.SocketException e) {
-		    // this is not an error: it's ok, we waited for that
-		} catch (java.net.SocketTimeoutException e) {
+    		// no content-length was given, thus we read until the connection closes
+    		InputStream dis = (gzip) ? (InputStream) new GZIPInputStream(clientInput) : (InputStream) clientInput;
+    		try {
+    		    while ((l = dis.read(buffer, 0, buffer.length)) >= 0) {
+        			if (procOS != null) procOS.write(buffer, 0, l);
+        			if (bufferOS != null) bufferOS.write(buffer, 0, l);
+    		    }
+    		} catch (java.net.SocketException e) {
+    		    // this is not an error: it's ok, we waited for that
+    		} catch (java.net.SocketTimeoutException e) {
                     // the same here; should be ok.
-                }
+            }
 	    }
 
 	    // close the streams
@@ -1180,6 +1182,7 @@ final class httpcFactory implements org.apache.commons.pool.PoolableObjectFactor
     public void destroyObject(Object obj) {
         if (obj instanceof httpc) {
             httpc theHttpc = (httpc) obj;
+            theHttpc.removedFromPool = true;
         }
     }
     

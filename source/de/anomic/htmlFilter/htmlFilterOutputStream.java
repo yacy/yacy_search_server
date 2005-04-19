@@ -322,7 +322,7 @@ public final class htmlFilterOutputStream extends OutputStream {
             } else if (inScript) {
                 buffer.append(b);
                 int bufferLength = buffer.length();
-                if ((b == rb) && (buffer.length() > 14) &&
+                if ((b == rb) && (bufferLength > 14) &&
                 (buffer.byteAt(bufferLength - 8) == (byte) '/') &&
                 (buffer.byteAt(bufferLength - 7) == (byte) 's') &&
                 (buffer.byteAt(bufferLength - 6) == (byte) 'c') &&
