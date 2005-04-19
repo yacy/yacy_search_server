@@ -8,11 +8,11 @@ else
 	cd `dirname $0`
 	if [ x$1 != x-d ]
 	then
-		nohup java -classpath classes yacy >> yacy.log &
+		nohup java -classpath classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar yacy >> yacy.log &
 		echo "YaCy started as daemon process. View it's activity in yacy.log"
 		echo "To stop YaCy, please execute stopYACY.sh and wait some seconds"
 		echo "To administrate YaCy, start your web browser and open http://localhost:8080"
 	else
-		java -classpath classes yacy
+		java -classpath classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar yacy
 	fi
 fi
