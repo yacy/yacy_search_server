@@ -56,25 +56,23 @@ import java.util.*;
 import de.anomic.kelondro.*;
 import de.anomic.tools.*;
 import de.anomic.htmlFilter.*;
-import de.anomic.net.*;
 import de.anomic.http.*;
-import de.anomic.plasma.*;
 import de.anomic.server.*;
 
-public class plasmaHTCache {
+public final class plasmaHTCache {
 
     private static final int stackLimit = 150;  // if we exceed that limit, we do not check idle
     private static final long idleDelay = 2000; // 2 seconds no hits until we think that we idle
     private static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
     
-    private plasmaSwitchboard switchboard;
+    private final plasmaSwitchboard switchboard;
     private kelondroMap responseHeaderDB = null;
-    private LinkedList cacheStack;
-    private TreeMap cacheAge; // a <date+hash, cache-path> - relation
+    private final LinkedList cacheStack;
+    private final TreeMap cacheAge; // a <date+hash, cache-path> - relation
     public  long currCacheSize;
     public  long maxCacheSize;
     private long lastAcc;
-    private File cachePath;
+    private final File cachePath;
     public  static serverLog log;
 
     public static final int CACHE_UNFILLED          = 0; // default case without assignment
@@ -334,15 +332,15 @@ public class plasmaHTCache {
     }
 
     public static boolean isPicture(httpHeader response) {
-	String ct = (String) response.get("Content-Type");
+	Object ct = response.get("Content-Type");
 	if (ct == null) return false;
-	return (ct).toUpperCase().startsWith("IMAGE");
+	return ((String)ct).toUpperCase().startsWith("IMAGE");
     }
     
     public static boolean isText(httpHeader response) {
-	String ct = (String) response.get("Content-Type");
+	Object ct = response.get("Content-Type");
 	if (ct == null) return false;
-	return (ct).toUpperCase().startsWith("TEXT");
+	return ((String)ct).toUpperCase().startsWith("TEXT");
     }
 
     public static boolean noIndexingURL(String urlString) {
@@ -433,7 +431,7 @@ public class plasmaHTCache {
 	return new Entry(initDate, depth, url, requestHeader, responseStatus, responseHeader, initiator, profile);
     }
 
-    public class Entry {
+    public final class Entry {
 
 	// the class objects
 	public Date                     initDate;       // the date when the request happened; will be used as a key
