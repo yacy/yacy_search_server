@@ -110,4 +110,8 @@ public interface serverHandler {
     // but only the necessary one for a newly initialized instance
     public Object clone();
     
+    // Instead of using clone this function can be used to reset an existing 
+    // handler prototype so that it can e reused
+    public void reset();
+    
 }

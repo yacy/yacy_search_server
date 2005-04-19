@@ -42,7 +42,7 @@ package de.anomic.server;
 
 import java.io.*;
 
-public class serverFileUtils {
+public final class serverFileUtils {
     
     public static void copy(InputStream source, OutputStream dest) throws IOException {
 	byte[] buffer = new byte[4096];

@@ -76,7 +76,6 @@ package de.anomic.http;
 
 import java.io.*;
 import java.util.*;
-import java.text.*;
 import java.lang.reflect.*;
 import de.anomic.server.*;
 

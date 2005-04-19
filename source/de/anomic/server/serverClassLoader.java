@@ -45,9 +45,9 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
 
-public class serverClassLoader extends ClassLoader {
+public final class serverClassLoader extends ClassLoader {
 
-    Hashtable classes;
+    private final Hashtable classes;
 
     public serverClassLoader() {
 	super(ClassLoader.getSystemClassLoader());

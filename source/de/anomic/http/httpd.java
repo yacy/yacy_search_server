@@ -53,9 +53,15 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.text.*;
-import de.anomic.server.*;
 
-public class httpd implements serverHandler {
+import org.apache.commons.pool.impl.GenericObjectPool;
+
+import de.anomic.server.*;
+import de.anomic.server.serverCore.Session;
+import de.anomic.server.serverCore.SessionFactory;
+import de.anomic.server.serverCore.SessionPool;
+
+public final class httpd implements serverHandler {
 
     // static objects
     public static final String vDATE = "<<REPL>>";
@@ -77,15 +83,19 @@ public class httpd implements serverHandler {
     private String proxyAccountBase64MD5;
     private String serverAccountBase64MD5;
     private String clientIP;
+    
+    // the connection properties
+    private static final Properties prop = new Properties();
+    
+   
 
     // class methods
-
     public httpd(serverSwitch s, httpdHandler fileHandler, httpdHandler proxyHandler) {
         // handler info
-        this.switchboard = s;
-        this.fileHandler = fileHandler;
-        this.proxyHandler = proxyHandler;
-        this.virtualHost = switchboard.getConfig("fileHost","localhost");
+        httpd.switchboard = s;
+        httpd.fileHandler = fileHandler;
+        httpd.proxyHandler = proxyHandler;
+        httpd.virtualHost = switchboard.getConfig("fileHost","localhost");
         
         // authentication: by default none
         this.proxyAccountBase64MD5 = null;
@@ -93,99 +103,109 @@ public class httpd implements serverHandler {
         this.clientIP = null;
     }
     
+    public void reset()  {
+        this.session = null;
+        this.userAddress = null;
+        this.allowProxy = false;
+        this.allowServer = false;
+        this.proxyAccountBase64MD5 = null;
+        this.serverAccountBase64MD5 = null;
+        this.clientIP = null;
+    }    
+    
      // must be called at least once, but can be called again to re-use the object.
      public void initSession(serverCore.Session session) throws IOException {
         this.session = session;
         this.userAddress = session.userAddress; // client InetAddress
         this.clientIP = userAddress.getHostAddress();
        	if (this.userAddress.isAnyLocalAddress()) this.clientIP = "localhost";
-	if (this.clientIP.equals("0:0:0:0:0:0:0:1")) this.clientIP = "localhost";
+        if (this.clientIP.equals("0:0:0:0:0:0:0:1")) this.clientIP = "localhost";
         if (this.clientIP.equals("127.0.0.1")) this.clientIP = "localhost";
- 	String proxyClient = switchboard.getConfig("proxyClient", "*");
-	String serverClient = switchboard.getConfig("serverClient", "*");
+     	String proxyClient = switchboard.getConfig("proxyClient", "*");
+    	String serverClient = switchboard.getConfig("serverClient", "*");
         this.allowProxy = (proxyClient.equals("*")) ? true : match(clientIP, proxyClient);
-	this.allowServer = (serverClient.equals("*")) ? true : match(clientIP, serverClient);
-        	
-	// check if we want to allow this socket to connect us
-	if (!((allowProxy) || (allowServer))) {
-	    throw new IOException("CONNECTION FROM " + clientIP + " FORBIDDEN");
-	}
+    	this.allowServer = (serverClient.equals("*")) ? true : match(clientIP, serverClient);
+            	
+    	// check if we want to allow this socket to connect us
+    	if (!((allowProxy) || (allowServer))) {
+    	    throw new IOException("CONNECTION FROM " + clientIP + " FORBIDDEN");
+    	}
 
         proxyAccountBase64MD5 = null;
-	serverAccountBase64MD5 = null;
+        serverAccountBase64MD5 = null;
     }
 
     private static boolean match(String key, String latch) {
-	// the latch is a comma-separated list of patterns
-	// each pattern may contain one wildcard-character '*' which matches anything
-	StringTokenizer st = new StringTokenizer(latch,",");
-	String pattern;
-	int pos;
-	while (st.hasMoreTokens()) {
-	    pattern = st.nextToken();
-	    pos = pattern.indexOf("*");
-	    if (pos < 0) {
-		// no wild card: exact match
-		if (key.equals(pattern)) return true;
-	    } else {
-		// wild card: match left and right side of pattern
-		if ((key.startsWith(pattern.substring(0, pos))) &&
-		    (key.endsWith(pattern.substring(pos + 1)))) return true;
-	    }
-	}
-	return false;
+    	// the latch is a comma-separated list of patterns
+    	// each pattern may contain one wildcard-character '*' which matches anything
+    	StringTokenizer st = new StringTokenizer(latch,",");
+    	String pattern;
+    	int pos;
+    	while (st.hasMoreTokens()) {
+    	    pattern = st.nextToken();
+    	    pos = pattern.indexOf("*");
+    	    if (pos < 0) {
+    		// no wild card: exact match
+    		if (key.equals(pattern)) return true;
+    	    } else {
+    		// wild card: match left and right side of pattern
+    		if ((key.startsWith(pattern.substring(0, pos))) &&
+    		    (key.endsWith(pattern.substring(pos + 1)))) return true;
+    	    }
+    	}
+    	return false;
     }
 
     public String greeting() { // OBLIGATORIC FUNCTION
-	// a response line upon connection is send to client
-	// if no response line is wanted, return "" or null
-	return null;
+    	// a response line upon connection is send to client
+    	// if no response line is wanted, return "" or null
+    	return null;
     }
 
     public String error(Throwable e) { // OBLIGATORIC FUNCTION
-	// return string in case of any error that occurs during communication
-	// is always (but not only) called if an IO-dependent exception occurrs.
-	e.printStackTrace();
-	return "501 Exception occurred: " + e.getMessage();
+    	// return string in case of any error that occurs during communication
+    	// is always (but not only) called if an IO-dependent exception occurrs.
+    	e.printStackTrace();
+    	return "501 Exception occurred: " + e.getMessage();
     }
 
     private String readLine() {
-	// reads a line from the input socket
-	// this function is provided by the server through a passed method on initialization
-	byte[] l = this.session.readLine();
-	if (l == null) return null; else return new String(l);
+    	// reads a line from the input socket
+    	// this function is provided by the server through a passed method on initialization
+    	byte[] l = this.session.readLine();
+    	if (l == null) return null; else return new String(l);
     }
 
     private httpHeader readHeader() {
-	httpHeader header = new httpHeader(reverseMappingCache);
-	int p;
-	String line;
-	String key;
-	String value;
-	while ((line = readLine()) != null) {
-	    if (line.length() == 0) break; // this seperates the header of the HTTP request from the body
-	    //System.out.println("***" + line); // debug
-	    // parse the header line: a property seperated with the ':' sign
-	    p = line.indexOf(":");
-	    if (p >= 0) {
-		// store a property
-		key = line.substring(0, p).trim();
-		value = (String) header.get(key);
-		// check if the header occurred already
-		if (value == null) {
-		    // create new entry
-		    header.put(key, line.substring(p + 1).trim());
-		} else {
-		    // value can occur double times, attach with '#' - separator
-		    header.put(key, value + "#" + line.substring(p + 1).trim());
-		}
-	    }
-	}
-	return header;
+    	httpHeader header = new httpHeader(reverseMappingCache);
+    	int p;
+    	String line;
+    	String key;
+    	String value;
+    	while ((line = readLine()) != null) {
+    	    if (line.length() == 0) break; // this seperates the header of the HTTP request from the body
+    	    //System.out.println("***" + line); // debug
+    	    // parse the header line: a property seperated with the ':' sign
+    	    p = line.indexOf(":");
+    	    if (p >= 0) {
+    		// store a property
+    		key = line.substring(0, p).trim();
+    		value = (String) header.get(key);
+    		// check if the header occurred already
+    		if (value == null) {
+    		    // create new entry
+    		    header.put(key, line.substring(p + 1).trim());
+    		} else {
+    		    // value can occur double times, attach with '#' - separator
+    		    header.put(key, value + "#" + line.substring(p + 1).trim());
+    		}
+    	    }
+    	}
+    	return header;
     }
 
     public Boolean GET(String arg) throws IOException {
-	Properties prop = parseQuery(arg);
+	parseQuery(prop, arg);
 	prop.setProperty("METHOD", "GET");
 	prop.setProperty("CLIENTIP", clientIP);
 	
@@ -268,7 +288,7 @@ public class httpd implements serverHandler {
     }
 
     public Boolean HEAD(String arg) throws IOException {
-	Properties prop = parseQuery(arg);
+	parseQuery(prop,arg);
 	prop.setProperty("METHOD", "HEAD");
 	prop.setProperty("CLIENTIP", clientIP);
 	
@@ -342,7 +362,7 @@ public class httpd implements serverHandler {
     }
 
     public Boolean POST(String arg) throws IOException {
-	Properties prop = parseQuery(arg);
+	parseQuery(prop, arg);
 	prop.setProperty("METHOD", "POST");
 	prop.setProperty("CLIENTIP", clientIP);
 
@@ -487,8 +507,13 @@ public class httpd implements serverHandler {
     }
 
     
-    private Properties parseQuery(String s) {
-	Properties prop = new Properties();
+    private static final Properties parseQuery(Properties prop, String s) {
+        
+    if (prop == null) {
+        prop = new Properties();
+    } else {
+        prop.clear();
+    }
 
 	// this parses a whole URL
 	if (s.length() == 0) {
@@ -819,7 +844,6 @@ permission
         if (pos < 0) return false;
         return whitelist.contains(mime.substring(0, pos));
     }
-        
 }
 
 /*

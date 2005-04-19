@@ -44,7 +44,7 @@ import java.io.*;
 import java.security.*;
 
 
-public class serverCodings {
+public final class serverCodings {
 
     // this provides encoding and decoding of long cardinals into a 6-bit - based number format
     // expressed by a string. This is probably the most compact form to encode numbers as strings.

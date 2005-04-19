@@ -3,7 +3,7 @@ package de.anomic.server;
 
 import java.lang.reflect.*;
 
-public class serverInstantThread extends serverAbstractThread implements serverThread {
+public final class serverInstantThread extends serverAbstractThread implements serverThread {
     
     private Method jobExecMethod, jobCountMethod;
     private Object environment;

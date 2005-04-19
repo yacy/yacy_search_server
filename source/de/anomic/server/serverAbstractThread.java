@@ -58,14 +58,14 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     private long threadBlockTimestamp = System.currentTimeMillis();
     private long idleCycles = 0, busyCycles = 0;
     
-    protected void announceThreadBlockApply() {
+    protected final void announceThreadBlockApply() {
         // shall only be used, if a thread blocks for an important reason
         // like a socket connect and must renew the timestamp to correct
         // statistics
         this.threadBlockTimestamp = System.currentTimeMillis();
     }
     
-    protected void announceThreadBlockRelease() {
+    protected final void announceThreadBlockRelease() {
         // shall only be used, if a thread blocks for an important reason
         // like a socket connect and must renew the timestamp to correct
         // statistics
@@ -74,69 +74,69 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         this.busytime -= thisBlockTime;
     }
     
-    protected void announceMoreExecTime(long millis) {
+    protected final void announceMoreExecTime(long millis) {
         this.busytime += millis;
     }
         
-    protected void announceMoreSleepTime(long millis) {
+    protected final void announceMoreSleepTime(long millis) {
         this.idletime += millis;
     }
         
-    public void setDescription(String shortText, String longText) {
+    public final void setDescription(String shortText, String longText) {
         // sets a visible description string
         this.shortDescr = shortText;
         this.longDescr  = longText;
     }
     
-    public void setStartupSleep(long milliseconds) {
+    public final void setStartupSleep(long milliseconds) {
         // sets a sleep time before execution of the job-loop
         startup = milliseconds;
     }
     
-    public void setIdleSleep(long milliseconds) {
+    public final void setIdleSleep(long milliseconds) {
         // sets a sleep time for pauses between two jobs
         idlePause = milliseconds;
     }
     
-    public void setBusySleep(long milliseconds) {
+    public final void setBusySleep(long milliseconds) {
         // sets a sleep time for pauses between two jobs
         busyPause = milliseconds;
     }
     
-    public String getShortDescription() {
+    public final String getShortDescription() {
         return this.shortDescr;
     }
     
-    public String getLongDescription() {
+    public final String getLongDescription() {
         return this.longDescr;
     }
     
-    public long getIdleCycles() {
+    public final long getIdleCycles() {
         // returns the total number of cycles of job execution with idle-result
         return this.idleCycles;
     }
     
-    public long getBusyCycles() {
+    public final long getBusyCycles() {
         // returns the total number of cycles of job execution with busy-result
         return this.busyCycles;
     }
 
-    public long getBlockTime() {
+    public final long getBlockTime() {
         // returns the total time that this thread has been blocked so far
         return this.blockPause;
     }
     
-    public long getSleepTime() {
+    public final long getSleepTime() {
         // returns the total time that this thread has slept so far
         return this.idletime;
     }
     
-    public long getExecTime() {
+    public final long getExecTime() {
         // returns the total time that this thread has worked so far
         return this.busytime;
     }
     
-    public void setLog(serverLog log) {
+    public final void setLog(serverLog log) {
         // defines a log where process states can be written to
         this.log = log;
     }
@@ -145,12 +145,15 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         // after calling this method, the thread shall terminate
         this.running = false;
         // wait for termination
-        if (waitFor) while (this.isAlive())
-            try {this.sleep(100);} catch (InterruptedException e) {break;}
+        if (waitFor) {
+            // Busy waiting removed: while (this.isAlive()) try {this.sleep(100);} catch (InterruptedException e) {break;}
+            try { this.join(); } catch (InterruptedException e) {return;}
+        }
+            
         // If we reach this point, the process is closed
     }
     
-    private void logError(String text) {
+    private final void logError(String text) {
         if (log == null)
             serverLog.logError("THREAD-CONTROL", text);
         else

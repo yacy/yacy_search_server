@@ -62,16 +62,13 @@ package de.anomic.http;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.text.*;
 import de.anomic.htmlFilter.*;
 import de.anomic.server.*;
-import de.anomic.tools.*;
 import de.anomic.yacy.*;
-import de.anomic.http.*;
 import de.anomic.plasma.*;
 
 
-public class httpdProxyHandler extends httpdAbstractHandler implements httpdHandler {
+public final class httpdProxyHandler extends httpdAbstractHandler implements httpdHandler {
     
     // static variables
     // can only be instantiated upon first instantiation of this class object
@@ -87,10 +84,10 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
     public static int remoteProxyPort = -1;
     public static String remoteProxyNoProxy = "";
     public static String[] remoteProxyNoProxyPatterns = null;
-    private static HashSet remoteProxyAllowProxySet = new HashSet();
-    private static HashSet remoteProxyDisallowProxySet = new HashSet();
+    private static final HashSet remoteProxyAllowProxySet = new HashSet();
+    private static final HashSet remoteProxyDisallowProxySet = new HashSet();
     private static htmlFilterTransformer transformer = null;
-    public  static String userAgent = "yacy (" + httpc.systemOST +") yacy.net";
+    public  static final String userAgent = "yacy (" + httpc.systemOST +") yacy.net";
     private File   htRootPath = null;
         
     // class methods
@@ -108,8 +105,6 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
             }
 	    remoteProxyUse     = switchboard.getConfig("remoteProxyUse","false").equals("true");
             remoteProxyNoProxy = switchboard.getConfig("remoteProxyNoProxy","");
-            remoteProxyAllowProxySet = new HashSet();
-            remoteProxyDisallowProxySet = new HashSet();
             remoteProxyNoProxyPatterns = remoteProxyNoProxy.split(",");
             
 	    // set loglevel
@@ -586,6 +581,8 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
                     respond.write(("]\r\n").getBytes());
                 }
             } catch (Exception ee) {}
+        } finally {
+            if (remote != null) httpc.returnInstance(remote);
         }
         respond.flush();
     }
@@ -686,7 +683,10 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
 		e.printStackTrace(new PrintStream(respond));
 		respond.write(("]\r\n").getBytes());
 	    } catch (Exception ee) {}
-	}
+	} finally {
+        if (remote != null) httpc.returnInstance(remote);
+    }
+    
 	respond.flush();
     }
 
@@ -740,71 +740,80 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
 		e.printStackTrace(new PrintStream(respond));
 		respond.write(("]\r\n").getBytes());
 		} catch (Exception ee) {}
-	}
+	} finally {
+        if (remote != null) httpc.returnInstance(remote);
+    }
 	respond.flush();
     }
 
     public void doConnect(Properties conProp, de.anomic.http.httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) throws IOException {
         String host = conProp.getProperty("HOST");
-	int    port = Integer.parseInt(conProp.getProperty("PORT"));
-	String httpVersion = conProp.getProperty("HTTP");
-	int timeout = Integer.parseInt(switchboard.getConfig("clientTimeout", "10000"));
-
-	// possibly branch into PROXY-PROXY connection
-	if (remoteProxyUse) {
-	    httpc remoteProxy = new httpc(host, port, timeout, false, remoteProxyHost, remoteProxyPort);
-	    httpc.response response = remoteProxy.CONNECT(host, port, requestHeader);
-	    response.print();
-	    if (response.success()) {
-		// replace connection details
-		host = remoteProxyHost;
-		port = remoteProxyPort;
-		// go on (see below)
-	    } else {
-		// pass error response back to client
-		respondHeader(clientOut, response.status, response.responseHeader);
-		return;
-	    }
-	} 
-
-	// try to establish connection to remote host
-	Socket sslSocket = new Socket(host, port);
-	sslSocket.setSoTimeout(timeout); // waiting time for write
-	sslSocket.setSoLinger(true, timeout); // waiting time for read
-	InputStream promiscuousIn  = sslSocket.getInputStream();
-	OutputStream promiscuousOut = sslSocket.getOutputStream();
-	
-	// now then we can return a success message
-	clientOut.write((httpVersion + " 200 Connection established" + serverCore.crlfString +
-			 "Proxy-agent: YACY" + serverCore.crlfString +
-			 serverCore.crlfString).getBytes());
-	
-	log.logInfo("SSL CONNECTION TO " + host + ":" + port + " ESTABLISHED");
-	
-	// start stream passing with mediate processes
-	try {
-	    Mediate cs = new Mediate(sslSocket, clientIn, promiscuousOut);
-	    Mediate sc = new Mediate(sslSocket, promiscuousIn, clientOut);
-	    cs.start();
-	    sc.start();
-	    while ((sslSocket != null) &&
-		   (sslSocket.isBound()) &&
-		   (!(sslSocket.isClosed())) &&
-		   (sslSocket.isConnected()) &&
-		   ((cs.isAlive()) || (sc.isAlive()))) {
-		// idle
-		try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {} // wait a while
-	    }
-	    // set stop mode
-	    cs.pleaseTerminate();
-	    sc.pleaseTerminate();
-	    // wake up thread
-	    cs.interrupt();
-	    sc.interrupt();
-	    // ...hope they have terminated...
-	} catch (IOException e) {
-	    //System.out.println("promiscuous termination: " + e.getMessage());
-	}
+    	int    port = Integer.parseInt(conProp.getProperty("PORT"));
+    	String httpVersion = conProp.getProperty("HTTP");
+    	int timeout = Integer.parseInt(switchboard.getConfig("clientTimeout", "10000"));
+    
+    	// possibly branch into PROXY-PROXY connection
+    	if (remoteProxyUse) {
+            httpc remoteProxy = null;
+            try {
+        	    remoteProxy = httpc.getInstance(host, port, timeout, false, remoteProxyHost, remoteProxyPort);
+        	    httpc.response response = remoteProxy.CONNECT(host, port, requestHeader);
+        	    response.print();
+        	    if (response.success()) {
+            		// replace connection details
+            		host = remoteProxyHost;
+            		port = remoteProxyPort;
+            		// go on (see below)
+                } else {
+            		// pass error response back to client
+            		respondHeader(clientOut, response.status, response.responseHeader);
+            		return;
+                }
+            } catch (Exception e) {
+                throw new IOException(e.getMessage());
+            } finally {
+                if (remoteProxy != null) httpc.returnInstance(remoteProxy);
+            }
+    	} 
+    
+    	// try to establish connection to remote host
+    	Socket sslSocket = new Socket(host, port);
+    	sslSocket.setSoTimeout(timeout); // waiting time for write
+    	sslSocket.setSoLinger(true, timeout); // waiting time for read
+    	InputStream promiscuousIn  = sslSocket.getInputStream();
+    	OutputStream promiscuousOut = sslSocket.getOutputStream();
+    	
+    	// now then we can return a success message
+    	clientOut.write((httpVersion + " 200 Connection established" + serverCore.crlfString +
+    			 "Proxy-agent: YACY" + serverCore.crlfString +
+    			 serverCore.crlfString).getBytes());
+    	
+    	log.logInfo("SSL CONNECTION TO " + host + ":" + port + " ESTABLISHED");
+    	
+    	// start stream passing with mediate processes
+    	try {
+    	    Mediate cs = new Mediate(sslSocket, clientIn, promiscuousOut);
+    	    Mediate sc = new Mediate(sslSocket, promiscuousIn, clientOut);
+    	    cs.start();
+    	    sc.start();
+    	    while ((sslSocket != null) &&
+    		   (sslSocket.isBound()) &&
+    		   (!(sslSocket.isClosed())) &&
+    		   (sslSocket.isConnected()) &&
+    		   ((cs.isAlive()) || (sc.isAlive()))) {
+    		// idle
+    		try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {} // wait a while
+    	    }
+    	    // set stop mode
+    	    cs.pleaseTerminate();
+    	    sc.pleaseTerminate();
+    	    // wake up thread
+    	    cs.interrupt();
+    	    sc.interrupt();
+    	    // ...hope they have terminated...
+    	} catch (IOException e) {
+    	    //System.out.println("promiscuous termination: " + e.getMessage());
+    	}
 	
     }
 
@@ -873,9 +882,9 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
         }
         // branch to server/proxy
         if (useProxy) {
-            return new httpc(server, port, timeout, false, remoteProxyHost, remoteProxyPort);
+            return httpc.getInstance(server, port, timeout, false, remoteProxyHost, remoteProxyPort);
         } else {
-	    return new httpc(server, port, timeout, false);
+	    return httpc.getInstance(server, port, timeout, false);
         }
     }
 
@@ -895,15 +904,18 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
     }
     
     private void respondHeader(OutputStream respond, String status, httpHeader header) throws IOException, SocketException {
-	String s;
 
 	// prepare header
 	//header.put("Server", "AnomicHTTPD (www.anomic.de)");
 	if (!(header.containsKey("date"))) header.put("Date", httpc.dateString(httpc.nowDate()));
 	if (!(header.containsKey("content-type"))) header.put("Content-type", "text/html"); // fix this
 
+    StringBuffer headerStringBuffer = new StringBuffer();
+    
 	// write status line
-	respond.write(("HTTP/1.1 " + status + "\r\n").getBytes());
+    headerStringBuffer.append("HTTP/1.1 ")
+                      .append(status)
+                      .append("\r\n");
 
 	//System.out.println("HEADER: PROXY TO CLIENT = " + header.toString()); // DEBUG
 
@@ -920,17 +932,27 @@ public class httpdProxyHandler extends httpdAbstractHandler implements httpdHand
 		if (!(key.equals("Location"))) while ((pos = value.lastIndexOf("#")) >= 0) {
 		    // special handling is needed if a key appeared several times, which is valid.
 		    // all lines with same key are combined in one value, separated by a "#"
-		    respond.write((key + ": " + value.substring(pos + 1).trim() + "\r\n").getBytes());
+            headerStringBuffer
+                .append(key)
+                .append(": ")
+                .append(value.substring(pos + 1).trim())
+                .append("\r\n");
 		    //System.out.println("#" + key + ": " + value.substring(pos + 1).trim());
 		    value = value.substring(0, pos).trim();
 		}
-		respond.write((key + ": " + value + "\r\n").getBytes());
+        headerStringBuffer
+            .append(key)
+            .append(": ")
+            .append(value)
+            .append("\r\n");        
 		//System.out.println("#" + key + ": " + value);
 	    }
 	}
 
+    headerStringBuffer.append("\r\n");
+    
 	// end header
-	respond.write(("\r\n").getBytes());
+	respond.write(headerStringBuffer.toString().getBytes());
 	respond.flush();
     }
 

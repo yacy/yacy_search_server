@@ -44,9 +44,9 @@ import java.io.*;
 import java.util.*;
 import de.anomic.server.*;
 
-public class httpdSwitchboard extends serverAbstractSwitch implements serverSwitch {
+public final class httpdSwitchboard extends serverAbstractSwitch implements serverSwitch {
 
-    private LinkedList cacheStack;
+    private final LinkedList cacheStack;
         
     public httpdSwitchboard(String rootPath, String initPath, String configPath) throws IOException {
         super(rootPath, initPath, configPath);

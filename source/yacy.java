@@ -75,11 +75,11 @@ import de.anomic.server.*;
 import de.anomic.yacy.*;
 //import de.anomic.http.*;
 
-public class yacy {
+public final class yacy {
 
     // static objects
     private static final String vString = "0.361";
-    private static final String vDATE   = "@REPL_DATE@";
+    private static final String vDATE   = "20050419";
     private static final String copyright = "[ YACY Proxy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
     
@@ -321,7 +321,7 @@ public class yacy {
 	httpHeader requestHeader = new httpHeader();
 	requestHeader.put("Authorization", "realm=" + encodedPassword); // for http-authentify
         try {
-            httpc con = new httpc("localhost", port, 10000, false);
+            httpc con = httpc.getInstance("localhost", port, 10000, false);
             httpc.response res = con.GET("Steering.html?shutdown=", requestHeader);
             
             // read response

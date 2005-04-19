@@ -51,11 +51,9 @@
 
 package de.anomic.http;
 
-import java.io.*;
-import java.util.*;
 import java.text.*;
 
-public abstract class httpdAbstractHandler {
+abstract class httpdAbstractHandler {
 
     // static tools
 

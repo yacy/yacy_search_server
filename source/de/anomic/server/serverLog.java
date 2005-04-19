@@ -43,7 +43,7 @@ package de.anomic.server;
 import java.text.*;
 import java.util.*;
 
-public class serverLog {
+public final class serverLog {
     
     // statics
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");

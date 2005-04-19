@@ -50,7 +50,7 @@ import de.anomic.server.*;
 import de.anomic.tools.*;
 import de.anomic.htmlFilter.*;
 
-public class plasmaCrawlLoader {
+public final class plasmaCrawlLoader {
 
     private plasmaHTCache   cacheManager;
     private int             socketTimeout;
@@ -130,7 +130,7 @@ public class plasmaCrawlLoader {
         return result;
     }
     
-    public class Exec extends Thread {
+    public final class Exec extends Thread {
 
 	public URL url;
         public String referer;
@@ -160,9 +160,8 @@ public class plasmaCrawlLoader {
 	private httpc newhttpc(String server, int port, boolean ssl) throws IOException {
 	    // a new httpc connection, combined with possible remote proxy
 	    if (remoteProxyUse)
-		return new httpc(server, port, socketTimeout, ssl, remoteProxyHost, remoteProxyPort);
-	    else
-		return new httpc(server, port, socketTimeout, ssl);
+             return httpc.getInstance(server, port, socketTimeout, ssl, remoteProxyHost, remoteProxyPort);
+	    else return httpc.getInstance(server, port, socketTimeout, ssl);
 	}
 
 	private void load(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) throws IOException {
@@ -179,20 +178,21 @@ public class plasmaCrawlLoader {
             if (referer.length() == 0) referer = "http://www.yacy.net/yacy/";
             
 	    // take a file from the net
+        httpc remote = null;
 	    try {
-		// create a request header
-		httpHeader requestHeader = new httpHeader();
-		requestHeader.put("User-Agent", httpdProxyHandler.userAgent);
-		requestHeader.put("Referer", referer);
-		requestHeader.put("Accept-Encoding", "gzip,deflate");
-
-                //System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
-                
-		// open the connection
-		httpc remote = newhttpc(host, port, ssl);
-		
-		// send request
-		httpc.response res = remote.GET(path, requestHeader);
+    		// create a request header
+    		httpHeader requestHeader = new httpHeader();
+    		requestHeader.put("User-Agent", httpdProxyHandler.userAgent);
+    		requestHeader.put("Referer", referer);
+    		requestHeader.put("Accept-Encoding", "gzip,deflate");
+    
+                    //System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
+                    
+    		// open the connection
+    		remote = newhttpc(host, port, ssl);
+    		
+    		// send request
+    		httpc.response res = remote.GET(path, requestHeader);
                 
                 if (res.status.startsWith("200")) {
                     // the transfer is ok
@@ -250,6 +250,8 @@ public class plasmaCrawlLoader {
                 // remote server was wrong.
                 log.logError("CRAWLER LOADER ERROR2 with url=" + url.toString() + ": " + e.toString());
                 e.printStackTrace();
+            } finally {
+                if (remote != null) httpc.returnInstance(remote);
             }
         }
 	

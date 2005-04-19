@@ -47,7 +47,7 @@ import java.lang.*;
 import java.util.*;
 import java.text.*;
 
-public class serverDate {
+public final class serverDate {
     
     
     // statics

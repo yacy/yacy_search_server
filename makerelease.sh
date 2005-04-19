@@ -52,9 +52,12 @@ release='yacy_dev_v'$version'_'$datestr
 target='RELEASE'
 classes='classes'
 source='source'
+lib='lib'
 doc='doc'
 data='DATA'
 mainclass='yacy.java'
+classpath='$classes:$lib'
+
 mkdir $release
 
 # clean up
@@ -103,18 +106,18 @@ mv -f $source/$mainclass $source/$mainclass.orig
 sed `echo 's/<<REPL_DATE>>/'$datestr'/'` $source/$mainclass.orig > $source/$mainclass.sed1
 sed `echo 's/<<REPL_VERSION>>/'$version'/'` $source/$mainclass.sed1 > $source/$mainclass
 rm $source/$mainclass.sed1
-#javac -classpath $classes -sourcepath $source -d $classes -g:none $source/httpd.java
-#javac -classpath $classes -sourcepath $source -d $classes -g:none $source/$mainclass
-javac -classpath $classes -sourcepath $source -d $classes -g $source/de/anomic/tools/*.java
-javac -classpath $classes -sourcepath $source -d $classes -g $source/de/anomic/net/*.java
-javac -classpath $classes -sourcepath $source -d $classes -g $source/de/anomic/htmlFilter/*.java
-javac -classpath $classes -sourcepath $source -d $classes -g $source/de/anomic/server/*.java
-javac -classpath $classes -sourcepath $source -d $classes -g $source/de/anomic/http/*.java
-javac -classpath $classes -sourcepath $source -d $classes -g $source/de/anomic/kelondro/*.java
-javac -classpath $classes -sourcepath $source -d $classes -g $source/de/anomic/data/*.java
-javac -classpath $classes -sourcepath $source -d $classes -g $source/de/anomic/plasma/*.java
-javac -classpath $classes -sourcepath $source -d $classes -g $source/de/anomic/yacy/*.java
-javac -classpath $classes -sourcepath $source -d $classes -g $source/$mainclass
+#javac -classpath $classpath -sourcepath $source -d $classes -g:none $source/httpd.java
+#javac -classpath $classpath -sourcepath $source -d $classes -g:none $source/$mainclass
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/tools/*.java
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/net/*.java
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/htmlFilter/*.java
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/server/*.java
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/http/*.java
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/kelondro/*.java
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/data/*.java
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/plasma/*.java
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/yacy/*.java
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/$mainclass
 mv -f $source/$mainclass.orig $source/$mainclass
 
 # compile server pages

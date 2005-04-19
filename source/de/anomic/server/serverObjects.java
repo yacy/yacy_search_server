@@ -60,7 +60,7 @@ package de.anomic.server;
 import java.io.*;
 import java.util.*;
 
-public class serverObjects extends Hashtable implements Cloneable {
+public final class serverObjects extends Hashtable implements Cloneable {
 
     public serverObjects() {
 	super();

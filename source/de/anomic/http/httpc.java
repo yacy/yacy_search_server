@@ -56,23 +56,29 @@ import java.lang.*;
 import java.util.*;
 import java.util.zip.*;
 import de.anomic.server.*;
+import de.anomic.server.serverCore.Session;
+import de.anomic.server.serverCore.SessionFactory;
+import de.anomic.server.serverCore.SessionPool;
+
 import javax.net.ssl.SSLSocketFactory; 
 
-public class httpc {
+import org.apache.commons.pool.impl.GenericObjectPool;
+
+public final class httpc {
 
     // statics
     private static final String vDATE = "20040602";
     private static String userAgent;
     public static String systemOST;
     private static final int terminalMaxLength = 30000;
-    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
+    private static final TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
     
     // --- The GMT standard date format used in the HTTP protocol
-    private static SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
-    private static SimpleDateFormat EMLFormatter     = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US);
-    private static SimpleDateFormat ShortFormatter   = new SimpleDateFormat("yyyyMMddHHmmss");
+    private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+    private static final SimpleDateFormat EMLFormatter     = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US);
+    private static final SimpleDateFormat ShortFormatter   = new SimpleDateFormat("yyyyMMddHHmmss");
     //Mo 06 Sep 2004 23:32 
-    private static HashMap reverseMappingCache = new HashMap();
+    private static final HashMap reverseMappingCache = new HashMap();
 
     // class variables
     private Socket socket = null; // client socket for commands
@@ -89,15 +95,83 @@ public class httpc {
     private String  requestPath = null;
 
     // the dns cache
-    private static HashMap nameCacheHit = new HashMap();
+    private static final HashMap nameCacheHit = new HashMap();
     //private static HashSet nameCacheMiss = new HashSet();
     
     static {
-	// set time-out of InetAddress.getByName cache ttl
-	java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
+    	// set time-out of InetAddress.getByName cache ttl
+    	java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
         java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
     }
+    
+    private static final httpcPool theHttpcPool;
+    static {
+        // implementation of session thread pool
+        GenericObjectPool.Config config = new GenericObjectPool.Config();
+        
+        // The maximum number of active connections that can be allocated from pool at the same time,
+        // 0 for no limit
+        config.maxActive = 150;
+        
+        // The maximum number of idle connections connections in the pool
+        // 0 = no limit.        
+        config.maxIdle = 75;
+        config.minIdle = 10;    
+        
+        config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
+        config.minEvictableIdleTimeMillis = 30000; 
+        
+        theHttpcPool = new httpcPool(new httpcFactory(),config);         
+    }
 
+    private static final ByteArrayOutputStream readLineBuffer = new ByteArrayOutputStream();
+    
+    public static httpc getInstance(String server, int port, int timeout, boolean ssl,
+            String remoteProxyHost,  int remoteProxyPort) throws IOException {
+        
+        try {
+            // fetching a new httpc from the object pool
+            httpc newHttpc = (httpc) httpc.theHttpcPool.borrowObject();
+            
+            // initialize it
+            newHttpc.init(server,port,timeout,ssl,remoteProxyHost, remoteProxyPort);        
+            return newHttpc;
+            
+        } catch (Exception e) {
+            throw new IOException("Unable to initialize a new httpc. " + e.getMessage());
+        }
+    }
+    
+    public static httpc getInstance(String server, int port, int timeout, boolean ssl) throws IOException {
+        
+        try {
+            // fetching a new httpc from the object pool
+            httpc newHttpc = (httpc) httpc.theHttpcPool.borrowObject();
+            
+            // initialize it
+            newHttpc.init(server,port,timeout,ssl);        
+            return newHttpc;
+            
+        } catch (Exception e) {
+            throw new IOException("Unable to initialize a new httpc. " + e.getMessage());
+        }            
+    }    
+    
+    public static void returnInstance(httpc theHttpc) {
+        try {
+            theHttpc.reset();
+            httpc.theHttpcPool.returnObject(theHttpc);
+        } catch (Exception e) {
+            // we could ignore this error 
+        }
+    }
+
+    protected void finalize() throws Throwable {
+        System.err.println("Httpc object was not returned to object pool.");
+        this.reset();
+        httpc.theHttpcPool.invalidateObject(this);
+    }
+    
     public static String dnsResolve(String host) {
         // looks for the ip of host <host> and returns ip number as string
         String ip = (String) nameCacheHit.get(host);
@@ -134,45 +208,72 @@ public class httpc {
             return false;
         }
     }
+    
+    void reset() {
+        try {
+            if (this.clientInput != null) {
+                this.clientInput.close();
+                this.clientInput = null;
+            }
+            if (this.clientOutput != null) {
+                this.clientOutput.close();
+                this.clientOutput = null;
+            }
+            if (this.socket != null) {
+                this.socket.close();
+                this.socket = null;
+            }
+            
+            this.host = null;
+            this.timeout = 0;
+            this.handle = 0;
+            
+            this.remoteProxyUse = false;
+            this.savedRemoteHost = null;
+            this.requestPath = null;
+        } catch (Exception e) {
+            // we could ignore this ...
+        }
+    }
       
     
     // http client
     
-    public httpc(String server, int port, int timeout, boolean ssl,
+    void init(String server, int port, int timeout, boolean ssl,
 		 String remoteProxyHost,  int remoteProxyPort) throws IOException {
-	this(remoteProxyHost, remoteProxyPort, timeout, ssl);
-	this.remoteProxyUse = true;
-	this.savedRemoteHost = server + ((port == 80) ? "" : (":" + port));
+    	this.init(remoteProxyHost, remoteProxyPort, timeout, ssl);
+    	this.remoteProxyUse = true;
+    	this.savedRemoteHost = server + ((port == 80) ? "" : (":" + port));
     }
 
-    public httpc(String server, int port, int timeout, boolean ssl) throws IOException {
+    void init(String server, int port, int timeout, boolean ssl) throws IOException {
         handle = System.currentTimeMillis();
         //serverLog.logDebug("HTTPC", handle + " initialized");
-	this.remoteProxyUse = false;
-	this.timeout = timeout;
-        this.savedRemoteHost = server;
-	try {
-	    this.host = server + ((port == 80) ? "" : (":" + port));
-	    String hostip;
-	    if ((server.equals("localhost")) || (server.equals("127.0.0.1")) || (server.startsWith("192.168.")) || (server.startsWith("10."))) {
-		hostip = server;
-	    } else {
-		hostip = dnsResolve(server);
-		if (hostip == null) throw new UnknownHostException(server);
-	    }
-            if (ssl)
-                socket = SSLSocketFactory.getDefault().createSocket(hostip, port);
-            else
-                socket = new Socket(hostip, port);
-	    socket.setSoTimeout(timeout); // waiting time for write
-	    //socket.setSoLinger(true, timeout); // waiting time for read
-	    socket.setKeepAlive(true); //
-	    clientInput  = new PushbackInputStream(socket.getInputStream());
-	    clientOutput = socket.getOutputStream();
-	    // if we reached this point, we should have a connection
-	} catch (UnknownHostException e) {
-	    throw new IOException("unknown host: " + server);
-	}
+    	this.remoteProxyUse = false;
+    	this.timeout = timeout;
+            this.savedRemoteHost = server;
+    	try {
+    	    this.host = server + ((port == 80) ? "" : (":" + port));
+    	    String hostip;
+    	    if ((server.equals("localhost")) || (server.equals("127.0.0.1")) || (server.startsWith("192.168.")) || (server.startsWith("10."))) {
+                hostip = server;
+    	    } else {
+        		hostip = dnsResolve(server);
+        		if (hostip == null) throw new UnknownHostException(server);
+    	    }
+                if (ssl)
+                    socket = SSLSocketFactory.getDefault().createSocket(hostip, port);
+                else
+                    socket = new Socket(hostip, port);
+    	    socket.setSoTimeout(timeout); // waiting time for write
+    	    //socket.setSoLinger(true, timeout); // waiting time for read
+    	    socket.setKeepAlive(true); //
+    	    clientInput  = new PushbackInputStream(socket.getInputStream());
+    	    clientOutput = socket.getOutputStream();
+    	    // if we reached this point, we should have a connection
+    	} catch (UnknownHostException e) {
+    	    throw new IOException("unknown host: " + server);
+    	}
     }
 
     // provide HTTP date handling static methods
@@ -230,7 +331,7 @@ public class httpc {
 	    }
 
 	    // reads in the http header, right now, right here
-	    byte[] b = serverCore.receive(clientInput, timeout, terminalMaxLength, false);
+	    byte[] b = serverCore.receive(clientInput, readLineBuffer, timeout, terminalMaxLength, false);
 	    if (b == null) {
 		// the server has meanwhile disconnected
 		status = "503 server has closed connection";
@@ -242,7 +343,7 @@ public class httpc {
 	    if (p < 0) {
 		status = "500 status line parse error";
 		// flush in anything that comes without parsing
-		while ((b = serverCore.receive(clientInput, timeout, terminalMaxLength, false)).length != 0) {}
+		while ((b = serverCore.receive(clientInput, readLineBuffer, timeout, terminalMaxLength, false)).length != 0) {}
 		return; // in bad mood
 	    }
 	    // we have a status
@@ -252,14 +353,14 @@ public class httpc {
 	    if (status.startsWith("400")) {
 		// bad request
 		// flush in anything that comes without parsing
-		while ((b = serverCore.receive(clientInput, timeout, terminalMaxLength, false)).length != 0) {}
+		while ((b = serverCore.receive(clientInput, readLineBuffer, timeout, terminalMaxLength, false)).length != 0) {}
 		return; // in bad mood
 	    }
 
 	    // at this point we should have a valid response. read in the header properties
 	    String key = "";
 	    String value = "";
-	    while ((b = serverCore.receive(clientInput, timeout, terminalMaxLength, false)) != null) {
+	    while ((b = serverCore.receive(clientInput, readLineBuffer, timeout, terminalMaxLength, false)) != null) {
 		if (b.length == 0) break;
 		buffer = new String(b);
 		//System.out.println("#H#" + buffer); // debug
@@ -727,24 +828,35 @@ do upload
                                    String user, String password, boolean ssl,
                                    String proxyHost,  int proxyPort,
                                    httpHeader requestHeader) throws IOException {
-	if (requestHeader == null) requestHeader = new httpHeader();
-	if ((user != null) && (password != null) && (user.length() != 0)) {
-	    requestHeader.put("Authorization", serverCodings.standardCoder.encodeBase64String(user + ":" + password));
-	}
-	httpc con;
-        if ((proxyHost == null) || (proxyPort == 0))
-            con = new httpc(host, port, timeout, ssl);
-        else 
-            con = new httpc(host, port, timeout, ssl, proxyHost, proxyPort);
-	httpc.response res = con.GET(path, null);
-	if (res.status.startsWith("2")) {
-	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	    res.writeContent(bos, null);
-	    con.close();
-	    return bos.toByteArray();
-	} else {
-	    return res.status.getBytes();
-	}
+    	if (requestHeader == null) requestHeader = new httpHeader();
+    	if ((user != null) && (password != null) && (user.length() != 0)) {
+    	    requestHeader.put("Authorization", serverCodings.standardCoder.encodeBase64String(user + ":" + password));
+    	}
+        
+        httpc con = null;
+        try {        
+
+            if ((proxyHost == null) || (proxyPort == 0)) {
+                con = httpc.getInstance(host, port, timeout, ssl);
+            } else { 
+                con = httpc.getInstance(host, port, timeout, ssl, proxyHost, proxyPort);
+            }
+                
+        	httpc.response res = con.GET(path, null);
+        	if (res.status.startsWith("2")) {
+        	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        	    res.writeContent(bos, null);
+        	    con.close();
+        	    return bos.toByteArray();
+        	} else {
+        	    return res.status.getBytes();
+        	}
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        } finally {
+            if (con != null) httpc.returnInstance(con);
+        }
+        
     }
 
     public static byte[] singleGET(URL u, int timeout,
@@ -773,25 +885,35 @@ do upload
                                     String user, String password, boolean ssl,
                                     String proxyHost, int proxyPort,
                                     httpHeader requestHeader, serverObjects props) throws IOException {
-	if (requestHeader == null) requestHeader = new httpHeader();
-	if ((user != null) && (password != null) && (user.length() != 0)) {
-	    requestHeader.put("Authorization", serverCodings.standardCoder.encodeBase64String(user + ":" + password));
-	}
-	httpc con;
-        if ((proxyHost == null) || (proxyPort == 0))
-            con = new httpc(host, port, timeout, ssl);
-        else 
-            con = new httpc(host, port, timeout, ssl, proxyHost, proxyPort);
-	httpc.response res = con.POST(path, null, props, null);
-	//System.out.println("response=" + res.toString());
-	if (res.status.startsWith("2")) {
-	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	    res.writeContent(bos, null);
-	    con.close();
-	    return bos.toByteArray();
-	} else {
-	    return res.status.getBytes();
-	}
+        
+    	if (requestHeader == null) requestHeader = new httpHeader();
+    	if ((user != null) && (password != null) && (user.length() != 0)) {
+    	    requestHeader.put("Authorization", serverCodings.standardCoder.encodeBase64String(user + ":" + password));
+    	}
+        
+    	httpc con = null;
+        try {
+                if ((proxyHost == null) || (proxyPort == 0))
+                    con = httpc.getInstance(host, port, timeout, ssl);
+                else 
+                    con = httpc.getInstance(host, port, timeout, ssl, proxyHost, proxyPort);
+        	httpc.response res = con.POST(path, null, props, null);
+            
+        	//System.out.println("response=" + res.toString());
+        	if (res.status.startsWith("2")) {
+        	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        	    res.writeContent(bos, null);
+        	    con.close();
+        	    return bos.toByteArray();
+        	} else {
+        	    return res.status.getBytes();
+        	}
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        } finally {
+            if (con != null) httpc.returnInstance(con);
+        }
+        
     }
 
     public static byte[] singlePOST(URL u, int timeout,
@@ -831,33 +953,41 @@ do upload
     }
     
     public static httpHeader whead(URL url, int timeout, String user, String password, String proxyHost, int proxyPort) throws IOException {
-	// generate request header
+        // generate request header
         httpHeader requestHeader = new httpHeader();
-	if ((user != null) && (password != null) && (user.length() != 0)) {
-	    requestHeader.put("Authorization", serverCodings.standardCoder.encodeBase64String(user + ":" + password));
-	}
+    	if ((user != null) && (password != null) && (user.length() != 0)) {
+    	    requestHeader.put("Authorization", serverCodings.standardCoder.encodeBase64String(user + ":" + password));
+    	}
         // parse query
+        
         int port = url.getPort();
         boolean ssl = url.getProtocol().equals("https");
-	if (port < 0) port = (ssl) ? 443 : 80;
-	String path = url.getPath();
-	String query = url.getQuery();
-	if ((query != null) && (query.length() > 0)) path = path + "?" + query;
-	String host = url.getHost();
+    	if (port < 0) port = (ssl) ? 443 : 80;
+    	String path = url.getPath();
+    	String query = url.getQuery();
+    	if ((query != null) && (query.length() > 0)) path = path + "?" + query;
+    	String host = url.getHost();
+        
         // start connection
-	httpc con;
-        if ((proxyHost == null) || (proxyPort == 0))
-            con = new httpc(host, port, timeout, ssl);
-        else 
-            con = new httpc(host, port, timeout, ssl, proxyHost, proxyPort);
-	httpc.response res = con.HEAD(path, requestHeader);
-	if (res.status.startsWith("2")) {
-            // success
-	    return res.responseHeader;
-	} else {
-            // fail
-	    return res.responseHeader;
-	}
+        httpc con = null;
+        try {        	
+            if ((proxyHost == null) || (proxyPort == 0))
+                 con = httpc.getInstance(host, port, timeout, ssl);
+            else con = httpc.getInstance(host, port, timeout, ssl, proxyHost, proxyPort);
+            
+        	httpc.response res = con.HEAD(path, requestHeader);
+        	if (res.status.startsWith("2")) {
+                    // success
+        	    return res.responseHeader;
+        	} else {
+                    // fail
+        	    return res.responseHeader;
+        	}
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        } finally {
+            if (con != null) httpc.returnInstance(con);
+        }
     }
 
     /*
@@ -929,6 +1059,9 @@ do upload
 	Enumeration i = text.elements();
 	while (i.hasMoreElements()) System.out.println((String) i.nextElement());
     }
+    
+    
+    
 
 }
 
@@ -1027,3 +1160,90 @@ public class SSLSocketClientWithClientAuth {
     }
 }
 */
+
+final class httpcFactory implements org.apache.commons.pool.PoolableObjectFactory {
+
+    public httpcFactory() {
+        super();  
+    }
+    
+    /**
+     * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
+     */
+    public Object makeObject() throws Exception {
+        return new httpc();
+    }          
+    
+     /**
+     * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
+     */
+    public void destroyObject(Object obj) {
+        if (obj instanceof httpc) {
+            httpc theHttpc = (httpc) obj;
+        }
+    }
+    
+    /**
+     * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
+     */
+    public boolean validateObject(Object obj) {
+        if (obj instanceof httpc) 
+        {
+            httpc theHttpc = (httpc) obj;
+            return true;
+        }
+        return true;
+    }
+    
+    /**
+     * @param obj 
+     * 
+     */
+    public void activateObject(Object obj)  {
+        //log.debug(" activateObject...");
+    }
+
+    /**
+     * @param obj 
+     * 
+     */
+    public void passivateObject(Object obj) { 
+        //log.debug(" passivateObject..." + obj);
+        if (obj instanceof Session)  {
+            httpc theHttpc = (httpc) obj;              
+        }
+    }
+}    
+
+final class httpcPool extends GenericObjectPool {
+    /**
+     * First constructor.
+     * @param objFactory
+     */        
+    public httpcPool(httpcFactory objFactory) {
+        super(objFactory);
+        this.setMaxIdle(75); // Maximum idle threads.
+        this.setMaxActive(150); // Maximum active threads.
+        this.setMinEvictableIdleTimeMillis(30000); //Evictor runs every 30 secs.
+        //this.setMaxWait(1000); // Wait 1 second till a thread is available
+    }
+    
+    public httpcPool(httpcFactory objFactory,
+                     GenericObjectPool.Config config) {
+        super(objFactory, config);
+    }
+    
+    /**
+     * @see org.apache.commons.pool.impl.GenericObjectPool#borrowObject()
+     */
+    public Object borrowObject() throws Exception  {
+       return super.borrowObject();
+    }
+
+    /**
+     * @see org.apache.commons.pool.impl.GenericObjectPool#returnObject(java.lang.Object)
+     */
+    public void returnObject(Object obj) throws Exception  {
+        super.returnObject(obj);
+    }        
+}    

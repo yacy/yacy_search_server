@@ -46,7 +46,7 @@ import de.anomic.server.*;
 import java.util.*;
 import java.io.*;
 
-public class httpTemplate {
+final class httpTemplate {
     
     private static final byte hash = (byte)'#';
     private static final byte[] hasha = {hash};

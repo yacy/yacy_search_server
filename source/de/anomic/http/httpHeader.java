@@ -57,9 +57,9 @@ import java.util.*;
 import java.text.*;
 import de.anomic.server.*;
 
-public class httpHeader extends TreeMap implements Map {
+public final class httpHeader extends TreeMap implements Map {
 
-    private HashMap reverseMappingCache;
+    private final HashMap reverseMappingCache;
 
     private static Collator insensitiveCollator = Collator.getInstance(Locale.US);
     static {
@@ -111,16 +111,17 @@ public class httpHeader extends TreeMap implements Map {
     // we override the put method to make use of the reverseMappingCache
     public Object put(Object key, Object value) {
 	String k = (String) key;
+    String upperK = k.toUpperCase();
 	if (reverseMappingCache == null) {
 	    return super.put(k, value);
 	} else {
-	    if (reverseMappingCache.containsKey(k.toUpperCase())) {
+	    if (reverseMappingCache.containsKey(upperK)) {
 		// we put in the value using the reverse mapping
-		return super.put(reverseMappingCache.get(k.toUpperCase()), value);
+		return super.put(reverseMappingCache.get(upperK), value);
 	    } else {
 		// we put in without a cached key and store the key afterwards
 		Object r = super.put(k, value);
-		reverseMappingCache.put(k.toUpperCase(), k);
+		reverseMappingCache.put(upperK, k);
 		return r;
 	    }
 	}
@@ -180,9 +181,8 @@ public class httpHeader extends TreeMap implements Map {
 	} catch (java.lang.NumberFormatException e) {
 	    //System.out.println("ERROR long version parse: " + e.getMessage() +  " at position " +  e.getErrorOffset());
 	    serverLog.logError("HTTPC-header", "DATE ERROR (NumberFormat): " + s);
-	    new Date();
+	    return new Date();
 	}
-	return new Date();
     }
 
     private Date headerDate(String kind) {

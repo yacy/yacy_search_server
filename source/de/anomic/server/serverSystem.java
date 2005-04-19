@@ -41,11 +41,10 @@
 package de.anomic.server;
 
 import java.io.*;
-import java.net.*;
 import java.util.*;
 import java.lang.reflect.*;
 
-public class serverSystem {
+public final class serverSystem {
 
     // constants for system identification
     public static final int systemMacOSC  =  0; // 'classic' Mac OS 7.6.1/8.*/9.*

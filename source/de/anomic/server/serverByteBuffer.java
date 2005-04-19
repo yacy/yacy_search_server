@@ -43,7 +43,7 @@ package de.anomic.server;
 import java.io.*;
 import java.util.*;
 
-public class serverByteBuffer extends OutputStream {
+public final class serverByteBuffer extends OutputStream {
     
     public static final byte singlequote = (byte) 39;
     public static final byte doublequote = (byte) 34;
@@ -94,13 +94,14 @@ public class serverByteBuffer extends OutputStream {
 
 	try {
 	    FileInputStream fis = new FileInputStream(f);
-	    byte buf[] = new byte[512];
-	    int p = 0;
+//	    byte buf[] = new byte[512];
+//	    int p = 0;
 	    int l;
-	    while ((l = fis.read(buf)) > 0) {
-		System.arraycopy(buf, 0, buffer, p, l);
-		p += l;
-	    }
+//	    while ((l = fis.read(buf)) > 0) {
+//		System.arraycopy(buf, 0, buffer, p, l);
+//		p += l;
+        l = fis.read(buffer);
+//	    }
 	    fis.close();
 	} catch (FileNotFoundException e) {
 	    throw new IOException("File not found: " + f.toString() + "; " + e.getMessage());

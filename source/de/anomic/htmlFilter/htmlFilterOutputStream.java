@@ -53,7 +53,7 @@ import java.net.*;
 import java.util.*;
 import de.anomic.server.*;
 
-public class htmlFilterOutputStream extends OutputStream {
+public final class htmlFilterOutputStream extends OutputStream {
 
     public static final byte lb = (byte) '<';
     public static final byte rb = (byte) '>';
@@ -321,14 +321,15 @@ public class htmlFilterOutputStream extends OutputStream {
                 }
             } else if (inScript) {
                 buffer.append(b);
+                int bufferLength = buffer.length();
                 if ((b == rb) && (buffer.length() > 14) &&
-                (buffer.byteAt(buffer.length() - 8) == (byte) '/') &&
-                (buffer.byteAt(buffer.length() - 7) == (byte) 's') &&
-                (buffer.byteAt(buffer.length() - 6) == (byte) 'c') &&
-                (buffer.byteAt(buffer.length() - 5) == (byte) 'r') &&
-                (buffer.byteAt(buffer.length() - 4) == (byte) 'i') &&
-                (buffer.byteAt(buffer.length() - 3) == (byte) 'p') &&
-                (buffer.byteAt(buffer.length() - 2) == (byte) 't')) {
+                (buffer.byteAt(bufferLength - 8) == (byte) '/') &&
+                (buffer.byteAt(bufferLength - 7) == (byte) 's') &&
+                (buffer.byteAt(bufferLength - 6) == (byte) 'c') &&
+                (buffer.byteAt(bufferLength - 5) == (byte) 'r') &&
+                (buffer.byteAt(bufferLength - 4) == (byte) 'i') &&
+                (buffer.byteAt(bufferLength - 3) == (byte) 'p') &&
+                (buffer.byteAt(bufferLength - 2) == (byte) 't')) {
                     // script is at end
                     inScript = false;
                     if (out != null) out.write(buffer.getBytes());

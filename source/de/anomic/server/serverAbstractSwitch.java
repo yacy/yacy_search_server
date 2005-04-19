@@ -47,12 +47,12 @@ import java.util.*;
 public abstract class serverAbstractSwitch implements serverSwitch {
 
     // configuration management
-    private File      configFile;
+    private final File      configFile;
     private Hashtable configProps;
-    private String    configComment;
-    private Hashtable authorization;
+    private final String    configComment;
+    private final Hashtable authorization;
     private String    rootPath;
-    private TreeMap   workerThreads;
+    private final TreeMap   workerThreads;
     
     public serverAbstractSwitch(String rootPath, String initPath, String configPath) throws IOException {
 	// we initialize the switchboard with a property file,

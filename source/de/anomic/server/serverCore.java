@@ -41,19 +41,30 @@
 package de.anomic.server;
 
 // standard server
-import java.io.*;
-import java.net.*;
-import java.lang.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PushbackInputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URL;
+import java.net.UnknownHostException;
+
+import java.util.Hashtable;
 
 // needed for ssl
 import javax.net.*;
 import javax.net.ssl.*;
 import java.security.KeyStore;
-import javax.security.cert.X509Certificate;
 
-public class serverCore extends serverAbstractThread implements serverThread {
+import org.apache.commons.pool.impl.GenericObjectPool;
+
+public final class serverCore extends serverAbstractThread implements serverThread {
 
     // generic input/output static methods
     public static final byte cr = 13;
@@ -69,21 +80,29 @@ public class serverCore extends serverAbstractThread implements serverThread {
     private int port;                      // the listening port
     private ServerSocket socket;           // listener
     private int maxSessions = 0;           // max. number of sessions; 0=unlimited
-    private serverLog log;                 // log object
+    serverLog log;                 // log object
     //private serverSwitch switchboard;      // external values
     private int timeout;                   // connection time-out of the socket
-    private Hashtable activeThreads;       // contains the active threads
-    private Hashtable sleepingThreads;     // contains the threads that are alive since the sleepthreashold
+    
+//    private Hashtable activeThreads;       // contains the active threads
+//    private Hashtable sleepingThreads;     // contains the threads that are alive since the sleepthreashold
+    
     private boolean termSleepingThreads;   // if true then threads over sleepthreashold are killed
     private int thresholdActive = 5000;    // after that time a thread should have got a command line
     private int thresholdSleep = 30000;     // after that time a thread is considered as beeing sleeping (30 seconds)
     private int thresholdDead = 3600000;     // after that time a thread is considered as beeing dead-locked (1 hour)
-    private serverHandler handlerPrototype;// the command class (a serverHandler) 
+    serverHandler handlerPrototype;// the command class (a serverHandler) 
     private Class[] initHandlerClasses;    // the init's methods arguments
     private Class[] initSessionClasses;    // the init's methods arguments
     private serverSwitch switchboard;      // the command class switchboard
     private Hashtable denyHost;
     private int commandMaxLength;
+    
+    /**
+     * The session-object pool
+     */
+    final SessionPool theSessionPool;
+    final ThreadGroup theSessionThreadGroup = new ThreadGroup("sessionThreadGroup");
 
     private static ServerSocketFactory getServerSocketFactory(boolean dflt, File keyfile, String passphrase) {
         // see doc's at
@@ -128,9 +147,9 @@ public class serverCore extends serverAbstractThread implements serverThread {
                       boolean termSleepingThreads, boolean blockAttack,
                       serverHandler handlerPrototype, serverSwitch switchboard,
                       int commandMaxLength, int logl) throws IOException {
-	this.port = port;
+        this.port = port;
         this.commandMaxLength = commandMaxLength;
-	this.denyHost = (blockAttack) ? new Hashtable() : null;
+        this.denyHost = (blockAttack) ? new Hashtable() : null;
 
         /*
         try {
@@ -142,27 +161,50 @@ public class serverCore extends serverAbstractThread implements serverThread {
         }
         */
         
-	try {
-            this.socket = new ServerSocket(port);
-	} catch (java.net.BindException e) {
- 	    System.out.println("FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number"); System.exit(0);
-	}
+    	try {
+                this.socket = new ServerSocket(port);
+    	} catch (java.net.BindException e) {
+     	    System.out.println("FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number"); System.exit(0);
+    	}
         
         try {
-	    this.handlerPrototype = handlerPrototype;
+            this.handlerPrototype = handlerPrototype;
             this.switchboard = switchboard;
-	    this.initHandlerClasses = new Class[] {Class.forName("de.anomic.server.serverSwitch")};
-	    this.initSessionClasses = new Class[] {Class.forName("de.anomic.server.serverCore$Session")};
-	    this.maxSessions = maxSessions;
-	    this.socket.setSoTimeout(0); // unlimited
-	    this.timeout = timeout;
-	    this.termSleepingThreads = termSleepingThreads;
+    	    this.initHandlerClasses = new Class[] {Class.forName("de.anomic.server.serverSwitch")};
+    	    this.initSessionClasses = new Class[] {Class.forName("de.anomic.server.serverCore$Session")};
+    	    this.maxSessions = maxSessions;
+    	    this.timeout = timeout;
+    	    this.termSleepingThreads = termSleepingThreads;
             this.log = new serverLog("SERVER", logl);
-	    activeThreads = new Hashtable();
-	    sleepingThreads = new Hashtable();
-	} catch (java.lang.ClassNotFoundException e) {
- 	    System.out.println("FATAL ERROR: " + e.getMessage() + " - Class Not Found"); System.exit(0);
-	}
+//    	    activeThreads = new Hashtable();
+//    	    sleepingThreads = new Hashtable();
+    	} catch (java.lang.ClassNotFoundException e) {
+     	    System.out.println("FATAL ERROR: " + e.getMessage() + " - Class Not Found"); System.exit(0);
+    	}
+        
+        // implementation of session thread pool
+        GenericObjectPool.Config config = new GenericObjectPool.Config();
+        
+        // The maximum number of active connections that can be allocated from pool at the same time,
+        // 0 for no limit
+        config.maxActive = this.maxSessions;
+        
+        // The maximum number of idle connections connections in the pool
+        // 0 = no limit.        
+        config.maxIdle = this.maxSessions / 2;
+        config.minIdle = this.maxSessions / 4;    
+        
+        // block undefinitely 
+        config.maxWait = timeout; 
+        
+        // Action to take in case of an exhausted DBCP statement pool
+        // 0 = fail, 1 = block, 2= grow        
+        config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
+        config.minEvictableIdleTimeMillis = this.thresholdSleep; 
+        config.testOnReturn = true;
+        
+        this.theSessionPool = new SessionPool(new SessionFactory(this.theSessionThreadGroup),config);  
+    
     }
     
     public static boolean isNotLocal(URL url) {
@@ -234,12 +276,12 @@ public class serverCore extends serverAbstractThread implements serverThread {
     // class body
     public boolean job() throws Exception {
         // prepare for new connection
-        idleThreadCheck();
-        switchboard.handleBusyState(activeThreads.size());
+        // idleThreadCheck();
+        this.switchboard.handleBusyState(this.theSessionPool.getNumActive() /*activeThreads.size() */);
 
         log.logDebug(
-        "* waiting for connections, " + activeThreads.size() + " sessions running, " +
-        sleepingThreads.size() + " sleeping");
+        "* waiting for connections, " + this.theSessionPool.getNumActive() + " sessions running, " +
+        this.theSessionPool.getNumIdle() + " sleeping");
         
         // list all connection (debug)
         /*
@@ -257,17 +299,17 @@ public class serverCore extends serverAbstractThread implements serverThread {
         
         // wait for new connection
         announceThreadBlockApply();
-        Socket controlSocket = socket.accept();
+        Socket controlSocket = this.socket.accept();
         announceThreadBlockRelease();
-        if ((denyHost == null) || (denyHost.get((""+controlSocket.getInetAddress().getHostAddress())) == null)) {
+        if ((this.denyHost == null) || (this.denyHost.get((""+controlSocket.getInetAddress().getHostAddress())) == null)) {
             //log.logDebug("* catched request from " + controlSocket.getInetAddress().getHostAddress());
-            controlSocket.setSoTimeout(timeout);
+            controlSocket.setSoTimeout(this.timeout);
             
-            Session connection = new Session(controlSocket);
-            // start the thread
-            connection.start();
+            Session connection = (Session) this.theSessionPool.borrowObject();
+            connection.execute(controlSocket);
+            
             //try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {} // wait for debug
-            activeThreads.put(connection, new Long(System.currentTimeMillis()));
+            // activeThreads.put(connection, new Long(System.currentTimeMillis()));
             //log.logDebug("* NEW SESSION: " + connection.request);
             
         } else {
@@ -275,380 +317,663 @@ public class serverCore extends serverAbstractThread implements serverThread {
         }
         // idle until number of maximal threads is (again) reached
         //synchronized(this) {
-        while ((maxSessions > 0) && (activeThreads.size() >= maxSessions)) try {
-            log.logDebug("* Waiting for activeThreads=" + activeThreads.size() + " < maxSessions=" + maxSessions);
-            Thread.currentThread().sleep(2000);
-            idleThreadCheck();
-        } catch (InterruptedException e) {}
+//        while ((maxSessions > 0) && (activeThreads.size() >= maxSessions)) try {
+//            log.logDebug("* Waiting for activeThreads=" + activeThreads.size() + " < maxSessions=" + maxSessions);
+//            Thread.currentThread().sleep(2000);
+//            idleThreadCheck();
+//        } catch (InterruptedException e) {}
         return true;
     }
 
     public void close() {
+        try {
+            // consuming the isInterrupted Flag. Otherwise we could not properly colse the session pool
+            Thread.interrupted();
+            
+            // close the session pool
+            this.theSessionPool.close();
+        }
+        catch (Exception e) {
+            this.log.logSystem("Unable to close session pool: " + e.getMessage());
+        }
         log.logSystem("* terminated");
     }
     
     public int getJobCount() {
-        return activeThreads.size();
+        return this.theSessionPool.getNumActive();
     }
     
     // idle sensor: the thread is idle if there are no sessions running
     public boolean idle() {
-        idleThreadCheck();
-        return (activeThreads.size() == 0);
+        // idleThreadCheck();
+        return (this.theSessionPool.getNumActive() == 0);
     }
     
-    public void idleThreadCheck() {
-	// a 'garbage collector' for session threads
-	Enumeration threadEnum;
-	Session session;
+//    public void idleThreadCheck() {
+//	// a 'garbage collector' for session threads
+//	Enumeration threadEnum;
+//	Session session;
+//        
+//	// look for sleeping threads
+//	threadEnum = activeThreads.keys();
+//        long time;
+//	while (threadEnum.hasMoreElements()) {
+//	    session = (Session) (threadEnum.nextElement());
+//            //if (session.request == null) session.interrupt();
+//	    if (session.isAlive()) {
+//                // check if socket still exists
+//                time = System.currentTimeMillis() - ((Long) activeThreads.get(session)).longValue();
+//                if (/*(session.controlSocket.isClosed()) || */
+//                    (!(session.controlSocket.isBound())) ||
+//                    (!(session.controlSocket.isConnected())) ||
+//                    ((session.request == null) && (time > 1000))) {
+//                    // kick it
+//                    try {
+//                        session.out.close();
+//                        session.in.close();
+//                        session.controlSocket.close();
+//                    } catch (IOException e) {}
+//                    session.interrupt(); // hopefully this wakes him up.
+//                    activeThreads.remove(session);
+//                    String reason = "";
+//                    if (session.controlSocket.isClosed()) reason = "control socked closed";
+//                    if (!(session.controlSocket.isBound())) reason = "control socked unbound";
+//                    if (!(session.controlSocket.isConnected())) reason = "control socked not connected";
+//                    if (session.request == null) reason = "no request placed";
+//                    log.logDebug("* canceled disconnected connection (" + reason + ") '" + session.request + "'");
+//                } else if (time > thresholdSleep) {
+//		    // move thread from the active threads to the sleeping
+//		    sleepingThreads.put(session, activeThreads.remove(session));
+//                    log.logDebug("* sleeping connection '" + session.request + "'");
+//		} else if ((time > thresholdActive) && (session.request == null)) {
+//		    // thread is not in use (or too late). kickk it.
+//		    try {
+//                        session.out.close();
+//                        session.in.close();
+//                        session.controlSocket.close();
+//                    } catch (IOException e) {}
+//                    session.interrupt(); // hopefully this wakes him up.
+//                    activeThreads.remove(session);
+//                    log.logDebug("* canceled inactivated connection");
+//		}
+//	    } else {
+//		// the thread is dead, remove it
+//                log.logDebug("* normal close of connection to '" + session.request + "', time=" + session.getTime());
+//		activeThreads.remove(session);
+//	    }
+//	}
+//
+//	// look for dead threads
+//	threadEnum = sleepingThreads.keys();
+//	while (threadEnum.hasMoreElements()) {
+//	    session = (Session) (threadEnum.nextElement());
+//	    if (session.isAlive()) {
+//		// check the age of the thread
+//		if (System.currentTimeMillis() - ((Long) sleepingThreads.get(session)).longValue() > thresholdDead) {
+//		    // kill the thread
+//		    if (termSleepingThreads) {
+//                        try {
+//                            session.out.close();
+//                            session.in.close();
+//                            session.controlSocket.close();
+//                        } catch (IOException e) {}
+//                        session.interrupt(); // hopefully this wakes him up.
+//                    }
+//		    sleepingThreads.remove(session);
+//                    log.logDebug("* out-timed connection '" + session.request + "'");
+//		}
+//	    } else {
+//		// the thread is dead, remove it
+//		sleepingThreads.remove(session);
+//                log.logDebug("* dead connection '" + session.request + "'");
+//	    }
+//	}
+//
+//    }
+
+    
+    public final class SessionPool extends GenericObjectPool 
+    {
+        public boolean isClosed = false;
         
-	// look for sleeping threads
-	threadEnum = activeThreads.keys();
-        long time;
-	while (threadEnum.hasMoreElements()) {
-	    session = (Session) (threadEnum.nextElement());
-            //if (session.request == null) session.interrupt();
-	    if (session.isAlive()) {
-                // check if socket still exists
-                time = System.currentTimeMillis() - ((Long) activeThreads.get(session)).longValue();
-                if (/*(session.controlSocket.isClosed()) || */
-                    (!(session.controlSocket.isBound())) ||
-                    (!(session.controlSocket.isConnected())) ||
-                    ((session.request == null) && (time > 1000))) {
-                    // kick it
-                    try {
-                        session.out.close();
-                        session.in.close();
-                        session.controlSocket.close();
-                    } catch (IOException e) {}
-                    session.interrupt(); // hopefully this wakes him up.
-                    activeThreads.remove(session);
-                    String reason = "";
-                    if (session.controlSocket.isClosed()) reason = "control socked closed";
-                    if (!(session.controlSocket.isBound())) reason = "control socked unbound";
-                    if (!(session.controlSocket.isConnected())) reason = "control socked not connected";
-                    if (session.request == null) reason = "no request placed";
-                    log.logDebug("* canceled disconnected connection (" + reason + ") '" + session.request + "'");
-                } else if (time > thresholdSleep) {
-		    // move thread from the active threads to the sleeping
-		    sleepingThreads.put(session, activeThreads.remove(session));
-                    log.logDebug("* sleeping connection '" + session.request + "'");
-		} else if ((time > thresholdActive) && (session.request == null)) {
-		    // thread is not in use (or too late). kickk it.
-		    try {
-                        session.out.close();
-                        session.in.close();
-                        session.controlSocket.close();
-                    } catch (IOException e) {}
-                    session.interrupt(); // hopefully this wakes him up.
-                    activeThreads.remove(session);
-                    log.logDebug("* canceled inactivated connection");
-		}
-	    } else {
-		// the thread is dead, remove it
-                log.logDebug("* normal close of connection to '" + session.request + "', time=" + session.getTime());
-		activeThreads.remove(session);
-	    }
-	}
+        /**
+         * First constructor.
+         * @param objFactory
+         */        
+        public SessionPool(SessionFactory objFactory) {
+            super(objFactory);
+            this.setMaxIdle(75); // Maximum idle threads.
+            this.setMaxActive(150); // Maximum active threads.
+            this.setMinEvictableIdleTimeMillis(30000); //Evictor runs every 30 secs.
+            //this.setMaxWait(1000); // Wait 1 second till a thread is available
+        }
+        
+        public SessionPool(SessionFactory objFactory,
+                           GenericObjectPool.Config config) {
+            super(objFactory, config);
+        }
+        
+        /**
+         * @see org.apache.commons.pool.impl.GenericObjectPool#borrowObject()
+         */
+        public Object borrowObject() throws Exception  {
+           return super.borrowObject();
+        }
 
-	// look for dead threads
-	threadEnum = sleepingThreads.keys();
-	while (threadEnum.hasMoreElements()) {
-	    session = (Session) (threadEnum.nextElement());
-	    if (session.isAlive()) {
-		// check the age of the thread
-		if (System.currentTimeMillis() - ((Long) sleepingThreads.get(session)).longValue() > thresholdDead) {
-		    // kill the thread
-		    if (termSleepingThreads) {
-                        try {
-                            session.out.close();
-                            session.in.close();
-                            session.controlSocket.close();
-                        } catch (IOException e) {}
-                        session.interrupt(); // hopefully this wakes him up.
-                    }
-		    sleepingThreads.remove(session);
-                    log.logDebug("* out-timed connection '" + session.request + "'");
-		}
-	    } else {
-		// the thread is dead, remove it
-		sleepingThreads.remove(session);
-                log.logDebug("* dead connection '" + session.request + "'");
-	    }
-	}
+        /**
+         * @see org.apache.commons.pool.impl.GenericObjectPool#returnObject(java.lang.Object)
+         */
+        public void returnObject(Object obj) throws Exception  {
+            super.returnObject(obj);
+        }        
+        
+        public synchronized void close() throws Exception {
 
+            /*
+             * shutdown all still running session threads ...
+             */
+            // interrupting all still running or pooled threads ...
+            serverCore.this.theSessionThreadGroup.interrupt();
+            
+            /* waiting for all threads to finish */
+            int threadCount  = serverCore.this.theSessionThreadGroup.activeCount();    
+            Thread[] threadList = new Thread[threadCount];     
+            threadCount = serverCore.this.theSessionThreadGroup.enumerate(threadList);
+            
+            try {
+                for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
+                    // we need to use a timeout here because of missing interruptable session threads ...
+                    threadList[currentThreadIdx].join(500);
+                }
+            }
+            catch (InterruptedException e) {
+                serverCore.this.log.logWarning("Interruption while trying to shutdown all session threads.");  
+            }
+            finally {
+                this.isClosed = true;
+            }
+            
+            super.close();
+        }
+        
     }
+    
+    public final class SessionFactory implements org.apache.commons.pool.PoolableObjectFactory {
 
-    public class Session extends Thread {
+        final ThreadGroup sessionThreadGroup;
+        public SessionFactory(ThreadGroup theSessionThreadGroup) {
+            super();  
+            
+            if (theSessionThreadGroup == null)
+                throw new IllegalArgumentException("The threadgroup object must not be null.");
+            
+            this.sessionThreadGroup = theSessionThreadGroup;
+        }
+        
+        /**
+         * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
+         */
+        public Object makeObject() {
+            return new Session(this.sessionThreadGroup);
+        }
+        
+         /**
+         * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
+         */
+        public void destroyObject(Object obj) {
+            if (obj instanceof Session) {
+                Session theSession = (Session) obj;
+                theSession.setStopped(true);
+            }
+        }
+        
+        /**
+         * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
+         */
+        public boolean validateObject(Object obj) {
+            if (obj instanceof Session) 
+            {
+                Session theSession = (Session) obj;
+                if (!theSession.isAlive() || theSession.isInterrupted()) return false;
+                if (theSession.isRunning()) return true;
+                return false;
+            }
+            return true;
+        }
+        
+        /**
+         * @param obj 
+         * 
+         */
+        public void activateObject(Object obj)  {
+            //log.debug(" activateObject...");
+        }
+
+        /**
+         * @param obj 
+         * 
+         */
+        public void passivateObject(Object obj) { 
+            //log.debug(" passivateObject..." + obj);
+            if (obj instanceof Session)  {
+                Session theSession = (Session) obj;
+                
+                // Clean up the result of the execution
+                theSession.setResult(null);                 
+            }
+        }        
+    }
+    
+    public final class Session extends Thread {
 	
+        // used as replacement for activeThreads, sleepingThreads
+        // static ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
+        
+        // synchronization object needed for the threadpool implementation
+        private Object syncObject;        
+        
+        private Object processingResult = null;
+        
+        private boolean running = false;
+        private boolean stopped = false;
+        private boolean done = false;        
+        
+        
         private long start;                // startup time
         private serverHandler commandObj;
-	private String request;            // current command line
-	private int commandCounter;        // for logging: number of commands in this session
-	private String identity;           // a string that identifies the client (i.e. ftp: account name)
-	//private boolean promiscuous;       // if true, no lines are read and streams are only passed
-	public  Socket controlSocket;      // dialog socket
-	public  InetAddress userAddress;   // the address of the client
-	public  PushbackInputStream in;    // on control input stream
-	public  OutputStream out;          // on control output stream, autoflush
-	
-	public Session(Socket controlSocket) throws IOException {
-	    //this.promiscuous = false;
-            this.start = System.currentTimeMillis();
-            //log.logDebug("* session " + handle + " allocated");
-	    this.identity = "-";
-	    this.userAddress = controlSocket.getInetAddress();
-	    String ipname = userAddress.getHostAddress();
-	    // check if we want to allow this socket to connect us
-	    this.controlSocket = controlSocket;
-	    this.in = new PushbackInputStream(controlSocket.getInputStream());
-	    this.out = controlSocket.getOutputStream();
-	    commandCounter = 0;
-	    // initiate the command class
-	    // we pass the input and output stream to the commands,
-	    // so that they can take over communication, if needed
-	    try {
-		// use the handler prototype to create a new command object class
-                commandObj = (serverHandler) handlerPrototype.clone();
-                commandObj.initSession(this);
-	    } catch (Exception e) {
-                e.printStackTrace();
-            }
-            //log.logDebug("* session " + handle + " initialized. time = " + (System.currentTimeMillis() - handle));
-	}
-	
+    	private String request;            // current command line
+    	private int commandCounter;        // for logging: number of commands in this session
+    	private String identity;           // a string that identifies the client (i.e. ftp: account name)
+    	//private boolean promiscuous;       // if true, no lines are read and streams are only passed
+    	public  Socket controlSocket;      // dialog socket
+    	public  InetAddress userAddress;   // the address of the client
+    	public  PushbackInputStream in;    // on control input stream
+    	public  OutputStream out;          // on control output stream, autoflush
+
+        private final ByteArrayOutputStream readLineBuffer = new ByteArrayOutputStream(256);
+    	
+    	public Session(ThreadGroup theThreadGroup) {
+            super(theThreadGroup,"Session");
+    	}
+        
+        public void setStopped(boolean stopped) {
+            this.stopped = stopped;            
+        }
+
+        public void execute(Socket controlSocket) {
+            this.execute(controlSocket, null);
+        }
+        
+        public synchronized void execute(Socket controlSocket, Object synObj) {           
+            this.controlSocket = controlSocket;
+            this.syncObject = synObj;
+            this.done = false;
+            
+            if (!this.running)  {
+               // this.setDaemon(true);
+               this.start();
+            }  else { 
+               this.notifyAll();
+            }          
+        }
+        
         public long getTime() {
             return System.currentTimeMillis() - start;
         }
+            
+    	public void setIdentity(String id) {
+    	    this.identity = id;
+    	}
+    
+    	/*
+    	public void setPromiscuous() {
+    	    this.promiscuous = true;
+    	}
+    	*/
+    
+    	public void log(boolean outgoing, String request) {
+    	    serverCore.this.log.logInfo(userAddress.getHostAddress() + "/" + this.identity + " " +
+    		     "[" + serverCore.this.theSessionPool.getNumActive() + ", " + this.commandCounter +
+    		     ((outgoing) ? "] > " : "] < ") +
+    		     request);
+    	}
+    
+    	public void writeLine(String messg) throws IOException {
+    	    send(this.out, messg);
+    	    log(true, messg);
+    	}
+    
+    	public byte[] readLine() {
+    	    return receive(in, this.readLineBuffer, timeout, commandMaxLength, false);
+    	}
+    
+    
+        /**
+         * @return
+         */
+        public boolean isRunning() {
+            return this.running;
+        }
+    
+        /**
+         * @param object
+         */
+        public void setResult(Object object) {
+            this.processingResult  = object;
+        }    
         
-	public void setIdentity(String id) {
-	    this.identity = id;
-	}
-
-	/*
-	public void setPromiscuous() {
-	    this.promiscuous = true;
-	}
-	*/
-
-	public void log(boolean outgoing, String request) {
-	    log.logInfo(userAddress.getHostAddress() + "/" + this.identity + " " +
-		     "[" + activeThreads.size() + ", " + commandCounter +
-		     ((outgoing) ? "] > " : "] < ") +
-		     request);
-	}
-
-	public void writeLine(String messg) throws IOException {
-	    send(out, messg);
-	    log(true, messg);
-	}
-
-	public byte[] readLine() {
-	    return receive(in, timeout, commandMaxLength, false);
-	}
-
-	public final void run() {
-            //log.logDebug("* session " + handle + " started. time = " + (System.currentTimeMillis() - handle));
-	    try {
-		listen();
-	    } finally {
-		try {
-                    out.flush();
-                    // close everything
-                    out.close();
-                    in.close();
-                    controlSocket.close();
-		} catch (IOException e) {
-		    System.err.println("ERROR: (internal) " + e);
-		}
-		synchronized (this) {this.notify();}
-	    }
-            //log.logDebug("* session " + handle + " completed. time = " + (System.currentTimeMillis() - handle));
-            announceMoreExecTime(System.currentTimeMillis() - start);
-	}
-	
-	private void listen() {
-	    try {
-		// set up some reflection
-		Class[] stringType    = {"".getClass()};
-		Class[] exceptionType = {Class.forName("java.lang.Throwable")};
-		
-                // send greeting
-		Object result = commandObj.greeting();
-		if (result != null) {
-		    if ((result instanceof String) && (((String) result).length() > 0)) writeLine((String) result);
-		}
-
-		// start dialog
-		byte[] requestBytes = null;
-		boolean terminate = false;
-		int pos;
-		String cmd;
-		String tmp;
-		Object[] stringParameter = new String[1];
-		while ((in != null) && ((requestBytes = readLine()) != null)) {
-		    commandCounter++;
-		    request = new String(requestBytes);
-                    //log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
-		    log(false, request);
-		    try {
-			pos = request.indexOf(' ');
-			if (pos < 0) {
-			    cmd = request.trim().toUpperCase();
-			    stringParameter[0] = "";
-			} else {
-			    cmd = request.substring(0, pos).trim().toUpperCase();
-			    stringParameter[0] = request.substring(pos).trim();
-			}
-
-			// exec command and return value
-			result = commandObj.getClass().getMethod(cmd, stringType).invoke(commandObj, stringParameter);
-                        //log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
-                        this.out.flush();
-			if (result == null) {
-			    /*
-			    log(2, true, "(NULL RETURNED/STREAM PASSED)");
-			    */
-			} else if (result instanceof Boolean) {
-			    if (((Boolean) result) == TERMINATE_CONNECTION) break;
-			} else if (result instanceof String) {
-			    if (((String) result).startsWith("!")) {
-				result = ((String) result).substring(1);
-				terminate = true;
-			    }
-			    writeLine((String) result);
-			} else if (result instanceof InputStream) {
-			    tmp = send(out, (InputStream) result);
-			    if ((tmp.length() > 4) && (tmp.toUpperCase().startsWith("PASS"))) {
-				log(true, "PASS ********");
-			    } else {
-				log(true, tmp);
-			    }
-			    tmp = null;
-			}
-			if (terminate) break;
-
-                    } catch (InvocationTargetException ite) {
-			System.out.println("ERROR A " + userAddress.getHostAddress());
-			// we extract a target exception and let the thread survive
-			writeLine((String) commandObj.error(ite.getTargetException()));
-		    } catch (NoSuchMethodException nsme) {
-			System.out.println("ERROR B " + userAddress.getHostAddress());
-			if (isNotLocal(userAddress.getHostAddress().toString())) {
-                            if (denyHost != null)
-                                denyHost.put((""+userAddress.getHostAddress()), "deny"); // block client: hacker attempt
-			}
-			break;
-			// the client requested a command that does not exist
-			//Object[] errorParameter = { nsme };
-			//writeLine((String) error.invoke(this.cmdObject, errorParameter));
-		    } catch (IllegalAccessException iae) {
-			System.out.println("ERROR C " + userAddress.getHostAddress());
-			// wrong parameters: this an only be an internal problem
-			writeLine((String) commandObj.error(iae));
-		    } catch (java.lang.ClassCastException e) {
-			System.out.println("ERROR D " + userAddress.getHostAddress());
-			// ??
-			writeLine((String) commandObj.error(e));
-		    } catch (Exception e) {
-			System.out.println("ERROR E " + userAddress.getHostAddress());
-			// whatever happens: the thread has to survive!
-			writeLine("UNKNOWN REASON:" + (String) commandObj.error(e));
-		    }
+        /**
+         * 
+         */
+        public void reset()  {
+            this.done = true;
+            this.syncObject = null;
+            this.readLineBuffer.reset();
+        }    
+        
+        /**
+         * 
+         * 
+         * @see java.lang.Thread#run()
+         */
+        public void run()  {
+            this.running = true;
+            
+            // The thread keeps running.
+            while (!this.stopped && !Thread.interrupted()) { 
+                 if (this.done)  { 
+                     // We are waiting for a task now.
+                    synchronized (this)  {
+                       try  {
+                          this.wait(); //Wait until we get a request to process.
+                       } 
+                       catch (InterruptedException e) {
+                           this.stopped = true;
+                           // log.error("", e);
+                       }
+                    }
+                 } 
+                 else 
+                 { 
+                    //There is a task....let us execute it.
+                    try  {
+                       execute();
+                       if (this.syncObject != null) {
+                          synchronized (this.syncObject) {
+                              //Notify the completion.
+                              this.syncObject.notifyAll();
+                          }
+                       }
+                    }  catch (Exception e) {
+                        // log.error("", e);
+                    } 
+                    finally  {
+                        reset();
+                        
+                        if (!this.stopped && !this.isInterrupted()) {
+                            try {
+                                serverCore.this.theSessionPool.returnObject(this);
+                            }
+                            catch (Exception e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+                    }
+                 }
+              }
+        }    
+        
+        private void execute() {
+                   
+            try {
+                // setting the session startup time
+                this.start = System.currentTimeMillis();  
+                
+                // settin the session identity
+                this.identity = "-";
+                
+                // getting some client information
+                this.userAddress = this.controlSocket.getInetAddress();
+                
+                // TODO: check if we want to allow this socket to connect us
+                
+                // getting input and output stream for communication with client
+                this.in = new PushbackInputStream(this.controlSocket.getInputStream());
+                this.out = this.controlSocket.getOutputStream();
+                
+                
+                // initiate the command class
+                this.commandCounter = 0;
+                if ((this.commandObj != null) && 
+                    (this.commandObj.getClass().getName().equals(serverCore.this.handlerPrototype.getClass().getName()))) {
+                    this.commandObj.reset();
                 }
-	    } catch (java.lang.ClassNotFoundException e) {
-		System.out.println("Internal Error: wrapper class not found: " + e.getMessage());
-		System.exit(0);
-	    } catch (java.io.IOException e) {
-		// connection interruption: more or less normal
-	    }
-	}
+                else {
+                    this.commandObj = (serverHandler) serverCore.this.handlerPrototype.clone();                    
+                }
+                this.commandObj.initSession(this);
+    
+    		    listen();
+            } catch (Exception e) {
+                System.err.println("ERROR: (internal) " + e);        
+    	    } finally {
+        		try {
+                    this.out.flush();
+                    // close everything
+                    this.out.close();
+                    this.in.close();
+                    this.controlSocket.close();
+        		} catch (IOException e) {
+        		    System.err.println("ERROR: (internal) " + e);
+        		}
+    	    }
+            
+            //log.logDebug("* session " + handle + " completed. time = " + (System.currentTimeMillis() - handle));
+            announceMoreExecTime(System.currentTimeMillis() - this.start);
+    	}
+    	
+    	private void listen() {
+    	    try {
+        		// set up some reflection
+        		Class[] stringType    = {"".getClass()};
+        		Class[] exceptionType = {Class.forName("java.lang.Throwable")};
+        		
+                        // send greeting
+        		Object result = commandObj.greeting();
+        		if (result != null) {
+        		    if ((result instanceof String) && (((String) result).length() > 0)) writeLine((String) result);
+        		}
+    
+        		// start dialog
+        		byte[] requestBytes = null;
+        		boolean terminate = false;
+        		int pos;
+        		String cmd;
+        		String tmp;
+        		Object[] stringParameter = new String[1];
+        		while ((this.in != null) && ((requestBytes = readLine()) != null)) {
+        		    commandCounter++;
+        		    request = new String(requestBytes);
+                            //log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
+        		    log(false, request);
+        		    try {
+            			pos = request.indexOf(' ');
+            			if (pos < 0) {
+            			    cmd = request.trim().toUpperCase();
+            			    stringParameter[0] = "";
+            			} else {
+            			    cmd = request.substring(0, pos).trim().toUpperCase();
+            			    stringParameter[0] = request.substring(pos).trim();
+            			}
+        
+            			// exec command and return value
+            			result = this.commandObj.getClass().getMethod(cmd, stringType).invoke(this.commandObj, stringParameter);
+                                    //log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
+                        this.out.flush();
+            			if (result == null) {
+            			    /*
+            			    log(2, true, "(NULL RETURNED/STREAM PASSED)");
+            			    */
+            			} else if (result instanceof Boolean) {
+            			    if (((Boolean) result) == TERMINATE_CONNECTION) break;
+            			} else if (result instanceof String) {
+            			    if (((String) result).startsWith("!")) {
+                				result = ((String) result).substring(1);
+                				terminate = true;
+            			    }
+            			    writeLine((String) result);
+            			} else if (result instanceof InputStream) {
+            			    tmp = send(out, (InputStream) result);
+            			    if ((tmp.length() > 4) && (tmp.toUpperCase().startsWith("PASS"))) {
+                                log(true, "PASS ********");
+            			    } else {
+                                log(true, tmp);
+            			    }
+            			    tmp = null;
+            			}
+                        if (terminate) break;
+        
+                    } catch (InvocationTargetException ite) {
+            			System.out.println("ERROR A " + userAddress.getHostAddress());
+            			// we extract a target exception and let the thread survive
+            			writeLine((String) commandObj.error(ite.getTargetException()));
+        		    } catch (NoSuchMethodException nsme) {
+            			System.out.println("ERROR B " + userAddress.getHostAddress());
+            			if (isNotLocal(userAddress.getHostAddress().toString())) {
+                                        if (denyHost != null)
+                                            denyHost.put((""+userAddress.getHostAddress()), "deny"); // block client: hacker attempt
+                        }
+            			break;
+            			// the client requested a command that does not exist
+            			//Object[] errorParameter = { nsme };
+            			//writeLine((String) error.invoke(this.cmdObject, errorParameter));
+        		    } catch (IllegalAccessException iae) {
+            			System.out.println("ERROR C " + userAddress.getHostAddress());
+            			// wrong parameters: this an only be an internal problem
+            			writeLine((String) commandObj.error(iae));
+        		    } catch (java.lang.ClassCastException e) {
+            			System.out.println("ERROR D " + userAddress.getHostAddress());
+            			// ??
+            			writeLine((String) commandObj.error(e));
+        		    } catch (Exception e) {
+            			System.out.println("ERROR E " + userAddress.getHostAddress());
+            			// whatever happens: the thread has to survive!
+            			writeLine("UNKNOWN REASON:" + (String) commandObj.error(e));
+                    }
+                } // end of while
+    	    } catch (java.lang.ClassNotFoundException e) {
+        		System.out.println("Internal Error: wrapper class not found: " + e.getMessage());
+        		System.exit(0);
+    	    } catch (java.io.IOException e) {
+                // connection interruption: more or less normal
+    	    }
+    	}
 	
     }
 
-    public static byte[] receive(PushbackInputStream pbis, long timeout, int maxSize, boolean logerr) {
+    public static byte[] receive(PushbackInputStream pbis, ByteArrayOutputStream readLineBuffer, long timeout, int maxSize, boolean logerr) {
+
         // this is essentially a readln on a PushbackInputStream
         int bufferSize = 0;
         bufferSize = 10;
 
-	try {
-	    long t = timeout;
-	    while (((bufferSize = pbis.available()) == 0) && (t > 0)) try {
-		Thread.currentThread().sleep(100);
-		t -= 100;
-	    } catch (InterruptedException e) {}
-	    if (t <= 0) {
-                if (logerr) serverLog.logError("SERVER", "receive interrupted - timeout");
-                return null;
-            }
-	    if (bufferSize == 0) {
-                if (logerr) serverLog.logError("SERVER", "receive interrupted - buffer empty");
-                return null;
-            }
-        } catch (IOException e) {
-            if (logerr) serverLog.logError("SERVER", "receive interrupted - exception 1 = " + e.getMessage());
-	    return null;
-	}
+        // reuse an existing linebuffer or create a new one ...
+        if (readLineBuffer == null) {
+            readLineBuffer = new ByteArrayOutputStream(256);
+        } else {
+            readLineBuffer.reset();
+        }
         
-	byte[] buffer = new byte[bufferSize];
-	byte[] bufferBkp;
-	bufferSize = 0;
-	int b = 0;
-	
-	try {
-	    while ((b = pbis.read()) > 31) {
-		// we have a valid byte in b, add it to the buffer
-		if (buffer.length == bufferSize) {
-		    // the buffer is full, double its size
-		    bufferBkp = buffer;
-		    buffer = new byte[bufferSize * 2];
-		    java.lang.System.arraycopy(bufferBkp, 0, buffer, 0, bufferSize);
-		    bufferBkp = null;
-		}
-                //if (bufferSize > 10000) {System.out.println("***ERRORDEBUG***:" + new String(buffer));} // debug
-		buffer[bufferSize++] = (byte) b; // error hier: ArrayIndexOutOfBoundsException: -2007395416 oder 0
-                if (bufferSize > maxSize) break;
+      
+      // TODO: we should remove this statements because calling the available function is very time consuming
+      // we better should use nio sockets instead because they are interruptable ...
+    	try {
+    	    long t = timeout;
+    	    while (((bufferSize = pbis.available()) == 0) && (t > 0)) try {
+        		Thread.currentThread().sleep(100);
+        		t -= 100;
+    	    } catch (InterruptedException e) {}
+    	    if (t <= 0) {
+                    if (logerr) serverLog.logError("SERVER", "receive interrupted - timeout");
+                    return null;
+                }
+    	    if (bufferSize == 0) {
+                    if (logerr) serverLog.logError("SERVER", "receive interrupted - buffer empty");
+                    return null;
+                }
+            } catch (IOException e) {
+                if (logerr) serverLog.logError("SERVER", "receive interrupted - exception 1 = " + e.getMessage());
+                return null;
             }
-	    // we have catched a possible line end
-	    if (b == cr) {
-		// maybe a lf follows, read it:
-		if ((b = pbis.read()) != lf) if (b >= 0) pbis.unread(b); // we push back the byte
-	    }
-	    
-	    // finally shrink buffer
-	    bufferBkp = buffer;
-	    buffer = new byte[bufferSize];
-	    java.lang.System.arraycopy(bufferBkp, 0, buffer, 0, bufferSize);
-	    bufferBkp = null;
-	    
-	    // return only the byte[]
-	    return buffer;
-	} catch (IOException e) {
-            if (logerr) serverLog.logError("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
-	    return null;
-	}
+            
+    	// byte[] buffer = new byte[bufferSize];
+    	// byte[] bufferBkp;
+    	bufferSize = 0;
+    	int b = 0;
+    	
+    	try {
+    	    while ((b = pbis.read()) > 31) {
+//        		// we have a valid byte in b, add it to the buffer
+//        		if (buffer.length == bufferSize) {
+//        		    // the buffer is full, double its size
+//        		    bufferBkp = buffer;
+//        		    buffer = new byte[bufferSize * 2];
+//        		    java.lang.System.arraycopy(bufferBkp, 0, buffer, 0, bufferSize);
+//        		    bufferBkp = null;
+//        		}
+//                        //if (bufferSize > 10000) {System.out.println("***ERRORDEBUG***:" + new String(buffer));} // debug
+//        		buffer[bufferSize++] = (byte) b; // error hier: ArrayIndexOutOfBoundsException: -2007395416 oder 0
+                
+                readLineBuffer.write(b);
+                if (bufferSize++ > maxSize) break;                
+            }
+            
+    	    // we have catched a possible line end
+    	    if (b == cr) {
+        		// maybe a lf follows, read it:
+        		if ((b = pbis.read()) != lf) if (b >= 0) pbis.unread(b); // we push back the byte
+    	    }
+    	    
+    	    // finally shrink buffer
+//    	    bufferBkp = buffer;
+//    	    buffer = new byte[bufferSize];
+//    	    java.lang.System.arraycopy(bufferBkp, 0, buffer, 0, bufferSize);
+//    	    bufferBkp = null;
+    	    
+    	    // return only the byte[]
+    	    // return buffer;
+            return readLineBuffer.toByteArray();
+    	} catch (IOException e) {
+                if (logerr) serverLog.logError("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
+    	    return null;
+    	}
     }
 
     public static void send(OutputStream os, String buf) throws IOException {
-	os.write(buf.getBytes());
-	os.write(crlf);
-	os.flush();
+    	os.write(buf.getBytes());
+    	os.write(crlf);
+    	os.flush();
     }
     
     public static void send(OutputStream os, byte[] buf) throws IOException {
-	os.write(buf);
-	os.write(crlf);
-	os.flush();
+    	os.write(buf);
+    	os.write(crlf);
+    	os.flush();
     }
         
     public static String send(OutputStream os, InputStream is) throws IOException {
-	int bufferSize = is.available();
-	byte[] buffer = new byte[((bufferSize < 1) || (bufferSize > 4096)) ? 4096 : bufferSize];
-	int l;
-	while ((l = is.read(buffer)) > 0) {os.write(buffer, 0, l);}
-	os.write(crlf);
-	os.flush();
-	if (bufferSize > 80) return "<LONG STREAM>"; else return new String(buffer);
+    	int bufferSize = is.available();
+    	byte[] buffer = new byte[((bufferSize < 1) || (bufferSize > 4096)) ? 4096 : bufferSize];
+    	int l;
+    	while ((l = is.read(buffer)) > 0) {os.write(buffer, 0, l);}
+    	os.write(crlf);
+    	os.flush();
+    	if (bufferSize > 80) return "<LONG STREAM>"; else return new String(buffer);
+    }
+    
+    protected void finalize() throws Throwable {
+        if (!this.theSessionPool.isClosed) this.theSessionPool.close();
+        super.finalize();
     }
 
 }
