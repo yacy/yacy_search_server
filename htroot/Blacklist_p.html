@@ -8,9 +8,9 @@
 #[header]#
 <br><br>
 <h2>Blacklist</h2>
-<p>This function provides an url filter to the proxy; any blacklisted url is blocked
+<p>This function provides an URL filter to the proxy; any blacklisted URL is blocked
 from loading. You can define several blacklists and activate them separately.
-You may also provide your blacklist to other peers by sharing them; in turn you may
+You may also provide your blacklist to other peers by sharing them; in return you may
 collect blacklist entries from other peers.</p>
 
 <table border="0" cellspacing="10" cellpadding="0">
@@ -22,7 +22,7 @@ collect blacklist entries from other peers.</p>
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 <tr>
 <td valign="top">
-Edit List: 
+Edit list: 
 <select name="blackLists" size="1">
 #{blackLists}#
 <option value="#[name]#" #(selected)#::selected#(/selected)#>#[name]# #(active)#not active::active#(/active)# #(shared)#not shared::shared#(/shared)#</option>
@@ -30,14 +30,14 @@ Edit List:
 </select>
 <input type="submit" name="changelistbutton" value="select"><br>
 <br>
-New List:
+New list:
 <input type="text" name="newlist">
 <input type="submit" name="newlistbutton" value="create">
 </td>
 <td valign="top" align="right">
-<input type="submit" name="activatelistbutton" value="enable/disable this list"><br>
-<input type="submit" name="sharelistbutton" value="share/do not share this list"><br>
-<input type="submit" name="dellistbutton" value="delete this list"><br>
+<input type="submit" name="activatelistbutton" value="Enable/disable this list"><br>
+<input type="submit" name="sharelistbutton" value="Share/don't share this list"><br>
+<input type="submit" name="dellistbutton" value="Delete this list"><br>
 </td>
 </tr>
 </table>
@@ -47,14 +47,14 @@ New List:
 </td></tr>
 <tr>
 <td colspan="2">
-<h3>Active List: #[filename]#</h3>
+<h3>Active list: #[filename]#</h3>
 </td>
 </tr>
 
 <tr>
 <td>
-these are the domain name / path patterns in this blacklist:<br>
-you can select them here for deletion<br>
+These are the domain name / path patterns in this blacklist:<br>
+You can select them here for deletion<br>
 <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
 <input type="hidden" name="filename" value="#[filename]#">
 <select name="Itemlist" size="10">
@@ -76,7 +76,7 @@ Enter new domain name / path pattern in the form:<br>
 <td bgcolor="#889988" width="1px"></td>
 <td valign="top">
 </form>
-Import Blacklist Items from other YACY Peers:<br>
+Import blacklist items from other YaCy peers:<br>
 <form action="sharedBlacklist_p.html" method="get">
 <input type="hidden" name="filename" value="#[filename]#">
 Host: <select name="hash">
@@ -85,23 +85,23 @@ Host: <select name="hash">
 #{/otherHosts}#
 </select>
 <br>
-<input type="submit" value="Load new Blacklist Items">
+<input type="submit" value="Load new blacklist items">
 </form>
 
-<p>Import Blacklist items from URL:<br>
+<p>Import blacklist items from URL:<br>
 <form action="sharedBlacklist_p.html" method="get">
 <input type="hidden" name="filename" value="#[filename]#">
 URL: <input type="text" name="url">
 <br>
-<input type="submit" value="Load new Blacklist Items">
+<input type="submit" value="Load new blacklist items">
 </form>
 
-<p>Import Blacklist items from File:<br>
+<p>Import blacklist items from file:<br>
 <form action="sharedBlacklist_p.html" method="get">
 <input type="hidden" name="filename" value="#[filename]#">
 File: <input type="text" name="file">
 <br>
-<input type="submit" value="Load new Blacklist Items">
+<input type="submit" value="Load new blacklist items">
 </form>
 
 </td>
@@ -110,9 +110,9 @@ File: <input type="text" name="file">
 <p>
 #(status)#
 ::
-<b>#[item]#</b> was removed from Blacklist
+<b>#[item]#</b> was removed from blacklist
 ::
-<b>#[item]#</b> was added to the BlackList
+<b>#[item]#</b> was added to the blackList
 #(/status)#
 
 
