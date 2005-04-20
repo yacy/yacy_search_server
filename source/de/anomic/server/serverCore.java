@@ -504,7 +504,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	public  PushbackInputStream in;    // on control input stream
     	public  OutputStream out;          // on control output stream, autoflush
 
-        private final ByteArrayOutputStream readLineBuffer = new ByteArrayOutputStream(256);
+        private final serverByteBuffer readLineBuffer = new serverByteBuffer(256);
     	
     	public Session(ThreadGroup theThreadGroup) {
             super(theThreadGroup,"Session");
@@ -785,7 +785,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
 	
     }
 
-    public static byte[] receive(PushbackInputStream pbis, ByteArrayOutputStream readLineBuffer, long timeout, int maxSize, boolean logerr) {
+    public static byte[] receive(PushbackInputStream pbis, serverByteBuffer readLineBuffer, long timeout, int maxSize, boolean logerr) {
 
         // this is essentially a readln on a PushbackInputStream
         int bufferSize = 0;
@@ -793,7 +793,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
 
         // reuse an existing linebuffer or create a new one ...
         if (readLineBuffer == null) {
-            readLineBuffer = new ByteArrayOutputStream(256);
+            readLineBuffer = new serverByteBuffer(256);
         } else {
             readLineBuffer.reset();
         }

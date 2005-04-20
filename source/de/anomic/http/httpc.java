@@ -87,8 +87,8 @@ public final class httpc {
     private long handle;
     
     // output and input streams for client control connection
-    public PushbackInputStream clientInput = null;
-    public OutputStream clientOutput = null;
+    PushbackInputStream clientInput = null;
+    OutputStream clientOutput = null;
 
     private boolean remoteProxyUse = false;
     private String  savedRemoteHost = null;
@@ -104,8 +104,19 @@ public final class httpc {
         java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
     }
     
+    /**
+     * A Object Pool containing all pooled httpc-objects.
+     * @see httpcPool
+     */
     private static final httpcPool theHttpcPool;
+    
+    /**
+     * Indicates if the current object was removed from pool because the maximum limit
+     * was exceeded.
+     */
     boolean removedFromPool = false;
+    
+    // Configuring the httpc object pool
     static {
         // implementation of session thread pool
         GenericObjectPool.Config config = new GenericObjectPool.Config();
@@ -125,16 +136,25 @@ public final class httpc {
         theHttpcPool = new httpcPool(new httpcFactory(),config);         
     }
 
-    private static final ByteArrayOutputStream readLineBuffer = new ByteArrayOutputStream();
+    /**
+     * A reusable readline buffer
+     * @see serverByteBuffer
+     */
+    final serverByteBuffer readLineBuffer = new serverByteBuffer();
     
-    public static httpc getInstance(String server, int port, int timeout, boolean ssl,
-            String remoteProxyHost,  int remoteProxyPort) throws IOException {
+    public static httpc getInstance(
+            String server, 
+            int port, 
+            int timeout, 
+            boolean ssl,
+            String remoteProxyHost,  
+            int remoteProxyPort
+        ) throws IOException {
         
         httpc newHttpc;
         try {
             // fetching a new httpc from the object pool
-            newHttpc = (httpc) httpc.theHttpcPool.borrowObject();
-            
+            newHttpc = (httpc) httpc.theHttpcPool.borrowObject();            
         } catch (Exception e) {
             throw new IOException("Unable to initialize a new httpc. " + e.getMessage());
         }            

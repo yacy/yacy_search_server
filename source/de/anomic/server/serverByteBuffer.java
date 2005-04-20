@@ -59,6 +59,12 @@ public final class serverByteBuffer extends OutputStream {
 	offset = 0;
     }
 
+    public serverByteBuffer(int initLength) {
+        this.buffer = new byte[initLength];
+        this.length = 0;
+        this.offset = 0;
+    }        
+    
     public serverByteBuffer(byte[] bb) {
 	buffer = bb;
 	length = bb.length;
@@ -291,5 +297,16 @@ public final class serverByteBuffer extends OutputStream {
         for (int i = 0; i < pattern.length; i++) if (buffer[offset + i] != pattern[i]) return false;
         return true;
     }
+
+    public void reset() {
+        this.length = 0;
+        this.offset = 0;
+    }        
     
+    public byte toByteArray()[] {
+        byte newbuf[] = new byte[this.length];
+        System.arraycopy(this.buffer, 0, newbuf, 0, this.length);
+        return newbuf;
+    }    
+        
 }

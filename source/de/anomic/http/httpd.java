@@ -643,22 +643,23 @@ public final class httpd implements serverHandler {
     }
 
     private static String parseArg(String s) {
-	// this parses a given value-string from a http property
-	// we replace all "+" by spaces
-	// and resolve %-escapes with two-digit hex attributes
-	int pos = 0;
-	String result = "";
-	while (pos < s.length()) {
-	    if (s.charAt(pos) == '+') {
-		result += " "; pos++;
-	    } else if (s.charAt(pos) == '%') {
-		result += (char) Integer.parseInt(s.substring(pos + 1, pos + 3), 16);
-		pos += 3;
-	    } else {
-		result += s.charAt(pos++);
-	    }
-	}
-	return result;
+    	// this parses a given value-string from a http property
+    	// we replace all "+" by spaces
+    	// and resolve %-escapes with two-digit hex attributes
+    	int pos = 0;
+    	StringBuffer result = new StringBuffer();
+    	while (pos < s.length()) {
+    	    if (s.charAt(pos) == '+') {
+                result.append(" "); 
+                pos++;
+    	    } else if (s.charAt(pos) == '%') {
+        		result.append((char) Integer.parseInt(s.substring(pos + 1, pos + 3), 16));
+        		pos += 3;
+    	    } else {
+                result.append(s.charAt(pos++));
+    	    }
+    	}
+    	return result.toString();
     }
 
 
