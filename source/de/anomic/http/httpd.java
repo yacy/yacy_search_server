@@ -85,7 +85,7 @@ public final class httpd implements serverHandler {
     private String clientIP;
     
     // the connection properties
-    private static final Properties prop = new Properties();
+    private final Properties prop = new Properties();
     
    
 
@@ -111,6 +111,7 @@ public final class httpd implements serverHandler {
         this.proxyAccountBase64MD5 = null;
         this.serverAccountBase64MD5 = null;
         this.clientIP = null;
+        this.prop.clear();
     }    
     
      // must be called at least once, but can be called again to re-use the object.
