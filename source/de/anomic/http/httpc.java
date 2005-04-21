@@ -166,17 +166,20 @@ public final class httpc {
     
     public static httpc getInstance(String server, int port, int timeout, boolean ssl) throws IOException {
         
+        httpc newHttpc = null;
         try {
             // fetching a new httpc from the object pool
-            httpc newHttpc = (httpc) httpc.theHttpcPool.borrowObject();
-            
-            // initialize it
-            newHttpc.init(server,port,timeout,ssl);        
-            return newHttpc;
+            newHttpc = (httpc) httpc.theHttpcPool.borrowObject();
             
         } catch (Exception e) {
             throw new IOException("Unable to initialize a new httpc. " + e.getMessage());
-        }            
+        }                 
+        
+        // initialize it
+        newHttpc.init(server,port,timeout,ssl);        
+        return newHttpc;
+            
+       
     }    
     
     public static void returnInstance(httpc theHttpc) {
@@ -320,7 +323,7 @@ public final class httpc {
 	userAgent = "yacy (www.yacy.net; v" + vDATE + "; " + systemOST + ")";
     }
     
-    public class response {
+    public final class response {
 	// Response-Header  = Date | Pragma | Allow | Content-Encoding | Content-Length | Content-Type |
 	//                    Expires | Last-Modified | HTTP-header
 	/*
@@ -438,7 +441,8 @@ public final class httpc {
 	}
 
 	public byte[] writeContent(OutputStream procOS) throws IOException {
-	    serverByteBuffer sbb = new serverByteBuffer();
+        int contentLength = (int) this.responseHeader.contentLength();
+	    serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
 	    writeContentX(procOS, sbb, httpc.this.clientInput);
 	    return sbb.getBytes();
 	}

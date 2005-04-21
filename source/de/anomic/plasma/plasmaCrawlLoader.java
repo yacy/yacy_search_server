@@ -44,218 +44,445 @@ package de.anomic.plasma;
 import java.io.*;
 import java.util.*;
 import java.net.*;
+
+import org.apache.commons.pool.impl.GenericObjectPool;
+
 import de.anomic.net.*;
 import de.anomic.http.*;
 import de.anomic.server.*;
 import de.anomic.tools.*;
 import de.anomic.htmlFilter.*;
 
-public final class plasmaCrawlLoader {
+public final class plasmaCrawlLoader extends Thread {
 
-    private plasmaHTCache   cacheManager;
-    private int             socketTimeout;
-    private int             loadTimeout;
-    private boolean         remoteProxyUse;
-    private String          remoteProxyHost;
-    private int             remoteProxyPort;
-    private int             maxSlots;
-    private List            slots;
-    private serverLog       log;
-    private HashSet         acceptMimeTypes;
-
-    public plasmaCrawlLoader(plasmaHTCache cacheManager, serverLog log, int socketTimeout, int loadTimeout, int mslots, boolean proxyUse, String proxyHost, int proxyPort,
-                             HashSet acceptMimeTypes) {
-	this.cacheManager    = cacheManager;
-	this.log             = log;
-	this.socketTimeout   = socketTimeout;
-	this.loadTimeout     = loadTimeout;
-	this.remoteProxyUse  = proxyUse;
-	this.remoteProxyHost = proxyHost;
-	this.remoteProxyPort = proxyPort;
-	this.maxSlots        = mslots;
-	this.slots           = new LinkedList();
-        this.acceptMimeTypes = acceptMimeTypes;
+    private final plasmaHTCache   cacheManager;
+    private final int             socketTimeout;
+    private final int             loadTimeout;
+    private final int             maxSlots;
+    private final serverLog       log;   
+    
+    private final CrawlerMessageQueue theQueue;
+    private final CrawlerPool crawlwerPool;
+    private final ThreadGroup theThreadGroup = new ThreadGroup("CrawlerThreads");
+    private boolean stopped = false;
+    
+    public plasmaCrawlLoader(
+            plasmaHTCache cacheManager, 
+            serverLog log, 
+            int socketTimeout, 
+            int loadTimeout, 
+            int mslots, 
+            boolean proxyUse, 
+            String proxyHost, 
+            int proxyPort,
+            HashSet acceptMimeTypes) {
+        this.setName("plasmaCrawlLoader");
+        
+    	this.cacheManager    = cacheManager;
+    	this.log             = log;
+    	this.socketTimeout   = socketTimeout;
+    	this.loadTimeout     = loadTimeout;
+    	this.maxSlots        = mslots;
+        
+        // configuring the crawler messagequeue
+        this.theQueue = new CrawlerMessageQueue();
+        
+        // configuring the crawler thread pool
+        // implementation of session thread pool
+        GenericObjectPool.Config config = new GenericObjectPool.Config();
+        
+        // The maximum number of active connections that can be allocated from pool at the same time,
+        // 0 for no limit
+        config.maxActive = this.maxSlots;
+        
+        // The maximum number of idle connections connections in the pool
+        // 0 = no limit.        
+        config.maxIdle = this.maxSlots / 2;
+        config.minIdle = this.maxSlots / 4;    
+        
+        // block undefinitely 
+        config.maxWait = -1; 
+        
+        // Action to take in case of an exhausted DBCP statement pool
+        // 0 = fail, 1 = block, 2= grow        
+        config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
+        config.minEvictableIdleTimeMillis = 30000; 
+//        config.testOnReturn = true;
+        
+        CrawlerFactory theFactory = new CrawlerFactory(
+                this.theThreadGroup,
+                cacheManager,
+                socketTimeout,
+                proxyUse,
+                proxyHost,
+                proxyPort,
+                acceptMimeTypes,
+                log);
+        
+        this.crawlwerPool = new CrawlerPool(theFactory,config,this.theThreadGroup);        
+        
+        // start the crawl loader
+        this.start();
     }
 
-    private void killTimeouts() {
-        Exec thread;
-        for (int i = slots.size() - 1; i >= 0; i--) {
-            // check if thread is alive
-            thread = (Exec) slots.get(i);
-            if (thread.isAlive()) {
-                // check the age of the thread
-                if (System.currentTimeMillis() - thread.startdate > loadTimeout) {
-                    // we kill that thread
-                    thread.interrupt(); // hopefully this wakes him up.
-                    slots.remove(i);
-                    log.logDebug("IGNORING SLEEPING DOWNLOAD SLOT " + thread.url.toString());
-                }
-            } else {
-                // thread i is dead, remove it
-                slots.remove(i);
-            }
-        }
+    public ThreadGroup threadStatus() {
+        return this.theThreadGroup;
     }
     
-    public synchronized void loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
+    public void run() {
+        
+        while (!this.stopped && !Thread.interrupted()) {
+            try {
+                // getting a new message from the crawler queue
+                plasmaCrawlLoaderMessage theMsg = this.theQueue.waitForMessage();
+                
+                // getting a new crawler from the crawler pool
+                plasmaCrawlWorker theWorker = (plasmaCrawlWorker) this.crawlwerPool.borrowObject();
+                theWorker.execute(theMsg);
+                
+            } catch (InterruptedException e) {
+                Thread.interrupted();
+                this.stopped = true;
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        // consuming the is interrupted flag
+        this.isInterrupted();
+        
+        // closing the pool
+        try {
+            this.crawlwerPool.close();
+        }
+        catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+    }
+       
+    public void loadParallel(
+            URL url, 
+            String referer, 
+            String initiator, 
+            int depth, 
+            plasmaCrawlProfile.entry profile) {
 
-	// wait until there is space in the download slots
-	Exec thread;
-	while (slots.size() >= maxSlots) {
-	    killTimeouts();
-
-	    // wait a while
-	    try {
-		Thread.currentThread().sleep(1000);
-	    } catch (InterruptedException e) {
-		break;
-	    }
-	}
-
-	// we found space in the download slots
-	thread = new Exec(url, referer, initiator, depth, profile);
-	thread.start();
-	slots.add(thread);
+        if (!this.crawlwerPool.isClosed) {            
+            int crawlingPriority = 5;
+            
+            // creating a new crawler queue object
+            plasmaCrawlLoaderMessage theMsg = new plasmaCrawlLoaderMessage(url, referer,initiator,depth,profile, crawlingPriority);
+            
+            // adding the message to the queue
+            try  {
+                this.theQueue.addMessage(theMsg);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 
     public int size() {
-        killTimeouts();
-        return slots.size();
+        return crawlwerPool.getNumActive();
     }
+}
+
+
+
+final class Semaphore  {
+   private long currentValue = 0;    
+   private long maximumValue = Long.MAX_VALUE;
     
-    public Exec[] threadStatus() {
-        killTimeouts();
-        Exec[] result = new Exec[slots.size()];
-        for (int i = 0; i < slots.size(); i++) result[i] = (Exec) slots.get(i);
-        return result;
-    }
-    
-    public final class Exec extends Thread {
+   protected Semaphore()  {
+       this(0,Long.MAX_VALUE);
+   }
+   
+   public Semaphore(long initialValue)  {
+       this(initialValue,Long.MAX_VALUE);
+   }    
 
-	public URL url;
-        public String referer;
-        public String initiator;
-	public int depth;
-	public long startdate;
-        public plasmaCrawlProfile.entry profile;
-        public String error;
-        
-	public Exec(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
-	    this.url = url;               // the url to crawl
-            this.referer = referer;       // the url that contained this url as link
-            this.initiator = initiator;
-            this.depth = depth;           // distance from start-url
-	    this.startdate = System.currentTimeMillis();
-            this.profile = profile;
-            this.error = null;
-        }
-
-        public void run() {
-	    try {
-		load(url, referer, initiator, depth, profile);
-	    } catch (IOException e) {
-	    }
-	}
-
-	private httpc newhttpc(String server, int port, boolean ssl) throws IOException {
-	    // a new httpc connection, combined with possible remote proxy
-	    if (remoteProxyUse)
-             return httpc.getInstance(server, port, socketTimeout, ssl, remoteProxyHost, remoteProxyPort);
-	    else return httpc.getInstance(server, port, socketTimeout, ssl);
-	}
-
-	private void load(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) throws IOException {
-            if (url == null) return;
-            Date requestDate = new Date(); // remember the time...
-	    String host = url.getHost();
-	    String path = url.getPath();
-	    int port = url.getPort();
-            boolean ssl = url.getProtocol().equals("https");
-	    if (port < 0) port = (ssl) ? 443 : 80;
-	    
-            // set referrer; in some case advertise a little bit:
-            referer = referer.trim();
-            if (referer.length() == 0) referer = "http://www.yacy.net/yacy/";
-            
-	    // take a file from the net
-        httpc remote = null;
-	    try {
-    		// create a request header
-    		httpHeader requestHeader = new httpHeader();
-    		requestHeader.put("User-Agent", httpdProxyHandler.userAgent);
-    		requestHeader.put("Referer", referer);
-    		requestHeader.put("Accept-Encoding", "gzip,deflate");
-    
-                    //System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
-                    
-    		// open the connection
-    		remote = newhttpc(host, port, ssl);
-    		
-    		// send request
-    		httpc.response res = remote.GET(path, requestHeader);
-                
-                if (res.status.startsWith("200")) {
-                    // the transfer is ok
-                    long contentLength = res.responseHeader.contentLength();
-                    
-                    // reserve cache entry
-                    plasmaHTCache.Entry htCache = cacheManager.newEntry(requestDate, depth, url, requestHeader, res.status, res.responseHeader, initiator, profile);
-                    
-                    // request has been placed and result has been returned. work off response
-                    File cacheFile = cacheManager.getCachePath(url);
-                    try {
-                        if (!(httpd.isTextMime(res.responseHeader.mime().toLowerCase(), acceptMimeTypes))) {
-                            // if the response has not the right file type then reject file
-                            remote.close();
-                            log.logInfo("REJECTED WRONG MIME TYPE " + res.responseHeader.mime() + " for url " + url.toString());
-                            htCache.status = plasmaHTCache.CACHE_UNFILLED;
-                        } else if ((profile.storeHTCache()) && ((error = htCache.shallStoreCache()) == null)) {
-                            // we write the new cache entry to file system directly
-                            cacheFile.getParentFile().mkdirs();
-                            FileOutputStream fos = new FileOutputStream(cacheFile);
-                            htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
-                            fos.close();
-                            htCache.status = plasmaHTCache.CACHE_FILL;
-                        } else {
-                            if (error != null) log.logDebug("CRAWLER NOT STORED RESOURCE " + url.toString() + ": " + error);
-                            // anyway, the content still lives in the content scraper
-                            htCache.cacheArray = res.writeContent(null); // writes only into cacheArray
-                            htCache.status = plasmaHTCache.CACHE_PASSING;
-                        }
-                        // enQueue new entry with response header
-                        if ((initiator == null) || (initiator.length() == 0)) {
-                            // enqueued for proxy writings
-                            cacheManager.stackProcess(htCache);
-                        } else {
-                            // direct processing for crawling
-                            cacheManager.process(htCache);
-                        }
-                    } catch (SocketException e) {
-                        // this may happen if the client suddenly closes its connection
-                        // maybe the user has stopped loading
-                        // in that case, we are not responsible and just forget it
-                        // but we clean the cache also, since it may be only partial
-                        // and most possible corrupted
-                        if (cacheFile.exists()) cacheFile.delete();
-                        log.logError("CRAWLER LOADER ERROR1: with url=" + url.toString() + ": " + e.toString());
-                    }
-                } else {
-                    // if the response has not the right response type then reject file
-                    log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for url " + url.toString());
-                    // not processed any further
-                }
-                remote.close();
-            } catch (Exception e) {
-                // this may happen if the targeted host does not exist or anything with the
-                // remote server was wrong.
-                log.logError("CRAWLER LOADER ERROR2 with url=" + url.toString() + ": " + e.toString());
-                e.printStackTrace();
-            } finally {
-                if (remote != null) httpc.returnInstance(remote);
+   protected Semaphore(long initialValue, long maxValue) {
+       /* some errorhandling */
+       if (maxValue < initialValue) {
+           throw new IllegalArgumentException("The semaphore maximum value must not be " +
+                                              "greater than the semaphore init value.");
+       }
+       
+       if (maxValue < 1)  {
+            throw new IllegalArgumentException("The semaphore maximum value must be greater or equal 1.");          
+       }
+       
+       if (initialValue < 0) {
+            throw new IllegalArgumentException("The semaphore initial value must be greater or equal 0.");          
+       }
+       
+       
+       // setting the initial Sempahore Values
+       this.currentValue = initialValue;
+       this.maximumValue = maxValue;        
+   }
+   
+   public synchronized void P() throws InterruptedException
+   {   
+        this.currentValue-- ;           
+       
+        if (this.currentValue < 0) {    
+            try  { 
+                wait();
+            } catch(InterruptedException e) { 
+                this.currentValue++;
+                throw e;
             }
         }
-	
+   }
+
+   public synchronized void V() {
+       if (this.currentValue+1 == this.maximumValue) {
+             throw new IndexOutOfBoundsException("The maximum value of the semaphore was reached");
+       }        
+       
+       this.currentValue++;        
+        
+       if (this.currentValue <= 0) {
+           notify();
+       }   
+    }
+}
+
+class CrawlerMessageQueue {
+    private final Semaphore readSync;
+    private final Semaphore writeSync;
+    private final ArrayList messageList;
+    
+    public CrawlerMessageQueue()  {
+        this.readSync  = new Semaphore (0);
+        this.writeSync = new Semaphore (1);
+        
+        this.messageList = new ArrayList(10);        
+    }
+        
+    /**
+     * 
+     * @param newMessage
+     * @throws MessageQueueLockedException
+     * @throws InterruptedException
+     */
+    public void addMessage(plasmaCrawlLoaderMessage newMessage) 
+        throws InterruptedException, NullPointerException 
+    {
+        if (newMessage == null) throw new NullPointerException();
+        
+        this.writeSync.P();
+        
+            boolean insertionDoneSuccessfully = false;
+            synchronized(this.messageList) {
+                insertionDoneSuccessfully = this.messageList.add(newMessage);
+            }
+        
+            if (insertionDoneSuccessfully)  {
+                this.sortMessages();
+                this.readSync.V();              
+            }
+        
+        this.writeSync.V();
+    }
+    
+    public plasmaCrawlLoaderMessage waitForMessage() throws InterruptedException {
+        this.readSync.P();         
+        this.writeSync.P();
+        
+        plasmaCrawlLoaderMessage newMessage = null;
+        synchronized(this.messageList) {               
+            newMessage = (plasmaCrawlLoaderMessage) this.messageList.remove(0);
+        }
+
+        this.writeSync.V();
+        return newMessage;
+    }
+    
+    protected void sortMessages() {
+        Collections.sort(this.messageList, new Comparator()  { 
+            public int compare(Object o1, Object o2)
+            {
+                plasmaCrawlLoaderMessage message1 = (plasmaCrawlLoaderMessage) o1; 
+                plasmaCrawlLoaderMessage message2 = (plasmaCrawlLoaderMessage) o2; 
+                
+                int message1Priority = message1.crawlingPriority;
+                int message2Priority = message2.crawlingPriority;
+                
+                if (message1Priority > message2Priority){ 
+                    return -1; 
+                } else if (message1Priority < message2Priority) { 
+                    return 1; 
+                }  else { 
+                    return 0; 
+                }            
+            } 
+        }); 
+    }
+}
+
+
+final class CrawlerPool extends GenericObjectPool 
+{
+    private final ThreadGroup theThreadGroup;
+    public boolean isClosed = false;
+    
+    
+    public CrawlerPool(CrawlerFactory objFactory,
+                       GenericObjectPool.Config config,
+                       ThreadGroup threadGroup) {
+        super(objFactory, config);
+        this.theThreadGroup = threadGroup;
+        objFactory.setPool(this);
     }
 
+    public Object borrowObject() throws Exception  {
+       return super.borrowObject();
+    }
+
+    public void returnObject(Object obj) throws Exception  {
+        super.returnObject(obj);
+    }        
+    
+    public synchronized void close() throws Exception {
+        /*
+         * shutdown all still running session threads ...
+         */
+        // interrupting all still running or pooled threads ...
+        this.theThreadGroup.interrupt();
+        
+        /* waiting for all threads to finish */
+        int threadCount  = this.theThreadGroup.activeCount();    
+        Thread[] threadList = new Thread[threadCount];     
+        threadCount = this.theThreadGroup.enumerate(threadList);
+        
+        try {
+            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
+                ((plasmaCrawlWorker)threadList[currentThreadIdx]).setStopped(true);
+            }            
+            
+            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
+                // we need to use a timeout here because of missing interruptable session threads ...
+                if (threadList[currentThreadIdx].isAlive()) threadList[currentThreadIdx].join(500);
+            }
+        }
+        catch (InterruptedException e) {
+            System.err.println("Interruption while trying to shutdown all crawler threads.");  
+        }        
+
+        this.isClosed  = true;
+        super.close();        
+        
+    }
     
 }
+
+final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFactory {
+
+    private CrawlerPool thePool;
+    private final ThreadGroup theThreadGroup;
+    private final plasmaHTCache   cacheManager;
+    private final int             socketTimeout;
+    private final boolean         remoteProxyUse;
+    private final String          remoteProxyHost;
+    private final int             remoteProxyPort;
+    private final HashSet         acceptMimeTypes;    
+    private final serverLog       theLog;
+    
+    public CrawlerFactory(           
+            ThreadGroup theThreadGroup,
+            plasmaHTCache cacheManager,
+            int socketTimeout,
+            boolean remoteProxyUse,
+            String  remoteProxyHost,
+            int remoteProxyPort,
+            HashSet acceptMimeTypes,
+            serverLog theLog) {
+        
+        super();  
+        
+        if (theThreadGroup == null)
+            throw new IllegalArgumentException("The threadgroup object must not be null.");
+        
+        this.theThreadGroup = theThreadGroup;
+        this.cacheManager = cacheManager;
+        this.socketTimeout = socketTimeout;
+        this.remoteProxyUse = remoteProxyUse;
+        this.remoteProxyHost = remoteProxyHost;
+        this.remoteProxyPort = remoteProxyPort;
+        this.acceptMimeTypes = acceptMimeTypes;  
+        this.theLog = theLog;
+    }
+    
+    public void setPool(CrawlerPool thePool) {
+        this.thePool = thePool;    
+    }
+    
+    /**
+     * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
+     */
+    public Object makeObject() {
+        return new plasmaCrawlWorker(
+                this.theThreadGroup,
+                this.thePool,
+                this.cacheManager,
+                this.socketTimeout,
+                this.remoteProxyUse,
+                this.remoteProxyHost,
+                this.remoteProxyPort,
+                this.acceptMimeTypes,
+                this.theLog);
+    }
+    
+     /**
+     * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
+     */
+    public void destroyObject(Object obj) {
+        if (obj instanceof plasmaCrawlWorker) {
+            plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;
+            theWorker.setStopped(true);
+        }
+    }
+    
+    /**
+     * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
+     */
+    public boolean validateObject(Object obj) {
+        if (obj instanceof plasmaCrawlWorker) 
+        {
+            plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;
+            if (!theWorker.isAlive() || theWorker.isInterrupted()) return false;
+            if (theWorker.isRunning()) return true;
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * @param obj 
+     * 
+     */
+    public void activateObject(Object obj)  {
+        //log.debug(" activateObject...");
+    }
+
+    /**
+     * @param obj 
+     * 
+     */
+    public void passivateObject(Object obj) { 
+        //log.debug(" passivateObject..." + obj);
+        if (obj instanceof plasmaCrawlWorker)  {
+            plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;             
+        }
+    }        
+}
+
+
+
+

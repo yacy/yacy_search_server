@@ -910,7 +910,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 	if (!(header.containsKey("date"))) header.put("Date", httpc.dateString(httpc.nowDate()));
 	if (!(header.containsKey("content-type"))) header.put("Content-type", "text/html"); // fix this
 
-    StringBuffer headerStringBuffer = new StringBuffer();
+    StringBuffer headerStringBuffer = new StringBuffer(200);
     
 	// write status line
     headerStringBuffer.append("HTTP/1.1 ")

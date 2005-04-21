@@ -396,18 +396,20 @@ public final class serverCore extends serverAbstractThread implements serverThre
             
             try {
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
+                    ((Session)threadList[currentThreadIdx]).setStopped(true);
+                }                
+                
+                for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     // we need to use a timeout here because of missing interruptable session threads ...
-                    threadList[currentThreadIdx].join(500);
+                    if (threadList[currentThreadIdx].isAlive()) threadList[currentThreadIdx].join(500);
                 }
             }
             catch (InterruptedException e) {
                 serverCore.this.log.logWarning("Interruption while trying to shutdown all session threads.");  
             }
-            finally {
-                this.isClosed = true;
-            }
             
-            super.close();
+            this.isClosed = true;
+            super.close();  
         }
         
     }
@@ -626,10 +628,12 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         
                         if (!this.stopped && !this.isInterrupted()) {
                             try {
+                                this.setName("Session_inPool");
                                 serverCore.this.theSessionPool.returnObject(this);
                             }
                             catch (Exception e1) {
-                                e1.printStackTrace();
+                                // e1.printStackTrace();
+                                this.stopped = true;
                             }
                         }
                     }
@@ -637,7 +641,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
               }
         }    
         
-        private void execute() {
+        private void execute() throws InterruptedException {
                    
             try {
                 // setting the session startup time
@@ -648,6 +652,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 
                 // getting some client information
                 this.userAddress = this.controlSocket.getInetAddress();
+                this.setName("Session_" + this.userAddress.getHostAddress() + ":" + this.controlSocket.getPort());
                 
                 // TODO: check if we want to allow this socket to connect us
                 
@@ -669,6 +674,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     
     		    listen();
             } catch (Exception e) {
+                if (e instanceof InterruptedException) throw (InterruptedException) e;
                 System.err.println("ERROR: (internal) " + e);        
     	    } finally {
         		try {

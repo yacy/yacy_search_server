@@ -319,16 +319,36 @@ public class IndexCreate_p {
                 } else {
                     prop.put("loader-set", 1);
                     prop.put("loader-set_num", loaderThreadsSize);
-                    dark = true;
-                    plasmaCrawlLoader.Exec[] loaderThreads = switchboard.cacheLoader.threadStatus();
-                    for (i = 0; i < loaderThreads.length; i++) {
-                        initiator = yacyCore.seedDB.getConnected(loaderThreads[i].initiator);
+                    dark = true;                    
+                    //plasmaCrawlLoader.Exec[] loaderThreads = switchboard.cacheLoader.threadStatus();
+//                  for (i = 0; i < loaderThreads.length; i++) {
+//                  initiator = yacyCore.seedDB.getConnected(loaderThreads[i].initiator);
+//                  prop.put("loader-set_list_"+i+"_dark", ((dark) ? 1 : 0) );
+//                  prop.put("loader-set_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
+//                  prop.put("loader-set_list_"+i+"_depth", loaderThreads[i].depth );
+//                  prop.put("loader-set_list_"+i+"_url", loaderThreads[i].url ); // null pointer exception here !!! maybe url = null; check reason.
+//                  dark = !dark;
+//              }
+//              prop.put("loader-set_list", i );                    
+                    
+                    ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();
+                    
+                    int threadCount  = loaderThreads.activeCount();    
+                    Thread[] threadList = new Thread[threadCount*2];     
+                    threadCount = loaderThreads.enumerate(threadList);                    
+                    
+                    for (i = 0; i < threadCount; i++)  {                        
+                        plasmaCrawlWorker theWorker = (plasmaCrawlWorker)threadList[i];
+                        plasmaCrawlLoaderMessage theMsg = theWorker.theMsg;
+                        if (theMsg == null) continue;
+                        
+                        initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
                         prop.put("loader-set_list_"+i+"_dark", ((dark) ? 1 : 0) );
                         prop.put("loader-set_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
-                        prop.put("loader-set_list_"+i+"_depth", loaderThreads[i].depth );
-                        prop.put("loader-set_list_"+i+"_url", loaderThreads[i].url ); // null pointer exception here !!! maybe url = null; check reason.
-                        dark = !dark;
-                    }
+                        prop.put("loader-set_list_"+i+"_depth", theMsg.depth );
+                        prop.put("loader-set_list_"+i+"_url", theMsg.url ); // null pointer exception here !!! maybe url = null; check reason.
+                        dark = !dark;                        
+                    }                    
                     prop.put("loader-set_list", i );
                 }
                 

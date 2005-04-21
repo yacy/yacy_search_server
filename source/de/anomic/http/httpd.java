@@ -647,7 +647,7 @@ public final class httpd implements serverHandler {
     	// we replace all "+" by spaces
     	// and resolve %-escapes with two-digit hex attributes
     	int pos = 0;
-    	StringBuffer result = new StringBuffer();
+    	StringBuffer result = new StringBuffer(s.length());
     	while (pos < s.length()) {
     	    if (s.charAt(pos) == '+') {
                 result.append(" "); 
