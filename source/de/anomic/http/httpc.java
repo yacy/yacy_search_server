@@ -468,7 +468,7 @@ public final class httpc {
 	    // and change the Content-Encoding and Content-Length attributes in the header
 	    byte[] buffer = new byte[2048];
 	    int l;
-        long len = 0;
+            long len = 0;
                 
 	    // find out length
 	    long length = responseHeader.contentLength();

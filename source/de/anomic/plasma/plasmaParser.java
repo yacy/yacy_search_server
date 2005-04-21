@@ -42,10 +42,11 @@
 
 package de.anomic.plasma;
 
-import de.anomic.htmlFilter.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import de.anomic.server.*;
+import de.anomic.htmlFilter.*;
 
 public class plasmaParser {
     
@@ -65,6 +66,18 @@ public class plasmaParser {
         OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
         try {
             hfos.write(source);
+            return transformScraper(location, mimeType, scraper);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public document parseSource(URL location, String mimeType, File sourceFile) {
+        // make a scraper and transformer
+        htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
+        OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
+        try {
+	    serverFileUtils.copy(sourceFile, hfos);
             return transformScraper(location, mimeType, scraper);
         } catch (IOException e) {
             return null;

@@ -469,10 +469,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     private synchronized void processResourceStack(plasmaHTCache.Entry entry) {
         // work off one stack entry with a fresh resource (scraped web page)
         String stats = "DEQUEUE: dequeueing one step (processStack=" + processStack.size() + ", localStackSize=" + noticeURL.localStackSize() + ", remoteStackSize=" + noticeURL.remoteStackSize() + ")";
-        if ((entry.cacheArray == null) && (entry.scraper == null)) {
-            log.logDebug(stats + " entry for " + entry.nomalizedURLString + " has no content -- skipped");
-            return;
-        }   
+
         try {
     
             // we must distinguish the following cases: resource-load was initiated by
@@ -504,10 +501,22 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
             if (entry.scraper != null) {
                 log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is pre-parsed by scraper");
                 document = parser.transformScraper(entry.url, entry.responseHeader.mime(), entry.scraper);
-            } else {
-                log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is not parsed, parsing now");
+            } else if (entry.cacheArray != null) {
+                log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is not parsed yet, parsing now from cacheArray");
                 document = parser.parseSource(entry.url, entry.responseHeader.mime(), entry.cacheArray);
-            }
+            } else {
+		if (entry.cacheFile.exists()) {
+		    log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is not parsed yet, parsing now from File");
+		    document = parser.parseSource(entry.url, entry.responseHeader.mime(), entry.cacheFile);
+		} else {
+		    log.logDebug("(Parser) '" + entry.nomalizedURLString + "' cannot be parsed, no resource available");
+		    return;
+		}
+	    }
+	    if (document == null) {
+		log.logError("(Parser) '" + entry.nomalizedURLString + "' parse failure");
+		return;
+	    }
             
             // put anchors on crawl stack
             if (((processCase == 4) || (processCase == 5)) &&

@@ -348,16 +348,16 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         
         // attach possible yacy-sublevel-domain
         if ((yAddress != null) &&
-        ((pos = yAddress.indexOf("/")) >= 0) &&
-        (!(remotePath.startsWith("/env"))) // this is the special path, staying always at root-level
-        ) remotePath = yAddress.substring(pos) + remotePath;
+	    ((pos = yAddress.indexOf("/")) >= 0) &&
+	    (!(remotePath.startsWith("/env"))) // this is the special path, staying always at root-level
+	    ) remotePath = yAddress.substring(pos) + remotePath;
         
         // decide wether to use a cache entry or connect to the network
         File cacheFile = cacheManager.getCachePath(url);
         String urlHash = plasmaCrawlLURL.urlHash(url);
         httpHeader cachedResponseHeader = null;
         boolean cacheExists = ((cacheFile.exists()) && (cacheFile.isFile()) &&
-        ((cachedResponseHeader = cacheManager.getCachedResponse(urlHash)) != null));
+			       ((cachedResponseHeader = cacheManager.getCachedResponse(urlHash)) != null));
         
         // why are files unzipped upon arrival? why not zip all files in cache?
         // This follows from the following premises
@@ -381,9 +381,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         // 4. cache stale - refill - superfluous
         // in two of these cases we trigger a scheduler to handle newly arrived files:
         // case 1 and case 3
-        plasmaHTCache.Entry hpc;
+        plasmaHTCache.Entry cacheEntry;
         if ((cacheExists) &&
-            ((hpc = cacheManager.newEntry(requestDate, 0, url, requestHeader, "200 OK",
+            ((cacheEntry = cacheManager.newEntry(requestDate, 0, url, requestHeader, "200 OK",
                                           cachedResponseHeader, null,
                                           switchboard.defaultProxyProfile)).shallUseCache())) {
             // we respond on the request by using the cache, the cache is fresh
@@ -466,29 +466,34 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             long contentLength = res.responseHeader.contentLength();
             
             // reserver cache entry
-            hpc = cacheManager.newEntry(requestDate, 0, url, requestHeader, res.status, res.responseHeader, null, switchboard.defaultProxyProfile);
+            cacheEntry = cacheManager.newEntry(requestDate, 0, url, requestHeader, res.status, res.responseHeader, null, switchboard.defaultProxyProfile);
             
             // handle file types
             if (((ext == null) || (!(switchboard.extensionBlack.contains(ext)))) &&
                 (httpd.isTextMime(res.responseHeader.mime(), switchboard.mimeWhite))) {
+		// this is a file that is a possible candidate for parsing by the indexer
                 if (transformer.isIdentityTransformer()) {
+		    log.logDebug("create passthrough (parse candidate) for url " + url);
                     // no transformation, only passthrough
+		    // this is especially the case if the bluelist is empty
+		    // in that case, the content is not scraped here but later
                     hfos = respond;
                 } else {
                     // make a scraper and transformer
+		    log.logDebug("create scraper for url " + url);
                     scraper = new htmlFilterContentScraper(url);
                     hfos = new htmlFilterOutputStream(respond, scraper, transformer, (ext.length() == 0));
                     if (((htmlFilterOutputStream) hfos).binarySuspect()) {
                         scraper = null; // forget it, may be rubbish
                         log.logDebug("Content of " + url + " is probably binary. deleted scraper.");
                     }
-                    hpc.scraper = scraper;
+                    cacheEntry.scraper = scraper;
                 }
             } else {
                 log.logDebug("Resource " + url + " has wrong extension (" + ext + ") or wrong mime-type (" + res.responseHeader.mime() + "). not scraped");
                 scraper = null;
                 hfos = respond;
-                hpc.scraper = scraper;
+                cacheEntry.scraper = scraper;
             }
             
             // handle incoming cookies
@@ -498,47 +503,52 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             try {
                 respondHeader(respond, res.status, res.responseHeader);
                 String storeError;
-                if ((storeError = hpc.shallStoreCache()) == null) {
+                if ((storeError = cacheEntry.shallStoreCache()) == null) {
                     // we write a new cache entry
                     if ((contentLength > 0) && // known
                         (contentLength < 1048576)) {// 1 MB
                         // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
-                        byte[] cacheArray;
-                        cacheArray = res.writeContent(hfos);
+                        byte[] cacheArray = res.writeContent(hfos);
+			log.logDebug("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
+
                         if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
                         
                         if (sizeBeforeDelete == -1) {
                             // totally fresh file
-                            hpc.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                            cacheManager.stackProcess(hpc, cacheArray);
+                            cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
+                            cacheManager.stackProcess(cacheEntry, cacheArray);
                         } else if (sizeBeforeDelete == cacheArray.length) {
                             // before we came here we deleted a cache entry
                             cacheArray = null;
-                            hpc.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                            cacheManager.stackProcess(hpc); // unnecessary update
+                            cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
+                            cacheManager.stackProcess(cacheEntry); // unnecessary update
                         } else {
                             // before we came here we deleted a cache entry
-                            hpc.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                            cacheManager.stackProcess(hpc, cacheArray); // necessary update, write response header to cache
+                            cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
+                            cacheManager.stackProcess(cacheEntry, cacheArray); // necessary update, write response header to cache
                         }
                     } else {
-                        // the file is too big to cache it in the ram, write to file right here
+                        // the file is too big to cache it in the ram, or the size is unknown
+			// write to file right here.
                         cacheFile.getParentFile().mkdirs();
                         res.writeContent(hfos, cacheFile);
                         if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
+			log.logDebug("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                         if (sizeBeforeDelete == -1) {
                             // totally fresh file
-                            hpc.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                            cacheManager.stackProcess(hpc);
+                            cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
+                            cacheManager.stackProcess(cacheEntry);
                         } else if (sizeBeforeDelete == cacheFile.length()) {
                             // before we came here we deleted a cache entry
-                            hpc.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                            cacheManager.stackProcess(hpc); // unnecessary update
+                            cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
+                            cacheManager.stackProcess(cacheEntry); // unnecessary update
                         } else {
                             // before we came here we deleted a cache entry
-                            hpc.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                            cacheManager.stackProcess(hpc); // necessary update, write response header to cache
+                            cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
+                            cacheManager.stackProcess(cacheEntry); // necessary update, write response header to cache
                         }
+			// beware! all these writings will not fill the cacheEntry.cacheArray
+			// that means they are not available for the indexer (except they are scraped before)
                     }
                 } else {
                     // no caching
@@ -547,12 +557,12 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
                     if (sizeBeforeDelete == -1) {
                         // no old file and no load. just data passing
-                        hpc.status = plasmaHTCache.CACHE_PASSING;
-                        cacheManager.stackProcess(hpc);
+                        cacheEntry.status = plasmaHTCache.CACHE_PASSING;
+                        cacheManager.stackProcess(cacheEntry);
                     } else {
                         // before we came here we deleted a cache entry
-                        hpc.status = plasmaHTCache.CACHE_STALE_NO_RELOAD;
-                        cacheManager.stackProcess(hpc);
+                        cacheEntry.status = plasmaHTCache.CACHE_STALE_NO_RELOAD;
+                        cacheManager.stackProcess(cacheEntry);
                     }
                 }
             } catch (SocketException e) {

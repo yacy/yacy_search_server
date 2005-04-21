@@ -15,10 +15,11 @@ document.getElementById("value").value=element.value;
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #[header]#
 <br><br>
-<h2>advanced Config</h2>
+<h2>Advanced Config</h2>
 <p>
 Here are all Config Options from YaCy.<br>
 You can change anything, but some Options need a restart, and some Options can crash YaCy, when wrong values are used.
+For explanation please look into yacy.init
 </p>
 <select name="options" size="25" style="width: 600">
 #{options}#<option id="#[key]#" value="#[value]#" onclick="element_clicked(this)">#[key]#: #[value]#</option>

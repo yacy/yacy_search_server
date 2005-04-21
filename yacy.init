@@ -92,7 +92,7 @@ parseableMime=application/xhtml+xml,text/html,text/plain
 # a comma-separated list of extensions that denote media file formats
 # this is important to recognize <a href> - tags as not-html reference
 # These files will be excluded from indexing
-mediaExt=swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar,sit,hqx,img,dmg,tar,gz,ps,pdf,doc,xls,ppt,ram,bz2,arj,jar,deb,torrent,ogg,iso,bin,ace,tgz,rpm
+mediaExt=swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar,sit,hqx,img,dmg,tar,gz,ps,pdf,doc,xls,ppt,ram,bz2,arj,jar,deb,torrent,ogg,iso,bin,ace,tgz,rpm,css
 
 # the proxy's and indexing maximum ram cache size in megabytes
 ramCacheSize = 12

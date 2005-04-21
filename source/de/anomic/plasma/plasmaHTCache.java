@@ -251,7 +251,9 @@ public final class plasmaHTCache {
                     entry.cacheFile.delete();
                 }
 		entry.cacheFile.getParentFile().mkdirs();
+		log.logInfo("WRITE FILE (" + entry.cacheArray.length + " bytes) " + entry.cacheFile);
                 serverFileUtils.write(entry.cacheArray, entry.cacheFile);
+		log.logInfo("AFTER WRITE cacheArray = " + entry.cacheFile + ": " + ((entry.cacheArray == null) ? "empty" : "full"));
 		//entry.cacheArray = null;
 	    } catch (FileNotFoundException e) {
 		// this is the case of a "(Not a directory)" error, which should be prohibited
@@ -280,7 +282,10 @@ public final class plasmaHTCache {
 	    case CACHE_UNFILLED:
 		log.logInfo("CACHE UNFILLED: " + entry.cacheFile); break;
 	    case CACHE_FILL:
-		log.logInfo("CACHE FILL: " + entry.cacheFile); break;
+		log.logInfo("CACHE FILL: " + entry.cacheFile +
+			    ((entry.cacheArray == null) ? "" : " (cacheArray is filled)") +
+			    ((entry.scraper    == null) ? "" : " (scraper is filled)"));
+			    break;
 	    case CACHE_HIT:
 		log.logInfo("CACHE HIT: " + entry.cacheFile); break;
 	    case CACHE_STALE_NO_RELOAD:
