@@ -1,3 +1,9 @@
+;yacy.nsi
+;--------
+;part of YaCy (C) by Michael Peter Christen
+;this file is contributed by Alexander Schier
+;Cologne, 2005
+;last major change: 26.03.2005
 Name "YACY"
 
 OutFile "yacy_v0.36_20050326.exe"
