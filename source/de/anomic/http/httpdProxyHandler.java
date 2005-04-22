@@ -573,6 +573,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 // and most possible corrupted
                 if (cacheFile.exists()) cacheFile.delete();
                 respondHeader(respond,"404 client unexpectedly closed connection", new httpHeader(null));
+            } catch (IOException e) {
+		// can have various reasons
+                if (cacheFile.exists()) cacheFile.delete();
+		if (e.getMessage().indexOf("Corrupt GZIP trailer") >= 0) {
+		    // just do nothing, we leave it this way
+                    log.logDebug("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
+		} else {
+		    respondHeader(respond,"404 client unexpectedly closed connection", new httpHeader(null));
+                    log.logDebug("IOError for URL " + url + " (" + e.getMessage() + ") - responded 404");
+		    e.printStackTrace();
+		}
             }
             remote.close();
         } catch (Exception e) {
