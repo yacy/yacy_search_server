@@ -60,6 +60,7 @@ public class plasmaWordIndexRAMCache extends Thread {
     kelondroMScoreCluster hashScore;
     plasmaWordIndexFileCache pic;
     boolean terminate;
+    long terminateUntil;
     int maxWords;
 
     static {
@@ -76,7 +77,7 @@ public class plasmaWordIndexRAMCache extends Thread {
 	this.maxWords = maxWords;
 	this.terminate = false;
     }
-
+    
     public void run() {
 	serverLog.logSystem("PLASMA INDEXING", "started word cache management");
 	int check;
@@ -101,32 +102,40 @@ public class plasmaWordIndexRAMCache extends Thread {
         // close all;
 	try {
 	    // first flush everything
-	    while (hashScore.size() > 0) flushSpecific(false);
+	    while ((hashScore.size() > 0) && (System.currentTimeMillis() < terminateUntil)) {
+                flushSpecific(false);
+            }
 
 	    // then close file cache:
 	    pic.close();
 	} catch (IOException e) {
 	    serverLog.logDebug("PLASMA INDEXING", "interrupted final flush: " + e.toString());
 	}
+        // report
+        if (hashScore.size() == 0)
+            serverLog.logSystem("PLASMA INDEXING", "finished final flush; flushed all words");
+        else
+            serverLog.logError("PLASMA INDEXING", "terminated final flush; " + hashScore.size() + " words lost");
+
 	// delete data
 	cache = null;
 	hashScore = null;
-	serverLog.logSystem("PLASMA INDEXING", "finished final flush");
+	
     }
 
-    public void terminate(int waitingBoundSeconds) {
+    public void close(int waitingBoundSeconds) {
         terminate = true;
 	// wait until terination is done
 	// we can do at least 6 flushes/second
 	int waitingtime = 10 + (((cache == null) ? 0 : cache.size()) / 5); // seconds
 	if (waitingtime > waitingBoundSeconds) waitingtime = waitingBoundSeconds; // upper bound
+        this.terminateUntil = System.currentTimeMillis() + (waitingtime * 1000);
+        terminate = true;
 	while ((cache != null) && (waitingtime > 0)) {
 	    serverLog.logDebug("PLASMA INDEXING", "final word flush; cache.size=" + cache.size() + "; time-out in " + waitingtime + " seconds");
 	    try {Thread.currentThread().sleep(5000);} catch (InterruptedException e) {}
 	    waitingtime -= 5;
 	}
-	if (cache != null) serverLog.logError("PLASMA INDEXING", "Cache was not flushed completely; " + hashScore.size() + " words lost");
-
     }
 
     private synchronized int flushSpecific(boolean greatest) throws IOException {

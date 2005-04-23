@@ -59,6 +59,12 @@ public class plasmaCrawlProfile {
         }
     }
     
+    public void close() {
+        try {
+            profileTable.close();
+        } catch (IOException e) {}
+    }
+    
     public int size() {
         return profileTable.size();
     }

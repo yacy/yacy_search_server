@@ -60,6 +60,10 @@ public class plasmaParser {
         
     }
     
+    public void close() {
+        // frees resources; does nothing yet
+    }
+    
     public document parseSource(URL location, String mimeType, byte[] source) {
         // make a scraper and transformer
         htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);

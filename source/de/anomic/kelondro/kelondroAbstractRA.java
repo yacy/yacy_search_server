@@ -124,18 +124,28 @@ abstract class kelondroAbstractRA implements kelondroRA {
     }
 
     public String readLine() throws IOException {
-	// with these functions, we consider a line as always terminated by CRLF
-	serverByteBuffer sb = new serverByteBuffer();
-	int c;
-	while (true) {
-	    c = read();
-	    if (c < 0) {
-		if (sb.length() == 0) return null; else return sb.toString();
-	    }
-	    if (c == cr) continue;
-	    if (c == lf) return sb.toString();
-	    sb.append((byte) c);
-	}
+        // with these functions, we consider a line as always terminated by CRLF
+        byte[] bb = new byte[80];
+        int bbsize = 0;
+        int c;
+        while (true) {
+            c = read();
+            if (c < 0) {
+                if (bbsize == 0) return null; else return new String(bb, 0, bbsize);
+            }
+            if (c == cr) continue;
+            if (c == lf) return new String(bb, 0, bbsize);
+
+            // append to bb
+            if (bbsize == bb.length) {
+                // extend bb size
+                byte[] newbb = new byte[bb.length * 2];
+                System.arraycopy(bb, 0, newbb, 0, bb.length);
+                bb = newbb;
+                newbb = null;
+            }
+            bb[bbsize++] = (byte) c;
+        }
     }
 
     public void writeProperties(Properties props, String comment) throws IOException {

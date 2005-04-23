@@ -77,8 +77,8 @@ public class plasmaWordIndex {
         return ramCache.removeEntriesMem(wordHash, urlHashes, deleteComplete);
     }
     
-    public void terminate(int waitingBoundSeconds) {
-        ramCache.terminate(waitingBoundSeconds);
+    public void close(int waitingBoundSeconds) {
+        ramCache.close(waitingBoundSeconds);
     }
     
     public synchronized void deleteComplete(String wordHash) throws IOException {

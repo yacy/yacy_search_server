@@ -358,17 +358,22 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         terminateAllThreads(true);
         log.logSystem("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing (stand by..)");
         int waitingBoundSeconds = Integer.parseInt(getConfig("shutdownWaiting", "120"));
-        wordIndex.terminate(waitingBoundSeconds);
+        wordIndex.close(waitingBoundSeconds);
         log.logSystem("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
         try {
             wikiDB.close();
             messageDB.close();
             facilityDB.close();
 	    loadedURL.close();
+            noticeURL.close();
+            errorURL.close();
+            profiles.close();
+            parser.close();
+            cacheManager.close();
 	} catch (IOException e) {}
         log.logSystem("SWITCHBOARD SHUTDOWN TERMINATED");
     }
-    
+
     public int totalSize() {
 	return processStack.size() + cacheLoader.size() + noticeURL.stackSize();
     }

@@ -526,7 +526,7 @@ public final class httpc {
     		    // this is not an error: it's ok, we waited for that
     		} catch (java.net.SocketTimeoutException e) {
                     // the same here; should be ok.
-            }
+		}
 	    }
 
 	    // close the streams

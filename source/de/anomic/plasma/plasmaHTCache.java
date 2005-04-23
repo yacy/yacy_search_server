@@ -130,6 +130,10 @@ public final class plasmaHTCache {
 	serverInstantThread.oneTimeJob(this, "cacheScan", log, 5000);
     }
     
+    public void close() throws IOException {
+        responseHeaderDB.close();
+    }
+    
     private String ageString(long date, File f) {
 	String s = Integer.toHexString(f.hashCode());
 	while (s.length() < 8) s = "0" + s;

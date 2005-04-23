@@ -142,6 +142,7 @@ public class kelondroRecords {
 	    throw new IOException("kelondroRecords: tree file " + file + " already exist");
 	this.filename   = file.getCanonicalPath();
         kelondroRA raf = new kelondroFileRA(this.filename);
+        //kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
         init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
         this.cachesize = (int) (buffersize / ((long) (overhead + recordsize)));
         if (cachesize <= 0) {
@@ -239,6 +240,7 @@ public class kelondroRecords {
 
         this.filename = file.getCanonicalPath();
         kelondroRA raf = new kelondroFileRA(this.filename);
+        //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
         init(raf);
         this.cachesize = (int) (buffersize / ((long) (overhead + recordsize)));
         if (cachesize <= 0) {
