@@ -149,7 +149,9 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     public  kelondroTables         facilityDB;
     public  plasmaParser           parser;
     public  int                    serverJobs;
-    public boolean terminate = false;
+    
+    private serverSemaphore shutdownSync = new serverSemaphore(0);
+    private boolean terminate = false;
     
     public plasmaSwitchboard(String rootPath, String initPath, String configPath) throws IOException {
 	super(rootPath, initPath, configPath);
@@ -207,7 +209,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         initProfiles();
         
         // make parser
-        parser = new plasmaParser(new File(""));
+        parser = new plasmaParser(new File("yacy.parser"));
         
         // start indexing management
         loadedURL = new plasmaCrawlLURL(new File(plasmaPath, "urlHash.db"), ramLURL);
@@ -502,7 +504,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 	    log.logDebug(stats + " processCase=" + processCase + ", depth=" + entry.depth + ", maxDepth=" + entry.profile.generalDepth() + ", filter=" + entry.profile.generalFilter() + ", initiatorHash=" + initiatorHash + ", status=" + entry.status + ", source=" + ((entry.cacheArray == null) ? "scraper" : "byte[]") + ", url=" + entry.nomalizedURLString); // DEBUG
 
             // parse content
-            plasmaParser.document document;
+            plasmaParserDocument document;
             if (entry.scraper != null) {
                 log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is pre-parsed by scraper");
                 document = parser.transformScraper(entry.url, entry.responseHeader.mime(), entry.scraper);
@@ -1396,5 +1398,19 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         if ((((String) header.get("CLIENTIP", "")).equals("localhost")) && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
         if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         return 0; // wrong password
+    }
+    
+    public void terminate() {
+        this.terminate = true;
+        this.shutdownSync.V();
+    }
+    
+    public boolean isTerminated() {
+        return this.terminate;
+    }
+    
+    public boolean waitForShutdown() throws InterruptedException {
+        this.shutdownSync.P();
+        return this.terminate;
     }
 }

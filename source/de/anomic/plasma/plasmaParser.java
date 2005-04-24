@@ -45,58 +45,196 @@ package de.anomic.plasma;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import de.anomic.server.*;
+
+import org.apache.commons.pool.KeyedPoolableObjectFactory;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool.impl.GenericObjectPool;
+
+import de.anomic.plasma.parser.Parser;
+import de.anomic.server.serverFileUtils;
 import de.anomic.htmlFilter.*;
 
-public class plasmaParser {
+public final class plasmaParser {
     
     public static String mediaExt =
         "swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar," +
-        "sit,hqx,img,dmg,tar,gz,ps,pdf,doc,xls,ppt,ram,bz2,arj";
+        "sit,hqx,img,dmg,tar,gz,ps,xls,ppt,ram,bz2,arj";
     
+    private final Properties parserList;
+
+	private final plasmaParserPool theParserPool;
 
     public plasmaParser(File parserDispatcherPropertyFile) {
-        // this is only a dummy yet because we have only one parser...
         
+        // loading a list of availabe parser from file
+    	Properties prop = new Properties();
+    	try {
+    	    prop.load(new FileInputStream(parserDispatcherPropertyFile));
+    	} catch (IOException e) {
+    	    System.err.println("ERROR: " + parserDispatcherPropertyFile.toString() + " not found in settings path");
+    	}    	
+        this.parserList = prop;
+        
+        /* 
+         * initializing the parser object pool
+         */
+        GenericKeyedObjectPool.Config config = new GenericKeyedObjectPool.Config();
+        
+        // The maximum number of active connections that can be allocated from pool at the same time,
+        // 0 for no limit
+        config.maxActive = 0;
+        
+        // The maximum number of idle connections connections in the pool
+        // 0 = no limit.        
+        config.maxIdle = 10;    
+        
+        config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
+        config.minEvictableIdleTimeMillis = 30000; 
+        
+        this.theParserPool = new plasmaParserPool(new plasmaParserFactory(),config);           
+        
+        /* testing if all parsers could be loaded properly.
+         * This is done now to avoid surprises at runtime. */
+        if (this.parserList.size() > 0) {
+			Iterator parserIterator = this.parserList.values().iterator();
+            while (parserIterator.hasNext()) {
+				String className = (String) parserIterator.next();
+                try {
+					Class.forName(className);
+                } catch (Exception e) {
+                    // if we could not load the parser we remove it from the parser list ...
+                    this.parserList.remove(className);
+                }
+            }
+        }        
     }
     
     public void close() {
-        // frees resources; does nothing yet
-    }
+        // release resources 
+        try {        
+	        // clearing the parser list
+	        this.parserList.clear();
+	        
+	        // closing the parser object pool
+	        this.theParserPool.close();
+        } catch (Exception e) {
+            //
+        }
+    }    
     
-    public document parseSource(URL location, String mimeType, byte[] source) {
-        // make a scraper and transformer
-        htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
-        OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
+    public plasmaParserDocument parseSource(URL location, String mimeType, byte[] source) {
+        
+        Parser theParser = null;
         try {
+            
+            if ((mimeType != null) && (mimeType.indexOf(";") != -1)) {
+                mimeType = mimeType.substring(0,mimeType.indexOf(";"));
+            }                        
+            
+            // getting the correct parser for the given mimeType
+            theParser = this.getParser(mimeType);
+            
+            // if a parser was found we use it ...
+            if (theParser != null) {
+                return theParser.parse(location, mimeType,source);
+            }
+        
+            // ...otherwise we make a html scraper and transformer
+            htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
+            OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
+
             hfos.write(source);
             return transformScraper(location, mimeType, scraper);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
+        } finally {
+            if (theParser != null) {
+                try {
+                    this.theParserPool.returnObject(mimeType, theParser);
+                } catch (Exception e) {
+                }
+            }
         }
     }
 
-    public document parseSource(URL location, String mimeType, File sourceFile) {
-        // make a scraper and transformer
-        htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
-        OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
+    public plasmaParserDocument parseSource(URL location, String mimeType, File sourceFile) {
+
+        Parser theParser = null;
         try {
-	    serverFileUtils.copy(sourceFile, hfos);
+            if ((mimeType != null) && (mimeType.indexOf(";") != -1)) {
+                mimeType = mimeType.substring(0,mimeType.indexOf(";"));
+            }            
+            
+            // getting the correct parser for the given mimeType
+            theParser = this.getParser(mimeType);
+            
+            // if a parser was found we use it ...
+            if (theParser != null) {
+                return theParser.parse(location, mimeType,sourceFile);
+            }    
+            
+            // ...otherwise we make a scraper and transformer
+            htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
+            OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
+            
+			serverFileUtils.copy(sourceFile, hfos);
             return transformScraper(location, mimeType, scraper);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
+        } finally {
+            if (theParser != null) {
+                try {
+                    this.theParserPool.returnObject(mimeType, theParser);
+                } catch (Exception e) {
+                }
+            }
         }
     }
     
-    public document transformScraper(URL location, String mimeType, htmlFilterContentScraper scraper) {
+    public plasmaParserDocument transformScraper(URL location, String mimeType, htmlFilterContentScraper scraper) {
         try {
-            return new document(new URL(urlNormalform(location)),
+            return new plasmaParserDocument(new URL(urlNormalform(location)),
                                 mimeType, null, null, scraper.getHeadline(),
                                 null, null,
                                 scraper.getText(), scraper.getAnchors(), scraper.getImages());
         } catch (MalformedURLException e) {
             return null;
         }
+    }
+    
+    /**
+     * This function is used to determine the parser class that should be used for a given
+     * mimetype ...
+     * @param mimeType
+     * @return
+     */
+    public Parser getParser(String mimeType) {
+        
+        if (mimeType == null) {            
+            // TODO: do automatic mimetype detection
+            return null;
+        }
+        
+        try {
+	        if (this.parserList.containsKey(mimeType)) {
+	            String parserClassName = (String)this.parserList.get(mimeType);
+	            
+                // fetching a new parser object from pool  
+				Parser theParser = (Parser) this.theParserPool.borrowObject(parserClassName);
+                
+                // checking if the created parser really supports the given mimetype 
+                HashSet supportedMimeTypes = theParser.getSupportedMimeTypes();
+                if ((supportedMimeTypes != null) && (supportedMimeTypes.contains(mimeType))) {
+					return theParser;
+                }
+                this.theParserPool.returnObject(parserClassName,theParser);
+	        }
+        } catch (Exception e) {
+            System.err.println("ERROR: Unable to load the correct parser for type " + mimeType);
+        }
+        
+        return null;
+        
     }
     
     public static String urlNormalform(URL url) {
@@ -114,160 +252,7 @@ public class plasmaParser {
         return us;
     }   
     
-    public class document {
-        
-        URL location;       // the source url
-        String mimeType;    // mimeType as taken from http header
-        String keywords;    // most resources provide a keyword field
-        String shortTitle;  // a shortTitle mostly appears in the window header (border)
-        String longTitle;   // the real title of the document, commonly h1-tags
-        String[] sections;  // if present: more titles/headlines appearing in the document
-        String abstrct;     // an abstract, if present: short content description
-        byte[] text;        // the clear text, all that is visible
-        Map anchors;        // all links embedded as clickeable entities (anchor tags)
-        Map images;         // all visible pictures in document
-        // the anchors and images - Maps are URL-to-EntityDescription mappings.
-        // The EntityDescription appear either as visible text in anchors or as alternative
-        // text in image tags.
-        Map hyperlinks;
-        Map medialinks;
-        Map emaillinks;
-                        
-        public document(URL location, String mimeType,
-                        String keywords, String shortTitle, String longTitle,
-                        String[] sections, String abstrct,
-                        byte[] text, Map anchors, Map images) {
-            this.location = location;
-            this.mimeType = mimeType;
-            this.keywords = keywords;
-            this.shortTitle = shortTitle;
-            this.longTitle = longTitle;
-            this.sections = sections;
-            this.abstrct = abstrct;
-            this.text = text;
-            this.anchors = anchors;
-            this.images = images;
-            this.hyperlinks = null;
-            this.medialinks = null;
-            this.emaillinks = null;
-        }
-        
-        private String absolutePath(String relativePath) {
-            try {
-                return urlNormalform(new URL(location, relativePath));
-            } catch (Exception e) {
-                return "";
-            }
-        }
-        
-        public String getMainShortTitle() {
-            if (shortTitle != null) return shortTitle; else return longTitle;
-        }
-        
-        public String getMainLongTitle() {
-            if (longTitle != null) return longTitle; else return shortTitle;
-        }
-        
-        public String[] getSectionTitles() {
-            if (sections != null) return sections; else return new String[]{getMainLongTitle()};
-        }
-
-        public String getAbstract() {
-            if (abstrct != null) return abstrct; else return getMainLongTitle();
-        }
-        
-        public byte[] getText() {
-            // returns only the clear (visible) text (not the source data)
-            return text;
-        }
-        
-        public Map getAnchors() {
-            // returns all links embedded as anchors (clickeable entities)
-            return anchors;
-        }
-        
-        public Map getImages() {
-            // returns all links enbedded as pictures (visible iin document)
-            return images;
-        }
-        
-        // the next three methods provide a calculated view on the getAnchors/getImages:
-        
-        public Map getHyperlinks() {
-            // this is a subset of the getAnchor-set: only links to other hyperrefs
-            if (hyperlinks == null) resortLinks();
-            return hyperlinks;
-        }
-        
-        public Map getMedialinks() {
-            // this is partly subset of getAnchor and getImage: all non-hyperrefs
-            if (medialinks == null) resortLinks();
-            return medialinks;
-        }
-        
-        public Map getEmaillinks() {
-            // this is part of the getAnchor-set: only links to email addresses
-            if (emaillinks == null) resortLinks();
-            return emaillinks;
-        }
-        
-        private synchronized void resortLinks() {
-            Iterator i;
-            String url;
-            int extpos;
-            String ext;
-            i = anchors.entrySet().iterator();
-            hyperlinks = new HashMap();
-            medialinks = new HashMap();
-            emaillinks = new HashMap();
-            Map.Entry entry;
-            while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                url = (String) entry.getKey();
-                if ((url != null) && (url.startsWith("mailto:"))) {
-                    emaillinks.put(url.substring(7), entry.getValue());
-                } else {
-                    extpos = url.lastIndexOf(".");
-                    String normal;
-                    if (extpos > 0) {
-                        ext = url.substring(extpos).toLowerCase();
-                        normal = urlNormalform(url);
-                        if (normal != null) {
-                            if (mediaExt.indexOf(ext.substring(1)) >= 0) {
-                                // this is not an normal anchor, its a media link
-                                medialinks.put(normal, entry.getValue());
-                            } else {
-                                hyperlinks.put(normal, entry.getValue());
-                            }
-                        }
-                    }
-                }
-            }
-            // finally add the images to the medialinks
-            i = images.entrySet().iterator();
-            String normal;
-            while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                url = (String) entry.getKey();
-                normal = urlNormalform(url);
-                if (normal != null) medialinks.put(normal, entry.getValue()); // avoid NullPointerException
-            }
-            expandHyperlinks();
-        }
-        
-        
-        public synchronized void expandHyperlinks() {
-            // we add artificial hyperlinks to the hyperlink set that can be calculated from
-            // given hyperlinks and imagelinks
-            hyperlinks.putAll(allReflinks(hyperlinks));
-            hyperlinks.putAll(allReflinks(medialinks));
-            hyperlinks.putAll(allSubpaths(hyperlinks));
-            hyperlinks.putAll(allSubpaths(medialinks));
-        }
-        
-    }
-    
-    private static Map allReflinks(Map links) {
+    static Map allReflinks(Map links) {
         // we find all links that are part of a reference inside a url
         HashMap v = new HashMap();
         Iterator i = links.keySet().iterator();
@@ -293,7 +278,7 @@ public class plasmaParser {
         return v;
     }
     
-    private static Map allSubpaths(Map links) {
+    static Map allSubpaths(Map links) {
         HashMap v = new HashMap();
         Iterator i = links.keySet().iterator();
         String s;
@@ -312,4 +297,93 @@ public class plasmaParser {
         return v;
     }
     
+    public static void main(String[] args) {
+		try {            
+			plasmaParser theParser = new plasmaParser(new File("yacy.parser"));
+            FileInputStream theInput = new FileInputStream(new File("Y:/public_html/test.pdf"));
+			ByteArrayOutputStream theOutput = new ByteArrayOutputStream();
+            serverFileUtils.copy(theInput, theOutput);
+            
+            theParser.parseSource(new URL("http://brain"),"application/pdf",theOutput.toByteArray());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+	}
+    
 }
+
+final class plasmaParserFactory implements KeyedPoolableObjectFactory {
+    
+    public plasmaParserFactory() {
+        super();  
+    }
+    
+    /**
+     * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
+     */
+    public Object makeObject(Object key) throws Exception {
+        
+        if (!(key instanceof String))
+            throw new IllegalArgumentException("The object key must be of type string.");
+        
+        Class moduleClass = Class.forName((String)key);
+        return moduleClass.newInstance();
+    }          
+    
+     /**
+     * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
+     */
+    public void destroyObject(Object key, Object obj) {
+        if (obj instanceof Parser) {
+            Parser theParser = (Parser) obj;
+        }
+    }
+    
+    /**
+     * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
+     */
+    public boolean validateObject(Object key, Object obj) {
+        if (obj instanceof Parser) {
+            Parser theParser = (Parser) obj;
+            return true;
+        }
+        return true;
+    }
+    
+    /**
+     * @param obj 
+     * 
+     */
+    public void activateObject(Object key, Object obj)  {
+        //log.debug(" activateObject...");
+    }
+
+    /**
+     * @param obj 
+     * 
+     */
+    public void passivateObject(Object key, Object obj) { 
+        //log.debug(" passivateObject..." + obj);
+        if (obj instanceof Parser)  {
+            Parser theParser = (Parser) obj;
+            theParser.reset();
+        }
+    }
+}    
+
+final class plasmaParserPool extends GenericKeyedObjectPool {
+
+    public plasmaParserPool(plasmaParserFactory objFactory,
+            GenericKeyedObjectPool.Config config) {
+        super(objFactory, config);
+    }
+    
+
+    public Object borrowObject(Object key) throws Exception  {
+       return super.borrowObject(key);
+    }
+
+    public void returnObject(Object key, Object borrowed) throws Exception  {
+        super.returnObject(key,borrowed);
+    }        
+}   

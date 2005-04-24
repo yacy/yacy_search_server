@@ -114,7 +114,7 @@ public class CacheAdmin_p {
                     else {
                         htmlFilterContentScraper scraper = new htmlFilterContentScraper(url);
                         OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                        plasmaParser.document document = switchboard.parser.transformScraper(url, "text/html", scraper);
+                        plasmaParserDocument document = switchboard.parser.transformScraper(url, "text/html", scraper);
                         serverFileUtils.copy(file, os);
                         info += "<b>HEADLINE:</b><br>" + scraper.getHeadline() + "<br><br>";
                         info += "<b>HREF:</b><br>" + formatAnchor(document.getHyperlinks()) + "<br>";

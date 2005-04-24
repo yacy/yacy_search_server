@@ -79,7 +79,7 @@ public final class yacy {
 
     // static objects
     private static final String vString = "@REPL_VERSION@";
-    private static final String vDATE   = "@REPL_DATE@";
+    private static final String vDATE   = "20050422";
     private static final String copyright = "[ YACY Proxy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
     
@@ -237,10 +237,9 @@ public final class yacy {
 			serverSystem.openBrowser("http://localhost:" + port + "/" + browserPopUpPage, browserPopUpApplication);
 		    }
 
-		    // loop and wait
-		    while (!(sb.terminate)) try {
-			Thread.currentThread().sleep(1000); // wait a while
-                        // System.gc(); // prevent that we catch too much memory
+            // wait for server shutdown
+			try {
+                sb.waitForShutdown();
 		    } catch (Exception e) {
                         serverLog.logError("MAIN CONTROL LOOP", "PANIK: " + e.getMessage());
                         e.printStackTrace();
@@ -259,7 +258,7 @@ public final class yacy {
                     
                     // idle until the processes are down
                     while (server.isAlive()) {
-			Thread.currentThread().sleep(2000); // wait a while
+						Thread.currentThread().sleep(2000); // wait a while
                     }
                     serverLog.logSystem("SHUTDOWN", "server has terminated");
                     sb.close();

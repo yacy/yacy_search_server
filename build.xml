@@ -5,6 +5,7 @@
 	
 <property name="src" location="source"/>
 <property name="lib" location="lib"/>
+<property name="libx" location="libx"/>
 <property name="build" location="classes"/>
 <property name="htroot" location="htroot"/>
 
@@ -39,6 +40,13 @@
         	<!-- libs needed for the yacy thread/object-pools -->
           	<pathelement location="${lib}/commons-collections.jar" />
         	<pathelement location="${lib}/commons-pool-1.2.jar" />        	
+        	
+        	<!-- libs needed to parse pdf files -->
+          	<pathelement location="${libx}/PDFBox-0.7.1.jar" />        	
+          	<pathelement location="${libx}/log4j-1.2.9.jar" />    
+        	
+        	<!-- libs needed for parsing doc files -->
+          	<pathelement location="${libx}/tm-extractors-0.4.jar" />         		
         </classpath>		
 	</javac>	
 	<javac srcdir="${htroot}/" destdir="${htroot}" classpath="${build}"/>

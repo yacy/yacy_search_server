@@ -73,7 +73,7 @@ public class Steering {
         }
         
 	if (post.containsKey("shutdown")) {
-            switchboard.terminate = true;
+            switchboard.terminate();
             prop.put("info", 3);//shutting down
             return prop;
         }

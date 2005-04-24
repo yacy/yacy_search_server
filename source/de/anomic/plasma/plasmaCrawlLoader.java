@@ -192,75 +192,14 @@ public final class plasmaCrawlLoader extends Thread {
 }
 
 
-
-final class Semaphore  {
-   private long currentValue = 0;    
-   private long maximumValue = Long.MAX_VALUE;
-    
-   protected Semaphore()  {
-       this(0,Long.MAX_VALUE);
-   }
-   
-   public Semaphore(long initialValue)  {
-       this(initialValue,Long.MAX_VALUE);
-   }    
-
-   protected Semaphore(long initialValue, long maxValue) {
-       /* some errorhandling */
-       if (maxValue < initialValue) {
-           throw new IllegalArgumentException("The semaphore maximum value must not be " +
-                                              "greater than the semaphore init value.");
-       }
-       
-       if (maxValue < 1)  {
-            throw new IllegalArgumentException("The semaphore maximum value must be greater or equal 1.");          
-       }
-       
-       if (initialValue < 0) {
-            throw new IllegalArgumentException("The semaphore initial value must be greater or equal 0.");          
-       }
-       
-       
-       // setting the initial Sempahore Values
-       this.currentValue = initialValue;
-       this.maximumValue = maxValue;        
-   }
-   
-   public synchronized void P() throws InterruptedException
-   {   
-        this.currentValue-- ;           
-       
-        if (this.currentValue < 0) {    
-            try  { 
-                wait();
-            } catch(InterruptedException e) { 
-                this.currentValue++;
-                throw e;
-            }
-        }
-   }
-
-   public synchronized void V() {
-       if (this.currentValue+1 == this.maximumValue) {
-             throw new IndexOutOfBoundsException("The maximum value of the semaphore was reached");
-       }        
-       
-       this.currentValue++;        
-        
-       if (this.currentValue <= 0) {
-           notify();
-       }   
-    }
-}
-
 class CrawlerMessageQueue {
-    private final Semaphore readSync;
-    private final Semaphore writeSync;
+    private final serverSemaphore readSync;
+    private final serverSemaphore writeSync;
     private final ArrayList messageList;
     
     public CrawlerMessageQueue()  {
-        this.readSync  = new Semaphore (0);
-        this.writeSync = new Semaphore (1);
+        this.readSync  = new serverSemaphore (0);
+        this.writeSync = new serverSemaphore (1);
         
         this.messageList = new ArrayList(10);        
     }
