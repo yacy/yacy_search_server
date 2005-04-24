@@ -5,7 +5,6 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2005
 //
-//this file is contributed by Martin Thelian
 //last major change: 24.04.2005
 //
 //This program is free software; you can redistribute it and/or modify
@@ -72,12 +71,12 @@ public class plasmaParserDocument {
                     String[] sections, String abstrct,
                     byte[] text, Map anchors, Map images) {
         this.location = location;
-        this.mimeType = mimeType;
-        this.keywords = keywords;
-        this.shortTitle = shortTitle;
-        this.longTitle = longTitle;
+        this.mimeType = (mimeType==null)?"application/octet-stream":mimeType;
+        this.keywords = (keywords==null)?"":keywords;
+        this.shortTitle = (shortTitle==null)?"":shortTitle;
+        this.longTitle = (longTitle==null)?"":longTitle;
         this.sections = sections;
-        this.abstrct = abstrct;
+        this.abstrct = (abstrct==null)?"":abstrct;
         this.text = text;
         this.anchors = (anchors==null)?new HashMap():anchors;
         this.images = (images==null)?new HashMap():images;
