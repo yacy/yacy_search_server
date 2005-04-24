@@ -66,7 +66,9 @@ public final class plasmaParser {
 
     public plasmaParser(File parserDispatcherPropertyFile) {
         
-        // loading a list of availabe parser from file
+        /* ===================================================
+         * loading a list of availabe parser from file
+         * =================================================== */ 
     	Properties prop = new Properties();
     	try {
     	    prop.load(new FileInputStream(parserDispatcherPropertyFile));
@@ -75,9 +77,9 @@ public final class plasmaParser {
     	}    	
         this.parserList = prop;
         
-        /* 
+        /* ===================================================
          * initializing the parser object pool
-         */
+         * =================================================== */
         GenericKeyedObjectPool.Config config = new GenericKeyedObjectPool.Config();
         
         // The maximum number of active connections that can be allocated from pool at the same time,
@@ -93,8 +95,10 @@ public final class plasmaParser {
         
         this.theParserPool = new plasmaParserPool(new plasmaParserFactory(),config);           
         
-        /* testing if all parsers could be loaded properly.
-         * This is done now to avoid surprises at runtime. */
+        /* ===================================================
+         * testing if all parsers could be loaded properly.
+         * This is done now to avoid surprises at runtime. 
+         * =================================================== */
         if (this.parserList.size() > 0) {
 			Iterator parserIterator = this.parserList.values().iterator();
             while (parserIterator.hasNext()) {
