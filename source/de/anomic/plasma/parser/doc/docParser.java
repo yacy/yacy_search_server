@@ -54,7 +54,7 @@ public class docParser implements Parser {
     /**
      * a list of mime types that are supported by this parser class
      */
-    public static final HashSet<String> SUPPORTED_MIME_TYPES = new HashSet<String>(Arrays.asList(new String[] {
+    public static final HashSet SUPPORTED_MIME_TYPES = new HashSet(Arrays.asList(new String[] {
         new String("application/msword")
     }));     
     
