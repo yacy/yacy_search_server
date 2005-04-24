@@ -12,13 +12,6 @@
 # port number of server
 port = 8080
 
-# shutdown time limit
-# this is the time that a peer takes at most for shutdown
-# the shutdown-procedure is difficult since there are many
-# caches that must be flushed first
-# measured in seconds
-shutdownWaiting = 120
-
 # time-out of client control socket in milliseconds
 # since this applies only to the client-proxy connection,
 # it can be rather short
@@ -93,19 +86,6 @@ parseableMime=application/xhtml+xml,text/html,text/plain
 # this is important to recognize <a href> - tags as not-html reference
 # These files will be excluded from indexing
 mediaExt=swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar,sit,hqx,img,dmg,tar,gz,ps,pdf,doc,xls,ppt,ram,bz2,arj,jar,deb,torrent,ogg,iso,bin,ace,tgz,rpm,css
-
-# the proxy's and indexing maximum ram cache size in megabytes
-ramCacheSize = 12
-# ram cache is partitioned into different separate caches
-# we define percentual shares of the complete ram cache
-# values here are computed from usage profiles and should not be changed
-# it is not computed if the complete sum of percentages computes to 100
-ramCachePercentRWI     = 85
-ramCachePercentHTTP    =  6
-ramCachePercentLURL    =  4
-ramCachePercentDHT     =  3
-ramCachePercentMessage =  1
-ramCachePercentWiki    =  1
 
 # Promotion Strings
 # These strings appear in the Web Mask of the YACY search client
@@ -401,3 +381,35 @@ xpstopw=true
 80_dequeue_busysleep=1000
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
+
+# ram cache for database files
+
+# ram cache for indexCache.db
+ramCacheRWI     = 16777216
+
+# ram cache for responseHeader.db
+ramCacheHTTP    =  1048576
+
+# ram cache for urlHash.db
+ramCacheLURL    =  8388608
+
+# ram cache for urlNotice.db
+ramCacheNURL    =  1048576
+
+# ram cache for urlErr.db 
+ramCacheEURL    =   131072
+
+# ram cache for message.db
+ramCacheMessage =     8192
+
+# ram cache for wiki.db
+ramCacheWiki    =     8192
+
+# performance properties for the word index cache
+# wordCacheMax is the number of word indexes that shall be held in the
+# ram cache during indexing. When YaCy is shut down, this cache must be
+# flushed to disc; this may last some minutes.
+# maxWaitingWordFlush gives the number of seconds that the shutdown
+# may last for the word flush
+wordCacheMax = 10000
+maxWaitingWordFlush = 180

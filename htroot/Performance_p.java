@@ -109,11 +109,7 @@ public class Performance_p {
             prop.put("table_" + c + "_sleeppercycle", ((idleCycles + busyCycles) == 0) ? "-" : ("" + (sleeptime / (idleCycles + busyCycles))));
             prop.put("table_" + c + "_execpercycle", (busyCycles == 0) ? "-" : ("" + (exectime / busyCycles)));
             
-            if (post == null) {
-                // load with old values
-                idlesleep = Long.parseLong(switchboard.getConfig(threadName + "_idlesleep" , "1000"));
-                busysleep = Long.parseLong(switchboard.getConfig(threadName + "_busysleep", "1000"));
-            } else {
+            if ((post != null) && (post.containsKey("delaysubmit"))) {
                 // load with new values
                 idlesleep = Long.parseLong((String) post.get(threadName + "_idlesleep", "1")) * 1000;
                 busysleep = Long.parseLong((String) post.get(threadName + "_busysleep", "1")) * 1000;
@@ -122,6 +118,10 @@ public class Performance_p {
                 switchboard.setThreadSleep(threadName, idlesleep, busysleep);
                 switchboard.setConfig(threadName + "_idlesleep", idlesleep);
                 switchboard.setConfig(threadName + "_busysleep", busysleep);
+            } else {
+                // load with old values
+                idlesleep = Long.parseLong(switchboard.getConfig(threadName + "_idlesleep" , "1000"));
+                busysleep = Long.parseLong(switchboard.getConfig(threadName + "_busysleep", "1000"));
             }
             prop.put("table_" + c + "_idlesleep", idlesleep / 1000);
             prop.put("table_" + c + "_busysleep", busysleep  / 1000);
@@ -129,6 +129,19 @@ public class Performance_p {
             c++;
         }
         prop.put("table", c);
+        
+        if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
+            int wordCacheMax = Integer.parseInt((String) post.get("wordCacheMax", "10000"));
+            switchboard.setConfig("wordCacheMax", "" + wordCacheMax);
+            switchboard.wordIndex.setMaxWords(wordCacheMax);
+            int maxWaitingWordFlush = Integer.parseInt((String) post.get("maxWaitingWordFlush", "180"));
+            switchboard.setConfig("maxWaitingWordFlush", "" + maxWaitingWordFlush);
+        }
+        // table cache settings
+        prop.put("wordCacheRAMSize", switchboard.wordIndex.wordCacheRAMSize());
+        prop.put("maxURLinWordCache", "" + switchboard.wordIndex.maxURLinWordCache());
+        prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
+        prop.put("wordCacheMax", switchboard.getConfig("wordCacheMax", "10000"));
         
         // return rewrite values for templates
         return prop;

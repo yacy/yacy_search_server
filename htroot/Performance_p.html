@@ -9,7 +9,7 @@
 <br><br>
 <h2>Performance</h2>
 <p>
-You can manipulate some performance attributes here.<br>
+<div class=small><b>Scheduled tasks overview and waiting time settings:</b></div>
 <form action="Performance_p.html" method="post" enctype="multipart/form-data">
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader" valign="bottom">
@@ -47,10 +47,66 @@ You can manipulate some performance attributes here.<br>
 <td class="small" align="left">#[longdescr]#</td>
 </tr>
 #{/table}#
-</table><br>
+<tr class="TableCellLight">
+<td class="small" align="left" colspan="16">
 <input type="submit" name="delaysubmit" value="Submit New Delay Values">
-Changes take effect immidiately
+Changes take effect immidiately</td>
+</tr>
+</table>
 </p></form>
+
+<p>
+<div class=small><b>Indexing Cache Settings:</b></div>
+<table border="0" cellpadding="5" cellspacing="0" width="100%">
+<form action="Performance_p.html" method="post" enctype="multipart/form-data">
+  <tr valign="top" class="TableCellDark">
+    <td width="120"></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Words in RAM Cache:</td>
+    <td class=small>#[wordCacheRAMSize]#</td>
+    <td class=small>
+    This is the current size of the word cache.
+    The smaller this number, the faster will be the shut-down procedure.
+    The maximum of this cache can be set below.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Maximum URLs currently assigned<br>to one cached word:</td>
+    <td class=small>#[maxURLinWordCache]#</td>
+    <td class=small>
+    This is the maximum size of URLs assigned to a single word cache entry.
+    If this is a big number, it shows that the caching works efficiently.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Maximum number of Word Caches:</td>
+    <td class=small><input name="wordCacheMax" type="text" size="20" maxlength="100" value="#[wordCacheMax]#"></td>
+    <td class=small>
+    This is is the number of word indexes that shall be held in the
+    ram cache during indexing. When YaCy is shut down, this cache must be
+    flushed to disc; this may last some minutes.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Maximum waitingtime to flush word cache<br>during shut-down (seconds):</td>
+    <td class=small><input name="maxWaitingWordFlush" type="text" size="6" maxlength="6" value="#[maxWaitingWordFlush]#"></td>
+    <td class=small>
+    This gives the number of seconds that the shutdown
+    may last for the final word flush. Words that cannot be flushed within this
+    time are lost.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellLight">
+    <td class=small colspan="3"><input type="submit" name="cacheSizeSubmit" value="Enter New Cache Size">
+    Changes take effect immidiately</td>
+    </td>
+  </tr>
+</form>
+</table>
+</p>
 #[footer]#
 </body>
 </html>

@@ -61,8 +61,14 @@ public final class httpdSwitchboard extends serverAbstractSwitch implements serv
         cacheStack.addLast(job);
     }
     
-    public void deQueue() {
-        System.out.println("Process: " + cacheStack.removeFirst().toString());
+    public boolean deQueue() {
+        if (cacheStack.size() > 0) {
+            System.out.println("Process: " + cacheStack.removeFirst().toString());
+            return true;
+        } else {
+            System.out.println("Process: queue is empty");
+            return false;
+        }
     }
 
     public serverObjects action(String actionName, serverObjects actionInput) {

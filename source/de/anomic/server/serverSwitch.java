@@ -74,7 +74,7 @@ public interface serverSwitch {
     // work off exactly only one job, not all
     public int queueSize();
     public void enQueue(Object job);
-    public void deQueue();
+    public boolean deQueue(); // returns true if there had been dequeued anything
 
     // authentification routines: sets and reads access attributes according to host addresses
     public void    setAuthentify(InetAddress host, String user, String rigth);

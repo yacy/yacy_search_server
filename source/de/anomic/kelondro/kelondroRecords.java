@@ -142,6 +142,7 @@ public class kelondroRecords {
 	    throw new IOException("kelondroRecords: tree file " + file + " already exist");
 	this.filename   = file.getCanonicalPath();
         kelondroRA raf = new kelondroFileRA(this.filename);
+        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 5000000, 1000);
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
         init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
         this.cachesize = (int) (buffersize / ((long) (overhead + recordsize)));
@@ -240,6 +241,7 @@ public class kelondroRecords {
 
         this.filename = file.getCanonicalPath();
         kelondroRA raf = new kelondroFileRA(this.filename);
+        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 5000000, 1000);
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
         init(raf);
         this.cachesize = (int) (buffersize / ((long) (overhead + recordsize)));
@@ -353,32 +355,6 @@ public class kelondroRecords {
                 // we simply clear the cache
                 this.cacheScore = new kelondroMScoreCluster();
                 this.cache = new HashMap();
-                
-                /*
-                java.util.NoSuchElementException
-                at java.util.TreeMap.key(TreeMap.java:431)
-                at java.util.TreeMap.firstKey(TreeMap.java:286)
-                at de.anomic.kelondro.kelondroMScoreCluster$scoreIterator.internalNext(kelondroMScoreCluster.java:235)
-                at de.anomic.kelondro.kelondroMScoreCluster$scoreIterator.<init>(kelondroMScoreCluster.java:224)
-                at de.anomic.kelondro.kelondroMScoreCluster.scores(kelondroMScoreCluster.java:209)
-                at de.anomic.kelondro.kelondroMScoreCluster.getScores(kelondroMScoreCluster.java:191)
-                at de.anomic.kelondro.kelondroMScoreCluster.getScores(kelondroMScoreCluster.java:185)
-                at de.anomic.kelondro.kelondroMScoreCluster.getMinObject(kelondroMScoreCluster.java:181)
-                at de.anomic.kelondro.kelondroRecords.checkCacheSpace(kelondroRecords.java:344)
-                at de.anomic.kelondro.kelondroRecords.access$1500(kelondroRecords.java:74)
-                at de.anomic.kelondro.kelondroRecords$Node.updateNode(kelondroRecords.java:624)
-                at de.anomic.kelondro.kelondroRecords$Node.<init>(kelondroRecords.java:399)
-                at de.anomic.kelondro.kelondroRecords$Node.<init>(kelondroRecords.java:350)
-                at de.anomic.kelondro.kelondroRecords.getNode(kelondroRecords.java:321)
-                at de.anomic.kelondro.kelondroTree$Search.searchproc(kelondroTree.java:265)
-                at de.anomic.kelondro.kelondroTree$Search.<init>(kelondroTree.java:246)
-                at de.anomic.kelondro.kelondroTree.get(kelondroTree.java:317)
-                at de.anomic.plasma.plasmaURL.exists(plasmaURL.java:106)
-                at de.anomic.plasma.plasmaSwitchboard.stackCrawl(plasmaSwitchboard.java:389)
-                at de.anomic.plasma.plasmaSwitchboard.processResourceStack(plasmaSwitchboard.java:304)
-                at de.anomic.plasma.plasmaSwitchboard.deQueue(plasmaSwitchboard.java:262)
-                at yacyProxy.main(yacyProxy.java:228)
-                 */
             }
         }
     }

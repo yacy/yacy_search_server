@@ -190,19 +190,20 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         }
         
 	// read memory amount
-        int ramCacheKB = Integer.parseInt(getConfig("ramCacheSize", "1")) * 0x400;
-        int ramLURL =  ramCacheKB * Integer.parseInt(getConfig("ramCachePercentLURL", "1")) / 100;
-        int ramPURL = ramLURL / 2;
-        int ramEURL = ramLURL / 2;
-        int ramRWI  =  ramCacheKB * Integer.parseInt(getConfig("ramCachePercentRWI", "1")) / 100;
-        int ramHTTP =  ramCacheKB * Integer.parseInt(getConfig("ramCachePercentHTTP", "1")) / 100;
-        int ramMessage = ramCacheKB * Integer.parseInt(getConfig("ramCachePercentMessage", "1")) / 100;
-        int ramWiki =  ramCacheKB * Integer.parseInt(getConfig("ramCachePercentWiki", "1")) / 100;
-        log.logSystem("LURL    Cache memory = " + ramLURL + " KB");
-        log.logSystem("RWI     Cache memory = " + ramRWI  + " KB");
-        log.logSystem("HTTP    Cache memory = " + ramHTTP + " KB");
-        log.logSystem("Message Cache memory = " + ramMessage + " KB");
-        log.logSystem("Wiki    Cache memory = " + ramWiki + " KB");
+        int ramLURL    = Integer.parseInt(getConfig("ramCacheLURL", "1024")) / 1024;
+        int ramNURL    = Integer.parseInt(getConfig("ramCacheNURL", "1024")) / 1024;
+        int ramEURL    = Integer.parseInt(getConfig("ramCacheEURL", "1024")) / 1024;
+        int ramRWI     = Integer.parseInt(getConfig("ramCacheRWI",  "1024")) / 1024;
+        int ramHTTP    = Integer.parseInt(getConfig("ramCacheHTTP", "1024")) / 1024;
+        int ramMessage = Integer.parseInt(getConfig("ramCacheMessage", "1024")) / 1024;
+        int ramWiki    = Integer.parseInt(getConfig("ramCacheWiki", "1024")) / 1024;
+        log.logSystem("LURL    Cache memory = " + ppRamString(ramLURL));
+        log.logSystem("NURL    Cache memory = " + ppRamString(ramNURL));
+        log.logSystem("EURL    Cache memory = " + ppRamString(ramEURL));
+        log.logSystem("RWI     Cache memory = " + ppRamString(ramRWI));
+        log.logSystem("HTTP    Cache memory = " + ppRamString(ramHTTP));
+        log.logSystem("Message Cache memory = " + ppRamString(ramMessage));
+        log.logSystem("Wiki    Cache memory = " + ppRamString(ramWiki));
         
 	// make crawl profiles database and default profiles
         profiles = new plasmaCrawlProfile(new File(plasmaPath, "crawlProfiles0.db"));
@@ -213,10 +214,10 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         
         // start indexing management
         loadedURL = new plasmaCrawlLURL(new File(plasmaPath, "urlHash.db"), ramLURL);
-        noticeURL = new plasmaCrawlNURL(plasmaPath, ramPURL);
+        noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL);
         errorURL = new plasmaCrawlEURL(new File(plasmaPath, "urlErr0.db"), ramEURL);
-	//indexCache = new plasmaWordIndexRAMCache(plasmaPath, 2000, ramRWI);
-        wordIndex = new plasmaWordIndex(plasmaPath, ramRWI);
+	wordIndex = new plasmaWordIndex(plasmaPath, ramRWI);
+        wordIndex.setMaxWords(10000);
 	searchManager = new plasmaSearch(loadedURL, wordIndex);
         
         // start a cache manager
@@ -290,6 +291,15 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                      new serverInstantThread(indexDistribution, "job", null), log, 120000);
     }
     
+    private static String ppRamString(int bytes) {
+        if (bytes < 1024) return bytes + " KByte";
+        bytes = bytes / 1024;
+        if (bytes < 1024) return bytes + " MByte";
+        bytes = bytes / 1024;
+        if (bytes < 1024) return bytes + " GByte";
+        return (bytes / 1024) + "TByte";
+    }
+    
     public void handleBusyState(int jobs) {
         this.serverJobs = jobs;
     }
@@ -359,7 +369,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         log.logSystem("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         terminateAllThreads(true);
         log.logSystem("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing (stand by..)");
-        int waitingBoundSeconds = Integer.parseInt(getConfig("shutdownWaiting", "120"));
+        int waitingBoundSeconds = Integer.parseInt(getConfig("maxWaitingWordFlush", "120"));
         wordIndex.close(waitingBoundSeconds);
         log.logSystem("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
         try {
@@ -397,16 +407,18 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         processStack.addLast(entry);
     }
 
-    public synchronized void deQueue() {
+    public synchronized boolean deQueue() {
         if (serverJobs < 6) {
             if (processStack.size() > 0) {
                 processResourceStack((plasmaHTCache.Entry) processStack.removeFirst());
+                return true;
             }
         } else {
             //if (processStack.size() > 0) {
                 log.logDebug("DEQUEUE: serverJobs=" + serverJobs + " 'busy' - no dequeueing (processStack=" + processStack.size() + ", localStackSize=" + noticeURL.localStackSize() + ", remoteStackSize=" + noticeURL.remoteStackSize() + ")");
             //}
         }
+        return false;
     }
     
     public int cleanupJobSize() {
@@ -444,7 +456,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     }
     
     public boolean localCrawlJob() {
-        if ((serverJobs < 2) &&
+        if ((serverJobs < 6) &&
             (processStack.size() < crawlSlots) &&
             (noticeURL.localStackSize() > 0) &&
             (cacheLoader.size() < crawlSlots)) {

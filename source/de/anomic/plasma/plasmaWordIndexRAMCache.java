@@ -70,12 +70,24 @@ public class plasmaWordIndexRAMCache extends Thread {
 	for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
 
-    public plasmaWordIndexRAMCache(File databaseRoot, int maxWords, int bufferkb) throws IOException {
+    public plasmaWordIndexRAMCache(File databaseRoot, int bufferkb) throws IOException {
 	this.pic = new plasmaWordIndexFileCache(databaseRoot, bufferkb);
 	this.cache = new TreeMap();
 	this.hashScore = new kelondroMScoreCluster();
-	this.maxWords = maxWords;
+	this.maxWords = 1000;
 	this.terminate = false;
+    }
+    
+    public int maxURLinWordCache() {
+        return hashScore.getScore(hashScore.getMaxObject());
+    }
+
+    public int wordCacheRAMSize() {
+        return cache.size();
+    }
+    
+    public void setMaxWords(int maxWords) {
+        this.maxWords = maxWords;
     }
     
     public void run() {
@@ -86,9 +98,9 @@ public class plasmaWordIndexRAMCache extends Thread {
 	    if (hashScore.size() < 100) try {Thread.currentThread().sleep(10000);} catch (InterruptedException e) {}
             while ((!(terminate)) && (cache != null) && (hashScore.size() > 0)) try {
 		//check = hashScore.size();
-		flushSpecific(true);
+		flushSpecific(false);
 		//serverLog.logDebug("PLASMA INDEXING", "single flush. bevore=" + check + "; after=" + hashScore.size());
-                try {Thread.currentThread().sleep(200 + (maxWords / (1 + hashScore.size())));} catch (InterruptedException e) {}
+                try {Thread.currentThread().sleep(10 + ((maxWords / 10) / (1 + hashScore.size())));} catch (InterruptedException e) {}
             } catch (IOException e) {
 		serverLog.logError("PLASMA INDEXING", "PANIK! exception in main cache loop: " + e.getMessage());
                 e.printStackTrace();
@@ -158,7 +170,7 @@ public class plasmaWordIndexRAMCache extends Thread {
 	String key = (String) ((greatest) ? hashScore.getMaxObject() : hashScore.getMinObject());
 	return flushKey(key, "flushSpecific");
     }
-
+    
     private synchronized int flushKey(String key, String caller) throws IOException {
 	Vector v = (Vector) cache.get(key);
 	if (v == null) {
@@ -197,7 +209,7 @@ public class plasmaWordIndexRAMCache extends Thread {
 	// make space for new words
 	int flushc = 0;
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
-	while (hashScore.size() > maxWords) flushc += flushSpecific(false);
+	while (hashScore.size() > maxWords) flushc += flushSpecific(true);
 	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");
 
 	// put new words into cache

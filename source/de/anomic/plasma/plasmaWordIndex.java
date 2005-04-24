@@ -57,8 +57,20 @@ public class plasmaWordIndex {
     
     public plasmaWordIndex(File databaseRoot, int bufferkb) throws IOException {
         this.databaseRoot = databaseRoot;
-        this.ramCache = new plasmaWordIndexRAMCache(databaseRoot, 2000, bufferkb);
+        this.ramCache = new plasmaWordIndexRAMCache(databaseRoot, bufferkb);
         ramCache.start();
+    }
+    
+    public int maxURLinWordCache() {
+        return ramCache.maxURLinWordCache();
+    }
+    
+    public int wordCacheRAMSize() {
+        return ramCache.wordCacheRAMSize();
+    }
+    
+    public void setMaxWords(int maxWords) {
+        ramCache.setMaxWords(maxWords);
     }
     
     public synchronized int addEntry(String wordHash, plasmaWordIndexEntry entry) throws IOException {

@@ -257,7 +257,7 @@ public final class plasmaHTCache {
 		entry.cacheFile.getParentFile().mkdirs();
 		log.logInfo("WRITE FILE (" + entry.cacheArray.length + " bytes) " + entry.cacheFile);
                 serverFileUtils.write(entry.cacheArray, entry.cacheFile);
-		log.logInfo("AFTER WRITE cacheArray = " + entry.cacheFile + ": " + ((entry.cacheArray == null) ? "empty" : "full"));
+		log.logDebug("AFTER WRITE cacheArray = " + entry.cacheFile + ": " + ((entry.cacheArray == null) ? "empty" : "full"));
 		//entry.cacheArray = null;
 	    } catch (FileNotFoundException e) {
 		// this is the case of a "(Not a directory)" error, which should be prohibited

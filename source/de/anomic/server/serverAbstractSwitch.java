@@ -225,7 +225,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     
     abstract public int queueSize();
     abstract public void enQueue(Object job);
-    abstract public void deQueue();
+    abstract public boolean deQueue();
 
 
     // authentification routines:

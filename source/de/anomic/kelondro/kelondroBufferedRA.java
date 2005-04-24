@@ -79,16 +79,10 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
                 // delete elements in buffer if buffer too big
                 Iterator it = bufferScore.scores(true);
                 Integer element = (Integer) it.next();
+                writeBuffer((byte[]) bufferMemory.get(element), element.intValue());
                 bufferMemory.remove(element);
                 int age = bufferScore.deleteScore(element);
-                int minclean = bufferMaxElements / 8;
-                int cleaned = 1;
-                while ((cleaned++ < minclean) && (it.hasNext())) {
-                    element = (Integer) it.next();
-                    bufferMemory.remove(element);
-                    age = bufferScore.deleteScore(element);
-                }
-                de.anomic.server.serverLog.logDebug("CACHE: " + name, "GC; cleaned=" + (cleaned - 1) + ", age=" + ((((int) (0xFFFFFFFFL & System.currentTimeMillis())) - age) / 1000));
+                de.anomic.server.serverLog.logDebug("CACHE: " + name, "GC; age=" + ((((int) (0xFFFFFFFFL & System.currentTimeMillis())) - age) / 1000));
             }
             // add new element
             buffer = new byte[bufferElementSize];
@@ -100,14 +94,6 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
         bufferScore.setScore(bufferNrI, (int) (0xFFFFFFFFL & System.currentTimeMillis()));
         return buffer;
     }
-    
-    /*
-    private static int log2i(int x) {
-        int log = 0;
-        while (x != 0) {x >>= 1; log++;}
-        return log;
-    }
-    */
     
     private void writeBuffer(byte[] buffer, int bufferNr) throws IOException {
         if (buffer == null) return;
@@ -132,7 +118,7 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
         byte[] buffer = readBuffer(bn);
         seekpos++;
         buffer[offset] = (byte) b;
-        writeBuffer(buffer, bn);
+        //writeBuffer(buffer, bn);
     }
 
     public int read(byte[] b, int off, int len) throws IOException {
@@ -165,13 +151,13 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
             // simple case
             System.arraycopy(b, off, buffer, offset, len);
             seekpos += len;
-            writeBuffer(buffer, bn1);
+            //writeBuffer(buffer, bn1);
         } else {
             // do recursively
             int thislen = bufferElementSize - offset;
             System.arraycopy(b, off, buffer, offset, thislen);
             seekpos += thislen;
-            writeBuffer(buffer, bn1);
+            //writeBuffer(buffer, bn1);
             write(b, thislen, len - thislen);
         }
     }
@@ -181,6 +167,13 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
     }
 
     public void close() throws IOException {
+        // write all unwritten buffers
+        Iterator it = bufferScore.scores(true);
+        while (it.hasNext()) {
+            Integer element = (Integer) it.next();
+            writeBuffer((byte[]) bufferMemory.get(element), element.intValue());
+            bufferMemory.remove(element);
+        }
         ra.close();
         bufferScore = null;
         bufferMemory = null;
