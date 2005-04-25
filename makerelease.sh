@@ -45,18 +45,19 @@
 # Contributions and changes to the program code must be marked as such.
 
 # define variables
-version='0.365'
+version='0.366'
 datestr=`date +%Y%m%d`
 #release='yacy_v'$version'_'$datestr
 release='yacy_dev_v'$version'_'$datestr
 target='RELEASE'
 classes='classes'
 lib='lib'
+libx='libx'
 source='source'
 doc='doc'
 data='DATA'
 mainclass='yacy.java'
-classpath='$classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar'
+classpath='$classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar:libx/PDFBox-0.7.1.jar:libx/log4j-1.2.9.jar:libx/tm-extractors-0.4.jar'
 
 mkdir $release
 
@@ -115,6 +116,7 @@ javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic
 javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/http/*.java
 javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/kelondro/*.java
 javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/data/*.java
+javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/plasma/parser/*.java
 javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/plasma/*.java
 javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/yacy/*.java
 javac -classpath $classpath -sourcepath $source -d $classes -g $source/$mainclass
@@ -133,6 +135,8 @@ cp -R $classes/* $release/$classes/
 # copy libs
 mkdir $release/$lib
 cp -R $lib/* $release/$lib/
+mkdir $release/$libx
+cp -R $libx/* $release/$libx/
 
 # copy configuration files
 cp yacy.init $release
@@ -170,6 +174,7 @@ cp $doc/grafics/*.jpg $release/$doc/grafics/
 # copy source code
 mkdir $release/$source
 cp -R $source/* $release/$source/
+rm -fR `find $release/$source/ | grep svn`
 
 # copy server pages
 mkdir $release/htroot
@@ -220,6 +225,7 @@ chmod 644 $release/$source/*.java
 chmod 755 $release/$source/de
 chmod 755 $release/$source/de/anomic
 chmod 755 $release/$source/de/anomic/*
+chmod 755 $release/$source/de/anomic/plasma/parser
 chmod 644 $release/$source/de/anomic/kelondro/*.java
 chmod 644 $release/$source/de/anomic/tools/*.java
 chmod 644 $release/$source/de/anomic/data/*.java
@@ -227,6 +233,7 @@ chmod 644 $release/$source/de/anomic/htmlFilter/*.java
 chmod 644 $release/$source/de/anomic/http/*.java
 chmod 644 $release/$source/de/anomic/net/*.java
 chmod 644 $release/$source/de/anomic/plasma/*.java
+chmod 644 $release/$source/de/anomic/plasma/parser/*.java
 chmod 644 $release/$source/de/anomic/server/*.java
 chmod 644 $release/$source/de/anomic/yacy/*.java
 chmod 755 $release/$classes
@@ -245,6 +252,8 @@ chmod 644 $release/$classes/de/anomic/server/*.class
 chmod 644 $release/$classes/de/anomic/yacy/*.class
 chmod 755 $release/$lib
 chmod 644 $release/$lib/*
+chmod 755 $release/$libx
+chmod 644 $release/$libx/*
 chmod 755 $release/$doc
 chmod 644 $release/$doc/*
 chmod 755 $release/$doc/grafics
