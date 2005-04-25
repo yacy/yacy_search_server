@@ -8,8 +8,8 @@
 # This Software is Copyrighted
 # (C) by Michael Peter Christen; mc@anomic.de
 # first published on http://www.anomic.de
-# Frankfurt, Germany, 2004
-# last major change: 28.12.2004
+# Frankfurt, Germany, 2005
+# last major change: 25.04.2005
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ version='0.366'
 datestr=`date +%Y%m%d`
 #release='yacy_v'$version'_'$datestr
 release='yacy_dev_v'$version'_'$datestr
+extralibs='yacy_libx'
 target='RELEASE'
 classes='classes'
 lib='lib'
@@ -60,6 +61,7 @@ mainclass='yacy.java'
 classpath='$classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar:libx/PDFBox-0.7.1.jar:libx/log4j-1.2.9.jar:libx/tm-extractors-0.4.jar'
 
 mkdir $release
+mkdir $extralibs
 
 # clean up
 rm -Rf $target &> /dev/null
@@ -135,8 +137,10 @@ cp -R $classes/* $release/$classes/
 # copy libs
 mkdir $release/$lib
 cp -R $lib/* $release/$lib/
-mkdir $release/$libx
-cp -R $libx/* $release/$libx/
+rm -fR `find $release/$lib/ | grep svn`
+mkdir $extralibs/$libx
+cp -R $libx/* $extralibs/$libx/
+rm -fR `find $extralibs/$libx/ | grep svn`
 
 # copy configuration files
 cp yacy.init $release
@@ -168,8 +172,9 @@ cp $doc/*.js $release/$doc/
 cp $doc/*.html $release/$doc/
 cp $doc/*.txt $release/$doc/
 cp $doc/grafics/*.gif $release/$doc/grafics/
-cp $doc/grafics/*.ico $release/$doc/grafics/
-cp $doc/grafics/*.jpg $release/$doc/grafics/
+#cp $doc/grafics/*.ico $release/$doc/grafics/
+#cp $doc/grafics/*.jpg $release/$doc/grafics/
+rm -fR `find $release/$doc/ | grep svn`
 
 # copy source code
 mkdir $release/$source
@@ -199,6 +204,7 @@ cp htroot/env/*.css $release/htroot/env/
 cp htroot/env/grafics/* $release/htroot/env/grafics/
 cp htroot/env/templates/*.template $release/htroot/env/templates/
 cp htroot/proxymsg/*.html $release/htroot/proxymsg/
+rm -fR `find $release/htroot/ | grep svn`
 
 # copy add-on's
 mkdir $release/addon
@@ -252,8 +258,6 @@ chmod 644 $release/$classes/de/anomic/server/*.class
 chmod 644 $release/$classes/de/anomic/yacy/*.class
 chmod 755 $release/$lib
 chmod 644 $release/$lib/*
-chmod 755 $release/$libx
-chmod 644 $release/$libx/*
 chmod 755 $release/$doc
 chmod 644 $release/$doc/*
 chmod 755 $release/$doc/grafics
@@ -261,17 +265,25 @@ chmod 644 $release/$doc/grafics/*
 chmod 755 $release/*.command
 chmod 755 $release/*.sh
 chmod 755 $release/addon
+chmod 755 $extralibs/$libx
+chmod 644 $extralibs/$libx/*
 
 # compress files
 tar -cf $release.tar $release
 rm -Rf $release
 gzip -9 $release.tar
 mv $release.tar.gz $target
+tar -cf $extralibs.tar $extralibs
+rm -Rf $extralibs
+gzip -9 $extralibs.tar
+mv $extralibs.tar.gz $target
 
 # make release test file:
 # this file must be copied later on to
-# www.anomic.de/AnomicHTTPProxy/
+# www.yacy.net/yacy/
 echo $version > $doc/release.txt
 
 # finished
-echo finished. created $target/$release.tar.gz
+echo finished.
+echo created $target/$release.tar.gz
+echo created $target/$extralibs.tar.gz
