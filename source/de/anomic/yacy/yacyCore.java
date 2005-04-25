@@ -361,7 +361,7 @@ public class yacyCore {
 	// still no success: ask own NAT or internet responder
 	boolean DI604use = switchboard.getConfig("DI604use", "false").equals("true");
 	String  DI604pw  = switchboard.getConfig("DI604pw", "");
-	String  ip       = natLib.retrieveIP(DI604use, DI604pw);
+	String  ip       = natLib.retrieveIP(DI604use, DI604pw, (switchboard.getConfig("yacyDebugMode", "false")=="false" ? false : true));
 	//System.out.println("DEBUG: new IP=" + ip);
 	seedDB.mySeed.put("IP", ip);
 	if (seedDB.mySeed.get("PeerType", "junior").equals("junior")) // ???????????????

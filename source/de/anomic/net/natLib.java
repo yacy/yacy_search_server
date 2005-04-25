@@ -137,12 +137,12 @@ public class natLib {
 	return null;
     }
 
-    public static String retrieveIP(boolean DI604, String password) {
+    public static String retrieveIP(boolean DI604, String password, boolean yacyDebugMode) {
 	String ip;
 	if (DI604) {
 	    // first try the simple way...
 	    ip = getDI604(password);
-	    if (isProper(ip)) {
+	    if (isProper(ip)||yacyDebugMode) {
 		//System.out.print("{DI604}");
 		return ip;
 	    }
@@ -152,7 +152,7 @@ public class natLib {
 	InetAddress ia = serverCore.publicIP();
 	if (ia != null) {
 	    ip = ia.getHostAddress();
-	    if (isProper(ip)) return ip;
+	    if (isProper(ip)||yacyDebugMode) return ip;
 	}
 
 	// now go the uneasy way and ask some web responder
