@@ -83,8 +83,13 @@ public class Log_p {
 	    //log += it.next() + "\n";
 	    //}
 
+		int startLine=logLines.length-lines;
+		if(startLine<0){
+			startLine=0;
+		}
+
 	    //either all Entries(<lines) or "lines" entries
-	    for(int i=0;i<(lines < logLines.length ? lines : logLines.length);i++){
+	    for(int i=startLine;i<logLines.length;i++){
 		log += (String)logLines[i] + "\n";
 	    }
 	}else{
