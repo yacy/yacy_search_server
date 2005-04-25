@@ -261,6 +261,9 @@ onlineMode=2
 # accepted as peer addresses
 yacyDebugMode=false
 
+#staticIP if you have a static IP, you can use this setting
+staticIP=
+
 # if the process is running behind a NAT or ROUTER, we cannot easily identify
 # the public IP of the process. We can ask a public IP responder, but cannot
 # rely on it. Therefore, AnomicHTTPProxy includes it's own responder.
