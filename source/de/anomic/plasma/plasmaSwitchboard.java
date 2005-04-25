@@ -281,11 +281,11 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         deployThread("60_globalcrawl", "Global Crawl", "thread that performes a single crawl/indexing step of a web page for global crawling",
                      new serverInstantThread(this, "globalCrawlJob", "globalCrawlJobSize"), log, 30000);
         deployThread("50_localcrawl", "Local Crawl", "thread that performes a single crawl step from the local crawl queue",
-                     new serverInstantThread(this, "localCrawlJob", "localCrawlJobSize"), log, 20000);
+                     new serverInstantThread(this, "localCrawlJob", "localCrawlJobSize"), log, 10000);
         deployThread("40_peerseedcycle", "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account",
                      new serverInstantThread(yc, "publishSeedList", null), yc.log, 180000);
         deployThread("30_peerping", "YaCy Core", "this is the p2p-control and peer-ping task",
-                     new serverInstantThread(yc, "peerPing", null), yc.log, 4000);
+                     new serverInstantThread(yc, "peerPing", null), yc.log, 2000);
         indexDistribution = new distributeIndex(100 /*indexCount*/, 8000, 1 /*peerCount*/);
         deployThread("20_dhtdistribution", "DHT Distribution (currently by juniors only)", "selection, transfer and deletion of index entries that are not searched on your peer, but on others",
                      new serverInstantThread(indexDistribution, "job", null), log, 120000);

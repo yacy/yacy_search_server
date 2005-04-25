@@ -113,6 +113,9 @@ public class Performance_p {
                 // load with new values
                 idlesleep = Long.parseLong((String) post.get(threadName + "_idlesleep", "1")) * 1000;
                 busysleep = Long.parseLong((String) post.get(threadName + "_busysleep", "1")) * 1000;
+
+		// check values to prevent short-cut loops
+		if (idlesleep == 0) idlesleep = 1000;
                 
                 // on-the-fly re-configuration
                 switchboard.setThreadSleep(threadName, idlesleep, busysleep);

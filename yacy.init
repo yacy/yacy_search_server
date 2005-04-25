@@ -375,13 +375,13 @@ xpstopw=true
 40_peerseedcycle_idlesleep=1800000
 40_peerseedcycle_busysleep=1200000
 50_localcrawl_idlesleep=5000
-50_localcrawl_busysleep=1000
+50_localcrawl_busysleep=0
 60_globalcrawl_idlesleep=60000
-60_globalcrawl_busysleep=5000
+60_globalcrawl_busysleep=3000
 70_cachemanager_idlesleep=10000
-70_cachemanager_busysleep=4000
+70_cachemanager_busysleep=0
 80_dequeue_idlesleep=4000
-80_dequeue_busysleep=1000
+80_dequeue_busysleep=0
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
 

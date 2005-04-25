@@ -58,7 +58,6 @@ public class Settings_p {
 	//if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
 
 	prop.put("port", env.getConfig("port", "8080"));
-        prop.put("shutdownWaiting", env.getConfig("shutdownWaiting", "120"));
 	prop.put("peerName", env.getConfig("peerName", "nameless"));
 	// set values
 	String s;

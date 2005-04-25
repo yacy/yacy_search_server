@@ -322,7 +322,11 @@ public class kelondroRecords {
         if (cachesize == 0) return new Node(handle, parentNode, referenceInParent);
         Node n = (Node) cache.get(handle);
         if (n == null) {
-            return new Node(handle, parentNode, referenceInParent);
+	    n = new Node(handle, parentNode, referenceInParent);
+	    cache.put(handle, n);
+	    cacheScore.setScore(handle, (int) ((System.currentTimeMillis() - startup) / 1000));
+	    checkCacheSpace();
+	    return n;
         } else {
             cacheScore.setScore(handle, (int) ((System.currentTimeMillis() - startup) / 1000));
             return n;

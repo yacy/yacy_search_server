@@ -190,7 +190,6 @@ public class SettingsAck_p {
         if (post.containsKey("generalsettings")) {
             String port = (String) post.get("port");
             String peerName = (String) post.get("peername");
-            String shutdownWaiting = (String) post.get("shutdownWaiting");
             
             // check if peer name already exists
             yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
@@ -209,12 +208,10 @@ public class SettingsAck_p {
                     // set values
                     env.setConfig("port", port);
                     env.setConfig("peerName", peerName);
-                    env.setConfig("shutdownWaiting", shutdownWaiting);
                     
                     prop.put("info", 12);//port or peername changed
                     prop.put("info_port", port);
                     prop.put("info_peerName", peerName);
-                    prop.put("info_shutdownWaiting", shutdownWaiting);
                 }
             } else {
                 // deny change
