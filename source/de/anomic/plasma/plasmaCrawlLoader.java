@@ -124,6 +124,21 @@ public final class plasmaCrawlLoader extends Thread {
         // start the crawl loader
         this.start();
     }
+    
+    public void close() {
+        try {
+	        // setting the stop flag to true
+	        this.stopped = true;
+	        
+	        // interrupting the plasmaCrawlLoader
+	        this.interrupt();
+	        
+	        // waiting for the thread to finish ...
+	        this.join();
+        } catch (Exception e) {
+            // we where interrupted while waiting for the crawlLoader Thread to finish
+        }
+    }
 
     public ThreadGroup threadStatus() {
         return this.theThreadGroup;

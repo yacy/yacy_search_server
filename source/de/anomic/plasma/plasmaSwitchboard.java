@@ -373,6 +373,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         wordIndex.close(waitingBoundSeconds);
         log.logSystem("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
         try {
+			cacheLoader.close();
             wikiDB.close();
             messageDB.close();
             facilityDB.close();
@@ -380,7 +381,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
             noticeURL.close();
             errorURL.close();
             profiles.close();
-            parser.close();
+            parser.close();            
             cacheManager.close();
 	} catch (IOException e) {}
         log.logSystem("SWITCHBOARD SHUTDOWN TERMINATED");

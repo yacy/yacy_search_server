@@ -1,1 +1,2 @@
 application/pdf=de.anomic.plasma.parser.pdf.pdfParser
+application/msword=de.anomic.plasma.parser.doc.docParser
