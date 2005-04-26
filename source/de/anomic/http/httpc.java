@@ -167,8 +167,8 @@ public final class httpc {
     public static httpc getInstance(String server, int port, int timeout, boolean ssl) throws IOException {
         
         httpc newHttpc = null;
+        // fetching a new httpc from the object pool
         try {
-            // fetching a new httpc from the object pool
             newHttpc = (httpc) httpc.theHttpcPool.borrowObject();
             
         } catch (Exception e) {
@@ -176,7 +176,12 @@ public final class httpc {
         }                 
         
         // initialize it
-        newHttpc.init(server,port,timeout,ssl);        
+        try {
+			newHttpc.init(server,port,timeout,ssl);
+        } catch (IOException e) {
+            try{ httpc.theHttpcPool.returnObject(newHttpc); } catch (Exception e1) {}
+            throw e;
+        }
         return newHttpc;
             
        
@@ -192,9 +197,11 @@ public final class httpc {
     }
 
     protected void finalize() throws Throwable {
-        if (!this.removedFromPool) System.err.println("Httpc object was not returned to object pool.");
-        this.reset();
-        httpc.theHttpcPool.invalidateObject(this);
+        if (!this.removedFromPool) {
+            System.err.println("Httpc object was not returned to object pool.");
+            httpc.theHttpcPool.invalidateObject(this);
+        }
+        this.reset();        
     }
     
     public static String dnsResolve(String host) {
