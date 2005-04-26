@@ -171,15 +171,15 @@ public class plasmaWordIndexRAMCache extends Thread {
 	return flushKey(key, "flushSpecific");
     }
     
-    private synchronized int flushKey(String key, String caller) throws IOException {
-	Vector v = (Vector) cache.get(key);
-	if (v == null) {
-	    //serverLog.logDebug("PLASMA INDEXING", "flushKey: '" + caller + "' forced to flush non-existing key " + key);
-	    return 0;
+    private int flushKey(String key, String caller) throws IOException {
+	Vector v = null;
+	synchronized (cache) {
+	    v = (Vector) cache.get(key);
+	    if (v == null) return 0; // flushing of nonexisting key
+	    cache.remove(key);
+	    hashScore.deleteScore(key);
 	}
 	pic.addEntriesToIndex(key, v);
-	cache.remove(key);
-	hashScore.deleteScore(key);
 	return v.size();
     }
 

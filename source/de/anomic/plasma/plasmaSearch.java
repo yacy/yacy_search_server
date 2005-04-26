@@ -301,10 +301,15 @@ public class plasmaSearch {
 	Enumeration e = searchResult.elements(true);
 	plasmaWordIndexEntry entry;
         long startCreateTime = System.currentTimeMillis();
-	while ((e.hasMoreElements()) &&
-	       ((acc.sizeFetched() < minEntries) || (System.currentTimeMillis() - startCreateTime < maxTime))) {
-	    entry = (plasmaWordIndexEntry) e.nextElement();
-	    acc.addResult(entry);
+	try {
+	    while ((e.hasMoreElements()) &&
+		   ((acc.sizeFetched() < minEntries) || (System.currentTimeMillis() - startCreateTime < maxTime))) {
+		entry = (plasmaWordIndexEntry) e.nextElement();
+		acc.addResult(entry);
+	    }
+	} catch (kelondroException ee) {
+	    serverLog.logError("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage());
+	    ee.printStackTrace();
 	}
         long startSortTime = System.currentTimeMillis();
         acc.sortResults();

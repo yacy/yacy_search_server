@@ -116,7 +116,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 
 
     // load slots
-    private static final int crawlSlots = 6;
+    private static final int crawlSlots = 8;
 
     // couloured list management
     public static TreeSet blueList = null;
@@ -411,19 +411,17 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     public boolean deQueue() {
 	// work off fresh entries from the proxy or from the crawler
 
-	synchronized (processStack) {
-	    if (processStack.size() == 0) return false; // noting to do
-	    
-	    // in case that the server is very busy we do not work off the queue too fast
-	    if (serverJobs > 10) try {Thread.currentThread().sleep(10 * serverJobs);} catch (InterruptedException e) {}
-	    
-	    // do one processing step
-	    log.logDebug("DEQUEUE: serverJobs=" + serverJobs +
-			 ", processStack=" + processStack.size() +
-			 ", localStackSize=" + noticeURL.localStackSize() +
-			 ", remoteStackSize=" + noticeURL.remoteStackSize());
-	    processResourceStack((plasmaHTCache.Entry) processStack.removeFirst());
-	}
+	if (processStack.size() == 0) return false; // nothing to do
+	
+	// in case that the server is very busy we do not work off the queue too fast
+	if (serverJobs > 10) try {Thread.currentThread().sleep(10 * serverJobs);} catch (InterruptedException e) {}
+	
+	// do one processing step
+	log.logDebug("DEQUEUE: serverJobs=" + serverJobs +
+		     ", processStack=" + processStack.size() +
+		     ", localStackSize=" + noticeURL.localStackSize() +
+		     ", remoteStackSize=" + noticeURL.remoteStackSize());
+	processResourceStack((plasmaHTCache.Entry) processStack.removeFirst());
 	return true;
     }
     

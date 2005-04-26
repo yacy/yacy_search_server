@@ -104,7 +104,7 @@ public final class plasmaCrawlWorker extends Thread {
         this.log = log;
     }
 
-    public void execute(plasmaCrawlLoaderMessage theMsg) {
+    public synchronized void execute(plasmaCrawlLoaderMessage theMsg) {
         this.theMsg = theMsg;
         
         this.url = theMsg.url;
