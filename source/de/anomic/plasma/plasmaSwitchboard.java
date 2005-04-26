@@ -770,7 +770,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         }
     }
     
-    private synchronized void processLocalCrawling(plasmaCrawlNURL.entry urlEntry, plasmaCrawlProfile.entry profile, String initiator) {
+    private void processLocalCrawling(plasmaCrawlNURL.entry urlEntry, plasmaCrawlProfile.entry profile, String initiator) {
         // work off one Crawl stack entry
         if ((urlEntry == null) && (urlEntry.url() == null)) {
             log.logInfo("LOCALCRAWL[" + noticeURL.localStackSize() + ", " + noticeURL.remoteStackSize() + "]: urlEntry=null");
