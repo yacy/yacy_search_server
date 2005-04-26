@@ -284,7 +284,7 @@ public class plasmaCrawlLURL extends plasmaURL {
             if (urle != null) try {
                 initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                 executorSeed = yacyCore.seedDB.getConnected(executorHash);
-                cachepath = urle.url().toString().substring(7);
+                cachepath = (urle.url() == null) ? "-not-cached-" : urle.url().toString().substring(7);
                 if (cachepath.endsWith("/")) cachepath = cachepath + "ndx";
                 prop.put("table_indexed_" + c + "_dark", (dark) ? 1 : 0);
                 prop.put("table_indexed_" + c + "_feedbackpage", feedbackpage);

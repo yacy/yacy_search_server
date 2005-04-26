@@ -408,18 +408,23 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         processStack.addLast(entry);
     }
 
-    public synchronized boolean deQueue() {
-        if (serverJobs < 6) {
-            if (processStack.size() > 0) {
-                processResourceStack((plasmaHTCache.Entry) processStack.removeFirst());
-                return true;
-            }
-        } else {
-            //if (processStack.size() > 0) {
-                log.logDebug("DEQUEUE: serverJobs=" + serverJobs + " 'busy' - no dequeueing (processStack=" + processStack.size() + ", localStackSize=" + noticeURL.localStackSize() + ", remoteStackSize=" + noticeURL.remoteStackSize() + ")");
-            //}
-        }
-        return false;
+    public boolean deQueue() {
+	// work off fresh entries from the proxy or from the crawler
+
+	synchronized (processStack) {
+	    if (processStack.size() == 0) return false; // noting to do
+	    
+	    // in case that the server is very busy we do not work off the queue too fast
+	    if (serverJobs > 10) try {Thread.currentThread().sleep(10 * serverJobs);} catch (InterruptedException e) {}
+	    
+	    // do one processing step
+	    log.logDebug("DEQUEUE: serverJobs=" + serverJobs +
+			 ", processStack=" + processStack.size() +
+			 ", localStackSize=" + noticeURL.localStackSize() +
+			 ", remoteStackSize=" + noticeURL.remoteStackSize());
+	    processResourceStack((plasmaHTCache.Entry) processStack.removeFirst());
+	}
+	return true;
     }
     
     public int cleanupJobSize() {
@@ -457,16 +462,25 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     }
     
     public boolean localCrawlJob() {
-        if ((serverJobs < 6) &&
-            (processStack.size() < crawlSlots) &&
-            (noticeURL.localStackSize() > 0) &&
-            (cacheLoader.size() < crawlSlots)) {
-            // local crawl (may start a global crawl)
-            plasmaCrawlNURL.entry nex = noticeURL.localPop();
-            processCrawling(nex, nex.initiator());
-            return true;
-        }
-        return false;
+        if (noticeURL.localStackSize() == 0) return false;
+        if (processStack.size() >= crawlSlots) {
+	    log.logDebug("LocalCrawl: too many processes in queue, dismissed (" +
+			 "processStack=" + processStack.size() + ")");
+	    return false;
+	}
+        if (cacheLoader.size() >= crawlSlots) {
+	    log.logDebug("LocalCrawl: too many loader in queue, dismissed (" +
+			 "cacheLoader=" + cacheLoader.size() + ")");
+	    return false;
+	}
+
+	// if the server is busy, we do crawling more slowly
+        if (serverJobs > 3) try {Thread.currentThread().sleep(100 * serverJobs);} catch (InterruptedException e) {}
+
+	// do a local crawl (may start a global crawl)
+	plasmaCrawlNURL.entry nex = noticeURL.localPop();
+	processCrawling(nex, nex.initiator());
+	return true;
     }
     
     public int globalCrawlJobSize() {
@@ -474,16 +488,30 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     }
     
     public boolean globalCrawlJob() {
-        if ((serverJobs < 2) &&
-            (processStack.size() == 0) &&
-            (noticeURL.localStackSize() == 0) &&
-            (noticeURL.remoteStackSize() > 0)) {
-            // we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
-            plasmaCrawlNURL.entry nex = noticeURL.remotePop();
-            processCrawling(nex, nex.initiator());
-            return true;
-        }
-        return false;
+	// work off crawl requests that had been placed by other peers to our crawl stack
+
+	// do nothing if either there are private processes to be done
+	// or there is no global crawl on the stack
+        if (noticeURL.remoteStackSize() == 0) return false;
+        if (processStack.size() > 0) {
+	    log.logDebug("GlobalCrawl: any processe is in queue, dismissed (" +
+			 "processStack=" + processStack.size() + ")");
+	    return false;
+	}
+	if (noticeURL.localStackSize() > 0) {
+	    log.logDebug("GlobalCrawl: any local crawl is in queue, dismissed (" +
+			 "localStackSize=" + noticeURL.localStackSize() + ")");
+	    return false;
+	}
+
+
+	// if the server is busy, we do this more slowly
+        if (serverJobs > 3) try {Thread.currentThread().sleep(100 * serverJobs);} catch (InterruptedException e) {}
+
+	// we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
+	plasmaCrawlNURL.entry nex = noticeURL.remotePop();
+	processCrawling(nex, nex.initiator());
+	return true;
     }
         
     private synchronized void processResourceStack(plasmaHTCache.Entry entry) {
@@ -742,7 +770,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         if (u == null) return plasmaURL.dummyHash; else return u.toString();
     }
     
-    private synchronized void processCrawling(plasmaCrawlNURL.entry urlEntry, String initiator) {
+    private void processCrawling(plasmaCrawlNURL.entry urlEntry, String initiator) {
         if (urlEntry.url() == null) return;
         String profileHandle = urlEntry.profileHandle();
         //System.out.println("DEBUG plasmaSwitchboard.processCrawling: profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
@@ -915,7 +943,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
             remainingTime = time - (System.currentTimeMillis() - timestamp);
             if (remainingTime < 500) remainingTime = 500;
             if (remainingTime > 3000) remainingTime = 3000;
-            plasmaSearch.result acc = searchManager.order(idx, queryhashes, stopwords, order, remainingTime, 100);
+            plasmaSearch.result acc = searchManager.order(idx, queryhashes, stopwords, order, remainingTime, 10);
             log.logDebug("SEARCH TIME AFTER ORDERING OF SEARCH RESULT: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
             // result is a List of urlEntry elements: prepare answer
@@ -1028,7 +1056,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
             long timestamp = System.currentTimeMillis();
             plasmaWordIndexEntity idx = searchManager.searchHashes(hashes, duetime * 8 / 10); // a nameless temporary index, not sorted by special order but by hash
             long remainingTime = duetime - (System.currentTimeMillis() - timestamp);
-            plasmaSearch.result acc = searchManager.order(idx, hashes, stopwords, new char[]{plasmaSearch.O_QUALITY, plasmaSearch.O_AGE}, remainingTime, 100);
+            plasmaSearch.result acc = searchManager.order(idx, hashes, stopwords, new char[]{plasmaSearch.O_QUALITY, plasmaSearch.O_AGE}, remainingTime, 10);
             
             // result is a List of urlEntry elements
             if (acc == null) {

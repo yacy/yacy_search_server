@@ -73,19 +73,19 @@ public class plasmaWordIndex {
         ramCache.setMaxWords(maxWords);
     }
     
-    public synchronized int addEntry(String wordHash, plasmaWordIndexEntry entry) throws IOException {
+    public int addEntry(String wordHash, plasmaWordIndexEntry entry) throws IOException {
         return ramCache.addEntryToIndexMem(wordHash, entry);
     }
     
-    public synchronized plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty) throws IOException {
+    public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty) throws IOException {
         return ramCache.getIndexMem(wordHash, deleteIfEmpty);
     }
     
-    public synchronized int sizeMin() {
+    public int sizeMin() {
         return ramCache.sizeMin();
     }
     
-    public synchronized int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) throws IOException {
+    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) throws IOException {
         return ramCache.removeEntriesMem(wordHash, urlHashes, deleteComplete);
     }
     

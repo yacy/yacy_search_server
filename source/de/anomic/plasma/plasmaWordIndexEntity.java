@@ -78,12 +78,14 @@ public class plasmaWordIndexEntity {
 	File fp = theLocation.getParentFile();
 	if (fp != null) fp.mkdirs();
 	kelondroTree kt;
+	long cacheSize = theLocation.length();
+	if (cacheSize > 1048576) cacheSize = 1048576;
 	if (theLocation.exists()) {
 	    // open existing index file
-	    kt = new kelondroTree(theLocation, 0x400);
+	    kt = new kelondroTree(theLocation, cacheSize);
 	} else {
 	    // create new index file
-	    kt = new kelondroTree(theLocation, 0x400, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceShort);
+	    kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceShort);
 	}
 	return kt; // everyone who get this should close it when finished!
     }

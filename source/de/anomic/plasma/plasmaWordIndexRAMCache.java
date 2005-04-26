@@ -150,7 +150,7 @@ public class plasmaWordIndexRAMCache extends Thread {
 	}
     }
 
-    private synchronized int flushSpecific(boolean greatest) throws IOException {
+    private int flushSpecific(boolean greatest) throws IOException {
 	//System.out.println("DEBUG: plasmaIndexRAMCache.flushSpecific(" + ((greatest) ? "greatest" : "smallest") + "); cache.size() = " + cache.size());
 	if ((hashScore.size() == 0) && (cache.size() == 0)) {
 	    serverLog.logDebug("PLASMA INDEXING", "flushSpecific: called but cache is empty");
@@ -205,11 +205,13 @@ public class plasmaWordIndexRAMCache extends Thread {
 	return pic.getIndex(wordHash, deleteIfEmpty);
     }
 
-    public synchronized int addEntryToIndexMem(String wordHash, plasmaWordIndexEntry entry) throws IOException {
+    public int addEntryToIndexMem(String wordHash, plasmaWordIndexEntry entry) throws IOException {
 	// make space for new words
 	int flushc = 0;
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
-	while (hashScore.size() > maxWords) flushc += flushSpecific(true);
+	synchronized (hashScore) {
+	    while (hashScore.size() > maxWords) flushc += flushSpecific(true);
+	}
 	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");
 
 	// put new words into cache
