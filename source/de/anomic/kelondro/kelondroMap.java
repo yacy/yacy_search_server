@@ -128,12 +128,11 @@ public class kelondroMap {
 
     class writeQueue extends Thread {
 
-        LinkedList queue;
+        private LinkedList queue = new LinkedList();
         boolean run;
         
         public writeQueue() {
             run = true;
-            queue = new LinkedList();
         }
         
         public void stack(String key) {
@@ -144,20 +143,28 @@ public class kelondroMap {
                 workoff(key);
         }
         
-        public synchronized void workoff() {
-            if (queue.size() > 0) workoff((String) queue.removeFirst());
+        public void workoff() {
+            String newKey = null;
+            synchronized (this.queue) {
+                if (this.queue.size() > 0) {
+                    newKey = (String) this.queue.removeFirst();                    
+                }
+			}
+            if (newKey != null) workoff(newKey);            
         }
 
-        public synchronized void dequeue(String key) {
+        public void dequeue(String key) {
             // take out one entry
-            ListIterator i = queue.listIterator();
-            String k;
-            while (i.hasNext()) {
-                k = (String) i.next();
-                if (k.equals(key)) {
-                    i.remove();
-                    return;
-                }
+            synchronized (this.queue) {
+	            ListIterator i = queue.listIterator();
+	            String k;
+	            while (i.hasNext()) {
+	                k = (String) i.next();
+	                if (k.equals(key)) {
+	                    i.remove();
+	                    return;
+	                }
+	            }
             }
         }
         
