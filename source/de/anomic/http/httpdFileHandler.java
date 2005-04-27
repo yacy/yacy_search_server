@@ -225,10 +225,14 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 out.write(("\r\n").getBytes());
                 out.flush();
                 return;
-            } else if (!(adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(auth.trim().substring(6))))) {
+            } else if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(auth.trim().substring(6)))) {
+		// remove brute-force flag
+		serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+	    } else {
                 // a wrong authentication was given. Ask again
                 serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + conProp.getProperty("CLIENTIP", "unknown-IP") + "'");
-                try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {} // add a delay to make brute-force harder
+                //try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {} // add a delay to make brute-force harder
+		serverCore.bfHost.put(conProp.getProperty("CLIENTIP"), "sleep");
                 out.write(("HTTP/1.1 401 log-in required\r\n").getBytes());
                 out.write(("WWW-Authenticate: Basic realm=\"admin log-in\"\r\n").getBytes());
                 out.write(("\r\n").getBytes());

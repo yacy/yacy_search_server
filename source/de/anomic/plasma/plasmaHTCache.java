@@ -199,15 +199,15 @@ public final class plasmaHTCache {
         return header;
     }
 
-    boolean idle() {
+    public boolean idle() {
 	return (System.currentTimeMillis() > (idleDelay + lastAcc));
     }
     
-    boolean full() {
+    public boolean full() {
 	return (cacheStack.size() > stackLimit);
     }
 
-    boolean empty() {
+    public boolean empty() {
 	return (cacheStack.size() == 0);
     }
 
@@ -311,7 +311,7 @@ public final class plasmaHTCache {
         try {
             File f;
             int workoff;
-            workoff = cacheStack.size() / 10;
+            workoff = 1 + cacheStack.size() / 10;
             // we want to work off always 10 % to prevent that we collaps
             while ((workoff-- > 0) && (!(empty()))) {
                 process((Entry) cacheStack.removeFirst());
@@ -427,8 +427,8 @@ public final class plasmaHTCache {
     }
 
     public static boolean isCGI(String urlString) {
-	return ((urlString.toLowerCase().indexOf("cgi") >= 0) ||
-		(urlString.toLowerCase().indexOf("exe") >= 0));
+	return ((urlString.toLowerCase().indexOf(".cgi") >= 0) ||
+		(urlString.toLowerCase().indexOf(".exe") >= 0));
     }
 
     public Entry newEntry(Date initDate, int depth, URL url,

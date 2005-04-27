@@ -296,7 +296,9 @@ public class plasmaCrawlNURL extends plasmaURL {
 		urlHashCache.put(entry);
 	    } catch (IOException e) {
 		System.out.println("INTERNAL ERROR AT plasmaNURL:url2hash:" + e.toString());
-	    }
+	    } catch (kelondroException e) {
+                serverLog.logError("PLASMA", "plasmaCrawlNURL.store failed: " + e.getMessage());
+            }
 	}
         
 	public String hash() {

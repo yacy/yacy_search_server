@@ -97,7 +97,7 @@ public class plasmaWordIndexRAMCache extends Thread {
         while (!(terminate)) {
 	    if (hashScore.size() < 100) try {Thread.currentThread().sleep(10000);} catch (InterruptedException e) {}
             while ((!(terminate)) && (cache != null) && (hashScore.size() > 0)) try {
-		//check = hashScore.size();
+		check = hashScore.size();
 		flushSpecific(false);
 		//serverLog.logDebug("PLASMA INDEXING", "single flush. bevore=" + check + "; after=" + hashScore.size());
                 try {Thread.currentThread().sleep(10 + ((maxWords / 10) / (1 + hashScore.size())));} catch (InterruptedException e) {}
@@ -171,14 +171,12 @@ public class plasmaWordIndexRAMCache extends Thread {
 	return flushKey(key, "flushSpecific");
     }
     
-    private int flushKey(String key, String caller) throws IOException {
+    private synchronized int flushKey(String key, String caller) throws IOException {
 	Vector v = null;
-	synchronized (cache) {
-	    v = (Vector) cache.get(key);
-	    if (v == null) return 0; // flushing of nonexisting key
-	    cache.remove(key);
-	    hashScore.deleteScore(key);
-	}
+	v = (Vector) cache.get(key);
+	if (v == null) return 0; // flushing of nonexisting key
+	cache.remove(key);
+	hashScore.deleteScore(key);
 	pic.addEntriesToIndex(key, v);
 	return v.size();
     }

@@ -76,6 +76,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     // static variables
     public static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
     public static final Boolean RESUME_CONNECTION = Boolean.TRUE;
+    public static Hashtable bfHost = new Hashtable(); // for brute-force prevention
 
     // class variables
     private int port;                      // the listening port
@@ -298,19 +299,19 @@ public final class serverCore extends serverAbstractThread implements serverThre
         announceThreadBlockApply();
         Socket controlSocket = this.socket.accept();
         announceThreadBlockRelease();
-        if ((this.denyHost == null) || (this.denyHost.get((""+controlSocket.getInetAddress().getHostAddress())) == null)) {
-            //log.logDebug("* catched request from " + controlSocket.getInetAddress().getHostAddress());
+	String clientIP = ""+controlSocket.getInetAddress().getHostAddress();
+        if (bfHost.get(clientIP) != null) {
+            log.logInfo("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + clientIP);
+	    // add a delay to make brute-force harder
+	    try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
+	}
+        if ((this.denyHost == null) || (this.denyHost.get(clientIP) == null)) {
             controlSocket.setSoTimeout(this.timeout);
-            
             Session connection = (Session) this.theSessionPool.borrowObject();
             connection.execute(controlSocket);
-            
-            //try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {} // wait for debug
-            // activeThreads.put(connection, new Long(System.currentTimeMillis()));
-            //log.logDebug("* NEW SESSION: " + connection.request);
-            
+            //log.logDebug("* NEW SESSION: " + connection.request + " from " + clientIP);
         } else {
-            System.out.println("ACCESS FROM " + controlSocket.getInetAddress().getHostAddress() + " DENIED");
+            System.out.println("ACCESS FROM " + clientIP + " DENIED");
         }
         // idle until number of maximal threads is (again) reached
         //synchronized(this) {
@@ -760,9 +761,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
         		    } catch (NoSuchMethodException nsme) {
             			System.out.println("ERROR B " + userAddress.getHostAddress());
             			if (isNotLocal(userAddress.getHostAddress().toString())) {
-                                        if (denyHost != null)
-                                            denyHost.put((""+userAddress.getHostAddress()), "deny"); // block client: hacker attempt
-                        }
+				    if (denyHost != null)
+					denyHost.put((""+userAddress.getHostAddress()), "deny"); // block client: hacker attempt
+				}
             			break;
             			// the client requested a command that does not exist
             			//Object[] errorParameter = { nsme };

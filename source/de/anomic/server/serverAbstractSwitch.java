@@ -53,6 +53,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     private final Hashtable authorization;
     private String    rootPath;
     private final TreeMap   workerThreads;
+    protected int serverJobs;
     
     public serverAbstractSwitch(String rootPath, String initPath, String configPath) throws IOException {
 	// we initialize the switchboard with a property file,
@@ -99,6 +100,9 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         
         // init thread control
         workerThreads = new TreeMap();
+        
+        // init busy state control
+        serverJobs = 0;
     }
 
     public static Hashtable loadHashtable(File f) {
@@ -287,6 +291,6 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     }
 
     public void handleBusyState(int jobs) {
-        // do nothing here; should be overridden
+        serverJobs = jobs;
     }
 }

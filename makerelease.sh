@@ -45,7 +45,7 @@
 # Contributions and changes to the program code must be marked as such.
 
 # define variables
-version='0.367'
+version='0.368'
 datestr=`date +%Y%m%d`
 #release='yacy_v'$version'_'$datestr
 release='yacy_dev_v'$version'_'$datestr
@@ -109,8 +109,6 @@ mv -f $source/$mainclass $source/$mainclass.orig
 sed `echo 's/@REPL_DATE@/'$datestr'/'` $source/$mainclass.orig > $source/$mainclass.sed1
 sed `echo 's/@REPL_VERSION@/'$version'/'` $source/$mainclass.sed1 > $source/$mainclass
 rm $source/$mainclass.sed1
-#javac -classpath $classpath -sourcepath $source -d $classes -g:none $source/httpd.java
-#javac -classpath $classpath -sourcepath $source -d $classes -g:none $source/$mainclass
 javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/tools/*.java
 javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/net/*.java
 javac -classpath $classpath -sourcepath $source -d $classes -g $source/de/anomic/htmlFilter/*.java
@@ -125,7 +123,6 @@ javac -classpath $classpath -sourcepath $source -d $classes -g $source/$mainclas
 mv -f $source/$mainclass.orig $source/$mainclass
 
 # compile server pages
-#javac -classpath $classes -sourcepath htroot -d $classes -g htroot/*.java
 javac -classpath $classes -sourcepath htroot -d htroot -g htroot/*.java
 javac -classpath $classes -sourcepath htroot/yacy -d htroot/yacy -g htroot/yacy/*.java
 javac -classpath $classes -sourcepath htroot/htdocsdefault -d htroot/htdocsdefault -g htroot/htdocsdefault/*.java

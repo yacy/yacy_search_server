@@ -121,9 +121,10 @@ public class plasmaWordIndexFileCache {
         try {
             row = indexCache.get(wordHash.getBytes());
         } catch (Exception e) {
-            // we had some negativeSeekOffsetExceptions here; in that case the indexCache is corrupt
+            // we had some negativeSeekOffsetExceptions here, and also loops may cause this
+	    // in that case the indexCache is corrupt
             System.out.println("Error in plasmaWordINdexFileCache.getCache: index for hash " + wordHash + " is corrupt:" + e.toString());
-            e.printStackTrace();
+            //e.printStackTrace();
             row = null;
         }
         if (row == null) {
@@ -159,7 +160,7 @@ public class plasmaWordIndexFileCache {
     }
 
     protected void addEntriesToIndex(String wordHash, Vector /* of plasmaIndexEntry */ newEntries) throws IOException {
-	//System.out.println("* adding cached word index: " + wordHash + "=" + word + ":" + entry.toEncodedForm()); // debug
+	//System.out.println("* adding " + newEntries.size() + " cached word index entries for word " + wordHash); // debug
 	// fetch the index cache
         if (newEntries.size() == 0) return;
 	byte[][] row = getCache(wordHash);

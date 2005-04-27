@@ -148,15 +148,13 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     public  HashMap                outgoingCookies, incomingCookies;
     public  kelondroTables         facilityDB;
     public  plasmaParser           parser;
-    public  int                    serverJobs;
     
     private serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
     
     public plasmaSwitchboard(String rootPath, String initPath, String configPath) throws IOException {
 	super(rootPath, initPath, configPath);
-        serverJobs = 0;
-
+        
         // set loglevel
 	int loglevel = Integer.parseInt(getConfig("plasmaLoglevel", "2"));
 	log = new serverLog("PLASMA", loglevel);
@@ -300,10 +298,6 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         return (bytes / 1024) + "TByte";
     }
     
-    public void handleBusyState(int jobs) {
-        this.serverJobs = jobs;
-    }
-    
     private void initProfiles() throws IOException {
         if ((profiles.size() == 0) ||
             (getConfig("defaultProxyProfile", "").length() == 0) ||
@@ -414,10 +408,10 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 	if (processStack.size() == 0) return false; // nothing to do
 	
 	// in case that the server is very busy we do not work off the queue too fast
-	if (serverJobs > 10) try {Thread.currentThread().sleep(10 * serverJobs);} catch (InterruptedException e) {}
+	if (!(cacheManager.idle())) try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
 	
 	// do one processing step
-	log.logDebug("DEQUEUE: serverJobs=" + serverJobs +
+	log.logDebug("DEQUEUE: cacheManager=" + ((cacheManager.idle()) ? "idle" : "busy") +
 		     ", processStack=" + processStack.size() +
 		     ", localStackSize=" + noticeURL.localStackSize() +
 		     ", remoteStackSize=" + noticeURL.remoteStackSize());
@@ -473,7 +467,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 	}
 
 	// if the server is busy, we do crawling more slowly
-        if (serverJobs > 3) try {Thread.currentThread().sleep(100 * serverJobs);} catch (InterruptedException e) {}
+        if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
 
 	// do a local crawl (may start a global crawl)
 	plasmaCrawlNURL.entry nex = noticeURL.localPop();
@@ -502,9 +496,8 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 	    return false;
 	}
 
-
 	// if the server is busy, we do this more slowly
-        if (serverJobs > 3) try {Thread.currentThread().sleep(100 * serverJobs);} catch (InterruptedException e) {}
+        if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
 
 	// we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
 	plasmaCrawlNURL.entry nex = noticeURL.remotePop();
@@ -514,10 +507,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         
     private synchronized void processResourceStack(plasmaHTCache.Entry entry) {
         // work off one stack entry with a fresh resource (scraped web page)
-        String stats = "DEQUEUE: dequeueing one step (processStack=" + processStack.size() + ", localStackSize=" + noticeURL.localStackSize() + ", remoteStackSize=" + noticeURL.remoteStackSize() + ")";
-
-        try {
-    
+        try {    
             // we must distinguish the following cases: resource-load was initiated by
             // 1) global crawling: the index is extern, not here (not possible here)
             // 2) result of search queries, some indexes are here (not possible here)
@@ -540,7 +530,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                 processCase = 6;
             }
 
-	    log.logDebug(stats + " processCase=" + processCase + ", depth=" + entry.depth + ", maxDepth=" + entry.profile.generalDepth() + ", filter=" + entry.profile.generalFilter() + ", initiatorHash=" + initiatorHash + ", status=" + entry.status + ", source=" + ((entry.cacheArray == null) ? "scraper" : "byte[]") + ", url=" + entry.nomalizedURLString); // DEBUG
+	    log.logDebug("processResourceStack processCase=" + processCase + ", depth=" + entry.depth + ", maxDepth=" + entry.profile.generalDepth() + ", filter=" + entry.profile.generalFilter() + ", initiatorHash=" + initiatorHash + ", status=" + entry.status + ", source=" + ((entry.cacheArray == null) ? "scraper" : "byte[]") + ", url=" + entry.nomalizedURLString); // DEBUG
 
             // parse content
             plasmaParserDocument document;

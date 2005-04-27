@@ -323,11 +323,10 @@ public class kelondroRecords {
         Node n = (Node) cache.get(handle);
         if (n == null) {
 	    n = new Node(handle, parentNode, referenceInParent);
-	    cache.put(handle, n);
-	    cacheScore.setScore(handle, (int) ((System.currentTimeMillis() - startup) / 1000));
-	    checkCacheSpace();
+            checkCacheSpace();
 	    return n;
         } else {
+            //System.out.println("read from cache " + n.toString());
             cacheScore.setScore(handle, (int) ((System.currentTimeMillis() - startup) / 1000));
             return n;
         }
@@ -336,7 +335,7 @@ public class kelondroRecords {
     protected void deleteNode(Handle handle) throws IOException {
         if (cachesize != 0) {
             Node n = (Node) cache.get(handle);
-            if (n != null) {
+            if (n != null) synchronized (cache) {
                 cacheScore.deleteScore(handle);
                 cache.remove(handle);
             }
@@ -351,14 +350,18 @@ public class kelondroRecords {
             // delete one entry
             try {
                 Handle delkey = (Handle) cacheScore.getMinObject(); // error (see below) here
-                cacheScore.deleteScore(delkey);
-                cache.remove(delkey);
+                synchronized (cache) {
+                    cacheScore.deleteScore(delkey);
+                    cache.remove(delkey);
+                }
             } catch (NoSuchElementException e) {
                 System.out.println("strange kelondroRecords error: " + e.getMessage() + "; cachesize=" + cachesize + ", cache.size()=" + cache.size() + ", cacheScore.size()=" + cacheScore.size());
                 // this is a strange error and could be caused by internal java problems
                 // we simply clear the cache
-                this.cacheScore = new kelondroMScoreCluster();
-                this.cache = new HashMap();
+                synchronized (cache) {
+                    this.cacheScore = new kelondroMScoreCluster();
+                    this.cache = new HashMap();
+                }
             }
         }
     }
@@ -441,11 +444,11 @@ public class kelondroRecords {
 	    if (b.length != OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong array size");
 	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
 	    if (this.ohBytes == null) this.ohBytes = new byte[OHBYTEC];
-            entryFile.seek(seekpos(this.handle));
+	    entryFile.seek(seekpos(this.handle));
 	    for (int j = 0; j < ohBytes.length; j++) {
-                ohBytes[j] = b[j];
-                entryFile.writeByte(b[j]);
-            }
+		ohBytes[j] = b[j];
+		entryFile.writeByte(b[j]);
+	    }
             updateNode();
 	}
 	protected synchronized void setOHHandle(Handle[] i) throws IOException {
@@ -453,9 +456,9 @@ public class kelondroRecords {
 	    if (i.length != OHHANDLEC) throw new IllegalArgumentException("setOHHandle: wrong array size");
 	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHHandle: no handle assigned");
 	    if (this.ohHandle == null) this.ohHandle = new Handle[OHHANDLEC];
-            entryFile.seek(seekpos(this.handle) + OHBYTEC);
+	    entryFile.seek(seekpos(this.handle) + OHBYTEC);
 	    for (int j = 0; j < ohHandle.length; j++) {
-                ohHandle[j] = i[j];
+		ohHandle[j] = i[j];
 		if (i[j] == null) 
 		    entryFile.writeInt(NUL);
 		else
@@ -469,8 +472,8 @@ public class kelondroRecords {
 		ohBytes = new byte[OHBYTEC];
 		entryFile.seek(seekpos(this.handle));
 		for (int j = 0; j < ohBytes.length; j++) {
-                    ohBytes[j] = entryFile.readByte();
-                }
+		    ohBytes[j] = entryFile.readByte();
+		}
                 updateNode();
 	    }
 	    return ohBytes;
@@ -555,20 +558,20 @@ public class kelondroRecords {
 		}
 	    } else if ((values.length > 1) && (values[1] == null)) {
 		// only the key has been read; load the remaining
-		    long seek = seekpos(this.handle) + overhead + COLWIDTHS[0];
-		    for (int i = 1; i < COLWIDTHS.length; i++) {
-			entryFile.seek(seek);
-			values[i] = new byte[COLWIDTHS[i]];
-			entryFile.read(values[i], 0, values[i].length);
-			seek = seek + COLWIDTHS[i];
-		    }
-                    updateNode();
-		    return values;
+		long seek = seekpos(this.handle) + overhead + COLWIDTHS[0];
+		for (int i = 1; i < COLWIDTHS.length; i++) {
+		    entryFile.seek(seek);
+		    values[i] = new byte[COLWIDTHS[i]];
+		    entryFile.read(values[i], 0, values[i].length);
+		    seek = seek + COLWIDTHS[i];
+		}
+		updateNode();
+		return values;
 	    } else {
 		return values;
 	    }
 	}
-	protected void save() throws IOException {
+	protected synchronized void save() throws IOException {
 	    // this is called when an entry was defined with values only and not by retrieving with an index
 	    // if this happens, nothing of the internal array values have been written to the file
 	    // then writing to the file is done here
@@ -585,9 +588,9 @@ public class kelondroRecords {
 		throw new kelondroException(filename, "no values to save");
 	    }
 	    entryFile.seek(seekpos(this.handle));
-	    if (ohBytes  == null) {for (int i = 0; i < OHBYTEC; i++) entryFile.writeByte(0);}
+	    if (ohBytes == null) {for (int i = 0; i < OHBYTEC; i++) entryFile.writeByte(0);}
 	    else {for (int i = 0; i < OHBYTEC; i++) entryFile.writeByte(ohBytes[i]);}
-	    if (ohHandle   == null) {for (int i = 0; i < OHHANDLEC; i++) entryFile.writeInt(0);}
+	    if (ohHandle == null) {for (int i = 0; i < OHHANDLEC; i++) entryFile.writeInt(0);}
 	    else {for (int i = 0; i < OHHANDLEC; i++) entryFile.writeInt(ohHandle[i].index);}
 	    long seek = seekpos(this.handle) + overhead;
 	    for (int i = 0; i < values.length; i++) {
@@ -623,8 +626,12 @@ public class kelondroRecords {
         private void updateNode() {
             if (cachesize != 0) {
                 if (!(cache.containsKey(handle))) checkCacheSpace();
-                cache.put(handle, this);
-                cacheScore.setScore(handle, (int) ((System.currentTimeMillis() - startup) / 1000));
+		synchronized (cache) {
+                    //System.out.println("updateNode " + this.toString());
+                    cache.put(handle, this);
+		    cacheScore.setScore(handle, (int) ((System.currentTimeMillis() - startup) / 1000));
+                    //System.out.println("cache now: " + cache.toString());
+		}
             }
         }
     }
@@ -844,7 +851,9 @@ public class kelondroRecords {
             if (index > ((Handle) h).index) return 1;
             return 0;
         }
-        
+        public int hashCode() {
+            return this.index;
+        }
     }
 
 
