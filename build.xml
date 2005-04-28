@@ -23,12 +23,13 @@
 	<mkdir dir="${build}/de/anomic/yacy"/>
 	<mkdir dir="${release}"/>
 	
+	
 	<move file="${src}/yacy.java" tofile="${src}/yacy.java.orig" />
 	<tstamp>
 		<format property="REPL_DATE_FORMAT" pattern="yyyymmdd" />
 	</tstamp>
-	<!-- <property name="REPL_DATE" value="${DSTAMP}" /> -->
 	
+	<filter token="REPL_VERSION" value="0.368" />
 	<filter token="REPL_DATE" value="${DSTAMP}"/>
 	<copy file="${src}/yacy.java.orig" tofile="${src}/yacy.java" filtering="true" />
 </target>
@@ -50,12 +51,12 @@
 </target>
 
 
-<target name="dist" depends="compile">
+<target name="all" depends="compile">
 	<delete file="${src}/yacy.java" />
 	<move file="${src}/yacy.java.orig" tofile="${src}/yacy.java" />
 </target>
 	
-<target name="all" depends="dist,pdfParser,docParser"/>	
+<target name="dist" depends="all,pdfParser,docParser"/>	
 	
 <!-- target to create a zip file for the optional pdf file Parser -->	
 <target name="pdfParser" depends="compile" description="Creating a zip file for the pdf parser addon">
