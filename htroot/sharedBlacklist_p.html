@@ -18,17 +18,46 @@ function selectall(){
 <br><br>
 <h2>Add Items to Blacklist</h2>
 
+#(page)#
 <p>This are all new Blacklist Entries from "#[name]#":</p>
-<p>#[status]#</p>
+::
+#(/page)#
+<p>
+#(status)#
+::
+#{list}#
+<b>#[entry]#</b> was added to your Blacklist.<br>
+#{/list}#
+::
+File Error! Wrong Path?
+::
+YaCy-Peer &quot;#[name]#&quot; not found.
+::
+URL &quot;#[address]#&quot; not found or empty list.
+::
+Wrong Invocation! Please invoke with sharedBlacklist.html?name=PeerName
+#(/status)#
+</p>
 
 <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data">
 <input type="hidden" name="num" value="#[num]#">
 <input type="hidden" name="filename" value="#[filename]#">
-<p><table border="1" cellspacing="1" cellpadding="3">
+<p>
+#(page)#
+<table border="1" cellspacing="1" cellpadding="3">
 <tr><th>Hostname/File/URL</th><th width="100%" align="left">Blocked Server</th><th>&nbsp;</th></tr>
-#[table]#
+#{urllist}#
+<tr>
+<td>#[name]#</td>
+<td>#[url]#</td>
+<td><input type="checkbox" name="#[count]#" value="#[url]#"></td>
+</tr>
+#{/urllist}#
 <tr><td colspan="3"><input type="button" onclick="selectall()" value="select all"><br><input type="submit" value="add" name="add"></td></tr>
-</table></p>
+</table>
+::
+#(/page)#
+</p>
 </form>
 
 #[footer]#

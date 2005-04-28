@@ -65,10 +65,8 @@ public class sharedBlacklist_p {
 	String filename = "";
  	String line = "";
 	String out = "";
-	String HTMLout = "";
 	HashSet Blacklist = new HashSet();
 	Vector otherBlacklist = new Vector();
-	String status = "";
 	int num = 0;
 	int i = 0; //loop-var
 	int count = 0;
@@ -80,6 +78,8 @@ public class sharedBlacklist_p {
 
 	if( post != null && post.containsKey("filename") ){
 		filename = (String)post.get("filename");
+	}else{
+		filename = "shared.black";
 	}
 	try{
 		//Read the List
@@ -93,9 +93,11 @@ public class sharedBlacklist_p {
 		br.close();
 	}catch(IOException e){}
 
+	prop.put("page", 0); //checkbox list
 	if( post != null && post.containsKey("hash") ){ //Step 1: retrieve the Items
 		Hash = (String) post.get("hash");
-		status = "Proxy \"" + Name + "\" not found"; //will later be resetted
+		prop.put("status", 3);//YaCy-Peer not found
+		prop.put("status_name", Name);
 		
 		yacySeed seed;
 		if( yacyCore.seedDB != null ){ //no nullpointer error..
@@ -106,7 +108,7 @@ public class sharedBlacklist_p {
 			    IP = seed.get("IP", "127.0.0.1"); 
 			    Port = seed.get("Port", "8080");
 			    Name = (String) seed.get("Name", "<" + IP + ":" + Port + ">");
-			    status = "";
+				prop.put("status", 0);//nothing
 			}else{
 			    //status = "No Seed found"; //wrong? The Name not known?
 			}
@@ -129,9 +131,12 @@ public class sharedBlacklist_p {
 			if( !Blacklist.contains(tmp) && (!tmp.equals("")) ){
 				//newBlacklist.add(tmp);
 				count++;
-				HTMLout += "<tr><td>" + Name + "</td><td>" + tmp + "</td><td><input type=\"checkbox\" name=\""+ count +"\" value=\"" + tmp + "\"></td></tr>\n";
+				prop.put("page_urllist_"+(count-1)+"_name", Name);
+				prop.put("page_urllist_"+(count-1)+"_url", tmp);
+				prop.put("page_urllist_"+(count-1)+"_count", count);
 			}
 		}
+		prop.put("page_urllist", (count));
 		//write the list
 		try{
 			BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(listsPath, filename))));
@@ -142,14 +147,15 @@ public class sharedBlacklist_p {
 	}else if( post != null && post.containsKey("url") ){
 		//load from URL
 		address = (String)post.get("url");
-		status = "URL \"" + address + "\" not found or empty List"; //will later be resetted
+		prop.put("status", 4);
+		prop.put("status_address", address);
 		//Name = "&nbsp;"; //No Name
 		Name = address;
                 
                 try {
                     otherBlacklist = httpc.wget(new URL(address), 6000, null, null, switchboard.remoteProxyHost, switchboard.remoteProxyPort); //get List
                 } catch (Exception e) {}
-		status = ""; //TODO: check if the wget failed...
+		prop.put("status", 0); //TODO: check if the wget failed...
 
                 //Make HTML-Optionlist with retrieved items
                 for(i = 0; i <= (otherBlacklist.size() -1); i++){
@@ -157,9 +163,12 @@ public class sharedBlacklist_p {
                         if( !Blacklist.contains(tmp) && (!tmp.equals("")) && (!tmp.startsWith("#")) ){ //This List may contain comments.
                                 //newBlacklist.add(tmp);
                                 count++;
-                                HTMLout += "<tr><td>" + Name + "</td><td>" + tmp + "</td><td><input type=\"checkbox\" name=\""+ count +"\" value=\"" + tmp + "\"></td></tr>\n";
+								prop.put("page_urllist_"+(count-1)+"_name", Name);
+								prop.put("page_urllist_"+(count-1)+"_url", tmp);
+								prop.put("page_urllist_"+(count-1)+"_count", count);
                         }
                 }
+				prop.put("page_urllist", (count));
 
 	}else if( post != null && post.containsKey("file") ){
 
@@ -173,9 +182,8 @@ public class sharedBlacklist_p {
 			}
 			br.close();
 		}catch(IOException e){
-			status = "File Error! Wrong Path?";
+			prop.put("status", 2); //File Error
 		}
-		status = "";
 		Name = (String)post.get("file");
 
                 //Make HTML-Optionlist with retrieved items
@@ -184,12 +192,18 @@ public class sharedBlacklist_p {
                         if( !Blacklist.contains(tmp) && (!tmp.equals("")) && (!tmp.startsWith("#")) ){ //This List may contain comments.
                                 //newBlacklist.add(tmp);
                                 count++;
-                                HTMLout += "<tr><td>" + Name + "</td><td>" + tmp + "</td><td><input type=\"checkbox\" name=\""+ count +"\" value=\"" + tmp + "\"></td></tr>\n";
+								prop.put("page_urllist_"+(count-1)+"_name", Name);
+								prop.put("page_urllist_"+(count-1)+"_url", tmp);
+								prop.put("page_urllist_"+(count-1)+"_count", count);
                         }
                 }
+				prop.put("page_urllist", (count));
 
 	}else if( post != null && post.containsKey("add") ){ //Step 2: Add the Items
+		prop.put("page", 1); //result page
 		num = Integer.parseInt( (String)post.get("num") );
+		prop.put("status", 1); //list of added Entries
+		count = 0;//couter of added entries
 		for(i=1;i <= num; i++){ //count/num starts with 1!
 			if( post.containsKey( String.valueOf(i) ) ){
 				String newItem = (String)post.get( String.valueOf(i) );
@@ -205,7 +219,8 @@ public class sharedBlacklist_p {
 				    newItem = newItem + "/.*";
 				}
 				out += newItem+"\n";
-				status += "<b>"+newItem+"</b> was added to the Blacklist<br>\n";
+				prop.put("status_list_"+count+"_entry", newItem);
+				count++;
 				if (httpdProxyHandler.blackListURLs != null)
 				    httpdProxyHandler.blackListURLs.put(newItem.substring(0, pos), newItem.substring(pos + 1));
 
@@ -219,14 +234,13 @@ public class sharedBlacklist_p {
 			}else{
 			}
 		}
+		prop.put("status_list", count);
 	}else{
-		status = "Wrong Invocation! Please invoke with sharedBlacklist.html?name=PeerName";
+		prop.put("status", 5);//Wrong Invokation
 	}
 	
 	prop.put("filename", filename);
-	prop.put("status", status);
-	prop.put("table",HTMLout);
-	prop.put("name", Name);
+	prop.put("page_name", Name);
 	prop.put("num", String.valueOf(count));
 	return prop;
     }
