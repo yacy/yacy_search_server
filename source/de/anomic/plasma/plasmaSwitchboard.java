@@ -405,8 +405,11 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     public boolean deQueue() {
 	// work off fresh entries from the proxy or from the crawler
 
-	if (processStack.size() == 0) return false; // nothing to do
-	
+	if (processStack.size() == 0) {
+	    log.logDebug("DEQUEUE: queue is empty");
+	    return false; // nothing to do
+	}
+
 	// in case that the server is very busy we do not work off the queue too fast
 	if (!(cacheManager.idle())) try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
 	
@@ -454,7 +457,10 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     }
     
     public boolean localCrawlJob() {
-        if (noticeURL.localStackSize() == 0) return false;
+        if (noticeURL.localStackSize() == 0) {
+	    log.logDebug("LocalCrawl: queue is empty");
+	    return false;
+	}
         if (processStack.size() >= crawlSlots) {
 	    log.logDebug("LocalCrawl: too many processes in queue, dismissed (" +
 			 "processStack=" + processStack.size() + ")");
@@ -484,7 +490,10 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 
 	// do nothing if either there are private processes to be done
 	// or there is no global crawl on the stack
-        if (noticeURL.remoteStackSize() == 0) return false;
+        if (noticeURL.remoteStackSize() == 0) {
+	    log.logDebug("GlobalCrawl: queue is empty");
+	    return false;
+	}
         if (processStack.size() > 0) {
 	    log.logDebug("GlobalCrawl: any processe is in queue, dismissed (" +
 			 "processStack=" + processStack.size() + ")");
@@ -505,7 +514,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 	return true;
     }
         
-    private synchronized void processResourceStack(plasmaHTCache.Entry entry) {
+    private void processResourceStack(plasmaHTCache.Entry entry) {
         // work off one stack entry with a fresh resource (scraped web page)
         try {    
             // we must distinguish the following cases: resource-load was initiated by
@@ -796,7 +805,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         log.logInfo("LOCALCRAWL[" + noticeURL.localStackSize() + ", " + noticeURL.remoteStackSize() + "]: enqueed for load " + urlEntry.url());
     }
     
-    private synchronized boolean processGlobalCrawling(plasmaCrawlNURL.entry urlEntry) {
+    private boolean processGlobalCrawling(plasmaCrawlNURL.entry urlEntry) {
         if (urlEntry == null) {
             log.logInfo("GLOBALCRAWL[" + noticeURL.localStackSize() + ", " + noticeURL.remoteStackSize() + "]: urlEntry=null");
             return false;

@@ -432,7 +432,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 		};
 		urlHashCache.put(entry);
 	    } catch (Exception e) {
-		System.out.println("INTERNAL ERROR AT plasmaStore:url2hash:" + e.toString());
+		System.out.println("INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString());
                 e.printStackTrace();
 	    }
 	}

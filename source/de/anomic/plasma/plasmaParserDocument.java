@@ -166,7 +166,7 @@ public class plasmaParserDocument {
                     ext = url.substring(extpos).toLowerCase();
                     normal = plasmaParser.urlNormalform(url);
                     if (normal != null) {
-                        if (plasmaParser.mediaExt.indexOf(ext.substring(1)) >= 0) {
+                        if (plasmaParser.mediaExtSet.contains(ext.substring(1))) {
                             // this is not an normal anchor, its a media link
                             medialinks.put(normal, entry.getValue());
                         } else {

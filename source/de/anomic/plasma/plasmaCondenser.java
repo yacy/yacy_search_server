@@ -139,6 +139,7 @@ public class plasmaCondenser {
 	sievedWordsEnum wordenum = new sievedWordsEnum(is, wordminsize);
 	while (wordenum.hasMoreElements()) {
 	    word = ((String) wordenum.nextElement()).toLowerCase();
+	    //System.out.println("PARSED-WORD " + word);
 	    wordlen = word.length();
 	    if ((wordlen == 1) && (punctuation(word.charAt(0)))) {
 		// store sentence
@@ -489,6 +490,7 @@ public class plasmaCondenser {
 			else s = s + r.charAt(i);
 		    }
 		    s = s.trim();
+		    //System.out.println("PARSING-LINE '" + r + "'->'" + s + "'");
 		} else {
 		    return null;
 		}

@@ -55,14 +55,19 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.htmlFilter.*;
 
 public final class plasmaParser {
-    
-    public static String mediaExt =
-        "swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar," +
-        "sit,hqx,img,dmg,tar,gz,ps,xls,ppt,ram,bz2,arj";
-    
-    private final Properties parserList;
 
-	private final plasmaParserPool theParserPool;
+    private final Properties parserList;
+    private final plasmaParserPool theParserPool;
+
+    public static HashSet mediaExtSet = new HashSet();
+    public static void initMediaExt(String mediaExtString) {
+	String[] xs = mediaExtString.split(",");
+	for (int i = 0; i < xs.length; i++) mediaExtSet.add(xs[i]);
+    }
+    static {
+	initMediaExt("swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar," +
+		     "sit,hqx,img,dmg,tar,gz,ps,xls,ppt,ram,bz2,arj");
+    }
 
     public plasmaParser(File parserDispatcherPropertyFile) {
         

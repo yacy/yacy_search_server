@@ -334,8 +334,7 @@ public class kelondroRecords {
     
     protected void deleteNode(Handle handle) throws IOException {
         if (cachesize != 0) {
-            Node n = (Node) cache.get(handle);
-            if (n != null) synchronized (cache) {
+            if (cache.get(handle) != null) synchronized (cache) {
                 cacheScore.deleteScore(handle);
                 cache.remove(handle);
             }
@@ -439,60 +438,68 @@ public class kelondroRecords {
 	    if (this.handle.index == NUL) throw new kelondroException(filename, "the entry has no index assigned");
 	    return new Handle(this.handle.index);
 	}
-	protected synchronized void setOHByte(byte[] b) throws IOException {
+	protected void setOHByte(byte[] b) throws IOException {
 	    if (b == null) throw new IllegalArgumentException("setOHByte: setting null value does not make any sense");
 	    if (b.length != OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong array size");
 	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
 	    if (this.ohBytes == null) this.ohBytes = new byte[OHBYTEC];
-	    entryFile.seek(seekpos(this.handle));
-	    for (int j = 0; j < ohBytes.length; j++) {
-		ohBytes[j] = b[j];
-		entryFile.writeByte(b[j]);
+	    synchronized (entryFile) {
+		entryFile.seek(seekpos(this.handle));
+		for (int j = 0; j < ohBytes.length; j++) {
+		    ohBytes[j] = b[j];
+		    entryFile.writeByte(b[j]);
+		}
 	    }
             updateNode();
 	}
-	protected synchronized void setOHHandle(Handle[] i) throws IOException {
+	protected void setOHHandle(Handle[] i) throws IOException {
 	    if (i == null) throw new IllegalArgumentException("setOHint: setting null value does not make any sense");
 	    if (i.length != OHHANDLEC) throw new IllegalArgumentException("setOHHandle: wrong array size");
 	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHHandle: no handle assigned");
 	    if (this.ohHandle == null) this.ohHandle = new Handle[OHHANDLEC];
-	    entryFile.seek(seekpos(this.handle) + OHBYTEC);
-	    for (int j = 0; j < ohHandle.length; j++) {
-		ohHandle[j] = i[j];
-		if (i[j] == null) 
-		    entryFile.writeInt(NUL);
-		else
-		    entryFile.writeInt(i[j].index);
+	    synchronized (entryFile) {
+		entryFile.seek(seekpos(this.handle) + OHBYTEC);
+		for (int j = 0; j < ohHandle.length; j++) {
+		    ohHandle[j] = i[j];
+		    if (i[j] == null) 
+			entryFile.writeInt(NUL);
+		    else
+			entryFile.writeInt(i[j].index);
+		}
 	    }
             updateNode();
 	}
-	protected synchronized byte[] getOHByte() throws IOException {
+	protected byte[] getOHByte() throws IOException {
 	    if (ohBytes == null) {
 		if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
 		ohBytes = new byte[OHBYTEC];
-		entryFile.seek(seekpos(this.handle));
-		for (int j = 0; j < ohBytes.length; j++) {
-		    ohBytes[j] = entryFile.readByte();
+		synchronized (entryFile) {
+		    entryFile.seek(seekpos(this.handle));
+		    for (int j = 0; j < ohBytes.length; j++) {
+			ohBytes[j] = entryFile.readByte();
+		    }
 		}
                 updateNode();
 	    }
 	    return ohBytes;
 	}
-	protected synchronized Handle[] getOHHandle() throws IOException {
+	protected Handle[] getOHHandle() throws IOException {
 	    if (ohHandle == null) {
 		if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
 		ohHandle = new Handle[OHHANDLEC];
-		entryFile.seek(seekpos(this.handle) + OHBYTEC);
-		int i;
-		for (int j = 0; j < ohHandle.length; j++) {
-		    i = entryFile.readInt();
-		    ohHandle[j] = (i == NUL) ? null : new Handle(i);
+		synchronized (entryFile) {
+		    entryFile.seek(seekpos(this.handle) + OHBYTEC);
+		    int i;
+		    for (int j = 0; j < ohHandle.length; j++) {
+			i = entryFile.readInt();
+			ohHandle[j] = (i == NUL) ? null : new Handle(i);
+		    }
 		}
                 updateNode();
 	    }
 	    return ohHandle;
 	}
-	public synchronized byte[][] setValues(byte[][] row) throws IOException {
+	public byte[][] setValues(byte[][] row) throws IOException {
 	    // if the index is defined, then write values directly to the file, else only to the object
 	    byte[][] result = getValues(); // previous value (this loads the values if not already happened)
 	    if (this.values == null) this.values = new byte[COLWIDTHS.length][];
@@ -501,18 +508,22 @@ public class kelondroRecords {
             }
             if (this.handle.index != NUL) {
 		// store data directly to database
-		long seek = seekpos(this.handle) + overhead;
-		for (int i = 0; i < values.length; i++) {
-		    entryFile.seek(seek);
-		    if (values[i] == null) {
-			for (int j = 0; j < COLWIDTHS[i]; j++) entryFile.writeByte(0);
-		    } else if (values[i].length >= COLWIDTHS[i]) {
-			entryFile.write(values[i], 0 , COLWIDTHS[i]);
-		    } else {
-			entryFile.write(values[i]);
-			for (int j = values[i].length; j < COLWIDTHS[i]; j++) entryFile.writeByte(0);
+		synchronized (entryFile) {
+		    long seek = seekpos(this.handle) + overhead;
+		    for (int i = 0; i < values.length; i++) {
+			entryFile.seek(seek);
+			if (values[i] == null) {
+			    for (int j = 0; j < COLWIDTHS[i]; j++)
+				entryFile.writeByte(0);
+			} else if (values[i].length >= COLWIDTHS[i]) {
+			    entryFile.write(values[i], 0 , COLWIDTHS[i]);
+			} else {
+			    entryFile.write(values[i]);
+			    for (int j = values[i].length; j < COLWIDTHS[i]; j++)
+				entryFile.writeByte(0);
+			}
+			seek = seek + COLWIDTHS[i];
 		    }
-		    seek = seek + COLWIDTHS[i];
 		}
 	    }
 	    //System.out.print("setValues result: "); for (int i = 0; i < values.length; i++) System.out.print(new String(result[i]) + " "); System.out.println(".");
@@ -520,16 +531,18 @@ public class kelondroRecords {
             return result; // return previous value
 	}
         
-	public synchronized byte[] getKey() throws IOException {
+	public byte[] getKey() throws IOException {
 	    if ((values == null) || (values[0] == null)) {
 		// load from database, but ONLY the key!
 		if (this.handle.index == NUL) {
 		    throw new kelondroException(filename, "Cannot load Key");
 		} else {
 		    values = new byte[COLWIDTHS.length][];
-		    entryFile.seek(seekpos(this.handle) + overhead);
 		    values[0] = new byte[COLWIDTHS[0]];
-		    entryFile.read(values[0], 0, values[0].length);
+		    synchronized (entryFile) {
+			entryFile.seek(seekpos(this.handle) + overhead);
+			entryFile.read(values[0], 0, values[0].length);
+		    }
 		    for (int i = 1; i < COLWIDTHS.length; i++) values[i] = null;
                     updateNode();
 		    return values[0];
@@ -539,31 +552,35 @@ public class kelondroRecords {
 	    }
 	} 
         
-	public synchronized byte[][] getValues() throws IOException {
+	public byte[][] getValues() throws IOException {
 	    if ((values == null) || (values[0] == null)) {
 		// load ALL values from database
 		if (this.handle.index == NUL) {
 		    throw new kelondroException(filename, "Cannot load values");
 		} else {
 		    values = new byte[COLWIDTHS.length][];
-		    long seek = seekpos(this.handle) + overhead;
-		    for (int i = 0; i < COLWIDTHS.length; i++) {
-			entryFile.seek(seek);
-			values[i] = new byte[COLWIDTHS[i]];
-			entryFile.read(values[i], 0, values[i].length);
-			seek = seek + COLWIDTHS[i];
+		    synchronized (entryFile) {
+			long seek = seekpos(this.handle) + overhead;
+			for (int i = 0; i < COLWIDTHS.length; i++) {
+			    entryFile.seek(seek);
+			    values[i] = new byte[COLWIDTHS[i]];
+			    entryFile.read(values[i], 0, values[i].length);
+			    seek = seek + COLWIDTHS[i];
+			}
 		    }
                     updateNode();
 		    return values;
 		}
 	    } else if ((values.length > 1) && (values[1] == null)) {
 		// only the key has been read; load the remaining
-		long seek = seekpos(this.handle) + overhead + COLWIDTHS[0];
-		for (int i = 1; i < COLWIDTHS.length; i++) {
-		    entryFile.seek(seek);
-		    values[i] = new byte[COLWIDTHS[i]];
-		    entryFile.read(values[i], 0, values[i].length);
-		    seek = seek + COLWIDTHS[i];
+		synchronized (entryFile) {
+		    long seek = seekpos(this.handle) + overhead + COLWIDTHS[0];
+		    for (int i = 1; i < COLWIDTHS.length; i++) {
+			entryFile.seek(seek);
+			values[i] = new byte[COLWIDTHS[i]];
+			entryFile.read(values[i], 0, values[i].length);
+			seek = seek + COLWIDTHS[i];
+		    }
 		}
 		updateNode();
 		return values;
@@ -679,17 +696,17 @@ public class kelondroRecords {
     }
     
     // Removes all mappings from this map (optional operation).
-    public synchronized void clear() {
+    public void clear() {
 	throw new UnsupportedOperationException("clear not supported");
     }
 
     // Returns true if this map contains no key-value mappings.
-    public synchronized boolean isEmpty() {
+    public boolean isEmpty() {
 	return (USEDC == 0);
     }
 
     // Returns the number of key-value mappings in this map.
-    public synchronized int size() {
+    public int size() {
 	return this.USEDC;
     }
 
@@ -701,22 +718,24 @@ public class kelondroRecords {
 	// delete element with handle h
 	// this element is then connected to the deleted-chain and can be re-used
 	// change counter
-	USEDC--; entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
-	FREEC++; entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
-	// change pointer
-	if (this.FREEH.index == NUL) {
-	    // the first entry
-	    entryFile.seek(seekpos(h)); entryFile.writeInt(NUL); // write null link at end of free-list
-	} else {
-	    // another entry
-	    entryFile.seek(seekpos(h)); entryFile.writeInt(this.FREEH.index); // extend free-list
+	synchronized (entryFile) {
+	    USEDC--; entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
+	    FREEC++; entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
+	    // change pointer
+	    if (this.FREEH.index == NUL) {
+		// the first entry
+		entryFile.seek(seekpos(h)); entryFile.writeInt(NUL); // write null link at end of free-list
+	    } else {
+		// another entry
+		entryFile.seek(seekpos(h)); entryFile.writeInt(this.FREEH.index); // extend free-list
+	    }
+	    // write new FREEH Handle link
+	    this.FREEH = h;
+	    entryFile.seek(POS_FREEH); entryFile.writeInt(this.FREEH.index);
 	}
-	// write new FREEH Handle link
-	this.FREEH = h;
-	entryFile.seek(POS_FREEH); entryFile.writeInt(this.FREEH.index);
     }
 
-    public synchronized void close() throws IOException {
+    public void close() throws IOException {
 	if (this.entryFile != null) this.entryFile.close();
 	this.entryFile = null;
     }
@@ -758,7 +777,7 @@ public class kelondroRecords {
         return x;
     }
 
-    public synchronized void print(boolean records) {
+    public void print(boolean records) {
 	System.out.println("REPORT FOR FILE '" + this.filename + "':");
 	System.out.println("--");
 	System.out.println("CONTROL DATA");
@@ -855,6 +874,5 @@ public class kelondroRecords {
             return this.index;
         }
     }
-
 
 }
