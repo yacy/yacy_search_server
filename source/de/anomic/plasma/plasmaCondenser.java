@@ -39,6 +39,8 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
+// compile with javac -sourcepath source source/de/anomic/plasma/plasmaCondenser.java
+// execute with java -cp source de.anomic.plasma.plasmaCondenser
 
 package de.anomic.plasma;
 
@@ -446,7 +448,6 @@ public class plasmaCondenser {
 		    c = r.charAt(i);
 		    if (!(((c >= 'a') && (c <= 'z')) ||
 			  ((c >= '0') && (c <= '9')))) continue loop; // go to next while loop
-		    //if ((c < 'a') || (c > 'z')) continue loop; // go to next while loop
 		}
 		return s;
 	    }
@@ -480,16 +481,21 @@ public class plasmaCondenser {
 
 	private Object nextElement0() {
 	    String r;
+	    StringBuffer sb;
+	    char c;
 	    while (s.length() == 0) {
 		if (e.hasMoreElements()) {
-		    r = ((String) e.nextElement()).trim();
-		    s = "";
+		    r = (String) e.nextElement();
+		    if (r == null) return null;
+		    r = r.trim();
+		    sb = new StringBuffer(r.length() * 2);
 		    for (int i = 0; i < r.length(); i++) {
-			if (invisible(r.charAt(i))) s = s + " ";
-			else if (punctuation(r.charAt(i))) s = s + " " + r.charAt(i) + " ";
-			else s = s + r.charAt(i);
+			c = r.charAt(i);
+			if (invisible(c)) sb = sb.append(' ');
+			else if (punctuation(c)) sb = sb.append(' ').append(c).append(' ');
+			else sb = sb.append(c);
 		    }
-		    s = s.trim();
+		    s = sb.toString().trim();
 		    //System.out.println("PARSING-LINE '" + r + "'->'" + s + "'");
 		} else {
 		    return null;
@@ -635,6 +641,5 @@ public class plasmaCondenser {
 	    System.out.println("Problem with input file: " + e.getMessage());
 	}
     }
-
 
 }

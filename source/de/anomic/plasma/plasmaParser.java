@@ -39,6 +39,8 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
+// compile: javac -classpath lib/commons-collections.jar:lib/commons-pool-1.2.jar -sourcepath source source/de/anomic/plasma/plasmaParser.java
+
 
 package de.anomic.plasma;
 
@@ -307,17 +309,23 @@ public final class plasmaParser {
     }
     
     public static void main(String[] args) {
-		try {            
-			plasmaParser theParser = new plasmaParser(new File("yacy.parser"));
-            FileInputStream theInput = new FileInputStream(new File("Y:/public_html/test.pdf"));
-			ByteArrayOutputStream theOutput = new ByteArrayOutputStream();
+	//javac -classpath lib/commons-collections.jar:lib/commons-pool-1.2.jar -sourcepath source source/de/anomic/plasma/plasmaParser.java
+	//java -cp source:lib/commons-collections.jar:lib/commons-pool-1.2.jar de.anomic.plasma.plasmaParser bug.html bug.out
+	try {
+	    File in = new File(args[0]);
+	    File out = new File(args[1]);
+	    plasmaParser theParser = new plasmaParser(new File("yacy.parser"));
+            FileInputStream theInput = new FileInputStream(in);
+	    ByteArrayOutputStream theOutput = new ByteArrayOutputStream();
             serverFileUtils.copy(theInput, theOutput);
-            
-            theParser.parseSource(new URL("http://brain"),"application/pdf",theOutput.toByteArray());
+            plasmaParserDocument document = theParser.parseSource(new URL("http://brain.yacy"), "text/html", theOutput.toByteArray());
+            //plasmaParserDocument document = theParser.parseSource(new URL("http://brain.yacy"), "application/pdf", theOutput.toByteArray());
+	    byte[] theText = document.getText();
+	    serverFileUtils.write(theText, out);
         } catch (Exception e) {
             e.printStackTrace();
         }
-	}
+    }
     
 }
 

@@ -406,7 +406,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 	// work off fresh entries from the proxy or from the crawler
 
 	if (processStack.size() == 0) {
-	    log.logDebug("DEQUEUE: queue is empty");
+	    //log.logDebug("DEQUEUE: queue is empty");
 	    return false; // nothing to do
 	}
 
@@ -458,7 +458,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     
     public boolean localCrawlJob() {
         if (noticeURL.localStackSize() == 0) {
-	    log.logDebug("LocalCrawl: queue is empty");
+	    //log.logDebug("LocalCrawl: queue is empty");
 	    return false;
 	}
         if (processStack.size() >= crawlSlots) {
@@ -491,7 +491,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
 	// do nothing if either there are private processes to be done
 	// or there is no global crawl on the stack
         if (noticeURL.remoteStackSize() == 0) {
-	    log.logDebug("GlobalCrawl: queue is empty");
+	    //log.logDebug("GlobalCrawl: queue is empty");
 	    return false;
 	}
         if (processStack.size() > 0) {
