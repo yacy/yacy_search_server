@@ -111,7 +111,7 @@ public final class httpHeader extends TreeMap implements Map {
     // we override the put method to make use of the reverseMappingCache
     public Object put(Object key, Object value) {
 	String k = (String) key;
-    String upperK = k.toUpperCase();
+        String upperK = k.toUpperCase();
 	if (reverseMappingCache == null) {
 	    return super.put(k, value);
 	} else {
@@ -127,12 +127,38 @@ public final class httpHeader extends TreeMap implements Map {
 	}
     }
 
-    // a convenience method to access the map with fail-over deafults
+    // to make the occurrence of multiple keys possible, we add them using a counter
+    public Object add(Object key, Object value) {
+        int c = keyCount((String) key);
+        if (c == 0) return put(key, value); else return put("*" + key + "-" + c, value);
+    }
+    
+    public int keyCount(String key) {
+        if (!(containsKey(key))) return 0;
+        int c = 1;
+        while (containsKey("*" + key + "-" + c)) c++;
+        return c;
+    }
+    
+    // a convenience method to access the map with fail-over defaults
     public Object get(Object key, Object dflt) {
 	Object result = get(key);
 	if (result == null) return dflt; else return result;
     }
 
+    // return multiple results
+    public Object getSingle(Object key, int count) {
+        if (count == 0) return get(key, null);
+        return get("*" + key + "-" + count, null);
+    }
+    
+    public Object[] getMultiple(String key) {
+        int count = keyCount(key);
+        Object[] result = new Object[count];
+        for (int i = 0; i < count; i++) result[i] = getSingle(key, i);
+        return result;
+    }
+    
     // convenience methods for storing and loading to a file system
     public void store(File f) throws IOException {
 	FileOutputStream fos = new FileOutputStream(f);

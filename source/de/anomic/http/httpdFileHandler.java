@@ -353,10 +353,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 String mimeType = mimeTable.getProperty(conProp.getProperty("EXT",""),"text/html");
                 byte[] result;
 		if (path.endsWith("html") || 
-            path.endsWith("xml") || 
-            path.endsWith("rss") || 
-            path.endsWith("csv") ||
-            path.endsWith("pac")) {
+                    path.endsWith("xml") || 
+                    path.endsWith("rss") || 
+                    path.endsWith("csv") ||
+                    path.endsWith("pac")) {
 		    rc = rewriteClassFile(file);
 		    if (rc != null) {
 			// CGI-class: call the class to create a property for rewriting

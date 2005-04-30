@@ -223,8 +223,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     }
     
     public void handleOutgoingCookies(httpHeader requestHeader, String targethost, String clienthost) {
-        // request header may have double-entries: they are accumulated in one entry
-        // by the httpd and separated by a "#" in the value field
         /*
         The syntax for the header is:
  
@@ -238,14 +236,12 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         domain          =       "$Domain" "=" value
         */
         if (requestHeader.containsKey("Cookie")) {
-            Object[] entry = new Object[]{new Date(), clienthost, requestHeader.get("Cookie")};
+            Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getMultiple("Cookie")};
             switchboard.outgoingCookies.put(targethost, entry);
         }
     }
     
     public void handleIncomingCookies(httpHeader respondHeader, String serverhost, String targetclient) {
-        // respond header may have double-entries: they are accumulated in one entry
-        // by the httpc and separated by a "#" in the value field
         /*
         The syntax for the Set-Cookie response header is 
 
@@ -262,7 +258,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                         |       "Version" "=" 1*DIGIT
         */
         if (respondHeader.containsKey("Set-Cookie")) {
-            Object[] entry = new Object[]{new Date(), targetclient, respondHeader.get("Set-Cookie")};
+            Object[] entry = new Object[]{new Date(), targetclient, respondHeader.getMultiple("Set-Cookie")};
             switchboard.incomingCookies.put(serverhost, entry);
         }
     }
@@ -414,8 +410,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     
                     // make a transformer
                     if ((!(transformer.isIdentityTransformer())) &&
-                    ((ext == null) || (!(switchboard.extensionBlack.contains(ext)))) &&
-                    ((cachedResponseHeader == null) || (httpd.isTextMime(cachedResponseHeader.mime(), switchboard.mimeWhite)))) {
+                        ((ext == null) || (!(switchboard.extensionBlack.contains(ext)))) &&
+                        ((cachedResponseHeader == null) || (httpd.isTextMime(cachedResponseHeader.mime(), switchboard.mimeWhite)))) {
                         hfos = new htmlFilterOutputStream(respond, null, transformer, (ext.length() == 0));
                     } else {
                         hfos = respond;
@@ -931,12 +927,10 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 	if (!(header.containsKey("date"))) header.put("Date", httpc.dateString(httpc.nowDate()));
 	if (!(header.containsKey("content-type"))) header.put("Content-type", "text/html"); // fix this
 
-    StringBuffer headerStringBuffer = new StringBuffer(200);
+	StringBuffer headerStringBuffer = new StringBuffer(200);
     
 	// write status line
-    headerStringBuffer.append("HTTP/1.1 ")
-                      .append(status)
-                      .append("\r\n");
+	headerStringBuffer.append("HTTP/1.1 ").append(status).append("\r\n");
 
 	//System.out.println("HEADER: PROXY TO CLIENT = " + header.toString()); // DEBUG
 
@@ -944,34 +938,22 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 	Iterator i = header.keySet().iterator();
 	String key;
 	String value;
-	int pos;
+        char tag;
+        int count;
 	//System.out.println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
 	while (i.hasNext()) {
 	    key = (String) i.next();
-	    if (!(key.startsWith("#"))) { // '#' in key is reserved for proxy attributes as artificial header values
-		value = (String) header.get(key);
-		if (!(key.equals("Location"))) while ((pos = value.lastIndexOf("#")) >= 0) {
-		    // special handling is needed if a key appeared several times, which is valid.
-		    // all lines with same key are combined in one value, separated by a "#"
-            headerStringBuffer
-                .append(key)
-                .append(": ")
-                .append(value.substring(pos + 1).trim())
-                .append("\r\n");
-		    //System.out.println("#" + key + ": " + value.substring(pos + 1).trim());
-		    value = value.substring(0, pos).trim();
-		}
-        headerStringBuffer
-            .append(key)
-            .append(": ")
-            .append(value)
-            .append("\r\n");        
-		//System.out.println("#" + key + ": " + value);
+            tag = key.charAt(0);
+	    if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
+                count = header.keyCount(key);
+                for (int j = 0; j < count; j++) {
+                    headerStringBuffer.append(key).append(": ").append((String) header.getSingle(key, j)).append("\r\n");  
+                }
+                //System.out.println("#" + key + ": " + value);
 	    }
 	}
+        headerStringBuffer.append("\r\n");
 
-    headerStringBuffer.append("\r\n");
-    
 	// end header
 	respond.write(headerStringBuffer.toString().getBytes());
 	respond.flush();

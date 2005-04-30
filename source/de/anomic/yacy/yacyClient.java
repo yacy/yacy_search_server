@@ -74,8 +74,9 @@ public class yacyClient {
 	HashMap result = null;
 	try {
 	    /*
-	    URL url = new URL("http://" + address + "/yacy/hello.html?iam=" + yacyCore.seedCache.mySeed.hash +
-                                "&pattern=&count=20" + 
+	    URL url = new URL("http://" + address + "/yacy/hello.html?iam=" +
+	                      yacyCore.seedCache.mySeed.hash +
+                              "&pattern=&count=20" + 
 			      "&key=" + key + "&seed=" + yacyCore.seedCache.mySeed.genSeedStr(key));
 	    yacyCore.log.logDebug("HELLO to URL " + url.toString());
 	    result = nxTools.table(httpc.wget(url,
@@ -90,7 +91,7 @@ public class yacyClient {
 	    obj.put("key", key);
             obj.put("mytime", yacyCore.universalDateShortString());
 	    obj.put("seed", yacyCore.seedDB.mySeed.genSeedStr(key));
-            result = nxTools.table(httpc.wput(url, 
+            result = nxTools.table(httpc.wput(url,
 					      20000, null, null,
 					      yacyCore.seedDB.sb.remoteProxyHost,
 					      yacyCore.seedDB.sb.remoteProxyPort,
@@ -196,7 +197,7 @@ public class yacyClient {
             String resp = (String) result.get("response");
             if (resp == null) return -1; else return Integer.parseInt(resp);
 	} catch (Exception e) {
-            //yacyCore.log.logError("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
+            yacyCore.log.logError("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
 	    return -1;
 	}
     }

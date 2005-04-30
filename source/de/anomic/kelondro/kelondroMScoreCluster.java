@@ -166,8 +166,6 @@ public class kelondroMScoreCluster {
             c = cs.longValue();
             gcount -= (c & 0xFFFFFFFF00000000L) >> 32;
             en = (int) (c & 0xFFFFFFFFL);
-            // decrease overall counter
-            gcount -= c;
         }
         
         // set new value
@@ -190,8 +188,9 @@ public class kelondroMScoreCluster {
             keyrefDB.remove(cs);
             refkeyDB.remove(obj);
             // decrease overall counter
-            gcount -= cs.longValue();
-            return (int) ((cs.longValue() & 0xFFFFFFFF00000000L) >> 32);
+            long oldScore = (cs.longValue() & 0xFFFFFFFF00000000L) >> 32;
+            gcount -= oldScore;
+            return (int) oldScore;
         }
     }
 

@@ -39,18 +39,20 @@ globalheader();
 
 <br><p>v0.37
 <ul>
-<li>YaCy's source code is now hosted in a subversion version control system on berlios: <a href="http://developer.berlios.de/projects/yacy/">yacy@berlios.de</a></li>
+<li>YaCy's source code is now hosted in a Subversion/svn version control system on developer.berlios.de: <a href="http://developer.berlios.de/projects/yacy/">yacy@berlios.de</a></li>
+<li>overall speed enhancements:</li>
   <ul>
-  <li>Check on new peer names: must not occur already and may only contain letters, numbers and '_' or '-'.</li>
-  <li>New ThreadPool and performance enhancements from Martin Thelian</li>
+  <li>new Thread-Pools and performance enhancements from Martin Thelian: much faster http-server and more responsive web interface</li>
+  <li>fixed bug in database caching that prevented from caching at all; now database much faster. This also speeded up proxy mode (must read http-header from database)</li>
+  <li>modified thread control for non-blocking dequeueing</li>
+  <li>increased cache memory settings</li>
   </ul>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
+<li>added a concept for external parsers; pdf an doc parser are integrated but not active yet.</li>
+<li>fixed several bugs that caused thread-locks and 100% CPU load</li>
+<li>fixed bug with cookie storage; changed handling of multiple cookies</li>
+<li>check on new peer names: must not occur already and may only contain letters, numbers and '_' or '-'.</li>
+<li>many minor bug fixes and spell corrections in interface</li>
 </ul>
-
-
 
 <br><p>v0.36_build20050326
 <ul>

@@ -391,7 +391,6 @@ public final class httpc {
 
 	    // at this point we should have a valid response. read in the header properties
 	    String key = "";
-	    String value = "";
 	    while ((b = serverCore.receive(clientInput, readLineBuffer, timeout, terminalMaxLength, false)) != null) {
 		if (b.length == 0) break;
 		buffer = new String(b);
@@ -406,16 +405,7 @@ public final class httpc {
 		    // create new entry
 		    p = buffer.indexOf(":");
 		    if (p > 0) {
-			key = buffer.substring(0, p).trim();
-			value = (String) responseHeader.get(key);
-			// check if the header occurred already
-			if (value == null) {
-			    // create new entry
-			    responseHeader.put(key, buffer.substring(p + 1).trim());
-			} else {
-			    // attach to old entry
-			    responseHeader.put(key, value + "#" + buffer.substring(p + 1).trim());
-			}
+			responseHeader.add(buffer.substring(0, p).trim(), buffer.substring(p + 1).trim());
 		    } else {
 			serverLog.logError("HTTPC", "RESPONSE PARSE ERROR: HOST='" + host + "', PATH='" + requestPath + "', STATUS='" + status + "'");
 			serverLog.logError("HTTPC", "..............BUFFER: " + buffer);
@@ -640,19 +630,18 @@ public final class httpc {
 	Iterator i = header.keySet().iterator();
 	String key;
 	String value;
-	int pos;
+	int count;
+        char tag;
 	while (i.hasNext()) {
 	    key = (String) i.next();
-	    value = (String) header.get(key);
-	    while ((pos = value.lastIndexOf("#")) >= 0) {
-		// special handling is needed if a key appeared several times, which is valid.
-		// all lines with same key are combined in one value, separated by a "#"
-		serverCore.send(clientOutput, key + ": " + value.substring(pos + 1).trim());
-		//System.out.println("**+" + key + ": " + value.substring(pos + 1).trim()); // debug
-		value = value.substring(0, pos).trim();
+            tag = key.charAt(0);
+            if ((tag != '*') && (tag != '#')) {
+                count = header.keyCount(key);
+                for (int j = 0; j < count; j++) {
+                    serverCore.send(clientOutput, key + ": " + ((String) header.getSingle(key, j)).trim());
+                }
+                //System.out.println("#" + key + ": " + value);
 	    }
-	    serverCore.send(clientOutput, key + ": " + value);
-	    //System.out.println("***" + key + ": " + value); // debug
 	}
 
 	// send terminating line

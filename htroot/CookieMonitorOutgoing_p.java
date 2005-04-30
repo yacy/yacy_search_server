@@ -63,7 +63,9 @@ public class CookieMonitorOutgoing_p {
         boolean dark = true;
         Iterator i = switchboard.outgoingCookies.entrySet().iterator();
         Map.Entry entry;
-        String host, client, cookie;
+        String host, client;
+        Object[] cookies;
+        String ucl;
         Date date;
         Object[] oa;
         while ((entCount < maxCount) && (i.hasNext())) {
@@ -73,14 +75,17 @@ public class CookieMonitorOutgoing_p {
             oa = (Object[]) entry.getValue();
             date = (Date) oa[0];
             client = (String) oa[1];
-            cookie = (String) oa[2];
-
+            cookies = (Object[]) oa[2];
+            ucl = "<ul>";
+            for (int j = 0; j < cookies.length; j++) ucl = ucl + "<li>" + ((String) cookies[j]) + "</li>";
+            ucl = ucl + "</ul>";
+            
             // put values in template
             prop.put("list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
             prop.put("list_" + entCount + "_host", host);
             prop.put("list_" + entCount + "_date", httpc.dateString(date));
             prop.put("list_" + entCount + "_client", client);
-            prop.put("list_" + entCount + "_cookie", cookie);
+            prop.put("list_" + entCount + "_cookie", ucl);
             
             // next
             entCount++;

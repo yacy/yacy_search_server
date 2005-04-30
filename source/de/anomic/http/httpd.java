@@ -181,8 +181,6 @@ public final class httpd implements serverHandler {
     	httpHeader header = new httpHeader(reverseMappingCache);
     	int p;
     	String line;
-    	String key;
-    	String value;
     	while ((line = readLine()) != null) {
     	    if (line.length() == 0) break; // this seperates the header of the HTTP request from the body
     	    //System.out.println("***" + line); // debug
@@ -190,16 +188,7 @@ public final class httpd implements serverHandler {
     	    p = line.indexOf(":");
     	    if (p >= 0) {
     		// store a property
-    		key = line.substring(0, p).trim();
-    		value = (String) header.get(key);
-    		// check if the header occurred already
-    		if (value == null) {
-    		    // create new entry
-    		    header.put(key, line.substring(p + 1).trim());
-    		} else {
-    		    // value can occur double times, attach with '#' - separator
-    		    header.put(key, value + "#" + line.substring(p + 1).trim());
-    		}
+    		header.add(line.substring(0, p).trim(), line.substring(p + 1).trim());
     	    }
     	}
     	return header;

@@ -183,7 +183,7 @@ public final class plasmaCrawlWorker extends Thread {
             this.setName(this.threadBaseName + "_" + this.url);
             load(this.url, this.referer, this.initiator, this.depth, this.profile);
         } catch (IOException e) {
-            throw e;
+            //throw e;
         }
         finally {
             this.done = true;
