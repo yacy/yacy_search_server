@@ -139,6 +139,15 @@ public final class serverCore extends serverAbstractThread implements serverThre
 	    }
 	}
     }
+    
+    public static String clientAddress(Socket s) {
+        InetAddress uAddr = s.getInetAddress();
+        if (uAddr.isAnyLocalAddress()) return "localhost";
+        String cIP = uAddr.getHostAddress();
+        if (cIP.equals("0:0:0:0:0:0:0:1")) cIP = "localhost";
+        if (cIP.equals("127.0.0.1")) cIP = "localhost";
+        return cIP;
+    }
 
     // class initializer
     public serverCore(int port, int maxSessions, int timeout,
@@ -299,19 +308,20 @@ public final class serverCore extends serverAbstractThread implements serverThre
         announceThreadBlockApply();
         Socket controlSocket = this.socket.accept();
         announceThreadBlockRelease();
-	String clientIP = ""+controlSocket.getInetAddress().getHostAddress();
-        if (bfHost.get(clientIP) != null) {
-            log.logInfo("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + clientIP);
+        String cIP = clientAddress(controlSocket);
+        //System.out.println("server bfHosts=" + bfHost.toString());
+        if (bfHost.get(cIP) != null) {
+            log.logInfo("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP);
 	    // add a delay to make brute-force harder
-	    try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
+	    try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {}
 	}
-        if ((this.denyHost == null) || (this.denyHost.get(clientIP) == null)) {
+        if ((this.denyHost == null) || (this.denyHost.get(cIP) == null)) {
             controlSocket.setSoTimeout(this.timeout);
             Session connection = (Session) this.theSessionPool.borrowObject();
             connection.execute(controlSocket);
             //log.logDebug("* NEW SESSION: " + connection.request + " from " + clientIP);
         } else {
-            System.out.println("ACCESS FROM " + clientIP + " DENIED");
+            System.out.println("ACCESS FROM " + cIP + " DENIED");
         }
         // idle until number of maximal threads is (again) reached
         //synchronized(this) {

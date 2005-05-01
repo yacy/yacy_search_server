@@ -230,13 +230,15 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 		serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
 	    } else {
                 // a wrong authentication was given. Ask again
-                serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + conProp.getProperty("CLIENTIP", "unknown-IP") + "'");
+                String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
+                serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                 //try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {} // add a delay to make brute-force harder
-		serverCore.bfHost.put(conProp.getProperty("CLIENTIP"), "sleep");
+		serverCore.bfHost.put(clientIP, "sleep");
                 out.write(("HTTP/1.1 401 log-in required\r\n").getBytes());
                 out.write(("WWW-Authenticate: Basic realm=\"admin log-in\"\r\n").getBytes());
                 out.write(("\r\n").getBytes());
                 out.flush();
+                //System.out.println("httpd bfHosts=" + serverCore.bfHost.toString());
                 return;
             }
 	}

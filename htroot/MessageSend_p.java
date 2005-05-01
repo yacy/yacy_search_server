@@ -80,10 +80,11 @@ public class MessageSend_p {
 	    HashMap result = yacyClient.permissionMessage(hash);
             //System.out.println("DEBUG: permission request result = " + result.toString());
 	    String peerName;
+            yacySeed targetPeer = null;
 	    if (hash.equals(yacyCore.seedDB.mySeed.hash)) {
 		peerName = yacyCore.seedDB.mySeed.get("Name","nameless");
             } else {
-                yacySeed targetPeer = yacyCore.seedDB.getConnected(hash);
+                targetPeer = yacyCore.seedDB.getConnected(hash);
                 if (targetPeer == null)
                     peerName = "nameless";
                 else
@@ -92,14 +93,17 @@ public class MessageSend_p {
             String response = (result == null) ? "-1" : (String) result.get("response");
 	    if ((response == null) || (response.equals("-1"))) {
 		// we don't have permission or other peer does not exist
-		body += "<p>You cannot send a message to '" + peerName + "'. The peer does not respond.</p>";
+		body += "<p>You cannot send a message to '" + peerName + "'. The peer does not respond. It was now removed from the peer-list.</p>";
+                if (targetPeer != null) {
+                    yacyCore.peerActions.disconnectPeer(targetPeer);
+                }
 	    } else {
 		// write input form
 		int messagesize = Integer.parseInt((String) result.get("messagesize"));
 		int attachmentsize = Integer.parseInt((String) result.get("attachmentsize"));
 		body += "<p>The peer '" + peerName + "' is alive and responded:<br>";
 		body += "'" + response + " You are allowed to send me a message &le; " + messagesize + " kb and an attachment &le; " + attachmentsize + ".'</p>";
-		body += "<form action=\"MessageSend_p.html\" method=\"post\" enctype=\"multipart/form-data\"><br><br>";
+		body += "<form action=\"MessageSend_p.html\" method=\"post\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\"><br><br>";
 		body += "<p><h3>Your Message</h3></p>";
 		body += "<p>Subject:<br><input name=\"subject\" type=\"text\" size=\"80\" maxlength=\"80\" value=\"" + subject + "\"></p>";
 		body += "<p>Text:<br><textarea name=\"message\" cols=\"80\" rows=\"8\"></textarea></p>";

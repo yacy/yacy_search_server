@@ -191,6 +191,7 @@ cp htroot/*.xml $release/htroot/
 cp htroot/*.html $release/htroot/
 cp htroot/*.java $release/htroot/
 cp htroot/*.class $release/htroot/
+cp htroot/*.ico $release/htroot/
 cp htroot/yacy/*.html $release/htroot/yacy/
 cp htroot/yacy/*.java $release/htroot/yacy/
 cp htroot/yacy/*.class $release/htroot/yacy/

@@ -340,13 +340,15 @@ public class yacySeedDB {
     }
     
     public void addDisconnected(yacySeed seed) {
-	if ((seed == null) || (!(seed.isProper()))) return;
-	//seed.put("LastSeen", yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
+	if (seed == null) return;
         try {
             nameLookupCache.remove(seed.getName());
-            seedPassiveDB.set(seed.hash, seed.getMap());
             seedActiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
+        } catch (Exception e) {}
+	//seed.put("LastSeen", yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
+        try {
+            seedPassiveDB.set(seed.hash, seed.getMap());
 	} catch (IOException e) {
 	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
 	    e.printStackTrace();
@@ -363,13 +365,16 @@ public class yacySeedDB {
     }
     
     public void addPotential(yacySeed seed) {
-	if ((seed == null) || (!(seed.isProper()))) return;
-	//seed.put("LastSeen", yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
+        if (seed == null) return;
         try {
             nameLookupCache.remove(seed.getName());
-            seedPotentialDB.set(seed.hash, seed.getMap());
             seedActiveDB.remove(seed.hash);
             seedPassiveDB.remove(seed.hash);
+        } catch (Exception e) {}
+	if (!(seed.isProper())) return;
+	//seed.put("LastSeen", yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
+        try {
+            seedPotentialDB.set(seed.hash, seed.getMap());
 	} catch (IOException e) {
 	    System.out.println("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db");
 	    e.printStackTrace();
