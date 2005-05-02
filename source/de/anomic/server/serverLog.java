@@ -124,8 +124,10 @@ public final class serverLog {
     private void log(int messageLevel, String message) {
         if (messageLevel <= logLevel) {
 	    System.out.println(l2t[messageLevel] + " " + dateLongString() + " " + appName + " " + message);
-	    lastLog.add(l2t[messageLevel] + " " + dateLongString() + " " + appName + " " + message);
-	    while (lastLog.size() > lastlogMaxSize) lastLog.removeFirst();
+	    synchronized (lastLog) {
+		lastLog.add(l2t[messageLevel] + " " + dateLongString() + " " + appName + " " + message);
+		while (lastLog.size() > lastlogMaxSize) lastLog.removeFirst();
+	    }
 	}
     }
 

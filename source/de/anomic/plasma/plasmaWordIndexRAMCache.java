@@ -171,12 +171,14 @@ public class plasmaWordIndexRAMCache extends Thread {
 	return flushKey(key, "flushSpecific");
     }
     
-    private synchronized int flushKey(String key, String caller) throws IOException {
+    private int flushKey(String key, String caller) throws IOException {
 	Vector v = null;
 	v = (Vector) cache.get(key);
 	if (v == null) return 0; // flushing of nonexisting key
-	cache.remove(key);
-	hashScore.deleteScore(key);
+	synchronized (cache) {
+	    cache.remove(key);
+	    hashScore.deleteScore(key);
+	}
 	pic.addEntriesToIndex(key, v);
 	return v.size();
     }
@@ -213,11 +215,13 @@ public class plasmaWordIndexRAMCache extends Thread {
 	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");
 
 	// put new words into cache
-	Vector v = (Vector) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
-	if (v == null) v = new Vector();
-	v.add(entry);
-	cache.put(wordHash, v);
-	hashScore.incScore(wordHash);
+	synchronized (cache) {
+	    Vector v = (Vector) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+	    if (v == null) v = new Vector();
+	    v.add(entry);
+	    cache.put(wordHash, v);
+	    hashScore.incScore(wordHash);
+	}
 	return flushc;
     }
     

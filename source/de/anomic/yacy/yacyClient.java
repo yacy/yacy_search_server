@@ -92,7 +92,7 @@ public class yacyClient {
             obj.put("mytime", yacyCore.universalDateShortString());
 	    obj.put("seed", yacyCore.seedDB.mySeed.genSeedStr(key));
             result = nxTools.table(httpc.wput(url,
-					      20000, null, null,
+					      105000, null, null,
 					      yacyCore.seedDB.sb.remoteProxyHost,
 					      yacyCore.seedDB.sb.remoteProxyPort,
 					      obj));
