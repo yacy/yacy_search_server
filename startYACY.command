@@ -1,2 +1,8 @@
 cd `dirname $0`
-java -classpath classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar:libx/PDFBox-0.7.1.jar:libx/log4j-1.2.9.jar:libx/tm-extractors-0.4.jar -server yacy
+
+# generating the proper classpath
+CLASSPATH=""
+for N in `ls -1 lib/*.jar`; do CLASSPATH="$CLASSPATH$N:"; done	
+for N in `ls -1 libx/*.jar`; do CLASSPATH="$CLASSPATH$N:"; done
+
+java -classpath classes:$CLASSPATH -server yacy

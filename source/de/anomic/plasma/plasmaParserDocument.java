@@ -148,7 +148,7 @@ public class plasmaParserDocument {
         Iterator i;
         String url;
         int extpos;
-        String ext;
+        String ext = null;
         i = anchors.entrySet().iterator();
         hyperlinks = new HashMap();
         medialinks = new HashMap();
@@ -163,10 +163,14 @@ public class plasmaParserDocument {
                 extpos = url.lastIndexOf(".");
                 String normal;
                 if (extpos > 0) {
-                    ext = url.substring(extpos).toLowerCase();
+                    if (url.indexOf("?") != -1) {
+                        ext = url.substring(extpos,url.indexOf("?")).toLowerCase();
+                    } else {
+						ext = url.substring(extpos).toLowerCase();
+                    }
                     normal = plasmaParser.urlNormalform(url);
                     if (normal != null) {
-                        if (plasmaParser.mediaExtSet.contains(ext.substring(1))) {
+                        if (plasmaParser.mediaExtContains(ext.substring(1))) {
                             // this is not an normal anchor, its a media link
                             medialinks.put(normal, entry.getValue());
                         } else {

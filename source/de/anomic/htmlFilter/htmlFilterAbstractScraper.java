@@ -398,7 +398,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
 	return bb;
     }
 
-    protected static serverByteBuffer stripAll(serverByteBuffer bb) {
+    public static serverByteBuffer stripAll(serverByteBuffer bb) {
 	//return stripAllTags(s);
 	 return convertUmlaute(transscriptAll(stripAllTags(bb)));
     }

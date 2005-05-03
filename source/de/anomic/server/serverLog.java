@@ -76,7 +76,7 @@ public final class serverLog {
     
     // statics
     private static serverLog genericLog = new serverLog("GENERIC", LOGLEVEL_DEBUG); // generic log
-    private static LinkedList lastLog = new LinkedList(); // for Web-Interface
+    private static LinkedList lastLog = new LinkedList(); // for Web-Interface    
     private static int lastlogMaxSize = 400; // for Web-Interface
     
     // class variables

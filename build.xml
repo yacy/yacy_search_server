@@ -3,6 +3,7 @@
 		YaCy - a Peer to Peer search Engine
 	</description>
 	
+<!-- defining all needed directory names -->	
 <property name="src" location="source"/>
 <property name="lib" location="lib"/>
 <property name="libx" location="libx"/>
@@ -10,6 +11,10 @@
 <property name="htroot" location="htroot"/>
 <property name="release" location="RELEASE"/>	
 
+<!-- defining some compiler arguments -->
+<property name="javacSource" value="1.4"/>	
+<property name="javacTarget" value="1.4"/>	
+	
 <target name="init">
 	<tstamp/>
 	<mkdir dir="${build}/de/anomic/data"/>
@@ -18,6 +23,7 @@
 	<mkdir dir="${build}/de/anomic/kelondro"/>
 	<mkdir dir="${build}/de/anomic/net"/>
 	<mkdir dir="${build}/de/anomic/plasma"/>
+	<mkdir dir="${build}/de/anomic/plasma/parser"/>
 	<mkdir dir="${build}/de/anomic/server"/>
 	<mkdir dir="${build}/de/anomic/tools"/>
 	<mkdir dir="${build}/de/anomic/yacy"/>
@@ -36,7 +42,7 @@
 
 
 <target name="compile" depends="init" description="compiles the source">
-	<javac srcdir="${src}/" destdir="${build}" excludes="de/anomic/plasma/parser/**/*">
+	<javac srcdir="${src}/" destdir="${build}" excludes="de/anomic/plasma/parser/*/*" source="${javacSource}" target="${javacTarget}">
         <classpath>
           	<pathelement location="${build}" />
         	
@@ -45,9 +51,9 @@
         	<pathelement location="${lib}/commons-pool-1.2.jar" />        	      	
         </classpath>		
 	</javac>	
-	<javac srcdir="${htroot}/" destdir="${htroot}" classpath="${build}"/>
-	<javac srcdir="${htroot}/htdocsdefault" destdir="${htroot}/htdocsdefault" classpath="${build}"/>	
-	<javac srcdir="${htroot}/yacy" destdir="${htroot}/yacy" classpath="${build}"/>	
+	<javac srcdir="${htroot}/" destdir="${htroot}" classpath="${build}" source="1.4" target="1.4"/>
+	<javac srcdir="${htroot}/htdocsdefault" destdir="${htroot}/htdocsdefault" classpath="${build}" source="1.4" target="1.4"/>	
+	<javac srcdir="${htroot}/yacy" destdir="${htroot}/yacy" classpath="${build}" source="1.4" target="1.4"/>	
 </target>
 
 
@@ -56,41 +62,19 @@
 	<move file="${src}/yacy.java.orig" tofile="${src}/yacy.java" />
 </target>
 	
-<target name="dist" depends="all,pdfParser,docParser"/>	
-	
-<!-- target to create a zip file for the optional pdf file Parser -->	
-<target name="pdfParser" depends="compile" description="Creating a zip file for the pdf parser addon">
-	  <javac srcdir="${src}/de/anomic/plasma/parser/pdf" destdir="${build}">
-	  	<classpath>
-		  <!-- libs needed to parse pdf files -->
-	  	  <pathelement location="${build}" />	
-		  <pathelement location="${libx}/PDFBox-0.7.1.jar" />        	
-		  <pathelement location="${libx}/log4j-1.2.9.jar" />    
-	  	</classpath>
-	  </javac>
-	
-	  <zip destfile="${release}/pdfparser.zip">
-	  	<zipfileset dir="${libx}" includes="PDFBox-0.7.1.*" prefix="libx/"/>
-	  	<zipfileset dir="${libx}" includes="log4j-1.2.9.*" prefix="libx/"/>
-	  	<zipfileset dir="${build}/de/anomic/plasma/parser/pdf" prefix="classes/de/anomic/plasma/parser/pdf"/>	  	
-	  </zip>
+<target name="parsers" depends="compile" description="Compiling and zipping all additional parsers">
+    <subant target="">
+    	<property name="src" location="${src}"/>
+    	<property name="build" location="${build}"/>
+    	<property name="libx" location="${libx}"/>
+    	<property name="release" location="${release}"/>
+    	<property name="javacSource" value="${javacSource}"/>
+    	<property name="javacTarget" value="${javacTarget}"/>
+		<fileset dir="${src}/" includes="de/anomic/plasma/parser/*/build.xml"/>    	
+    </subant>	
 </target>	
 	
-<!-- target to create a zip file for the optional doc file Parser -->	
-<target name="docParser" depends="compile" description="Creating a zip file for the doc parser addon">	
-	  <javac srcdir="${src}/de/anomic/plasma/parser/doc" destdir="${build}">
-	  	<classpath>
-  	  	  <pathelement location="${build}" />
-	  	  <pathelement location="${libx}/tm-extractors-0.4.jar" />     
-  		</classpath>
-	  </javac>	
-
-	  <zip destfile="${release}/docparser.zip">
-	  	<zipfileset dir="${libx}" includes="tm-extractors-0.4.*" prefix="libx/"/>
-	  	<zipfileset dir="${build}/de/anomic/plasma/parser/doc" prefix="classes/de/anomic/plasma/parser/doc"/>	  	
-	  </zip>
-</target>		
-	
+<target name="dist" depends="all,parsers"/>	
 
 <target name="clean" description="make clean">	
     <delete>

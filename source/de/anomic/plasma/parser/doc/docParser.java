@@ -43,51 +43,31 @@
 
 package de.anomic.plasma.parser.doc;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Hashtable;
+
 import org.textmining.text.extraction.WordExtractor;
 
 
 import de.anomic.plasma.plasmaParserDocument;
+import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 
-public class docParser implements Parser {
+public class docParser
+extends AbstractParser
+implements Parser {
 
     /**
      * a list of mime types that are supported by this parser class
-     */
-    public static final HashSet SUPPORTED_MIME_TYPES = new HashSet(Arrays.asList(new String[] {
-        new String("application/msword")
-    }));     
-    
+     * @see #getSupportedMimeTypes()
+     */    
+    public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
+    static { SUPPORTED_MIME_TYPES.put("application/msword","doc"); } 
     
 	public docParser() {
 		super();
-	}
-
-	public plasmaParserDocument parse(URL location, String mimeType,
-			byte[] source) throws ParserException {
-        ByteArrayInputStream contentInputStream = new ByteArrayInputStream(source);
-        return this.parse(location,mimeType,contentInputStream);
-	}
-
-	public plasmaParserDocument parse(URL location, String mimeType,
-			File sourceFile) throws ParserException {
-        BufferedInputStream contentInputStream = null;
-        try {
-            contentInputStream = new BufferedInputStream(new FileInputStream(sourceFile));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return this.parse(location, mimeType, contentInputStream);
 	}
 
 	public plasmaParserDocument parse(URL location, String mimeType,
@@ -117,21 +97,12 @@ public class docParser implements Parser {
 		}        
 	}
 
-	public HashSet getSupportedMimeTypes() {
+	public java.util.Hashtable getSupportedMimeTypes() {
 		return docParser.SUPPORTED_MIME_TYPES;
 	}
 
 	public void reset() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+        // Nothing todo here at the moment
 	}
 
 }

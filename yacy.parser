@@ -1,2 +1,8 @@
-application/pdf=de.anomic.plasma.parser.pdf.pdfParser
+#plasmaParser configuration file
+#Mon May 02 10:12:02 CEST 2005
+application/atom+xml=de.anomic.plasma.parser.rss.rssParser
+text/rss=de.anomic.plasma.parser.rss.rssParser
+application/rss+xml=de.anomic.plasma.parser.rss.rssParser
+application/rdf+xml=de.anomic.plasma.parser.rss.rssParser
 application/msword=de.anomic.plasma.parser.doc.docParser
+application/pdf=de.anomic.plasma.parser.pdf.pdfParser

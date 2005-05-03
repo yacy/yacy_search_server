@@ -45,6 +45,7 @@
 
 import java.util.*;
 import de.anomic.tools.*;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.*;
 import de.anomic.yacy.*;
 import de.anomic.http.*;
@@ -124,8 +125,37 @@ public class Settings_p {
 	prop.put("seedFTPPath", env.getConfig("seedFTPPath", ""));
 	prop.put("seedFTPAccount", env.getConfig("seedFTPAccount", ""));
 	prop.put("seedFTPPassword", env.getConfig("seedFTPPassword", ""));
-        prop.put("seedURL", env.getConfig("seedURL", ""));
+    prop.put("seedURL", env.getConfig("seedURL", ""));
         
+    
+    /*
+     * Parser Configuration
+     */
+    plasmaSwitchboard sb = (plasmaSwitchboard)env;
+    Hashtable enabledParsers = sb.parser.getEnabledParserList();
+    Hashtable availableParsers = sb.parser.getAvailableParserList();
+    
+    // fetching a list of all available mimetypes
+    List availableParserKeys = Arrays.asList(availableParsers.keySet().toArray(new String[availableParsers.size()]));
+    
+    // sort it
+    Collections.sort(availableParserKeys);
+
+    // loop through the mimeTypes and add it to the properties
+    int parserIdx = 0;
+    Iterator availableParserIter = availableParserKeys.iterator();
+    while (availableParserIter.hasNext()) {
+        String mimeType = (String) availableParserIter.next();
+        
+        prop.put("parser_" + parserIdx + "_mime", mimeType);
+        prop.put("parser_" + parserIdx + "_name", availableParsers.get(mimeType));
+        prop.put("parser_" + parserIdx + "_status", enabledParsers.containsKey(mimeType) ? 1:0);
+        
+        parserIdx++;
+    }
+    
+    prop.put("parser", parserIdx);
+    
 	// return rewrite properties
 	return prop;
     }

@@ -46,6 +46,7 @@
 import java.util.*;
 import java.io.*;
 import de.anomic.tools.*;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.*;
 import de.anomic.yacy.*;
 import de.anomic.http.*;
@@ -250,6 +251,19 @@ public class SettingsAck_p {
                 prop.put("info", 14);//Seedserver changed, but something is wrong
             return prop;
         }
+        
+        if (post.containsKey("parserSettings")) {   
+            plasmaSwitchboard sb = (plasmaSwitchboard)env;
+			post.remove("parserSettings");
+            
+            // activate all received parsers
+            Enumeration mimeTypeEnum = post.keys();            
+            sb.parser.setEnabledParserList(mimeTypeEnum);
+            
+            prop.put("info", 18);
+            return prop;
+        }
+        
         
         // nothing made
         prop.put("info", 1);//no information submitted

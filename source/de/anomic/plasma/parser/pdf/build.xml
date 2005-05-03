@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<project name="YACY - pdfParser" default="dist">
+    <description>
+            A class to parse pdf documents (application/pdf)
+    </description>
+
+    <property name="parserShortName" value="pdf"/>
+	<property name="parserVersion" value="0.1"/>
+
+    <property name="parserLongName" value="${parserShortName}Parser"/>    	
+   	<property name="parserArchive" location="${release}/${parserLongName}_${parserVersion}.zip"/>	    	
+    	
+    <target name="compile">
+  	  <echo message="Compiling ${parserLongName} Version ${parserVersion} ..."/>
+  	  <javac srcdir="${src}/de/anomic/plasma/parser/${parserShortName}" destdir="${build}" source="${javacSource}" target="${javacTarget}">
+  	  	<classpath>
+  	  	  <pathelement location="${build}" />	
+  	  	
+		  <!-- main lib needed to parse pdf files -->  	  	
+  		  <pathelement location="${libx}/PDFBox-0.7.1.jar" />        	
+  		  	
+  		  <!-- libs needed by the main lib -->  	  	  		  	
+  		  <pathelement location="${libx}/log4j-1.2.9.jar" />    
+  	  	</classpath>
+  	  </javac>    	
+    </target>
+	
+
+    <target name="zip" depends="compile">
+	  <echo message="Compressing ${parserLongName} Version ${parserVersion} ..."/>  
+  	  <zip destfile="${parserArchive}">
+  	  	<zipfileset dir="${libx}" includes="PDFBox-0.7.1.*" prefix="libx/"/>
+  	  	<zipfileset dir="${libx}" includes="log4j-1.2.9.*" prefix="libx/"/>
+  	  	<zipfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" prefix="source/de/anomic/plasma/parser/${parserShortName}"/>
+  	  	<zipfileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" prefix="classes/de/anomic/plasma/parser/${parserShortName}"/>	  	
+  	  </zip>    	
+    </target>	
+
+
+    <target name="dist" depends="compile,zip" description="Compile and zip the parser"/>        
+	
+	
+</project>
+

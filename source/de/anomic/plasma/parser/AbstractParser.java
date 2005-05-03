@@ -1,4 +1,4 @@
-//Parser.java 
+//AbstractParser.java 
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@anomic.de
@@ -44,46 +44,69 @@
 
 package de.anomic.plasma.parser;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Hashtable;
 
 import de.anomic.plasma.plasmaParserDocument;
 
 /**
- * This interface defines a list of methods that needs to be implemented
- * by each content parser class.
+ * New classes implementing the {@link de.anomic.plasma.parser.Parser} interface
+ * can extend this class to inherit all functions already implemented in this class.
  * @author Martin Thelian
  * @version $LastChangedRevision$ / $LastChangedDate$
  */
-public interface Parser {
-    
+public abstract class AbstractParser implements Parser{
+
     /**
-     * Parsing a document available as byte array
+     * The Constructor of this class.
+     */
+	public AbstractParser() {
+		super();
+	}
+
+	/**
+	 * Parsing a document available as byte array.
      * @param location the origin of the document 
      * @param mimeType the mimetype of the document
      * @param source the content byte array
      * @return a {@link plasmaParserDocument} containing the extracted plain text of the document
      * and some additional metadata.
-     *  
-     * @throws ParserException if the content could not be parsed properly 
-     */
-    public plasmaParserDocument parse(URL location, String mimeType, byte[] source)
-    throws ParserException;
-    
-    /**
-     * Parsing a document stored in a {@link File}
+	 * @throws ParserException if the content could not be parsed properly 
+	 * 
+	 * @see de.anomic.plasma.parser.Parser#parse(java.net.URL, java.lang.String, byte[])
+	 */
+	public plasmaParserDocument parse(URL location, String mimeType,
+			byte[] source) throws ParserException {
+        ByteArrayInputStream contentInputStream = new ByteArrayInputStream(source);
+        return this.parse(location,mimeType,contentInputStream);
+	}
+
+	/**
+	 * Parsing a document stored in a {@link File}
      * @param location the origin of the document 
      * @param mimeType the mimetype of the document
      * @param sourceFile the file containing the content of the document
      * @return a {@link plasmaParserDocument} containing the extracted plain text of the document
      * and some additional metadata.
-     *  
-     * @throws ParserException if the content could not be parsed properly 
-     */    
-    public plasmaParserDocument parse(URL location, String mimeType, File sourceFile)
-    throws ParserException;
+	 * @throws ParserException if the content could not be parsed properly 
+	 * 
+	 * @see de.anomic.plasma.parser.Parser#parse(java.net.URL, java.lang.String, java.io.File)
+	 */
+	public plasmaParserDocument parse(URL location, String mimeType,
+			File sourceFile) throws ParserException {
+        BufferedInputStream contentInputStream = null;
+        try {
+            contentInputStream = new BufferedInputStream(new FileInputStream(sourceFile));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return this.parse(location, mimeType, contentInputStream);
+	}
     
     /**
      * Parsing a document available as {@link InputStream}
@@ -92,23 +115,11 @@ public interface Parser {
      * @param source the {@link InputStream} containing the document content
      * @return a {@link plasmaParserDocument} containing the extracted plain text of the document
      * and some additional metadata.
-     *  
      * @throws ParserException if the content could not be parsed properly 
-     */    
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) 
-    throws ParserException;
-            
-    /**
-     * Can be used to determine the MimeType(s) that are supported by the parser
-     * @return a {@link Hashtable} containing a list of MimeTypes that are supported by 
-     * the parser
+     * 
+     * @see de.anomic.plasma.parser.Parser#parse(java.net.URL, java.lang.String, java.io.InputStream)
      */
-    public Hashtable getSupportedMimeTypes();
-    
-    /**
-     * This function should be called before reusing the parser object.
-     */
-    public void reset();
-    
-    
+    public abstract plasmaParserDocument parse(URL location, String mimeType,
+			InputStream source) throws ParserException;
+
 }

@@ -54,6 +54,7 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Hashtable;
 
 
 import org.pdfbox.pdfparser.PDFParser;
@@ -62,41 +63,35 @@ import org.pdfbox.pdmodel.PDDocumentInformation;
 import org.pdfbox.util.PDFTextStripper;
 
 import de.anomic.plasma.plasmaParserDocument;
+import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 
-public class pdfParser implements Parser
+public class pdfParser extends AbstractParser implements Parser
 {
 
     /**
      * a list of mime types that are supported by this parser class
+     * @see #getSupportedMimeTypes()
      */
-    public static final HashSet SUPPORTED_MIME_TYPES = new HashSet(Arrays.asList(new String[] {
-        new String("application/pdf")
-    }));    
+    public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
+    static { SUPPORTED_MIME_TYPES.put("application/pdf","pdf"); }     
+    
+    /**
+     * a list of file extensions that are supported by this parser class
+     * @see #getSupportedMimeTypes()
+     */
+    public static final HashSet SUPPORTED_FILE_EXT = new HashSet(Arrays.asList(new String[] {
+        new String("pdf")
+    }));       
     
     public pdfParser() {
         super();
     }
     
-    public HashSet getSupportedMimeTypes() {
+    public Hashtable getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
-    
-    public plasmaParserDocument parse(URL location, String mimeType, File sourceFile) throws ParserException {
-        BufferedInputStream contentInputStream = null;
-        try {
-            contentInputStream = new BufferedInputStream(new FileInputStream(sourceFile));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return this.parse(location, mimeType, contentInputStream);
-    }
-
-    public plasmaParserDocument parse(URL location, String mimeType, byte[] source) throws ParserException {
-        ByteArrayInputStream contentInputStream = new ByteArrayInputStream(source);
-        return this.parse(location,mimeType,contentInputStream);
-    }    
     
     public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
         
@@ -155,8 +150,12 @@ public class pdfParser implements Parser
     }
     
     public void reset() {
-    	// TODO Auto-generated method stub
+		// Nothing todo here at the moment
     	
     }
+
+	public HashSet getSupportedFileExtensions() {
+		return SUPPORTED_FILE_EXT;
+	}
 
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<project name="YACY - docParser" default="dist">
+    <description>
+            A class to parse doc documents (application/msword)
+    </description>
+
+    <property name="parserShortName" value="doc"/>
+	<property name="parserVersion" value="0.1"/>
+
+    <property name="parserLongName" value="${parserShortName}Parser"/>    	
+   	<property name="parserArchive" location="${release}/${parserLongName}_${parserVersion}.zip"/>	    	
+    	
+    <target name="compile">
+  	  <echo message="Compiling ${parserLongName} Version ${parserVersion} ..."/>
+  	  <javac srcdir="${src}/de/anomic/plasma/parser/${parserShortName}" destdir="${build}" source="${javacSource}" target="${javacTarget}">
+  	  	<classpath>
+  	  	  <pathelement location="${build}" />	
+  	  	
+		  <!-- main lib needed to parse doc files -->  	  	
+  		  <pathelement location="${libx}/tm-extractors-0.4.jar" />        	
+  	  	</classpath>
+  	  </javac>    	
+    </target>
+	
+
+    <target name="zip" depends="compile">
+	  <echo message="Compressing ${parserLongName} Version ${parserVersion} ..."/>  
+  	  <zip destfile="${parserArchive}">
+  	  	<zipfileset dir="${libx}" includes="tm-extractors-0.4.*" prefix="libx/"/>
+  	  	<zipfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" prefix="source/de/anomic/plasma/parser/${parserShortName}"/>
+  	  	<zipfileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" prefix="classes/de/anomic/plasma/parser/${parserShortName}"/>	  	
+  	  </zip>    	
+    </target>	
+
+
+    <target name="dist" depends="compile,zip" description="Compile and zip the parser"/>        
+	
+	
+</project>
+

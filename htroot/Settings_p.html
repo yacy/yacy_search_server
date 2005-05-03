@@ -171,6 +171,24 @@ but only if there had been changes to the seed-list.
 </fieldset>
 </form><br>
 
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend>Content Parser Settings</legend>
+<p>Activation/Deactivation of additional content parsers ...</p>
+<p>
+<table>
+#{parser}#
+<tr>
+	<td><input type="checkbox" name="#[mime]#" align="top" #(status)#::checked#(/status)#></td>
+	<td>#[mime]#</td>
+	<td>#[name]#</td>
+	</tr>
+#{/parser}#
+  <tr>
+    <td colspan="3"><input type="submit" name="parserSettings" value="submit"></td>
+  </tr>
+</table>
+</fieldset>
+</form><br>
 
 #[footer]#
 </body>
