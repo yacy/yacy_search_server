@@ -10,7 +10,7 @@
 # the http service configurations
 
 # port number of server
-port = 8090
+port = 8080
 
 # time-out of client control socket in milliseconds
 # since this applies only to the client-proxy connection,
@@ -79,13 +79,13 @@ proxyCache = DATA/HTCACHE
 proxyCacheSize = 200
 
 # the following mime-types are the whitelist for indexing
-parseableMime=application/xhtml+xml,text/html,text/plain,application/pdf,application/msword
+parseableMime=application/xhtml+xml,text/html,text/plain
 
 # media extension string
 # a comma-separated list of extensions that denote media file formats
 # this is important to recognize <a href> - tags as not-html reference
 # These files will be excluded from indexing
-mediaExt=swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar,sit,hqx,img,dmg,tar,gz,ps,xls,ppt,ram,bz2,arj,jar,deb,torrent,ogg,iso,bin,ace,tgz,rpm,css
+mediaExt=swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar,sit,hqx,img,dmg,tar,gz,ps,pdf,doc,xls,ppt,ram,bz2,arj,jar,deb,torrent,ogg,iso,bin,ace,tgz,rpm,css
 
 # Promotion Strings
 # These strings appear in the Web Mask of the YACY search client
