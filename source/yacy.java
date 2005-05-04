@@ -54,7 +54,7 @@
 
   On termination, the following must be done:
   - stop feeding of the crawling process because it othervise fills the indexing queue.
-  - say goodby to connected peers and disable new connections. Don't wait for success.
+  - say goodbye to connected peers and disable new connections. Don't wait for success.
   - first terminate the serverCore thread. This prevents that new cache objects are queued
   - wait that the plasmaHTMLCache terminates (it should be normal that this process already has terminated)
   - then wait for termination of all loader process of the plasmaCrawlerLoader
@@ -272,7 +272,7 @@ public final class yacy {
 	    serverLog.logFailure("STARTUP", "FATAL ERROR: " + ee.getMessage());
             ee.printStackTrace();
 	}
-        serverLog.logSystem("SHUTDOWN", "goodby. (this is the last line)");
+        serverLog.logSystem("SHUTDOWN", "goodbye. (this is the last line)");
 	try {System.exit(0);} catch (Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
     }
     
