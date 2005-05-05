@@ -43,13 +43,16 @@
 // javac -classpath .:../Classes SettingsAck_p.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import java.io.*;
-import de.anomic.tools.*;
+import java.util.Enumeration;
+
+import de.anomic.http.httpHeader;
+import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.*;
-import de.anomic.yacy.*;
-import de.anomic.http.*;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class SettingsAck_p {
     

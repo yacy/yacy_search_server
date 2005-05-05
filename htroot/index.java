@@ -44,16 +44,22 @@
 // javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.htmlFilter.*;
-import de.anomic.yacy.*;
-import de.anomic.http.*;
-import de.anomic.kelondro.*;
-import de.anomic.plasma.*;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.TreeSet;
+
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
 
 public class index {
 

@@ -46,14 +46,11 @@
 // javac -classpath .:../Classes Config_p.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import java.io.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.yacy.*;
-import de.anomic.http.*;
-import de.anomic.plasma.*;
-import de.anomic.data.*;
+import java.util.Enumeration;
+
+import de.anomic.http.httpHeader;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class Config_p {
 

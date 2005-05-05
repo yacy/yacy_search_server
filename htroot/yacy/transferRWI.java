@@ -43,14 +43,17 @@
 // javac -classpath .:../classes transferRWI.java
 
 
-import de.anomic.server.*;
-import de.anomic.http.*;
-import de.anomic.plasma.*;
-import de.anomic.yacy.*;
-import de.anomic.tools.*;
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Vector;
+
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
 
 public class transferRWI {
 

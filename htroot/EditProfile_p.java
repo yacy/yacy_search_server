@@ -45,13 +45,15 @@
 // javac -classpath .:../Classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import de.anomic.server.*;
-import de.anomic.http.*;
-import de.anomic.plasma.*;
-import de.anomic.data.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+import de.anomic.http.httpHeader;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class EditProfile_p {
 

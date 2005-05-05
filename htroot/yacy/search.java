@@ -44,12 +44,16 @@
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
-import java.util.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.plasma.*;
-import de.anomic.yacy.*;
-import de.anomic.http.*;
+import java.util.Date;
+import java.util.HashSet;
+
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class search {
 

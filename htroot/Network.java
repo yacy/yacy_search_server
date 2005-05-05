@@ -43,11 +43,13 @@
 // javac -classpath .:../classes Network.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.http.*;
-import de.anomic.yacy.*;
+import java.util.Enumeration;
+
+import de.anomic.http.httpHeader;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class Network {
     

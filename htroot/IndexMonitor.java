@@ -43,12 +43,11 @@
 // javac -classpath .:../Classes Settings_p.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import de.anomic.server.*;
-import de.anomic.http.*;
-import de.anomic.plasma.*;
-import de.anomic.yacy.*;
-import java.text.*;
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class IndexMonitor {
 

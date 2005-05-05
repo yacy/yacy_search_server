@@ -45,15 +45,28 @@
 // javac -classpath .:../Classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.yacy.*;
-import de.anomic.net.*;
-import de.anomic.http.*;
-import de.anomic.plasma.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Vector;
+
+import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
+import de.anomic.http.httpdProxyHandler;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class sharedBlacklist_p {
 

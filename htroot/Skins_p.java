@@ -45,13 +45,22 @@
 // javac -classpath .:../Classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import de.anomic.server.*;
-import de.anomic.http.*;
-import de.anomic.plasma.*;
-import de.anomic.data.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.Vector;
+
+import de.anomic.data.listManager;
+import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class Skins_p {
 

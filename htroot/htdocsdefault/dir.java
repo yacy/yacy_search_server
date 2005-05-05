@@ -44,17 +44,27 @@
 // which most probably means to compile this with
 // javac -classpath ../../classes dir.java
 
-import java.util.*;
-import java.text.*;
-import java.io.*;
-import java.net.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.yacy.*;
-import de.anomic.data.*;
-import de.anomic.plasma.*;
-import de.anomic.http.*;
-import de.anomic.htmlFilter.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Set;
+
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaCondenser;
+import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class dir {
 

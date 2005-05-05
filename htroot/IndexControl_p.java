@@ -43,15 +43,25 @@
 // javac -classpath .:../Classes IndexControl_p.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.plasma.*;
-import de.anomic.http.*;
-import de.anomic.htmlFilter.*;
-import de.anomic.yacy.*;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaWordIndexEntity;
+import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyClient;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class IndexControl_p {
 

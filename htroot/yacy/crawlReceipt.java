@@ -43,13 +43,15 @@
 // javac -classpath .:../classes crawlOrder.java
 
 
-import de.anomic.server.*;
-import de.anomic.http.*;
-import de.anomic.plasma.*;
-import de.anomic.yacy.*;
-import de.anomic.tools.*;
-import java.util.*;
-import java.net.*;
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaCrawlNURL;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.tools.bitfield;
+import de.anomic.tools.crypt;
+import de.anomic.yacy.yacyCore;
 
 public class crawlReceipt {
 

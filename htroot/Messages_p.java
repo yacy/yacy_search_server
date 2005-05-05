@@ -44,15 +44,18 @@
 // javac -classpath .:../Classes Message.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import java.text.*;
-import java.io.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.yacy.*;
-import de.anomic.data.*;
-import de.anomic.plasma.*;
-import de.anomic.http.*;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+
+import de.anomic.data.messageBoard;
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class Messages_p {
 

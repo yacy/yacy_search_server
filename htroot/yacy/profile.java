@@ -45,10 +45,16 @@
 // javac -classpath .:../../Classes hello.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import java.io.*;
-import de.anomic.server.*;
-import de.anomic.http.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+
+import de.anomic.http.httpHeader;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class profile {
 

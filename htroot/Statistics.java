@@ -43,12 +43,16 @@
 // javac -classpath .:../classes Network.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import java.net.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.http.*;
-import de.anomic.plasma.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.Map;
+
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class Statistics {
     

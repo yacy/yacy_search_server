@@ -43,14 +43,27 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import de.anomic.server.*;
-import de.anomic.http.*;
-import de.anomic.plasma.*;
-import de.anomic.yacy.*;
-import java.text.*;
-import java.net.*;
-import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Locale;
+
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.plasma.plasmaCrawlLoaderMessage;
+import de.anomic.plasma.plasmaCrawlNURL;
+import de.anomic.plasma.plasmaCrawlProfile;
+import de.anomic.plasma.plasmaCrawlWorker;
+import de.anomic.plasma.plasmaHTCache;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class IndexCreate_p {
     

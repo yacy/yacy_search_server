@@ -44,14 +44,19 @@
 // javac -classpath .:../../Classes message.java
 // if the shell's current path is HTROOT/yacy
 
-import java.util.*;
-import java.text.*;
-import java.io.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.yacy.*;
-import de.anomic.plasma.*;
-import de.anomic.http.*;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.tools.crypt;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class message {
 

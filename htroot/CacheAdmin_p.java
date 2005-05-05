@@ -44,17 +44,25 @@
 // javac -classpath .:../classes CacheAdmin_p.java
 // if the shell's current path is HTROOT
 
-import java.util.*;
-import java.text.*;
-import java.io.*;
-import java.net.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.yacy.*;
-import de.anomic.data.*;
-import de.anomic.plasma.*;
-import de.anomic.http.*;
-import de.anomic.htmlFilter.*;
+import java.io.File;
+import java.io.OutputStream;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterOutputStream;
+import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaHTCache;
+import de.anomic.plasma.plasmaParserDocument;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public class CacheAdmin_p {
 
