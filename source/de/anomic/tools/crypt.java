@@ -40,9 +40,11 @@
 
 package de.anomic.tools;
 
-import java.util.*;
-import java.text.*;
-import de.anomic.server.*;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Random;
+
+import de.anomic.server.serverCodings;
 
 public class crypt {
 

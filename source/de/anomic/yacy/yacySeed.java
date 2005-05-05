@@ -59,14 +59,21 @@
 
 package de.anomic.yacy;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.plasma.*;
-import de.anomic.net.*;
-import de.anomic.yacy.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
+
+import de.anomic.net.natLib;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCodings;
+import de.anomic.tools.bitfield;
+import de.anomic.tools.crypt;
 
 public class yacySeed {
     

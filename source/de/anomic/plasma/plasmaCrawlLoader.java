@@ -41,17 +41,16 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
-import de.anomic.net.*;
-import de.anomic.http.*;
-import de.anomic.server.*;
-import de.anomic.tools.*;
-import de.anomic.htmlFilter.*;
+import de.anomic.server.serverLog;
+import de.anomic.server.serverSemaphore;
 
 public final class plasmaCrawlLoader extends Thread {
 

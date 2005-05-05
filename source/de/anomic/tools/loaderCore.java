@@ -41,7 +41,8 @@
 
 package de.anomic.tools;
 
-import java.util.*;
+import java.util.Properties;
+import java.util.Vector;
 
 public abstract class loaderCore implements loaderProcess {
     

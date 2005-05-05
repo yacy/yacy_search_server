@@ -43,7 +43,6 @@
 package de.anomic.server;
 
 // standard server
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -56,12 +55,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.KeyStore;
 import java.util.Hashtable;
 
-// needed for ssl
-import javax.net.*;
-import javax.net.ssl.*;
-import java.security.KeyStore;
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocketFactory;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 

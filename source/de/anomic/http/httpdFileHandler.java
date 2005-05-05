@@ -74,10 +74,30 @@
 
 package de.anomic.http;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-import de.anomic.server.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PushbackInputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+
+import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverClassLoader;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverLog;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
 

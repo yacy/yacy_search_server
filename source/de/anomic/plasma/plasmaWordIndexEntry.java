@@ -45,10 +45,11 @@
 
 package de.anomic.plasma;
 
-import java.net.*;
-import java.util.*;
-import de.anomic.yacy.*;
-import de.anomic.server.*;
+import java.net.URL;
+import java.util.Properties;
+
+import de.anomic.server.serverCodings;
+import de.anomic.yacy.yacySeedDB;
 
 public class plasmaWordIndexEntry {
 	

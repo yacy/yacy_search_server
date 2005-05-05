@@ -59,13 +59,39 @@
 
 package de.anomic.http;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import de.anomic.htmlFilter.*;
-import de.anomic.server.*;
-import de.anomic.yacy.*;
-import de.anomic.plasma.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PushbackInputStream;
+import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.URL;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.TreeMap;
+
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterContentTransformer;
+import de.anomic.htmlFilter.htmlFilterOutputStream;
+import de.anomic.htmlFilter.htmlFilterTransformer;
+import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaHTCache;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverLog;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
 
 
 public final class httpdProxyHandler extends httpdAbstractHandler implements httpdHandler {

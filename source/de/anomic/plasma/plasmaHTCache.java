@@ -50,14 +50,25 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import de.anomic.kelondro.*;
-import de.anomic.tools.*;
-import de.anomic.htmlFilter.*;
-import de.anomic.http.*;
-import de.anomic.server.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.TreeMap;
+
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
+import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.kelondroMap;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverLog;
+import de.anomic.tools.enumerateFiles;
 
 public final class plasmaHTCache {
 

@@ -57,8 +57,13 @@
 
 package de.anomic.server;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Vector;
 
 public final class serverObjects extends Hashtable implements Cloneable {
 

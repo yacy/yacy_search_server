@@ -40,7 +40,9 @@
 
 package de.anomic.tools;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Vector;
 
 public class nxTools {
 

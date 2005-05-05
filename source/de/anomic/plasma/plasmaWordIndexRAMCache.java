@@ -45,11 +45,15 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.util.*;
-import de.anomic.yacy.*;
-import de.anomic.server.*;
-import de.anomic.kelondro.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.Vector;
+
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.server.serverLog;
+import de.anomic.yacy.yacySeedDB;
 
 public class plasmaWordIndexRAMCache extends Thread {
 

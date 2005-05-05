@@ -68,8 +68,11 @@
 
 package de.anomic.kelondro;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
 public class kelondroRecords {
 

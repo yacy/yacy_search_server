@@ -64,15 +64,40 @@
 */
 
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import de.anomic.http.*;
-import de.anomic.plasma.*;
-import de.anomic.kelondro.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.yacy.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.TreeSet;
+
+import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
+import de.anomic.http.httpd;
+import de.anomic.http.httpdFileHandler;
+import de.anomic.http.httpdProxyHandler;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaWordIndexEntity;
+import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverLog;
+import de.anomic.server.serverSystem;
+import de.anomic.tools.enumerateFiles;
+import de.anomic.yacy.yacyCore;
 //import de.anomic.http.*;
 
 public final class yacy {

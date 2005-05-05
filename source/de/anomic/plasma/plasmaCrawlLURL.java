@@ -49,15 +49,25 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.text.*;
-import de.anomic.kelondro.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.http.*;
-import de.anomic.yacy.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.Locale;
+import java.util.Properties;
+
+import de.anomic.http.httpc;
+import de.anomic.kelondro.kelondroTree;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverLog;
+import de.anomic.server.serverObjects;
+import de.anomic.tools.crypt;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class plasmaCrawlLURL extends plasmaURL {
 

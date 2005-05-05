@@ -100,17 +100,53 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.text.*;
-import de.anomic.server.*;
-import de.anomic.tools.*;
-import de.anomic.htmlFilter.*;
-import de.anomic.yacy.*;
-import de.anomic.data.*;
-import de.anomic.http.*;
-import de.anomic.kelondro.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Vector;
+
+import de.anomic.data.messageBoard;
+import de.anomic.data.wikiBoard;
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterOutputStream;
+import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroTables;
+import de.anomic.server.serverAbstractSwitch;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverLog;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSemaphore;
+import de.anomic.server.serverSwitch;
+import de.anomic.tools.bitfield;
+import de.anomic.tools.crypt;
+import de.anomic.yacy.yacyClient;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySearch;
+import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacySeedDB;
 
 public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
 

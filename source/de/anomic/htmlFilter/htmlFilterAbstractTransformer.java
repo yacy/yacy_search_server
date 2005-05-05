@@ -40,7 +40,8 @@
 
 package de.anomic.htmlFilter;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Properties;
 
 public abstract class htmlFilterAbstractTransformer implements htmlFilterTransformer {
 

@@ -44,10 +44,27 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.util.*;
-import de.anomic.htmlFilter.*;
-import de.anomic.kelondro.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterOutputStream;
+import de.anomic.kelondro.kelondroMSetTools;
 
 public class plasmaCondenser {
 

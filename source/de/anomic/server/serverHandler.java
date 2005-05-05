@@ -80,7 +80,6 @@
 
 package de.anomic.server;
 
-import java.io.*;
 
 public interface serverHandler {
 

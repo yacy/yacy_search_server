@@ -40,12 +40,13 @@
 
 package de.anomic.yacy;
 
-import java.io.*;
-import java.util.*;
-import de.anomic.plasma.*;
-import de.anomic.server.*;
-import de.anomic.kelondro.*;
-import de.anomic.htmlFilter.*;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Set;
+
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaSearch;
 
 public class yacySearch extends Thread {
 

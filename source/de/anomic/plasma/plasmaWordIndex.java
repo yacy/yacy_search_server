@@ -45,10 +45,16 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.util.*;
-import de.anomic.yacy.*;
-import de.anomic.kelondro.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.TreeSet;
+
+import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.yacy.yacySeedDB;
 
 public class plasmaWordIndex {
     

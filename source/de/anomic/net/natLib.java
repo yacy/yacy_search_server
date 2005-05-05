@@ -40,12 +40,14 @@
 
 package de.anomic.net;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import de.anomic.tools.*;
-import de.anomic.server.*;
-import de.anomic.http.*;
+import java.net.InetAddress;
+import java.net.URL;
+import java.util.Vector;
+
+import de.anomic.http.httpc;
+import de.anomic.server.serverCore;
+import de.anomic.tools.disorderHeap;
+import de.anomic.tools.nxTools;
 
 public class natLib {
 

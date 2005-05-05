@@ -41,10 +41,16 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.util.*;
-import de.anomic.kelondro.*;
-import de.anomic.server.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+
+import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroMap;
+import de.anomic.server.serverCodings;
 
 public class plasmaCrawlProfile {
     

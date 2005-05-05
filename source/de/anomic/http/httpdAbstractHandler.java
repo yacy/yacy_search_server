@@ -51,7 +51,7 @@
 
 package de.anomic.http;
 
-import java.text.*;
+import java.text.SimpleDateFormat;
 
 abstract class httpdAbstractHandler {
 

@@ -49,7 +49,6 @@ import java.util.Hashtable;
 
 import org.textmining.text.extraction.WordExtractor;
 
-
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;

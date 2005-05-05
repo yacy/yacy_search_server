@@ -50,8 +50,9 @@
 
 package de.anomic.kelondro;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Properties;
 
 public interface kelondroRA {
 

@@ -43,11 +43,20 @@
 
 package de.anomic.data;
 
-import java.util.*;
-import java.io.*;
-import de.anomic.plasma.*;
-import de.anomic.http.*;
-import de.anomic.server.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.TreeMap;
+import java.util.Vector;
+
+import de.anomic.http.httpdProxyHandler;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
 
 //The Naming of the functions is a bit strange...
 

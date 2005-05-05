@@ -42,9 +42,15 @@
 
 package de.anomic.http;
 
-import de.anomic.server.*;
-import java.util.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PushbackInputStream;
+import java.util.Hashtable;
+
+import de.anomic.server.serverFileUtils;
 
 final class httpTemplate {
     

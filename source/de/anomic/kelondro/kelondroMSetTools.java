@@ -40,7 +40,10 @@
 
 package de.anomic.kelondro;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class kelondroMSetTools {
 

@@ -41,10 +41,12 @@
 
 package de.anomic.kelondro;
 
-import java.io.*;
-import java.util.*;
-
-import de.anomic.server.*;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 
 abstract class kelondroAbstractRA implements kelondroRA {
 

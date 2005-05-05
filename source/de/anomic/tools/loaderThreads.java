@@ -40,10 +40,12 @@
 
 package de.anomic.tools;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import de.anomic.http.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import de.anomic.http.httpc;
 
 public class loaderThreads {
     

@@ -1,7 +1,8 @@
 
 package de.anomic.server;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public final class serverInstantThread extends serverAbstractThread implements serverThread {
     

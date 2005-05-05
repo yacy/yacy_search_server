@@ -45,10 +45,12 @@
 
 package de.anomic.plasma;
 
-import de.anomic.kelondro.*;
-import de.anomic.server.*;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.TreeMap;
+
+import de.anomic.kelondro.kelondroDynTree;
+import de.anomic.server.serverCodings;
 
 public class plasmaWordConnotation {
     

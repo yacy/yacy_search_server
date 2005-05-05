@@ -49,9 +49,11 @@
 
 package de.anomic.kelondro;
 
-import de.anomic.server.*;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+
+import de.anomic.server.serverCodings;
 
 public class kelondroFScoreCluster {
     

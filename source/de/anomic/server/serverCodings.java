@@ -40,8 +40,11 @@
 
 package de.anomic.server;
 
-import java.io.*;
-import java.security.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.MessageDigest;
 
 
 public final class serverCodings {

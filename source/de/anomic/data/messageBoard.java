@@ -40,11 +40,20 @@
 
 package de.anomic.data;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-import de.anomic.kelondro.*;
-import de.anomic.server.*;
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TimeZone;
+
+import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroMap;
+import de.anomic.server.serverCodings;
 
 public class messageBoard {
     

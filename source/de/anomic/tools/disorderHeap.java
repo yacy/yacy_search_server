@@ -41,7 +41,7 @@
 
 package de.anomic.tools;
 
-import java.util.*;
+import java.util.LinkedList;
 
 public class disorderHeap {
 

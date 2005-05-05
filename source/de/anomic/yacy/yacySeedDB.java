@@ -40,15 +40,27 @@
 
 package de.anomic.yacy;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import de.anomic.kelondro.*;
-import de.anomic.tools.*;
-import de.anomic.http.*;
-import de.anomic.server.*;
-import de.anomic.net.*;
-import de.anomic.plasma.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
+
+import de.anomic.http.httpc;
+import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.kelondroMap;
+import de.anomic.net.ftpc;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
+import de.anomic.tools.disorderHeap;
 
 public class yacySeedDB {
     

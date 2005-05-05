@@ -41,9 +41,9 @@
 
 package de.anomic.server;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Hashtable;
 
 public final class serverClassLoader extends ClassLoader {
 

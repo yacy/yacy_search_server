@@ -46,8 +46,9 @@
 
 package de.anomic.server;
 
-import java.net.*;
-import java.util.*;
+import java.net.InetAddress;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 public interface serverSwitch {
     // the root path for the application

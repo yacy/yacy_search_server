@@ -40,14 +40,25 @@
 
 package de.anomic.yacy;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import de.anomic.tools.*;
-import de.anomic.plasma.*;
-import de.anomic.net.*;
-import de.anomic.http.*;
-import de.anomic.server.*;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Vector;
+
+import de.anomic.http.httpc;
+import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaSearch;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndexEntity;
+import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverObjects;
+import de.anomic.tools.crypt;
+import de.anomic.tools.nxTools;
 
 public class yacyClient {
 

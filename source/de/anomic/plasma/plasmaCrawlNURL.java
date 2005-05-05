@@ -43,14 +43,21 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import de.anomic.kelondro.*;
-import de.anomic.server.*;
-import de.anomic.tools.*;
-import de.anomic.http.*;
-import de.anomic.yacy.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroRecords;
+import de.anomic.kelondro.kelondroStack;
+import de.anomic.kelondro.kelondroTree;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverLog;
+import de.anomic.tools.bitfield;
 
 public class plasmaCrawlNURL extends plasmaURL {
 

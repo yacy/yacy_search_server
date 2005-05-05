@@ -41,9 +41,14 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.util.*;
-import de.anomic.kelondro.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.TreeMap;
+
+import de.anomic.kelondro.kelondroRecords;
+import de.anomic.kelondro.kelondroTree;
 
 public class plasmaWordIndexEntity {
 

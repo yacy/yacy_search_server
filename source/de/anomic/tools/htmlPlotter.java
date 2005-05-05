@@ -40,8 +40,10 @@
 
 package de.anomic.tools;
 
-import java.io.*;
-import de.anomic.server.*;
+import java.io.File;
+import java.io.IOException;
+
+import de.anomic.server.serverFileUtils;
 
 public class htmlPlotter {
     

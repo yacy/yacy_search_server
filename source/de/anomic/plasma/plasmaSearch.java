@@ -42,11 +42,20 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import de.anomic.server.*;
-import de.anomic.kelondro.*;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeMap;
+
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverLog;
 
 public class plasmaSearch {
 

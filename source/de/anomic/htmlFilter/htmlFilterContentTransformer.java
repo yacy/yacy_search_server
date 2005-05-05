@@ -40,9 +40,14 @@
 
 package de.anomic.htmlFilter;
 
-import java.io.*;
-import java.util.*;
-import de.anomic.server.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Vector;
+
+import de.anomic.server.serverByteBuffer;
 
 public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer implements htmlFilterTransformer {
 

@@ -40,7 +40,7 @@
 
 package de.anomic.htmlFilter;
 
-import java.util.*;
+import java.util.Properties;
 
 public interface htmlFilterTransformer {
 

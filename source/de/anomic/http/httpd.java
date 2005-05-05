@@ -49,17 +49,21 @@
 
 package de.anomic.http;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.text.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
-
-import de.anomic.server.*;
-import de.anomic.server.serverCore.Session;
-import de.anomic.server.serverCore.SessionFactory;
-import de.anomic.server.serverCore.SessionPool;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverHandler;
+import de.anomic.server.serverLog;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public final class httpd implements serverHandler {
 

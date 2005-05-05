@@ -41,14 +41,18 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.text.*;
-import de.anomic.kelondro.*;
-import de.anomic.server.*;
-import de.anomic.yacy.*;
-import de.anomic.htmlFilter.*;
+import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.StringTokenizer;
+
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.kelondro.kelondroTree;
+import de.anomic.server.serverCodings;
+import de.anomic.yacy.yacySeedDB;
 
 public class plasmaURL {
 

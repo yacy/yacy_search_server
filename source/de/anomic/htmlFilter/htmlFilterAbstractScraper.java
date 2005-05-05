@@ -26,8 +26,10 @@
 
 package de.anomic.htmlFilter;
 
-import java.util.*;
-import de.anomic.server.*;
+import java.util.HashSet;
+import java.util.Properties;
+
+import de.anomic.server.serverByteBuffer;
 
 public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
 

@@ -42,8 +42,11 @@
 // this is mainly a convenience class to bundle many kelondroMap Objects
 
 package de.anomic.kelondro;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class kelondroTables {
     

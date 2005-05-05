@@ -40,8 +40,10 @@
 
 package de.anomic.yacy;
 
-import java.util.*;
-import de.anomic.kelondro.*;
+import java.util.Enumeration;
+
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroMScoreCluster;
 
 public class yacyDHTAction implements yacyPeerAction {
    

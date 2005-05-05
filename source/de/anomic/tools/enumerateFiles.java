@@ -40,8 +40,10 @@
 
 package de.anomic.tools;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.TreeSet;
 
 public class enumerateFiles implements Enumeration {
     

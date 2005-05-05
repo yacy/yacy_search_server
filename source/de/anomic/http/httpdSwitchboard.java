@@ -40,9 +40,12 @@
 
 package de.anomic.http;
 
-import java.io.*;
-import java.util.*;
-import de.anomic.server.*;
+import java.io.IOException;
+import java.util.LinkedList;
+
+import de.anomic.server.serverAbstractSwitch;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
 
 public final class httpdSwitchboard extends serverAbstractSwitch implements serverSwitch {
 

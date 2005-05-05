@@ -40,9 +40,13 @@
 
 package de.anomic.htmlFilter;
 
-import java.net.*;
-import java.util.*;
-import de.anomic.server.*;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
+
+import de.anomic.server.serverByteBuffer;
 
 
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {

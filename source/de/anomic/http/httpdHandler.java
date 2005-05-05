@@ -51,8 +51,11 @@
 
 package de.anomic.http;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PushbackInputStream;
+import java.util.Properties;
 
 public interface httpdHandler {
 

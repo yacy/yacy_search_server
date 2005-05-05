@@ -48,10 +48,19 @@
 
 package de.anomic.htmlFilter;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import de.anomic.server.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.Vector;
+
+import de.anomic.server.serverByteBuffer;
 
 public final class htmlFilterOutputStream extends OutputStream {
 
