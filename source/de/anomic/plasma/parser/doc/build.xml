@@ -8,7 +8,7 @@
 	<property name="parserVersion" value="0.1"/>
 
     <property name="parserLongName" value="${parserShortName}Parser"/>    	
-   	<property name="parserArchive" location="${release}/${parserLongName}_${parserVersion}.zip"/>	    	
+   	<property name="parserArchive" location="${release}/${parserLongName}_${parserVersion}.tgz"/>	    	
     	
     <target name="compile">
   	  <echo message="Compiling ${parserLongName} Version ${parserVersion} ..."/>
@@ -25,11 +25,18 @@
 
     <target name="zip" depends="compile">
 	  <echo message="Compressing ${parserLongName} Version ${parserVersion} ..."/>  
-  	  <zip destfile="${parserArchive}">
-  	  	<zipfileset dir="${libx}" includes="tm-extractors-0.4.*" prefix="libx/"/>
-  	  	<zipfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" prefix="source/de/anomic/plasma/parser/${parserShortName}"/>
-  	  	<zipfileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" prefix="classes/de/anomic/plasma/parser/${parserShortName}"/>	  	
-  	  </zip>    	
+  	  <tar destfile="${parserArchive}" compression="gzip">
+  	  	<tarfileset dir="${libx}" 
+  	  				includes="tm-extractors-0.4.*" 
+  	  				prefix="libx/"
+			  	  	dirmode="755" mode="644"/>
+  	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
+  	  				prefix="source/de/anomic/plasma/parser/${parserShortName}"
+			  	  	dirmode="755" mode="644"/>
+  	  	<tarfileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" 
+  	  				prefix="classes/de/anomic/plasma/parser/${parserShortName}"
+			  	  	dirmode="755" mode="644"/>	  	
+  	  </tar>    	
     </target>	
 
 

@@ -3,8 +3,62 @@
 		YaCy - a Peer to Peer search Engine
 	</description>
 	
+<!-- 
+# THIS IS THE YACY MAKE-RELEASE SCRIPT
+# YOU CAN USE IT TO COMPILE YOUR OWN RELEASE
+# THE TARGET OF THE COMPILATION CAN BE FOUND
+# IN THE 'RELEASE' DIRECTORY AFTERWARDS
+# ==========================================
+# This Software is Copyrighted
+# (C) by Michael Peter Christen; mc@anomic.de
+# first published on http://www.anomic.de
+# Frankfurt, Germany, 2005
+# last major change: 06.05.2005
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# Using this software in any meaning (reading, learning, copying, compiling,
+# running) means that you agree that the Author(s) is (are) not responsible
+# for cost, loss of data or any harm that may be caused directly or indirectly
+# by usage of this softare or this documentation. The usage of this software
+# is on your own risk. The installation and usage (starting/running) of this
+# software may allow other people or application to access your computer and
+# any attached devices and is highly dependent on the configuration of the
+# software which must be done by the user of the software; the author(s) is
+# (are) also not responsible for proper configuration and usage of the
+# software, even if provoked by documentation provided together with
+# the software.
+#
+# Any changes to this file according to the GPL as documented in the file
+# gpl.txt aside this file in the shipment you received can be done to the
+# lines that follows this copyright notice here, but changes must not be
+# done inside the copyright notive above. A re-distribution must contain
+# the intact and unchanged copyright notice.
+# Contributions and changes to the program code must be marked as such.
+-->
+	
+<tstamp>
+	<format property="REPL_DATE_FORMAT" pattern="yyyymmdd" />
+</tstamp>	
+	
+	
 <!-- defining all needed directory names -->	
+<property name="addon" location="addon"/>
 <property name="src" location="source"/>
+<property name="doc" location="doc"/>
+<property name="data" location="DATA"/>
 <property name="lib" location="lib"/>
 <property name="libx" location="libx"/>
 <property name="build" location="classes"/>
@@ -15,8 +69,12 @@
 <property name="javacSource" value="1.4"/>	
 <property name="javacTarget" value="1.4"/>	
 	
+<!-- Release Configuration -->
+<property name="releaseVersion" value="0.37"/>
+<property name="releaseFile" value="yacy_v${releaseVersion}_${DSTAMP}.tgz"/>
+	
 <target name="init">
-	<tstamp/>
+
 	<mkdir dir="${build}/de/anomic/data"/>
 	<mkdir dir="${build}/de/anomic/htmlFilter"/>
 	<mkdir dir="${build}/de/anomic/http"/>
@@ -27,21 +85,20 @@
 	<mkdir dir="${build}/de/anomic/server"/>
 	<mkdir dir="${build}/de/anomic/tools"/>
 	<mkdir dir="${build}/de/anomic/yacy"/>
-	<mkdir dir="${release}"/>
-	
+
+	<mkdir dir="${doc}"/>
+	<mkdir dir="${data}"/>
+	<mkdir dir="${release}"/>		
 	
 	<move file="${src}/yacy.java" tofile="${src}/yacy.java.orig" />
-	<tstamp>
-		<format property="REPL_DATE_FORMAT" pattern="yyyymmdd" />
-	</tstamp>
 	
-	<filter token="REPL_VERSION" value="0.37" />
+	<filter token="REPL_VERSION" value="${releaseVersion}" />
 	<filter token="REPL_DATE" value="${DSTAMP}"/>
 	<copy file="${src}/yacy.java.orig" tofile="${src}/yacy.java" filtering="true" />
 </target>
 
 
-<target name="compile" depends="init" description="compiles the source">
+<target name="compile" depends="init" description="Compiling the yacy sources ...">
 	<javac srcdir="${src}/" destdir="${build}" excludes="de/anomic/plasma/parser/*/*" source="${javacSource}" target="${javacTarget}">
         <classpath>
           	<pathelement location="${build}" />
@@ -74,8 +131,77 @@
     </subant>	
 </target>	
 	
-<target name="dist" depends="all,parsers"/>	
+<target name="dist" depends="all,parsers" description="Compiling sources and make a release file ...">
+	
+	<property name="accessRightsDir" value="755"/>
+	<property name="accessRightsFile" value="644"/>		
+	
+	<tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes">
+		
+		<!-- copy classes -->
+		<tarfileset dir="${build}" prefix="classes" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+			<include name="**/*.*"/>						
+			<exclude name="de/anomic/plasma/parser/*/*"/>
+		</tarfileset>
+		
+		<!-- copy libs -->
+		<tarfileset dir="${lib}" includes="**/*" prefix="lib" dirmode="${accessRightsDir}" mode="${accessRightsFile}"/>
+		
+		<!-- copy configuration files -->
+		<tarfileset dir="." dirmode="${accessRightsDir}" mode="${accessRightsFile}">
+			<include name="yacy.init"/>
+	  		<include name="yacy.yellow"/>	  		
+			<include name="yacy.black"/>
+			<include name="yacy.blue"/>
+			<include name="yacy.stopwords"/>
+			<include name="yacy.parser"/>
+			<include name="httpd.mime"/>
+			<include name="superseed.txt"/>
+		</tarfileset>
+		
+		<!-- copy wrappers -->
+		<tarfileset dir="." dirmode="${accessRightsDir}" mode="${accessRightsFile}">
+			<include name="startYACY.command"/>
+	  		<include name="startYACY.bat"/>	  		
+			<include name="startYACY_noconsole.bat"/>
+			<include name="startYACY.sh"/>
+			<include name="stopYACY.command"/>
+			<include name="stopYACY.bat"/>
+			<include name="stopYACY.sh"/>
+			<include name="killYACY.sh"/>
+		</tarfileset>		
 
+		<!-- copy documentation -->
+		<tarfileset dir="." dirmode="${accessRightsDir}" mode="${accessRightsFile}">
+			<include name="readme.txt"/>
+			<include name="gpl.txt"/>
+		</tarfileset>			
+		<tarfileset dir="${doc}" prefix="doc" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
+			<include name="**/*"/>
+		</tarfileset>			
+
+		<!-- copy source code -->
+		<tarfileset dir="${src}" prefix="source" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
+			<include name="**/*.*"/>						
+			<exclude name="de/anomic/plasma/parser/*/*"/>			
+		</tarfileset>
+		
+		<!-- copy server pages -->
+		<tarfileset dir="${htroot}" prefix="htroot" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
+			<include name="**/*"/>
+		</tarfileset>
+		
+		<!-- copy add-on's -->
+		<tarfileset dir="${addon}" prefix="addon" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
+			<include name="**/*"/>
+		</tarfileset>		
+	</tar> 
+	
+	<echo message="${releaseVersion}" file="${doc}/release.txt"/>
+</target>
+
+	
+	
 <target name="clean" description="make clean">	
     <delete>
       	<fileset dir="${build}" includes="**/*.class" />
