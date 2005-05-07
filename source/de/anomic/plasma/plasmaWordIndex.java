@@ -55,16 +55,17 @@ import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.server.serverLog;
 
 public class plasmaWordIndex {
     
     File databaseRoot;
-    plasmaWordIndexRAMCache ramCache;
+    plasmaWordIndexCache ramCache;
     
-    public plasmaWordIndex(File databaseRoot, int bufferkb) throws IOException {
+    public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) throws IOException {
         this.databaseRoot = databaseRoot;
-        this.ramCache = new plasmaWordIndexRAMCache(databaseRoot, bufferkb);
-        ramCache.start();
+        plasmaWordIndexClassicDB fileDB = new plasmaWordIndexClassicDB(databaseRoot, log);
+        this.ramCache = new plasmaWordIndexCache(databaseRoot, fileDB, log);
     }
     
     public int maxURLinWordCache() {
@@ -79,107 +80,35 @@ public class plasmaWordIndex {
         ramCache.setMaxWords(maxWords);
     }
     
-    public int addEntry(String wordHash, plasmaWordIndexEntry entry) throws IOException {
-        return ramCache.addEntryToIndexMem(wordHash, entry);
+    public int addEntries(plasmaWordIndexEntryContainer entries) {
+        return ramCache.addEntries(entries, System.currentTimeMillis());
+    }   
+    
+    public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty) {
+        return ramCache.getIndex(wordHash, deleteIfEmpty);
     }
     
-    public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty) throws IOException {
-        return ramCache.getIndexMem(wordHash, deleteIfEmpty);
+    public int size() {
+        return ramCache.size();
     }
     
-    public int sizeMin() {
-        return ramCache.sizeMin();
-    }
-    
-    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) throws IOException {
-        return ramCache.removeEntriesMem(wordHash, urlHashes, deleteComplete);
+    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
+        return ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
     }
     
     public void close(int waitingBoundSeconds) {
         ramCache.close(waitingBoundSeconds);
     }
     
-    public synchronized void deleteComplete(String wordHash) throws IOException {
-        ramCache.deleteComplete(wordHash);
+    public void deleteIndex(String wordHash) {
+        ramCache.deleteIndex(wordHash);
     }
     
-    public synchronized Iterator hashIterator(String startHash, boolean up, boolean rot, boolean deleteEmpty) {
-        Iterator i = new iterateCombined(startHash, up, deleteEmpty);
-        if ((rot) && (!(i.hasNext())) && (startHash != null)) {
-            return new iterateCombined(null, up, deleteEmpty);
-        } else {
-            return i;
-        }
+    public Iterator wordHashes(String startHash, boolean up, boolean rot) {
+        return ramCache.wordHashes(startHash, up);
     }
-    
-     public class iterateCombined implements Iterator {
-        
-        Comparator comp;
-        Iterator filei;
-        Iterator cachei;
-        String nextf, nextc;
-        
-        public iterateCombined(String startHash, boolean up, boolean deleteEmpty) {
-            this.comp = kelondroMSetTools.fastStringComparator(up);
-            filei = fileIterator(startHash, up, deleteEmpty);
-            try {
-                cachei = ramCache.wordHashesMem(startHash, 100);
-            } catch (IOException e) {
-                cachei = new HashSet().iterator();
-            }
-            nextFile();
-            nextCache();
-        }
- 
-        private void nextFile() {
-            if (filei.hasNext()) nextf = (String) filei.next(); else nextf = null;
-        }
-        private void nextCache() {
-            if (cachei.hasNext()) nextc = new String(((byte[][]) cachei.next())[0]); else nextc = null;
-        }
-        
-        public boolean hasNext() {
-            return (nextf != null) || (nextc != null);
-        }
-        
-        public Object next() {
-            String s;
-            if (nextc == null) {
-                s = nextf;
-                //System.out.println("Iterate Hash: take " + s + " from file, cache is empty");
-                nextFile();
-                return s;}
-            if (nextf == null) {
-                s = nextc;
-                //System.out.println("Iterate Hash: take " + s + " from cache, file is empty");
-                nextCache();
-                return s;}
-            // compare the strings
-            int c = comp.compare(nextf, nextc);
-            if (c == 0) {
-                s = nextf;
-                //System.out.println("Iterate Hash: take " + s + " from file&cache");
-                nextFile();
-                nextCache();
-                return s;
-            } else if (c < 0) {
-                s = nextf;
-                //System.out.println("Iterate Hash: take " + s + " from file");
-                nextFile();
-                return s;
-            } else {
-                s = nextc;
-                //System.out.println("Iterate Hash: take " + s + " from cache");
-                nextCache();
-                return s;
-            }
-        }
-        
-        public void remove() {
-            
-        }
-    }
-    
+
+
     public Iterator fileIterator(String startHash, boolean up, boolean deleteEmpty) {
         return new iterateFiles(startHash, up, deleteEmpty);
     }
@@ -295,8 +224,8 @@ public class plasmaWordIndex {
     public static void main(String[] args) {
         //System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
         try {
-        plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555);
-        Iterator i = index.hashIterator("5A8yhZMh_Kmv", true, true, true);
+        plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, new serverLog("TESTAPP"));
+        Iterator i = index.wordHashes("5A8yhZMh_Kmv", true, true);
         while (i.hasNext()) {
             System.out.println("File: " + (String) i.next());
         }

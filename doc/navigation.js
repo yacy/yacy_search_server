@@ -1,7 +1,7 @@
 var appname  = "YACY: a Java Freeware P2P-Based Search Engine with Caching HTTP Proxy";
 var thismenu = new Array(
     "index","FAQ","Details","Technology","Platforms","News","Demo","License","Download",
-    "Installation","Volunteers","Deutsches Forum@http://www.yacy-forum.de","English Forum@http://sourceforge.net/forum/?group_id=116142","Links","Contact","","Impressum");
+    "Installation","Volunteers","Deutsches Forum@http://www.yacy-forum.de","English Forum@http://sourceforge.net/forum/?group_id=116142","Material","Links","Contact","","Impressum");
 var mainmenu = new Array(
     "YACY Home@http://www.yacy.net/index.html",
     "Products@http://www.yacy.net/Products/index.html",

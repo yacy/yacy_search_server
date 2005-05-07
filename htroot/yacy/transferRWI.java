@@ -51,6 +51,7 @@ import java.util.Vector;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -106,17 +107,13 @@ public class transferRWI {
                     wordHash = estring.substring(0, p);
                     wordhashes[i] = wordHash;
                     entry = new plasmaWordIndexEntry(estring.substring(p));
-                    try {
-                        switchboard.wordIndex.addEntry(wordHash, entry);
-                        urlHash = entry.getUrlHash();
-                        if ((!(unknownURL.contains(urlHash))) &&
-                        (!(switchboard.loadedURL.exists(urlHash)))) {
-                            unknownURL.add(urlHash);
-                        }
-                        received++;
-                    } catch (IOException ee) {
-                        ee.printStackTrace();
+                    switchboard.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, entry));
+                    urlHash = entry.getUrlHash();
+                    if ((!(unknownURL.contains(urlHash))) &&
+                    (!(switchboard.loadedURL.exists(urlHash)))) {
+                        unknownURL.add(urlHash);
                     }
+                    received++;
                 }
             }
             yacyCore.seedDB.mySeed.incRI(received);

@@ -81,19 +81,11 @@ public class plasmaSearch {
 	// we take mod 64**3 = 262144, this is the mask of the storage
 	return (int) ((modified.getTime() / 86400000) % 262144);
     }
-
-    public void addWordIndex(URL url, String urlHash, Date urlModified, int quality, String wordHash, int wordCount, int posintext, int posinphrase, int posofphraseint, String language, char doctype, boolean local) {
-        // this is called by the remote search procedure when a new index arrives from remote
-	plasmaWordIndexEntry entry = new plasmaWordIndexEntry(urlHash, wordCount,
-							      posintext, posinphrase, posofphraseint, 
-							      calcVirtualAge(urlModified), quality,
-							      language, doctype, local);
-	try {
-	    wordIndex.addEntry(wordHash, entry);
-	} catch (IOException e) {}
-	// System.out.println("* received one index entry for URL: " + url); // debug
-    }
     
+    public void addWords(plasmaWordIndexEntryContainer container) {
+        wordIndex.addEntries(container);
+    }
+        
     public int addPageIndex(URL url, String urlHash, Date urlModified, plasmaCondenser condenser,
 			 String language, char doctype) {
         // this is called by the switchboard to put in a new page into the index
@@ -112,8 +104,7 @@ public class plasmaSearch {
 	int count;
 	plasmaWordIndexEntry entry;
 	String wordHash;
-	int c = 0;
-        int p = 0;
+	int p = 0;
 	while (i.hasNext()) {
 	    word = (String) i.next();
 	    count = condenser.wordCount(word);
@@ -121,9 +112,7 @@ public class plasmaSearch {
 	    wordHash = plasmaWordIndexEntry.word2hash(word);
 	    entry = new plasmaWordIndexEntry(urlHash, count, p++, 0, 0,
                                          age, quality, language, doctype, true);
-	    try {
-		c += wordIndex.addEntry(wordHash, entry);
-	    } catch (IOException e) {}
+	    wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, entry));
 	}
 	//System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
         return condenser.getWords().size();

@@ -45,10 +45,10 @@
 # Contributions and changes to the program code must be marked as such.
 
 # define variables
-version='0.37'
+version='0.371'
 datestr=`date +%Y%m%d`
-release='yacy_v'$version'_'$datestr
-#release='yacy_dev_v'$version'_'$datestr
+#release='yacy_v'$version'_'$datestr
+release='yacy_dev_v'$version'_'$datestr
 extralibs='yacy_libx'
 target='RELEASE'
 classes='classes'
@@ -58,7 +58,7 @@ source='source'
 doc='doc'
 data='DATA'
 mainclass='yacy.java'
-classpath='$classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar:libx/PDFBox-0.7.1.jar:libx/log4j-1.2.9.jar:libx/tm-extractors-0.4.jar'
+classpath='$classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar:libx/PDFBox-0.7.1.jar:libx/log4j-1.2.9.jar:libx/tm-extractors-0.4.jar:libx/informa-0.6.0.jar:libx/jdom.jar'
 
 mkdir $release
 mkdir $extralibs

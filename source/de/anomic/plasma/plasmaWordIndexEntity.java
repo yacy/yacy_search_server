@@ -1,5 +1,5 @@
-// plasmaIndex.java
-// -----------------------
+// plasmaWordIndexEntity.java
+// --------------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
@@ -154,12 +154,11 @@ public class plasmaWordIndexEntity {
         if (theTmpMap == null) return (theIndex.get(entry.getUrlHash().getBytes()) != null); else return (theTmpMap.containsKey(entry.getUrlHash()));
     }
     
-    public void addEntry(plasmaWordIndexEntry entry) throws IOException {
+    public boolean addEntry(plasmaWordIndexEntry entry) throws IOException {
 	if (theTmpMap == null) {
-	    theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm(false).getBytes());
-	    //System.out.println(theIndex.toString()); // debug
+	    return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm(false).getBytes()) == null);
 	} else {
-	    theTmpMap.put(entry.getUrlHash(), entry);
+	    return (theTmpMap.put(entry.getUrlHash(), entry) == null);
 	}
     }
     

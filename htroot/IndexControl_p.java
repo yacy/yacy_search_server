@@ -76,7 +76,7 @@ public class IndexControl_p {
             prop.put("urlstring", "");
             prop.put("urlhash", "");
             prop.put("result", "");
-            prop.put("wcount", "" + switchboard.wordIndex.sizeMin());
+            prop.put("wcount", "" + switchboard.wordIndex.size());
             prop.put("ucount", "" + switchboard.loadedURL.size());
             prop.put("otherHosts", "");
             prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
@@ -116,25 +116,23 @@ public class IndexControl_p {
         }
         
         if (post.containsKey("keyhashdeleteall")) {
-            try {
-                if ((delurl) || (delurlref)) {
-                    // generate an urlx array
-                    try {
-                        HashSet keyhashes = new HashSet();
-                        keyhashes.add(keyhash);
-                        plasmaWordIndexEntity index = switchboard.searchManager.searchHashes(keyhashes, 10000);
-                        Enumeration en = index.elements(true);
-                        int i = 0;
-                        urlx = new String[index.size()];
-                        while (en.hasMoreElements()) urlx[i++] = ((plasmaWordIndexEntry) en.nextElement()).getUrlHash();
-                    } catch (IOException e) {
-                        urlx = new String[0];
-                    }
+            if ((delurl) || (delurlref)) {
+                // generate an urlx array
+                try {
+                    HashSet keyhashes = new HashSet();
+                    keyhashes.add(keyhash);
+                    plasmaWordIndexEntity index = switchboard.searchManager.searchHashes(keyhashes, 10000);
+                    Enumeration en = index.elements(true);
+                    int i = 0;
+                    urlx = new String[index.size()];
+                    while (en.hasMoreElements()) urlx[i++] = ((plasmaWordIndexEntry) en.nextElement()).getUrlHash();
+                } catch (IOException e) {
+                    urlx = new String[0];
                 }
-                if (delurlref) for (int i = 0; i < urlx.length; i++) switchboard.removeAllUrlReferences(urlx[i], true);
-                if ((delurl) || (delurlref)) for (int i = 0; i < urlx.length; i++) switchboard.loadedURL.remove(urlx[i]);
-                switchboard.wordIndex.deleteComplete(keyhash);
-            } catch (IOException e) {}
+            }
+            if (delurlref) for (int i = 0; i < urlx.length; i++) switchboard.removeAllUrlReferences(urlx[i], true);
+            if ((delurl) || (delurlref)) for (int i = 0; i < urlx.length; i++) switchboard.loadedURL.remove(urlx[i]);
+            switchboard.wordIndex.deleteIndex(keyhash);
             post.remove("keyhashdeleteall");
             if ((keystring.length() > 0) && (plasmaWordIndexEntry.word2hash(keystring).equals(keyhash)))
                 post.put("keystringsearch", "generated");
@@ -143,11 +141,9 @@ public class IndexControl_p {
         }
         
         if (post.containsKey("keyhashdelete")) {
-            try {
-                if (delurlref) for (int i = 0; i < urlx.length; i++) switchboard.removeAllUrlReferences(urlx[i], true);
-                if ((delurl) || (delurlref)) for (int i = 0; i < urlx.length; i++) switchboard.loadedURL.remove(urlx[i]);
-                switchboard.wordIndex.removeEntries(keyhash, urlx, true);
-            } catch (IOException e) {}
+            if (delurlref) for (int i = 0; i < urlx.length; i++) switchboard.removeAllUrlReferences(urlx[i], true);
+            if ((delurl) || (delurlref)) for (int i = 0; i < urlx.length; i++) switchboard.loadedURL.remove(urlx[i]);
+            switchboard.wordIndex.removeEntries(keyhash, urlx, true);
             // this shall lead to a presentation of the list; so handle that the remaining program
             // thinks that it was called for a list presentation
             post.remove("keyhashdelete");
@@ -200,16 +196,13 @@ public class IndexControl_p {
             plasmaWordIndexEntity[] indexes = new plasmaWordIndexEntity[1];
             String result;
             long starttime = System.currentTimeMillis();
-            try {indexes[0] = switchboard.wordIndex.getEntity(keyhash, true);
-                result = yacyClient.transferIndex(yacyCore.seedDB.getConnected(post.get("hostHash", "")), indexes, switchboard.loadedURL);
-            } catch (IOException e) {
-                result = "IOException: " + e.getMessage();
-            }
+            indexes[0] = switchboard.wordIndex.getEntity(keyhash, true);
+            result = yacyClient.transferIndex(yacyCore.seedDB.getConnected(post.get("hostHash", "")), indexes, switchboard.loadedURL);
             prop.put("result", (result == null) ? ("Successfully transferred " + indexes[0].size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds") : result);
         }
         
 	if (post.containsKey("keyhashsimilar")) {
-                Iterator hashIt = switchboard.wordIndex.hashIterator(keyhash, true, true, true);
+                Iterator hashIt = switchboard.wordIndex.wordHashes(keyhash, true, true);
                 String result = "Sequential List of Word-Hashes:<br>";
                 String hash;
                 int i = 0;
@@ -294,7 +287,7 @@ public class IndexControl_p {
 	}
         
         // insert constants
-        prop.put("wcount", "" + switchboard.wordIndex.sizeMin());
+        prop.put("wcount", "" + switchboard.wordIndex.size());
         prop.put("ucount", "" + switchboard.loadedURL.size());
 	prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
         prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");

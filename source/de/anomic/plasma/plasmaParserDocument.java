@@ -147,7 +147,7 @@ public class plasmaParserDocument {
     private synchronized void resortLinks() {
         Iterator i;
         String url;
-        int extpos;
+        int extpos, qpos;
         String ext = null;
         i = anchors.entrySet().iterator();
         hyperlinks = new HashMap();
@@ -163,10 +163,10 @@ public class plasmaParserDocument {
                 extpos = url.lastIndexOf(".");
                 String normal;
                 if (extpos > 0) {
-                    if (url.indexOf("?") != -1) {
-                        ext = url.substring(extpos,url.indexOf("?")).toLowerCase();
+                    if (((qpos = url.indexOf("?")) >= 0) && (qpos > extpos)) {
+                        ext = url.substring(extpos, qpos).toLowerCase();
                     } else {
-						ext = url.substring(extpos).toLowerCase();
+			ext = url.substring(extpos).toLowerCase();
                     }
                     normal = plasmaParser.urlNormalform(url);
                     if (normal != null) {

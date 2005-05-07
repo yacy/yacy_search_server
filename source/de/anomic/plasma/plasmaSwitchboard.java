@@ -250,8 +250,9 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         loadedURL = new plasmaCrawlLURL(new File(plasmaPath, "urlHash.db"), ramLURL);
         noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL);
         errorURL = new plasmaCrawlEURL(new File(plasmaPath, "urlErr0.db"), ramEURL);
-	wordIndex = new plasmaWordIndex(plasmaPath, ramRWI);
-        wordIndex.setMaxWords(10000);
+	wordIndex = new plasmaWordIndex(plasmaPath, ramRWI, log);
+        int wordCacheMax = Integer.parseInt((String) getConfig("wordCacheMax", "10000"));
+        wordIndex.setMaxWords(wordCacheMax);
 	searchManager = new plasmaSearch(loadedURL, wordIndex);
         
         // start a cache manager
@@ -430,7 +431,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     }
 
     public int cacheSizeMin() {
-	return wordIndex.sizeMin();
+	return wordIndex.size();
     }
 
     public void enQueue(Object job) {
@@ -1195,9 +1196,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         while (it.hasNext()) {
             word = (String) it.next();
             // delete the URL reference in this word index
-            try {
-                count += wordIndex.removeEntries(plasmaWordIndexEntry.word2hash(word), urlEntries, true);
-            } catch (IOException e) {}
+            count += wordIndex.removeEntries(plasmaWordIndexEntry.word2hash(word), urlEntries, true);
         }
         return count;
     }
@@ -1266,7 +1265,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                 (yacyCore.seedDB.mySeed == null) ||
                 (yacyCore.seedDB.mySeed.isVirgin()) ||
                 (loadedURL.size() < 10) ||
-                (wordIndex.sizeMin() < 100) ||
+                (wordIndex.size() < 100) ||
                 (!(yacyCore.seedDB.mySeed.isJunior()))) return false;
 
             int transferred;
@@ -1369,7 +1368,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         Vector tmpEntities = new Vector();
         String nexthash = "";
         try {
-            Iterator wordHashIterator = wordIndex.hashIterator(hash, true, true, true);
+            Iterator wordHashIterator = wordIndex.wordHashes(hash, true, true);
             plasmaWordIndexEntity indexEntity, tmpEntity;
             Enumeration urlEnum;
             plasmaWordIndexEntry indexEntry;

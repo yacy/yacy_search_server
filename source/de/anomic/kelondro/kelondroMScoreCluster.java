@@ -301,16 +301,34 @@ public class kelondroMScoreCluster {
     
      public static void main(String[] args) {
         System.out.println("Test for Score: start");
-        long time = System.currentTimeMillis();
         kelondroMScoreCluster s = new kelondroMScoreCluster();
-        for (int i = 0; i < 10000; i++) s.addScore("score#" + i + "xxx" + i + "xxx" + i + "xxx" + i + "xxx", i/10);
+	int c = 0;
+
+	// create cluster
+        long time = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
+	    s.addScore("score#" + i + "xxx" + i + "xxx" + i + "xxx" + i + "xxx", i/10);
+	    c += i/10;
+	}
+	/*
         System.out.println("result:");
         Object[] result;
         result = s.getScores(s.size(), true);
         for (int i = 0; i < s.size(); i++) System.out.println("up: " + result[i]);
         result = s.getScores(s.size(), false);
         for (int i = 0; i < s.size(); i++) System.out.println("down: " + result[i]);
-        System.out.println("Test for Score: finish. time = " + (System.currentTimeMillis() - time));
-        System.out.println("total=" + s.totalCount() + ", elements=" + s.size());
+	*/
+        System.out.println("finished create. time = " + (System.currentTimeMillis() - time));
+        System.out.println("total=" + s.totalCount() + ", elements=" + s.size() + ", redundant count=" + c);
+
+	// delete cluster
+        time = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
+	    s.deleteScore("score#" + i + "xxx" + i + "xxx" + i + "xxx" + i + "xxx");
+	    c -= i/10;
+	}
+        System.out.println("finished delete. time = " + (System.currentTimeMillis() - time));
+        System.out.println("total=" + s.totalCount() + ", elements=" + s.size() + ", redundant count=" + c);
+
     }
 }
