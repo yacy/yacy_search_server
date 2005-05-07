@@ -838,7 +838,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
             return;
         }
         cacheLoader.loadParallel(urlEntry.url(), urlEntry.referrerHash(), initiator, urlEntry.depth(), profile);
-        log.logInfo("LOCALCRAWL[" + noticeURL.localStackSize() + ", " + noticeURL.remoteStackSize() + "]: enqueed for load " + urlEntry.url());
+        log.logInfo("LOCALCRAWL[" + noticeURL.localStackSize() + ", " + noticeURL.remoteStackSize() + "]: enqueued for load " + urlEntry.url());
     }
     
     private boolean processGlobalCrawling(plasmaCrawlNURL.entry urlEntry) {
