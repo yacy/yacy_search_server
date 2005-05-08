@@ -70,7 +70,7 @@
 <property name="javacTarget" value="1.4"/>	
 	
 <!-- Release Configuration -->
-<property name="releaseVersion" value="0.37"/>
+<property name="releaseVersion" value="0.372"/>
 <property name="releaseFile" value="yacy_v${releaseVersion}_${DSTAMP}.tgz"/>
 	
 <target name="init">
