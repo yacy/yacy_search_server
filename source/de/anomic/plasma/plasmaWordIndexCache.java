@@ -172,6 +172,7 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 }
             }
         }
+	dumpStack.close();
         log.logSystem("dumped " + urlcount + " word/url relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
     }
         
@@ -211,6 +212,7 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 }
             }
         }
+	dumpStack.close();
         log.logSystem("restored " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         return urlCount;
     }
