@@ -51,7 +51,7 @@ import de.anomic.yacy.yacySeedDB;
 
 public class plasmaWordIndexCache implements plasmaWordIndexInterface {
     
-    private static final String indexDumpFileName = "indexDump.stack";
+    private static final String indexDumpFileName = "indexDump0.stack";
     
     static String minKey, maxKey;
 
@@ -91,24 +91,27 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
         log.logSystem("creating dump for index cache, " + cache.size() + " words (and much more urls)");
         File indexDumpFile = new File(databaseRoot, indexDumpFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
-        kelondroStack dumpStack = new kelondroStack(indexDumpFile, 0, new int[]{plasmaWordIndexEntry.wordHashLength, 4, 8, plasmaWordIndexEntry.attrSpaceLong});
+        kelondroStack dumpStack = new kelondroStack(indexDumpFile, 0, new int[]{plasmaWordIndexEntry.wordHashLength, 4, 8, plasmaWordIndexEntry.wordHashLength, plasmaWordIndexEntry.attrSpaceLong});
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;
         long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
         synchronized (cache) {
-            Iterator i = cache.entrySet().iterator();
-            Map.Entry entry;
+            //Iterator i = cache.entrySet().iterator();
+            Iterator i = hashScore.scores(false);
+            //Map.Entry entry;
             String wordHash;
             plasmaWordIndexEntryContainer container;
             long creationTime;
             plasmaWordIndexEntry wordEntry;
-            byte[][] row = new byte[4][];
+            byte[][] row = new byte[5][];
             while (i.hasNext()) {
                 // get entries
-                entry = (Map.Entry) i.next();
-                wordHash = (String) entry.getKey();
+                //entry = (Map.Entry) i.next();
+                wordHash = (String) i.next();
+                //wordHash = (String) entry.getKey();
                 creationTime = getCreationTime(wordHash);
-                container = (plasmaWordIndexEntryContainer) entry.getValue();
+                container = (plasmaWordIndexEntryContainer) cache.get(wordHash);
+                //container = (plasmaWordIndexEntryContainer) entry.getValue();
 
                 // put entries on stack
                 if (container != null) {
@@ -118,7 +121,8 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
                         row[0] = wordHash.getBytes();
                         row[1] = kelondroRecords.long2bytes(container.size(), 4);
                         row[2] = kelondroRecords.long2bytes(creationTime, 8);
-                        row[3] = wordEntry.toEncodedForm(true).getBytes();
+                        row[3] = wordEntry.getUrlHash().getBytes();
+                        row[4] = wordEntry.toEncodedForm(true).getBytes();
                         dumpStack.push(row);
                         urlcount++;
                     }
@@ -147,7 +151,7 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
         synchronized (cache) {
             Iterator i = dumpStack.iterator();
             kelondroRecords.Node node;
-            String wordHash;
+            String wordHash, urlHash;
             plasmaWordIndexEntryContainer container;
             long creationTime;
             plasmaWordIndexEntry wordEntry;
@@ -158,7 +162,8 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 row = node.getValues();
                 wordHash = new String(row[0]);
                 creationTime = kelondroRecords.bytes2long(row[2]);
-                wordEntry = new plasmaWordIndexEntry(wordHash, new String(row[3]));
+                urlHash = new String(row[3]);
+                wordEntry = new plasmaWordIndexEntry(urlHash, new String(row[4]));
 
                 // store to cache
                 addEntry(wordHash, wordEntry, creationTime);
@@ -166,7 +171,7 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 
                 // write a log
                 if (System.currentTimeMillis() > messageTime) {
-                    urlsPerSecond = urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
+                    urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
                     log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpStack.size() - urlCount) / urlsPerSecond) + " seconds remaining");
                     messageTime = System.currentTimeMillis() + 5000;
                 }

@@ -141,8 +141,7 @@ public class kelondroRecords {
 	// FHandles: number of integer properties
 	// txtProps: number of text properties
 
-	if (file.exists())
-	    throw new IOException("kelondroRecords: tree file " + file + " already exist");
+	if (file.exists()) throw new IOException("kelondroRecords: file " + file + " already exist");
 	this.filename   = file.getCanonicalPath();
         kelondroRA raf = new kelondroFileRA(this.filename);
         //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 5000000, 1000);
