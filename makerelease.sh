@@ -45,7 +45,7 @@
 # Contributions and changes to the program code must be marked as such.
 
 # define variables
-version='0.371'
+version='0.372'
 datestr=`date +%Y%m%d`
 #release='yacy_v'$version'_'$datestr
 release='yacy_dev_v'$version'_'$datestr
@@ -64,7 +64,7 @@ echo "[`date +%Y/%m/%d\ %H:%M:%S`] Building yacy version $version - $datestr ...
 classpath="$classes"
 for N in `ls -1 lib/*.jar`; do classpath="$classpath:$N"; done
 for N in `ls -1 libx/*.jar`; do classpath="$classpath:$N"; done
-echo "[`date +%Y/%m/%d\ %H:%M:%S`] Unsing classpath: $classpath"
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] Using classpath: $classpath"
 
 #classpath='$classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar:libx/PDFBox-0.7.1.jar:libx/log4j-1.2.9.jar:libx/tm-extractors-0.4.jar'
 

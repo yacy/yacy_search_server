@@ -41,9 +41,11 @@
 
 package de.anomic.plasma;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import de.anomic.server.serverCodings;
 
-public class plasmaWordIndexEntryContainer {
+public class plasmaWordIndexEntryContainer implements Comparable {
 
     private String wordHash;
     private HashMap container;
@@ -79,6 +81,14 @@ public class plasmaWordIndexEntryContainer {
         return x;
     }
     
+    public boolean contains(String urlHash) {
+        return container.containsKey(urlHash);
+    }
+    
+    public plasmaWordIndexEntry getOne() {
+        return (plasmaWordIndexEntry) container.values().toArray()[0];
+    }
+    
     public Iterator entries() {
         // returns an iterator of plasmaWordIndexEntry objects
         return container.values().iterator();
@@ -92,6 +102,15 @@ public class plasmaWordIndexEntryContainer {
     
     public String toString() {
         return "C[" + wordHash + "] has " + container.size() + " entries";
+    }
+    
+    public int compareTo(Object obj) {
+        plasmaWordIndexEntryContainer other = (plasmaWordIndexEntryContainer) obj;
+        return this.wordHash.compareTo(other.wordHash);
+    }
+
+    public int hashCode() {
+        return (int) serverCodings.enhancedCoder.decodeBase64Long(this.wordHash.substring(0, 4));
     }
     
 }

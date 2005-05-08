@@ -51,10 +51,17 @@ import de.anomic.yacy.yacySeedDB;
 
 public class plasmaWordIndexCache implements plasmaWordIndexInterface {
     
+    // environment constants
     private static final String indexDumpFileName = "indexDump0.stack";
+    private static final String singletonFileName = "indexSingletons0.db";
+    private static final int[] bufferStructure = new int[]{
+        plasmaWordIndexEntry.wordHashLength, // a wordHash
+        4,                                   // occurrence counter
+        8,                                   // timestamp of last access
+        plasmaWordIndexEntry.urlHashLength,  // corresponding URL hash
+        plasmaWordIndexEntry.attrSpaceLong   // URL attributes
+    };
     
-    static String minKey, maxKey;
-
     // class variables
     private File databaseRoot;
     private plasmaWordIndexInterface backend;
@@ -63,7 +70,11 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private HashMap hashDate;
     private int maxWords;
     private serverLog log;
+    private kelondroTree singletons;
+    private long singletonBufferSize;
 
+    // calculated constants
+    private static String minKey, maxKey;
     static {
 	maxKey = "";
 	for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += 'z';
@@ -71,14 +82,38 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
 
-    public plasmaWordIndexCache(File databaseRoot, plasmaWordIndexInterface backend, serverLog log) {
+    public plasmaWordIndexCache(File databaseRoot, plasmaWordIndexInterface backend, long singletonBufferSize, serverLog log) {
+        // creates a new index cache
+        // the cache has a back-end where indexes that do not fit in the cache are flushed
         this.databaseRoot = databaseRoot;
+        this.singletonBufferSize = singletonBufferSize;
         this.cache = new TreeMap();
 	this.hashScore = new kelondroMScoreCluster();
         this.hashDate  = new HashMap();
 	this.maxWords = 10000;
         this.backend = backend;
         this.log = log;
+        File singletonFile = new File(databaseRoot, singletonFileName);
+        if (singletonFile.exists()) {
+            // open existing singeton tree file
+            try {
+                singletons = new kelondroTree(singletonFile, singletonBufferSize);
+                log.logSystem("Opened Singleton Database, " + singletons.size() + " entries."); 
+            } catch (IOException e){
+                log.logError("unable to open singleton database: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            // create new sigleton tree file
+            try {
+                singletons = new kelondroTree(singletonFile, singletonBufferSize, bufferStructure);
+                log.logSystem("Created new Singleton Database"); 
+            } catch (IOException e){
+                log.logError("unable to create singleton database: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        // read in dump of last session
         try {
             restore();
         } catch (IOException e){
@@ -91,7 +126,7 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
         log.logSystem("creating dump for index cache, " + cache.size() + " words (and much more urls)");
         File indexDumpFile = new File(databaseRoot, indexDumpFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
-        kelondroStack dumpStack = new kelondroStack(indexDumpFile, 0, new int[]{plasmaWordIndexEntry.wordHashLength, 4, 8, plasmaWordIndexEntry.wordHashLength, plasmaWordIndexEntry.attrSpaceLong});
+        kelondroStack dumpStack = new kelondroStack(indexDumpFile, 0, bufferStructure);
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;
         long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
@@ -151,19 +186,18 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
         synchronized (cache) {
             Iterator i = dumpStack.iterator();
             kelondroRecords.Node node;
-            String wordHash, urlHash;
+            String wordHash;
             plasmaWordIndexEntryContainer container;
             long creationTime;
             plasmaWordIndexEntry wordEntry;
-            byte[][] row = new byte[4][];
+            byte[][] row;
             while (i.hasNext()) {
                 // get out one entry
                 node = (kelondroRecords.Node) i.next();
                 row = node.getValues();
                 wordHash = new String(row[0]);
                 creationTime = kelondroRecords.bytes2long(row[2]);
-                urlHash = new String(row[3]);
-                wordEntry = new plasmaWordIndexEntry(urlHash, new String(row[4]));
+                wordEntry = new plasmaWordIndexEntry(new String(row[3]), new String(row[4]));
 
                 // store to cache
                 addEntry(wordHash, wordEntry, creationTime);
@@ -180,6 +214,99 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
         log.logSystem("restored " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         return urlCount;
     }
+
+    // singleton access methods
+    
+    private void storeSingleton(String wordHash, plasmaWordIndexEntry entry, long creationTime) {
+        // stores a word index to singleton database
+        // this throws an exception if the word hash already existed
+        //log.logDebug("storeSingleton: wordHash=" + wordHash + ", urlHash=" + entry.getUrlHash() + ", time=" + creationTime);
+        byte[][] row = new byte[5][];
+        row[0] = wordHash.getBytes();
+        row[1] = kelondroRecords.long2bytes(1, 4);
+        row[2] = kelondroRecords.long2bytes(creationTime, 8);
+        row[3] = entry.getUrlHash().getBytes();
+        row[4] = entry.toEncodedForm(true).getBytes();
+        byte[][] oldrow = null;
+        try {
+            oldrow = singletons.put(row);
+        } catch (IOException e) {
+            log.logFailure("storeSingleton/IO-error: " + e.getMessage() + " - reset singleton-DB");
+            e.printStackTrace();
+            resetSingletonDatabase();
+        } catch (kelondroException e) {
+            log.logFailure("storeSingleton/kelondro-error: " + e.getMessage() + " - reset singleton-DB");
+            e.printStackTrace();
+            resetSingletonDatabase();
+        }
+        if (oldrow != null) throw new RuntimeException("Store to singleton ambiguous");
+    }
+    
+    public Object[] /*{plasmaWordIndexEntry, Long(creationTime)}*/ readSingleton(String wordHash) {
+        // returns a single word index from singleton database; returns null if index does not exist
+        //log.logDebug("readSingleton: wordHash=" + wordHash);
+        byte[][] row = null;
+        try {
+            row = singletons.get(wordHash.getBytes());
+        } catch (IOException e) {
+            log.logFailure("readSingleton/IO-error: " + e.getMessage() + " - reset singleton-DB");
+            e.printStackTrace();
+            resetSingletonDatabase();
+        } catch (kelondroException e) {
+            log.logFailure("readSingleton/kelondro-error: " + e.getMessage() + " - reset singleton-DB");
+            e.printStackTrace();
+            resetSingletonDatabase();
+        }
+        if (row == null) return null;
+        long creationTime = kelondroRecords.bytes2long(row[2]);
+        plasmaWordIndexEntry wordEntry = new plasmaWordIndexEntry(new String(row[3]), new String(row[4]));
+        return new Object[]{wordEntry, new Long(creationTime)};
+    }
+    
+    private void removeSingleton(String wordHash) {
+        // deletes a word index from singleton database
+        //log.logDebug("removeSingleton: wordHash=" + wordHash);
+        byte[][] row = null;
+        try {
+            row = singletons.remove(wordHash.getBytes());
+        } catch (IOException e) {
+            log.logFailure("removeSingleton/IO-error: " + e.getMessage() + " - reset singleton-DB");
+            e.printStackTrace();
+            resetSingletonDatabase();
+        } catch (kelondroException e) {
+            log.logFailure("removeSingleton/kelondro-error: " + e.getMessage() + " - reset singleton-DB");
+            e.printStackTrace();
+            resetSingletonDatabase();
+        }
+    }
+    
+    private void resetSingletonDatabase() {
+        // deletes the singleton database and creates a new one
+        try {
+            singletons.close();
+        } catch (IOException e) {}
+        File singletonFile = new File(databaseRoot, singletonFileName);
+        if (!(singletonFile.delete())) throw new RuntimeException("cannot delete singleton database");
+        try {
+            singletons = new kelondroTree(singletonFile, singletonBufferSize, bufferStructure);
+        } catch (IOException e){
+            log.logError("unable to re-create singleton database: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    public Iterator singletonHashes(String startWordHash, boolean up, boolean rot) {
+        try {
+            return singletons.keys(up, rot, startWordHash.getBytes());
+        } catch (IOException e) {
+            log.logFailure("iterateSingleton/IO-error: " + e.getMessage() + " - reset singleton-DB");
+            e.printStackTrace();
+            resetSingletonDatabase();
+            return null;
+        }
+    }
+    
+    // cache settings
     
     public int maxURLinWordCache() {
         return hashScore.getScore(hashScore.getMaxObject());
@@ -194,92 +321,90 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
     
     public int size() {
-        if (backend.size() > cache.size()) return backend.size(); else return cache.size();
+        return java.lang.Math.max(singletons.size(), java.lang.Math.max(backend.size(), cache.size()));
     }
     
     public Iterator wordHashes(String startWordHash, boolean up) {
+        // here we merge 3 databases into one view:
+        // - the RAM Cache
+        // - the singleton File Cache
+        // - the backend
         if (!(up)) throw new RuntimeException("plasmaWordIndexCache.wordHashes can only count up");
-        return new iterateCombined(cache.keySet().iterator(), backend.wordHashes(startWordHash, true), true);
+        return new kelondroMergeIterator(
+                        new kelondroMergeIterator(
+                                 cache.keySet().iterator(),
+                                 singletonHashes(startWordHash, true, false),
+                                 true),
+                        backend.wordHashes(startWordHash, true),
+                        true);
     }
     
-    public class iterateCombined implements Iterator {
-        
-        Comparator comp;
-        Iterator a, b;
-        String na, nb;
-        boolean up;
-        
-        public iterateCombined(Iterator a, Iterator b, boolean up) {
-            this.a = a;
-            this.b = b;
-            this.up = up;
-            this.comp = kelondroMSetTools.fastStringComparator(up);
-            nexta();
-            nextb();
-        }
- 
-        private void nexta() {
-            if (a.hasNext()) na = (String) a.next(); else na = null;
-        }
-        private void nextb() {
-            if (b.hasNext()) nb = (String) b.next(); else nb = null;
-        }
-        
-        public boolean hasNext() {
-            return (na != null) || (nb != null);
-        }
-        
-        public Object next() {
-            String s;
-            if (na == null) {
-                s = nb;
-                nextb();
-                return s;
-            }
-            if (nb == null) {
-                s = na;
-                nexta();
-                return s;
-            }
-            // compare the strings
-            int c = comp.compare(na, nb);
-            if (c == 0) {
-                s = na;
-                //System.out.println("Iterate Hash: take " + s + " from file&cache");
-                nexta();
-                nextb();
-                return s;
-            } else if ((up) && (c < 0)) {
-                s = na;
-                nexta();
-                return s;
-            } else {
-                s = nb;
-                nextb();
-                return s;
-            }
-        }
-        
-        public void remove() {
-            
-        }
-    }
-    
-    private int flushKey(String key) {
+    private int flushFromMem(String key) {
         plasmaWordIndexEntryContainer container = null;
         long time;
 	synchronized (cache) {
+            // get the container
             container = (plasmaWordIndexEntryContainer) cache.get(key);
             if (container == null) return 0; // flushing of nonexisting key
             time = getCreationTime(key);
-	    cache.remove(key);
+
+            // remove it from the cache
+            cache.remove(key);
 	    hashScore.deleteScore(key);
             hashDate.remove(key);
 	}
-	return backend.addEntries(container, time);
+        // now decide where to flush that container
+        Object[] singleton = readSingleton(key);
+        if (singleton == null) {
+            if (container.size() == 1) {
+                // store to singleton
+                storeSingleton(key, container.getOne(), time);
+                return 1;
+            } else {
+                // store to back-end
+                return backend.addEntries(container, time);
+            }
+        } else {
+            // we have a singleton and need to integrate this in the flush
+            plasmaWordIndexEntry oldEntry = (plasmaWordIndexEntry) singleton[0];
+            long oldTime = ((Long) singleton[1]).longValue();
+            if (container.contains(oldEntry.getUrlHash())) {
+                // we have an double-occurrence
+                if (container.size() == 1) {
+                    // it is superfluous to flush this, simple do nothing
+                    return 0;
+                } else {
+                    // we flush to the backend, but remove the entry from the singletons
+                    removeSingleton(key);
+                    return backend.addEntries(container, java.lang.Math.max(time, oldTime));
+                }
+            } else {
+                // now we have more than one entry,
+                // we must remove the key from the singleton database
+                removeSingleton(key);
+                // add this to the backend
+                container.add(oldEntry);
+                return backend.addEntries(container, java.lang.Math.max(time, oldTime));
+            }
+        }	
+    }
+    
+    private boolean flushFromSingleton(String key) {
+        Object[] singleton = readSingleton(key);
+        if (singleton == null) {
+            return false;
+        } else {
+            // we have a singleton
+            plasmaWordIndexEntry entry = (plasmaWordIndexEntry) singleton[0];
+            long time = ((Long) singleton[1]).longValue();
+            // remove it from the singleton database
+            removeSingleton(key);
+            // integrate it to the backend
+            return backend.addEntries(plasmaWordIndexEntryContainer.instantContainer(key, entry), time) > 0;
+        }
     }
 
-    private int flushToLimit() {
+    private int flushFromMemToLimit() {
 	if ((hashScore.size() == 0) && (cache.size() == 0)) {
 	    serverLog.logDebug("PLASMA INDEXING", "flushToLimit: called but cache is empty");
 	    return 0;
@@ -299,25 +424,47 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
             String key;
             int count;
             Long createTime;
-            while (hashScore.size() >= maxWords) {
+            
+            // flush high-scores
+            while ((total < 100) && (hashScore.size() >= maxWords)) {
                 key = (String) hashScore.getMaxObject();
                 createTime = (Long) hashDate.get(key);
                 count = hashScore.getScore(key);
-                if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) < 9000)) {
-                    log.logDebug("key " + key + " is too fresh, abandon flush (count=" + count + ", cachesize=" + cache.size() + ")");
+                if (count < 5) {
+                    log.logWarning("flushing of high-key " + key + " not appropriate (too less entries, count=" + count + "): increase cache size");
                     break;
                 }
-                if (count < 5) log.logWarning("flushing of key " + key + " not appropriate (too less entries, count=" + count + "): increase cache size");
-                log.logDebug("flushing key " + key + ", count=" + count + ", cachesize=" + cache.size());
-                total += flushKey(key);
-                if (total > 100) break;
+                if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) < 9000)) {
+                    //log.logDebug("high-key " + key + " is too fresh, interrupting flush (count=" + count + ", cachesize=" + cache.size()  + ", singleton-size=" + singletons.size() + ")");
+                    break;
+                }
+                //log.logDebug("flushing high-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
+                total += flushFromMem(key);
+            }
+            
+            // flush singletons
+            while ((total < 200) && (hashScore.size() >= maxWords)) {
+                key = (String) hashScore.getMinObject();
+                createTime = (Long) hashDate.get(key);
+                count = hashScore.getScore(key);
+                if (count > 1) {
+                    //log.logDebug("flush of singleton-key " + key + ": count too high (count=" + count + ")");
+                    break;
+                }
+                if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) < 9000)) {
+                    //log.logDebug("singleton-key " + key + " is too fresh, interruptiong flush (count=" + count + ", cachesize=" + cache.size()  + ", singleton-size=" + singletons.size() + ")");
+                    break;
+                }
+                //log.logDebug("flushing singleton-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
+                total += flushFromMem(key);
             }
         }
         return total;
     }
     
     public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty) {
-        flushKey(wordHash);
+        flushFromMem(wordHash);
+        flushFromSingleton(wordHash);
 	return backend.getIndex(wordHash, deleteIfEmpty);
     }
     
@@ -333,17 +480,19 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
             hashScore.deleteScore(wordHash);
             hashDate.remove(wordHash);
         }
+        removeSingleton(wordHash);
 	backend.deleteIndex(wordHash);
     }
 
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
-        flushKey(wordHash);
+        flushFromMem(wordHash);
+        flushFromSingleton(wordHash);
         return backend.removeEntries(wordHash, urlHashes, deleteComplete);
     }
     
     public int addEntries(plasmaWordIndexEntryContainer container, long creationTime) {
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
-        flushToLimit();
+        flushFromMemToLimit();
 	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");
 
 	// put new words into cache
@@ -374,6 +523,12 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
 
     public void close(int waitingSeconds) {
+        try {
+            singletons.close();
+        } catch (IOException e){
+            log.logError("unable to close singleton database: " + e.getMessage());
+            e.printStackTrace();
+        }
         try {
             dump(waitingSeconds);
         } catch (IOException e){

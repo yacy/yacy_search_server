@@ -59,6 +59,7 @@ public class plasmaWordIndexEntry {
     
     // the size of a word hash
     public static final int wordHashLength   = yacySeedDB.commonHashLength; // 12
+    public static final int  urlHashLength   = yacySeedDB.commonHashLength; // 12
 
     // the size of the index entry attributes
     public static final int attrSpaceShort   = 12;
@@ -201,6 +202,8 @@ public class plasmaWordIndexEntry {
     }
     
     public String toEncodedForm(boolean longAttr) {
+        // attention: this integrates NOT the URL into the encoding
+        // if you need a complete dump, use toExternalForm()
 	if (code == null) {
             String shortAttr =
                 b64save(quality, plasmaCrawlLURL.urlQualityLength) +

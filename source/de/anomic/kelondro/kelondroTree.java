@@ -85,13 +85,13 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     }
     
     public kelondroTree(File file, long buffersize, int[] columns) throws IOException {
-	// this creates a new tree
+	// this creates a new tree file
 	this(file, buffersize, columns, columns.length /*txtProps*/, 80 /*txtPropWidth*/);
     }
 
     public kelondroTree(File file, long buffersize,
                         int[] columns, int txtProps, int txtPropsWidth) throws IOException {
-	// this creates a new tree
+	// this creates a new tree file
 	super(file, buffersize,
               thisOHBytes, thisOHHandles,
               columns, thisFHandles, columns.length /*txtProps*/, 80 /*txtPropWidth*/);
@@ -99,23 +99,23 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     }
     
     public kelondroTree(kelondroRA ra, long buffersize, int[] columns) throws IOException {
-	// this creates a new tree
+	// this creates a new tree within a kelondroRA
         this(ra, buffersize, columns, columns.length /*txtProps*/, 80 /*txtPropWidth*/);
     }
     
     public kelondroTree(kelondroRA ra, long buffersize, int[] columns, int txtProps, int txtPropsWidth) throws IOException {
-	// this creates a new tree
+	// this creates a new tree within a kelondroRA
 	super(ra, buffersize, thisOHBytes, thisOHHandles, columns, thisFHandles, txtProps, txtPropsWidth);
 	setHandle(root, null); // define the root value
     }
     
     public kelondroTree(File file, long buffersize) throws IOException{
-	// this opens a file with an existing tree
+	// this opens a file with an existing tree file
 	super(file, buffersize);
     }
 
     public kelondroTree(kelondroRA ra, long buffersize) throws IOException{
-	// this opens a file with an existing tree
+	// this opens a file with an existing tree in a kelondroRA
 	super(ra, buffersize);
     }
 
@@ -277,117 +277,6 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	return (lc.equals(childn.handle()));
     }
     
-    private class nodeIterator implements Iterator {
-	// we implement an iteration! (not a recursive function as the structure would suggest...)
-	// the iterator iterates Handle objects
-	Node nextNode = null;
-        boolean up, rot;
-        LinkedList nodeStack;
-	int count;
-        
-	public nodeIterator(boolean up, boolean rotating) throws IOException {
-            this(up, rotating, (up) ? firstNode() : lastNode());
-	}
-        
-	public nodeIterator(boolean up, boolean rotating, Node start) throws IOException {
-	    this.count = 0;
-            this.up = up;
-            this.rot = rotating;
-            this.nextNode = start;
-            
-            // fill node stack for start node
-            nodeStack = new LinkedList();
-            
-            Handle searchHandle = getHandle(root);
-            if (searchHandle == null) {nextNode = null; return;}
-
-            Node searchNode = getNode(searchHandle, null, 0);            
-            byte[] startKey = start.getKey();
-            int c, ct;
-            while ((c = compare(startKey, searchNode.getKey())) != 0) {
-                // the current 'thisNode' is not the start node, put it on the stack
-                ct = (c < 0) ? leftchild : rightchild;
-                nodeStack.addLast(new Object[]{searchNode, new Integer(ct)});
-                
-                // go to next node
-                searchHandle = searchNode.getOHHandle()[ct];
-                if (searchHandle == null) throw new kelondroException(filename, "start node does not exist (handle null)");
-                searchNode = getNode(searchHandle, searchNode, ct);
-                if (searchNode == null) throw new kelondroException(filename, "start node does not exist (node null)");
-            }
-            // now every parent node to the start node is on the stack
-	}
-        
-	public boolean hasNext() {
-            return nextNode != null;
-	}
-
-        public Object next() {
-	    count++;
-            if (nextNode == null) throw new kelondroException(filename, "no more entries available");
-	    if (count > size()) throw new kelondroException(filename, "internal loopback; database corrupted");
-            Object ret = nextNode;
-            
-            // middle-case
-            
-            try {
-                int childtype = (up) ? rightchild : leftchild;
-                Handle childHandle = nextNode.getOHHandle()[childtype];
-                if (childHandle != null) {
-                    //System.out.println("go to other leg, stack size=" + nodeStack.size());
-                    // we have walked one leg of the tree; now go to the other one: step down to next child
-                    nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
-                    nextNode = getNode(childHandle, nextNode, childtype);
-                    childtype = (up) ? leftchild : rightchild;
-                    while ((childHandle = nextNode.getOHHandle()[childtype]) != null) {
-                        try {
-                            nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
-                            nextNode = getNode(childHandle, nextNode, childtype);
-                        } catch (IllegalArgumentException e) {
-                            // return what we have
-                            nodeStack.removeLast();
-                            return ret;
-                        }
-                    }
-                    // thats it: we are at a place where we can't go further
-                    // nextNode is correct
-                } else {
-                    //System.out.println("go up");
-                    // we have walked along both legs of the child-trees.
-                    
-                    // Now step up.
-                    if (nodeStack.size() == 0) {
-                        nextNode = null;
-                    } else {
-                        Object[] stacktop;
-                        Node parent = null;
-                        int parentpointer = (up) ? rightchild : leftchild;
-                        while ((nodeStack.size() != 0) && (parentpointer == ((up) ? rightchild : leftchild))) {
-                            //System.out.println("step up");
-                            // go on, walk up further
-                            stacktop = (Object[]) nodeStack.removeLast(); // top of stack: Node/parentpointer pair
-                            parent = (Node) stacktop[0];
-                            parentpointer = ((Integer) stacktop[1]).intValue();
-                        }
-                        if ((nodeStack.size() == 0) && (parentpointer == ((up) ? rightchild : leftchild))) {
-                            nextNode = null;
-                        } else {
-                            nextNode = parent;
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                nextNode = null;
-            }
-            
-            return ret;
-        }
-        
-        public void remove() {
-            throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro Tables not yet supported");
-	}
-    }
-
     public long[] putLong(byte[] key, long[] newlongs) throws IOException {
         byte[][] newrow = new byte[newlongs.length + 1][];
         newrow[0] = key;
@@ -847,9 +736,120 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	}
     }
     
+    private class nodeIterator implements Iterator {
+	// we implement an iteration! (not a recursive function as the structure would suggest...)
+	// the iterator iterates Node objects
+	Node nextNode = null;
+        boolean up, rot;
+        LinkedList nodeStack;
+	int count;
+        
+	public nodeIterator(boolean up, boolean rotating) throws IOException {
+            this(up, rotating, (up) ? firstNode() : lastNode());
+	}
+        
+	public nodeIterator(boolean up, boolean rotating, Node start) throws IOException {
+	    this.count = 0;
+            this.up = up;
+            this.rot = rotating;
+            this.nextNode = start;
+            
+            // fill node stack for start node
+            nodeStack = new LinkedList();
+            
+            Handle searchHandle = getHandle(root);
+            if (searchHandle == null) {nextNode = null; return;}
+
+            Node searchNode = getNode(searchHandle, null, 0);            
+            byte[] startKey = start.getKey();
+            int c, ct;
+            while ((c = compare(startKey, searchNode.getKey())) != 0) {
+                // the current 'thisNode' is not the start node, put it on the stack
+                ct = (c < 0) ? leftchild : rightchild;
+                nodeStack.addLast(new Object[]{searchNode, new Integer(ct)});
+                
+                // go to next node
+                searchHandle = searchNode.getOHHandle()[ct];
+                if (searchHandle == null) throw new kelondroException(filename, "start node does not exist (handle null)");
+                searchNode = getNode(searchHandle, searchNode, ct);
+                if (searchNode == null) throw new kelondroException(filename, "start node does not exist (node null)");
+            }
+            // now every parent node to the start node is on the stack
+	}
+        
+	public boolean hasNext() {
+            return nextNode != null;
+	}
+
+        public Object next() {
+	    count++;
+            if (nextNode == null) throw new kelondroException(filename, "no more entries available");
+	    if ((count > size()) && (!(rot))) throw new kelondroException(filename, "internal loopback; database corrupted");
+            Object ret = nextNode;
+            
+            // middle-case
+            
+            try {
+                int childtype = (up) ? rightchild : leftchild;
+                Handle childHandle = nextNode.getOHHandle()[childtype];
+                if (childHandle != null) {
+                    //System.out.println("go to other leg, stack size=" + nodeStack.size());
+                    // we have walked one leg of the tree; now go to the other one: step down to next child
+                    nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
+                    nextNode = getNode(childHandle, nextNode, childtype);
+                    childtype = (up) ? leftchild : rightchild;
+                    while ((childHandle = nextNode.getOHHandle()[childtype]) != null) {
+                        try {
+                            nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
+                            nextNode = getNode(childHandle, nextNode, childtype);
+                        } catch (IllegalArgumentException e) {
+                            // return what we have
+                            nodeStack.removeLast();
+                            return ret;
+                        }
+                    }
+                    // thats it: we are at a place where we can't go further
+                    // nextNode is correct
+                } else {
+                    //System.out.println("go up");
+                    // we have walked along both legs of the child-trees.
+                    
+                    // Now step up.
+                    if (nodeStack.size() == 0) {
+                        nextNode = null;
+                    } else {
+                        Object[] stacktop;
+                        Node parent = null;
+                        int parentpointer = (up) ? rightchild : leftchild;
+                        while ((nodeStack.size() != 0) && (parentpointer == ((up) ? rightchild : leftchild))) {
+                            //System.out.println("step up");
+                            // go on, walk up further
+                            stacktop = (Object[]) nodeStack.removeLast(); // top of stack: Node/parentpointer pair
+                            parent = (Node) stacktop[0];
+                            parentpointer = ((Integer) stacktop[1]).intValue();
+                        }
+                        if ((nodeStack.size() == 0) && (parentpointer == ((up) ? rightchild : leftchild))) {
+                            nextNode = null;
+                        } else {
+                            nextNode = parent;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                nextNode = null;
+            }
+            
+            return ret;
+        }
+        
+        public void remove() {
+            throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro Tables not yet supported");
+	}
+    }
+
     public synchronized rowIterator rows(boolean up, boolean rotating) throws IOException {
-	// iterates only the keys of the Nodes
-	// enumerated objects are of type byte[]
+	// iterates the rows of the Nodes
+	// enumerated objects are of type byte[][]
         // iterates the elements in a sorted way.
 	return new rowIterator(new nodeIterator(up, rotating));
     }
@@ -895,6 +895,54 @@ public class kelondroTree extends kelondroRecords implements Comparator {
         
     }
 
+    public synchronized keyIterator keys(boolean up, boolean rotating) throws IOException {
+	// iterates only the keys of the Nodes
+	// enumerated objects are of type String
+        // iterates the elements in a sorted way.
+	return new keyIterator(new nodeIterator(up, rotating));
+    }
+    
+    public synchronized Iterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        Search s = new Search(firstKey);
+        if (s.found()) {
+            return new keyIterator(new nodeIterator(up, rotating, s.getMatcher()));
+        } else {
+            Node nn = s.getParent();
+            if (nn == null) {
+                return (Iterator) (new HashSet()).iterator();
+            } else {
+                return new keyIterator(new nodeIterator(up, rotating, nn));
+            }
+        }
+    }
+    
+    public class keyIterator implements Iterator {
+        
+        Iterator nodeIterator;
+        
+        public keyIterator(Iterator nodeIterator) {
+            this.nodeIterator = nodeIterator;
+        }
+        
+        public boolean hasNext() {
+            return (nodeIterator.hasNext());
+        }
+        
+        public Object next() {
+            try {
+		Node nextNode = (Node) nodeIterator.next();
+		if (nextNode == null) throw new kelondroException(filename, "no more elements available");
+                return new String(nextNode.getKey());
+            } catch (IOException e) {
+                throw new kelondroException(filename, "io-error: " + e.getMessage());
+            }
+        }
+        
+        public void remove() {
+        }
+        
+    }
+    
     public int imp(File file, String separator) throws IOException {
 	// imports a value-separated file, returns number of records that have been read
 
