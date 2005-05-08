@@ -32,7 +32,7 @@
 <tr><td width="100" valign="top">
 <table width="100%" border="0" cellspacing="2" cellpadding="0" class="Menu">
   <tr><td class="MenuHeader">&nbsp;Global&nbsp;Index</td></tr>
-  <tr><td class="MenuItem">&nbsp;<a href="/index.html" class="MenuItemLink">Search Page</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/index.html" accesskey="s" class="MenuItemLink"><u>S</u>earch Page</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/Help.html" class="MenuItemLink">Help</a></td></tr>
 <!--<tr><td class="MenuItem">&nbsp;<a href="/Statistics.html" class="MenuItemLink">Statistics</a></td></tr>-->
   <tr><td class="MenuSpacer"></td></tr>
@@ -58,8 +58,8 @@
   <tr><td class="MenuSpacer"></td></tr>
   
   <tr><td class="MenuHeader">&nbsp;Peer&nbsp;Control</td></tr>
-  <tr><td class="MenuItem">&nbsp;<a href="/Status.html" class="MenuItemLink">Status</a></td></tr>
-  <tr><td class="MenuItem">&nbsp;<a href="/Network.html" class="MenuItemLink">Network</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/Status.html" accesskey="t" class="MenuItemLink">S<u>t</u>atus</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/Network.html" accesskey="n" class="MenuItemLink"><u>N</u>etwork</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/ViewLog_p.html" class="MenuItemLink">Log</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Settings_p.html" class="MenuItemLink">Settings</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Performance_p.html" class="MenuItemLink">Performance</a></td></tr>
