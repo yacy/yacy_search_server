@@ -312,10 +312,31 @@ public final class httpd implements serverHandler {
 	// we now know the HTTP version. depending on that, we read the header
 	httpHeader header;
 	String httpVersion = prop.getProperty("HTTP", "HTTP/0.9");
-	if (httpVersion.equals("HTTP/0.9"))
+	if (httpVersion.equals("HTTP/0.9")) {
 	    header = new httpHeader(reverseMappingCache);
-	else
+    }
+	else {
 	    header = readHeader();
+        if ((httpdProxyHandler.isTransparentProxy) && header.containsKey("HOST")){
+            Integer dstPort;
+            String dstHost = (String) header.get("HOST");
+            
+            int idx = dstHost.indexOf(":");
+            if (idx != -1) {
+                dstPort = Integer.valueOf(dstHost.substring(idx+1));
+                dstHost = dstHost.substring(0,idx);                
+            } else {
+                dstPort = new Integer(80);
+            }
+
+            if (dstPort.intValue() == 80) {
+                InetAddress dstHostAddress = InetAddress.getByName(dstHost);
+                if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
+                    this.prop.setProperty("HOST",dstHost);
+                }
+            }
+        } 
+    }
 
 	// return multi-line message
 	if (prop.getProperty("HOST").equals(virtualHost)) {
@@ -386,10 +407,30 @@ public final class httpd implements serverHandler {
 	// we now know the HTTP version. depending on that, we read the header
 	httpHeader header;
 	String httpVersion = prop.getProperty("HTTP", "HTTP/0.9");
-	if (httpVersion.equals("HTTP/0.9"))
+	if (httpVersion.equals("HTTP/0.9")) {
 	    header = new httpHeader(reverseMappingCache);
-	else
+    } else {
 	    header = readHeader();
+        if ((httpdProxyHandler.isTransparentProxy) && header.containsKey("HOST")){
+            Integer dstPort;
+            String dstHost = (String) header.get("HOST");
+            
+            int idx = dstHost.indexOf(":");
+            if (idx != -1) {
+                dstPort = Integer.valueOf(dstHost.substring(idx+1));
+                dstHost = dstHost.substring(0,idx);                
+            } else {
+                dstPort = new Integer(80);
+            }
+
+            if (dstPort.intValue() == 80) {
+                InetAddress dstHostAddress = InetAddress.getByName(dstHost);
+                if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
+                    this.prop.setProperty("HOST",dstHost);
+                }
+            }
+        }         
+    }
 
 	boolean persistent = (!((httpVersion.equals("HTTP/0.9")) || (httpVersion.equals("HTTP/1.0"))));
 	String connection = prop.getProperty("Connection", "close").toLowerCase();
