@@ -9,7 +9,7 @@
 # (C) by Michael Peter Christen; mc@anomic.de
 # first published on http://www.anomic.de
 # Frankfurt, Germany, 2005
-# last major change: 25.04.2005
+# last major change: 08.05.2005
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,12 +58,21 @@ source='source'
 doc='doc'
 data='DATA'
 mainclass='yacy.java'
-classpath='$classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar:libx/PDFBox-0.7.1.jar:libx/log4j-1.2.9.jar:libx/tm-extractors-0.4.jar:libx/informa-0.6.0.jar:libx/jdom.jar'
 
-mkdir $release
-mkdir $extralibs
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] Building yacy version $version - $datestr ..."
+
+classpath="$classes"
+for N in `ls -1 lib/*.jar`; do classpath="$classpath:$N"; done
+for N in `ls -1 libx/*.jar`; do classpath="$classpath:$N"; done
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] Unsing classpath: $classpath"
+
+#classpath='$classes:lib/commons-collections.jar:lib/commons-pool-1.2.jar:libx/PDFBox-0.7.1.jar:libx/log4j-1.2.9.jar:libx/tm-extractors-0.4.jar'
+
+mkdir -p $release
+mkdir -p $extralibs
 
 # clean up
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] Clean up ..."
 rm -Rf $target &> /dev/null
 rm -Rf $classes &> /dev/null
 rm $doc/release.txt &> /dev/null
@@ -99,12 +108,15 @@ rm htroot/env/grafics/*~ &> /dev/null
 rm htroot/env/templates/*~ &> /dev/null
 
 # make classes directory
-mkdir $classes
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] make classes directory ..."
+mkdir -p $classes
 
 # make release directory
-mkdir $target
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] make release directory ..."
+mkdir -p $target
 
 # compile core
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] compile core ..."
 mv -f $source/$mainclass $source/$mainclass.orig
 sed `echo 's/@REPL_DATE@/'$datestr'/'` $source/$mainclass.orig > $source/$mainclass.sed1
 sed `echo 's/@REPL_VERSION@/'$version'/'` $source/$mainclass.sed1 > $source/$mainclass
@@ -123,23 +135,27 @@ javac -classpath $classpath -sourcepath $source -d $classes -g $source/$mainclas
 mv -f $source/$mainclass.orig $source/$mainclass
 
 # compile server pages
-javac -classpath $classes -sourcepath htroot -d htroot -g htroot/*.java
-javac -classpath $classes -sourcepath htroot/yacy -d htroot/yacy -g htroot/yacy/*.java
-javac -classpath $classes -sourcepath htroot/htdocsdefault -d htroot/htdocsdefault -g htroot/htdocsdefault/*.java
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] compile server pages ..."
+javac -classpath $classpath -sourcepath htroot -d htroot -g htroot/*.java
+javac -classpath $classpath -sourcepath htroot/yacy -d htroot/yacy -g htroot/yacy/*.java
+javac -classpath $classpath -sourcepath htroot/htdocsdefault -d htroot/htdocsdefault -g htroot/htdocsdefault/*.java
 
 # copy classes
-mkdir $release/$classes
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] copy classes ..."
+mkdir -p $release/$classes
 cp -R $classes/* $release/$classes/
 
 # copy libs
-mkdir $release/$lib
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] copy libs ..."
+mkdir -p $release/$lib
 cp -R $lib/* $release/$lib/
 rm -fR `find $release/$lib/ | grep svn`
-mkdir $extralibs/$libx
+mkdir -p $extralibs/$libx
 cp -R $libx/* $extralibs/$libx/
 rm -fR `find $extralibs/$libx/ | grep svn`
 
 # copy configuration files
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] copy configuration files ..."
 cp yacy.init $release
 cp yacy.yellow $release
 #cp yacy.black $release
@@ -149,6 +165,7 @@ cp httpd.mime $release
 cp superseed.txt $release
 
 # copy wrappers
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] copy wrappers ..."
 cp startYACY.command $release
 cp startYACY.bat $release
 cp startYACY_noconsole.bat $release
@@ -160,10 +177,11 @@ cp killYACY.sh $release
 cp makerelease.sh $release
 
 # copy documentation
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] copy documentation ..."
 cp readme.txt $release
 cp gpl.txt $release
-mkdir $release/$doc
-mkdir $release/$doc/grafics
+mkdir -p $release/$doc
+mkdir -p $release/$doc/grafics
 cp $doc/*.css $release/$doc/
 cp $doc/*.js $release/$doc/
 cp $doc/*.html $release/$doc/
@@ -174,18 +192,20 @@ cp $doc/grafics/*.gif $release/$doc/grafics/
 rm -fR `find $release/$doc/ | grep svn`
 
 # copy source code
-mkdir $release/$source
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] copy source code ..."
+mkdir -p $release/$source
 cp -R $source/* $release/$source/
 rm -fR `find $release/$source/ | grep svn`
 
 # copy server pages
-mkdir $release/htroot
-mkdir $release/htroot/yacy
-mkdir $release/htroot/htdocsdefault
-mkdir $release/htroot/env
-mkdir $release/htroot/env/grafics
-mkdir $release/htroot/env/templates
-mkdir $release/htroot/proxymsg
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] copy server pages ..."
+mkdir -p $release/htroot
+mkdir -p $release/htroot/yacy
+mkdir -p $release/htroot/htdocsdefault
+mkdir -p $release/htroot/env
+mkdir -p $release/htroot/env/grafics
+mkdir -p $release/htroot/env/templates
+mkdir -p $release/htroot/proxymsg
 cp htroot/*.rss $release/htroot/
 cp htroot/*.xml $release/htroot/
 cp htroot/*.html $release/htroot/
@@ -205,10 +225,12 @@ cp htroot/proxymsg/*.html $release/htroot/proxymsg/
 rm -fR `find $release/htroot/ | grep svn`
 
 # copy add-on's
-mkdir $release/addon
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] copy add-on's ..."
+mkdir -p $release/addon
 cp addon/* $release/addon/
 
 # set access rights
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] set access rights ..."
 chmod 644 $release/*
 chmod 755 $release/htroot
 chmod 644 $release/htroot/*
@@ -267,6 +289,7 @@ chmod 755 $extralibs/$libx
 chmod 644 $extralibs/$libx/*
 
 # compress files
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] compress files ..."
 tar -cf $release.tar $release
 rm -Rf $release
 gzip -9 $release.tar
@@ -279,9 +302,10 @@ mv $extralibs.tar.gz $target
 # make release test file:
 # this file must be copied later on to
 # www.yacy.net/yacy/
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] make release file ..."
 echo $version > $doc/release.txt
 
 # finished
-echo finished.
-echo created $target/$release.tar.gz
-echo created $target/$extralibs.tar.gz
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] finished."
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] created $target/$release.tar.gz"
+echo "[`date +%Y/%m/%d\ %H:%M:%S`] created $target/$extralibs.tar.gz"
