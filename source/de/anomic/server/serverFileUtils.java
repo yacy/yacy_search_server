@@ -52,30 +52,43 @@ import java.io.OutputStream;
 public final class serverFileUtils {
     
     public static void copy(InputStream source, OutputStream dest) throws IOException {
-	byte[] buffer = new byte[4096];
-	int c;
-	while ((c = source.read(buffer)) > 0) dest.write(buffer, 0, c);
-	dest.flush();
+		byte[] buffer = new byte[4096];
+		int c;
+		while ((c = source.read(buffer)) > 0) dest.write(buffer, 0, c);
+		dest.flush();
     }
           
     public static void copy(InputStream source, File dest) throws IOException {
-        FileOutputStream fos = new FileOutputStream(dest);
-        copy(source, fos);
-        fos.close();
+        FileOutputStream fos = null;
+        try {
+			fos = new FileOutputStream(dest);
+			copy(source, fos);
+        } finally {
+			if (fos != null) try {fos.close();} catch (Exception e) {}
+        }
     }
     
     public static void copy(File source, OutputStream dest) throws IOException {
-	InputStream fis = new FileInputStream(source);
-        copy(fis, dest);
-	fis.close();
+		InputStream fis = null;
+        try {
+			fis = new FileInputStream(source);
+			copy(fis, dest);
+        } finally {
+            if (fis != null) try { fis.close(); } catch (Exception e) {}
+        }
     }
     
     public static void copy(File source, File dest) throws IOException {
-        FileInputStream fis = new FileInputStream(source);
-        FileOutputStream fos = new FileOutputStream(dest);
-        copy(fis, fos);
-        fis.close();
-        fos.close();
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
+        try {
+	        fis = new FileInputStream(source);
+	        fos = new FileOutputStream(dest);
+	        copy(fis, fos);
+        } finally {
+            if (fis != null) try {fis.close();} catch (Exception e) {}
+            if (fos != null) try {fos.close();} catch (Exception e) {}            
+        }
     }
 
     public static byte[] read(InputStream source) throws IOException {
@@ -86,13 +99,16 @@ public final class serverFileUtils {
     }
     
     public static byte[] read(File source) throws IOException {
-        byte[] buffer = new byte[(int) source.length()];
-        InputStream fis = new FileInputStream(source);
-        int p = 0;
-        int c;
-	while ((c = fis.read(buffer, p, buffer.length - p)) > 0) p += c;
-	fis.close();
-        return buffer;
+		byte[] buffer = new byte[(int) source.length()];
+		InputStream fis = null;
+        try {
+	        fis = new FileInputStream(source);
+			int p = 0, c;
+			while ((c = fis.read(buffer, p, buffer.length - p)) > 0) p += c;
+        } finally {
+            if (fis != null) try { fis.close(); } catch (Exception e) {}
+        }
+		return buffer;
     }
     
     public static void write(byte[] source, OutputStream dest) throws IOException {

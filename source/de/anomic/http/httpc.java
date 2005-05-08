@@ -470,12 +470,15 @@ public final class httpc {
 	    // this writes the input stream to either another output stream or
 	    // a file or both.
 	    FileOutputStream bufferOS = null;
-	    if (file != null) bufferOS = new FileOutputStream(file);
-	    writeContentX(procOS, bufferOS, httpc.this.clientInput);
-	    if (bufferOS != null) {
-		bufferOS.close();
-		if (file.length() == 0) file.delete();
-	    }
+        try {        
+		    if (file != null) bufferOS = new FileOutputStream(file);
+		    writeContentX(procOS, bufferOS, httpc.this.clientInput);
+        } finally {
+		    if (bufferOS != null) {
+				bufferOS.close();
+				if (file.length() == 0) file.delete();
+		    }
+        }
 	}
 
 	public void writeContentX(OutputStream procOS, OutputStream bufferOS, InputStream clientInput) throws IOException {
@@ -558,15 +561,15 @@ public final class httpc {
 	    serverLog.logInfo("HTTPC", "RESPONSE: status=" + status + ", header=" + responseHeader.toString());
 	}
 
-    }
+	}
 
     public void close() {
-	// closes the connection
-	try {
-	    clientInput.close();
-	    clientOutput.close();
-	    socket.close();
-	} catch (IOException e) {}
+		// closes the connection
+		try {
+		    this.clientInput.close();
+		    this.clientOutput.close();
+		    this.socket.close();
+		} catch (IOException e) {}
     }
 
     // method is either GET, HEAD or POST

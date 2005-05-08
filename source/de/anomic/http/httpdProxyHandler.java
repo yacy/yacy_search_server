@@ -164,47 +164,54 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 
 
     private static HashSet loadSet(String setname, String filename) {
-	HashSet set = new HashSet();
-	try {
-	    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-	    String line;
-	    while ((line = br.readLine()) != null) {
-		line = line.trim();
-		if ((line.length() > 0) && (!(line.startsWith("#")))) set.add(line.trim().toLowerCase());
-	    }
-	    br.close();
-	    serverLog.logInfo("PROXY", "read " + setname + " set from file " + filename);
-	} catch (IOException e) {}
-	return set;
+		HashSet set = new HashSet();
+        BufferedReader br = null;
+		try {
+		    br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+		    String line;
+		    while ((line = br.readLine()) != null) {
+				line = line.trim();
+				if ((line.length() > 0) && (!(line.startsWith("#")))) set.add(line.trim().toLowerCase());
+		    }
+		    br.close();
+		    serverLog.logInfo("PROXY", "read " + setname + " set from file " + filename);
+		} catch (IOException e) {
+		} finally {
+            if (br != null) try { br.close(); } catch (Exception e) {}
+		}
+		return set;
     }
 
     private static TreeMap loadMap(String mapname, String filename, String sep) {
-	TreeMap map = new TreeMap();
-	try {
-	    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-	    String line;
-	    int pos;
-	    while ((line = br.readLine()) != null) {
-		line = line.trim();
-		if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0))
-		    map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
-	    }
-	    br.close();
-	    serverLog.logInfo("PROXY", "read " + mapname + " map from file " + filename);
-	} catch (IOException e) {}
-	return map;
+		TreeMap map = new TreeMap();
+        BufferedReader br = null;
+		try {
+		    br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+		    String line;
+		    int pos;
+		    while ((line = br.readLine()) != null) {
+				line = line.trim();
+				if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0))
+				    map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
+		    }
+		    serverLog.logInfo("PROXY", "read " + mapname + " map from file " + filename);
+		} catch (IOException e) {            
+		} finally {
+            if (br != null) try { br.close(); } catch (Exception e) {}
+		}
+		return map;
     }
 
     public static TreeMap loadBlacklist(String mapname, String filenames, String sep) {
-	TreeMap map = new TreeMap();
-        if (switchboard == null) return map; // not initialized yet
-	File listsPath = new File(switchboard.getRootPath(), switchboard.getConfig("listsPath", "DATA/LISTS"));
-        String filenamesarray[] = filenames.split(",");
-	String filename = "";
-	if(filenamesarray.length >0)
-	    for(int i = 0; i < filenamesarray.length; i++)
-		map.putAll(loadMap(mapname, (new File(listsPath, filenamesarray[i])).toString(), sep));
-	return map;
+		TreeMap map = new TreeMap();
+		if (switchboard == null) return map; // not initialized yet
+		File listsPath = new File(switchboard.getRootPath(), switchboard.getConfig("listsPath", "DATA/LISTS"));
+		String filenamesarray[] = filenames.split(",");
+
+		if(filenamesarray.length >0)
+			for(int i = 0; i < filenamesarray.length; i++)
+				map.putAll(loadMap(mapname, (new File(listsPath, filenamesarray[i])).toString(), sep));
+		return map;
     }
 
     private static String domain(String host) {
@@ -445,11 +452,15 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     
                     // send also the complete body now from the cache
                     // simply read the file and transfer to out socket
-                    InputStream is = new FileInputStream(cacheFile);
-                    byte[] buffer = new byte[2048];
-                    int l;
-                    while ((l = is.read(buffer)) > 0) {hfos.write(buffer, 0, l);}
-                    is.close();
+                    InputStream is = null;
+                    try {
+	                    is = new FileInputStream(cacheFile);
+	                    byte[] buffer = new byte[2048];
+	                    int l;
+	                    while ((l = is.read(buffer)) > 0) {hfos.write(buffer, 0, l);}
+                    } finally {
+                        if (is != null) try { is.close(); } catch (Exception e) {}
+                    }
                     if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
                 }
                 // that's it!
@@ -493,16 +504,16 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // handle file types
             if (((ext == null) || (!(switchboard.extensionBlack.contains(ext)))) &&
                 (httpd.isTextMime(res.responseHeader.mime(), switchboard.mimeWhite))) {
-		// this is a file that is a possible candidate for parsing by the indexer
+				// this is a file that is a possible candidate for parsing by the indexer
                 if (transformer.isIdentityTransformer()) {
-		    log.logDebug("create passthrough (parse candidate) for url " + url);
-                    // no transformation, only passthrough
-		    // this is especially the case if the bluelist is empty
-		    // in that case, the content is not scraped here but later
+					log.logDebug("create passthrough (parse candidate) for url " + url);
+					// no transformation, only passthrough
+					// this is especially the case if the bluelist is empty
+					// in that case, the content is not scraped here but later
                     hfos = respond;
                 } else {
                     // make a scraper and transformer
-		    log.logDebug("create scraper for url " + url);
+					log.logDebug("create scraper for url " + url);
                     scraper = new htmlFilterContentScraper(url);
                     hfos = new htmlFilterOutputStream(respond, scraper, transformer, (ext.length() == 0));
                     if (((htmlFilterOutputStream) hfos).binarySuspect()) {
@@ -531,7 +542,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                         (contentLength < 1048576)) {// 1 MB
                         // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
                         byte[] cacheArray = res.writeContent(hfos);
-			log.logDebug("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
+						log.logDebug("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
                         if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
                         
@@ -551,11 +562,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                         }
                     } else {
                         // the file is too big to cache it in the ram, or the size is unknown
-			// write to file right here.
+						// write to file right here.
                         cacheFile.getParentFile().mkdirs();
                         res.writeContent(hfos, cacheFile);
                         if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
-			log.logDebug("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
+						log.logDebug("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                         if (sizeBeforeDelete == -1) {
                             // totally fresh file
                             cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
@@ -569,8 +580,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                             cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
                             cacheManager.stackProcess(cacheEntry); // necessary update, write response header to cache
                         }
-			// beware! all these writings will not fill the cacheEntry.cacheArray
-			// that means they are not available for the indexer (except they are scraped before)
+						// beware! all these writings will not fill the cacheEntry.cacheArray
+						// that means they are not available for the indexer (except they are scraped before)
                     }
                 } else {
                     // no caching
@@ -596,18 +607,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 if (cacheFile.exists()) cacheFile.delete();
                 respondHeader(respond,"404 client unexpectedly closed connection", new httpHeader(null));
             } catch (IOException e) {
-		// can have various reasons
+				// can have various reasons
                 if (cacheFile.exists()) cacheFile.delete();
-		if (e.getMessage().indexOf("Corrupt GZIP trailer") >= 0) {
-		    // just do nothing, we leave it this way
-                    log.logDebug("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
-		} else {
-		    respondHeader(respond,"404 client unexpectedly closed connection", new httpHeader(null));
-                    log.logDebug("IOError for URL " + url + " (" + e.getMessage() + ") - responded 404");
-		    e.printStackTrace();
-		}
+				if (e.getMessage().indexOf("Corrupt GZIP trailer") >= 0) {
+				    // just do nothing, we leave it this way
+					log.logDebug("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
+				} else {
+				    respondHeader(respond,"404 client unexpectedly closed connection", new httpHeader(null));
+					log.logDebug("IOError for URL " + url + " (" + e.getMessage() + ") - responded 404");
+				    e.printStackTrace();
+				}
             }
-            remote.close();
         } catch (Exception e) {
             // this may happen if the targeted host does not exist or anything with the
             // remote server was wrong.
@@ -632,6 +642,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 
     
     private void respondError(OutputStream respond, String origerror, int errorcase, String url) {
+        FileInputStream fis = null;
         try {
             // set rewrite values
             serverObjects tp = new serverObjects();
@@ -643,7 +654,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             File file = new File(htRootPath, "/proxymsg/error.html");
             byte[] result;
             ByteArrayOutputStream o = new ByteArrayOutputStream();
-            FileInputStream fis = new FileInputStream(file);
+            fis = new FileInputStream(file);
             httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
             o.close();
             result = o.toByteArray();
@@ -659,8 +670,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             respondHeader(respond, origerror, header);
             serverFileUtils.write(result, respond);
             respond.flush();
-        } catch (IOException e) {
-            
+        } catch (IOException e) {            
+        } finally {
+			if (fis != null) try { fis.close(); } catch (Exception e) {}
         }
     }
 

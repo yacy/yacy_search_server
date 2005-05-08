@@ -114,57 +114,60 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     private String adminAccountBase64MD5;
 
     public httpdFileHandler(serverSwitch switchboard) {
-	this.switchboard = switchboard;
+		this.switchboard = switchboard;
+	
+		if (this.mimeTable == null) {
+			// load the mime table
+			this.mimeTable = new Properties();
+			String mimeTablePath = switchboard.getConfig("mimeConfig","");
+	        FileInputStream mimeTableInputStream = null;
+			try {
+				serverLog.logSystem("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
+	            mimeTableInputStream = new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath));
+				this.mimeTable.load(mimeTableInputStream);
+			} catch (Exception e) {
+	            if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}
+				serverLog.logError("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
+				System.exit(1);
+		    }
+		}
+        
+		// create default files array
+		defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
+		if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
+        
+		// create a htRootPath: system pages
+		if (htRootPath == null) {
+			htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
+			if (!(htRootPath.exists())) htRootPath.mkdir();
+		}
+        
+		// create a htDocsPath: user defined pages
+		if (htDocsPath == null) {
+			htDocsPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "htdocs"));
+			if (!(htDocsPath.exists())) htDocsPath.mkdir();
+		}
 
-	if (mimeTable == null) {
-	    // load the mime table
-	    mimeTable = new Properties();
-            String mimeTablePath = switchboard.getConfig("mimeConfig","");
-            try {
-		serverLog.logSystem("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
-		mimeTable.load(new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath)));
-	    } catch (Exception e) {
-		serverLog.logError("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
-		System.exit(1);
-	    }
-	}
-        
-        // create default files array
-        defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
-        if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
-        
-        // create a htRootPath: system pages
-        if (htRootPath == null) {
-            htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
-            if (!(htRootPath.exists())) htRootPath.mkdir();
-        }
-        
-        // create a htDocsPath: user defined pages
-        if (htDocsPath == null) {
-            htDocsPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "htdocs"));
-            if (!(htDocsPath.exists())) htDocsPath.mkdir();
-        }
-
-        // create a htTemplatePath
-        if (htTemplatePath == null) {
-            htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
-            if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
-        }
+		// create a htTemplatePath
+		if (htTemplatePath == null) {
+			htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
+			if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
+		}
         
         if (templates == null) templates = loadTemplates(htTemplatePath);
 
-	// create a class loader
-        if (provider == null) {
-	    provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
-	    // debug
-	    /*
-	    Package[] ps = ((cachedClassLoader) provider).packages();
-	    for (int i = 0; i < ps.length; i++) System.out.println("PACKAGE IN PROVIDER: " + ps[i].toString());
-	    */
-	}
-	adminAccountBase64MD5 = null;
+		// create a class loader
+		if (provider == null) {
+			provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
+			// debug
+			/*
+			Package[] ps = ((cachedClassLoader) provider).packages();
+			for (int i = 0; i < ps.length; i++) System.out.println("PACKAGE IN PROVIDER: " + ps[i].toString());
+			*/
+		}
+		adminAccountBase64MD5 = null;
         
-        serverLog.logSystem("HTTPDFileHandler", "File Handler Initialized");
+		serverLog.logSystem("HTTPDFileHandler", "File Handler Initialized");
     }
  
     private void respondHeader(OutputStream out, int retcode,
@@ -416,11 +419,18 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 		    // read templates
 		    tp.putAll(templates);
 		    // rewrite the file
-		    ByteArrayOutputStream o = new ByteArrayOutputStream();
-                    FileInputStream fis = new FileInputStream(file);
-		    httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
-		    o.close();
-                    result = o.toByteArray();
+		    ByteArrayOutputStream o = null;
+            FileInputStream fis = null;
+            try {
+	            o = new ByteArrayOutputStream();
+	            fis = new FileInputStream(file);
+			    httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
+	            result = o.toByteArray();
+            } finally {
+                if (o != null) try {o.close();} catch(Exception e) {}
+                if (fis != null) try {fis.close();} catch(Exception e) {}
+            }
+                    
 		} else { // no html
                     // write the file to the client
                     result = serverFileUtils.read(file);
@@ -450,22 +460,23 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     }
 
     private static HashMap loadTemplates(File path) {
-	// reads all templates from a path
-	// we use only the folder from the given file path
-	HashMap result = new HashMap();
-	if (path == null) return result;
-	if (!(path.isDirectory())) path = path.getParentFile();
-	if ((path == null) || (!(path.isDirectory()))) return result;
-	String[] templates = path.list();
-	int c;
-	for (int i = 0; i < templates.length; i++) {
-	    if (templates[i].endsWith(".template")) try {
-		//System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
-		result.put(templates[i].substring(0, templates[i].length() - 9),
-                           new String(serverFileUtils.read(new File(path, templates[i]))));
-	    } catch (Exception e) {}
-	}
-	return result;
+		// reads all templates from a path
+		// we use only the folder from the given file path
+		HashMap result = new HashMap();
+		if (path == null) return result;
+		if (!(path.isDirectory())) path = path.getParentFile();
+		if ((path == null) || (!(path.isDirectory()))) return result;
+		String[] templates = path.list();
+		int c;
+		for (int i = 0; i < templates.length; i++) {
+			if (templates[i].endsWith(".template")) 
+                try {
+					//System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
+					result.put(templates[i].substring(0, templates[i].length() - 9),
+							new String(serverFileUtils.read(new File(path, templates[i]))));
+				} catch (Exception e) {}
+		}
+		return result;
     }
 
     private File rewriteClassFile(File template) {
