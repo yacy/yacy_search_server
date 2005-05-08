@@ -194,11 +194,12 @@ public class SettingsAck_p {
         if (post.containsKey("generalsettings")) {
             String port = (String) post.get("port");
             String peerName = (String) post.get("peername");
+            httpdProxyHandler.isTransparentProxy = post.get("isTransparentProxy", "").equals("on");
             
             // check if peer name already exists
             yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
             
-            if (oldSeed == null) {
+            if ((oldSeed == null) || (env.getConfig("peerName","").equals(peerName))) {
                 // the name is new
                 boolean nameOK = (peerName.length() <= 80);
                 for (int i = 0; i < peerName.length(); i++) {
@@ -212,10 +213,12 @@ public class SettingsAck_p {
                     // set values
                     env.setConfig("port", port);
                     env.setConfig("peerName", peerName);
+                    env.setConfig("isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "true" : "false");                    
                     
                     prop.put("info", 12);//port or peername changed
                     prop.put("info_port", port);
                     prop.put("info_peerName", peerName);
+                    prop.put("info_isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "on" : "off");
                 }
             } else {
                 // deny change

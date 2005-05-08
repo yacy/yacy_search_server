@@ -53,7 +53,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -206,10 +209,30 @@ public final class httpd implements serverHandler {
         // we now know the HTTP version. depending on that, we read the header
 	httpHeader header;
 	String httpVersion = prop.getProperty("HTTP", "HTTP/0.9");
-	if (httpVersion.equals("HTTP/0.9"))
+	if (httpVersion.equals("HTTP/0.9")) {
 	    header = new httpHeader(reverseMappingCache);
-	else
+	} else {
 	    header = readHeader();
+        if ((httpdProxyHandler.isTransparentProxy) && header.containsKey("HOST")){
+            Integer dstPort;
+			String dstHost = (String) header.get("HOST");
+            
+            int idx = dstHost.indexOf(":");
+            if (idx != -1) {
+                dstPort = Integer.valueOf(dstHost.substring(idx+1));
+                dstHost = dstHost.substring(0,idx);                
+            } else {
+                dstPort = new Integer(80);
+            }
+
+            if (dstPort.intValue() == 80) {
+                InetAddress dstHostAddress = InetAddress.getByName(dstHost);
+                if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
+                    this.prop.setProperty("HOST",dstHost);
+                }
+            }
+        }            
+	}
 
 	// managing keep-alive: in HTTP/0.9 and HTTP/1.0 every connection is closed
 	// afterwards. In HTTP/1.1 (and above, in the future?) connections are

@@ -64,6 +64,8 @@ public class Settings_p {
 
 	prop.put("port", env.getConfig("port", "8080"));
 	prop.put("peerName", env.getConfig("peerName", "nameless"));
+    prop.put("isTransparentProxy", env.getConfig("isTransparentProxy", "false").equals("true") ? 1 : 0);
+    
 	// set values
 	String s;
 	int pos;

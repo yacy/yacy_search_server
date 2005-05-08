@@ -105,6 +105,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     public  static TreeMap blackListURLs = null;
     private static int timeout = 30000;
     private static boolean yacyTrigger = true;
+    
+    public static boolean isTransparentProxy = false;
+    
     public static boolean remoteProxyUse = false;
     public static String remoteProxyHost = "";
     public static int remoteProxyPort = -1;
@@ -112,6 +115,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     public static String[] remoteProxyNoProxyPatterns = null;
     private static final HashSet remoteProxyAllowProxySet = new HashSet();
     private static final HashSet remoteProxyDisallowProxySet = new HashSet();
+    
+    
     private static htmlFilterTransformer transformer = null;
     public  static final String userAgent = "yacy (" + httpc.systemOST +") yacy.net";
     private File   htRootPath = null;
