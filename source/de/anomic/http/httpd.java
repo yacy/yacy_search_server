@@ -262,13 +262,13 @@ public final class httpd implements serverHandler {
 	    if (allowProxy) {
 		if (proxyAccountBase64MD5 == null) proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
 		if ((proxyAccountBase64MD5.length() == 0) ||
-		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Authorization", "xxxxxx")).trim().substring(6))))) {
+		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Proxy-Authorization", "xxxxxx")).trim().substring(6))))) {
 		    // we are authorized or no authenticate requested
 		    if (proxyHandler != null) proxyHandler.doGet(prop, header, this.session.out);
 		} else {
 		    // ask for authenticate
 		    session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-				       "WWW-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+				       "Proxy-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
 				       serverCore.crlfString).getBytes());
 		    return serverCore.TERMINATE_CONNECTION;
 		}
@@ -335,13 +335,13 @@ public final class httpd implements serverHandler {
 	    if (allowProxy) {
 		if (proxyAccountBase64MD5 == null) proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
 		if ((proxyAccountBase64MD5.length() == 0) ||
-		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Authorization", "xxxxxx")).trim().substring(6))))) {
+		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Proxy-Authorization", "xxxxxx")).trim().substring(6))))) {
 		    // we are authorized or no authenticate requested
 		    if (proxyHandler != null) proxyHandler.doHead(prop, header, this.session.out);
 		} else {
 		    // ask for authenticate
 		    session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-				       "WWW-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+				       "Proxy-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
 				       serverCore.crlfString).getBytes());
 		    return serverCore.TERMINATE_CONNECTION;
 		}
@@ -413,13 +413,13 @@ public final class httpd implements serverHandler {
 	    if (allowProxy) {
 		if (proxyAccountBase64MD5 == null) proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
 		if ((proxyAccountBase64MD5.length() == 0) ||
-		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Authorization", "xxxxxx")).trim().substring(6))))) {
+		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Proxy-Authorization", "xxxxxx")).trim().substring(6))))) {
 		    // we are authorized or no authenticate requested
 		    if (proxyHandler != null) proxyHandler.doPost(prop, header, this.session.out, this.session.in);
 		} else {
 		    // ask for authenticate
 		    session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-				       "WWW-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+				       "Proxy-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
 				       serverCore.crlfString).getBytes());
 		    return serverCore.TERMINATE_CONNECTION;
 		}
@@ -483,13 +483,13 @@ public final class httpd implements serverHandler {
 	if (allowProxy) {
 	    if (proxyAccountBase64MD5 == null) proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
 	    if ((proxyAccountBase64MD5.length() == 0) ||
-		(proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Authorization", "xxxxxx")).trim().substring(6))))) {
+		(proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Proxy-Authorization", "xxxxxx")).trim().substring(6))))) {
 		// we are authorized or no authenticate requested
 		if (proxyHandler != null) proxyHandler.doConnect(prop, header, (InputStream) this.session.in, this.session.out);
 	    } else {
 		// ask for authenticate
 		session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-				   "WWW-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+				   "Proxy-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
 				   serverCore.crlfString).getBytes());
 	    }
 	} else {
