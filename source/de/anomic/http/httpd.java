@@ -201,6 +201,22 @@ public final class httpd implements serverHandler {
     	return header;
     }
 
+    private void transparentProxyHandling(httpHeader header) {        
+        if (!(httpdProxyHandler.isTransparentProxy && header.containsKey("HOST"))) return;
+        
+        String dstHost, dstHostSocket = (String) header.get("HOST");
+        
+        int idx = dstHostSocket.indexOf(":");
+        dstHost = (idx != -1) ? dstHostSocket.substring(0,idx).trim() : dstHostSocket.trim();
+ 
+        try {
+            InetAddress dstHostAddress = InetAddress.getByName(dstHost);
+            if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
+                this.prop.setProperty("HOST",dstHostSocket);
+            }                
+        } catch (Exception e) { }
+    }
+    
     public Boolean GET(String arg) throws IOException {
 	parseQuery(prop, arg);
 	prop.setProperty("METHOD", "GET");
@@ -213,25 +229,7 @@ public final class httpd implements serverHandler {
 	    header = new httpHeader(reverseMappingCache);
 	} else {
 	    header = readHeader();
-        if ((httpdProxyHandler.isTransparentProxy) && header.containsKey("HOST")){
-            Integer dstPort;
-			String dstHost = (String) header.get("HOST");
-            
-            int idx = dstHost.indexOf(":");
-            if (idx != -1) {
-                dstPort = Integer.valueOf(dstHost.substring(idx+1));
-                dstHost = dstHost.substring(0,idx);                
-            } else {
-                dstPort = new Integer(80);
-            }
-
-            if (dstPort.intValue() == 80) {
-                InetAddress dstHostAddress = InetAddress.getByName(dstHost);
-                if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
-                    this.prop.setProperty("HOST",dstHost);
-                }
-            }
-        }            
+        this.transparentProxyHandling(header);           
 	}
 
 	// managing keep-alive: in HTTP/0.9 and HTTP/1.0 every connection is closed
@@ -314,28 +312,9 @@ public final class httpd implements serverHandler {
 	String httpVersion = prop.getProperty("HTTP", "HTTP/0.9");
 	if (httpVersion.equals("HTTP/0.9")) {
 	    header = new httpHeader(reverseMappingCache);
-    }
-	else {
+    } else {
 	    header = readHeader();
-        if ((httpdProxyHandler.isTransparentProxy) && header.containsKey("HOST")){
-            Integer dstPort;
-            String dstHost = (String) header.get("HOST");
-            
-            int idx = dstHost.indexOf(":");
-            if (idx != -1) {
-                dstPort = Integer.valueOf(dstHost.substring(idx+1));
-                dstHost = dstHost.substring(0,idx);                
-            } else {
-                dstPort = new Integer(80);
-            }
-
-            if (dstPort.intValue() == 80) {
-                InetAddress dstHostAddress = InetAddress.getByName(dstHost);
-                if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
-                    this.prop.setProperty("HOST",dstHost);
-                }
-            }
-        } 
+        this.transparentProxyHandling(header);  
     }
 
 	// return multi-line message
@@ -411,25 +390,7 @@ public final class httpd implements serverHandler {
 	    header = new httpHeader(reverseMappingCache);
     } else {
 	    header = readHeader();
-        if ((httpdProxyHandler.isTransparentProxy) && header.containsKey("HOST")){
-            Integer dstPort;
-            String dstHost = (String) header.get("HOST");
-            
-            int idx = dstHost.indexOf(":");
-            if (idx != -1) {
-                dstPort = Integer.valueOf(dstHost.substring(idx+1));
-                dstHost = dstHost.substring(0,idx);                
-            } else {
-                dstPort = new Integer(80);
-            }
-
-            if (dstPort.intValue() == 80) {
-                InetAddress dstHostAddress = InetAddress.getByName(dstHost);
-                if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
-                    this.prop.setProperty("HOST",dstHost);
-                }
-            }
-        }         
+        this.transparentProxyHandling(header);         
     }
 
 	boolean persistent = (!((httpVersion.equals("HTTP/0.9")) || (httpVersion.equals("HTTP/1.0"))));

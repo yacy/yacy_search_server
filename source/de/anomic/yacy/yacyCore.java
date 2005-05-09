@@ -270,6 +270,7 @@ public class yacyCore {
         public Exception error;
         
         public publishThread(yacySeed seed) {
+            super("PublishSeed_" + seed.getName());
             this.seed = seed;
             this.added = 0;
             this.error = null;

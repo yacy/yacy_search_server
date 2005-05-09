@@ -61,13 +61,13 @@ public class yacySearch extends Thread {
 
     public yacySearch(Set wordhashes, int count, boolean global, yacySeed targetPeer,
 		      plasmaCrawlLURL urlManager, plasmaSearch searchManager, long duetime) {
-	this.wordhashes = wordhashes;
-	this.count = count;
-	this.global = global;
-	this.urlManager = urlManager;
-	this.searchManager = searchManager;
-	this.targetPeer = targetPeer;
-	this.links = -1;
+        this.wordhashes = wordhashes;
+        this.count = count;
+        this.global = global;
+        this.urlManager = urlManager;
+        this.searchManager = searchManager;
+        this.targetPeer = targetPeer;
+        this.links = -1;
         this.duetime = duetime;
     }
 
@@ -75,16 +75,16 @@ public class yacySearch extends Thread {
         String wh = "";
         Iterator i = wordhashes.iterator();
         while (i.hasNext()) wh = wh + (String) i.next();
-	this.links = yacyClient.search(wh, count, global, targetPeer, urlManager, searchManager, duetime);
+        this.links = yacyClient.search(wh, count, global, targetPeer, urlManager, searchManager, duetime);
         if (links != 0) {
             //yacyCore.log.logInfo("REMOTE SEARCH - remote peer '" + targetPeer.get("Name", "anonymous") + "' contributed " + links + " links for word hash " + wordhashes);
             yacyCore.seedDB.mySeed.incRI(links);
             yacyCore.seedDB.mySeed.incRU(links);
         }
     }
-
+    
     public int links() {
-	return this.links;
+        return this.links;
     }
 
     private static yacySeed[] selectPeers(Set wordhashes, int seedcount) {
@@ -121,57 +121,57 @@ public class yacySearch extends Thread {
     
     public static int search(Set querywords, plasmaCrawlLURL urlManager, plasmaSearch searchManager,
 			     int count, int targets, long waitingtime) {
-	// check own peer status
-	if ((yacyCore.seedDB.mySeed == null) || (yacyCore.seedDB.mySeed.getAddress() == null)) return 0;
-
-	// start delay control
-	long start = System.currentTimeMillis();
-
+        // check own peer status
+        if ((yacyCore.seedDB.mySeed == null) || (yacyCore.seedDB.mySeed.getAddress() == null)) return 0;
+        
+        // start delay control
+        long start = System.currentTimeMillis();
+        
         // set a duetime for clients
         long duetime = waitingtime - 4000; // subtract network traffic overhead, guessed 4 seconds
         if (duetime < 1000) duetime = 1000;
         
-	// prepare seed targets and threads
+        // prepare seed targets and threads
         Set wordhashes = plasmaSearch.words2hashes(querywords);
-	yacySeed[] targetPeers = selectPeers(wordhashes, targets);
-	if (targetPeers == null) return 0;
-	targets = targetPeers.length;
-	if (targets == 0) return 0;
-	yacySearch[] searchThreads = new yacySearch[targets];
-	for (int i = 0; i < targets; i++) {
-	    searchThreads[i]= new yacySearch(wordhashes, count, true, targetPeers[i],
-					     urlManager, searchManager, duetime);
-	    searchThreads[i].start();
-	    try {Thread.currentThread().sleep(20);} catch (InterruptedException e) {}
+        yacySeed[] targetPeers = selectPeers(wordhashes, targets);
+        if (targetPeers == null) return 0;
+        targets = targetPeers.length;
+        if (targets == 0) return 0;
+        yacySearch[] searchThreads = new yacySearch[targets];
+        for (int i = 0; i < targets; i++) {
+            searchThreads[i]= new yacySearch(wordhashes, count, true, targetPeers[i],
+                    urlManager, searchManager, duetime);
+            searchThreads[i].start();
+            try {Thread.currentThread().sleep(20);} catch (InterruptedException e) {}
             if ((System.currentTimeMillis() - start) > waitingtime) {
                 targets = i + 1;
                 break;
             }
-	}
+        }
 
         int c;
-	// wait until wanted delay passed or wanted result appeared
-	boolean anyIdle = true;
-	while ((anyIdle) && ((System.currentTimeMillis() - start) < waitingtime)) {
-	    // wait..
-	    try {Thread.currentThread().sleep(200);} catch (InterruptedException e) {}
-	    // check if all threads have been finished or results so far are enough
-	    c = 0;
-	    anyIdle = false;
-	    for (int i = 0; i < targets; i++) {
-		if (searchThreads[i].links() < 0) anyIdle = true; else c = c + searchThreads[i].links();
-	    }
+        // wait until wanted delay passed or wanted result appeared
+        boolean anyIdle = true;
+        while ((anyIdle) && ((System.currentTimeMillis() - start) < waitingtime)) {
+            // wait..
+            try {Thread.currentThread().sleep(200);} catch (InterruptedException e) {}
+            // check if all threads have been finished or results so far are enough
+            c = 0;
+            anyIdle = false;
+            for (int i = 0; i < targets; i++) {
+                if (searchThreads[i].links() < 0) anyIdle = true; else c = c + searchThreads[i].links();
+            }
             if ((c >= count * 3) && ((System.currentTimeMillis() - start) > (waitingtime * 2 / 3))) {
                 System.out.println("DEBUG yacySearch: c=" + c + ", count=" + count + ", waitingtime=" + waitingtime);
                 break; // we have enough
             }
             if (c >= count * 5) break;
-	}
+        }
 
-	// collect results
-	c = 0;
-	for (int i = 0; i < targets; i++) c = c + ((searchThreads[i].links() > 0) ? searchThreads[i].links() : 0);
-	return c;
+        // collect results
+        c = 0;
+        for (int i = 0; i < targets; i++) c = c + ((searchThreads[i].links() > 0) ? searchThreads[i].links() : 0);
+        return c;
     }
 
 }

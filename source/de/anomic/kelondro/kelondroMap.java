@@ -136,6 +136,7 @@ public class kelondroMap {
         boolean run;
         
         public writeQueue() {
+            super("kelondroMap:WriteQueue");
             run = true;
         }
         

@@ -45,9 +45,12 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
     <i>(hint: choose a name that appears on a web page that tells something about you, vistit the page, get the 'senior' status, and you can be found..)</i></td>
   </tr>
   <tr valign="top">
-    <td>Use as Transparent Proxy:</td>
+    <td>Transparent Proxy:</td>
     <td><input type="checkbox" name="isTransparentProxy" align="top" #(isTransparentProxy)#::checked#(/isTransparentProxy)#></td>
-    <td>With this you can specify if YaCy can be used as transparent proxy.</td>
+    <td>With this you can specify if YaCy can be used as transparent proxy.<br>
+    <i>Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:</i><br>     
+  	<small><code>iptables -t nat -A PREROUTING -p tcp -s 192.168.0.0/16 --dport 80 -j DNAT --to 192.168.0.1:#[port]#</code></small>
+  </td>
   </tr>  
   <tr>
     <td><input type="submit" name="generalsettings" value="submit"></td>

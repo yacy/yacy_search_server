@@ -247,6 +247,7 @@ public final class yacy {
                                                    sb,
                                                    30000 /*command max length incl. GET args*/,
 						   httpdLoglevel /*loglevel*/);
+        server.setName("httpd:"+port);
 		if (server == null) {
 		    serverLog.logFailure("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
 		} else {
