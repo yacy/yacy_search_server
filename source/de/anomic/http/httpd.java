@@ -204,17 +204,24 @@ public final class httpd implements serverHandler {
     private void transparentProxyHandling(httpHeader header) {        
         if (!(httpdProxyHandler.isTransparentProxy && header.containsKey("HOST"))) return;
         
-        String dstHost, dstHostSocket = (String) header.get("HOST");
-        
-        int idx = dstHostSocket.indexOf(":");
-        dstHost = (idx != -1) ? dstHostSocket.substring(0,idx).trim() : dstHostSocket.trim();
- 
-        try {
-            InetAddress dstHostAddress = InetAddress.getByName(dstHost);
-            if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
-                this.prop.setProperty("HOST",dstHostSocket);
-            }                
-        } catch (Exception e) { }
+        try {                
+            String dstHost, dstHostSocket = (String) header.get("HOST");
+            
+            int idx = dstHostSocket.indexOf(":");
+            dstHost = (idx != -1) ? dstHostSocket.substring(0,idx).trim() : dstHostSocket.trim();     
+            Integer dstPort = (idx != -1) ? Integer.valueOf(dstHostSocket.substring(idx+1)) : new Integer(80);
+            
+            if (dstPort.intValue() == 80) {
+                if (dstHost.endsWith(".yacy")) {
+                    this.prop.setProperty("HOST",dstHostSocket);
+                } else {
+                    InetAddress dstHostAddress = InetAddress.getByName(dstHost);
+                    if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
+                        this.prop.setProperty("HOST",dstHostSocket);
+                    }
+                }
+            }
+        } catch (Exception e) {}
     }
     
     public Boolean GET(String arg) throws IOException {
