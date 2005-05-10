@@ -416,3 +416,17 @@ ramCacheWiki    =     8192
 # may last for the word flush
 wordCacheMax = 10000
 maxWaitingWordFlush = 180
+
+# Specifies if yacy can be used as transparent http proxy.
+# 
+# Please note that you also have to reconfigure your firewall
+# before you can use yacy as transparent proxy. On linux this
+# can be done like this:
+#   iptables -t nat -A PREROUTING -p tcp -s 192.168.0.0/16 \
+#   --dport 80 -j DNAT --to 192.168.0.1:8080
+#
+# With this iptables filter listed above all http traffic that
+# comes from your private network (in this case 192.168.0.0)
+# and goes to any webserver listening on port 80 will be forwarded
+# by the firewall to yacy running on port 8080 (192.168.0.1:8080)
+isTransparentProxy=false
