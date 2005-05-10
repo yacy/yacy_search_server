@@ -1872,7 +1872,7 @@ cd ..
 	    c.exec("open " + host, false);
 	    c.exec("user " + account + " " + password, false);
 	    if (remotePath != null) {
-                remotePath.replace('\\', '/');
+            remotePath = remotePath.replace('\\', '/');
                 c.exec("cd " + remotePath, false);
             }
 	    c.exec("binary", false);

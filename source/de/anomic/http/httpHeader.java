@@ -209,7 +209,7 @@ public final class httpHeader extends TreeMap implements Map {
 	if (s.charAt(2) == ',') s = s.substring(0, 2) + s.substring(3); // ommit comma after day of week
 	if ((s.charAt(0) > '9') && (s.length() > 20) && (s.charAt(2) == ' ')) s = s.substring(3);
 	if (s.length() > 20) s = s.substring(0, 20).trim(); // truncate remaining, since that must be wrong
-        if (s.indexOf("Mrz") > 0) s.replaceAll("Mrz", "March");
+        if (s.indexOf("Mrz") > 0) s = s.replaceAll("Mrz", "March");
 	try {
 	    return EMLFormatter.parse(s);
 	} catch (java.text.ParseException e) {
