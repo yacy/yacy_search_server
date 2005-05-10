@@ -48,6 +48,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.File;
 import java.util.Hashtable;
 
 import de.anomic.server.serverFileUtils;
@@ -71,6 +75,10 @@ final class httpTemplate {
     private static final byte rrbr  = (byte)')';
     private static final byte[] aOpen  = {hash, lrbr};
     private static final byte[] aClose = {rrbr, hash};
+
+    private static final byte ps  = (byte)'%';
+    private static final byte[] iOpen  = {hash, ps};
+    private static final byte[] iClose = {ps, hash};
 
     private static boolean transferUntil(PushbackInputStream i, OutputStream o, byte[] pattern) throws IOException {
         // returns true if pattern was found; everything but the pattern has then be transfered so far
@@ -269,7 +277,27 @@ final class httpTemplate {
 		    serverFileUtils.copy(pis, out);
             	    return;
 		}
-	    }else{ //no match, but a single hash (output # + bb)
+	    }else if( (bb & 0xFF) == ps){ //include
+			String include = "";
+			String line = "";
+		    keyStream = new ByteArrayOutputStream(); //reset stream
+			if(transferUntil(pis, keyStream, iClose)){
+				try{
+					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream( new File("htroot", keyStream.toString()) )));
+					//Read the Include
+					while( (line = br.readLine()) != null ){
+						include+=line+de.anomic.server.serverCore.crlfString;
+					}
+				}catch(IOException e){
+					//file not found?
+					System.err.println("Include Error with file: "+keyStream.toString());
+					e.printStackTrace();
+				}
+				PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
+				writeTemplate(pis2, out, pattern, dflt, prefix);
+			}
+
+		}else{ //no match, but a single hash (output # + bb)
 		byte[] tmp=new byte[2];
 		tmp[0]=hash;
 		tmp[1]=(byte)bb;
