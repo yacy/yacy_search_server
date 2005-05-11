@@ -82,6 +82,13 @@ Changes take effect immediately</td>
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
+    <td class=small>Singletons Cache Size:</td>
+    <td class=small>#[singletonsSize]#</td>
+    <td class=small>
+    The Singletons Cache is a database that holds words that occurred only once.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
     <td class=small>Maximum number of Word Caches:</td>
     <td class=small><input name="wordCacheMax" type="text" size="20" maxlength="100" value="#[wordCacheMax]#"></td>
     <td class=small>
@@ -90,6 +97,7 @@ Changes take effect immediately</td>
     flushed to disc; this may last some minutes.
     </td>
   </tr>
+  <!--
   <tr valign="top" class="TableCellDark">
     <td class=small>Maximum waitingtime to flush word cache<br>during shut-down (seconds):</td>
     <td class=small><input name="maxWaitingWordFlush" type="text" size="6" maxlength="6" value="#[maxWaitingWordFlush]#"></td>
@@ -99,11 +107,13 @@ Changes take effect immediately</td>
     time are lost.
     </td>
   </tr>
+  -->
   <tr valign="top" class="TableCellLight">
     <td class=small colspan="3"><input type="submit" name="cacheSizeSubmit" value="Enter New Cache Size">
     Changes take effect immediately</td>
     </td>
   </tr>
+
 </form>
 </table>
 </p>

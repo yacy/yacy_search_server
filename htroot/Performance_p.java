@@ -146,6 +146,7 @@ public class Performance_p {
         prop.put("maxURLinWordCache", "" + switchboard.wordIndex.maxURLinWordCache());
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
         prop.put("wordCacheMax", switchboard.getConfig("wordCacheMax", "10000"));
+        prop.put("singletonsSize", switchboard.wordIndex.singletonsSize());
         
         // return rewrite values for templates
         return prop;

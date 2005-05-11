@@ -65,7 +65,7 @@ public class plasmaWordIndex {
     public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) throws IOException {
         this.databaseRoot = databaseRoot;
         plasmaWordIndexClassicDB fileDB = new plasmaWordIndexClassicDB(databaseRoot, log);
-        this.ramCache = new plasmaWordIndexCache(databaseRoot, fileDB, 1000000, log);
+        this.ramCache = new plasmaWordIndexCache(databaseRoot, fileDB, bufferkb, log);
     }
     
     public int maxURLinWordCache() {
@@ -76,6 +76,10 @@ public class plasmaWordIndex {
         return ramCache.wordCacheRAMSize();
     }
     
+    public int singletonsSize() {
+        return ramCache.singletonsSize();
+    }
+        
     public void setMaxWords(int maxWords) {
         ramCache.setMaxWords(maxWords);
     }

@@ -82,11 +82,11 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
 
-    public plasmaWordIndexCache(File databaseRoot, plasmaWordIndexInterface backend, long singletonBufferSize, serverLog log) {
+    public plasmaWordIndexCache(File databaseRoot, plasmaWordIndexInterface backend, int singletonbufferkb, serverLog log) {
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
         this.databaseRoot = databaseRoot;
-        this.singletonBufferSize = singletonBufferSize;
+        this.singletonBufferSize = singletonbufferkb * 1024;
         this.cache = new TreeMap();
 	this.hashScore = new kelondroMScoreCluster();
         this.hashDate  = new HashMap();
@@ -132,7 +132,7 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
         long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
         synchronized (cache) {
             //Iterator i = cache.entrySet().iterator();
-            Iterator i = hashScore.scores(false);
+            Iterator i = hashScore.scores(true);
             //Map.Entry entry;
             String wordHash;
             plasmaWordIndexEntryContainer container;
@@ -318,6 +318,10 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return cache.size();
     }
     
+    public int singletonsSize() {
+        return singletons.size();
+    }
+    
     public void setMaxWords(int maxWords) {
         this.maxWords = maxWords;
     }
@@ -341,7 +345,14 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
                         true);
     }
     
-    private int flushFromMem(String key) {
+    private int flushFromMem(String key, boolean reintegrate) {
+        // this method flushes indexes out from the ram to the disc.
+        // at first we check the singleton database and act accordingly
+        // if we we are to flush an index, but see also an entry in the singletons, we
+        // decide upn the 'reintegrate'-Flag:
+        // true: do not flush to disc, but re-Integrate the singleton to the RAM
+        // false: flush the singleton together with container to disc
+        
         plasmaWordIndexEntryContainer container = null;
         long time;
 	synchronized (cache) {
@@ -358,12 +369,13 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
         // now decide where to flush that container
         Object[] singleton = readSingleton(key);
         if (singleton == null) {
+            // not found in singletons
             if (container.size() == 1) {
-                // store to singleton
+                // it is a singleton: store to singleton
                 storeSingleton(key, container.getOne(), time);
                 return 1;
             } else {
-                // store to back-end
+                // store to back-end; this should be a rare case
                 return backend.addEntries(container, time);
             }
         } else {
@@ -376,17 +388,28 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     // it is superfluous to flush this, simple do nothing
                     return 0;
                 } else {
-                    // we flush to the backend, but remove the entry from the singletons
+                    // we flush to the backend, and the entry from the singletons
                     removeSingleton(key);
                     return backend.addEntries(container, java.lang.Math.max(time, oldTime));
                 }
             } else {
-                // now we have more than one entry,
+                // now we have more than one entry
                 // we must remove the key from the singleton database
                 removeSingleton(key);
-                // add this to the backend
+                // .. and put it to the container
                 container.add(oldEntry);
-                return backend.addEntries(container, java.lang.Math.max(time, oldTime));
+                if (reintegrate) {
+                    // put singleton together with container back to ram
+                    synchronized (cache) {
+                        cache.put(key, container);
+                        hashScore.setScore(key, container.size());
+                        hashDate.put(key, new Long(time));
+                    }
+                    return -1;
+                } else {
+                    // add this to the backend
+                    return backend.addEntries(container, java.lang.Math.max(time, oldTime));
+                }
             }
         }	
     }
@@ -441,31 +464,35 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     break;
                 }
                 //log.logDebug("flushing high-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
-                total += flushFromMem(key);
+                total += flushFromMem(key, false);
             }
             
             // flush singletons
-            while ((total < 200) && (hashScore.size() >= maxWords)) {
-                key = (String) hashScore.getMinObject();
+            Iterator i = hashScore.scores(true);
+            ArrayList al = new ArrayList();
+            while ((i.hasNext()) && (total < 200)) {
+                key = (String) i.next();
                 createTime = (Long) hashDate.get(key);
                 count = hashScore.getScore(key);
                 if (count > 1) {
                     //log.logDebug("flush of singleton-key " + key + ": count too high (count=" + count + ")");
                     break;
                 }
-                if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) < 9000)) {
-                    //log.logDebug("singleton-key " + key + " is too fresh, interruptiong flush (count=" + count + ", cachesize=" + cache.size()  + ", singleton-size=" + singletons.size() + ")");
-                    break;
+                if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) < 90000)) {
+                    //log.logDebug("singleton-key " + key + " is too fresh, interrupting flush (count=" + count + ", cachesize=" + cache.size()  + ", singleton-size=" + singletons.size() + ")");
+                    continue;
                 }
                 //log.logDebug("flushing singleton-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
-                total += flushFromMem(key);
+                al.add(key);
+                total++;
             }
+            for (int k = 0; k < al.size(); k++) flushFromMem((String) al.get(k), true);
         }
         return total;
     }
     
     public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty) {
-        flushFromMem(wordHash);
+        flushFromMem(wordHash, false);
         flushFromSingleton(wordHash);
 	return backend.getIndex(wordHash, deleteIfEmpty);
     }
@@ -486,13 +513,13 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	backend.deleteIndex(wordHash);
     }
 
-    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
-        flushFromMem(wordHash);
+    public synchronized int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
+        flushFromMem(wordHash, false);
         flushFromSingleton(wordHash);
         return backend.removeEntries(wordHash, urlHashes, deleteComplete);
     }
     
-    public int addEntries(plasmaWordIndexEntryContainer container, long creationTime) {
+    public synchronized int addEntries(plasmaWordIndexEntryContainer container, long creationTime) {
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
         flushFromMemToLimit();
 	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");

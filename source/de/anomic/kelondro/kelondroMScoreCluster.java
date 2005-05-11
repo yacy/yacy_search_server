@@ -44,6 +44,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.TreeMap;
+import java.util.Map;
 
 public class kelondroMScoreCluster {
     
@@ -243,21 +244,22 @@ public class kelondroMScoreCluster {
     }
     
     public Iterator scores(boolean up) {
-        return scores(up, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        if (up) return new simpleScoreIterator();
+        else return scores(false, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
     
     public Iterator scores(boolean up, int minScore, int maxScore) {
-        return new scoreIterator(up, minScore, maxScore);
+        return new komplexScoreIterator(up, minScore, maxScore);
     }
     
-    private class scoreIterator implements Iterator {
+    private class komplexScoreIterator implements Iterator {
 
         boolean up;
         TreeMap keyrefDBcopy;
         Object n;
         int min, max;
         
-        public scoreIterator(boolean up, int minScore, int maxScore) {
+        public komplexScoreIterator(boolean up, int minScore, int maxScore) {
             this.up = up;
             this.min = minScore;
             this.max = maxScore;
@@ -299,7 +301,31 @@ public class kelondroMScoreCluster {
         
     }
     
-     public static void main(String[] args) {
+    private class simpleScoreIterator implements Iterator {
+
+        Iterator ii;
+        Map.Entry entry;
+        
+        public simpleScoreIterator() {
+            ii = keyrefDB.entrySet().iterator();
+        }
+       
+        public boolean hasNext() {
+            return ii.hasNext();
+        }
+        
+        public Object next() {
+            entry = (Map.Entry) ii.next();
+            return entry.getValue();
+        }
+        
+        public void remove() {
+            ii.remove();
+        }
+        
+    }
+        
+    public static void main(String[] args) {
         System.out.println("Test for Score: start");
         kelondroMScoreCluster s = new kelondroMScoreCluster();
 	int c = 0;

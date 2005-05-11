@@ -101,16 +101,15 @@ public class yacySearch extends Thread {
         int c;
         while (i.hasNext()) {
             dhtEnum = yacyCore.dhtAgent.getDHTSeeds(true, (String) i.next());
-            c = seedcount;
-            while ((dhtEnum.hasMoreElements()) && (c > 0)) {
+            c = 0;
+            while ((dhtEnum.hasMoreElements()) && (c < seedcount)) {
                 seed = (yacySeed) dhtEnum.nextElement();
-                ranking.addScore(seed.hash, c);
-                c--;
+                ranking.addScore(seed.hash, c++);
             }
         }
         if (ranking.size() < seedcount) seedcount = ranking.size();
         yacySeed[] result = new yacySeed[seedcount];
-        Iterator e = ranking.scores(false);
+        Iterator e = ranking.scores(true);
         c = 0;
         while ((e.hasNext()) && (c < result.length))
             result[c++] = yacyCore.seedDB.getConnected((String) e.next());
