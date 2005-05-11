@@ -86,24 +86,25 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
 	// load config's from last save
 	if (configFile.exists()) configProps = loadHashMap(configFile); else configProps = new HashMap();
+	
+	synchronized (configProps) {
 
-        // remove all values from config that do not appear in init (out-dated settings)
-        Iterator i = configProps.keySet().iterator();
-        String key;
-        while (i.hasNext()) {
-            key = (String) i.next();
-            if (!(initProps.containsKey(key))) {
-                configProps.remove(key);
-            }
-        }
+	    // remove all values from config that do not appear in init (out-dated settings)
+	    Iterator i = configProps.keySet().iterator();
+	    String key;
+	    while (i.hasNext()) {
+		key = (String) i.next();
+		if (!(initProps.containsKey(key))) i.remove();
+	    }
 
-	// merge new props from init to config
-	// this is necessary for migration, when new properties are attached
-	initProps.putAll(configProps);
-	configProps = initProps;
-        
-	// save result; this may initially create a config file after initialization
-	saveConfig();
+	    // merge new props from init to config
+	    // this is necessary for migration, when new properties are attached
+	    initProps.putAll(configProps);
+	    configProps = initProps;
+	    
+	    // save result; this may initially create a config file after initialization
+	    saveConfig();
+	}
 
 	// other settings
 	authorization = new HashMap();
@@ -232,12 +233,15 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         newAction.setLog(log);
         newAction.setDescription(actionShortDescription, actionLongDescription);
         switchActions.put(actionName, newAction);
+	log.logInfo("Deployed Action '" + actionShortDescription + "', (" + switchActions.size() + " actions registered)");
     }
 
     public void undeployAction(String actionName) {
+	serverSwitchAction action = (serverSwitchAction) switchActions.get(actionName);
+	action.close();
 	switchActions.remove(actionName);
+	log.logInfo("Undeployed Action '" + action.getShortDescription() + "', (" + switchActions.size() + " actions registered)");
     }
-
 
     public void deployThread(String threadName, String threadShortDescription, String threadLongDescription, serverThread newThread, long startupDelay) {
         deployThread(threadName, threadShortDescription, threadLongDescription,
