@@ -87,8 +87,8 @@ public class transferURL {
             // return rewrite properties
             int more = switchboard.loadedURL.size() - sizeBefore;
             doublevalues = "" + (received - more);
-            switchboard.log.logInfo("Received " + received + " URL's from peer " + iam);
-            if ((received - more) > 0) switchboard.log.logError("Received " + doublevalues + " double URL's from peer " + iam);
+            switchboard.getLog().logInfo("Received " + received + " URL's from peer " + iam);
+            if ((received - more) > 0) switchboard.getLog().logError("Received " + doublevalues + " double URL's from peer " + iam);
             result = "ok";
         } else {
             result = "error_not_granted";

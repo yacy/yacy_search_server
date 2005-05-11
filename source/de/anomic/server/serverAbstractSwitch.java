@@ -48,6 +48,8 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -56,12 +58,14 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
     // configuration management
     private final File      configFile;
-    private Hashtable configProps;
+    private Map             configProps;
     private final String    configComment;
-    private final Hashtable authorization;
-    private String    rootPath;
+    private final HashMap   authorization;
+    private String          rootPath;
     private final TreeMap   workerThreads;
-    protected int serverJobs;
+    private final TreeMap   switchActions;
+    protected serverLog     log;
+    protected int           serverJobs;
     
     public serverAbstractSwitch(String rootPath, String initPath, String configPath) throws IOException {
 	// we initialize the switchboard with a property file,
@@ -77,20 +81,18 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	new File(configFile.getParent()).mkdir();
 
 	// predefine init's
-	Hashtable initProps;
-	if (initFile.exists()) initProps = loadHashtable(initFile); else initProps = new Hashtable();
+	Map initProps;
+	if (initFile.exists()) initProps = loadHashMap(initFile); else initProps = new HashMap();
 
 	// load config's from last save
-	if (configFile.exists()) configProps = loadHashtable(configFile); else configProps = new Hashtable();
+	if (configFile.exists()) configProps = loadHashMap(configFile); else configProps = new HashMap();
 
         // remove all values from config that do not appear in init (out-dated settings)
-        Enumeration e = configProps.keys();
+        Iterator i = configProps.keySet().iterator();
         String key;
-        while (e.hasMoreElements()) {
-            key = (String) e.nextElement();
-            //System.out.println("TESTING " + key);
+        while (i.hasNext()) {
+            key = (String) i.next();
             if (!(initProps.containsKey(key))) {
-                //System.out.println("MIGRATE: removing out-dated property '" + key + "'");
                 configProps.remove(key);
             }
         }
@@ -104,16 +106,28 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	saveConfig();
 
 	// other settings
-	authorization = new Hashtable();
+	authorization = new HashMap();
         
         // init thread control
         workerThreads = new TreeMap();
         
+        // init switch actions
+	switchActions = new TreeMap();
+
         // init busy state control
         serverJobs = 0;
     }
 
-    public static Hashtable loadHashtable(File f) {
+    // a logger for this switchboard
+    public void setLog(serverLog log) {
+	this.log = log;
+    }
+
+    public serverLog getLog() {
+	return log;
+    }
+
+    public static Map loadHashMap(File f) {
 	// load props
 	Properties prop = new Properties();
 	try {
@@ -125,15 +139,16 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	return (Hashtable) prop;
     }
 
-    public static void saveHashtable(File f, Hashtable props, String comment) throws IOException {
+    public static void saveMap(File f, Map props, String comment) throws IOException {
 	PrintWriter pw = new PrintWriter(new FileOutputStream(f));
 	pw.println("# " + comment);
-	Enumeration e = props.keys();
+	Iterator i = props.entrySet().iterator();
 	String key, value;
-	while (e.hasMoreElements()) {
-	    key = (String) e.nextElement();
-	    //value = (String) props.get(key);
-	    value = ((String) props.get(key)).replaceAll("\n", "\\\\n");
+	Map.Entry entry;
+	while (i.hasNext()) {
+	    entry  = (Map.Entry) i.next();
+	    key = (String) entry.getKey();
+	    value = ((String) entry.getValue()).replaceAll("\n", "\\\\n");
 	    pw.println(key + "=" + value);
 	}
 	pw.println("# EOF");
@@ -143,37 +158,95 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     public void setConfig(String key, long value) {
         setConfig(key, "" + value);
     }
-    
+
     public void setConfig(String key, String value) {
-	configProps.put(key, value);
+	// perform action before setting new value
+	Map.Entry entry;
+	serverSwitchAction action;
+	Iterator i = switchActions.entrySet().iterator();
+	while (i.hasNext()) {
+	    entry = (Map.Entry) i.next();
+	    action = (serverSwitchAction) entry.getValue();
+	    try {
+		action.doBevoreSetConfig(key, value);
+	    } catch (Exception e) {
+		log.logError("serverAction bevoreSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
+	    }
+	}
+
+	// set the value
+	String oldValue = (String) configProps.put(key, value);
 	saveConfig();
+
+	// perform actions afterwards
+	i = switchActions.entrySet().iterator();
+	while (i.hasNext()) {
+	    entry = (Map.Entry) i.next();
+	    action = (serverSwitchAction) entry.getValue();
+	    try {
+		action.doAfterSetConfig(key, value, oldValue);
+	    } catch (Exception e) {
+		log.logError("serverAction afterSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
+	    }
+	}
     }
 
     public String getConfig(String key, String dflt) {
+	// get the value
 	String s = (String) configProps.get(key);
+
+	// do action
+	Map.Entry entry;
+	serverSwitchAction action;
+	Iterator i = switchActions.entrySet().iterator();
+	while (i.hasNext()) {
+	    entry = (Map.Entry) i.next();
+	    action = (serverSwitchAction) entry.getValue();
+	    try {
+		action.doWhenGetConfig(key, s, dflt);
+	    } catch (Exception e) {
+		log.logError("serverAction whenGetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
+	    }
+	}
+
+	// return value
 	if (s == null) return dflt; else return s;
     }
 
-    public Enumeration configKeys() {
-	return configProps.keys();
+    public Iterator configKeys() {
+	return configProps.keySet().iterator();
     }
 
     private void saveConfig() {
 	try {
-	    saveHashtable(configFile, configProps, configComment);
+	    saveMap(configFile, configProps, configComment);
 	} catch (IOException e) {
 	    System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
 	}
     }
 
-    public void deployThread(String threadName, String threadShortDescription, String threadLongDescription, serverThread newThread, serverLog log, long startupDelay) {
+
+    // add/remove action listener
+    public void deployAction(String actionName, String actionShortDescription, String actionLongDescription,
+			     serverSwitchAction newAction) {
+        newAction.setLog(log);
+        newAction.setDescription(actionShortDescription, actionLongDescription);
+        switchActions.put(actionName, newAction);
+    }
+
+    public void undeployAction(String actionName) {
+	switchActions.remove(actionName);
+    }
+
+
+    public void deployThread(String threadName, String threadShortDescription, String threadLongDescription, serverThread newThread, long startupDelay) {
         deployThread(threadName, threadShortDescription, threadLongDescription,
-                     newThread, log, startupDelay,
+                     newThread, startupDelay,
                      Long.parseLong(getConfig(threadName + "_idlesleep" , "novalue")), 
                      Long.parseLong(getConfig(threadName + "_busysleep" , "novalue")));
     }
 
-    public void deployThread(String threadName, String threadShortDescription, String threadLongDescription, serverThread newThread, serverLog log, long startupDelay, long initialIdleSleep, long initialBusySleep) {
+    public void deployThread(String threadName, String threadShortDescription, String threadLongDescription, serverThread newThread, long startupDelay, long initialIdleSleep, long initialBusySleep) {
         if (newThread.isAlive()) throw new RuntimeException("undeployed threads must not live; they are started as part of the deployment");
         newThread.setStartupSleep(startupDelay);
         long sleep;

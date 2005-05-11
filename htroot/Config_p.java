@@ -46,7 +46,7 @@
 // javac -classpath .:../Classes Config_p.java
 // if the shell's current path is HTROOT
 
-import java.util.Enumeration;
+import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
@@ -58,7 +58,7 @@ public class Config_p {
 	// return variable that accumulates replacements
 	serverObjects prop = new serverObjects();
 	int count=0;
-	Enumeration keys = env.configKeys();
+	Iterator keys = env.configKeys();
 	String key="";
 	
 	//change a Key
@@ -70,8 +70,8 @@ public class Config_p {
 		}
 	}
 
-	while(keys.hasMoreElements()){
-		key=(String)keys.nextElement();
+	while(keys.hasNext()){
+		key=(String)keys.next();
 		prop.put("options_"+count+"_key", key);
 		prop.put("options_"+count+"_value", env.getConfig(key, "ERROR"));
 		count++;

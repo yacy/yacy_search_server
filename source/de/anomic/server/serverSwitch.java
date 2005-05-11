@@ -53,15 +53,24 @@ import java.util.Iterator;
 public interface serverSwitch {
     // the root path for the application
     public String getRootPath();
-    
-    // the switchboard can be used to set and read properties
-    public void setConfig(String key, String value);
-    public String getConfig(String key, String dflt);
-    public Enumeration configKeys();
+
+    // a logger for this switchboard
+    public void setLog(serverLog log);
+    public serverLog getLog();
+
+    // a switchboard can have action listener
+    // these listeners are hooks for numerous methods below
+    public void deployAction(String actionName,
+			     String actionShortDescription,
+			     String actionLongDescription,
+                             serverSwitchAction action); 
+    public void undeployAction(String actionName); 
 
     // the switchboard can manage worker threads
-    public void deployThread(String threadName, String threadShortDescription, String threadLongDescription,
-                             serverThread newThread, serverLog log,
+    public void deployThread(String threadName,
+			     String threadShortDescription,
+			     String threadLongDescription,
+                             serverThread newThread,
                              long startupDelay, long initialIdleSleep, long initialBusySleep);
     public serverThread getThread(String threadName);
     public void setThreadSleep(String threadName, long idleMillis, long busyMillis);
@@ -69,6 +78,11 @@ public interface serverSwitch {
     public void terminateAllThreads(boolean waitFor);
     public Iterator /*of serverThread-Names (String)*/ threadNames();
     
+    // the switchboard can be used to set and read properties
+    public void setConfig(String key, String value);
+    public String getConfig(String key, String dflt);
+    public Iterator configKeys();
+
     // the switchboard also shall maintain a job list
     // jobs can be queued by submitting a job object
     // to work off a queue job, use deQueue, which is meant to

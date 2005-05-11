@@ -360,7 +360,8 @@ public final class plasmaHTCache {
     public static boolean isText(httpHeader response) {
 	Object ct = response.get("Content-Type");
 	if (ct == null) return false;
-	return ((String)ct).toUpperCase().startsWith("TEXT");
+	String t = ((String)ct).toLowerCase();
+	return ((t.startsWith("text")) || (t.equals("application/xhtml+xml")));
     }
 
     public static boolean noIndexingURL(String urlString) {

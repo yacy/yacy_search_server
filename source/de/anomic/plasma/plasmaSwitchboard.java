@@ -170,7 +170,6 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     public  plasmaHTCache          cacheManager;
     public  plasmaCrawlLoader      cacheLoader;
     public  LinkedList             processStack = new LinkedList();
-    public  serverLog              log;
     public  messageBoard           messageDB;
     public  wikiBoard              wikiDB;
     public  String                 remoteProxyHost;
@@ -191,9 +190,9 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     public plasmaSwitchboard(String rootPath, String initPath, String configPath) throws IOException {
 	super(rootPath, initPath, configPath);
         
-        // set loglevel
+        // set loglevel and log
 	int loglevel = Integer.parseInt(getConfig("plasmaLoglevel", "2"));
-	log = new serverLog("PLASMA", loglevel);
+	setLog(new serverLog("PLASMA", loglevel));
         
 	// load values from configs
 	plasmaPath   = new File(rootPath, getConfig("dbPath", "DATABASE"));
@@ -308,22 +307,22 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         
         // deploy threads
         deployThread("90_cleanup", "Cleanup", "simple cleaning process for monitoring information" ,
-                     new serverInstantThread(this, "cleanupJob", "cleanupJobSize"), log, 10000); // all 5 Minutes
+                     new serverInstantThread(this, "cleanupJob", "cleanupJobSize"), 10000); // all 5 Minutes
         deployThread("80_dequeue", "Indexing Dequeue", "thread that creates database entries from scraped web content and performes indexing" ,
-                     new serverInstantThread(this, "deQueue", "queueSize"), log, 10000);
+                     new serverInstantThread(this, "deQueue", "queueSize"), 10000);
         deployThread("70_cachemanager", "Proxy Cache Enqueue", "job takes new proxy files from RAM stack, stores them, and hands over to the Indexing Stack",
-                     new serverInstantThread(cacheManager, "job", "size"), log, 10000);
+                     new serverInstantThread(cacheManager, "job", "size"), 10000);
         deployThread("60_globalcrawl", "Global Crawl", "thread that performes a single crawl/indexing step of a web page for global crawling",
-                     new serverInstantThread(this, "globalCrawlJob", "globalCrawlJobSize"), log, 30000);
+                     new serverInstantThread(this, "globalCrawlJob", "globalCrawlJobSize"), 30000);
         deployThread("50_localcrawl", "Local Crawl", "thread that performes a single crawl step from the local crawl queue",
-                     new serverInstantThread(this, "localCrawlJob", "localCrawlJobSize"), log, 10000);
+                     new serverInstantThread(this, "localCrawlJob", "localCrawlJobSize"), 10000);
         deployThread("40_peerseedcycle", "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account",
-                     new serverInstantThread(yc, "publishSeedList", null), yc.log, 180000);
+                     new serverInstantThread(yc, "publishSeedList", null), 180000);
         deployThread("30_peerping", "YaCy Core", "this is the p2p-control and peer-ping task",
-                     new serverInstantThread(yc, "peerPing", null), yc.log, 2000);
+                     new serverInstantThread(yc, "peerPing", null), 2000);
         indexDistribution = new distributeIndex(100 /*indexCount*/, 8000, 1 /*peerCount*/);
         deployThread("20_dhtdistribution", "DHT Distribution (currently by juniors only)", "selection, transfer and deletion of index entries that are not searched on your peer, but on others",
-                     new serverInstantThread(indexDistribution, "job", null), log, 120000);
+                     new serverInstantThread(indexDistribution, "job", null), 120000);
     }
     
     private static String ppRamString(int bytes) {
