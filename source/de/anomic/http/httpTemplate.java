@@ -282,16 +282,20 @@ final class httpTemplate {
 			String line = "";
 		    keyStream = new ByteArrayOutputStream(); //reset stream
 			if(transferUntil(pis, keyStream, iClose)){
+			String filename = keyStream.toString();
+			if(filename.startsWith( Character.toString((char)lbr) ) && filename.endsWith( Character.toString((char)rbr) )){ //simple pattern for filename
+				filename= new String(replacePattern( filename.substring(1, filename.length()-1), pattern, dflt));
+			}
 				try{
-					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream( new File("htroot", keyStream.toString()) )));
+					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream( new File("htroot", filename) )));
 					//Read the Include
 					while( (line = br.readLine()) != null ){
 						include+=line+de.anomic.server.serverCore.crlfString;
 					}
 				}catch(IOException e){
 					//file not found?
-					System.err.println("Include Error with file: "+keyStream.toString());
-					e.printStackTrace();
+					System.err.println("Include Error with file: "+filename);
+					//e.printStackTrace();
 				}
 				PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
 				writeTemplate(pis2, out, pattern, dflt, prefix);
