@@ -103,8 +103,8 @@ import de.anomic.yacy.yacyCore;
 public final class yacy {
     
     // static objects
-    private static final String vString = "0.373";
-    private static final String vDATE   = "20050512";
+    private static final String vString = "@REPL_VERSION@";
+    private static final String vDATE   = "@REPL_DATE@";
     private static final String copyright = "[ YACY Proxy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
         
