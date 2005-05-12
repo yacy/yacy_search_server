@@ -4,7 +4,7 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 28.06.2003
+// Last major change: 28.06.2003
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@
 // Contributions and changes to the program code must be marked as such.
 
 
-// you must compile this file with
+// You must compile this file with
 // javac -classpath .:../Classes MessageSend_p.java
 // if the shell's current path is HTROOT
 
@@ -79,8 +79,8 @@ public class MessageSend_p {
 	String message = post.get("message", "");
             
 	if (message.length() == 0) {
-	    // open a editor page for the message
-	    // first ask if the other peer is online, and also what kind of dokument it accepts
+	    // open an editor page for the message
+	    // first ask if the other peer is online, and also what kind of document it accepts
 	    HashMap result = yacyClient.permissionMessage(hash);
             //System.out.println("DEBUG: permission request result = " + result.toString());
 	    String peerName;

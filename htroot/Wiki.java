@@ -41,7 +41,7 @@
 
 // Contains contributions from Alexandier Schier [AS]
 
-// you must compile this file with
+// You must compile this file with
 // javac -classpath .:../classes Wiki.java
 // if the shell's current path is HTROOT
 

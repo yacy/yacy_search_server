@@ -39,7 +39,7 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-// you must compile this file with
+// You must compile this file with
 // javac -classpath .:../../Classes hello.java
 // if the shell's current path is HTROOT
 
