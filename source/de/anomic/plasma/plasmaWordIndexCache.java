@@ -415,6 +415,7 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
     
     private boolean flushFromSingleton(String key) {
+	// this should only be called if the singleton shall be deleted or returned in an index entity
         Object[] singleton = readSingleton(key);
         if (singleton == null) {
             return false;
@@ -443,52 +444,60 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	    return 0;
 	}
 
+        int count = 0;
 	//serverLog.logDebug("PLASMA INDEXING", "flushSpecific: hashScore.size=" + hashScore.size() + ", cache.size=" + cache.size());
-        int total = 0;
         synchronized (hashScore) {
             String key;
-            int count;
             Long createTime;
-            
-            // flush high-scores
-            while ((total < 100) && (hashScore.size() >= maxWords)) {
-                key = (String) hashScore.getMaxObject();
-                createTime = (Long) hashDate.get(key);
-                count = hashScore.getScore(key);
-                if (count < 5) {
-                    log.logWarning("flushing of high-key " + key + " not appropriate (too less entries, count=" + count + "): increase cache size");
-                    break;
-                }
-                if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) < 9000)) {
-                    //log.logDebug("high-key " + key + " is too fresh, interrupting flush (count=" + count + ", cachesize=" + cache.size()  + ", singleton-size=" + singletons.size() + ")");
-                    break;
-                }
-                //log.logDebug("flushing high-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
-                total += flushFromMem(key, false);
-            }
-            
-            // flush singletons
+
+            // generate flush list
             Iterator i = hashScore.scores(true);
-            ArrayList al = new ArrayList();
-            while ((i.hasNext()) && (total < 200)) {
+            TreeMap[] al = new TreeMap[hashScore.getMaxScore() + 1];
+	    for (int k = 0; k < al.length; k++) al[k] = new TreeMap(); // by create time ordered hash-list
+            while (i.hasNext()) {
+		// get the entry properties
                 key = (String) i.next();
                 createTime = (Long) hashDate.get(key);
                 count = hashScore.getScore(key);
-                if (count > 1) {
-                    //log.logDebug("flush of singleton-key " + key + ": count too high (count=" + count + ")");
-                    break;
-                }
-                if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) < 90000)) {
-                    //log.logDebug("singleton-key " + key + " is too fresh, interrupting flush (count=" + count + ", cachesize=" + cache.size()  + ", singleton-size=" + singletons.size() + ")");
-                    continue;
-                }
-                //log.logDebug("flushing singleton-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
-                al.add(key);
-                total++;
+		
+		// put it into a specific ohl
+		al[count].put(createTime, key);
+		//System.out.println("COUNT FOR KEY " + key + ": " + count);
             }
-            for (int k = 0; k < al.size(); k++) flushFromMem((String) al.get(k), true);
+
+	    // print statistics
+	    for (int k = 1; k < al.length; k++) log.logDebug("FLUSH-LIST " + k + ": " + al[k].size() + " entries");
+
+            // flush singletons
+	    i = al[1].entrySet().iterator();
+	    Map.Entry entry;
+	    while (i.hasNext()) {
+		entry = (Map.Entry) i.next();
+		key = (String) entry.getValue();
+		createTime = (Long) entry.getKey();
+		if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) > 90000)) {
+		    //log.logDebug("flushing singleton-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
+		    count += flushFromMem((String) key, true);
+		}
+	    }
+
+            // flush high-scores
+            for (int k = al.length - 1; k >= 2; k--) {
+                i = al[k].entrySet().iterator();
+                while (i.hasNext()) {
+                    entry = (Map.Entry) i.next();
+                    key = (String) entry.getValue();
+                    createTime = (Long) entry.getKey();
+                    if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) > (600000/k))) {
+                        //log.logDebug("flushing high-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
+                        count += flushFromMem(key, false);
+                    }
+                    if (count > 2000) return count;
+                }
+            }
+            
         }
-        return total;
+        return count;
     }
     
     public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty) {
@@ -521,7 +530,7 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
     
     public synchronized int addEntries(plasmaWordIndexEntryContainer container, long creationTime) {
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
-        flushFromMemToLimit();
+        if (cache.size() >= this.maxWords) flushFromMemToLimit();
 	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");
 
 	// put new words into cache

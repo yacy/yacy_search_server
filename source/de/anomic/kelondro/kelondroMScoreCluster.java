@@ -211,6 +211,16 @@ public class kelondroMScoreCluster {
         }
     }
     
+    public int getMaxScore() {
+        if (refkeyDB.size() == 0) return -1;
+	return (int) ((((Long) keyrefDB.lastKey()).longValue() & 0xFFFFFFFF00000000L) >> 32);
+    }
+
+    public int getMinScore() {
+        if (refkeyDB.size() == 0) return -1;
+	return (int) ((((Long) keyrefDB.firstKey()).longValue() & 0xFFFFFFFF00000000L) >> 32);
+    }
+
     public Object getMaxObject() {
         if (refkeyDB.size() == 0) return null;
         //return getScores(1, false)[0];

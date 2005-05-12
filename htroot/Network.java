@@ -167,7 +167,7 @@ public class Network {
                     boolean complete = post.containsKey("ip");
                     Enumeration e = null;
                     switch (page) {
-                        case 1 : e = yacyCore.seedDB.seedsSortedConnected(post.get("order", "down").equals("up"), post.get("sort", "ICount")); break;
+                        case 1 : e = yacyCore.seedDB.seedsSortedConnected(post.get("order", "down").equals("up"), post.get("sort", "LCount")); break;
                         case 2 : e = yacyCore.seedDB.seedsSortedDisconnected(post.get("order", "up").equals("up"), post.get("sort", "LastSeen")); break;
                         case 3 : e = yacyCore.seedDB.seedsSortedPotential(post.get("order", "up").equals("up"), post.get("sort", "LastSeen")); break;
                     }
