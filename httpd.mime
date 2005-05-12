@@ -1,5 +1,5 @@
 ###
-### This is the MIME file type matching configuration for the YACY Server
+### This is the MIME file type matching configuration for the YaCy server
 ###
 
 # Extension = MIME type
@@ -58,6 +58,10 @@ sh      = text/plain
 shtml   = text/html
 stream  = audio/x-qt-stream
 swf     = application/x-shockwave-flash
+sxw     = application/OOo-writer 
+sxc     = application/OOo-calc 
+sxd     = application/OOo-draw 
+sxi     = application/OOo-impress 
 tar     = application/tar
 tex     = application/x-tex
 tgz     = application/tar
