@@ -131,9 +131,9 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
         long messageTime = System.currentTimeMillis() + 5000;
         long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
         synchronized (cache) {
-            //Iterator i = cache.entrySet().iterator();
-            Iterator i = hashScore.scores(true);
-            //Map.Entry entry;
+            Iterator i = cache.entrySet().iterator();
+            //Iterator i = hashScore.scores(true);
+            Map.Entry entry;
             String wordHash;
             plasmaWordIndexEntryContainer container;
             long creationTime;
@@ -141,12 +141,12 @@ public class plasmaWordIndexCache implements plasmaWordIndexInterface {
             byte[][] row = new byte[5][];
             while (i.hasNext()) {
                 // get entries
-                //entry = (Map.Entry) i.next();
-                wordHash = (String) i.next();
-                //wordHash = (String) entry.getKey();
+                entry = (Map.Entry) i.next();
+                //wordHash = (String) i.next();
+                wordHash = (String) entry.getKey();
                 creationTime = getCreationTime(wordHash);
-                container = (plasmaWordIndexEntryContainer) cache.get(wordHash);
-                //container = (plasmaWordIndexEntryContainer) entry.getValue();
+                //container = (plasmaWordIndexEntryContainer) cache.get(wordHash);
+                container = (plasmaWordIndexEntryContainer) entry.getValue();
 
                 // put entries on stack
                 if (container != null) {

@@ -351,7 +351,7 @@ public final class yacy {
         
         // send 'wget' to web interface
         httpHeader requestHeader = new httpHeader();
-        requestHeader.put("REMOTE-SHUTDOWN", "realm=" + encodedPassword); // for http-authentify
+        requestHeader.put("Authorization", "realm=" + encodedPassword); // for http-authentify
         try {
             httpc con = httpc.getInstance("localhost", port, 10000, false);
             httpc.response res = con.GET("Steering.html?shutdown=", requestHeader);
