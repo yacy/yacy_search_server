@@ -176,15 +176,15 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 			       String cookie) throws IOException {
 	try {
 	    out.write(("HTTP/1.1 " + retcode + " OK\r\n").getBytes());
-	    out.write(("Server: AnomicHTTPD (www.anomic.de)\r\n").getBytes());
-	    out.write(("Date: " + httpc.dateString(httpc.nowDate()) + "\r\n").getBytes());
+	    out.write((httpHeader.SERVER + ": AnomicHTTPD (www.anomic.de)\r\n").getBytes());
+	    out.write((httpHeader.DATE + ": " + httpc.dateString(httpc.nowDate()) + "\r\n").getBytes());
 	    if (expires != null) out.write(("Expires: " + httpc.dateString(expires) + "\r\n").getBytes()); 
-	    out.write(("Content-type: " + conttype /* "image/gif", "text/html" */ + "\r\n").getBytes());
-	    out.write(("Last-modified: " + httpc.dateString(moddate) + "\r\n").getBytes()); 
-	    out.write(("Content-length: " + contlength +"\r\n").getBytes());
-	    out.write(("Pragma: no-cache\r\n").getBytes());
+	    out.write((httpHeader.CONTENT_TYPE + ": " + conttype /* "image/gif", "text/html" */ + "\r\n").getBytes());
+	    out.write((httpHeader.LAST_MODIFIED + ": " + httpc.dateString(moddate) + "\r\n").getBytes()); 
+	    out.write((httpHeader.CONTENT_LENGTH + ": " + contlength +"\r\n").getBytes());
+	    out.write((httpHeader.PRAGMA + ": no-cache\r\n").getBytes());
 	    //    out.write(("Accept-ranges: bytes\r\n").getBytes());
-	    if (cookie != null) out.write(("Set-Cookie: " + cookie + "\r\n").getBytes());
+	    if (cookie != null) out.write((httpHeader.SET_COOKIE + ": " + cookie + "\r\n").getBytes());
 	    out.write(("\r\n").getBytes());
 	    out.flush();
 	} catch (Exception e) {
@@ -214,7 +214,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 
     public void doResponse(Properties conProp, httpHeader requestHeader, OutputStream out, PushbackInputStream body) throws IOException {
 
-	String userAgent = (String) requestHeader.get("USER-AGENT");
+	String userAgent = (String) requestHeader.get(httpHeader.USER_AGENT);
 	if (userAgent == null) userAgent = "";
 	userAgent = userAgent.trim().toLowerCase();
 	//userAgent = "portalmmm n400i"; // debug
@@ -240,11 +240,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         if ((path.endsWith("_p.html")) &&
             ((adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "")).length() != 0)) {
             // authentication required
-            String auth = (String) requestHeader.get("Authorization");
+            String auth = (String) requestHeader.get(httpHeader.AUTHORIZATION);
             if (auth == null) {
                 // no authorization given in response. Ask for that
                 out.write(("HTTP/1.1 401 log-in required\r\n").getBytes());
-                out.write(("WWW-Authenticate: Basic realm=\"admin log-in\"\r\n").getBytes());
+                out.write((httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"admin log-in\"\r\n").getBytes());
                 out.write(("\r\n").getBytes());
                 out.flush();
                 return;
@@ -258,7 +258,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 //try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {} // add a delay to make brute-force harder
 		serverCore.bfHost.put(clientIP, "sleep");
                 out.write(("HTTP/1.1 401 log-in required\r\n").getBytes());
-                out.write(("WWW-Authenticate: Basic realm=\"admin log-in\"\r\n").getBytes());
+                out.write((httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"admin log-in\"\r\n").getBytes());
                 out.write(("\r\n").getBytes());
                 out.flush();
                 //System.out.println("httpd bfHosts=" + serverCore.bfHost.toString());
@@ -273,12 +273,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 	    // no args here, maybe a POST with multipart extension
 	    int length;
 	    //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
-	    if ((method.equals("POST")) &&
-		(requestHeader.containsKey("CONTENT-LENGTH"))) {
+	    if ((method.equals(httpHeader.METHOD_POST)) &&
+		(requestHeader.containsKey(httpHeader.CONTENT_LENGTH))) {
 		// if its a POST, it can be either multipart or as args in the body
-		length = Integer.parseInt((String) requestHeader.get("CONTENT-LENGTH"));
-		if ((requestHeader.containsKey("CONTENT-TYPE")) &&
-		    (((String) requestHeader.get("CONTENT-TYPE")).toLowerCase().startsWith("multipart"))) {
+		length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
+		if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
+		    (((String) requestHeader.get(httpHeader.CONTENT_TYPE)).toLowerCase().startsWith("multipart"))) {
 		    // parse multipart
                     HashMap files = httpd.parseMultipart(requestHeader, args, body, length);
                     // integrate these files into the args
@@ -396,7 +396,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             if (tp.containsKey("AUTHENTICATE")) {
                                 String account = tp.get("AUTHENTICATE", "");
                                 out.write(("HTTP/1.1 401 log-in required\r\n").getBytes());
-                                out.write(("WWW-Authenticate: Basic realm=\"" + account + "\"\r\n").getBytes());
+                                out.write((httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"" + account + "\"\r\n").getBytes());
                                 out.write(("\r\n").getBytes());
                                 out.flush();
                                 return;
@@ -453,7 +453,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 	    System.out.println("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'\r\n");
 	}
 	out.flush();
-        if (!(requestHeader.get("Connection", "close").equals("keep-alive"))) {
+        if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
           // wait a little time until everything closes so that clients can read from the streams/sockets
           try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
         }

@@ -273,8 +273,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         path            =       "$Path" "=" value
         domain          =       "$Domain" "=" value
         */
-        if (requestHeader.containsKey("Cookie")) {
-            Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getMultiple("Cookie")};
+        if (requestHeader.containsKey(httpHeader.COOKIE)) {
+            Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getMultiple(httpHeader.COOKIE)};
             switchboard.outgoingCookies.put(targethost, entry);
         }
     }
@@ -295,8 +295,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                         |       "Secure"
                         |       "Version" "=" 1*DIGIT
         */
-        if (respondHeader.containsKey("Set-Cookie")) {
-            Object[] entry = new Object[]{new Date(), targetclient, respondHeader.getMultiple("Set-Cookie")};
+        if (respondHeader.containsKey(httpHeader.SET_COOKIE)) {
+            Object[] entry = new Object[]{new Date(), targetclient, respondHeader.getMultiple(httpHeader.SET_COOKIE)};
             switchboard.incomingCookies.put(serverhost, entry);
         }
     }
@@ -367,7 +367,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         // set another userAgent, if not yellowlisted
         if ((yellowList != null) && (!(yellowList.contains(domain(hostlow))))) {
             // change the User-Agent
-            requestHeader.put("User-Agent", userAgent);
+            requestHeader.put(httpHeader.USER_AGENT, userAgent);
         }
         
         // set a scraper and a htmlFilter
@@ -424,14 +424,14 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             try {
                 // replace date field in old header by actual date, this is according to RFC
-                cachedResponseHeader.put("Date", httpc.dateString(httpc.nowDate()));
+                cachedResponseHeader.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
                 
                 // maybe the content length is missing
-                if (!(cachedResponseHeader.containsKey("CONTENT-LENGTH")))
-                    cachedResponseHeader.put("CONTENT-LENGTH", Long.toString(cacheFile.length()));
+                if (!(cachedResponseHeader.containsKey(httpHeader.CONTENT_LENGTH)))
+                    cachedResponseHeader.put(httpHeader.CONTENT_LENGTH, Long.toString(cacheFile.length()));
                 
                 // check if we can send a 304 instead the complete content
-                if (requestHeader.containsKey("IF-MODIFIED-SINCE")) {
+                if (requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) {
                     // conditional request: freshness of cache for that condition was already
                     // checked within shallUseCache(). Now send only a 304 response
                     log.logInfo("CACHE HIT/304 " + cacheFile.toString());
@@ -666,10 +666,10 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // return header
             httpHeader header = new httpHeader();
-            header.put("Date", httpc.dateString(httpc.nowDate()));
-            header.put("Content-type", "text/html");
-            header.put("Content-length", "" + o.size());
-            header.put("Pragma", "no-cache");
+            header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
+            header.put(httpHeader.CONTENT_TYPE, "text/html");
+            header.put(httpHeader.CONTENT_LENGTH, "" + o.size());
+            header.put(httpHeader.PRAGMA, "no-cache");
             
             // write the array to the client
             respondHeader(respond, origerror, header);
@@ -710,7 +710,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 	// set another userAgent, if not yellowlisted
 	if (!(yellowList.contains(domain(hostlow)))) {
 	    // change the User-Agent
-	    requestHeader.put("User-Agent", userAgent);
+	    requestHeader.put(httpHeader.USER_AGENT, userAgent);
 	}
 	
         // resolve yacy and yacyh domains
@@ -766,7 +766,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 	// set another userAgent, if not yellowlisted
 	if (!(yellowList.contains(domain(host).toLowerCase()))) {
 	    // change the User-Agent
-	    requestHeader.put("User-Agent", userAgent);
+	    requestHeader.put(httpHeader.USER_AGENT, userAgent);
 	}
 	
         // resolve yacy and yacyh domains
@@ -967,8 +967,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 
 	// prepare header
 	//header.put("Server", "AnomicHTTPD (www.anomic.de)");
-	if (!(header.containsKey("date"))) header.put("Date", httpc.dateString(httpc.nowDate()));
-	if (!(header.containsKey("content-type"))) header.put("Content-type", "text/html"); // fix this
+	if (!(header.containsKey(httpHeader.DATE))) header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
+	if (!(header.containsKey(httpHeader.CONTENT_TYPE))) header.put(httpHeader.CONTENT_TYPE, "text/html"); // fix this
 
 	StringBuffer headerStringBuffer = new StringBuffer(200);
     
@@ -1005,10 +1005,10 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 
     private void textMessage(OutputStream out, String body) throws IOException {
 	out.write(("HTTP/1.1 200 OK\r\n").getBytes());
-	out.write(("Server: AnomicHTTPD (www.anomic.de)\r\n").getBytes());
-	out.write(("Date: " + httpc.dateString(httpc.nowDate()) + "\r\n").getBytes());
-	out.write(("Content-type: text/plain\r\n").getBytes());
-	out.write(("Content-length: " + body.length() +"\r\n").getBytes());
+	out.write((httpHeader.SERVER + ": AnomicHTTPD (www.anomic.de)\r\n").getBytes());
+	out.write((httpHeader.DATE + ": " + httpc.dateString(httpc.nowDate()) + "\r\n").getBytes());
+	out.write((httpHeader.CONTENT_TYPE + ": text/plain\r\n").getBytes());
+	out.write((httpHeader.CONTENT_LENGTH + ": " + body.length() +"\r\n").getBytes());
 	out.write(("\r\n").getBytes());
 	out.flush();
 	out.write(body.getBytes());

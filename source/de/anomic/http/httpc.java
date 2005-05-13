@@ -586,36 +586,36 @@ public final class httpc {
 	if (header == null) header = new httpHeader();
 
         // set some standard values
-        if (!(header.containsKey(http.HEADER_ACCEPT)))
-            header.put(http.HEADER_ACCEPT, "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5");
-        if (!(header.containsKey(http.HEADER_ACCEPT_CHARSET)))
-            header.put(http.HEADER_ACCEPT_CHARSET, "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
-        if (!(header.containsKey(http.HEADER_ACCEPT_LANGUAGE)))
-            header.put(http.HEADER_ACCEPT_LANGUAGE, "en-us,en;q=0.5");
-        if (!(header.containsKey(http.HEADER_KEEP_ALIVE)))
-            header.put(http.HEADER_KEEP_ALIVE, "300");
+        if (!(header.containsKey(httpHeader.ACCEPT)))
+            header.put(httpHeader.ACCEPT, "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5");
+        if (!(header.containsKey(httpHeader.ACCEPT_CHARSET)))
+            header.put(httpHeader.ACCEPT_CHARSET, "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
+        if (!(header.containsKey(httpHeader.ACCEPT_LANGUAGE)))
+            header.put(httpHeader.ACCEPT_LANGUAGE, "en-us,en;q=0.5");
+        if (!(header.containsKey(httpHeader.KEEP_ALIVE)))
+            header.put(httpHeader.KEEP_ALIVE, "300");
         
 	// set user agent. The user agent is only set if the value does not yet exists.
 	// this gives callers the opportunity, to change the user agent themselves, and
 	// it will not be changed.
-	if (!(header.containsKey(http.HEADER_USER_AGENT))) header.put(http.HEADER_USER_AGENT, userAgent);
+	if (!(header.containsKey(httpHeader.USER_AGENT))) header.put(httpHeader.USER_AGENT, userAgent);
 
 	// set the host attribute. This is in particular necessary, if we contact another proxy
 	// the host is mandatory, if we use HTTP/1.1
-	if (!(header.containsKey(http.HEADER_HOST))) {
+	if (!(header.containsKey(httpHeader.HOST))) {
 	    if (this.remoteProxyUse)
-		header.put(http.HEADER_HOST, savedRemoteHost);
+		header.put(httpHeader.HOST, savedRemoteHost);
 	    else
-		header.put(http.HEADER_HOST, this.host);
+		header.put(httpHeader.HOST, this.host);
 	}
 
-	if (!(header.containsKey(http.HEADER_CONNECTION))) {
-	    header.put(http.HEADER_CONNECTION, "close");
+	if (!(header.containsKey(httpHeader.CONNECTION))) {
+	    header.put(httpHeader.CONNECTION, "close");
 	}
 
 	// advertise a little bit...
-	if ((!(header.containsKey(http.HEADER_REFERER))) || (((String) header.get(http.HEADER_REFERER)).trim().length() == 0))  {
-            header.put(http.HEADER_REFERER,
+	if ((!(header.containsKey(httpHeader.REFERER))) || (((String) header.get(httpHeader.REFERER)).trim().length() == 0))  {
+            header.put(httpHeader.REFERER,
                        (((System.currentTimeMillis() >> 10) & 1) == 0) ?
                        "http://www.anomic.de" :
                        "http://www.yacy.net/yacy");
@@ -623,30 +623,30 @@ public final class httpc {
 
 	// stimulate zipping or not
 	// we can unzip, and we will return it always as unzipped, unless not wanted
-	if (header.containsKey(http.HEADER_ACCEPT_ENCODING)) {
-	    String encoding = (String) header.get(http.HEADER_ACCEPT_ENCODING);
+	if (header.containsKey(httpHeader.ACCEPT_ENCODING)) {
+	    String encoding = (String) header.get(httpHeader.ACCEPT_ENCODING);
 	    if (zipped) {
 		if (encoding.indexOf("gzip") < 0) {
 		    // add the gzip encoding
 		    //System.out.println("!!! adding gzip encoding");
-		    header.put(http.HEADER_ACCEPT_ENCODING, "gzip,deflate" + ((encoding.length() == 0) ? "" : (";" + encoding)));
+		    header.put(httpHeader.ACCEPT_ENCODING, "gzip,deflate" + ((encoding.length() == 0) ? "" : (";" + encoding)));
 		}
 	    } else {
 		int pos  = encoding.indexOf("gzip");
 		if (pos >= 0) {
 		    // remove the gzip encoding
 		    //System.out.println("!!! removing gzip encoding");
-		    header.put(http.HEADER_ACCEPT_ENCODING, encoding.substring(0, pos) + encoding.substring(pos + 4));
+		    header.put(httpHeader.ACCEPT_ENCODING, encoding.substring(0, pos) + encoding.substring(pos + 4));
 		}
 	    }
 	} else {
-	    if (zipped) header.put(http.HEADER_ACCEPT_ENCODING, "gzip,deflate");
+	    if (zipped) header.put(httpHeader.ACCEPT_ENCODING, "gzip,deflate");
 	}
 
 	//header = new httpHeader(); header.put("Host", this.host); // debug
 
 	// send request
-	if ((this.remoteProxyUse) && (!(method.equals(http.METHOD_CONNECT))))
+	if ((this.remoteProxyUse) && (!(method.equals(httpHeader.METHOD_CONNECT))))
 	    path = "http://" + this.savedRemoteHost + path;
 	serverCore.send(clientOutput, method + " " + path + " HTTP/1.0"); // if set to HTTP/1.1, servers give time-outs?
 
@@ -687,7 +687,7 @@ public final class httpc {
         //serverLog.logDebug("HTTPC", handle + " requested GET '" + path + "', time = " + (System.currentTimeMillis() - handle));
 	try {
 	    boolean zipped = shallTransportZipped(path);
-	    send(http.METHOD_GET, path, requestHeader, zipped);
+	    send(httpHeader.METHOD_GET, path, requestHeader, zipped);
 	    response r = new response(zipped);
             //serverLog.logDebug("HTTPC", handle + " returned GET '" + path + "', time = " + (System.currentTimeMillis() - handle));
             return r;
@@ -698,7 +698,7 @@ public final class httpc {
 
     public response HEAD(String path, httpHeader requestHeader) throws IOException {
 	try {
-	    send(http.METHOD_HEAD, path, requestHeader, false);
+	    send(httpHeader.METHOD_HEAD, path, requestHeader, false);
 	    return new response(false);
 	    // in this case the caller should not read the response body,
 	    // since there is none...
@@ -709,9 +709,9 @@ public final class httpc {
 
     public response POST(String path, httpHeader requestHeader, InputStream ins) throws IOException {
 	try {
-	    send(http.METHOD_POST, path, requestHeader, false);
+	    send(httpHeader.METHOD_POST, path, requestHeader, false);
 	    // if there is a body to the call, we would have a CONTENT-LENGTH tag in the requestHeader
-	    String cl = (String) requestHeader.get(http.HEADER_CONTENT_LENGTH);
+	    String cl = (String) requestHeader.get(httpHeader.CONTENT_LENGTH);
             int len, c;
             byte[] buffer = new byte[512];
 	    if (cl != null) {
@@ -727,7 +727,7 @@ public final class httpc {
                     clientOutput.write(buffer, 0, c);
                     len += c;
                 }
-                requestHeader.put(http.HEADER_CONTENT_LENGTH, "" + len);
+                requestHeader.put(httpHeader.CONTENT_LENGTH, "" + len);
             }
             clientOutput.flush();
 	    return new response(false);
@@ -738,7 +738,7 @@ public final class httpc {
 
     public response CONNECT(String host, int port, httpHeader requestHeader) throws IOException {
 	try {
-	    send(http.METHOD_CONNECT, host + ":" + port, requestHeader, false);
+	    send(httpHeader.METHOD_CONNECT, host + ":" + port, requestHeader, false);
 	    return new response(false);
 	} catch (SocketException e) {
 	    throw new IOException(e.getMessage());
@@ -750,18 +750,18 @@ public final class httpc {
 	// make shure, the header has a boundary information like
 	// CONTENT-TYPE=multipart/form-data; boundary=----------0xKhTmLbOuNdArY
 	if (requestHeader == null) requestHeader = new httpHeader();
-	String boundary = (String) requestHeader.get(http.HEADER_CONTENT_TYPE);
+	String boundary = (String) requestHeader.get(httpHeader.CONTENT_TYPE);
 	if (boundary == null) {
 	    // create a boundary
 	    boundary = "multipart/form-data; boundary=----------" + java.lang.System.currentTimeMillis();
-	    requestHeader.put(http.HEADER_CONTENT_TYPE, boundary);
+	    requestHeader.put(httpHeader.CONTENT_TYPE, boundary);
 	}
 	// extract the boundary string
 	int pos = boundary.toUpperCase().indexOf("BOUNDARY=");
 	if (pos < 0) {
 	    // again, create a boundary
 	    boundary = "multipart/form-data; boundary=----------" + java.lang.System.currentTimeMillis();
-	    requestHeader.put(http.HEADER_CONTENT_TYPE, boundary);
+	    requestHeader.put(httpHeader.CONTENT_TYPE, boundary);
 	    pos = boundary.indexOf("boundary=");
 	}
 	boundary = "--" + boundary.substring(pos + "boundary=".length());
@@ -806,10 +806,10 @@ public final class httpc {
         byte[] body = buf.toByteArray();
         //System.out.println("DEBUG: PUT BODY=" + new String(body));
         // size of that body
-	requestHeader.put(http.HEADER_CONTENT_LENGTH, "" + body.length);
+	requestHeader.put(httpHeader.CONTENT_LENGTH, "" + body.length);
 	// send the header
 	//System.out.println("header=" + requestHeader);
-	send(http.METHOD_POST, path, requestHeader, false);
+	send(httpHeader.METHOD_POST, path, requestHeader, false);
 	// send the body
 	//System.out.println("body=" + buf.toString());
 	serverCore.send(clientOutput, body);
@@ -877,7 +877,7 @@ do upload
                                    httpHeader requestHeader) throws IOException {
     	if (requestHeader == null) requestHeader = new httpHeader();
     	if ((user != null) && (password != null) && (user.length() != 0)) {
-    	    requestHeader.put(http.HEADER_AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
+    	    requestHeader.put(httpHeader.AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
     	}
         
         httpc con = null;
@@ -935,7 +935,7 @@ do upload
         
     	if (requestHeader == null) requestHeader = new httpHeader();
     	if ((user != null) && (password != null) && (user.length() != 0)) {
-    	    requestHeader.put(http.HEADER_AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
+    	    requestHeader.put(httpHeader.AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
     	}
         
     	httpc con = null;
@@ -1003,7 +1003,7 @@ do upload
         // generate request header
         httpHeader requestHeader = new httpHeader();
     	if ((user != null) && (password != null) && (user.length() != 0)) {
-    	    requestHeader.put(http.HEADER_AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
+    	    requestHeader.put(httpHeader.AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
     	}
         // parse query
         

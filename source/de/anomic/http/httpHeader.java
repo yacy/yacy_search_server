@@ -71,6 +71,45 @@ import de.anomic.server.serverLog;
 
 public final class httpHeader extends TreeMap implements Map {
 
+    
+    /* =============================================================
+     * Constants defining http header names
+     * ============================================================= */    
+    public static final String ACCEPT = "Accept";
+    public static final String ACCEPT_CHARSET = "Accept-Charset";
+    public static final String ACCEPT_LANGUAGE = "Accept-Language";
+    public static final String KEEP_ALIVE = "Keep-Alive";
+    public static final String USER_AGENT = "User-Agent";
+    public static final String HOST = "Host";
+    public static final String CONNECTION = "Connection";
+    public static final String REFERER = "Referer";
+    public static final String ACCEPT_ENCODING = "Accept-Encoding";
+    public static final String CONTENT_LENGTH = "CONTENT-LENGTH";
+    public static final String CONTENT_TYPE = "CONTENT-TYPE";
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
+    public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
+    public static final String PROXY_AUTHENTICATE = "Proxy-Authenticate";
+    public static final String DATE = "Date";
+    public static final String SERVER = "Server";
+    public static final String LAST_MODIFIED = "Last-modified";
+    public static final String PRAGMA = "Pragma";
+    public static final String SET_COOKIE = "Set-Cookie";
+    public static final String IF_MODIFIED_SINCE = "IF-MODIFIED-SINCE";
+    public static final String COOKIE = "Cookie";
+    public static final String EXPIRES = "Expires";
+    public static final String CONTENT_ENCODING = "CONTENT-ENCODING";
+
+    /* =============================================================
+     * Constants defining http methods
+     * ============================================================= */
+    public static final String METHOD_GET = "GET";
+    public static final String METHOD_HEAD = "HEAD";
+    public static final String METHOD_POST = "POST";
+    public static final String METHOD_CONNECT = "CONNECT";    
+    
+    
+    
     private final HashMap reverseMappingCache;
 
     private static Collator insensitiveCollator = Collator.getInstance(Locale.US);
@@ -200,6 +239,7 @@ public final class httpHeader extends TreeMap implements Map {
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
     private static SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
     private static SimpleDateFormat EMLFormatter     = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US);
+
     
     public static Date parseHTTPDate(String s) {
 	if ((s == null) || (s.length() < 9)) return new Date();
@@ -239,23 +279,23 @@ public final class httpHeader extends TreeMap implements Map {
     }
     
     public String mime() {
-        return (String) get("CONTENT-TYPE", "application/octet-stream");
+        return (String) get(httpHeader.CONTENT_TYPE, "application/octet-stream");
     }
     
     public Date date() {
-        return headerDate("Date");
+        return headerDate(httpHeader.DATE);
     }
     
     public Date expires() {
-        return headerDate("Expires");
+        return headerDate(httpHeader.EXPIRES);
     }
     
     public Date lastModified() {
-        return headerDate("Last-modified");
+        return headerDate(httpHeader.LAST_MODIFIED);
     }
     
     public Date ifModifiedSince() {
-        return headerDate("IF-MODIFIED-SINCE");
+        return headerDate(httpHeader.IF_MODIFIED_SINCE);
     }
     
     public long age() {
@@ -264,9 +304,9 @@ public final class httpHeader extends TreeMap implements Map {
     }
     
     public long contentLength() {
-        if (containsKey("CONTENT-LENGTH")) {
+        if (containsKey(httpHeader.CONTENT_LENGTH)) {
             try {
-                return Long.parseLong((String) get("CONTENT-LENGTH"));
+                return Long.parseLong((String) get(httpHeader.CONTENT_LENGTH));
             } catch (NumberFormatException e) {
                 return -1;
             }
@@ -276,8 +316,8 @@ public final class httpHeader extends TreeMap implements Map {
     }
 
     public boolean gzip() {
-        return ((containsKey("CONTENT-ENCODING")) &&
-		(((String) get("CONTENT-ENCODING")).toUpperCase().startsWith("GZIP")));
+        return ((containsKey(httpHeader.CONTENT_ENCODING)) &&
+		(((String) get(httpHeader.CONTENT_ENCODING)).toUpperCase().startsWith("GZIP")));
     }
     /*
     public static void main(String[] args) {
