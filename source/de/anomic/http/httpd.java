@@ -202,10 +202,10 @@ public final class httpd implements serverHandler {
     }
 
     private void transparentProxyHandling(httpHeader header) {        
-        if (!(httpdProxyHandler.isTransparentProxy && header.containsKey("HOST"))) return;
+        if (!(httpdProxyHandler.isTransparentProxy && header.containsKey(http.HEADER_HOST))) return;
         
         try {                
-            String dstHost, dstHostSocket = (String) header.get("HOST");
+            String dstHost, dstHostSocket = (String) header.get(http.HEADER_HOST);
             
             int idx = dstHostSocket.indexOf(":");
             dstHost = (idx != -1) ? dstHostSocket.substring(0,idx).trim() : dstHostSocket.trim();     
@@ -213,11 +213,11 @@ public final class httpd implements serverHandler {
             
             if (dstPort.intValue() == 80) {
                 if (dstHost.endsWith(".yacy")) {
-                    this.prop.setProperty("HOST",dstHostSocket);
+                    this.prop.setProperty(http.HEADER_HOST,dstHostSocket);
                 } else {
                     InetAddress dstHostAddress = InetAddress.getByName(dstHost);
                     if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
-                        this.prop.setProperty("HOST",dstHostSocket);
+                        this.prop.setProperty(http.HEADER_HOST,dstHostSocket);
                     }
                 }
             }
@@ -226,7 +226,7 @@ public final class httpd implements serverHandler {
     
     public Boolean GET(String arg) throws IOException {
 	parseQuery(prop, arg);
-	prop.setProperty("METHOD", "GET");
+	prop.setProperty("METHOD", http.METHOD_GET);
 	prop.setProperty("CLIENTIP", clientIP);
 	
         // we now know the HTTP version. depending on that, we read the header
@@ -244,14 +244,14 @@ public final class httpd implements serverHandler {
 	// persistent by default, but closed with the "Connection: close"
 	// property.
 	boolean persistent = (!((httpVersion.equals("HTTP/0.9")) || (httpVersion.equals("HTTP/1.0"))));
-	String connection = prop.getProperty("Connection", "close").toLowerCase();
+	String connection = prop.getProperty(http.HEADER_CONNECTION, "close").toLowerCase();
 	if (connection.equals("close")) persistent = false;
 	if (connection.equals("keep-alive")) persistent = true;
 	    
 	//System.out.println("HEADER: " + header.toString());
 
 	// return multi-line message
-	if (prop.getProperty("HOST").equals(virtualHost)) {
+	if (prop.getProperty(http.HEADER_HOST).equals(virtualHost)) {
 	    // pass to server
 	    if (allowServer) {
 		if (serverAccountBase64MD5 == null) serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
@@ -260,11 +260,11 @@ public final class httpd implements serverHandler {
 		    if (fileHandler == null) fileHandler  = new httpdFileHandler(this.switchboard);
 		    fileHandler.doGet(prop, header, this.session.out);
                 } else {
-                    String auth = (String) header.get("Authorization");
+                    String auth = (String) header.get(http.HEADER_AUTHORIZATION);
                     if (auth == null) {
                         // authorization requested, but no authorizeation given in header. Ask for authenticate:
                         session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
-                        "WWW-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+                        http.HEADER_WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
                         serverCore.crlfString).getBytes());
                         return serverCore.TERMINATE_CONNECTION;
                     } else if (serverAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(auth.trim().substring(6)))) {
@@ -275,7 +275,7 @@ public final class httpd implements serverHandler {
                         // wrong password given: ask for authenticate again
                         serverLog.logInfo("HTTPD", "Wrong log-in for account 'server' in HTTPD.GET " + prop.getProperty("PATH") + " from IP " + clientIP);
                         session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
-                        "WWW-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+                                http.HEADER_WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
                         serverCore.crlfString).getBytes());
                         return serverCore.TERMINATE_CONNECTION;
                     }
@@ -290,13 +290,13 @@ public final class httpd implements serverHandler {
 	    if (allowProxy) {
 		if (proxyAccountBase64MD5 == null) proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
 		if ((proxyAccountBase64MD5.length() == 0) ||
-		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Proxy-Authorization", "xxxxxx")).trim().substring(6))))) {
+		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get(http.HEADER_PROXY_AUTHORIZATION, "xxxxxx")).trim().substring(6))))) {
 		    // we are authorized or no authenticate requested
 		    if (proxyHandler != null) proxyHandler.doGet(prop, header, this.session.out);
 		} else {
 		    // ask for authenticate
 		    session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-				       "Proxy-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+				       http.HEADER_PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
 				       serverCore.crlfString).getBytes());
 		    return serverCore.TERMINATE_CONNECTION;
 		}
@@ -311,7 +311,7 @@ public final class httpd implements serverHandler {
 
     public Boolean HEAD(String arg) throws IOException {
 	parseQuery(prop,arg);
-	prop.setProperty("METHOD", "HEAD");
+	prop.setProperty("METHOD", http.METHOD_HEAD);
 	prop.setProperty("CLIENTIP", clientIP);
 	
 	// we now know the HTTP version. depending on that, we read the header
@@ -325,7 +325,7 @@ public final class httpd implements serverHandler {
     }
 
 	// return multi-line message
-	if (prop.getProperty("HOST").equals(virtualHost)) {
+	if (prop.getProperty(http.HEADER_HOST).equals(virtualHost)) {
 	// pass to server
             if (allowServer) {
                 if (serverAccountBase64MD5 == null) serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
@@ -334,11 +334,11 @@ public final class httpd implements serverHandler {
                     if (fileHandler == null) fileHandler  = new httpdFileHandler(this.switchboard);
                     fileHandler.doHead(prop, header, this.session.out);
                 } else {
-                    String auth = (String) header.get("Authorization");
+                    String auth = (String) header.get(http.HEADER_AUTHORIZATION);
                     if (auth == null) {
                         // authorization requested, but no authorizeation given in header. Ask for authenticate:
                         session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
-                        "WWW-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+                        http.HEADER_WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
                         serverCore.crlfString).getBytes());
                         return serverCore.TERMINATE_CONNECTION;
                     } else if (serverAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(auth.trim().substring(6)))) {
@@ -349,7 +349,7 @@ public final class httpd implements serverHandler {
                         // wrong password given: ask for authenticate again
                         serverLog.logInfo("HTTPD", "Wrong log-in for account 'server' in HTTPD.HEAD " + prop.getProperty("PATH") + " from IP " + clientIP);
                         session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
-                        "WWW-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+                        http.HEADER_WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
                         serverCore.crlfString).getBytes());
                         return serverCore.TERMINATE_CONNECTION;
                     }
@@ -365,13 +365,13 @@ public final class httpd implements serverHandler {
 	    if (allowProxy) {
 		if (proxyAccountBase64MD5 == null) proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
 		if ((proxyAccountBase64MD5.length() == 0) ||
-		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Proxy-Authorization", "xxxxxx")).trim().substring(6))))) {
+		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get(http.HEADER_PROXY_AUTHORIZATION, "xxxxxx")).trim().substring(6))))) {
 		    // we are authorized or no authenticate requested
 		    if (proxyHandler != null) proxyHandler.doHead(prop, header, this.session.out);
 		} else {
 		    // ask for authenticate
 		    session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-				       "Proxy-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+				       http.HEADER_PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
 				       serverCore.crlfString).getBytes());
 		    return serverCore.TERMINATE_CONNECTION;
 		}
@@ -387,7 +387,7 @@ public final class httpd implements serverHandler {
 
     public Boolean POST(String arg) throws IOException {
 	parseQuery(prop, arg);
-	prop.setProperty("METHOD", "POST");
+	prop.setProperty("METHOD", http.METHOD_POST);
 	prop.setProperty("CLIENTIP", clientIP);
 
 	// we now know the HTTP version. depending on that, we read the header
@@ -406,7 +406,7 @@ public final class httpd implements serverHandler {
 	if (connection.equals("keep-alive")) persistent = true;
 
         // return multi-line message
-	if (prop.getProperty("HOST").equals(virtualHost)) {
+	if (prop.getProperty(http.HEADER_HOST).equals(virtualHost)) {
 	    // pass to server
 	    if (allowServer) {
 		if (serverAccountBase64MD5 == null) serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
@@ -415,11 +415,11 @@ public final class httpd implements serverHandler {
                     if (fileHandler == null) fileHandler  = new httpdFileHandler(this.switchboard);
                     fileHandler.doPost(prop, header, this.session.out, this.session.in);
                 } else {
-                    String auth = (String) header.get("Authorization");
+                    String auth = (String) header.get(http.HEADER_AUTHORIZATION);
                     if (auth == null) {
                         // ask for authenticate
                         session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
-                        "WWW-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+                        http.HEADER_WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
                         serverCore.crlfString).getBytes());
                         return serverCore.TERMINATE_CONNECTION;
                     } else if (serverAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(auth.trim().substring(6)))) {
@@ -430,7 +430,7 @@ public final class httpd implements serverHandler {
                         // wrong password given: ask for authenticate again
                         serverLog.logInfo("HTTPD", "Wrong log-in for account 'server' in HTTPD.POST " + prop.getProperty("PATH") + " from IP " + clientIP);
                         session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
-                        "WWW-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+                        http.HEADER_WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
                         serverCore.crlfString).getBytes());
                         return serverCore.TERMINATE_CONNECTION;
                     }
@@ -445,13 +445,13 @@ public final class httpd implements serverHandler {
 	    if (allowProxy) {
 		if (proxyAccountBase64MD5 == null) proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
 		if ((proxyAccountBase64MD5.length() == 0) ||
-		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Proxy-Authorization", "xxxxxx")).trim().substring(6))))) {
+		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get(http.HEADER_PROXY_AUTHORIZATION, "xxxxxx")).trim().substring(6))))) {
 		    // we are authorized or no authenticate requested
 		    if (proxyHandler != null) proxyHandler.doPost(prop, header, this.session.out, this.session.in);
 		} else {
 		    // ask for authenticate
 		    session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-				       "Proxy-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+				       http.HEADER_PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
 				       serverCore.crlfString).getBytes());
 		    return serverCore.TERMINATE_CONNECTION;
 		}
@@ -515,13 +515,13 @@ public final class httpd implements serverHandler {
 	if (allowProxy) {
 	    if (proxyAccountBase64MD5 == null) proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
 	    if ((proxyAccountBase64MD5.length() == 0) ||
-		(proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Proxy-Authorization", "xxxxxx")).trim().substring(6))))) {
+		(proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get(http.HEADER_PROXY_AUTHORIZATION, "xxxxxx")).trim().substring(6))))) {
 		// we are authorized or no authenticate requested
 		if (proxyHandler != null) proxyHandler.doConnect(prop, header, (InputStream) this.session.in, this.session.out);
 	    } else {
 		// ask for authenticate
 		session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-				   "Proxy-Authenticate: Basic realm=\"log-in\"" + serverCore.crlfString +
+				   http.HEADER_PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
 				   serverCore.crlfString).getBytes());
 	    }
 	} else {
@@ -708,7 +708,7 @@ public final class httpd implements serverHandler {
 	// we parse a multipart message and put results into the properties
 	// find/identify boundary marker
 	//System.out.println("DEBUG parseMultipart = <<" + new String(buffer) + ">>");
-	String s = (String) header.get("CONTENT-TYPE");
+	String s = (String) header.get(http.HEADER_CONTENT_TYPE);
 	if (s == null) return null;
 	int q;
 	int p = s.toLowerCase().indexOf("boundary=");
