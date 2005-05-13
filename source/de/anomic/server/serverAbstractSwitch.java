@@ -75,7 +75,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	// the only attribute that will always be read from the init is the
 	// file name of the config file
         this.rootPath = rootPath;
-	configComment = "this is an automaticaly generated file, updated by serverAbstractSwitch and initialized by " + initPath;
+	configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
 	File initFile = new File(rootPath, initPath);
 	configFile = new File(rootPath, configPath); //propertiesFile(config);
 	new File(configFile.getParent()).mkdir();

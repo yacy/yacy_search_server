@@ -39,7 +39,6 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-
 // You must compile this file with
 // javac -classpath .:../classes CacheAdmin_p.java
 // if the shell's current path is HTROOT
