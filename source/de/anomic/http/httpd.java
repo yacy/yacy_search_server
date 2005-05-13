@@ -251,7 +251,7 @@ public final class httpd implements serverHandler {
 	//System.out.println("HEADER: " + header.toString());
 
 	// return multi-line message
-	if (prop.getProperty(httpHeader.HOST).equals(virtualHost)) {
+	if (prop.getProperty("HOST").equals(virtualHost)) {
 	    // pass to server
 	    if (allowServer) {
 		if (serverAccountBase64MD5 == null) serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
@@ -325,7 +325,7 @@ public final class httpd implements serverHandler {
     }
 
 	// return multi-line message
-	if (prop.getProperty(httpHeader.HOST).equals(virtualHost)) {
+	if (prop.getProperty("HOST").equals(virtualHost)) {
 	// pass to server
             if (allowServer) {
                 if (serverAccountBase64MD5 == null) serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
@@ -406,7 +406,7 @@ public final class httpd implements serverHandler {
 	if (connection.equals("keep-alive")) persistent = true;
 
         // return multi-line message
-	if (prop.getProperty(httpHeader.HOST).equals(virtualHost)) {
+	if (prop.getProperty("HOST").equals(virtualHost)) {
 	    // pass to server
 	    if (allowServer) {
 		if (serverAccountBase64MD5 == null) serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
