@@ -110,7 +110,7 @@ public class Messages_p {
             }
             messages += "</table>";
             } catch (IOException e) {
-                messages += "IO Error reading message Table: " + e.getMessage();
+                messages += "I/O error reading message table: " + e.getMessage();
             }
         }
         
