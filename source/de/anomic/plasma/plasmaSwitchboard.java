@@ -1160,7 +1160,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     urlentry = acc.nextElement();
                     resource = urlentry.toString();
                     if (resource != null) {
-                        links.append(resource).append(i).append("=").append(resource).append(serverCore.crlfString);
+                        links.append("resource").append(i).append("=").append(resource).append(serverCore.crlfString);
                         i++;
                     }
                 }
