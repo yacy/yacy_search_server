@@ -182,12 +182,12 @@ public class IndexCreate_p {
             
             if (post.containsKey("pausecrawlqueue")) {
                 switchboard.pauseCrawling();
-                prop.put("info", 4);//crawling queue cleared
+                prop.put("info", 4);//crawling paused
             }           
             
             if (post.containsKey("continuecrawlqueue")) {
                 switchboard.continueCrawling();
-                prop.put("info", 5);//crawling queue cleared
+                prop.put("info", 5);//crawling continued
             }                        
         }
         
