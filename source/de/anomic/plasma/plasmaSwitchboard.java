@@ -148,7 +148,7 @@ import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 
-public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
+public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
 
 
     // load slots
@@ -186,6 +186,9 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     
     private serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
+    
+    private Object  crawlingPausedSync = new Object();
+    private boolean crawlingIsPaused = false;  
     
     public plasmaSwitchboard(String rootPath, String initPath, String configPath) throws IOException {
 	super(rootPath, initPath, configPath);
@@ -488,33 +491,73 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
         return hasDoneSomething;
     }
     
+    /**
+     * With this function the crawling process can be paused 
+     */
+    public void pauseCrawling() {
+        synchronized(this.crawlingPausedSync) {
+            this.crawlingIsPaused = true;
+        }
+    }
+    
+    /**
+     * Continue the previously paused crawling 
+     */
+    public void continueCrawling() {
+        synchronized(this.crawlingPausedSync) {            
+            if (this.crawlingIsPaused) {
+                this.crawlingIsPaused = false;
+                this.crawlingPausedSync.notifyAll();
+            }
+        }
+    }
+    
+    /**
+     * @return <code>true</code> if crawling was paused or <code>false</code> otherwise
+     */
+    public boolean crawlingIsPaused() {
+        synchronized(this.crawlingPausedSync) {
+            return this.crawlingIsPaused;
+        }
+    }    
+    
     public int localCrawlJobSize() {
         return noticeURL.localStackSize();
     }
     
     public boolean localCrawlJob() {
         if (noticeURL.localStackSize() == 0) {
-	    //log.logDebug("LocalCrawl: queue is empty");
-	    return false;
-	}
+            //log.logDebug("LocalCrawl: queue is empty");
+            return false;
+        }
         if (processStack.size() >= crawlSlots) {
-	    log.logDebug("LocalCrawl: too many processes in queue, dismissed (" +
-			 "processStack=" + processStack.size() + ")");
-	    return false;
-	}
+            log.logDebug("LocalCrawl: too many processes in queue, dismissed (" +
+                    "processStack=" + processStack.size() + ")");
+            return false;
+        }
         if (cacheLoader.size() >= crawlSlots) {
-	    log.logDebug("LocalCrawl: too many loader in queue, dismissed (" +
-			 "cacheLoader=" + cacheLoader.size() + ")");
-	    return false;
-	}
-
-	// if the server is busy, we do crawling more slowly
+            log.logDebug("LocalCrawl: too many loader in queue, dismissed (" +
+                    "cacheLoader=" + cacheLoader.size() + ")");
+            return false;
+        }
+        
+        // if the server is busy, we do crawling more slowly
         if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
-
-	// do a local crawl (may start a global crawl)
-	plasmaCrawlNURL.entry nex = noticeURL.localPop();
-	processCrawling(nex, nex.initiator());
-	return true;
+        
+        // if crawling was paused we have to wait until we wer notified to continue
+        synchronized(this.crawlingPausedSync) {
+            if (this.crawlingIsPaused) {
+                try {
+                    this.crawlingPausedSync.wait();
+                }
+                catch (InterruptedException e){ return false;}
+            }
+        }           
+        
+        // do a local crawl (may start a global crawl)
+        plasmaCrawlNURL.entry nex = noticeURL.localPop();
+        processCrawling(nex, nex.initiator());
+        return true;
     }
     
     public int globalCrawlJobSize() {
@@ -522,32 +565,42 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
     }
     
     public boolean globalCrawlJob() {
-	// work off crawl requests that had been placed by other peers to our crawl stack
-
-	// do nothing if either there are private processes to be done
-	// or there is no global crawl on the stack
+        // work off crawl requests that had been placed by other peers to our crawl stack
+        
+        // do nothing if either there are private processes to be done
+        // or there is no global crawl on the stack
         if (noticeURL.remoteStackSize() == 0) {
-	    //log.logDebug("GlobalCrawl: queue is empty");
-	    return false;
-	}
+            //log.logDebug("GlobalCrawl: queue is empty");
+            return false;
+        }
         if (processStack.size() > 0) {
-	    log.logDebug("GlobalCrawl: any processe is in queue, dismissed (" +
-			 "processStack=" + processStack.size() + ")");
-	    return false;
-	}
-	if (noticeURL.localStackSize() > 0) {
-	    log.logDebug("GlobalCrawl: any local crawl is in queue, dismissed (" +
-			 "localStackSize=" + noticeURL.localStackSize() + ")");
-	    return false;
-	}
-
-	// if the server is busy, we do this more slowly
+            log.logDebug("GlobalCrawl: any processe is in queue, dismissed (" +
+                    "processStack=" + processStack.size() + ")");
+            return false;
+        }
+        if (noticeURL.localStackSize() > 0) {
+            log.logDebug("GlobalCrawl: any local crawl is in queue, dismissed (" +
+                    "localStackSize=" + noticeURL.localStackSize() + ")");
+            return false;
+        }
+        
+        // if the server is busy, we do this more slowly
         if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
-
-	// we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
-	plasmaCrawlNURL.entry nex = noticeURL.remotePop();
-	processCrawling(nex, nex.initiator());
-	return true;
+        
+        // if crawling was paused we have to wait until we wer notified to continue
+        synchronized(this.crawlingPausedSync) {
+            if (this.crawlingIsPaused) {
+                try {
+                    this.crawlingPausedSync.wait();
+                }
+                catch (InterruptedException e){ return false; }
+            }
+        }           
+        
+        // we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
+        plasmaCrawlNURL.entry nex = noticeURL.remotePop();
+        processCrawling(nex, nex.initiator());
+        return true;
     }
         
     private void processResourceStack(plasmaHTCache.Entry entry) {
@@ -1099,7 +1152,7 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
             } else {
                 prop.put("totalcount", "" + acc.sizeOrdered());
                 int i = 0;
-                String links = "";
+                StringBuffer links = new StringBuffer();
                 String resource = "";
                 //plasmaIndexEntry pie;
                 plasmaCrawlLURL.entry urlentry;
@@ -1107,19 +1160,18 @@ public class plasmaSwitchboard extends serverAbstractSwitch implements serverSwi
                     urlentry = acc.nextElement();
                     resource = urlentry.toString();
                     if (resource != null) {
-                        links += "resource" + i + "=" + resource + serverCore.crlfString;
+                        links.append(resource).append(i).append("=").append(resource).append(serverCore.crlfString);
                         i++;
                     }
                 }
-                prop.put("links", links);
+                prop.put("links", links.toString());
                 prop.put("linkcount", "" + i);
                 
                 // prepare reference hints
                 Object[] ws = acc.getReferences(16);
-                String refstr = "";
-                for (int j = 0; j < ws.length; j++) refstr += "," + (String) ws[j];
-                if (refstr.length() > 0) refstr = refstr.substring(1);
-                prop.put("references", refstr);
+                StringBuffer refstr = new StringBuffer();
+                for (int j = 0; j < ws.length; j++) refstr.append(",").append((String) ws[j]);
+                prop.put("references", (refstr.length() > 0)?refstr.substring(1):refstr.toString());
             }
             
             // add information about forward peers

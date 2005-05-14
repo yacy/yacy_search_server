@@ -157,6 +157,10 @@ The indexing result is presented on the
 If you crawl any un-wanted pages, you can delete them <a href="IndexDelete_p.html">here</a>.<br>
 ::
 Removed #[numEntries]# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty
+::
+Crawling paused successfully.
+::
+Continue crawling.
 #(/info)#
 <br>
 #(refreshbutton)#
@@ -314,6 +318,11 @@ There are #[num]# entries in the crawler queue. Showing #[show-num]# most recent
 <br>
 <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
 <input type="submit" name="clearcrawlqueue" value="clear crawl queue">
+#(paused)#
+<input type="submit" name="continuecrawlqueue" value="continue crawling">
+::
+<input type="submit" name="pausecrawlqueue" value="pause crawling">
+#(/paused)#
 </form>
 #(/crawler-queue)#
 </p>

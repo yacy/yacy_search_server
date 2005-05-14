@@ -179,6 +179,16 @@ public class IndexCreate_p {
                 prop.put("info", 3);//crawling queue cleared
                 prop.put("info_numEntries", c);
             }
+            
+            if (post.containsKey("pausecrawlqueue")) {
+                switchboard.pauseCrawling();
+                prop.put("info", 4);//crawling queue cleared
+            }           
+            
+            if (post.containsKey("continuecrawlqueue")) {
+                switchboard.continueCrawling();
+                prop.put("info", 5);//crawling queue cleared
+            }                        
         }
         
         // define visible variables
@@ -389,6 +399,7 @@ public class IndexCreate_p {
                     }
                     prop.put("crawler-queue_list", i);
                 }
+                prop.put("crawler-queue_paused",(switchboard.crawlingIsPaused())?0:1);
             }
         }
         // return rewrite properties
