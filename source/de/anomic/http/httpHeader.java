@@ -84,8 +84,8 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String CONNECTION = "Connection";
     public static final String REFERER = "Referer";
     public static final String ACCEPT_ENCODING = "Accept-Encoding";
-    public static final String CONTENT_LENGTH = "CONTENT-LENGTH";
-    public static final String CONTENT_TYPE = "CONTENT-TYPE";
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String CONTENT_TYPE = "Content-Type";
     public static final String AUTHORIZATION = "Authorization";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
     public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
@@ -95,10 +95,14 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String LAST_MODIFIED = "Last-modified";
     public static final String PRAGMA = "Pragma";
     public static final String SET_COOKIE = "Set-Cookie";
-    public static final String IF_MODIFIED_SINCE = "IF-MODIFIED-SINCE";
+    public static final String SET_COOKIE2 = "Set-Cookie2";
+    public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
     public static final String COOKIE = "Cookie";
     public static final String EXPIRES = "Expires";
-    public static final String CONTENT_ENCODING = "CONTENT-ENCODING";
+    public static final String CONTENT_ENCODING = "Content-Encoding";
+    public static final String CONTENT_RANGE = "Content-Range";
+    public static final String RANGE = "Range";
+    public static final String CACHE_CONTROL = "Cache-Control";
 
     /* =============================================================
      * Constants defining http methods
