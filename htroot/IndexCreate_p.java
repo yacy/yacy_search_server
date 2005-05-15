@@ -375,12 +375,13 @@ public class IndexCreate_p {
                     prop.put("loader-set_list", i );
                 }
                 
-                if (crawlerListSize == 0) {
+                int localStackSize = switchboard.noticeURL.localStackSize();
+                if (localStackSize == 0) {
                     prop.put("crawler-queue", 0);
                 } else {
                     prop.put("crawler-queue", 1);
                     plasmaCrawlNURL.entry[] crawlerList = switchboard.noticeURL.localTop(20);
-                    prop.put("crawler-queue_num", crawlerListSize);//num Entries
+                    prop.put("crawler-queue_num", localStackSize);//num Entries
                     prop.put("crawler-queue_show-num", crawlerList.length); //showin sjow-num most recent
                     plasmaCrawlNURL.entry urle;
                     dark = true;
