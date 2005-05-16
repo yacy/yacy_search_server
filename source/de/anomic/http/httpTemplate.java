@@ -298,7 +298,7 @@ final class httpTemplate {
 					//e.printStackTrace();
 				}
 				PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
-				writeTemplate(pis2, out, pattern, dflt, prefix);
+				writeTemplate(pis2, out, pattern, dflt, prefix + "_");
 			}
 
 		}else{ //no match, but a single hash (output # + bb)
