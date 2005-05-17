@@ -53,7 +53,7 @@ package de.anomic.http;
 
 import java.text.SimpleDateFormat;
 
-abstract class httpdAbstractHandler {
+public abstract class httpdAbstractHandler {
 
     // static tools
 

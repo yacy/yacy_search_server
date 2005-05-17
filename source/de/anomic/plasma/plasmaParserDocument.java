@@ -75,9 +75,9 @@ public class plasmaParserDocument {
         this.keywords = (keywords==null)?"":keywords;
         this.shortTitle = (shortTitle==null)?"":shortTitle;
         this.longTitle = (longTitle==null)?"":longTitle;
-        this.sections = sections;
+        this.sections = (sections==null)?new String[0]:sections;
         this.abstrct = (abstrct==null)?"":abstrct;
-        this.text = text;
+        this.text = (text==null)?new byte[0]:text;
         this.anchors = (anchors==null)?new HashMap():anchors;
         this.images = (images==null)?new HashMap():images;
         this.hyperlinks = null;
@@ -113,6 +113,11 @@ public class plasmaParserDocument {
         // returns only the clear (visible) text (not the source data)
         return text;
     }
+    
+    public String getKeywords() {
+        return this.keywords;
+        
+    }    
     
     public Map getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
@@ -201,5 +206,7 @@ public class plasmaParserDocument {
         hyperlinks.putAll(plasmaParser.allSubpaths(hyperlinks));
         hyperlinks.putAll(plasmaParser.allSubpaths(medialinks));
     }
+
+
     
 }

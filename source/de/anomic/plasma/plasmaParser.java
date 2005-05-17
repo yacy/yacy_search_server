@@ -49,6 +49,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -56,15 +57,19 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -74,6 +79,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacySeedUploader;
 
 public final class plasmaParser {
 
@@ -81,14 +87,14 @@ public final class plasmaParser {
      * A list containing all installed parsers and the mimeType that they support
      * @see #loadAvailableParserList()
      */
-    private final Properties availableParserList = new Properties();
+    private static final Properties availableParserList = new Properties();
     
     /**
      * A list containing all enabled parsers and the mimeType that they can handle
      * @see #loadEnabledParserList()
      * @see #setEnabledParserList(Enumeration)
      */
-    private final Properties enabledParserList = new Properties();    
+    private static final Properties enabledParserList = new Properties();    
     
     /**
      * A list of file extensions that are supported by all enabled parsers
@@ -96,18 +102,17 @@ public final class plasmaParser {
     private static final HashSet supportedFileExt = new HashSet();
     
     /**
+     * A list of mimeTypes that can be parsed in Realtime (on the fly)
+     */
+    private static final HashSet realtimeParsableMimeTypes = new HashSet();    
+    
+    /**
      * A pool of parsers.
      * @see plasmaParserPool
      * @see plasmaParserFactory
      */
-    private final plasmaParserPool theParserPool;
+    private static plasmaParserPool theParserPool;
 
-    /**
-     * The configuration file containing a list of enabled parsers
-     * @see plasmaParser#plasmaParser(File)
-     */
-    private final File parserDispatcherPropertyFile;
-    
     /**
      * A list of media extensions that should not be handled by the plasmaParser
      */
@@ -118,7 +123,7 @@ public final class plasmaParser {
      * which seems to be additional content parsers.
      * Currently the filenames of all content parser classes must end with <code>Parser.class</code> 
      */
-    private final FilenameFilter parserFileNameFilter = new FilenameFilter() {
+    private static final FilenameFilter parserFileNameFilter = new FilenameFilter() {
         public boolean accept(File dir, String name) {
             return name.endsWith("Parser.class");
         }
@@ -128,7 +133,7 @@ public final class plasmaParser {
      * This {@link FileFilter} is used to get all subpackages
      * of the parser package.
      */
-    private final FileFilter parserDirectoryFilter = new FileFilter() {
+    private static final FileFilter parserDirectoryFilter = new FileFilter() {
         public boolean accept(File file) {
             return file.isDirectory();
         }
@@ -141,36 +146,7 @@ public final class plasmaParser {
     static {
 		initMediaExt("swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar," +
 			"sit,hqx,img,dmg,tar,gz,ps,xls,ppt,ram,bz2,arj");
-    }
-    
-    public static void initMediaExt(String mediaExtString) {
-		String[] xs = mediaExtString.split(",");
-        initMediaExt(Arrays.asList(xs));
-    }
-    
-    public static void initMediaExt(List mediaExtList) {
-        synchronized (mediaExtSet) {
-            mediaExtSet.clear();
-    		mediaExtSet.addAll(mediaExtList);
-		}
-    }
-    
-    public static boolean mediaExtContains(String mediaExt) {
         
-        synchronized (supportedFileExt) {
-			if (supportedFileExt.contains(mediaExt)) return false;
-		}
-        
-        synchronized (mediaExtSet) {
-			return mediaExtSet.contains(mediaExtSet);
-		}
-    }
-
-
-    public plasmaParser(File parserDispatcherPropertyFile) {
-        
-        this.parserDispatcherPropertyFile = parserDispatcherPropertyFile;
-
         /* ===================================================
          * initializing the parser object pool
          * =================================================== */
@@ -187,67 +163,160 @@ public final class plasmaParser {
         config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
         config.minEvictableIdleTimeMillis = 30000; 
         
-        this.theParserPool = new plasmaParserPool(new plasmaParserFactory(),config);               
+        plasmaParser.theParserPool = new plasmaParserPool(new plasmaParserFactory(),config);    
         
         /* ===================================================
          * loading a list of available parsers
          * =================================================== */        
-		loadAvailableParserList();
-        
-        /* ===================================================
-         * loading a list of activated parsers
-         * =================================================== */         
-		loadEnabledParserList();
-        
+        loadAvailableParserList();      
     }
     
-    public boolean setEnabledParserList(Enumeration mimeTypes) {
+    public static void initRealtimeParsableMimeTypes(String realtimeParsableMimeTypes) {
+        if ((realtimeParsableMimeTypes == null) || (realtimeParsableMimeTypes.length() == 0)) return;
+        
+        String[] realtimeParsableMimeTypeList = realtimeParsableMimeTypes.split(",");
+        LinkedList mimeTypes = new LinkedList();
+        for (int i = 0; i < realtimeParsableMimeTypeList.length; i++) mimeTypes.add(realtimeParsableMimeTypeList[i].toLowerCase().trim());
+        initRealtimeParsableMimeTypes(mimeTypes);
+    }
+    
+    public static void initRealtimeParsableMimeTypes(List mimeTypesList) {
+        synchronized (realtimeParsableMimeTypes) {
+            realtimeParsableMimeTypes.clear();
+            realtimeParsableMimeTypes.addAll(mimeTypesList);
+        }        
+    }
+    
+    public static void initParseableMimeTypes(String enabledMimeTypes) {
+        if ((enabledMimeTypes == null) || (enabledMimeTypes.length() == 0)) return;
+        
+        String[] enabledMimeTypeList = enabledMimeTypes.split(",");
+        HashSet mimeTypes = new HashSet();
+        for (int i = 0; i < enabledMimeTypeList.length; i++) mimeTypes.add(enabledMimeTypeList[i].toLowerCase().trim());
+        setEnabledParserList(mimeTypes);
+    }
+    
+    public static void initMediaExt(String mediaExtString) {
+        if ((mediaExtString == null) || (mediaExtString.length() == 0)) return;
+        
+		String[] xs = mediaExtString.split(",");
+        LinkedList extensions = new LinkedList();
+        for (int i = 0; i < xs.length; i++) extensions.add(xs[i].toLowerCase().trim());        
+        initMediaExt(extensions);
+    }
+    
+    public static void initMediaExt(List mediaExtList) {
+        synchronized (mediaExtSet) {
+            mediaExtSet.clear();
+    		mediaExtSet.addAll(mediaExtList);
+		}
+    }
+    
+    public static boolean realtimeParsableMimeTypesContains(String mimeType) {
+        mimeType = getRealMimeType(mimeType);
+        synchronized (realtimeParsableMimeTypes) {
+            return realtimeParsableMimeTypes.contains(mimeType);
+        }
+    }
+    
+    public static boolean supportedMimeTypesContains(String mimeType) {
+        mimeType = getRealMimeType(mimeType);
+        
+        synchronized (realtimeParsableMimeTypes) {
+            if (realtimeParsableMimeTypes.contains(mimeType)) return true;
+        }        
+        
+        synchronized (enabledParserList) { 
+            return enabledParserList.containsKey(mimeType);
+        }
+    }
+    
+    public static boolean mediaExtContains(String mediaExt) {
+        if (mediaExt == null) return false;
+        
+        synchronized (supportedFileExt) {
+			if (supportedFileExt.contains(mediaExt)) return false;
+		}
+        
+        synchronized (mediaExtSet) {
+			return mediaExtSet.contains(mediaExt);
+		}
+    }
+
+    public static String getRealMimeType(String mimeType) {
+        //if (mimeType == null) doMimeTypeAnalysis
+        if (mimeType == null) mimeType = "application/octet-stream";
+        
+        int pos = mimeType.indexOf(';');
+        return ((pos < 0) ? mimeType : mimeType.substring(0, pos)).toLowerCase();              
+    }
+    
+    public static String getMimeTypeByFileExt(String fileExt) {
+        // loading a list of extensions from file
+        Properties prop = new Properties();
+        try {
+            prop.load(new FileInputStream(new File("httpd.mime")));
+        } catch (IOException e) {
+            System.err.println("ERROR: httpd.mime not found in settings path");
+        }            
+        
+        return prop.getProperty(fileExt,"application/octet-stream");
+    }
+    
+    public plasmaParser() {
+        // nothing todo here at the moment
+    }
+    
+    public static String[] setEnabledParserList(Set mimeTypeSet) {
         
         Properties newEnabledParsers = new Properties();
         HashSet newSupportedFileExt = new HashSet();
         
-        if (mimeTypes != null) {
-	        while (mimeTypes.hasMoreElements()) {
-	            String mimeType = (String) mimeTypes.nextElement();
-				if (this.availableParserList.containsKey(mimeType)) {
+        if (mimeTypeSet != null) {
+            Iterator mimeTypes = mimeTypeSet.iterator();
+	        while (mimeTypes.hasNext()) {
+	            String mimeType = (String) mimeTypes.next();
+				if (availableParserList.containsKey(mimeType)) {
                     Parser theParser = null;
                     try {
                         // getting the parser
-                        theParser = (Parser) this.theParserPool.borrowObject(this.availableParserList.get(mimeType));
+                        theParser = (Parser) plasmaParser.theParserPool.borrowObject(availableParserList.get(mimeType));
                         
                         // getting a list of mimeTypes that the parser supports
                         Hashtable parserSupportsMimeTypes = theParser.getSupportedMimeTypes();                        
                         if (parserSupportsMimeTypes != null) {
                             Object supportedExtensions = parserSupportsMimeTypes.get(mimeType);                        
-                            if ((supportedExtensions != null) && (supportedExtensions instanceof String)) {
+                            if ((supportedExtensions != null) && 
+                                (supportedExtensions instanceof String) && 
+                                (((String)supportedExtensions).length() > 0)) {
                         		String[] extArray = ((String)supportedExtensions).split(",");
                                 newSupportedFileExt.addAll(Arrays.asList(extArray));
                             }
                         }
-						newEnabledParsers.put(mimeType,this.availableParserList.get(mimeType));
+						newEnabledParsers.put(mimeType,availableParserList.get(mimeType));
                         
                     } catch (Exception e) { 
                         e.printStackTrace();
                     } finally {
                         if (theParser != null) 
-                            try { this.theParserPool.returnObject(mimeType,theParser); } catch (Exception e) {}
+                            try { plasmaParser.theParserPool.returnObject(mimeType,theParser); } catch (Exception e) {}
                     }
 				}
 	        }
         }
         
-        synchronized (this.enabledParserList) {
-			this.enabledParserList.clear();
-            this.enabledParserList.putAll(newEnabledParsers);
+        synchronized (enabledParserList) {
+			enabledParserList.clear();
+            enabledParserList.putAll(newEnabledParsers);            
 		}
         
         
         synchronized (supportedFileExt) {
 			supportedFileExt.clear();
-            supportedFileExt.addAll(supportedFileExt);
+            supportedFileExt.addAll(newSupportedFileExt);
 		}
         
-        return true;
+        return newEnabledParsers.keySet().toArray(new String[newEnabledParsers.size()]);
     }
     
     public Hashtable getEnabledParserList() {
@@ -260,29 +329,32 @@ public final class plasmaParser {
         return this.availableParserList;
     }
     
-    private void loadEnabledParserList() {
+    private static void loadEnabledParserList() {
         // loading a list of availabe parser from file
     	Properties prop = new Properties();
     	try {
-    	    prop.load(new FileInputStream(this.parserDispatcherPropertyFile));
+    	    prop.load(new FileInputStream(new File("yacy.parser")));
     	} catch (IOException e) {
-    	    System.err.println("ERROR: " + this.parserDispatcherPropertyFile.toString() + " not found in settings path");
+    	    System.err.println("ERROR: yacy.parser not found in settings path");
     	}    	
 
         // enable them ...
-        this.setEnabledParserList(prop.keys());
+        setEnabledParserList(prop.keySet());
 	}
 
-	private void loadAvailableParserList() {
+	private static void loadAvailableParserList() {
         try {
-            this.availableParserList.clear();
+            plasmaParser.availableParserList.clear();
+            
+            // getting the current java classpath
+            String javaClassPath = System.getProperty("java.class.path");
             
             // getting the current package name
-			String plasmaParserPkgName = this.getClass().getPackage().getName() + ".parser";
+			String plasmaParserPkgName = plasmaParser.class.getPackage().getName() + ".parser";
 			System.out.println("INFO: Searching for additional content parsers in package " + plasmaParserPkgName);
  
             // getting an uri to the parser subpackage
-	        String packageURI = this.getClass().getResource("/"+plasmaParserPkgName.replace('.','/')).toString();
+	        String packageURI = plasmaParser.class.getResource("/"+plasmaParserPkgName.replace('.','/')).toString();
 			System.out.println("INFO: Parser directory is " + packageURI);           
  
             // open the parser directory
@@ -293,12 +365,12 @@ public final class plasmaParser {
              * loop through all subdirectories and test if we can 
              * find an additional parser class
              */
-            File[] parserDirectories = parserDir.listFiles(this.parserDirectoryFilter);
+            File[] parserDirectories = parserDir.listFiles(parserDirectoryFilter);
             if (parserDirectories == null) return;
 			for (int parserDirNr=0; parserDirNr< parserDirectories.length; parserDirNr++) {
                 File currentDir = parserDirectories[parserDirNr];
 				System.out.println("INFO: Searching in directory " + currentDir.toString());
-                String[] parserClasses = currentDir.list(this.parserFileNameFilter);
+                String[] parserClasses = currentDir.list(parserFileNameFilter);
                 if (parserClasses == null) continue;
                 
                 for (int parserNr=0; parserNr<parserClasses.length; parserNr++) {
@@ -306,14 +378,25 @@ public final class plasmaParser {
                     String className = parserClasses[parserNr].substring(0,parserClasses[parserNr].indexOf(".class"));
                     String fullClassName = plasmaParserPkgName + "." + currentDir.getName() + "." + className;
 	                try {
+                        // trying to load the parser class by its name
 						Class parserClass = Class.forName(fullClassName);
                         Object theParser = parserClass.newInstance();
                         if (!(theParser instanceof Parser)) continue;
+                        
+                        // testing if all needed libx libraries are available
+                        String[] neededLibx = ((Parser)theParser).getLibxDependences();
+                        if (neededLibx != null) {
+                            for (int libxId=0; libxId < neededLibx.length; libxId++) {
+                                if (javaClassPath.indexOf(neededLibx[libxId]) == -1) continue;
+                            }
+                        }                        
+                        
+                        // loading the list of mime-types that are supported by this parser class
                         Hashtable supportedMimeTypes = ((Parser)theParser).getSupportedMimeTypes();
                         Iterator mimeTypeIterator = supportedMimeTypes.keySet().iterator();
                         while (mimeTypeIterator.hasNext()) {
                             String mimeType = (String) mimeTypeIterator.next();
-                            this.availableParserList.put(mimeType,fullClassName);
+                            availableParserList.put(mimeType,fullClassName);
 							System.out.println("INFO: Found parser for mimeType " + mimeType);
                         }
                             
@@ -329,12 +412,6 @@ public final class plasmaParser {
 	public void close() {        
         // clearing the parser list
         synchronized (this.enabledParserList) {
-        	try {
-        	    this.enabledParserList.store(new FileOutputStream(this.parserDispatcherPropertyFile),"plasmaParser configuration file");
-        	} catch (IOException e) {
-        	    System.err.println("ERROR: " + this.parserDispatcherPropertyFile.toString() + " can not be stored.");
-        	} 
-            
 	        this.enabledParserList.clear();
 		}
         
@@ -348,10 +425,7 @@ public final class plasmaParser {
         
         Parser theParser = null;
         try {
-            
-            if ((mimeType != null) && (mimeType.indexOf(";") != -1)) {
-                mimeType = mimeType.substring(0,mimeType.indexOf(";"));
-            }                        
+            mimeType = getRealMimeType(mimeType);
             
             // getting the correct parser for the given mimeType
             theParser = this.getParser(mimeType);
@@ -359,22 +433,21 @@ public final class plasmaParser {
             // if a parser was found we use it ...
             if (theParser != null) {
                 return theParser.parse(location, mimeType,source);
+            } else if (realtimeParsableMimeTypesContains(mimeType)) {        
+                // ... otherwise we make a html scraper and transformer
+                htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
+                OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
+    
+                hfos.write(source);
+                return transformScraper(location, mimeType, scraper);
+            } else {
+                return null;
             }
-        
-            // ...otherwise we make a html scraper and transformer
-            htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
-            OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
-
-            hfos.write(source);
-            return transformScraper(location, mimeType, scraper);
         } catch (Exception e) {
             return null;
         } finally {
             if (theParser != null) {
-                try {
-                    this.theParserPool.returnObject(mimeType, theParser);
-                } catch (Exception e) {
-                }
+                try { this.theParserPool.returnObject(mimeType, theParser); } catch (Exception e) {}
             }
         }
     }
@@ -383,9 +456,7 @@ public final class plasmaParser {
 
         Parser theParser = null;
         try {
-            if ((mimeType != null) && (mimeType.indexOf(";") != -1)) {
-                mimeType = mimeType.substring(0,mimeType.indexOf(";"));
-            }            
+            mimeType = getRealMimeType(mimeType);
             
             // getting the correct parser for the given mimeType
             theParser = this.getParser(mimeType);
@@ -393,22 +464,22 @@ public final class plasmaParser {
             // if a parser was found we use it ...
             if (theParser != null) {
                 return theParser.parse(location, mimeType,sourceFile);
-            }    
-            
-            // ...otherwise we make a scraper and transformer
-            htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
-            OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
-            
-			serverFileUtils.copy(sourceFile, hfos);
-            return transformScraper(location, mimeType, scraper);
+            } else if (realtimeParsableMimeTypesContains(mimeType)) {                      
+                // ...otherwise we make a scraper and transformer
+                htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
+                OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
+                
+                serverFileUtils.copy(sourceFile, hfos);
+                return transformScraper(location, mimeType, scraper);
+            } else {
+                return null;
+            }
         } catch (Exception e) {
+            // e.printStackTrace();
             return null;
         } finally {
             if (theParser != null) {
-                try {
-                    this.theParserPool.returnObject(mimeType, theParser);
-                } catch (Exception e) {
-                }
+                try { this.theParserPool.returnObject(mimeType, theParser); } catch (Exception e) { }
             }
         }
     }
@@ -431,19 +502,15 @@ public final class plasmaParser {
      * @return
      */
     public Parser getParser(String mimeType) {
-        
-        if (mimeType == null) {            
-            // TODO: do automatic mimetype detection
-            return null;
-        }
-        
+
+        mimeType = getRealMimeType(mimeType);        
         try {
             
             // determining the proper parser class name for the mimeType
             String parserClassName = null;
-            synchronized (this.enabledParserList) {
-    	        if (this.enabledParserList.containsKey(mimeType)) {
-    	            parserClassName = (String)this.enabledParserList.get(mimeType);
+            synchronized (plasmaParser.enabledParserList) {
+    	        if (plasmaParser.enabledParserList.containsKey(mimeType)) {
+    	            parserClassName = (String)plasmaParser.enabledParserList.get(mimeType);
     	        } else {
                     return null;
     	        }
@@ -454,7 +521,7 @@ public final class plasmaParser {
             
             // checking if the created parser really supports the given mimetype 
             Hashtable supportedMimeTypes = theParser.getSupportedMimeTypes();
-            if ((supportedMimeTypes != null) && (supportedMimeTypes.contains(mimeType))) {
+            if ((supportedMimeTypes != null) && (supportedMimeTypes.containsKey(mimeType))) {
 				return theParser;
             }
             this.theParserPool.returnObject(parserClassName,theParser);
@@ -533,11 +600,13 @@ public final class plasmaParser {
 		try {
 			File in = new File(args[0]);
 			File out = new File(args[1]);
-			plasmaParser theParser = new plasmaParser(new File("yacy.parser"));
+			plasmaParser theParser = new plasmaParser();
+            theParser.initRealtimeParsableMimeTypes("application/xhtml+xml,text/html,text/plain");
+            theParser.initParseableMimeTypes("application/atom+xml,application/gzip,application/java-archive,application/msword,application/octet-stream,application/pdf,application/rdf+xml,application/rss+xml,application/rtf,application/x-gzip,application/x-tar,application/xml,application/zip,text/rss,text/rtf,text/xml,application/x-bzip2");
 			FileInputStream theInput = new FileInputStream(in);
 			ByteArrayOutputStream theOutput = new ByteArrayOutputStream();
 			serverFileUtils.copy(theInput, theOutput);
-			plasmaParserDocument document = theParser.parseSource(new URL("http://brain.yacy"), "text/html", theOutput.toByteArray());
+			plasmaParserDocument document = theParser.parseSource(new URL("http://brain/~theli/test.pdf"), null, theOutput.toByteArray());
 			//plasmaParserDocument document = theParser.parseSource(new URL("http://brain.yacy"), "application/pdf", theOutput.toByteArray());
 			byte[] theText = document.getText();
 			serverFileUtils.write(theText, out);

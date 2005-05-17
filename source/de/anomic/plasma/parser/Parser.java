@@ -110,5 +110,9 @@ public interface Parser {
      */
     public void reset();
     
+    /**
+     * @return Returns a list of library names that are needed by this parser
+     */
+    public String[] getLibxDependences();
     
 }

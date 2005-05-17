@@ -85,6 +85,7 @@ import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.htmlFilter.htmlFilterTransformer;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaHTCache;
+import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
@@ -448,8 +449,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     
                     // make a transformer
                     if ((!(transformer.isIdentityTransformer())) &&
-                        ((ext == null) || (!(switchboard.extensionBlack.contains(ext)))) &&
-                        ((cachedResponseHeader == null) || (httpd.isTextMime(cachedResponseHeader.mime(), switchboard.mimeWhite)))) {
+                        ((ext == null) || (!(plasmaParser.mediaExtContains(ext)))) &&
+                        ((cachedResponseHeader == null) || (plasmaParser.realtimeParsableMimeTypesContains(cachedResponseHeader.mime())))) {
                         hfos = new htmlFilterOutputStream(respond, null, transformer, (ext.length() == 0));
                     } else {
                         hfos = respond;
@@ -507,8 +508,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             cacheEntry = cacheManager.newEntry(requestDate, 0, url, requestHeader, res.status, res.responseHeader, null, switchboard.defaultProxyProfile);
             
             // handle file types
-            if (((ext == null) || (!(switchboard.extensionBlack.contains(ext)))) &&
-                (httpd.isTextMime(res.responseHeader.mime(), switchboard.mimeWhite))) {
+            if (((ext == null) || (!(plasmaParser.mediaExtContains(ext)))) &&
+                (plasmaParser.realtimeParsableMimeTypesContains(res.responseHeader.mime()))) {
 				// this is a file that is a possible candidate for parsing by the indexer
                 if (transformer.isIdentityTransformer()) {
 					log.logDebug("create passthrough (parse candidate) for url " + url);

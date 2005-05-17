@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<project name="YACY - seedUpload via SCP" default="dist">
+    <description>
+            A class that allows to upload the seed list via scp
+    </description>
+
+    <property name="addonShortName" value="Scp"/>
+	<property name="addonVersion" value="0.1"/>
+
+    <property name="addonLongName" value="${addonShortName}SeedUploader"/>    	
+   	<property name="parserArchive" location="${release}/${addonLongName}_${addonVersion}.tgz"/>	    	
+    	
+    <target name="compile">
+  	  <echo message="Compiling ${addonLongName} Version ${addonVersion} ..."/>
+  	  <javac srcdir="${src}/de/anomic/yacy/seedUpload/" destdir="${build}" source="${javacSource}" target="${javacTarget}">
+  	    <include name="${src}/de/anomic/yacy/seedUpload/yacySeedUpload${addonShortName}.java"/>
+  	  	<classpath>
+  	  	  <pathelement location="${build}" />	
+  	  	
+		  <!-- main lib needed to parse rss/atom feed files -->  	
+   		  <pathelement location="${libx}/jsch-0.1.19.jar" />  	  		    	
+  	  	</classpath>
+  	  </javac>    	
+    </target>
+	
+
+    <target name="zip" depends="compile">
+	  <echo message="Compressing ${addonLongName} Version ${addonVersion} ..."/>  
+  	  <tar destfile="${parserArchive}" compression="gzip">
+  	  	<tarfileset dir="${libx}" 
+  	  				includes="jsch-0.1.19.*" 
+  	  				prefix="libx/"
+			  		dirmode="755" mode="644"/>
+  	  	<tarfileset dir="${src}/de/anomic/yacy/seedUpload/" 
+  	  			    includes="yacySeedUpload${addonShortName}.java"
+  	  				prefix="source/de/anomic/yacy/seedUpload/"
+			  	  	dirmode="755" mode="644"/>
+  	  	<tarfileset dir="${build}/de/anomic/yacy/seedUpload/" 
+  	  			    includes="yacySeedUpload${addonShortName}.class"
+  	  				prefix="classes/de/anomic/yacy/seedUpload/"
+			  	  	dirmode="755" mode="644"/>
+  	  	<tarfileset dir="${htroot}/yacy/seedUpload/" 
+  	  			    includes="yacySeedUpload${addonShortName}.html"
+  	  				prefix="htroot/yacy/seedUpload/"
+			  	  	dirmode="755" mode="644"/>				  	  					  	  		
+  	  </tar>    	
+    </target>	
+
+
+    <target name="dist" depends="compile,zip" description="Compile and zip the addon"/>        
+	
+	
+</project>
+

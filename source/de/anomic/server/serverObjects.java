@@ -57,6 +57,7 @@
 
 package de.anomic.server;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -68,9 +69,13 @@ import java.util.Vector;
 public final class serverObjects extends Hashtable implements Cloneable {
 
     public serverObjects() {
-	super();
+        super();
     }
-
+    
+    public serverObjects(int initialCapacity) {
+        super(initialCapacity);
+    }
+    
     public serverObjects(Map input) {
 	super(input);
     }
@@ -157,16 +162,24 @@ public final class serverObjects extends Hashtable implements Cloneable {
 
     // convenience methods for storing and loading to a file system
     public void store(File f) throws IOException {
-	FileOutputStream fos = new FileOutputStream(f);
-	Enumeration e = keys();
-	String key, value;
-	while (e.hasMoreElements()) {
-	    key = (String) e.nextElement();
-	    value = ((String) get(key)).replaceAll("\n", "\\\\n");  
-	    fos.write((key + "=" + value + "\r\n").getBytes());
-	}
-	fos.flush();
-	fos.close();
+        BufferedOutputStream fos = null;
+        try {
+            fos = new BufferedOutputStream(new FileOutputStream(f));
+            Enumeration e = keys();
+            String key, value;
+            while (e.hasMoreElements()) {
+                key = (String) e.nextElement();
+                value = ((String) get(key)).replaceAll("\n", "\\\\n");  
+                fos.write((key + "=" + value + "\r\n").getBytes());
+            }
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.flush();
+                    fos.close();
+                } catch (Exception e){}
+            }
+        }
     }
 
     public Object clone() {

@@ -117,6 +117,35 @@ Changes take effect immediately</td>
 </form>
 </table>
 </p>
+
+<div class=small><b>Thread pool settings:</b></div>
+<form action="Performance_p.html" method="post" enctype="multipart/form-data">
+<table border="0" cellpadding="2" cellspacing="1" width="100%">
+<tr class="TableHeader" valign="bottom">
+<td class="small" width="150">Thread Pool</td>
+<td class="small" width="80">maximum Active</td>
+<td class="small" width="80">maximum Idle</td>
+<td class="small" width="80">minimum Idle</td>
+<td class="small">Full Description</td>
+</tr>
+#{pool}#
+<tr class="TableCellDark">
+<td class="small" align="left">#[name]#</td>
+<td class="small" align="right"><input name="#[name]#_maxActive" type="text" size="8" maxlength="8" value="#[maxActive]#"></td>
+<td class="small" align="right"><input name="#[name]#_maxIdle" type="text" size="8" maxlength="8" value="#[maxIdle]#"></td>
+<td class="small" align="right"><input name="#[name]#_minIdle" type="text" size="8" maxlength="8" value="#[minIdle]#"></td>
+<td class="small" align="left"></td>
+</tr>
+#{/pool}#
+<tr class="TableCellLight">
+<td class="small" align="left" colspan="5">
+<input type="submit" name="poolConfig" value="Enter new Threadpool Configuration">
+Changes take effect immediately</td>
+</tr>
+</table>
+</p></form>
+
+
 #[footer]#
 </body>
 </html>

@@ -45,8 +45,12 @@
 
 import java.util.Iterator;
 
+import org.apache.commons.pool.impl.GenericObjectPool;
+
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
@@ -141,12 +145,56 @@ public class Performance_p {
             int maxWaitingWordFlush = Integer.parseInt((String) post.get("maxWaitingWordFlush", "180"));
             switchboard.setConfig("maxWaitingWordFlush", "" + maxWaitingWordFlush);
         }
+        
+        if ((post != null) && (post.containsKey("poolConfig"))) {
+            GenericObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
+            int maxActive = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
+            int maxIdle = Integer.parseInt(post.get("Crawler Pool_maxIdle","4"));
+            int minIdle = Integer.parseInt(post.get("Crawler Pool_minIdle","0"));
+            
+            crawlerPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
+            crawlerPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
+            crawlerPoolConfig.maxActive = maxActive;    
+            
+            plasmaSwitchboard.crawlSlots = maxActive;
+            switchboard.cacheLoader.setPoolConfig(crawlerPoolConfig);
+            
+            serverThread httpd = switchboard.getThread("10_httpd");
+            GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();
+            maxActive = Integer.parseInt(post.get("httpd Session Pool_maxActive","8"));
+            maxIdle = Integer.parseInt(post.get("httpd Session Pool_maxIdle","4"));
+            minIdle = Integer.parseInt(post.get("httpd Session Pool_minIdle","0"));
+            
+            httpdPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
+            httpdPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
+            httpdPoolConfig.maxActive = maxActive;    
+            
+            ((serverCore)httpd).maxSessions = maxActive;
+            ((serverCore)httpd).setPoolConfig(httpdPoolConfig);            
+        }        
+        
         // table cache settings
         prop.put("wordCacheRAMSize", switchboard.wordIndex.wordCacheRAMSize());
         prop.put("maxURLinWordCache", "" + switchboard.wordIndex.maxURLinWordCache());
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
         prop.put("wordCacheMax", switchboard.getConfig("wordCacheMax", "10000"));
         prop.put("singletonsSize", switchboard.wordIndex.singletonsSize());
+        
+        // table thread pool settings
+        GenericObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
+        prop.put("pool_0_name","Crawler Pool");
+        prop.put("pool_0_maxActive",crawlerPoolConfig.maxActive);
+        prop.put("pool_0_maxIdle",crawlerPoolConfig.maxIdle);
+        prop.put("pool_0_minIdle",crawlerPoolConfig.maxIdle);
+        
+        serverThread httpd = switchboard.getThread("10_httpd");
+        GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();
+        prop.put("pool_1_name","httpd Session Pool");
+        prop.put("pool_1_maxActive",httpdPoolConfig.maxActive);
+        prop.put("pool_1_maxIdle",httpdPoolConfig.maxIdle);
+        prop.put("pool_1_minIdle",httpdPoolConfig.maxIdle);                
+        prop.put("pool",2);
+        
         
         // return rewrite values for templates
         return prop;

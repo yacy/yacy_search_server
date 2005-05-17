@@ -79,7 +79,11 @@ proxyCache = DATA/HTCACHE
 proxyCacheSize = 200
 
 # the following mime-types are the whitelist for indexing
-parseableMime=application/xhtml+xml,text/html,text/plain
+#
+# parseableRealtimeMimeTypes: specifies mime-types that can be indexed on the fly
+# parseableMime: specifies mime-types that can be indexed but not on the fly
+parseableRealtimeMimeTypes=application/xhtml+xml,text/html,text/plain
+parseableMimeTypes=
 
 # media extension string
 # a comma-separated list of extensions that denote media file formats
@@ -222,15 +226,30 @@ adminAccountBase64MD5=
 superseedFile=superseed.txt
 superseedLocation=http://www.yacy.net/superseed.txt
 
+
 # if you are running a principal peer, you must update the following variables
-# This is an ftp account with all relevant information
-# the cycle parameter is the update period in minutes.
+# The upload method that should be used to upload the seed-list file to
+# a public accessible webserver where it can be loaded by other peers.
+#
+# You can set the seedUploadMethod-Property to 
+# - None
+# - Ftp
+# - File
+# - Scp (only if you have installed the optional addon)
+#
+seedUploadMethod=
+
+# The URL to the seed list file 
+seedURL=
+
+# This is the most common method to upload the seed-list
+#  
+# This is an ftp account with all relevant information.
 # The update is only made if there had been changes in between.
 seedFTPServer=
 seedFTPAccount=
 seedFTPPassword=
 seedFTPPath=
-seedURL=
 
 # alternatively to an FTP account, a peer can also become a principal peer
 # if the seed-list can be generated as a file and that file is also accessible from
@@ -239,6 +258,15 @@ seedURL=
 # however, you must always set a seedURL because it is used to check if the
 # file is actually accessible from the internet
 seedFilePath=
+
+# Settings needed to upload the seed-list file via scp
+#
+# Please note that this upload method can only be used if you have installed
+# this optional upload method.
+seedScpServer=
+seedScpAccount=
+seedScpPassword=
+seedScpPath=
 
 # every peer should have a name. inded, we try to give every peer an unique ID,
 # which is necessary for internal organization of the index sharing, but the

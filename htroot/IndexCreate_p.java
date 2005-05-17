@@ -122,7 +122,7 @@ public class IndexCreate_p {
                     }
                     
                     // check if pattern matches
-                    if ((crawlingStartURL == null) || (!(crawlingStart.matches(newcrawlingfilter)))) {
+                    if ((crawlingStartURL == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
                         // print error message
                         prop.put("error", 4); //crawlfilter does not match url
                         prop.put("error_newcrawlingfilter", newcrawlingfilter);

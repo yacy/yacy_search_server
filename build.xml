@@ -97,26 +97,40 @@
 </target>
 
 <target name="compile" depends="init" description="Compiling the yacy sources ...">
+ 
+  <!-- defining the classpath that should be used for compiling -->   
+  <path id="project.class.path">
+    <pathelement location="${build}"/>
+    
+    <!-- libs needed for the yacy thread/object-pools -->
+    <pathelement location="${lib}/commons-collections.jar" />
+    <pathelement location="${lib}/commons-pool-1.2.jar" />    
+  </path>
+    
+  <!-- compiling the main sources -->   
   <javac srcdir="${src}/" destdir="${build}"
-         excludes="de/anomic/plasma/parser/*/*"
+         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**"
          debug="true"
          source="${javacSource}" target="${javacTarget}">
-    <classpath>
-      <pathelement location="${build}" />
-
-      <!-- libs needed for the yacy thread/object-pools -->
-      <pathelement location="${lib}/commons-collections.jar" />
-      <pathelement location="${lib}/commons-pool-1.2.jar" />
-    </classpath>
+    <classpath refid="project.class.path"/>
   </javac>
+  <!-- compiling the two standard seed uploader methods -->   
+  <javac srcdir="${src}" destdir="${build}"
+         classpathref="project.class.path"
+         source="1.4" target="1.4">
+    <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java" />
+    <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>    
+  </javac> 
+  <!-- compiling htroot and htdocsdefault -->
   <javac srcdir="${htroot}/" destdir="${htroot}"
-         classpath="${build}"
+         classpathref="project.class.path"
          source="1.4" target="1.4"/>
   <javac srcdir="${htroot}/htdocsdefault" destdir="${htroot}/htdocsdefault"
-         classpath="${build}"
+         classpathref="project.class.path"
          source="1.4" target="1.4"/>
+ <!-- compiling yacy.java -->   
   <javac srcdir="${htroot}/yacy" destdir="${htroot}/yacy"
-         classpath="${build}"
+         classpathref="project.class.path"
          source="1.4" target="1.4"/>
 </target>
 
@@ -125,6 +139,7 @@
   <move file="${src}/yacy.java.orig" tofile="${src}/yacy.java" />
 </target>
 
+<!-- compiling optional content parsers and building install packages -->
 <target name="parsers" depends="compile" description="Compiling and zipping all additional parsers">
   <subant target="">
     <property name="src" location="${src}"/>
@@ -133,23 +148,47 @@
     <property name="release" location="${release}"/>
     <property name="javacSource" value="${javacSource}"/>
     <property name="javacTarget" value="${javacTarget}"/>
+    <!-- each optional parser must have its own build file --> 
     <fileset dir="${src}/" includes="de/anomic/plasma/parser/*/build.xml"/>
   </subant>
 </target>
+ 
+<!-- compiling optional seed uploaders and building install packages -->   
+<target name="seedUploaders" depends="compile" description="Compiling and zipping additional seed uploaders">
+  <subant target="">
+    <property name="src" location="${src}"/>
+    <property name="build" location="${build}"/>
+    <property name="libx" location="${libx}"/>
+    <property name="htroot" value="${htroot}"/>    
+    <property name="release" location="${release}"/>
+    <property name="javacSource" value="${javacSource}"/>
+    <property name="javacTarget" value="${javacTarget}"/>
+    <!-- each optionl uploader module must have its own build file --> 
+    <fileset dir="${src}/" includes="de/anomic/yacy/seedUpload/yacySeedUpload*.xml"/>
+  </subant>
+</target>   
 
-<target name="dist" depends="all,parsers" description="Compiling sources and make a release file ...">
+<!-- making a release file for yacy -->   
+<target name="dist" depends="all,parsers,seedUploaders" description="Compiling sources and make a release file ...">
 
+  <!-- defining some file/directory access rights -->   
   <property name="accessRightsDir" value="755"/>
   <property name="accessRightsFile" value="644"/>
 
   <tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes">
 
-  <!-- copy classes -->
+  <!-- copy class files -->
   <tarfileset dir="${build}" prefix="classes" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
     <include name="**/*.*"/>
     <exclude name="de/anomic/plasma/parser/*/*"/>
+    <exclude name="de/anomic/yacy/seedUpload/**"/> 
+    <exclude name="de/anomic/soap/**"/>
   </tarfileset>
-
+    <tarfileset dir="${build}" prefix="classes" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+      <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.class"/>
+      <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.class"/>        
+    </tarfileset>
+    
   <!-- copy libs -->
   <tarfileset dir="${lib}" includes="**/*" prefix="lib" dirmode="${accessRightsDir}" mode="${accessRightsFile}"/>
 
@@ -190,12 +229,23 @@
   <tarfileset dir="${src}" prefix="source" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
     <include name="**/*.*"/>
     <exclude name="de/anomic/plasma/parser/*/*"/>
+    <exclude name="de/anomic/yacy/seedUpload/yacySeedUpload**"/>
+    <exclude name="de/anomic/soap/**"/> 
   </tarfileset>
+  <tarfileset dir="${src}" prefix="source" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
+    <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java"/>
+    <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>        
+  </tarfileset>    
 
   <!-- copy server pages -->
   <tarfileset dir="${htroot}" prefix="htroot" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
     <include name="**/*"/>
+    <exclude name="yacy/seedUpload/**"/>     
   </tarfileset>
+    <tarfileset dir="${htroot}" prefix="htroot" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+      <include name="yacy/seedUpload/yacySeedUploadFile.html"/>
+      <include name="yacy/seedUpload/yacySeedUploadFtp.html"/>        
+    </tarfileset>    
 
   <!-- copy add-on's -->
   <tarfileset dir="${addon}" prefix="addon" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
@@ -203,9 +253,12 @@
   </tarfileset>
   </tar>
 
+  <!-- writing the current release version into a file -->   
   <echo message="${releaseVersion}" file="${doc}/release.txt"/>
 </target>
 
+
+<!-- make clean -->   
 <target name="clean" description="make clean"> 
   <delete>
     <fileset dir="${build}" includes="**/*.class" />

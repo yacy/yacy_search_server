@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Hashtable;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -62,6 +63,7 @@ public final class plasmaCrawlLoader extends Thread {
     
     private final CrawlerMessageQueue theQueue;
     private final CrawlerPool crawlwerPool;
+    private GenericObjectPool.Config cralwerPoolConfig = null; 
     private final ThreadGroup theThreadGroup = new ThreadGroup("CrawlerThreads");
     private boolean stopped = false;
     
@@ -73,8 +75,7 @@ public final class plasmaCrawlLoader extends Thread {
             int mslots, 
             boolean proxyUse, 
             String proxyHost, 
-            int proxyPort,
-            HashSet acceptMimeTypes) {
+            int proxyPort) {
         this.setName("plasmaCrawlLoader");
         
     	this.cacheManager    = cacheManager;
@@ -88,24 +89,24 @@ public final class plasmaCrawlLoader extends Thread {
         
         // configuring the crawler thread pool
         // implementation of session thread pool
-        GenericObjectPool.Config config = new GenericObjectPool.Config();
+        this.cralwerPoolConfig = new GenericObjectPool.Config();
         
         // The maximum number of active connections that can be allocated from pool at the same time,
         // 0 for no limit
-        config.maxActive = this.maxSlots;
+        this.cralwerPoolConfig.maxActive = this.maxSlots;
         
         // The maximum number of idle connections connections in the pool
         // 0 = no limit.        
-        config.maxIdle = this.maxSlots / 2;
-        config.minIdle = this.maxSlots / 4;    
+        this.cralwerPoolConfig.maxIdle = this.maxSlots / 2;
+        this.cralwerPoolConfig.minIdle = this.maxSlots / 4;    
         
         // block undefinitely 
-        config.maxWait = -1; 
+        this.cralwerPoolConfig.maxWait = -1; 
         
         // Action to take in case of an exhausted DBCP statement pool
         // 0 = fail, 1 = block, 2= grow        
-        config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
-        config.minEvictableIdleTimeMillis = 30000; 
+        this.cralwerPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
+        this.cralwerPoolConfig.minEvictableIdleTimeMillis = 30000; 
 //        config.testOnReturn = true;
         
         CrawlerFactory theFactory = new CrawlerFactory(
@@ -115,13 +116,20 @@ public final class plasmaCrawlLoader extends Thread {
                 proxyUse,
                 proxyHost,
                 proxyPort,
-                acceptMimeTypes,
                 log);
         
-        this.crawlwerPool = new CrawlerPool(theFactory,config,this.theThreadGroup);        
+        this.crawlwerPool = new CrawlerPool(theFactory,this.cralwerPoolConfig,this.theThreadGroup);        
         
         // start the crawl loader
         this.start();
+    }
+    
+    public GenericObjectPool.Config getPoolConfig() {
+        return this.cralwerPoolConfig;
+    }
+    
+    public void setPoolConfig(GenericObjectPool.Config newConfig) {
+        this.crawlwerPool.setConfig(newConfig);
     }
     
     public void close() {
@@ -343,8 +351,7 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
     private final int             socketTimeout;
     private final boolean         remoteProxyUse;
     private final String          remoteProxyHost;
-    private final int             remoteProxyPort;
-    private final HashSet         acceptMimeTypes;    
+    private final int             remoteProxyPort;   
     private final serverLog       theLog;
     
     public CrawlerFactory(           
@@ -354,7 +361,6 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
             boolean remoteProxyUse,
             String  remoteProxyHost,
             int remoteProxyPort,
-            HashSet acceptMimeTypes,
             serverLog theLog) {
         
         super();  
@@ -367,8 +373,7 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
         this.socketTimeout = socketTimeout;
         this.remoteProxyUse = remoteProxyUse;
         this.remoteProxyHost = remoteProxyHost;
-        this.remoteProxyPort = remoteProxyPort;
-        this.acceptMimeTypes = acceptMimeTypes;  
+        this.remoteProxyPort = remoteProxyPort;  
         this.theLog = theLog;
     }
     
@@ -388,7 +393,6 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
                 this.remoteProxyUse,
                 this.remoteProxyHost,
                 this.remoteProxyPort,
-                this.acceptMimeTypes,
                 this.theLog);
     }
     

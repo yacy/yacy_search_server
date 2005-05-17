@@ -103,8 +103,8 @@ import de.anomic.yacy.yacyCore;
 public final class yacy {
     
     // static objects
-    private static final String vString = "@REPL_VERSION@";
-    private static final String vDATE   = "@REPL_DATE@";
+    private static final String vString = "0.374";
+    private static final String vDATE   = "20050514";
     private static final String copyright = "[ YACY Proxy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
         
@@ -231,9 +231,6 @@ public final class yacy {
                 sb.setConfig("downloadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
                 sb.setConfig("downloadAccountBase64", "");
             }
-            
-            // init parser
-            de.anomic.plasma.plasmaParser.initMediaExt(sb.getConfig("mediaExt",""));
             
             // start main threads
             try {

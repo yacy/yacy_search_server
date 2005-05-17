@@ -259,23 +259,23 @@ public final class plasmaHTCache {
 	if (((entry.status == CACHE_FILL) || (entry.status == CACHE_STALE_RELOAD_GOOD)) &&
 	    ((storeError = entry.shallStoreCache()) == null)) {
 
-	    // write file if not written yet
-	    if (entry.cacheArray != null) try {
-		if (entry.cacheFile.exists()) {
-                    currCacheSize -= entry.cacheFile.length();
-                    entry.cacheFile.delete();
-                }
-		entry.cacheFile.getParentFile().mkdirs();
-		log.logInfo("WRITE FILE (" + entry.cacheArray.length + " bytes) " + entry.cacheFile);
-                serverFileUtils.write(entry.cacheArray, entry.cacheFile);
-		log.logDebug("AFTER WRITE cacheArray = " + entry.cacheFile + ": " + ((entry.cacheArray == null) ? "empty" : "full"));
-		//entry.cacheArray = null;
-	    } catch (FileNotFoundException e) {
-		// this is the case of a "(Not a directory)" error, which should be prohibited
-		// by the shallStoreCache() property. However, sometimes the error still occurs
-		// In this case do nothing.
-                log.logError("File storage failed: " + e.getMessage());
-	    }
+        // write file if not written yet
+        if (entry.cacheArray != null) try {
+            if (entry.cacheFile.exists()) {
+                currCacheSize -= entry.cacheFile.length();
+                entry.cacheFile.delete();
+            }
+            entry.cacheFile.getParentFile().mkdirs();
+            log.logInfo("WRITE FILE (" + entry.cacheArray.length + " bytes) " + entry.cacheFile);
+            serverFileUtils.write(entry.cacheArray, entry.cacheFile);
+            log.logDebug("AFTER WRITE cacheArray = " + entry.cacheFile + ": " + ((entry.cacheArray == null) ? "empty" : "full"));
+            //entry.cacheArray = null;
+        } catch (FileNotFoundException e) {
+            // this is the case of a "(Not a directory)" error, which should be prohibited
+            // by the shallStoreCache() property. However, sometimes the error still occurs
+            // In this case do nothing.
+            log.logError("File storage failed: " + e.getMessage());
+        }
 	    
 	    // update statistics
 	    currCacheSize += entry.cacheFile.length();
@@ -352,36 +352,44 @@ public final class plasmaHTCache {
     }
 
     public static boolean isPicture(httpHeader response) {
-	Object ct = response.get("Content-Type");
-	if (ct == null) return false;
-	return ((String)ct).toUpperCase().startsWith("IMAGE");
+        Object ct = response.get(httpHeader.CONTENT_TYPE);
+        if (ct == null) return false;
+        return ((String)ct).toUpperCase().startsWith("IMAGE");
     }
     
     public static boolean isText(httpHeader response) {
-	Object ct = response.get("Content-Type");
-	if (ct == null) return false;
-	String t = ((String)ct).toLowerCase();
-	return ((t.startsWith("text")) || (t.equals("application/xhtml+xml")));
+//      Object ct = response.get(httpHeader.CONTENT_TYPE);
+//      if (ct == null) return false;
+//      String t = ((String)ct).toLowerCase();
+//      return ((t.startsWith("text")) || (t.equals("application/xhtml+xml")));
+        return plasmaParser.supportedMimeTypesContains(response.mime());
     }
 
     public static boolean noIndexingURL(String urlString) {
-	if (urlString == null) return false;
+        if (urlString == null) return false;
         urlString = urlString.toLowerCase();
-        return (
-            (urlString.endsWith(".gz")) ||
-            (urlString.endsWith(".msi")) ||
-            (urlString.endsWith(".doc")) ||
-            (urlString.endsWith(".zip")) ||
-            (urlString.endsWith(".tgz")) ||
-            (urlString.endsWith(".rar")) ||
-            (urlString.endsWith(".pdf")) ||
-            (urlString.endsWith(".ppt")) ||
-            (urlString.endsWith(".xls")) ||
-            (urlString.endsWith(".log")) ||
-            (urlString.endsWith(".java")) ||
-            (urlString.endsWith(".c")) ||
-            (urlString.endsWith(".p"))
-            );
+//        return (
+//                (urlString.endsWith(".gz")) ||
+//                (urlString.endsWith(".msi")) ||
+//                (urlString.endsWith(".doc")) ||
+//                (urlString.endsWith(".zip")) ||
+//                (urlString.endsWith(".tgz")) ||
+//                (urlString.endsWith(".rar")) ||
+//                (urlString.endsWith(".pdf")) ||
+//                (urlString.endsWith(".ppt")) ||
+//                (urlString.endsWith(".xls")) ||
+//                (urlString.endsWith(".log")) ||
+//                (urlString.endsWith(".java")) ||
+//                (urlString.endsWith(".c")) ||
+//                (urlString.endsWith(".p"))
+//        );
+        int idx = urlString.indexOf("?");
+        if (idx > 0) urlString = urlString.substring(0,idx);
+        
+        idx = urlString.lastIndexOf(".");
+        if (idx > 0) urlString = urlString.substring(idx+1);
+        
+        return plasmaParser.mediaExtContains(urlString);
     }
         
     // this method creates from a given host and path a cache path
@@ -537,7 +545,7 @@ public final class plasmaHTCache {
         public URL referrerURL() {
             if (requestHeader == null) return null;
             try {
-                return new URL((String) requestHeader.get("Referer", ""));
+                return new URL((String) requestHeader.get(httpHeader.REFERER, ""));
             } catch (Exception e) {
                 return null;
             }
@@ -573,18 +581,18 @@ public final class plasmaHTCache {
             
 	    // -CGI access in request
 	    // CGI access makes the page very individual, and therefore not usable in caches
-	    if ((isPOST(nomalizedURLString)) && (!(profile.crawlingQ()))) return "dynamic_post";
-            if (isCGI(nomalizedURLString)) return "dynamic_cgi";
+        if ((isPOST(nomalizedURLString)) && (!(profile.crawlingQ()))) return "dynamic_post";
+        if (isCGI(nomalizedURLString)) return "dynamic_cgi";
 	    
 	    // -authorization cases in request
 	    // authorization makes pages very individual, and therefore we cannot use the
 	    // content in the cache
-	    if ((requestHeader != null) && (requestHeader.containsKey("AUTHORIZATION"))) return "personalized";
+	    if ((requestHeader != null) && (requestHeader.containsKey(httpHeader.AUTHORIZATION))) return "personalized";
 	    
 	    // -ranges in request and response
 	    // we do not cache partial content
-	    if ((requestHeader != null) && (requestHeader.containsKey("RANGE"))) return "partial";
-	    if ((responseHeader != null) && (responseHeader.containsKey("CONTENT-RANGE"))) return "partial";
+	    if ((requestHeader != null) && (requestHeader.containsKey(httpHeader.RANGE))) return "partial";
+	    if ((responseHeader != null) && (responseHeader.containsKey(httpHeader.CONTENT_RANGE))) return "partial";
 	    
 	    // -if-modified-since in request
 	    // we do not care about if-modified-since, because this case only occurres if the
@@ -602,8 +610,8 @@ public final class plasmaHTCache {
 	    // -pragma in response
 	    // if we have a pragma non-cache, we don't cache. usually if this is wanted from
 	    // the server, it makes sense
-	    if ((responseHeader.containsKey("PRAGMA")) &&
-		(((String) responseHeader.get("Pragma")).toUpperCase().equals("NO-CACHE"))) return "controlled_no_cache";
+	    if ((responseHeader.containsKey(httpHeader.PRAGMA)) &&
+		(((String) responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return "controlled_no_cache";
 	    
 	    // -expires in response
 	    // we do not care about expires, because at the time this is called the data is
@@ -611,7 +619,7 @@ public final class plasmaHTCache {
 	    
 	    // -cache-control in response
 	    // the cache-control has many value options.
-	    String cacheControl = (String) responseHeader.get("Cache-Control");
+	    String cacheControl = (String) responseHeader.get(httpHeader.CACHE_CONTROL);
 	    if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("MAX-AGE=")) {
@@ -645,21 +653,21 @@ public final class plasmaHTCache {
 	    if (isCGI(nomalizedURLString)) return false;
 	    
 	    // -authorization cases in request
-	    if (requestHeader.containsKey("AUTHORIZATION")) return false;
+	    if (requestHeader.containsKey(httpHeader.AUTHORIZATION)) return false;
 	    
 	    // -ranges in request
 	    // we do not cache partial content
-	    if ((requestHeader != null) && (requestHeader.containsKey("RANGE"))) return false;
+	    if ((requestHeader != null) && (requestHeader.containsKey(httpHeader.RANGE))) return false;
 	    
 	    //Date d1, d2;
 
 	    // -if-modified-since in request
 	    // The entity has to be transferred only if it has
 	    // been modified since the date given by the If-Modified-Since header.
-	    if (requestHeader.containsKey("IF-MODIFIED-SINCE")) {
+	    if (requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) {
 		// checking this makes only sense if the cached response contains
 		// a Last-Modified field. If the field does not exist, we go the safe way
-		if (!(responseHeader.containsKey("Last-Modified"))) return false;
+		if (!(responseHeader.containsKey(httpHeader.LAST_MODIFIED))) return false;
 		// parse date
                 Date d1, d2;
 		d2 = responseHeader.lastModified(); if (d2 == null) d2 = new Date();
@@ -673,25 +681,25 @@ public final class plasmaHTCache {
 	    // -cookies in request
 	    // unfortunately, we should reload in case of a cookie
 	    // but we think that pictures can still be considered as fresh
-	    if ((requestHeader.containsKey("COOKIE")) && (isNotPicture)) return false;
+	    if ((requestHeader.containsKey(httpHeader.COOKIE)) && (isNotPicture)) return false;
 	    
 	    // -set-cookie in cached response
 	    // this is a similar case as for COOKIE.
-	    if ((responseHeader.containsKey("SET-COOKIE")) && (isNotPicture)) return false; // too strong
-	    if ((responseHeader.containsKey("SET-COOKIE2")) && (isNotPicture)) return false; // too strong
+	    if ((responseHeader.containsKey(httpHeader.SET_COOKIE)) && (isNotPicture)) return false; // too strong
+	    if ((responseHeader.containsKey(httpHeader.SET_COOKIE2)) && (isNotPicture)) return false; // too strong
 	    
 	    // -pragma in cached response
 	    // logically, we would not need to care about no-cache pragmas in cached response headers,
 	    // because they cannot exist since they are not written to the cache.
 	    // So this IF should always fail..
-	    if ((responseHeader.containsKey("PRAGMA")) &&
-		(((String) responseHeader.get("Pragma")).toUpperCase().equals("NO-CACHE"))) return false;
+	    if ((responseHeader.containsKey(httpHeader.PRAGMA)) &&
+		(((String) responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return false;
 	    
 	    // calculate often needed values for freshness attributes
 	    Date date           = responseHeader.date();
 	    Date expires        = responseHeader.expires();
 	    Date lastModified   = responseHeader.lastModified();
-	    String cacheControl = (String) responseHeader.get("Cache-Control");
+	    String cacheControl = (String) responseHeader.get(httpHeader.CACHE_CONTROL);
 	    
 	    
 	    // see for documentation also:
@@ -784,8 +792,8 @@ public final class plasmaHTCache {
 	    // -if-modified-since in request
 	    // if the page is fresh at the very moment we can index it
 	    if ((requestHeader != null) &&
-                (requestHeader.containsKey("IF-MODIFIED-SINCE")) &&
-                (responseHeader.containsKey("Last-Modified"))) {
+                (requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) &&
+                (responseHeader.containsKey(httpHeader.LAST_MODIFIED))) {
 		// parse date
                 Date d1, d2;
 		d2 = responseHeader.lastModified(); if (d2 == null) d2 = new Date();
@@ -800,7 +808,7 @@ public final class plasmaHTCache {
 	    // -cookies in request
 	    // unfortunately, we cannot index pages which have been requested with a cookie
 	    // because the returned content may be special for the client
-	    if ((requestHeader != null) && (requestHeader.containsKey("COOKIE"))) {
+	    if ((requestHeader != null) && (requestHeader.containsKey(httpHeader.COOKIE))) {
 		//System.out.println("***not indexed because cookie");
 		return "Dynamic_(Requested_With_Cookie)";
 	    }
@@ -810,8 +818,8 @@ public final class plasmaHTCache {
 	    // thus we do not care about it here for indexing
 
 	    // -pragma in cached response
-	    if ((responseHeader.containsKey("PRAGMA")) &&
-		(((String) responseHeader.get("Pragma")).toUpperCase().equals("NO-CACHE"))) return "Denied_(pragma_no_cache)";
+	    if ((responseHeader.containsKey(httpHeader.PRAGMA)) &&
+		(((String) responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return "Denied_(pragma_no_cache)";
             
 	    // see for documentation also:
 	    // http://www.web-caching.com/cacheability.html
@@ -820,7 +828,7 @@ public final class plasmaHTCache {
 	    Date date           = responseHeader.date();
 	    Date expires        = responseHeader.expires();
 	    Date lastModified   = responseHeader.lastModified();
-	    String cacheControl = (String) responseHeader.get("Cache-Control");
+	    String cacheControl = (String) responseHeader.get(httpHeader.CACHE_CONTROL);
 	    
 	    // look for freshnes information
 	    

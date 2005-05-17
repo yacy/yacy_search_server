@@ -65,8 +65,16 @@ implements Parser {
     public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
     static { SUPPORTED_MIME_TYPES.put("application/msword","doc"); } 
     
+    /**
+     * a list of library names that are needed by this parser
+     * @see Parser#getLibxDependences()
+     */
+    private static final String[] LIBX_DEPENDENCIES = new String[] {
+        "tm-extractors-0.4.jar"
+    };    
+    
 	public docParser() {
-		super();
+		super(LIBX_DEPENDENCIES);
 	}
 
 	public plasmaParserDocument parse(URL location, String mimeType,

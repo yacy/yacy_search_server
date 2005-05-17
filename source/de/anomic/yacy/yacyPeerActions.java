@@ -91,7 +91,8 @@ public class yacyPeerActions {
     }
     
     public void updateMySeed() {
-    	    if (sb.getConfig("peerName", "nameless").equals("nameless")) sb.setConfig("peerName", serverCore.publicIP().getHostName() + yacyCore.speedKey + serverSystem.infoKey() + (System.currentTimeMillis() & 99));
+    	    if (sb.getConfig("peerName", "nameless").equals("nameless")) 
+                sb.setConfig("peerName", serverCore.publicIP().getHostName() + yacyCore.speedKey + serverSystem.infoKey() + (System.currentTimeMillis() & 99));
 	    seedDB.mySeed.put("Name", sb.getConfig("peerName", "nameless"));
 	    seedDB.mySeed.put("Port", sb.getConfig("port", "8080"));
 	    seedDB.mySeed.put("ISpeed", "unknown"); // the speed of indexing (words/minute) of the peer

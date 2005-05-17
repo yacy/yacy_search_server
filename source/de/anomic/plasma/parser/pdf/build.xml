@@ -7,7 +7,7 @@
     <property name="parserShortName" value="pdf"/>
 	<property name="parserVersion" value="0.1"/>
 
-    <property name="parserLongName" value="${parserShortName}Parser"/>    	
+    <property name="parserLongName" value="yacyContentParser_${parserShortName}"/>    	
    	<property name="parserArchive" location="${release}/${parserLongName}_${parserVersion}.tgz"/>	    	
     	
     <target name="compile">

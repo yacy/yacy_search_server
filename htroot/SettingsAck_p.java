@@ -43,7 +43,14 @@
 // javac -classpath .:../Classes SettingsAck_p.java
 // if the shell's current path is HTROOT
 
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdProxyHandler;
@@ -53,9 +60,12 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacySeedUploader;
 
 public class SettingsAck_p {
     
+    private static boolean nothingChanged;
+
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
@@ -245,26 +255,106 @@ public class SettingsAck_p {
             return prop;
         }
         
-        if (post.containsKey("seedFTPsettings")) {
-            env.setConfig("seedFTPServer", (String)post.get("seedFTPServer"));
-            env.setConfig("seedFTPPath", (String)post.get("seedFTPPath"));
-            env.setConfig("seedFTPAccount", (String)post.get("seedFTPAccount"));
-            env.setConfig("seedFTPPassword", (String)post.get("seedFTPPassword"));
-            env.setConfig("seedURL", (String)post.get("seedURL"));
-            if (yacyCore.saveSeedList(env))
-                prop.put("info", 13);//SeedServer changed
-            else
-                prop.put("info", 14);//Seedserver changed, but something is wrong
-            return prop;
+        if (post.containsKey("seedSettings")) {            
+            try {
+                // getting the currently used uploading method
+                String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
+                String newSeedUploadMethod = (String)post.get("seedUploadMethod");
+                String oldSeedURLStr = env.getConfig("seedURL","");
+                String newSeedURLStr = (String)post.get("seedURL");
+                new URL(newSeedURLStr);
+                
+                boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
+                boolean uploadMethodChanged = !oldSeedUploadMethod.equals(newSeedUploadMethod);
+                if (uploadMethodChanged) {
+                    uploadMethodChanged = yacyCore.changeSeedUploadMethod((String) post.get("seedUploadMethod")); 
+                }
+
+                if (seedUrlChanged || uploadMethodChanged) {
+                    env.setConfig("seedUploadMethod", (String)post.get("seedUploadMethod"));
+                    env.setConfig("seedURL", newSeedURLStr);
+                    
+                    boolean success = yacyCore.saveSeedList(env);
+                    if (!success) {
+                        prop.put("info", 14);
+                        env.setConfig("seedUploadMethod","none");
+                    } else {
+                        prop.put("info_seedUploadMethod",newSeedUploadMethod);
+                        prop.put("info_seedURL",newSeedURLStr);
+                        prop.put("info", 19);
+                    }                  
+                }
+            } catch (Exception e) {
+                prop.put("info",14);
+            }
+            return prop;            
         }
+        
+        /* 
+         * Loop through the available seed uploaders to see if the 
+         * configuration of one of them has changed 
+         */
+        Hashtable uploaders = yacyCore.getSeedUploadMethods();
+        Enumeration uploaderKeys = uploaders.keys();
+        while (uploaderKeys.hasMoreElements()) {
+            // getting the uploader module name
+            String uploaderName = (String) uploaderKeys.nextElement();
+            
+            // determining if the user has reconfigured the settings of this uploader
+            if (post.containsKey("seed" + uploaderName + "Settings")) {
+                nothingChanged = true;
+                yacySeedUploader theUploader = yacyCore.getSeedUploader(uploaderName);
+                String[] configOptions = theUploader.getConfigurationOptions();
+                if (configOptions != null) {
+                    for (int i=0; i<configOptions.length; i++) {
+                        String newSettings = post.get(configOptions[i],"");
+                        String oldSettings = env.getConfig(configOptions[i],"");
+                        nothingChanged &= newSettings.equals(oldSettings); 
+                        if (!nothingChanged) {
+                            env.setConfig(configOptions[i],newSettings);
+                        }
+                    }
+                }   
+                if ((!nothingChanged)&&(env.getConfig("seedUploadMethod","none").equals(theUploader))) {
+                    boolean success = yacyCore.saveSeedList(env);
+                    if (!success) {
+                        prop.put("info", 14);
+                        env.setConfig("seedUploadMethod","none");
+                    } else {
+                        prop.put("info", 13);
+                    }                      
+                } else {
+                    prop.put("info", 13);
+                }
+            }
+            
+        }
+        
+
         
         if (post.containsKey("parserSettings")) {   
             plasmaSwitchboard sb = (plasmaSwitchboard)env;
 			post.remove("parserSettings");
             
-            // activate all received parsers
-            Enumeration mimeTypeEnum = post.keys();            
-            sb.parser.setEnabledParserList(mimeTypeEnum);
+            String[] enabledMimes = null;
+            if (post.containsKey("allParserEnabled")) {
+                // enable all available parsers
+                enabledMimes = sb.parser.setEnabledParserList(sb.parser.getAvailableParserList().keySet());
+            } else {
+                // activate all received parsers       
+                enabledMimes = sb.parser.setEnabledParserList(post.keySet());
+            }
+            Arrays.sort(enabledMimes);
+            
+            StringBuffer enabledMimesTxt = new StringBuffer();
+            for (int i=0; i < enabledMimes.length; i++) {
+                enabledMimesTxt.append(enabledMimes[i]).append(",");
+                prop.put("info_parser_" + i + "_enabledMime",enabledMimes[i]);
+            }
+            prop.put("info_parser",enabledMimes.length);
+            if (enabledMimesTxt.length() > 0) enabledMimesTxt.deleteCharAt(enabledMimesTxt.length()-1);            
+            
+            env.setConfig("parseableMimeTypes",enabledMimesTxt.toString());
             
             prop.put("info", 18);
             return prop;

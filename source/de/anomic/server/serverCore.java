@@ -64,6 +64,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
 public final class serverCore extends serverAbstractThread implements serverThread {
 
@@ -81,7 +82,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     // class variables
     private int port;                      // the listening port
     private ServerSocket socket;           // listener
-    private int maxSessions = 0;           // max. number of sessions; 0=unlimited
+    public int maxSessions = 0;           // max. number of sessions; 0=unlimited
     serverLog log;                         // log object
     private int timeout;                   // connection time-out of the socket
     
@@ -101,6 +102,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
      */
     final SessionPool theSessionPool;
     final ThreadGroup theSessionThreadGroup = new ThreadGroup("sessionThreadGroup");
+    private Config cralwerPoolConfig = null;
 
     private static ServerSocketFactory getServerSocketFactory(boolean dflt, File keyfile, String passphrase) {
         // see doc's at
@@ -151,68 +153,77 @@ public final class serverCore extends serverAbstractThread implements serverThre
 
     // class initializer
     public serverCore(int port, int maxSessions, int timeout,
-                      boolean termSleepingThreads, boolean blockAttack,
-                      serverHandler handlerPrototype, serverSwitch switchboard,
-                      int commandMaxLength, int logl) throws IOException {
+            boolean termSleepingThreads, boolean blockAttack,
+            serverHandler handlerPrototype, serverSwitch switchboard,
+            int commandMaxLength, int logl) throws IOException {
         this.port = port;
         this.commandMaxLength = commandMaxLength;
         this.denyHost = (blockAttack) ? new Hashtable() : null;
-
+        
         /*
+         try {
+         ServerSocketFactory ssf = getServerSocketFactory(false, new File("D:\\dev\\proxy\\addon\\testkeys"), "passphrase");
+         this.socket = ssf.createServerSocket(port);
+         //((SSLServerSocket) this.socket ).setNeedClientAuth(true);
+          } catch (java.net.BindException e) {
+          System.out.println("FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number"); System.exit(0);
+          }
+          */
+        
+        
         try {
-            ServerSocketFactory ssf = getServerSocketFactory(false, new File("D:\\dev\\proxy\\addon\\testkeys"), "passphrase");
-            this.socket = ssf.createServerSocket(port);
-            //((SSLServerSocket) this.socket ).setNeedClientAuth(true);
+            this.socket = new ServerSocket(port);
         } catch (java.net.BindException e) {
             System.out.println("FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number"); System.exit(0);
         }
-        */
-        
-    	try {
-                this.socket = new ServerSocket(port);
-    	} catch (java.net.BindException e) {
-     	    System.out.println("FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number"); System.exit(0);
-    	}
         
         try {
             this.handlerPrototype = handlerPrototype;
             this.switchboard = switchboard;
-    	    this.initHandlerClasses = new Class[] {Class.forName("de.anomic.server.serverSwitch")};
-    	    this.initSessionClasses = new Class[] {Class.forName("de.anomic.server.serverCore$Session")};
-    	    this.maxSessions = maxSessions;
-    	    this.timeout = timeout;
-    	    this.termSleepingThreads = termSleepingThreads;
+            this.initHandlerClasses = new Class[] {Class.forName("de.anomic.server.serverSwitch")};
+            this.initSessionClasses = new Class[] {Class.forName("de.anomic.server.serverCore$Session")};
+            this.maxSessions = maxSessions;
+            this.timeout = timeout;
+            this.termSleepingThreads = termSleepingThreads;
             this.log = new serverLog("SERVER", logl);
-//    	    activeThreads = new Hashtable();
-//    	    sleepingThreads = new Hashtable();
-    	} catch (java.lang.ClassNotFoundException e) {
-     	    System.out.println("FATAL ERROR: " + e.getMessage() + " - Class Not Found"); System.exit(0);
-    	}
+//          activeThreads = new Hashtable();
+//          sleepingThreads = new Hashtable();
+        } catch (java.lang.ClassNotFoundException e) {
+            System.out.println("FATAL ERROR: " + e.getMessage() + " - Class Not Found"); System.exit(0);
+        }
         
         // implementation of session thread pool
-        GenericObjectPool.Config config = new GenericObjectPool.Config();
+        this.cralwerPoolConfig = new GenericObjectPool.Config();
         
         // The maximum number of active connections that can be allocated from pool at the same time,
         // 0 for no limit
-        config.maxActive = this.maxSessions;
+        this.cralwerPoolConfig.maxActive = this.maxSessions;
         
         // The maximum number of idle connections connections in the pool
         // 0 = no limit.        
-        config.maxIdle = this.maxSessions / 2;
-        config.minIdle = this.maxSessions / 4;    
+        this.cralwerPoolConfig.maxIdle = this.maxSessions / 2;
+        this.cralwerPoolConfig.minIdle = this.maxSessions / 4;    
         
         // block undefinitely 
-        config.maxWait = timeout; 
+        this.cralwerPoolConfig.maxWait = timeout; 
         
         // Action to take in case of an exhausted DBCP statement pool
         // 0 = fail, 1 = block, 2= grow        
-        config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
-        config.minEvictableIdleTimeMillis = this.thresholdSleep; 
-        config.testOnReturn = true;
+        this.cralwerPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
+        this.cralwerPoolConfig.minEvictableIdleTimeMillis = this.thresholdSleep; 
+        this.cralwerPoolConfig.testOnReturn = true;
         
-        this.theSessionPool = new SessionPool(new SessionFactory(this.theSessionThreadGroup),config);  
-    
+        this.theSessionPool = new SessionPool(new SessionFactory(this.theSessionThreadGroup),this.cralwerPoolConfig);  
+        
     }
+    
+    public GenericObjectPool.Config getPoolConfig() {
+        return this.cralwerPoolConfig ;
+    }
+    
+    public void setPoolConfig(GenericObjectPool.Config newConfig) {
+        this.theSessionPool.setConfig(newConfig);
+    }    
     
     public static boolean isNotLocal(URL url) {
         return isNotLocal(url.getHost());
@@ -228,52 +239,58 @@ public final class serverCore extends serverAbstractThread implements serverThre
     }
     
     public static InetAddress publicIP() {
-	try {
-	    // list all addresses
-	    //InetAddress[] ia = InetAddress.getAllByName("localhost");
-	    InetAddress[] ia = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
-	    //for (int i = 0; i < ia.length; i++) System.out.println("IP: " + ia[i].getHostAddress()); // DEBUG
-	    if (ia.length == 0) {
-		try {
-		    return InetAddress.getLocalHost();
-		} catch (UnknownHostException e) {
-		    try {
-			return InetAddress.getByName("127.0.0.1");
-		    } catch (UnknownHostException ee) {
-			return null;
-		    }
-		}
-	    }
-	    if (ia.length == 1) {
-		// only one network connection available
-		return ia[0];
-	    }
-	    // we have more addresses, find an address that is not local
-	    int b0, b1;
-	    for (int i = 0; i < ia.length; i++) {
-		b0 = 0Xff & ia[i].getAddress()[0];
-		b1 = 0Xff & ia[i].getAddress()[1];
-		if ((b0 != 10) && // class A reserved
-		    (b0 != 127) && // loopback
-		    ((b0 != 172) || (b1 < 16) || (b1 > 31)) && // class B reserved
-		    ((b0 != 192) || (b0 != 168)) && // class C reserved
-		    (ia[i].getHostAddress().indexOf(":") < 0)
-		    ) return ia[i];
-	    }
-	    // there is only a local address, we filter out the possibly returned loopback address 127.0.0.1
-	    for (int i = 0; i < ia.length; i++) {
-		if (((0Xff & ia[i].getAddress()[0]) != 127) &&
-		    (ia[i].getHostAddress().indexOf(":") < 0)) return ia[i];
-	    }
-	    // if all fails, give back whatever we have
-	    for (int i = 0; i < ia.length; i++) {
-		if (ia[i].getHostAddress().indexOf(":") < 0) return ia[i];
-	    }
-	    return ia[0];
-	} catch (java.net.UnknownHostException e) {
-	    System.err.println("ERROR: (internal) " + e.getMessage());
-	    return null;
-	}
+        try {
+            
+//            TODO: implement port forwarding here ...            
+//            if (portForwardingEnabled) {
+//                
+//            }
+            
+            // list all addresses
+            //InetAddress[] ia = InetAddress.getAllByName("localhost");
+            InetAddress[] ia = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
+            //for (int i = 0; i < ia.length; i++) System.out.println("IP: " + ia[i].getHostAddress()); // DEBUG
+            if (ia.length == 0) {
+                try {
+                    return InetAddress.getLocalHost();
+                } catch (UnknownHostException e) {
+                    try {
+                        return InetAddress.getByName("127.0.0.1");
+                    } catch (UnknownHostException ee) {
+                        return null;
+                    }
+                }
+            }
+            if (ia.length == 1) {
+                // only one network connection available
+                return ia[0];
+            }
+            // we have more addresses, find an address that is not local
+            int b0, b1;
+            for (int i = 0; i < ia.length; i++) {
+                b0 = 0Xff & ia[i].getAddress()[0];
+                b1 = 0Xff & ia[i].getAddress()[1];
+                if ((b0 != 10) && // class A reserved
+                        (b0 != 127) && // loopback
+                        ((b0 != 172) || (b1 < 16) || (b1 > 31)) && // class B reserved
+                        ((b0 != 192) || (b0 != 168)) && // class C reserved
+                        (ia[i].getHostAddress().indexOf(":") < 0)
+                ) return ia[i];
+            }
+            // there is only a local address, we filter out the possibly returned loopback address 127.0.0.1
+            for (int i = 0; i < ia.length; i++) {
+                if (((0Xff & ia[i].getAddress()[0]) != 127) &&
+                        (ia[i].getHostAddress().indexOf(":") < 0)) return ia[i];
+            }
+            // if all fails, give back whatever we have
+            for (int i = 0; i < ia.length; i++) {
+                if (ia[i].getHostAddress().indexOf(":") < 0) return ia[i];
+            }
+            return ia[0];
+        } catch (java.net.UnknownHostException e) {
+            System.err.println("ERROR: (internal) " + e.getMessage());
+            return null;
+        }
     }
 
     public void open() {

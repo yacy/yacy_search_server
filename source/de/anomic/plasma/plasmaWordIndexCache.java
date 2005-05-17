@@ -49,7 +49,7 @@ import de.anomic.kelondro.*;
 import de.anomic.server.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public class plasmaWordIndexCache implements plasmaWordIndexInterface {
+public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     
     // environment constants
     private static final String indexDumpFileName = "indexDump0.stack";

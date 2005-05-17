@@ -57,10 +57,10 @@ import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.server.serverLog;
 
-public class plasmaWordIndex {
+public final class plasmaWordIndex {
     
-    File databaseRoot;
-    plasmaWordIndexCache ramCache;
+    final File databaseRoot;
+    final plasmaWordIndexCache ramCache;
     
     public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) throws IOException {
         this.databaseRoot = databaseRoot;

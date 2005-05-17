@@ -77,6 +77,7 @@ public final class httpd implements serverHandler {
     private static HashMap reverseMappingCache = new HashMap();
     private static httpdHandler proxyHandler = null;   // a servlet that holds the proxy functions
     private static httpdHandler fileHandler = null;    // a servlet that holds the file serving functions
+    private static httpdHandler soapHandler = null;
     private static serverSwitch switchboard = null;
     private static String virtualHost = null;
 
@@ -254,18 +255,36 @@ public final class httpd implements serverHandler {
 	if (prop.getProperty("HOST").equals(virtualHost)) {
 	    // pass to server
 	    if (allowServer) {
-		if (serverAccountBase64MD5 == null) serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
-		if (serverAccountBase64MD5.length() == 0) {
+            
+            /*
+             * Handling SOAP Requests here ...
+             */
+            if (this.prop.containsKey("PATH") && this.prop.getProperty("PATH").startsWith("/soap")) {
+                if (soapHandler == null) {
+                    try {
+                        soapHandler  = (httpdHandler) Class.forName("de.anomic.soap.httpdSoapHandler").newInstance();
+                    } catch (Exception e) {
+                        throw new IOException("Unable to load the soap handler");
+                    }
+                }
+                soapHandler.doGet(prop, header, this.session.out);
+                
+            /*
+             * Handling HTTP requests here ...
+             */
+            } else {                               
+                if (serverAccountBase64MD5 == null) serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
+                if (serverAccountBase64MD5.length() == 0) {
                     // no authenticate requested
-		    if (fileHandler == null) fileHandler  = new httpdFileHandler(this.switchboard);
-		    fileHandler.doGet(prop, header, this.session.out);
+                    if (fileHandler == null) fileHandler  = new httpdFileHandler(this.switchboard);
+                    fileHandler.doGet(prop, header, this.session.out);
                 } else {
                     String auth = (String) header.get(httpHeader.AUTHORIZATION);
                     if (auth == null) {
                         // authorization requested, but no authorizeation given in header. Ask for authenticate:
                         session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
-                        httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
-                        serverCore.crlfString).getBytes());
+                                httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
+                                serverCore.crlfString).getBytes());
                         return serverCore.TERMINATE_CONNECTION;
                     } else if (serverAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(auth.trim().substring(6)))) {
                         // we are authorized
@@ -276,10 +295,11 @@ public final class httpd implements serverHandler {
                         serverLog.logInfo("HTTPD", "Wrong log-in for account 'server' in HTTPD.GET " + prop.getProperty("PATH") + " from IP " + clientIP);
                         session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
                                 httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
-                        serverCore.crlfString).getBytes());
+                                serverCore.crlfString).getBytes());
                         return serverCore.TERMINATE_CONNECTION;
                     }
                 }
+            }
 	    } else {
 		// not authorized through firewall blocking (ip does not match filter)
 		session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this server, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.crlfString).getBytes());
@@ -409,7 +429,24 @@ public final class httpd implements serverHandler {
 	if (prop.getProperty("HOST").equals(virtualHost)) {
 	    // pass to server
 	    if (allowServer) {
-		if (serverAccountBase64MD5 == null) serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
+            
+            /*
+             * Handling SOAP Requests here ...
+             */
+            if (this.prop.containsKey("PATH") && this.prop.getProperty("PATH").startsWith("/soap")) {
+                if (soapHandler == null) {
+                    try {
+                        soapHandler  = (httpdHandler) Class.forName("de.anomic.soap.httpdSoapHandler").newInstance();
+                    } catch (Exception e) {
+                        throw new IOException("Unable to load the soap handler");
+                    }
+                }
+                soapHandler.doPost(prop, header, this.session.out, this.session.in);                
+            /*
+             * Handling normal HTTP requests here ...
+             */
+            } else {                         
+                if (serverAccountBase64MD5 == null) serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
                 if (serverAccountBase64MD5.length() == 0) {
                     // no authenticate requested
                     if (fileHandler == null) fileHandler  = new httpdFileHandler(this.switchboard);
@@ -419,8 +456,8 @@ public final class httpd implements serverHandler {
                     if (auth == null) {
                         // ask for authenticate
                         session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
-                        httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
-                        serverCore.crlfString).getBytes());
+                                httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
+                                serverCore.crlfString).getBytes());
                         return serverCore.TERMINATE_CONNECTION;
                     } else if (serverAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(auth.trim().substring(6)))) {
                         // we are authorized
@@ -430,39 +467,40 @@ public final class httpd implements serverHandler {
                         // wrong password given: ask for authenticate again
                         serverLog.logInfo("HTTPD", "Wrong log-in for account 'server' in HTTPD.POST " + prop.getProperty("PATH") + " from IP " + clientIP);
                         session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
-                        httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
-                        serverCore.crlfString).getBytes());
+                                httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
+                                serverCore.crlfString).getBytes());
                         return serverCore.TERMINATE_CONNECTION;
                     }
                 }
-	    } else {
-		// not authorized through firewall blocking (ip does not match filter)
-		session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this server, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.crlfString).getBytes());
-		return serverCore.TERMINATE_CONNECTION;
-	    }
+            }
+        } else {
+            // not authorized through firewall blocking (ip does not match filter)
+            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this server, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.crlfString).getBytes());
+            return serverCore.TERMINATE_CONNECTION;
+        }
 	} else {
-	    // pass to proxy
-	    if (allowProxy) {
-		if (proxyAccountBase64MD5 == null) proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
-		if ((proxyAccountBase64MD5.length() == 0) ||
-		    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get(httpHeader.PROXY_AUTHORIZATION, "xxxxxx")).trim().substring(6))))) {
-		    // we are authorized or no authenticate requested
-		    if (proxyHandler != null) proxyHandler.doPost(prop, header, this.session.out, this.session.in);
-		} else {
-		    // ask for authenticate
-		    session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-				       httpHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
-				       serverCore.crlfString).getBytes());
-		    return serverCore.TERMINATE_CONNECTION;
-		}
-	    } else {
-		// not authorized through firewall blocking (ip does not match filter)
-		session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
-		return serverCore.TERMINATE_CONNECTION;
-	    }
-	}
-	//return serverCore.RESUME_CONNECTION;
-	return (persistent) ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+        // pass to proxy
+        if (allowProxy) {
+            if (proxyAccountBase64MD5 == null) proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
+            if ((proxyAccountBase64MD5.length() == 0) ||
+                    (proxyAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(((String) header.get(httpHeader.PROXY_AUTHORIZATION, "xxxxxx")).trim().substring(6))))) {
+                // we are authorized or no authenticate requested
+                if (proxyHandler != null) proxyHandler.doPost(prop, header, this.session.out, this.session.in);
+            } else {
+                // ask for authenticate
+                session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
+                        httpHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
+                        serverCore.crlfString).getBytes());
+                return serverCore.TERMINATE_CONNECTION;
+            }
+        } else {
+            // not authorized through firewall blocking (ip does not match filter)
+            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
+            return serverCore.TERMINATE_CONNECTION;
+        }
+    }
+    //return serverCore.RESUME_CONNECTION;
+    return (persistent) ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
     }
 
 
@@ -863,14 +901,14 @@ permission
         return new httpd(this.switchboard, this.fileHandler, this.proxyHandler);        
     }
 
-    public static boolean isTextMime(String mime, Set whitelist) {
-        if (whitelist.contains(mime)) return true;
-        // some mime-types are given as "text/html; charset=...", so look for ";"
-        if (mime.length() == 0) return false;
-        int pos = mime.indexOf(';');
-        if (pos < 0) return false;
-        return whitelist.contains(mime.substring(0, pos));
-    }
+//    public static boolean isTextMime(String mime, Set whitelist) {
+//        if (whitelist.contains(mime)) return true;
+//        // some mime-types are given as "text/html; charset=...", so look for ";"
+//        if (mime.length() == 0) return false;
+//        int pos = mime.indexOf(';');
+//        if (pos < 0) return false;
+//        return whitelist.contains(mime.substring(0, pos));
+//    }
 }
 
 /*

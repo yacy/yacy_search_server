@@ -40,6 +40,7 @@
 
 package de.anomic.yacy;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -60,6 +61,7 @@ import de.anomic.kelondro.kelondroMap;
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverSwitch;
 import de.anomic.tools.disorderHeap;
 
 public class yacySeedDB {
@@ -480,56 +482,76 @@ public class yacySeedDB {
     }
 
     private Vector storeCache(File seedFile, boolean addMySeed) throws IOException {
-	PrintWriter pw = new PrintWriter(new FileWriter(seedFile));
-	Vector v = new Vector();
-	// store own seed
-	String line;
-	if ((addMySeed) && (mySeed != null)) {
-	    line = mySeed.genSeedStr(null);
-	    v.add(line);
-	    pw.print(line + serverCore.crlfString);
-	}
-	// store other seeds
-	yacySeed ys;
-	for (int i = 0; i < seedActiveDB.size(); i++) {
-	    ys = anySeed();
-	    if (ys != null) {
-		line = ys.genSeedStr(null);
-		v.add(line);
-		pw.print(line + serverCore.crlfString);
-	    }
-	}
-	pw.close();
-	return v;
+        PrintWriter pw = null;
+        Vector v = new Vector(seedActiveDB.size()+1);
+        try {
+            
+            pw = new PrintWriter(new BufferedWriter(new FileWriter(seedFile)));
+            
+            // store own seed
+            String line;
+            if ((addMySeed) && (mySeed != null)) {
+                line = mySeed.genSeedStr(null);
+                v.add(line);
+                pw.print(line + serverCore.crlfString);
+            }
+            
+            // store other seeds
+            yacySeed ys;
+            for (int i = 0; i < seedActiveDB.size(); i++) {
+                ys = anySeed();
+                if (ys != null) {
+                    line = ys.genSeedStr(null);
+                    v.add(line);
+                    pw.print(line + serverCore.crlfString);
+                }
+            }
+            pw.flush();
+        } finally {
+            if (pw != null) try { pw.close(); } catch (Exception e) {}
+        }
+        return v;
     }
 
-    public String uploadCache(String  seedFTPServer,
-			      String  seedFTPAccount,
-			      String  seedFTPPassword,
-			      File    seedFTPPath,
+    public String uploadCache(yacySeedUploader uploader, 
+                              serverSwitch sb,
+                              yacySeedDB seedDB,
+//                  String  seedFTPServer,
+//			      String  seedFTPAccount,
+//			      String  seedFTPPassword,
+//			      File    seedFTPPath,
 			      URL     seedURL) throws IOException {
-	// upload a seed file, if possible
-        if (seedURL == null) return "UPLOAD - Error: URL not given";
-	File seedFile = new File("seedFile.txt");
-	Vector uv = storeCache(seedFile, true);
-	// upload the seed file
-	String log = ftpc.put(seedFTPServer, seedFile, seedFTPPath.getParent(), seedFTPPath.getName(), seedFTPAccount, seedFTPPassword);
-	try {
-	    // check also if the result can be retrieved again
-	    if (checkCache(uv, seedURL))
+        
+        // upload a seed file, if possible
+        if (seedURL == null) throw new NullPointerException("UPLOAD - Error: URL not given");
+        
+        String log = null; 
+        File seedFile = null;
+        try {            
+            // create a seed file which for uploading ...
+            seedFile = new File("seedFile.txt");
+            Vector uv = storeCache(seedFile, true);            
+            
+            // uploading the seed file
+            log = uploader.uploadSeedFile(sb,seedDB,seedFile);
+            
+            // check also if the result can be retrieved again
+            if (checkCache(uv, seedURL))
                 log = log + "UPLOAD CHECK - Success: the result vectors are equal" + serverCore.crlfString;
             else
                 log = log + "UPLOAD CHECK - Error: the result vector is different" + serverCore.crlfString;
-	} catch (IOException e) {
-	    log = log + "UPLOAD CHECK - Error: IO problem " + e.getMessage() + serverCore.crlfString;
-	}
-	seedFile.delete();
-	return log;
+        } catch (IOException e) {
+            log = log + "UPLOAD CHECK - Error: IO problem " + e.getMessage() + serverCore.crlfString;
+        } finally {
+            if (seedFile != null) seedFile.delete();
+        }
+        
+        return log;
     }
         
     public String copyCache(File seedFile, URL seedURL) throws IOException {
         if (seedURL == null) return "COPY - Error: URL not given";
-	Vector uv = storeCache(seedFile, true);
+        Vector uv = storeCache(seedFile, true);
         try {
             // check also if the result can be retrieved again
             if (checkCache(uv, seedURL))

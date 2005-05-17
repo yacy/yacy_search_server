@@ -134,65 +134,72 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 </fieldset>
 </form><br>
 
-<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<p>
 <fieldset>
 <legend>Seed Upload Settings</legend>
-<p>This is the account for an ftp server where you can host a seed-list file.
-If you set this, you will become a principal peer.
+<p>With this settings you can configure if you have an account on a public accessable 
+server where you can host a seed-list file.</p>
+<p><b>General Settings:</b></p>
+If you enable one of the available uploading methods, you will become a principal peer.
 Your peer will then upload the seed-bootstrap information periodically,
 but only if there had been changes to the seed-list.
 </p>
-<p>
+<form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <table border="0" cellspacing="5">
   <tr valign="top">
-    <td>Server:</td>
-    <td><input name="seedFTPServer" type="text" size="40" value="#[seedFTPServer]#"></td>
-    <td><i>The host where you have an FTP account, like 'ftp.&lt;my-host&gt;.net'</i></td>
+    <td>Upload Method:</td>
+    <td><select name="seedUploadMethod" size="1">
+#{seedUploadMethods}#
+		<option value="#[name]#" #(selected)#::selected#(/selected)#>#[name]#</option>
+#{/seedUploadMethods}#
+		</select></td>
+    <td><i>Here you can specify which upload method should be used. Select 'none' to deativate uploading.</i></td>
   </tr>
-  <tr valign="top">
-    <td>Path:</td>
-    <td><input name="seedFTPPath" type="text" size="40" value="#[seedFTPPath]#"></td>
-    <td><i>The remote path on the ftp server, like 'yacy/seed.txt'.
-           Missing sub-directories are NOT created automatically.</i></td>
-  </tr>
-  <tr valign="top">
-    <td>Username:</td>
-    <td><input name="seedFTPAccount" type="text" size="40" value="#[seedFTPAccount]#"></td>
-    <td><i>Your log-in at the ftp server</i></td>
-  </tr>
-  <tr valign="top">
-    <td>Password:</td>
-    <td><input name="seedFTPPassword" type="password" size="40" value="#[seedFTPPassword]#"></td>
-    <td><i>The password</i></td>
-  </tr>
-  <tr>
   <tr valign="top">
     <td>URL:</td>
     <td><input name="seedURL" type="text" size="40" value="#[seedURL]#"></td>
     <td><i>The URL that can be used to retrieve the uploaded seed file, like
            http://www.&lt;my-host&gt;.net/yacy/seed.txt'</i></td>
-  </tr>
+  </tr>  
   <tr>
-    <td><input type="submit" name="seedFTPsettings" value="submit"></td>
-  </tr>
+    <td colspan="3"><input type="submit" name="seedSettings" value="submit"></td>
+  </tr>  
 </table>
-</fieldset>
-</form><br>
+</form>
 
+#{seedUploadMethods}#
+#%[file]%#		
+#{/seedUploadMethods}#
+</fieldset>
+
+<br>
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <fieldset><legend>Content Parser Settings</legend>
-<p>Activation/Deactivation of additional content parsers ...</p>
+<p>With this settings you can activate or deactivate parsing of additional content types based on there mime-types.<br>
+For a detailed description of the various mime-types take a look at <a href="http://www.iana.org/assignments/media-types/">http://www.iana.org/assignments/media-types/</a></p>
 <p>
-<table>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small" >Activate</td>
+<td class="small" >Mime-Type</td>
+<td class="small" >Parser&nbsp;Class&nbsp;Name</td>
+<td class="small" ></td>
+</tr>
 #{parser}#
-<tr>
-	<td><input type="checkbox" name="#[mime]#" align="top" #(status)#::checked#(/status)#></td>
-	<td>#[mime]#</td>
-	<td>#[name]#</td>
+<tr class="TableCellDark">
+	<td class="small" align="center"><input type="checkbox" name="#[mime]#" align="top" #(status)#::checked#(/status)#></td>
+	<td class="small" >#[mime]#</td>
+	<td class="small" title="Full qualified name: #[name]#">#[shortname]#</td>
+	<td class="small" width="100%"></td>
 	</tr>
 #{/parser}#
-  <tr>
-    <td colspan="3"><input type="submit" name="parserSettings" value="submit"></td>
+  <tr class="TableCellLight">
+    <td class="small" align="center"><input type="checkbox" name="allParserEnabled" align="top" #(allParserEnabled)#::checked#(/allParserEnabled)#>
+    <td colspan="2" class="small" >Enable all parsers</td>
+    <td class="small">&nbsp;</td>
+  </tr>
+  <tr class="TableCellLight">
+    <td colspan="4" class="small" ><input type="submit" name="parserSettings" value="submit">&nbsp;Changes take effect immediately</td>
   </tr>
 </table>
 </fieldset>

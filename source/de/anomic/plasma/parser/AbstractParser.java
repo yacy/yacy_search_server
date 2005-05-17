@@ -63,10 +63,16 @@ import de.anomic.plasma.plasmaParserDocument;
 public abstract class AbstractParser implements Parser{
 
     /**
+     * a list of library names that are needed by this parser
+     */
+    protected String[] libxDependencies = null;
+    
+    /**
      * The Constructor of this class.
      */
-	public AbstractParser() {
+	public AbstractParser(String[] libxDependencies) {
 		super();
+        this.libxDependencies = libxDependencies;
 	}
 
 	/**
@@ -122,4 +128,12 @@ public abstract class AbstractParser implements Parser{
     public abstract plasmaParserDocument parse(URL location, String mimeType,
 			InputStream source) throws ParserException;
 
+    /**
+     * @return Returns a list of library names that are needed by this parser
+     * @see de.anomic.plasma.parser.Parser#getLibxDependences()
+     */
+    public String[] getLibxDependences() {
+        return this.libxDependencies;
+    }
+    
 }

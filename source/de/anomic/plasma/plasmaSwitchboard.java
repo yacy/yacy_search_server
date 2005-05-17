@@ -152,7 +152,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
 
     // load slots
-    private static final int crawlSlots = 8;
+    public static int crawlSlots = 8;
 
     // couloured list management
     public static TreeSet blueList = null;
@@ -178,8 +178,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaCrawlProfile.entry defaultProxyProfile;
     public  plasmaCrawlProfile.entry defaultRemoteProfile;
     public  distributeIndex        indexDistribution;
-    public  HashSet                mimeWhite;
-    public  HashSet                extensionBlack;
     public  HashMap                outgoingCookies, incomingCookies;
     public  kelondroTables         facilityDB;
     public  plasmaParser           parser;
@@ -245,42 +243,38 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         profiles = new plasmaCrawlProfile(new File(plasmaPath, "crawlProfiles0.db"));
         initProfiles();
         
-        // make parser
-        parser = new plasmaParser(new File("yacy.parser"));
-        
         // start indexing management
         loadedURL = new plasmaCrawlLURL(new File(plasmaPath, "urlHash.db"), ramLURL);
         noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL);
         errorURL = new plasmaCrawlEURL(new File(plasmaPath, "urlErr0.db"), ramEURL);
-	wordIndex = new plasmaWordIndex(plasmaPath, ramRWI, log);
+        wordIndex = new plasmaWordIndex(plasmaPath, ramRWI, log);
         int wordCacheMax = Integer.parseInt((String) getConfig("wordCacheMax", "10000"));
         wordIndex.setMaxWords(wordCacheMax);
-	searchManager = new plasmaSearch(loadedURL, wordIndex);
+        searchManager = new plasmaSearch(loadedURL, wordIndex);
         
         // start a cache manager
-	cacheManager = new plasmaHTCache(this, ramHTTP);
-
+        this.cacheManager = new plasmaHTCache(this, ramHTTP);
+        
+        // make parser
+        this.parser = new plasmaParser();  
+        
         // define an extension-blacklist
-        String[] extensionBlackArray = getConfig("mediaExt","").split(",");
-        extensionBlack = new HashSet();
-        for (int i = 0; i < extensionBlackArray.length; i++) extensionBlack.add(extensionBlackArray[i].toLowerCase());
+        plasmaParser.initMediaExt(getConfig("mediaExt",null));
         
-        // define mime-type-whitelist
-        String[] mimeWhiteArray = getConfig("parseableMime","").split(",");
-        mimeWhite = new HashSet();
-        for (int i = 0; i < mimeWhiteArray.length; i++) mimeWhite.add(mimeWhiteArray[i].toLowerCase());
+        // define a realtime parsable mimetype list
+        plasmaParser.initRealtimeParsableMimeTypes(getConfig("parseableRealtimeMimeTypes",null));
+        plasmaParser.initParseableMimeTypes(getConfig("parseableMimeTypes",null));
         
-	// start a loader
+        // start a loader
         int remoteport;
         try { remoteport = Integer.parseInt(getConfig("remoteProxyPort","3128")); }
         catch (NumberFormatException e) { remoteport = 3128; }
-	cacheLoader = new plasmaCrawlLoader(cacheManager, log,
-					      Integer.parseInt(getConfig("clientTimeout", "10000")),
-					      5000, crawlSlots,
-					      getConfig("remoteProxyUse","false").equals("true"),
-					      getConfig("remoteProxyHost",""),
-					      remoteport,
-                                              mimeWhite);
+        this.cacheLoader = new plasmaCrawlLoader(this.cacheManager, this.log,
+                Integer.parseInt(getConfig("clientTimeout", "10000")),
+                5000, crawlSlots,
+                getConfig("remoteProxyUse","false").equals("true"),
+                getConfig("remoteProxyHost",""),
+                remoteport);
 
 	// init boards
 	messageDB = new messageBoard(new File(getRootPath(), "DATA/SETTINGS/message.db"), ramMessage);
@@ -627,30 +621,36 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 initiator = yacyCore.seedDB.getConnected(initiatorHash);
                 processCase = 6;
             }
-
-	    log.logDebug("processResourceStack processCase=" + processCase + ", depth=" + entry.depth + ", maxDepth=" + entry.profile.generalDepth() + ", filter=" + entry.profile.generalFilter() + ", initiatorHash=" + initiatorHash + ", status=" + entry.status + ", source=" + ((entry.cacheArray == null) ? "scraper" : "byte[]") + ", url=" + entry.nomalizedURLString); // DEBUG
-
+            
+            log.logDebug("processResourceStack processCase=" + processCase + ", depth=" + entry.depth + ", maxDepth=" + entry.profile.generalDepth() + ", filter=" + entry.profile.generalFilter() + ", initiatorHash=" + initiatorHash + ", status=" + entry.status + ", source=" + ((entry.cacheArray == null) ? "scraper" : "byte[]") + ", url=" + entry.nomalizedURLString); // DEBUG
+            
             // parse content
             plasmaParserDocument document;
-            if (entry.scraper != null) {
-                log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is pre-parsed by scraper");
-                document = parser.transformScraper(entry.url, entry.responseHeader.mime(), entry.scraper);
-            } else if (entry.cacheArray != null) {
-                log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is not parsed yet, parsing now from cacheArray");
-                document = parser.parseSource(entry.url, entry.responseHeader.mime(), entry.cacheArray);
+            
+            if (plasmaParser.supportedMimeTypesContains(entry.responseHeader.mime())) {
+                if (entry.scraper != null) {
+                    log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is pre-parsed by scraper");
+                    document = parser.transformScraper(entry.url, entry.responseHeader.mime(), entry.scraper);
+                } else if (entry.cacheArray != null) {
+                    log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is not parsed yet, parsing now from cacheArray");
+                    document = parser.parseSource(entry.url, entry.responseHeader.mime(), entry.cacheArray);
+                } else {
+                    if (entry.cacheFile.exists()) {
+                        log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is not parsed yet, parsing now from File");
+                        document = parser.parseSource(entry.url, entry.responseHeader.mime(), entry.cacheFile);
+                    } else {
+                        log.logDebug("(Parser) '" + entry.nomalizedURLString + "' cannot be parsed, no resource available");
+                        return;
+                    }
+                }
+                if (document == null) {
+                    log.logError("(Parser) '" + entry.nomalizedURLString + "' parse failure");
+                    return;
+                }
             } else {
-		if (entry.cacheFile.exists()) {
-		    log.logDebug("(Parser) '" + entry.nomalizedURLString + "' is not parsed yet, parsing now from File");
-		    document = parser.parseSource(entry.url, entry.responseHeader.mime(), entry.cacheFile);
-		} else {
-		    log.logDebug("(Parser) '" + entry.nomalizedURLString + "' cannot be parsed, no resource available");
-		    return;
-		}
-	    }
-	    if (document == null) {
-		log.logError("(Parser) '" + entry.nomalizedURLString + "' parse failure");
-		return;
-	    }
+                log.logDebug("(Parser) '" + entry.nomalizedURLString + "'. Unsupported mimeType '" + entry.responseHeader.mime() + "'.");
+                return;                
+            }
             
             // put anchors on crawl stack
             if (((processCase == 4) || (processCase == 5)) &&
@@ -784,14 +784,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return reason;
         }
         
-	// filter deny
-	if (!(nexturlString.matches(profile.generalFilter()))) {
-	    reason = "denied_(does_not_match_filter)";
+        // filter deny
+        if ((currentdepth > 0) && (!(nexturlString.matches(profile.generalFilter())))) {
+            reason = "denied_(does_not_match_filter)";
             errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-                                  name, reason, new bitfield(plasmaURL.urlFlagLength), false);
-	    return reason;
-	}
-
+                    name, reason, new bitfield(plasmaURL.urlFlagLength), false);
+            return reason;
+        }
+        
         // deny cgi
         if (plasmaHTCache.isCGI(nexturlString))  {
             reason = "denied_(cgi_url)";
@@ -1517,7 +1517,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public int adminAuthenticated(httpHeader header) {
         String adminAccountBase64MD5 = getConfig("adminAccountBase64MD5", "");
         if (adminAccountBase64MD5.length() == 0) return 2; // not necessary
-        String authorization = ((String) header.get("Authorization", "xxxxxx")).trim().substring(6);
+        String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
         if (authorization.length() == 0) return 1; // no authentication information given
         if ((((String) header.get("CLIENTIP", "")).equals("localhost")) && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
         if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok

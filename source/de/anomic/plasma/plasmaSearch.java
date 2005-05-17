@@ -57,14 +57,14 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverLog;
 
-public class plasmaSearch {
+public final class plasmaSearch {
 
     public static final char O_QUALITY = 'q';
     public static final char O_AGE     = 'a';
     public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
     
-    private plasmaCrawlLURL urlStore;
-    private plasmaWordIndex wordIndex;
+    private final plasmaCrawlLURL urlStore;
+    private final plasmaWordIndex wordIndex;
 
     public plasmaSearch(plasmaCrawlLURL urlStore, plasmaWordIndex wordIndex) {
 	this.urlStore = urlStore;
@@ -138,44 +138,44 @@ public class plasmaSearch {
     }
 
     public plasmaWordIndexEntity searchHashes(Set hashes, long time) throws IOException {
-	// search for the set of hashes and return an array of urlEntry elements
-
+        // search for the set of hashes and return an array of urlEntry elements
+        
         long stamp = System.currentTimeMillis();
-	TreeMap map = new TreeMap();
-	String singleHash;
-	plasmaWordIndexEntity singleResult;
+        TreeMap map = new TreeMap();
+        String singleHash;
+        plasmaWordIndexEntity singleResult;
         Iterator i = hashes.iterator();
-	while (i.hasNext()) {
-	    // get next hash:
-	    singleHash = (String) i.next();
-
-	    // retrieve index
-	    singleResult = wordIndex.getEntity(singleHash, true);
-
-	    // check result
-	    if (singleResult.size() == 0) return new plasmaWordIndexEntity(null); // as this is a cunjunction of searches, we have no result if any word is not known
-
-	    // store result in order of result size
-	    map.put(serverCodings.enhancedCoder.encodeHex(singleResult.size(), 8) + singleHash, singleResult);
-	}
-
-	// check if there is any result
-	if (map.size() == 0) return new plasmaWordIndexEntity(null); // no result, nothing found
-	
-	// the map now holds the search results in order of number of hits per word
-	// we now must pairwise build up a conjunction of these sets
-	String k = (String) map.firstKey(); // the smallest, which means, the one with the least entries
-	plasmaWordIndexEntity searchResult = (plasmaWordIndexEntity) map.remove(k);
-	while ((map.size() > 0) && (searchResult.size() > 0) && (time > 0)) {
-	    // take the first element of map which is a result and combine it with result
-	    k = (String) map.firstKey(); // the next smallest...
+        while (i.hasNext()) {
+            // get next hash:
+            singleHash = (String) i.next();
+            
+            // retrieve index
+            singleResult = wordIndex.getEntity(singleHash, true);
+            
+            // check result
+            if (singleResult.size() == 0) return new plasmaWordIndexEntity(null); // as this is a cunjunction of searches, we have no result if any word is not known
+            
+            // store result in order of result size
+            map.put(serverCodings.enhancedCoder.encodeHex(singleResult.size(), 8) + singleHash, singleResult);
+        }
+        
+        // check if there is any result
+        if (map.size() == 0) return new plasmaWordIndexEntity(null); // no result, nothing found
+        
+        // the map now holds the search results in order of number of hits per word
+        // we now must pairwise build up a conjunction of these sets
+        String k = (String) map.firstKey(); // the smallest, which means, the one with the least entries
+        plasmaWordIndexEntity searchResult = (plasmaWordIndexEntity) map.remove(k);
+        while ((map.size() > 0) && (searchResult.size() > 0) && (time > 0)) {
+            // take the first element of map which is a result and combine it with result
+            k = (String) map.firstKey(); // the next smallest...
             time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
             searchResult = joinConstructive(searchResult, (plasmaWordIndexEntity) map.remove(k), 2 * time / (map.size() + 1));
-	}
-
-	// in 'searchResult' is now the combined search result
-	if (searchResult.size() == 0) return new plasmaWordIndexEntity(null);
-	return searchResult;
+        }
+        
+        // in 'searchResult' is now the combined search result
+        if (searchResult.size() == 0) return new plasmaWordIndexEntity(null);
+        return searchResult;
     }
 
     private static int log2(int x) {
@@ -317,12 +317,12 @@ public class plasmaSearch {
     
     public class result /*implements Enumeration*/ {
         
-        TreeMap pageAcc;            // key = order hash; value = plasmaLURL.entry
-        kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
-        Set searchhashes;           // hashes that are searched here
-        Set stopwords;              // words that are excluded from the commonSense heuristic
-        char[] order;               // order of heuristics
-        ArrayList results;          // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
+        final TreeMap pageAcc;            // key = order hash; value = plasmaLURL.entry
+        final kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
+        final Set searchhashes;           // hashes that are searched here
+        final Set stopwords;              // words that are excluded from the commonSense heuristic
+        final char[] order;               // order of heuristics
+        ArrayList results;                // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
         
         public result(Set searchhashes, Set stopwords, char[] order) {
             this.pageAcc = new TreeMap();

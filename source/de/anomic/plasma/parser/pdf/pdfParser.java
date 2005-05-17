@@ -47,10 +47,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Hashtable;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.pdfbox.pdfparser.PDFParser;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.pdmodel.PDDocumentInformation;
@@ -61,8 +61,7 @@ import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 
-public class pdfParser extends AbstractParser implements Parser
-{
+public class pdfParser extends AbstractParser implements Parser {
 
     /**
      * a list of mime types that are supported by this parser class
@@ -72,15 +71,16 @@ public class pdfParser extends AbstractParser implements Parser
     static { SUPPORTED_MIME_TYPES.put("application/pdf","pdf"); }     
     
     /**
-     * a list of file extensions that are supported by this parser class
-     * @see #getSupportedMimeTypes()
+     * a list of library names that are needed by this parser
+     * @see Parser#getLibxDependences()
      */
-    public static final HashSet SUPPORTED_FILE_EXT = new HashSet(Arrays.asList(new String[] {
-        new String("pdf")
-    }));       
+    private static final String[] LIBX_DEPENDENCIES = new String[] {
+        "PDFBox-0.7.1.jar",
+        "log4j-1.2.9.jar"
+    };    
     
-    public pdfParser() {
-        super();
+    public pdfParser() {        
+        super(LIBX_DEPENDENCIES);
     }
     
     public Hashtable getSupportedMimeTypes() {
@@ -90,6 +90,11 @@ public class pdfParser extends AbstractParser implements Parser
     public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
         
         try {       
+            
+            // deactivating the logging for jMimeMagic
+            Logger theLogger = Logger.getLogger("org.pdfbox");
+            theLogger.setLevel(Level.INFO);            
+            
             String docTitle = null, docSubject = null, docAuthor = null, docKeyWords = null;
             
             PDFParser parser = new PDFParser(source);
@@ -147,9 +152,5 @@ public class pdfParser extends AbstractParser implements Parser
 		// Nothing todo here at the moment
     	
     }
-
-	public HashSet getSupportedFileExtensions() {
-		return SUPPORTED_FILE_EXT;
-	}
 
 }

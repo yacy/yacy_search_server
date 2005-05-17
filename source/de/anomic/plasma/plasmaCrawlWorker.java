@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.Date;
-import java.util.HashSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -65,7 +64,6 @@ public final class plasmaCrawlWorker extends Thread {
     private final boolean         remoteProxyUse;
     private final String          remoteProxyHost;
     private final int             remoteProxyPort;
-    private final HashSet         acceptMimeTypes;
     private final serverLog       log;
     
     public plasmaCrawlLoaderMessage theMsg;
@@ -90,7 +88,6 @@ public final class plasmaCrawlWorker extends Thread {
             boolean remoteProxyUse,
             String remoteProxyHost,
             int remoteProxyPort,
-            HashSet acceptMimeTypes,
             serverLog log) {
         super(theTG,threadBaseName + "_inPool");
                 
@@ -100,7 +97,6 @@ public final class plasmaCrawlWorker extends Thread {
         this.remoteProxyUse = remoteProxyUse;
         this.remoteProxyHost = remoteProxyHost;
         this.remoteProxyPort = remoteProxyPort;
-        this.acceptMimeTypes = acceptMimeTypes;
         this.log = log;
     }
 
@@ -228,7 +224,7 @@ public final class plasmaCrawlWorker extends Thread {
             //System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
                     
             // open the connection
-            remote = newhttpc(host, port, ssl);
+            remote = newhttpc(host, port, ssl); 
             
             // send request
             httpc.response res = remote.GET(path, requestHeader);
@@ -243,7 +239,7 @@ public final class plasmaCrawlWorker extends Thread {
                 // request has been placed and result has been returned. work off response
                 File cacheFile = cacheManager.getCachePath(url);
                 try {
-                    if (!(httpd.isTextMime(res.responseHeader.mime().toLowerCase(), acceptMimeTypes))) {
+                    if (!(plasmaParser.supportedMimeTypesContains(res.responseHeader.mime()))) {
                         // if the response has not the right file type then reject file
                         remote.close();
                         log.logInfo("REJECTED WRONG MIME TYPE " + res.responseHeader.mime() + " for url " + url.toString());

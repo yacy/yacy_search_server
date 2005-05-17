@@ -56,26 +56,33 @@
 package de.anomic.yacy;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.TimeZone;
 import java.util.Vector;
 
 import de.anomic.http.httpc;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.parser.Parser;
 import de.anomic.server.serverLog;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.seedUpload.yacySeedUploadFtp;
 
 public class yacyCore {
     
     // statics
     public static long startupTime = System.currentTimeMillis();
     public static yacySeedDB seedDB = null;
+    public static final Hashtable seedUploadMethods = new Hashtable();
     public static yacyPeerActions peerActions = null;
     public static yacyDHTAction dhtAgent = null;
     public static serverLog log;
@@ -93,7 +100,7 @@ public class yacyCore {
     private int onlineMode = 1;
     private plasmaSwitchboard switchboard;
     
-    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
+    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("America/Los_Angeles");
     public static SimpleDateFormat shortFormatter = new SimpleDateFormat("yyyyMMddHHmmss");
     
     public static long universalTime() {
@@ -123,62 +130,64 @@ public class yacyCore {
     }
         
     public yacyCore(plasmaSwitchboard sb) throws IOException {
-	long time = System.currentTimeMillis();
-
-	this.switchboard = sb;
-	switchboard.setConfig("yacyStatus","");
-	
-	// set log level
-	log = new serverLog("YACY", Integer.parseInt(switchboard.getConfig("yacyLoglevel", "0")));
-
-	// create a yacy db
-	yacyDBPath = new File(sb.getRootPath(), sb.getConfig("yacyDB", "DATA/YACYDB"));
-	if (!(yacyDBPath.exists())) yacyDBPath.mkdir();
-
+        long time = System.currentTimeMillis();
+        
+        this.switchboard = sb;
+        switchboard.setConfig("yacyStatus","");
+        
+        // set log level
+        log = new serverLog("YACY", Integer.parseInt(switchboard.getConfig("yacyLoglevel", "0")));
+        
+        // create a yacy db
+        yacyDBPath = new File(sb.getRootPath(), sb.getConfig("yacyDB", "DATA/YACYDB"));
+        if (!(yacyDBPath.exists())) yacyDBPath.mkdir();
+        
         // read memory amount
         int mem = Integer.parseInt(switchboard.getConfig("ramCacheSize", "1")) * 0x400 *
-                  Integer.parseInt(switchboard.getConfig("ramCachePercentDHT", "1")) / 100;
+        Integer.parseInt(switchboard.getConfig("ramCachePercentDHT", "1")) / 100;
         log.logSystem("DHT Cache memory = " + mem + " KB");
         
         // create or init seed cache
-	seedDB = new yacySeedDB(
-                      sb, 
-		      new File(yacyDBPath, "seed.new.db"),
-                      new File(yacyDBPath, "seed.old.db"),
-                      new File(yacyDBPath, "seed.pot.db"),
-                      mem);
-
+        seedDB = new yacySeedDB(
+                sb, 
+                new File(yacyDBPath, "seed.new.db"),
+                new File(yacyDBPath, "seed.old.db"),
+                new File(yacyDBPath, "seed.pot.db"),
+                mem);
+        
+        loadSeedUploadMethods();
+        
         peerActions = new yacyPeerActions(seedDB, switchboard,
-                                          new File(sb.getRootPath(), sb.getConfig("superseedFile", "superseed.txt")),
-                                          switchboard.getConfig("superseedLocation", "http://www.yacy.net/yacy/superseed.txt"));
+                new File(sb.getRootPath(), sb.getConfig("superseedFile", "superseed.txt")),
+                switchboard.getConfig("superseedLocation", "http://www.yacy.net/yacy/superseed.txt"));
         dhtAgent = new yacyDHTAction(seedDB);
         peerActions.deploy(dhtAgent);
         
         // create or init index sharing
         //shareManager = new yacyShare(switchboard);
         
-	seedCacheSizeStamp = seedDB.sizeConnected();
-
-	log.logSystem("CORE INITIALIZED");
-	// ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!
-
-	speedKey = System.currentTimeMillis() - time;
+        seedCacheSizeStamp = seedDB.sizeConnected();
+        
+        log.logSystem("CORE INITIALIZED");
+        // ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!
+        
+        speedKey = System.currentTimeMillis() - time;
         
         // start with a seedList update to propagate out peer, if possible
-	onlineMode = Integer.parseInt(switchboard.getConfig("onlineMode", "1"));
-	//lastSeedUpdate = universalTime();
-	lastOnlineTime = 0;
-
-	// cycle
-	// within cycle: update seed file, strengthen network, pass news (new, old seed's)
-	if (online())
-	    log.logSystem("you are in online mode");
-	else {
-	    log.logSystem("YOU ARE OFFLINE! ---");
-	    log.logSystem("--- TO START BOOTSTRAPING, YOU MUST USE THE PROXY,");
-	    log.logSystem("--- OR HIT THE BUTTON 'go online'");
+        onlineMode = Integer.parseInt(switchboard.getConfig("onlineMode", "1"));
+        //lastSeedUpdate = universalTime();
+        lastOnlineTime = 0;
+        
+        // cycle
+        // within cycle: update seed file, strengthen network, pass news (new, old seed's)
+        if (online())
+            log.logSystem("you are in online mode");
+        else {
+            log.logSystem("YOU ARE OFFLINE! ---");
+            log.logSystem("--- TO START BOOTSTRAPING, YOU MUST USE THE PROXY,");
+            log.logSystem("--- OR HIT THE BUTTON 'go online'");
             log.logSystem("--- ON THE STATUS PAGE http://localhost:" + switchboard.getConfig("port", "8080") + "/Status.html");
-	}
+        }
     }
 
     
@@ -198,17 +207,10 @@ public class yacyCore {
     }
     
     public void publishSeedList() {
+        
         log.logDebug("triggered Seed Publish");
 
-        // we want to be a principal...
-        if ((switchboard.getConfig("seedFTPPassword","").length() == 0) &&
-            (switchboard.getConfig("seedFilePath", "").length() == 0)) {
-            log.logDebug("yacyCore.publishSeedList: no FTP settings present; password-len=" +
-                               switchboard.getConfig("seedFTPPassword","").length() + ", filePath=" +
-                               switchboard.getConfig("seedFilePath", ""));
-            return;
-        }
-
+        
         /*
         if (oldIPStamp.equals((String) seedDB.mySeed.get("IP", "127.0.0.1")))
             System.out.println("***DEBUG publishSeedList: oldIP is equal");
@@ -218,16 +220,32 @@ public class yacyCore {
             System.out.println("***DEBUG publishSeedList: I can reach myself");
         */
         
-        if ((!(oldIPStamp.equals((String) seedDB.mySeed.get("IP", "127.0.0.1")))) ||
+        if (!(!(oldIPStamp.equals(seedDB.mySeed.get("IP", "127.0.0.1")))) ||
             (seedCacheSizeStamp != seedDB.sizeConnected()) ||
             (!(canReachMyself()))) {
-            // publish seed-list to ftp account, this can only a principal peer
-            saveSeedList();
-            seedCacheSizeStamp = seedDB.sizeConnected();
-            oldIPStamp = (String) seedDB.mySeed.get("IP", "127.0.0.1");
-        } else {
             log.logDebug("not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
+            return;
+        }        
+        
+        // getting the seed upload method that should be used ...
+        String seedUploadMethod = this.switchboard.getConfig("seedUploadMethod","");
+        
+        if (!(seedUploadMethod.equalsIgnoreCase("none")) || 
+            ((seedUploadMethod.equals("")) &&
+             (this.switchboard.getConfig("seedFTPPassword","").length() > 0) &&
+             (this.switchboard.getConfig("seedFilePath", "").length() > 0))) {
+            if (seedUploadMethod.equals("")) this.switchboard.setConfig("seedUploadMethod","Ftp");
+            // we want to be a principal...
+            saveSeedList();
+            this.seedCacheSizeStamp = seedDB.sizeConnected();
+            this.oldIPStamp = seedDB.mySeed.get("IP", "127.0.0.1");            
+        } else {
+            if (seedUploadMethod.equals("")) this.switchboard.setConfig("seedUploadMethod","none");
+            log.logDebug("yacyCore.publishSeedList: No uploading method configured");
+            return;
         }
+        
+            
     }
     
     public void peerPing() {
@@ -382,78 +400,151 @@ public class yacyCore {
 	return 0;
     }
     
-  
+    public static Hashtable getSeedUploadMethods() {
+        synchronized (yacyCore.seedUploadMethods) {
+            return (Hashtable) yacyCore.seedUploadMethods.clone();
+        }        
+    }
+    
+    public static yacySeedUploader getSeedUploader(String methodname) {
+        String className = null;
+        synchronized (yacyCore.seedUploadMethods) {
+            if (yacyCore.seedUploadMethods.containsKey(methodname)) {
+                className = (String) yacyCore.seedUploadMethods.get(methodname);
+            }
+        }    
+        
+        if (className == null) return null;
+        try {
+            Class uploaderClass = Class.forName(className);
+            Object uploader = uploaderClass.newInstance();
+            return (yacySeedUploader) uploader;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    public static void loadSeedUploadMethods() {
+        Hashtable availableUploaders = new Hashtable();
+        
+        try {
+            String uploadersPkgName = yacyCore.class.getPackage().getName() + ".seedUpload";
+            String packageURI = yacyCore.class.getResource("/"+uploadersPkgName.replace('.','/')).toString(); 
+            
+            // open the parser directory
+            File uploadersDir = new File(new URI(packageURI));
+            if ((uploadersDir == null) || (!uploadersDir.exists()) || (!uploadersDir.isDirectory())) {
+                yacyCore.seedUploadMethods.clear(); 
+                changeSeedUploadMethod("none");
+            }
+            
+            String[] uploaderClasses = uploadersDir.list(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return name.startsWith("yacySeedUpload") && name.endsWith(".class");
+                }});
+            
+            String javaClassPath = System.getProperty("java.class.path");
+            
+            if (uploaderClasses == null) return;
+            for (int uploaderNr=0; uploaderNr<uploaderClasses.length; uploaderNr++) {
+                String className = uploaderClasses[uploaderNr].substring(0,uploaderClasses[uploaderNr].indexOf(".class"));
+                String fullClassName = uploadersPkgName + "." + className;
+                try {
+                    Class uploaderClass = Class.forName(fullClassName);
+                    Object theUploader = uploaderClass.newInstance();
+                    if (!(theUploader instanceof yacySeedUploader)) continue;
+                    String[] neededLibx = ((yacySeedUploader)theUploader).getLibxDependences();
+                    if (neededLibx != null) {
+                        for (int libxId=0; libxId < neededLibx.length; libxId++) {
+                            if (javaClassPath.indexOf(neededLibx[libxId]) == -1) continue;
+                        }
+                    }
+                    availableUploaders.put(className.substring("yacySeedUpload".length()),fullClassName);
+                } catch (Exception e) { /* we can ignore this for the moment */ }
+            }
+        } catch (Exception e) {
+            
+        } finally {
+            synchronized (yacyCore.seedUploadMethods) {
+                yacyCore.seedUploadMethods.clear();
+                yacyCore.seedUploadMethods.putAll(availableUploaders);
+            }
+        }
+    }
+
+    public static boolean changeSeedUploadMethod(String method) {
+        if ((method == null)||(method.length() == 0)) return false;
+        
+        if (method.equals("none")) return true;
+        
+        synchronized (yacyCore.seedUploadMethods) {
+            return yacyCore.seedUploadMethods.containsKey(method);
+        }        
+    }
+    
     public boolean saveSeedList() {
 	return saveSeedList(this.switchboard);
     }
-
+    
     public static boolean saveSeedList(serverSwitch sb) {
-	String logt;
-	// be shure that we have something to say
-	if (seedDB.mySeed.getAddress() == null) return false;
-	// upload a seed file
-	String  seedFTPServer   = sb.getConfig("seedFTPServer","");
-	String  seedFTPAccount  = sb.getConfig("seedFTPAccount","");
-	String  seedFTPPassword = sb.getConfig("seedFTPPassword","");
-	File    seedFTPPath     = new File(sb.getConfig("seedFTPPath",""));
-	File    seedFile        = new File(sb.getConfig("seedFilePath",""));
-	String prevStatus = seedDB.mySeed.get("PeerType", "junior");
-	if (prevStatus.equals("principal")) prevStatus = "senior";
-	URL seedURL;
-	try{
-		seedURL = new URL(sb.getConfig("seedURL",""));
-	}catch(MalformedURLException e){
-		return false;
-	}
-	if ((seedFTPServer.length() != 0) && 
-	    (seedFTPAccount.length() != 0) && 
-	    (seedFTPPassword.length() != 0) && 
-	    (seedFTPPath.toString().length() != 0)) {
-	    try {
-		seedDB.mySeed.put("PeerType", "principal"); // this information shall also be uploaded
-		logt = seedDB.uploadCache(seedFTPServer, seedFTPAccount, seedFTPPassword, seedFTPPath, seedURL);
-		log.logInfo(logt);
-		if (logt.indexOf("Error") >= 0) {
-		    seedDB.mySeed.put("PeerType", prevStatus);
-		    log.logInfo("seed upload failed (ftp error): " + logt.substring(logt.indexOf("Error") + 6));
-		    return false;
-		}
-		// check if seed file has arrived a public accessible location
-		// seedURL=http://www.yacy.net/yacy/seed.txt
-		
-		// finally, set the principal status
-		sb.setConfig("yacyStatus","principal");
-		return true;
-	    } catch (IOException e) {
-		seedDB.mySeed.put("PeerType", prevStatus);
-		log.logInfo("seed upload failed (IO error): " + e.getMessage());
-		return false;
-	    }
-        }else if(seedFile.toString().length() != 0){ // [AS]
-            try{
-                seedDB.mySeed.put("PeerType", "principal"); // this information shall also be uploaded
-                logt = seedDB.copyCache(seedFile, seedURL);
-                log.logInfo(logt);
+        String logt;
+        
+        // be shure that we have something to say
+        if (seedDB.mySeed.getAddress() == null) return false;        
+        
+        // getting the configured seed uploader
+        String seedUploadMethod = sb.getConfig("seedUploadMethod","");
+        
+        // for backward compatiblity ....
+        if ((seedUploadMethod.equalsIgnoreCase("Ftp")) || 
+                ((seedUploadMethod.equals("")) &&
+                 (sb.getConfig("seedFTPPassword","").length() > 0) &&
+                 (sb.getConfig("seedFilePath", "").length() > 0))) {
+            seedUploadMethod = "Ftp";
+            sb.setConfig("seedUploadMethod",seedUploadMethod);
+        }        
+
+        //  determine the seed uploader that should be used ...       
+        if (seedUploadMethod.equalsIgnoreCase("none"))  return true;
+
+        yacySeedUploader uploader = getSeedUploader(seedUploadMethod);
+        if (uploader == null) return false;
+        
+        // ensure that the seed file url is configured properly
+        URL seedURL;
+        try{
+            seedURL = new URL(sb.getConfig("seedURL",""));
+        }catch(MalformedURLException e){
+            return false;
+        }              
+        
+        // upload the seed-list using the configured uploader class
+        String prevStatus = seedDB.mySeed.get("PeerType", "junior");
+        if (prevStatus.equals("principal")) prevStatus = "senior";
+
+        try {
+            seedDB.mySeed.put("PeerType", "principal"); // this information shall also be uploaded
+            
+            //logt = seedDB.uploadCache(seedFTPServer, seedFTPAccount, seedFTPPassword, seedFTPPath, seedURL);
+            logt = seedDB.uploadCache(uploader,sb, seedDB, seedURL);
+            if (logt != null) {
                 if (logt.indexOf("Error") >= 0) {
                     seedDB.mySeed.put("PeerType", prevStatus);
-                    log.logInfo("seed copy failed (IO error): " + logt.substring(logt.indexOf("Error") + 6));
-                    return false;
+                    log.logError("seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6));
+                    return false;                    
                 }
-                // check if seed file has arrived a public accessible location
-                // seedURL=http://www.yacy.net/yacy/seed.txt
-                
-                // finally, set the principal status
-                sb.setConfig("yacyStatus","principal");
-                return true;
-            } catch (IOException e) {
-                seedDB.mySeed.put("PeerType", prevStatus);
-                log.logInfo("seed copy failed (IO error): " + e.getMessage());
-                return false;
+                log.logInfo(logt);
             }
+            
+            // finally, set the principal status
+            sb.setConfig("yacyStatus","principal");
+            return true;
+        } catch (Exception e) {
+            seedDB.mySeed.put("PeerType", prevStatus);
+            sb.setConfig("yacyStatus", prevStatus);
+            log.logInfo("seed upload failed (IO error): " + e.getMessage());
+            return false;
         }
-	seedDB.mySeed.put("PeerType", prevStatus);
-	sb.setConfig("yacyStatus", prevStatus);
-	return false;
     }
 
     private class vprobe implements Runnable {

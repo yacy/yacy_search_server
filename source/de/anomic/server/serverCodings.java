@@ -54,12 +54,12 @@ public final class serverCodings {
     // the resulting string is filename-friendly, it contains no special character that is not
     // suitable for file names.
 
-    public static serverCodings standardCoder = new serverCodings(true);
-    public static serverCodings enhancedCoder = new serverCodings(false);
+    public static final serverCodings standardCoder = new serverCodings(true);
+    public static final serverCodings enhancedCoder = new serverCodings(false);
 
-    boolean rfc1113compliant;
-    public char[] alpha;
-    public byte[] ahpla;
+    final boolean rfc1113compliant;
+    public final char[] alpha;
+    public final byte[] ahpla;
 
     public serverCodings(boolean rfc1113compliant) {
 	// if we choose not to be rfc1113compliant,
