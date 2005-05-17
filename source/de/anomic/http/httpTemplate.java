@@ -56,7 +56,7 @@ import java.util.Hashtable;
 
 import de.anomic.server.serverFileUtils;
 
-final class httpTemplate {
+public final class httpTemplate {
     
     private static final byte hash = (byte)'#';
     private static final byte[] hasha = {hash};
@@ -284,8 +284,9 @@ final class httpTemplate {
 			if(transferUntil(pis, keyStream, iClose)){
 			String filename = keyStream.toString();
 			if(filename.startsWith( Character.toString((char)lbr) ) && filename.endsWith( Character.toString((char)rbr) )){ //simple pattern for filename
-				filename= new String(replacePattern( filename.substring(1, filename.length()-1), pattern, dflt));
+				filename= new String(replacePattern( prefix + filename.substring(1, filename.length()-1), pattern, dflt));
 			}
+            if ((!filename.equals("")) && (!filename.equals(dflt))) {
 				try{
 					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream( new File("htroot", filename) )));
 					//Read the Include
@@ -298,9 +299,9 @@ final class httpTemplate {
 					//e.printStackTrace();
 				}
 				PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
-				writeTemplate(pis2, out, pattern, dflt, prefix + "_");
+				writeTemplate(pis2, out, pattern, dflt, prefix);
 			}
-
+            }
 		}else{ //no match, but a single hash (output # + bb)
 		byte[] tmp=new byte[2];
 		tmp[0]=hash;
