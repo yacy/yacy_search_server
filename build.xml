@@ -84,6 +84,7 @@
   <mkdir dir="${build}/de/anomic/server"/>
   <mkdir dir="${build}/de/anomic/tools"/>
   <mkdir dir="${build}/de/anomic/yacy"/>
+  <mkdir dir="${build}/de/anomic/yacy/seedUpload"/>   
 
   <mkdir dir="${doc}"/>
   <mkdir dir="${data}"/>
