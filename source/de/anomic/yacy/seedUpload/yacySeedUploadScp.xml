@@ -13,7 +13,7 @@
     <target name="compile">
   	  <echo message="Compiling ${addonLongName} Version ${addonVersion} ..."/>
   	  <javac srcdir="${src}/de/anomic/yacy/seedUpload/" destdir="${build}" source="${javacSource}" target="${javacTarget}">
-  	    <include name="${src}/de/anomic/yacy/seedUpload/yacySeedUpload${addonShortName}.java"/>
+  	    <include name="yacySeedUpload${addonShortName}.java"/>
   	  	<classpath>
   	  	  <pathelement location="${build}" />	
   	  	
