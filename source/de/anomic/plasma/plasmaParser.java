@@ -316,7 +316,7 @@ public final class plasmaParser {
             supportedFileExt.addAll(newSupportedFileExt);
 		}
         
-        return newEnabledParsers.keySet().toArray(new String[newEnabledParsers.size()]);
+        return (String[])newEnabledParsers.keySet().toArray(new String[newEnabledParsers.size()]);
     }
     
     public Hashtable getEnabledParserList() {
