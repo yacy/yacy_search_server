@@ -240,10 +240,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logSystem("Wiki    Cache memory = " + ppRamString(ramWiki));
         
 	// make crawl profiles database and default profiles
+        log.logSystem("Initializing Crawl Profiles");
         profiles = new plasmaCrawlProfile(new File(plasmaPath, "crawlProfiles0.db"));
         initProfiles();
         
         // start indexing management
+        log.logSystem("Starting Indexing Management");
         loadedURL = new plasmaCrawlLURL(new File(plasmaPath, "urlHash.db"), ramLURL);
         noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL);
         errorURL = new plasmaCrawlEURL(new File(plasmaPath, "urlErr0.db"), ramEURL);
@@ -253,19 +255,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         searchManager = new plasmaSearch(loadedURL, wordIndex);
         
         // start a cache manager
+        log.logSystem("Starting HT Cache Manager");
         this.cacheManager = new plasmaHTCache(this, ramHTTP);
         
         // make parser
+        log.logSystem("Starting Parser");
         this.parser = new plasmaParser();  
         
         // define an extension-blacklist
+        log.logSystem("Parser: Initializing Media Extensions");
         plasmaParser.initMediaExt(getConfig("mediaExt",null));
         
         // define a realtime parsable mimetype list
+        log.logSystem("Parser: Initializing Mime Types");
         plasmaParser.initRealtimeParsableMimeTypes(getConfig("parseableRealtimeMimeTypes","application/xhtml+xml,text/html,text/plain"));
         plasmaParser.initParseableMimeTypes(getConfig("parseableMimeTypes",null));
         
         // start a loader
+        log.logSystem("Starting Crawl Loader");
         int remoteport;
         try { remoteport = Integer.parseInt(getConfig("remoteProxyPort","3128")); }
         catch (NumberFormatException e) { remoteport = 3128; }
@@ -277,18 +284,23 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 remoteport);
 
 	// init boards
+        log.logSystem("Starting Message Board");
 	messageDB = new messageBoard(new File(getRootPath(), "DATA/SETTINGS/message.db"), ramMessage);
-	wikiDB = new wikiBoard(new File(getRootPath(), "DATA/SETTINGS/wiki.db"),
+	log.logSystem("Starting Wiki Board");
+        wikiDB = new wikiBoard(new File(getRootPath(), "DATA/SETTINGS/wiki.db"),
 			       new File(getRootPath(), "DATA/SETTINGS/wiki-bkp.db"), ramWiki);
 
         // init cookie-Monitor
+        log.logSystem("Starting Cookie Monitor");
         outgoingCookies = new HashMap();
         incomingCookies = new HashMap();
             
         // clean up profiles
+        log.logSystem("Cleaning Profiles");
         cleanProfiles();
 
         // init facility DB
+        log.logSystem("Starting Facility Database");
         File facilityDBpath = new File(getRootPath(), "DATA/SETTINGS/");
         facilityDB = new kelondroTables(facilityDBpath);
         facilityDB.declareMaps("backlinks", 250, 500, new String[] {"date"}, null);
@@ -299,10 +311,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         testresult = facilityDB.selectLong("statistik", (new serverDate()).toShortString(false).substring(0, 11));
         
         // start yacy core
+        log.logSystem("Starting YaCy Protocol Core");
         yacyCore yc = new yacyCore(this);
         serverInstantThread.oneTimeJob(yc, "loadSeeds", yc.log, 3000);
         
         // deploy threads
+        log.logSystem("Starting Threads");
         deployThread("90_cleanup", "Cleanup", "simple cleaning process for monitoring information" ,
                      new serverInstantThread(this, "cleanupJob", "cleanupJobSize"), 10000); // all 5 Minutes
         deployThread("80_dequeue", "Indexing Dequeue", "thread that creates database entries from scraped web content and performes indexing" ,
