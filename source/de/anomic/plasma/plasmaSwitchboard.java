@@ -262,7 +262,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         plasmaParser.initMediaExt(getConfig("mediaExt",null));
         
         // define a realtime parsable mimetype list
-        plasmaParser.initRealtimeParsableMimeTypes(getConfig("parseableRealtimeMimeTypes",null));
+        plasmaParser.initRealtimeParsableMimeTypes(getConfig("parseableRealtimeMimeTypes","application/xhtml+xml,text/html,text/plain"));
         plasmaParser.initParseableMimeTypes(getConfig("parseableMimeTypes",null));
         
         // start a loader
