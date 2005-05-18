@@ -135,10 +135,20 @@ public final class Settings_p {
          */
         // available methods
         String enabledUploader = env.getConfig("seedUploadMethod", "none");
+        
+        // for backward compatiblity ....
+        if ((enabledUploader.equalsIgnoreCase("Ftp")) || 
+                ((enabledUploader.equals("")) &&
+                 (env.getConfig("seedFTPPassword","").length() > 0) &&
+                 (env.getConfig("seedFilePath", "").length() > 0))) {
+            enabledUploader = "Ftp";
+            env.setConfig("seedUploadMethod",enabledUploader);
+        }                  
+        
         Hashtable uploaders = yacyCore.getSeedUploadMethods();
         prop.put("seedUploadMethods", uploaders.size() + 1);
         prop.put("seedUploadMethods_0_name", "none");
-        prop.put("seedUploadMethods_0_selected", 1);
+        prop.put("seedUploadMethods_0_selected", enabledUploader.equals("none")?1:0);
         prop.put("seedUploadMethods_0_file", "");
         
         int count = 0;
