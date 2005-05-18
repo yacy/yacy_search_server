@@ -1,2 +1,20 @@
-@java -classpath classes;lib/commons-collections.jar;lib/commons-pool-1.2.jar;libx/PDFBox-0.7.1.jar;libx/log4j-1.2.9.jar;libx/tm-extractors-0.4.jar yacy -shutdown
+@Echo Off
+If %1.==CPGEN. GoTo :CPGEN
 
+Rem Generating the proper classpath unsing loops and labels
+Set CLASSPATH=classes
+For %%X in (lib/*.jar) Do Call %0 CPGEN lib\%%X
+For %%X in (libx/*.jar) Do Call %0 CPGEN libx\%%X
+
+Rem Starting yacy
+Echo Generated Classpath:%CLASSPATH%
+java -classpath %CLASSPATH% yacy -shutdown
+
+GoTo :END
+
+Rem This target is used to concatenate the classpath parts 
+:CPGEN
+Set CLASSPATH=%CLASSPATH%;%2
+
+Rem Target needed to jump to the end of the file
+:END
