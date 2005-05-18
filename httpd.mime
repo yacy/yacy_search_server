@@ -70,6 +70,7 @@ tiff    = image/tiff
 torrent = application/x-bittorrent
 txt     = text/plain
 wav     = audio/x-wav
+xcf     = image/gimp-native
 xhtml   = application/xhtml+xml
 xla     = application/msexcel
 xls     = application/msexcel
