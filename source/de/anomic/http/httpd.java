@@ -214,11 +214,11 @@ public final class httpd implements serverHandler {
             
             if (dstPort.intValue() == 80) {
                 if (dstHost.endsWith(".yacy")) {
-                    this.prop.setProperty(httpHeader.HOST,dstHostSocket);
+                    this.prop.setProperty("HOST",dstHostSocket);
                 } else {
                     InetAddress dstHostAddress = InetAddress.getByName(dstHost);
                     if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
-                        this.prop.setProperty(httpHeader.HOST,dstHostSocket);
+                        this.prop.setProperty("HOST",dstHostSocket);
                     }
                 }
             }

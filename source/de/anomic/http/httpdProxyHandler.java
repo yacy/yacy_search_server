@@ -128,6 +128,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 	    switchboard = (plasmaSwitchboard) sb;
 	    cacheManager = switchboard.getCacheManager();
 
+        isTransparentProxy = Boolean.valueOf(switchboard.getConfig("isTransparentProxy","false")).booleanValue();
+        
 	    // load remote proxy data
 	    remoteProxyHost    = switchboard.getConfig("remoteProxyHost","");
             try {
