@@ -21,7 +21,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 <p><table border="0" cellspacing="5">
 <tr valign="top">
 <td>Account Name:</td><td><input name="adminuser" type="text" size="16" maxlength="16" value="#[adminuser]#"></td>
-<td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="adminaccount" value="Submit"></td></tr>
+<td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="adminaccount" value="submit"></td></tr>
 <tr valign="top"><td>Password:</td><td><input name="adminpw1" type="password" size="16" maxlength="16" value=""></td></tr>
 <tr valign="top"><td>Password (repeat same as above):</td><td><input name="adminpw2" type="password" size="16" maxlength="16" value=""></td></tr>
 </table>
@@ -64,22 +64,22 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <fieldset><legend>Remote Proxy (optional)</legend>
-<p>YaCy can use another proxy to connect to the internet. You can enter the address for a remote proxy here:</p>
+<p>YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:</p>
 <p><table border="0" cellspacing="5">
   <tr valign="top">
-    <td>remote Proxy Host:</td>
+    <td>Remote proxy host:</td>
     <td><input name="remoteProxyHost" type="text" size="32" maxlength="128" value="#[remoteProxyHost]#"></td>
   </tr>
   <tr valign="top">
-    <td>remote Proxy Port:</td>
+    <td>Remote proxy port:</td>
     <td><input name="remoteProxyPort" type="text" size="5" maxlength="5" value="#[remoteProxyPort]#"></td>
   </tr>
   <tr valign="top">
-    <td>no-Proxy Adresses:</td>
+    <td>no-proxy adresses:</td>
     <td><input name="remoteProxyNoProxy" type="text" size="32" maxlength="128" value="#[remoteProxyNoProxy]#"></td>
   </tr>
   <tr valign="top">
-    <td>use remote Proxy:</td>
+    <td>Use remote proxy:</td>
     <td><input type="checkbox" name="remoteProxyUse" align="top" #(remoteProxyUseChecked)#::checked#(/remoteProxyUseChecked)#></td>
   </tr>
   <tr valign="top">
@@ -92,8 +92,8 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 
 <p>You can restrict the access to this proxy using a two-stage security barrier:
 <ul>
-<li>define an <i>access domain</i> with a list of granted client IP-Numbers or with wild cards</li>
-<li>define an <i>user account</i> with a user:password - pair</li>
+<li>define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards</li>
+<li>define an <i>user account</i> with an user:password - pair</li>
 </ul><br>
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
@@ -137,7 +137,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 <p>
 <fieldset>
 <legend>Seed Upload Settings</legend>
-<p>With this settings you can configure if you have an account on a public accessable 
+<p>With these settings you can configure if you have an account on a public accessible 
 server where you can host a seed-list file.</p>
 <p><b>General Settings:</b></p>
 If you enable one of the available uploading methods, you will become a principal peer.
@@ -175,8 +175,8 @@ but only if there had been changes to the seed-list.
 <br>
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <fieldset><legend>Content Parser Settings</legend>
-<p>With this settings you can activate or deactivate parsing of additional content types based on there mime-types.<br>
-For a detailed description of the various mime-types take a look at <a href="http://www.iana.org/assignments/media-types/">http://www.iana.org/assignments/media-types/</a></p>
+<p>With this settings you can activate or deactivate parsing of additional content types based on their MIME-types.<br>
+For a detailed description of the various MIME-types take a look at <a href="http://www.iana.org/assignments/media-types/">http://www.iana.org/assignments/media-types/</a></p>
 <p>
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader" valign="bottom">
