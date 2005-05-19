@@ -89,6 +89,9 @@ public class pdfParser extends AbstractParser implements Parser {
     
     public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
         
+        
+        PDDocument theDocument = null;
+        OutputStreamWriter writer = null;
         try {       
             
             // deactivating the logging for jMimeMagic
@@ -101,7 +104,7 @@ public class pdfParser extends AbstractParser implements Parser {
             parser.parse();
             
             PDFTextStripper stripper = new PDFTextStripper();
-            PDDocument theDocument = parser.getPDDocument();
+            theDocument = parser.getPDDocument();
                               
             PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();
             
@@ -114,11 +117,11 @@ public class pdfParser extends AbstractParser implements Parser {
             }
             
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            OutputStreamWriter writer = new OutputStreamWriter( out );            
+            writer = new OutputStreamWriter( out );            
             stripper.writeText(theDocument, writer );
             
-            writer.close();
-            theDocument.close();
+            writer.close(); writer = null;
+            theDocument.close(); theDocument = null;
             
             byte[] contents = out.toByteArray();
 			
@@ -145,7 +148,10 @@ public class pdfParser extends AbstractParser implements Parser {
         }
         catch (Exception e) {            
             throw new ParserException("Unable to parse the pdf content. " + e.getMessage());
-        }        
+        } finally {
+            if (theDocument != null) try { theDocument.close(); } catch (Exception e) {}
+            if (writer != null) try { writer.close(); } catch (Exception e) {}
+        }
     }
     
     public void reset() {
