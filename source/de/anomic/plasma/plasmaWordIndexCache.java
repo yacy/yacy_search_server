@@ -258,7 +258,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	}
         
         // now decide where to flush that container
-        plasmaWordIndexAssortment.record singleton = singletons.read(key);
+        plasmaWordIndexAssortment.record singleton = singletons.remove(key);
         if (singleton == null) {
             // not found in singletons
             if (container.size() == 1) {
@@ -273,49 +273,35 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             // we have a singleton and need to integrate this in the flush
             plasmaWordIndexEntry oldEntry = singleton.entries[0];
             long oldTime = singleton.creationTime;
-            if (container.contains(oldEntry.getUrlHash())) {
-                // we have an double-occurrence
-                if (container.size() == 1) {
-                    // it is superfluous to flush this, simple do nothing
-                    return 0;
-                } else {
-                    // we flush to the backend, and the entry from the singletons
-                    singletons.remove(key);
-                    return backend.addEntries(container, java.lang.Math.max(time, oldTime));
-                }
-            } else {
-                // now we have more than one entry
-                // we must remove the key from the singleton database
-                singletons.remove(key);
-                // .. and put it to the container
-                container.add(oldEntry);
-                if (reintegrate) {
-                    // put singleton together with container back to ram
-                    synchronized (cache) {
-                        cache.put(key, container);
-                        hashScore.setScore(key, container.size());
-                        hashDate.put(key, new Long(time));
-                    }
-                    return -1;
-                } else {
-                    // add this to the backend
-                    return backend.addEntries(container, java.lang.Math.max(time, oldTime));
-                }
+
+	    // put new entries to the container
+            if (!(container.contains(oldEntry.getUrlHash()))) container.add(oldEntry);
+
+	    // possibly reintegrate
+	    if (reintegrate) {
+		// put singleton together with container back to ram
+		synchronized (cache) {
+		    cache.put(key, container);
+		    hashScore.setScore(key, container.size());
+		    hashDate.put(key, new Long(time));
+		}
+		return -1;
+	    } else {
+		// add this to the backend
+		return backend.addEntries(container, java.lang.Math.max(time, oldTime));
             }
         }	
     }
     
     private boolean flushFromSingleton(String key) {
 	// this should only be called if the singleton shall be deleted or returned in an index entity
-        plasmaWordIndexAssortment.record singleton = singletons.read(key);
+        plasmaWordIndexAssortment.record singleton = singletons.remove(key);
         if (singleton == null) {
             return false;
         } else {
             // we have a singleton
             plasmaWordIndexEntry entry = (plasmaWordIndexEntry) singleton.entries[0];
             long time = singleton.creationTime;
-            // remove it from the singleton database
-            singletons.remove(key);
             // integrate it to the backend
             return backend.addEntries(plasmaWordIndexEntryContainer.instantContainer(key, entry), time) > 0;
         }

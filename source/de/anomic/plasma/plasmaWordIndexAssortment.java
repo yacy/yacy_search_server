@@ -167,7 +167,8 @@ public final class plasmaWordIndexAssortment {
         }
         if (oldrow != null) throw new RuntimeException("Store to assortment ambiguous");
     }
-    
+
+    /*    
     public record read(String wordHash) {
         // returns a single word index from assortment database; returns null if index does not exist
         //log.logDebug("readAssortment: wordHash=" + wordHash);
@@ -207,6 +208,33 @@ public final class plasmaWordIndexAssortment {
             e.printStackTrace();
             resetDatabase();
         }
+    }
+    */
+
+    public record remove(String wordHash) {
+        // deletes a word index from assortment database
+	// and returns the content record
+        byte[][] row = null;
+        try {
+            row = assortments.remove(wordHash.getBytes());
+        } catch (IOException e) {
+            log.logFailure("removeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB");
+            e.printStackTrace();
+            resetDatabase();
+	    return null;
+        } catch (kelondroException e) {
+            log.logFailure("removeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB");
+            e.printStackTrace();
+            resetDatabase();
+	    return null;
+        }
+        if (row == null) return null;
+        long creationTime = kelondroRecords.bytes2long(row[2]);
+        plasmaWordIndexEntry[] wordEntries = new plasmaWordIndexEntry[this.bufferStructureLength];
+	for (int i = 0; i < assortmentCapacity; i++) {
+	    wordEntries[i] = new plasmaWordIndexEntry(new String(row[3 + 2 * i]), new String(row[4 + 2 * i]));
+	}
+        return new record(wordEntries, creationTime);
     }
     
     private void resetDatabase() {
