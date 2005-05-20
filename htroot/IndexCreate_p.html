@@ -28,15 +28,15 @@ You can define url's as start points for Web page crawling and start that crawli
     <td class=small colspan="3">
     A minimum of 1 is recommended.
     Be careful with the prefetch number. Consider a branching factor of average 20;
-    A prefect-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
+    A prefetch-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Crawling Filter:</td>
     <td class=small><input name="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#"></td>
     <td class=small colspan="3">
-    This is an emacs-like regular expression that must match with the crawled url.
-    Use this i.e. to crawl a single domain. If you set this filter is would make sense to increase
+    This is an emacs-like regular expression that must match with the crawled URL.
+    Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase
     the crawl depth.
     </td>
   </tr>
@@ -45,7 +45,7 @@ You can define url's as start points for Web page crawling and start that crawli
     <td class=small><input type="checkbox" name="crawlingQ" align="top" #(crawlingQChecked)#::checked#(/crawlingQChecked)#></td>
     <td class=small colspan="3">
     URL's pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
-    is accessed with URL's containing question marks. If you are unshure, do not check this to avoid crawl loops.
+    is accessed with URL's containing question marks. If you are unsure, do not check this to avoid crawl loops.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
@@ -71,7 +71,7 @@ You can define url's as start points for Web page crawling and start that crawli
     <td class=small colspan="3">
     If checked, the crawl will try to assign the leaf nodes of the search tree to remote peers.
     If you need your crawling results locally, you must switch this off.
-    Only senior and principal peers can initiate or receive remote crawls.
+    Only senior and principal peer's can initiate or receive remote crawls.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
@@ -104,8 +104,8 @@ You can define url's as start points for Web page crawling and start that crawli
     <td class=small>Start Point:</td>
     <td class=small colspan="2"><input name="crawlingURL" type="text" size="42" maxlength="256" value="http://"></td>
     <td class=small><input type="submit" name="crawlingstart" value="Start New Crawl"></td>
-    <td class=small>Existing start url's are re-crawled.
-    Other already visited url's are sorted out as 'double'.
+    <td class=small>Existing start URL's are re-crawled.
+    Other already visited URL's are sorted out as 'double'.
     A complete re-crawl will be available soon.
     </td>
   </tr>
