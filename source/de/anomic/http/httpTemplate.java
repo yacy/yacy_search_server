@@ -56,6 +56,61 @@ import java.util.Hashtable;
 
 import de.anomic.server.serverFileUtils;
 
+/**
+ * A template engine, which substitutes patterns in strings<br>
+ *
+ * The template engine supports four types of templates:<br>
+ * <ol>
+ * <li>Normal templates: the template will be replaced by a string.</li>
+ * <li>Multi templates: the template will be used more than one time.<br>
+ * i.e. for lists</li>
+ * <li>3. Alternatives: the program chooses one of multiple alternatives.</li>
+ * <li>Includes: another file with templates will be included.</li>
+ * </ol>
+ *
+ * All these templates can be used recursivly.<p>
+ * <b>HTML-Example</b><br>
+ * <pre>
+ * &lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;
+ * #{times}#
+ * Good #(daytime)#morning::evening#(/daytime)#, #[name]#!(#[num]#. Greeting)&lt;br&gt;
+ * #{/times}#
+ * &lt;/body&gt;&lt;/html&gt;
+ * </pre>
+ * <p>
+ * The corresponding Hashtable to use this Template:<br>
+ * <b>Java Example</b><br>
+ * <pre>
+ * Hashtable pattern;
+ * pattern.put("times", 10); //10 greetings
+ * for(int i=0;i<=9;i++){
+ * 	pattern.put("times_"+i+"_daytime", 1); //index: 1, second Entry, evening
+ * 	pattern.put("times_"+i+"_name", "John Connor");
+ * 	pattern.put("times_"+i+"_num", (i+1));
+ * }
+ * </pre>
+ * <p>
+ * <b>Recursion</b><br>
+ * If you use recursive templates, the templates will be used from
+ * the external to the internal templates.
+ * In our Example, the Template in #{times}##{/times}# will be repeated ten times.<br>
+ * Then the inner Templates will be applied.
+ * <p>
+ * The inner templates have a prefix, so they may have the same name as a template on another level,
+ * or templates which are in another recursive template.<br>
+ * <b>The Prefixes:</b>
+ * <ul>
+ * <li>Multi templates: multitemplatename_index_</li>
+ * <li>Alterantives: alternativename_</li>
+ * </ul>
+ * So the Names in the Hashtable are:
+ * <ul>
+ * <li>Multi templates: multitemplatename_index_templatename</li>
+ * <li>Alterantives: alternativename_templatename</li>
+ * </ul>
+ * <i>#(alternative)#::#{repeat}##[test]##{/repeat}##(/alternative)#</i><br>
+ * would be adressed as "alternative_repeat_"+number+"_test"
+ */
 public final class httpTemplate {
     
     private static final byte hash = (byte)'#';
@@ -80,8 +135,11 @@ public final class httpTemplate {
     private static final byte[] iOpen  = {hash, ps};
     private static final byte[] iClose = {ps, hash};
 
+	/**
+	 * transfer until a specified pattern is found; everything but the pattern is transfered so far
+	 * the function returns true, if the pattern is found
+	 */
     private static boolean transferUntil(PushbackInputStream i, OutputStream o, byte[] pattern) throws IOException {
-        // returns true if pattern was found; everything but the pattern has then be transfered so far
         int ppos = 0;
         int b, bb;
         boolean equal;
@@ -109,6 +167,9 @@ public final class httpTemplate {
 	writeTemplate(in, out, pattern, dflt, "");
     }
 
+	/**
+	 * Reads a input stream, and writes the data with replaced templates on a output stream
+	 */
     public static void writeTemplate(InputStream in, OutputStream out, Hashtable pattern, byte[] dflt, String prefix) throws IOException {
         PushbackInputStream pis = new PushbackInputStream(in, 100);
         ByteArrayOutputStream keyStream;
