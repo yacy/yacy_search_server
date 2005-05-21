@@ -76,12 +76,12 @@ public class ViewProfile {
                     prop.put("success_peername", seed.getName());
                 }
             } else {
-                prop.put("success","3"); // all ok
+                prop.put("success","3"); // everything ok
                 HashMap profile = yacyClient.getProfile(seed);
-                System.out.println("fetched profile:" + profile);
+                yacyCore.log.logInfo("fetched profile:" + profile);
                 Iterator i = profile.entrySet().iterator();
                 Map.Entry entry;
-		//all known Keys which should be set as they are
+		//all known keys which should be set as they are
 		Vector knownKeys = new Vector();
 		knownKeys.add("name");
 		knownKeys.add("nickname");
@@ -99,7 +99,7 @@ public class ViewProfile {
 		    prop.put("success_"+(String)it.next(), 0);
 		}
 		
-		//number of not explicitly recopgnized but displayed items
+		//number of not explicitly recognized but displayed items
 		int numUnknown=0;
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
@@ -116,7 +116,7 @@ public class ViewProfile {
 			}
 			prop.put("success_"+key, 1);
 			prop.put("success_"+key+"_value", value);
-			//This will display Unknown Items(of newer versions) as plaintext
+			//This will display unknown items(of newer versions) as plaintext
 		    }else{//unknown
                     	prop.put("success_other_"+numUnknown+"_key", key);
                     	prop.put("success_other_"+numUnknown+"_value", value);
