@@ -61,7 +61,6 @@ public class kelondroMap {
     private HashMap sortClusterMap; // a String-kelondroMScoreCluster - relation
     private HashMap accMap; // to store accumulations of specific fields
     private int elementCount;
-    private writeQueue writeWorker;
     
     public kelondroMap(kelondroDyn dyn) {
         this(dyn, null, null);
@@ -124,96 +123,9 @@ public class kelondroMap {
 
         // fill acc map
         if (accfields != null) for (int i = 0; i < accfields.length; i++) accMap.put(accfields[i], accumulator[i]);
-
-        // initialize a writeQueue and start it
-        writeWorker = new writeQueue();
-        writeWorker.start();
     }
 
-    class writeQueue extends Thread {
-
-        private LinkedList queue = new LinkedList();
-        boolean run;
-        
-        public writeQueue() {
-            super("kelondroMap:WriteQueue");
-            run = true;
-        }
-        
-        public void stack(String key) {
-            //System.out.println("kelondroMap: stack(" + dyn.entryFile.name() + ") " + key);
-            if (this.isAlive())
-                queue.addLast(key);
-            else
-                workoff(key);
-        }
-        
-        public void workoff() {
-            String newKey = null;
-            synchronized (this.queue) {
-                if (this.queue.size() > 0) {
-                    newKey = (String) this.queue.removeFirst();                    
-                }
-			}
-            if (newKey != null) workoff(newKey);            
-        }
-
-        public void dequeue(String key) {
-            // take out one entry
-            synchronized (this.queue) {
-	            ListIterator i = queue.listIterator();
-	            String k;
-	            while (i.hasNext()) {
-	                k = (String) i.next();
-	                if (k.equals(key)) {
-	                    i.remove();
-	                    return;
-	                }
-	            }
-            }
-        }
-        
-        public void workoff(String key) {
-            //System.out.println("kelondroMap: workoff(" + dyn.entryFile.name() + ") " + key);
-            Map map = (Map) cache.get(key);
-            if (map == null) return;
-            try {
-                writeKra(key, map, "");
-            } catch (IOException e) {
-                System.out.println("PANIC! Critical Error in kelondroMap.writeQueue.workoff(" + dyn.entryFile.name() + "): " + e.getMessage());
-                e.printStackTrace();
-                run = false;
-            }
-        }
-        
-        public void run() {
-            try {sleep(((System.currentTimeMillis() / 3) % 10) * 10000);} catch (InterruptedException e) {} // offset start
-            
-            //System.out.println("XXXX! " + (System.currentTimeMillis() / 1000) + " " + dyn.entryFile.name());
-            int c;
-            while (run) {
-                c = 0; while ((run) && (c++ < 10)) try {sleep(1000);} catch (InterruptedException e) {}
-                //System.out.println("PING! " + (System.currentTimeMillis() / 1000) + " " + dyn.entryFile.name());
-                while (queue.size() > 0) {
-                    if (run) try {sleep(5000 / queue.size());} catch (InterruptedException e) {}
-                    workoff();
-                }
-            }
-            while (queue.size() > 0) workoff();
-        }
-        
-        public void terminate(boolean waitFor) {
-            run = false;
-            if (waitFor) while (this.isAlive()) try {sleep(500);} catch (InterruptedException e) {}                
-        }
-    }
-    
-    /*
-    public synchronized boolean has(String key) throws IOException {
-        return (cache.containsKey(key)) || (dyn.existsDyn(key));
-    }
-    */
-    
+      
     public synchronized void set(String key, Map newMap) throws IOException {
         // update elementCount
         if ((sortfields != null) || (accfields != null)) {
@@ -227,8 +139,8 @@ public class kelondroMap {
             }
         }
         
-        // stack to write queue
-        writeWorker.stack(key);
+        // write entry
+        writeKra(key, newMap, "");
         
         // check for space in cache
         checkCacheSpace();
@@ -236,7 +148,6 @@ public class kelondroMap {
         // write map to cache
         cacheScore.setScore(key, (int) ((System.currentTimeMillis() - startup) / 1000));
         cache.put(key, newMap);
-        
         
         // update sortCluster
         if (sortClusterMap != null) updateSortCluster(key, newMap);
@@ -298,9 +209,6 @@ public class kelondroMap {
             }
         }
         
-        // remove from queue
-        writeWorker.dequeue(key);
-        
         // remove from cache
         cacheScore.deleteScore(key);
         cache.remove(key);
@@ -344,6 +252,7 @@ public class kelondroMap {
         // return value
 	return map;
     }
+    
     
     private synchronized void checkCacheSpace() {
         // check for space in cache
@@ -396,7 +305,7 @@ public class kelondroMap {
     
     public void close() throws IOException {
         // finish queue
-        writeWorker.terminate(true);
+        //writeWorker.terminate(true);
         
         // close cluster
         if (sortClusterMap != null) {

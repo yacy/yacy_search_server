@@ -178,7 +178,13 @@ public class Performance_p {
         prop.put("maxURLinWordCache", "" + switchboard.wordIndex.maxURLinWordCache());
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
         prop.put("wordCacheMax", switchboard.getConfig("wordCacheMax", "10000"));
-        prop.put("singletonsSize", switchboard.wordIndex.assortmentSizes()[0]);
+        
+        int[] asizes = switchboard.wordIndex.assortmentSizes();
+        for (int i = 0; i < asizes.length; i++) {
+            prop.put("assortmentCluster_" + i + "_assortmentSlot", i + 1);
+            prop.put("assortmentCluster_" + i + "_assortmentSize", asizes[i]);
+        }
+        prop.put("assortmentCluster", asizes.length);
         
         // table thread pool settings
         GenericObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();

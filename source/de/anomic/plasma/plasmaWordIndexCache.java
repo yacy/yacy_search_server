@@ -55,7 +55,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private static final String indexDumpFileName = "indexDump0.stack";
     private static final String oldSingletonFileName = "indexSingletons0.db";
     private static final String newSingletonFileName = "indexAssortment001.db";
-    private static final int assortmentLimit = 1;
+    private static final String indexAssortmentClusterPath = "ACLUSTER";
+    private static final int assortmentLimit = 3;
     
     
     // class variables
@@ -79,10 +80,18 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
 
     public plasmaWordIndexCache(File databaseRoot, plasmaWordIndexInterface backend, int singletonbufferkb, serverLog log) {
-        // migrate
+        // migrate#1
         File oldSingletonFile = new File(databaseRoot, oldSingletonFileName);
         File newSingletonFile = new File(databaseRoot, newSingletonFileName);
         if ((oldSingletonFile.exists()) && (!(newSingletonFile.exists()))) oldSingletonFile.renameTo(newSingletonFile);
+        
+        // create new assortment cluster path
+        File assortmentClusterPath = new File(databaseRoot, indexAssortmentClusterPath);
+        if (!(assortmentClusterPath.exists())) assortmentClusterPath.mkdirs();
+        
+        // migrate#2
+        File acSingletonFile = new File(assortmentClusterPath, newSingletonFileName);
+        if ((newSingletonFile.exists()) && (!(acSingletonFile.exists()))) newSingletonFile.renameTo(acSingletonFile);
         
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
@@ -94,7 +103,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	this.maxWords = 10000;
         this.backend = backend;
         this.log = log;
-	this.assortmentCluster = new plasmaWordIndexAssortmentCluster(databaseRoot, assortmentLimit, singletonBufferSize, log);
+	this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentLimit, singletonBufferSize, log);
 
         // read in dump of last session
         try {
@@ -261,7 +270,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         
         // now decide where to flush that container
         plasmaWordIndexEntryContainer flushedFromAssortment = assortmentCluster.removeFromAll(key);
-        if (flushedFromAssortment == null) {
+        if ((flushedFromAssortment == null) || (flushedFromAssortment.size() == 0)) {
             // not found in assortments
             if (container.size() <= assortmentLimit) {
                 // this fits into the assortments
@@ -288,15 +297,15 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 		    hashScore.setScore(key, container.size());
 		    hashDate.put(key, new Long(time));
 		}
-		return -1;
+		return -flushedFromAssortment.size();
 	    } else {
 		// add this to the backend
-		return backend.addEntries(container, java.lang.Math.max(time, flushedFromAssortment.updated()));
+		return backend.addEntries(container, java.lang.Math.max(time, flushedFromAssortment.updated())) - flushedFromAssortment.size();
             }
         }	
     }
     
-    private boolean flushFromSingleton(String key) {
+    private boolean flushFromAssortmentCluster(String key) {
 	// this should only be called if the singleton shall be deleted or returned in an index entity
         plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(key);
         if (container == null) {
@@ -330,8 +339,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
             // generate flush list
             Iterator i = hashScore.scores(true);
-            TreeMap[] al = new TreeMap[hashScore.getMaxScore() + 1];
-	    for (int k = 0; k < al.length; k++) al[k] = new TreeMap(); // by create time ordered hash-list
+            TreeMap[] clusterCandidate = new TreeMap[hashScore.getMaxScore()];
+	    for (int k = 0; k < clusterCandidate.length; k++) clusterCandidate[k] = new TreeMap(); // by create time ordered hash-list
             while (i.hasNext()) {
 		// get the entry properties
                 key = (String) i.next();
@@ -339,36 +348,48 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 count = hashScore.getScore(key);
 		
 		// put it into a specific ohl
-		al[count].put(createTime, key);
+		clusterCandidate[count - 1].put(createTime, key);
 		//System.out.println("COUNT FOR KEY " + key + ": " + count);
             }
 
 	    // print statistics
-	    for (int k = 1; k < al.length; k++) log.logDebug("FLUSH-LIST " + k + ": " + al[k].size() + " entries");
+	    for (int k = 0; k < clusterCandidate.length; k++)
+                log.logDebug("FLUSH-LIST " + (k + 1) + ": " + clusterCandidate[k].size() + " entries");
 
-            // flush singletons
-	    i = al[1].entrySet().iterator();
-	    Map.Entry entry;
-	    while (i.hasNext()) {
-		entry = (Map.Entry) i.next();
-		key = (String) entry.getValue();
-		createTime = (Long) entry.getKey();
-		if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) > 90000)) {
-		    //log.logDebug("flushing singleton-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
-		    count += flushFromMem((String) key, true);
-		}
-	    }
-
-            // flush high-scores
-            for (int k = al.length - 1; k >= 2; k--) {
-                i = al[k].entrySet().iterator();
+            Map.Entry entry;
+            int candidateCounter;
+            // flush from assortment cluster
+            for (int cluster = 0; cluster < assortmentLimit; cluster++) {
+                candidateCounter = 0;
+                // select a specific cluster
+                i = clusterCandidate[cluster].entrySet().iterator();
+                // check each element in this flush-list: too old?
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
                     key = (String) entry.getValue();
                     createTime = (Long) entry.getKey();
-                    if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) > (600000/k))) {
-                        //log.logDebug("flushing high-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
-                        count += flushFromMem(key, false);
+                    if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) > 90000)) {
+                        //log.logDebug("flushing singleton-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
+                        count += java.lang.Math.abs(flushFromMem(key, true));
+                        candidateCounter += cluster + 1;
+                    }
+                }
+                if (candidateCounter > 0) log.logDebug("flushed low-cluster #" + (cluster + 1) + ", count=" + count + ", candidateCounter=" + candidateCounter + ", cachesize=" + cache.size());
+                if (count > 2000) return count;
+            }
+
+            // flush high-scores
+            for (int cluster = clusterCandidate.length; cluster > 0; cluster--) {
+                candidateCounter = 0;
+                i = clusterCandidate[cluster - 1].entrySet().iterator();
+                while (i.hasNext()) {
+                    entry = (Map.Entry) i.next();
+                    key = (String) entry.getValue();
+                    createTime = (Long) entry.getKey();
+                    if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) > (600000/cluster))) {
+                        count += java.lang.Math.abs(flushFromMem(key, false));
+                        candidateCounter += cluster + 1;
+                        log.logDebug("flushed high-cluster #" + (cluster + 1) + ", key=" + key + ", count=" + count + ", cachesize=" + cache.size());
                     }
                     if (count > 2000) return count;
                 }
@@ -380,7 +401,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     
     public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty) {
         flushFromMem(wordHash, false);
-        flushFromSingleton(wordHash);
+        flushFromAssortmentCluster(wordHash);
 	return backend.getIndex(wordHash, deleteIfEmpty);
     }
     
@@ -402,7 +423,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     public synchronized int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
         flushFromMem(wordHash, false);
-        flushFromSingleton(wordHash);
+        flushFromAssortmentCluster(wordHash);
         return backend.removeEntries(wordHash, urlHashes, deleteComplete);
     }
     
