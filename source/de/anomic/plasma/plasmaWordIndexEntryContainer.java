@@ -39,6 +39,17 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
+
+/*
+    an indexContainer is a bag of indexEntries for a single word
+    such an container represents a RWI snipplet:
+    it collects a new RWI until it is so big that it should be flushed to either
+    - an indexAssortment: collection of indexContainers of same size or
+    - the backend storage
+ 
+    the creationTime is necessary to organize caching of containers
+*/
+
 package de.anomic.plasma;
 
 import java.util.HashMap;
@@ -48,10 +59,12 @@ import de.anomic.server.serverCodings;
 public class plasmaWordIndexEntryContainer implements Comparable {
 
     private String wordHash;
-    private HashMap container;
+    private HashMap container; // urlHash/plasmaWordIndexEntry - Mapping
+    private long updateTime;
     
     public plasmaWordIndexEntryContainer(String wordHash) {
         this.wordHash = wordHash;
+        this.updateTime = 0;
         container = new HashMap(); // a urlhash/plasmaWordIndexEntry - relation
     }
     
@@ -59,16 +72,19 @@ public class plasmaWordIndexEntryContainer implements Comparable {
         return container.size();
     }
     
+    public long updated() {
+        return updateTime;
+    }
+    
     public String wordHash() {
         return wordHash;
     }
 
-    public boolean add(plasmaWordIndexEntry entry) {
-        // returns true if the new entry was added, false if it already existet
-        String urlHash = entry.getUrlHash();
-        if (container.containsKey(urlHash)) return false;
-        container.put(urlHash, entry);
-        return true;
+    public int add(plasmaWordIndexEntry[] entries, long updateTime) {
+        int c = 0;
+        for (int i = 0; i < entries.length; i++) if (add(entries[i])) c++;
+        this.updateTime = java.lang.Math.max(this.updateTime, updateTime);
+        return c;
     }
     
     public int add(plasmaWordIndexEntryContainer c) {
@@ -78,28 +94,38 @@ public class plasmaWordIndexEntryContainer implements Comparable {
         while (i.hasNext()) {
             if (add((plasmaWordIndexEntry) i.next())) x++;
         }
+        this.updateTime = java.lang.Math.max(this.updateTime, c.updateTime);
         return x;
+    }
+    
+    private boolean add(plasmaWordIndexEntry entry) {
+        // returns true if the new entry was added, false if it already existet
+        String urlHash = entry.getUrlHash();
+        if (container.containsKey(urlHash)) return false;
+        container.put(urlHash, entry);
+        return true;
     }
     
     public boolean contains(String urlHash) {
         return container.containsKey(urlHash);
     }
     
-    public plasmaWordIndexEntry getOne() {
-        return (plasmaWordIndexEntry) container.values().toArray()[0];
+    public plasmaWordIndexEntry[] getEntryArray() {
+        return (plasmaWordIndexEntry[]) container.values().toArray();
     }
     
     public Iterator entries() {
         // returns an iterator of plasmaWordIndexEntry objects
         return container.values().iterator();
     }
-    
-    public static plasmaWordIndexEntryContainer instantContainer(String wordHash, plasmaWordIndexEntry entry) {
+
+    public static plasmaWordIndexEntryContainer instantContainer(String wordHash, long creationTime, plasmaWordIndexEntry entry) {
         plasmaWordIndexEntryContainer c = new plasmaWordIndexEntryContainer(wordHash);
         c.add(entry);
+        c.updateTime = creationTime;
         return c;
     }
-    
+
     public String toString() {
         return "C[" + wordHash + "] has " + container.size() + " entries";
     }

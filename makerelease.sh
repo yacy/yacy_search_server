@@ -45,7 +45,7 @@
 # Contributions and changes to the program code must be marked as such.
 
 # define variables
-version='0.374'
+version='0.375'
 datestr=`date +%Y%m%d`
 #release='yacy_v'$version'_'$datestr
 release='yacy_dev_v'$version'_'$datestr

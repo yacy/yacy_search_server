@@ -43,6 +43,7 @@ package de.anomic.kelondro;
 
 import java.util.Iterator;
 import java.util.Comparator;
+import java.util.Set;
 
 public class kelondroMergeIterator implements Iterator {
     
@@ -104,5 +105,21 @@ public class kelondroMergeIterator implements Iterator {
     
     public void remove() {
         throw new java.lang.UnsupportedOperationException("merge does not support remove");
+    }
+    
+    public static Iterator cascade(Set /*of*/ iterators, boolean up) {
+        // this extends the ability to combine two iterators
+        // to the abiliy of combining a set of iterators
+        if (iterators == null) return null;
+        if (iterators.size() == 0) return null;
+        return cascade(iterators.iterator(), up);
+    }
+    
+    private static Iterator cascade(Iterator /*of*/ iiterators, boolean up) {
+        if (iiterators == null) return null;
+        if (!(iiterators.hasNext())) return null;
+        Iterator one = (Iterator) iiterators.next();
+        if (!(iiterators.hasNext())) return one;
+        return new kelondroMergeIterator(one, cascade(iiterators, up), up);
     }
 }

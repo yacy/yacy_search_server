@@ -47,7 +47,7 @@
   For each 'x' there is an assortment database, where 1<=x<=max
   If a word appears on more than 'max' web pages, the corresponing url-list
   is stored to some kind of back-end database which we consider as the
-  'slowes' option to save data.
+  'slowest' option to save data. This here is the fastest file-based.
  */
 
 package de.anomic.plasma;
@@ -124,34 +124,21 @@ public final class plasmaWordIndexAssortment {
         }
     }
 
-    public record newRecord(plasmaWordIndexEntry entry, long creationTime) {
-        return new record(new plasmaWordIndexEntry[]{entry}, creationTime);
-    }
-    
-    public record newRecord(plasmaWordIndexEntry[] entries, long creationTime) {
-        return new record(entries, creationTime);
-    }
-    
-    public class record {
-	public plasmaWordIndexEntry[] entries;
-	public long creationTime;
-	public record(plasmaWordIndexEntry[] entries, long creationTime) {
-	    this.entries = entries;
-	    this.creationTime = creationTime;
-	}
-    }
-
-    public void store(String wordHash, record newRecord) {
+    public void store(String wordHash, plasmaWordIndexEntryContainer newContainer) {
         // stores a word index to assortment database
         // this throws an exception if the word hash already existed
         //log.logDebug("storeAssortment: wordHash=" + wordHash + ", urlHash=" + entry.getUrlHash() + ", time=" + creationTime);
+        if (newContainer.size() != assortmentCapacity) throw new RuntimeException("plasmaWordIndexAssortment.store: wrong container size");
         byte[][] row = new byte[this.bufferStructureLength][];
         row[0] = wordHash.getBytes();
         row[1] = kelondroRecords.long2bytes(1, 4);
-        row[2] = kelondroRecords.long2bytes(newRecord.creationTime, 8);
-	for (int i = 0; i < assortmentCapacity; i++) {
-	    row[3 + 2 * i] = newRecord.entries[i].getUrlHash().getBytes();
-	    row[4 + 2 * i] = newRecord.entries[i].toEncodedForm(true).getBytes();
+        row[2] = kelondroRecords.long2bytes(newContainer.updated(), 8);
+        Iterator entries = newContainer.entries();
+	plasmaWordIndexEntry entry;
+        for (int i = 0; i < assortmentCapacity; i++) {
+            entry = (plasmaWordIndexEntry) entries.next();
+	    row[3 + 2 * i] = entry.getUrlHash().getBytes();
+	    row[4 + 2 * i] = entry.toEncodedForm(true).getBytes();
 	}
         byte[][] oldrow = null;
         try {
@@ -168,50 +155,7 @@ public final class plasmaWordIndexAssortment {
         if (oldrow != null) throw new RuntimeException("Store to assortment ambiguous");
     }
 
-    /*    
-    public record read(String wordHash) {
-        // returns a single word index from assortment database; returns null if index does not exist
-        //log.logDebug("readAssortment: wordHash=" + wordHash);
-        byte[][] row = null;
-        try {
-            row = assortments.get(wordHash.getBytes());
-        } catch (IOException e) {
-            log.logFailure("readAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB");
-            e.printStackTrace();
-            resetDatabase();
-        } catch (kelondroException e) {
-            log.logFailure("readAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB");
-            e.printStackTrace();
-            resetDatabase();
-        }
-        if (row == null) return null;
-        long creationTime = kelondroRecords.bytes2long(row[2]);
-        plasmaWordIndexEntry[] wordEntries = new plasmaWordIndexEntry[this.bufferStructureLength];
-	for (int i = 0; i < assortmentCapacity; i++) {
-	    wordEntries[i] = new plasmaWordIndexEntry(new String(row[3 + 2 * i]), new String(row[4 + 2 * i]));
-	}
-        return new record(wordEntries, creationTime);
-    }
-    
-    public void remove(String wordHash) {
-        // deletes a word index from assortment database
-        //log.logDebug("removeAssortment: wordHash=" + wordHash);
-        byte[][] row = null;
-        try {
-            row = assortments.remove(wordHash.getBytes());
-        } catch (IOException e) {
-            log.logFailure("removeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB");
-            e.printStackTrace();
-            resetDatabase();
-        } catch (kelondroException e) {
-            log.logFailure("removeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB");
-            e.printStackTrace();
-            resetDatabase();
-        }
-    }
-    */
-
-    public record remove(String wordHash) {
+    public plasmaWordIndexEntryContainer remove(String wordHash) {
         // deletes a word index from assortment database
 	// and returns the content record
         byte[][] row = null;
@@ -229,12 +173,13 @@ public final class plasmaWordIndexAssortment {
 	    return null;
         }
         if (row == null) return null;
-        long creationTime = kelondroRecords.bytes2long(row[2]);
+        long updateTime = kelondroRecords.bytes2long(row[2]);
         plasmaWordIndexEntry[] wordEntries = new plasmaWordIndexEntry[this.bufferStructureLength];
+        plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
 	for (int i = 0; i < assortmentCapacity; i++) {
-	    wordEntries[i] = new plasmaWordIndexEntry(new String(row[3 + 2 * i]), new String(row[4 + 2 * i]));
+            container.add(new plasmaWordIndexEntry[]{new plasmaWordIndexEntry(new String(row[3 + 2 * i]), new String(row[4 + 2 * i]))}, updateTime);
 	}
-        return new record(wordEntries, creationTime);
+        return container;
     }
     
     private void resetDatabase() {

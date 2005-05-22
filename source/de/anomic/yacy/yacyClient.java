@@ -298,7 +298,9 @@ public class yacyClient {
                 plasmaWordIndexEntry entry = new plasmaWordIndexEntry(link.hash(), link.wordCount(), 0, 0, 0,
                                                                       plasmaSearch.calcVirtualAge(link.moddate()), link.quality(),
                                                                       link.language(), link.doctype(), false);
-                for (int m = 0; m < words; m++) container[m].add(entry);
+                for (int m = 0; m < words; m++) {
+                    container[m].add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
+                }
             }
             
             // finally insert the containers to the index

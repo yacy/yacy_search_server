@@ -178,7 +178,7 @@ public class Performance_p {
         prop.put("maxURLinWordCache", "" + switchboard.wordIndex.maxURLinWordCache());
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
         prop.put("wordCacheMax", switchboard.getConfig("wordCacheMax", "10000"));
-        prop.put("singletonsSize", switchboard.wordIndex.singletonsSize());
+        prop.put("singletonsSize", switchboard.wordIndex.assortmentSizes()[0]);
         
         // table thread pool settings
         GenericObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();

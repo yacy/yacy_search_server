@@ -112,7 +112,7 @@ public final class plasmaSearch {
 	    wordHash = plasmaWordIndexEntry.word2hash(word);
 	    entry = new plasmaWordIndexEntry(urlHash, count, p++, 0, 0,
                                          age, quality, language, doctype, true);
-	    wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, entry));
+	    wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry));
 	}
 	//System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
         return condenser.getWords().size();

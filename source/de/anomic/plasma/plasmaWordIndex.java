@@ -76,8 +76,8 @@ public final class plasmaWordIndex {
         return ramCache.wordCacheRAMSize();
     }
     
-    public int singletonsSize() {
-        return ramCache.singletonsSize();
+    public int[] assortmentSizes() {
+        return ramCache.assortmentsSizes();
     }
         
     public void setMaxWords(int maxWords) {

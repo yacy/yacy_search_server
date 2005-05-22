@@ -55,6 +55,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private static final String indexDumpFileName = "indexDump0.stack";
     private static final String oldSingletonFileName = "indexSingletons0.db";
     private static final String newSingletonFileName = "indexAssortment001.db";
+    private static final int assortmentLimit = 1;
+    
     
     // class variables
     private File databaseRoot;
@@ -64,7 +66,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private HashMap hashDate;
     private int maxWords;
     private serverLog log;
-    private plasmaWordIndexAssortment singletons;
+    private plasmaWordIndexAssortmentCluster assortmentCluster;
     private int singletonBufferSize; //kb
 
     // calculated constants
@@ -92,7 +94,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	this.maxWords = 10000;
         this.backend = backend;
         this.log = log;
-	this.singletons = new plasmaWordIndexAssortment(databaseRoot, 1, singletonBufferSize, log);
+	this.assortmentCluster = new plasmaWordIndexAssortmentCluster(databaseRoot, assortmentLimit, singletonBufferSize, log);
 
         // read in dump of last session
         try {
@@ -212,12 +214,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         this.maxWords = maxWords;
     }
     
-    public int singletonsSize() {
-        return singletons.size();
+    public int[] assortmentsSizes() {
+        return assortmentCluster.sizes();
     }
     
     public int size() {
-        return java.lang.Math.max(singletons.size(), java.lang.Math.max(backend.size(), cache.size()));
+        return java.lang.Math.max(assortmentCluster.sizeTotal(), java.lang.Math.max(backend.size(), cache.size()));
     }
     
     public Iterator wordHashes(String startWordHash, boolean up) {
@@ -229,7 +231,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return new kelondroMergeIterator(
                         new kelondroMergeIterator(
                                  cache.keySet().iterator(),
-                                 singletons.hashes(startWordHash, true, false),
+                                 assortmentCluster.hashConjunction(startWordHash, true),
                                  true),
                         backend.wordHashes(startWordHash, true),
                         true);
@@ -258,28 +260,29 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	}
         
         // now decide where to flush that container
-        plasmaWordIndexAssortment.record singleton = singletons.remove(key);
-        if (singleton == null) {
-            // not found in singletons
-            if (container.size() == 1) {
-                // it is a singleton: store to singleton
-                singletons.store(key, singletons.newRecord(container.getOne(), time));
-                return 1;
+        plasmaWordIndexEntryContainer flushedFromAssortment = assortmentCluster.removeFromAll(key);
+        if (flushedFromAssortment == null) {
+            // not found in assortments
+            if (container.size() <= assortmentLimit) {
+                // this fits into the assortments
+                plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(key, container);
+                if (feedback == null) {
+                    return container.size();
+                } else {
+                    // *** should care about another option here ***
+                    return backend.addEntries(feedback, time);
+                }
             } else {
                 // store to back-end; this should be a rare case
                 return backend.addEntries(container, time);
             }
         } else {
-            // we have a singleton and need to integrate this in the flush
-            plasmaWordIndexEntry oldEntry = singleton.entries[0];
-            long oldTime = singleton.creationTime;
-
-	    // put new entries to the container
-            if (!(container.contains(oldEntry.getUrlHash()))) container.add(oldEntry);
-
+            // we have some records and must integrate them into the flush
+            container.add(flushedFromAssortment);
+            
 	    // possibly reintegrate
 	    if (reintegrate) {
-		// put singleton together with container back to ram
+		// put assortmentRecord together with container back to ram
 		synchronized (cache) {
 		    cache.put(key, container);
 		    hashScore.setScore(key, container.size());
@@ -288,22 +291,20 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 		return -1;
 	    } else {
 		// add this to the backend
-		return backend.addEntries(container, java.lang.Math.max(time, oldTime));
+		return backend.addEntries(container, java.lang.Math.max(time, flushedFromAssortment.updated()));
             }
         }	
     }
     
     private boolean flushFromSingleton(String key) {
 	// this should only be called if the singleton shall be deleted or returned in an index entity
-        plasmaWordIndexAssortment.record singleton = singletons.remove(key);
-        if (singleton == null) {
+        plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(key);
+        if (container == null) {
             return false;
         } else {
-            // we have a singleton
-            plasmaWordIndexEntry entry = (plasmaWordIndexEntry) singleton.entries[0];
-            long time = singleton.creationTime;
+            // we have a non-empty entry-container
             // integrate it to the backend
-            return backend.addEntries(plasmaWordIndexEntryContainer.instantContainer(key, entry), time) > 0;
+            return backend.addEntries(container, container.updated()) > 0;
         }
     }
 
@@ -395,7 +396,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             hashScore.deleteScore(wordHash);
             hashDate.remove(wordHash);
         }
-        singletons.remove(wordHash);
+        assortmentCluster.removeFromAll(wordHash);
 	backend.deleteIndex(wordHash);
     }
 
@@ -405,7 +406,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return backend.removeEntries(wordHash, urlHashes, deleteComplete);
     }
     
-    public synchronized int addEntries(plasmaWordIndexEntryContainer container, long creationTime) {
+    public synchronized int addEntries(plasmaWordIndexEntryContainer container, long updateTime) {
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
         if (cache.size() >= this.maxWords) flushFromMemToLimit();
 	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");
@@ -420,25 +421,25 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             if (added > 0) {
                 cache.put(wordHash, entries);
                 hashScore.addScore(wordHash, added);
-                hashDate.put(wordHash, new Long(creationTime));
+                hashDate.put(wordHash, new Long(updateTime));
             }
 	}
         //System.out.println("DEBUG: cache = " + cache.toString());
         return added;
     }
 
-    private void addEntry(String wordHash, plasmaWordIndexEntry newEntry, long creationTime) {
+    private void addEntry(String wordHash, plasmaWordIndexEntry newEntry, long updateTime) {
         plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) cache.get(wordHash);
         if (entries == null) entries = new plasmaWordIndexEntryContainer(wordHash);
-        if (entries.add(newEntry)) {
+        if (entries.add(new plasmaWordIndexEntry[]{newEntry}, updateTime) > 0) {
             cache.put(wordHash, entries);
             hashScore.incScore(wordHash);
-            hashDate.put(wordHash, new Long(creationTime));
+            hashDate.put(wordHash, new Long(updateTime));
         }
     }
 
     public void close(int waitingSeconds) {
-        singletons.close();
+        assortmentCluster.close();
         try {
             dump(waitingSeconds);
         } catch (IOException e){
