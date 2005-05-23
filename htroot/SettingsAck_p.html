@@ -52,11 +52,11 @@ You are now permanently <b>online</b>. After a short while you should see the ef
 <b>Transparent Proxy Support is: <font color="#556699">#[isTransparentProxy]#</font></b><p>
 <u>if you changed the Port, you need to restart the Proxy.</u>
 ::
-<b>Seed Settings changed. You are now a principal peer.</b><br>
+<b>Seed Settings changed.#(success)#::You are now a principal peer.#(/success)#</b><br>
 ::
-<b>Seed Settings changed, but something is wrong.<b>
+<p><b>Seed Settings changed, but something is wrong.</b></p>
 Seed Uploading was deactivated automatically. 
-Please return to the settings page and modify the data.</b><br>
+Please return to the settings page and modify the data.<br>
 ::
 <b>The remote-proxy setting has been changed</b><br>
 The new setting is effective immediately, you don't need to re-start.
@@ -68,7 +68,7 @@ The settings have not been changed.
 Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
 The settings have not been changed.
 ::
-The new parser settings where changed successfully.<p>
+The new parser settings where changed successfully.<br>
 Parsing of the following mime-types was enabled:<br>
 <ul>
 #{parser}#
@@ -76,7 +76,9 @@ Parsing of the following mime-types was enabled:<br>
 #{/parser}#
 </ul>
 ::
-Seed Upload method was changed successfully.<p>
+Seed Upload method was changed successfully.
+#(success)#::<br>You are now a principal peer.#(/success)#
+<p>
 <table>
 <tr><td>Seed Upload Method:</td><td><font color="#556699">#[seedUploadMethod]#</font></td></tr>
 <tr><td>Seed File URL:</td><td><a href="#[seedURL]#"><font color="#556699">#[seedURL]#</font></a></td></tr>

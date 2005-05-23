@@ -204,7 +204,8 @@ public class SettingsAck_p {
         if (post.containsKey("generalsettings")) {
             String port = (String) post.get("port");
             String peerName = (String) post.get("peername");
-            httpdProxyHandler.isTransparentProxy = post.get("isTransparentProxy", "").equals("on");
+            
+            httpdProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
             
             // check if peer name already exists
             yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
@@ -267,11 +268,11 @@ public class SettingsAck_p {
                 boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
                 boolean uploadMethodChanged = !oldSeedUploadMethod.equals(newSeedUploadMethod);
                 if (uploadMethodChanged) {
-                    uploadMethodChanged = yacyCore.changeSeedUploadMethod((String) post.get("seedUploadMethod")); 
+                    uploadMethodChanged = yacyCore.changeSeedUploadMethod(newSeedUploadMethod); 
                 }
 
                 if (seedUrlChanged || uploadMethodChanged) {
-                    env.setConfig("seedUploadMethod", (String)post.get("seedUploadMethod"));
+                    env.setConfig("seedUploadMethod", newSeedUploadMethod);
                     env.setConfig("seedURL", newSeedURLStr);
                     
                     boolean success = yacyCore.saveSeedList(env);
@@ -281,8 +282,15 @@ public class SettingsAck_p {
                     } else {
                         prop.put("info_seedUploadMethod",newSeedUploadMethod);
                         prop.put("info_seedURL",newSeedURLStr);
+                        prop.put("info_success",(newSeedUploadMethod.equalsIgnoreCase("none")?0:1));
                         prop.put("info", 19);
                     }                  
+                } else {
+                    prop.put("info_seedUploadMethod",newSeedUploadMethod);
+                    prop.put("info_seedURL",newSeedURLStr);
+                    prop.put("info_success",0);
+                    prop.put("info", 19);                    
+                    
                 }
             } catch (Exception e) {
                 prop.put("info",14);
@@ -315,19 +323,26 @@ public class SettingsAck_p {
                         }
                     }
                 }   
-                if ((!nothingChanged)&&(env.getConfig("seedUploadMethod","none").equals(theUploader))) {
-                    boolean success = yacyCore.saveSeedList(env);
-                    if (!success) {
-                        prop.put("info", 14);
-                        env.setConfig("seedUploadMethod","none");
+                if (!nothingChanged) {
+                    if (env.getConfig("seedUploadMethod","none").equals(theUploader)) {
+                        boolean success = yacyCore.saveSeedList(env);
+                        if (!success) {
+                            prop.put("info", 14);
+                            env.setConfig("seedUploadMethod","none");
+                        } else {
+                            prop.put("info", 13);
+                            prop.put("info_success",1);
+                        }                          
                     } else {
                         prop.put("info", 13);
-                    }                      
+                        prop.put("info_success",0);
+                    }
                 } else {
                     prop.put("info", 13);
+                    prop.put("info_success",0);
                 }
-            }
-            
+                return prop;
+            }            
         }
         
 
