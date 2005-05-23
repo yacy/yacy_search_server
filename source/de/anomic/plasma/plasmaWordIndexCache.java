@@ -56,7 +56,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private static final String oldSingletonFileName = "indexSingletons0.db";
     private static final String newSingletonFileName = "indexAssortment001.db";
     private static final String indexAssortmentClusterPath = "ACLUSTER";
-    private static final int assortmentLimit = 6;
+    private static final int assortmentLimit = 8;
     
     
     // class variables
@@ -317,7 +317,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
     }
 
-    private int flushFromMemToLimit() {
+    private synchronized int flushFromMemToLimit() {
 	if ((hashScore.size() == 0) && (cache.size() == 0)) {
 	    serverLog.logDebug("PLASMA INDEXING", "flushToLimit: called but cache is empty");
 	    return 0;
@@ -361,7 +361,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	    count = 0;
 
             // flush high-scores that accumultated too much
-            for (int cluster = clusterCandidate.length; cluster >= 100; cluster--) {
+            for (int cluster = clusterCandidate.length; cluster >= 50; cluster--) {
                 candidateCounter = 0;
                 i = clusterCandidate[cluster - 1].entrySet().iterator();
                 while (i.hasNext()) {
@@ -369,16 +369,16 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     key = (String) entry.getValue();
                     createTime = (Long) entry.getKey();
 		    count += java.lang.Math.abs(flushFromMem(key, false));
-		    candidateCounter += cluster + 1;
-		    log.logDebug("flushed high-cluster over limit #" + (cluster + 1) + ", key=" + key + ", count=" + count + ", cachesize=" + cache.size());
+		    candidateCounter += cluster;
+		    log.logDebug("flushed high-cluster over limit #" + cluster + ", key=" + key + ", count=" + count + ", cachesize=" + cache.size());
                 }
             }
 
             // flush from assortment cluster
-            for (int cluster = 0; cluster < assortmentLimit; cluster++) {
+            for (int cluster = 1; cluster <= java.lang.Math.min(clusterCandidate.length, assortmentLimit); cluster++) {
                 candidateCounter = 0;
                 // select a specific cluster
-                i = clusterCandidate[cluster].entrySet().iterator();
+                i = clusterCandidate[cluster - 1].entrySet().iterator();
                 // check each element in this flush-list: too old?
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
@@ -387,14 +387,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) > 90000)) {
                         //log.logDebug("flushing singleton-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
                         count += java.lang.Math.abs(flushFromMem(key, true));
-                        candidateCounter += cluster + 1;
+                        candidateCounter += cluster;
                     }
-		    if (count > 2000) {
-			if (candidateCounter > 0) log.logDebug("flushed low-cluster #" + (cluster + 1) + ", count=" + count + ", candidateCounter=" + candidateCounter + ", cachesize=" + cache.size());
-			return count;
-		    }
                 }
-                if (candidateCounter > 0) log.logDebug("flushed low-cluster #" + (cluster + 1) + ", count=" + count + ", candidateCounter=" + candidateCounter + ", cachesize=" + cache.size());
+                if (candidateCounter > 0) log.logDebug("flushed low-cluster #" + cluster + ", count=" + count + ", candidateCounter=" + candidateCounter + ", cachesize=" + cache.size());
+                if (count > 1000) return count;
+
             }
 
 	    // stop flushing if cache is shrinked enough
@@ -402,19 +400,19 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	    if (cache.size() < this.maxWords) return count;
 
             // flush high-scores
-            for (int cluster = 100; cluster >= assortmentLimit; cluster--) {
+            for (int cluster = java.lang.Math.min(clusterCandidate.length, 50); cluster > assortmentLimit; cluster--) {
                 candidateCounter = 0;
                 i = clusterCandidate[cluster - 1].entrySet().iterator();
                 while (i.hasNext()) {
-		    if (cache.size() < this.maxWords) return count;
-                    entry = (Map.Entry) i.next();
+		    entry = (Map.Entry) i.next();
                     key = (String) entry.getValue();
                     createTime = (Long) entry.getKey();
                     if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) > (600000/cluster))) {
                         count += java.lang.Math.abs(flushFromMem(key, false));
-                        candidateCounter += cluster + 1;
-                        log.logDebug("flushed high-cluster below limit #" + (cluster + 1) + ", key=" + key + ", count=" + count + ", cachesize=" + cache.size());
+                        candidateCounter += cluster;
+                        log.logDebug("flushed high-cluster below limit #" + cluster + ", key=" + key + ", count=" + count + ", cachesize=" + cache.size());
                     }
+                    if (cache.size() < this.maxWords) return count;
                 }
             }
             

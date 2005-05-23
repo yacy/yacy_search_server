@@ -107,7 +107,7 @@ public final class plasmaWordIndexAssortment {
             // open existing singeton tree file
             try {
                 assortments = new kelondroTree(assortmentFile, bufferSize);
-                log.logSystem("Opened Assortment Database, " + assortments.size() + " entries."); 
+                log.logSystem("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentCapacity); 
             } catch (IOException e){
                 log.logError("unable to open assortment database: " + e.getMessage());
                 e.printStackTrace();
@@ -116,7 +116,7 @@ public final class plasmaWordIndexAssortment {
             // create new sigleton tree file
             try {
                 assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentCapacity));
-                log.logSystem("Created new Assortment Database"); 
+                log.logSystem("Created new Assortment Database, width " + assortmentCapacity); 
             } catch (IOException e){
                 log.logError("unable to create assortment database: " + e.getMessage());
                 e.printStackTrace();
