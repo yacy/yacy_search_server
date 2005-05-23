@@ -60,7 +60,7 @@ import de.anomic.server.serverSwitch;
  *  
  * @author Martin Thelian
  */
-final class httpdSoapHandler extends httpdAbstractHandler implements httpdHandler 
+public final class httpdSoapHandler extends httpdAbstractHandler implements httpdHandler 
 {
  
     /* ===============================================================
@@ -431,7 +431,7 @@ final class httpdSoapHandler extends httpdAbstractHandler implements httpdHandle
             msgContext.setProperty(Constants.MC_RELATIVE_PATH, path.toString());
             msgContext.setProperty(Constants.MC_JWS_CLASSDIR,  "jwsClasses");
             msgContext.setProperty(Constants.MC_HOME_DIR,      "."); 
-            msgContext.setProperty(MessageContext.TRANS_URL, "http://" + requestHeader.get("Host") + this.switchboard.getConfig("port","8080") + "/soap/index");
+            msgContext.setProperty(MessageContext.TRANS_URL, "http://" + requestHeader.get("Host") + ((((String)requestHeader.get("Host")).indexOf(":") > -1)?"":this.switchboard.getConfig("port","8080")) + "/soap/index");
             
             msgContext.setProperty(MESSAGE_CONTEXT_HTTP_ROOT_PATH  ,this.htRootPath.toString());
             msgContext.setProperty(MESSAGE_CONTEXT_SERVER_SWITCH,this.switchboard);

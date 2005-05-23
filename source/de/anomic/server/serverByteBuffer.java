@@ -307,6 +307,18 @@ public final class serverByteBuffer extends OutputStream {
         this.offset = 0;
     }        
     
+    public void reset(int newSize) {  
+        this.resize(newSize);
+        this.reset();
+    }         
+     
+    public void resize(int newSize) {
+        if(newSize < 0) throw new IllegalArgumentException("Illegal array size: " + newSize);
+        byte[] v = new byte[newSize];
+        System.arraycopy(this.buffer,0,v,0,newSize > this.buffer.length ? this.buffer.length : newSize);
+        this.buffer = v;          
+    }
+    
     public byte toByteArray()[] {
         byte newbuf[] = new byte[this.length];
         System.arraycopy(this.buffer, 0, newbuf, 0, this.length);

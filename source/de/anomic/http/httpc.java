@@ -285,6 +285,10 @@ public final class httpc {
             this.remoteProxyUse = false;
             this.savedRemoteHost = null;
             this.requestPath = null;
+            
+            
+            // shrink readlinebuffer if it is to large
+            this.readLineBuffer.reset(80);
         } catch (Exception e) {
             // we could ignore this ...
         }
@@ -303,31 +307,32 @@ public final class httpc {
     void init(String server, int port, int timeout, boolean ssl) throws IOException {
         handle = System.currentTimeMillis();
         //serverLog.logDebug("HTTPC", handle + " initialized");
-    	this.remoteProxyUse = false;
-    	this.timeout = timeout;
-            this.savedRemoteHost = server;
-    	try {
-    	    this.host = server + ((port == 80) ? "" : (":" + port));
-    	    String hostip;
-    	    if ((server.equals("localhost")) || (server.equals("127.0.0.1")) || (server.startsWith("192.168.")) || (server.startsWith("10."))) {
+        this.remoteProxyUse = false;
+        this.timeout = timeout;
+        this.savedRemoteHost = server;
+
+        try {
+            this.host = server + ((port == 80) ? "" : (":" + port));
+            String hostip;
+            if ((server.equals("localhost")) || (server.equals("127.0.0.1")) || (server.startsWith("192.168.")) || (server.startsWith("10."))) {
                 hostip = server;
-    	    } else {
-        		hostip = dnsResolve(server);
-        		if (hostip == null) throw new UnknownHostException(server);
-    	    }
-                if (ssl)
-                    socket = SSLSocketFactory.getDefault().createSocket(hostip, port);
-                else
-                    socket = new Socket(hostip, port);
-    	    socket.setSoTimeout(timeout); // waiting time for write
-    	    //socket.setSoLinger(true, timeout); // waiting time for read
-    	    socket.setKeepAlive(true); //
-    	    clientInput  = new PushbackInputStream(socket.getInputStream());
-    	    clientOutput = socket.getOutputStream();
-    	    // if we reached this point, we should have a connection
-    	} catch (UnknownHostException e) {
-    	    throw new IOException("unknown host: " + server);
-    	}
+            } else {
+                hostip = dnsResolve(server);
+                if (hostip == null) throw new UnknownHostException(server);
+            }
+            if (ssl)
+                socket = SSLSocketFactory.getDefault().createSocket(hostip, port);
+            else
+                socket = new Socket(hostip, port);
+            socket.setSoTimeout(timeout); // waiting time for write
+            //socket.setSoLinger(true, timeout); // waiting time for read
+            socket.setKeepAlive(true); //
+            clientInput  = new PushbackInputStream(socket.getInputStream());
+            clientOutput = socket.getOutputStream();
+            // if we reached this point, we should have a connection
+        } catch (UnknownHostException e) {
+            throw new IOException("unknown host: " + server);
+        }
     }
 
     // provide HTTP date handling static methods

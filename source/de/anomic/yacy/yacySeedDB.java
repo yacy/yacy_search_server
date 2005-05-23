@@ -514,13 +514,13 @@ public class yacySeedDB {
     }
 
     public String uploadCache(yacySeedUploader uploader, 
-                              serverSwitch sb,
-                              yacySeedDB seedDB,
-//                  String  seedFTPServer,
-//			      String  seedFTPAccount,
-//			      String  seedFTPPassword,
-//			      File    seedFTPPath,
-			      URL     seedURL) throws IOException {
+            serverSwitch sb,
+            yacySeedDB seedDB,
+//          String  seedFTPServer,
+//          String  seedFTPAccount,
+//          String  seedFTPPassword,
+//          File    seedFTPPath,
+            URL     seedURL) throws Exception {
         
         // upload a seed file, if possible
         if (seedURL == null) throw new NullPointerException("UPLOAD - Error: URL not given");
@@ -538,10 +538,9 @@ public class yacySeedDB {
             // check also if the result can be retrieved again
             if (checkCache(uv, seedURL))
                 log = log + "UPLOAD CHECK - Success: the result vectors are equal" + serverCore.crlfString;
-            else
-                log = log + "UPLOAD CHECK - Error: the result vector is different" + serverCore.crlfString;
-        } catch (IOException e) {
-            log = log + "UPLOAD CHECK - Error: IO problem " + e.getMessage() + serverCore.crlfString;
+            else {
+                throw new Exception("UPLOAD CHECK - Error: the result vector is different" + serverCore.crlfString);
+            }
         } finally {
             if (seedFile != null) seedFile.delete();
         }

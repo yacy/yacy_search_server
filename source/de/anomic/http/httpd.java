@@ -52,6 +52,7 @@ package de.anomic.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Arrays;
@@ -262,7 +263,9 @@ public final class httpd implements serverHandler {
             if (this.prop.containsKey("PATH") && this.prop.getProperty("PATH").startsWith("/soap")) {
                 if (soapHandler == null) {
                     try {
-                        soapHandler  = (httpdHandler) Class.forName("de.anomic.soap.httpdSoapHandler").newInstance();
+                        Class soapHandlerClass = Class.forName("de.anomic.soap.httpdSoapHandler");
+                        Constructor classConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
+                        soapHandler  = (httpdHandler) classConstructor.newInstance(new Object[] { this.switchboard });
                     } catch (Exception e) {
                         throw new IOException("Unable to load the soap handler");
                     }

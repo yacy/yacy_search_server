@@ -275,16 +275,14 @@ public class SettingsAck_p {
                     env.setConfig("seedUploadMethod", newSeedUploadMethod);
                     env.setConfig("seedURL", newSeedURLStr);
                     
-                    boolean success = yacyCore.saveSeedList(env);
-                    if (!success) {
-                        prop.put("info", 14);
-                        env.setConfig("seedUploadMethod","none");
-                    } else {
-                        prop.put("info_seedUploadMethod",newSeedUploadMethod);
-                        prop.put("info_seedURL",newSeedURLStr);
-                        prop.put("info_success",(newSeedUploadMethod.equalsIgnoreCase("none")?0:1));
-                        prop.put("info", 19);
-                    }                  
+                    // trying to upload the seed-list file
+                    yacyCore.saveSeedList(env);
+                    
+                    // we have successfully uploaded the seed-list file
+                    prop.put("info_seedUploadMethod",newSeedUploadMethod);
+                    prop.put("info_seedURL",newSeedURLStr);
+                    prop.put("info_success",(newSeedUploadMethod.equalsIgnoreCase("none")?0:1));
+                    prop.put("info", 19);                                     
                 } else {
                     prop.put("info_seedUploadMethod",newSeedUploadMethod);
                     prop.put("info_seedURL",newSeedURLStr);
@@ -294,6 +292,8 @@ public class SettingsAck_p {
                 }
             } catch (Exception e) {
                 prop.put("info",14);
+                prop.put("info_errormsg",e.getMessage().replaceAll("\n","<br>"));                
+                env.setConfig("seedUploadMethod","none"); 
             }
             return prop;            
         }
@@ -307,6 +307,7 @@ public class SettingsAck_p {
         while (uploaderKeys.hasMoreElements()) {
             // getting the uploader module name
             String uploaderName = (String) uploaderKeys.nextElement();
+            
             
             // determining if the user has reconfigured the settings of this uploader
             if (post.containsKey("seed" + uploaderName + "Settings")) {
@@ -324,15 +325,21 @@ public class SettingsAck_p {
                     }
                 }   
                 if (!nothingChanged) {
-                    if (env.getConfig("seedUploadMethod","none").equals(theUploader)) {
-                        boolean success = yacyCore.saveSeedList(env);
-                        if (!success) {
-                            prop.put("info", 14);
-                            env.setConfig("seedUploadMethod","none");
-                        } else {
+                    // if the seed upload method is equal to the seed uploader whose settings
+                    // were changed, we now try to upload the seed list with the new settings
+                    if (env.getConfig("seedUploadMethod","none").equalsIgnoreCase(uploaderName)) {
+                        try {
+                            yacyCore.saveSeedList(env);
+                            
+                            // we have successfully uploaded the seed file
                             prop.put("info", 13);
                             prop.put("info_success",1);
-                        }                          
+                        } catch (Exception e) {
+                            // if uploading failed we print out an error message
+                            prop.put("info", 14);
+                            prop.put("info_errormsg",e.getMessage().replaceAll("\n","<br>"));
+                            env.setConfig("seedUploadMethod","none");                            
+                        }                       
                     } else {
                         prop.put("info", 13);
                         prop.put("info_success",0);

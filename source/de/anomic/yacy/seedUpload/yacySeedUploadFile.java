@@ -12,19 +12,19 @@ public class yacySeedUploadFile implements yacySeedUploader {
     
     public static final String CONFIG_FILE_PATH = "seedFilePath";
 
-    public String uploadSeedFile(serverSwitch sb, yacySeedDB seedDB, File seedFile) {
+    public String uploadSeedFile(serverSwitch sb, yacySeedDB seedDB, File seedFile) throws Exception {
         
-        String logt;
+        String logt, seedFilePath = "";
         try {
-            String seedFilePath = sb.getConfig(CONFIG_FILE_PATH,null);
-            if (seedFilePath == null) return "Error: Path to seed file is not configured properly";
+            seedFilePath = sb.getConfig(CONFIG_FILE_PATH,"");
+            if (seedFilePath.length() == 0) throw new Exception("Path to seed file is not configured properly");
             
             File publicSeedFile = new File(seedFilePath);            
             serverFileUtils.copy(seedFile,publicSeedFile);
             
             return "Seed-List file stored successfully";
         } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            throw new Exception("Unable to store the seed-list file into the filesystem using path '" + seedFilePath + "'. " + e.getMessage());
         }
     }
 

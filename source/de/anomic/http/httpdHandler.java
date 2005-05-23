@@ -57,6 +57,8 @@ import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.util.Properties;
 
+import de.anomic.server.serverSwitch;
+
 public interface httpdHandler {
 
     void doGet(Properties conProp, httpHeader header, OutputStream response) throws IOException;

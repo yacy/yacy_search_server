@@ -4,21 +4,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.axis.AxisFault;
 import org.apache.axis.Message;
 import org.apache.axis.MessageContext;
 import org.apache.axis.message.SOAPEnvelope;
 import org.apache.axis.message.SOAPHeaderElement;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpTemplate;
 import de.anomic.server.serverClassLoader;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -27,7 +32,7 @@ import de.anomic.server.serverSwitch;
  * 
  * @author Martin Thelian
  */
-final public class httpdSoapService
+public class httpdSoapService
 {
     /* ================================================================
      * Constants needed to set the template that should be used to 
@@ -36,7 +41,7 @@ final public class httpdSoapService
     /**
      * Constant: template for searching
      */
-    private static final String TEMPLATE_SEARCH = "index.rss";
+    private static final String TEMPLATE_SEARCH = "index.soap";
     /**
      * Constant: template for the network status page
      */    
@@ -81,7 +86,14 @@ final public class httpdSoapService
      * 
      * @throws AxisFault if the service could not be executed propery. 
      */
-    public String search(String searchString) 
+    public Document search(
+                String searchString,
+                String searchMode,
+                String searchOrder,
+                int maxSearchCount,
+                int maxSearchTime,
+                String urlMaskFilter            
+            ) 
         throws AxisFault
     {        
         try
@@ -89,14 +101,20 @@ final public class httpdSoapService
             // extracting the message context
             extractMessageContext();
             
+            if ((searchMode == null) || !(searchMode.equalsIgnoreCase("global") || searchMode.equalsIgnoreCase("locale"))) {
+                searchMode = "global";
+            }
+            
+            if (urlMaskFilter == null) urlMaskFilter = ".*";
+            
             // setting the searching properties
             serverObjects args = new serverObjects();
             args.put("order","Quality-Date");
             args.put("Enter","Search");
-            args.put("count","10");
+            args.put("count",Integer.toString(maxSearchCount));
             args.put("resource","global");
-            args.put("time","10");
-            args.put("urlmaskfilter",".*");
+            args.put("time",Integer.toString(maxSearchTime));
+            args.put("urlmaskfilter",urlMaskFilter);
             
             args.put("search",searchString);
             
@@ -104,7 +122,7 @@ final public class httpdSoapService
             String result = writeTemplate(TEMPLATE_SEARCH, args);
             
             // sending back the result to the client
-            return result;
+            return this.convertContentToXML(result);
         }
         catch (Exception e)
         {
@@ -335,5 +353,26 @@ final public class httpdSoapService
         //System.out.println("found method: " + m.toString());
         return m;
         }        
+    
+    private Document convertContentToXML(String contentString) 
+    throws Exception
+    {
+        Document doc = null;
+        try
+        {
+            DocumentBuilderFactory newDocBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder newDocBuilder = newDocBuilderFactory.newDocumentBuilder();          
+            
+            InputSource is = new InputSource(new StringReader(contentString));
+            doc = newDocBuilder.parse(is);                      
+        }       
+        catch (Exception e)
+        {
+            String errorMessage = "Unable to parse the search result XML data. " + e.getClass().getName() + ". " + e.getMessage();
+            throw new Exception(errorMessage);
+        }       
+        
+        return doc;
+    }    
     
 }
