@@ -89,7 +89,11 @@ implements Parser {
                       location,
                       mimeType,
                       null,
-                      null,
+                      ((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
+                          replaceAll("\r\n"," ").
+                          replaceAll("\n"," ").
+                          replaceAll("\r"," ").
+                          replaceAll("\t"," "),
                       null,
                       null,
                       null,
