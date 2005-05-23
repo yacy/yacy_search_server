@@ -125,6 +125,14 @@ public class pdfParser extends AbstractParser implements Parser {
             
             byte[] contents = out.toByteArray();
 			
+            if ((docTitle == null) || (docTitle.length() == 0)) {
+                docTitle = ((contents.length > 80)? new String(contents, 0, 80):new String(contents)).
+                replaceAll("\r\n"," ").
+                replaceAll("\n"," ").
+                replaceAll("\r"," ").
+                replaceAll("\t"," ");                
+            }
+            
             /*
              *         public document(URL location, String mimeType,
                             String keywords, String shortTitle, String longTitle,
