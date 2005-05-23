@@ -104,7 +104,7 @@ public class ViewProfile {
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
 		    String key=(String)entry.getKey();
-		    String value=(String)entry.getValue();
+		    String value=((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n");
 		    //all known Keys which should be set as they are
 		    if(knownKeys.contains(key)){
 			prop.put("success_"+key, 1);
