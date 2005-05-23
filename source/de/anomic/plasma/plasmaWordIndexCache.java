@@ -56,7 +56,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private static final String oldSingletonFileName = "indexSingletons0.db";
     private static final String newSingletonFileName = "indexAssortment001.db";
     private static final String indexAssortmentClusterPath = "ACLUSTER";
-    private static final int assortmentLimit = 3;
+    private static final int assortmentLimit = 6;
     
     
     // class variables
@@ -378,11 +378,16 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 if (count > 2000) return count;
             }
 
+	    // stop flushing if cache is shrinked enough
+	    // avoid as possible to flush high-scores
+	    if (cache.size() < this.maxWords) return count;
+
             // flush high-scores
             for (int cluster = clusterCandidate.length; cluster > 0; cluster--) {
                 candidateCounter = 0;
                 i = clusterCandidate[cluster - 1].entrySet().iterator();
                 while (i.hasNext()) {
+		    if (cache.size() < this.maxWords) return count;
                     entry = (Map.Entry) i.next();
                     key = (String) entry.getValue();
                     createTime = (Long) entry.getKey();
@@ -391,7 +396,6 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                         candidateCounter += cluster + 1;
                         log.logDebug("flushed high-cluster #" + (cluster + 1) + ", key=" + key + ", count=" + count + ", cachesize=" + cache.size());
                     }
-                    if (count > 2000) return count;
                 }
             }
             
