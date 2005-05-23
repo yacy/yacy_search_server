@@ -79,6 +79,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverLog;
 import de.anomic.yacy.yacySeedUploader;
 
 public final class plasmaParser {
@@ -351,11 +352,11 @@ public final class plasmaParser {
             
             // getting the current package name
 			String plasmaParserPkgName = plasmaParser.class.getPackage().getName() + ".parser";
-			System.out.println("INFO: Searching for additional content parsers in package " + plasmaParserPkgName);
+            serverLog.logInfo("PARSER","Searching for additional content parsers in package " + plasmaParserPkgName);
  
             // getting an uri to the parser subpackage
 	        String packageURI = plasmaParser.class.getResource("/"+plasmaParserPkgName.replace('.','/')).toString();
-			System.out.println("INFO: Parser directory is " + packageURI);           
+			serverLog.logDebug("PARSER", "Parser directory is " + packageURI);           
  
             // open the parser directory
 	        File parserDir = new File(new URI(packageURI));
@@ -369,12 +370,12 @@ public final class plasmaParser {
             if (parserDirectories == null) return;
 			for (int parserDirNr=0; parserDirNr< parserDirectories.length; parserDirNr++) {
                 File currentDir = parserDirectories[parserDirNr];
-				System.out.println("INFO: Searching in directory " + currentDir.toString());
+                serverLog.logDebug("PARSER", "Searching in directory " + currentDir.toString());
                 String[] parserClasses = currentDir.list(parserFileNameFilter);
                 if (parserClasses == null) continue;
                 
                 for (int parserNr=0; parserNr<parserClasses.length; parserNr++) {
-                	System.out.println("INFO: Testing parser class " + parserClasses[parserNr]);
+                    serverLog.logDebug("PARSER", "Testing parser class " + parserClasses[parserNr]);
                     String className = parserClasses[parserNr].substring(0,parserClasses[parserNr].indexOf(".class"));
                     String fullClassName = plasmaParserPkgName + "." + currentDir.getName() + "." + className;
 	                try {
@@ -387,7 +388,10 @@ public final class plasmaParser {
                         String[] neededLibx = ((Parser)theParser).getLibxDependences();
                         if (neededLibx != null) {
                             for (int libxId=0; libxId < neededLibx.length; libxId++) {
-                                if (javaClassPath.indexOf(neededLibx[libxId]) == -1) continue;
+                                if (javaClassPath.indexOf(neededLibx[libxId]) == -1) {
+                                    serverLog.logWarning("PARSER","Parser '" + className + "': issing dependency detected: '" + neededLibx[libxId] + "'. Parser will be ignored.");
+                                    continue;
+                                }
                             }
                         }                        
                         
@@ -397,15 +401,17 @@ public final class plasmaParser {
                         while (mimeTypeIterator.hasNext()) {
                             String mimeType = (String) mimeTypeIterator.next();
                             availableParserList.put(mimeType,fullClassName);
-							System.out.println("INFO: Found parser for mimeType " + mimeType);
+                            serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'.");
                         }
                             
-	                } catch (Exception e) { /* we can ignore this for the moment */ }
+	                } catch (Exception e) { /* we can ignore this for the moment */ 
+                        serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored. " + e.getClass().getName());
+                    }
                 }
 			}
             
         } catch (Exception e) {
-            System.err.println("ERROR: while trying to determine all installed parsers. " + e.getMessage());
+            serverLog.logError("PARSER", "Unable to determine all installed parsers. " + e.getMessage());
         }		
 	}
 
