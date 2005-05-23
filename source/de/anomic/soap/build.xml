@@ -34,13 +34,13 @@
   	  <tar destfile="${addonArchive}" compression="gzip">
   	  	<tarfileset dir="${libx}" 
   	  				includes="axis.jar,axis-ant.jar,commons-discovery.jar,commons-logging.jar,jaxrpc.jar,saaj.jar,wsdl4j.jar" 
-  	  				prefix="libx/"
+  	  				prefix="${releaseDir}/libx/"
 			  		dirmode="755" mode="644"/>
   	  	<tarfileset dir="${src}/de/anomic/soap/" 
-  	  				prefix="source/de/anomic/soap/"
+  	  				prefix="${releaseDir}/source/de/anomic/soap/"
 			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${build}/de/anomic/soap/" 
-  	  				prefix="classes/de/anomic/soap/"
+  	  				prefix="${releaseDir}/classes/de/anomic/soap/"
 			  	  	dirmode="755" mode="644"/>			  	  					  	  		
   	  </tar>    	
     </target>	

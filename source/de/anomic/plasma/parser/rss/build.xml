@@ -32,18 +32,14 @@
 	  <echo message="Compressing ${parserLongName} Version ${parserVersion} ..."/>  
   	  <tar destfile="${parserArchive}" compression="gzip">
   	  	<tarfileset dir="${libx}" 
-  	  				includes="informa-0.6.0.*" 
-  	  				prefix="libx/"
+  	  				includes="informa-0.6.0.*,commons-logging.jar,jdom.jar" 
+  	  				prefix="${releaseDir}/libx/"
 			  	  	dirmode="755" mode="644"/>
-  	  	<tarfileset dir="${libx}" 
-  	  				includes="commons-logging.jar,jdom.jar" 
-  	  				prefix="libx/"
-			  		dirmode="755" mode="644"/>
   	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
-  	  				prefix="source/de/anomic/plasma/parser/${parserShortName}"
+  	  				prefix="${releaseDir}/source/de/anomic/plasma/parser/${parserShortName}"
 			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" 
-  	  				prefix="classes/de/anomic/plasma/parser/${parserShortName}"
+  	  				prefix="${releaseDir}/classes/de/anomic/plasma/parser/${parserShortName}"
 					dirmode="755" mode="644"/>	  	
   	  </tar>    	
     </target>	
