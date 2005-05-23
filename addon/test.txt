@@ -1,3 +1,3 @@
-$Revision: 1 $
-$LastChangedRevision: 1 $
-$Rev: 1 $
+$Revision$
+$LastChangedRevision$
+$Rev$
