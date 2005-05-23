@@ -95,7 +95,11 @@ implements Parser {
                     location,
                     mimeType,
                     null,
-                    null,
+                    ((bodyText.length() > 80)? bodyText.substring(0, 80):bodyText.trim()).
+                        replaceAll("\r\n"," ").
+                        replaceAll("\n"," ").
+                        replaceAll("\r"," ").
+                        replaceAll("\t"," "),
                     null,
                     null,
                     null,
