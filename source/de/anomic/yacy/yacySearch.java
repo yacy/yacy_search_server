@@ -61,6 +61,7 @@ public class yacySearch extends Thread {
 
     public yacySearch(Set wordhashes, int count, boolean global, yacySeed targetPeer,
 		      plasmaCrawlLURL urlManager, plasmaSearch searchManager, long duetime) {
+        super("yacySearch_" + targetPeer.getName());
         this.wordhashes = wordhashes;
         this.count = count;
         this.global = global;

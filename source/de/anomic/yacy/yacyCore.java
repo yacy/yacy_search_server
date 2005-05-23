@@ -475,7 +475,7 @@ public class yacyCore {
     public static boolean changeSeedUploadMethod(String method) {
         if ((method == null)||(method.length() == 0)) return false;
         
-        if (method.equals("none")) return true;
+        if (method.equalsIgnoreCase("none")) return true;
         
         synchronized (yacyCore.seedUploadMethods) {
             return yacyCore.seedUploadMethods.containsKey(method);
