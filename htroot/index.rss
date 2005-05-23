@@ -9,5 +9,15 @@
 			<link>#[url]#</link>
 		</item>
 		#{/results}#
+                <topwords>
+                    #(combine)#
+                    ::
+                    #{words}#
+                    <item>
+                        <word>#[word]#</word>
+                    </item>
+                    #{/words}#
+                    #(/combine)#
+                </topwords>
 	</channel>
 </rss>

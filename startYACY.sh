@@ -19,6 +19,6 @@ else
 		echo "To stop YaCy, please execute stopYACY.sh and wait some seconds"
 		echo "To administrate YaCy, start your web browser and open http://localhost:8080"
 	else
-		java -classpath classes:$CLASSPATH yacy
+		java -Xms16m -Xmx200m -classpath classes:$CLASSPATH yacy
 	fi
 fi
