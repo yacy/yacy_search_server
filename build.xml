@@ -49,10 +49,10 @@
 # Contributions and changes to the program code must be marked as such.
 -->
 
+<!-- defining the timestamp format -->    
 <tstamp>
   <format property="REPL_DATE_FORMAT" pattern="yyyymmdd" />
 </tstamp>
-
 
 <!-- defining all needed directory names -->
 <property name="addon" location="addon"/>
@@ -65,6 +65,7 @@
 <property name="htroot" location="htroot"/>
 <property name="release" location="RELEASE"/>
 
+<!-- loading some property values from file -->   
 <loadproperties srcFile="build.properties"> 
     <filterchain>           
         <tokenfilter>
@@ -75,6 +76,10 @@
      </filterchain>   
 </loadproperties>   
 <loadproperties srcFile="build.properties"/>    
+    
+<condition property="singleExtFile">
+    <equals arg1="${extensionTarget}" arg2="copy"/>
+</condition> 
     
 <target name="init">
   <mkdir dir="${build}/de/anomic/data"/>
@@ -93,11 +98,9 @@
   <mkdir dir="${data}"/>
   <mkdir dir="${release}"/>
 
-  <move file="${src}/yacy.java" tofile="${src}/yacy.java.orig" />
-
   <filter token="REPL_VERSION" value="${releaseVersion}" />
   <filter token="REPL_DATE" value="${DSTAMP}"/>
-  <copy file="${src}/yacy.java.orig" tofile="${src}/yacy.java" filtering="true" />
+  <copy file="${src}/yacy.java" tofile="${build}/yacy.java" filtering="true" />
 </target>
 
 <target name="compile" depends="init" description="Compiling the yacy sources ...">
@@ -111,41 +114,47 @@
     <pathelement location="${lib}/commons-pool-1.2.jar" />    
   </path>
     
+  <!-- compiling yacy.java -->   
+  <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
+         includes="yacy.java" 
+         classpathref="project.class.path"
+         source="${javacSource}" target="${javacTarget}"/>
+
   <!-- compiling the main sources -->   
   <javac srcdir="${src}/" destdir="${build}"
-         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**"
+         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**,yacy.java"
          debug="true"
          source="${javacSource}" target="${javacTarget}">
     <classpath refid="project.class.path"/>
   </javac>
+    
   <!-- compiling the two standard seed uploader methods -->   
   <javac srcdir="${src}" destdir="${build}"
          classpathref="project.class.path"
-         source="1.4" target="1.4">
+         source="${javacSource}" target="${javacTarget}">
     <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java" />
     <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>    
   </javac> 
+    
   <!-- compiling htroot and htdocsdefault -->
   <javac srcdir="${htroot}/" destdir="${htroot}"
          classpathref="project.class.path"
-         source="1.4" target="1.4"/>
+         source="${javacSource}" target="${javacTarget}"/>
   <javac srcdir="${htroot}/htdocsdefault" destdir="${htroot}/htdocsdefault"
          classpathref="project.class.path"
-         source="1.4" target="1.4"/>
- <!-- compiling yacy.java -->   
+         source="${javacSource}" target="${javacTarget}"/>
   <javac srcdir="${htroot}/yacy" destdir="${htroot}/yacy"
          classpathref="project.class.path"
-         source="1.4" target="1.4"/>
+         source="${javacSource}" target="${javacTarget}"/>
 </target>
 
 <target name="all" depends="compile">
-  <delete file="${src}/yacy.java" />
-  <move file="${src}/yacy.java.orig" tofile="${src}/yacy.java" />
+  <delete file="${build}/yacy.java" />
 </target>
 
 <!-- compiling optional content parsers and building install packages -->
 <target name="parsers" depends="compile" description="Compiling and zipping all additional parsers">
-  <subant target="">
+  <subant target="${extensionTarget}">
     <property name="src" location="${src}"/>
     <property name="build" location="${build}"/>
     <property name="libx" location="${libx}"/>
@@ -160,7 +169,7 @@
  
 <!-- compiling optional seed uploaders and building install packages -->   
 <target name="seedUploaders" depends="compile" description="Compiling and zipping additional seed uploaders">
-  <subant target="">
+  <subant target="${extensionTarget}">
     <property name="src" location="${src}"/>
     <property name="build" location="${build}"/>
     <property name="libx" location="${libx}"/>
@@ -176,7 +185,7 @@
  
 <!-- compiling optional soap API and building install packages -->   
 <target name="yacySOAP" depends="compile" description="Compiling and zipping additional yacy SOAP API">
-  <subant target="">
+  <subant target="${extensionTarget}">
     <property name="src" location="${src}"/>
     <property name="build" location="${build}"/>
     <property name="libx" location="${libx}"/>
@@ -185,19 +194,29 @@
     <property name="releaseDir" value="${releaseDir}"/> 
     <property name="javacSource" value="${javacSource}"/>
     <property name="javacTarget" value="${javacTarget}"/>
-    <!-- each optionl uploader module must have its own build file --> 
     <fileset dir="${src}/" includes="de/anomic/soap/build.xml"/>
   </subant>
 </target>       
 
+
+<target name="singleExtensionFile" if="singleExtFile">
+      <tar destfile="${release}/${extensionFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
+        <tarfileset dir="${release}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+          <include name="**/*.*"/>
+          <exclude name="*.gz"/>
+        </tarfileset>        
+      </tar>
+      
+    <delete dir="${release}/classes"/>
+    <delete dir="${release}/htroot"/>   
+    <delete dir="${release}/libx"/>      
+    <delete dir="${release}/source"/>          
+</target>   
+    
 <!-- making a release file for yacy -->   
-<target name="dist" depends="all,parsers,seedUploaders,yacySOAP" description="Compiling sources and make a release file ...">
+<target name="dist" depends="all,parsers,seedUploaders,yacySOAP,singleExtensionFile" description="Compiling sources and make a release file ...">
 
-  <!-- defining some file/directory access rights -->   
-  <property name="accessRightsDir" value="755"/>
-  <property name="accessRightsFile" value="644"/>
-
-  <tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes">
+  <tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
 
   <!-- copy class files -->
   <tarfileset dir="${build}" prefix="${releaseDir}/classes" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
@@ -279,7 +298,7 @@
   <echo message="${releaseVersion}" file="${doc}/release.txt"/>
 </target>
 
-
+    
 <!-- make clean -->   
 <target name="clean" description="make clean"> 
   <delete>

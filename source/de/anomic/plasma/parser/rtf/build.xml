@@ -11,7 +11,6 @@
    	<property name="parserArchive" location="${release}/${parserLongName}_${parserVersion}.tgz"/>	    	
     	
     <target name="compile">
-  	  <echo message="Compiling ${parserLongName} Version ${parserVersion} ..."/>
   	  <javac srcdir="${src}/de/anomic/plasma/parser/${parserShortName}" destdir="${build}" source="${javacSource}" target="${javacTarget}">
   	  	<classpath>
   	  	  <pathelement location="${build}" />	    	
@@ -21,7 +20,6 @@
 	
 
     <target name="zip" depends="compile">
-	  <echo message="Compressing ${parserLongName} Version ${parserVersion} ..."/>  
   	  <tar destfile="${parserArchive}" compression="gzip">
   	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
   	  				prefix="${releaseDir}/source/de/anomic/plasma/parser/${parserShortName}"
@@ -32,7 +30,16 @@
   	  </tar>    	
     </target>	
 
-
+    <target name="copy" depends="compile">
+        <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
+             <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 
+        </copy>        
+        <copy todir="${release}/classes/de/anomic/plasma/parser/${parserShortName}">
+             <fileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 
+        </copy>         
+    </target> 
+ 
+    
     <target name="dist" depends="compile,zip" description="Compile and zip the parser"/>        
 	
 	
