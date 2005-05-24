@@ -109,65 +109,71 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     private File htTemplatePath = null;
     private HashMap templates = null;
     private String[] defaultFiles = null;
+    private File htDefaultPath = null;
+    private File htLocalePath = null;
 
     private serverSwitch switchboard;
     private String adminAccountBase64MD5;
 
     public httpdFileHandler(serverSwitch switchboard) {
-		this.switchboard = switchboard;
+	this.switchboard = switchboard;
 	
-		if (this.mimeTable == null) {
-			// load the mime table
-			this.mimeTable = new Properties();
-			String mimeTablePath = switchboard.getConfig("mimeConfig","");
-	        FileInputStream mimeTableInputStream = null;
-			try {
-				serverLog.logSystem("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
-	            mimeTableInputStream = new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath));
-				this.mimeTable.load(mimeTableInputStream);
-			} catch (Exception e) {
-	            if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}
-				serverLog.logError("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
-				System.exit(1);
-		    }
-		}
+	if (this.mimeTable == null) {
+	    // load the mime table
+	    this.mimeTable = new Properties();
+	    String mimeTablePath = switchboard.getConfig("mimeConfig","");
+	    FileInputStream mimeTableInputStream = null;
+	    try {
+		serverLog.logSystem("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
+		mimeTableInputStream = new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath));
+		this.mimeTable.load(mimeTableInputStream);
+	    } catch (Exception e) {
+		if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}
+		serverLog.logError("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
+		System.exit(1);
+	    }
+	}
         
-		// create default files array
-		defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
-		if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
+	// create default files array
+	defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
+	if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
         
-		// create a htRootPath: system pages
-		if (htRootPath == null) {
-			htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
-			if (!(htRootPath.exists())) htRootPath.mkdir();
-		}
+	// create a htRootPath: system pages
+	if (htRootPath == null) {
+	    htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
+	    if (!(htRootPath.exists())) htRootPath.mkdir();
+	}
         
-		// create a htDocsPath: user defined pages
-		if (htDocsPath == null) {
-			htDocsPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "htdocs"));
-			if (!(htDocsPath.exists())) htDocsPath.mkdir();
-		}
-
-		// create a htTemplatePath
-		if (htTemplatePath == null) {
-			htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
-			if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
-		}
-        
+	// create a htDocsPath: user defined pages
+	if (htDocsPath == null) {
+	    htDocsPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "htdocs"));
+	    if (!(htDocsPath.exists())) htDocsPath.mkdir();
+	}
+	
+	// create a htTemplatePath
+	if (htTemplatePath == null) {
+	    htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
+	    if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
+	}
         if (templates == null) templates = loadTemplates(htTemplatePath);
 
-		// create a class loader
-		if (provider == null) {
-			provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
-			// debug
-			/*
-			Package[] ps = ((cachedClassLoader) provider).packages();
-			for (int i = 0; i < ps.length; i++) System.out.println("PACKAGE IN PROVIDER: " + ps[i].toString());
-			*/
-		}
-		adminAccountBase64MD5 = null;
+	// create htLocaleDefault, htLocalePath
+	if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
+	if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("htLocalePath","htroot/locale"));
+	//htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
+
+	// create a class loader
+	if (provider == null) {
+	    provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
+	    // debug
+	    /*
+	      Package[] ps = ((cachedClassLoader) provider).packages();
+	      for (int i = 0; i < ps.length; i++) System.out.println("PACKAGE IN PROVIDER: " + ps[i].toString());
+	    */
+	}
+	adminAccountBase64MD5 = null;
         
-		serverLog.logSystem("HTTPDFileHandler", "File Handler Initialized");
+	serverLog.logSystem("HTTPDFileHandler", "File Handler Initialized");
     }
  
     private void respondHeader(OutputStream out, int retcode,
@@ -344,20 +350,33 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 	    }
             
             // find defaults
-            File file = null;
             String testpath = path;
             if (path.endsWith("/")) {
+		File file;
 		// attach default file name
                 for (int i = 0; i < defaultFiles.length; i++) {
                     testpath = path + defaultFiles[i];
-                    file = new File(htRootPath, testpath);
+                    file = new File(htDefaultPath, testpath);
                     if (!(file.exists())) file = new File(htDocsPath, testpath);
                     if (file.exists()) {path = testpath; break;}
                 }
+	    }
+	    
+	    // find locales or alternatives in htDocsPath
+	    File defaultFile = new File(htDefaultPath, path);
+            File localizedFile = defaultFile;
+	    if (defaultFile.exists()) {
+		// look if we have a localization of that file
+		String htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
+		if (!(htLocaleSelection.equals("default"))) {
+		    File localePath = new File(htLocalePath, htLocaleSelection + "/" + path);
+		    if (localePath.exists()) localizedFile = localePath;
+		}
 	    } else {
-               file = new File(htRootPath, path);
-               if (!(file.exists())) file = new File(htDocsPath, path);
-            }
+		// try to find that file in the htDocsPath
+		defaultFile = new File(htDocsPath, path);
+		localizedFile = defaultFile;
+	    }
             
             /*
 	    if ((iMode) && (path.endsWith(".html"))) {
@@ -369,12 +388,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 	    }
             */
             
-	    if ((file.exists()) && (file.canRead())) {
+	    if ((localizedFile.exists()) && (localizedFile.canRead())) {
 		// we have found a file that can be written to the client
 		// if this file uses templates, then we use the template
 		// re-write - method to create an result
 		serverObjects tp = new serverObjects();
-		filedate = new Date(file.lastModified());
+		filedate = new Date(localizedFile.lastModified());
                 String mimeType = mimeTable.getProperty(conProp.getProperty("EXT",""),"text/html");
                 byte[] result;
 		if (path.endsWith("html") || 
@@ -382,7 +401,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     path.endsWith("rss") || 
                     path.endsWith("csv") ||
                     path.endsWith("pac")) {
-		    rc = rewriteClassFile(file);
+		    rc = rewriteClassFile(defaultFile);
 		    if (rc != null) {
 			// CGI-class: call the class to create a property for rewriting
 			try {
@@ -423,7 +442,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             FileInputStream fis = null;
             try {
 	            o = new ByteArrayOutputStream();
-	            fis = new FileInputStream(file);
+	            fis = new FileInputStream(localizedFile);
 			    httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
 	            result = o.toByteArray();
             } finally {
@@ -433,7 +452,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     
 		} else { // no html
                     // write the file to the client
-                    result = serverFileUtils.read(file);
+                    result = serverFileUtils.read(localizedFile);
                 }
                 // check mime type again using the result array: these are 'magics'
                 if (serverByteBuffer.equals(result, 1, "PNG".getBytes())) mimeType = mimeTable.getProperty("png","text/html");

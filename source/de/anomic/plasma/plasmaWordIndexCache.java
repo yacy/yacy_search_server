@@ -353,8 +353,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             }
 
 	    // print statistics
-	    for (int k = 0; k < clusterCandidate.length; k++)
-                log.logDebug("FLUSH-LIST " + (k + 1) + ": " + clusterCandidate[k].size() + " entries");
+	    //for (int k = 0; k < clusterCandidate.length; k++)
+            //    log.logDebug("FLUSH-LIST " + (k + 1) + ": " + clusterCandidate[k].size() + " entries");
 
             Map.Entry entry;
             int candidateCounter;
@@ -384,15 +384,13 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     entry = (Map.Entry) i.next();
                     key = (String) entry.getValue();
                     createTime = (Long) entry.getKey();
-                    if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) > 90000)) {
+                    if ((createTime != null) && ((System.currentTimeMillis() - createTime.longValue()) > (cluster * 30000))) {
                         //log.logDebug("flushing singleton-key " + key + ", count=" + count + ", cachesize=" + cache.size() + ", singleton-size=" + singletons.size());
                         count += java.lang.Math.abs(flushFromMem(key, true));
                         candidateCounter += cluster;
                     }
                 }
                 if (candidateCounter > 0) log.logDebug("flushed low-cluster #" + cluster + ", count=" + count + ", candidateCounter=" + candidateCounter + ", cachesize=" + cache.size());
-                if (count > 1000) return count;
-
             }
 
 	    // stop flushing if cache is shrinked enough
