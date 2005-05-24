@@ -49,6 +49,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,6 +66,17 @@ import de.anomic.yacy.yacySeedUploader;
 public class SettingsAck_p {
     
     private static boolean nothingChanged;
+
+    public static HashMap langMap(serverSwitch env) {
+	String[] ms = env.getConfig("htLocaleLang", "").split(",");
+	HashMap map = new HashMap();
+	int p;
+	for (int i = 0; i < ms.length; i++) {
+	    p = ms[i].indexOf("/");
+	    if (p > 0) map.put(ms[i].substring(0, p), ms[i].substring(p + 1));
+	}
+	return map;
+    }
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
@@ -111,6 +123,16 @@ public class SettingsAck_p {
         
         // proxy password
         if (post.containsKey("proxyaccount")) {
+	    // set new port
+            String port = (String) post.get("port");
+	    env.setConfig("port", port);
+	    prop.put("info_port", port);
+
+	    // set transparent proxy flag
+            httpdProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
+	    env.setConfig("isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "true" : "false");
+	    prop.put("info_isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "on" : "off");
+
             // read and process data
             String filter = (String) post.get("proxyfilter");
             String user   = (String) post.get("proxyuser");
@@ -202,12 +224,16 @@ public class SettingsAck_p {
         }
         
         if (post.containsKey("generalsettings")) {
-            String port = (String) post.get("port");
-            String peerName = (String) post.get("peername");
-            
-            httpdProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
-            
+	    // set peer language
+            String peerLang = (String) post.get("peerlang");
+            if ((peerLang == null) || (peerLang.equals("en"))) peerLang = "default";
+	    HashMap lm = langMap(env);
+	    if (!(lm.containsKey(peerLang))) peerLang = "default";
+	    env.setConfig("htLocaleSelection", peerLang);
+	    prop.put("info_peerLang", (String) lm.get(peerLang));
+
             // check if peer name already exists
+            String peerName = (String) post.get("peername");
             yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
             
             if ((oldSeed == null) || (env.getConfig("peerName","").equals(peerName))) {
@@ -222,14 +248,9 @@ public class SettingsAck_p {
                 } else {
                     
                     // set values
-                    env.setConfig("port", port);
                     env.setConfig("peerName", peerName);
-                    env.setConfig("isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "true" : "false");                    
-                    
                     prop.put("info", 12);//port or peername changed
-                    prop.put("info_port", port);
                     prop.put("info_peerName", peerName);
-                    prop.put("info_isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "on" : "off");
                 }
             } else {
                 // deny change
@@ -351,8 +372,6 @@ public class SettingsAck_p {
                 return prop;
             }            
         }
-        
-
         
         if (post.containsKey("parserSettings")) {   
             plasmaSwitchboard sb = (plasmaSwitchboard)env;

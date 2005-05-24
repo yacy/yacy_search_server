@@ -19,11 +19,17 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 <fieldset><legend>Administration Account Settings</legend>
 <p>This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:
 <p><table border="0" cellspacing="5">
-<tr valign="top">
-<td>Account Name:</td><td><input name="adminuser" type="text" size="16" maxlength="16" value="#[adminuser]#"></td>
-<td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="adminaccount" value="submit"></td></tr>
-<tr valign="top"><td>Password:</td><td><input name="adminpw1" type="password" size="16" maxlength="16" value=""></td></tr>
-<tr valign="top"><td>Password (repeat same as above):</td><td><input name="adminpw2" type="password" size="16" maxlength="16" value=""></td></tr>
+  <tr valign="top">
+    <td>Account Name:</td><td><input name="adminuser" type="text" size="16" maxlength="16" value="#[adminuser]#"></td>
+    <td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="adminaccount" value="submit"></td>
+  </tr>
+  <tr valign="top">
+    <td>Password:</td>
+    <td><input name="adminpw1" type="password" size="16" maxlength="16" value=""></td></tr>
+  <tr valign="top">
+    <td>Password (repeat same as above):</td>
+    <td><input name="adminpw2" type="password" size="16" maxlength="16" value=""></td>
+  </tr>
 </table>
 </fieldset>
 </form><br>
@@ -33,11 +39,6 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 <p>
 <table border="0" cellspacing="5">
   <tr valign="top">
-    <td>Proxy and Administration Port:</td>
-    <td><input name="port" type="text" size="5" maxlength="5" value="#[port]#"></td>
-    <td><i>Changes will take effect after restart only.</i></td>
-  </tr>
-  <tr valign="top">
     <td>Peer Name:</td>
     <td><input name="peername" type="text" size="32" maxlength="80" value="#[peerName]#"></td>
     <td><b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.
@@ -45,13 +46,10 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
     <i>(hint: choose a name that appears on a web page that tells something about you, vistit the page, get the 'senior' status, and you can be found..)</i></td>
   </tr>
   <tr valign="top">
-    <td>Transparent Proxy:</td>
-    <td><input type="checkbox" name="isTransparentProxy" align="top" #(isTransparentProxy)#::checked#(/isTransparentProxy)#></td>
-    <td>With this you can specify if YaCy can be used as transparent proxy.<br>
-    <i>Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:</i><br>     
-  	<small><code>iptables -t nat -A PREROUTING -p tcp -s 192.168.0.0/16 --dport 80 -j DNAT --to 192.168.0.1:#[port]#</code></small>
-  </td>
-  </tr>  
+    <td>Peer Language:</td>
+    <td><input name="peerlang" type="text" size="2" maxlength="2" value="#[peerLang]#"></td>
+    <td>Enter 'de' for Deutsch, 'en' for English</td> <!-- make a selection box here -->
+  </tr>
   <tr>
     <td><input type="submit" name="generalsettings" value="submit"></td>
     <td></td>
@@ -61,6 +59,40 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 </fieldset>
 </form><br>
 
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend>Proxy Access Settings</legend>
+<table border="0" cellspacing="5">
+  <tr valign="top">
+    <td>Proxy and Administration Port:</td>
+    <td><input name="port" type="text" size="5" maxlength="5" value="#[port]#"></td>
+    <td><i>Changes will take effect after restart only.</i></td>
+  </tr>
+  <tr valign="top">
+    <td>Transparent Proxy:</td>
+    <td><input type="checkbox" name="isTransparentProxy" align="top" #(isTransparentProxy)#::checked#(/isTransparentProxy)#></td>
+    <td>With this you can specify if YaCy can be used as transparent proxy.<br>
+    <i>Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:</i><br>     
+  	<small><code>iptables -t nat -A PREROUTING -p tcp -s 192.168.0.0/16 --dport 80 -j DNAT --to 192.168.0.1:#[port]#</code></small>
+  </td>
+  </tr>  
+</table>
+
+<p>You can restrict the access to this proxy using a two-stage security barrier:
+<ul>
+<li>define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards</li>
+<li>define an <i>user account</i> with an user:password - pair</li>
+</ul><br>
+
+<p>This is the account that restricts access to the proxy function. You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet. The default setting should be right in most cases. If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.</p>
+<p><table border="0" cellspacing="5">
+<tr valign="top"><td>IP-Number filter:</td><td colspan ="2"><input name="proxyfilter" type="text" size="50" maxlength="1000" value="#[proxyfilter]#"></td></tr>
+<tr valign="top"><td>Account Name:</td><td><input name="proxyuser" type="text" size="16" maxlength="16" value="#[proxyuser]#"></td>
+<td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="proxyaccount" value="Submit"></td></tr>
+<tr valign="top"><td>Password:</td><td><input name="proxypw1" type="password" size="16" maxlength="16" value=""></td></tr>
+<tr valign="top"><td>Password (repeat same as above):</td><td><input name="proxypw2" type="password" size="16" maxlength="16" value=""></td></tr>
+</table>
+</fieldset>
+</form><br>
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <fieldset><legend>Remote Proxy (optional)</legend>
@@ -86,25 +118,6 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
     <td></td>
     <td><input type="submit" name="proxysettings" value="submit"></td>
   </tr>
-</table>
-</fieldset>
-</form><br>
-
-<p>You can restrict the access to this proxy using a two-stage security barrier:
-<ul>
-<li>define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards</li>
-<li>define an <i>user account</i> with an user:password - pair</li>
-</ul><br>
-
-<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend>Proxy Access Settings</legend>
-<p>This is the account that restricts access to the proxy function. You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet. The default setting should be right in most cases. If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.</p>
-<p><table border="0" cellspacing="5">
-<tr valign="top"><td>IP-Number filter:</td><td colspan ="2"><input name="proxyfilter" type="text" size="50" maxlength="1000" value="#[proxyfilter]#"></td></tr>
-<tr valign="top"><td>Account Name:</td><td><input name="proxyuser" type="text" size="16" maxlength="16" value="#[proxyuser]#"></td>
-<td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="proxyaccount" value="Submit"></td></tr>
-<tr valign="top"><td>Password:</td><td><input name="proxypw1" type="password" size="16" maxlength="16" value=""></td></tr>
-<tr valign="top"><td>Password (repeat same as above):</td><td><input name="proxypw2" type="password" size="16" maxlength="16" value=""></td></tr>
 </table>
 </fieldset>
 </form><br>

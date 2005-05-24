@@ -66,8 +66,11 @@ public final class Settings_p {
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
         prop.put("port", env.getConfig("port", "8080"));
-        prop.put("peerName", env.getConfig("peerName", "nameless"));
         prop.put("isTransparentProxy", env.getConfig("isTransparentProxy", "false").equals("true") ? 1 : 0);
+        prop.put("peerName", env.getConfig("peerName", "nameless"));
+	String peerLang = env.getConfig("htLocaleSelection", "default");
+	if (peerLang.equals("default")) peerLang = "en";
+        prop.put("peerLang", peerLang);
         
         // set values
         String s;
