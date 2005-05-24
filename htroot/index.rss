@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:yacyTopwords="http://www.yacy.net/yacy/topwords">
 	<channel>
 		<title>Search for #[former]#</title>
 		<description>Search for #[former]#</description>
@@ -9,15 +9,15 @@
 			<link>#[url]#</link>
 		</item>
 		#{/results}#
-                <topwords>
-                    #(combine)#
-                    ::
-                    #{words}#
-                    <item>
-                        <word>#[word]#</word>
-                    </item>
-                    #{/words}#
-                    #(/combine)#
-                </topwords>
+        <yacyTopwords:topwords>
+            #(combine)#
+            ::
+            #{words}#
+            <yacyTopwords:item>
+                <yacyTopwords:word>#[word]#</yacyTopwords:word>
+            </yacyTopwords:item>
+            #{/words}#
+            #(/combine)#
+        </yacyTopwords:topwords>
 	</channel>
 </rss>
