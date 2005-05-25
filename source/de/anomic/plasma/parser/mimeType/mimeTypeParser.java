@@ -65,7 +65,7 @@ import de.anomic.server.serverFileUtils;
 public class mimeTypeParser
 extends AbstractParser
 implements Parser {
-
+    
     /**
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
@@ -88,10 +88,10 @@ implements Parser {
         "xerces.jar"
     };
     
-	public mimeTypeParser() {
-		super(LIBX_DEPENDENCIES);
-	}
-
+    public mimeTypeParser() {
+        super(LIBX_DEPENDENCIES);
+    }
+    
     public plasmaParserDocument parse(URL location, String mimeType, File sourceFile) throws ParserException {
         
         // determining the mime type of the file ...
@@ -113,6 +113,9 @@ implements Parser {
                     mimeType = match.getMimeType();
                 }
                 
+                // to avoid loops we have to test if the mimetype has changed ...
+                if (this.getSupportedMimeTypes().containsKey(mimeType)) return null;
+                
                 plasmaParser theParser = new plasmaParser();
                 return theParser.parseSource(location,mimeType,sourceFile);
             }
@@ -123,8 +126,8 @@ implements Parser {
         }
     }
     
-	public plasmaParserDocument parse(URL location, String mimeType,
-			InputStream source) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType,
+            InputStream source) throws ParserException {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("mimeTypeParser",".tmp");
@@ -136,14 +139,14 @@ implements Parser {
             if (dstFile != null) {dstFile.delete();}            
         }
         
-	}
-
-	public java.util.Hashtable getSupportedMimeTypes() {
-		return mimeTypeParser.SUPPORTED_MIME_TYPES;
-	}
-
-	public void reset() {
+    }
+    
+    public java.util.Hashtable getSupportedMimeTypes() {
+        return mimeTypeParser.SUPPORTED_MIME_TYPES;
+    }
+    
+    public void reset() {
         // Nothing todo here at the moment
-	}
-
+    }
+    
 }

@@ -244,7 +244,13 @@ public class index {
         
 	// return rewrite properties
 	prop.put("promoteSearchPageGreeting", env.getConfig("promoteSearchPageGreeting", ""));
-	return prop;
+    
+    // adding some additional properties needed for the rss feed
+    String hostName = (String) header.get("Host","localhost");
+    if (hostName.indexOf(":") == -1) hostName += ":" + env.getConfig("port","8080");
+    prop.put("rssYacyImageURL","http://" + hostName + "/env/grafics/yacy.gif");    
+    
+    return prop;
     }
 
     public static TreeSet cleanQuery(String words) {

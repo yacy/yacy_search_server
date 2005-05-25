@@ -1,12 +1,18 @@
 <?xml version="1.0"?>
+<?xml-stylesheet type='text/xsl' href='/index.xsl' version='1.0'?>
 <rss version="2.0" xmlns:yacyTopwords="http://www.yacy.net/yacy/topwords">
 	<channel>
 		<title>Search for #[former]#</title>
 		<description>Search for #[former]#</description>
+		<image>
+			<url>#[rssYacyImageURL]#</url>
+			<title>Search for #[former]#</title>
+		</image>
 		#{results}#
 		<item>
 			<title>#[description]#</title>
 			<link>#[url]#</link>
+			<pubDate>#[date]#</pubDate>
 		</item>
 		#{/results}#
         <yacyTopwords:topwords>

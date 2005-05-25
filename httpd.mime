@@ -73,6 +73,7 @@ wav     = audio/x-wav
 xhtml   = application/xhtml+xml
 xla     = application/msexcel
 xls     = application/msexcel
+xsl		= application/xml
 xml     = application/xml
 Z       = application/x-compress
 zip     = application/zip

@@ -1103,7 +1103,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 			prop.put("results_" + i + "_description", descr);
 			prop.put("results_" + i + "_url", urlstring); 
 			prop.put("results_" + i + "_urlname", urlname); 
-			prop.put("results_" + i + "_date", dateString(urlentry.moddate())); 
+			prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
+            prop.put("results_" + i + "_size", Long.toString(urlentry.size())); 
                         i++;
                     }
                 }
