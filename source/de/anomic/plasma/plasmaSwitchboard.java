@@ -1422,7 +1422,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     ee.printStackTrace();
                     return -1;
                 }
-            }
+            } else {
+		// simply close the indexEntities
+		for (int i = 0; i < indexEntities.length; i++) try {
+		    indexEntities[i].close();
+		} catch (IOException ee) {}
+	    }
             return indexCount;
         } else {
             log.logError("Index distribution failed. Too less peers (" + hc + ") received the index, not deleted locally.");
@@ -1514,17 +1519,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 indexEntities[i].close();
             } else {
                 // delete complete file
-                if (!(indexEntities[i].deleteComplete())) {
+                if (indexEntities[i].deleteComplete()) {
+                    indexEntities[i].close();
+		} else {
                     indexEntities[i].close();
                     // have another try...
                     if (!(plasmaWordIndexEntity.wordHash2path(plasmaPath, indexEntities[i].wordHash()).delete())) {
                         success = false;
                         log.logError("Could not delete whole Index for word " + indexEntities[i].wordHash());
                     }
-                } else {
-                    indexEntities[i].close();
                 }
             }
+	    indexEntities[i] = null;
         }
         return success;
     }

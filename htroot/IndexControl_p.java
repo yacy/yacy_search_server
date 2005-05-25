@@ -126,6 +126,7 @@ public class IndexControl_p {
                     int i = 0;
                     urlx = new String[index.size()];
                     while (en.hasMoreElements()) urlx[i++] = ((plasmaWordIndexEntry) en.nextElement()).getUrlHash();
+		    index.close();
                 } catch (IOException e) {
                     urlx = new String[0];
                 }
@@ -199,6 +200,7 @@ public class IndexControl_p {
             indexes[0] = switchboard.wordIndex.getEntity(keyhash, true);
             result = yacyClient.transferIndex(yacyCore.seedDB.getConnected(post.get("hostHash", "")), indexes, switchboard.loadedURL);
             prop.put("result", (result == null) ? ("Successfully transferred " + indexes[0].size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds") : result);
+	    try {indexes[0].close();} catch (IOException e) {}
         }
         
 	if (post.containsKey("keyhashsimilar")) {
@@ -206,7 +208,7 @@ public class IndexControl_p {
                 String result = "Sequential List of Word-Hashes:<br>";
                 String hash;
                 int i = 0;
-                while (hashIt.hasNext()) {
+                while ((hashIt.hasNext()) && (i < 256)) {
                     hash = (String) hashIt.next();
                     result += "<a href=\"/IndexControl_p.html?" + 
                     "keystring=" +
@@ -251,7 +253,7 @@ public class IndexControl_p {
                 String result = "Sequential List of URL-Hashes:<br>";
 		String hash;
 		int i = 0;
-                while (hashIt.hasNext()) {
+                while ((hashIt.hasNext()) && (i < 256)) {
 		    hash = (String) hashIt.next();
                     result += "<a href=\"/IndexControl_p.html?" + 
                     "keystring=" +
@@ -376,6 +378,7 @@ public class IndexControl_p {
                 "<span class=\"small\">for every resolveable and deleted URL reference, delete the same reference at every other word where the reference exists (very extensive, but prevents further unresolved references)</span>" +
                 "</td></tr></table></fieldset></form>";
             }
+	    index.close();
             return result;
         }  catch (IOException e) {
             return "";
