@@ -165,14 +165,21 @@ public final class plasmaSearch {
         // the map now holds the search results in order of number of hits per word
         // we now must pairwise build up a conjunction of these sets
         String k = (String) map.firstKey(); // the smallest, which means, the one with the least entries
-        plasmaWordIndexEntity searchResult = (plasmaWordIndexEntity) map.remove(k);
+        plasmaWordIndexEntity searchA, searchB, searchResult = (plasmaWordIndexEntity) map.remove(k);
         while ((map.size() > 0) && (searchResult.size() > 0) && (time > 0)) {
             // take the first element of map which is a result and combine it with result
             k = (String) map.firstKey(); // the next smallest...
             time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
-            searchResult = joinConstructive(searchResult, (plasmaWordIndexEntity) map.remove(k), 2 * time / (map.size() + 1));
+	    searchA = searchResult;
+	    searchB = (plasmaWordIndexEntity) map.remove(k);
+            searchResult = joinConstructive(searchA, searchB, 2 * time / (map.size() + 1));
+	    // close the input files/structures
+	    if (searchA != searchResult) searchA.close();
+	    if (searchB != searchResult) searchB.close();
         }
-        
+        searchA = null; // free resources
+	searchB = null; // free resources
+
         // in 'searchResult' is now the combined search result
         if (searchResult.size() == 0) return new plasmaWordIndexEntity(null);
         return searchResult;

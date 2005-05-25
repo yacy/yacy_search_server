@@ -742,6 +742,12 @@ public class kelondroRecords {
 	this.entryFile = null;
     }
 
+    public void finalize() {
+	try {
+	    close();
+	} catch (IOException e) {}
+    }
+
     protected static String[] line2args(String line) {
 	// parse the command line
 	if ((line == null) || (line.length() == 0)) return null;

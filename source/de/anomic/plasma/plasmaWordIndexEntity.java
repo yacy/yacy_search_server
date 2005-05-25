@@ -141,9 +141,15 @@ public class plasmaWordIndexEntity {
 
     public void close() throws IOException {
 	if (theTmpMap == null) {
-            theIndex.close(); 
+            if (theIndex != null) theIndex.close(); 
             theIndex = null;
         } else theTmpMap = null;
+    }
+
+    public void finalize() {
+	try {
+	    close();
+	} catch (IOException e) {}
     }
 
     public boolean contains(String urlhash) throws IOException {
