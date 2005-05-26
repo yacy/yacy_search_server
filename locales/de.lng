@@ -1,0 +1,17 @@
+#English=German
+
+#index.html
+
+P2P\ WEB\ SEARCH=P2P Suche
+#only the Button
+"Search"="Suchen"
+Enter\ search\ word\ list,\ separated\ by\ space\:=Geben Sie hier die Suchworte getrennt durch Leerzeichen ein:
+Max.\ number\ of\ results\:=Max. Anzahl Ergebnisse:
+order\ by\:=sortiert nach:
+# ">" to avoid replacing value=
+>Quality-Date=>Qualität-Datum
+>Date-Quality=>Datum-Qualität
+Resource\:=Quelle:
+Max.\ search\ time=Max. Suchzeit
+seconds=Sekunden
+URL\ mask\:=URL-Maske
