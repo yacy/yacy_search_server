@@ -43,6 +43,8 @@
 
 package de.anomic.data;
 
+import de.anomic.server.serverLog;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -67,7 +69,7 @@ public class translator {
 		while(keys.hasMoreElements()){
 			key = (String)keys.nextElement();
 			result = result.replaceAll(key, translationList.getProperty(key));
-			System.out.println("Replaced \""+key+"\" by \""+translationList.getProperty(key)+"\"");
+			//System.out.println("Replaced \""+key+"\" by \""+translationList.getProperty(key)+"\""); //DEBUG
 		}
 		return result;
 	}
@@ -124,9 +126,9 @@ public class translator {
 			
 			if(sourceFiles[i].getName().endsWith(extension)){
 				if(translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), translationList)){
-					System.out.println("Translated File: "+ sourceFiles[i].getName());
+					serverLog.logInfo("Translator", "Translated File: "+ sourceFiles[i].getName());
 				}else{
-					System.err.println("File Error while translating File "+sourceFiles[i].getName());
+					serverLog.logError("Translator", "File Error while translating File "+sourceFiles[i].getName());
 				}
 			}
 
