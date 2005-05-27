@@ -15,3 +15,7 @@ Resource\:=Quelle:
 Max.\ search\ time=Max. Suchzeit
 seconds=Sekunden
 URL\ mask\:=URL-Maske
+
+#IndexCreate_p.html
+Index\ Creation=Index Erzeugung
+You\ can\ define\ url's\ as\ start\ points\ for\ Web\ page\ crawling\ and\ start\ that\ crawling\ here\.=Du kannst hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten.
