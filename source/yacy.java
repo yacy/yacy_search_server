@@ -259,6 +259,21 @@ public final class yacy {
                         String  browserPopUpApplication = sb.getConfig("browserPopUpApplication", "netscape");
                         serverSystem.openBrowser("http://localhost:" + port + "/" + browserPopUpPage, browserPopUpApplication);
                     }
+
+                    //Copy the shipped locales into DATA
+                    File localesPath = new File(sb.getRootPath(), sb.getConfig("localesPath", "DATA/LOCALES"));
+					File defaultLocalesPath = new File(sb.getRootPath(), "locales");
+                    
+                    try{
+                        File[] defaultLocales = defaultLocalesPath.listFiles();
+                        localesPath.mkdirs();
+                        for(int i=0;i < defaultLocales.length; i++){
+                            if(defaultLocales[i].getName().endsWith(".lng"))
+                               serverFileUtils.copy(defaultLocales[i], new File(localesPath, defaultLocales[i].getName()));
+                        }
+                    }catch(NullPointerException e){
+                        serverLog.logError("STARTUP", "Nullpointer Exception while copying the default Locales");
+                    }
                     
                     // registering shutdown hook
                     serverLog.logSystem("STARTUP", "Registering Shutdown Hook");
