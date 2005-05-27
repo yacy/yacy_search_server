@@ -261,7 +261,7 @@ public final class yacy {
                     }
 
                     //Copy the shipped locales into DATA
-                    File localesPath = new File(sb.getRootPath(), sb.getConfig("localesPath", "DATA/LOCALES"));
+                    File localesPath = new File(sb.getRootPath(), sb.getConfig("localesPath", "DATA/LOCALE"));
 					File defaultLocalesPath = new File(sb.getRootPath(), "locales");
                     
                     try{
@@ -271,6 +271,7 @@ public final class yacy {
                             if(defaultLocales[i].getName().endsWith(".lng"))
                                serverFileUtils.copy(defaultLocales[i], new File(localesPath, defaultLocales[i].getName()));
                         }
+                        serverLog.logInfo("STARTUP", "Copied the default lokales to DATA/LOCALE");
                     }catch(NullPointerException e){
                         serverLog.logError("STARTUP", "Nullpointer Exception while copying the default Locales");
                     }
