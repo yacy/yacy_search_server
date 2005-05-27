@@ -63,6 +63,7 @@
 <property name="libx" location="libx"/>
 <property name="build" location="classes"/>
 <property name="htroot" location="htroot"/>
+<property name="locales" location="locales"/>
 <property name="release" location="RELEASE"/>
 
 <!-- loading some property values from file -->   
@@ -245,18 +246,27 @@
     <include name="superseed.txt"/>
   </tarfileset>
 
-  <!-- copy wrappers -->
+  <!-- copy Unix wrappers -->
+  <tarfileset dir="." dirmode="${accessRightsDir}" mode="${accessRightsExecutable}" prefix="${releaseDir}">
+    <include name="startYACY.sh"/>
+    <include name="stopYACY.sh"/>
+    <include name="killYACY.sh"/>
+  </tarfileset>
+  
+  <!-- copy Other wrappers -->
   <tarfileset dir="." dirmode="${accessRightsDir}" mode="${accessRightsFile}" prefix="${releaseDir}">
     <include name="startYACY.command"/>
     <include name="startYACY.bat"/>
     <include name="startYACY_noconsole.bat"/>
-    <include name="startYACY.sh"/>
     <include name="stopYACY.command"/>
     <include name="stopYACY.bat"/>
-    <include name="stopYACY.sh"/>
-    <include name="killYACY.sh"/>
   </tarfileset>
 
+  <!-- copy locales  -->
+  <tarfileset dir="${locales}" prefix="${releaseDir}/locales" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
+    <include name="*"/>
+  </tarfileset>
+  
   <!-- copy documentation -->
   <tarfileset dir="." dirmode="${accessRightsDir}" mode="${accessRightsFile}" prefix="${releaseDir}">
     <include name="readme.txt"/>
