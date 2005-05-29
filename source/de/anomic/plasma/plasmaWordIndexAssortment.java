@@ -107,18 +107,18 @@ public final class plasmaWordIndexAssortment {
             // open existing singeton tree file
             try {
                 assortments = new kelondroTree(assortmentFile, bufferSize);
-                log.logSystem("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentCapacity); 
+                if (log != null) log.logSystem("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentCapacity + ", " + bufferkb + "kb buffer"); 
             } catch (IOException e){
-                log.logError("unable to open assortment database: " + e.getMessage());
+                if (log != null) log.logError("unable to open assortment database: " + e.getMessage());
                 e.printStackTrace();
             }
         } else {
             // create new sigleton tree file
             try {
                 assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentCapacity));
-                log.logSystem("Created new Assortment Database, width " + assortmentCapacity); 
+                if (log != null) log.logSystem("Created new Assortment Database, width " + assortmentCapacity + ", " + bufferkb + "kb buffer"); 
             } catch (IOException e){
-                log.logError("unable to create assortment database: " + e.getMessage());
+                if (log != null) log.logError("unable to create assortment database: " + e.getMessage());
                 e.printStackTrace();
             }
         }

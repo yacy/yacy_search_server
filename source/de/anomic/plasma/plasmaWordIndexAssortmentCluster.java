@@ -58,19 +58,30 @@ public final class plasmaWordIndexAssortmentCluster {
     private int clusterCapacity;
     private serverLog log;
     private plasmaWordIndexAssortment[] assortments;
-    private long completeBufferSize;
+    private long completeBufferKB;
 
     public plasmaWordIndexAssortmentCluster(File assortmentsPath, int clusterCapacity, int bufferkb, serverLog log) {
 	// set class variables
 	if (!(assortmentsPath.exists())) assortmentsPath.mkdirs();
 	this.clusterCapacity = clusterCapacity;
-        this.completeBufferSize = bufferkb * 1024;
+        this.completeBufferKB = bufferkb;
         this.log = log;
 	this.assortments = new plasmaWordIndexAssortment[clusterCapacity];
 
-	// initialize cluster
+        // open cluster and close it directly again to detect the element sizes
+        int[] sizes = new int[clusterCapacity];
+        int sumSizes = 1;
+        plasmaWordIndexAssortment testAssortment;
+        for (int i = 0; i < clusterCapacity; i++) {
+	    testAssortment = new plasmaWordIndexAssortment(assortmentsPath, i + 1, 0, null);
+            sizes[i] = testAssortment.size() + clusterCapacity - i;
+            sumSizes += sizes[i];
+            testAssortment.close();
+	}
+        
+	// initialize cluster using the cluster elements size for optimal buffer size
 	for (int i = 0; i < clusterCapacity; i++) {
-	    assortments[i] = new plasmaWordIndexAssortment(assortmentsPath, i + 1, (int) completeBufferSize / clusterCapacity, log);
+	    assortments[i] = new plasmaWordIndexAssortment(assortmentsPath, i + 1, (int) completeBufferKB * sizes[i] / sumSizes, log);
 	}
     }
 
