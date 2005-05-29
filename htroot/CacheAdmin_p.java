@@ -98,9 +98,9 @@ public class CacheAdmin_p {
             for (int i = 0; i < list.length; i++) {
                 f = new File(dir, list[i]);
                 if (f.isDirectory())
-                    tree += "<img src=\"/env/grafics/folderIconSmall.gif\" align=\"top\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString;
+                    tree += "<img src=\"/env/grafics/folderIconSmall.gif\" align=\"top\" alt=\"Folder\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString;
                 else
-                    tree += "<img src=\"/env/grafics/fileIconSmall.gif\" align=\"top\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString;
+                    tree += "<img src=\"/env/grafics/fileIconSmall.gif\" align=\"top\" alt=\"File\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString;
             }
         }
         

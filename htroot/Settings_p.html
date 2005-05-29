@@ -43,7 +43,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
     <td><input name="peername" type="text" size="32" maxlength="80" value="#[peerName]#"></td>
     <td><b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.
            Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.</b><br>
-    <i>(hint: choose a name that appears on a web page that tells something about you, vistit the page, get the 'senior' status, and you can be found..)</i></td>
+    <i>(hint: Choose a name that appears on a web page that tells something about you, visit the page, get the 'senior' status, and you can be found...)</i></td>
   </tr>
   <tr valign="top">
     <td>Peer Language:</td>
@@ -71,7 +71,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
     <td>Transparent Proxy:</td>
     <td><input type="checkbox" name="isTransparentProxy" align="top" #(isTransparentProxy)#::checked#(/isTransparentProxy)#></td>
     <td>With this you can specify if YaCy can be used as transparent proxy.<br>
-    <i>Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:</i><br>     
+    <i>Hint: On Linux you can configure your firewall to transparently redirect all HTTP traffic through YaCy using this iptables rule:</i><br>     
   	<small><code>iptables -t nat -A PREROUTING -p tcp -s 192.168.0.0/16 --dport 80 -j DNAT --to 192.168.0.1:#[port]#</code></small>
   </td>
   </tr>  
@@ -125,7 +125,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <fieldset><legend>Server Access Settings</legend>
 <p>Here you can restrict access to the server. By default, the access is not limited, because this function is needed to spawn the p2p index-sharing function. If you block access to your server (setting anything else than '*'), then you will also be blocked from using other peers' indexes for search service. However, blocking access may be correct in enterprise environments where you only want to index your company's own web pages.</p>
-<p>ATTENTION: your current IP is recognized as "#[clientIP]#". If the value you enter here does not match with this IP, you will not be able to access the server pages any more</p>
+<p>ATTENTION: Your current IP is recognized as "#[clientIP]#". If the value you enter here does not match with this IP, you will not be able to access the server pages anymore</p>
 <p><table border="0" cellspacing="5">
 <tr valign="top"><td>IP-Number filter:</td><td colspan ="2"><input name="serverfilter" type="text" size="50" maxlength="1000" value="#[serverfilter]#"></td></tr>
 <tr valign="top"><td><!--Account Name:</td><td><input name="serveruser" type="text" size="16" maxlength="16" value="#[serveruser]#">--></td>
@@ -188,7 +188,7 @@ but only if there had been changes to the seed-list.
 <br>
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <fieldset><legend>Content Parser Settings</legend>
-<p>With this settings you can activate or deactivate parsing of additional content types based on their MIME-types.<br>
+<p>With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.<br>
 For a detailed description of the various MIME-types take a look at <a href="http://www.iana.org/assignments/media-types/">http://www.iana.org/assignments/media-types/</a></p>
 <p>
 <table border="0" cellpadding="2" cellspacing="1">
