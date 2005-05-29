@@ -169,12 +169,17 @@ public class IndexCreate_p {
             if (post.containsKey("clearcrawlqueue")) {
                 String urlHash;
                 int c = 0;
-                while (switchboard.noticeURL.localStackSize() > 0) {
-                    urlHash = switchboard.noticeURL.localPop().hash();
-                    if (urlHash != null) {
-                        switchboard.noticeURL.remove(urlHash);
-                        c++;
-                    }
+                while (switchboard.noticeURL.coreStackSize() > 0) {
+                    urlHash = switchboard.noticeURL.corePop().hash();
+                    if (urlHash != null) { switchboard.noticeURL.remove(urlHash); c++; }
+                }
+                while (switchboard.noticeURL.limitStackSize() > 0) {
+                    urlHash = switchboard.noticeURL.limitPop().hash();
+                    if (urlHash != null) { switchboard.noticeURL.remove(urlHash); c++; }
+                }
+                while (switchboard.noticeURL.remoteStackSize() > 0) {
+                    urlHash = switchboard.noticeURL.remotePop().hash();
+                    if (urlHash != null) { switchboard.noticeURL.remove(urlHash); c++; }
                 }
                 prop.put("info", 3);//crawling queue cleared
                 prop.put("info_numEntries", c);
@@ -375,12 +380,12 @@ public class IndexCreate_p {
                     prop.put("loader-set_list", i );
                 }
                 
-                int localStackSize = switchboard.noticeURL.localStackSize();
+                int localStackSize = switchboard.noticeURL.coreStackSize();
                 if (localStackSize == 0) {
                     prop.put("crawler-queue", 0);
                 } else {
                     prop.put("crawler-queue", 1);
-                    plasmaCrawlNURL.entry[] crawlerList = switchboard.noticeURL.localTop(20);
+                    plasmaCrawlNURL.entry[] crawlerList = switchboard.noticeURL.coreTop(20);
                     prop.put("crawler-queue_num", localStackSize);//num Entries
                     prop.put("crawler-queue_show-num", crawlerList.length); //showin sjow-num most recent
                     plasmaCrawlNURL.entry urle;

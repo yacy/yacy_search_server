@@ -61,8 +61,13 @@ import de.anomic.tools.bitfield;
 
 public class plasmaCrawlNURL extends plasmaURL {
 
+    public static final int STACK_TYPE_NULL     = 0; // do not stack
+    public static final int STACK_TYPE_CORE     = 1; // put on local stack
+    public static final int STACK_TYPE_LIMIT    = 2; // put on global stack
+    public static final int STACK_TYPE_OVERHANG = 3; // put on overhang stack; links that are known but not crawled
+    public static final int STACK_TYPE_REMOTE   = 4; // put on remote-triggered stack
     
-    private kelondroStack localStack;     // links found by crawling to depth-1
+    private kelondroStack coreStack;      // links found by crawling to depth-1
     private kelondroStack limitStack;     // links found by crawling at target depth
     private kelondroStack overhangStack;  // links found by crawling at depth+1
     private kelondroStack remoteStack;    // links from remote crawl orders
@@ -101,9 +106,21 @@ public class plasmaCrawlNURL extends plasmaURL {
         
 	File localCrawlStack = new File(cacheStacksPath, "urlNoticeLocal0.stack");
         if (localCrawlStack.exists()) {
-	    localStack = new kelondroStack(localCrawlStack, 0);
+	    coreStack = new kelondroStack(localCrawlStack, 0);
 	} else {
-	    localStack = new kelondroStack(localCrawlStack, 0, new int[] {plasmaURL.urlHashLength});
+	    coreStack = new kelondroStack(localCrawlStack, 0, new int[] {plasmaURL.urlHashLength});
+	}
+        File limitCrawlStack = new File(cacheStacksPath, "urlNoticeLimit0.stack");
+        if (limitCrawlStack.exists()) {
+	    limitStack = new kelondroStack(limitCrawlStack, 0);
+	} else {
+	    limitStack = new kelondroStack(limitCrawlStack, 0, new int[] {plasmaURL.urlHashLength});
+	}
+        File overhangCrawlStack = new File(cacheStacksPath, "urlNoticeOverhang0.stack");
+        if (overhangCrawlStack.exists()) {
+	    overhangStack = new kelondroStack(overhangCrawlStack, 0);
+	} else {
+	    overhangStack = new kelondroStack(overhangCrawlStack, 0, new int[] {plasmaURL.urlHashLength});
 	}
         File globalCrawlStack = new File(cacheStacksPath, "urlNoticeRemote0.stack");
         if (globalCrawlStack.exists()) {
@@ -114,7 +131,7 @@ public class plasmaCrawlNURL extends plasmaURL {
         
         // init stack Index
         stackIndex = new HashSet();
-        Iterator i = localStack.iterator();
+        Iterator i = coreStack.iterator();
         while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
         i = remoteStack.iterator();
         while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
@@ -134,11 +151,22 @@ public class plasmaCrawlNURL extends plasmaURL {
     }
     
     public int stackSize() {
-        return localStack.size() + remoteStack.size();
+        // this does not count the overhang stack size
+        return coreStack.size()  + limitStack.size() + remoteStack.size();
     }
-    public int localStackSize() {
-        return localStack.size();
+    
+    public int coreStackSize() {
+        return coreStack.size();
     }
+    
+    public int limitStackSize() {
+        return limitStack.size();
+    }
+    
+    public int overhangStackSize() {
+        return overhangStack.size();
+    }
+    
     public int remoteStackSize() {
         return remoteStack.size();
     }
@@ -159,21 +187,24 @@ public class plasmaCrawlNURL extends plasmaURL {
         // 3 = on overhang stack
         // 4 = on remote stack
         try {
-            if (stackMode == 1) {
-                localStack.push(new byte[][] {e.hash.getBytes()});
-                stackIndex.add(new String(e.hash.getBytes()));
-            }
-            if (stackMode == 4) {
-                remoteStack.push(new byte[][] {e.hash.getBytes()});
-                stackIndex.add(new String(e.hash.getBytes()));
-            }
+            if (stackMode == 1) coreStack.push(new byte[][] {e.hash.getBytes()});
+            if (stackMode == 2) limitStack.push(new byte[][] {e.hash.getBytes()});
+            if (stackMode == 3) overhangStack.push(new byte[][] {e.hash.getBytes()});
+            if (stackMode == 4) remoteStack.push(new byte[][] {e.hash.getBytes()});
+            stackIndex.add(new String(e.hash.getBytes()));
         } catch (IOException er) {
         }
         return e;
     }
 
-    public entry localPop() { return pop(localStack); }
-    public entry[] localTop(int count) { return top(localStack, count); }
+    public entry corePop() { return pop(coreStack); }
+    public entry[] coreTop(int count) { return top(coreStack, count); }
+    
+    public entry limitPop() { return pop(limitStack); }
+    public entry[] limitTop(int count) { return top(limitStack, count); }
+    
+    public entry overhangPop() { return pop(overhangStack); }
+    public entry[] overhangTop(int count) { return top(overhangStack, count); }
     
     public entry remotePop() { return pop(remoteStack); }
     public entry[] remoteTop(int count) { return top(remoteStack, count); }
@@ -344,6 +375,7 @@ public class plasmaCrawlNURL extends plasmaURL {
         }
     }
 
+    /*
     public class kenum implements Enumeration {
 	// enumerates entry elements
 	kelondroTree.rowIterator i;
@@ -362,5 +394,5 @@ public class plasmaCrawlNURL extends plasmaURL {
 	// enumerates entry elements
 	return new kenum(up, rotating);
     }
-    
+    */
 }

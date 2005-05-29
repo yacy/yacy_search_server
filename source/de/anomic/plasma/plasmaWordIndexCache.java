@@ -57,7 +57,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private static final String newSingletonFileName = "indexAssortment001.db";
     private static final String indexAssortmentClusterPath = "ACLUSTER";
     private static final int assortmentLimit = 50;
-    private static final int ramcacheLimit = 70;
+    private static final int ramcacheLimit = 51;
     
     
     // class variables
