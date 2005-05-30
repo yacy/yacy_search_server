@@ -1,5 +1,6 @@
 #English=German
 
+#-----------------------------------------------------------
 #index.html
 
 P2P\ WEB\ SEARCH=P2P Suche
@@ -14,8 +15,26 @@ order\ by\:=sortiert nach:
 Resource\:=Quelle:
 Max.\ search\ time=Max. Suchzeit
 seconds=Sekunden
-URL\ mask\:=URL-Maske
+"URL mask":=URL-Maske
 
+
+#-------------------------------------------------------
 #IndexCreate_p.html
 Index\ Creation=Index Erzeugung
 You\ can\ define\ url's\ as\ start\ points\ for\ Web\ page\ crawling\ and\ start\ that\ crawling\ here\.=Du kannst hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten.
+
+#-------------------------------------------------------
+#Status.html
+Protection=Sicherheit
+Welcome\ to\ YaCy\!=Willkommen bei YaCy!
+System\ version=Systemversion
+Proxy\ host=Proxy Host
+Remote\ proxy=Zweiter Proxy
+This\ peer's\ address=Adresse dieses Peers
+This\ peer's\ name=Name dieses Peers
+This\ peer's\ statistics= Statistik dieses Peers
+This\ peer's\ status=Status dieses Peers
+Other\ peers=Andere Peers
+Seed\ server=Seed Server
+Auto-popup\ on\ start-up=Popup bei YaCy-Start
+Online-mode=Onlinemodus
