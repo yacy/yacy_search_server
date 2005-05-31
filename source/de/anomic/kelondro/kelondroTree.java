@@ -546,7 +546,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     }
 
     // Associates the specified value with the specified key in this map
-    public byte[] put(byte[] key, byte[] value) throws IOException {
+    public synchronized byte[] put(byte[] key, byte[] value) throws IOException {
 	byte[][] row = new byte[2][];
 	row[0] = key;
 	row[1] = value;
@@ -555,7 +555,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     }
     
     // Removes the mapping for this key from this map if present (optional operation).
-    public byte[][] remove(byte[] key) throws IOException {
+    public synchronized byte[][] remove(byte[] key) throws IOException {
 	Search search = new Search(key);
 	if (search.found()) {
 	    Node result = search.getMatcher();

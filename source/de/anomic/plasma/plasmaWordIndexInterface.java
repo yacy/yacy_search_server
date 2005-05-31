@@ -51,7 +51,7 @@ public interface plasmaWordIndexInterface {
     public Iterator wordHashes(String startWordHash, boolean up);
 
     public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty);
-    public long getCreationTime(String wordHash);
+    public long getUpdateTime(String wordHash);
     public void deleteIndex(String wordHash);
 
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete);

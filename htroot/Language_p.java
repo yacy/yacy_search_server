@@ -53,6 +53,7 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.HashMap;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
@@ -63,8 +64,20 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.data.translator;
 
+
 public class Language_p {
 
+    public static HashMap langMap(serverSwitch env) {
+	String[] ms = env.getConfig("htLocaleLang", "").split(",");
+	HashMap map = new HashMap();
+	int p;
+	for (int i = 0; i < ms.length; i++) {
+	    p = ms[i].indexOf("/");
+	    if (p > 0) map.put(ms[i].substring(0, p), ms[i].substring(p + 1));
+	}
+	return map;
+    }
+        
 	private static boolean copyFile(File from, File to){
 			if(from == null || to == null){
 			return false;
@@ -153,20 +166,26 @@ public class Language_p {
 	//reread language files
 	langFiles = listManager.getDirListing(langPath);
 	int i;
-	//virtuell entry
+	HashMap langNames = langMap(env);
+        String langKey, langName;
+        
+        //virtuell entry
 	prop.put("langlist_0_file", "default");
-	prop.put("langlist_0_name", "default");
-
+	prop.put("langlist_0_name", ((langNames.get("default") == null) ? "default" : (String) langNames.get("default")));
+        
 	for(i=0;i<= langFiles.length-1 ;i++){
 		if(langFiles[i].endsWith(".lng")){
 			//+1 because of the virtuall entry "default" at top
+                        langKey = langFiles[i].substring(0, langFiles[i].length() -4);
+                        langName = (String) langNames.get(langKey);
 			prop.put("langlist_"+(i+1)+"_file", langFiles[i]);
-			prop.put("langlist_"+(i+1)+"_name", langFiles[i].substring(0, langFiles[i].length() -4));
+			prop.put("langlist_"+(i+1)+"_name", ((langName == null) ? langKey : langName));
 		}
 	}
 	prop.put("langlist", (i+1));
 
-	prop.put("currentlang", env.getConfig("htLocaleSelection", "default"));
+        langName = (String) langNames.get(env.getConfig("htLocaleSelection", "default"));
+	prop.put("currentlang", ((langName == null) ? "default" : langName));
 	return prop;
     }
 

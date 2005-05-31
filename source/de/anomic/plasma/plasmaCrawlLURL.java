@@ -303,7 +303,7 @@ public class plasmaCrawlLURL extends plasmaURL {
                 prop.put("table_indexed_" + c + "_showInit", (showInit) ? 1 : 0);
                 prop.put("table_indexed_" + c + "_showInit_initiatorSeed", (initiatorSeed == null) ? dfltInit : initiatorSeed.getName());
                 prop.put("table_indexed_" + c + "_showExec", (showExec) ? 1 : 0);
-                prop.put("table_indexed_" + c + "_showExec_executorSeed", (initiatorSeed == null) ? dfltExec : executorSeed.getName());
+                prop.put("table_indexed_" + c + "_showExec_executorSeed", (executorSeed == null) ? dfltExec : executorSeed.getName());
                 prop.put("table_indexed_" + c + "_moddate", daydate(urle.moddate()));
                 prop.put("table_indexed_" + c + "_wordcount", urle.wordCount());
                 prop.put("table_indexed_" + c + "_urldescr", urle.descr());

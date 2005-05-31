@@ -187,7 +187,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         }
     }
     
-    public long getCreationTime(String wordHash) {
+    public long getUpdateTime(String wordHash) {
         File f = plasmaWordIndexEntity.wordHash2path(databaseRoot, wordHash);
         if (f.exists()) return f.lastModified(); else return -1;
     }

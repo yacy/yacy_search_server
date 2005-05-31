@@ -173,9 +173,9 @@ public class kelondroMap {
                 valuel = Long.parseLong(value);
                 accumulator = (Long) accMap.get(accfields[i]);
                 if (add)
-                    accMap.put(accfields[i], new Long(accumulator.longValue() + valuel));
+                    accMap.put(accfields[i], new Long(accumulator.longValue() + ((long) valuel)));
                 else
-                    accMap.put(accfields[i], new Long(accumulator.longValue() - valuel));
+                    accMap.put(accfields[i], new Long(accumulator.longValue() - ((long) valuel)));
             } catch (NumberFormatException e) {}
         }
     }
