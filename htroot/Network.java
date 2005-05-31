@@ -167,9 +167,18 @@ public class Network {
                     boolean complete = post.containsKey("ip");
                     Enumeration e = null;
                     switch (page) {
-                        case 1 : e = yacyCore.seedDB.seedsSortedConnected(post.get("order", "down").equals("up"), post.get("sort", "LCount")); break;
-                        case 2 : e = yacyCore.seedDB.seedsSortedDisconnected(post.get("order", "up").equals("up"), post.get("sort", "LastSeen")); break;
-                        case 3 : e = yacyCore.seedDB.seedsSortedPotential(post.get("order", "up").equals("up"), post.get("sort", "LastSeen")); break;
+                        case 1 :
+                            e = yacyCore.seedDB.seedsSortedConnected(post.get("order", "down").equals("up"), post.get("sort", "LCount"));
+                            prop.put("table_total", yacyCore.seedDB.sizeConnected());
+                            break;
+                        case 2 :
+                            e = yacyCore.seedDB.seedsSortedDisconnected(post.get("order", "up").equals("up"), post.get("sort", "LastSeen"));
+                            prop.put("table_total", yacyCore.seedDB.sizeDisconnected());
+                            break;
+                        case 3 :
+                            e = yacyCore.seedDB.seedsSortedPotential(post.get("order", "up").equals("up"), post.get("sort", "LastSeen"));
+                            prop.put("table_total", yacyCore.seedDB.sizePotential());
+                            break;
                     }
                     while ((e.hasMoreElements()) && (conCount < maxCount)) {
                         seed = (yacySeed) e.nextElement();
@@ -228,7 +237,7 @@ public class Network {
                     prop.put("table_list", conCount);
                     prop.put("table", 1);
                     prop.put("table_num", conCount);
-                    prop.put("table_total", (maxCount > conCount) ? conCount : maxCount);
+                    //prop.put("table_total", (maxCount > conCount) ? conCount : maxCount);
                     prop.put("table_complete", ((complete)? 1 : 0) );
                 }
             }

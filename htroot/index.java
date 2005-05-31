@@ -114,7 +114,7 @@ public class index {
 
         // process search words
         String querystring = (String) post.get("search", "");
-	try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (IOException e) {}
+	try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
         TreeSet query = cleanQuery(querystring);
         // filter out stopwords
         TreeSet filtered = kelondroMSetTools.joinConstructive(query, plasmaSwitchboard.stopwords);

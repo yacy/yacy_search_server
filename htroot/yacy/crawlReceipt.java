@@ -45,6 +45,7 @@
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlNURL;
+import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
@@ -112,6 +113,14 @@ public class crawlReceipt {
             // put new data into database
             switchboard.loadedURL.newEntry(propStr, true, youare, iam, 1);
             switchboard.noticeURL.remove(urlhash);
+            
+            // write log
+            plasmaCrawlLURL.entry entry = switchboard.loadedURL.getEntry(urlhash);
+            if (entry == null) {
+                switchboard.getLog().logError("RECEIVED wrong RECEIPT for hash " + urlhash + " from peer " + iam);
+            } else {
+                switchboard.getLog().logInfo("RECEIVED RECEIPT for url " + entry.url().toString());
+            }
             
             // ready for more
             prop.put("delay", "10");

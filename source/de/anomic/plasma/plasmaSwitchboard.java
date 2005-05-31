@@ -645,7 +645,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         processLocalCrawling(urlEntry, profile);
-        return false;
+        return true;
     }
     
     public int remoteTriggeredCrawlJobSize() {
@@ -969,7 +969,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (u == null) return plasmaURL.dummyHash; else return u.toString();
     }
     
-    
+    /*
     private void processCrawlingX(plasmaCrawlNURL.entry urlEntry, String initiator) {
         if (urlEntry.url() == null) return;
         String profileHandle = urlEntry.profileHandle();
@@ -984,11 +984,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 		     ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
 
         boolean tryRemote = 
-            (profile.remoteIndexing()) /* granted */ &&
-            (urlEntry.depth() == profile.generalDepth()) /* leaf node */ && 
-            (urlEntry.initiator() != null) && (!(urlEntry.initiator().equals(plasmaURL.dummyHash))) /* not proxy */ &&
+            (profile.remoteIndexing()) &&
+            (urlEntry.depth() == profile.generalDepth()) && 
+            (urlEntry.initiator() != null) && (!(urlEntry.initiator().equals(plasmaURL.dummyHash)))  &&
             ((yacyCore.seedDB.mySeed.isSenior()) ||
-             (yacyCore.seedDB.mySeed.isPrincipal())) /* qualified */;
+             (yacyCore.seedDB.mySeed.isPrincipal())) ;
                 
         if (tryRemote) {
             boolean success = processRemoteCrawlTrigger(urlEntry);
@@ -997,16 +997,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             processLocalCrawling(urlEntry, profile);
         }
     }
-    
+    */
     
     private boolean processLocalCrawling(plasmaCrawlNURL.entry urlEntry, plasmaCrawlProfile.entry profile) {
         // work off one Crawl stack entry
         if ((urlEntry == null) && (urlEntry.url() == null)) {
-            log.logInfo("LOCALCRAWL[" + noticeURL.coreStackSize() + ", " + noticeURL.remoteStackSize() + "]: urlEntry=null");
+            log.logInfo("LOCALCRAWL[" + noticeURL.coreStackSize() + ", " + noticeURL.limitStackSize() + ", " + noticeURL.overhangStackSize() + ", " + noticeURL.remoteStackSize() + "]: urlEntry=null");
             return false;
         }
         cacheLoader.loadParallel(urlEntry.url(), urlEntry.referrerHash(), urlEntry.initiator(), urlEntry.depth(), profile);
-        log.logInfo("LOCALCRAWL[" + noticeURL.coreStackSize() + ", " + noticeURL.remoteStackSize() + "]: enqueued for load " + urlEntry.url());
+        log.logInfo("LOCALCRAWL[" + noticeURL.coreStackSize() + ", " + noticeURL.limitStackSize() + ", " + noticeURL.overhangStackSize() + ", " + noticeURL.remoteStackSize() + "]: enqueued for load " + urlEntry.url());
         return true;
     }
     

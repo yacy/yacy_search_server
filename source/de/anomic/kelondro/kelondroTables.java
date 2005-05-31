@@ -101,6 +101,7 @@ public class kelondroTables {
     public synchronized void update(String tablename, String key, Map map) throws IOException {
         kelondroMap table = (kelondroMap) mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.update: map table '" + tablename + "' does not exist.");
+        if (key.length() > table.keySize()) key = key.substring(0, table.keySize());
         table.set(key, map);
         mTables.put(tablename, table);
     }
@@ -122,6 +123,7 @@ public class kelondroTables {
     public synchronized Map selectMap(String tablename, String key) throws IOException {
         kelondroMap table = (kelondroMap) mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.selectMap: map table '" + tablename + "' does not exist.");
+        if (key.length() > table.keySize()) key = key.substring(0, table.keySize());
         return table.get(key);
     }
 
@@ -171,6 +173,7 @@ public class kelondroTables {
     
     public synchronized void delete(String tablename, String key) throws IOException {
         kelondroMap table = (kelondroMap) mTables.get(tablename);
+        if (key.length() > table.keySize()) key = key.substring(0, table.keySize());
         if (table != null) {table.remove(key); mTables.put(tablename, table); return;}
       
         kelondroTree Tree = (kelondroTree) tTables.get(tablename);

@@ -125,7 +125,10 @@ public class kelondroMap {
         if (accfields != null) for (int i = 0; i < accfields.length; i++) accMap.put(accfields[i], accumulator[i]);
     }
 
-      
+    public int keySize() {
+        return dyn.columnSize(0);
+    }
+    
     public synchronized void set(String key, Map newMap) throws IOException {
         // update elementCount
         if ((sortfields != null) || (accfields != null)) {
