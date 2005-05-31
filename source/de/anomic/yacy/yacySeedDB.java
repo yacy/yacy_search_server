@@ -109,7 +109,7 @@ public class yacySeedDB {
         
         // create or init own seed
         myOwnSeedFile = new File(sb.getRootPath(), sb.getConfig("yacyOwnSeedFile", "mySeed.txt"));
-	if (myOwnSeedFile.exists()) {
+	if (myOwnSeedFile.exists() && (myOwnSeedFile.length() > 0)) {
 	    // load existing identity
 	    mySeed = yacySeed.load(myOwnSeedFile);
 	} else {
