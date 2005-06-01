@@ -10,18 +10,24 @@ public final class serverInstantThread extends serverAbstractThread implements s
     private Object environment;
     
     public serverInstantThread(Object env, String jobExec, String jobCount) {
-        // job is the name of a method of the object 'env'
+        // jobExec is the name of a method of the object 'env' that executes the one-step-run
+        // jobCount is the name of a method that returns the size of the job
         try {
             this.jobExecMethod = env.getClass().getMethod(jobExec, new Class[0]);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("serverInstantThread, wrong declaration of jobExec: " + e.getMessage());
+        }
+        try {
             if (jobCount == null)
                 this.jobCountMethod = null;
             else
                 this.jobCountMethod = env.getClass().getMethod(jobCount, new Class[0]);
-            this.environment = env;
-            this.setName(env.getClass().getName() + "." + jobExec);
+            
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Internal Error in serverInstantThread, wrong declaration: " + e.getMessage());
+            throw new RuntimeException("serverInstantThread, wrong declaration of jobCount: " + e.getMessage());
         }
+        this.environment = env;
+        this.setName(env.getClass().getName() + "." + jobExec);
     }
     
     public int getJobCount() {

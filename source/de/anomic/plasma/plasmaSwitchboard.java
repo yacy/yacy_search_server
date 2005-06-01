@@ -181,6 +181,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  HashMap                outgoingCookies, incomingCookies;
     public  kelondroTables         facilityDB;
     public  plasmaParser           parser;
+    public  plasmaWordIndexClassicCacheMigration classicCache;
     
     private serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
@@ -196,7 +197,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	setLog(new serverLog("PLASMA", loglevel));
         
 	// load values from configs
-	plasmaPath   = new File(rootPath, getConfig("dbPath", "DATABASE"));
+	plasmaPath   = new File(rootPath, getConfig("dbPath", "PLASMADB"));
         listsPath      = new File(rootPath, getConfig("listsPath", "LISTS"));
         remoteProxyHost = getConfig("remoteProxyHost", "");
         try {
@@ -336,6 +337,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         indexDistribution = new distributeIndex(100 /*indexCount*/, 8000, 1 /*peerCount*/);
         deployThread("20_dhtdistribution", "DHT Distribution (currently by juniors only)", "selection, transfer and deletion of index entries that are not searched on your peer, but on others",
                      new serverInstantThread(indexDistribution, "job", null), 120000);
+            
+        // init migratiion from 0.37 -> 0.38
+        classicCache = new plasmaWordIndexClassicCacheMigration(plasmaPath, wordIndex);
+        setConfig("99_indexcachemigration_idlesleep" , 10000);
+        setConfig("99_indexcachemigration_busysleep" , 40);
+        deployThread("99_indexcachemigration", "index cache migration", "migration of index cache data structures 0.37 -> 0.38",
+                     new serverInstantThread(classicCache, "oneStepMigration", "size"), 30000);
+
     }
     
     private static String ppRamString(int bytes) {
@@ -609,7 +618,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // start a global crawl, if possible
         plasmaCrawlNURL.entry urlEntry = noticeURL.limitPop();
-        if (urlEntry.url() == null) return false;
+        if (urlEntry.url() == null) return true;
         String profileHandle = urlEntry.profileHandle();
         //System.out.println("DEBUG plasmaSwitchboard.processCrawling: profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
         plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
@@ -622,6 +631,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 		     ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
 
         boolean tryRemote = 
+            ((noticeURL.coreStackSize() != 0) || (processStack.size() != 0)) /* should do ourself */ &&
             (profile.remoteIndexing()) /* granted */ &&
             (urlEntry.initiator() != null) && (!(urlEntry.initiator().equals(plasmaURL.dummyHash))) /* not proxy */ &&
             ((yacyCore.seedDB.mySeed.isSenior()) ||

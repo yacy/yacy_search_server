@@ -268,18 +268,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 if (pause) {
                     try {this.sleep(300);} catch (InterruptedException e) {}
                 } else {
-                    nextHash = (String) hashDate.getMinObject();
-                    if (nextHash != null) {
-                        try {
-                            flushFromMem(nextHash, true);
-                        } catch (Exception e) {
-                            log.logError("flushThread: " + e.getMessage());
-                            e.printStackTrace();
-                        }
-                        try {this.sleep(10 + java.lang.Math.min(1000, 10 * maxWords/(cache.size() + 1)));} catch (InterruptedException e) {}
-                    } else {
-                        try {this.sleep(2000);} catch (InterruptedException e) {}
-                    }
+                    flushFromMem();
+                    try {this.sleep(10 + java.lang.Math.min(1000, 10 * maxWords/(cache.size() + 1)));} catch (InterruptedException e) {}
                 }              
             }
         }
@@ -295,6 +285,32 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         public void terminate() {
             terminate = true;
         }
+    }
+    
+    private void flushFromMem() {
+        // select appropriate hash
+        // we have 2 different methods to find a good hash:
+        // - the oldest entry in the cache
+        // - the entry with maximum count
+        if (cache.size() == 0) return;
+        flushThread.pause();
+        try {
+            int count = hashScore.getMaxScore();
+            String hash = (String) hashScore.getMaxObject();
+            long time = (hash == null) ? System.currentTimeMillis() : longTime(hashDate.getScore(hash));
+            if ((count > ramcacheLimit) && (System.currentTimeMillis() - time > 10000)) {
+                // flush high-score entries
+                flushFromMem(hash, true);
+            } else {
+                // flush oldest entries
+                hash = (String) hashDate.getMinObject();
+                flushFromMem(hash, true);
+            }
+        } catch (Exception e) {
+            log.logError("flushFromMem: " + e.getMessage());
+            e.printStackTrace();
+        }
+        flushThread.proceed();
     }
     
     private int flushFromMem(String key, boolean reintegrate) {
@@ -376,6 +392,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
     }
 
+    /*
     private synchronized int flushFromMemToLimit() {
         if ((hashScore.size() == 0) || (cache.size() == 0)) return 0;
 
@@ -468,12 +485,13 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     }
                 }
             }
-            
         }
         flushThread.proceed();
         return count;
     }
+    */
     
+
     public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty) {
         flushThread.pause();
         flushFromMem(wordHash, false);
@@ -517,7 +535,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     public synchronized int addEntries(plasmaWordIndexEntryContainer container, long updateTime) {
         flushThread.pause();
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
-        if (cache.size() >= this.maxWords) flushFromMemToLimit();
+        while (cache.size() >= this.maxWords) flushFromMem();
 	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");
 
 	// put new words into cache
