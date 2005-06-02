@@ -117,6 +117,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -129,6 +130,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroTables;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
@@ -174,6 +176,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  wikiBoard              wikiDB;
     public  String                 remoteProxyHost;
     public  int                    remoteProxyPort;
+    public  boolean                remoteProxyUse;
     public  plasmaCrawlProfile     profiles;
     public  plasmaCrawlProfile.entry defaultProxyProfile;
     public  plasmaCrawlProfile.entry defaultRemoteProfile;
@@ -205,7 +208,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         } catch (NumberFormatException e) {
             remoteProxyPort = 3128;
         }
-        if (!(getConfig("remoteProxyUse", "false").equals("true"))) {
+        if (getConfig("remoteProxyUse", "false").equals("true")) {
+            remoteProxyUse = true;
+        } else {
+            remoteProxyUse = false;
             remoteProxyHost = null;
             remoteProxyPort = 0;
         }
@@ -340,11 +346,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
         // init migratiion from 0.37 -> 0.38
         classicCache = new plasmaWordIndexClassicCacheMigration(plasmaPath, wordIndex);
-        setConfig("99_indexcachemigration_idlesleep" , 10000);
-        setConfig("99_indexcachemigration_busysleep" , 40);
-        deployThread("99_indexcachemigration", "index cache migration", "migration of index cache data structures 0.37 -> 0.38",
-                     new serverInstantThread(classicCache, "oneStepMigration", "size"), 30000);
-
+        if (classicCache.size() > 0) {
+            setConfig("99_indexcachemigration_idlesleep" , 10000);
+            setConfig("99_indexcachemigration_busysleep" , 40);
+            deployThread("99_indexcachemigration", "index cache migration", "migration of index cache data structures 0.37 -> 0.38",
+            new serverInstantThread(classicCache, "oneStepMigration", "size"), 30000);
+        }
     }
     
     private static String ppRamString(int bytes) {
@@ -1211,12 +1218,21 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                          */
                     //addScoreForked(ref, gs, descr.split(" "));
                     //addScoreForked(ref, gs, urlstring.split("/"));
+                    String snipplet;
                     if (urlstring.matches(urlmask)) { //.* is default
 			prop.put("results_" + i + "_description", descr);
 			prop.put("results_" + i + "_url", urlstring); 
 			prop.put("results_" + i + "_urlname", urlname); 
 			prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
-            prop.put("results_" + i + "_size", Long.toString(urlentry.size())); 
+                        prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
+                        snipplet = getSnipplet(url, false, querywords, false);
+                        if ((snipplet == null) || (snipplet.length() < 10)) {
+                            prop.put("results_" + i + "_snipplet", 0);
+                            prop.put("results_" + i + "_snipplet_text", "");
+                        } else {
+                            prop.put("results_" + i + "_snipplet", 1);
+                            prop.put("results_" + i + "_snipplet_text", snipplet);
+                        }
                         i++;
                     }
                 }
@@ -1283,9 +1299,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 String resource = "";
                 //plasmaIndexEntry pie;
                 plasmaCrawlLURL.entry urlentry;
+                String snipplet;
                 while ((acc.hasMoreElements()) && (i < count)) {
                     urlentry = acc.nextElement();
-                    resource = urlentry.toString();
+                    snipplet = getSnipplet(urlentry.url(), false, hashes, true);
+                    if ((snipplet == null) || (snipplet.length() < 10)) {
+                        resource = urlentry.toString();
+                    } else {
+                        resource = urlentry.toString(snipplet);
+                    }
                     if (resource != null) {
                         links.append("resource").append(i).append("=").append(resource).append(serverCore.crlfString);
                         i++;
@@ -1352,7 +1374,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         URL url = entry.url();
         if (url == null) return 0;
         // get set of words
-        Set words = plasmaCondenser.getWords(getText(getResource(url, fetchOnline)));
+        //Set words = plasmaCondenser.getWords(getText(getResource(url, fetchOnline)));
+        Set words = plasmaCondenser.getWords(getDocument(url, fetchOnline).getText());
         // delete all word references
         int count = removeReferences(urlhash, words);
         // finally delete the url entry itself
@@ -1380,13 +1403,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     private byte[] getResource(URL url, boolean fetchOnline) {
-        byte[] resource = null;
-        // first load from cache
-        resource = getResourceFromCache(url);
-        // if not succedded then load from web
-        if ((fetchOnline) && (resource == null)) resource = getResourceFromWeb(url);
-        // the result
-        return resource;
+        // load the url as resource from the web
+        try {
+            //return httpc.singleGET(url, 5000, null, null, remoteProxyHost, remoteProxyPort);
+            byte[] resource = getResourceFromCache(url);
+            if ((fetchOnline) && (resource == null)) {
+                loadResourceFromWeb(url, 5000);
+                resource = getResourceFromCache(url);
+            }
+            return resource;
+        } catch (IOException e) {
+            return null;
+        }
     }
     
     private byte[] getResourceFromCache(URL url) {
@@ -1394,33 +1422,89 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String path = htmlFilterContentScraper.urlNormalform(url).substring(6);
         File cache = new File(getRootPath(), getConfig("proxyCache", "DATA/HTCACHE"));
         File f = new File(cache, path);
-        try {
+        if (f.exists()) try {
             return serverFileUtils.read(f);
         } catch (IOException e) {
             return null;
-        }
-    }
-    
-    private byte[] getResourceFromWeb(URL url) {
-        // load the url as resource from the web
-        try {
-            return httpc.singleGET(url, 5000, null, null, remoteProxyHost, remoteProxyPort);
-        } catch (IOException e) {
+        } else {
             return null;
         }
     }
     
-    private static byte[] getText(byte[] resource) {
+    private void loadResourceFromWeb(URL url, int socketTimeout) throws IOException {
+        plasmaCrawlWorker.load(
+            url, 
+            null, 
+            null, 
+            0, 
+            null,
+            socketTimeout,
+            remoteProxyHost,
+            remoteProxyPort,
+            remoteProxyUse,
+            cacheManager,
+            log);
+    }
+    
+    private plasmaParserDocument getDocument(URL url, boolean fetchOnline) {
+        byte[] resource = getResource(url, fetchOnline);
         if (resource == null) return null;
-        // generate word list from resource
-        htmlFilterContentScraper scraper = new htmlFilterContentScraper(null);
-        OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
+        httpHeader header = null;
         try {
-            serverFileUtils.write(resource, os);
-            return scraper.getText();
+            header = cacheManager.getCachedResponse(plasmaURL.urlHash(url));
         } catch (IOException e) {
             return null;
         }
+        if (header == null) return null;
+        if (plasmaParser.supportedMimeTypesContains(header.mime())) {
+            return parser.parseSource(url, header.mime(), resource);
+        } else {
+            return null;
+        }
+    }
+    
+    private String getSnipplet(URL url, boolean fetchOnline, Set query, boolean queryAreHashes) {
+        if (query.size() == 0) return null;
+        plasmaParserDocument document = getDocument(url, fetchOnline);
+        if (document == null) return null;
+        String[] sentences = document.getSentences();
+        //System.out.println("----" + url.toString()); for (int l = 0; l < sentences.length; l++) System.out.println(sentences[l]);
+        if ((sentences == null) || (sentences.length == 0)) return null;
+        TreeMap sentencematrix = hashMatrix(sentences);
+        if (!(queryAreHashes)) query = plasmaSearch.words2hashes(query);
+        Iterator i = query.iterator();
+        String hash;
+        kelondroMScoreCluster hitTable = new kelondroMScoreCluster();
+        Iterator j;
+        Integer sentencenumber;
+        Map.Entry entry;
+        while (i.hasNext()) {
+            hash = (String) i.next();
+            j = sentencematrix.entrySet().iterator();
+            while (j.hasNext()) {
+                entry = (Map.Entry) j.next();
+                sentencenumber = (Integer) entry.getKey();
+                if (((HashSet) entry.getValue()).contains(hash)) hitTable.addScore(sentencenumber, sentences[sentencenumber.intValue()].length());
+            }
+        }
+        Integer maxLine = (Integer) hitTable.getMaxObject();
+        if (maxLine == null) return null;
+        String snipplet = sentences[maxLine.intValue()];
+        if (snipplet.length() > 140) return null;
+        return snipplet;
+    }
+        
+    private TreeMap hashMatrix(String[] sentences) {
+        TreeMap map = new TreeMap();
+        HashSet set;
+        Enumeration words;
+        for (int i = 0; i < sentences.length; i++) {
+            set = new HashSet();
+            words = plasmaCondenser.wordTokenizer(sentences[i]);
+            while (words.hasMoreElements()) set.add(plasmaWordIndexEntry.word2hash((String) words.nextElement()));
+            map.put(new Integer(i), set);
+        }
+        return map;
     }
     
     public class distributeIndex {

@@ -137,7 +137,7 @@
     <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>    
   </javac> 
     
-  <!-- compiling htroot and htdocsdefault -->
+  <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
   <javac srcdir="${htroot}/" destdir="${htroot}"
          classpathref="project.class.path"
          source="${javacSource}" target="${javacTarget}"/>

@@ -127,8 +127,6 @@ public class plasmaCondenser {
 	
     }
 
-    
-
     public static String intString(int number, int length) {
 	String s = "" + number;
 	while (s.length() < length) s = "0" + s;
@@ -323,7 +321,16 @@ public class plasmaCondenser {
 
     }
 
-    public void reconstruct() {
+    public void print() {
+	String[] s = sentences();
+
+	// printout a reconstruction of the text
+	for (int i = 0; i < s.length; i++) {
+	    if (s[i] != null) System.out.print("#T " + intString(i, numlength) + " " + s[i]);
+	}
+    }
+
+    public String[] sentences() {
 	// we reconstruct the word hashtable
 	// and order the entries by the number of the sentence
 	// this structure is only needed to reconstruct the text
@@ -342,20 +349,24 @@ public class plasmaCondenser {
 
 	Object[] orderedSentences = makeOrderedSentences();
 
-	// printout a reconstruction of the text
+	// create a reconstruction of the text
+        String[] result = new String[orderedSentences.length];
+        String s;
 	for (int i = 0; i < orderedSentences.length; i++) {
 	    if (orderedSentences[i] != null) {
-		System.out.print("#T " + intString(i, numlength) + " " + ((String[]) orderedSentences[i])[0] + " ");
+		s = "";
 		for (int j = 2; j < ((String[]) orderedSentences[i]).length; j++) {
-		    System.out.print(" " +
-				     orderedWords[Integer.parseInt(((String[]) orderedSentences[i])[j])]
-				     );
+		    s += " " + orderedWords[Integer.parseInt(((String[]) orderedSentences[i])[j])];
 		}
-		System.out.println(((String[]) orderedSentences[i])[1]);
-	    }
+		s += ((String[]) orderedSentences[i])[1];
+                result[i] = (s.length() > 1) ? s.substring(1) : s;
+	    } else {
+                result[i] = "";
+            }
 	}
+        return result;
     }
-
+        
     private Object[] makeOrderedSentences() {
 	// we reconstruct the sentence hashtable again and create by-handle ordered entries
 	// this structure is needed to present the strings in the right order in a printout
@@ -652,7 +663,7 @@ public class plasmaCondenser {
 	    textStream.close();
 	    // output result
 	    pc.writeMapToFile(new File(args[2]));
-	    pc.reconstruct();
+	    pc.print();
 	    System.out.println("ANALYSIS:" + pc.getAnalysis().toString());
 	} catch (IOException e) {
 	    System.out.println("Problem with input file: " + e.getMessage());

@@ -42,6 +42,8 @@
 
 package de.anomic.plasma;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,6 +67,7 @@ public class plasmaParserDocument {
     Map hyperlinks;
     Map medialinks;
     Map emaillinks;
+    plasmaCondenser condenser;
                     
     public plasmaParserDocument(URL location, String mimeType,
                     String keywords, String shortTitle, String longTitle,
@@ -83,6 +86,7 @@ public class plasmaParserDocument {
         this.hyperlinks = null;
         this.medialinks = null;
         this.emaillinks = null;
+        this.condenser = null;
     }
     
     private String absolutePath(String relativePath) {
@@ -114,10 +118,20 @@ public class plasmaParserDocument {
         return text;
     }
     
+    public plasmaCondenser getCondenser() {
+        if (condenser == null) try {
+            condenser = new plasmaCondenser(new ByteArrayInputStream(getText()), 0, 0);
+        } catch (IOException e) {}
+        return condenser;
+    }
+    
+    public String[] getSentences() {
+        return getCondenser().sentences();
+    }
+    
     public String getKeywords() {
         return this.keywords;
-        
-    }    
+    }
     
     public Map getAnchors() {
         // returns all links embedded as anchors (clickeable entities)

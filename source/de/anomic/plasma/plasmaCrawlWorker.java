@@ -73,7 +73,7 @@ public final class plasmaCrawlWorker extends Thread {
     private int depth;
     private long startdate;
     private plasmaCrawlProfile.entry profile;
-    private String error;
+    //private String error;
     
     private boolean running = false;
     private boolean stopped = false;
@@ -110,7 +110,7 @@ public final class plasmaCrawlWorker extends Thread {
         this.profile = theMsg.profile;
         
         this.startdate = System.currentTimeMillis();        
-        this.error = null;        
+        //this.error = null;        
         
 
         this.done = false;        
@@ -129,7 +129,7 @@ public final class plasmaCrawlWorker extends Thread {
         this.depth = 0;
         this.startdate = 0;
         this.profile = null;
-        this.error = null;        
+        //this.error = null;        
     }
     
     public void run()  {
@@ -177,7 +177,10 @@ public final class plasmaCrawlWorker extends Thread {
     public void execute() throws IOException {
         try {
             this.setName(this.threadBaseName + "_" + this.url);
-            load(this.url, this.referer, this.initiator, this.depth, this.profile);
+            load(this.url, this.referer, this.initiator, this.depth, this.profile,
+                 this.socketTimeout, this.remoteProxyHost, this.remoteProxyPort, this.remoteProxyUse,
+                 this.cacheManager, this.log);
+            
         } catch (IOException e) {
             //throw e;
         }
@@ -186,6 +189,7 @@ public final class plasmaCrawlWorker extends Thread {
         }
     }
 
+    /*
     private httpc newhttpc(String server, int port, boolean ssl) throws IOException {
         // a new httpc connection, combined with possible remote proxy
         if (remoteProxyUse)
@@ -289,7 +293,8 @@ public final class plasmaCrawlWorker extends Thread {
             if (remote != null) httpc.returnInstance(remote);
         }
     }
-
+    */
+    
     public void setStopped(boolean stopped) {
         this.stopped = stopped;           
     }
@@ -298,5 +303,112 @@ public final class plasmaCrawlWorker extends Thread {
         return this.running;
     }
 
+    public static void load(
+            URL url, 
+            String referer, 
+            String initiator, 
+            int depth, 
+            plasmaCrawlProfile.entry profile,
+            int socketTimeout,
+            String remoteProxyHost,
+            int remoteProxyPort,
+            boolean remoteProxyUse,
+            plasmaHTCache cacheManager,
+            serverLog log
+        ) throws IOException {
+        if (url == null) return;
+        Date requestDate = new Date(); // remember the time...
+        String host = url.getHost();
+        String path = url.getPath();
+        int port = url.getPort();
+        boolean ssl = url.getProtocol().equals("https");
+        if (port < 0) port = (ssl) ? 443 : 80;
+    
+        // set referrer; in some case advertise a little bit:
+        referer = (referer == null) ? "" : referer.trim();
+        if (referer.length() == 0) referer = "http://www.yacy.net/yacy/";
+        
+        // take a file from the net
+        httpc remote = null;
+        try {
+            // create a request header
+            httpHeader requestHeader = new httpHeader();
+            requestHeader.put("User-Agent", httpdProxyHandler.userAgent);
+            requestHeader.put("Referer", referer);
+            requestHeader.put("Accept-Encoding", "gzip,deflate");
+    
+            //System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
+                    
+            // open the connection
+            if (remoteProxyUse)
+                remote = httpc.getInstance(host, port, socketTimeout, ssl, remoteProxyHost, remoteProxyPort);
+            else
+                remote = httpc.getInstance(host, port, socketTimeout, ssl);
+            
+            // send request
+            httpc.response res = remote.GET(path, requestHeader);
+                
+            if (res.status.startsWith("200")) {
+                // the transfer is ok
+                long contentLength = res.responseHeader.contentLength();
+                
+                // reserve cache entry
+                plasmaHTCache.Entry htCache = cacheManager.newEntry(requestDate, depth, url, requestHeader, res.status, res.responseHeader, initiator, profile);
+                
+                // request has been placed and result has been returned. work off response
+                File cacheFile = cacheManager.getCachePath(url);
+                try {
+                    String error = null;
+                    if (!(plasmaParser.supportedMimeTypesContains(res.responseHeader.mime()))) {
+                        // if the response has not the right file type then reject file
+                        remote.close();
+                        log.logInfo("REJECTED WRONG MIME TYPE " + res.responseHeader.mime() + " for url " + url.toString());
+                        htCache.status = plasmaHTCache.CACHE_UNFILLED;
+                    } else if ((profile == null) || ((profile.storeHTCache()) && ((error = htCache.shallStoreCache()) == null))) {
+                        // we write the new cache entry to file system directly
+                        cacheFile.getParentFile().mkdirs();
+                        FileOutputStream fos = new FileOutputStream(cacheFile);
+                        htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
+                        fos.close();
+                        htCache.status = plasmaHTCache.CACHE_FILL;
+                    } else {
+                        if (error != null) log.logDebug("CRAWLER NOT STORED RESOURCE " + url.toString() + ": " + error);
+                        // anyway, the content still lives in the content scraper
+                        htCache.cacheArray = res.writeContent(null); // writes only into cacheArray
+                        htCache.status = plasmaHTCache.CACHE_PASSING;
+                    }
+                    // enQueue new entry with response header
+                    if ((initiator == null) || (initiator.length() == 0)) {
+                        // enqueued for proxy writings
+                        cacheManager.stackProcess(htCache);
+                    } else {
+                        // direct processing for crawling
+                        cacheManager.process(htCache);
+                    }
+                } catch (SocketException e) {
+                    // this may happen if the client suddenly closes its connection
+                    // maybe the user has stopped loading
+                    // in that case, we are not responsible and just forget it
+                    // but we clean the cache also, since it may be only partial
+                    // and most possible corrupted
+                    if (cacheFile.exists()) cacheFile.delete();
+                    log.logError("CRAWLER LOADER ERROR1: with url=" + url.toString() + ": " + e.toString());
+                }
+            } else {
+                // if the response has not the right response type then reject file
+                log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for url " + url.toString());
+                // not processed any further
+            }
+            remote.close();
+        } catch (Exception e) {
+            // this may happen if the targeted host does not exist or anything with the
+            // remote server was wrong.
+            log.logError("CRAWLER LOADER ERROR2 with url=" + url.toString() + ": " + e.toString());
+            e.printStackTrace();
+        } finally {
+            if (remote != null) httpc.returnInstance(remote);
+        }
+    }
+    
 }
 
