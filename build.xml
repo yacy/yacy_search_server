@@ -138,13 +138,7 @@
   </javac> 
     
   <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
-  <javac srcdir="${htroot}/" destdir="${htroot}"
-         classpathref="project.class.path"
-         source="${javacSource}" target="${javacTarget}"/>
-  <javac srcdir="${htroot}/htdocsdefault" destdir="${htroot}/htdocsdefault"
-         classpathref="project.class.path"
-         source="${javacSource}" target="${javacTarget}"/>
-  <javac srcdir="${htroot}/yacy" destdir="${htroot}/yacy"
+  <javac srcdir="${htroot}/" 
          classpathref="project.class.path"
          source="${javacSource}" target="${javacTarget}"/>
 </target>
