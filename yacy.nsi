@@ -6,8 +6,11 @@
 ;last major change: 26.03.2005
 Name "YaCy"
 
-OutFile "yacy_v0.37_20050502.exe"
+OutFile "yacy_v0.38_20050603.exe"
 InstallDir $PROGRAMFILES\YaCy
+
+SetCompress auto
+SetCompressor bzip2
 
 InstType /CUSTOMSTRING=Custom
 
@@ -16,7 +19,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.37(Build 20050502) on your computer. Select which optional things you want installed."
+ComponentText "This will install YaCy v0.38(Build 20050603) on your computer. Select which optional things you want installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old Version was installed into another locAtion(eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install in to:"
@@ -32,11 +35,11 @@ Section "Binaries (required)"
 	File "startYACY.bat"
 	File "startYACY_noconsole.bat"
 	File "stopYACY.bat"
-	#File "httpProxy.black"   ##not included
 	#File "httpProxy.command" ##Apple
 	File "yacy.init"
 	#File "httpProxy.sh"      ##UNIX
 	File "yacy.yellow"
+	File "yacy.stopwords"
 	
 	#texts
 	File "readme.txt"
@@ -52,18 +55,29 @@ Section "Binaries (required)"
 	SetOutPath "$INSTDIR\classes"
 	File /r "classes\*"
 
+	#locales
+	SetOutPath "$INSTDIR\locales"
+	File /r "locales\*"
+
 	#htroot non devel
 	SetOutPath "$INSTDIR\htroot"
 	File "htroot\*.html"
 	File "htroot\*.xml"
 	File "htroot\*.rss"
+	File "htroot\*.csv"
 	File "htroot\*.class"
 	File "htroot\*.ico"
+	File "htroot\*.gif"
+	File "htroot\*.pac" #proxy autoconfig
 
 	#yacy non-devel
 	SetOutPath "$INSTDIR\htroot\yacy"
 	File "htroot\yacy\*.html"
 	File "htroot\yacy\*.class"
+
+	#yacy/seedUpload
+	SetOutPath "$INSTDIR\htroot\yacy\seedUpload"
+	File "htroot\yacy\seedUpload\*.html"
 
 	#proxymsg non-devel
 	SetOutPath "$INSTDIR\htroot\proxymsg"
@@ -111,8 +125,8 @@ Section "Development"
 	File /r "source\*"
 
 	SetOutPath $INSTDIR
-	#File "wishlist.txt"
-	#File "compile.bat"
+	File "build.xml"
+	File "build.properties"
 	
 	SetOutPath "$INSTDIR\htroot"
 	File "HTROOT\*.java"
@@ -170,8 +184,10 @@ Section "Uninstall"
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\YACY"
 
 	RMDir /r "$INSTDIR\classes"
+	RMDir /r "$INSTDIR\lib"
 	RMDir /r "$INSTDIR\doc"
 	RMDir /r "$INSTDIR\htroot"
+	RMDir /r "$INSTDIR\locales"
 	RMDir /r "$INSTDIR\source"
 	RMDir /r "$INSTDIR\addon"
 	Delete "$INSTDIR\*.*"
