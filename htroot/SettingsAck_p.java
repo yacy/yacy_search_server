@@ -67,6 +67,7 @@ public class SettingsAck_p {
     
     private static boolean nothingChanged;
 
+    /*
     public static HashMap langMap(serverSwitch env) {
 	String[] ms = env.getConfig("htLocaleLang", "").split(",");
 	HashMap map = new HashMap();
@@ -77,7 +78,8 @@ public class SettingsAck_p {
 	}
 	return map;
     }
-
+    */
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
@@ -224,14 +226,16 @@ public class SettingsAck_p {
         }
         
         if (post.containsKey("generalsettings")) {
-	    // set peer language
+            /*
+            // set peer language
             String peerLang = (String) post.get("peerlang");
             if ((peerLang == null) || (peerLang.equals("en"))) peerLang = "default";
 	    HashMap lm = langMap(env);
 	    if (!(lm.containsKey(peerLang))) peerLang = "default";
 	    env.setConfig("htLocaleSelection", peerLang);
 	    prop.put("info_peerLang", (String) lm.get(peerLang));
-
+            */
+            
             // check if peer name already exists
             String peerName = (String) post.get("peername");
             yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);

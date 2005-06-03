@@ -1218,20 +1218,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                          */
                     //addScoreForked(ref, gs, descr.split(" "));
                     //addScoreForked(ref, gs, urlstring.split("/"));
-                    String snipplet;
+                    String snippet;
                     if (urlstring.matches(urlmask)) { //.* is default
 			prop.put("results_" + i + "_description", descr);
 			prop.put("results_" + i + "_url", urlstring); 
 			prop.put("results_" + i + "_urlname", urlname); 
 			prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
                         prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
-                        snipplet = getSnipplet(url, false, querywords, false);
-                        if ((snipplet == null) || (snipplet.length() < 10)) {
-                            prop.put("results_" + i + "_snipplet", 0);
-                            prop.put("results_" + i + "_snipplet_text", "");
+                        snippet = getSnippet(url, false, querywords, false);
+                        if ((snippet == null) || (snippet.length() < 10)) {
+                            prop.put("results_" + i + "_snippet", 0);
+                            prop.put("results_" + i + "_snippet_text", "");
                         } else {
-                            prop.put("results_" + i + "_snipplet", 1);
-                            prop.put("results_" + i + "_snipplet_text", snipplet);
+                            prop.put("results_" + i + "_snippet", 1);
+                            prop.put("results_" + i + "_snippet_text", snippet);
                         }
                         i++;
                     }
@@ -1299,14 +1299,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 String resource = "";
                 //plasmaIndexEntry pie;
                 plasmaCrawlLURL.entry urlentry;
-                String snipplet;
+                String snippet;
                 while ((acc.hasMoreElements()) && (i < count)) {
                     urlentry = acc.nextElement();
-                    snipplet = getSnipplet(urlentry.url(), false, hashes, true);
-                    if ((snipplet == null) || (snipplet.length() < 10)) {
+                    snippet = getSnippet(urlentry.url(), false, hashes, true);
+                    if ((snippet == null) || (snippet.length() < 10)) {
                         resource = urlentry.toString();
                     } else {
-                        resource = urlentry.toString(snipplet);
+                        resource = urlentry.toString(snippet);
                     }
                     if (resource != null) {
                         links.append("resource").append(i).append("=").append(resource).append(serverCore.crlfString);
@@ -1463,7 +1463,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
     }
     
-    private String getSnipplet(URL url, boolean fetchOnline, Set query, boolean queryAreHashes) {
+    private String getSnippet(URL url, boolean fetchOnline, Set query, boolean queryAreHashes) {
         if (query.size() == 0) return null;
         plasmaParserDocument document = getDocument(url, fetchOnline);
         if (document == null) return null;
@@ -1489,9 +1489,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         Integer maxLine = (Integer) hitTable.getMaxObject();
         if (maxLine == null) return null;
-        String snipplet = sentences[maxLine.intValue()];
-        if (snipplet.length() > 140) return null;
-        return snipplet;
+        String snippet = sentences[maxLine.intValue()];
+        if (snippet.length() > 140) return null;
+        return snippet;
     }
         
     private TreeMap hashMatrix(String[] sentences) {

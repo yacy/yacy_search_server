@@ -42,7 +42,7 @@
 
 /*
     an indexContainer is a bag of indexEntries for a single word
-    such an container represents a RWI snipplet:
+    such an container represents a RWI snippet:
     it collects a new RWI until it is so big that it should be flushed to either
     - an indexAssortment: collection of indexContainers of same size or
     - the backend storage

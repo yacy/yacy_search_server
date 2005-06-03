@@ -28,6 +28,13 @@ globalheader();
 <br><p>
 <ul>
 <li></li>
+  <ul>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  </ul>
 <li></li>
 <li></li>
 <li></li>
@@ -36,6 +43,22 @@ globalheader();
 </ul>
 -->
 
+<br><p>v0.38_build20050603
+<ul>
+<li>Enhanced Crawling:
+  <ul>
+  <li>There are now 3 different crawl threads: local crawling, global crawl trigger and remote-triggered crawl jobs.</li>
+  <li>The thread pools can now be configured through the Performance-Menu and a customized number of crawling threads is possible.</li>
+  <li>Crawling can be paused and resumed.</li>
+  <li>Changed method of index caching; this speeds up crawling and provides a more economic data structure.</li>
+  </ul>
+</li>
+<li>Enhanced Proxy: added transparent proxy support. It is now possible to route http traffic through yacy without setting a proxy configuration in browsers. Example: set your iptables configuration with <br><tt>iptables -t nat -A PREROUTING -p tcp -s 192.168.0.0/16 --dport 80 -j DNAT --to 192.168.0.1:8080</tt></li>
+<li>Extended seed-upload methods for principal peers: more configuration options, better extensibility. Added support for scp.</li>
+<li>More external parsers. YaCy now supports tar, zip, gzip, bzip, rss, rtf, pdf, doc. To use these parsers, an additional libx-library must be installed which comes separately to the YaCy core distribution.</li>
+<li>Enhanced Shutdown procedure: many unnesessary threads had been removed, a shutdown hook had been added. Missing file closings hat been added. The new index caching method flushes the cache faster.</li>
+<li>Added support for localization: it is now possible to extend YaCy with localization data; added languages can be accessed with the new Language-Menu</li>
+</ul>
 
 <br><p>v0.37_build20050502
 <ul>

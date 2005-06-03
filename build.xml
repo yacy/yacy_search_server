@@ -306,6 +306,7 @@
 <!-- make clean -->   
 <target name="clean" description="make clean"> 
   <delete>
+    <fileset dir="${src}" includes="**/*.class" />
     <fileset dir="${build}" includes="**/*.class" />
     <fileset dir="${htroot}" includes="**/*.class" />
   </delete>

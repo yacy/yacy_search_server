@@ -6,13 +6,15 @@ This is free software, and you are welcome to redistribute it
 under certain conditions; see file gpl.txt for details.
 ---------------------------------------------------------------------------
 
-This is a caching http proxy with integrated search engine
-in a p2p environment.
+This is a P2P-based Web Search Engine
+and also a http/https proxy.
+
 The complete documentation can be found inside the 'doc' subdirectory
 in this release. Start browsing the manual by opening the index.html
 file with your web browser.
 
-YOU NEED JAVA 1.4.2 OR LATER TO RUN THIS APPLICATION! PLEASE DOWNLOAD FROM http://java.sun.com
+YOU NEED JAVA 1.4.2 OR LATER TO RUN THIS APPLICATION!
+PLEASE DOWNLOAD JAVA FROM http://java.sun.com
 
 Startup of YaCy:
 
@@ -21,15 +23,15 @@ Startup of YaCy:
 - on Mac OS X     : double-click startYACY.command (alias possible!)
 - on any other OS : set your classpath to the 'classes' folder
                     and execute yacy.class, while your current system
-		        path must target the release directory to access the
+                    path must target the release directory to access the
                     configuration files.
 
-Then start to administrate YaCy by using the applications on-line
-interface: browse to http://localhost:8080, you see your personal
-proxy configuration and administration interface.
+Then start using YaCy with the applications on-line interface:
+browse to http://localhost:8080 where you can see your personal
+search, configuration and administration interface.
 
-Configure your internet connection to use YaCy at port 8080.
-You can also change the default proxy port.
+If you want to use the proxy, simply configure your internet connection
+to use YaCy at port 8080. You can also change the default proxy port.
 
 If you like to use YaCy not as proxy but only as distributed
 crawling/search engine, you can do so.
@@ -45,5 +47,5 @@ feel free to ask the author for a business proposal to customize YaCy
 according to your needs. We also provide integration solutions if the
 software is about to be integrated into your enterprise application.
 
-Germany, Frankfurt a.M., 07.04.2005
+Germany, Frankfurt a.M., 03.05.2005
 Michael Peter Christen

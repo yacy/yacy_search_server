@@ -543,11 +543,11 @@ public class plasmaCrawlLURL extends plasmaURL {
 		    "}";
 	}
 
-	public String toString(String snipplet) {
+	public String toString(String snippet) {
             // add information needed for remote transport
 	    String core = corePropList();
             if (core == null) return null;
-	    return "{" + core + ",snipplet=" + crypt.simpleEncode(snipplet) + "}";
+	    return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
 	}
         
         public String toString() {

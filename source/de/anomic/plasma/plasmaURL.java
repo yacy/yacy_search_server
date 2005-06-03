@@ -81,6 +81,11 @@ public class plasmaURL {
     public static final int urlHostLength               = 8;  // the host as struncated name
     public static final int urlHandleLength             = 4;  // a handle
     
+    
+    /* nw data fields to become valid after migration
+     * age of page at time of load
+     */
+    
     public static String dummyHash;
     static {
         dummyHash = "";
