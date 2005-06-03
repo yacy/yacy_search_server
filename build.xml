@@ -4,10 +4,11 @@
   </description>
  
 <!-- 
-# THIS IS THE YACY MAKE-RELEASE SCRIPT
+# THIS IS THE YACY BUILD SCRIPT
 # YOU CAN USE IT TO COMPILE YOUR OWN RELEASE
 # THE TARGET OF THE COMPILATION CAN BE FOUND
 # IN THE 'RELEASE' DIRECTORY AFTERWARDS
+# YOU NEED APACHE ANT TO USE THIS SCRIPT
 # ==========================================
 # This Software is Copyrighted
 # (C) by Michael Peter Christen; mc@anomic.de
@@ -99,9 +100,11 @@
   <mkdir dir="${data}"/>
   <mkdir dir="${release}"/>
 
-  <filter token="REPL_VERSION" value="${releaseVersion}" />
   <filter token="REPL_DATE" value="${DSTAMP}"/>
+  <filter token="REPL_RELEASE" value="${releaseFile}"/>
+  <filter token="REPL_VERSION" value="${releaseVersion}" />
   <copy file="${src}/yacy.java" tofile="${build}/yacy.java" filtering="true" />
+  <copy file="${doc}/Download.html" tofile="${doc}/Download.html.up" filtering="true" />
 </target>
 
 <target name="compile" depends="init" description="Compiling the yacy sources ...">
@@ -247,7 +250,7 @@
     <include name="killYACY.sh"/>
   </tarfileset>
   
-  <!-- copy Other wrappers -->
+  <!-- copy other wrappers -->
   <tarfileset dir="." dirmode="${accessRightsDir}" mode="${accessRightsFile}" prefix="${releaseDir}">
     <include name="startYACY.command"/>
     <include name="startYACY.bat"/>
@@ -296,6 +299,13 @@
   <tarfileset dir="${addon}" prefix="${releaseDir}/addon" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
     <include name="**/*"/>
   </tarfileset>
+
+  <!-- copy development tools -->
+  <tarfileset dir="." dirmode="${accessRightsDir}" mode="${accessRightsFile}" prefix="${releaseDir}">
+    <include name="build.xml"/>
+    <include name="build.properties"/>
+  </tarfileset>
+
   </tar>
 
   <!-- writing the current release version into a file -->   

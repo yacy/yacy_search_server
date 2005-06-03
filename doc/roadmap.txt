@@ -26,16 +26,17 @@ This is just a vision of the possible evolution of the proxy.
     - blacklist distribution
 
 0.3 distributed hash tables for reverse word indexes
+    - prefetch schemes and local prefetch execution
+    - spider order entry + interface
+    - blacklists / hotlists
     - next p2p-command:
       * 'Tell'       - for information wares distribution
     - establishment of the DHT's structure for all information wares
     - performance of search of RWI's using the DHT's
     - more information ware: L-URL's (loaded-url register) and DHT's
 
-0.4 local proxy prefetch and separate spider
-    - prefetch schemes and local prefetch execution
-    - spider order entry + interface
-    - blacklists / hotlists
+0.4 DHT in place
+    - all peers shall contibute in DHT transfer
     - search patterns
     - search depth
 
