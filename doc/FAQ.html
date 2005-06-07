@@ -25,15 +25,11 @@ Both application parts benefit from each other.</p>
 
 <h3>Why is this Search Engine also a Proxy?</h3>
 <p>
-We wanted to avoid that you start a search service ony for that very time when you submit a search query.
-This would give the Search Engine too less online time.
-So we looked for a cause the you would like to run the Search Engine during all the time that you are online.
-By giving you the additional value of a caching proxy, the reason was found.
-The built-in blacklist (url filter, useful i.e. to block ads) for the proxy is another increase in value.
+We wanted to avoid that you start a search service ony for that very time when you submit a search query. This would give the Search Engine too little online time. So we looked for a cause the you would like to run the Search Engine during all the time that you are online. By giving you the additional value of a caching proxy, the reason was found. The built-in blacklist (url filter, useful i.e. to block ads) for the proxy is another increase in value.
 </p>
 
 <h3>Why is this Proxy also a Search Engine?</h3>
-<p>YaCy has a built-in <i>caching</i> proxy, which means that YaCy has a lot of indexig information
+<p>YaCy has a built-in <i>caching</i> proxy, which means that YaCy has a lot of indexing information
 'for free' without crawling. This may not be a very usual function of a proxy, but a very useful one:
 you see a lot of information when you browse the internet and maybe you would like to search exactly
 only what you have seen. Beside this interesting feature, you can use YaCy to index an intranet
@@ -41,13 +37,13 @@ simply by using the proxy; you don't need to additionally set up another search/
 YaCy gives you an 'instant' database and an 'instant' search service.</p>
 
 <h3>Can I Crawl The Web With YaCy?</h3>
-<p>Yes! You can start your own crawl and you may also trigger distributed crawling, which means that your peer asks other peers to perform specific crawl tasks. You can specify many parameters that focus your crawl to a limited set of web pages.</p>
+<p>Yes! You can start your own crawl and you may also trigger distributed crawling, which means that your own YaCy peer asks other peers to perform specific crawl tasks. You can specify many parameters that focus your crawl to a limited set of web pages.</p>
 
 <h3>What do you mean with 'Global Search Engine'?</h3>
-<p>The integrated indexing and search service can not only be used localy, but also <i>globaly</i>.
-Every proxy distributes some contact information to all other proxies that can be reached in the internet,
+<p>The integrated indexing and search service can not only be used locally, but also <i>globally</i>.
+Each proxy distributes some contact information to all other proxies that can be reached in the internet,
 and proxies exchange <i>but do not copy</i> their indexes to each other.
-This is done in such a way, that every <i>peer</i> knows how to address the correct other
+This is done in such a way, that each <i>peer</i> knows how to address the correct other
 <i>peer</i> to retrieve a special search index.
 Therefore the community of all proxies spawns a <i>distributed hash table</i> (DHT)
 which is used to share the <i>reverse word index</i> (RWI) to all operators and users of the proxies.
@@ -71,7 +67,7 @@ Junior peers can contribute to the network by submitting index files to senior/p
 
 <h3>Search Engines need a lot of terabytes of space, don't they? How much space do I need on my machine?</h3>
 <p>The global index is <i>shared</i>, but not <i>copied</i> to the peers.
-If you run YaCy, you need an average of the same space for the index as you need for the cache.
+If you run YaCy, you need an average of the same disc memory amount for the index as you need for the cache.
 In fact, the global space for the index may reach the space of Terabytes, but not all of that on your machine!</p>
 
 <h3>Search Engines must do crawling, don't they? Do you?</h3>
@@ -107,7 +103,7 @@ Many people prefer to look at news pages every day, and by passing through the p
 <p>No. YaCy contains it's own database engine, which does not need any extra set-up or configuration.</p>
 
 <h3>What kind of database do you use? Is it fast enough?</h3>
-<p>The database stores either tables or property-lists in filed AVL-Trees. These are files with the data structure of height-regulated binary trees. Such a search tree ensures a logarithmic order of computation time. For example a search within an AVL tree with one million entries needs an average of 20 comparisons, and at most 24 in the worst case. This database is therefore extremely fast. It lacks an API like SQL or the LDAP protocol, but it does not need one because it provides a highly specialized database structure. The missing interface pays off with a very small organization overhead, which improves the speed further in comparison to other databases with SQL or LDAP api's. This database is fast enough for millions of indexed web pages, maybe also for billions.</p>
+<p>The database stores either tables or property-lists in files with the structure of AVL-Trees (which are height-regulated binary trees). Such a search tree ensures a logarithmic order of computation time. For example a search within an AVL tree with one million entries needs an average of 20 comparisons, and at most 24 in the worst case. This database is therefore extremely fast. It lacks an API like SQL or the LDAP protocol, but it does not need one because it provides a highly specialized database structure. The missing interface pays off with a very small organization overhead, which improves the speed further in comparison to other databases with SQL or LDAP api's. This database is fast enough for millions of indexed web pages, maybe also for billions.</p>
 
 <h3>Why do you use your own database? Why not use mySQL or openLDAP?</h3>
 <p>The database structure we need is very special. One demand is that the entries can be retrieved in logarithmic time <i>and</i> can be enumerated in any order. Enumeration in a specific order is needed to create conjunctions of tables very fast. This is needed when someone searches for several words. We implement the search word conjunction by pairwise and simultanous enumeration/comparisment of index trees/sequences. This forces us to use binary trees as data structure. Another demand is that we need the ability to have many index tables, maybe <i>millions of tables</i>. The size of the tables may be not big in average, but we need many of them. This is in contrast of the organization of relational databases, where the focus is on management of very large tables, but not of many of them. A third demand is the ease of installation and maintenance: the user shall not be forced to install a RBMS first, care about tablespaces and such. The integrated database is completely service-free.</p>
