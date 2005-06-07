@@ -80,6 +80,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -103,7 +105,7 @@ import de.anomic.yacy.yacyCore;
 public final class yacy {
     
     // static objects
-    private static final String vString = "@REPL_VERSION@";
+    private static String vString = "@REPL_VERSION@";
     private static final String vDATE   = "@REPL_DATE@";
     private static final String copyright = "[ YACY Proxy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
@@ -132,6 +134,34 @@ public final class yacy {
             if (!(dataFolder.exists())) dataFolder.mkdir();
             
             plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
+            
+            // if we are running an SVN version, we try to detect the used svn revision now ...
+            if (vString.equals("@" + "REPL_VERSION" + "@")) {
+                Properties buildProp = new Properties();
+                File buildPropFile = null;
+                try {
+                    buildPropFile = new File(homePath,"build.properties");
+                    buildProp.load(new FileInputStream(buildPropFile));
+                } catch (Exception e) {
+                    System.err.println("ERROR: " + buildPropFile.toString() + " not found in settings path");
+                }
+                
+                try {
+                    if (buildProp.containsKey("releaseNr")) {
+                        // this normally looks like this: $Revision: 181 $
+                        String svnReleaseNrStr = buildProp.getProperty("releaseNr");
+                        Pattern pattern = Pattern.compile("\\$Revision:\\s(.*)\\s\\$",Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
+                        Matcher matcher = pattern.matcher(svnReleaseNrStr);
+                        if (matcher.find()) {
+                            String svrReleaseNr = matcher.group(1);
+                            vString = "SVN " + svrReleaseNr;
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Unable to determine the currently used SVN revision number.");
+                }
+            }
+            
             sb.setConfig("version", vString);
             sb.setConfig("vdate", vDATE);
             sb.setConfig("applicationRoot", homePath);
