@@ -133,9 +133,8 @@ public final class plasmaHTCache {
 	// init cache age and size management
 	cacheAge = new TreeMap();
 	currCacheSize = 0;
-	maxCacheSize = Long.parseLong(switchboard.getConfig("proxyCacheSize", "2")); // this is megabyte
-	maxCacheSize = maxCacheSize * 1024 * 1024; // now it's the number of bytes
-
+	maxCacheSize = 1024 * 1024 * Long.parseLong(switchboard.getConfig("proxyCacheSize", "2")); // this is megabyte
+	
 	// start the cache startup thread
 	// this will collect information about the current cache size and elements
 	serverInstantThread.oneTimeJob(this, "cacheScan", log, 5000);
@@ -157,7 +156,7 @@ public final class plasmaHTCache {
 	    //log.logSystem("STARTING CACHE SCANNING");
             kelondroMScoreCluster doms = new kelondroMScoreCluster();
 	    int c = 0;
-	    enumerateFiles ef = new enumerateFiles(cachePath, true, false, true);
+	    enumerateFiles ef = new enumerateFiles(cachePath, true, false, true, true);
 	    File f;
 	    while (ef.hasMoreElements()) {
 		c++;
@@ -338,8 +337,17 @@ public final class plasmaHTCache {
                     f = (File) cacheAge.remove(cacheAge.firstKey());
                     if (f.exists()) {
                         currCacheSize -= f.length();
-                        f.delete();
-                        log.logInfo("DELETED OLD CACHE : " + f.toString());
+                        if (f.delete()) {
+                            log.logInfo("DELETED OLD CACHE : " + f.toString());
+                            f = f.getParentFile();
+                            if ((f.exists()) && (f.isDirectory())) {
+                                // check size of directory
+                                if (f.list().length == 0) {
+                                    // the directory has no files in it; delete it also
+                                    if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
+                                }
+                            }
+                        }
                     }
                 }
             }

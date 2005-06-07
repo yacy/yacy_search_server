@@ -248,14 +248,14 @@
     <include name="startYACY.sh"/>
     <include name="stopYACY.sh"/>
     <include name="killYACY.sh"/>
+    <include name="startYACY.command"/>
+    <include name="stopYACY.command"/>
   </tarfileset>
   
   <!-- copy other wrappers -->
   <tarfileset dir="." dirmode="${accessRightsDir}" mode="${accessRightsFile}" prefix="${releaseDir}">
-    <include name="startYACY.command"/>
     <include name="startYACY.bat"/>
     <include name="startYACY_noconsole.bat"/>
-    <include name="stopYACY.command"/>
     <include name="stopYACY.bat"/>
   </tarfileset>
 

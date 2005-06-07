@@ -404,7 +404,7 @@ public final class yacy {
         // find all hashes
         serverLog.logInfo("GEN-WORDSTAT", "searching all word-hash databases...");
         File dbRoot = new File(homePath, config.getProperty("dbPath"));
-        enumerateFiles ef = new enumerateFiles(new File(dbRoot, "WORDS"), true, false, true);
+        enumerateFiles ef = new enumerateFiles(new File(dbRoot, "WORDS"), true, false, true, true);
         File f;
         String h;
         kelondroMScoreCluster hs = new kelondroMScoreCluster();

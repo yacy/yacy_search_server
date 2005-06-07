@@ -102,31 +102,44 @@ public class MessageSend_p {
                     yacyCore.peerActions.disconnectPeer(targetPeer);
                 }
 	    } else {
-		// write input form
-		int messagesize = Integer.parseInt((String) result.get("messagesize"));
-		int attachmentsize = Integer.parseInt((String) result.get("attachmentsize"));
-		body += "<p>The peer '" + peerName + "' is alive and responded:<br>";
-		body += "'" + response + " You are allowed to send me a message &le; " + messagesize + " kb and an attachment &le; " + attachmentsize + ".'</p>";
-		body += "<form action=\"MessageSend_p.html\" method=\"post\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\"><br><br>";
-		body += "<p><h3>Your Message</h3></p>";
-		body += "<p>Subject:<br><input name=\"subject\" type=\"text\" size=\"80\" maxlength=\"80\" value=\"" + subject + "\"></p>";
-		body += "<p>Text:<br><textarea name=\"message\" cols=\"80\" rows=\"8\"></textarea></p>";
-		body += "<input type=\"hidden\" name=\"hash\" value=\"" + hash + "\">";
-		body += "<input type=\"hidden\" name=\"messagesize\" value=\"" + messagesize + "\">";
-		body += "<input type=\"hidden\" name=\"attachmentsize\" value=\"" + attachmentsize + "\">";
-		body += "<input name=\"new\" type=\"submit\" value=\"Enter\"></form>";
+                // write input form
+                try {
+                    int messagesize = Integer.parseInt((String) result.get("messagesize"));
+                    int attachmentsize = Integer.parseInt((String) result.get("attachmentsize"));
+                    body += "<p>The peer '" + peerName + "' is alive and responded:<br>";
+                    body += "'" + response + " You are allowed to send me a message &le; " + messagesize + " kb and an attachment &le; " + attachmentsize + ".'</p>";
+                    body += "<form action=\"MessageSend_p.html\" method=\"post\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\"><br><br>";
+                    body += "<p><h3>Your Message</h3></p>";
+                    body += "<p>Subject:<br><input name=\"subject\" type=\"text\" size=\"80\" maxlength=\"80\" value=\"" + subject + "\"></p>";
+                    body += "<p>Text:<br><textarea name=\"message\" cols=\"80\" rows=\"8\"></textarea></p>";
+                    body += "<input type=\"hidden\" name=\"hash\" value=\"" + hash + "\">";
+                    body += "<input type=\"hidden\" name=\"messagesize\" value=\"" + messagesize + "\">";
+                    body += "<input type=\"hidden\" name=\"attachmentsize\" value=\"" + attachmentsize + "\">";
+                    body += "<input name=\"new\" type=\"submit\" value=\"Enter\"></form>";
+                } catch (NumberFormatException e) {
+                    // "unresolved pattern", the remote peer is alive but had an exception
+                    body += "<p>The peer '" + peerName + "' is alive but cannot respond. Sorry..</p>";
+                }
 	    }
 	} else {
-	    // send written message to peer
-	    int messagesize = Integer.parseInt(post.get("messagesize", "0"));
-	    int attachmentsize = Integer.parseInt(post.get("attachmentsize", "0"));
-
-	    if (messagesize < 1000) messagesize = 1000; // debug
-	    if (subject.length() > 100) subject = subject.substring(0, 100);
-	    if (message.length() > messagesize) message = message.substring(0, messagesize);
-	    HashMap result = yacyClient.postMessage(hash, subject, message.getBytes());
-	    body += "<p>Your message has been send. The target peer respondet:</p>";
-	    body += "<p><i>" + result.get("response") + "</i></p>";
+	// send written message to peer
+            try {
+                int messagesize = Integer.parseInt(post.get("messagesize", "0"));
+                int attachmentsize = Integer.parseInt(post.get("attachmentsize", "0"));
+                
+                if (messagesize < 1000) messagesize = 1000; // debug
+                if (subject.length() > 100) subject = subject.substring(0, 100);
+                if (message.length() > messagesize) message = message.substring(0, messagesize);
+                HashMap result = yacyClient.postMessage(hash, subject, message.getBytes());
+                body += "<p>Your message has been send. The target peer respondet:</p>";
+                body += "<p><i>" + result.get("response") + "</i></p>";
+            } catch (NumberFormatException e) {
+                // "unresolved pattern", the remote peer is alive but had an exception
+                body += "<p>The target peer is alive but did not receive your message. Sorry..</p>";
+                body += "<p>Here is a copy of your message, so you can copy it to save it for further attempts:<br>";
+                body += message;
+                body += "</p>";
+            }
 	}
 
 	// return rewrite properties

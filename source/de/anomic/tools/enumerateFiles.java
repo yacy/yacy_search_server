@@ -55,21 +55,23 @@ public class enumerateFiles implements Enumeration {
     private Object buffer;       // the prefetch-buffer
     private boolean return_files;
     private boolean return_folders;
+    private boolean delete_emptyFolders;
     
-    public enumerateFiles(File root, boolean files, boolean folders, boolean increasing) {
+    public enumerateFiles(File root, boolean files, boolean folders, boolean increasing, boolean deleteEmptyFolders) {
         // we define our data structures first
-        return_files = files;
-        return_folders = folders;
-        hierarchy = new ArrayList();
-        incOrder = increasing;
+        this.return_files = files;
+        this.return_folders = folders;
+        this.delete_emptyFolders = deleteEmptyFolders;
+        this.hierarchy = new ArrayList();
+        this.incOrder = increasing;
         // the we initially fill the hierarchy with the content of the root folder
         TreeSet t = new TreeSet();
         String[] l = root.list();
         // System.out.println("D " + l.toString());
         for (int i = 0; i < l.length; i++) t.add(new File(root, l[i]));
-        hierarchy.add(t);
+        this.hierarchy.add(t);
         // start with search by filling the buffer
-        buffer = nextElement0();
+        this.buffer = nextElement0();
     }
     
     private Object nextElement0() {
@@ -94,9 +96,18 @@ public class enumerateFiles implements Enumeration {
             if (f.isDirectory()) {
                 t = new TreeSet();
                 String[] l = f.list();
-                for (int i = 0; i < l.length; i++) t.add(new File(f, l[i]));
-                hierarchy.add(t);
-                if (!(return_folders)) f = null;
+                if (l.length == 0) {
+                    if (delete_emptyFolders) {
+                        f.delete();
+                        f = null;
+                    } else {
+                        if (!(return_folders)) f = null;
+                    }
+                } else {
+                    for (int i = 0; i < l.length; i++) t.add(new File(f, l[i]));
+                    hierarchy.add(t);
+                    if (!(return_folders)) f = null;
+                }
             } else {
                 if (!(return_files)) f = null;
             }
