@@ -147,7 +147,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         // wait for termination
         if (waitFor) {
             // Busy waiting removed: while (this.isAlive()) try {this.sleep(100);} catch (InterruptedException e) {break;}
-            try { this.join(); } catch (InterruptedException e) {return;}
+            try { this.join(3000); } catch (InterruptedException e) {return;}
         }
             
         // If we reach this point, the process is closed

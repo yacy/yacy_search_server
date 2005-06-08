@@ -141,7 +141,8 @@ public final class plasmaCrawlLoader extends Thread {
 	        this.interrupt();
 	        
 	        // waiting for the thread to finish ...
-	        this.join();
+            this.log.logInfo("Waiting for plasmaCrawlLoader shutdown ...");
+	        this.join(5000);            
         } catch (Exception e) {
             // we where interrupted while waiting for the crawlLoader Thread to finish
         }
