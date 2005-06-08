@@ -334,7 +334,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // deploy threads
         log.logSystem("Starting Threads");
-        int indexing_cluster = Integer.parseInt(getConfig("?80_indexing_cluster", "1"));
+        int indexing_cluster = Integer.parseInt(getConfig("80_indexing_cluster", "1"));
         if (indexing_cluster < 1) indexing_cluster = 1;
         deployThread("90_cleanup", "Cleanup", "simple cleaning process for monitoring information" ,
                      new serverInstantThread(this, "cleanupJob", "cleanupJobSize"), 10000); // all 5 Minutes
@@ -468,7 +468,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public int totalSize() {
 	return processStack.size() + cacheLoader.size() + noticeURL.stackSize();
     }
-*/
+    */
     
     public int queueSize() {
         return queueStack.size();
@@ -491,22 +491,26 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public boolean deQueue() {
 	// work off fresh entries from the proxy or from the crawler
 
-	if (queueStack.size() == 0) {
-	    //log.logDebug("DEQUEUE: queue is empty");
-	    return false; // nothing to do
-	}
-
-	// in case that the server is very busy we do not work off the queue too fast
-	if (!(cacheManager.idle())) try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
-	
-	// do one processing step
-	log.logDebug("DEQUEUE: cacheManager=" + ((cacheManager.idle()) ? "idle" : "busy") +
-		     ", queueStack=" + queueStack.size() +
-		     ", coreStackSize=" + noticeURL.coreStackSize() +
-		     ", limitStackSize=" + noticeURL.limitStackSize() +
-		     ", overhangStackSize=" + noticeURL.overhangStackSize() +
-		     ", remoteStackSize=" + noticeURL.remoteStackSize());
-	processResourceStack((plasmaHTCache.Entry) queueStack.removeFirst());
+        plasmaHTCache.Entry nextentry;
+        synchronized (queueStack) {
+            if (queueStack.size() == 0) {
+                //log.logDebug("DEQUEUE: queue is empty");
+                return false; // nothing to do
+            }
+            
+            // in case that the server is very busy we do not work off the queue too fast
+            if (!(cacheManager.idle())) try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
+            
+            // do one processing step
+            log.logDebug("DEQUEUE: cacheManager=" + ((cacheManager.idle()) ? "idle" : "busy") +
+            ", queueStack=" + queueStack.size() +
+            ", coreStackSize=" + noticeURL.coreStackSize() +
+            ", limitStackSize=" + noticeURL.limitStackSize() +
+            ", overhangStackSize=" + noticeURL.overhangStackSize() +
+            ", remoteStackSize=" + noticeURL.remoteStackSize());
+            nextentry = (plasmaHTCache.Entry) queueStack.removeFirst();
+        }
+	processResourceStack(nextentry);
 	return true;
     }
     

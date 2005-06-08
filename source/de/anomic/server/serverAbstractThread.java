@@ -195,7 +195,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 // do job
                 timestamp = System.currentTimeMillis();
                 isBusy = this.job();
-                busytime += System.currentTimeMillis() - timestamp;
+                busytime += (isBusy) ? System.currentTimeMillis() - timestamp : 0;
                 // interrupt loop if this is supposed to be a one-time job
                 if ((this.idlePause < 0) || (this.busyPause < 0)) break; // for one-time jobs
                 // process scheduled pause
