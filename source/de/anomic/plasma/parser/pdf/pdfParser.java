@@ -93,10 +93,12 @@ public class pdfParser extends AbstractParser implements Parser {
         PDDocument theDocument = null;
         OutputStreamWriter writer = null;
         try {       
+            // reducing thread priority
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);                        
             
             // deactivating the logging for jMimeMagic
-            Logger theLogger = Logger.getLogger("org.pdfbox");
-            theLogger.setLevel(Level.INFO);            
+//            Logger theLogger = Logger.getLogger("org.pdfbox");
+//            theLogger.setLevel(Level.INFO);            
             
             String docTitle = null, docSubject = null, docAuthor = null, docKeyWords = null;
             
@@ -159,6 +161,7 @@ public class pdfParser extends AbstractParser implements Parser {
         } finally {
             if (theDocument != null) try { theDocument.close(); } catch (Exception e) {}
             if (writer != null) try { writer.close(); } catch (Exception e) {}
+            Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
         }
     }
     
