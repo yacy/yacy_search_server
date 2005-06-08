@@ -209,10 +209,10 @@ public class IndexCreate_p {
         prop.put("xdstopwChecked", env.getConfig("xdstopw", "").equals("true") ? 1 : 0);
         prop.put("xpstopwChecked", env.getConfig("xpstopw", "").equals("true") ? 1 : 0);
         
-        int processStackSize = switchboard.processStack.size();
+        int queueStackSize = switchboard.queueStack.size();
         int loaderThreadsSize = switchboard.cacheLoader.size();
         int crawlerListSize = switchboard.noticeURL.stackSize();
-        int completequeue = processStackSize + loaderThreadsSize + crawlerListSize;
+        int completequeue = queueStackSize + loaderThreadsSize + crawlerListSize;
         
         if ((completequeue > 0) || ((post != null) && (post.containsKey("refreshpage")))) {
             prop.put("refreshbutton", 1);
@@ -318,15 +318,15 @@ public class IndexCreate_p {
                 
                 yacySeed initiator;
                 
-                if (switchboard.processStack.size() == 0) {
+                if (switchboard.queueStack.size() == 0) {
                     prop.put("indexing-queue", 0); //is empty
                 } else {
                     prop.put("indexing-queue", 1);
-                    prop.put("indexing-queue_num", switchboard.processStack.size());//num entries in queue
+                    prop.put("indexing-queue_num", switchboard.queueStack.size());//num entries in queue
                     dark = true;
                     plasmaHTCache.Entry pcentry;
-                    for (i = 0; i < switchboard.processStack.size(); i++) {
-                        pcentry = (plasmaHTCache.Entry) switchboard.processStack.get(i);
+                    for (i = 0; i < switchboard.queueStack.size(); i++) {
+                        pcentry = (plasmaHTCache.Entry) switchboard.queueStack.get(i);
                         if (pcentry != null) {
                             initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                             prop.put("indexing-queue_list_"+i+"_dark", ((dark) ? 1 : 0));

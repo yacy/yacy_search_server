@@ -1,5 +1,5 @@
 // ProxyIndexingMonitor_p.java 
-// -----------------------
+// ---------------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de

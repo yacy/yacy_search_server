@@ -420,10 +420,19 @@ xpstopw=true
 62_remotetriggeredcrawl_busysleep=0
 70_cachemanager_idlesleep=10000
 70_cachemanager_busysleep=0
-80_dequeue_idlesleep=10000
-80_dequeue_busysleep=0
+80_indexing_idlesleep=10000
+80_indexing_busysleep=0
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
+
+# multiprocessor-settings
+# you may want to run time-consuming processes on several processors
+# the most time-consuming process is the indexing-Process
+# We implemented an option to run several of these processes here
+# setting the number of processes to Zero is not allowed
+# If you have a double-processor system,
+# a cluster value of '2' would be appropriate
+80_indexing_cluster=1
 
 # ram cache for database files
 
