@@ -83,7 +83,7 @@ public final class plasmaHTCache {
     public  long currCacheSize;
     public  long maxCacheSize;
     private long lastAcc;
-    private final File cachePath;
+    public  final File cachePath;
     public  static serverLog log;
 
     public static final int CACHE_UNFILLED          = 0; // default case without assignment

@@ -181,7 +181,7 @@ public class Status {
         try {
             long mins = Long.parseLong(minsAsString);
             
-            StringBuilder uptime = new StringBuilder();
+            StringBuffer uptime = new StringBuffer();
             
             int uptimeDays  = (int) (Math.floor(mins/1440));
             int uptimeHours = (int) (Math.floor(mins/60)%24);
@@ -189,7 +189,7 @@ public class Status {
             
             uptime.append(uptimeDays)
                   .append(((uptimeDays == 1)?" day ":" days "))
-                   .append((uptimeHours < 10)?"0":"")
+                  .append((uptimeHours < 10)?"0":"")
                   .append(uptimeHours)
                   .append(":")
                   .append((uptimeMins < 10)?"0":"")

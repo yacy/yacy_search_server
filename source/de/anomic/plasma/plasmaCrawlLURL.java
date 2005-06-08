@@ -333,6 +333,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 	private char   doctype;
 	private long   size;
 	private int    wordCount;
+        private String snippet;
 
 	public entry(URL url, String descr, Date moddate, Date loaddate,
 		     String referrerHash, int copyCount, boolean localNeed,
@@ -351,6 +352,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 	    this.doctype = doctype;
 	    this.size = size;
 	    this.wordCount = wordCount;
+            this.snippet = null;
 	    store();
 	}
 
@@ -378,6 +380,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 		    this.doctype = (char) entry[10][0];
 		    this.size = (long) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[11]));
 		    this.wordCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[12]));
+                    this.snippet = null;
 		    return;
 		}
 	    } catch (Exception e) {
@@ -409,6 +412,8 @@ public class plasmaCrawlLURL extends plasmaURL {
 		    this.doctype = prop.getProperty("dt", "t").charAt(0);
 		    this.size = Long.parseLong(prop.getProperty("size", "0"));
 		    this.wordCount = Integer.parseInt(prop.getProperty("wc", "0"));
+                    this.snippet = prop.getProperty("snippet", "");
+                    if (snippet.length() == 0) snippet = null; else snippet = crypt.simpleDecode(snippet, null);
 		    store();
 		    //}
 	    } catch (Exception e) {
@@ -507,6 +512,12 @@ public class plasmaCrawlLURL extends plasmaURL {
 	    return wordCount;
 	}
 
+        public String snippet() {
+            // the snippet may appear here if the url was transported in a remote search
+            // it will not be saved anywhere, but can only be requested here
+            return snippet;
+        }
+        
         private String corePropList() {
             // generate a parseable string; this is a simple property-list
             try {
