@@ -43,6 +43,8 @@ package de.anomic.server;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import de.anomic.server.logging.serverLog;
+
 public final class serverInstantThread extends serverAbstractThread implements serverThread {
     
     private Method jobExecMethod, jobCountMethod;

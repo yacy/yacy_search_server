@@ -54,6 +54,8 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.TreeMap;
 
+import de.anomic.server.logging.serverLog;
+
 public abstract class serverAbstractSwitch implements serverSwitch {
 
     // configuration management

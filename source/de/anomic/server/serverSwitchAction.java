@@ -40,6 +40,8 @@
 
 package de.anomic.server;
 
+import de.anomic.server.logging.serverLog;
+
 public interface serverSwitchAction {
 
     // --------------------------------------------------------------------------
