@@ -43,9 +43,11 @@
 // javac -classpath .:../Classes Status.java
 // if the shell's current path is HTROOT
 
-import java.util.Properties;
+import java.text.DecimalFormat;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpdByteCountInputStream;
+import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -168,9 +170,13 @@ public class Status {
 
     // memory usage
     Runtime rt = Runtime.getRuntime();
-    prop.put("freeMemory", Long.toString(rt.freeMemory()));
-    prop.put("totalMemory", Long.toString(rt.totalMemory()));
-    prop.put("maxMemory", Long.toString(rt.maxMemory()));  
+    prop.put("freeMemory", bytesToString(rt.freeMemory()));
+    prop.put("totalMemory", bytesToString(rt.totalMemory()));
+    prop.put("maxMemory", bytesToString(rt.maxMemory()));  
+    
+    // proxy traffic
+    prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
+    prop.put("trafficOut",bytesToString(httpdByteCountOutputStream.getGlobalCount()));
     
     // return rewrite properties
 	return prop;
@@ -199,6 +205,32 @@ public class Status {
         } catch (Exception e) {
             return "unknown";
         }
+    }
+    
+    public static String bytesToString(long byteCount) {  
+        try {
+            StringBuffer byteString = new StringBuffer();
+            
+            DecimalFormat df = new DecimalFormat( "0.00" );
+            if (byteCount > 1073741824) {                
+                byteString.append(df.format((double)byteCount / (double)1073741824 ))
+                          .append(" GB");
+            } else if (byteCount > 1048576) {
+                byteString.append(df.format((double)byteCount / (double)1048576))
+                          .append(" MB");              
+            } else if (byteCount > 1024) {
+                byteString.append(df.format((double)byteCount /(double)1024))
+                          .append(" KB");             
+            } else {
+                byteString.append(Long.toString(byteCount))
+                .append(" Bytes");                
+            }
+            
+            return byteString.toString();       
+        } catch (Exception e) {
+            return "unknown";
+        }        
+        
     }
 
 }
