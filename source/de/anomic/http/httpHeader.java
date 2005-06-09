@@ -67,7 +67,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 
 public final class httpHeader extends TreeMap implements Map {
 
@@ -90,6 +90,7 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
     public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
     public static final String PROXY_AUTHENTICATE = "Proxy-Authenticate";
+    public static final String PROXY_CONNECTION = "Proxy-Connection";
     public static final String DATE = "Date";
     public static final String SERVER = "Server";
     public static final String LAST_MODIFIED = "Last-modified";
@@ -103,7 +104,14 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String CONTENT_RANGE = "Content-Range";
     public static final String RANGE = "Range";
     public static final String CACHE_CONTROL = "Cache-Control";
-
+    public static final String TRANSFER_ENCODING = "Transfer-Encoding";
+    
+    public static final String X_CACHE = "X-Cache";
+    public static final String X_CACHE_LOOKUP = "X-Cache-Lookup";
+    
+    public static final String X_YACY_KEEP_ALIVE_REQUEST_COUNT = "X-Keep-Alive-Request-Count";
+    public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
+    
     /* =============================================================
      * Constants defining http methods
      * ============================================================= */
@@ -112,11 +120,63 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String METHOD_POST = "POST";
     public static final String METHOD_CONNECT = "CONNECT";    
     
-    
+    /* =============================================================
+     * defining default http status messages
+     * ============================================================= */
+    public static final HashMap http0_9 = new HashMap();
+    public static final HashMap http1_0 = new HashMap();
+    static {
+        http1_0.putAll(http0_9);
+        http1_0.put("200","OK");
+        http1_0.put("201","Created");
+        http1_0.put("202","Accepted");
+        http1_0.put("204","No Content");
+        http1_0.put("300","Multiple Choices");
+        http1_0.put("301","Moved Permanently");
+        http1_0.put("302","Moved Temporarily");
+        http1_0.put("304","Not Modified");
+        http1_0.put("400","Bad Request");
+        http1_0.put("401","Unauthorized");
+        http1_0.put("403","Forbidden");
+        http1_0.put("404","Not Found");
+        http1_0.put("500","Internal Server Error");
+        http1_0.put("501","Not Implemented");
+        http1_0.put("502","Bad Gateway");
+        http1_0.put("503","Service Unavailable");        
+    }
+    public static final HashMap http1_1 = new HashMap(); 
+    static {
+        http1_1.putAll(http1_0);
+        http1_1.put("100","Continue");
+        http1_1.put("101","Switching Protocols");
+        http1_1.put("203","Non-Authoritative Information");
+        http1_1.put("205","Reset Content");
+        http1_1.put("206","Partial Content");
+        http1_1.put("300","Multiple Choices");
+        http1_1.put("303","See Other");
+        http1_1.put("305","Use Proxy");
+        http1_1.put("307","Temporary Redirect");
+        http1_1.put("402","Payment Required");
+        http1_1.put("405","Method Not Allowed");
+        http1_1.put("406","Not Acceptable");
+        http1_1.put("407","Proxy Authentication Required");
+        http1_1.put("408","Request Time-out");
+        http1_1.put("409","Conflict");
+        http1_1.put("410","Gone");
+        http1_1.put("411","Length Required");
+        http1_1.put("412","Precondition Failed");
+        http1_1.put("413","Request Entity Too Large");
+        http1_1.put("414","Request-URI Too Large");
+        http1_1.put("415","Unsupported Media Type");
+        http1_1.put("416","Requested range not satisfiable");
+        http1_1.put("417","Expectation Failed");
+        http1_1.put("504","Gateway Time-out");
+        http1_1.put("505","HTTP Version not supported");        
+    }
     
     private final HashMap reverseMappingCache;
 
-    private static Collator insensitiveCollator = Collator.getInstance(Locale.US);
+    private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
     static {
 	insensitiveCollator.setStrength(Collator.SECONDARY);
 	insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
@@ -271,16 +331,6 @@ public final class httpHeader extends TreeMap implements Map {
         if (containsKey(kind)) return parseHTTPDate((String) get(kind));
         else return null;
     }
-
-    private static boolean isTextType(String type) {
-        return ((type != null)  &&
-		((type.startsWith("text/html")) || (type.startsWith("text/plain")))
-		);
-    }
-    
-    public boolean isTextType() {
-        return isTextType(mime());
-    }
     
     public String mime() {
         return (String) get(httpHeader.CONTENT_TYPE, "application/octet-stream");
@@ -319,6 +369,11 @@ public final class httpHeader extends TreeMap implements Map {
         }
     }
 
+    public boolean acceptGzip() {
+        return ((containsKey(httpHeader.ACCEPT_ENCODING)) &&
+                (((String) get(httpHeader.ACCEPT_ENCODING)).toUpperCase().indexOf("GZIP")) != -1);        
+    }
+    
     public boolean gzip() {
         return ((containsKey(httpHeader.CONTENT_ENCODING)) &&
 		(((String) get(httpHeader.CONTENT_ENCODING)).toUpperCase().startsWith("GZIP")));
