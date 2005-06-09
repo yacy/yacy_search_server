@@ -479,3 +479,6 @@ maxWaitingWordFlush = 180
 # and goes to any webserver listening on port 80 will be forwarded
 # by the firewall to yacy running on port 8080 (192.168.0.1:8080)
 isTransparentProxy=false
+
+# Specifies if yacy should use the http connection keep-alive feature
+connectionKeepAliveSupport=false
