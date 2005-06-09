@@ -56,7 +56,7 @@ import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 
 public class plasmaCrawlNURL extends plasmaURL {

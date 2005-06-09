@@ -63,7 +63,7 @@ import java.util.Properties;
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverObjects;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;

@@ -50,8 +50,8 @@ import java.util.Hashtable;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
-import de.anomic.server.serverLog;
 import de.anomic.server.serverSemaphore;
+import de.anomic.server.logging.serverLog;
 
 public final class plasmaCrawlLoader extends Thread {
 
@@ -142,7 +142,7 @@ public final class plasmaCrawlLoader extends Thread {
 	        
 	        // waiting for the thread to finish ...
             this.log.logInfo("Waiting for plasmaCrawlLoader shutdown ...");
-	        this.join(5000);            
+	        this.join(5000);  
         } catch (Exception e) {
             // we where interrupted while waiting for the crawlLoader Thread to finish
         }

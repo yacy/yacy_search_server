@@ -63,6 +63,7 @@ package de.anomic.plasma;
 import java.io.*;
 import java.util.*;
 import de.anomic.server.*;
+import de.anomic.server.logging.serverLog;
 import de.anomic.kelondro.*;
 
 public class plasmaWordIndexClassicCacheMigration {
@@ -123,7 +124,7 @@ public class plasmaWordIndexClassicCacheMigration {
         try {
             return indexCache.rows(true, false, null);
         } catch (kelondroException e) {
-            de.anomic.server.serverLog.logError("PLASMA", "kelondro error in plasmaWordIndexFileCache: " + e.getMessage());
+            de.anomic.server.logging.serverLog.logError("PLASMA", "kelondro error in plasmaWordIndexFileCache: " + e.getMessage());
             return new HashSet().iterator();
         }
     }

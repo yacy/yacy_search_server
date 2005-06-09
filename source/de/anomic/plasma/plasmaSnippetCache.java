@@ -49,7 +49,7 @@ import java.net.URL;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 import de.anomic.http.httpHeader;
 import de.anomic.yacy.yacySearch;
 

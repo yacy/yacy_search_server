@@ -56,7 +56,7 @@ import java.io.*;
 import java.util.*;
 import java.lang.RuntimeException;
 import de.anomic.kelondro.*;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexAssortment {
     

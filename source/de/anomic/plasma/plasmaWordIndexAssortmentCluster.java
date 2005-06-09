@@ -49,7 +49,7 @@ package de.anomic.plasma;
 import java.io.File;
 import java.util.*;
 import de.anomic.kelondro.*;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexAssortmentCluster {
     

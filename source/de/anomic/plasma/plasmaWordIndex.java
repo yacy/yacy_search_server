@@ -55,7 +55,7 @@ import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndex {
     

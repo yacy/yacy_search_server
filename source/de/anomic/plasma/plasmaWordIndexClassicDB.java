@@ -47,7 +47,7 @@ import java.io.IOException;
 import java.util.*;
 
 import de.anomic.kelondro.*;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
 public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
