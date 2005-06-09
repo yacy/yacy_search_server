@@ -49,7 +49,6 @@
 
 package de.anomic.http;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -82,9 +81,10 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverLog;
 import de.anomic.server.serverObjects;
+import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCore.Session;
+
 
 public final class httpc {
 
@@ -126,6 +126,8 @@ public final class httpc {
         java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
     }
     
+
+    
     /**
      * A Object Pool containing all pooled httpc-objects.
      * @see httpcPool
@@ -164,6 +166,11 @@ public final class httpc {
      */
     final serverByteBuffer readLineBuffer = new serverByteBuffer();
     
+    public String toString() {
+        return (this.savedRemoteHost == null) ? "Disconnected" : "Connected to " + this.savedRemoteHost +  
+               ((this.remoteProxyUse) ? " via " + this.host : "");
+    }
+
     public static httpc getInstance(
             String server, 
             int port, 
@@ -371,9 +378,10 @@ public final class httpc {
 
 	// header information
 	public httpHeader responseHeader = null;
+    public String httpVer = "HTTP/0.9";
 	public String status; // the success/failure response string starting with status-code
 	private boolean gzip; // for gunzipping on-the-fly
-        private long gzipLength; // zipped-length of the response
+    private String encoding;
 
 	public response(boolean zipped) throws IOException {
 
@@ -390,7 +398,7 @@ public final class httpc {
 	    }
 
 	    // reads in the http header, right now, right here
-	    byte[] b = serverCore.receive(clientInput, readLineBuffer, timeout, terminalMaxLength, false);
+	    byte[] b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false);
 	    if (b == null) {
 		// the server has meanwhile disconnected
 		status = "503 server has closed connection";
@@ -402,9 +410,12 @@ public final class httpc {
 	    if (p < 0) {
 		status = "500 status line parse error";
 		// flush in anything that comes without parsing
-		while ((b = serverCore.receive(clientInput, readLineBuffer, timeout, terminalMaxLength, false)).length != 0) {}
+		while ((b != null) && (b.length != 0)) b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false); 
 		return; // in bad mood
 	    }
+        // the http version reported by the server
+        this.httpVer = buffer.substring(0,p); 
+        
 	    // we have a status
 	    status = buffer.substring(p + 1).trim(); // the status code plus reason-phrase
 
@@ -412,13 +423,13 @@ public final class httpc {
 	    if (status.startsWith("400")) {
 		// bad request
 		// flush in anything that comes without parsing
-		while ((b = serverCore.receive(clientInput, readLineBuffer, timeout, terminalMaxLength, false)).length != 0) {}
+		while ((b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false)).length != 0) {}
 		return; // in bad mood
 	    }
 
 	    // at this point we should have a valid response. read in the header properties
 	    String key = "";
-	    while ((b = serverCore.receive(clientInput, readLineBuffer, timeout, terminalMaxLength, false)) != null) {
+	    while ((b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false)) != null) {
 		if (b.length == 0) break;
 		buffer = new String(b);
 		//System.out.println("#H#" + buffer); // debug
@@ -446,19 +457,18 @@ public final class httpc {
 	    gzip = ((zipped) && (responseHeader.gzip()));
                 
 	    if (gzip) {
-		// change attributes in case of gzip decoding
-                gzipLength = responseHeader.contentLength();
-		responseHeader.remove("CONTENT-ENCODING"); // we fake that we don't have encoding, since what comes out does not have gzip and we also don't know what was encoded
-                responseHeader.remove("CONTENT-LENGTH"); // we cannot use the length during gunzippig yet; still we can hope that it works
-	    } else {
-                gzipLength = -1;
-            }
-
-            //System.out.println("###incoming header: " + responseHeader.toString());
-            
-	    // the body must be read separately by the get/writeContent methods
-	    //System.out.println("## connection is " + ((socket.isClosed()) ? "closed" : "open") + ".");
-	}
+            responseHeader.remove("CONTENT-ENCODING"); // we fake that we don't have encoding, since what comes out does not have gzip and we also don't know what was encoded
+            responseHeader.remove("CONTENT-LENGTH"); // we cannot use the length during gunzippig yet; still we can hope that it works
+	    }
+    }
+    
+    public String toString() {
+        StringBuffer toStringBuffer = new StringBuffer();
+        toStringBuffer.append((this.status == null) ? "Status: Unknown" : "Status: " + this.status)
+                      .append(" | Headers: ")
+                      .append((this.responseHeader == null) ? "none" : this.responseHeader.toString());
+        return toStringBuffer.toString();
+    }
 
 	public boolean success() {
 	    return ((status.charAt(0) == '2') || (status.charAt(0) == '3'));
@@ -486,81 +496,54 @@ public final class httpc {
         }
 	}
 
-	public void writeContentX(OutputStream procOS, OutputStream bufferOS, InputStream clientInput) throws IOException {
-	    // we write length bytes, but if length == -1 (or < 0) then we
-	    // write until the input stream closes
-	    // procOS == null -> no write to procOS
-	    // file == null -> no write to file
-	    // If the Content-Encoding is gzip, we gunzip on-the-fly
-	    // and change the Content-Encoding and Content-Length attributes in the header
-	    byte[] buffer = new byte[2048];
-	    int l;
-            long len = 0;
-                
-	    // find out length
-	    long length = responseHeader.contentLength();
-
-	    // we have three methods of reading: length-based, length-based gzip and connection-close-based
-	    if (length > 0) {
-		// we read exactly 'length' bytes
-		try {
-                    while ((len < length) && ((l = clientInput.read(buffer)) >= 0)) {
-                        if (procOS != null) procOS.write(buffer, 0, l);
-                        if (bufferOS != null) bufferOS.write(buffer, 0, l);
-                        len += l;
-                    }
-                } catch (java.net.SocketException e) {
-                    // this is an error:
-                    throw new IOException("Socket exception: " + e.getMessage());
-                } catch (java.net.SocketTimeoutException e) {
-                    // this is an error:
-                    throw new IOException("Socket time-out: " + e.getMessage());
-                }
-            } else if ((gzip) && (gzipLength > 0) && (gzipLength < 100000)) {
-                //System.out.println("PERFORMING NEW GZIP-LENGTH-BASED HTTPC: gzipLength=" + gzipLength); // DEBUG
-                // we read exactly 'gzipLength' bytes; first copy into buffer:
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                while ((len < gzipLength) && ((l = clientInput.read(buffer)) >= 0)) {
-                    baos.write(buffer, 0, l);
+    public void writeContentX(OutputStream procOS, OutputStream bufferOS, InputStream clientInput) throws IOException {
+        // we write length bytes, but if length == -1 (or < 0) then we
+        // write until the input stream closes
+        // procOS == null -> no write to procOS
+        // file == null -> no write to file
+        // If the Content-Encoding is gzip, we gunzip on-the-fly
+        // and change the Content-Encoding and Content-Length attributes in the header
+        byte[] buffer = new byte[2048];
+        int l;
+        long len = 0;
+        
+        // find out length
+        long length = this.responseHeader.contentLength();
+        
+        // using the proper intput stream
+        InputStream dis = (this.gzip) ? (InputStream) new GZIPInputStream(clientInput) : (InputStream) clientInput;
+        
+        // we have three methods of reading: length-based, length-based gzip and connection-close-based
+        try {
+            if (length > 0) {
+                // we read exactly 'length' bytes
+                while ((len < length) && ((l = dis.read(buffer)) >= 0)) {
+                    if (procOS != null) procOS.write(buffer, 0, l);
+                    if (bufferOS != null) bufferOS.write(buffer, 0, l);
                     len += l;
                 }
-                baos.flush();
-                // now uncompress
-                InputStream dis = new GZIPInputStream(new ByteArrayInputStream(baos.toByteArray()));
-                try {
-                    while ((l = dis.read(buffer)) > 0) {
-                        if (procOS != null) procOS.write(buffer, 0, l);
-                        if (bufferOS != null) bufferOS.write(buffer, 0, l);
-                        len += l;
-                    }
-                } catch (java.net.SocketException e) {
-                    // this is an error:
-                    throw new IOException("Socket exception: " + e.getMessage());
-                } catch (java.net.SocketTimeoutException e) {
-                    // this is an error:
-                    throw new IOException("Socket time-out: " + e.getMessage());
+            } else {
+                // no content-length was given, thus we read until the connection closes
+                while ((l = dis.read(buffer, 0, buffer.length)) >= 0) {
+                    if (procOS != null) procOS.write(buffer, 0, l);
+                    if (bufferOS != null) bufferOS.write(buffer, 0, l);
                 }
-                baos.close(); baos = null;
-	    } else {
-    		// no content-length was given, thus we read until the connection closes
-    		InputStream dis = (gzip) ? (InputStream) new GZIPInputStream(clientInput) : (InputStream) clientInput;
-    		try {
-    		    while ((l = dis.read(buffer, 0, buffer.length)) >= 0) {
-        			if (procOS != null) procOS.write(buffer, 0, l);
-        			if (bufferOS != null) bufferOS.write(buffer, 0, l);
-    		    }
-    		} catch (java.net.SocketException e) {
-    		    // this is not an error: it's ok, we waited for that
-    		} catch (java.net.SocketTimeoutException e) {
-                    // the same here; should be ok.
-		}
-	    }
-
-	    // close the streams
-	    if (procOS != null) procOS.flush();
-	    if (bufferOS != null) bufferOS.flush();
-	    buffer = null;
-	}
+            }
+        } catch (java.net.SocketException e) {
+            throw new IOException("Socket exception: " + e.getMessage());
+        } catch (java.net.SocketTimeoutException e) {
+            throw new IOException("Socket time-out: " + e.getMessage());
+        } finally {
+            // close the streams
+            if (procOS != null) {
+                if (procOS instanceof httpChunkedOutputStream) 
+                    ((httpChunkedOutputStream)procOS).finish();
+                procOS.flush();
+            }
+            if (bufferOS != null) bufferOS.flush();
+            buffer = null;
+        }
+    }
 
 	public void print() {
 	    serverLog.logInfo("HTTPC", "RESPONSE: status=" + status + ", header=" + responseHeader.toString());
@@ -573,23 +556,23 @@ public final class httpc {
 		try {
 		    this.clientInput.close();
 		    this.clientOutput.close();
-		    this.socket.close();
+		    this.socket.close();            
 		} catch (IOException e) {}
     }
 
     // method is either GET, HEAD or POST
     private void send(String method, String path, httpHeader header, boolean zipped) throws IOException {
-	// scheduled request through request-response objects/threads
-
-	// check and correct path
-	if ((path == null) || (path.length() == 0)) path = "/";
-
-	// for debuggug:
-	requestPath = path;
-
-	// prepare header
-	if (header == null) header = new httpHeader();
-
+        // scheduled request through request-response objects/threads
+        
+        // check and correct path
+        if ((path == null) || (path.length() == 0)) path = "/";
+        
+        // for debuggug:
+        requestPath = path;
+        
+        // prepare header
+        if (header == null) header = new httpHeader();
+        
         // set some standard values
         if (!(header.containsKey(httpHeader.ACCEPT)))
             header.put(httpHeader.ACCEPT, "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5");
@@ -600,105 +583,97 @@ public final class httpc {
         if (!(header.containsKey(httpHeader.KEEP_ALIVE)))
             header.put(httpHeader.KEEP_ALIVE, "300");
         
-	// set user agent. The user agent is only set if the value does not yet exists.
-	// this gives callers the opportunity, to change the user agent themselves, and
-	// it will not be changed.
-	if (!(header.containsKey(httpHeader.USER_AGENT))) header.put(httpHeader.USER_AGENT, userAgent);
-
-	// set the host attribute. This is in particular necessary, if we contact another proxy
-	// the host is mandatory, if we use HTTP/1.1
-	if (!(header.containsKey(httpHeader.HOST))) {
-	    if (this.remoteProxyUse)
-		header.put(httpHeader.HOST, savedRemoteHost);
-	    else
-		header.put(httpHeader.HOST, this.host);
-	}
-
-	if (!(header.containsKey(httpHeader.CONNECTION))) {
-	    header.put(httpHeader.CONNECTION, "close");
-	}
-
-	// advertise a little bit...
-	if ((!(header.containsKey(httpHeader.REFERER))) || (((String) header.get(httpHeader.REFERER)).trim().length() == 0))  {
-            header.put(httpHeader.REFERER,
-                       (((System.currentTimeMillis() >> 10) & 1) == 0) ?
-                       "http://www.anomic.de" :
-                       "http://www.yacy.net/yacy");
+        // set user agent. The user agent is only set if the value does not yet exists.
+        // this gives callers the opportunity, to change the user agent themselves, and
+        // it will not be changed.
+        if (!(header.containsKey(httpHeader.USER_AGENT))) header.put(httpHeader.USER_AGENT, userAgent);
+        
+        // set the host attribute. This is in particular necessary, if we contact another proxy
+        // the host is mandatory, if we use HTTP/1.1
+        if (!(header.containsKey(httpHeader.HOST))) {
+            if (this.remoteProxyUse)
+                header.put(httpHeader.HOST, savedRemoteHost);
+            else
+                header.put(httpHeader.HOST, this.host);
         }
-
-	// stimulate zipping or not
-	// we can unzip, and we will return it always as unzipped, unless not wanted
-	if (header.containsKey(httpHeader.ACCEPT_ENCODING)) {
-	    String encoding = (String) header.get(httpHeader.ACCEPT_ENCODING);
-	    if (zipped) {
-		if (encoding.indexOf("gzip") < 0) {
-		    // add the gzip encoding
-		    //System.out.println("!!! adding gzip encoding");
-		    header.put(httpHeader.ACCEPT_ENCODING, "gzip,deflate" + ((encoding.length() == 0) ? "" : (";" + encoding)));
-		}
-	    } else {
-		int pos  = encoding.indexOf("gzip");
-		if (pos >= 0) {
-		    // remove the gzip encoding
-		    //System.out.println("!!! removing gzip encoding");
-		    header.put(httpHeader.ACCEPT_ENCODING, encoding.substring(0, pos) + encoding.substring(pos + 4));
-		}
-	    }
-	} else {
-	    if (zipped) header.put(httpHeader.ACCEPT_ENCODING, "gzip,deflate");
-	}
-
-	//header = new httpHeader(); header.put("Host", this.host); // debug
-
-	// send request
-	if ((this.remoteProxyUse) && (!(method.equals(httpHeader.METHOD_CONNECT))))
-	    path = "http://" + this.savedRemoteHost + path;
-	serverCore.send(clientOutput, method + " " + path + " HTTP/1.0"); // if set to HTTP/1.1, servers give time-outs?
-
+        
+        if (!(header.containsKey(httpHeader.CONNECTION))) {
+            header.put(httpHeader.CONNECTION, "close");
+        }
+        
+        // advertise a little bit...
+        if ((!(header.containsKey(httpHeader.REFERER))) || (((String) header.get(httpHeader.REFERER)).trim().length() == 0))  {
+            header.put(httpHeader.REFERER,
+                    (((System.currentTimeMillis() >> 10) & 1) == 0) ?
+                    "http://www.anomic.de" :
+                    "http://www.yacy.net/yacy");
+        }
+        
+        // stimulate zipping or not
+        // we can unzip, and we will return it always as unzipped, unless not wanted
+        if (header.containsKey(httpHeader.ACCEPT_ENCODING)) {
+            String encoding = (String) header.get(httpHeader.ACCEPT_ENCODING);
+            if (zipped) {
+                if (encoding.indexOf("gzip") < 0) {
+                    // add the gzip encoding
+                    //System.out.println("!!! adding gzip encoding");
+                    header.put(httpHeader.ACCEPT_ENCODING, "gzip,deflate" + ((encoding.length() == 0) ? "" : (";" + encoding)));
+                }
+            } else {
+                int pos  = encoding.indexOf("gzip");
+                if (pos >= 0) {
+                    // remove the gzip encoding
+                    //System.out.println("!!! removing gzip encoding");
+                    header.put(httpHeader.ACCEPT_ENCODING, encoding.substring(0, pos) + encoding.substring(pos + 4));
+                }
+            }
+        } else {
+            if (zipped) header.put(httpHeader.ACCEPT_ENCODING, "gzip,deflate");
+        }
+        
+        //header = new httpHeader(); header.put("Host", this.host); // debug
+        
+        // send request
+        if ((this.remoteProxyUse) && (!(method.equals(httpHeader.METHOD_CONNECT))))
+            path = "http://" + this.savedRemoteHost + path;
+        serverCore.send(clientOutput, method + " " + path + " HTTP/1.0"); // if set to HTTP/1.1, servers give time-outs?
+        
         // send header
-	//System.out.println("***HEADER for path " + path + ": PROXY TO SERVER = " + header.toString()); // DEBUG
-	Iterator i = header.keySet().iterator();
-	String key;
-	String value;
-	int count;
+        //System.out.println("***HEADER for path " + path + ": PROXY TO SERVER = " + header.toString()); // DEBUG
+        Iterator i = header.keySet().iterator();
+        String key;
+        int count;
         char tag;
-	while (i.hasNext()) {
-	    key = (String) i.next();
+        while (i.hasNext()) {
+            key = (String) i.next();
             tag = key.charAt(0);
             if ((tag != '*') && (tag != '#')) {
                 count = header.keyCount(key);
                 for (int j = 0; j < count; j++) {
-                    serverCore.send(clientOutput, key + ": " + ((String) header.getSingle(key, j)).trim());
+                    serverCore.send(this.clientOutput, key + ": " + ((String) header.getSingle(key, j)).trim());
                 }
                 //System.out.println("#" + key + ": " + value);
-	    }
-	}
-
-	// send terminating line
-	serverCore.send(clientOutput, "");
-	clientOutput.flush();
-
-	// this is the place where www.stern.de refuses to answer ..???
+            }
+        }
+        
+        // send terminating line
+        serverCore.send(this.clientOutput, "");
+        this.clientOutput.flush();
+        
+        // this is the place where www.stern.de refuses to answer ..???
     }
 
-	
-    private boolean shallTransportZipped(String path) {
-	return (!((path.endsWith(".gz")) || (path.endsWith(".tgz")) ||
-		  (path.endsWith(".jpg")) || (path.endsWith(".jpeg")) ||
-		  (path.endsWith(".gif")) | (path.endsWith(".zip"))));
-    }
-    
     public response GET(String path, httpHeader requestHeader) throws IOException {
         //serverLog.logDebug("HTTPC", handle + " requested GET '" + path + "', time = " + (System.currentTimeMillis() - handle));
-	try {
-	    boolean zipped = shallTransportZipped(path);
-	    send(httpHeader.METHOD_GET, path, requestHeader, zipped);
-	    response r = new response(zipped);
+        try {
+            boolean zipped = httpd.shallTransportZipped(path);
+            send(httpHeader.METHOD_GET, path, requestHeader, zipped);
+            response r = new response(zipped);
             //serverLog.logDebug("HTTPC", handle + " returned GET '" + path + "', time = " + (System.currentTimeMillis() - handle));
             return r;
-        } catch (SocketException e) {
-	    throw new IOException(e.getMessage());
-	}
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     public response HEAD(String path, httpHeader requestHeader) throws IOException {
