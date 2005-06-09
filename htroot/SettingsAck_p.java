@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
@@ -125,15 +126,10 @@ public class SettingsAck_p {
         
         // proxy password
         if (post.containsKey("proxyaccount")) {
-	    // set new port
+            // set new port
             String port = (String) post.get("port");
-	    env.setConfig("port", port);
-	    prop.put("info_port", port);
-
-	    // set transparent proxy flag
-            httpdProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
-	    env.setConfig("isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "true" : "false");
-	    prop.put("info_isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "on" : "off");
+            env.setConfig("port", port);
+            prop.put("info_port", port);
 
             // read and process data
             String filter = (String) post.get("proxyfilter");
@@ -170,6 +166,23 @@ public class SettingsAck_p {
                 prop.put("info_user", user);
                 prop.put("info_filter", filter);
             }
+            return prop;
+        }
+        
+        // http networking
+        if (post.containsKey("httpNetworking")) {
+            
+            // set transparent proxy flag
+            httpdProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
+            env.setConfig("isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "true" : "false");
+            prop.put("info_isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "on" : "off");            
+            
+            // setting the keep alive property
+            httpd.keepAliveSupport = post.containsKey("connectionKeepAliveSupport");
+            env.setConfig("connectionKeepAliveSupport", httpd.keepAliveSupport ? "true" : "false");
+            prop.put("info_connectionKeepAliveSupport", httpd.keepAliveSupport ? "on" : "off"); 
+            
+            prop.put("info", 20);             
             return prop;
         }
         
