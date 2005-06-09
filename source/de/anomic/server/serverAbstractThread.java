@@ -48,6 +48,8 @@
 
 package de.anomic.server;
 
+import de.anomic.server.logging.serverLog;
+
 public abstract class serverAbstractThread extends Thread implements serverThread {
 
     private long startup = 0, idlePause = 0, busyPause = 0, blockPause = 0;
@@ -144,6 +146,10 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     public void terminate(boolean waitFor) {
         // after calling this method, the thread shall terminate
         this.running = false;
+        
+        // interrupting the thread
+        this.interrupt();
+        
         // wait for termination
         if (waitFor) {
             // Busy waiting removed: while (this.isAlive()) try {this.sleep(100);} catch (InterruptedException e) {break;}
@@ -215,13 +221,18 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     }
     
     private void ratz(long millis) {
-        int loop = 1;
-        while (millis > 1000) {
-            loop = loop * 2;
-            millis = millis / 2;
-        }
-        while ((loop-- > 0) && (running)) {
-            try {this.sleep(millis);} catch (InterruptedException e) {}
+//        int loop = 1;
+//        while (millis > 1000) {
+//            loop = loop * 2;
+//            millis = millis / 2;
+//        }
+//        while ((loop-- > 0) && (running)) {
+//            try {this.sleep(millis);} catch (InterruptedException e) {}
+//        }
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            if (this.log != null) log.logSystem(this.getName() + " interrupted because of shutdown.");
         }
     }
     
