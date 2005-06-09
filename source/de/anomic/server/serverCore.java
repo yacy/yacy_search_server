@@ -876,7 +876,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 if (bufferSize++ > maxSize) break;                
             }
             
-    	    // we have catched a possible line end
+    	    // we have caught a possible line end
     	    if (b == cr) {
         		// maybe a lf follows, read it:
         		if ((b = pbis.read()) != lf) if (b >= 0) pbis.unread(b); // we push back the byte

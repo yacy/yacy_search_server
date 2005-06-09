@@ -321,7 +321,7 @@ public final class yacy {
                     }
                     
                     // shut down
-                    serverLog.logSystem("SHUTDOWN", "catched termination signal");
+                    serverLog.logSystem("SHUTDOWN", "caught termination signal");
                     server.terminate(false);
                     server.interrupt();
                     if (server.isAlive()) try {
