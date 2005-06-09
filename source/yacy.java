@@ -96,8 +96,8 @@ import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverLog;
 import de.anomic.server.serverSystem;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyCore;
 //import de.anomic.http.*;
@@ -121,10 +121,15 @@ public final class yacy {
             try {
                 String[] check = "a,b".split(","); // split needs java 1.4
             } catch (NoSuchMethodError e) {
-                serverLog.logFailure("STARTUP", "Java Version too low. You need at least Java 1.4.2 to run YACY");
+                System.err.println("STARTUP: Java Version too low. You need at least Java 1.4.2 to run YACY");
                 Thread.currentThread().sleep(3000);
                 System.exit(-1);
             }
+            
+            // setting up logging
+            serverLog.configureLogging(homePath);                 
+            serverLog.logSystem("STARTUP", copyright);
+            serverLog.logSystem("STARTUP", hline);
             
             serverLog.logSystem("STARTUP", "java version " + System.getProperty("java.version", "no-java-version"));
             serverLog.logSystem("STARTUP", "Application Root Path: " + homePath.toString());
