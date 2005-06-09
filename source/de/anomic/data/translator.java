@@ -43,7 +43,6 @@
 
 package de.anomic.data;
 
-import de.anomic.server.logging.serverLog;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -55,6 +54,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.Enumeration;
+
+import de.anomic.server.logging.serverLog;
 
 /**
  * Wordlist based translator
