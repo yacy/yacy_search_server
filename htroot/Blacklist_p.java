@@ -1,6 +1,6 @@
 // Blacklist_p.java 
 // -----------------------
-// part of the AnomicHTTPProxy
+// part of YaCy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004

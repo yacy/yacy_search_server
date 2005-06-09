@@ -57,11 +57,6 @@ import java.util.logging.StreamHandler;
 
 public final class serverLog {
     
-//    // statics
-//    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
-//    private static SimpleDateFormat longFormatter  = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-//    private static SimpleDateFormat shortFormatter = new SimpleDateFormat("yyyyMMddHHmmss");
-//    
 //    // log-level categories
     public static final int LOGLEVEL_ZERO    = Level.OFF.intValue(); // no output at all
     public static final int LOGLEVEL_FAILURE = Level.SEVERE.intValue(); // system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
@@ -80,21 +75,6 @@ public final class serverLog {
     public static final char LOGTOKEN_INFO    = 'I';
     public static final char LOGTOKEN_DEBUG   = 'D';
 
-//    // an array-wrapped function
-//    public static final char[] l2t = new char[] {
-//        LOGTOKEN_ZERO, LOGTOKEN_FAILURE, LOGTOKEN_ERROR, LOGTOKEN_WARNING,
-//        LOGTOKEN_SYSTEM, LOGTOKEN_INFO, LOGTOKEN_DEBUG
-//    };
-    
-//    // statics
-//    private static serverLog genericLog = new serverLog("GENERIC", LOGLEVEL_DEBUG); // generic log
-//    private static LinkedList lastLog = new LinkedList(); // for Web-Interface    
-//    private static int lastlogMaxSize = 400; // for Web-Interface
-//    
-//    // class variables
-//    private String appName;
-//    private int logLevel;
-    
     private final Logger theLogger;
     
     public serverLog(String appName) {
@@ -117,41 +97,6 @@ public final class serverLog {
 //        this.logLevel = newLevel;
     }
     
-//    private static int t2l(char token) {
-//        switch (token) {
-//            case LOGTOKEN_ZERO:    return LOGLEVEL_ZERO;
-//            case LOGTOKEN_FAILURE: return LOGLEVEL_FAILURE;
-//            case LOGTOKEN_ERROR:   return LOGLEVEL_ERROR;
-//            case LOGTOKEN_WARNING: return LOGLEVEL_WARNING;
-//            case LOGTOKEN_SYSTEM:  return LOGLEVEL_SYSTEM;
-//            case LOGTOKEN_INFO:    return LOGLEVEL_INFO;
-//            case LOGTOKEN_DEBUG:   return LOGLEVEL_DEBUG;
-//        }
-//        return LOGLEVEL_DEBUG;
-//    }
-//    
-//    private static String dateLongString() {
-//	return longFormatter.format(new GregorianCalendar(GMTTimeZone).getTime());
-//    }
-//
-//    private static String dateShortString() {
-//	return shortFormatter.format(new GregorianCalendar(GMTTimeZone).getTime());
-//    }
-//
-//    private void log(int messageLevel, String message) {
-//        if (messageLevel <= logLevel) {
-//	    System.out.println(l2t[messageLevel] + " " + dateLongString() + " " + appName + " " + message);
-//	    synchronized (lastLog) {
-//		lastLog.add(l2t[messageLevel] + " " + dateLongString() + " " + appName + " " + message);
-//		while (lastLog.size() > lastlogMaxSize) lastLog.removeFirst();
-//	    }
-//	}
-//    }
-
-//    public static LinkedList getLastLog(){
-//	return lastLog;
-//    }
-
     // class log messages
     public void logFailure(String message) {this.theLogger.severe(message);}
     public void logError(String message)   {this.theLogger.severe(message);}
@@ -163,8 +108,6 @@ public final class serverLog {
     
     // static log messages: log everything
     private static void log(String appName, int messageLevel, String message) {
-//        genericLog.appName = appName;
-//        genericLog.log(messageLevel, message);
         Logger.getLogger(appName).log(Level.parse(Integer.toString(messageLevel)),message);
     }
     
@@ -187,25 +130,5 @@ public final class serverLog {
         
         // generating the root logger
         Logger logger = Logger.getLogger("");
-                
-        //StreamHandler stdOut = new StreamHandler(System.out, new serverSimpleLogFormatter());
-//        ConsoleOutErrHandler stdOutErr = new ConsoleOutErrHandler();
-//        stdOutErr.setFormatter(new serverSimpleLogFormatter());
-//        stdOutErr.setLevel(Level.ALL);
-//        stdOutErr.setLevels(Level.ALL,Level.WARNING,Level.ALL);
-//        
-//        FileHandler fileLog = new FileHandler("log/yacy%u%g.log",1024*1024, 20, true);
-//        fileLog.setFormatter(new serverSimpleLogFormatter());
-//        fileLog.setLevel(Level.ALL);
-//        
-//        GuiHandler guiLog = new GuiHandler();
-//        guiLog.setFormatter(new serverSimpleLogFormatter());
-//        fileLog.setLevel(Level.ALL);
-//        
-//        logger.addHandler(fileLog);                     
-//        logger.addHandler(stdOutErr);
-//        logger.addHandler(guiLog); 
-        
-
     }
 }
