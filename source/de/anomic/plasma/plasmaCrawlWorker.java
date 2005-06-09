@@ -47,12 +47,16 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.Date;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
+import de.anomic.server.logging.serverMiniLogFormatter;
 
 public final class plasmaCrawlWorker extends Thread {
 
@@ -79,7 +83,25 @@ public final class plasmaCrawlWorker extends Thread {
     private boolean stopped = false;
     private boolean done = false;   
     
-    
+    private static boolean doAccessLogging = false; 
+    /**
+     * Do logging configuration for special proxy access log file
+     */
+    static {
+        try {
+            Logger crawlerLogger = Logger.getLogger("CRAWLER.access");
+            crawlerLogger.setUseParentHandlers(false);
+            FileHandler txtLog = new FileHandler("log/crawlerAccess%u%g.log",1024*1024, 20, true);
+            txtLog.setFormatter(new serverMiniLogFormatter());
+            txtLog.setLevel(Level.FINEST);
+            crawlerLogger.addHandler(txtLog);     
+            
+            doAccessLogging = true;
+        } catch (Exception e) { 
+            System.err.println("PROXY: Unable to configure proxy access logging.");        
+        }
+    }    
+        
     public plasmaCrawlWorker(
             ThreadGroup theTG, 
             CrawlerPool thePool, 
