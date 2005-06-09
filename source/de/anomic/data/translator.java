@@ -43,7 +43,7 @@
 
 package de.anomic.data;
 
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 
 import java.io.File;
 import java.io.FileFilter;
