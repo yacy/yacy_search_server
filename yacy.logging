@@ -1,0 +1,35 @@
+# Set the logging level for the root of the namespace.
+# This becomes the default logging level for all Loggers.
+.level=ALL
+
+# setting logging levels vor individual classes
+PARSER.level = INFO
+YACY.level = INFO
+HTCACHE.level = INFO
+PLASMA.level = INFO
+SERVER.level = INFO
+
+# List of global handlers
+handlers = java.util.logging.FileHandler,\
+           de.anomic.server.logging.GuiHandler,\
+           de.anomic.server.logging.ConsoleOutErrHandler
+
+# Properties for the FileHandler
+java.util.logging.FileHandler.limit = 1048576
+java.util.logging.FileHandler.count = 20
+java.util.logging.FileHandler.pattern = log/yacy%u%g.log
+java.util.logging.FileHandler.level = ALL
+java.util.logging.FileHandler.formatter=de.anomic.server.logging.serverSimpleLogFormatter
+
+# Properties for the GuiHandler
+de.anomic.server.logging.GuiHandler.level = ALL
+de.anomic.server.logging.GuiHandler.formatter=de.anomic.server.logging.serverSimpleLogFormatter
+de.anomic.server.logging.GuiHandler.size = 400
+
+# Properties for the ConsoleOutErrHandler
+de.anomic.server.logging.ConsoleOutErrHandler.level = ALL
+de.anomic.server.logging.ConsoleOutErrHandler.levelStdOut = ALL
+de.anomic.server.logging.ConsoleOutErrHandler.levelSplit = WARNING
+de.anomic.server.logging.ConsoleOutErrHandler.levelStdErr = ALL
+de.anomic.server.logging.ConsoleOutErrHandler.formatter=de.anomic.server.logging.serverSimpleLogFormatter
+
