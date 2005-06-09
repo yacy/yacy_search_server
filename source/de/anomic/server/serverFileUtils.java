@@ -48,6 +48,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.GZIPOutputStream;
 
 public final class serverFileUtils {
     
@@ -109,6 +110,21 @@ public final class serverFileUtils {
             if (fis != null) try { fis.close(); } catch (Exception e) {}
 		}
 		return buffer;
+    }
+    
+    public static byte[] readAndZip(File source) throws IOException {
+        ByteArrayOutputStream byteOut = null;
+        GZIPOutputStream zipOut = null;
+        try {
+            byteOut = new ByteArrayOutputStream((int)(source.length()/2));
+            zipOut = new GZIPOutputStream(byteOut);
+            copy(source,zipOut);
+            zipOut.close();
+            return byteOut.toByteArray();
+        } finally {
+            if (zipOut != null) try { zipOut.close(); } catch (Exception e) {}
+            if (byteOut != null) try { byteOut.close(); } catch (Exception e) {}
+        }
     }
     
     public static void write(byte[] source, OutputStream dest) throws IOException {
