@@ -55,7 +55,7 @@ import java.util.TreeMap;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 
 public final class plasmaSearch {
 
