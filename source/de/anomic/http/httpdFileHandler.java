@@ -40,37 +40,37 @@
 
 
 /*
-   Class documentation:
-   this class provides a file servlet and CGI interface
-   for the httpd server.
-   Whenever this server is addressed to load a local file,
-   this class searches for the file in the local path as
-   configured in the setting property 'rootPath'
-   The servlet loads the file and returns it to the client.
-   Every file can also act as an template for the built-in
-   CGI interface. There is no specific path for CGI functions.
-   CGI functionality is triggered, if for the file to-be-served
-   'template.html' also a file 'template.class' exists. Then,
-   the class file is called with the GET/POST properties that
-   are attached to the http call.
-   Possible variable hand-over are:
-   - form method GET
-   - form method POST, enctype text/plain
-   - form method POST, enctype multipart/form-data
-   The class that creates the CGI respond must have at least one
-   static method of the form
-   public static java.util.Hashtable respond(java.util.HashMap, serverSwitch)
-   In the HashMap, the GET/POST variables are handed over.
-   The return value is a Property object that contains replacement
-   key/value pairs for the patterns in the template file.
-   The templates must have the form
-   either '#['<name>']#' for single attributes, or
-   '#{'<enumname>'}#' and '#{/'<enumname>'}#' for enumerations of
-   values '#['<value>']#'.
-   A single value in repetitions/enumerations in the template has
-   the property key '_'<enumname><count>'_'<value>
-   Please see also the example files 'test.html' and 'test.java'
-*/
+ Class documentation:
+ this class provides a file servlet and CGI interface
+ for the httpd server.
+ Whenever this server is addressed to load a local file,
+ this class searches for the file in the local path as
+ configured in the setting property 'rootPath'
+ The servlet loads the file and returns it to the client.
+ Every file can also act as an template for the built-in
+ CGI interface. There is no specific path for CGI functions.
+ CGI functionality is triggered, if for the file to-be-served
+ 'template.html' also a file 'template.class' exists. Then,
+ the class file is called with the GET/POST properties that
+ are attached to the http call.
+ Possible variable hand-over are:
+ - form method GET
+ - form method POST, enctype text/plain
+ - form method POST, enctype multipart/form-data
+ The class that creates the CGI respond must have at least one
+ static method of the form
+ public static java.util.Hashtable respond(java.util.HashMap, serverSwitch)
+ In the HashMap, the GET/POST variables are handed over.
+ The return value is a Property object that contains replacement
+ key/value pairs for the patterns in the template file.
+ The templates must have the form
+ either '#['<name>']#' for single attributes, or
+ '#{'<enumname>'}#' and '#{/'<enumname>'}#' for enumerations of
+ values '#['<value>']#'.
+ A single value in repetitions/enumerations in the template has
+ the property key '_'<enumname><count>'_'<value>
+ Please see also the example files 'test.html' and 'test.java'
+ */
 
 package de.anomic.http;
 
@@ -83,24 +83,29 @@ import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.zip.GZIPOutputStream;
+
+import sun.security.provider.MD5;
 
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverLog;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 
 public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
-
+    
     // class variables   
     private Properties mimeTable = null;
     private serverClassLoader provider = null;
@@ -111,181 +116,177 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     private String[] defaultFiles = null;
     private File htDefaultPath = null;
     private File htLocalePath = null;
-
+    
     private serverSwitch switchboard;
     private String adminAccountBase64MD5;
-
+    
+    private Properties connectionProperties = null;    
+    private MessageDigest md5Digest = null;
+    
     public httpdFileHandler(serverSwitch switchboard) {
-	this.switchboard = switchboard;
-	
-	if (this.mimeTable == null) {
-	    // load the mime table
-	    this.mimeTable = new Properties();
-	    String mimeTablePath = switchboard.getConfig("mimeConfig","");
-	    FileInputStream mimeTableInputStream = null;
-	    try {
-		serverLog.logSystem("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
-		mimeTableInputStream = new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath));
-		this.mimeTable.load(mimeTableInputStream);
-	    } catch (Exception e) {
-		if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}
-		serverLog.logError("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
-		System.exit(1);
-	    }
-	}
+        this.switchboard = switchboard;
         
-	// create default files array
-	defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
-	if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
+        if (this.mimeTable == null) {
+            // load the mime table
+            this.mimeTable = new Properties();
+            String mimeTablePath = switchboard.getConfig("mimeConfig","");
+            FileInputStream mimeTableInputStream = null;
+            try {
+                serverLog.logSystem("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
+                mimeTableInputStream = new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath));
+                this.mimeTable.load(mimeTableInputStream);
+            } catch (Exception e) {
+                if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}
+                serverLog.logError("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
+                System.exit(1);
+            }
+        }
         
-	// create a htRootPath: system pages
-	if (htRootPath == null) {
-	    htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
-	    if (!(htRootPath.exists())) htRootPath.mkdir();
-	}
+        // create default files array
+        defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
+        if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
         
-	// create a htDocsPath: user defined pages
-	if (htDocsPath == null) {
-	    htDocsPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "htdocs"));
-	    if (!(htDocsPath.exists())) htDocsPath.mkdir();
-	}
-	
-	// create a htTemplatePath
-	if (htTemplatePath == null) {
-	    htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
-	    if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
-	}
+        // create a htRootPath: system pages
+        if (htRootPath == null) {
+            htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
+            if (!(htRootPath.exists())) htRootPath.mkdir();
+        }
+        
+        // create a htDocsPath: user defined pages
+        if (htDocsPath == null) {
+            htDocsPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "htdocs"));
+            if (!(htDocsPath.exists())) htDocsPath.mkdir();
+        }
+        
+        // create a htTemplatePath
+        if (htTemplatePath == null) {
+            htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
+            if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
+        }
         if (templates == null) templates = loadTemplates(htTemplatePath);
-
-	// create htLocaleDefault, htLocalePath
-	if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
-	if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("htLocalePath","htroot/locale"));
-	//htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
-
-	// create a class loader
-	if (provider == null) {
-	    provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
-	    // debug
-	    /*
-	      Package[] ps = ((cachedClassLoader) provider).packages();
-	      for (int i = 0; i < ps.length; i++) System.out.println("PACKAGE IN PROVIDER: " + ps[i].toString());
-	    */
-	}
-	adminAccountBase64MD5 = null;
         
-	serverLog.logSystem("HTTPDFileHandler", "File Handler Initialized");
-    }
- 
-    private void respondHeader(OutputStream out, int retcode,
-			       String conttype, long contlength,
-			       Date moddate, Date expires,
-			       String cookie) throws IOException {
-	try {
-	    out.write(("HTTP/1.1 " + retcode + " OK\r\n").getBytes());
-	    out.write((httpHeader.SERVER + ": AnomicHTTPD (www.anomic.de)\r\n").getBytes());
-	    out.write((httpHeader.DATE + ": " + httpc.dateString(httpc.nowDate()) + "\r\n").getBytes());
-	    if (expires != null) out.write(("Expires: " + httpc.dateString(expires) + "\r\n").getBytes()); 
-	    out.write((httpHeader.CONTENT_TYPE + ": " + conttype /* "image/gif", "text/html" */ + "\r\n").getBytes());
-	    out.write((httpHeader.LAST_MODIFIED + ": " + httpc.dateString(moddate) + "\r\n").getBytes()); 
-	    out.write((httpHeader.CONTENT_LENGTH + ": " + contlength +"\r\n").getBytes());
-	    out.write((httpHeader.PRAGMA + ": no-cache\r\n").getBytes());
-	    //    out.write(("Accept-ranges: bytes\r\n").getBytes());
-	    if (cookie != null) out.write((httpHeader.SET_COOKIE + ": " + cookie + "\r\n").getBytes());
-	    out.write(("\r\n").getBytes());
-	    out.flush();
-	} catch (Exception e) {
-	    // any interruption may be caused be network error or because the user has closed
-	    // the windows during transmission. We simply pass it as IOException
-	    throw new IOException(e.getMessage());
-	}
+        // create htLocaleDefault, htLocalePath
+        if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
+        if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("htLocalePath","htroot/locale"));
+        //htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
+        
+        // create a class loader
+        if (provider == null) {
+            provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
+            // debug
+            /*
+             Package[] ps = ((cachedClassLoader) provider).packages();
+             for (int i = 0; i < ps.length; i++) System.out.println("PACKAGE IN PROVIDER: " + ps[i].toString());
+             */
+        }
+        adminAccountBase64MD5 = null;
+        
+        // initialise an message digest for Content-MD5 support ...
+        try {
+            this.md5Digest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            serverLog.logWarning("HTTPDFileHandler", "Content-MD5 support not availabel ...");
+        }
+        
+        serverLog.logSystem("HTTPDFileHandler", "File Handler Initialized");
     }
     
-    private void textMessage(OutputStream out, int retcode, String body) throws IOException {
-	respondHeader(out, retcode, "text/plain", body.length(), httpc.nowDate(), null, null);
-	out.write(body.getBytes());
-	out.flush();
+//    private void textMessage(OutputStream out, int retcode, String body) throws IOException {
+//        httpd.sendRespondHeader(
+//                this.connectionProperties,  // the connection properties 
+//                out,                        // the output stream
+//                "HTTP/1.1",                 // the http version that should be used
+//                retcode,                    // the http status code
+//                null,                       // the http status message
+//                "text/plain",               // the mimetype
+//                body.length(),              // the content length
+//                httpc.nowDate(),            // the modification date
+//                null,                       // the expires date
+//                null,                       // cookies
+//                null,                       // content encoding
+//                null);                      // transfer encoding
+//        out.write(body.getBytes());
+//        out.flush();
+//    }
+    
+    private httpHeader getDefaultHeaders() {
+        httpHeader headers = new httpHeader();
+        headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
+        headers.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
+        headers.put(httpHeader.PRAGMA, "no-cache");         
+        return headers;
     }
     
     public void doGet(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
-	doResponse(conProp, requestHeader, response, null);
+        doResponse(conProp, requestHeader, response, null);
     }
-
+    
     public void doHead(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
-	doResponse(conProp, requestHeader, response, null);
+        doResponse(conProp, requestHeader, response, null);
     }
-
+    
     public void doPost(Properties conProp, httpHeader requestHeader, OutputStream response, PushbackInputStream body) throws IOException {
-	doResponse(conProp, requestHeader, response, body);
+        doResponse(conProp, requestHeader, response, body);
     }
-
+    
     public void doResponse(Properties conProp, httpHeader requestHeader, OutputStream out, PushbackInputStream body) throws IOException {
-
-	String userAgent = (String) requestHeader.get(httpHeader.USER_AGENT);
-	if (userAgent == null) userAgent = "";
-	userAgent = userAgent.trim().toLowerCase();
-	//userAgent = "portalmmm n400i"; // debug
-	//boolean iMode = (userAgent.startsWith("portalmmm"));
-	//if (iMode) System.out.println("DETECTED IMODE");
-
-	//System.out.println("HTTPD-REQUEST FROM CLIENT: " + userAgent); // DEBUG
-
-	// prepare response
-	String method = conProp.getProperty("METHOD");
-	String path = conProp.getProperty("PATH");
-	String argsString = conProp.getProperty("ARGS"); // is null if no args were given
-
-	// check hack attacks in path
-	if (path.indexOf("..") >= 0) {
-	    out.write(("HTTP/1.0 403 bad path\r\n").getBytes());
-	    out.write(("\r\n").getBytes());
-	    out.flush();
-	    return;
-	}
-
+        
+        this.connectionProperties = conProp;
+        
+        // getting some connection properties
+        String method     = conProp.getProperty(httpd.CONNECTION_PROP_METHOD);
+        String path       = conProp.getProperty(httpd.CONNECTION_PROP_PATH);
+        String argsString = conProp.getProperty(httpd.CONNECTION_PROP_ARGS); // is null if no args were given
+        String httpVersion= conProp.getProperty(httpd.CONNECTION_PROP_HTTP_VER);
+        String url = "http://" + requestHeader.get(httpHeader.HOST,"localhost") + path;
+        
+        // check hack attacks in path
+        if (path.indexOf("..") >= 0) {
+            httpd.sendRespondHeader(conProp,out,httpVersion,403,getDefaultHeaders());
+            return;
+        }
+        
         // check permission/granted access
         if ((path.endsWith("_p.html")) &&
-            ((adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "")).length() != 0)) {
+                ((adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "")).length() != 0)) {
             // authentication required
             String auth = (String) requestHeader.get(httpHeader.AUTHORIZATION);
             if (auth == null) {
                 // no authorization given in response. Ask for that
-                out.write(("HTTP/1.1 401 log-in required\r\n").getBytes());
-                out.write((httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"admin log-in\"\r\n").getBytes());
-                out.write(("\r\n").getBytes());
-                out.flush();
+                httpHeader headers = getDefaultHeaders();
+                headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
+                httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                 return;
             } else if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(auth.trim().substring(6)))) {
-		// remove brute-force flag
-		serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
-	    } else {
+                // remove brute-force flag
+                serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+            } else {
                 // a wrong authentication was given. Ask again
                 String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
                 serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                //try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {} // add a delay to make brute-force harder
-		serverCore.bfHost.put(clientIP, "sleep");
-                out.write(("HTTP/1.1 401 log-in required\r\n").getBytes());
-                out.write((httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"admin log-in\"\r\n").getBytes());
-                out.write(("\r\n").getBytes());
-                out.flush();
-                //System.out.println("httpd bfHosts=" + serverCore.bfHost.toString());
+                serverCore.bfHost.put(clientIP, "sleep");
+
+                httpHeader headers = getDefaultHeaders();
+                headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
+                httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                 return;
             }
-	}
-
-	// parse arguments
-	serverObjects args = new serverObjects();
-	int argc;
-	if (argsString == null) {
-	    // no args here, maybe a POST with multipart extension
-	    int length;
-	    //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
-	    if ((method.equals(httpHeader.METHOD_POST)) &&
-		(requestHeader.containsKey(httpHeader.CONTENT_LENGTH))) {
-		// if its a POST, it can be either multipart or as args in the body
-		length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
-		if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
-		    (((String) requestHeader.get(httpHeader.CONTENT_TYPE)).toLowerCase().startsWith("multipart"))) {
-		    // parse multipart
+        }
+        
+        // parse arguments
+        serverObjects args = new serverObjects();
+        int argc;
+        if (argsString == null) {
+            // no args here, maybe a POST with multipart extension
+            int length;
+            //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
+            if ((method.equals(httpHeader.METHOD_POST)) &&
+                    (requestHeader.containsKey(httpHeader.CONTENT_LENGTH))) {
+                // if its a POST, it can be either multipart or as args in the body
+                length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
+                if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
+                        (((String) requestHeader.get(httpHeader.CONTENT_TYPE)).toLowerCase().startsWith("multipart"))) {
+                    // parse multipart
                     HashMap files = httpd.parseMultipart(requestHeader, args, body, length);
                     // integrate these files into the args
                     if (files != null) {
@@ -296,245 +297,258 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             args.put(((String) entry.getKey()) + "$file", entry.getValue());
                         }
                     }
-		    argc = Integer.parseInt((String) requestHeader.get("ARGC"));
-		} else {
-		    // parse args in body
-		    argc = httpd.parseArgs(args, body, length);
-		}
-	    } else {
-		// no args
-		argsString = null;
-		args = null;
-		argc = 0;
-	    }
-	} else {
-	    // simple args in URL (stuff after the "?")
-	    argc = httpd.parseArgs(args, argsString);
-	}
-	
-	//if (args != null) System.out.println("***ARGS=" + args.toString()); // DEBUG
-
-	// check for cross site scripting - attacks in request arguments
-	if (argc > 0) {
-	    // check all values for occurrences of script values
-	    Enumeration e = args.elements(); // enumeration of values
-	    Object val;
-	    while (e.hasMoreElements()) {
-		val = e.nextElement();
-		if ((val != null) && (val instanceof String) && (((String) val).indexOf("<script") >= 0)) {
-		    // deny request
-		    out.write(("HTTP/1.0 403 bad post values\r\n").getBytes());
-		    out.write(("\r\n").getBytes());
-		    out.flush();
-		    return;
-		}
-	    }
-	}
-
-	// we are finished with parsing
-	// the result of value hand-over is in args and argc
-	if (path.length() == 0) {
-	    textMessage(out, 400, "Bad Request\r\n");
-	    out.flush();
-	    return;
-	}
-
-	Date filedate;
-	long filelength;
-	File rc = null;
-	try {
-	    // locate the file
-	    if (!(path.startsWith("/"))) {
-		// attach leading slash
-		path = "/" + path;
-	    }
+                    argc = Integer.parseInt((String) requestHeader.get("ARGC"));
+                } else {
+                    // parse args in body
+                    argc = httpd.parseArgs(args, body, length);
+                }
+            } else {
+                // no args
+                argsString = null;
+                args = null;
+                argc = 0;
+            }
+        } else {
+            // simple args in URL (stuff after the "?")
+            argc = httpd.parseArgs(args, argsString);
+        }
+        
+        //if (args != null) System.out.println("***ARGS=" + args.toString()); // DEBUG
+        
+        // check for cross site scripting - attacks in request arguments
+        if (argc > 0) {
+            // check all values for occurrences of script values
+            Enumeration e = args.elements(); // enumeration of values
+            Object val;
+            while (e.hasMoreElements()) {
+                val = e.nextElement();
+                if ((val != null) && (val instanceof String) && (((String) val).indexOf("<script") >= 0)) {
+                    // deny request
+                    httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null);
+                    //httpd.sendRespondHeader(conProp,out,httpVersion,403,"bad post values",0);
+                    return;
+                }
+            }
+        }
+        
+        // we are finished with parsing
+        // the result of value hand-over is in args and argc
+        if (path.length() == 0) {
+            httpd.sendRespondError(conProp,out,4,400,null,"Bad Request",null);
+            // textMessage(out, 400, "Bad Request\r\n");
+            out.flush();
+            return;
+        }
+        
+        Date filedate;
+        long filelength;
+        File rc = null;
+        try {
+            // locate the file
+            if (!(path.startsWith("/"))) {
+                // attach leading slash
+                path = "/" + path;
+            }
             
             // find defaults
             String testpath = path;
             if (path.endsWith("/")) {
-		File file;
-		// attach default file name
+                File file;
+                // attach default file name
                 for (int i = 0; i < defaultFiles.length; i++) {
                     testpath = path + defaultFiles[i];
                     file = new File(htDefaultPath, testpath);
                     if (!(file.exists())) file = new File(htDocsPath, testpath);
                     if (file.exists()) {path = testpath; break;}
                 }
-	    }
-	    
-	    // find locales or alternatives in htDocsPath
-	    File defaultFile = new File(htDefaultPath, path);
+            }
+            
+            // find locales or alternatives in htDocsPath
+            File defaultFile = new File(htDefaultPath, path);
             File localizedFile = defaultFile;
-	    if (defaultFile.exists()) {
-		// look if we have a localization of that file
-		String htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
-		if (!(htLocaleSelection.equals("default"))) {
-		    File localePath = new File(htLocalePath, htLocaleSelection + "/" + path);
-		    if (localePath.exists()) localizedFile = localePath;
-		}
-	    } else {
-		// try to find that file in the htDocsPath
-		defaultFile = new File(htDocsPath, path);
-		localizedFile = defaultFile;
-	    }
-            
-            /*
-	    if ((iMode) && (path.endsWith(".html"))) {
-		file = new File(htRootPath, path.substring(0, path.length() - 4) + "ihtml");
-		if (!(file.exists())) file = new File(htDocsPath, path.substring(0, path.length() - 4) + "ihtml");
-		if (!(file.exists())) file = new File(htRootPath, path);
-		if (!(file.exists())) file = new File(htDocsPath, path);
-		//System.out.println("IMODE PATH = " + file.toString());
-	    }
-            */
-            
-	    if ((localizedFile.exists()) && (localizedFile.canRead())) {
-		// we have found a file that can be written to the client
-		// if this file uses templates, then we use the template
-		// re-write - method to create an result
-		serverObjects tp = new serverObjects();
-		filedate = new Date(localizedFile.lastModified());
-                String mimeType = mimeTable.getProperty(conProp.getProperty("EXT",""),"text/html");
+            if (defaultFile.exists()) {
+                // look if we have a localization of that file
+                String htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
+                if (!(htLocaleSelection.equals("default"))) {
+                    File localePath = new File(htLocalePath, htLocaleSelection + "/" + path);
+                    if (localePath.exists()) localizedFile = localePath;
+                }
+            } else {
+                // try to find that file in the htDocsPath
+                defaultFile = new File(htDocsPath, path);
+                localizedFile = defaultFile;
+            }
+                       
+            if ((localizedFile.exists()) && (localizedFile.canRead())) {
+                // we have found a file that can be written to the client
+                // if this file uses templates, then we use the template
+                // re-write - method to create an result
+                serverObjects tp = new serverObjects();
+                filedate = new Date(localizedFile.lastModified());
+                String mimeType = this.mimeTable.getProperty(conProp.getProperty("EXT",""),"text/html");
                 byte[] result;
-		if (path.endsWith("html") || 
-                    path.endsWith("xml") || 
-                    path.endsWith("rss") || 
-                    path.endsWith("csv") ||
-                    path.endsWith("pac")) {
-		    rc = rewriteClassFile(defaultFile);
-		    if (rc != null) {
-			// CGI-class: call the class to create a property for rewriting
-			try {
-			    requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
+                boolean zipContent = requestHeader.acceptGzip() && httpd.shallTransportZipped("." + conProp.getProperty("EXT",""));
+                String md5String = null;
+                if (path.endsWith("html") || 
+                        path.endsWith("xml") || 
+                        path.endsWith("rss") || 
+                        path.endsWith("csv") ||
+                        path.endsWith("pac")) {
+                    rc = rewriteClassFile(defaultFile);
+                    if (rc != null) {
+                        // CGI-class: call the class to create a property for rewriting
+                        try {
+                            requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
                             requestHeader.put("PATH", path);
-			    // in case that there are no args given, args = null or empty hashmap
-			    tp = (serverObjects) rewriteMethod(rc).invoke(null, new Object[] {requestHeader, args, switchboard});
-			    // if no args given , then tp will be an empty Hashtable object (not null)
-			    if (tp == null) tp = new serverObjects();
+                            // in case that there are no args given, args = null or empty hashmap
+                            tp = (serverObjects) rewriteMethod(rc).invoke(null, new Object[] {requestHeader, args, switchboard});
+                            // if no args given , then tp will be an empty Hashtable object (not null)
+                            if (tp == null) tp = new serverObjects();
                             // check if the servlets requests authentification
                             if (tp.containsKey("AUTHENTICATE")) {
-                                String account = tp.get("AUTHENTICATE", "");
-                                out.write(("HTTP/1.1 401 log-in required\r\n").getBytes());
-                                out.write((httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"" + account + "\"\r\n").getBytes());
-                                out.write(("\r\n").getBytes());
-                                out.flush();
+                                httpHeader headers = getDefaultHeaders();
+                                headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"" + tp.get("AUTHENTICATE", "") + "\"");
+                                httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                                 return;
                             }
-			    // add the application version to every rewrite table
-			    tp.put("version", switchboard.getConfig("version", ""));
-			    tp.put("uptime", ((System.currentTimeMillis() - Long.parseLong(switchboard.getConfig("startupTime","0"))) / 1000) / 60); // uptime in minutes
-			    //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
-			} catch (InvocationTargetException e) {
-			    System.out.println("INTERNAL ERROR: " + e.toString() + ":" +
-					       e.getMessage() +
-					       " target exception at " + rc + ": " +
-					       e.getTargetException().toString() + ":" +
-					       e.getTargetException().getMessage());
-			    e.printStackTrace();
-			    rc = null;
-			}
+                            // add the application version to every rewrite table
+                            tp.put("version", switchboard.getConfig("version", ""));
+                            tp.put("uptime", ((System.currentTimeMillis() - Long.parseLong(switchboard.getConfig("startupTime","0"))) / 1000) / 60); // uptime in minutes
+                            //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
+                        } catch (InvocationTargetException e) {
+                            System.out.println("INTERNAL ERROR: " + e.toString() + ":" +
+                                    e.getMessage() +
+                                    " target exception at " + rc + ": " +
+                                    e.getTargetException().toString() + ":" +
+                                    e.getTargetException().getMessage());
+                            e.printStackTrace();
+                            rc = null;
+                        }
                         filedate = new Date(System.currentTimeMillis());
-		    }
-		    // read templates
-		    tp.putAll(templates);
-		    // rewrite the file
-		    ByteArrayOutputStream o = null;
-            FileInputStream fis = null;
-            try {
-	            o = new ByteArrayOutputStream();
-	            fis = new FileInputStream(localizedFile);
-			    httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
-	            result = o.toByteArray();
-            } finally {
-                if (o != null) try {o.close();} catch(Exception e) {}
-                if (fis != null) try {fis.close();} catch(Exception e) {}
-            }
+                    }
+                    // read templates
+                    tp.putAll(templates);
+                    // rewrite the file
+                    ByteArrayOutputStream o = null;
+                    FileInputStream fis = null;
+                    GZIPOutputStream zippedOut = null;
+                    try {
+                        o = new ByteArrayOutputStream();
+                        if (zipContent) zippedOut = new GZIPOutputStream(o);
+                        fis = new FileInputStream(localizedFile);
+                        httpTemplate.writeTemplate(fis, (zipContent) ? (OutputStream)zippedOut: (OutputStream)o, tp, "-UNRESOLVED_PATTERN-".getBytes());
+                        if (zipContent) {
+                            zippedOut.finish();
+                            zippedOut.flush();
+                            zippedOut.close();
+                            zippedOut = null;
+                        }
+                        result = o.toByteArray();
+                        
+                        if (this.md5Digest != null) {
+                            this.md5Digest.reset();
+                            this.md5Digest.update(result);
+                            byte[] digest = this.md5Digest.digest();
+                            StringBuffer digestString = new StringBuffer();
+                            for ( int i = 0; i < digest.length; i++ )
+                                digestString.append(Integer.toHexString( digest[i]&0xff));
+
+                            md5String = digestString.toString();
+                        }                        
+                    } finally {
+                        if (zippedOut != null) try {zippedOut.close();} catch(Exception e) {}
+                        if (o != null) try {o.close();} catch(Exception e) {}
+                        if (fis != null) try {fis.close();} catch(Exception e) {}
+                    }
                     
-		} else { // no html
+                } else { // no html                    
                     // write the file to the client
-                    result = serverFileUtils.read(localizedFile);
+                    result = (zipContent)? serverFileUtils.readAndZip(localizedFile) : serverFileUtils.read(localizedFile);
+                    
+                    // check mime type again using the result array: these are 'magics'
+//                    if (serverByteBuffer.equals(result, 1, "PNG".getBytes())) mimeType = mimeTable.getProperty("png","text/html");
+//                    else if (serverByteBuffer.equals(result, 0, "GIF89".getBytes())) mimeType = mimeTable.getProperty("gif","text/html");
+//                    else if (serverByteBuffer.equals(result, 6, "JFIF".getBytes())) mimeType = mimeTable.getProperty("jpg","text/html");
+                    //System.out.print("MAGIC:"); for (int i = 0; i < 10; i++) System.out.print(Integer.toHexString((int) result[i]) + ","); System.out.println();            
                 }
-                // check mime type again using the result array: these are 'magics'
-                if (serverByteBuffer.equals(result, 1, "PNG".getBytes())) mimeType = mimeTable.getProperty("png","text/html");
-                else if (serverByteBuffer.equals(result, 0, "GIF89".getBytes())) mimeType = mimeTable.getProperty("gif","text/html");
-                else if (serverByteBuffer.equals(result, 6, "JFIF".getBytes())) mimeType = mimeTable.getProperty("jpg","text/html");
-                //System.out.print("MAGIC:"); for (int i = 0; i < 10; i++) System.out.print(Integer.toHexString((int) result[i]) + ","); System.out.println();
+                
                 // write the array to the client
-                respondHeader(out, 200, mimeType, result.length, filedate, null, null);
+                httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, filedate, null, null, (zipContent)?"gzip":null, null);
                 Thread.currentThread().sleep(200); // this solved the message problem (!!)
                 serverFileUtils.write(result, out);
-	    } else {
-		textMessage(out, 404, "404 File not Found\r\n"); // would be a possible vuln to return original the original path
-	    }
-	} catch (Exception e) {
-	    //textMessage(out, 503, "Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'\r\n");
-	    //e.printStackTrace();
-	    System.out.println("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'\r\n");
-	}
-	out.flush();
+            } else {
+                httpd.sendRespondError(conProp,out,3,404,"File not Found",null,null);
+                //textMessage(out, 404, "404 File not Found\r\n"); // would be a possible vuln to return original the original path
+            }
+        } catch (Exception e) {
+            //textMessage(out, 503, "Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'\r\n");
+            //e.printStackTrace();
+            System.out.println("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'\r\n");
+        }
+        out.flush();
         if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
-          // wait a little time until everything closes so that clients can read from the streams/sockets
-          try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
+            // wait a little time until everything closes so that clients can read from the streams/sockets
+            try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
         }
     }
-
+    
     private static HashMap loadTemplates(File path) {
-		// reads all templates from a path
-		// we use only the folder from the given file path
-		HashMap result = new HashMap();
-		if (path == null) return result;
-		if (!(path.isDirectory())) path = path.getParentFile();
-		if ((path == null) || (!(path.isDirectory()))) return result;
-		String[] templates = path.list();
-		int c;
-		for (int i = 0; i < templates.length; i++) {
-			if (templates[i].endsWith(".template")) 
+        // reads all templates from a path
+        // we use only the folder from the given file path
+        HashMap result = new HashMap();
+        if (path == null) return result;
+        if (!(path.isDirectory())) path = path.getParentFile();
+        if ((path == null) || (!(path.isDirectory()))) return result;
+        String[] templates = path.list();
+        int c;
+        for (int i = 0; i < templates.length; i++) {
+            if (templates[i].endsWith(".template")) 
                 try {
-					//System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
-					result.put(templates[i].substring(0, templates[i].length() - 9),
-							new String(serverFileUtils.read(new File(path, templates[i]))));
-				} catch (Exception e) {}
-		}
-		return result;
+                    //System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
+                    result.put(templates[i].substring(0, templates[i].length() - 9),
+                            new String(serverFileUtils.read(new File(path, templates[i]))));
+                } catch (Exception e) {}
+        }
+        return result;
     }
-
+    
     private File rewriteClassFile(File template) {
-	try {
-	    String f = template.getCanonicalPath();
-	    int p = f.lastIndexOf(".");
-	    if (p < 0) return null;
-	    f = f.substring(0, p) + ".class";
-	    //System.out.println("constructed class path " + f);
-	    File cf = new File(f);
-	    if (cf.exists()) return cf;
-	    return null;
-	} catch (IOException e) {
-	    return null;
-	}
+        try {
+            String f = template.getCanonicalPath();
+            int p = f.lastIndexOf(".");
+            if (p < 0) return null;
+            f = f.substring(0, p) + ".class";
+            //System.out.println("constructed class path " + f);
+            File cf = new File(f);
+            if (cf.exists()) return cf;
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
     }
-
+    
     private Method rewriteMethod(File classFile) {
-	Method m = null;
-	// now make a class out of the stream
-	try {
-	    //System.out.println("**DEBUG** loading class file " + classFile);
-	    Class c = provider.loadClass(classFile);
-	    Class[] params = new Class[] {
-		Class.forName("de.anomic.http.httpHeader"),
-		Class.forName("de.anomic.server.serverObjects"),
-		Class.forName("de.anomic.server.serverSwitch")};
-	    m = c.getMethod("respond", params);
-	} catch (ClassNotFoundException e) {
-	    System.out.println("INTERNAL ERROR: class " + classFile + " is missing:" + e.getMessage()); 
-	} catch (NoSuchMethodException e) {
-	    System.out.println("INTERNAL ERROR: method respond not found in class " + classFile + ": " + e.getMessage());
-	}
-	//System.out.println("found method: " + m.toString());
-	return m;
+        Method m = null;
+        // now make a class out of the stream
+        try {
+            //System.out.println("**DEBUG** loading class file " + classFile);
+            Class c = provider.loadClass(classFile);
+            Class[] params = new Class[] {
+                    Class.forName("de.anomic.http.httpHeader"),
+                    Class.forName("de.anomic.server.serverObjects"),
+                    Class.forName("de.anomic.server.serverSwitch")};
+            m = c.getMethod("respond", params);
+        } catch (ClassNotFoundException e) {
+            System.out.println("INTERNAL ERROR: class " + classFile + " is missing:" + e.getMessage()); 
+        } catch (NoSuchMethodException e) {
+            System.out.println("INTERNAL ERROR: method respond not found in class " + classFile + ": " + e.getMessage());
+        }
+        //System.out.println("found method: " + m.toString());
+        return m;
     }
-
+    
     public void doConnect(Properties conProp, httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) {
         throw new UnsupportedOperationException();
     }
-        
+    
 }
