@@ -65,17 +65,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.TimeZone;
 import java.util.Vector;
 
 import de.anomic.http.httpc;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.parser.Parser;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.seedUpload.yacySeedUploadFtp;
 
 public class yacyCore {
     
