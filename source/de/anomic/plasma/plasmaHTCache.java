@@ -67,7 +67,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 
 public final class plasmaHTCache {
@@ -413,7 +413,9 @@ public final class plasmaHTCache {
 	if (!(remotePath.startsWith("/"))) remotePath = "/" + remotePath;
 	if (remotePath.endsWith("/")) remotePath = remotePath + "ndx";
         if (remotePath.indexOf('#') > 0) remotePath.substring(0, remotePath.indexOf('#'));
-        remotePath = remotePath.replace('?', '_'); remotePath = remotePath.replace('&', '_'); // yes this is not reversible, but that is not needed
+        remotePath = remotePath.replace('?', '_'); 
+        remotePath = remotePath.replace('&', '_'); // yes this is not reversible, but that is not needed
+        remotePath = remotePath.replace(':', '_'); // yes this is not reversible, but that is not needed
 	int port = url.getPort();
 	if (port < 0) port = 80;
 	return new File(this.cachePath, url.getHost() + ((port == 80) ? "" : ("+" + port)) + remotePath);
