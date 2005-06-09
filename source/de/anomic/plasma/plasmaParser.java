@@ -79,7 +79,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverLog;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedUploader;
 
 public final class plasmaParser {
@@ -173,11 +173,13 @@ public final class plasmaParser {
     }
     
     public static void initRealtimeParsableMimeTypes(String realtimeParsableMimeTypes) {
-        if ((realtimeParsableMimeTypes == null) || (realtimeParsableMimeTypes.length() == 0)) return;
-        
-        String[] realtimeParsableMimeTypeList = realtimeParsableMimeTypes.split(",");
         LinkedList mimeTypes = new LinkedList();
-        for (int i = 0; i < realtimeParsableMimeTypeList.length; i++) mimeTypes.add(realtimeParsableMimeTypeList[i].toLowerCase().trim());
+        if ((realtimeParsableMimeTypes == null) || (realtimeParsableMimeTypes.length() == 0)) {
+            
+        } else {            
+            String[] realtimeParsableMimeTypeList = realtimeParsableMimeTypes.split(",");        
+            for (int i = 0; i < realtimeParsableMimeTypeList.length; i++) mimeTypes.add(realtimeParsableMimeTypeList[i].toLowerCase().trim());
+        }
         initRealtimeParsableMimeTypes(mimeTypes);
     }
     
@@ -189,20 +191,26 @@ public final class plasmaParser {
     }
     
     public static void initParseableMimeTypes(String enabledMimeTypes) {
-        if ((enabledMimeTypes == null) || (enabledMimeTypes.length() == 0)) return;
-        
-        String[] enabledMimeTypeList = enabledMimeTypes.split(",");
-        HashSet mimeTypes = new HashSet();
-        for (int i = 0; i < enabledMimeTypeList.length; i++) mimeTypes.add(enabledMimeTypeList[i].toLowerCase().trim());
+        HashSet mimeTypes = null;
+        if ((enabledMimeTypes == null) || (enabledMimeTypes.length() == 0)) {
+            mimeTypes = new HashSet();
+        } else {            
+            String[] enabledMimeTypeList = enabledMimeTypes.split(",");
+            mimeTypes = new HashSet(enabledMimeTypeList.length);
+            for (int i = 0; i < enabledMimeTypeList.length; i++) mimeTypes.add(enabledMimeTypeList[i].toLowerCase().trim());
+        }
         setEnabledParserList(mimeTypes);
     }
     
     public static void initMediaExt(String mediaExtString) {
-        if ((mediaExtString == null) || (mediaExtString.length() == 0)) return;
-        
-		String[] xs = mediaExtString.split(",");
         LinkedList extensions = new LinkedList();
-        for (int i = 0; i < xs.length; i++) extensions.add(xs[i].toLowerCase().trim());        
+        if ((mediaExtString == null) || (mediaExtString.length() == 0)) {
+            
+        } else {
+            
+            String[] xs = mediaExtString.split(",");
+            for (int i = 0; i < xs.length; i++) extensions.add(xs[i].toLowerCase().trim());
+        }
         initMediaExt(extensions);
     }
     
@@ -321,13 +329,13 @@ public final class plasmaParser {
     }
     
     public Hashtable getEnabledParserList() {
-        synchronized (this.enabledParserList) {
-            return (Hashtable) this.enabledParserList.clone();
+        synchronized (plasmaParser.enabledParserList) {
+            return (Hashtable) plasmaParser.enabledParserList.clone();
 		}        
     }
     
     public Hashtable getAvailableParserList() {
-        return this.availableParserList;
+        return plasmaParser.availableParserList;
     }
     
     private static void loadEnabledParserList() {
@@ -452,8 +460,8 @@ public final class plasmaParser {
         } catch (Exception e) {
             return null;
         } finally {
-            if (theParser != null) {
-                try { this.theParserPool.returnObject(mimeType, theParser); } catch (Exception e) {}
+            if ((theParser != null) && (supportedMimeTypesContains(mimeType))) {
+                try { plasmaParser.theParserPool.returnObject(mimeType, theParser); } catch (Exception e) {}
             }
         }
     }
@@ -484,8 +492,8 @@ public final class plasmaParser {
             // e.printStackTrace();
             return null;
         } finally {
-            if (theParser != null) {
-                try { this.theParserPool.returnObject(mimeType, theParser); } catch (Exception e) { }
+            if ((theParser != null) && (supportedMimeTypesContains(mimeType))) {
+                try { plasmaParser.theParserPool.returnObject(mimeType, theParser); } catch (Exception e) { }
             }
         }
     }
