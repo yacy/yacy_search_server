@@ -306,7 +306,8 @@ public final class htmlFilterOutputStream extends OutputStream {
                     // the tag ends here. after filtering: pass on
                     filtered = filterSentence(buffer.getBytes(), singlequote);
                     if (out != null) out.write(filtered);
-                    buffer = new serverByteBuffer();
+                    // buffer = new serverByteBuffer();
+                    buffer.reset();
                 }
             } else if (inDoubleQuote) {
                 buffer.append(b);
@@ -317,7 +318,8 @@ public final class htmlFilterOutputStream extends OutputStream {
                     // the tag ends here. after filtering: pass on
                     filtered = filterSentence(buffer.getBytes(), doublequote);
                     if (out != null) out.write(filtered);
-                    buffer = new serverByteBuffer();
+                    // buffer = new serverByteBuffer();
+                    buffer.reset();
                 }
             } else if (inComment) {
                 buffer.append(b);
@@ -326,7 +328,8 @@ public final class htmlFilterOutputStream extends OutputStream {
                     // comment is at end
                     inComment = false;
                     if (out != null) out.write(buffer.getBytes());
-                    buffer = new serverByteBuffer();
+                    // buffer = new serverByteBuffer();
+                    buffer.reset();
                 }
             } else if (inScript) {
                 buffer.append(b);
@@ -342,7 +345,8 @@ public final class htmlFilterOutputStream extends OutputStream {
                     // script is at end
                     inScript = false;
                     if (out != null) out.write(buffer.getBytes());
-                    buffer = new serverByteBuffer();
+                    // buffer = new serverByteBuffer();
+                    buffer.reset();
                 }
             } else {
                 if (buffer.length() == 0) {
@@ -376,7 +380,8 @@ public final class htmlFilterOutputStream extends OutputStream {
                         // the tag ends here. after filtering: pass on
                         filtered = filterSentence(buffer.getBytes(), doublequote);
                         if (out != null) out.write(filtered);
-                        buffer = new serverByteBuffer();
+                        // buffer = new serverByteBuffer();
+                        buffer.reset();
                     } else if (b == lb) {
                         // this is an error case
                         // we consider that there is one rb missing
@@ -384,7 +389,8 @@ public final class htmlFilterOutputStream extends OutputStream {
                             filtered = filterSentence(buffer.getBytes(), doublequote);
                             if (out != null) out.write(filtered);
                         }
-                        buffer = new serverByteBuffer();
+                        // buffer = new serverByteBuffer();
+                        buffer.reset();
                         buffer.append(b);
                     } else {
                         buffer.append(b);
@@ -397,7 +403,8 @@ public final class htmlFilterOutputStream extends OutputStream {
                             filtered = filterSentence(buffer.getBytes(), doublequote);
                             if (out != null) out.write(filtered);
                         }
-                        buffer = new serverByteBuffer();
+                        // buffer = new serverByteBuffer();
+                        buffer.reset();
                         buffer.append(b);
                     } else {
                         // simply append
