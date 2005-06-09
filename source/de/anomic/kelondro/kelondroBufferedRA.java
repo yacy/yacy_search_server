@@ -84,7 +84,7 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
                 writeBuffer((byte[]) bufferMemory.get(element), element.intValue());
                 bufferMemory.remove(element);
                 int age = bufferScore.deleteScore(element);
-                de.anomic.server.serverLog.logDebug("CACHE: " + name, "GC; age=" + ((((int) (0xFFFFFFFFL & System.currentTimeMillis())) - age) / 1000));
+                de.anomic.server.logging.serverLog.logDebug("CACHE: " + name, "GC; age=" + ((((int) (0xFFFFFFFFL & System.currentTimeMillis())) - age) / 1000));
             }
             // add new element
             buffer = new byte[bufferElementSize];
