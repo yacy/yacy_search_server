@@ -80,6 +80,8 @@
 
 package de.anomic.server;
 
+import java.io.IOException;
+
 
 public interface serverHandler {
 
@@ -109,8 +111,23 @@ public interface serverHandler {
     // but only the necessary one for a newly initialized instance
     public Object clone();
     
-    // Instead of using clone this function can be used to reset an existing 
-    // handler prototype so that it can e reused
+    /** 
+     * Instead of using clone this function can be used to reset an existing 
+     * handler prototype so that it can e reused 
+     */
     public void reset();
     
+    /**
+     * Tthis function will be called by the {@link serverCore}.listen() function
+     * if the whole request line is empty and therefore no function of this
+     * serverHandlerClass can be called because of the missing command name
+     */
+    public Boolean EMPTY(String arg) throws IOException;
+    
+    /** 
+     * This function will be called by the {@link serverCore}.listen() function
+     * if no corresponding funktion of the serverHandler class can be
+     * found for the received command.
+     */
+    public Boolean UNKNOWN(String requestLine) throws IOException;    
 }
