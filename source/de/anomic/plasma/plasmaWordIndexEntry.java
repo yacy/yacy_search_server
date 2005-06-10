@@ -50,6 +50,7 @@ import java.util.Properties;
 
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 
 public class plasmaWordIndexEntry {
 	
@@ -88,6 +89,8 @@ public class plasmaWordIndexEntry {
     public static final char DT_MOVIE   = 'm';
     public static final char DT_FLASH   = 'f';
     public static final char DT_SHARE   = 's';
+    public static final char DT_AUDIO   = 'a';
+    public static final char DT_BINARY  = 'b';
     public static final char DT_UNKNOWN = 'u';
 
     // local flag attributes
@@ -103,28 +106,68 @@ public class plasmaWordIndexEntry {
     }
 
     // doctype calculation
-    public static char docType(String path) {
-	    char doctype = DT_UNKNOWN;
-	    if (path.endsWith(".gif")) doctype = DT_IMAGE;
-	    if (path.endsWith(".jpg")) doctype = DT_IMAGE;
-	    if (path.endsWith(".jpeg")) doctype = DT_IMAGE;
-	    if (path.endsWith(".png")) doctype = DT_IMAGE;
-	    if (path.endsWith(".html")) doctype = DT_HTML;
-	    if (path.endsWith(".txt")) doctype = DT_TEXT;
-	    if (path.endsWith(".doc")) doctype = DT_DOC;
-	    if (path.endsWith(".rtf")) doctype = DT_DOC;
-	    if (path.endsWith(".pdf")) doctype = DT_PDFPS;
-	    if (path.endsWith(".ps")) doctype = DT_PDFPS;
-	    if (path.endsWith(".avi")) doctype = DT_MOVIE;
-	    if (path.endsWith(".mov")) doctype = DT_MOVIE;
-	    if (path.endsWith(".qt")) doctype = DT_MOVIE;
-	    if (path.endsWith(".mpg")) doctype = DT_MOVIE;
-            if (path.endsWith(".md5")) doctype = DT_SHARE;
-	    if (path.endsWith(".mpeg")) doctype = DT_MOVIE;
-	    if (path.endsWith(".asf")) doctype = DT_FLASH;
-	    return doctype;
+    public static char docType(URL url) {
+        String path = htmlFilterContentScraper.urlNormalform(url);
+        char doctype = DT_UNKNOWN;
+        if (path.endsWith(".gif")) doctype = DT_IMAGE;
+        if (path.endsWith(".jpg")) doctype = DT_IMAGE;
+        if (path.endsWith(".jpeg")) doctype = DT_IMAGE;
+        if (path.endsWith(".png")) doctype = DT_IMAGE;
+        if (path.endsWith(".html")) doctype = DT_HTML;
+        if (path.endsWith(".txt")) doctype = DT_TEXT;
+        if (path.endsWith(".doc")) doctype = DT_DOC;
+        if (path.endsWith(".rtf")) doctype = DT_DOC;
+        if (path.endsWith(".pdf")) doctype = DT_PDFPS;
+        if (path.endsWith(".ps")) doctype = DT_PDFPS;
+        if (path.endsWith(".avi")) doctype = DT_MOVIE;
+        if (path.endsWith(".mov")) doctype = DT_MOVIE;
+        if (path.endsWith(".qt")) doctype = DT_MOVIE;
+        if (path.endsWith(".mpg")) doctype = DT_MOVIE;
+        if (path.endsWith(".md5")) doctype = DT_SHARE;
+        if (path.endsWith(".mpeg")) doctype = DT_MOVIE;
+        if (path.endsWith(".asf")) doctype = DT_FLASH;
+        return doctype;
     }
 
+    public static char docType(String mime) {
+        char doctype = DT_UNKNOWN;
+        if (mime.endsWith("/jpeg")) doctype = DT_IMAGE;
+        if (mime.endsWith("/rtf")) doctype = DT_DOC;
+        if (mime.endsWith("/msword")) doctype = DT_DOC;
+        if (mime.endsWith("/mspowerpoint")) doctype = DT_DOC;
+        if (mime.endsWith("/postscript")) doctype = DT_PDFPS;
+        if (mime.endsWith("/pdf")) doctype = DT_PDFPS;
+        if (mime.endsWith("/octet-stream")) doctype = DT_BINARY;
+        if (mime.endsWith("/x-shockwave-flash")) doctype = DT_FLASH;
+        if (mime.startsWith("audio/")) doctype = DT_AUDIO;
+        if (mime.startsWith("video/")) doctype = DT_MOVIE;
+        if (mime.startsWith("text/")) doctype = DT_TEXT;
+        if (mime.startsWith("image/")) doctype = DT_IMAGE;
+        if (mime.endsWith("/html")) doctype = DT_HTML;
+        //bz2     = application/x-bzip2
+        //dvi     = application/x-dvi
+        //gz      = application/gzip
+        //hqx     = application/mac-binhex40
+        //lha     = application/x-lzh
+        //lzh     = application/x-lzh
+        //pac     = application/x-ns-proxy-autoconfig
+        //php     = application/x-httpd-php
+        //phtml   = application/x-httpd-php
+        //rss     = application/xml
+        //tar     = application/tar
+        //tex     = application/x-tex
+        //tgz     = application/tar
+        //torrent = application/x-bittorrent
+        //xhtml   = application/xhtml+xml
+        //xla     = application/msexcel
+        //xls     = application/msexcel
+        //xsl	  = application/xml
+        //xml     = application/xml
+        //Z       = application/x-compress
+        //zip     = application/zip
+        return doctype;
+    }
+    
     // language calculation
     public static String language(URL url) {
 	String host = url.getHost();

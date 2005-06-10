@@ -532,7 +532,8 @@ public final class plasmaHTCache {
 		lastModified = responseHeader.lastModified();
                 if (lastModified == null) lastModified = new Date(); // does not exist in header
 	    }
-	    this.doctype = plasmaWordIndexEntry.docType(nomalizedURLString);
+	    this.doctype = plasmaWordIndexEntry.docType(responseHeader.mime());
+            if (this.doctype == plasmaWordIndexEntry.DT_UNKNOWN) this.doctype = plasmaWordIndexEntry.docType(url);
 	    this.language = plasmaWordIndexEntry.language(url);
 
 	    // to be defined later:
