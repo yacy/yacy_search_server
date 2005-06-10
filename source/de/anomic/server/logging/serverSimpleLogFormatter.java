@@ -69,14 +69,16 @@ public class serverSimpleLogFormatter extends SimpleFormatter {
           // adding the stack trace if available
           buffer.append(System.getProperty("line.separator"));
           if (record.getThrown() != null) {
+              StringWriter writer = null;
               try {
-                  StringWriter writer = new StringWriter();
+                  writer = new StringWriter();
                   PrintWriter printer = new PrintWriter(writer);
                   record.getThrown().printStackTrace(printer);
-                  writer.close();
                   buffer.append(writer.toString());
               } catch (Exception e) {
                   buffer.append("Failed to get stack trace: " + e.getMessage());
+              } finally {
+                  if (writer != null) try {writer.close();} catch (Exception ex) {}
               }
           }
           return buffer.toString();

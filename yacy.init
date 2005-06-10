@@ -107,20 +107,6 @@ mediaExt=ace,arj,asf,avi,bin,bz2,css,deb,doc,dmg,gif,gz,hqx,img,iso,jar,jpe,jpg,
 # other peer users
 promoteSearchPageGreeting =
 
-# the log level, each for a specific software part
-# loglevels are:
-# NULL    = 0: no output at all
-# FAILURE = 1: system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
-# ERROR   = 2: exceptional error, catcheable and non-critical (i.e. file error)
-# WARNING = 3: uncritical service failure, may require user activity (i.e. input required, wrong authorization)
-# SYSTEM  = 4: regular system status information (i.e. start-up messages)
-# INFO    = 5: regular action information (i.e. any httpd request URL)
-# DEBUG   = 6: in-function status debug output
-httpdLoglevel=4
-proxyLoglevel=5
-plasmaLoglevel=5
-yacyLoglevel=5
-
 # the path to the PLASMA database, especially the reverse word index
 dbPath=DATA/PLASMADB
 

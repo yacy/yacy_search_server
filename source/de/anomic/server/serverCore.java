@@ -170,7 +170,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public serverCore(int port, int maxSessions, int timeout,
             boolean termSleepingThreads, boolean blockAttack,
             serverHandler handlerPrototype, serverSwitch switchboard,
-            int commandMaxLength, int logl) throws IOException {
+            int commandMaxLength) throws IOException {
         this.port = port;
         this.commandMaxLength = commandMaxLength;
         this.denyHost = (blockAttack) ? new Hashtable() : null;
@@ -207,7 +207,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.maxSessions = maxSessions;
             this.timeout = timeout;
             this.termSleepingThreads = termSleepingThreads;
-            this.log = new serverLog("SERVER", logl);
+            this.log = new serverLog("SERVER");
         } catch (java.lang.ClassNotFoundException e) {
             System.out.println("FATAL ERROR: " + e.getMessage() + " - Class Not Found"); System.exit(0);
         }

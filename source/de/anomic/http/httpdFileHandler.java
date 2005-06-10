@@ -123,6 +123,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     private Properties connectionProperties = null;    
     private MessageDigest md5Digest = null;
     
+    private final serverLog theLogger = new serverLog("FILEHANDLER");
+    
     public httpdFileHandler(serverSwitch switchboard) {
         this.switchboard = switchboard;
         
@@ -416,12 +418,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             tp.put("uptime", ((System.currentTimeMillis() - Long.parseLong(switchboard.getConfig("startupTime","0"))) / 1000) / 60); // uptime in minutes
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (InvocationTargetException e) {
-                            System.out.println("INTERNAL ERROR: " + e.toString() + ":" +
+                            this.theLogger.logError("INTERNAL ERROR: " + e.toString() + ":" +
                                     e.getMessage() +
                                     " target exception at " + rc + ": " +
                                     e.getTargetException().toString() + ":" +
-                                    e.getTargetException().getMessage());
-                            e.printStackTrace();
+                                    e.getTargetException().getMessage(),e);
                             rc = null;
                         }
                         filedate = new Date(System.currentTimeMillis());
@@ -483,7 +484,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         } catch (Exception e) {
             //textMessage(out, 503, "Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'\r\n");
             //e.printStackTrace();
-            System.out.println("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'\r\n");
+            this.theLogger.logError("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'",e);
         }
         out.flush();
         if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {

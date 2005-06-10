@@ -160,22 +160,28 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     }
     
     private final void logError(String text) {
-        if (log == null)
-            serverLog.logError("THREAD-CONTROL", text);
-        else
-            log.logError(text);
+        if (log == null) serverLog.logError("THREAD-CONTROL", text);
+        else log.logError(text);
+    }    
+    
+    private final void logError(String text,Throwable thrown) {
+        if (log == null) serverLog.logError("THREAD-CONTROL", text, thrown);
+        else log.logError(text,thrown);
     }
+    
     private void logSystem(String text) {
-        if (log == null)
-            serverLog.logSystem("THREAD-CONTROL", text);
-        else
-            log.logSystem(text);
+        if (log == null) serverLog.logSystem("THREAD-CONTROL", text);
+        else log.logSystem(text);
     }
+    
+    private void logSystem(String text, Throwable thrown) {
+        if (log == null) serverLog.logSystem("THREAD-CONTROL", text, thrown);
+        else log.logSystem(text,thrown);
+    }    
     
     public void jobExceptionHandler(Exception e) {
         // default handler for job exceptions. shall be overridden for own handler
-        logError("thread '" + this.getName() + "': " + e.toString());
-        e.printStackTrace();
+        logError("thread '" + this.getName() + "': " + e.toString(),e);
     }
     
     public void run() {

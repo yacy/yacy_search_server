@@ -425,8 +425,7 @@ public final class plasmaCrawlWorker extends Thread {
         } catch (Exception e) {
             // this may happen if the targeted host does not exist or anything with the
             // remote server was wrong.
-            log.logError("CRAWLER LOADER ERROR2 with url=" + url.toString() + ": " + e.toString());
-            e.printStackTrace();
+            log.logError("CRAWLER LOADER ERROR2 with url=" + url.toString() + ": " + e.toString(),e);
         } finally {
             if (remote != null) httpc.returnInstance(remote);
         }

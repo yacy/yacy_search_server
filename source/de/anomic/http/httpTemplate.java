@@ -55,6 +55,7 @@ import java.io.File;
 import java.util.Hashtable;
 
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.logging.serverLog;
 
 /**
  * A template engine, which substitutes patterns in strings<br>
@@ -355,9 +356,8 @@ public final class httpTemplate {
 						include+=line+de.anomic.server.serverCore.crlfString;
 					}
 				}catch(IOException e){
-					//file not found?
-					System.err.println("Include Error with file: "+filename);
-					//e.printStackTrace();
+					//file not found?                    
+					serverLog.logError("FILEHANDLER","Include Error with file: "+filename);
 				}
 				PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
 				writeTemplate(pis2, out, pattern, dflt, prefix);

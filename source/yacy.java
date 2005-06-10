@@ -176,7 +176,6 @@ public final class yacy {
             // read environment
             //new
             int port          = Integer.parseInt(sb.getConfig("port", "8080"));
-            int httpdLoglevel = Integer.parseInt(sb.getConfig("httpdLoglevel", "2"));
             int timeout       = Integer.parseInt(sb.getConfig("httpdTimeout", "60000"));
             if (timeout < 60000) timeout = 60000;
             int maxSessions   = Integer.parseInt(sb.getConfig("httpdMaxSessions", "100"));
@@ -277,8 +276,7 @@ public final class yacy {
                         true /* block attacks (wrong protocol) */,
                         protocolHandler /*command class*/,
                         sb,
-                        30000 /*command max length incl. GET args*/,
-                        httpdLoglevel /*loglevel*/);
+                        30000 /*command max length incl. GET args*/);
                 server.setName("httpd:"+port);
                 server.setPriority(Thread.MAX_PRIORITY); 
                 if (server == null) {
@@ -321,8 +319,7 @@ public final class yacy {
                     try {
                         sb.waitForShutdown();
                     } catch (Exception e) {
-                        serverLog.logError("MAIN CONTROL LOOP", "PANIK: " + e.getMessage());
-                        e.printStackTrace();
+                        serverLog.logError("MAIN CONTROL LOOP", "PANIK: " + e.getMessage(),e);
                     }
                     
                     // shut down
@@ -344,13 +341,11 @@ public final class yacy {
                     sb.close();
                 }
             } catch (Exception e) {
-                serverLog.logError("STARTUP", "" + e);
-                e.printStackTrace();
+                serverLog.logError("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
                 //System.exit(1);
             }
         } catch (Exception ee) {
-            serverLog.logFailure("STARTUP", "FATAL ERROR: " + ee.getMessage());
-            ee.printStackTrace();
+            serverLog.logFailure("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         }
         serverLog.logSystem("SHUTDOWN", "goodbye. (this is the last line)");
         try {
@@ -630,7 +625,7 @@ class shutdownHookThread extends Thread
                 this.mainThread.join();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            serverLog.logFailure("SHUTDOWN","Unexpected error. " + e.getClass().getName(),e);
         }
     }
 }

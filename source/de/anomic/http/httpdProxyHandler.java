@@ -455,9 +455,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             }
            
         } catch (Exception e) {
-            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
-            System.err.println("PROXY: " + errorMsg);   
-            this.theLogger.logError(errorMsg);
+            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();   
+            this.theLogger.logError(errorMsg,e);
         } finally {
             respond.flush();
             if (respond instanceof httpdByteCountOutputStream) ((httpdByteCountOutputStream)respond).finish();
@@ -693,12 +692,12 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 if (cacheFile.exists()) cacheFile.delete();
                 if (e.getMessage().indexOf("Corrupt GZIP trailer") >= 0) {
                     // just do nothing, we leave it this way
-                    this.theLogger.logDebug("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
+                    this.theLogger.logDebug("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")",e);
                     conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
                 } else {
                     if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                         httpd.sendRespondError(conProp,respond,4,404,null,"client unexpectedly closed connection",e);
-                        this.theLogger.logDebug("IOError for URL " + url + " (" + e.getMessage() + ") - responded 404");
+                        this.theLogger.logDebug("IOError for URL " + url + " (" + e.getMessage() + ") - responded 404",e);
                     } else {
                         conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
                     }

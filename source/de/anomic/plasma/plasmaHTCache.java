@@ -97,8 +97,7 @@ public final class plasmaHTCache {
     public plasmaHTCache(plasmaSwitchboard switchboard, int bufferkb) {
 	this.switchboard = switchboard;
         
-        int loglevel = Integer.parseInt(switchboard.getConfig("plasmaLoglevel", "2"));
-        this.log = new serverLog("HTCACHE", loglevel);
+        this.log = new serverLog("HTCACHE");
         
 	// set cache path
 	cachePath = new File(switchboard.getRootPath(),switchboard.getConfig("proxyCache","HTCACHE"));

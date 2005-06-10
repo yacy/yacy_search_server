@@ -245,7 +245,7 @@ public final class httpd implements serverHandler {
     public String error(Throwable e) { // OBLIGATORIC FUNCTION
         // return string in case of any error that occurs during communication
         // is always (but not only) called if an IO-dependent exception occurrs.
-        e.printStackTrace();
+        this.log.logError("Unexpected Error. " + e.getClass().getName(),e);
         return "501 Exception occurred: " + e.getMessage();
     }
     
@@ -507,9 +507,8 @@ public final class httpd implements serverHandler {
             
             return this.prop.getProperty(CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (Exception e) {
-            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
-            System.err.println("PROXY: " + errorMsg);   
-            this.log.logError(errorMsg);
+            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();   
+            this.log.logError(errorMsg,e);
             return serverCore.TERMINATE_CONNECTION;
         }
     }
@@ -560,9 +559,8 @@ public final class httpd implements serverHandler {
             }
             return this.prop.getProperty(CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (Exception e) {
-            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
-            System.err.println("PROXY: " + errorMsg);   
-            this.log.logError(errorMsg);
+            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();  
+            this.log.logError(errorMsg,e);
             return serverCore.TERMINATE_CONNECTION;
         }        
     }
@@ -632,8 +630,7 @@ public final class httpd implements serverHandler {
             return this.prop.getProperty(CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (Exception e) {
             String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
-            System.err.println("PROXY: " + errorMsg);   
-            this.log.logError(errorMsg);
+            this.log.logError(errorMsg,e);
             return serverCore.TERMINATE_CONNECTION;
         }        
     }

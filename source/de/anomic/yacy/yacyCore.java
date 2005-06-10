@@ -133,7 +133,7 @@ public class yacyCore {
         switchboard.setConfig("yacyStatus","");
         
         // set log level
-        log = new serverLog("YACY", Integer.parseInt(switchboard.getConfig("yacyLoglevel", "0")));
+        log = new serverLog("YACY");
         
         // create a yacy db
         yacyDBPath = new File(sb.getRootPath(), sb.getConfig("yacyDB", "DATA/YACYDB"));

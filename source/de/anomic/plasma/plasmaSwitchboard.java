@@ -106,7 +106,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -117,7 +116,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -125,24 +123,19 @@ import java.util.Vector;
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroTables;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
-import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverThread;
 import de.anomic.server.serverInstantThread;
-import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyClient;
@@ -198,8 +191,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	super(rootPath, initPath, configPath);
         
         // set loglevel and log
-	int loglevel = Integer.parseInt(getConfig("plasmaLoglevel", "2"));
-	setLog(new serverLog("PLASMA", loglevel));
+	setLog(new serverLog("PLASMA"));
         
 	// load values from configs
 	plasmaPath   = new File(rootPath, getConfig("dbPath", "PLASMADB"));
