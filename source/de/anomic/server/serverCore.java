@@ -588,7 +588,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	*/
     
     	public void log(boolean outgoing, String request) {
-    	    serverCore.this.log.logInfo(userAddress.getHostAddress() + "/" + this.identity + " " +
+    	    serverCore.this.log.logDebug(userAddress.getHostAddress() + "/" + this.identity + " " +
     		     "[" + serverCore.this.theSessionPool.getNumActive() + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
