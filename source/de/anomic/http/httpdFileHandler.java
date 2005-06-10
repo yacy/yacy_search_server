@@ -484,7 +484,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         } catch (Exception e) {
             //textMessage(out, 503, "Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'\r\n");
             //e.printStackTrace();
-            this.theLogger.logError("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'",e);
+            this.theLogger.logError("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'");
         }
         out.flush();
         if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
