@@ -458,7 +458,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();   
             this.theLogger.logError(errorMsg,e);
         } finally {
-            respond.flush();
+            try { respond.flush(); } catch (Exception e) {}
             if (respond instanceof httpdByteCountOutputStream) ((httpdByteCountOutputStream)respond).finish();
             
             this.currentConProp.put(httpd.CONNECTION_PROP_REQUEST_END,new Long(System.currentTimeMillis()));
@@ -816,7 +816,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 httpd.sendRespondError(conProp,respond,4,503,"socket error: " + e.getMessage(),"socket error: " + e.getMessage(), e);
             }
         } finally {
-            respond.flush();
+            try { respond.flush(); } catch (Exception e) {}
         }
         return;
     }
