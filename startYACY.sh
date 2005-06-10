@@ -14,12 +14,12 @@ else
 	
 	if [ x$1 != x-d ]
 	then
-		nohup java -classpath classes:$CLASSPATH yacy >> yacy.log &
+		nohup java -classpath classes:htroot:$CLASSPATH yacy >> yacy.log &
 		echo "YaCy started as daemon process. View it's activity in yacy.log"
 		echo "To stop YaCy, please execute stopYACY.sh and wait some seconds"
 		echo "To administrate YaCy, start your web browser and open http://localhost:8080"
 	else
 		java -classpath classes:$CLASSPATH yacy
-		#java -Xms16m -Xmx200m -classpath classes:$CLASSPATH yacy
+		#java -Xms16m -Xmx200m -classpath classes:htroot:$CLASSPATH yacy
 	fi
 fi

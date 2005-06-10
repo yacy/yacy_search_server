@@ -112,6 +112,7 @@
   <!-- defining the classpath that should be used for compiling -->   
   <path id="project.class.path">
     <pathelement location="${build}"/>
+    <pathelement location="${htroot}"/>
     
     <!-- libs needed for the yacy thread/object-pools -->
     <pathelement location="${lib}/commons-collections.jar" />
