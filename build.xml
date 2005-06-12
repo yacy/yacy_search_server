@@ -123,12 +123,13 @@
   <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
          includes="yacy.java" 
          classpathref="project.class.path"
+         debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}"/>
 
   <!-- compiling the main sources -->   
   <javac srcdir="${src}/" destdir="${build}"
          excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**,yacy.java"
-         debug="true"
+         debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}">
     <classpath refid="project.class.path"/>
   </javac>
@@ -136,6 +137,7 @@
   <!-- compiling the two standard seed uploader methods -->   
   <javac srcdir="${src}" destdir="${build}"
          classpathref="project.class.path"
+         debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}">
     <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java" />
     <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>    
@@ -144,6 +146,7 @@
   <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
   <javac srcdir="${htroot}/" 
          classpathref="project.class.path"
+         debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}"/>
 </target>
 

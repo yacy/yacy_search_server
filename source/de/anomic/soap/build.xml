@@ -11,7 +11,7 @@
    	<property name="addonArchive" location="${release}/${addonLongName}_${addonVersion}.tgz"/>	    	
     	
     <target name="compile">
-  	  <javac srcdir="${src}/de/anomic/soap/" destdir="${build}" source="${javacSource}" target="${javacTarget}">
+  	  <javac srcdir="${src}/de/anomic/soap/" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
   	  	<classpath>
   	  	  <pathelement location="${build}" />	
   	  	

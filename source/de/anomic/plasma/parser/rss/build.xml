@@ -12,7 +12,7 @@
    	<property name="parserArchive" location="${release}/${parserLongName}_${parserVersion}.tgz"/>	    	
     	
     <target name="compile">
-  	  <javac srcdir="${src}/de/anomic/plasma/parser/${parserShortName}" destdir="${build}" source="${javacSource}" target="${javacTarget}">
+  	  <javac srcdir="${src}/de/anomic/plasma/parser/${parserShortName}" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
   	  	<classpath>
   	  	  <pathelement location="${build}" />	
   	  	
