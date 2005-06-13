@@ -94,9 +94,11 @@ public class sharedBlacklist_p {
 	}else{
 		filename = "shared.black";
 	}
+    
+    BufferedReader br = null;
 	try{
-		//Read the List
-		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(listsPath, filename))));
+		//Read the List 
+		br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(listsPath, filename))));
 		while((line = br.readLine()) != null){
 			if(! (line.startsWith("#") || line.equals("")) ){
 				Blacklist.add(line);
@@ -105,6 +107,9 @@ public class sharedBlacklist_p {
 		}
 		br.close();
 	}catch(IOException e){}
+    finally {
+        if (br!=null) try{br.close(); br=null;}catch(Exception e){}
+    }
 
 	prop.put("page", 0); //checkbox list
 	if( post != null && post.containsKey("hash") ){ //Step 1: retrieve the Items
@@ -187,7 +192,7 @@ public class sharedBlacklist_p {
 
 		try{
 			//Read the List
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream( (String)post.get("file") )));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream( (String)post.get("file") )));
 			while((line = br.readLine()) != null){
 				if(! (line.startsWith("#") || line.equals("")) ){
 					otherBlacklist.add(line);
@@ -196,7 +201,9 @@ public class sharedBlacklist_p {
 			br.close();
 		}catch(IOException e){
 			prop.put("status", 2); //File Error
-		}
+		} finally {
+            if (br != null) try {br.close(); br = null; } catch (Exception e){}
+        }
 		Name = (String)post.get("file");
 
                 //Make HTML-Optionlist with retrieved items

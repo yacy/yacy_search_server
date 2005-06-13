@@ -64,10 +64,15 @@ public class profile {
 	int count=0;
 	String key="";
 	String value="";
+    
+    FileInputStream fileIn = null;
 	try{
-		profile.load(new FileInputStream(new File("DATA/SETTINGS/profile.txt")));
-		
+        fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
+		profile.load(fileIn);		
 	}catch(IOException e){}
+    finally {
+        if (fileIn!=null) try{fileIn.close(); fileIn=null;}catch(Exception e) {}
+    }
 	
 	Iterator it = ((Map)profile).keySet().iterator();
 	while(it.hasNext()){
