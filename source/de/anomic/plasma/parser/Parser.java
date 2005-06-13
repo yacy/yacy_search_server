@@ -50,6 +50,7 @@ import java.net.URL;
 import java.util.Hashtable;
 
 import de.anomic.plasma.plasmaParserDocument;
+import de.anomic.server.logging.serverLog;
 
 /**
  * This interface defines a list of methods that needs to be implemented
@@ -114,5 +115,11 @@ public interface Parser {
      * @return Returns a list of library names that are needed by this parser
      */
     public String[] getLibxDependences();
+    
+    /**
+     * Can be used to set the logger that should be used by the parser module
+     * @param log the {@link serverLog logger} that should be used 
+     */
+    public void setLogger(serverLog log);
     
 }

@@ -349,8 +349,9 @@ public final class httpTemplate {
 				filename= new String(replacePattern( prefix + filename.substring(1, filename.length()-1), pattern, dflt));
 			}
             if ((!filename.equals("")) && (!filename.equals(dflt))) {
+                BufferedReader br = null;
 				try{
-					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream( new File("htroot", filename) )));
+					br = new BufferedReader(new InputStreamReader(new FileInputStream( new File("htroot", filename) )));
 					//Read the Include
 					while( (line = br.readLine()) != null ){
 						include+=line+de.anomic.server.serverCore.crlfString;
@@ -358,7 +359,9 @@ public final class httpTemplate {
 				}catch(IOException e){
 					//file not found?                    
 					serverLog.logError("FILEHANDLER","Include Error with file: "+filename);
-				}
+				} finally {
+                    if (br!=null) try{br.close(); br=null;}catch(Exception e){}
+                }
 				PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
 				writeTemplate(pis2, out, pattern, dflt, prefix);
 			}

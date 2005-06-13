@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 import de.anomic.plasma.plasmaParserDocument;
+import de.anomic.server.logging.serverLog;
 
 /**
  * New classes implementing the {@link de.anomic.plasma.parser.Parser} interface
@@ -66,6 +67,12 @@ public abstract class AbstractParser implements Parser{
      * a list of library names that are needed by this parser
      */
     protected String[] libxDependencies = null;
+    
+    /**
+     * the logger class that should be used by the parser module for logging
+     * purposes.
+     */
+    protected serverLog theLogger = null;
     
     /**
      * The Constructor of this class.
@@ -134,6 +141,13 @@ public abstract class AbstractParser implements Parser{
      */
     public String[] getLibxDependences() {
         return this.libxDependencies;
+    }
+    
+    /**
+     * Setting the logger that should be used by this parser class ...
+     */
+    public void setLogger(serverLog log) {
+        this.theLogger = log;
     }
     
 }

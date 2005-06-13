@@ -78,6 +78,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.plasma.parser.Parser;
+import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedUploader;
@@ -397,8 +398,7 @@ public final class plasmaParser {
                         if (neededLibx != null) {
                             for (int libxId=0; libxId < neededLibx.length; libxId++) {
                                 if (javaClassPath.indexOf(neededLibx[libxId]) == -1) {
-                                    serverLog.logWarning("PARSER","Parser '" + className + "': issing dependency detected: '" + neededLibx[libxId] + "'. Parser will be ignored.");
-                                    continue;
+                                    throw new ParserException("Missing dependency detected: '" + neededLibx[libxId] + "'.");
                                 }
                             }
                         }                        
@@ -413,7 +413,7 @@ public final class plasmaParser {
                         }
                             
 	                } catch (Exception e) { /* we can ignore this for the moment */ 
-                        serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored. " + e.getClass().getName());
+                        serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
                     }
                 }
 			}
@@ -645,8 +645,19 @@ final class plasmaParserFactory implements KeyedPoolableObjectFactory {
         if (!(key instanceof String))
             throw new IllegalArgumentException("The object key must be of type string.");
         
+        // loading class by name
         Class moduleClass = Class.forName((String)key);
-        return moduleClass.newInstance();
+        
+        // instantiating class
+        Parser theParser = (Parser) moduleClass.newInstance();
+        
+        // setting logger that should by used
+        String parserShortName = ((String)key).substring("de.anomic.plasma.parser.".length(),((String)key).lastIndexOf("."));
+        
+        serverLog theLogger = new serverLog("PARSER." + parserShortName.toUpperCase());
+        theParser.setLogger(theLogger);
+        
+        return theParser;
     }          
     
      /**

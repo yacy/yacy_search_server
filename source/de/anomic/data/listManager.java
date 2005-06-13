@@ -121,8 +121,9 @@ public class listManager {
 		String line;
 		Vector list = new Vector();
 		int count = 0;
+        BufferedReader br = null;
 		try{
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile)));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile)));
 
 			while( (line = br.readLine()) != null){
 				list.add(line);
@@ -131,20 +132,25 @@ public class listManager {
 			br.close();
 		}catch(IOException e){
 			//list is empty
-		}
+		} finally {
+            if (br!=null)try{br.close();}catch(Exception e) {}
+        }
 		return list; 
 	}
 
 	//Writes the Liststring to a file
 	public static boolean writeList(File listFile, String out){
+        BufferedWriter bw = null;
 		try{
-		    BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(listFile)));
+		    bw = new BufferedWriter(new PrintWriter(new FileWriter(listFile)));
 			bw.write(out);
 			bw.close();
 			return true;
 		}catch(IOException e){
 			return false;
-		}
+		} finally {
+            if (bw!=null)try{bw.close();}catch(Exception e){}
+        }
 	}
 
 	//overloaded function to write an array
@@ -159,8 +165,9 @@ public class listManager {
 	public static String getListString(String filename, boolean withcomments){
 		String temp = "";
 		String line = "";
+        BufferedReader br = null;
 		try{
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(listsPath ,filename))));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(listsPath ,filename))));
 			//Read the List
 			while((line = br.readLine()) != null){
 				if( (!line.startsWith("#") || withcomments) || (!line.equals("")) ){
@@ -168,7 +175,11 @@ public class listManager {
 				}
 			}
 			br.close();
-		}catch(IOException e){}
+		} catch(IOException e){            
+        } finally {
+            if (br!=null)try{br.close();}catch(Exception e){}
+        }
+        
 		return temp;
 	}
 

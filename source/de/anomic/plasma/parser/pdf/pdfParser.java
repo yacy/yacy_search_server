@@ -49,8 +49,6 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.Hashtable;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.pdfbox.pdfparser.PDFParser;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.pdmodel.PDDocumentInformation;
@@ -107,11 +105,10 @@ public class pdfParser extends AbstractParser implements Parser {
             
             PDFTextStripper stripper = new PDFTextStripper();
             theDocument = parser.getPDDocument();
-                              
-            PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();
             
-            if (theDocInfo != null)
-            {
+            // extracting some metadata
+            PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();            
+            if (theDocInfo != null) {
                 docTitle = theDocInfo.getTitle();
                 docSubject = theDocInfo.getSubject();
                 docAuthor = theDocInfo.getAuthor();
@@ -157,10 +154,10 @@ public class pdfParser extends AbstractParser implements Parser {
             return theDoc;
         }
         catch (Exception e) {            
-            throw new ParserException("Unable to parse the pdf content. " + e.getMessage());
+            throw new ParserException("Unable to parse the pdf content. " + e.getMessage(),e);
         } finally {
             if (theDocument != null) try { theDocument.close(); } catch (Exception e) {}
-            if (writer != null) try { writer.close(); } catch (Exception e) {}
+            if (writer != null)      try { writer.close(); }      catch (Exception e) {}
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
         }
     }

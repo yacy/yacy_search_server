@@ -93,9 +93,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
-import sun.security.provider.MD5;
-
-import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -137,10 +134,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 serverLog.logSystem("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
                 mimeTableInputStream = new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath));
                 this.mimeTable.load(mimeTableInputStream);
-            } catch (Exception e) {
-                if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}
+            } catch (Exception e) {                
                 serverLog.logError("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
                 System.exit(1);
+            } finally {
+                if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}                
             }
         }
         

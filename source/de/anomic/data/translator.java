@@ -77,47 +77,60 @@ public class translator {
 	
 	public static boolean translateFile(File sourceFile, File destFile, File translationFile){
 		Properties translationList = new Properties();
+        FileInputStream fileIn = null;
 		try{
-			translationList.load(new FileInputStream(translationFile));
+			translationList.load(fileIn = new FileInputStream(translationFile));
 			return translateFile(sourceFile, destFile, translationList);
 		}catch(IOException e){
 			return false;
-		}
+		} finally {
+            if (fileIn!=null)try{fileIn.close();}catch(Exception e){}
+        }
 	}
 	
 	public static boolean translateFile(File sourceFile, File destFile, Properties translationList){
 
 		String content = "";
 		String line = "";
+        BufferedReader br = null;
 		try{
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile)));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile)));
 			while( (line = br.readLine()) != null){
 				content += line + de.anomic.server.serverCore.crlfString;
 			}
 			br.close();
 		}catch(IOException e){
 			return false;
-		}
+		} finally {
+            if (br!=null)try{br.close();}catch(Exception e){}
+        }
+        
 		content = translate(content, translationList);
+        BufferedWriter bw = null;
 		try{
-			BufferedWriter bw = new BufferedWriter(new FileWriter(destFile));
+			bw = new BufferedWriter(new FileWriter(destFile));
 			bw.write(content);
 			bw.close();
 		}catch(IOException e){
 			return false;
-		}
+		} finally {
+            if(bw!=null)try{bw.close();}catch(Exception e){}
+        }
 		
 		return true;
 	}
 
 	public static boolean translateFiles(File sourceDir, File destDir, File translationFile, String extension){
 		Properties translationList = new Properties();
+        FileInputStream fileIn = null;
 		try{
-			translationList.load(new FileInputStream(translationFile));
+			translationList.load(fileIn = new FileInputStream(translationFile));
 			return translateFiles(sourceDir, destDir, translationList, extension);
 		}catch(IOException e){
 			return false;
-		}
+		} finally {
+            if (fileIn!=null)try{fileIn.close();}catch(Exception e){}
+        }
 	}
 
 	public static boolean translateFiles(File sourceDir, File destDir, Properties translationList, String extension){

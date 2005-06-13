@@ -154,18 +154,27 @@ public final class serverLog {
     
     public static final void configureLogging(String homePath) throws SecurityException, FileNotFoundException, IOException {
         
-        // loading the logger configuration from file
-        LogManager logManager = LogManager.getLogManager();
-        logManager.readConfiguration(new FileInputStream(new File(homePath, "yacy.logging")));
-
-        // creating the logging directory
-        File log = new File("./log/");
-        if(!log.canRead()) log.mkdir();            
-        
-        // generating the root logger
-        Logger logger = Logger.getLogger("");
-        
-//        System.setOut(new PrintStream(new LoggerOutputStream(Logger.getLogger("STDOUT"),Level.FINEST)));
-//        System.setErr(new PrintStream(new LoggerOutputStream(Logger.getLogger("STDERR"),Level.SEVERE)));
+        FileInputStream fileIn = null;
+        try {
+            File loggingConfigFile = new File(homePath, "yacy.logging");
+            System.out.print("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());            
+            fileIn = new FileInputStream(loggingConfigFile);
+            
+            // loading the logger configuration from file
+            LogManager logManager = LogManager.getLogManager();
+            logManager.readConfiguration(fileIn);
+            
+            // creating the logging directory
+            File log = new File("./log/");
+            if(!log.canRead()) log.mkdir();            
+            
+            // generating the root logger
+            Logger logger = Logger.getLogger("");
+            
+//          System.setOut(new PrintStream(new LoggerOutputStream(Logger.getLogger("STDOUT"),Level.FINEST)));
+//          System.setErr(new PrintStream(new LoggerOutputStream(Logger.getLogger("STDERR"),Level.SEVERE)));
+        } finally {
+            if (fileIn != null) try {fileIn.close();}catch(Exception e){}
+        }
     }
 }
