@@ -157,7 +157,7 @@ public final class serverLog {
         // loading the logger configuration from file
         LogManager logManager = LogManager.getLogManager();
         logManager.readConfiguration(new FileInputStream(new File(homePath, "yacy.logging")));
-        
+
         // creating the logging directory
         File log = new File("./log/");
         if(!log.canRead()) log.mkdir();            

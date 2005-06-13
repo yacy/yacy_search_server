@@ -327,4 +327,16 @@
   </delete>
 </target>
 
+<!-- run YaCy (needed for NetBeans4) -->
+<target name="run" description="run YaCy">
+  <java classname="yacy">
+    <classpath>
+      <pathelement location="${build}"/>
+      <pathelement location="${lib}/commons-collections.jar" />
+      <pathelement location="${lib}/commons-pool-1.2.jar" />    
+    </classpath>
+    <arg line="-start /Users/admin/dev/yacy/trunk"/>
+  </java>
+</target>
+
 </project>
