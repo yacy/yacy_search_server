@@ -329,13 +329,16 @@
 
 <!-- run YaCy (needed for NetBeans4) -->
 <target name="run" description="run YaCy">
-  <java classname="yacy">
-    <classpath>
+  <java classname="yacy" fork="yes">
+    <classpath>    
       <pathelement location="${build}"/>
+      <pathelement location="${htroot}"/>
       <pathelement location="${lib}/commons-collections.jar" />
-      <pathelement location="${lib}/commons-pool-1.2.jar" />    
+      <pathelement location="${lib}/commons-pool-1.2.jar" />        
+      <pathelement location="${libx}" />                 
+      <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>
-    <arg line="-start /Users/admin/dev/yacy/trunk"/>
+    <arg line="-start ${user.home}"/>
   </java>
 </target>
 
