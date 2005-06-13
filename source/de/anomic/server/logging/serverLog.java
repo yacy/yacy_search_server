@@ -157,7 +157,7 @@ public final class serverLog {
         FileInputStream fileIn = null;
         try {
             File loggingConfigFile = new File(homePath, "yacy.logging");
-            System.out.print("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());            
+            System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());            
             fileIn = new FileInputStream(loggingConfigFile);
             
             // loading the logger configuration from file
