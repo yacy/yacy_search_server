@@ -1086,23 +1086,27 @@ public final class httpd implements serverHandler {
             
             // set rewrite values
             serverObjects tp = new serverObjects();
+            
+            tp.put("host", serverCore.publicIP().getHostAddress());
+            tp.put("port", switchboard.getConfig("port", "8080"));
+            
             tp.put("errorMessageType", errorcase);            
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
             tp.put("requestMethod",    conProp.getProperty(httpd.CONNECTION_PROP_METHOD));
             tp.put("requestURL",       urlString);
-            tp.put("detailedErrorMsg",(detailedErrorMsg != null) ? detailedErrorMsg : "");
+            tp.put("errorMessageType_detailedErrorMsg",(detailedErrorMsg != null) ? detailedErrorMsg : "");
             
             // building the stacktrace            
             if (stackTrace != null) {    
                 serverByteBuffer errorMsg = new serverByteBuffer();
-                errorMsg.append("Exception occurred:\r\n")
+                errorMsg.append("Exception occurred:\r\n\r\n")
                         .append(stackTrace.toString())
                         .append("\r\n")
-                        .append("[TRACE: ");
+                        .append("TRACE: ");
                 stackTrace.printStackTrace(new PrintStream(errorMsg));
-                errorMsg.write(("]\r\n").getBytes());
+                errorMsg.write(("\r\n").getBytes());
                 tp.put("printStackTrace",1);
-                tp.put("printStackTrace_stacktrace",errorMsg.toString());
+                tp.put("printStackTrace_stacktrace",errorMsg.toString().replaceAll("\n","<br>"));
             } else {
                 tp.put("printStackTrace",0);
             }

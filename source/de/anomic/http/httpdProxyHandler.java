@@ -598,7 +598,14 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // request has been placed and result has been returned. work off response
             try {
-                httpd.sendRespondHeader(conProp,respond,httpVer,Integer.parseInt(res.status.split(" ")[0]),res.status.split(" ")[1],res.responseHeader);
+                String[] resStatus = res.status.split(" ");
+                httpd.sendRespondHeader(
+                        conProp,
+                        respond,
+                        httpVer,
+                        Integer.parseInt((resStatus.length > 0) ? resStatus[0]:"503"),
+                        (resStatus.length > 1) ? resStatus[1] : null, 
+                        res.responseHeader);
                 
                 String storeError;
                 if ((storeError = cacheEntry.shallStoreCache()) == null) {

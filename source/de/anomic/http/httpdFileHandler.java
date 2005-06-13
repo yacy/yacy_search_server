@@ -343,7 +343,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         }
         
         Date filedate;
-        long filelength;
         File rc = null;
         try {
             // locate the file
@@ -481,15 +480,34 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 httpd.sendRespondError(conProp,out,3,404,"File not Found",null,null);
                 //textMessage(out, 404, "404 File not Found\r\n"); // would be a possible vuln to return original the original path
             }
-        } catch (Exception e) {
-            //textMessage(out, 503, "Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'\r\n");
-            //e.printStackTrace();
-            this.theLogger.logError("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'");
-        }
-        out.flush();
-        if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
-            // wait a little time until everything closes so that clients can read from the streams/sockets
-            try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
+        } catch (Exception e) {            
+            if (e instanceof InterruptedException) {
+                this.theLogger.logInfo("Interruption detected while processing query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'");
+                if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+                    httpd.sendRespondError(conProp,out, 4, 503, null, "Exception with query: " + path + "; Service unavailable because of server shutdown.",e);
+                } else {
+                    conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
+                }
+            } else {
+                if (e.getMessage().startsWith("Broken pipe") || e.getMessage().startsWith("Connection reset by peer")) {
+                    // client closed the connection, so we just end silently
+                    this.theLogger.logInfo("Client unexpectedly closed connection while processing query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'");
+                    conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
+                } else {
+                    this.theLogger.logError("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'");
+                    if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+                        httpd.sendRespondError(conProp,out, 4, 503, null, "Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'",e);
+                    } else {
+                        conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
+                    }
+                }
+            }
+        } finally {
+            try {out.flush();}catch (Exception e) {}
+            if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
+                // wait a little time until everything closes so that clients can read from the streams/sockets
+                try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
+            }
         }
     }
     
