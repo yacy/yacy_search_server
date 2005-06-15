@@ -274,25 +274,24 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     private boolean blacklistedURL(String hostlow, String path) {
         if (blackListURLs == null) return false;
         
-        int index = 0;
-        
-        // [TL] While "." are found within the string
-        while ((index = hostlow.indexOf(".", index + 1)) != -1) {
-            if (blackListURLs.get(hostlow.substring(0, index + 1) + "*") != null) {
-                //System.out.println("Host blocked: " + hostlow.substring(0, index+1) + "*");
-                return true;
-            }
-        }
-        
-        index = hostlow.length();
-        while ((index = hostlow.lastIndexOf(".", index - 1)) != -1) {
-            if (blackListURLs.get("*" + hostlow.substring(index, hostlow.length())) != null) {
-                //System.out.println("Host blocked: " + "*" + hostlow.substring(index, host.length()));
-                return true;
-            }
-        }
-        
         String pp = ""; // path-pattern
+        
+        // first try to match the domain with wildcard '*'
+        // [TL] While "." are found within the string
+        int index = 0;
+        while ((index = hostlow.indexOf('.', index + 1)) != -1) {
+            if ((pp = (String) blackListURLs.get(hostlow.substring(0, index + 1) + "*")) != null) {
+                return ((pp.equals("*")) || (path.substring(1).matches(pp)));
+            }
+        }
+        index = hostlow.length();
+        while ((index = hostlow.lastIndexOf('.', index - 1)) != -1) {
+            if ((pp = (String) blackListURLs.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
+                return ((pp.equals("*")) || (path.substring(1).matches(pp)));
+            }
+        }
+        
+        // try to match without wildcard in domain
         return (((pp = (String) blackListURLs.get(hostlow)) != null) &&
                 ((pp.equals("*")) || (path.substring(1).matches(pp))));
     }

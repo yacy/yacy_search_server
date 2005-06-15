@@ -78,6 +78,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -88,11 +89,14 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
@@ -100,7 +104,6 @@ import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyCore;
-//import de.anomic.http.*;
 
 public final class yacy {
     
@@ -128,7 +131,7 @@ public final class yacy {
             
             // setting up logging
             try {
-                serverLog.configureLogging(homePath);
+                serverLog.configureLogging(new File(homePath, "yacy.logging"));
             } catch (IOException e) {
                 System.out.println("could not find logging properties in homePath=" + homePath);
                 e.printStackTrace();
@@ -464,7 +467,53 @@ public final class yacy {
         // finished
         serverLog.logSystem("GEN-WORDSTAT", "FINISHED");
     }
+
+    private static void checkMigrate(File dbroot, serverLog log, File file, plasmaWordIndex wordIndex) throws IOException {
+        kelondroTree db = new kelondroTree(file, 0);
+        String wordhash = file.getName().substring(0, 12);
+        int size = db.size();
+        long length = file.length();
+        db.close();
+        if (size <= 50) {
+            plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordhash);
+            plasmaWordIndexEntity entity = new plasmaWordIndexEntity(dbroot, wordhash, true);
+            Enumeration entries = entity.elements(true);
+            plasmaWordIndexEntry entry;
+            while (entries.hasMoreElements()) {
+                entry = (plasmaWordIndexEntry) entries.nextElement();
+                container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
+            }
+            wordIndex.addEntries(container);
+            entity.deleteComplete();
+            entity.close();
+            if (file.exists()) {
+                log.logInfo("MIGRATED " + file.toString() + ": " + size + " entries, " + (length / 1024) + "kb, delete fail at end");
+                file.delete();
+            } else {
+                log.logInfo("MIGRATED " + file.toString() + ": " + size + " entries, " + (length / 1024) + "kb");
+            }
+        } else {
+            log.logInfo("SKIPPED  " + file.toString() + ": " + size + " entries, " + (length / 1024) + "kb");
+        }
+        db.close();
+    }
     
+    public static void migrateWords(String homePath) {
+        // run with "java -classpath classes yacy -migratewords"
+        try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
+        File dbroot = new File(new File(homePath), "DATA/PLASMADB");
+        try {
+            serverLog log = new serverLog("WORDMIGRATION");
+            plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, 20000, log);
+            enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
+            while (words.hasMoreElements()) {
+                checkMigrate(dbroot, log, (File) words.nextElement(), wordIndex);
+            }
+            wordIndex.close(60);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     
     private static HashMap loadWordMap(File wordlist) {
         // returns a hash-word - Relation
@@ -575,8 +624,8 @@ public final class yacy {
     // application wrapper
     public static void main(String args[]) {
         String applicationRoot = System.getProperty("user.dir");
-        System.out.println("args.length=" + args.length);
-        System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
+        //System.out.println("args.length=" + args.length);
+        //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
         if ((args.length >= 1) && ((args[0].equals("-startup")) || (args[0].equals("-start")))) {
             // normal start-up of yacy
             if (args.length == 2) applicationRoot= args[1];
@@ -585,6 +634,11 @@ public final class yacy {
             // normal shutdown of yacy
             if (args.length == 2) applicationRoot= args[1];
             shutdown(applicationRoot);
+        } else if ((args.length >= 1) && (args[0].equals("-migratewords"))) {
+            // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
+            // attention: this may run long and should not be interrupted!
+            if (args.length == 2) applicationRoot= args[1];
+            migrateWords(applicationRoot);
         } else if ((args.length >= 1) && (args[0].equals("-deletestopwords"))) {
             // delete those words in the index that are listed in the stopwords file
             if (args.length == 2) applicationRoot= args[1];
@@ -606,7 +660,6 @@ public final class yacy {
             startup(applicationRoot);
         }
     }
-    
 }
 
 class shutdownHookThread extends Thread    

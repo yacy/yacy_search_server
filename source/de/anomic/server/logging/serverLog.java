@@ -73,7 +73,8 @@ public final class serverLog {
     private final Logger theLogger;
     
     public serverLog(String appName) {
-        this.theLogger = Logger.getLogger(appName); 
+        this.theLogger = Logger.getLogger(appName);
+        this.theLogger.setLevel(Level.FINEST); // set a default level
     }
        
     public void setLevel(Level newLevel) {
@@ -152,11 +153,10 @@ public final class serverLog {
     }    
     
     
-    public static final void configureLogging(String homePath) throws SecurityException, FileNotFoundException, IOException {
+    public static final void configureLogging(File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
         
         FileInputStream fileIn = null;
         try {
-            File loggingConfigFile = new File(homePath, "yacy.logging");
             System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());            
             fileIn = new FileInputStream(loggingConfigFile);
             

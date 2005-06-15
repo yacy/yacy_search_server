@@ -4,17 +4,17 @@
 
 # setting logging levels vor individual classes
 # possible values are:
-# ZERO    no output at all
-# FAILURE system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
+# OFF     no output at all
+# SEVERE  system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
 # ERROR   exceptional error, catcheable and non-critical (i.e. file error)
 # WARNING uncritical service failure, may require user activity (i.e. input required, wrong authorization)
-# SYSTEM  regular system status information (i.e. start-up messages)
+# CONFIG  regular system status information (i.e. start-up messages)
 # INFO    regular action information (i.e. any httpd request URL)
-# DEBUG   in-function status debug output
+# FINEST  in-function status debug output
 PARSER.level = INFO
 YACY.level = INFO
 HTCACHE.level = INFO
-PLASMA.level = INFO
+PLASMA.level = FINEST
 SERVER.level = INFO
 
 # List of global handlers

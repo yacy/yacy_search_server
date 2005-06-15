@@ -338,7 +338,9 @@
       <pathelement location="${libx}" />                 
       <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>
-    <arg line="-start ${user.home}"/>
+    <arg line="-start"/>
+    <!-- <arg line="-migratewords"/> -->
+    <!-- <arg line="-start ${user.dir}"/>-->
   </java>
 </target>
 

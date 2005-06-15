@@ -587,7 +587,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // if the server is busy, we do crawling more slowly
-        if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
+        //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         
         // if crawling was paused we have to wait until we wer notified to continue
         synchronized(this.crawlingPausedSync) {
@@ -793,7 +793,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // put anchors on crawl stack
             if (((processCase == 4) || (processCase == 5)) &&
-                             (entry.depth < entry.profile.generalDepth())) {
+                (entry.depth < entry.profile.generalDepth())) {
                 Map hl = document.getHyperlinks();
                 Iterator i = hl.entrySet().iterator();
                 String nexturlstring;
@@ -816,7 +816,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             
             // create index
-            
             String descr = document.getMainLongTitle();
             URL referrerURL = entry.referrerURL();
             String referrerHash = (referrerURL == null) ? plasmaURL.dummyHash : plasmaURL.urlHash(referrerURL);

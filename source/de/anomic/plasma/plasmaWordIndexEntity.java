@@ -175,11 +175,11 @@ public class plasmaWordIndexEntity {
             boolean success = theLocation.delete();
             // and also the paren directory if that is empty
             if (success) {
-            File f = theLocation.getParentFile();
-            while ((f.isDirectory()) && (f.list().length == 0)) {
-                if (!(f.delete())) break;
-                f = f.getParentFile();
-            }
+                File f = theLocation.getParentFile();
+                while ((f.isDirectory()) && (f.list().length == 0)) {
+                    if (!(f.delete())) break;
+                    f = f.getParentFile();
+                }
             }
             // reset all values
             theIndex = null;
@@ -188,7 +188,7 @@ public class plasmaWordIndexEntity {
             theTmpMap = new TreeMap();
             //theIndex.removeAll();
             return success;
-	} else {
+        } else {
             theTmpMap = new TreeMap();
             return true;
 	}
