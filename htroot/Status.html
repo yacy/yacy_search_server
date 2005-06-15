@@ -107,11 +107,13 @@ you must switch off the proxy to go off-line.
 #(/omode)#
 </td></tr>
 <tr class="TableCellDark"><td>Memory Usage</td><td>
-free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]#
+<form action="Status.html" method="get">free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]# | <input type="submit" name="gc" value="do Garbage-Collect now"></form>
 </td></tr>
-
 <tr class="TableCellLight"><td>Traffic</td><td>
 In: #[trafficIn]# | Out: #[trafficOut]#
+</td></tr>
+<tr class="TableCellDark"><td>System Resources</td><td>
+processors: #[processors]#
 </td></tr>
 
 </table>

@@ -469,10 +469,14 @@ public final class yacy {
     }
 
     private static void checkMigrate(File dbroot, serverLog log, File file, plasmaWordIndex wordIndex) throws IOException {
+        long length = file.length();
+        if (length > 3000) {
+            log.logInfo("SKIPPED  " + file.toString() + ": too big, size=" + (length / 1024) + "kb");
+            return;
+        }
         kelondroTree db = new kelondroTree(file, 0);
         String wordhash = file.getName().substring(0, 12);
         int size = db.size();
-        long length = file.length();
         db.close();
         if (size <= 50) {
             plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordhash);

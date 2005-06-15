@@ -56,47 +56,47 @@ import de.anomic.yacy.yacyCore;
 public class Status {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
-	serverObjects prop = new serverObjects();
-
-	// set values
-	String s;
-	int pos;
-
-	/*
-	  versionProbe=http://www.anomic.de/AnomicHTTPProxy/release.txt
-	  superseedFile=superseed.txt
-	*/
+        // return variable that accumulates replacements
+        serverObjects prop = new serverObjects();
+        
+        // set values
+        String s;
+        int pos;
+        
+        /*
+          versionProbe=http://www.anomic.de/AnomicHTTPProxy/release.txt
+          superseedFile=superseed.txt
+         */
         // update seed info
         yacyCore.peerActions.updateMySeed();
-
-	// password protection
-	if (env.getConfig("adminAccountBase64MD5", "").length() == 0)
-	    prop.put("protection", 0);//not protected
-	else
-	    prop.put("protection", 1);//protected
-
-	// version information
-	if ((yacyCore.latestVersion == null) || (yacyCore.latestVersion.length() < 3) || (yacyCore.latestVersion.equals(env.getConfig("version",""))))
-	    prop.put("versioncomment", 0);//no commet
-	else
-	    prop.put("versioncomment", 1);//new version
-	    prop.put("versioncomment_latestVersion", yacyCore.latestVersion);
-
-	prop.put("host", serverCore.publicIP());
-	prop.put("port", env.getConfig("port", "<unknown>"));
-	if (env.getConfig("remoteProxyUse", "false").equals("true")) {
-	    prop.put("remoteProxy", 1);
-		prop.put("remoteProxy_host", env.getConfig("remoteProxyHost", "<unknown>"));
-		prop.put("remoteProxy_port", env.getConfig("remoteProxyPort", "<unknown>"));
-	} else {
-	    prop.put("remoteProxy", 0);//not used
-	}
-
-	// peer information
-	String thisHash = "";
-	String thisName = env.getConfig("peerName", "<nameless>");
-	if (yacyCore.seedDB.mySeed == null)  {
+        
+        // password protection
+        if (env.getConfig("adminAccountBase64MD5", "").length() == 0)
+            prop.put("protection", 0);//not protected
+        else
+            prop.put("protection", 1);//protected
+        
+        // version information
+        if ((yacyCore.latestVersion == null) || (yacyCore.latestVersion.length() < 3) || (yacyCore.latestVersion.equals(env.getConfig("version",""))))
+            prop.put("versioncomment", 0);//no commet
+        else
+            prop.put("versioncomment", 1);//new version
+        prop.put("versioncomment_latestVersion", yacyCore.latestVersion);
+        
+        prop.put("host", serverCore.publicIP());
+        prop.put("port", env.getConfig("port", "<unknown>"));
+        if (env.getConfig("remoteProxyUse", "false").equals("true")) {
+            prop.put("remoteProxy", 1);
+            prop.put("remoteProxy_host", env.getConfig("remoteProxyHost", "<unknown>"));
+            prop.put("remoteProxy_port", env.getConfig("remoteProxyPort", "<unknown>"));
+        } else {
+            prop.put("remoteProxy", 0);//not used
+        }
+        
+        // peer information
+        String thisHash = "";
+        String thisName = env.getConfig("peerName", "<nameless>");
+        if (yacyCore.seedDB.mySeed == null)  {
             thisHash = "not assigned";
             prop.put("peerAddress", 0);//not assigned
             prop.put("peerStatistics", 0);//unknown
@@ -120,66 +120,69 @@ public class Status {
                 prop.put("peerAddress_peername", env.getConfig("peerName", "<nameless>").toLowerCase());
             }
         }
-	String peerStatus = ((yacyCore.seedDB.mySeed == null) ? "virgin" : yacyCore.seedDB.mySeed.get("PeerType", "virgin"));
-	if (peerStatus.equals("virgin")) {
-	    prop.put("peerStatus", 0);//virgin
-	} else if (peerStatus.equals("junior")) {
-	    prop.put("peerStatus", 1);//junior
-	} else if (peerStatus.equals("senior")) {
-	    prop.put("peerStatus", 2);//senior
-	} else if (peerStatus.equals("principal")) {
-	    prop.put("peerStatus", 3);//principal
-	    prop.put("peerStatus_seedURL", yacyCore.seedDB.mySeed.get("seedURL", "?"));
-	}
-	prop.put("peerName", thisName);
-	prop.put("hash", thisHash);
-	if ((env.getConfig("seedFTPServer","").length() != 0) && 
-	    (env.getConfig("seedFTPAccount","").length() != 0) && 
-	    (env.getConfig("seedFTPPassword","").length() != 0) && 
-	    (env.getConfig("seedFTPPath","").length() != 0)) {
-	    prop.put("seedServer", 1);//enabled
-	    prop.put("seedServer_seedFTPServer", env.getConfig("seedFTPServer",""));
-	} else {
-	    prop.put("seedServer", 0);//disabled
-	}
+        String peerStatus = ((yacyCore.seedDB.mySeed == null) ? "virgin" : yacyCore.seedDB.mySeed.get("PeerType", "virgin"));
+        if (peerStatus.equals("virgin")) {
+            prop.put("peerStatus", 0);//virgin
+        } else if (peerStatus.equals("junior")) {
+            prop.put("peerStatus", 1);//junior
+        } else if (peerStatus.equals("senior")) {
+            prop.put("peerStatus", 2);//senior
+        } else if (peerStatus.equals("principal")) {
+            prop.put("peerStatus", 3);//principal
+            prop.put("peerStatus_seedURL", yacyCore.seedDB.mySeed.get("seedURL", "?"));
+        }
+        prop.put("peerName", thisName);
+        prop.put("hash", thisHash);
+        if ((env.getConfig("seedFTPServer","").length() != 0) &&
+                (env.getConfig("seedFTPAccount","").length() != 0) &&
+                (env.getConfig("seedFTPPassword","").length() != 0) &&
+                (env.getConfig("seedFTPPath","").length() != 0)) {
+            prop.put("seedServer", 1);//enabled
+            prop.put("seedServer_seedFTPServer", env.getConfig("seedFTPServer",""));
+        } else {
+            prop.put("seedServer", 0);//disabled
+        }
+        
+        if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected() > 0)){
+            prop.put("otherPeers", 1);
+            prop.put("otherPeers_num", yacyCore.seedDB.sizeConnected());
+        }else{
+            prop.put("otherPeers", 0);//not online
+        }
+        
+        Runtime rt = Runtime.getRuntime();
 
-	if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected() > 0)){
-		prop.put("otherPeers", 1);
-		prop.put("otherPeers_num", yacyCore.seedDB.sizeConnected());
-	}else{
-		prop.put("otherPeers", 0);//not online
-	}
-
-	// pop-up trigger management
-	if (post != null) {
-	    if (post.containsKey("dispop")) env.setConfig("browserPopUpTrigger", "false");
-	    if (post.containsKey("enpop")) env.setConfig("browserPopUpTrigger", "true");
-	}
-
-	if (env.getConfig("browserPopUpTrigger", "false").equals("false")) {
-	    prop.put("popup", 0);
-	} else {
-	    prop.put("popup", 1); 
-	}
-	
-	if (env.getConfig("onlineMode", "1").equals("1")) {
-	    prop.put("omode", 1);
-	} else {
-	    prop.put("omode", 2);
-	}
-
-    // memory usage
-    Runtime rt = Runtime.getRuntime();
-    prop.put("freeMemory", bytesToString(rt.freeMemory()));
-    prop.put("totalMemory", bytesToString(rt.totalMemory()));
-    prop.put("maxMemory", bytesToString(rt.maxMemory()));  
-    
-    // proxy traffic
-    prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
-    prop.put("trafficOut",bytesToString(httpdByteCountOutputStream.getGlobalCount()));
-    
-    // return rewrite properties
-	return prop;
+        // pop-up trigger management and gc
+        if (post != null) {
+            if (post.containsKey("dispop")) env.setConfig("browserPopUpTrigger", "false");
+            if (post.containsKey("enpop")) env.setConfig("browserPopUpTrigger", "true");
+            if (post.containsKey("gc")) rt.gc();
+        }
+        
+        if (env.getConfig("browserPopUpTrigger", "false").equals("false")) {
+            prop.put("popup", 0);
+        } else {
+            prop.put("popup", 1);
+        }
+        
+        if (env.getConfig("onlineMode", "1").equals("1")) {
+            prop.put("omode", 1);
+        } else {
+            prop.put("omode", 2);
+        }
+        
+        // memory usage and system attributes
+        prop.put("freeMemory", bytesToString(rt.freeMemory()));
+        prop.put("totalMemory", bytesToString(rt.totalMemory()));
+        prop.put("maxMemory", bytesToString(rt.maxMemory()));
+        prop.put("processors", rt.availableProcessors());
+        
+        // proxy traffic
+        prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
+        prop.put("trafficOut",bytesToString(httpdByteCountOutputStream.getGlobalCount()));
+        
+        // return rewrite properties
+        return prop;
     }
     
     public static String intervalToString(String minsAsString)
