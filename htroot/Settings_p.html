@@ -60,18 +60,23 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 </form><br>
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend>Proxy Access Settings</legend>
-<br><b>Proxy Port Configuration</b><br><br>
+<fieldset><legend>Server Access Settings</legend>
+These settings configure the access method to your own http proxy and server.
+All traffic is routed throug one single port, for both proxy and server.<br>
+<br><b>Port Configuration</b><br><br>
 <table border="0" cellspacing="5">
   <tr valign="top">
-    <td>Proxy and Administration Port:</td>
+    <td>Proxy and http-Server Administration Port:</td>
     <td><input name="port" type="text" size="5" maxlength="5" value="#[port]#"></td>
     <td><i>Changes will take effect after restart only.</i></td>
   </tr> 
 </table>
 
 
-<p><b>Proxy Port Forwarding</b><br><br>
+<p><b>Port Forwarding</b><br><br>
+You can use a remote server running a ssh demon to forward your server/proxy port.
+This is useful if you want to tunnel throug a NAT/router.
+Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.
 <table border="0" cellspacing="5">
   <tr valign="top">
     <td>Enable port forwarding:</td>
@@ -101,7 +106,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 </table>
 </p>
 
-<p><b>Proxy Access Restrictions</b><br><br>You can restrict the access to this proxy using a two-stage security barrier:
+<p><b>Server Access Restrictions</b><br><br>You can restrict the access to this proxy/server using a two-stage security barrier:
 <ul>
 <li>define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards</li>
 <li>define an <i>user account</i> with an user:password - pair</li>

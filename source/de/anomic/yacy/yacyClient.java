@@ -134,6 +134,8 @@ public class yacyClient {
         
         // set my own seed according to new information
         yacySeed mySeedBkp = (yacySeed) yacyCore.seedDB.mySeed.clone();
+
+        // we overwrite our own IP number only, if we do not portForwarding
         if (!serverCore.portForwardingEnabled) {
             yacyCore.seedDB.mySeed.put("IP", (String) result.get("yourip"));
         }
