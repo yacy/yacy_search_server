@@ -1117,8 +1117,8 @@ public final class httpd implements serverHandler {
             ByteArrayOutputStream o = new ByteArrayOutputStream();
             fis = new FileInputStream(file);
             httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
-            o.close();
             result = o.toByteArray();
+            o.close(); o = null;
 
             httpHeader header = new httpHeader();            
             header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));

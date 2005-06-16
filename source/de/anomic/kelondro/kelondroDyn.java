@@ -350,30 +350,41 @@ public class kelondroDyn extends kelondroTree {
     }
     
     public synchronized void writeFile(String key, File f) throws IOException {
-	// reads a file from the FS and writes it into the database
-	kelondroRA kra = getRA(key);
-	byte[] buffer = new byte[1024];
-	byte[] result = new byte[(int) f.length()];
-	FileInputStream fis = new FileInputStream(f);
-	int i;
-	int pos = 0;
-	while ((i = fis.read(buffer)) > 0) {
-	    System.arraycopy(buffer, 0, result, pos, i);
-	    pos += i;
-	}
-	fis.close();
-	kra.writeArray(result);
-	kra.close();
+        // reads a file from the FS and writes it into the database
+        kelondroRA kra = null;
+        FileInputStream fis = null;
+        try {
+            kra = getRA(key);
+            byte[] buffer = new byte[1024];
+            byte[] result = new byte[(int) f.length()];
+            fis = new FileInputStream(f);
+            int i;
+            int pos = 0;
+            while ((i = fis.read(buffer)) > 0) {
+                System.arraycopy(buffer, 0, result, pos, i);
+                pos += i;
+            }
+            fis.close();
+            kra.writeArray(result);
+        } finally {
+            if (fis != null) try{fis.close();}catch(Exception e){}
+            if (kra != null) try{kra.close();}catch(Exception e){}
+        }
     }
 
     public synchronized void readFile(String key, File f) throws IOException {
-	// reads a file from the DB and writes it to the FS
-	kelondroRA kra = getRA(key);
-	byte[] result = kra.readArray();
-	FileOutputStream fos = new FileOutputStream(f);
-	fos.write(result);
-	fos.close();
-	kra.close();
+        // reads a file from the DB and writes it to the FS
+        kelondroRA kra = null;
+        FileOutputStream fos = null;
+        try {
+            kra = getRA(key);
+            byte[] result = kra.readArray();
+            fos = new FileOutputStream(f);
+            fos.write(result);
+        } finally {
+            if (fos != null) try{fos.close();}catch(Exception e){}
+            if (kra != null) try{kra.close();}catch(Exception e){}
+        }
     }
 
     public static void main(String[] args) {

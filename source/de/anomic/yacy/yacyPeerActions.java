@@ -183,27 +183,31 @@ public class yacyPeerActions {
     }
 
     private disorderSet loadSuperseed(File local, String url) {
-	// this returns a list of locations where seed list-files can be found
-	disorderSet supsee = new disorderSet();
-	String line;
-	// read in local file
+        // this returns a list of locations where seed list-files can be found
+        disorderSet supsee = new disorderSet();
+        String line;
+        // read in local file
         int lc = 0;
+        BufferedReader br = null;
         try {
-	    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(local)));
-	    while ((line = br.readLine()) != null) {
-		line = line.trim();
-		//System.out.println("one line in file:" + line);
-		if (line.length() > 0) supsee.add(line);
-	    }
-	    br.close();
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(local)));
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                //System.out.println("one line in file:" + line);
+                if (line.length() > 0) supsee.add(line);
+            }
+            br.close();
             lc = supsee.size();
             yacyCore.log.logInfo("BOOTSTRAP: " + lc + " seed-list urls from superseed file " + local.toString());
-	} catch (IOException e) {
-	    //e.printStackTrace();
-	    supsee = new disorderSet();
+        } catch (IOException e) {
+            //e.printStackTrace();
+            supsee = new disorderSet();
             yacyCore.log.logInfo("BOOTSTRAP: failed to load seed-list urls from superseed file " + local.toString() + ": " + e.getMessage());
-	}
-	// read in remote file from url
+        } finally {
+            if (br!=null)try{br.close();}catch(Exception e){}
+        }
+        
+        // read in remote file from url
         try {
             Vector remote = httpc.wget(new URL(url), 5000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
             if ((remote != null) && (remote.size() > 0)) {

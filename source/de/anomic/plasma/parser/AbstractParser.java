@@ -115,10 +115,12 @@ public abstract class AbstractParser implements Parser{
         BufferedInputStream contentInputStream = null;
         try {
             contentInputStream = new BufferedInputStream(new FileInputStream(sourceFile));
+            return this.parse(location, mimeType, contentInputStream);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            throw new ParserException(e.getMessage());
+        } finally {
+            if (contentInputStream != null) try{contentInputStream.close();}catch(Exception e){}
         }
-        return this.parse(location, mimeType, contentInputStream);
 	}
     
     /**

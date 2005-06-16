@@ -45,21 +45,18 @@
 
 package de.anomic.plasma;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -264,11 +261,14 @@ public final class plasmaParser {
     public static String getMimeTypeByFileExt(String fileExt) {
         // loading a list of extensions from file
         Properties prop = new Properties();
-        try {
-            prop.load(new FileInputStream(new File("httpd.mime")));
+        BufferedInputStream bufferedIn = null;
+        try {            
+            prop.load(bufferedIn = new BufferedInputStream(new FileInputStream(new File("httpd.mime"))));
         } catch (IOException e) {
             System.err.println("ERROR: httpd.mime not found in settings path");
-        }            
+        } finally {
+            if (bufferedIn != null) try{bufferedIn.close();}catch(Exception e){}
+        }
         
         return prop.getProperty(fileExt,"application/octet-stream");
     }
@@ -342,11 +342,14 @@ public final class plasmaParser {
     private static void loadEnabledParserList() {
         // loading a list of availabe parser from file
     	Properties prop = new Properties();
+        BufferedInputStream bufferedIn = null;
     	try {
-    	    prop.load(new FileInputStream(new File("yacy.parser")));
+    	    prop.load(bufferedIn = new BufferedInputStream(new FileInputStream(new File("yacy.parser"))));
     	} catch (IOException e) {
     	    System.err.println("ERROR: yacy.parser not found in settings path");
-    	}    	
+    	} finally {
+            if (bufferedIn != null) try{ bufferedIn.close(); }catch(Exception e){}
+        }
 
         // enable them ...
         setEnabledParserList(prop.keySet());

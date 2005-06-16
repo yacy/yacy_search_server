@@ -276,16 +276,20 @@ public final class httpHeader extends TreeMap implements Map {
     
     // convenience methods for storing and loading to a file system
     public void store(File f) throws IOException {
-	FileOutputStream fos = new FileOutputStream(f);
-	Iterator i = keySet().iterator();
-	String key, value;
-	while (i.hasNext()) {
-	    key = (String) i.next();
-	    value = (String) get(key);
-	    fos.write((key + "=" + value + "\r\n").getBytes());
-	}
-	fos.flush();
-	fos.close();
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(f);
+            Iterator i = keySet().iterator();
+            String key, value;
+            while (i.hasNext()) {
+                key = (String) i.next();
+                value = (String) get(key);
+                fos.write((key + "=" + value + "\r\n").getBytes());
+            }
+            fos.flush();
+        } finally {
+            if (fos != null) try{fos.close();}catch(Exception e){}
+        }
     }
 
     public String toString() {

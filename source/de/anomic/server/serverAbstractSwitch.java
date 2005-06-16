@@ -40,6 +40,8 @@
 
 package de.anomic.server;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -131,31 +133,38 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     }
 
     public static Map loadHashMap(File f) {
-	// load props
-	Properties prop = new Properties();
-	try {
-	    prop.load(new FileInputStream(f));
-	} catch (IOException e1) {
-	    System.err.println("ERROR: " + f.toString() + " not found in settings path");
-	    prop = null;
-	}
-	return (Hashtable) prop;
+        // load props
+        Properties prop = new Properties();
+        BufferedInputStream bufferedIn = null;
+        try {
+            prop.load(bufferedIn = new BufferedInputStream(new FileInputStream(f)));
+        } catch (IOException e1) {
+            System.err.println("ERROR: " + f.toString() + " not found in settings path");
+            prop = null;
+        } finally {
+            if (bufferedIn != null)try{bufferedIn.close();}catch(Exception e){}
+        }
+        return (Hashtable) prop;
     }
 
     public static void saveMap(File f, Map props, String comment) throws IOException {
-	PrintWriter pw = new PrintWriter(new FileOutputStream(f));
-	pw.println("# " + comment);
-	Iterator i = props.entrySet().iterator();
-	String key, value;
-	Map.Entry entry;
-	while (i.hasNext()) {
-	    entry  = (Map.Entry) i.next();
-	    key = (String) entry.getKey();
-	    value = ((String) entry.getValue()).replaceAll("\n", "\\\\n");
-	    pw.println(key + "=" + value);
-	}
-	pw.println("# EOF");
-	pw.close();
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(f)));
+            pw.println("# " + comment);
+            Iterator i = props.entrySet().iterator();
+            String key, value;
+            Map.Entry entry;
+            while (i.hasNext()) {
+                entry  = (Map.Entry) i.next();
+                key = (String) entry.getKey();
+                value = ((String) entry.getValue()).replaceAll("\n", "\\\\n");
+                pw.println(key + "=" + value);
+            }
+            pw.println("# EOF");
+        } finally {
+          if (pw!=null)try{pw.close();}catch(Exception e){}  
+        }
     }
 
     public void setConfig(String key, long value) {

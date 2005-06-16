@@ -283,9 +283,13 @@ public final class plasmaCrawlWorker extends Thread {
                     } else if ((profile == null) || ((profile.storeHTCache()) && ((error = htCache.shallStoreCache()) == null))) {
                         // we write the new cache entry to file system directly
                         cacheFile.getParentFile().mkdirs();
-                        FileOutputStream fos = new FileOutputStream(cacheFile);
-                        htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
-                        fos.close();
+                        FileOutputStream fos = null;
+                        try {
+                            fos = new FileOutputStream(cacheFile);
+                            htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
+                        } finally {
+                            if (fos!=null)try{fos.close();}catch(Exception e){}
+                        }
                         htCache.status = plasmaHTCache.CACHE_FILL;
                     } else {
                         if (error != null) log.logDebug("CRAWLER NOT STORED RESOURCE " + url.toString() + ": " + error);

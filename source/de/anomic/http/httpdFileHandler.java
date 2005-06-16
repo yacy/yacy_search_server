@@ -455,7 +455,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         }                        
                     } finally {
                         if (zippedOut != null) try {zippedOut.close();} catch(Exception e) {}
-                        if (o != null) try {o.close();} catch(Exception e) {}
+                        if (o != null) try {o.close(); o = null;} catch(Exception e) {}
                         if (fis != null) try {fis.close();} catch(Exception e) {}
                     }
                     

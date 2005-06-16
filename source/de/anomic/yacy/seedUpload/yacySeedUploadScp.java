@@ -1,5 +1,6 @@
 package de.anomic.yacy.seedUpload;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -116,12 +117,17 @@ class sshc {
             checkAck(in);
             
             // send a content of lfile
-            FileInputStream fis=new FileInputStream(localFile);
             byte[] buf=new byte[1024];
-            while(true){
-                int len=fis.read(buf, 0, buf.length);
-                if(len<=0) break;
-                out.write(buf, 0, len); out.flush();
+            BufferedInputStream bufferedIn = null;
+            try {
+                bufferedIn=new BufferedInputStream(new FileInputStream(localFile));                
+                while(true){
+                    int len=bufferedIn.read(buf, 0, buf.length);
+                    if(len<=0) break;
+                    out.write(buf, 0, len); out.flush();
+                }
+            } finally {
+                if (bufferedIn != null) try{bufferedIn.close();}catch(Exception e){}
             }
             
             // send '\0'

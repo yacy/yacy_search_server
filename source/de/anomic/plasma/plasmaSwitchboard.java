@@ -420,16 +420,21 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private static TreeSet loadList(File file) {
         TreeSet list = new TreeSet(kelondroMSetTools.fastStringComparator);
         if (!(file.exists())) return list;
-	try {
-	    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-	    String line;
-	    while ((line = br.readLine()) != null) {
-		line = line.trim();
-		if ((line.length() > 0) && (!(line.startsWith("#")))) list.add(line.trim().toLowerCase());
-	    }
-	    br.close();
-	} catch (IOException e) {}
-	return list;
+        
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if ((line.length() > 0) && (!(line.startsWith("#")))) list.add(line.trim().toLowerCase());
+            }
+            br.close();
+        } catch (IOException e) {            
+        } finally {
+            if (br != null) try{br.close();}catch(Exception e){}
+        }
+        return list;
     }
 
     public void close() {
