@@ -73,4 +73,5 @@ public interface htmlFilterTransformer {
     // method that is called when a body-containing text occurs
     public byte[] transformTag1(String tagname, Properties tagopts, byte[] text, byte quotechar);
 
+    public void close();
 }

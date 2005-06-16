@@ -102,6 +102,7 @@ public class yacySeed {
 	dna.put("ISpeed", "0");   // the speed of indexing (words/minute) of the peer
 	dna.put("Uptime", "0");   // the number of minutes that the peer is up in minutes/day (moving average MA30)
 	dna.put("LCount", "0");   // the number of links that the peer has stored (LURL's)
+        dna.put("NCount", "0");   // the number of links that the peer has noticed, but not loaded (NURL's)
 	dna.put("ICount", "0");   // the number of words that the peer has indexed (as it says)
 	dna.put("SCount", "0");   // the number of seeds that the peer has stored
 	dna.put("CCount", "0");   // the number of clients that the peer connects (as connects/hour)

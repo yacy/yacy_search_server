@@ -46,11 +46,11 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     }
 
     public boolean isTag0(String tag) {
-	return tags0.contains(tag);
+	return (tags0 != null) && (tags0.contains(tag));
     }
 
     public boolean isTag1(String tag) {
-	return tags1.contains(tag);
+	return (tags1 != null) && (tags1.contains(tag));
     }
 
     //the 'missing' method that shall be implemented:
@@ -405,4 +405,14 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
 	 return convertUmlaute(transscriptAll(stripAllTags(bb)));
     }
 
+    public void close() {
+        // free resources
+        tags0 = null;
+        tags1 = null;
+    }
+    
+    public void finalize() {
+        close();
+    }
+        
 }

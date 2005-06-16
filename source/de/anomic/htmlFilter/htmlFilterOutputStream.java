@@ -434,13 +434,15 @@ public final class htmlFilterOutputStream extends OutputStream {
 	if (out != null) out.flush();
 	// if you want to flush all, call close() at end of writing;
     }
-
-    private byte[] finalized = null;
-
+    
     public void finalize() throws IOException {
 	// if we are forced to close, we of course flush the buffer first,
 	// then close the connection
-        byte quotechar = (inSingleQuote) ? singlequote : doublequote;
+        close();
+    }
+
+    public void close() throws IOException {
+	byte quotechar = (inSingleQuote) ? singlequote : doublequote;
         if (buffer != null) {
             if (buffer.length() > 0) {
                 byte[] filtered = filterSentence(buffer.getBytes(), quotechar);
@@ -448,18 +450,19 @@ public final class htmlFilterOutputStream extends OutputStream {
             }
             buffer = null;
         }
-        finalized = filterFinalize(quotechar);
-    }
-
-    public void close() throws IOException {
-	finalize();
+        byte[] finalized = filterFinalize(quotechar);
 	if (out != null) {
 	    if (finalized != null) out.write(finalized);
 	    out.flush();
 	    out.close();
 	}
+        filterTag = null;
+        filterOpts = null;
+        filterCont = null;
+        //if (scraper != null) {scraper.close(); scraper = null;}
+        //if (transformer != null) {transformer.close(); transformer = null;}
     }
-
+    
     private static boolean binaryHint(byte b) {
 	if (b < 0) return false;
         if (b > 31) return false;

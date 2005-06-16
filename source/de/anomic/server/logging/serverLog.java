@@ -74,7 +74,7 @@ public final class serverLog {
     
     public serverLog(String appName) {
         this.theLogger = Logger.getLogger(appName);
-        this.theLogger.setLevel(Level.FINEST); // set a default level
+        //this.theLogger.setLevel(Level.FINEST); // set a default level
     }
        
     public void setLevel(Level newLevel) {

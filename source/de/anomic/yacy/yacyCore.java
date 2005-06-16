@@ -359,7 +359,7 @@ public class yacyCore {
                 if (i == 0) Thread.currentThread().sleep(2000); // after the first time wait some seconds
 		Thread.currentThread().sleep(1000 + 500 * v.size()); // wait a while
 	    } catch (InterruptedException e) {}
-
+            
             // check all threads
             for (int j = 0; j < v.size(); j++) {
                 t = (publishThread) v.elementAt(j);

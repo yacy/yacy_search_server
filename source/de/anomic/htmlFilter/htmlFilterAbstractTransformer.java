@@ -78,4 +78,14 @@ public abstract class htmlFilterAbstractTransformer implements htmlFilterTransfo
 	return htmlFilterOutputStream.genTag1(tagname, tagopts, text, quotechar);
     }
 
+    public void close() {
+        // free resources
+        tags0 = null;
+        tags1 = null;
+    }
+    
+    public void finalize() {
+        close();
+    }
+        
 }

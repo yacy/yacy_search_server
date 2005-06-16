@@ -360,6 +360,29 @@
 
 <!-- run YaCy (needed for NetBeans4) -->
 <target name="run" description="run YaCy">
+<!-- debug options:
+     java -Xrunhprof:help
+     Hprof usage: -Xrunhprof[:help]|[:<option>=<value>, ...]
+
+     Option Name and Value  Description                Default
+     _____________________  ___________                _______
+     heap=dump|sites|all    heap profiling             all
+     cpu=samples|times|old  CPU usage                  off
+     monitor=y|n            monitor contention         n
+     format=a|b             ascii or binary output     a
+     file=<file>            write data to file         java.hprof(.txt for ascii)
+     net=<host>:<port>      send data over a socket    write to file
+     depth=<size>           stack trace depth          4
+     cutoff=<value>         output cutoff point        0.0001
+     lineno=y|n             line number in traces?     y
+     thread=y|n             thread in traces?          n
+     doe=y|n                dump on exit?              y
+     gc_okay=y|n            GC okay during sampling    y
+
+     Example: java -Xrunhprof:cpu=samples,file=log.txt,depth=3 FooClass
+
+     Note: format=b cannot be used with cpu=old|times
+-->
   <java classname="yacy" fork="yes">
     <classpath>    
       <pathelement location="${build}"/>
@@ -369,8 +392,9 @@
       <pathelement location="${libx}" />                 
       <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>
+    <!--<arg value="-Xrunhprof"/>-->
     <arg line="-start"/>
-    <!-- <arg line="-migratewords"/> -->
+    <!-- <arg line="-migratewords"/>-->
     <!-- <arg line="-start ${user.dir}"/>-->
   </java>
 </target>

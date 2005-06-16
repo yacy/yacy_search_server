@@ -102,7 +102,8 @@ public class yacyPeerActions {
         seedDB.mySeed.put("ISpeed", "unknown"); // the speed of indexing (words/minute) of the peer
         long uptime = ((yacyCore.universalTime() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000) / 60;
         seedDB.mySeed.put("Uptime", "" + uptime); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        seedDB.mySeed.put("LCount", "" + sb.lUrlSize()); // the number of links that the peer has stored (LURL's)
+        seedDB.mySeed.put("LCount", "" + sb.urlPool.loadedURL.size()); // the number of links that the peer has stored (LURL's)
+        seedDB.mySeed.put("NCount", "" + sb.urlPool.noticeURL.stackSize()); // the number of links that the peer has noticed, but not loaded (NURL's)
         seedDB.mySeed.put("ICount", "" + sb.cacheSizeMin()); // the minimum number of words that the peer has indexed (as it says)
         seedDB.mySeed.put("SCount", "" + seedDB.sizeConnected()); // the number of seeds that the peer has stored
         seedDB.mySeed.put("CCount", "" + (((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)

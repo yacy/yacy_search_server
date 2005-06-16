@@ -104,11 +104,11 @@ public class IndexCreate_p {
                     boolean crawlOrder = ((String) post.get("crawlOrder", "")).equals("on");
                     env.setConfig("crawlOrder", (crawlOrder) ? "true" : "false");
                     boolean xsstopw = ((String) post.get("xsstopw", "")).equals("on");
-                    env.setConfig("xsstopw", (crawlOrder) ? "true" : "false");
+                    env.setConfig("xsstopw", (xsstopw) ? "true" : "false");
                     boolean xdstopw = ((String) post.get("xdstopw", "")).equals("on");
-                    env.setConfig("xdstopw", (crawlOrder) ? "true" : "false");
+                    env.setConfig("xdstopw", (xdstopw) ? "true" : "false");
                     boolean xpstopw = ((String) post.get("xpstopw", "")).equals("on");
-                    env.setConfig("xpstopw", (crawlOrder) ? "true" : "false");
+                    env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
                     
                     String crawlingStart = (String) post.get("crawlingURL");
                     if (!(crawlingStart.startsWith("http"))) crawlingStart = "http://" + crawlingStart;

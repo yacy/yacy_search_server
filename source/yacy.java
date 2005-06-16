@@ -628,8 +628,8 @@ public final class yacy {
     // application wrapper
     public static void main(String args[]) {
         String applicationRoot = System.getProperty("user.dir");
-        //System.out.println("args.length=" + args.length);
-        //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
+        System.out.println("args.length=" + args.length);
+        System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
         if ((args.length >= 1) && ((args[0].equals("-startup")) || (args[0].equals("-start")))) {
             // normal start-up of yacy
             if (args.length == 2) applicationRoot= args[1];

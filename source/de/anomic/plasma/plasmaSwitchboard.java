@@ -445,7 +445,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         wordIndex.close(waitingBoundSeconds);
         log.logSystem("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
         try {
-			cacheLoader.close();
+            cacheLoader.close();
             wikiDB.close();
             messageDB.close();
             facilityDB.close();
@@ -468,10 +468,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //return processStack.size() + cacheLoader.size() + noticeURL.stackSize();
     }
     
+    /*
     public int lUrlSize() {
 	return urlPool.loadedURL.size();
     }
-
+    */
+    
     public int cacheSizeMin() {
 	return wordIndex.size();
     }
@@ -765,7 +767,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logDebug("processResourceStack processCase=" + processCase + ", depth=" + entry.depth + ", maxDepth=" + entry.profile.generalDepth() + ", filter=" + entry.profile.generalFilter() + ", initiatorHash=" + initiatorHash + ", status=" + entry.status + ", source=" + ((entry.cacheArray == null) ? "scraper" : "byte[]") + ", url=" + entry.nomalizedURLString); // DEBUG
             
             // parse content
-            plasmaParserDocument document;
+            plasmaParserDocument document = null;
             
             if (plasmaParser.supportedMimeTypesContains(entry.responseHeader.mime())) {
                 if (entry.scraper != null) {

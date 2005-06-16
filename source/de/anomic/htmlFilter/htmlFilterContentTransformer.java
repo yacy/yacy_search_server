@@ -128,4 +128,11 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
 	return htmlFilterOutputStream.genTag1(tagname, tagopts, text, quotechar);
     }
 
+    public void close() {
+        // free resources
+        super.close();
+        linkTags0 = null;
+        linkTags1 = null;
+    }
+        
 }

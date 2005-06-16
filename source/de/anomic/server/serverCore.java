@@ -383,16 +383,17 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         // wait for new connection
         announceThreadBlockApply();
-                
         Socket controlSocket = this.socket.accept();
-        
         announceThreadBlockRelease();
+
         String cIP = clientAddress(controlSocket);
         //System.out.println("server bfHosts=" + bfHost.toString());
         if (bfHost.get(cIP) != null) {
             this.log.logInfo("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP);
             // add a delay to make brute-force harder
+            announceThreadBlockApply();
             try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {}
+            announceThreadBlockRelease();
         }
         
         if ((this.denyHost == null) || (this.denyHost.get(cIP) == null)) {

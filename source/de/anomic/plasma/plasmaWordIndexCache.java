@@ -184,36 +184,43 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;
         long urlCount = 0, urlsPerSecond = 0;
-        synchronized (cache) {
-            Iterator i = dumpStack.iterator();
-            kelondroRecords.Node node;
-            String wordHash;
-            plasmaWordIndexEntryContainer container;
-            long creationTime;
-            plasmaWordIndexEntry wordEntry;
-            byte[][] row;
-            while (i.hasNext()) {
-                // get out one entry
-                node = (kelondroRecords.Node) i.next();
-                row = node.getValues();
-                wordHash = new String(row[0]);
-                creationTime = kelondroRecords.bytes2long(row[2]);
-                wordEntry = new plasmaWordIndexEntry(new String(row[3]), new String(row[4]));
-
-                // store to cache
-                addEntry(wordHash, wordEntry, creationTime);
-                urlCount++;
-                
-                // write a log
-                if (System.currentTimeMillis() > messageTime) {
-                    urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                    log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpStack.size() - urlCount) / urlsPerSecond) + " seconds remaining");
-                    messageTime = System.currentTimeMillis() + 5000;
+        try {
+            synchronized (cache) {
+                Iterator i = dumpStack.iterator();
+                kelondroRecords.Node node;
+                String wordHash;
+                plasmaWordIndexEntryContainer container;
+                long creationTime;
+                plasmaWordIndexEntry wordEntry;
+                byte[][] row;
+                while (i.hasNext()) {
+                    // get out one entry
+                    node = (kelondroRecords.Node) i.next();
+                    row = node.getValues();
+                    wordHash = new String(row[0]);
+                    creationTime = kelondroRecords.bytes2long(row[2]);
+                    wordEntry = new plasmaWordIndexEntry(new String(row[3]), new String(row[4]));
+                    
+                    // store to cache
+                    addEntry(wordHash, wordEntry, creationTime);
+                    urlCount++;
+                    
+                    // write a log
+                    if (System.currentTimeMillis() > messageTime) {
+                        urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
+                        log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpStack.size() - urlCount) / urlsPerSecond) + " seconds remaining");
+                        messageTime = System.currentTimeMillis() + 5000;
+                    }
                 }
             }
+            
+            dumpStack.close();
+            log.logSystem("restored " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+        } catch (kelondroException e) {
+            // restore failed
+            log.logError("restore of indexCache dump failed: " + e.getMessage());
+            e.printStackTrace();
         }
-	dumpStack.close();
-        log.logSystem("restored " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         return urlCount;
     }
 

@@ -53,5 +53,7 @@ public interface htmlFilterScraper {
     public void scrapeTag0(String tagname, Properties tagopts);
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text);
+    
+    public void close();
 
 }

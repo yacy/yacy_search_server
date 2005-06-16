@@ -284,35 +284,35 @@ public final class plasmaParser {
         
         if (mimeTypeSet != null) {
             Iterator mimeTypes = mimeTypeSet.iterator();
-	        while (mimeTypes.hasNext()) {
-	            String mimeType = (String) mimeTypes.next();
-				if (availableParserList.containsKey(mimeType)) {
+            while (mimeTypes.hasNext()) {
+                String mimeType = (String) mimeTypes.next();
+                if (availableParserList.containsKey(mimeType)) {
                     Parser theParser = null;
                     try {
                         // getting the parser
                         theParser = (Parser) plasmaParser.theParserPool.borrowObject(availableParserList.get(mimeType));
                         
                         // getting a list of mimeTypes that the parser supports
-                        Hashtable parserSupportsMimeTypes = theParser.getSupportedMimeTypes();                        
+                        Hashtable parserSupportsMimeTypes = theParser.getSupportedMimeTypes();
                         if (parserSupportsMimeTypes != null) {
-                            Object supportedExtensions = parserSupportsMimeTypes.get(mimeType);                        
-                            if ((supportedExtensions != null) && 
-                                (supportedExtensions instanceof String) && 
-                                (((String)supportedExtensions).length() > 0)) {
-                        		String[] extArray = ((String)supportedExtensions).split(",");
+                            Object supportedExtensions = parserSupportsMimeTypes.get(mimeType);
+                            if ((supportedExtensions != null) &&
+                                    (supportedExtensions instanceof String) &&
+                                    (((String)supportedExtensions).length() > 0)) {
+                                String[] extArray = ((String)supportedExtensions).split(",");
                                 newSupportedFileExt.addAll(Arrays.asList(extArray));
                             }
                         }
-						newEnabledParsers.put(mimeType,availableParserList.get(mimeType));
+                        newEnabledParsers.put(mimeType,availableParserList.get(mimeType));
                         
-                    } catch (Exception e) { 
+                    } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
-                        if (theParser != null) 
+                        if (theParser != null)
                             try { plasmaParser.theParserPool.returnObject(mimeType,theParser); } catch (Exception e) {}
                     }
-				}
-	        }
+                }
+            }
         }
         
         synchronized (enabledParserList) {
@@ -392,7 +392,7 @@ public final class plasmaParser {
                     String fullClassName = plasmaParserPkgName + "." + currentDir.getName() + "." + className;
 	                try {
                         // trying to load the parser class by its name
-						Class parserClass = Class.forName(fullClassName);
+                        Class parserClass = Class.forName(fullClassName);
                         Object theParser = parserClass.newInstance();
                         if (!(theParser instanceof Parser)) continue;
                         
@@ -458,11 +458,13 @@ public final class plasmaParser {
                 OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
     
                 hfos.write(source);
+                hfos.close();
                 return transformScraper(location, mimeType, scraper);
             } else {
                 return null;
             }
         } catch (Exception e) {
+            //e.printStackTrace();
             return null;
         } finally {
             if ((theParser != null) && (supportedMimeTypesContains(mimeType))) {
@@ -487,14 +489,14 @@ public final class plasmaParser {
                 // ...otherwise we make a scraper and transformer
                 htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
                 OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
-                
                 serverFileUtils.copy(sourceFile, hfos);
+                hfos.close();
                 return transformScraper(location, mimeType, scraper);
             } else {
                 return null;
             }
         } catch (Exception e) {
-            // e.printStackTrace();
+            //e.printStackTrace();
             return null;
         } finally {
             if ((theParser != null) && (supportedMimeTypesContains(mimeType))) {
@@ -505,11 +507,14 @@ public final class plasmaParser {
     
     public plasmaParserDocument transformScraper(URL location, String mimeType, htmlFilterContentScraper scraper) {
         try {
-            return new plasmaParserDocument(new URL(urlNormalform(location)),
+            plasmaParserDocument ppd =  new plasmaParserDocument(new URL(urlNormalform(location)),
                                 mimeType, null, null, scraper.getHeadline(),
                                 null, null,
                                 scraper.getText(), scraper.getAnchors(), scraper.getImages());
+            //scraper.close();
+            return ppd;
         } catch (MalformedURLException e) {
+            //e.printStackTrace();
             return null;
         }
     }
