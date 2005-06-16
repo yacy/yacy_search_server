@@ -147,14 +147,16 @@ public class yacySeedDB {
     }
     
     private synchronized kelondroMap openSeedTable(File seedDBFile) throws IOException {
-        if (seedDBFile.exists()) {
+        if (seedDBFile.exists()) try {
             // open existing seed database
             return new kelondroMap(new kelondroDyn(seedDBFile, seedDBBufferKB * 0x400), sortFields, accFields);
-        } else {
-            // create new seed database
-            new File(seedDBFile.getParent()).mkdir();
-            return new kelondroMap(new kelondroDyn(seedDBFile, seedDBBufferKB * 0x400, commonHashLength, 480), sortFields, accFields);
+        } catch (kelondroException e) {
+            // if we have an error, we start with a fresh database
+            if (seedDBFile.exists()) seedDBFile.delete();
         }
+        // create new seed database
+        new File(seedDBFile.getParent()).mkdir();
+        return new kelondroMap(new kelondroDyn(seedDBFile, seedDBBufferKB * 0x400, commonHashLength, 480), sortFields, accFields);
     }
     
     private synchronized kelondroMap resetSeedTable(kelondroMap seedDB, File seedDBFile) {

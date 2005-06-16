@@ -148,7 +148,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
 
     // load slots
-    public static int crawlSlots = 8;
+    public static int crawlSlots = 20;
 
     // couloured list management
     public static TreeSet blueList = null;

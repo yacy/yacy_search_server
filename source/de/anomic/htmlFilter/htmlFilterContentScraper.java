@@ -52,7 +52,7 @@ import de.anomic.server.serverByteBuffer;
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
 
-    // statics: for initialisation of the HTMLFilterAbstractTransformer
+    // statics: for initialisation of the HTMLFilterAbstractScraper
     private static HashSet linkTags0;
     private static HashSet linkTags1;
 
@@ -122,10 +122,10 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
 	//System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
-	if ((tagname.equals("a")) && (text.length < 2048)) {
-            byte[] a = super.stripAll(new serverByteBuffer(text)).getBytes();
-            anchors.put(absolutePath(tagopts.getProperty("href", "")), new serverByteBuffer(a).trim().toString());
-        }
+	//if (tagname.equals("a")) anchors.put(absolutePath(tagopts.getProperty("href", "")), new serverByteBuffer(super.stripAll(new serverByteBuffer(text)).getBytes()).trim().toString());
+	//if (tagname.equals("h1")) headline = new String(super.stripAll(new serverByteBuffer(text)).getBytes());
+	//if (tagname.equals("title")) title = new String(super.stripAll(new serverByteBuffer(text)).getBytes());
+	if ((tagname.equals("a")) && (text.length < 2048)) anchors.put(absolutePath(tagopts.getProperty("href", "")), new serverByteBuffer(super.stripAll(new serverByteBuffer(text)).getBytes()).trim().toString());
 	if ((tagname.equals("h1")) && (text.length < 512)) headline = new String(super.stripAll(new serverByteBuffer(text)).getBytes());
 	if ((tagname.equals("title")) && (text.length < 512)) title = new String(super.stripAll(new serverByteBuffer(text)).getBytes());
     }
@@ -166,8 +166,12 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     public void close() {
         // free resources
         super.close();
-        linkTags0 = null;
-        linkTags1 = null;
+        anchors = null;
+        images = null;
+        title = null;
+        headline = null;
+        text = null;
+        root = null;
     }
     
     public void print() {

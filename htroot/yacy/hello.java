@@ -78,23 +78,26 @@ public class hello {
         if (remoteSeed == null) return new serverObjects();
         
         // we easily know the caller's IP:
-        String yourip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum
-        //System.out.println("YACYHELLO: YOUR IP=" + yourip);
-        prop.put("yourip", yourip);
-        
-        // now let's check if the calling peer can be reached and answers
-        int urls = -1;
+        String clientip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum
         String reportedip = remoteSeed.get("IP", "");
-        remoteSeed.put("IP", yourip);
-        urls = yacyClient.queryUrlCount(remoteSeed);
+        float clientversion = remoteSeed.getVersion();
 
-        // if this was not successful, we try to use the reported ip
-        if ((urls < 0) && (!(reportedip.equals(yourip)))) {
-            // the other peer does not respond under the ip it reported
-            // we try again using the ip we got from the http header
+        int urls = -1;
+        if ((!(clientip.equals(reportedip))) && (clientversion >= (float)0.383)) {
+            // try first the reportedip, since this may be a connect from a port-forwarding host
+            prop.put("yourip", reportedip);
             remoteSeed.put("IP", reportedip);
             urls = yacyClient.queryUrlCount(remoteSeed);
         }
+        
+        if (urls < 0) {
+            // if the previous attempt was not successful, try the ip where the request came from
+            prop.put("yourip", clientip);
+            remoteSeed.put("IP", clientip);
+            urls = yacyClient.queryUrlCount(remoteSeed);
+        }
+        
+        //System.out.println("YACYHELLO: YOUR IP=" + clientip);
         
         // assign status
         if (urls >= 0) {
@@ -114,7 +117,7 @@ public class hello {
             remoteSeed.put("LastSeen", yacyCore.universalDateShortString());
             yacyCore.peerActions.juniorConnects++; // update statistics
             remoteSeed.put("PeerType", "junior");
-            yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + yourip + ":" + remoteSeed.get("Port", "8080"));
+            yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + remoteSeed.getAddress());
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper())) yacyCore.peerActions.peerPing(remoteSeed);
         }

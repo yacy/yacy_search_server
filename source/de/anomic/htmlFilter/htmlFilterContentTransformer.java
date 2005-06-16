@@ -131,8 +131,6 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     public void close() {
         // free resources
         super.close();
-        linkTags0 = null;
-        linkTags1 = null;
     }
         
 }
