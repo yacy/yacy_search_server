@@ -77,7 +77,7 @@ public class IndexControl_p {
             prop.put("urlhash", "");
             prop.put("result", "");
             prop.put("wcount", "" + switchboard.wordIndex.size());
-            prop.put("ucount", "" + switchboard.loadedURL.size());
+            prop.put("ucount", "" + switchboard.urlPool.loadedURL.size());
             prop.put("otherHosts", "");
             prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
             prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
@@ -132,7 +132,7 @@ public class IndexControl_p {
                 }
             }
             if (delurlref) for (int i = 0; i < urlx.length; i++) switchboard.removeAllUrlReferences(urlx[i], true);
-            if ((delurl) || (delurlref)) for (int i = 0; i < urlx.length; i++) switchboard.loadedURL.remove(urlx[i]);
+            if ((delurl) || (delurlref)) for (int i = 0; i < urlx.length; i++) switchboard.urlPool.loadedURL.remove(urlx[i]);
             switchboard.wordIndex.deleteIndex(keyhash);
             post.remove("keyhashdeleteall");
             if ((keystring.length() > 0) && (plasmaWordIndexEntry.word2hash(keystring).equals(keyhash)))
@@ -143,7 +143,7 @@ public class IndexControl_p {
         
         if (post.containsKey("keyhashdelete")) {
             if (delurlref) for (int i = 0; i < urlx.length; i++) switchboard.removeAllUrlReferences(urlx[i], true);
-            if ((delurl) || (delurlref)) for (int i = 0; i < urlx.length; i++) switchboard.loadedURL.remove(urlx[i]);
+            if ((delurl) || (delurlref)) for (int i = 0; i < urlx.length; i++) switchboard.urlPool.loadedURL.remove(urlx[i]);
             switchboard.wordIndex.removeEntries(keyhash, urlx, true);
             // this shall lead to a presentation of the list; so handle that the remaining program
             // thinks that it was called for a list presentation
@@ -161,14 +161,14 @@ public class IndexControl_p {
         }
         
         if (post.containsKey("urlhashdelete")) {
-            plasmaCrawlLURL.entry entry = switchboard.loadedURL.getEntry(urlhash);
+            plasmaCrawlLURL.entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
             URL url = entry.url();
             if (url == null) {
                 prop.put("result", "No Entry for url hash " + urlhash + "; nothing deleted.");
             } else {
                 urlstring = htmlFilterContentScraper.urlNormalform(url);
                 prop.put("urlstring", "");
-                switchboard.loadedURL.remove(urlhash);
+                switchboard.urlPool.loadedURL.remove(urlhash);
                 prop.put("result", "Removed URL " + urlstring);
             }
         }
@@ -198,7 +198,7 @@ public class IndexControl_p {
             String result;
             long starttime = System.currentTimeMillis();
             indexes[0] = switchboard.wordIndex.getEntity(keyhash, true);
-            result = yacyClient.transferIndex(yacyCore.seedDB.getConnected(post.get("hostHash", "")), indexes, switchboard.loadedURL);
+            result = yacyClient.transferIndex(yacyCore.seedDB.getConnected(post.get("hostHash", "")), indexes, switchboard.urlPool.loadedURL);
             prop.put("result", (result == null) ? ("Successfully transferred " + indexes[0].size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds") : result);
 	    try {indexes[0].close();} catch (IOException e) {}
         }
@@ -227,7 +227,7 @@ public class IndexControl_p {
                 URL url = new URL(urlstring);
                 urlhash = plasmaURL.urlHash(url);
                 prop.put("urlhash", urlhash);
-                plasmaCrawlLURL.entry entry = switchboard.loadedURL.getEntry(urlhash);
+                plasmaCrawlLURL.entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
                 prop.put("result", genUrlProfile(switchboard, entry, urlhash));
             } catch (MalformedURLException e) {
                 prop.put("urlstring", "wrong url: " + urlstring);
@@ -236,7 +236,7 @@ public class IndexControl_p {
         }
         
         if (post.containsKey("urlhashsearch")) {
-            plasmaCrawlLURL.entry entry = switchboard.loadedURL.getEntry(urlhash);
+            plasmaCrawlLURL.entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
             URL url = entry.url();
             if (url == null) {
                 prop.put("result", "No Entry for url hash " + urlhash);
@@ -249,7 +249,7 @@ public class IndexControl_p {
 
 	if (post.containsKey("urlhashsimilar")) {
             try {
-                Iterator hashIt = switchboard.loadedURL.urlHashes(urlhash, true);
+                Iterator hashIt = switchboard.urlPool.loadedURL.urlHashes(urlhash, true);
                 String result = "Sequential List of URL-Hashes:<br>";
 		String hash;
 		int i = 0;
@@ -290,7 +290,7 @@ public class IndexControl_p {
         
         // insert constants
         prop.put("wcount", "" + switchboard.wordIndex.size());
-        prop.put("ucount", "" + switchboard.loadedURL.size());
+        prop.put("ucount", "" + switchboard.urlPool.loadedURL.size());
 	prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
         prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
         // return rewrite properties
@@ -307,7 +307,7 @@ public class IndexControl_p {
         "<tr><td class=\"small\">Description</td><td class=\"tt\">" + entry.descr() + "</td></tr>" +
         "<tr><td class=\"small\">Modified-Date</td><td class=\"tt\">" + entry.moddate() + "</td></tr>" +
         "<tr><td class=\"small\">Loaded-Date</td><td class=\"tt\">" + entry.loaddate() + "</td></tr>" +
-        "<tr><td class=\"small\">Referrer</td><td class=\"tt\">" + switchboard.loadedURL.getEntry(entry.referrerHash()).url() + "</td></tr>" +
+        "<tr><td class=\"small\">Referrer</td><td class=\"tt\">" + switchboard.urlPool.loadedURL.getEntry(entry.referrerHash()).url() + "</td></tr>" +
         "<tr><td class=\"small\">Doctype</td><td class=\"tt\">" + entry.doctype() + "</td></tr>" +
         "<tr><td class=\"small\">Copy-Count</td><td class=\"tt\">" + entry.copyCount() + "</td></tr>" +
         "<tr><td class=\"small\">Local-Flag</td><td class=\"tt\">" + entry.local() + "</td></tr>" +
@@ -351,8 +351,8 @@ public class IndexControl_p {
                     uh = ie.getUrlHash();
                     result +=
                     "<input type=\"checkbox\" name=\"urlhx" + i++ + "\" value=\"" + uh + "\" align=\"top\">";
-                    if (switchboard.loadedURL.exists(uh)) {
-                        us = switchboard.loadedURL.getEntry(uh).url().toString();
+                    if (switchboard.urlPool.loadedURL.exists(uh)) {
+                        us = switchboard.urlPool.loadedURL.getEntry(uh).url().toString();
                         result +=
                         "<a href=\"/IndexControl_p.html?" + "keystring=" + keystring +
                         "&keyhash=" + keyhash + "&urlhash=" + uh + "&urlstringsearch=" + "&urlstring=" + us +

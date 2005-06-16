@@ -66,7 +66,7 @@ public class IndexShare_p {
             prop.put("dtable", "");
             prop.put("rtable", "");
             prop.put("wcount", "" + switchboard.wordIndex.size());
-            prop.put("ucount", "" + switchboard.loadedURL.size());
+            prop.put("ucount", "" + switchboard.urlPool.loadedURL.size());
             return prop; // be save
         }
         
@@ -79,7 +79,7 @@ public class IndexShare_p {
 
         // insert constants
         prop.put("wcount", "" + switchboard.wordIndex.size());
-        prop.put("ucount", "" + switchboard.loadedURL.size());
+        prop.put("ucount", "" + switchboard.urlPool.loadedURL.size());
 	// return rewrite properties
 	return prop;
     }

@@ -71,13 +71,13 @@ public class transferURL {
         
         if (granted) {
             int received = 0;
-            int sizeBefore = switchboard.loadedURL.size();
+            int sizeBefore = switchboard.urlPool.loadedURL.size();
             // read the urls from the other properties and store
             String urls;
             for (int i = 0; i < urlc; i++) {
                 urls = (String) post.get("url" + i);
                 if (urls != null) {
-                    switchboard.loadedURL.newEntry(urls, true, iam, iam, 3);
+                    switchboard.urlPool.loadedURL.newEntry(urls, true, iam, iam, 3);
                     received++;
                 }
             }
@@ -85,7 +85,7 @@ public class transferURL {
             yacyCore.seedDB.mySeed.incRU(received);
             
             // return rewrite properties
-            int more = switchboard.loadedURL.size() - sizeBefore;
+            int more = switchboard.urlPool.loadedURL.size() - sizeBefore;
             doublevalues = "" + (received - more);
             switchboard.getLog().logInfo("Received " + received + " URL's from peer " + iam);
             if ((received - more) > 0) switchboard.getLog().logError("Received " + doublevalues + " double URL's from peer " + iam);

@@ -443,7 +443,7 @@ public class dir {
         try {
             URL url = new URL(urlstring);
             plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()));
-            plasmaCrawlLURL.entry newEntry = switchboard.loadedURL.newEntry(
+            plasmaCrawlLURL.entry newEntry = switchboard.urlPool.loadedURL.newEntry(
             url, "YaCyShare: " + descr, new Date(), new Date(),
             "____________", /*initiator*/
             yacyCore.seedDB.mySeed.hash, /*executor*/
@@ -468,7 +468,7 @@ public class dir {
             String urlhash = plasmaURL.urlHash(new URL(urlstring));
             Set words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes());
             switchboard.removeReferences(urlhash, words);
-            switchboard.loadedURL.remove(urlhash);
+            switchboard.urlPool.loadedURL.remove(urlhash);
         } catch (Exception e) {
             System.out.println("INTERNAL ERROR in dir.deletePhrase:");
             e.printStackTrace();

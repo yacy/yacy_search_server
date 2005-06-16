@@ -152,10 +152,10 @@ public class crawlOrder {
                     reason = reasonString;
                     delay = "" + (acceptDelay / 4);
                     // send lurl-Entry as response
-                    plasmaCrawlLURL.entry entry = switchboard.loadedURL.getEntry(plasmaCrawlLURL.urlHash(url));
+                    plasmaCrawlLURL.entry entry = switchboard.urlPool.loadedURL.getEntry(plasmaCrawlLURL.urlHash(url));
                     if (entry != null) {
                         response = "double";
-                        switchboard.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
+                        switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
                         lurl = crypt.simpleEncode(entry.toString());
                         delay = "1";
                     } else {

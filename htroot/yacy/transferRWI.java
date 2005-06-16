@@ -110,7 +110,7 @@ public class transferRWI {
                     switchboard.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry));
                     urlHash = entry.getUrlHash();
                     if ((!(unknownURL.contains(urlHash))) &&
-                    (!(switchboard.loadedURL.exists(urlHash)))) {
+                    (!(switchboard.urlPool.loadedURL.exists(urlHash)))) {
                         unknownURL.add(urlHash);
                     }
                     received++;

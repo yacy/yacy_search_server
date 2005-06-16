@@ -61,16 +61,22 @@ import de.anomic.tools.bitfield;
 
 public class plasmaCrawlNURL extends plasmaURL {
 
-    public static final int STACK_TYPE_NULL     = 0; // do not stack
-    public static final int STACK_TYPE_CORE     = 1; // put on local stack
-    public static final int STACK_TYPE_LIMIT    = 2; // put on global stack
-    public static final int STACK_TYPE_OVERHANG = 3; // put on overhang stack; links that are known but not crawled
-    public static final int STACK_TYPE_REMOTE   = 4; // put on remote-triggered stack
+    public static final int STACK_TYPE_NULL     =  0; // do not stack
+    public static final int STACK_TYPE_CORE     =  1; // put on local stack
+    public static final int STACK_TYPE_LIMIT    =  2; // put on global stack
+    public static final int STACK_TYPE_OVERHANG =  3; // put on overhang stack; links that are known but not crawled
+    public static final int STACK_TYPE_REMOTE   =  4; // put on remote-triggered stack
+    public static final int STACK_TYPE_IMAGE    = 11; // put on image stack
+    public static final int STACK_TYPE_MOVIE    = 12; // put on movie stack
+    public static final int STACK_TYPE_MUSIC    = 13; // put on music stack
     
     private kelondroStack coreStack;      // links found by crawling to depth-1
     private kelondroStack limitStack;     // links found by crawling at target depth
     private kelondroStack overhangStack;  // links found by crawling at depth+1
     private kelondroStack remoteStack;    // links from remote crawl orders
+    private kelondroStack imageStack;     // links pointing to image resources
+    private kelondroStack movieStack;     // links pointing to movie resources
+    private kelondroStack musicStack;     // links pointing to music resources
     
     private HashSet stackIndex;           // to find out if a specific link is already on any stack
     
@@ -104,39 +110,41 @@ public class plasmaCrawlNURL extends plasmaURL {
 	    urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, ce);
 	}
         
-	File localCrawlStack = new File(cacheStacksPath, "urlNoticeLocal0.stack");
-        if (localCrawlStack.exists()) {
-	    coreStack = new kelondroStack(localCrawlStack, 0);
-	} else {
-	    coreStack = new kelondroStack(localCrawlStack, 0, new int[] {plasmaURL.urlHashLength});
-	}
-        File limitCrawlStack = new File(cacheStacksPath, "urlNoticeLimit0.stack");
-        if (limitCrawlStack.exists()) {
-	    limitStack = new kelondroStack(limitCrawlStack, 0);
-	} else {
-	    limitStack = new kelondroStack(limitCrawlStack, 0, new int[] {plasmaURL.urlHashLength});
-	}
-        File overhangCrawlStack = new File(cacheStacksPath, "urlNoticeOverhang0.stack");
-        if (overhangCrawlStack.exists()) {
-	    overhangStack = new kelondroStack(overhangCrawlStack, 0);
-	} else {
-	    overhangStack = new kelondroStack(overhangCrawlStack, 0, new int[] {plasmaURL.urlHashLength});
-	}
-        File globalCrawlStack = new File(cacheStacksPath, "urlNoticeRemote0.stack");
-        if (globalCrawlStack.exists()) {
-	    remoteStack = new kelondroStack(globalCrawlStack, 0);
-	} else {
-	    remoteStack = new kelondroStack(globalCrawlStack, 0, new int[] {plasmaURL.urlHashLength});
-	}
-        
+        File coreStackFile = new File(cacheStacksPath, "urlNoticeLocal0.stack");
+        File limitStackFile = new File(cacheStacksPath, "urlNoticeLimit0.stack");
+        File overhangStackFile = new File(cacheStacksPath, "urlNoticeOverhang0.stack");
+        File remoteStackFile = new File(cacheStacksPath, "urlNoticeRemote0.stack");
+        File imageStackFile = new File(cacheStacksPath, "urlNoticeImage0.stack");
+        File movieStackFile = new File(cacheStacksPath, "urlNoticeMovie0.stack");
+        File musicStackFile = new File(cacheStacksPath, "urlNoticeMusic0.stack");
+        if (coreStackFile.exists()) coreStack = new kelondroStack(coreStackFile, 0); else coreStack = new kelondroStack(coreStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        if (limitStackFile.exists()) limitStack = new kelondroStack(limitStackFile, 0); else limitStack = new kelondroStack(limitStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        if (overhangStackFile.exists()) overhangStack = new kelondroStack(overhangStackFile, 0); else overhangStack = new kelondroStack(overhangStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        if (remoteStackFile.exists()) remoteStack = new kelondroStack(remoteStackFile, 0); else remoteStack = new kelondroStack(remoteStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        if (imageStackFile.exists()) imageStack = new kelondroStack(imageStackFile, 0); else imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        if (movieStackFile.exists()) movieStack = new kelondroStack(movieStackFile, 0); else movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        if (musicStackFile.exists()) musicStack = new kelondroStack(musicStackFile, 0); else musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength});
+
         // init stack Index
         stackIndex = new HashSet();
-        Iterator i = coreStack.iterator();
-        while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
-        i = remoteStack.iterator();
-        while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+        new initStackIndex().start();
     }
 
+    public class initStackIndex extends Thread {
+        public void run() {
+            Iterator i;
+            try {
+                i =     coreStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+                i =    limitStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+                i = overhangStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+                i =   remoteStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+                i =    imageStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+                i =    movieStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+                i =    musicStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+            } catch (IOException e) {}
+        }
+    }
+    
     private static String normalizeHost(String host) {
 	if (host.length() > urlHostLength) host = host.substring(0, urlHostLength);
 	host = host.toLowerCase();
@@ -155,20 +163,17 @@ public class plasmaCrawlNURL extends plasmaURL {
         return coreStack.size()  + limitStack.size() + remoteStack.size();
     }
     
-    public int coreStackSize() {
-        return coreStack.size();
-    }
-    
-    public int limitStackSize() {
-        return limitStack.size();
-    }
-    
-    public int overhangStackSize() {
-        return overhangStack.size();
-    }
-    
-    public int remoteStackSize() {
-        return remoteStack.size();
+    public int stackSize(int stackType) {
+        switch (stackType) {
+            case STACK_TYPE_CORE:     return coreStack.size();
+            case STACK_TYPE_LIMIT:    return limitStack.size();
+            case STACK_TYPE_OVERHANG: return overhangStack.size();
+            case STACK_TYPE_REMOTE:   return remoteStack.size();
+            case STACK_TYPE_IMAGE:    return imageStack.size();
+            case STACK_TYPE_MOVIE:    return movieStack.size();
+            case STACK_TYPE_MUSIC:    return musicStack.size();
+            default: return -1;
+        }
     }
     
     public boolean existsInStack(String urlhash) {
@@ -179,35 +184,48 @@ public class plasmaCrawlNURL extends plasmaURL {
                 String profile, int depth, int anchors, int forkfactor, int stackMode) {
 	entry e = new entry(initiator, url, referrer, name, loaddate, profile,
                      depth, anchors, forkfactor);
-        
-        // stackMode can have 3 cases:
-        // 0 = do not stack
-        // 1 = on local stack
-        // 2 = on global stack
-        // 3 = on overhang stack
-        // 4 = on remote stack
         try {
-            if (stackMode == 1) coreStack.push(new byte[][] {e.hash.getBytes()});
-            if (stackMode == 2) limitStack.push(new byte[][] {e.hash.getBytes()});
-            if (stackMode == 3) overhangStack.push(new byte[][] {e.hash.getBytes()});
-            if (stackMode == 4) remoteStack.push(new byte[][] {e.hash.getBytes()});
+            switch (stackMode) {
+                case STACK_TYPE_CORE:     coreStack.push(new byte[][] {e.hash.getBytes()}); break;
+                case STACK_TYPE_LIMIT:    limitStack.push(new byte[][] {e.hash.getBytes()}); break;
+                case STACK_TYPE_OVERHANG: overhangStack.push(new byte[][] {e.hash.getBytes()}); break;
+                case STACK_TYPE_REMOTE:   remoteStack.push(new byte[][] {e.hash.getBytes()}); break;
+                case STACK_TYPE_IMAGE:    imageStack.push(new byte[][] {e.hash.getBytes()}); break;
+                case STACK_TYPE_MOVIE:    movieStack.push(new byte[][] {e.hash.getBytes()}); break;
+                case STACK_TYPE_MUSIC:    musicStack.push(new byte[][] {e.hash.getBytes()}); break;
+                default: break;
+            }
             stackIndex.add(new String(e.hash.getBytes()));
         } catch (IOException er) {
         }
         return e;
     }
 
-    public entry corePop() { return pop(coreStack); }
-    public entry[] coreTop(int count) { return top(coreStack, count); }
+    public entry[] top(int stackType, int count) {
+        switch (stackType) {
+            case STACK_TYPE_CORE:     return top(coreStack, count);
+            case STACK_TYPE_LIMIT:    return top(limitStack, count);
+            case STACK_TYPE_OVERHANG: return top(overhangStack, count);
+            case STACK_TYPE_REMOTE:   return top(remoteStack, count);
+            case STACK_TYPE_IMAGE:    return top(imageStack, count);
+            case STACK_TYPE_MOVIE:    return top(movieStack, count);
+            case STACK_TYPE_MUSIC:    return top(musicStack, count);
+            default: return null;
+        }
+    }
     
-    public entry limitPop() { return pop(limitStack); }
-    public entry[] limitTop(int count) { return top(limitStack, count); }
-    
-    public entry overhangPop() { return pop(overhangStack); }
-    public entry[] overhangTop(int count) { return top(overhangStack, count); }
-    
-    public entry remotePop() { return pop(remoteStack); }
-    public entry[] remoteTop(int count) { return top(remoteStack, count); }
+    public entry pop(int stackType) {
+        switch (stackType) {
+            case STACK_TYPE_CORE:     return pop(coreStack);
+            case STACK_TYPE_LIMIT:    return pop(limitStack);
+            case STACK_TYPE_OVERHANG: return pop(overhangStack);
+            case STACK_TYPE_REMOTE:   return pop(remoteStack);
+            case STACK_TYPE_IMAGE:    return pop(imageStack);
+            case STACK_TYPE_MOVIE:    return pop(movieStack);
+            case STACK_TYPE_MUSIC:    return pop(musicStack);
+            default: return null;
+        }
+    }
     
     private entry pop(kelondroStack stack) {
 	// this is a filo - pop
@@ -237,7 +255,7 @@ public class plasmaCrawlNURL extends plasmaURL {
 	    return null;
 	}
     }
-    
+
     public synchronized entry getEntry(String hash) {
 	return new entry(hash);
     }
@@ -247,10 +265,11 @@ public class plasmaCrawlNURL extends plasmaURL {
             urlHashCache.remove(hash.getBytes());
         } catch (IOException e) {}
     }
-    
+
     public class entry {
 
-        private String   initiator;     // the initiator hash, is NULL or "" if it is the own proxy
+        private String   initiator;     // the initiator hash, is NULL or "" if it is the own proxy;
+                                        // if this is generated by a crawl, the own peer hash in entered
 	private String   hash;          // the url's hash
         private String   referrer;      // the url's referrer hash
         private URL      url;           // the url as string

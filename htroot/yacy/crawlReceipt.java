@@ -111,11 +111,11 @@ public class crawlReceipt {
             prop.put("delay", "3600");
         } else if (result.equals("fill")) {
             // put new data into database
-            switchboard.loadedURL.newEntry(propStr, true, youare, iam, 1);
-            switchboard.noticeURL.remove(urlhash);
+            switchboard.urlPool.loadedURL.newEntry(propStr, true, youare, iam, 1);
+            switchboard.urlPool.noticeURL.remove(urlhash);
             
             // write log
-            plasmaCrawlLURL.entry entry = switchboard.loadedURL.getEntry(urlhash);
+            plasmaCrawlLURL.entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
             if (entry == null) {
                 switchboard.getLog().logError("RECEIVED wrong RECEIPT for hash " + urlhash + " from peer " + iam);
             } else {
@@ -125,10 +125,10 @@ public class crawlReceipt {
             // ready for more
             prop.put("delay", "10");
         } else {
-            plasmaCrawlNURL.entry en = switchboard.noticeURL.getEntry(urlhash);
+            plasmaCrawlNURL.entry en = switchboard.urlPool.noticeURL.getEntry(urlhash);
             if (en != null) {
-                switchboard.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(plasmaURL.urlFlagLength), false);
-                switchboard.noticeURL.remove(urlhash);
+                switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(plasmaURL.urlFlagLength), false);
+                switchboard.urlPool.noticeURL.remove(urlhash);
             }
             prop.put("delay", "100"); // what shall we do with that???
         }

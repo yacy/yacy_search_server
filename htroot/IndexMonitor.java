@@ -95,12 +95,12 @@ public class IndexMonitor {
         }
         
         // do the commands
-        if (post.containsKey("clearlist")) switchboard.loadedURL.clearStack(process);
+        if (post.containsKey("clearlist")) switchboard.urlPool.loadedURL.clearStack(process);
         if (post.containsKey("deleteentry")) {
                 String hash = post.get("hash", null);
                 if (hash != null) {
                     // delete from database
-                    switchboard.loadedURL.remove(hash);
+                    switchboard.urlPool.loadedURL.remove(hash);
                 }
             }
         if (post.containsKey("moreIndexed")) {
@@ -113,7 +113,7 @@ public class IndexMonitor {
         if (process == 0) {
             prop.put("table", 2);
         } else {
-            prop.putAll(switchboard.loadedURL.genTableProps(process, showIndexedCount, si, se, "unknown", null, "IndexMonitor.html", true));
+            prop.putAll(switchboard.urlPool.loadedURL.genTableProps(process, showIndexedCount, si, se, "unknown", null, "IndexMonitor.html", true));
         }
         prop.put("process", process);
 	// return rewrite properties

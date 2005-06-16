@@ -131,8 +131,8 @@ public class IndexCreate_p {
                         // stack request
                         // first delete old entry, if exists
                         String urlhash = plasmaURL.urlHash(crawlingStart);
-                        switchboard.loadedURL.remove(urlhash);
-                        switchboard.noticeURL.remove(urlhash);
+                        switchboard.urlPool.loadedURL.remove(urlhash);
+                        switchboard.urlPool.noticeURL.remove(urlhash);
                         
                         // stack url
                         String reasonString = switchboard.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0,
@@ -157,7 +157,7 @@ public class IndexCreate_p {
                 }
             }
             if (post.containsKey("clearRejected")) {
-                switchboard.errorURL.clearStack();
+                switchboard.urlPool.errorURL.clearStack();
             }
             if (post.containsKey("moreRejected")) {
                 showRejectedCount = Integer.parseInt(post.get("showRejected", "10"));
@@ -169,17 +169,17 @@ public class IndexCreate_p {
             if (post.containsKey("clearcrawlqueue")) {
                 String urlHash;
                 int c = 0;
-                while (switchboard.noticeURL.coreStackSize() > 0) {
-                    urlHash = switchboard.noticeURL.corePop().hash();
-                    if (urlHash != null) { switchboard.noticeURL.remove(urlHash); c++; }
+                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) > 0) {
+                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE).hash();
+                    if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
                 }
-                while (switchboard.noticeURL.limitStackSize() > 0) {
-                    urlHash = switchboard.noticeURL.limitPop().hash();
-                    if (urlHash != null) { switchboard.noticeURL.remove(urlHash); c++; }
+                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) > 0) {
+                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT).hash();
+                    if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
                 }
-                while (switchboard.noticeURL.remoteStackSize() > 0) {
-                    urlHash = switchboard.noticeURL.remotePop().hash();
-                    if (urlHash != null) { switchboard.noticeURL.remove(urlHash); c++; }
+                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) > 0) {
+                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT).hash();
+                    if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
                 }
                 prop.put("info", 3);//crawling queue cleared
                 prop.put("info_numEntries", c);
@@ -211,7 +211,7 @@ public class IndexCreate_p {
         
         int queueStackSize = switchboard.queueStack.size();
         int loaderThreadsSize = switchboard.cacheLoader.size();
-        int crawlerListSize = switchboard.noticeURL.stackSize();
+        int crawlerListSize = switchboard.urlPool.noticeURL.stackSize();
         int completequeue = queueStackSize + loaderThreadsSize + crawlerListSize;
         
         if ((completequeue > 0) || ((post != null) && (post.containsKey("refreshpage")))) {
@@ -279,11 +279,11 @@ public class IndexCreate_p {
             }
             
             // failure cases
-            if (switchboard.errorURL.stackSize() != 0) {
-                if (showRejectedCount > switchboard.errorURL.stackSize()) showRejectedCount = switchboard.errorURL.stackSize();
+            if (switchboard.urlPool.errorURL.stackSize() != 0) {
+                if (showRejectedCount > switchboard.urlPool.errorURL.stackSize()) showRejectedCount = switchboard.urlPool.errorURL.stackSize();
                 prop.put("rejected", 1);
-                prop.put("rejected_num", switchboard.errorURL.stackSize());
-                if (showRejectedCount != switchboard.errorURL.stackSize()) {
+                prop.put("rejected_num", switchboard.urlPool.errorURL.stackSize());
+                if (showRejectedCount != switchboard.urlPool.errorURL.stackSize()) {
                     prop.put("rejected_only-latest", 1);
                     prop.put("rejected_only-latest_num", showRejectedCount);
                     prop.put("rejected_only-latest_newnum", ((int) (showRejectedCount * 1.5)));
@@ -295,8 +295,8 @@ public class IndexCreate_p {
                 plasmaCrawlEURL.entry entry;
                 yacySeed initiatorSeed, executorSeed;
                 int j=0;
-                for (i = switchboard.errorURL.stackSize() - 1; i >= (switchboard.errorURL.stackSize() - showRejectedCount); i--) {
-                    entry = (plasmaCrawlEURL.entry) switchboard.errorURL.getStack(i);
+                for (i = switchboard.urlPool.errorURL.stackSize() - 1; i >= (switchboard.urlPool.errorURL.stackSize() - showRejectedCount); i--) {
+                    entry = (plasmaCrawlEURL.entry) switchboard.urlPool.errorURL.getStack(i);
                     initiatorHash = entry.initiator();
                     executorHash = entry.executor();
                     url = entry.url().toString();
@@ -380,12 +380,12 @@ public class IndexCreate_p {
                     prop.put("loader-set_list", i );
                 }
                 
-                int localStackSize = switchboard.noticeURL.coreStackSize();
+                int localStackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
                 if (localStackSize == 0) {
                     prop.put("crawler-queue", 0);
                 } else {
                     prop.put("crawler-queue", 1);
-                    plasmaCrawlNURL.entry[] crawlerList = switchboard.noticeURL.coreTop(20);
+                    plasmaCrawlNURL.entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, 20);
                     prop.put("crawler-queue_num", localStackSize);//num Entries
                     prop.put("crawler-queue_show-num", crawlerList.length); //showin sjow-num most recent
                     plasmaCrawlNURL.entry urle;
