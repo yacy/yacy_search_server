@@ -67,7 +67,9 @@ public class query {
 	String key    = (String) post.get("key", "");    // transmission key for response
 	String obj    = (String) post.get("object", ""); // keyword for query subject
 	String env    = (String) post.get("env", "");    // argument to query
-
+    
+    prop.put("mytime", yacyCore.universalDateShortString());
+    
 	// check if we are the right target and requester has correct information about this peer
 	if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
 	    // this request has a wrong target
@@ -141,7 +143,7 @@ public class query {
 	    return prop;
 	}
 
-        prop.put("mytime", yacyCore.universalDateShortString());
+
 	// return rewrite properties
 	return prop;
     }
