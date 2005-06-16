@@ -89,8 +89,7 @@ public class hello {
         urls = yacyClient.queryUrlCount(remoteSeed);
 
         // if this was not successful, we try to use the reported ip
-        if ((urls < 0) &&
-            (!remoteSeed.get("IP","").equalsIgnoreCase(yourip))) {
+        if ((urls < 0) && (!(reportedip.equals(yourip)))) {
             // the other peer does not respond under the ip it reported
             // we try again using the ip we got from the http header
             remoteSeed.put("IP", reportedip);
