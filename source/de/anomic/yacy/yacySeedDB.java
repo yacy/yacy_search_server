@@ -121,7 +121,11 @@ public class yacySeedDB {
 	}
         
 	mySeed.put("IP", "");       // we delete the old information to see what we have now
-	mySeed.put("Port", sb.getConfig("port", "8080")); // set my seed's correct port number
+    if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
+        mySeed.put("Port", Integer.toString(serverCore.portForwarding.getPort()));
+    } else {
+        mySeed.put("Port", sb.getConfig("port", "8080")); // set my seed's correct port number
+    }
 	mySeed.put("PeerType", "virgin"); // markup startup condition
 
         // start our virtual DNS service for yacy peers with empty cache

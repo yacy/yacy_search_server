@@ -52,11 +52,18 @@ import java.util.zip.GZIPOutputStream;
 
 public final class serverFileUtils {
     
-    public static void copy(InputStream source, OutputStream dest) throws IOException {
+    public static int copy(InputStream source, OutputStream dest) throws IOException {
 		byte[] buffer = new byte[4096];
-		int c;
-		while ((c = source.read(buffer)) > 0) dest.write(buffer, 0, c);
+        
+		int c, total = 0;
+		while ((c = source.read(buffer)) > 0) {
+            dest.write(buffer, 0, c);
+            dest.flush();
+            total += c;
+        }
 		dest.flush();
+        
+        return total;
     }
           
     public static void copy(InputStream source, File dest) throws IOException {

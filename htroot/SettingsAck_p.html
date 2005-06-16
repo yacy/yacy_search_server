@@ -10,67 +10,69 @@
 <h2>Settings Receipt:</h2>
 
 <p>
-#(info)#
+#(info)#<!-- 0 -->
 <b>No information has been submitted</b><br>
 Nothing changed
-::
+::<!-- 1 -->
 <b>Error with submitted information.</b><br>
 Nothing changed.
-::
+::<!-- 2 -->
 <b>The user name must be given.</b><br>
 Your request cannot be processed.<br>Nothing changed.
-::
+::<!-- 3 -->
 <b>The password redundancy check failed. You have probably misstyped your password.</b><br>
 Your request cannot be processed.<br>Nothing changed.
-::
+::<!-- 4 -->
 <b>Shutting down.</b><br>Application will terminate after working off all crawling tasks.
-::
+::<!-- 5 -->
 <b>Your administration account setting has been made.</b><br>
 Your new administration account name is #[user]#. The password has been accepted.<br>If you go back to the Settings page, you must log-in again.
-::
+::<!-- 6 -->
 <b>Your proxy access setting has been changed.<br>
-Your proxy account check has been disabled, since you did not supply a password.</b><br>
-The new proxy IP filter is set to #[filter]#<p>
+Your proxy account check has been disabled, since you did not supply a password.</b><p>
+The new proxy IP filter is set to #[filter]#<br>
 The proxy port is: <font color="#556699">#[port]#</font><br>
-<u>if you changed the Port, you need to restart YaCy.</u>
-::
+Port Forwarding is: <font color="#556699">#[portForwardingEnabled]#</font><p>
+<u>if you changed the Port or Port Forwarding Settings, you need to restart YaCy.</u>
+::<!-- 7 -->
 <b>Your proxy access setting has been changed.</b><br>
 Your new proxy account name is #[user]#. The password has been accepted.<br>
-If you open any public web page through the proxy, you must log-in then.<br>
-The new proxy IP filter is set to #[filter]#.<p>
+If you open any public web page through the proxy, you must log-in then.<p>
+The new proxy IP filter is set to #[filter]#.<br>
 The proxy port is: <font color="#556699">#[port]#</font><br>
-<u>if you changed the Port, you need to restart YaCy.</u>
-::
+Port Forwarding is: <font color="#556699">#[portForwardingEnabled]#</font><p>
+<u>if you changed the Port or Port Forwarding Settings, you need to restart YaCy.</u>
+::<!-- 8 -->
 <b>Your server access filter is now set to #[filter]#</b><br>
 <!--Your new server account name is #[user]#. The password has been accepted.<br>
 If you go back to the Settings page, you must log-in again.-->
-::
+::<!-- 9 -->
 Auto pop-up of the Status page is now <b>disabled</b><br>
-::
+::<!-- 10 -->
 Auto pop-up of the Status page is now <b>enabled</b><br>
-::
+::<!-- 11 -->
 You are now permanently <b>online</b>. After a short while you should see the effect on the <a href="Status.html">status</a> page.<br>
-::
+::<!-- 12 -->
 <b>The Peer Name is: <font color="#556699">#[peerName]#</font><br>
 <!--Your Peer Language is: <font color="#556699">#[peerLang]#</font><br>-->
-::
+::<!-- 13 -->
 <b>Seed Settings changed.#(success)#::You are now a principal peer.#(/success)#<br>
-::
+::<!-- 14 -->
 <p><b>Seed Settings changed, but something is wrong.</b></p>
 <p><font color="red">#[errormsg]#</font></p>
 Seed Uploading was deactivated automatically. 
 Please return to the settings page and modify the data.<br>
-::
+::<!-- 15 -->
 <b>The remote-proxy setting has been changed</b><br>
 The new setting is effective immediately, you don't need to re-start.
-::
+::<!-- 16 -->
 <b>The submitted peer name is already used by another peer. Please choose a different name.</b> The Peer name has not been changed.<br>
 Your Peer Language is: <font color="#556699">#[peerLang]#</font><br>
-::
+::<!-- 17 -->
 <b>The submitted peer name is not well-formed. Please choose a different name.</b> The Peer name has not been changed.<br>
 Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
 Your Peer Language is: <font color="#556699">#[peerLang]#</font><br>
-::
+::<!-- 18 -->
 The new parser settings where changed successfully.<br>
 Parsing of the following mime-types was enabled:<br>
 <ul>

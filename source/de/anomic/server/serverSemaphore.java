@@ -47,7 +47,7 @@ public final class serverSemaphore  {
     private long currentValue = 0;    
     private long maximumValue = Long.MAX_VALUE;
      
-    protected serverSemaphore()  {
+    public serverSemaphore()  {
         this(0,Long.MAX_VALUE);
     }
     

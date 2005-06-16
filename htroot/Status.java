@@ -83,8 +83,18 @@ public class Status {
             prop.put("versioncomment", 1);//new version
         prop.put("versioncomment_latestVersion", yacyCore.latestVersion);
         
-        prop.put("host", serverCore.publicIP());
-        prop.put("port", env.getConfig("port", "<unknown>"));
+        prop.put("host", serverCore.publicLocalIP());
+        prop.put("port", env.getConfig("port", "<unknown>"));    
+        
+        // port forwarding: hostname and port
+        if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
+            prop.put("portForwarding", 1);
+            prop.put("portForwarding_host", serverCore.portForwarding.getHost());
+            prop.put("portForwarding_port", Integer.toString(serverCore.portForwarding.getPort()));
+        } else {
+            prop.put("portForwarding", 0);
+        }        
+        
         if (env.getConfig("remoteProxyUse", "false").equals("true")) {
             prop.put("remoteProxy", 1);
             prop.put("remoteProxy_host", env.getConfig("remoteProxyHost", "<unknown>"));

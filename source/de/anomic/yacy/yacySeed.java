@@ -72,6 +72,7 @@ import java.util.StringTokenizer;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverCore;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 
@@ -323,7 +324,11 @@ public class yacySeed {
 
 	// now calculate other information about the host
 	newSeed.dna.put("Name", sb.getConfig("peerName", "unnamed"));
-	newSeed.dna.put("Port", sb.getConfig("port", "8080"));
+    if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
+        newSeed.dna.put("Port",Integer.toString(serverCore.portForwarding.getPort()));
+    } else {
+        newSeed.dna.put("Port", sb.getConfig("port", "8080"));
+    }
 	newSeed.dna.put("BDate", yacyCore.universalDateShortString());
 	newSeed.dna.put("LastSeen", newSeed.dna.get("BDate")); // just as initial setting
 	newSeed.dna.put("PeerType", "virgin");

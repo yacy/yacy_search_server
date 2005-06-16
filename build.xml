@@ -128,7 +128,7 @@
 
   <!-- compiling the main sources -->   
   <javac srcdir="${src}/" destdir="${build}"
-         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**,yacy.java"
+         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**,yacy.java,de/anomic/server/serverPortForwardingSch.java"
          debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}">
     <classpath refid="project.class.path"/>
@@ -142,7 +142,7 @@
     <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java" />
     <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>    
   </javac> 
-    
+	
   <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
   <javac srcdir="${htroot}/" 
          classpathref="project.class.path"
@@ -199,8 +199,33 @@
     <fileset dir="${src}/" includes="de/anomic/soap/build.xml"/>
   </subant>
 </target>       
-
-
+   
+<target name="portForwarding" depends="compile" description="Compiling and zipping additional port forwarder"> 
+    <javac srcdir="${src}/de/anomic/server/" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
+        <include name="serverPortForwardingSch.java"/>
+        <classpath>
+          <pathelement location="${build}" />   
+        
+          <!-- main lib needed to parse rss/atom feed files -->     
+          <pathelement location="${libx}/jsch-0.1.19.jar" />                    
+        </classpath>
+    </javac>      
+    <copy todir="${release}/libx/">
+         <fileset dir="${libx}" includes="jsch-0.1.19.*"/> 
+    </copy>
+    <copy todir="${release}/source/de/anomic/server/">
+         <fileset dir="${src}/de/anomic/server/">
+              <include name="serverPortForwardingSch.java"/> 
+         </fileset>   
+    </copy>        
+    <copy todir="${release}/classes/de/anomic/server/">
+         <fileset dir="${build}/de/anomic/server/">
+              <include name="serverPortForwardingSch.class"/> 
+              <include name="serverPortForwardingSch$MyUserInfo.class"/>  
+         </fileset>   
+    </copy>      
+</target>   
+    
 <target name="singleExtensionFile" if="singleExtFile">
       <tar destfile="${release}/${extensionFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
         <tarfileset dir="${release}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
@@ -216,21 +241,27 @@
 </target>   
     
 <!-- making a release file for yacy -->   
-<target name="dist" depends="all,parsers,seedUploaders,yacySOAP,singleExtensionFile" description="Compiling sources and make a release file ...">
+<target name="dist" depends="all,parsers,seedUploaders,yacySOAP,portForwarding,singleExtensionFile" description="Compiling sources and make a release file ...">
 
   <tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
 
   <!-- copy class files -->
   <tarfileset dir="${build}" prefix="${releaseDir}/classes" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
     <include name="**/*.*"/>
+    <!-- excluding all additional content parsers --> 
     <exclude name="de/anomic/plasma/parser/*/*"/>
+    <!-- excluding all additional seed uploaders --> 
     <exclude name="de/anomic/yacy/seedUpload/**"/> 
+    <!-- excluding the soap handler --> 
     <exclude name="de/anomic/soap/**"/>
+    <!-- excluding the port forwarder --> 
+    <exclude name="de/anomic/server/serverPortForwardingSch.class"/> 
+    <exclude name="de/anomic/server/serverPortForwardingSch$MyUserInfo.class"/>
   </tarfileset>
-    <tarfileset dir="${build}" prefix="${releaseDir}/classes" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
-      <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.class"/>
-      <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.class"/>        
-    </tarfileset>
+  <tarfileset dir="${build}" prefix="${releaseDir}/classes" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+    <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.class"/>
+    <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.class"/>        
+  </tarfileset>
     
   <!-- copy libs -->
   <tarfileset dir="${lib}" includes="**/*" prefix="${releaseDir}/lib" dirmode="${accessRightsDir}" mode="${accessRightsFile}"/>

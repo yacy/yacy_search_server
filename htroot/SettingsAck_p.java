@@ -130,6 +130,14 @@ public class SettingsAck_p {
             String port = (String) post.get("port");
             env.setConfig("port", port);
             prop.put("info_port", port);
+            
+            // port forwarding configuration
+            env.setConfig("portForwardingEnabled", post.containsKey("portForwardingEnabled")?"true":"false");
+            env.setConfig("portForwardingHost", (String)post.get("portForwardingHost"));
+            env.setConfig("portForwardingPort", (String)post.get("portForwardingPort"));
+            env.setConfig("portForwardingUser", (String)post.get("portForwardingUser"));
+            env.setConfig("portForwardingPwd", (String)post.get("portForwardingPwd"));
+            prop.put("info_portForwardingEnabled",post.containsKey("portForwardingEnabled")?"on":"off");
 
             // read and process data
             String filter = (String) post.get("proxyfilter");

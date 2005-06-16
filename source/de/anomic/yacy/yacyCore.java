@@ -457,7 +457,8 @@ public class yacyCore {
                         }
                     }
                     availableUploaders.put(className.substring("yacySeedUpload".length()),fullClassName);
-                } catch (Exception e) { /* we can ignore this for the moment */ }
+                } catch (Exception e) { /* we can ignore this for the moment */                     
+                } catch (Error e)     { /* we can ignore this for the moment */ }
             }
         } catch (Exception e) {
             

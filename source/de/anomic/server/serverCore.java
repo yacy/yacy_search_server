@@ -94,7 +94,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
     
     // class variables
     private int port;                      // the listening port
-    private ServerSocketChannel channel;   
+    
+    public static boolean portForwardingEnabled = false;
+    public static serverPortForwarding portForwarding = null;
+    
     private ServerSocket socket;           // listener
     public int maxSessions = 0;            // max. number of sessions; 0=unlimited
     serverLog log;                         // log object
@@ -167,13 +170,22 @@ public final class serverCore extends serverAbstractThread implements serverThre
     }
 
     // class initializer
-    public serverCore(int port, int maxSessions, int timeout,
-            boolean termSleepingThreads, boolean blockAttack,
-            serverHandler handlerPrototype, serverSwitch switchboard,
-            int commandMaxLength) throws IOException {
+    public serverCore(
+            int port, 
+            int maxSessions, 
+            int timeout,
+            boolean termSleepingThreads, 
+            boolean blockAttack,
+            serverHandler handlerPrototype, 
+            serverSwitch switchboard,
+            int commandMaxLength
+    ) throws IOException {
         this.port = port;
         this.commandMaxLength = commandMaxLength;
         this.denyHost = (blockAttack) ? new Hashtable() : null;
+        
+        // initialize logger
+        this.log = new serverLog("SERVER");
         
         /*
          try {
@@ -185,18 +197,51 @@ public final class serverCore extends serverAbstractThread implements serverThre
           }
           */
         
-        
+        // Open a new server-socket channel
         try {
-            // Open a new server-socket channel
-            this.channel = ServerSocketChannel.open();
-                
             // Binds the ServerSocket to a specific address 
-            this.socket = this.channel.socket();
+            this.socket = new ServerSocket();
             this.socket.bind(new InetSocketAddress(port));
             
             // this.socket = new ServerSocket(port);
         } catch (java.net.BindException e) {
             System.out.println("FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number"); System.exit(0);
+        }
+        
+        // doing the port forwarding stuff
+        if (switchboard.getConfig("portForwardingEnabled","false").equalsIgnoreCase("true")) {
+            try {
+                String portFwHost = switchboard.getConfig("portForwardingHost","localhost");
+                Integer portFwPort = Integer.valueOf(switchboard.getConfig("portForwardingPort","8080"));
+                String portFwUser = switchboard.getConfig("portForwardingUser","xxx");
+                
+                String localHost = this.socket.getInetAddress().getHostName();
+                Integer localPort = new Integer(this.socket.getLocalPort());
+                
+                this.log.logInfo("Trying to connect to remote port forwarding host " + portFwUser + "@" + portFwHost + ":" + portFwPort);
+
+                Class forwarderClass = Class.forName("de.anomic.server.serverPortForwardingSch");
+                serverCore.portForwarding = (serverPortForwarding) forwarderClass.newInstance();                
+                
+                serverCore.portForwarding.init(
+                        portFwHost,
+                        portFwPort.intValue(),
+                        portFwUser,
+                        switchboard.getConfig("portForwardingPwd","xxx"),
+                        localHost,
+                        localPort.intValue());
+                
+                serverCore.portForwarding.connect();
+                serverCore.portForwardingEnabled = true;
+                
+                this.log.logInfo("Remote port forwarding connection established: " + portFwHost+":"+portFwPort+" -> "+localHost+":"+localPort);                
+            } catch (Exception e) {
+                this.log.logError("Unable to initialize server port forwarding.",e);
+                switchboard.setConfig("portForwardingEnabled","false");
+            } catch (Error e) {
+                this.log.logError("Unable to initialize server port forwarding.",e);
+                switchboard.setConfig("portForwardingEnabled","false");
+            }
         }
         
         try {
@@ -207,7 +252,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.maxSessions = maxSessions;
             this.timeout = timeout;
             this.termSleepingThreads = termSleepingThreads;
-            this.log = new serverLog("SERVER");
         } catch (java.lang.ClassNotFoundException e) {
             System.out.println("FATAL ERROR: " + e.getMessage() + " - Class Not Found"); System.exit(0);
         }
@@ -261,11 +305,21 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static InetAddress publicIP() {
         try {
             
-//            TODO: implement port forwarding here ...            
-//            if (portForwardingEnabled) {
-//                
-//            }
-            
+            // If port forwarding was enabled we need to return the remote IP Address           
+            if ((serverCore.portForwardingEnabled)&&(serverCore.portForwarding != null)) {
+                return InetAddress.getByName(serverCore.portForwarding.getHost());
+            } else {
+                return publicLocalIP();
+            }
+        } catch (java.net.UnknownHostException e) {
+            System.err.println("ERROR: (internal) " + e.getMessage());
+            return null;
+        }
+    }
+    
+    public static InetAddress publicLocalIP() {            
+        try {
+                    
             // list all addresses
             //InetAddress[] ia = InetAddress.getAllByName("localhost");
             InetAddress[] ia = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
@@ -358,17 +412,21 @@ public final class serverCore extends serverAbstractThread implements serverThre
             // consuming the isInterrupted Flag. Otherwise we could not properly close the session pool
             Thread.interrupted();
             
+            // closing the port forwarding channel
+            if ((portForwardingEnabled) && (portForwarding != null) ) {
+                portForwarding.disconnect();
+            }
+
+            // close the session pool
+            this.theSessionPool.close();            
+            
             // closing the serverchannel and socket
             this.socket.close();
-            this.channel.close();
-            
-            // close the session pool
-            this.theSessionPool.close();
         }
         catch (Exception e) {
             this.log.logSystem("Unable to close session pool: " + e.getMessage());
         }
-        log.logSystem("* terminated");
+        this.log.logSystem("* terminated");
     }
     
     public int getJobCount() {
@@ -430,17 +488,33 @@ public final class serverCore extends serverAbstractThread implements serverThre
             threadCount = serverCore.this.theSessionThreadGroup.enumerate(threadList);
             
             try {
+                // trying to gracefull stop all still running sessions ...
+                serverCore.this.log.logInfo("Trying to shutdown " + threadCount + " remaining session threads ...");
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     ((Session)threadList[currentThreadIdx]).setStopped(true);
+                }          
+                
+                // waiting a frew ms for the session objects to continue processing
+                Thread.sleep(500);
+                
+                // if there are some sessions that are blocking in IO, we simply close the socket
+                for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
+                    Session currentSession = (Session)threadList[currentThreadIdx];
+                    if (currentSession.isAlive()) {
+                        if ((currentSession.controlSocket != null)&&(currentSession.controlSocket.isConnected())) {
+                            currentSession.controlSocket.close();
+                            serverCore.this.log.logInfo("Closing socket of thread " + currentSession.getName());
+                        }
+                    }
                 }                
                 
+                // we need to use a timeout here because of missing interruptable session threads ...
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    // we need to use a timeout here because of missing interruptable session threads ...
                     if (threadList[currentThreadIdx].isAlive()) threadList[currentThreadIdx].join(500);
                 }
             }
             catch (InterruptedException e) {
-                serverCore.this.log.logWarning("Interruption while trying to shutdown all session threads.");  
+                serverCore.this.log.logWarning("Interruption while trying to shutdown all remaining session threads.");  
             }
             
             this.isClosed = true;
@@ -538,6 +612,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	private int commandCounter;        // for logging: number of commands in this session
     	private String identity;           // a string that identifies the client (i.e. ftp: account name)
     	//private boolean promiscuous;       // if true, no lines are read and streams are only passed
+        
     	public  Socket controlSocket;      // dialog socket
     	public  InetAddress userAddress;   // the address of the client
     	public  PushbackInputStream in;    // on control input stream

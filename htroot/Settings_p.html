@@ -61,6 +61,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <fieldset><legend>Proxy Access Settings</legend>
+<br><b>Proxy Port Configuration</b><br><br>
 <table border="0" cellspacing="5">
   <tr valign="top">
     <td>Proxy and Administration Port:</td>
@@ -69,7 +70,38 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
   </tr> 
 </table>
 
-<p>You can restrict the access to this proxy using a two-stage security barrier:
+
+<p><b>Proxy Port Forwarding</b><br><br>
+<table border="0" cellspacing="5">
+  <tr valign="top">
+    <td>Enable port forwarding:</td>
+    <td><input type="checkbox" name="portForwardingEnabled" align="top" #(portForwardingEnabled)#::checked#(/portForwardingEnabled)#></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td>Forwarding host:</td>
+    <td><input name="portForwardingHost" type="text" size="32" maxlength="128" value="#[portForwardingHost]#"></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td>Forwarding port:</td>
+    <td><input name="portForwardingPort" type="text" size="5" maxlength="5" value="#[portForwardingPort]#"></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td>Remote host user:</td>
+    <td><input name="portForwardingUser" type="text" size="32" maxlength="128" value="#[portForwardingUser]#"></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td>Remote host password:</td>
+    <td><input name="portForwardingPwd" type="password" size="32" maxlength="128" value="#[portForwardingPwd]#"></td>
+    <td>&nbsp;</td>
+  </tr>  
+</table>
+</p>
+
+<p><b>Proxy Access Restrictions</b><br><br>You can restrict the access to this proxy using a two-stage security barrier:
 <ul>
 <li>define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards</li>
 <li>define an <i>user account</i> with an user:password - pair</li>

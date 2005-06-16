@@ -52,13 +52,14 @@ import java.util.List;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedUploader;
 
 public final class Settings_p {
-
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
@@ -68,13 +69,20 @@ public final class Settings_p {
         prop.put("port", env.getConfig("port", "8080"));               
         
         prop.put("peerName", env.getConfig("peerName", "nameless"));
-	String peerLang = env.getConfig("htLocaleSelection", "default");
-	if (peerLang.equals("default")) peerLang = "en";
+        String peerLang = env.getConfig("htLocaleSelection", "default");
+        if (peerLang.equals("default")) peerLang = "en";
         prop.put("peerLang", peerLang);
         
         // http networking settings
         prop.put("isTransparentProxy", env.getConfig("isTransparentProxy", "false").equals("true") ? 1 : 0); 
         prop.put("connectionKeepAliveSupport", env.getConfig("connectionKeepAliveSupport", "false").equals("true") ? 1 : 0);
+        
+        // remote port forwarding settings
+        prop.put("portForwardingEnabled",env.getConfig("portForwardingEnabled","false").equals("true")? 1 : 0);
+        prop.put("portForwardingHost",env.getConfig("portForwardingHost", ""));
+        prop.put("portForwardingPort",env.getConfig("portForwardingPort", ""));
+        prop.put("portForwardingUser",env.getConfig("portForwardingUser", ""));
+        prop.put("portForwardingPwd",env.getConfig("portForwardingPwd", ""));
         
         // set values
         String s;
@@ -146,8 +154,8 @@ public final class Settings_p {
         // for backward compatiblity ....
         if ((enabledUploader.equalsIgnoreCase("Ftp")) || 
                 ((enabledUploader.equals("")) &&
-                 (env.getConfig("seedFTPPassword","").length() > 0) &&
-                 (env.getConfig("seedFilePath", "").length() > 0))) {
+                        (env.getConfig("seedFTPPassword","").length() > 0) &&
+                        (env.getConfig("seedFilePath", "").length() > 0))) {
             enabledUploader = "Ftp";
             env.setConfig("seedUploadMethod",enabledUploader);
         }                  
@@ -218,5 +226,5 @@ public final class Settings_p {
         // return rewrite properties
         return prop;
     }
-
+    
 }

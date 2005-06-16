@@ -122,21 +122,35 @@ public class yacyClient {
         Date remoteTime = yacyCore.parseUniversalDate((String) result.get("mytime")); // read remote time
         
         // check consistency with expectation
+        float otherPeerVersion = 0;
         if ((otherHash != null ) && (otherHash.length() > 0)) {
             yacySeed otherPeer = yacySeed.genRemoteSeed((String) result.get("seed0"), key, remoteTime);
             if ((otherPeer == null) || (!(otherPeer.hash.equals(otherHash)))) {
                 yacyCore.log.logDebug("yacyClient.publishMySeed consistency error: other peer wrong");
                 return -1; // no success
             }
+            otherPeerVersion = otherPeer.getVersion();
         }
         
         // set my own seed according to new information
         yacySeed mySeedBkp = (yacySeed) yacyCore.seedDB.mySeed.clone();
-        yacyCore.seedDB.mySeed.put("IP", (String) result.get("yourip"));
-        String mytype = (String) result.get("yourtype");
-        if (mytype == null) mytype = "junior";
-        if ((yacyCore.seedDB.mySeed.get("PeerType", "junior").equals("principal")) && (mytype.equals("senior"))) mytype = "principal";
-        yacyCore.seedDB.mySeed.put("PeerType", mytype);
+        if (!serverCore.portForwardingEnabled) {
+            yacyCore.seedDB.mySeed.put("IP", (String) result.get("yourip"));
+        }
+        
+        /* If we have port forwarding enabled but the other peer uses a too old yacy version
+         * we can ignore the seed-type that was reported by the peer.
+         * 
+         * Otherwise we have to change our seed-type  
+         * 
+         * @see serverCore#portForwardingEnabled 
+         */
+        if ((!serverCore.portForwardingEnabled) || (otherPeerVersion > (float)0.381)) {
+            String mytype = (String) result.get("yourtype");
+            if (mytype == null) mytype = "junior";        
+            if ((yacyCore.seedDB.mySeed.get("PeerType", "junior").equals("principal")) && (mytype.equals("senior"))) mytype = "principal";
+            yacyCore.seedDB.mySeed.put("PeerType", mytype);
+        }
         
         if (!(yacyCore.seedDB.mySeed.isProper())) {
             yacyCore.seedDB.mySeed = mySeedBkp;

@@ -48,6 +48,8 @@
 
 package de.anomic.server;
 
+import java.nio.channels.ClosedByInterruptException;
+
 import de.anomic.server.logging.serverLog;
 
 public abstract class serverAbstractThread extends Thread implements serverThread {
@@ -180,8 +182,10 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     }    
     
     public void jobExceptionHandler(Exception e) {
-        // default handler for job exceptions. shall be overridden for own handler
-        logError("thread '" + this.getName() + "': " + e.toString(),e);
+        if (!(e instanceof ClosedByInterruptException)) {
+            // default handler for job exceptions. shall be overridden for own handler
+            logError("thread '" + this.getName() + "': " + e.toString(),e);
+        }
     }
     
     public void run() {

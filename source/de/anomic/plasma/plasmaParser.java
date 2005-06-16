@@ -414,6 +414,8 @@ public final class plasmaParser {
                             
 	                } catch (Exception e) { /* we can ignore this for the moment */ 
                         serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
+                    } catch (Error e) { /* we can ignore this for the moment */ 
+                        serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
                     }
                 }
 			}

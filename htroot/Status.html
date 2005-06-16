@@ -37,8 +37,9 @@ Your settings are protected by a password.
 #[version]##(versioncomment)#:: - the latest public version is #[latestVersion]#. Click here to <a href="http://www.yacy.net/yacy/Download.html">download</a> it.#(/versioncomment)#
 </td></tr>
 <tr class="TableCellDark"><td>Proxy host</td><td>#[host]#:#[port]#</td></tr>
-<tr class="TableCellLight"><td>Remote proxy</td><td>#(remoteProxy)#not used::#[host]#:#[port]##(/remoteProxy)#</td></tr>
-<tr class="TableCellDark"><td>This peer's address</td><td>
+<tr class="TableCellLight"><td>Port forwarding host</td><td>#(portForwarding)#not used::#[host]#:#[port]##(/portForwarding)#</td></tr>
+<tr class="TableCellDark"><td>Remote proxy</td><td>#(remoteProxy)#not used::#[host]#:#[port]##(/remoteProxy)#</td></tr>
+<tr class="TableCellLight"><td>This peer's address</td><td>
 #(peerAddress)#
 Not assigned
 ::
@@ -51,8 +52,8 @@ see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installatio
 #[address]# ; Your '.yacy' home at http://www.#[peername]#.yacy
 #(/peerAddress)#
 </td></tr>
-<tr class="TableCellLight"><td>This peer's name</td><td>#[peerName]#/#[hash]#</td></tr>
-<tr class="TableCellDark"><td>This peer's statistics</td><td>
+<tr class="TableCellDark"><td>This peer's name</td><td>#[peerName]#/#[hash]#</td></tr>
+<tr class="TableCellLight"><td>This peer's statistics</td><td>
 #(peerStatistics)#
 Unknown
 ::
@@ -60,7 +61,7 @@ Uptime = #[uptime]#, Links# = #[links]#, RWIs# = #[words]#,
 Connects(#[juniorConnects]#|#[seniorConnects]#|#[principalConnects]#|#[disconnects]#) #[connects]# peers/hour
 #(/peerStatistics)#
 </td></tr>
-<tr class="TableCellLight"><td>This peer's status</td><td>
+<tr class="TableCellDark"><td>This peer's status</td><td>
 #(peerStatus)#
 Virgin - You have not yet published your peer, because you have not yet used the proxy. If you configured your proxy setting (see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a> and go online by browsing the internet) you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers.
 ::
@@ -71,15 +72,15 @@ Senior - You are running a server and you support the global internet index, whi
 Principal - You are senior and you publish your seed-list to a ftp account which can be retrieved at #[seedURL]#. You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.
 #(/peerStatus)#
 </td></tr>
-<tr class="TableCellDark"><td>Other peers</td><td>#(otherPeers)#not online.::#[num]# other peers online.#(/otherPeers)#</td></tr>
-<tr class="TableCellLight"><td>Seed server</td><td>
+<tr class="TableCellLight"><td>Other peers</td><td>#(otherPeers)#not online.::#[num]# other peers online.#(/otherPeers)#</td></tr>
+<tr class="TableCellDark"><td>Seed server</td><td>
 #(seedServer)#
 Disabled. To enable this you need a ftp account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html">Settings page</a>.
 ::
 Enabled: Updating periodically to server #[seedFTPServer]#
 #(/seedServer)#
 </td></tr>
-<tr class="TableCellDark"><td>Auto-popup on start-up</td><td>
+<tr class="TableCellLight"><td>Auto-popup on start-up</td><td>
 #(popup)#
 Disabled. To enable this again please use the <a href="Settings_p.html">Settings</a> page
 ::
@@ -88,7 +89,7 @@ Enabled <input type="submit" name="dispop" value="Disable pop-up">
 </form>
 #(/popup)#
 </td></tr>
-<tr class="TableCellLight"><td>Online-mode</td><td>
+<tr class="TableCellDark"><td>Online-mode</td><td>
 #(omode)#
 <!-- online Mode 0 -->
 ::
@@ -106,13 +107,13 @@ Attention: If you don't have a flatrate or are always-on,
 you must switch off the proxy to go off-line.
 #(/omode)#
 </td></tr>
-<tr class="TableCellDark"><td>Memory Usage</td><td>
+<tr class="TableCellLight"><td>Memory Usage</td><td>
 <form action="Status.html" method="get">free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]# | <input type="submit" name="gc" value="do Garbage-Collect now"></form>
 </td></tr>
-<tr class="TableCellLight"><td>Traffic</td><td>
+<tr class="TableCellDark"><td>Traffic</td><td>
 In: #[trafficIn]# | Out: #[trafficOut]#
 </td></tr>
-<tr class="TableCellDark"><td>System Resources</td><td>
+<tr class="TableCellLight"><td>System Resources</td><td>
 processors: #[processors]#
 </td></tr>
 

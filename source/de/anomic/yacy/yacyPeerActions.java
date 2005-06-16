@@ -91,27 +91,31 @@ public class yacyPeerActions {
     }
     
     public void updateMySeed() {
-    	    if (sb.getConfig("peerName", "nameless").equals("nameless")) 
-                sb.setConfig("peerName", serverCore.publicIP().getHostName() + yacyCore.speedKey + serverSystem.infoKey() + (System.currentTimeMillis() & 99));
-	    seedDB.mySeed.put("Name", sb.getConfig("peerName", "nameless"));
-	    seedDB.mySeed.put("Port", sb.getConfig("port", "8080"));
-	    seedDB.mySeed.put("ISpeed", "unknown"); // the speed of indexing (words/minute) of the peer
-	    long uptime = ((yacyCore.universalTime() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000) / 60;
-	    seedDB.mySeed.put("Uptime", "" + uptime); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-	    seedDB.mySeed.put("LCount", "" + sb.lUrlSize()); // the number of links that the peer has stored (LURL's)
-	    seedDB.mySeed.put("ICount", "" + sb.cacheSizeMin()); // the minimum number of words that the peer has indexed (as it says)
-	    seedDB.mySeed.put("SCount", "" + seedDB.sizeConnected()); // the number of seeds that the peer has stored
-	    seedDB.mySeed.put("CCount", "" + (((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
-	    seedDB.mySeed.put("Version", sb.getConfig("version", ""));
-	    if (seedDB.mySeed.get("PeerType","").equals("principal")) {
-		// attach information about seed location
-		seedDB.mySeed.put("seedURL", sb.getConfig("seedURL", ""));
-	    }
-            seedDB.mySeed.setFlagDirectConnect(true);
-            seedDB.mySeed.put("LastSeen", yacyCore.universalDateShortString());
-            seedDB.mySeed.setFlagAcceptRemoteCrawl(sb.getConfig("crawlResponse", "").equals("true"));
-            seedDB.mySeed.setFlagAcceptRemoteIndex(sb.getConfig("allowReceiveIndex", "").equals("true"));
-            //mySeed.setFlagAcceptRemoteIndex(true);
+        if (sb.getConfig("peerName", "nameless").equals("nameless")) 
+            sb.setConfig("peerName", serverCore.publicIP().getHostName() + yacyCore.speedKey + serverSystem.infoKey() + (System.currentTimeMillis() & 99));
+        seedDB.mySeed.put("Name", sb.getConfig("peerName", "nameless"));
+        if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
+            seedDB.mySeed.put("Port", Integer.toString(serverCore.portForwarding.getPort()));
+        } else {
+            seedDB.mySeed.put("Port", sb.getConfig("port", "8080"));
+        }
+        seedDB.mySeed.put("ISpeed", "unknown"); // the speed of indexing (words/minute) of the peer
+        long uptime = ((yacyCore.universalTime() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000) / 60;
+        seedDB.mySeed.put("Uptime", "" + uptime); // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        seedDB.mySeed.put("LCount", "" + sb.lUrlSize()); // the number of links that the peer has stored (LURL's)
+        seedDB.mySeed.put("ICount", "" + sb.cacheSizeMin()); // the minimum number of words that the peer has indexed (as it says)
+        seedDB.mySeed.put("SCount", "" + seedDB.sizeConnected()); // the number of seeds that the peer has stored
+        seedDB.mySeed.put("CCount", "" + (((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
+        seedDB.mySeed.put("Version", sb.getConfig("version", ""));
+        if (seedDB.mySeed.get("PeerType","").equals("principal")) {
+            // attach information about seed location
+            seedDB.mySeed.put("seedURL", sb.getConfig("seedURL", ""));
+        }
+        seedDB.mySeed.setFlagDirectConnect(true);
+        seedDB.mySeed.put("LastSeen", yacyCore.universalDateShortString());
+        seedDB.mySeed.setFlagAcceptRemoteCrawl(sb.getConfig("crawlResponse", "").equals("true"));
+        seedDB.mySeed.setFlagAcceptRemoteIndex(sb.getConfig("allowReceiveIndex", "").equals("true"));
+        //mySeed.setFlagAcceptRemoteIndex(true);
     }
             
     public void saveMySeed() {

@@ -468,3 +468,11 @@ isTransparentProxy=false
 
 # Specifies if yacy should use the http connection keep-alive feature
 connectionKeepAliveSupport=false
+
+# Configuration options needed to configure server port forwarding
+portForwardingEnabled=false
+portForwardingHost=
+portForwardingPort=
+portForwardingUser=
+portForwardingPwd=
+

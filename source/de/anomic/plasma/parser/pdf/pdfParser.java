@@ -58,6 +58,7 @@ import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.server.serverByteBuffer;
 
 public class pdfParser extends AbstractParser implements Parser {
 
@@ -115,7 +116,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 docKeyWords = theDocInfo.getKeywords();
             }
             
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            serverByteBuffer out = new serverByteBuffer();
             writer = new OutputStreamWriter( out );            
             stripper.writeText(theDocument, writer );
             
@@ -123,6 +124,8 @@ public class pdfParser extends AbstractParser implements Parser {
             theDocument.close(); theDocument = null;
             
             byte[] contents = out.toByteArray();
+            out.close();
+            out = null;
 			
             if ((docTitle == null) || (docTitle.length() == 0)) {
                 docTitle = ((contents.length > 80)? new String(contents, 0, 80):new String(contents)).
