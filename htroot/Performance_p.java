@@ -116,8 +116,8 @@ public class Performance_p {
             
             if ((post != null) && (post.containsKey("delaysubmit"))) {
                 // load with new values
-                idlesleep = Long.parseLong((String) post.get(threadName + "_idlesleep", "1")) * 1000;
-                busysleep = Long.parseLong((String) post.get(threadName + "_busysleep", "1")) * 1000;
+                idlesleep = Long.parseLong((String) post.get(threadName + "_idlesleep", "1"));
+                busysleep = Long.parseLong((String) post.get(threadName + "_busysleep", "1"));
 
 		// check values to prevent short-cut loops
 		if (idlesleep == 0) idlesleep = 1000;
@@ -131,8 +131,8 @@ public class Performance_p {
                 idlesleep = Long.parseLong(switchboard.getConfig(threadName + "_idlesleep" , "1000"));
                 busysleep = Long.parseLong(switchboard.getConfig(threadName + "_busysleep", "1000"));
             }
-            prop.put("table_" + c + "_idlesleep", idlesleep / 1000);
-            prop.put("table_" + c + "_busysleep", busysleep  / 1000);
+            prop.put("table_" + c + "_idlesleep", idlesleep);
+            prop.put("table_" + c + "_busysleep", busysleep);
             
             c++;
         }
