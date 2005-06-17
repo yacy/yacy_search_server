@@ -93,10 +93,23 @@ public abstract class AbstractParser implements Parser{
 	 * 
 	 * @see de.anomic.plasma.parser.Parser#parse(java.net.URL, java.lang.String, byte[])
 	 */
-	public plasmaParserDocument parse(URL location, String mimeType,
-			byte[] source) throws ParserException {
-        ByteArrayInputStream contentInputStream = new ByteArrayInputStream(source);
-        return this.parse(location,mimeType,contentInputStream);
+	public plasmaParserDocument parse(
+            URL location, 
+            String mimeType,
+            byte[] source
+    ) throws ParserException {
+        ByteArrayInputStream contentInputStream = null;
+        try {
+            contentInputStream = new ByteArrayInputStream(source);
+            return this.parse(location,mimeType,contentInputStream); 
+        } finally {
+            if (contentInputStream != null) {
+                try {
+                    contentInputStream.close();
+                    contentInputStream = null;
+                } catch (Exception e){}
+            }
+        }
 	}
 
 	/**
