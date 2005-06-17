@@ -487,14 +487,15 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
                 }
             } else {
-                if (e.getMessage().startsWith("Broken pipe") || e.getMessage().startsWith("Connection reset by peer")) {
+                String errorMsg = e.getMessage();
+                if ((errorMsg != null) && (errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset by peer"))) {
                     // client closed the connection, so we just end silently
-                    this.theLogger.logInfo("Client unexpectedly closed connection while processing query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'");
+                    this.theLogger.logInfo("Client unexpectedly closed connection while processing query: " + path + "; '" + e.toString() + ":" + errorMsg + "'");
                     conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
                 } else {
-                    this.theLogger.logError("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'");
+                    this.theLogger.logError("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + ((errorMsg ==null)?"":e.getMessage()) + "'");
                     if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                        httpd.sendRespondError(conProp,out, 4, 503, null, "Exception with query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'",e);
+                        httpd.sendRespondError(conProp,out, 4, 503, null, "Exception with query: " + path + "; '" + e.toString() + ":" + ((errorMsg ==null)?"":e.getMessage()) + "'",e);
                     } else {
                         conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
                     }
