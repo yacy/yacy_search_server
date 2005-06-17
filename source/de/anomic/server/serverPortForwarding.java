@@ -18,4 +18,5 @@ public interface serverPortForwarding {
     
     public void connect() throws IOException;
     public void disconnect() throws IOException;
+    public boolean isConnected();
 }

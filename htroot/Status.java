@@ -92,6 +92,7 @@ public class Status {
             prop.put("portForwarding", 1);
             prop.put("portForwarding_host", serverCore.portForwarding.getHost());
             prop.put("portForwarding_port", Integer.toString(serverCore.portForwarding.getPort()));
+            prop.put("portForwarding_status", serverCore.portForwarding.isConnected() ? 1:0);
         } else {
             prop.put("portForwarding", 0);
         }        

@@ -100,6 +100,11 @@ public class serverPortForwardingSch implements serverPortForwarding{
         }
     }
     
+    public boolean isConnected() {
+        if (this.session == null) return false;
+        return this.session.isConnected();
+    }
+    
     class MyUserInfo 
     implements UserInfo, UIKeyboardInteractive {
         String passwd;
