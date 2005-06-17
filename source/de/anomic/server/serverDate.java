@@ -227,6 +227,30 @@ public final class serverDate {
 	return testSFormatter.format(gregorian.getTime());
     }
     
+    public static String intervalToString(long millis) {
+        try {
+            long mins = millis / 60000;
+            
+            StringBuffer uptime = new StringBuffer();
+            
+            int uptimeDays  = (int) (Math.floor(mins/1440));
+            int uptimeHours = (int) (Math.floor(mins/60)%24);
+            int uptimeMins  = (int) mins%60;
+            
+            uptime.append(uptimeDays)
+                  .append(((uptimeDays == 1)?" day ":" days "))
+                  .append((uptimeHours < 10)?"0":"")
+                  .append(uptimeHours)
+                  .append(":")
+                  .append((uptimeMins < 10)?"0":"")
+                  .append(uptimeMins);            
+            
+            return uptime.toString();       
+        } catch (Exception e) {
+            return "unknown";
+        }
+    }
+        
     public static void main(String[] args) {
         //System.out.println("kelondroDate is (" + new kelondroDate().toString() + ")");
         System.out.println("serverDate : " + new serverDate().toShortString(false));

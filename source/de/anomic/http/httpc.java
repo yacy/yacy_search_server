@@ -164,7 +164,7 @@ public final class httpc {
      * A reusable readline buffer
      * @see serverByteBuffer
      */
-    final serverByteBuffer readLineBuffer = new serverByteBuffer();
+    final serverByteBuffer readLineBuffer = new serverByteBuffer(100);
     
     public String toString() {
         return (this.savedRemoteHost == null) ? "Disconnected" : "Connected to " + this.savedRemoteHost +  

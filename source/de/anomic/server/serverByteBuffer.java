@@ -57,12 +57,13 @@ public final class serverByteBuffer extends OutputStream {
     private int offset;
     private int length;
 
+    
     public serverByteBuffer() {
 	buffer = new byte[80];
 	length = 0;
 	offset = 0;
     }
-
+    
     public serverByteBuffer(int initLength) {
         this.buffer = new byte[initLength];
         this.length = 0;
@@ -75,6 +76,13 @@ public final class serverByteBuffer extends OutputStream {
 	offset = 0;
     }
 
+    public serverByteBuffer(byte[] bb, int initLength) {
+        this.buffer = new byte[initLength];
+        System.arraycopy(bb, 0, buffer, 0, bb.length);
+	length = bb.length;
+	offset = 0;
+    }
+    
     public serverByteBuffer(byte[] bb, int of, int le) {
 	if (of * 2 > bb.length) {
 	    buffer = new byte[le];
@@ -123,7 +131,9 @@ public final class serverByteBuffer extends OutputStream {
     }
 
     private void grow() {
-	byte[] tmp = new byte[buffer.length * 2 + 1];
+        int newsize = buffer.length * 2 + 1;
+        if (newsize < 256) newsize = 256;
+        byte[] tmp = new byte[newsize];
 	System.arraycopy(buffer, offset, tmp, 0, length);
 	buffer = tmp;
 	tmp = null;
@@ -151,6 +161,11 @@ public final class serverByteBuffer extends OutputStream {
     
     public serverByteBuffer append(byte b) {
 	write(b);
+	return this;
+    }
+
+    public serverByteBuffer append(int i) {
+	write((byte) (i & 0xFF));
 	return this;
     }
 
@@ -237,7 +252,7 @@ public final class serverByteBuffer extends OutputStream {
     }
 
     public String toString() {
-	return new String(getBytes());
+	return new String(getBytes(), offset, length);
     }
 
     public Properties propParser() {

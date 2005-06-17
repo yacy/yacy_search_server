@@ -83,14 +83,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 	this.images = new HashMap();
 	this.title = "";
 	this.headline = "";
-	this.text = new serverByteBuffer();
+	this.text = new serverByteBuffer(1024);
     }
-
 
     public void scrapeText(byte[] newtext) {
 	//System.out.println("SCRAPE: " + new String(newtext));
-	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
-	text.append(new serverByteBuffer(super.stripAll(new serverByteBuffer(newtext))).trim()).append((byte) ' ');
+	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append(32);
+	text.append(super.stripAll(new serverByteBuffer(newtext, newtext.length + 1)).trim()).append(32);
     }
 
     public static String urlNormalform(URL url) {
@@ -122,12 +121,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
 	//System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
-	//if (tagname.equals("a")) anchors.put(absolutePath(tagopts.getProperty("href", "")), new serverByteBuffer(super.stripAll(new serverByteBuffer(text)).getBytes()).trim().toString());
-	//if (tagname.equals("h1")) headline = new String(super.stripAll(new serverByteBuffer(text)).getBytes());
-	//if (tagname.equals("title")) title = new String(super.stripAll(new serverByteBuffer(text)).getBytes());
-	if ((tagname.equals("a")) && (text.length < 2048)) anchors.put(absolutePath(tagopts.getProperty("href", "")), new serverByteBuffer(super.stripAll(new serverByteBuffer(text)).getBytes()).trim().toString());
-	if ((tagname.equals("h1")) && (text.length < 512)) headline = new String(super.stripAll(new serverByteBuffer(text)).getBytes());
-	if ((tagname.equals("title")) && (text.length < 512)) title = new String(super.stripAll(new serverByteBuffer(text)).getBytes());
+	if ((tagname.equals("a")) && (text.length < 2048)) anchors.put(absolutePath(tagopts.getProperty("href", "")), super.stripAll(new serverByteBuffer(text)).trim().toString());
+	if ((tagname.equals("h1")) && (text.length < 512)) headline = super.stripAll(new serverByteBuffer(text)).toString();
+	if ((tagname.equals("title")) && (text.length < 512)) title = super.stripAll(new serverByteBuffer(text)).toString();
     }
 
 
@@ -138,7 +134,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 	if (title.length() > 0) hl = title.trim();
 	else if (headline.length() > 0) hl = headline.trim();
 	else if (text.length() > 80) hl = new String(text.getBytes(), 0, 80).trim();
-	else hl = text.toString().trim();
+	else hl = text.trim().toString();
 
         // clean the line: may contain too many funny symbols
         for (int i = 0; i < hl.length(); i++)

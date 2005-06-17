@@ -48,6 +48,7 @@ import java.util.Enumeration;
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
@@ -101,7 +102,7 @@ public class Network {
                     accActWords += words;
                 }
                 prop.put("table_my-version", seed.get("Version", "-"));
-                prop.put("table_my-uptime", Status.intervalToString(seed.get("Uptime", "-")));
+                prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", ""))));
                 prop.put("table_my-links", groupDigits(links));
                 prop.put("table_my-words", groupDigits(words));
                 prop.put("table_my-acceptcrawl", "" + (seed.getFlagAcceptRemoteCrawl() ? 1 : 0) );
@@ -210,7 +211,7 @@ public class Network {
                             prop.put("table_list_"+conCount+"_version", seed.get("Version", "-"));
                             prop.put("table_list_"+conCount+"_contact", (seed.getFlagDirectConnect() ? 1 : 0) );
                             prop.put("table_list_"+conCount+"_lastSeen", lastSeen(seed.get("LastSeen", "-")) );
-                            prop.put("table_list_"+conCount+"_uptime", Status.intervalToString(seed.get("Uptime", "-")));
+                            prop.put("table_list_"+conCount+"_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", "0"))));
                             prop.put("table_list_"+conCount+"_links", groupDigits(links));
                             prop.put("table_list_"+conCount+"_words", groupDigits(words));
                             prop.put("table_list_"+conCount+"_acceptcrawl", (seed.getFlagAcceptRemoteCrawl() ? 1 : 0) );

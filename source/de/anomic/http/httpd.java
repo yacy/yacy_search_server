@@ -1098,7 +1098,7 @@ public final class httpd implements serverHandler {
             
             // building the stacktrace            
             if (stackTrace != null) {    
-                serverByteBuffer errorMsg = new serverByteBuffer();
+                serverByteBuffer errorMsg = new serverByteBuffer(100);
                 errorMsg.append("Exception occurred:\r\n\r\n")
                         .append(stackTrace.toString())
                         .append("\r\n")

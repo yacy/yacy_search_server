@@ -51,6 +51,7 @@ import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyCore;
 
 public class Status {
@@ -112,7 +113,7 @@ public class Status {
             prop.put("peerStatistics", 0);//unknown
         } else {
             prop.put("peerStatistics", 1);
-            prop.put("peerStatistics_uptime", intervalToString(yacyCore.seedDB.mySeed.get("Uptime", "unknown")));
+            prop.put("peerStatistics_uptime", serverDate.intervalToString(60000 * Long.parseLong(yacyCore.seedDB.mySeed.get("Uptime", "0"))));
             prop.put("peerStatistics_links", yacyCore.seedDB.mySeed.get("LCount", "unknown"));
             prop.put("peerStatistics_words", yacyCore.seedDB.mySeed.get("ICount", "unknown"));
             prop.put("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);
@@ -193,31 +194,6 @@ public class Status {
         
         // return rewrite properties
         return prop;
-    }
-    
-    public static String intervalToString(String minsAsString)
-    {
-        try {
-            long mins = Long.parseLong(minsAsString);
-            
-            StringBuffer uptime = new StringBuffer();
-            
-            int uptimeDays  = (int) (Math.floor(mins/1440));
-            int uptimeHours = (int) (Math.floor(mins/60)%24);
-            int uptimeMins  = (int) mins%60;
-            
-            uptime.append(uptimeDays)
-                  .append(((uptimeDays == 1)?" day ":" days "))
-                  .append((uptimeHours < 10)?"0":"")
-                  .append(uptimeHours)
-                  .append(":")
-                  .append((uptimeMins < 10)?"0":"")
-                  .append(uptimeMins);            
-            
-            return uptime.toString();       
-        } catch (Exception e) {
-            return "unknown";
-        }
     }
     
     public static String bytesToString(long byteCount) {  

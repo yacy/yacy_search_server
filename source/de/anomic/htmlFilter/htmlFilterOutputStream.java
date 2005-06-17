@@ -91,7 +91,7 @@ public final class htmlFilterOutputStream extends OutputStream {
 	this.out           = out;
 	this.scraper       = scraper;
 	this.transformer   = transformer;
-	this.buffer        = new serverByteBuffer();
+	this.buffer        = new serverByteBuffer(1024);
 	this.filterTag     = null;
 	this.filterOpts    = null;
 	this.filterCont    = null;
@@ -105,7 +105,7 @@ public final class htmlFilterOutputStream extends OutputStream {
 
 
     public static byte[] genTag0raw(String tagname, boolean opening, byte[] tagopts) {
-	serverByteBuffer bb = new serverByteBuffer();
+	serverByteBuffer bb = new serverByteBuffer(tagname.length() + tagopts.length + 3);
 	bb.append((byte) '<');
 	if (!(opening)) bb.append((byte) '/');
 	bb.append(tagname.getBytes());
@@ -119,7 +119,7 @@ public final class htmlFilterOutputStream extends OutputStream {
     }
 
     public static byte[] genTag1raw(String tagname, byte[] tagopts, byte[] text) {
-	serverByteBuffer bb = new serverByteBuffer();
+	serverByteBuffer bb = new serverByteBuffer(2 * tagname.length() + tagopts.length + text.length + 5);
 	bb.append((byte) '<').append(tagname.getBytes());
 	if (tagopts.length > 0) {
 	    //if (tagopts[0] == (byte) 32) 
@@ -132,22 +132,23 @@ public final class htmlFilterOutputStream extends OutputStream {
 	return bb.getBytes();
     }
 
-
     public static byte[] genTag0(String tagname, Properties tagopts, byte quotechar) {
-	serverByteBuffer bb = new serverByteBuffer().append((byte) '<').append(tagname.getBytes());
-	if (tagopts.size() != 0) bb = bb.append((byte) 32).append(genOpts(tagopts, quotechar));
+        byte[] tagoptsx = (tagopts.size() == 0) ? null : genOpts(tagopts, quotechar);
+	serverByteBuffer bb = new serverByteBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2).append((byte) '<').append(tagname.getBytes());
+	if (tagoptsx != null) bb = bb.append((byte) 32).append(tagoptsx);
 	bb = bb.append((byte) '>');
 	return bb.getBytes();
     }
 
     public static byte[] genTag1(String tagname, Properties tagopts, byte[] text, byte quotechar) {
-	return new serverByteBuffer(genTag0(tagname, tagopts, quotechar)).append(text).append(("</" + tagname + ">").getBytes()).getBytes();
+        byte[] gt0 = genTag0(tagname, tagopts, quotechar);
+	return new serverByteBuffer(gt0, gt0.length + text.length + tagname.length() + 3).append(text).append(("</" + tagname + ">").getBytes()).getBytes();
     }
 
     // a helper method for pretty-printing of properties for html tags
     public static byte[] genOpts(Properties prop, byte quotechar) {
 	Enumeration e = prop.propertyNames();
-	serverByteBuffer bb = new serverByteBuffer();
+	serverByteBuffer bb = new serverByteBuffer(prop.size() * 40);
 	String key;
 	while (e.hasMoreElements()) {
 	    key = (String) e.nextElement();

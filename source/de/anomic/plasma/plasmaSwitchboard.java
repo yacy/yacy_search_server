@@ -604,19 +604,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // do a local crawl
         plasmaCrawlNURL.entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
-        if (urlEntry.url() == null) return false;
+        String stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+        if (urlEntry.url() == null) {
+            log.logError(stats + ": urlEntry.url() == null");
+            return true;
+        }
         String profileHandle = urlEntry.profileHandle();
         //System.out.println("DEBUG plasmaSwitchboard.processCrawling: profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
         plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
         if (profile == null) {
-            log.logError("LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]: LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
-            return false;
+            log.logError(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
+            return true;
         }
         log.logDebug("LOCALCRAWL: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
 		     ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter() +
 		     ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
 
-        return processLocalCrawling(urlEntry, profile);
+        processLocalCrawling(urlEntry, profile, stats);
+        return true;
     }
     
     public int limitCrawlTriggerJobSize() {
@@ -629,7 +634,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
         // if the server is busy, we do crawling more slowly
-        if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
+        //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         
         // if crawling was paused we have to wait until we wer notified to continue
         synchronized(this.crawlingPausedSync) {
@@ -643,13 +648,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // start a global crawl, if possible
         plasmaCrawlNURL.entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT);
-        if (urlEntry.url() == null) return true;
+        String stats = "REMOTECRAWLTRIGGER[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+        if (urlEntry.url() == null) {
+            log.logError(stats + ": urlEntry.url() == null");
+            return true;
+        }
         String profileHandle = urlEntry.profileHandle();
         //System.out.println("DEBUG plasmaSwitchboard.processCrawling: profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
         plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
         if (profile == null) {
-            log.logError("REMOTECRAWLTRIGGER[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]: LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
-            return false;
+            log.logError(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
+            return true;
         }
         log.logDebug("plasmaSwitchboard.limitCrawlTriggerJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
 		     ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter() +
@@ -679,7 +688,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
         
-        processLocalCrawling(urlEntry, profile);
+        processLocalCrawling(urlEntry, profile, stats);
         return true;
     }
     
@@ -710,7 +719,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         */
         
         // if the server is busy, we do this more slowly
-        if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
+        //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         
         // if crawling was paused we have to wait until we wer notified to continue
         synchronized(this.crawlingPausedSync) {
@@ -724,19 +733,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
         plasmaCrawlNURL.entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_REMOTE);
-        if (urlEntry.url() == null) return false;
+        String stats = "REMOTETRIGGEREDCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+        if (urlEntry.url() == null) {
+            log.logError(stats + ": urlEntry.url() == null");
+            return false;
+        }
         String profileHandle = urlEntry.profileHandle();
         //System.out.println("DEBUG plasmaSwitchboard.processCrawling: profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
         plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
+        
         if (profile == null) {
-            log.logError("REMOTETRIGGEREDCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]: LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
+            log.logError(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
             return false;
         }
         log.logDebug("plasmaSwitchboard.remoteTriggeredCrawlJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
 		     ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter() +
 		     ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
 
-        return processLocalCrawling(urlEntry, profile);
+        processLocalCrawling(urlEntry, profile, stats);
+        return true;
     }
         
     private void processResourceStack(plasmaHTCache.Entry entry) {
@@ -1000,21 +1015,22 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (u == null) return plasmaURL.dummyHash; else return u.toString();
     }
     
-    private boolean processLocalCrawling(plasmaCrawlNURL.entry urlEntry, plasmaCrawlProfile.entry profile) {
+    private void processLocalCrawling(plasmaCrawlNURL.entry urlEntry, plasmaCrawlProfile.entry profile, String stats) {
         // work off one Crawl stack entry
         if ((urlEntry == null) && (urlEntry.url() == null)) {
-            log.logInfo("LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]: urlEntry=null");
-            return false;
+            log.logInfo(stats + ": urlEntry=null");
+            return;
         }
         cacheLoader.loadParallel(urlEntry.url(), urlEntry.referrerHash(), urlEntry.initiator(), urlEntry.depth(), profile);
-        log.logInfo("LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]: enqueued for load " + urlEntry.url());
-        return true;
+        log.logInfo(stats + ": enqueued for load " + urlEntry.url());
+        return;
     }
     
     private boolean processRemoteCrawlTrigger(plasmaCrawlNURL.entry urlEntry) {
+        // return true iff another peer has/will index(ed) the url
         if (urlEntry == null) {
             log.logInfo("REMOTECRAWLTRIGGER[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]: urlEntry=null");
-            return false;
+            return true; // superfluous request; true correct in this context
         }
 
         // are we qualified?
@@ -1027,19 +1043,22 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // check url
         if (urlEntry.url() == null) {
             log.logDebug("ERROR: plasmaSwitchboard.processRemoteCrawlTrigger - url is null. name=" + urlEntry.name());
-            return false;
+            return true;
         }
         String nexturlString = urlEntry.url().toString();
         String urlhash = plasmaURL.urlHash(urlEntry.url());
         
         // check remote crawl
         yacySeed remoteSeed = yacyCore.dhtAgent.getCrawlSeed(urlhash);
+        
         if (remoteSeed == null) {
             log.logDebug("plasmaSwitchboard.processRemoteCrawlTrigger: no remote crawl seed available");
-            return false;
+            return false;            
         }
         
+        // do the request
         HashMap page = yacyClient.crawlOrder(remoteSeed, nexturlString, hash2urlstring(urlEntry.referrerHash()), 0);
+
         
         // check success
         /*
@@ -1060,7 +1079,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         */
         if ((page == null) || (page.get("delay") == null)) {
             log.logInfo("CRAWL: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CAUSE: unknown (URL=" + nexturlString + ")");
-            yacyCore.peerActions.peerDeparture(remoteSeed);
+            if (remoteSeed != null) yacyCore.peerActions.peerDeparture(remoteSeed);
             return false;
         } else try {
             log.logDebug("plasmaSwitchboard.processRemoteCrawlTrigger: remoteSeed=" + remoteSeed.getName() + ", url=" + nexturlString + ", response=" + page.toString()); // DEBUG
@@ -1093,7 +1112,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             e.printStackTrace();
             return false;
         }
-
     }
 
     
