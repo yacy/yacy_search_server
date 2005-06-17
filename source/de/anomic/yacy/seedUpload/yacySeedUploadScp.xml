@@ -34,7 +34,7 @@
   	  				prefix="${releaseDir}/source/de/anomic/yacy/seedUpload/"
 			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${build}/de/anomic/yacy/seedUpload/" 
-  	  			    includes="yacySeedUpload${addonShortName}.class"
+  	  			    includes="yacySeedUpload${addonShortName}.class,SchUserInfo.class,sshc.class"  	  			    
   	  				prefix="${releaseDir}/classes/de/anomic/yacy/seedUpload/"
 			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${htroot}/yacy/seedUpload/" 
@@ -57,6 +57,8 @@
         <copy todir="${release}/classes/de/anomic/yacy/seedUpload/">
              <fileset dir="${build}/de/anomic/yacy/seedUpload/">
                   <include name="yacySeedUpload${addonShortName}.class"/> 
+                  <include name="SchUserInfo.class"/> 
+                  <include name="sshc.class"/>
              </fileset>   
         </copy> 
         <copy todir="${release}/htroot/yacy/seedUpload/">
