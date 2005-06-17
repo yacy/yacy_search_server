@@ -302,6 +302,20 @@ public class SettingsAck_p {
             return prop;
         }
         
+        if (post.containsKey("seedUploadRetry")) {
+            try {
+                // trying to upload the seed-list file
+                yacyCore.saveSeedList(env);     
+                prop.put("info", 13);
+                prop.put("info_success",1);
+            } catch (Exception e) {
+                prop.put("info",14);
+                prop.put("info_errormsg",e.getMessage().replaceAll("\n","<br>"));                
+                env.setConfig("seedUploadMethod","none");                 
+            }
+            return prop;
+        }
+        
         if (post.containsKey("seedSettings")) {            
             try {
                 // getting the currently used uploading method
