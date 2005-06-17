@@ -147,7 +147,7 @@ public class yacyClient {
          * 
          * @see serverCore#portForwardingEnabled 
          */
-        if ((!serverCore.portForwardingEnabled) || (otherPeerVersion > (float)0.383)) {
+        if ((!serverCore.portForwardingEnabled) || (otherPeerVersion >= (float)0.383)) {
             String mytype = (String) result.get("yourtype");
             if (mytype == null) mytype = "junior";        
             if ((yacyCore.seedDB.mySeed.get("PeerType", "junior").equals("principal")) && (mytype.equals("senior"))) mytype = "principal";
