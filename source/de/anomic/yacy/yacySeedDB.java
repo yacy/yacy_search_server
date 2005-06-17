@@ -62,6 +62,7 @@ import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.disorderHeap;
 
 public class yacySeedDB {
@@ -534,14 +535,17 @@ public class yacySeedDB {
         String log = null; 
         File seedFile = null;
         try {            
-            // create a seed file which for uploading ...
+            // create a seed file which for uploading ...            
             seedFile = new File("seedFile.txt");
+            serverLog.logDebug("YACY","SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             Vector uv = storeCache(seedFile, true);            
             
             // uploading the seed file
+            serverLog.logDebug("YACY","SaveSeedList: Trying to upload seed-file ...");
             log = uploader.uploadSeedFile(sb,seedDB,seedFile);
             
             // check also if the result can be retrieved again
+            serverLog.logDebug("YACY","SaveSeedList: Checking uploading success ...");
             if (checkCache(uv, seedURL))
                 log = log + "UPLOAD CHECK - Success: the result vectors are equal" + serverCore.crlfString;
             else {

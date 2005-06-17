@@ -227,11 +227,17 @@ public class yacyCore {
         // getting the seed upload method that should be used ...
         String seedUploadMethod = this.switchboard.getConfig("seedUploadMethod","");
         
-        if (!(seedUploadMethod.equalsIgnoreCase("none")) || 
-            ((seedUploadMethod.equals("")) &&
-             (this.switchboard.getConfig("seedFTPPassword","").length() > 0) &&
-             (this.switchboard.getConfig("seedFilePath", "").length() > 0))) {
-            if (seedUploadMethod.equals("")) this.switchboard.setConfig("seedUploadMethod","Ftp");
+        if (
+                (!seedUploadMethod.equalsIgnoreCase("none")) || 
+                ((seedUploadMethod.equals("")) && (this.switchboard.getConfig("seedFTPPassword","").length() > 0)) ||
+                ((seedUploadMethod.equals("")) && (this.switchboard.getConfig("seedFilePath", "").length() > 0))
+        ) {
+            if (seedUploadMethod.equals("")) {
+                if (this.switchboard.getConfig("seedFTPPassword","").length() > 0)
+                    this.switchboard.setConfig("seedUploadMethod","Ftp");
+                if (this.switchboard.getConfig("seedFilePath","").length() > 0)
+                    this.switchboard.setConfig("seedUploadMethod","File");                
+            }
             // we want to be a principal...
             saveSeedList();
             this.seedCacheSizeStamp = seedDB.sizeConnected();
@@ -495,28 +501,39 @@ public class yacyCore {
         
         // be shure that we have something to say
         if (seedDB.mySeed.getAddress() == null) {
-            throw new Exception ("We have no valid IP address until now");        
+            String errorMsg = "We have no valid IP address until now";
+            log.logWarning("SaveSeedList: " + errorMsg);
+            throw new Exception (errorMsg);        
         }
         
         // getting the configured seed uploader
         String seedUploadMethod = sb.getConfig("seedUploadMethod","");
         
         // for backward compatiblity ....
-        if ((seedUploadMethod.equalsIgnoreCase("Ftp")) || 
+        if (
+                (seedUploadMethod.equalsIgnoreCase("Ftp")) || 
                 ((seedUploadMethod.equals("")) &&
-                 (sb.getConfig("seedFTPPassword","").length() > 0) &&
-                 (sb.getConfig("seedFilePath", "").length() > 0))) {
+                 (sb.getConfig("seedFTPPassword","").length() > 0))
+        ) {
             seedUploadMethod = "Ftp";
             sb.setConfig("seedUploadMethod",seedUploadMethod);
-        }        
+        } else if (
+                (seedUploadMethod.equalsIgnoreCase("File")) ||
+                (sb.getConfig("seedFilePath", "").length() > 0)                
+        ) {
+            seedUploadMethod = "File";
+            sb.setConfig("seedUploadMethod",seedUploadMethod);            
+        }
 
         //  determine the seed uploader that should be used ...       
         if (seedUploadMethod.equalsIgnoreCase("none")) return;
 
         yacySeedUploader uploader = getSeedUploader(seedUploadMethod);
         if (uploader == null) {
-            throw new Exception("Unable to get the proper uploader-class for seed uploading method '" + seedUploadMethod + "'.");
-        }
+            String errorMsg = "Unable to get the proper uploader-class for seed uploading method '" + seedUploadMethod + "'.";
+            log.logWarning("SaveSeedList: " + errorMsg);
+            throw new Exception (errorMsg);               
+        }        
         
         // ensure that the seed file url is configured properly
         URL seedURL;
@@ -526,7 +543,9 @@ public class yacyCore {
             if (!seedURLStr.toLowerCase().startsWith("http://")) throw new MalformedURLException("Unsupported protocol.");
             seedURL = new URL(seedURLStr);
         }catch(MalformedURLException e){
-            throw new Exception("Malformed seed file URL '" + sb.getConfig("seedURL","") + "'. " + e.getMessage());
+            String errorMsg = "Malformed seed file URL '" + sb.getConfig("seedURL","") + "'. " + e.getMessage();
+            log.logWarning("SaveSeedList: " + errorMsg);            
+            throw new Exception(errorMsg);
         }              
         
         // upload the seed-list using the configured uploader class
@@ -536,12 +555,15 @@ public class yacyCore {
         try {
             seedDB.mySeed.put("PeerType", "principal"); // this information shall also be uploaded
             
+            log.logDebug("SaveSeedList: Using seed uploading method '" + seedUploadMethod + "' for seed-list uploading." +
+                         "\n\tPrevious peerType is '" + seedDB.mySeed.get("PeerType", "junior") + "'.");
+            
             //logt = seedDB.uploadCache(seedFTPServer, seedFTPAccount, seedFTPPassword, seedFTPPath, seedURL);
             logt = seedDB.uploadCache(uploader,sb, seedDB, seedURL);
             if (logt != null) {
                 if (logt.indexOf("Error") >= 0) {
                     seedDB.mySeed.put("PeerType", prevStatus);
-                    log.logError("seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6));
+                    log.logError("SaveSeedList: seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6));
                     throw new Exception("Seed-list uploading failed using uploader '" + uploader.getClass().getName() + "'\n(error): " + logt.substring(logt.indexOf("Error") + 6));                    
                 }
                 log.logInfo(logt);
@@ -553,7 +575,7 @@ public class yacyCore {
         } catch (Exception e) {
             seedDB.mySeed.put("PeerType", prevStatus);
             sb.setConfig("yacyStatus", prevStatus);
-            log.logInfo("Seed upload failed (IO error): " + e.getMessage());
+            log.logInfo("SaveSeedList: Seed upload failed (IO error): " + e.getMessage());
             throw new Exception("Seed-list uploading failed using uploader '" + uploader.getClass().getName() + "'\n(error): " + e.getMessage());
         }
     }

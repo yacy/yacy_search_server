@@ -14,7 +14,7 @@ public class yacySeedUploadFtp implements yacySeedUploader {
     public static final String CONFIG_FTP_PASSWORD = "seedFTPPassword";
     public static final String CONFIG_FTP_PATH = "seedFTPPath";
     
-    public String uploadSeedFile (serverSwitch sb, yacySeedDB seedDB, File seedFile) {
+    public String uploadSeedFile (serverSwitch sb, yacySeedDB seedDB, File seedFile) throws Exception {
         try {        
             if (sb == null) throw new NullPointerException("Reference to serverSwitch nut not be null.");
             if (seedDB == null) throw new NullPointerException("Reference to seedDB must not be null.");
@@ -29,11 +29,11 @@ public class yacySeedUploadFtp implements yacySeedUploader {
                 String log = ftpc.put(seedFTPServer, seedFile, seedFTPPath.getParent(), seedFTPPath.getName(), seedFTPAccount, seedFTPPassword);
                 return log;
             } 
-            return "Seed upload settings not configured properly. password-len=" +
+            throw new Exception ("Seed upload settings not configured properly. password-len=" +
                     seedFTPPassword.length() + ", filePath=" +
-                    seedFTPPath;
+                    seedFTPPath);
         } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            throw e;
         }
     }
 
