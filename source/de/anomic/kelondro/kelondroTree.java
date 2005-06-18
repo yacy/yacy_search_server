@@ -125,7 +125,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     }
 
     // Returns the value to which this map maps the specified key.
-    public byte[][] get(byte[] key) throws IOException {
+    public synchronized byte[][] get(byte[] key) throws IOException {
 	//System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
 	Search search = new Search(key);
 	if (search.found()) {
@@ -298,7 +298,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     }
     
     // Associates the specified value with the specified key in this map
-    public byte[][] put(byte[][] newrow) throws IOException {
+    public synchronized byte[][] put(byte[][] newrow) throws IOException {
 	if (newrow.length != columns()) throw new IllegalArgumentException("put: wrong row length " + newrow.length + "; must be " + columns());
 	// first try to find the key element in the database
 	Search searchResult = new Search(newrow[0]);
@@ -546,7 +546,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     }
 
     // Associates the specified value with the specified key in this map
-    public synchronized byte[] put(byte[] key, byte[] value) throws IOException {
+    public byte[] put(byte[] key, byte[] value) throws IOException {
 	byte[][] row = new byte[2][];
 	row[0] = key;
 	row[1] = value;
@@ -571,7 +571,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
         while (size() > 0) remove(lastNode(), null);
     }
     
-    public void remove(Node node, Node parentOfNode) throws IOException {
+    private void remove(Node node, Node parentOfNode) throws IOException {
 	// there are three cases when removing a node
 	// - the node is a leaf - it can be removed easily
 	// - the node has one child - the child replaces the node
@@ -1214,7 +1214,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     // Returns -1, 0, or 1 as the first argument
     // is less than, equal to, or greater than the second.
     // two arrays are also equal if one array is a subset of the other's array with filled-up char(0)-values
-    public synchronized int compare(byte[] a, byte[] b) {
+    public int compare(byte[] a, byte[] b) {
 	int i = 0;
 	int al = a.length;
 	int bl = b.length;
