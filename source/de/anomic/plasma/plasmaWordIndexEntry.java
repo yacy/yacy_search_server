@@ -76,7 +76,7 @@ public class plasmaWordIndexEntry {
     private int    posofphrase; // position of the phrase in the text as count of sentences; 0=unknown; 1=path; 2=keywords; 3=headline; >4: in text
     private int    age;         // calculated by using last-modified
     private int    quality;     // result of a heuristic on the source file
-    private String language;    // essentially the country code (the TLD as heuristic), two letters lowercase only
+    private byte[] language;    // essentially the country code (the TLD as heuristic), two letters lowercase only
     private char   doctype;     // type of source
     private char   localflag;   // indicates if the index was created locally
 
@@ -97,9 +97,6 @@ public class plasmaWordIndexEntry {
     public static final char LT_LOCAL   = 'L';
     public static final char LT_GLOBAL  = 'G';
 
-    // encoded discrete values
-    private String code;
-    
     // create a word hash
     public static String word2hash(String word) {
 	return serverCodings.encodeMD5B64(word.toLowerCase(), true).substring(0, wordHashLength);
@@ -191,25 +188,23 @@ public class plasmaWordIndexEntry {
         this.posofphrase = posofphrase;
 	this.age = virtualage;
 	this.quality = quality;
-	this.language = language;
+	this.language = language.getBytes();
 	this.doctype = doctype;
-	this.code = null;
 	this.localflag = (local) ? LT_LOCAL : LT_GLOBAL;
     }
     
     public plasmaWordIndexEntry(String urlHash, String code) {
         // the code is not parsed but used later on
         this.urlHash = urlHash;
-        this.count = 0;
-        this.posintext = 0;
-        this.posinphrase = 0;
-        this.posofphrase = 0;
-        this.age = 0;
-        this.quality = 0;
-        this.language = "uk";
-        this.doctype = 'u';
-        this.code = code;
-        this.localflag = LT_LOCAL;
+        this.count = (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(6, 8));
+        this.posintext = (code.length() >= 14) ? (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(12, 14)) : 0;
+        this.posinphrase = (code.length() >= 15) ? (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(14, 16)) : 0;
+        this.posofphrase = (code.length() >= 16) ? (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(16, 18)) : 0;
+        this.age = (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(3, 6));
+        this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(0, 3));
+        this.language = code.substring(8, 10).getBytes();
+        this.doctype = code.charAt(10);
+        this.localflag = code.charAt(11);
     }
     
     public plasmaWordIndexEntry(String external) {
@@ -228,11 +223,9 @@ public class plasmaWordIndexEntry {
        this.posofphrase = (int) serverCodings.enhancedCoder.decodeBase64Long(pr.getProperty("o", "__"));
        this.age = (int) serverCodings.enhancedCoder.decodeBase64Long(pr.getProperty("a", "A"));
        this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(pr.getProperty("q", "__"));
-       this.language = pr.getProperty("l", "uk");
+       this.language = pr.getProperty("l", "uk").getBytes();
        this.doctype = pr.getProperty("d", "u").charAt(0);
        this.localflag = pr.getProperty("f", ""+LT_LOCAL).charAt(0);
-       // clear code
-       this.code = null;
     }
 
    private String b64save(long x, int l) {
@@ -244,120 +237,80 @@ public class plasmaWordIndexEntry {
 	}
     }
     
-    public String toEncodedForm(boolean longAttr) {
-        // attention: this integrates NOT the URL into the encoding
-        // if you need a complete dump, use toExternalForm()
-	if (code == null) {
-            String shortAttr =
-                b64save(quality, plasmaCrawlLURL.urlQualityLength) +
-		b64save(age, 3) +
-		b64save(count, 2) +
-		language +
-		doctype +
-		localflag; // 3 + 3 + 2 + 2 + 1 + 1 = 12 bytes
-            if (longAttr)
-              return 
-		shortAttr +
-                b64save(posintext, 2) +
-                b64save(posinphrase, 2) +
-                b64save(posofphrase, 2);
-	    // 12 + 3 + 2 + 2 + 1 + 1 = 12 bytes
-            else
-              return shortAttr;
-		
-	} else {
-	    return code;
-	}
-    }
+   public String toEncodedForm(boolean longAttr) {
+       // attention: this integrates NOT the URL into the encoding
+       // if you need a complete dump, use toExternalForm()
+       String shortAttr =
+               b64save(quality, plasmaCrawlLURL.urlQualityLength) +
+               b64save(age, 3) +
+               b64save(count, 2) +
+               new String(language) +
+               doctype +
+               localflag; // 3 + 3 + 2 + 2 + 1 + 1 = 12 bytes
+       if (longAttr)
+           return
+               shortAttr +
+                   b64save(posintext, 2) +
+                   b64save(posinphrase, 2) +
+                   b64save(posofphrase, 2);
+       // 12 + 3 + 2 + 2 + 1 + 1 = 12 bytes
+       else
+           return shortAttr;
+   }
     
-    public String toExternalForm() {
-	if (code == null) {
-            return "{" +
-                "h=" + urlHash +
-                ",q=" + b64save(quality, plasmaCrawlLURL.urlQualityLength) +
-		",a=" + b64save(age, 3) +
-		",c=" + b64save(count, 2) +
-		",l=" + language +
-		",d=" + doctype +
-		",f=" + localflag +
-                ",t=" + b64save(posintext, 2) +
-                ",r=" + b64save(posinphrase, 2) +
-                ",o=" + b64save(posofphrase, 2) +
-                "}";
-	} else {
-	    return "{" +
-                "h=" + urlHash +
-                ",q=" + code.substring(0, 3) +
-		",a=" + code.substring(3, 6) +
-		",c=" + code.substring(6, 8) +
-		",l=" + code.substring(8, 10) +
-		",d=" + code.charAt(10) +
-		",f=" + code.charAt(11) +
-                ((code.length() > 12) ? (
-                ",t=" + code.substring(12, 14) +
-                ",r=" + code.substring(14, 16) +
-                ",o=" + code.substring(16, 18)
-                ) : "") +
-                "}";
-	}
-    }
+   public String toExternalForm() {
+       return "{" +
+               "h=" + urlHash +
+               ",q=" + b64save(quality, plasmaCrawlLURL.urlQualityLength) +
+               ",a=" + b64save(age, 3) +
+               ",c=" + b64save(count, 2) +
+               ",l=" + new String(language) +
+               ",d=" + doctype +
+               ",f=" + localflag +
+               ",t=" + b64save(posintext, 2) +
+               ",r=" + b64save(posinphrase, 2) +
+               ",o=" + b64save(posofphrase, 2) +
+               "}";
+   }
         
     public String getUrlHash() {
 	return urlHash;
     }
     
     public int getQuality() {
-	if (code == null) return quality;
-	else return (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(0, 3));
+	return quality;
     }
 
     public int getVirtualAge() {
-	if (code == null) return age;
-	else return (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(3, 6));
+	return age;
     }
     
     public int getCount() {
-	if (code == null) return count;
-	else return (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(6, 8));
+	return count;
     }
 
     public int posintext() {
-        if (code == null) return posintext;
-        if (code.length() >= 14)
-            return (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(12, 14));
-        else
-            return 0;
+        return posintext;
     }
 
     public int posinphrase() {
-        if (code == null) return posinphrase;
-        if (code.length() >= 15)
-            return (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(14, 16));
-        else
-            return 0;
+        return posinphrase;
     }
 
     public int posofphrase() {
-        if (code == null) return posofphrase;
-        if (code.length() >= 16)
-            return (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(16, 18));
-        else
-            return 0;
+        return posofphrase;
     }
     
     public String getLanguage() {
-	if (code == null) return language;
-	else return code.substring(8, 10);
+	return new String(language);
     }
 
     public char getType() {
-	if (code == null) return doctype;
-	else return code.charAt(10);
+	return doctype;
     }
 
     public boolean isLocal() {
-        if (code == null) return localflag == LT_LOCAL;
-	else return code.charAt(11) == LT_LOCAL;
+        return localflag == LT_LOCAL;
     }
 
     public static void main(String[] args) {

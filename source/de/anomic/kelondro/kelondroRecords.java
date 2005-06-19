@@ -682,6 +682,7 @@ public class kelondroRecords {
                     cacheNode = null;
                     // check cache size
                     if (XcacheHeaders.size() > sizeBefore) checkCacheSpace();
+                    //System.out.println("kelondroRecords cache4" + filename + ": " + XcacheHeaders.size() + " entries, " + XcacheSize + " allowed.");
                 }
             }
         }

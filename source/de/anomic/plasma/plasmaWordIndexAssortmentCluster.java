@@ -77,11 +77,12 @@ public final class plasmaWordIndexAssortmentCluster {
             sizes[i] = testAssortment.size() + clusterCapacity - i;
             sumSizes += sizes[i];
             testAssortment.close();
+            testAssortment = null;
 	}
         
 	// initialize cluster using the cluster elements size for optimal buffer size
 	for (int i = 0; i < clusterCapacity; i++) {
-	    assortments[i] = new plasmaWordIndexAssortment(assortmentsPath, i + 1, (int) completeBufferKB * sizes[i] / sumSizes, log);
+	    assortments[i] = new plasmaWordIndexAssortment(assortmentsPath, i + 1, (int) ((long) completeBufferKB * (long) sizes[i] / (long) sumSizes), log);
 	}
     }
 

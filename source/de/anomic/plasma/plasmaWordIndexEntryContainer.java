@@ -97,23 +97,20 @@ public class plasmaWordIndexEntryContainer implements Comparable {
         this.updateTime = java.lang.Math.max(this.updateTime, c.updateTime);
         return x;
     }
-    
+
     private boolean add(plasmaWordIndexEntry entry) {
         // returns true if the new entry was added, false if it already existet
-        String urlHash = entry.getUrlHash();
-        if (container.containsKey(urlHash)) return false;
-        container.put(urlHash, entry);
-        return true;
+        return (container.put(entry.getUrlHash(), entry) == null);
     }
-    
+
     public boolean contains(String urlHash) {
         return container.containsKey(urlHash);
     }
-    
+
     public plasmaWordIndexEntry[] getEntryArray() {
         return (plasmaWordIndexEntry[]) container.values().toArray();
     }
-    
+
     public Iterator entries() {
         // returns an iterator of plasmaWordIndexEntry objects
         return container.values().iterator();

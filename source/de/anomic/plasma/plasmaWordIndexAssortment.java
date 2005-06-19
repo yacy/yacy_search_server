@@ -104,7 +104,7 @@ public final class plasmaWordIndexAssortment {
         this.bufferSize = bufferkb * 1024;
         this.log = log;
         if (assortmentFile.exists()) {
-            // open existing singeton tree file
+            // open existing assortment tree file
             try {
                 assortments = new kelondroTree(assortmentFile, bufferSize);
                 if (log != null) log.logSystem("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentCapacity + ", " + bufferkb + "kb buffer"); 
@@ -113,7 +113,7 @@ public final class plasmaWordIndexAssortment {
                 e.printStackTrace();
             }
         } else {
-            // create new sigleton tree file
+            // create new assortment tree file
             try {
                 assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentCapacity));
                 if (log != null) log.logSystem("Created new Assortment Database, width " + assortmentCapacity + ", " + bufferkb + "kb buffer"); 

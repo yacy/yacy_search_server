@@ -193,6 +193,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 long creationTime;
                 plasmaWordIndexEntry wordEntry;
                 byte[][] row;
+                Runtime rt = Runtime.getRuntime();
                 while (i.hasNext()) {
                     // get out one entry
                     node = (kelondroRecords.Node) i.next();
@@ -200,11 +201,16 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     wordHash = new String(row[0]);
                     creationTime = kelondroRecords.bytes2long(row[2]);
                     wordEntry = new plasmaWordIndexEntry(new String(row[3]), new String(row[4]));
-                    
                     // store to cache
                     addEntry(wordHash, wordEntry, creationTime);
                     urlCount++;
-                    
+                    // protect against memory shortage
+                    while (rt.freeMemory() < 1000000) {
+                        //System.out.print("FLUSH+GC bevore=" + rt.freeMemory());
+                        flushFromMem();
+                        System.gc();
+                        //System.out.println(", after=" + rt.freeMemory());
+                    }
                     // write a log
                     if (System.currentTimeMillis() > messageTime) {
                         urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
@@ -271,12 +277,15 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         
         public void run() {
             String nextHash;
+            Runtime rt = Runtime.getRuntime();
             while (!terminate) {
                 if (pause) {
                     try {this.sleep(300);} catch (InterruptedException e) {}
                 } else {
                     flushFromMem();
-                    try {this.sleep(10 + java.lang.Math.min(1000, 10 * maxWords/(cache.size() + 1)));} catch (InterruptedException e) {}
+                    if ((rt.freeMemory() > 1000000) || (cache.size() == 0)) try {
+                        this.sleep(10 + java.lang.Math.min(1000, 10 * maxWords/(cache.size() + 1)));
+                    } catch (InterruptedException e) {}
                 }              
             }
         }
@@ -388,7 +397,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
     
     private boolean flushFromAssortmentCluster(String key) {
-	// this should only be called if the singleton shall be deleted or returned in an index entity
+	// this should only be called if the assortment shall be deleted or returned in an index entity
         plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(key);
         if (container == null) {
             return false;
@@ -543,6 +552,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         flushThread.pause();
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
         while (cache.size() >= this.maxWords) flushFromMem();
+        while ((cache.size() > 0) && (Runtime.getRuntime().freeMemory() < 1000000)) {
+            flushFromMem();
+            System.gc();
+        }
 	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");
 
 	// put new words into cache
@@ -557,6 +570,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 hashScore.addScore(wordHash, added);
                 hashDate.setScore(wordHash, intTime(updateTime));
             }
+            entries = null;
 	}
         //System.out.println("DEBUG: cache = " + cache.toString());
         flushThread.proceed();
@@ -564,13 +578,17 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
 
     private void addEntry(String wordHash, plasmaWordIndexEntry newEntry, long updateTime) {
-        plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) cache.get(wordHash);
-        if (entries == null) entries = new plasmaWordIndexEntryContainer(wordHash);
-        if (entries.add(new plasmaWordIndexEntry[]{newEntry}, updateTime) > 0) {
-            cache.put(wordHash, entries);
+        flushThread.pause();
+	plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) cache.get(wordHash);
+        if (container == null) container = new plasmaWordIndexEntryContainer(wordHash);
+        plasmaWordIndexEntry[] entries = new plasmaWordIndexEntry[]{newEntry};
+        if (container.add(entries, updateTime) > 0) {
+            cache.put(wordHash, container);
             hashScore.incScore(wordHash);
             hashDate.setScore(wordHash, intTime(updateTime));
         }
+        entries = null;
+        container = null;
         flushThread.proceed();
     }
 
