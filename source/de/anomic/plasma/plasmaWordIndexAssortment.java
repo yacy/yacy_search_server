@@ -184,7 +184,7 @@ public final class plasmaWordIndexAssortment {
     
     private void resetDatabase() {
         // deletes the assortment database and creates a new one
-        try {
+        if (assortments != null) try {
             assortments.close();
         } catch (IOException e) {}
         if (!(assortmentFile.delete())) throw new RuntimeException("cannot delete assortment database");

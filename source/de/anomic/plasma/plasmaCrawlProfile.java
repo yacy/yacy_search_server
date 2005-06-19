@@ -50,18 +50,35 @@ import java.util.Map;
 
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.server.serverCodings;
 
 public class plasmaCrawlProfile {
     
     private kelondroMap profileTable;
+    private File profileTableFile;
     
     public plasmaCrawlProfile(File profileTableFile) throws IOException {
+        this.profileTableFile = profileTableFile;
         if (profileTableFile.exists()) {
             profileTable = new kelondroMap(new kelondroDyn(profileTableFile, 32000));
         } else {
             profileTableFile.getParentFile().mkdirs();
             profileTable = new kelondroMap(new kelondroDyn(profileTableFile, 32000, plasmaURL.urlCrawlProfileHandleLength, 2000));
+        }
+    }
+    
+    private void resetDatabase() {
+        // deletes the profile database and creates a new one
+        if (profileTable != null) try {
+            profileTable.close();
+        } catch (IOException e) {}
+        if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
+        try {
+            profileTableFile.getParentFile().mkdirs();
+            profileTable = new kelondroMap(new kelondroDyn(profileTableFile, 32000, plasmaURL.urlCrawlProfileHandleLength, 2000));
+        } catch (IOException e){
+            e.printStackTrace();
         }
     }
     
@@ -116,11 +133,17 @@ public class plasmaCrawlProfile {
                            boolean storeHTCache, boolean storeTXCache,
                            boolean localIndexing, boolean remoteIndexing,
                            boolean xsstopw, boolean xdstopw, boolean xpstopw) throws IOException {
+        
         entry ne = new entry(name, startURL, generalFilter, specificFilter,
                              generalDepth, specificDepth,
                              crawlingQ, storeHTCache, storeTXCache, localIndexing, remoteIndexing,
                              xsstopw, xdstopw, xpstopw);
-        profileTable.set(ne.handle(), ne.map());
+        try {
+            profileTable.set(ne.handle(), ne.map());
+        } catch (kelondroException e) {
+            resetDatabase();
+            profileTable.set(ne.handle(), ne.map());
+        }
         return ne;
     }
     

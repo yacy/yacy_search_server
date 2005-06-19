@@ -62,6 +62,15 @@ public class kelondroMergeIterator implements Iterator {
         nextb();
     }
     
+    public void finalize() {
+        // call finalizer of embedded objects
+        a = null;
+        b = null;
+        na = null;
+        nb = null;
+        comp = null;
+    }
+    
     private void nexta() {
         if (a.hasNext()) na = (String) a.next(); else na = null;
     }

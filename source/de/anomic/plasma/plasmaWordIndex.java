@@ -118,6 +118,7 @@ public final class plasmaWordIndex {
     }
     
     public class iterateFiles implements Iterator {
+        // Iterator of hash-strings in WORDS path
         
         private ArrayList hierarchy; // contains TreeSet elements, earch TreeSet contains File Entries
         private Comparator comp;     // for string-compare

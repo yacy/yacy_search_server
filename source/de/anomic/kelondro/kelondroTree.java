@@ -777,6 +777,11 @@ public class kelondroTree extends kelondroRecords implements Comparator {
             // now every parent node to the start node is on the stack
 	}
         
+        public void finalize() {
+            nextNode = null;
+            nodeStack = null;
+        }
+            
 	public boolean hasNext() {
             return nextNode != null;
 	}
@@ -924,6 +929,10 @@ public class kelondroTree extends kelondroRecords implements Comparator {
             this.nodeIterator = nodeIterator;
         }
         
+        public void finalize() {
+            nodeIterator = null;
+        }
+                
         public boolean hasNext() {
             return (nodeIterator.hasNext());
         }
