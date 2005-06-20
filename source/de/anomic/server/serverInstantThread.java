@@ -117,6 +117,7 @@ public final class serverInstantThread extends serverAbstractThread implements s
         thread.setStartupSleep(startupDelay);
         thread.setIdleSleep(-1);
         thread.setBusySleep(-1);
+        thread.setMemPreReqisite(0);
         thread.setLog(log);
         thread.start();
         return thread;

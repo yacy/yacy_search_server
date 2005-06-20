@@ -392,24 +392,36 @@ xpstopw=true
 # the idlesleep is the pause that an proces sleeps if the last call to the
 # process job was without execution of anything;
 # the busysleep is the pause after a full job execution
+# the prereq-value is a memory pre-requisite: that much bytes must
+# be available/free in the heap; othervise the loop is not executed
+# and another idlesleep is performed
 20_dhtdistribution_idlesleep=20000
 20_dhtdistribution_busysleep=5000
+20_dhtdistribution_memprereq=5000000
 30_peerping_idlesleep=120000
 30_peerping_busysleep=120000
+30_peerping_memprereq=20000
 40_peerseedcycle_idlesleep=1800000
 40_peerseedcycle_busysleep=1200000
-50_localcrawl_idlesleep=10000
+40_peerseedcycle_memprereq=2000000
+50_localcrawl_idlesleep=1000
 50_localcrawl_busysleep=200
-61_globalcrawltrigger_idlesleep=10000
+50_localcrawl_memprereq=4000000
+61_globalcrawltrigger_idlesleep=2000
 61_globalcrawltrigger_busysleep=200
+61_globalcrawltrigger_memprereq=4000000
 62_remotetriggeredcrawl_idlesleep=10000
 62_remotetriggeredcrawl_busysleep=200
+62_remotetriggeredcrawl_memprereq=5000000
 70_cachemanager_idlesleep=1000
 70_cachemanager_busysleep=0
+70_cachemanager_memprereq=10000
 80_indexing_idlesleep=1000
 80_indexing_busysleep=0
+80_indexing_memprereq=2000000
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
+90_cleanup_memprereq=10000
 
 # multiprocessor-settings
 # you may want to run time-consuming processes on several processors
@@ -422,17 +434,17 @@ xpstopw=true
 
 # ram cache for database files
 
-# ram cache for indexCache.db
-ramCacheRWI     = 16777216
+# ram cache for assortment cache cluster (for all 50 files)
+ramCacheRWI     =  8388608
 
 # ram cache for responseHeader.db
 ramCacheHTTP    =  1048576
 
 # ram cache for urlHash.db
-ramCacheLURL    =  8388608
+ramCacheLURL    =  4194304
 
 # ram cache for urlNotice.db
-ramCacheNURL    =  1048576
+ramCacheNURL    =   524288
 
 # ram cache for urlErr.db 
 ramCacheEURL    =   131072

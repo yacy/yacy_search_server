@@ -77,8 +77,9 @@ import java.util.StringTokenizer;
 public class kelondroRecords {
 
     // constants
-    private static int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
-
+    private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
+    public  static final long memBlock = 5000000; // do not fill cache further if the amount of available memory is less that this
+    
     // static seek pointers
     private static long POS_MAGIC      = 0;                     // 1 byte, byte: file type magic
     private static long POS_BUSY       = POS_MAGIC      + 1;    // 1 byte, byte: marker for synchronization
@@ -352,10 +353,12 @@ public class kelondroRecords {
         // check for space in cache
         // should be only called within a synchronized(XcacheHeaders) environment
         if (XcacheSize == 0) return;
-        while (XcacheHeaders.size() >= XcacheSize) {
+        Handle delkey;
+        while ((XcacheHeaders.size() >= XcacheSize) ||
+               ((XcacheHeaders.size() > 0) && (Runtime.getRuntime().freeMemory() < memBlock))) {
             // delete one entry
             try {
-                Handle delkey = (Handle) XcacheScore.getMinObject(); // error (see below) here
+                delkey = (Handle) XcacheScore.getMinObject(); // error (see below) here
                 XcacheScore.deleteScore(delkey);
                 XcacheHeaders.remove(delkey);
             } catch (NoSuchElementException e) {
@@ -365,6 +368,7 @@ public class kelondroRecords {
                 this.XcacheScore = new kelondroMScoreCluster();
                 this.XcacheHeaders = new HashMap();
             }
+            delkey = null;
         }
     }
         
@@ -662,6 +666,7 @@ public class kelondroRecords {
                 synchronized (XcacheHeaders) {
                     // remember size to evaluate a cache size check need
                     int sizeBefore = XcacheHeaders.size();
+                    //long memBefore = Runtime.getRuntime().freeMemory();
                     // generate cache entry
                     byte[][] cacheValue;
                     if (values == null) {
@@ -676,10 +681,11 @@ public class kelondroRecords {
                     cacheNode.ohBytes = this.ohBytes;
                     cacheNode.ohHandle = this.ohHandle;
                     // store the cache entry
-                    XcacheHeaders.put(cacheNode.handle, cacheNode);
-                    XcacheScore.setScore(handle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
+                    boolean newentry = XcacheHeaders.put(cacheNode.handle, cacheNode) == null;
+                    XcacheScore.setScore(cacheNode.handle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
                     // delete the cache entry
                     cacheNode = null;
+                    //System.out.println("kelondroRecords cache4" + filename + ": cache record size = " + (memBefore - Runtime.getRuntime().freeMemory()) + " bytes" + ((newentry) ? " new" : ""));
                     // check cache size
                     if (XcacheHeaders.size() > sizeBefore) checkCacheSpace();
                     //System.out.println("kelondroRecords cache4" + filename + ": " + XcacheHeaders.size() + " entries, " + XcacheSize + " allowed.");

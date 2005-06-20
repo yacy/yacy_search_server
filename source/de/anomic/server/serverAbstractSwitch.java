@@ -254,30 +254,51 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	log.logInfo("Undeployed Action '" + action.getShortDescription() + "', (" + switchActions.size() + " actions registered)");
     }
 
-    public void deployThread(String threadName, String threadShortDescription, String threadLongDescription, serverThread newThread, long startupDelay) {
+    public void deployThread(
+            String threadName,
+            String threadShortDescription,
+            String threadLongDescription,
+            serverThread newThread,
+            long startupDelay) {
         deployThread(threadName, threadShortDescription, threadLongDescription,
                      newThread, startupDelay,
-                     Long.parseLong(getConfig(threadName + "_idlesleep" , "novalue")), 
-                     Long.parseLong(getConfig(threadName + "_busysleep" , "novalue")));
+                     Long.parseLong(getConfig(threadName + "_idlesleep" ,     "100")), 
+                     Long.parseLong(getConfig(threadName + "_busysleep" ,    "1000")),
+                     Long.parseLong(getConfig(threadName + "_memprereq" , "1000000")));
     }
 
-    public void deployThread(String threadName, String threadShortDescription, String threadLongDescription, serverThread newThread, long startupDelay, long initialIdleSleep, long initialBusySleep) {
+    public void deployThread(
+            String threadName,
+            String threadShortDescription,
+            String threadLongDescription,
+            serverThread newThread,
+            long startupDelay,
+            long initialIdleSleep,
+            long initialBusySleep,
+            long initialMemoryPreRequisite) {
         if (newThread.isAlive()) throw new RuntimeException("undeployed threads must not live; they are started as part of the deployment");
         newThread.setStartupSleep(startupDelay);
-        long sleep;
+        long x;
         try {
-            sleep = Long.parseLong(getConfig(threadName + "_idlesleep" , "novalue"));
-            newThread.setIdleSleep(sleep);
+            x = Long.parseLong(getConfig(threadName + "_idlesleep" , "novalue"));
+            newThread.setIdleSleep(x);
         } catch (NumberFormatException e) {
             newThread.setIdleSleep(initialIdleSleep);
             setConfig(threadName + "_idlesleep", initialIdleSleep);
         }
         try {
-            sleep = Long.parseLong(getConfig(threadName + "_busysleep" , "novalue"));
-            newThread.setBusySleep(sleep);
+            x = Long.parseLong(getConfig(threadName + "_busysleep" , "novalue"));
+            newThread.setBusySleep(x);
         } catch (NumberFormatException e) {
             newThread.setBusySleep(initialBusySleep);
             setConfig(threadName + "_busysleep", initialBusySleep);
+        }
+        try {
+            x = Long.parseLong(getConfig(threadName + "_memprereq" , "novalue"));
+            newThread.setMemPreReqisite(x);
+        } catch (NumberFormatException e) {
+            newThread.setMemPreReqisite(initialMemoryPreRequisite);
+            setConfig(threadName + "_memprereq", initialMemoryPreRequisite);
         }
         newThread.setLog(log);
         newThread.setDescription(threadShortDescription, threadLongDescription);
@@ -290,11 +311,12 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         return (serverThread) workerThreads.get(threadName);
     }
     
-    public void setThreadSleep(String threadName, long idleMillis, long busyMillis) {
+    public void setThreadPerformance(String threadName, long idleMillis, long busyMillis, long memprereqBytes) {
         serverThread thread = (serverThread) workerThreads.get(threadName);
         if (thread != null) {
             thread.setIdleSleep(idleMillis);
             thread.setBusySleep(busyMillis);
+            thread.setMemPreReqisite(memprereqBytes);
         }
     }
     

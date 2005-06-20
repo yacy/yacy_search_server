@@ -81,11 +81,11 @@ public class Performance_p {
         
         // set templates for latest news from the threads
         long blocktime, sleeptime, exectime;
-        long idlesleep, busysleep;
+        long idlesleep, busysleep, memprereq;
         int queuesize;
         threads = switchboard.threadNames();
         int c = 0;
-        long idleCycles, busyCycles;
+        long idleCycles, busyCycles, memshortageCycles;
         while (threads.hasNext()) {
             threadName = (String) threads.next();
             thread = switchboard.getThread(threadName);
@@ -102,37 +102,43 @@ public class Performance_p {
             exectime = thread.getExecTime();
             idleCycles = thread.getIdleCycles();
             busyCycles = thread.getBusyCycles();
+            memshortageCycles = thread.getOutOfMemoryCycles();
             prop.put("table_" + c + "_blocktime", blocktime / 1000);
             prop.put("table_" + c + "_blockpercent", "" + (100 * blocktime / blocktime_total));
             prop.put("table_" + c + "_sleeptime", sleeptime / 1000);
             prop.put("table_" + c + "_sleeppercent", "" + (100 * sleeptime / sleeptime_total));
             prop.put("table_" + c + "_exectime", exectime / 1000);
             prop.put("table_" + c + "_execpercent", "" + (100 * exectime / exectime_total));
-            prop.put("table_" + c + "_totalcycles", "" + (idleCycles + busyCycles));
+            prop.put("table_" + c + "_totalcycles", "" + (idleCycles + busyCycles + memshortageCycles));
             prop.put("table_" + c + "_idlecycles", "" + idleCycles);
             prop.put("table_" + c + "_busycycles", "" + busyCycles);
+            prop.put("table_" + c + "_memscycles", "" + memshortageCycles);
             prop.put("table_" + c + "_sleeppercycle", ((idleCycles + busyCycles) == 0) ? "-" : ("" + (sleeptime / (idleCycles + busyCycles))));
             prop.put("table_" + c + "_execpercycle", (busyCycles == 0) ? "-" : ("" + (exectime / busyCycles)));
             
             if ((post != null) && (post.containsKey("delaysubmit"))) {
                 // load with new values
-                idlesleep = Long.parseLong((String) post.get(threadName + "_idlesleep", "1"));
-                busysleep = Long.parseLong((String) post.get(threadName + "_busysleep", "1"));
-
+                idlesleep = Long.parseLong((String) post.get(threadName + "_idlesleep",  "100"));
+                busysleep = Long.parseLong((String) post.get(threadName + "_busysleep", "1000"));
+                memprereq = Long.parseLong((String) post.get(threadName + "_memprereq",    "0"));
+                
 		// check values to prevent short-cut loops
 		if (idlesleep == 0) idlesleep = 1000;
                 
                 // on-the-fly re-configuration
-                switchboard.setThreadSleep(threadName, idlesleep, busysleep);
+                switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
                 switchboard.setConfig(threadName + "_idlesleep", idlesleep);
                 switchboard.setConfig(threadName + "_busysleep", busysleep);
+                switchboard.setConfig(threadName + "_memprereq", memprereq);
             } else {
                 // load with old values
                 idlesleep = Long.parseLong(switchboard.getConfig(threadName + "_idlesleep" , "1000"));
                 busysleep = Long.parseLong(switchboard.getConfig(threadName + "_busysleep", "1000"));
+                memprereq = Long.parseLong(switchboard.getConfig(threadName + "_memprereq", "1000"));
             }
             prop.put("table_" + c + "_idlesleep", idlesleep);
             prop.put("table_" + c + "_busysleep", busysleep);
+            prop.put("table_" + c + "_memprereq", memprereq);
             
             c++;
         }

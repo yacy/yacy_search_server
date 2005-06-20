@@ -73,9 +73,11 @@ public interface serverSwitch {
 			     String threadShortDescription,
 			     String threadLongDescription,
                              serverThread newThread,
-                             long startupDelay, long initialIdleSleep, long initialBusySleep);
+                             long startupDelay,
+                             long initialIdleSleep, long initialBusySleep,
+                             long initialMemoryPreRequisite);
     public serverThread getThread(String threadName);
-    public void setThreadSleep(String threadName, long idleMillis, long busyMillis);
+    public void setThreadPerformance(String threadName, long idleMillis, long busyMillis, long memprereq);
     public void terminateThread(String threadName, boolean waitFor);
     public void terminateAllThreads(boolean waitFor);
     public Iterator /*of serverThread-Names (String)*/ threadNames();

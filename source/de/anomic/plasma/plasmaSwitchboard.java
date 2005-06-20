@@ -148,7 +148,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
 
     // load slots
-    public static int crawlSlots = 20;
+    public static int crawlSlots = 12;
 
     // couloured list management
     public static TreeSet blueList = null;
@@ -578,12 +578,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //log.logDebug("CoreCrawl: queue is empty");
             return false;
         }
-        if (Runtime.getRuntime().freeMemory() < 2000000) {
-            log.logDebug("CoreCrawl: not enough memory available, dismissed (" +
-                    "free=" + Runtime.getRuntime().freeMemory() + ")");
-            System.gc();
-            return false;
-        }
         if (queueStack.size() >= crawlSlots) {
             log.logDebug("CoreCrawl: too many processes in queue, dismissed (" +
                     "queueStack=" + queueStack.size() + ")");
@@ -637,12 +631,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public boolean limitCrawlTriggerJob() {
         if (urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) == 0) {
             //log.logDebug("LimitCrawl: queue is empty");
-            return false;
-        }
-        if (Runtime.getRuntime().freeMemory() < 2000000) {
-            log.logDebug("limitCrawlTrigger: not enough memory available, dismissed (" +
-                    "free=" + Runtime.getRuntime().freeMemory() + ")");
-            System.gc();
             return false;
         }
         // if the server is busy, we do crawling more slowly
@@ -715,12 +703,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // or there is no global crawl on the stack
         if (urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) == 0) {
             //log.logDebug("GlobalCrawl: queue is empty");
-            return false;
-        }
-        if (Runtime.getRuntime().freeMemory() < 2000000) {
-            log.logDebug("remoteTriggeredCrawl: not enough memory available, dismissed (" +
-                    "free=" + Runtime.getRuntime().freeMemory() + ")");
-            System.gc();
             return false;
         }
         /*

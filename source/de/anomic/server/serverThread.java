@@ -65,6 +65,9 @@ public interface serverThread {
     public void setBusySleep(long milliseconds);
     // sets a sleep time for pauses between two jobs if the job returns true (busy)
     
+    public void setMemPreReqisite(long freeBytes);
+    // sets minimum required amount of memory for the job execution
+    
     public String getShortDescription();
     // returns short description string for online display
     
@@ -76,6 +79,10 @@ public interface serverThread {
     
     public long getBusyCycles();
     // returns the total number of cycles of job execution with busy-result
+    
+    public long getOutOfMemoryCycles();
+    // returns the total number of cycles where
+    // a job execution was omitted because of memory shortage
     
     public long getBlockTime();
     // returns the total time that this thread has been blocked so far

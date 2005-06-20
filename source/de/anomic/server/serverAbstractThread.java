@@ -57,10 +57,10 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     private long startup = 0, idlePause = 0, busyPause = 0, blockPause = 0;
     private boolean running = true;
     private serverLog log = null;
-    private long idletime = 0, busytime = 0;
+    private long idletime = 0, busytime = 0, memprereq = 0;
     private String shortDescr = "", longDescr = "";
     private long threadBlockTimestamp = System.currentTimeMillis();
-    private long idleCycles = 0, busyCycles = 0;
+    private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0;
     
     protected final void announceThreadBlockApply() {
         // shall only be used, if a thread blocks for an important reason
@@ -107,6 +107,11 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         busyPause = milliseconds;
     }
     
+    public void setMemPreReqisite(long freeBytes) {
+        // sets minimum required amount of memory for the job execution
+        memprereq = freeBytes;
+    }
+    
     public final String getShortDescription() {
         return this.shortDescr;
     }
@@ -125,6 +130,12 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         return this.busyCycles;
     }
 
+    public long getOutOfMemoryCycles() {
+        // returns the total number of cycles where
+        // a job execution was omitted because of memory shortage
+        return this.outofmemoryCycles;
+    }
+    
     public final long getBlockTime() {
         // returns the total time that this thread has been blocked so far
         return this.blockPause;
@@ -206,8 +217,10 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         long innerpause;
         long timestamp;
         boolean isBusy;
+        Runtime rt = Runtime.getRuntime();
+                
         while (running) {
-            try {
+            if (rt.freeMemory() > memprereq) try {
                 // do job
                 timestamp = System.currentTimeMillis();
                 isBusy = this.job();
@@ -224,6 +237,14 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 // if the exception is too bad it should call terminate()
                 this.jobExceptionHandler(e);
                 busyCycles++;
+            } else {
+                // omit job, not enough memory
+                // process scheduled pause
+                timestamp = System.currentTimeMillis();
+                ratz(this.idlePause);
+                idletime += System.currentTimeMillis() - timestamp;
+                outofmemoryCycles++;
+                if (rt.freeMemory() <= memprereq) System.gc(); // give next loop a chance
             }
         }
         this.close();
