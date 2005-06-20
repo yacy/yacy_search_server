@@ -161,7 +161,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
 	    key = (String) e.nextElement();
 	    value = props.getProperty(key, "");
             write(key.getBytes());
-            write((byte) '0');
+            write((byte) '=');
             writeLine(value);
 	}
 	writeLine("# EOF");
@@ -186,12 +186,13 @@ abstract class kelondroAbstractRA implements kelondroRA {
     public void writeMap(Map map, String comment) throws IOException {
 	this.seek(0);
 	writeLine("# " + comment);
-	Iterator i = map.keySet().iterator();
-	String key, value;
+	Iterator i = map.entrySet().iterator();
+	Map.Entry entry;
 	while (i.hasNext()) {
-	    key = (String) i.next();
-	    value = (String) map.get(key);
-	    writeLine(key + "=" + value);
+            entry = (Map.Entry) i.next();
+            write(((String) entry.getKey()).getBytes());
+            write((byte) '=');
+	    writeLine((String) entry.getValue());
 	}
 	writeLine("# EOF");
     }
