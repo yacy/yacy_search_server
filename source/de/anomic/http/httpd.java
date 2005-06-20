@@ -1123,7 +1123,7 @@ public final class httpd implements serverHandler {
             httpHeader header = new httpHeader();            
             header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
             header.put(httpHeader.CONTENT_TYPE, "text/html");
-            header.put(httpHeader.CONTENT_LENGTH, "" + o.size());
+            header.put(httpHeader.CONTENT_LENGTH, "" + result.length);
             header.put(httpHeader.PRAGMA, "no-cache");
             sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,header);
             
