@@ -19,20 +19,20 @@ and automatically excluded from indexing.
 <p><form action="ProxyIndexingMonitor_p.html" method="post" enctype="multipart/form-data">
 <div class=small><b>Proxy pre-fetch setting:</b>
 this is an automated html page loading procedure that takes actual proxy-requested
-url's as crawling start points for crawling.</div>
+URLs as crawling start points for crawling.</div>
 <table border="0" cellpadding="5" cellspacing="0" width="100%">
   <tr valign="top" class="TableCellDark">
     <td class=small>Prefetch Depth:</td>
     <td class=small><input name="proxyPrefetchDepth" type="text" size="2" maxlength="2" value="#[proxyPrefetchDepth]#"></td>
     <td class=small>
         A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all
-        embedded url's, but since embedded image links are loaded by the browser
+        embedded URLs, but since embedded image links are loaded by the browser
         this means that only embedded href-anchors are prefetched additionally.</td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Store to Cache:</td>
     <td class=small><input type="checkbox" name="proxyStoreHTCache" align="top" #(proxyStoreHTCacheChecked)#::checked#(/proxyStoreHTCacheChecked)#></td>
-    <td class=small>It is almost always recommendet to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.</td>
+    <td class=small>It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.</td>
   </tr>
   <tr valign="top" class="TableCellLight">
     <td class=small></td>
