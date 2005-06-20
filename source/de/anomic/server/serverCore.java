@@ -804,9 +804,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     // close everything                    
                     this.controlSocket.close();   this.controlSocket = null;
                                       
-        		} catch (IOException e) {
-        		    System.err.println("ERROR: (internal) " + e);
-        		}
+        		} catch (IOException e) {}
     	    }
             
             //log.logDebug("* session " + handle + " completed. time = " + (System.currentTimeMillis() - handle));
