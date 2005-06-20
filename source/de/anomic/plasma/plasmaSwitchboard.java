@@ -304,8 +304,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         File facilityDBpath = new File(getRootPath(), "DATA/SETTINGS/");
         facilityDB = new kelondroTables(facilityDBpath);
         facilityDB.declareMaps("backlinks", 250, 500, new String[] {"date"}, null);
+        log.logSystem("..opened backlinks");
         facilityDB.declareMaps("zeitgeist",  40, 500);
+        log.logSystem("..opened zeitgeist");
         facilityDB.declareTree("statistik", new int[]{11, 8, 8, 8, 8, 8, 8}, 0x400);
+        log.logSystem("..opened statistik");
         facilityDB.update("statistik", (new serverDate()).toShortString(false).substring(0, 11), new long[]{1,2,3,4,5,6});
         long[] testresult = facilityDB.selectLong("statistik", "yyyyMMddHHm");
         testresult = facilityDB.selectLong("statistik", (new serverDate()).toShortString(false).substring(0, 11));

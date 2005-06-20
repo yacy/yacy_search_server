@@ -94,7 +94,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
 	int ch3 = this.read();
 	int ch4 = this.read();
 	if ((ch1 | ch2 | ch3 | ch4) < 0) throw new IOException("kelondroAbstractRA.readInt: wrong values; ch1=" + ch1 + ", ch2=" + ch2 + ", ch3=" + ch3 + ", ch4=" + ch4);
-	return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
+	return ((ch1 << 24) | (ch2 << 16) | (ch3 << 8) | ch4);
     }
 
     public void writeInt(int v) throws IOException {
@@ -122,7 +122,9 @@ abstract class kelondroAbstractRA implements kelondroRA {
     private static final String crlf = new String(new byte[] {cr, lf});
 
     public void writeLine(String line) throws IOException {
-	this.write((line + crlf).getBytes());
+	this.write(line.getBytes());
+        this.write(cr);
+        this.write(lf);
     }
 
     public String readLine() throws IOException {
@@ -158,7 +160,9 @@ abstract class kelondroAbstractRA implements kelondroRA {
 	while (e.hasMoreElements()) {
 	    key = (String) e.nextElement();
 	    value = props.getProperty(key, "");
-	    writeLine(key + "=" + value);
+            write(key.getBytes());
+            write((byte) '0');
+            writeLine(value);
 	}
 	writeLine("# EOF");
     }
@@ -171,7 +175,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
 	while ((line = readLine()) != null) {
 	    line = line.trim();
 	    if (line.equals("# EOF")) return props;
-	    if ((line.length() == 0) || (line.startsWith("#"))) continue;
+	    if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
 	    pos = line.indexOf("=");
 	    if (pos < 0) continue;
 	    props.setProperty(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
@@ -200,7 +204,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
 	while ((line = readLine()) != null) { // very slow readLine????
 	    line = line.trim();
 	    if (line.equals("# EOF")) return map;
-	    if ((line.length() == 0) || (line.startsWith("#"))) continue;
+	    if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
 	    pos = line.indexOf("=");
 	    if (pos < 0) continue;
 	    map.put(line.substring(0, pos), line.substring(pos + 1));
