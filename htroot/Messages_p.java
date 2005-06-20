@@ -123,6 +123,13 @@ public class Messages_p {
             messages += "<tr><td class=\"MenuHeader\">Send Date:</td><td class=\"MessageBackground\">" + dateString(message.date()) + "</td></tr>";
             messages += "<tr><td class=\"MenuHeader\">Subject:</td><td class=\"MessageBackground\">" + message.subject() + "</td></tr>";
             messages += "<tr><td class=\"MessageBackground\" colspan=\"2\">" + new String(message.message()) + "</td></tr>";
+	    messages += "<tr><td class=\"MenuHeader\">Action:</td>" +	    
+	    		"<td class=\"MessageBackground\">" +
+			"<a href=\"Messages_p.html\">inbox</a>&nbsp;/&nbsp;" +
+	    		"<a href=\"MessageSend_p.html?hash=" + message.authorHash() + 
+	    		"&subject=Re: " + message.subject() + "\">reply</a>&nbsp;/&nbsp;" +
+                        "<a href=\"Messages_p.html?action=delete&object=" + key + "\">delete</a>" +
+			"</td></tr>";
             messages += "</table>";
         }
         
