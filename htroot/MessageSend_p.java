@@ -131,7 +131,7 @@ public class MessageSend_p {
                 if (subject.length() > 100) subject = subject.substring(0, 100);
                 if (message.length() > messagesize) message = message.substring(0, messagesize);
                 HashMap result = yacyClient.postMessage(hash, subject, message.getBytes());
-                body += "<p>Your message has been sent. The target peer respondet:</p>";
+                body += "<p>Your message has been sent. The target peer responded:</p>";
                 body += "<p><i>" + result.get("response") + "</i></p>";
             } catch (NumberFormatException e) {
                 // "unresolved pattern", the remote peer is alive but had an exception
