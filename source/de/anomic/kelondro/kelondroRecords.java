@@ -78,7 +78,8 @@ public class kelondroRecords {
 
     // constants
     private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
-    public  static final long memBlock = 5000000; // do not fill cache further if the amount of available memory is less that this
+    public  static final long memBlock =  5000000; // do not fill cache further if the amount of available memory is less that this
+    public  static final long memKcolb = 10000000; // if the amount of available memory is greater than this, do not use cache size to block, simply use memory
     
     // static seek pointers
     private static long POS_MAGIC      = 0;                     // 1 byte, byte: file type magic
@@ -240,7 +241,7 @@ public class kelondroRecords {
 
     public kelondroRecords(File file, long buffersize) throws IOException{
 	// opens an existing tree
-	if (!file.exists()) throw new IOException("kelondroRecords: tree file " + file + " does not exist");
+	if (!file.exists()) throw new IOException("kelondroRecords: file " + file.getAbsoluteFile().toString() + " does not exist");
 
         this.filename = file.getCanonicalPath();
         kelondroRA raf = new kelondroFileRA(this.filename);
@@ -317,8 +318,17 @@ public class kelondroRecords {
     }
     
     
+    protected int newNode() {
+        Node n = new Node();
+        return USEDC + FREEC;
+    }
+    
     protected Node newNode(byte[][] v) {
         return new Node(v);
+    }
+    
+    protected Node getNode(Handle handle) {
+        return getNode(handle, null, 0);
     }
     
     protected Node getNode(Handle handle, Node parentNode, int referenceInParent) {
@@ -328,6 +338,7 @@ public class kelondroRecords {
             if (n == null) {
                 n = new Node(handle, parentNode, referenceInParent);
                 checkCacheSpace();
+                n.updateNodeCache();
                 return n;
             } else {
                 //System.out.println("read from cache " + n.toString());
@@ -354,8 +365,11 @@ public class kelondroRecords {
         // should be only called within a synchronized(XcacheHeaders) environment
         if (XcacheSize == 0) return;
         Handle delkey;
-        while ((XcacheHeaders.size() >= XcacheSize) ||
-               ((XcacheHeaders.size() > 0) && (Runtime.getRuntime().freeMemory() < memBlock))) {
+        long free = Runtime.getRuntime().freeMemory();
+        int count = 0;
+        while ((count++ < 100) && (free < memKcolb) &&
+               ((XcacheHeaders.size() >= XcacheSize) ||
+                ((XcacheHeaders.size() > 0) && (free < memBlock)))) {
             // delete one entry
             try {
                 delkey = (Handle) XcacheScore.getMinObject(); // error (see below) here
@@ -401,7 +415,22 @@ public class kelondroRecords {
 	private byte[][]  values  = null;  // an array of byte[] nodes is the value vector
 	private Handle    handle  = new Handle(NUL); // index of the entry, by default NUL means undefined
         
-	private Node(byte[][] v) {
+	private Node() {
+	    // create a new empty node and reserve empty space in file for it
+            // use this method only if you want to extend the file with new entries
+            // without the need to have content in it.
+            try {
+                this.handle = new Handle(NUL);
+                this.values = new byte[COLWIDTHS.length][];
+                for (int i = 0; i < COLWIDTHS.length; i++) this.values[i] = null;
+                this.ohBytes = null;
+                this.ohHandle = null;
+                save();
+            } catch (IOException e) {
+                throw new kelondroException(filename, "kelondro file out of space");
+            }
+	}
+        private Node(byte[][] v) {
 	    // this defines an entry, but it does not lead to writing these entry values to the file
 	    // storing this entry can be done using the 'save()' command
 	    if (v == null) throw new IllegalArgumentException("Node values = NULL");
@@ -412,7 +441,20 @@ public class kelondroRecords {
 	    this.ohBytes = null;
             this.ohHandle = null;
 	}
-	private Node(Handle handle, Node parentNode, int referenceInParent) {
+	private Node(Handle handle) {
+	    // this creates an entry with an pre-reserved entry position
+	    // values can be written using the setValues() method
+	    // but we expect that values are already there in the file ready to be read which we do not here
+	    if (handle == null) throw new IllegalArgumentException("INTERNAL ERROR: node handle is null.");
+            if (handle.index > 	USEDC + FREEC) throw new kelondroException(filename, "INTERNAL ERROR: node handle index exceeds size.");  
+
+            // set values and read node
+            this.values = null;
+	    this.handle.index  = handle.index;
+	    this.ohBytes = null;
+            this.ohHandle = null;
+	}
+        private Node(Handle handle, Node parentNode, int referenceInParent) {
 	    // this creates an entry with an pre-reserved entry position
 	    // values can be written using the setValues() method
 	    // but we expect that values are already there in the file ready to be read which we do not here
@@ -439,7 +481,6 @@ public class kelondroRecords {
 	    this.handle.index  = handle.index;
 	    this.ohBytes = null;
             this.ohHandle = null;
-            updateNode();
 	}
         
         public void finalize() {
@@ -466,7 +507,7 @@ public class kelondroRecords {
 		    entryFile.writeByte(b[j]);
 		}
 	    }
-            updateNode();
+            updateNodeCache();
 	}
 	protected void setOHHandle(Handle[] i) throws IOException {
 	    if (i == null) throw new IllegalArgumentException("setOHint: setting null value does not make any sense");
@@ -483,7 +524,7 @@ public class kelondroRecords {
 			entryFile.writeInt(i[j].index);
 		}
 	    }
-            updateNode();
+            updateNodeCache();
 	}
 	protected byte[] getOHByte() throws IOException {
 	    if (ohBytes == null) {
@@ -495,7 +536,6 @@ public class kelondroRecords {
 			ohBytes[j] = entryFile.readByte();
 		    }
 		}
-                updateNode();
 	    }
 	    return ohBytes;
 	}
@@ -511,7 +551,6 @@ public class kelondroRecords {
 			ohHandle[j] = (i == NUL) ? null : new Handle(i);
 		    }
 		}
-                updateNode();
 	    }
 	    return ohHandle;
 	}
@@ -541,9 +580,9 @@ public class kelondroRecords {
 			seek = seek + COLWIDTHS[i];
 		    }
 		}
+                updateNodeCache();
 	    }
 	    //System.out.print("setValues result: "); for (int i = 0; i < values.length; i++) System.out.print(new String(result[i]) + " "); System.out.println(".");
-	    updateNode();
             return result; // return previous value
 	}
         
@@ -560,7 +599,6 @@ public class kelondroRecords {
 			entryFile.read(values[0], 0, values[0].length);
 		    }
 		    for (int i = 1; i < COLWIDTHS.length; i++) values[i] = null;
-                    updateNode();
 		    return values[0];
 		}
 	    } else {
@@ -584,7 +622,6 @@ public class kelondroRecords {
 			    seek = seek + COLWIDTHS[i];
 			}
 		    }
-                    updateNode();
 		    return values;
 		}
 	    } else if ((values.length > 1) && (values[1] == null)) {
@@ -598,7 +635,6 @@ public class kelondroRecords {
 			seek = seek + COLWIDTHS[i];
 		    }
 		}
-		updateNode();
 		return values;
 	    } else {
 		return values;
@@ -617,7 +653,8 @@ public class kelondroRecords {
 	    // or by recycling used records
 	    this.handle = new Handle();
 	    // place the data to the file
-	    if ((values == null) || ((values != null) && (values.length > 1) && (values[1] == null))) {
+	    //if ((values == null) || ((values != null) && (values.length > 1) && (values[1] == null))) {
+            if (values == null) {
 		// there is nothing to save
 		throw new kelondroException(filename, "no values to save");
 	    }
@@ -627,7 +664,7 @@ public class kelondroRecords {
 	    if (ohHandle == null) {for (int i = 0; i < OHHANDLEC; i++) entryFile.writeInt(0);}
 	    else {for (int i = 0; i < OHHANDLEC; i++) entryFile.writeInt(ohHandle[i].index);}
 	    long seek = seekpos(this.handle) + overhead;
-	    for (int i = 0; i < values.length; i++) {
+            for (int i = 0; i < values.length; i++) {
 		entryFile.seek(seek);
 		if (values[i] == null) {
 		    for (int j = 0; j < COLWIDTHS[i]; j++) entryFile.writeByte(0);
@@ -639,7 +676,6 @@ public class kelondroRecords {
 		}
 		seek = seek + COLWIDTHS[i];
 	    }
-            updateNode();
 	}
 	public String toString() {
 	    if (this.handle.index == NUL) return "NULL";
@@ -657,7 +693,7 @@ public class kelondroRecords {
 	    }
 	    return s;
         }
-        private void updateNode() {
+        private void updateNodeCache() {
             if (this.handle == null) return;
             if (this.values == null) return;
             if (this.ohBytes == null) return;
@@ -892,7 +928,7 @@ public class kelondroRecords {
 		}
 	    }
 	}
-	private Handle(int index) {
+	protected Handle(int index) {
 	    this.index = index;
 	}
 	public String toString() {

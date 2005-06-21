@@ -508,12 +508,17 @@ public final class yacy {
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
         try {
             serverLog log = new serverLog("WORDMIGRATION");
+            log.logInfo("STARTING MIGRATION");
             plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, 20000, log);
             enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
-            while (words.hasMoreElements()) {
+            while (words.hasMoreElements()) try {
                 checkMigrate(dbroot, log, (File) words.nextElement(), wordIndex);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            log.logInfo("FINISHED MIGRATION JOB, WAIT FOR DUMP");
             wordIndex.close(60);
+            log.logInfo("TERMINATED MIGRATION");
         } catch (IOException e) {
             e.printStackTrace();
         }

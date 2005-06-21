@@ -141,6 +141,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             long updateTime;
             plasmaWordIndexEntry wordEntry;
             byte[][] row = new byte[5][];
+            System.gc(); // this can speed up the assortment, because they may better use the cache
             while (i.hasNext()) {
                 // get entries
                 entry = (Map.Entry) i.next();
@@ -163,11 +164,13 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     }
                 }
                 wordcount++;
+                i.remove(); // free some mem
                 
                 // write a log
                 if (System.currentTimeMillis() > messageTime) {
+                    System.gc(); // for better statistic
                     wordsPerSecond = wordcount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                    log.logInfo("dumping status: " + wordcount + " words done, " + ((cache.size() - wordcount) / wordsPerSecond) + " seconds remaining");
+                    log.logInfo("dumping status: " + wordcount + " words done, " + (cache.size() / wordsPerSecond) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
                     messageTime = System.currentTimeMillis() + 5000;
                 }
             }
@@ -194,6 +197,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 plasmaWordIndexEntry wordEntry;
                 byte[][] row;
                 Runtime rt = Runtime.getRuntime();
+                System.gc(); // this is not for performance, but only to make the statistic work better
                 while (i.hasNext()) {
                     // get out one entry
                     node = (kelondroRecords.Node) i.next();
@@ -205,16 +209,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     addEntry(wordHash, wordEntry, creationTime);
                     urlCount++;
                     // protect against memory shortage
-                    while (rt.freeMemory() < 1000000) {
-                        //System.out.print("FLUSH+GC bevore=" + rt.freeMemory());
-                        flushFromMem();
-                        System.gc();
-                        //System.out.println(", after=" + rt.freeMemory());
-                    }
+                    while (rt.freeMemory() < 1000000) {flushFromMem(); System.gc();}
                     // write a log
                     if (System.currentTimeMillis() > messageTime) {
+                        System.gc(); // for better statistic
                         urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                        log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpStack.size() - urlCount) / urlsPerSecond) + " seconds remaining");
+                        log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpStack.size() - urlCount) / urlsPerSecond) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
                         messageTime = System.currentTimeMillis() + 5000;
                     }
                 }
@@ -552,6 +552,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         flushThread.pause();
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
         while (cache.size() >= this.maxWords) flushFromMem();
+        if ((cache.size() > 10000) && (Runtime.getRuntime().freeMemory() < 11000000)) flushFromMem();
         while ((cache.size() > 0) && (Runtime.getRuntime().freeMemory() < 1000000)) {
             flushFromMem();
             System.gc();

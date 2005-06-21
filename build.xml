@@ -399,4 +399,21 @@
   </java>
 </target>
 
+<!-- run a single file (selected in NetBeans4) -->
+<target name="run-single" depends="compile" description="Run Single File">
+  <fail unless="classname">Must set property 'classname'</fail>
+  <java classname="yacy" fork="yes">
+    <classpath refid="run.classpath"/>
+    <classpath>    
+      <pathelement location="${build}"/>
+      <pathelement location="${htroot}"/>
+      <pathelement location="${lib}/commons-collections.jar" />
+      <pathelement location="${lib}/commons-pool-1.2.jar" />        
+      <pathelement location="${libx}" />                 
+      <fileset dir="${libx}" includes="**/*.jar" />
+    </classpath>
+    <arg line=""/>
+  </java>
+</target>
+    
 </project>
