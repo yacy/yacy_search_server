@@ -45,13 +45,9 @@
 
 package de.anomic.kelondro;
 
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Iterator;
-import java.util.StringTokenizer;
 
 public class kelondroArray extends kelondroRecords {
 
@@ -60,7 +56,7 @@ public class kelondroArray extends kelondroRecords {
     private static short thisOHHandles = 0; // and two handles overhead for a double-chained list
     
     public kelondroArray(File file, int[] columns, int intprops) throws IOException {
-	// this creates a new tree
+	// this creates a new array
 	super(file, 0, thisOHBytes, thisOHHandles, columns, intprops, columns.length /*txtProps*/, 80 /*txtPropWidth*/);
         for (int i = 0; i < intprops; i++) setHandle(i, new Handle(0));
     }
@@ -90,6 +86,17 @@ public class kelondroArray extends kelondroRecords {
         return getNode(new Handle(index)).getValues();
     }
 
+    
+    public synchronized int seti(int index, int value) throws IOException {
+        int before = getHandle(index).hashCode();
+        setHandle(index, new Handle(index));
+        return before;
+    }
+
+    public synchronized int geti(int index) throws IOException {
+        return getHandle(index).hashCode();
+    }
+    
     public void print() throws IOException {
         System.out.println("PRINTOUT of table, length=" + size());
         byte[][] row;

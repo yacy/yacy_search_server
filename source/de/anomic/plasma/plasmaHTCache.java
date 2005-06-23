@@ -52,10 +52,12 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.Map;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -206,9 +208,9 @@ public final class plasmaHTCache {
         }
     
     public httpHeader getCachedResponse(String urlHash) throws IOException {
-        httpHeader header = new httpHeader(null, responseHeaderDB.get(urlHash));
-        //System.out.println("DEBUG: getCachedResponse hash=" + urlHash + ", header=" + header.toString());
-        return header;
+        Map hdb = responseHeaderDB.get(urlHash);
+        if (hdb == null) return null;
+        return new httpHeader(null, hdb);
     }
 
     public boolean idle() {
@@ -245,76 +247,76 @@ public final class plasmaHTCache {
     }
     
     synchronized public void process(Entry entry) throws IOException {
-
+        
         if (entry == null) return;
         
-	// store response header
-	if ((entry.status == CACHE_FILL) ||
-	    (entry.status == CACHE_STALE_RELOAD_GOOD) ||
-	    (entry.status == CACHE_STALE_RELOAD_BAD)) {
-	    responseHeaderDB.set(entry.nomalizedURLHash, entry.responseHeader);
-	}
-
-	// work off unwritten files and undone parsing
-	String storeError = null;
-	if (((entry.status == CACHE_FILL) || (entry.status == CACHE_STALE_RELOAD_GOOD)) &&
-	    ((storeError = entry.shallStoreCache()) == null)) {
-
-        // write file if not written yet
-        if (entry.cacheArray != null) try {
-            if (entry.cacheFile.exists()) {
-                currCacheSize -= entry.cacheFile.length();
-                entry.cacheFile.delete();
-            }
-            entry.cacheFile.getParentFile().mkdirs();
-            log.logInfo("WRITE FILE (" + entry.cacheArray.length + " bytes) " + entry.cacheFile);
-            serverFileUtils.write(entry.cacheArray, entry.cacheFile);
-            log.logDebug("AFTER WRITE cacheArray = " + entry.cacheFile + ": " + ((entry.cacheArray == null) ? "empty" : "full"));
-            //entry.cacheArray = null;
-        } catch (FileNotFoundException e) {
-            // this is the case of a "(Not a directory)" error, which should be prohibited
-            // by the shallStoreCache() property. However, sometimes the error still occurs
-            // In this case do nothing.
-            log.logError("File storage failed: " + e.getMessage());
+        // store response header
+        if ((entry.status == CACHE_FILL) ||
+                (entry.status == CACHE_STALE_RELOAD_GOOD) ||
+                (entry.status == CACHE_STALE_RELOAD_BAD)) {
+            responseHeaderDB.set(entry.nomalizedURLHash, entry.responseHeader);
         }
-	    
-	    // update statistics
-	    currCacheSize += entry.cacheFile.length();
-	    cacheAge.put(ageString(entry.cacheFile.lastModified(), entry.cacheFile), entry.cacheFile);
-
-	    // enqueue in switchboard
-	    switchboard.enQueue(entry);
-	} else if (entry.status == CACHE_PASSING) {
-	    // even if the file should not be stored in the cache, it can be used to be indexed
-	    if (storeError != null) log.logDebug("NOT STORED " + entry.cacheFile + ":" + storeError);
-
-	    // enqueue in switchboard
-	    switchboard.enQueue(entry);
-	}
-
-	// write log
-
-	    switch (entry.status) {
-	    case CACHE_UNFILLED:
-		log.logInfo("CACHE UNFILLED: " + entry.cacheFile); break;
-	    case CACHE_FILL:
-		log.logInfo("CACHE FILL: " + entry.cacheFile +
-			    ((entry.cacheArray == null) ? "" : " (cacheArray is filled)") +
-			    ((entry.scraper    == null) ? "" : " (scraper is filled)"));
-			    break;
-	    case CACHE_HIT:
-		log.logInfo("CACHE HIT: " + entry.cacheFile); break;
-	    case CACHE_STALE_NO_RELOAD:
-		log.logInfo("CACHE STALE, NO RELOAD: " + entry.cacheFile); break;
-	    case CACHE_STALE_RELOAD_GOOD:
-		log.logInfo("CACHE STALE, NECESSARY RELOAD: " + entry.cacheFile); break;
-	    case CACHE_STALE_RELOAD_BAD:
-		log.logInfo("CACHE STALE, SUPERFLUOUS RELOAD: " + entry.cacheFile); break;
-	    case CACHE_PASSING:
-		log.logInfo("PASSING: " + entry.cacheFile); break;
-	    default:
-		log.logInfo("CACHE STATE UNKNOWN: " + entry.cacheFile); break;
-	    }
+        
+        // work off unwritten files and undone parsing
+        String storeError = null;
+        if (((entry.status == CACHE_FILL) || (entry.status == CACHE_STALE_RELOAD_GOOD)) &&
+                ((storeError = entry.shallStoreCache()) == null)) {
+            
+            // write file if not written yet
+            if (entry.cacheArray != null) try {
+                if (entry.cacheFile.exists()) {
+                    currCacheSize -= entry.cacheFile.length();
+                    entry.cacheFile.delete();
+                }
+                entry.cacheFile.getParentFile().mkdirs();
+                log.logInfo("WRITE FILE (" + entry.cacheArray.length + " bytes) " + entry.cacheFile);
+                serverFileUtils.write(entry.cacheArray, entry.cacheFile);
+                log.logDebug("AFTER WRITE cacheArray = " + entry.cacheFile + ": " + ((entry.cacheArray == null) ? "empty" : "full"));
+                //entry.cacheArray = null;
+            } catch (FileNotFoundException e) {
+                // this is the case of a "(Not a directory)" error, which should be prohibited
+                // by the shallStoreCache() property. However, sometimes the error still occurs
+                // In this case do nothing.
+                log.logError("File storage failed: " + e.getMessage());
+            }
+            
+            // update statistics
+            currCacheSize += entry.cacheFile.length();
+            cacheAge.put(ageString(entry.cacheFile.lastModified(), entry.cacheFile), entry.cacheFile);
+            
+            // enqueue in switchboard
+            switchboard.enQueue(entry);
+        } else if (entry.status == CACHE_PASSING) {
+            // even if the file should not be stored in the cache, it can be used to be indexed
+            if (storeError != null) log.logDebug("NOT STORED " + entry.cacheFile + ":" + storeError);
+            
+            // enqueue in switchboard
+            switchboard.enQueue(entry);
+        }
+        
+        // write log
+        
+        switch (entry.status) {
+            case CACHE_UNFILLED:
+                log.logInfo("CACHE UNFILLED: " + entry.cacheFile); break;
+            case CACHE_FILL:
+                log.logInfo("CACHE FILL: " + entry.cacheFile +
+                        ((entry.cacheArray == null) ? "" : " (cacheArray is filled)") +
+                        ((entry.scraper    == null) ? "" : " (scraper is filled)"));
+                break;
+            case CACHE_HIT:
+                log.logInfo("CACHE HIT: " + entry.cacheFile); break;
+            case CACHE_STALE_NO_RELOAD:
+                log.logInfo("CACHE STALE, NO RELOAD: " + entry.cacheFile); break;
+            case CACHE_STALE_RELOAD_GOOD:
+                log.logInfo("CACHE STALE, NECESSARY RELOAD: " + entry.cacheFile); break;
+            case CACHE_STALE_RELOAD_BAD:
+                log.logInfo("CACHE STALE, SUPERFLUOUS RELOAD: " + entry.cacheFile); break;
+            case CACHE_PASSING:
+                log.logInfo("PASSING: " + entry.cacheFile); break;
+            default:
+                log.logInfo("CACHE STATE UNKNOWN: " + entry.cacheFile); break;
+        }
     }
     
 
@@ -452,6 +454,32 @@ public final class plasmaHTCache {
 	}
 	return null;
     }
+    
+    public byte[] loadResource(URL url) {
+        // load the url as resource from the cache
+        File f = getCachePath(url);
+        if (f.exists()) try {
+            return serverFileUtils.read(f);
+        } catch (IOException e) {
+            return null;
+        } else {
+            return null;
+        }
+    }
+    
+    /*
+    public void saveResource(URL url, byte[] resource) {
+        File f = getCachePath(url);
+        f.getParentFile().mkdirs();
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(f);
+            htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
+        } finally {
+            if (fos!=null)try{fos.close();}catch(Exception e){}
+        }
+    }
+    */
     
     public static boolean isPOST(String urlString) {
 	return ((urlString.indexOf("?") >= 0) ||

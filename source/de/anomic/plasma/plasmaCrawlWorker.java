@@ -298,12 +298,14 @@ public final class plasmaCrawlWorker extends Thread {
                         htCache.status = plasmaHTCache.CACHE_PASSING;
                     }
                     // enQueue new entry with response header
-                    if ((initiator == null) || (initiator.length() == 0)) {
-                        // enqueued for proxy writings
-                        cacheManager.stackProcess(htCache);
-                    } else {
-                        // direct processing for crawling
-                        cacheManager.process(htCache);
+                    if (profile != null) {
+                        if ((initiator == null) || (initiator.length() == 0)) {
+                            // enqueued for proxy writings
+                            cacheManager.stackProcess(htCache);
+                        } else {
+                            // direct processing for crawling
+                            cacheManager.process(htCache);
+                        }
                     }
                 } catch (SocketException e) {
                     // this may happen if the client suddenly closes its connection

@@ -143,8 +143,8 @@ public final class plasmaParser {
      * @see #initMediaExt(String)
      */
     static {
-		initMediaExt("swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar," +
-			"sit,hqx,img,dmg,tar,gz,ps,xls,ppt,ram,bz2,arj");
+		initMediaExt(extString2extList("swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar," +
+			"sit,hqx,img,dmg,tar,gz,ps,xls,ppt,ram,bz2,arj"));
         
         /* ===================================================
          * initializing the parser object pool
@@ -200,25 +200,31 @@ public final class plasmaParser {
         setEnabledParserList(mimeTypes);
     }
     
-    public static void initMediaExt(String mediaExtString) {
+    public static List extString2extList(String extString) {
         LinkedList extensions = new LinkedList();
-        if ((mediaExtString == null) || (mediaExtString.length() == 0)) {
-            
+        if ((extString == null) || (extString.length() == 0)) {
+            return extensions;
         } else {
-            
-            String[] xs = mediaExtString.split(",");
+            String[] xs = extString.split(",");
             for (int i = 0; i < xs.length; i++) extensions.add(xs[i].toLowerCase().trim());
         }
-        initMediaExt(extensions);
+        return extensions;
     }
     
     public static void initMediaExt(List mediaExtList) {
         synchronized (mediaExtSet) {
             mediaExtSet.clear();
-    		mediaExtSet.addAll(mediaExtList);
-		}
+            mediaExtSet.addAll(mediaExtList);
+        }
     }
     
+    public static void initSupportedFileExt(List supportedFileExtList) {
+        synchronized (mediaExtSet) {
+            supportedFileExt.clear();
+            supportedFileExt.addAll(supportedFileExtList);
+        }
+    }
+        
     public static boolean realtimeParsableMimeTypesContains(String mimeType) {
         mimeType = getRealMimeType(mimeType);
         synchronized (realtimeParsableMimeTypes) {
@@ -236,6 +242,12 @@ public final class plasmaParser {
         synchronized (enabledParserList) { 
             return enabledParserList.containsKey(mimeType);
         }
+    }
+    
+    public static boolean supportedFileExtContains(String mediaExt) {
+        if (supportedFileExt == null) return false;
+        //System.out.println("supported ext: " + supportedFileExt.toString());
+        return (supportedFileExt.contains(mediaExt));
     }
     
     public static boolean mediaExtContains(String mediaExt) {
@@ -316,16 +328,16 @@ public final class plasmaParser {
         }
         
         synchronized (enabledParserList) {
-			enabledParserList.clear();
-            enabledParserList.putAll(newEnabledParsers);            
-		}
+            //enabledParserList.clear();
+            enabledParserList.putAll(newEnabledParsers);
+        }
         
         
         synchronized (supportedFileExt) {
-			supportedFileExt.clear();
+            //supportedFileExt.clear();
             supportedFileExt.addAll(newSupportedFileExt);
-		}
-        
+        }
+
         return (String[])newEnabledParsers.keySet().toArray(new String[newEnabledParsers.size()]);
     }
     

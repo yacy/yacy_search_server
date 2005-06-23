@@ -81,7 +81,7 @@ public class index {
                     referrerprop.put("clientip", header.get("CLIENTIP"));
                     referrerprop.put("useragent", header.get("User-Agent"));
                     referrerprop.put("date", (new serverDate()).toShortString(false));
-                    try { sb.facilityDB.update("backlinks", referer, referrerprop); } catch (IOException e) {}
+                    if (sb.facilityDB != null) try { sb.facilityDB.update("backlinks", referer, referrerprop); } catch (IOException e) {}
                 }
             }
 
@@ -114,7 +114,7 @@ public class index {
 
         // process search words
         String querystring = (String) post.get("search", "");
-	try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
+	if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
         TreeSet query = cleanQuery(querystring);
         // filter out stopwords
         TreeSet filtered = kelondroMSetTools.joinConstructive(query, plasmaSwitchboard.stopwords);

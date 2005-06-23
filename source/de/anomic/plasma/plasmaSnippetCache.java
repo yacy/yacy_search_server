@@ -114,26 +114,38 @@ public class plasmaSnippetCache {
         return (String) snippetsCache.get(key);
     }
     
-    public String retrieve(java.net.URL url, boolean fetchOnline, Set query, boolean queryAreHashes) {
-        if (query.size() == 0) return null;
-        if (!(queryAreHashes)) query = plasmaSearch.words2hashes(query);
+    public String retrieve(java.net.URL url, boolean fetchOnline, Set queryhashes) {
+        if (queryhashes.size() == 0) {
+            //System.out.println("found no queryhashes for url retrieve " + url);
+            return null;
+        }
         String urlhash = plasmaURL.urlHash(url);
         
         // try to get snippet from snippetCache
-        String wordhashes = yacySearch.set2string(query);
+        String wordhashes = yacySearch.set2string(queryhashes);
         String snippet = retrieve(wordhashes, urlhash);
-        if (snippet != null) return snippet;
+        if (snippet != null) {
+            //System.out.println("found snippet for url " + url + " in cache: " + snippet);
+            return snippet;
+        }
         
         // if the snippet is not in the cache, we can try to get it from the htcache
         plasmaParserDocument document = getDocument(url, fetchOnline);
-        if (document == null) return null;
+        if (document == null) {
+            //System.out.println("cannot load document for url " + url);
+            return null;
+        }
+        //System.out.println("loaded document for url " + url);
         String[] sentences = document.getSentences();
         //System.out.println("----" + url.toString()); for (int l = 0; l < sentences.length; l++) System.out.println(sentences[l]);
-        if ((sentences == null) || (sentences.length == 0)) return null;
+        if ((sentences == null) || (sentences.length == 0)) {
+            //System.out.println("found no sentences in url " + url);
+            return null;
+        }
 
         // we have found a parseable non-empty file: use the lines
         TreeMap sentencematrix = hashMatrix(sentences);
-        Iterator i = query.iterator();
+        Iterator i = queryhashes.iterator();
         String hash;
         kelondroMScoreCluster hitTable = new kelondroMScoreCluster();
         Iterator j;
@@ -151,8 +163,9 @@ public class plasmaSnippetCache {
         Integer maxLine = (Integer) hitTable.getMaxObject();
         if (maxLine == null) return null;
         snippet = sentences[maxLine.intValue()];
-        if (snippet.length() > 140) return null;
-        
+        //System.out.println("loaded snippet for url " + url + ": " + snippet);
+        if (snippet.length() > 120) snippet = snippet.substring(0, 120);
+
         // finally store this snippet in our own cache
         store(wordhashes, urlhash, snippet);
         return snippet;
@@ -175,27 +188,13 @@ public class plasmaSnippetCache {
         // load the url as resource from the web
         try {
             //return httpc.singleGET(url, 5000, null, null, remoteProxyHost, remoteProxyPort);
-            byte[] resource = getResourceFromCache(url);
+            byte[] resource = cacheManager.loadResource(url);
             if ((fetchOnline) && (resource == null)) {
                 loadResourceFromWeb(url, 5000);
-                resource = getResourceFromCache(url);
+                resource = cacheManager.loadResource(url);
             }
             return resource;
         } catch (IOException e) {
-            return null;
-        }
-    }
-    
-    private byte[] getResourceFromCache(URL url) {
-        // load the url as resource from the cache
-        String path = htmlFilterContentScraper.urlNormalform(url).substring(6);
-        File cache = cacheManager.cachePath;
-        File f = new File(cache, path);
-        if (f.exists()) try {
-            return serverFileUtils.read(f);
-        } catch (IOException e) {
-            return null;
-        } else {
             return null;
         }
     }
@@ -221,14 +220,23 @@ public class plasmaSnippetCache {
         httpHeader header = null;
         try {
             header = cacheManager.getCachedResponse(plasmaURL.urlHash(url));
-        } catch (IOException e) {
-            return null;
-        }
-        if (header == null) return null;
-        if (plasmaParser.supportedMimeTypesContains(header.mime())) {
-            return parser.parseSource(url, header.mime(), resource);
+        } catch (IOException e) {}
+        
+        if (header == null) {
+            String filename = url.getFile();
+            int p = filename.lastIndexOf('.');
+            if ((p < 0) ||
+                ((p >= 0) && (plasmaParser.supportedFileExtContains(filename.substring(p + 1))))) {
+                return parser.parseSource(url, "text/html", resource);
+            } else {
+                return null;
+            }
         } else {
-            return null;
+            if (plasmaParser.supportedMimeTypesContains(header.mime())) {
+                return parser.parseSource(url, header.mime(), resource);
+            } else {
+                return null;
+            }
         }
     }
 }

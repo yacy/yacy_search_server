@@ -59,9 +59,11 @@ public class kelondroMSetTools {
 	throw new ClassCastException();
     }
 
-    private static int log2(int x) {
+    public static int log2a(int x) {
+        // this computes 1 + log2
+        // it is the number of bits in x, not the logarithmus by 2
 	int l = 0;
-	while (x > 0) {x = x >> 1; l++;}
+	while (x > 0) {x = x >>> 1; l++;}
 	return l;
     }
 
@@ -84,7 +86,7 @@ public class kelondroMSetTools {
 	int high = ((map.size() > set.size()) ? map.size() : set.size());
 	int low  = ((map.size() > set.size()) ? set.size() : map.size());
 	int stepsEnum = 10 * (high + low - 1);
-	int stepsTest = 12 * log2(high) * low;
+	int stepsTest = 12 * log2a(high) * low;
 
 	// start most efficient method
 	if (stepsEnum > stepsTest) {
@@ -156,7 +158,7 @@ public class kelondroMSetTools {
 	int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
 	int low  = ((set1.size() > set2.size()) ? set2.size() : set1.size());
 	int stepsEnum = 10 * (high + low - 1);
-	int stepsTest = 12 * log2(high) * low;
+	int stepsTest = 12 * log2a(high) * low;
 
 	// start most efficient method
 	if (stepsEnum > stepsTest) {

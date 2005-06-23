@@ -450,8 +450,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
          */        
         public SessionPool(SessionFactory objFactory) {
             super(objFactory);
-            this.setMaxIdle(75); // Maximum idle threads.
-            this.setMaxActive(150); // Maximum active threads.
+            this.setMaxIdle(50); // Maximum idle threads.
+            this.setMaxActive(100); // Maximum active threads.
             this.setMinEvictableIdleTimeMillis(30000); //Evictor runs every 30 secs.
             //this.setMaxWait(1000); // Wait 1 second till a thread is available
         }

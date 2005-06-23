@@ -146,6 +146,7 @@ public class kelondroMScoreCluster {
         // set new value
         c = scoreKey(en, ec);
         cs = new Long(c);
+        Object oldcs = refkeyDB.remove(obj); if (oldcs != null) keyrefDB.remove(oldcs); // avoid memory leak
         refkeyDB.put(obj, cs);
         keyrefDB.put(cs, obj);
         
@@ -174,6 +175,7 @@ public class kelondroMScoreCluster {
         // set new value
         c = scoreKey(en, ec);
         cs = new Long(c);
+        Object oldcs = refkeyDB.remove(obj); if (oldcs != null) keyrefDB.remove(oldcs); // avoid memory leak
         refkeyDB.put(obj, cs);
         keyrefDB.put(cs, obj);
         

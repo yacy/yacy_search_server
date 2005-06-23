@@ -170,7 +170,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 if (System.currentTimeMillis() > messageTime) {
                     System.gc(); // for better statistic
                     wordsPerSecond = wordcount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                    log.logInfo("dumping status: " + wordcount + " words done, " + (cache.size() / wordsPerSecond) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
+                    log.logInfo("dumping status: " + wordcount + " words done, " + (cache.size() / (wordsPerSecond + 1)) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
                     messageTime = System.currentTimeMillis() + 5000;
                 }
             }
@@ -552,11 +552,9 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         flushThread.pause();
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
         while (cache.size() >= this.maxWords) flushFromMem();
-        if ((cache.size() > 10000) && (Runtime.getRuntime().freeMemory() < 11000000)) flushFromMem();
-        while ((cache.size() > 0) && (Runtime.getRuntime().freeMemory() < 1000000)) {
-            flushFromMem();
-            System.gc();
-        }
+        if ((cache.size() > 10000) && (Runtime.getRuntime().freeMemory() < 5000000)) flushFromMem();
+        if ((cache.size() > 0) && (Runtime.getRuntime().freeMemory() < 1000000)) flushFromMem();
+        
 	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");
 
 	// put new words into cache

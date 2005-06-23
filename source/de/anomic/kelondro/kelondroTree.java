@@ -119,18 +119,16 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	super(ra, buffersize);
     }
 
-    private static byte abs(byte b) {
-	// for height computation
-	if (b < 0) return (byte) -b; else return b;
-    }
-
     // Returns the value to which this map maps the specified key.
     public synchronized byte[][] get(byte[] key) throws IOException {
 	//System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
 	Search search = new Search(key);
 	if (search.found()) {
-	    return search.getMatcher().getValues();
+            byte[][] result = search.getMatcher().getValues();
+            search = null;
+	    return result;
 	} else {
+            search = null;
 	    return null;
 	}
     }
@@ -306,6 +304,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	    // a node with this key exist. simply overwrite the content and return old content
 	    Node e = searchResult.getMatcher();
 	    byte[][] result = e.setValues(newrow);
+            searchResult = null;
 	    return result;
 	} else if (searchResult.isRoot()) {
 	    // a node with this key does not exist and there is no node at all
@@ -320,6 +319,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	    e.setOHHandle(new Handle[] {null, null, null}); // {parent, leftchild, rightchild}
 	    // do updates
 	    setHandle(root, e.handle());
+            searchResult = null;
 	    return null;
 	} else {
 	    // a node with this key does not exist
@@ -375,7 +375,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 		    parentOHByte[balance]--;
 		    path = "R" + path;
 		}
-		increasedHight = ((abs(parentOHByte[balance]) - abs(prevHight)) > 0);
+		increasedHight = ((java.lang.Math.abs((int) parentOHByte[balance]) - java.lang.Math.abs((int) prevHight)) > 0);
 		parentNode.setOHByte(parentOHByte);
 
 		// here we either stop because we had no increased hight,
@@ -384,7 +384,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 		if (!(increasedHight)) break; // finished
 
 		// check rotation need
-		if (abs(parentOHByte[balance]) > 1) {
+		if (java.lang.Math.abs((int) parentOHByte[balance]) > 1) {
 		    // rotate and stop then
 		    //System.out.println("* DB DEBUG: " + path.substring(0,2) + " ROTATION AT NODE " + parentNode.handle().toString() + ": BALANCE=" + parentOHByte[balance]);
 		    if (path.startsWith("LL")) {
@@ -561,6 +561,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	    Node result = search.getMatcher();
 	    byte[][] values = result.getValues();
 	    remove(result, search.getParent());
+            search = null;
 	    return values;
 	} else {
 	    return null;
@@ -722,9 +723,12 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	try {
             Search s = new Search(firstKey);
             if (s.found()) {
-                return new nodeIterator(up, rotating, s.getMatcher());
+                Node matcher = s.getMatcher();
+                s = null;
+                return new nodeIterator(up, rotating, matcher);
             } else {
                 Node nn = s.getParent();
+                s = null;
                 if (nn == null) {
                     return (new HashSet()).iterator(); // an empty iterator
                 } else {
@@ -862,9 +866,12 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
         Search s = new Search(firstKey);
         if (s.found()) {
-            return new rowIterator(new nodeIterator(up, rotating, s.getMatcher()));
+            Node matcher = s.getMatcher();
+            s = null;
+            return new rowIterator(new nodeIterator(up, rotating, matcher));
         } else {
             Node nn = s.getParent();
+            s = null;
             if (nn == null) {
                 return (Iterator) (new HashSet()).iterator();
             } else {
@@ -910,9 +917,12 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     public synchronized Iterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
         Search s = new Search(firstKey);
         if (s.found()) {
-            return new keyIterator(new nodeIterator(up, rotating, s.getMatcher()));
+            Node matcher = s.getMatcher();
+            s = null;
+            return new keyIterator(new nodeIterator(up, rotating, matcher));
         } else {
             Node nn = s.getParent();
+            s = null;
             if (nn == null) {
                 return (Iterator) (new HashSet()).iterator();
             } else {

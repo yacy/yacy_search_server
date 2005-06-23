@@ -79,6 +79,7 @@ public class plasmaWordIndexEntity {
     }
     
     private kelondroTree indexFile(File databaseRoot, String wordHash) throws IOException {
+        if (wordHash.length() < 12) throw new IOException("word hash wrong: '" + wordHash + "'");
 	theLocation = wordHash2path(databaseRoot, wordHash);
 	File fp = theLocation.getParentFile();
 	if (fp != null) fp.mkdirs();
@@ -97,7 +98,8 @@ public class plasmaWordIndexEntity {
 
     public static File wordHash2path(File databaseRoot, String hash) {
 	// creates a path that constructs hashing on a file system
-	return new File (databaseRoot, "WORDS/" +
+
+        return new File (databaseRoot, "WORDS/" +
 			 hash.substring(0,1) + "/" + hash.substring(1,2) + "/" + hash.substring(2,4) + "/" +
 			 hash.substring(4,6) + "/" + hash + ".db");
     }

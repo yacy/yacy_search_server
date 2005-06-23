@@ -744,6 +744,10 @@ public class kelondroRecords {
     }
     
     // additional properties
+    public synchronized int handles() {
+	return this.HANDLES.length;
+    }
+    
     protected void setHandle(int pos, Handle handle) throws IOException {
 	if (pos >= HANDLES.length) throw new IllegalArgumentException("setHandle: handle array exceeded");
 	if (handle == null) handle = new Handle(NUL);
