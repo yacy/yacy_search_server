@@ -145,12 +145,28 @@ public class Status {
         }
         prop.put("peerName", thisName);
         prop.put("hash", thisHash);
-        if ((env.getConfig("seedFTPServer","").length() != 0) &&
-                (env.getConfig("seedFTPAccount","").length() != 0) &&
-                (env.getConfig("seedFTPPassword","").length() != 0) &&
-                (env.getConfig("seedFTPPath","").length() != 0)) {
-            prop.put("seedServer", 1);//enabled
-            prop.put("seedServer_seedFTPServer", env.getConfig("seedFTPServer",""));
+        String seedUploadMethod = env.getConfig("seedUploadMethod","");
+        if (
+                (!seedUploadMethod.equalsIgnoreCase("none")) || 
+                ((seedUploadMethod.equals("")) && (env.getConfig("seedFTPPassword","").length() > 0)) ||
+                ((seedUploadMethod.equals("")) && (env.getConfig("seedFilePath", "").length() > 0))
+        ) {
+            if (seedUploadMethod.equals("")) {
+                if (env.getConfig("seedFTPPassword","").length() > 0)
+                    env.setConfig("seedUploadMethod","Ftp");
+                if (env.getConfig("seedFilePath","").length() > 0)
+                    env.setConfig("seedUploadMethod","File");                
+            }                        
+            if (seedUploadMethod.equalsIgnoreCase("ftp")) {
+                prop.put("seedServer", 1);//enabled
+                prop.put("seedServer_seedServer", env.getConfig("seedFTPServer",""));
+            } else if (seedUploadMethod.equalsIgnoreCase("scp")) {
+                prop.put("seedServer", 1);//enabled
+                prop.put("seedServer_seedServer", env.getConfig("seedScpServer",""));
+            } else if (seedUploadMethod.equalsIgnoreCase("file")) {
+                prop.put("seedServer", 2);//enabled
+                prop.put("seedServer_seedFile", env.getConfig("seedFilePath",""));
+            }
         } else {
             prop.put("seedServer", 0);//disabled
         }

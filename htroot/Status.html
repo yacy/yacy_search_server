@@ -69,7 +69,8 @@ Junior - You cannot be reached. A possible reason is that you are behind a firew
 ::
 Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!
 ::
-Principal - You are senior and you publish your seed-list to a ftp account which can be retrieved at #[seedURL]#. You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.
+Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the url <a href="#[seedURL]#">#[seedURL]#</a>.<br>
+You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.
 #(/peerStatus)#
 </td></tr>
 <tr class="TableCellLight"><td>Other peers</td><td>#(otherPeers)#not online.::#[num]# other peers online.#(/otherPeers)#</td></tr>
@@ -77,7 +78,9 @@ Principal - You are senior and you publish your seed-list to a ftp account which
 #(seedServer)#
 Disabled. To enable this you need a ftp account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html">Settings page</a>.
 ::
-Enabled: Updating periodically to server #[seedFTPServer]#
+Enabled: Updating periodically to server #[seedServer]#
+::
+Enabled: Updating periodically to file #[seedFile]#
 #(/seedServer)#
 </td></tr>
 <tr class="TableCellLight"><td>Auto-popup on start-up</td><td>
