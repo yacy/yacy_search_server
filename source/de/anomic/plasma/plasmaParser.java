@@ -101,6 +101,12 @@ public final class plasmaParser {
     private static final HashSet supportedFileExt = new HashSet();
     
     /**
+     * A list of file extensions that are supported by the html-parser and can
+     * be parsed in realtime.
+     */
+    private static final HashSet supportedRealtimeFileExt = new HashSet();
+    
+    /**
      * A list of mimeTypes that can be parsed in Realtime (on the fly)
      */
     private static final HashSet realtimeParsableMimeTypes = new HashSet();    
@@ -113,7 +119,7 @@ public final class plasmaParser {
     private static plasmaParserPool theParserPool;
 
     /**
-     * A list of media extensions that should not be handled by the plasmaParser
+     * A list of media extensions that should <b>not</b> be handled by the plasmaParser
      */
     private static final HashSet mediaExtSet = new HashSet(28);
     
@@ -170,6 +176,13 @@ public final class plasmaParser {
         loadAvailableParserList();      
     }
     
+    /**
+     * This function is used to initialize the realtimeParsableMimeTypes List.
+     * This list contains a list of mimeTypes that can be parsed in realtime by
+     * the yacy html-Parser
+     * @param realtimeParsableMimeTypes a list of mimetypes that can be parsed by the 
+     * yacy html parser
+     */
     public static void initRealtimeParsableMimeTypes(String realtimeParsableMimeTypes) {
         LinkedList mimeTypes = new LinkedList();
         if ((realtimeParsableMimeTypes == null) || (realtimeParsableMimeTypes.length() == 0)) {
@@ -181,6 +194,13 @@ public final class plasmaParser {
         initRealtimeParsableMimeTypes(mimeTypes);
     }
     
+    /**
+     * This function is used to initialize the realtimeParsableMimeTypes List.
+     * This list contains a list of mimeTypes that can be parsed in realtime by
+     * the yacy html-Parser
+     * @param realtimeParsableMimeTypes a list of mimetypes that can be parsed by the 
+     * yacy html parser
+     */    
     public static void initRealtimeParsableMimeTypes(List mimeTypesList) {
         synchronized (realtimeParsableMimeTypes) {
             realtimeParsableMimeTypes.clear();
@@ -218,10 +238,10 @@ public final class plasmaParser {
         }
     }
     
-    public static void initSupportedFileExt(List supportedFileExtList) {
-        synchronized (mediaExtSet) {
-            supportedFileExt.clear();
-            supportedFileExt.addAll(supportedFileExtList);
+    public static void initSupportedRealtimeFileExt(List supportedRealtimeFileExtList) {
+        synchronized (supportedRealtimeFileExt) {
+            supportedRealtimeFileExt.clear();
+            supportedRealtimeFileExt.addAll(supportedRealtimeFileExtList);
         }
     }
         
@@ -246,8 +266,14 @@ public final class plasmaParser {
     
     public static boolean supportedFileExtContains(String mediaExt) {
         if (supportedFileExt == null) return false;
-        //System.out.println("supported ext: " + supportedFileExt.toString());
-        return (supportedFileExt.contains(mediaExt));
+        
+        synchronized(supportedFileExt) {
+            if (supportedFileExt.contains(mediaExt)) return true;
+        }
+        
+        synchronized (supportedRealtimeFileExt) {
+            return supportedRealtimeFileExt.contains(mediaExt);
+        }
     }
     
     public static boolean mediaExtContains(String mediaExt) {
@@ -328,13 +354,13 @@ public final class plasmaParser {
         }
         
         synchronized (enabledParserList) {
-            //enabledParserList.clear();
+            enabledParserList.clear();
             enabledParserList.putAll(newEnabledParsers);
         }
         
         
         synchronized (supportedFileExt) {
-            //supportedFileExt.clear();
+            supportedFileExt.clear();
             supportedFileExt.addAll(newSupportedFileExt);
         }
 

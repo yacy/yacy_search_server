@@ -265,7 +265,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // define an extension-blacklist
         log.logSystem("Parser: Initializing Extension Mappings for Media/Parser");
         plasmaParser.initMediaExt(plasmaParser.extString2extList(getConfig("mediaExt","")));
-        plasmaParser.initSupportedFileExt(plasmaParser.extString2extList(getConfig("parseableExt","")));
+        plasmaParser.initSupportedRealtimeFileExt(plasmaParser.extString2extList(getConfig("parseableExt","")));
 
         // define a realtime parsable mimetype list
         log.logSystem("Parser: Initializing Mime Types");
