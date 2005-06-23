@@ -62,7 +62,7 @@ public class autoconfig {
      
     serverObjects prop = new serverObjects();
 
-    prop.put("host", serverCore.publicIP().getHostAddress());
+    prop.put("host", serverCore.publicLocalIP().getHostAddress());
     prop.put("port", env.getConfig("port", "8080"));
 
  // return rewrite properties

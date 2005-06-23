@@ -92,12 +92,12 @@ public class yacySeedDB {
     
     
     public yacySeedDB(plasmaSwitchboard sb,
-                         File seedActiveDBFile,
-                         File seedPassiveDBFile,
-                         File seedPotentialDBFile,
-                         int bufferkb) throws IOException {
-       
-	this.seedActiveDBFile = seedActiveDBFile;
+            File seedActiveDBFile,
+            File seedPassiveDBFile,
+            File seedPotentialDBFile,
+            int bufferkb) throws IOException {
+        
+        this.seedActiveDBFile = seedActiveDBFile;
         this.seedPassiveDBFile = seedPassiveDBFile;
         this.seedPotentialDBFile = seedPotentialDBFile;
         this.mySeed = null; // my own seed
@@ -110,33 +110,34 @@ public class yacySeedDB {
         
         // create or init own seed
         myOwnSeedFile = new File(sb.getRootPath(), sb.getConfig("yacyOwnSeedFile", "mySeed.txt"));
-	if (myOwnSeedFile.exists() && (myOwnSeedFile.length() > 0)) {
-	    // load existing identity
-	    mySeed = yacySeed.load(myOwnSeedFile);
-	} else {
-	    // create new identity
-	    mySeed = yacySeed.genLocalSeed(sb);
-	    // save of for later use
-	    mySeed.save(myOwnSeedFile); // in a file
-	    //writeMap(mySeed.hash, mySeed.dna, "new"); // in a database
-	}
+        if (myOwnSeedFile.exists() && (myOwnSeedFile.length() > 0)) {
+            // load existing identity
+            mySeed = yacySeed.load(myOwnSeedFile);
+        } else {
+            // create new identity
+            mySeed = yacySeed.genLocalSeed(sb);
+            // save of for later use
+            mySeed.save(myOwnSeedFile); // in a file
+            //writeMap(mySeed.hash, mySeed.dna, "new"); // in a database
+        }
         
-	mySeed.put("IP", "");       // we delete the old information to see what we have now
-    if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-        mySeed.put("Port", Integer.toString(serverCore.portForwarding.getPort()));
-    } else {
-        mySeed.put("Port", sb.getConfig("port", "8080")); // set my seed's correct port number
-    }
-	mySeed.put("PeerType", "virgin"); // markup startup condition
-
+        if (sb.getConfig("portForwardingEnabled","false").equalsIgnoreCase("true")) {
+            mySeed.put("Port", sb.getConfig("portForwardingPort","8080"));
+            mySeed.put("IP", sb.getConfig("portForwardingHost","localhost"));
+        } else {
+            mySeed.put("IP", "");       // we delete the old information to see what we have now
+            mySeed.put("Port", sb.getConfig("port", "8080")); // set my seed's correct port number
+        }
+        mySeed.put("PeerType", "virgin"); // markup startup condition
+        
         // start our virtual DNS service for yacy peers with empty cache
         nameLookupCache = new Hashtable();
         
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();
-
-	// set up seed queue (for probing candidates)
-	seedQueue = null;
+        
+        // set up seed queue (for probing candidates)
+        seedQueue = null;
     }
     
     public synchronized void removeMySeed() {

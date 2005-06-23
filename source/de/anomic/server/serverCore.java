@@ -78,6 +78,7 @@ import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
 import de.anomic.http.httpd;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyCore;
 
 public final class serverCore extends serverAbstractThread implements serverThread {
     
@@ -232,7 +233,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         localPort.intValue());
                 
                 serverCore.portForwarding.connect();
+                
                 serverCore.portForwardingEnabled = true;
+                yacyCore.seedDB.mySeed.put("IP",publicIP().getHostAddress());
+                yacyCore.seedDB.mySeed.put("Port",Integer.toString(serverCore.portForwarding.getPort()));
                 
                 this.log.logInfo("Remote port forwarding connection established: " + portFwHost+":"+portFwPort+" -> "+localHost+":"+localPort);                
             } catch (Exception e) {
@@ -402,31 +406,39 @@ public final class serverCore extends serverAbstractThread implements serverThre
             connection.execute(controlSocket,this.timeout);
             //log.logDebug("* NEW SESSION: " + connection.request + " from " + clientIP);
         } else {
-            System.out.println("ACCESS FROM " + cIP + " DENIED");
+            this.log.logWarning("ACCESS FROM " + cIP + " DENIED");
         }
 
         return true;
     }
 
     public void close() {
-        try {
-            // consuming the isInterrupted Flag. Otherwise we could not properly close the session pool
-            Thread.interrupted();
-            
-            // closing the port forwarding channel
-            if ((portForwardingEnabled) && (portForwarding != null) ) {
+        // consuming the isInterrupted Flag. Otherwise we could not properly close the session pool
+        Thread.interrupted();
+        
+        // closing the port forwarding channel
+        if ((portForwardingEnabled) && (portForwarding != null) ) {
+            try {
                 portForwarding.disconnect();
+            } catch (Exception e) {
+                this.log.logWarning("Unable to shutdown the port forwarding channel.");
             }
-
-            // close the session pool
-            this.theSessionPool.close();            
-            
-            // closing the serverchannel and socket
+        }
+        
+        // close the session pool
+        try {
+            this.theSessionPool.close();
+        } catch (Exception e) {
+            this.log.logWarning("Unable to close the session pool.");
+        }
+        
+        // closing the serverchannel and socket
+        try {
             this.socket.close();
+        } catch (Exception e) {
+            this.log.logWarning("Unable to close the server socket."); 
         }
-        catch (Exception e) {
-            this.log.logSystem("Unable to close session pool: " + e.getMessage());
-        }
+
         this.log.logSystem("* terminated");
     }
     
@@ -504,7 +516,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     if (currentSession.isAlive()) {
                         if ((currentSession.controlSocket != null)&&(currentSession.controlSocket.isConnected())) {
                             currentSession.controlSocket.close();
-                            serverCore.this.log.logInfo("Closing socket of thread " + currentSession.getName());
+                            serverCore.this.log.logInfo("Closing socket of thread '" + currentSession.getName() + "'");
                         }
                     }
                 }                

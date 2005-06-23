@@ -223,6 +223,11 @@ public final class httpc {
         }
     }
     
+    public boolean isClosed() {
+        if (this.socket == null) return true;
+        else return (!this.socket.isConnected()) || (this.socket.isClosed());
+    }
+    
     public static String dnsResolve(String host) {
         // looks for the ip of host <host> and returns ip number as string
         String ip = (String) nameCacheHit.get(host);

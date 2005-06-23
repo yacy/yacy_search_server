@@ -83,7 +83,7 @@ public class hello {
         float clientversion = remoteSeed.getVersion();
 
         int urls = -1;
-        if ((!(clientip.equals(reportedip))) && (clientversion >= (float)0.383)) {
+        if ((reportedip.length() > 0) && (!(clientip.equals(reportedip))) && (clientversion >= (float)0.383)) {
             // try first the reportedip, since this may be a connect from a port-forwarding host
             prop.put("yourip", reportedip);
             remoteSeed.put("IP", reportedip);
@@ -117,7 +117,7 @@ public class hello {
             remoteSeed.put("LastSeen", yacyCore.universalDateShortString());
             yacyCore.peerActions.juniorConnects++; // update statistics
             remoteSeed.put("PeerType", "junior");
-            yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + remoteSeed.getAddress());
+            yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper())) yacyCore.peerActions.peerPing(remoteSeed);
         }

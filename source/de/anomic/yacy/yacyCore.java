@@ -62,9 +62,13 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -72,11 +76,14 @@ import de.anomic.http.httpc;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 
 public class yacyCore {
     
     // statics
+    public static ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
     public static long startupTime = System.currentTimeMillis();
     public static yacySeedDB seedDB = null;
     public static final Hashtable seedUploadMethods = new Hashtable();
@@ -289,118 +296,191 @@ public class yacyCore {
         public int added;
         public yacySeed seed;
         public Exception error;
+        private final serverSemaphore sync;
+        private final List syncList;
         
-        public publishThread(yacySeed seed) {
-            super("PublishSeed_" + seed.getName());
+        public publishThread(ThreadGroup tg, yacySeed seed, serverSemaphore sync, List syncList) throws InterruptedException {
+            super(tg, "PublishSeed_" + seed.getName());
+            
+            this.sync = sync;
+            this.sync.P();            
+            this.syncList = syncList;
+            
             this.seed = seed;
             this.added = 0;
             this.error = null;
         }
 
         public void run() {
-            try {
-                added = yacyClient.publishMySeed(seed.getAddress(), seed.hash);
-                if (added < 0) {
+            try {                
+                this.added = yacyClient.publishMySeed(seed.getAddress(), seed.hash);
+                if (this.added < 0) {
                     // no or wrong response, delete that address
-                    log.logInfo("publish: disconnected " + seed.get("PeerType", "senior") + " peer '" + seed.getName() + "' from " + seed.getAddress());
-                    peerActions.peerDeparture(seed);
+                    log.logInfo("publish: disconnected " + this.seed.get("PeerType", "senior") + " peer '" + this.seed.getName() + "' from " + this.seed.getAddress());
+                    peerActions.peerDeparture(this.seed);
                 } else {
                     // success! we have published our peer to a senior peer
                     // update latest news from the other peer
-                    log.logInfo("publish: handshaked " + seed.get("PeerType", "senior") + " peer '" + seed.getName() + "' at " + seed.getAddress());
+                    log.logInfo("publish: handshaked " + this.seed.get("PeerType", "senior") + " peer '" + this.seed.getName() + "' at " + this.seed.getAddress());
                 }
             } catch (Exception e) {
-                error = e;
+                this.error = e;
+            } finally {
+                this.syncList.add(this);
+                this.sync.V();
             }
         }
         
     }
     
     private int publishMySeed(boolean force) {
-	// call this after the httpd was started up
-
-	// we need to find out our own ip
-	// This is not always easy, since the application may
-	// live behind a firewall or nat.
-	// the normal way to do this is either measure the value that java gives us,
-	// but this is not correct if the peer lives behind a NAT/Router or has several
-	// addresses and not the right one can be found out.
-	// We have several alternatives:
-	// 1. ask another peer. This should be normal and the default method.
-	//    but if no other peer lives, or we don't know them, we cannot do that
-	// 2. ask own NAT. This is only an option if the NAT is a DI604, because this is the
-	//    only supported for address retrieval
-	// 3. ask ip respond services in the internet. There are several, and they are all
-	//    probed until we get a valid response.
-
-	// init yacyHello-process
-	String address;
-	int added;
-        yacySeed[] seeds;
-        int attempts = seedDB.sizeConnected(); if (attempts > 10) attempts = 10;
-        if (seedDB.mySeed.get("PeerType", "virgin").equals("virgin")) {
-            seeds = seedDB.seedsByAge(true, attempts); // best for fast connection
-        } else {
-            seeds = seedDB.seedsByAge(false, attempts); // best for seed list maintenance/cleaning
-        }
-        if (seeds == null) return 0;
-        Vector v = new Vector(); // memory for threads        
-        publishThread t;
-	for (int i = 0; i < seeds.length; i++) {
-	    if (seeds[i] == null) continue;
-	    log.logDebug("HELLO #" + i + " to peer " + seeds[i].get("Name", "")); // debug
-            address = seeds[i].getAddress();
-	    if ((address == null) || (!(seeds[i].isProper()))) {
-		// we don't like that address, delete it
-		peerActions.peerDeparture(seeds[i]);
-	    } else {
-		// ask senior peer
-                t = new publishThread(seeds[i]);
-                v.add(t);
-                t.start();
-	    }
-
-            // wait
-	    try {
-                if (i == 0) Thread.currentThread().sleep(2000); // after the first time wait some seconds
-		Thread.currentThread().sleep(1000 + 500 * v.size()); // wait a while
-	    } catch (InterruptedException e) {}
+        try {
+            // call this after the httpd was started up
             
-            // check all threads
-            for (int j = 0; j < v.size(); j++) {
-                t = (publishThread) v.elementAt(j);
-                added = t.added;
-                if (!(t.isAlive())) {
-                    //log.logDebug("PEER " + seeds[j].get("Name", "") + " request terminated"); // debug
-                    if (added >= 0) {
-                        // success! we have published our peer to a senior peer
-                        // update latest news from the other peer
-                        //log.logInfo("publish: handshaked " + t.seed.get("PeerType", "senior") + " peer '" + t.seed.getName() + "' at " + t.seed.getAddress());
-                        peerActions.saveMySeed();
-                        return added;
+            // we need to find out our own ip
+            // This is not always easy, since the application may
+            // live behind a firewall or nat.
+            // the normal way to do this is either measure the value that java gives us,
+            // but this is not correct if the peer lives behind a NAT/Router or has several
+            // addresses and not the right one can be found out.
+            // We have several alternatives:
+            // 1. ask another peer. This should be normal and the default method.
+            //    but if no other peer lives, or we don't know them, we cannot do that
+            // 2. ask own NAT. This is only an option if the NAT is a DI604, because this is the
+            //    only supported for address retrieval
+            // 3. ask ip respond services in the internet. There are several, and they are all
+            //    probed until we get a valid response.
+            
+            // init yacyHello-process
+            yacySeed[] seeds;
+            
+            int attempts = seedDB.sizeConnected(); 
+            if (attempts > 10) attempts = 10;
+            
+            // getting a list of peers to contact
+            if (seedDB.mySeed.get("PeerType", "virgin").equals("virgin")) {
+                seeds = seedDB.seedsByAge(true, attempts); // best for fast connection
+            } else {
+                seeds = seedDB.seedsByAge(false, attempts); // best for seed list maintenance/cleaning
+            }
+            if (seeds == null) return 0;
+            
+            // holding a reference to all started threads
+            int contactedSeedCount = 0;
+            List syncList = Collections.synchronizedList(new LinkedList()); // memory for threads    
+            serverSemaphore sync = new serverSemaphore(attempts);
+            
+            // going through the peer list and starting a new publisher thread for each peer
+            for (int i = 0; i < seeds.length; i++) {
+                if (seeds[i] == null) continue;
+                
+                String address = seeds[i].getAddress();
+                log.logDebug("HELLO #" + i + " to peer '" + seeds[i].get("Name", "") + "' at " + address); // debug            
+                if ((address == null) || (!(seeds[i].isProper()))) {
+                    // we don't like that address, delete it
+                    peerActions.peerDeparture(seeds[i]);
+                    sync.V();
+                } else {
+                    // starting a new publisher thread
+                    contactedSeedCount++;
+                    (new publishThread(yacyCore.publishThreadGroup,seeds[i],sync,syncList)).start();
+                }
+            }
+            
+            // receiving the result of all started publisher threads
+            int newSeeds = -1;
+            for (int j=0; j < contactedSeedCount; j++) {
+                
+                // waiting for the next thread to finish
+                sync.P();              
+                
+                // if this is true something is wrong ...
+                if (syncList.isEmpty()) return 0;
+                
+                // getting a reference to the finished thread
+                publishThread t = (publishThread) syncList.remove(0);
+                
+                // getting the amount of new reported seeds
+                if (t.added >= 0) {
+                    if (newSeeds==-1) newSeeds =  t.added;
+                    else           newSeeds += t.added;
+                }            
+            }
+            
+            if (newSeeds >= 0) {
+                // success! we have published our peer to a senior peer
+                // update latest news from the other peer
+                //log.logInfo("publish: handshaked " + t.seed.get("PeerType", "senior") + " peer '" + t.seed.getName() + "' at " + t.seed.getAddress());
+                peerActions.saveMySeed();
+                return newSeeds;
+            }        
+            
+//            // wait
+//            try {
+//                if (i == 0) Thread.currentThread().sleep(2000); // after the first time wait some seconds
+//                Thread.currentThread().sleep(1000 + 500 * v.size()); // wait a while
+//            } catch (InterruptedException e) {}
+//            
+//            // check all threads
+//            for (int j = 0; j < v.size(); j++) {
+//                t = (publishThread) v.elementAt(j);
+//                added = t.added;
+//                if (!(t.isAlive())) {
+//                    //log.logDebug("PEER " + seeds[j].get("Name", "") + " request terminated"); // debug
+//                    if (added >= 0) {
+//                        // success! we have published our peer to a senior peer
+//                        // update latest news from the other peer
+//                        //log.logInfo("publish: handshaked " + t.seed.get("PeerType", "senior") + " peer '" + t.seed.getName() + "' at " + t.seed.getAddress());
+//                        peerActions.saveMySeed();
+//                        return added;
+//                    }
+//                }
+//            }
+            
+            // if we have an address, we do nothing
+            if ((seedDB.mySeed.isProper()) && (!(force))) return 0;
+            
+            // still no success: ask own NAT or internet responder
+            boolean DI604use = switchboard.getConfig("DI604use", "false").equals("true");
+            String  DI604pw  = switchboard.getConfig("DI604pw", "");
+            String  ip       = switchboard.getConfig("staticIP", "");
+            if(ip.equals("")){
+                ip = natLib.retrieveIP(DI604use, DI604pw, (switchboard.getConfig("yacyDebugMode", "false")=="false" ? false : true));
+            }
+            //System.out.println("DEBUG: new IP=" + ip);
+            seedDB.mySeed.put("IP", ip);
+            if (seedDB.mySeed.get("PeerType", "junior").equals("junior")) // ???????????????
+                seedDB.mySeed.put("PeerType", "senior"); // to start bootstraping, we need to be recognised as "senior" peer
+            log.logInfo("publish: no recipient found, asked NAT or responder; our address is " +
+                    ((seedDB.mySeed.getAddress() == null) ? "unknown" : seedDB.mySeed.getAddress()));
+            peerActions.saveMySeed();
+            return 0;
+        } catch (InterruptedException e) {
+            log.logInfo("publish: Interruption detected while publishing my seed.");
+            
+            // interrupt all already started publishThreads
+            log.logInfo("publish: Trying to shutdown all remaining publishing threads ...");
+            yacyCore.publishThreadGroup.interrupt();
+            
+            // waiting some time for the publishThreads to finish handshake
+            int threadCount  = yacyCore.publishThreadGroup.activeCount();    
+            Thread[] threadList = new Thread[threadCount];     
+            threadCount = yacyCore.publishThreadGroup.enumerate(threadList);
+            try {
+                // we need to use a timeout here because of missing interruptable session threads ...
+                for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
+                    if (threadList[currentThreadIdx].isAlive()) {
+                        log.logInfo("publish: Waiting for remaining publishing thread '" + threadList[currentThreadIdx].getName() + "' to finish shutdown");
+                        threadList[currentThreadIdx].join(500);
                     }
                 }
             }
-	}
-
-	// if we have an address, we do nothing
-	if ((seedDB.mySeed.isProper()) && (!(force))) return 0;
-	
-	// still no success: ask own NAT or internet responder
-	boolean DI604use = switchboard.getConfig("DI604use", "false").equals("true");
-	String  DI604pw  = switchboard.getConfig("DI604pw", "");
-	String  ip       = switchboard.getConfig("staticIP", "");
-	if(ip.equals("")){
-		ip       = natLib.retrieveIP(DI604use, DI604pw, (switchboard.getConfig("yacyDebugMode", "false")=="false" ? false : true));
-	}
-	//System.out.println("DEBUG: new IP=" + ip);
-	seedDB.mySeed.put("IP", ip);
-	if (seedDB.mySeed.get("PeerType", "junior").equals("junior")) // ???????????????
-	    seedDB.mySeed.put("PeerType", "senior"); // to start bootstraping, we need to be recognised as "senior" peer
-	log.logInfo("publish: no recipient found, asked NAT or responder; our address is " +
-						 ((seedDB.mySeed.getAddress() == null) ? "unknown" : seedDB.mySeed.getAddress()));
-	peerActions.saveMySeed();
-	return 0;
+            catch (InterruptedException ee) {
+                log.logWarning("Interruption while trying to shutdown all remaining publishing threads.");  
+            }
+            
+            return 0;
+        }
     }
     
     public static Hashtable getSeedUploadMethods() {
@@ -459,7 +539,8 @@ public class yacyCore {
                     String[] neededLibx = ((yacySeedUploader)theUploader).getLibxDependences();
                     if (neededLibx != null) {
                         for (int libxId=0; libxId < neededLibx.length; libxId++) {
-                            if (javaClassPath.indexOf(neededLibx[libxId]) == -1) continue;
+                            if (javaClassPath.indexOf(neededLibx[libxId]) == -1) 
+                                throw new Exception("Missing dependency");
                         }
                     }
                     availableUploaders.put(className.substring("yacySeedUpload".length()),fullClassName);
@@ -519,7 +600,8 @@ public class yacyCore {
             sb.setConfig("seedUploadMethod",seedUploadMethod);
         } else if (
                 (seedUploadMethod.equalsIgnoreCase("File")) ||
-                (sb.getConfig("seedFilePath", "").length() > 0)                
+                ((seedUploadMethod.equals("")) &&
+                 (sb.getConfig("seedFilePath", "").length() > 0))                
         ) {
             seedUploadMethod = "File";
             sb.setConfig("seedUploadMethod",seedUploadMethod);            

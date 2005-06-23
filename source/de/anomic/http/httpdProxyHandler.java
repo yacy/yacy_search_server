@@ -67,10 +67,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.net.BindException;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
+import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
@@ -454,8 +458,20 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             }
            
         } catch (Exception e) {
-            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();   
-            this.theLogger.logError(errorMsg,e);
+            try {
+                String exTxt = e.getMessage();
+                if ((exTxt!=null)&&(exTxt.startsWith("Socket closed"))) {
+                    this.forceConnectionClose();
+                } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+                    String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
+                    httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
+                    this.theLogger.logError(errorMsg);
+                } else {
+                    this.forceConnectionClose();                    
+                }
+            } catch (Exception ee) {
+                this.forceConnectionClose();
+            }            
         } finally {
             try { respond.flush(); } catch (Exception e) {}
             if (respond instanceof httpdByteCountOutputStream) ((httpdByteCountOutputStream)respond).finish();
@@ -595,141 +611,136 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // remove hop by hop headers
             this.removeHopByHopHeaders(res.responseHeader);
             
-            // request has been placed and result has been returned. work off response
-            try {
-                String[] resStatus = res.status.split(" ");
-                httpd.sendRespondHeader(
-                        conProp,
-                        respond,
-                        httpVer,
-                        Integer.parseInt((resStatus.length > 0) ? resStatus[0]:"503"),
-                        (resStatus.length > 1) ? resStatus[1] : null, 
-                        res.responseHeader);
-                
-                String storeError;
-                if ((storeError = cacheEntry.shallStoreCache()) == null) {
-                    // we write a new cache entry
-                    if ((contentLength > 0) && (contentLength < 1048576)) // if the length is known and < 1 MB
-                    {
-                        // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
-                        byte[] cacheArray = res.writeContent(hfos);
-                        this.theLogger.logDebug("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
-                        
-                        if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
-                        
-                        if (sizeBeforeDelete == -1) {
-                            // totally fresh file
-                            cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                            cacheManager.stackProcess(cacheEntry, cacheArray);
-                            conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
-                        } else if (sizeBeforeDelete == cacheArray.length) {
-                            // before we came here we deleted a cache entry
-                            cacheArray = null;
-                            cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                            cacheManager.stackProcess(cacheEntry); // unnecessary update
-                            conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REF_FAIL_HIT");                                
-                        } else {
-                            // before we came here we deleted a cache entry
-                            cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                            cacheManager.stackProcess(cacheEntry, cacheArray); // necessary update, write response header to cache
-                            conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
-                        }                        
-                    } else {
-                        // the file is too big to cache it in the ram, or the size is unknown
-                        // write to file right here.
-                        cacheFile.getParentFile().mkdirs();
-                        res.writeContent(hfos, cacheFile);
-                        if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
-                        this.theLogger.logDebug("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
-                        if (sizeBeforeDelete == -1) {
-                            // totally fresh file
-                            cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                            cacheManager.stackProcess(cacheEntry);
-                        } else if (sizeBeforeDelete == cacheFile.length()) {
-                            // before we came here we deleted a cache entry
-                            cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                            cacheManager.stackProcess(cacheEntry); // unnecessary update
-                        } else {
-                            // before we came here we deleted a cache entry
-                            cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                            cacheManager.stackProcess(cacheEntry); // necessary update, write response header to cache
-                        }
-                        // beware! all these writings will not fill the cacheEntry.cacheArray
-                        // that means they are not available for the indexer (except they are scraped before)
-                    }
-                } else {
-                    // no caching
-                    this.theLogger.logDebug(cacheFile.toString() + " not cached: " + storeError);
-                    res.writeContent(hfos, null);
+            // request has been placed and result has been returned. work off response            
+            String[] resStatus = res.status.split(" ");
+            
+            // sending the respond header back to the client
+            httpd.sendRespondHeader(
+                    conProp,
+                    respond,
+                    httpVer,
+                    Integer.parseInt((resStatus.length > 0) ? resStatus[0]:"503"),
+                    (resStatus.length > 1) ? resStatus[1] : null, 
+                            res.responseHeader);
+            
+            String storeError;
+            if ((storeError = cacheEntry.shallStoreCache()) == null) {
+                // we write a new cache entry
+                if ((contentLength > 0) && (contentLength < 1048576)) // if the length is known and < 1 MB
+                {
+                    // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
+                    byte[] cacheArray = res.writeContent(hfos);
+                    this.theLogger.logDebug("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
+                    
                     if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
+                    
                     if (sizeBeforeDelete == -1) {
-                        // no old file and no load. just data passing
-                        cacheEntry.status = plasmaHTCache.CACHE_PASSING;
-                        cacheManager.stackProcess(cacheEntry);
+                        // totally fresh file
+                        cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
+                        cacheManager.stackProcess(cacheEntry, cacheArray);
+                        conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
+                    } else if (sizeBeforeDelete == cacheArray.length) {
+                        // before we came here we deleted a cache entry
+                        cacheArray = null;
+                        cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
+                        cacheManager.stackProcess(cacheEntry); // unnecessary update
+                        conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REF_FAIL_HIT");                                
                     } else {
                         // before we came here we deleted a cache entry
-                        cacheEntry.status = plasmaHTCache.CACHE_STALE_NO_RELOAD;
+                        cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
+                        cacheManager.stackProcess(cacheEntry, cacheArray); // necessary update, write response header to cache
+                        conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
+                    }                        
+                } else {
+                    // the file is too big to cache it in the ram, or the size is unknown
+                    // write to file right here.
+                    cacheFile.getParentFile().mkdirs();
+                    res.writeContent(hfos, cacheFile);
+                    if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
+                    this.theLogger.logDebug("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
+                    if (sizeBeforeDelete == -1) {
+                        // totally fresh file
+                        cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
                         cacheManager.stackProcess(cacheEntry);
-                    }
-                }
-                
-                if (gzippedOut != null) {
-                    gzippedOut.finish();
-                }
-                if (chunkedOut != null) {
-                    chunkedOut.finish();
-                    chunkedOut.flush();
-                }
-                
-            } catch (SocketException e) {
-                // this may happen if the client suddenly closes its connection
-                // maybe the user has stopped loading
-                // in that case, we are not responsible and just forget it
-                // but we clean the cache also, since it may be only partial
-                // and most possible corrupted
-                if (cacheFile.exists()) cacheFile.delete();
-                if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                    httpd.sendRespondError(conProp,respond,4,404,null,"client unexpectedly closed connection",e);
-                } else {
-                    conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
-                }
-            } catch (IOException e) {
-                // can have various reasons
-                if (cacheFile.exists()) cacheFile.delete();
-                if (e.getMessage().indexOf("Corrupt GZIP trailer") >= 0) {
-                    // just do nothing, we leave it this way
-                    this.theLogger.logDebug("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")",e);
-                    conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
-                } else {
-                    if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                        httpd.sendRespondError(conProp,respond,4,404,null,"client unexpectedly closed connection",e);
-                        this.theLogger.logDebug("IOError for URL " + url + " (" + e.getMessage() + ") - responded 404",e);
+                    } else if (sizeBeforeDelete == cacheFile.length()) {
+                        // before we came here we deleted a cache entry
+                        cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
+                        cacheManager.stackProcess(cacheEntry); // unnecessary update
                     } else {
-                        conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
+                        // before we came here we deleted a cache entry
+                        cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
+                        cacheManager.stackProcess(cacheEntry); // necessary update, write response header to cache
                     }
+                    // beware! all these writings will not fill the cacheEntry.cacheArray
+                    // that means they are not available for the indexer (except they are scraped before)
                 }
-                
+            } else {
+                // no caching
+                this.theLogger.logDebug(cacheFile.toString() + " not cached: " + storeError);
+                res.writeContent(hfos, null);
+                if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
+                if (sizeBeforeDelete == -1) {
+                    // no old file and no load. just data passing
+                    cacheEntry.status = plasmaHTCache.CACHE_PASSING;
+                    cacheManager.stackProcess(cacheEntry);
+                } else {
+                    // before we came here we deleted a cache entry
+                    cacheEntry.status = plasmaHTCache.CACHE_STALE_NO_RELOAD;
+                    cacheManager.stackProcess(cacheEntry);
+                }
+            }
+            
+            if (gzippedOut != null) {
+                gzippedOut.finish();
+            }
+            if (chunkedOut != null) {
+                chunkedOut.finish();
+                chunkedOut.flush();
             }
         } catch (Exception e) {
             // this may happen if the targeted host does not exist or anything with the
             // remote server was wrong.
             // in any case, sending a 404 is appropriate
             try {
-                if ((e.toString().indexOf("unknown host")) > 0) {
-                    if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                        httpd.sendRespondError(conProp,respond,4,404,null,"unknown host",e);
-                    } else {
-                        conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
-                    }
+                
+                // deleting cached content
+                if (cacheFile.exists()) cacheFile.delete();                
+                
+                // doing some errorhandling ...
+                int httpStatusCode = 404; 
+                String httpStatusText = null; 
+                String errorMessage = null; 
+                Exception errorExc = e;
+                
+                if (e instanceof ConnectException) {
+                    httpStatusCode = 403; httpStatusText = "Connection refused"; 
+                    errorMessage = "Connection refused by destination host";             
+                } else if (e instanceof BindException) {
+                    errorMessage = "Unable to establish a connection to the destination host";               
+                } else if (e instanceof NoRouteToHostException) {
+                    errorMessage = "No route to destination host";                    
+                } else if (e instanceof UnknownHostException) {
+                    errorMessage = "IP address of the destination host could not be determined";                    
                 } else {
-                    if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                        httpd.sendRespondError(conProp,respond,4,404,null,"Not Found",e);
+                    if (e.getMessage().indexOf("Corrupt GZIP trailer") >= 0) {
+                        // just do nothing, we leave it this way
+                        this.theLogger.logDebug("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")",e);
+                        this.forceConnectionClose();
+                    } else if ((remote != null)&&(remote.isClosed())) {
+                        errorMessage = "destination host unexpectedly closed connection";                 
                     } else {
-                        conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
+                        errorMessage = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
                     }
                 }
+                
+                // sending back an error message to the client
+                if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+                    httpd.sendRespondError(conProp,respond,4,httpStatusCode,httpStatusText,errorMessage,errorExc);
+                } else {
+                    this.forceConnectionClose();
+                }                
             } catch (Exception ee) {
-                conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
+                this.forceConnectionClose();
             }
         } finally {
             if (remote != null) httpc.returnInstance(remote);
@@ -850,6 +861,12 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         headers.remove(httpHeader.X_CACHE_LOOKUP);        
     }
         
+    private void forceConnectionClose() {
+        if (this.currentConProp != null) {
+            this.currentConProp.setProperty(httpd.CONNECTION_PROP_PERSISTENT,"close");            
+        }
+    }
+    
     public void doHead(Properties conProp, httpHeader requestHeader, OutputStream respond) throws IOException {
         this.currentConProp = conProp;
         
@@ -898,25 +915,32 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         httpc.response res = null;
         
         try {
-            // open the connection
-            if (yAddress == null) {
-                remote = newhttpc(host, port, timeout);
-            } else {
-                remote = newhttpc(yAddress, timeout); // with [AS] patch
-            }
+            // open the connection: second is needed for [AS] patch
+            remote = (yAddress == null) ? newhttpc(host, port, timeout): newhttpc(yAddress, timeout);
+            
+            // sending the http-HEAD request to the server
             res = remote.HEAD(remotePath, requestHeader);
+            
+            // removing hop by hop headers
+            this.removeHopByHopHeaders(res.responseHeader);
+            
+            // sending the server respond back to the client
             httpd.sendRespondHeader(conProp,respond,httpVer,Integer.parseInt(res.status.split(" ")[0]),res.responseHeader);
-            //respondHeader(respond, res.status, res.responseHeader);
         } catch (Exception e) {
             try {
-                if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                    httpd.sendRespondError(conProp,respond,4,404,null,"Not Found",e);
+                String exTxt = e.getMessage();
+                if ((exTxt!=null)&&(exTxt.startsWith("Socket closed"))) {
+                    this.forceConnectionClose();
+                } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+                    String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
+                    httpd.sendRespondError(conProp,respond,4,503,null,errorMsg,e);
+                    this.theLogger.logError(errorMsg);
                 } else {
-                    conProp.setProperty(httpd.CONNECTION_PROP_PERSISTENT,"close");
+                    this.forceConnectionClose();                    
                 }
             } catch (Exception ee) {
-                conProp.setProperty(httpd.CONNECTION_PROP_PERSISTENT,"close");
-            }
+                this.forceConnectionClose();
+            }   
         } finally {
             if (remote != null) httpc.returnInstance(remote);
         }
@@ -988,24 +1012,25 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 if (chunked != null)  chunked.finish();
                 
                 remote.close();
-            } catch (Exception e) {
-                try {
-                    if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                        httpd.sendRespondError(conProp,respond,4,404,null,"Not Found",e);
-                    } else {
-                        conProp.setProperty(httpd.CONNECTION_PROP_PERSISTENT,"close");
-                    }
-                } catch (Exception ee) {
-                    conProp.setProperty(httpd.CONNECTION_PROP_PERSISTENT,"close");
-                }
             } finally {
                 if (remote != null) httpc.returnInstance(remote);
             }
             respond.flush();
         } catch (Exception e) {
-            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
-            System.err.println("PROXY: " + errorMsg);   
-            this.theLogger.logError(errorMsg);          
+            try {
+                String exTxt = e.getMessage();
+                if ((exTxt!=null)&&(exTxt.startsWith("Socket closed"))) {
+                    this.forceConnectionClose();
+                } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+                    String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
+                    httpd.sendRespondError(conProp,respond,4,503,null,errorMsg,e);
+                    this.theLogger.logError(errorMsg);
+                } else {
+                    this.forceConnectionClose();                    
+                }
+            } catch (Exception ee) {
+                this.forceConnectionClose();
+            }                    
         } finally {
             respond.flush();
             if (respond instanceof httpdByteCountOutputStream) ((httpdByteCountOutputStream)respond).finish();
