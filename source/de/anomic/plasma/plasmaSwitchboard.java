@@ -585,7 +585,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public boolean coreCrawlJob() {
-        System.gc(); // debug
         if (urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) == 0) {
             //log.logDebug("CoreCrawl: queue is empty");
             return false;
@@ -1158,7 +1157,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 // take some elements and fetch the snippets
                 int i = 0;
                 plasmaCrawlLURL.entry urlentry;
-                String urlstring, snippet;
+                String urlstring;
+                plasmaSnippetCache.result snippet;
                 while ((acc.hasMoreElements()) && (i < fetchcount)) {
                     urlentry = acc.nextElement();
                     if (urlentry.url().getHost().endsWith(".yacyh")) continue;
@@ -1166,7 +1166,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     if (urlstring.matches(urlmask)) { //.* is default
                         log.logDebug("presearch: fetching URL " + urlstring);
 			snippet = snippetCache.retrieve(urlentry.url(), true, queryhashes);
-                        if (snippet != null) log.logDebug("found snippet for URL " + urlstring + ": '" + snippet + "'");
+                        if (snippet != null) log.logDebug("found snippet for URL " + urlstring + ": '" + snippet.line + "'");
                         i++;
                     }
                 }
@@ -1237,8 +1237,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 URL url;
                 plasmaCrawlLURL.entry urlentry;
                 String urlstring, urlname, filename;
-                String host, hash, address, snippet, descr = "";
+                String host, hash, address, descr = "";
                 yacySeed seed;
+                plasmaSnippetCache.result snippet;
                 //kelondroMScoreCluster ref = new kelondroMScoreCluster();
                 while ((acc.hasMoreElements()) && (i < count)) {
                     urlentry = acc.nextElement();
@@ -1284,12 +1285,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 			prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
                         prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
                         snippet = snippetCache.retrieve(url, false, queryhashes);
-                        if ((snippet == null) || (snippet.length() < 10)) {
+                        if ((snippet == null) || (snippet.line.length() < 10)) {
                             prop.put("results_" + i + "_snippet", 0);
                             prop.put("results_" + i + "_snippet_text", "");
                         } else {
                             prop.put("results_" + i + "_snippet", 1);
-                            prop.put("results_" + i + "_snippet_text", snippet);
+                            prop.put("results_" + i + "_snippet_text", snippet.line);
                         }
                         i++;
                     }
@@ -1357,14 +1358,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 String resource = "";
                 //plasmaIndexEntry pie;
                 plasmaCrawlLURL.entry urlentry;
-                String snippet;
+                plasmaSnippetCache.result snippet;
                 while ((acc.hasMoreElements()) && (i < count)) {
                     urlentry = acc.nextElement();
                     snippet = snippetCache.retrieve(urlentry.url(), false, hashes);
-                    if ((snippet == null) || (snippet.length() < 10)) {
+                    if ((snippet == null) || (snippet.line.length() < 10)) {
                         resource = urlentry.toString();
                     } else {
-                        resource = urlentry.toString(snippet);
+                        resource = urlentry.toString(snippet.line);
                     }
                     if (resource != null) {
                         links.append("resource").append(i).append("=").append(resource).append(serverCore.crlfString);
@@ -1433,7 +1434,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (url == null) return 0;
         // get set of words
         //Set words = plasmaCondenser.getWords(getText(getResource(url, fetchOnline)));
-        Set words = plasmaCondenser.getWords(snippetCache.getDocument(url, fetchOnline).getText());
+        Set words = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline)).getText());
         // delete all word references
         int count = removeReferences(urlhash, words);
         // finally delete the url entry itself

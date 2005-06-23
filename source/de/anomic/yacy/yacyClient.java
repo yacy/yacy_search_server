@@ -329,7 +329,7 @@ public class yacyClient {
                     // we don't store the snippets along the url entry, because they are search-specific.
                     // instead, they are placed in a snipped-search cache.
                     //System.out.println("--- RECEIVED SNIPPET '" + link.snippet() + "'");
-                    snippets.store(wordhashes, link.hash(), link.snippet());
+                    snippets.storeToCache(wordhashes, link.hash(), link.snippet());
                 }
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {
