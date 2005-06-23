@@ -146,6 +146,7 @@ public class CacheAdmin_p {
     }
 
     private static String formatHeader(httpHeader header) {
+        if (header == null) return "- no header in header cache -";
         String out = "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">";
         Iterator it = header.entrySet().iterator();
         Map.Entry entry;

@@ -153,7 +153,7 @@ public final class plasmaSearch {
             singleResult = wordIndex.getEntity(singleHash, true);
             
             // check result
-            if (singleResult.size() == 0) return new plasmaWordIndexEntity(null); // as this is a cunjunction of searches, we have no result if any word is not known
+            if ((singleResult == null) || (singleResult.size() == 0)) return new plasmaWordIndexEntity(null); // as this is a cunjunction of searches, we have no result if any word is not known
             
             // store result in order of result size
             map.put(serverCodings.enhancedCoder.encodeHex(singleResult.size(), 8) + singleHash, singleResult);

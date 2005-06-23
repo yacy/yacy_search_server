@@ -1199,8 +1199,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logInfo("INIT WORD SEARCH: " + gs + " - " + count + " links, " + (time / 1000) + " seconds");
             long timestamp = System.currentTimeMillis();
             
-            Thread preselect = new presearch(queryhashes, order, time / 10, urlmask, 5);
-            preselect.start();
+            if (global) {
+                // start a presearch, which makes only sense if we idle afterwards.
+                // this is especially the case if we start a global search and idle until search
+                // results appear from other peers
+                Thread preselect = new presearch(queryhashes, order, time / 10, urlmask, 5);
+                preselect.start();
+            }
             
             // do global fetching
             int globalresults = 0;

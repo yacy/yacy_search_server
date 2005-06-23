@@ -324,6 +324,8 @@ public class yacyCore {
                     log.logInfo("publish: handshaked " + this.seed.get("PeerType", "senior") + " peer '" + this.seed.getName() + "' at " + this.seed.getAddress());
                 }
             } catch (Exception e) {
+                log.logError("publishThread: error with target seed " + seed.getMap() + ": " + e.getMessage());
+                e.printStackTrace();
                 this.error = e;
             } finally {
                 this.syncList.add(this);
