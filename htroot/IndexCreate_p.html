@@ -185,7 +185,7 @@ Crawl Profile List:<br>
 #{crawlProfiles}#
   <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
     <td class="small">#[name]#</td>
-    <td class="small">#[startURL]#</td>
+    <td class="small"><a class="small" href="#[startURL]#">#[startURL]#</a></td>
     <td class="small">#[depth]#</td>
     <td class="small">#[filter]#</td>
     <td class="small">#(withQuery)#no::yes#(/withQuery)#</td>
@@ -240,7 +240,7 @@ There are #[num]# entries in the rejected-queue:<br>
 <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
 <td width="60" class="small">#[initiator]#</td>
 <td width="60" class="small">#[executor]#</td>
-<td class="small">#[url]#</td>
+<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
 <td class="small">#[failreason]#</td>
 </tr>
 #{/list}#
@@ -267,7 +267,7 @@ There are #[num]# entries in the indexing queue:<br>
 <td width="80" class="small">#[modified]#</td>
 <td width="10" class="small">#[href]#</td>
 <td width="180" class="small">#[anchor]#</td>
-<td class="small">#[url]#</td>
+<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
 </tr>
 #{/list}#
 </table>
@@ -287,7 +287,7 @@ There are #[num]# entries in the loader set:<br>
 <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
 <td width="60" class="small">#[initiator]#</td>
 <td width="10" class="small">#[depth]#</td>
-<td class="small">#[url]#</td>
+<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
 </tr>
 #{/list}#
 </table>
@@ -311,7 +311,7 @@ There are #[num]# entries in the crawler queue. Showing #[show-num]# most recent
 <td width="10" class="small">#[depth]#</td>
 <td width="80" class="small">#[modified]#</td>
 <td width="180" class="small">#[anchor]#</td>
-<td class="small">#[url]#</td>
+<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
 </tr>
 #{/list}#
 </table>
