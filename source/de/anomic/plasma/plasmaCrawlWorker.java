@@ -264,7 +264,7 @@ public final class plasmaCrawlWorker extends Thread {
             // send request
             httpc.response res = remote.GET(path, requestHeader);
                 
-            if (res.status.startsWith("200")) {
+            if (res.status.startsWith("200") || res.status.startsWith("203")) {
                 // the transfer is ok
                 long contentLength = res.responseHeader.contentLength();
                 
