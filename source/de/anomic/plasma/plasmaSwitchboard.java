@@ -1136,12 +1136,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         char[] order;
         String urlmask;
         long time;
-        int fetchcount;
-        public presearch(Set queryhashes, char[] order, long time /*milliseconds*/, String urlmask, int fetchcount) {
+        int searchcount, fetchcount;
+        public presearch(Set queryhashes, char[] order, long time /*milliseconds*/, String urlmask, int searchcount, int fetchcount) {
             this.queryhashes = queryhashes;
             this.order = order;
             this.urlmask = urlmask;
             this.time = time;
+            this.searchcount = searchcount;
             this.fetchcount = fetchcount;
         }
         public void run() {
@@ -1150,30 +1151,52 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logDebug("presearch: started job");
                 plasmaWordIndexEntity idx = searchManager.searchHashes(queryhashes, time);
                 log.logDebug("presearch: found " + idx.size() + " results");
-                plasmaSearch.result acc = searchManager.order(idx, queryhashes, stopwords, order, time, fetchcount);
+                plasmaSearch.result acc = searchManager.order(idx, queryhashes, stopwords, order, time, searchcount);
                 if (acc == null) return;
                 log.logDebug("presearch: ordered results, now " + acc.sizeOrdered() + " URLs ready for fetch");
                 
                 // take some elements and fetch the snippets
-                int i = 0;
-                plasmaCrawlLURL.entry urlentry;
-                String urlstring;
-                plasmaSnippetCache.result snippet;
-                while ((acc.hasMoreElements()) && (i < fetchcount)) {
-                    urlentry = acc.nextElement();
-                    if (urlentry.url().getHost().endsWith(".yacyh")) continue;
-                    urlstring = htmlFilterContentScraper.urlNormalform(urlentry.url());
-                    if (urlstring.matches(urlmask)) { //.* is default
-                        log.logDebug("presearch: fetching URL " + urlstring);
-			snippet = snippetCache.retrieve(urlentry.url(), true, queryhashes);
-                        if (snippet != null) log.logDebug("found snippet for URL " + urlstring + ": '" + snippet.line + "'");
-                        i++;
-                    }
-                }
+                fetchSnippets(acc, queryhashes, urlmask, fetchcount);
             } catch (IOException e) {
                 e.printStackTrace();
             }
             log.logDebug("presearch: job terminated");
+        }
+    }
+    
+    public void fetchSnippets(plasmaSearch.result acc, Set queryhashes, String urlmask, int fetchcount) {
+        // fetch the snippets
+        int i = 0;
+        plasmaCrawlLURL.entry urlentry;
+        String urlstring;
+        plasmaSnippetCache.result snippet;
+        while ((acc.hasMoreElements()) && (i < fetchcount)) {
+            urlentry = acc.nextElement();
+            if (urlentry.url().getHost().endsWith(".yacyh")) continue;
+            urlstring = htmlFilterContentScraper.urlNormalform(urlentry.url());
+            if ((urlstring.matches(urlmask)) &&
+                (!(snippetCache.existsInCache(urlentry.url(), queryhashes)))) {
+                new snippetFetcher(urlentry.url(), queryhashes).start();
+                i++;
+            }
+        }
+    }
+        
+    public class snippetFetcher extends Thread {
+        URL url;
+        Set queryhashes;
+        public snippetFetcher(URL url, Set queryhashes) {
+            if (url.getHost().endsWith(".yacyh")) return;
+            this.url = url;
+            this.queryhashes = queryhashes;
+        }
+        public void run() {
+            log.logDebug("snippetFetcher: try to get URL " + url);
+            plasmaSnippetCache.result snippet = snippetCache.retrieve(url, queryhashes, true);
+            if (snippet.line == null)
+                log.logDebug("snippetFetcher: cannot get URL " + url + ". error: " + snippet.error);
+            else
+                log.logDebug("snippetFetcher: got URL " + url + ", the snippet is '" + snippet.line + "', source=" + snippet.source);
         }
     }
     
@@ -1199,11 +1222,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logInfo("INIT WORD SEARCH: " + gs + " - " + count + " links, " + (time / 1000) + " seconds");
             long timestamp = System.currentTimeMillis();
             
+            // start a presearch, which makes only sense if we idle afterwards.
+            // this is especially the case if we start a global search and idle until search
             if (global) {
-                // start a presearch, which makes only sense if we idle afterwards.
-                // this is especially the case if we start a global search and idle until search
-                // results appear from other peers
-                Thread preselect = new presearch(queryhashes, order, time / 10, urlmask, 5);
+                Thread preselect = new presearch(queryhashes, order, time / 10, urlmask, 10, 3);
                 preselect.start();
             }
             
@@ -1229,6 +1251,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if (remainingTime < 500) remainingTime = 500;
             if (remainingTime > 3000) remainingTime = 3000;
             plasmaSearch.result acc = searchManager.order(idx, queryhashes, stopwords, order, remainingTime, 10);
+            if (!(global)) fetchSnippets(acc.cloneSmart(), queryhashes, urlmask, 10);
             log.logDebug("SEARCH TIME AFTER ORDERING OF SEARCH RESULT: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
             // result is a List of urlEntry elements: prepare answer
@@ -1289,8 +1312,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 			prop.put("results_" + i + "_urlname", urlname); 
 			prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
                         prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
-                        snippet = snippetCache.retrieve(url, false, queryhashes);
-                        if ((snippet == null) || (snippet.line.length() < 10)) {
+                        snippet = snippetCache.retrieve(url, queryhashes, false);
+                        if (snippet.line == null) {
                             prop.put("results_" + i + "_snippet", 0);
                             prop.put("results_" + i + "_snippet_text", "");
                         } else {
@@ -1366,8 +1389,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 plasmaSnippetCache.result snippet;
                 while ((acc.hasMoreElements()) && (i < count)) {
                     urlentry = acc.nextElement();
-                    snippet = snippetCache.retrieve(urlentry.url(), false, hashes);
-                    if ((snippet == null) || (snippet.line.length() < 10)) {
+                    snippet = snippetCache.retrieve(urlentry.url(), hashes, false);
+                    if (snippet.line == null) {
                         resource = urlentry.toString();
                     } else {
                         resource = urlentry.toString(snippet.line);

@@ -314,7 +314,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     }
 
     // string conversions
-    private static String code_iso8859s(byte c) {
+    private static String code_iso8859s(int c) {
 	switch ((int) c & 0xff) {
         
         // german umlaute and ligaturen
@@ -361,7 +361,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
         String z;
 	for (int i = 0; i < bb.length(); i++) {
             b = bb.byteAt(i);
-	    z = code_iso8859s(b);
+	    z = code_iso8859s(b & 0xff);
             if (z == null) t.append(b); else t.append(z);
 	}
 	return t;

@@ -148,7 +148,7 @@ public class kelondroMSetTools {
     }
     
     // now the same for set-set
-        public static TreeSet joinConstructive(TreeSet set1, TreeSet set2) {
+    public static TreeSet joinConstructive(TreeSet set1, TreeSet set2) {
 	// comparators must be equal
         if ((set1 == null) || (set2 == null)) return null;
 	if (set1.comparator() != set2.comparator()) return null;

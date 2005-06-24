@@ -324,12 +324,12 @@ public final class plasmaSearch {
     
     public class result /*implements Enumeration*/ {
         
-        final TreeMap pageAcc;            // key = order hash; value = plasmaLURL.entry
-        final kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
-        final Set searchhashes;           // hashes that are searched here
-        final Set stopwords;              // words that are excluded from the commonSense heuristic
-        final char[] order;               // order of heuristics
-        ArrayList results;                // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
+        TreeMap pageAcc;            // key = order hash; value = plasmaLURL.entry
+        kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
+        Set searchhashes;           // hashes that are searched here
+        Set stopwords;              // words that are excluded from the commonSense heuristic
+        char[] order;               // order of heuristics
+        ArrayList results;          // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
         
         public result(Set searchhashes, Set stopwords, char[] order) {
             this.pageAcc = new TreeMap();
@@ -338,6 +338,15 @@ public final class plasmaSearch {
             this.stopwords = stopwords;
             this.order = order;
             this.results = new ArrayList();
+        }
+        
+        public result cloneSmart() {
+            // clones only the top structure
+            result theClone = new result(this.searchhashes, this.stopwords, this.order);
+            theClone.pageAcc = (TreeMap) this.pageAcc.clone();
+            theClone.ref = this.ref;
+            theClone.results = this.results;
+            return theClone;
         }
         
         public int sizeOrdered() {

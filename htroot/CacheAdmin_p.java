@@ -128,6 +128,10 @@ public class CacheAdmin_p {
                         info += "<b>MEDIA:</b><br>" + formatAnchor(document.getMedialinks()) + "<br>";
                         info += "<b>EMAIL:</b><br>" + formatAnchor(document.getEmaillinks()) + "<br>";
                         info += "<b>TEXT:</b><br><span class=\"small\">" + new String(scraper.getText()) + "</span><br>";
+                        info += "<b>LINES:</b><br><span class=\"small\">";
+                        String[] sentences = document.getSentences();
+                        for (int i = 0; i < sentences.length; i++) info += sentences + "<br>";
+                        info += "</span><br>";
                     }
                 } catch (Exception e) {
                     info += e.toString();

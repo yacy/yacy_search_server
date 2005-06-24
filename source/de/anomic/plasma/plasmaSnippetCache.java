@@ -59,6 +59,7 @@ public class plasmaSnippetCache {
     public static final int SOURCE_CACHE = 0;
     public static final int SOURCE_FILE = 0;
     public static final int SOURCE_WEB = 0;
+    public static final int SOURCE_ERROR = 0;
     
     
     private int                   snippetsScoreCounter;
@@ -87,20 +88,26 @@ public class plasmaSnippetCache {
     
     public class result {
         public String line;
+        public String error;
         public int source;
-        public result(String line, int source) {
+        public result(String line, int source, String error) {
             this.line = line;
             this.source = source;
+            this.error = error;
         }
         public String toString() {
             return line;
         }
     }
     
-    public result retrieve(java.net.URL url, boolean fetchOnline, Set queryhashes) {
+    public boolean existsInCache(URL url, Set queryhashes) {
+        return retrieveFromCache(yacySearch.set2string(queryhashes), plasmaURL.urlHash(url)) != null;
+    }
+    
+    public result retrieve(URL url, Set queryhashes, boolean fetchOnline) {
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for url retrieve " + url);
-            return null;
+            return new result(null, SOURCE_ERROR, "no query hashes given");
         }
         String urlhash = plasmaURL.urlHash(url);
         
@@ -109,7 +116,7 @@ public class plasmaSnippetCache {
         String line = retrieveFromCache(wordhashes, urlhash);
         if (line != null) {
             //System.out.println("found snippet for url " + url + " in cache: " + line);
-            return new result(line, SOURCE_CACHE);
+            return new result(line, SOURCE_CACHE, null);
         }
         
         // if the snippet is not in the cache, we can try to get it from the htcache
@@ -123,32 +130,32 @@ public class plasmaSnippetCache {
                 source = SOURCE_WEB;
             }
         } catch (IOException e) {
-            return null;
+            return new result(null, SOURCE_ERROR, "error loading resource from web: " + e.getMessage());
         }
         if (resource == null) {
             //System.out.println("cannot load document for url " + url);
-            return null;
+            return new result(null, SOURCE_ERROR, "error loading resource from web, cacheManager returned NULL");
         }
         plasmaParserDocument document = parseDocument(url, resource);
         
-        if (document == null) return null; // cannot be parsed
+        if (document == null) return new result(null, SOURCE_ERROR, "parser error/failed"); // cannot be parsed
         //System.out.println("loaded document for url " + url);
         String[] sentences = document.getSentences();
         //System.out.println("----" + url.toString()); for (int l = 0; l < sentences.length; l++) System.out.println(sentences[l]);
         if ((sentences == null) || (sentences.length == 0)) {
             //System.out.println("found no sentences in url " + url);
-            return null;
+            return new result(null, SOURCE_ERROR, "parser returned no sentences");
         }
 
         // we have found a parseable non-empty file: use the lines
         line = computeSnippet(sentences, queryhashes, 12 * queryhashes.size(), 120);
         //System.out.println("loaded snippet for url " + url + ": " + line);
-        if (line == null) return null;
+        if (line == null) return new result(null, SOURCE_ERROR, "no matching snippet found");
         if (line.length() > 120) line = line.substring(0, 120);
 
         // finally store this snippet in our own cache
         storeToCache(wordhashes, urlhash, line);
-        return new result(line, source);
+        return new result(line, source, null);
     }
     
     public synchronized void storeToCache(String wordhashes, String urlhash, String snippet) {
@@ -184,24 +191,50 @@ public class plasmaSnippetCache {
     }
     
     private String computeSnippet(String[] sentences, Set queryhashes, int minLength, int maxLength) {
+        if ((sentences == null) || (sentences.length == 0)) return null;
+        if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
         kelondroMScoreCluster hitTable = new kelondroMScoreCluster();
-        Iterator i;
+        Iterator j;
         HashSet hs;
-        for (int j = 0; j < sentences.length; j++) {
-            if ((sentences[j].length() > minLength) && (sentences[j].length() < maxLength)) {
-                hs = hashSentence(sentences[j]);
-                i = queryhashes.iterator();
-                while (i.hasNext()) {
-                    if (hs.contains((String) i.next())) hitTable.incScore(new Integer(j));
+        for (int i = 0; i < sentences.length; i++) {
+            if ((sentences[i].length() > minLength) && (sentences[i].length() < maxLength)) {
+                hs = hashSentence(sentences[i]);
+                j = queryhashes.iterator();
+                while (j.hasNext()) {
+                    if (hs.contains((String) j.next())) hitTable.incScore(new Integer(i));
                 }
             }
         }
-        Integer maxLine = (Integer) hitTable.getMaxObject();
-        if (maxLine == null) return null;
-        if (hitTable.getScore(maxLine) == 0) return null;
-        return sentences[maxLine.intValue()];
+        int score = hitTable.getMaxScore(); // best number of hits
+        if (score <= 0) return null;
+        // we found (a) line(s) that have <score> hits.
+        // now find the shortest line of these hits
+        int shortLineIndex = -1;
+        int shortLineLength = Integer.MAX_VALUE;
+        for (int i = 0; i < sentences.length; i++) {
+            if ((hitTable.getScore(new Integer(i)) == score) &&
+                (sentences[i].length() < shortLineLength)) {
+                shortLineIndex = i;
+                shortLineLength = sentences[i].length();
+            }
+        }
+        // find a first result
+        String result = sentences[shortLineIndex];
+        if (score == queryhashes.size()) return result;
+        // the result has not all words in it.
+        // find another sentence that represents the missing other words
+        // first remove all words that appear in the result from the queryhashes
+        hs = hashSentence(result);
+        j = queryhashes.iterator();
+        while (j.hasNext()) {
+            if (hs.contains((String) j.next())) j.remove();
+        }
+        if (queryhashes.size() == 0) return result;
+        // now find recursively more sentences
+        String nextSnippet = computeSnippet(sentences, queryhashes, minLength, maxLength);
+        return result + ((nextSnippet == null) ? "" : (" ... " + nextSnippet));
     }
-   
+    
     private HashSet hashSentence(String sentence) {
         HashSet set = new HashSet();
         Enumeration words = plasmaCondenser.wordTokenizer(sentence);
@@ -264,5 +297,4 @@ public class plasmaSnippetCache {
             log);
     }
     
-
 }
