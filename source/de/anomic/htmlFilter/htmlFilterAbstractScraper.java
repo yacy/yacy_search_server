@@ -357,12 +357,27 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
 
     public static serverByteBuffer convertUmlaute(serverByteBuffer bb) {
 	serverByteBuffer t = new serverByteBuffer(bb.length() + 20);
-        byte b;
+        int b0, b1, b2;
         String z;
-	for (int i = 0; i < bb.length(); i++) {
-            b = bb.byteAt(i);
-	    z = code_iso8859s(b & 0xff);
-            if (z == null) t.append(b); else t.append(z);
+        int i = 0;
+        while (i < bb.length()) {
+            b0 = bb.byteAt(i) & 0xff;
+            // check utf-8 encoding
+            if (b0 < 128) {
+                t.append(b0);
+                i++;
+            } else {
+                b1 = bb.byteAt(i + 1) & 0xff;
+                if ((b0 > 0xbf) && (b0 < 0xe0)) {
+                    z = code_iso8859s(((b0 & 0x1f) << 0x6) | (b1 & 0x3f));
+                    i += 2;
+                } else {
+                    b2 = bb.byteAt(i + 2) & 0xff;
+                    z = code_iso8859s(((b0 & 0xf) << 0xc) | ((b1 & 0x3f) << 0x6) | (b2 & 0x3f));
+                    i += 3;
+                }
+                if (z == null) t.append(b0); else t.append(z);
+            }
 	}
 	return t;
     }

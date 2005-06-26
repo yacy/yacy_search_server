@@ -637,6 +637,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	
     	public Session(ThreadGroup theThreadGroup) {
             super(theThreadGroup,"Session");
+            
+            // setting the session startup time
+            this.start = System.currentTimeMillis(); 
     	}
         
         public void setStopped(boolean stopped) {
@@ -724,56 +727,50 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.running = true;
             
             // The thread keeps running.
-            while (!this.stopped && !Thread.interrupted()) { 
-                 if (this.done)  { 
-                     // We are waiting for a task now.
+            while (!this.stopped && !Thread.interrupted()) {
+                if (this.done)  {
+                    // We are waiting for a task now.
                     synchronized (this)  {
-                       try  {
-                          this.wait(); //Wait until we get a request to process.
-                       } 
-                       catch (InterruptedException e) {
-                           this.stopped = true;
-                           // log.error("", e);
-                       }
+                        try  {
+                            this.wait(); //Wait until we get a request to process.
+                        } catch (InterruptedException e) {
+                            this.stopped = true;
+                            // log.error("", e);
+                        }
                     }
-                 } 
-                 else 
-                 { 
+                } else {
                     //There is a task....let us execute it.
                     try  {
-                       execute();
-                       if (this.syncObject != null) {
-                          synchronized (this.syncObject) {
-                              //Notify the completion.
-                              this.syncObject.notifyAll();
-                          }
-                       }
+                        execute();
+                        if (this.syncObject != null) {
+                            synchronized (this.syncObject) {
+                                //Notify the completion.
+                                this.syncObject.notifyAll();
+                            }
+                        }
                     }  catch (Exception e) {
                         // log.error("", e);
-                    } 
-                    finally  {
+                    } finally  {
                         reset();
                         
                         if (!this.stopped && !this.isInterrupted()) {
                             try {
                                 this.setName("Session_inPool");
                                 serverCore.this.theSessionPool.returnObject(this);
-                            }
-                            catch (Exception e1) {
+                            } catch (Exception e1) {
                                 // e1.printStackTrace();
                                 this.stopped = true;
                             }
                         }
                     }
-                 }
-              }
-        }    
+                }
+            }
+        }  
         
         private void execute() throws InterruptedException {
                    
             try {
-                // setting the session startup time
-                this.start = System.currentTimeMillis();  
+                 
                 
                 // settin the session identity
                 this.identity = "-";
@@ -820,53 +817,52 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	    }
             
             //log.logDebug("* session " + handle + " completed. time = " + (System.currentTimeMillis() - handle));
-            announceMoreExecTime(System.currentTimeMillis() - this.start);
     	}
     	
-    	private void listen() {
-    	    try {
-        		// set up some reflection
-        		Class[] stringType    = {"".getClass()};
-        		Class[] exceptionType = {Class.forName("java.lang.Throwable")};
-        		
-                        // send greeting
-        		Object result = commandObj.greeting();
-        		if (result != null) {
-        		    if ((result instanceof String) && (((String) result).length() > 0)) writeLine((String) result);
-        		}
-    
-        		// start dialog
-        		byte[] requestBytes = null;
-        		boolean terminate = false;
-        		int pos;
-        		String cmd;
-        		String tmp;
-        		Object[] stringParameter = new String[1];
-        		while ((this.in != null) && ((requestBytes = readLine()) != null)) {                    
-        		    this.commandCounter++;
+        private void listen() {
+            try {
+                // set up some reflection
+                Class[] stringType    = {"".getClass()};
+                Class[] exceptionType = {Class.forName("java.lang.Throwable")};
+                
+                // send greeting
+                Object result = commandObj.greeting();
+                if (result != null) {
+                    if ((result instanceof String) && (((String) result).length() > 0)) writeLine((String) result);
+                }
+                
+                // start dialog
+                byte[] requestBytes = null;
+                boolean terminate = false;
+                int pos;
+                String cmd;
+                String tmp;
+                Object[] stringParameter = new String[1];
+                while ((this.in != null) && ((requestBytes = readLine()) != null)) {
+                    this.commandCounter++;
                     this.setName("Session_" + this.userAddress.getHostAddress() + ":" + this.controlSocket.getPort() + "#" + commandCounter);
                     
-        		    this.request = new String(requestBytes);
-                            //log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
-        		    log(false, this.request);
-        		    try {
+                    this.request = new String(requestBytes);
+                    //log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
+                    log(false, this.request);
+                    try {
                         // if we can not determine the proper command string we try to call function emptyRequest
                         // of the commandObject
                         if (this.request.trim().length() == 0) this.request = "EMPTY";
                         
-            			pos = this.request.indexOf(' ');
-            			if (pos < 0) {
-            			    cmd = this.request.trim().toUpperCase();
-            			    stringParameter[0] = "";
-            			} else {
-            			    cmd = this.request.substring(0, pos).trim().toUpperCase();
-            			    stringParameter[0] = this.request.substring(pos).trim();
-            			}
-        
+                        pos = this.request.indexOf(' ');
+                        if (pos < 0) {
+                            cmd = this.request.trim().toUpperCase();
+                            stringParameter[0] = "";
+                        } else {
+                            cmd = this.request.substring(0, pos).trim().toUpperCase();
+                            stringParameter[0] = this.request.substring(pos).trim();
+                        }
+                        
                         // setting the socket timeout for reading of the request content
                         this.controlSocket.setSoTimeout(this.socketTimeout);
                         
-            			// exec command and return value
+                        // exec command and return value
                         Object commandMethod = this.commandObjMethodCache.get(cmd);
                         if (commandMethod == null) {
                             try {
@@ -877,38 +873,40 @@ public final class serverCore extends serverAbstractThread implements serverThre
                                 stringParameter[0] = this.request.trim();
                             }
                         }
-            			result = ((Method)commandMethod).invoke(this.commandObj, stringParameter);
-                                    //log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
+                        //long commandStart = System.currentTimeMillis();
+                        result = ((Method)commandMethod).invoke(this.commandObj, stringParameter);
+                        //announceMoreExecTime(commandStart - System.currentTimeMillis()); // shall be negative!
+                        //log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
                         this.out.flush();
-            			if (result == null) {
-            			    /*
-            			    log(2, true, "(NULL RETURNED/STREAM PASSED)");
-            			    */
-            			} else if (result instanceof Boolean) {
-            			    if (((Boolean) result).equals(TERMINATE_CONNECTION)) break;
+                        if (result == null) {
+                                    /*
+                                    log(2, true, "(NULL RETURNED/STREAM PASSED)");
+                                     */
+                        } else if (result instanceof Boolean) {
+                            if (((Boolean) result).equals(TERMINATE_CONNECTION)) break;
                             // deactivating timeout. this is needed because of persistent connections
                             this.controlSocket.setSoTimeout(0);
-            			} else if (result instanceof String) {
-            			    if (((String) result).startsWith("!")) {
-                				result = ((String) result).substring(1);
-                				terminate = true;
-            			    }
-            			    writeLine((String) result);
-            			} else if (result instanceof InputStream) {
-            			    tmp = send(out, (InputStream) result);
-            			    if ((tmp.length() > 4) && (tmp.toUpperCase().startsWith("PASS"))) {
+                        } else if (result instanceof String) {
+                            if (((String) result).startsWith("!")) {
+                                result = ((String) result).substring(1);
+                                terminate = true;
+                            }
+                            writeLine((String) result);
+                        } else if (result instanceof InputStream) {
+                            tmp = send(out, (InputStream) result);
+                            if ((tmp.length() > 4) && (tmp.toUpperCase().startsWith("PASS"))) {
                                 log(true, "PASS ********");
-            			    } else {
+                            } else {
                                 log(true, tmp);
-            			    }
-            			    tmp = null;
-            			}
+                            }
+                            tmp = null;
+                        }
                         if (terminate) break;
-        
+                        
                     } catch (InvocationTargetException ite) {
-            			System.out.println("ERROR A " + userAddress.getHostAddress());
-            			// we extract a target exception and let the thread survive
-            			writeLine((String) commandObj.error(ite.getTargetException()));
+                        System.out.println("ERROR A " + userAddress.getHostAddress());
+                        // we extract a target exception and let the thread survive
+                        writeLine((String) commandObj.error(ite.getTargetException()));
                     } catch (NoSuchMethodException nsme) {
                         System.out.println("ERROR B " + userAddress.getHostAddress());
                         if (isNotLocal(userAddress.getHostAddress().toString())) {
@@ -933,14 +931,15 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         writeLine("UNKNOWN REASON:" + (String) commandObj.error(e));
                     }
                 } // end of while
-    	    } catch (java.lang.ClassNotFoundException e) {
-        		System.out.println("Internal Error: wrapper class not found: " + e.getMessage());
-        		System.exit(0);
-    	    } catch (java.io.IOException e) {
+            } catch (java.lang.ClassNotFoundException e) {
+                System.out.println("Internal Error: wrapper class not found: " + e.getMessage());
+                System.exit(0);
+            } catch (java.io.IOException e) {
                 // connection interruption: more or less normal
-    	    }
-    	}
-	
+            }
+            //announceMoreExecTime(System.currentTimeMillis() - this.start);
+        }
+        
     }
 
     public static byte[] receive(PushbackInputStream pbis, serverByteBuffer readLineBuffer, int maxSize, boolean logerr) {
