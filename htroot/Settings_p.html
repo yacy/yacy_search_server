@@ -8,15 +8,40 @@
 #[header]#
 <br><br>
 <h2>Settings</h2>
-
 <p>This is the configuration page for YaCy. Access to this page should be limited to an administration person only.
-To restrict the access to this page, please set an administrator account and password below.</p>
+To restrict the access to this page, please set an administrator account and password <a href="#admin">below.</a></p>
 <p>If you want to restore all settings to the default values,
 but <b>forgot your administration password</b>, you must stop the proxy,
 delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.
+<p>
+<table>
+<tr>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#admin">Administration Account Settings</a></td>
+	<td rowspan="5" width="30">&nbsp;</td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#ServerAccess">Server Access Settings</a></td>
+</tr>
+<tr>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#general">General Settings</a></td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#SystemBehaviour">System Behaviour Settings</a></td>
+</tr>
+<tr>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#ProxyAccess">Server Access Settings</a></td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#seed">Seed Upload Settings</a></td>
+</tr>
+<tr>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#http">HTTP Networking</a></td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#parser">Content Parser Settings</a></td>
+</tr>
+<tr>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#proxy">Remote Proxy (optional)</a></td>
+	<td>&nbsp;</td>
+</tr>
+
+</table>
+</p>
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend>Administration Account Settings</legend>
+<fieldset><legend><a name="admin">Administration Account Settings</a></legend>
 <p>This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:
 <p><table border="0" cellspacing="5">
   <tr valign="top">
@@ -35,7 +60,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 </form><br>
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend>General Settings</legend>
+<fieldset><legend><a name="general">General Settings</a></legend>
 <p>
 <table border="0" cellspacing="5">
   <tr valign="top">
@@ -60,7 +85,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 </form><br>
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend>Server Access Settings</legend>
+<fieldset><legend><a name="ProxyAccess">Server Access Settings</a></legend>
 These settings configure the access method to your own http proxy and server.
 All traffic is routed throug one single port, for both proxy and server.<br>
 <br><b>Port Configuration</b><br><br>
@@ -124,7 +149,7 @@ Alternatively, you can simply set a virtual server port on your NAT/Server to en
 </form><br>
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend>HTTP Networking</legend>
+<fieldset><legend><a name="http">HTTP Networking</a></legend>
 <table border="0" cellspacing="5">
   <tr valign="top">
     <td>Transparent&nbsp;Proxy:</td>
@@ -148,7 +173,7 @@ Alternatively, you can simply set a virtual server port on your NAT/Server to en
 </form><br>
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend>Remote Proxy (optional)</legend>
+<fieldset><legend><a name="proxy">Remote Proxy (optional)</a></legend>
 <p>YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:</p>
 <p><table border="0" cellspacing="5">
   <tr valign="top">
@@ -176,7 +201,7 @@ Alternatively, you can simply set a virtual server port on your NAT/Server to en
 </form><br>
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend>Server Access Settings</legend>
+<fieldset><legend><a name="ServerAccess">Server Access Settings</a></legend>
 <p>Here you can restrict access to the server. By default, the access is not limited, because this function is needed to spawn the p2p index-sharing function. If you block access to your server (setting anything else than '*'), then you will also be blocked from using other peers' indexes for search service. However, blocking access may be correct in enterprise environments where you only want to index your company's own web pages.</p>
 <p>ATTENTION: Your current IP is recognized as "#[clientIP]#". If the value you enter here does not match with this IP, you will not be able to access the server pages anymore</p>
 <p><table border="0" cellspacing="5">
@@ -192,7 +217,7 @@ Alternatively, you can simply set a virtual server port on your NAT/Server to en
 </form><br>
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend>System Behaviour Settings</legend>
+<fieldset><legend><a name="SystemBehaviour">System Behaviour Settings</a></legend>
 <table>
 <tr><td>Auto pop-up of status page on start-up:</td>
 <td><input type="submit" name="enpop" value="enable"> / <input type="submit" name="dispop" value="disable"></td></tr>
@@ -202,7 +227,7 @@ Alternatively, you can simply set a virtual server port on your NAT/Server to en
 
 <p>
 <fieldset>
-<legend>Seed Upload Settings</legend>
+<legend><a name="seed">Seed Upload Settings</a></legend>
 <p>With these settings you can configure if you have an account on a public accessible 
 server where you can host a seed-list file.</p>
 <p><b>General Settings:</b></p>
@@ -241,7 +266,7 @@ but only if there had been changes to the seed-list.
 
 <br>
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend>Content Parser Settings</legend>
+<fieldset><legend><a name="parser">Content Parser Settings</a></legend>
 <p>With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.<br>
 For a detailed description of the various MIME-types take a look at <a href="http://www.iana.org/assignments/media-types/">http://www.iana.org/assignments/media-types/</a></p>
 <p>

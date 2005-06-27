@@ -8,11 +8,32 @@
 #[header]#
 <br><br>
 <h2>Index Creation</h2>
+<p>
+<table>
+<tr>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#startCrawling">Start new crawling job</a></td>
+	<td rowspan="5" width="30">&nbsp;</td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#rejectedUrls">Rejected URL List</a></td>
+</tr>
+<tr>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#distributedIndexing">Distributed Indexing</a></td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#indexingQueue">Indexing Queue</a></td>
+</tr>
+<tr>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#crawlingProfiles">Crawl Profile List</a></td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#loaderQueue">Loader Queue</a></td>
+</tr>
+<tr>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#remoteCrawlPeers">Remote Crawling Peers</a></td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#crawlingQueue">Crawling Queue</a></td>
+</tr>
+</table>
+</p>
 
 <p>
-<div class=small><b>
+<div class=small><a name="startCrawling"><b>Start Crawling Job:</b></a>&nbsp;
 You can define url's as start points for Web page crawling and start that crawling here.
-</b></div>
+</div>
 <table border="0" cellpadding="5" cellspacing="0" width="100%">
 <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
   <tr valign="top" class="TableCellDark">
@@ -114,7 +135,7 @@ You can define url's as start points for Web page crawling and start that crawli
 </p>
 
 <p><form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-<div class=small><b>Distributed Indexing: </b>
+<div class=small><a name="distributedIndexing"><b>Distributed Indexing: </b></a>
 Crawling and indexing can be done by remote peers.
 Your peer can search and index for other peers and they can search for you.</div>
 <table border="0" cellpadding="5" cellspacing="0" width="100%">
@@ -170,7 +191,7 @@ Continue crawling.
 </form>
 <br>
 #(/refreshbutton)#
-Crawl Profile List:<br>
+<b><a name="crawlingProfiles">Crawl Profile List:</a></b><br>
 <table border="0" cellpadding="2" cellspacing="1" width="100%">
   <tr class="TableHeader">
     <td width="120" class="small"><b>Crawl Thread</b></td>
@@ -196,6 +217,8 @@ Crawl Profile List:<br>
 #{/crawlProfiles}#
 </table>
 <br>
+<a name="remoteCrawlPeers">
+<b>Remote Crawling Peers:</b>&nbsp;
 #(remoteCrawlPeers)#
 No remote crawl peers availible.<br>
 ::
@@ -215,11 +238,14 @@ No remote crawl peers availible.<br>
 </tr>
 </table>
 #(/remoteCrawlPeers)#
+</a>
+
 <br>
+<a name="rejectedUrls">
 #(rejected)#
 ::
 <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-There are #[num]# entries in the rejected-urls list.
+<b>Rejected URL List:</b>&nbsp;There are #[num]# entries in the rejected-urls list.
 #(only-latest)#
 ::
 Showing latest #[num]# entries.
@@ -246,7 +272,11 @@ There are #[num]# entries in the rejected-queue:<br>
 #{/list}#
 </table>
 #(/rejected)#
+</a>
+
 <br>
+<a name="indexingQueue">
+<b>Indexing Queue:</b>&nbsp;
 #(indexing-queue)#
 The indexing queue is empty<br>
 ::
@@ -272,7 +302,11 @@ There are #[num]# entries in the indexing queue:<br>
 #{/list}#
 </table>
 #(/indexing-queue)#
+</a>
+
 <br>
+<a name="loaderQueue">
+<b>Loader Set:</b>&nbsp;
 #(loader-set)#
 The loader set is empty<br>
 ::
@@ -292,7 +326,11 @@ There are #[num]# entries in the loader set:<br>
 #{/list}#
 </table>
 #(/loader-set)#
+</a>
+
 <br>
+<a name="crawlingQueue">
+<b>Crawler Queue:</b>&nbsp;
 #(crawler-queue)#
 The crawler queue is empty<br><br>
 ::
@@ -325,6 +363,7 @@ There are #[num]# entries in the crawler queue. Showing #[show-num]# most recent
 #(/paused)#
 </form>
 #(/crawler-queue)#
+</a>
 </p>
 #[footer]#
 </body>
