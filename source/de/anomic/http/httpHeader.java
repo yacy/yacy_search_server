@@ -105,6 +105,7 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String RANGE = "Range";
     public static final String CACHE_CONTROL = "Cache-Control";
     public static final String TRANSFER_ENCODING = "Transfer-Encoding";
+    public static final String LOCATION = "Location";
     
     public static final String X_CACHE = "X-Cache";
     public static final String X_CACHE_LOOKUP = "X-Cache-Lookup";

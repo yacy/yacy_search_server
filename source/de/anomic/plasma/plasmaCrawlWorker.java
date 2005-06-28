@@ -232,6 +232,35 @@ public final class plasmaCrawlWorker extends Thread {
             plasmaHTCache cacheManager,
             serverLog log
         ) throws IOException {
+        load(url,
+             referer,
+             initiator,
+             depth, 
+             profile,
+             socketTimeout, 
+             remoteProxyHost, 
+             remoteProxyPort, 
+             remoteProxyUse, 
+             cacheManager, 
+             log, 
+             0
+        );
+    }
+    
+    public static void load(
+            URL url, 
+            String referer, 
+            String initiator, 
+            int depth, 
+            plasmaCrawlProfile.entry profile,
+            int socketTimeout,
+            String remoteProxyHost,
+            int remoteProxyPort,
+            boolean remoteProxyUse,
+            plasmaHTCache cacheManager,
+            serverLog log,
+            int redirectionCount
+        ) throws IOException {
         if (url == null) return;
         Date requestDate = new Date(); // remember the time...
         String host = url.getHost();
@@ -316,7 +345,37 @@ public final class plasmaCrawlWorker extends Thread {
                     if (cacheFile.exists()) cacheFile.delete();
                     log.logError("CRAWLER LOADER ERROR1: with url=" + url.toString() + ": " + e.toString());
                 }
-            } else {
+            } else if (res.status.startsWith("30")) {
+                if (redirectionCount < 5) {                    
+                    if (res.responseHeader.containsKey(httpHeader.LOCATION)) {
+                        // generating the new url
+                        URL redirectionUrl = new URL(url, (String) res.responseHeader.get(httpHeader.LOCATION));
+                        
+                        // returning the used httpc
+                        httpc.returnInstance(remote);
+                        remote = null;
+                        
+                        // restart crawling with new url
+                        log.logInfo("Redirection detected ('" + res.status + "') for url " + url.toString() + 
+                                    "\nRedirecting request to: " + redirectionUrl);
+                        load(redirectionUrl,
+                             referer,
+                             initiator,
+                             depth, 
+                             profile,
+                             socketTimeout, 
+                             remoteProxyHost, 
+                             remoteProxyPort, 
+                             remoteProxyUse, 
+                             cacheManager, 
+                             log, 
+                             ++redirectionCount
+                        );
+                    }
+                } else {
+                    log.logInfo("Redirection counter exceeded for url " + url.toString() + ". Processing aborted.");
+                }
+            }else {
                 // if the response has not the right response type then reject file
                 log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for url " + url.toString());
                 // not processed any further
