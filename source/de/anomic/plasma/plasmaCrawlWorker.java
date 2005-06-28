@@ -380,7 +380,7 @@ public final class plasmaCrawlWorker extends Thread {
                 log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for url " + url.toString());
                 // not processed any further
             }
-            remote.close();
+            if (remote != null) remote.close();
         } catch (Exception e) {
             // this may happen if the targeted host does not exist or anything with the
             // remote server was wrong.
