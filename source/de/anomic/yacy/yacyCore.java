@@ -99,8 +99,12 @@ public class yacyCore {
     //public static boolean terminate = false;
 
     // class variables
-    private int seedCacheSizeStamp = 0;
-    private String oldIPStamp = "";
+    private int        lastSeedUpload_seedDBSize = 0;
+    public static long lastSeedUpload_timeStamp = System.currentTimeMillis();
+    private String lastSeedUpload_myPeerType = "";    
+    private String lastSeedUpload_myIP = "";
+    
+    
     private int onlineMode = 1;
     private plasmaSwitchboard switchboard;
     
@@ -170,7 +174,7 @@ public class yacyCore {
         // create or init index sharing
         //shareManager = new yacyShare(switchboard);
         
-        seedCacheSizeStamp = seedDB.sizeConnected();
+        lastSeedUpload_seedDBSize = seedDB.sizeConnected();
         
         log.logSystem("CORE INITIALIZED");
         // ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!
@@ -212,8 +216,7 @@ public class yacyCore {
     
     public void publishSeedList() {
         
-        log.logDebug("triggered Seed Publish");
-
+        log.logDebug("yacyCore.publishSeedList: Triggered Seed Publish");
         
         /*
         if (oldIPStamp.equals((String) seedDB.mySeed.get("IP", "127.0.0.1")))
@@ -224,12 +227,16 @@ public class yacyCore {
             System.out.println("***DEBUG publishSeedList: I can reach myself");
         */
         
-        if (!(!(oldIPStamp.equals(seedDB.mySeed.get("IP", "127.0.0.1")))) ||
-            (seedCacheSizeStamp != seedDB.sizeConnected()) ||
-            (!(canReachMyself()))) {
-            log.logDebug("not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
+        if (
+                (this.lastSeedUpload_myIP.equals(seedDB.mySeed.get("IP", "127.0.0.1"))) &&
+                (this.lastSeedUpload_seedDBSize == seedDB.sizeConnected()) &&
+                (canReachMyself()) &&
+                (System.currentTimeMillis() - yacyCore.lastSeedUpload_timeStamp < 1000*60*60*24) &&
+                (seedDB.mySeed.isPrincipal())
+        ) {
+            log.logDebug("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
             return;
-        }        
+        }
         
         // getting the seed upload method that should be used ...
         String seedUploadMethod = this.switchboard.getConfig("seedUploadMethod","");
@@ -247,8 +254,13 @@ public class yacyCore {
             }
             // we want to be a principal...
             saveSeedList();
-            this.seedCacheSizeStamp = seedDB.sizeConnected();
-            this.oldIPStamp = seedDB.mySeed.get("IP", "127.0.0.1");            
+            
+            this.lastSeedUpload_seedDBSize = seedDB.sizeConnected();
+            this.lastSeedUpload_timeStamp = System.currentTimeMillis();
+            
+            this.lastSeedUpload_myIP = seedDB.mySeed.get("IP", "127.0.0.1");  
+            this.lastSeedUpload_myPeerType = seedDB.mySeed.get("PeerType", yacySeed.PEERTYPE_JUNIOR);
+            
         } else {
             if (seedUploadMethod.equals("")) this.switchboard.setConfig("seedUploadMethod","none");
             log.logDebug("yacyCore.publishSeedList: No uploading method configured");
@@ -269,10 +281,10 @@ public class yacyCore {
         if (oldSize == 0) {
             // reload the seed lists
             peerActions.loadSeedLists();
-            log.logInfo("re-initialized seed list. received " + seedDB.sizeConnected() + " new peers");
+            log.logInfo("re-initialized seed list. received " + seedDB.sizeConnected() + " new peer(s)");
         }
         int newSeeds = publishMySeed(false);
-        if (newSeeds > 0) log.logInfo("received " + newSeeds + " new peers, know a total of " +
+        if (newSeeds > 0) log.logInfo("received " + newSeeds + " new peer(s), know a total of " +
         seedDB.sizeConnected() + " different peers");
     }
     

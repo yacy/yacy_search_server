@@ -78,6 +78,13 @@ import de.anomic.tools.crypt;
 
 public class yacySeed {
     
+    public static final String PEERTYPE_VIRGIN = "virgin";
+    public static final String PEERTYPE_JUNIOR = "junior";
+    public static final String PEERTYPE_SENIOR = "senior";
+    public static final String PEERTYPE_PRINCIPAL = "principal";
+    
+    public static final String PEERTYPE = "PeerType";
+    
     // class variables
     public String hash;
     private Map dna;

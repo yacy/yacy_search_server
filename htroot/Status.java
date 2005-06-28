@@ -157,6 +157,7 @@ public class Status {
                 if (env.getConfig("seedFilePath","").length() > 0)
                     env.setConfig("seedUploadMethod","File");                
             }                        
+            
             if (seedUploadMethod.equalsIgnoreCase("ftp")) {
                 prop.put("seedServer", 1);//enabled
                 prop.put("seedServer_seedServer", env.getConfig("seedFTPServer",""));
@@ -167,6 +168,8 @@ public class Status {
                 prop.put("seedServer", 2);//enabled
                 prop.put("seedServer_seedFile", env.getConfig("seedFilePath",""));
             }
+            prop.put("seedServer_lastUpload",
+                    serverDate.intervalToString(System.currentTimeMillis()-yacyCore.lastSeedUpload_timeStamp));
         } else {
             prop.put("seedServer", 0);//disabled
         }

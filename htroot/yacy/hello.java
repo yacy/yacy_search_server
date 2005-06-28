@@ -121,6 +121,9 @@ public class hello {
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper())) yacyCore.peerActions.peerPing(remoteSeed);
         }
+        if (!((String)prop.get("yourtype")).equals(remoteSeed.get("PeerType", "junior"))) {
+            yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() + "' [" + reportedip + "] peerType to '" + prop.get("yourtype") + "'.");
+        }
         
         String seeds = "";
         

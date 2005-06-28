@@ -507,12 +507,25 @@ public final class httpd implements serverHandler {
             
             return this.prop.getProperty(CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (Exception e) {
-            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();   
-            this.log.logError(errorMsg,e);
+            logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
         }
     }
     
+    private void logUnexpectedError(Exception e) {
+        if (e instanceof InterruptedException) {
+            this.log.logInfo("Interruption detected");
+        } else {
+            String errorMsg = e.getMessage();
+            if ((errorMsg != null) && (errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
+                // client closed the connection, so we just end silently
+                this.log.logInfo("Client unexpectedly closed connection");
+            } else {
+                this.log.logError("Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(),e);
+            }
+        }        
+    }
+
     public Boolean HEAD(String arg) throws IOException {
         try {
             parseQuery(httpHeader.METHOD_HEAD,arg);
@@ -559,8 +572,7 @@ public final class httpd implements serverHandler {
             }
             return this.prop.getProperty(CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (Exception e) {
-            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();  
-            this.log.logError(errorMsg,e);
+            logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
         }        
     }
@@ -629,8 +641,7 @@ public final class httpd implements serverHandler {
             //return serverCore.RESUME_CONNECTION;
             return this.prop.getProperty(CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (Exception e) {
-            String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
-            this.log.logError(errorMsg,e);
+            logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
         }        
     }

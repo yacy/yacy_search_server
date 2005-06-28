@@ -488,7 +488,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
             } else {
                 String errorMsg = e.getMessage();
-                if ((errorMsg != null) && (errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset by peer"))) {
+                if ((errorMsg != null) && (errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
                     // client closed the connection, so we just end silently
                     this.theLogger.logInfo("Client unexpectedly closed connection while processing query: " + path + "; '" + e.toString() + ":" + errorMsg + "'");
                     conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");

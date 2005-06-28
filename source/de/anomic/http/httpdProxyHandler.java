@@ -726,7 +726,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                         // just do nothing, we leave it this way
                         this.theLogger.logDebug("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")",e);
                         this.forceConnectionClose();
-                    } else if ((remote != null)&&(remote.isClosed())) {
+                    } else if ((remote != null)&&(remote.isClosed())) { // TODO: query for broken pipe
                         errorMessage = "destination host unexpectedly closed connection";                 
                     } else {
                         errorMessage = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
