@@ -283,6 +283,10 @@ public final class plasmaParser {
 			if (supportedFileExt.contains(mediaExt)) return false;
 		}
         
+        synchronized (supportedRealtimeFileExt) {
+            if (supportedRealtimeFileExt.contains(mediaExt)) return false;
+        }        
+        
         synchronized (mediaExtSet) {
 			return mediaExtSet.contains(mediaExt);
 		}
