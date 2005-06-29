@@ -80,6 +80,7 @@ public class hello {
         // we easily know the caller's IP:
         String clientip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum
         String reportedip = remoteSeed.get("IP", "");
+        String reportedPeerType = remoteSeed.get("PeerType", "junior");
         float clientversion = remoteSeed.getVersion();
 
         int urls = -1;
@@ -121,7 +122,7 @@ public class hello {
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper())) yacyCore.peerActions.peerPing(remoteSeed);
         }
-        if (!((String)prop.get("yourtype")).equals(remoteSeed.get("PeerType", "junior"))) {
+        if (!((String)prop.get("yourtype")).equals(reportedPeerType)) {
             yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() + "' [" + reportedip + "] peerType to '" + prop.get("yourtype") + "'.");
         }
         
