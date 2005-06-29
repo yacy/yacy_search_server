@@ -6,7 +6,7 @@
 // Frankfurt, Germany, 2004, 2005
 //
 // This File is contributed by Alexander Schier
-// last change: 27.02.2005
+// last change: 29.06.2005 by Marc Nause
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.tools.unHtml;
 
 public class ViewProfile {
 
@@ -104,7 +105,7 @@ public class ViewProfile {
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
 		    String key=(String)entry.getKey();
-		    String value=((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n");
+		    String value=(new unHtml(((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n"))).un();
 		    //all known Keys which should be set as they are
 		    if(knownKeys.contains(key)){
 			prop.put("success_"+key, 1);
