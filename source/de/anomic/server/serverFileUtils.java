@@ -90,12 +90,12 @@ public final class serverFileUtils {
         FileInputStream fis = null;
         FileOutputStream fos = null;
         try {
-	        fis = new FileInputStream(source);
-	        fos = new FileOutputStream(dest);
-	        copy(fis, fos);
+            fis = new FileInputStream(source);
+            fos = new FileOutputStream(dest);
+            copy(fis, fos);
         } finally {
             if (fis != null) try {fis.close();} catch (Exception e) {}
-            if (fos != null) try {fos.close();} catch (Exception e) {}            
+            if (fos != null) try {fos.close();} catch (Exception e) {}
         }
     }
 
@@ -107,16 +107,16 @@ public final class serverFileUtils {
     }
     
     public static byte[] read(File source) throws IOException {
-		byte[] buffer = new byte[(int) source.length()];
-		InputStream fis = null;
-		try {
-			fis = new FileInputStream(source);
-			int p = 0, c;
-			while ((c = fis.read(buffer, p, buffer.length - p)) > 0) p += c;
-		} finally {
+        byte[] buffer = new byte[(int) source.length()];
+        InputStream fis = null;
+        try {
+            fis = new FileInputStream(source);
+            int p = 0, c;
+            while ((c = fis.read(buffer, p, buffer.length - p)) > 0) p += c;
+        } finally {
             if (fis != null) try { fis.close(); } catch (Exception e) {}
-		}
-		return buffer;
+        }
+        return buffer;
     }
     
     public static byte[] readAndZip(File source) throws IOException {

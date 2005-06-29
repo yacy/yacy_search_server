@@ -105,6 +105,7 @@ public class plasmaSnippetCache {
     }
     
     public result retrieve(URL url, Set queryhashes, boolean fetchOnline) {
+        // heise = "0OQUNU3JSs05"
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for url retrieve " + url);
             return new result(null, SOURCE_ERROR, "no query hashes given");
@@ -250,7 +251,7 @@ public class plasmaSnippetCache {
         } catch (IOException e) {}
         
         if (header == null) {
-            String filename = url.getFile();
+            String filename = cacheManager.getCachePath(url).getName();
             int p = filename.lastIndexOf('.');
             if ((p < 0) ||
                 ((p >= 0) && (plasmaParser.supportedFileExtContains(filename.substring(p + 1))))) {

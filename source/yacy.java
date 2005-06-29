@@ -148,6 +148,10 @@ public final class yacy {
             
             plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
             
+            // hardcoded, forced, temporary value-migration
+            sb.setConfig("htTemplatePath", "htroot/env/templates");
+            sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
+            
             // if we are running an SVN version, we try to detect the used svn revision now ...
             if (vString.equals("@" + "REPL_VERSION" + "@")) {
                 Properties buildProp = new Properties();
@@ -187,9 +191,6 @@ public final class yacy {
             int timeout       = Integer.parseInt(sb.getConfig("httpdTimeout", "60000"));
             if (timeout < 60000) timeout = 60000;
             int maxSessions   = Integer.parseInt(sb.getConfig("httpdMaxSessions", "100"));
-            
-            // hardcoded, forced, temporary value-migration
-            sb.setConfig("htTemplatePath", "htroot/env/templates");
             
             // create some directories
             File htRootPath = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot"));

@@ -371,6 +371,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             deployThread("99_indexcachemigration", "index cache migration", "migration of index cache data structures 0.37 -> 0.38",
             new serverInstantThread(classicCache, "oneStepMigration", "size"), 30000);
         }
+        
+        // test routine for snippet fetch
+        // url = /www.heise.de/mobil/newsticker/meldung/mail/54980
+        Set query = new HashSet(); query.add("0OQUNU3JSs05"); // 'heise'
+        //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/mobil/newsticker/meldung/mail/54980"), query, true);
+        plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
     }
     
     private static String ppRamString(int bytes) {

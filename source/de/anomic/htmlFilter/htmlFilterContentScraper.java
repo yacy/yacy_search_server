@@ -41,6 +41,7 @@
 package de.anomic.htmlFilter;
 
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -178,4 +179,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 	System.out.println("TEXT    :" + new String(text.getBytes()));
     }
 
+    
+    public static void main(String[] args) {
+	String test = "Nokia kürzt bei Forschung und Entwicklung";
+        try {
+            htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL("http://localhost"));
+            scraper.scrapeText(test.getBytes());
+            System.out.println(new String(scraper.getText()));
+        } catch (MalformedURLException e) {}
+    }
+    
 }

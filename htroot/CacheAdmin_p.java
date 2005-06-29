@@ -121,8 +121,9 @@ public class CacheAdmin_p {
                     else {
                         htmlFilterContentScraper scraper = new htmlFilterContentScraper(url);
                         OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                        plasmaParserDocument document = switchboard.parser.transformScraper(url, "text/html", scraper);
                         serverFileUtils.copy(file, os);
+                        os.flush();
+                        plasmaParserDocument document = switchboard.parser.transformScraper(url, "text/html", scraper);
                         info += "<b>HEADLINE:</b><br>" + scraper.getHeadline() + "<br><br>";
                         info += "<b>HREF:</b><br>" + formatAnchor(document.getHyperlinks()) + "<br>";
                         info += "<b>MEDIA:</b><br>" + formatAnchor(document.getMedialinks()) + "<br>";
@@ -130,7 +131,7 @@ public class CacheAdmin_p {
                         info += "<b>TEXT:</b><br><span class=\"small\">" + new String(scraper.getText()) + "</span><br>";
                         info += "<b>LINES:</b><br><span class=\"small\">";
                         String[] sentences = document.getSentences();
-                        for (int i = 0; i < sentences.length; i++) info += sentences + "<br>";
+                        for (int i = 0; i < sentences.length; i++) info += sentences[i] + "<br>";
                         info += "</span><br>";
                     }
                 } catch (Exception e) {

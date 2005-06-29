@@ -149,8 +149,8 @@ public final class plasmaParser {
      * @see #initMediaExt(String)
      */
     static {
-		initMediaExt(extString2extList("swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar," +
-			"sit,hqx,img,dmg,tar,gz,ps,xls,ppt,ram,bz2,arj"));
+        initMediaExt(extString2extList("swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar," +
+        "sit,hqx,img,dmg,tar,gz,ps,xls,ppt,ram,bz2,arj"));
         
         /* ===================================================
          * initializing the parser object pool
@@ -383,21 +383,21 @@ public final class plasmaParser {
     
     private static void loadEnabledParserList() {
         // loading a list of availabe parser from file
-    	Properties prop = new Properties();
+        Properties prop = new Properties();
         BufferedInputStream bufferedIn = null;
-    	try {
-    	    prop.load(bufferedIn = new BufferedInputStream(new FileInputStream(new File("yacy.parser"))));
-    	} catch (IOException e) {
-    	    System.err.println("ERROR: yacy.parser not found in settings path");
-    	} finally {
+        try {
+            prop.load(bufferedIn = new BufferedInputStream(new FileInputStream(new File("yacy.parser"))));
+        } catch (IOException e) {
+            System.err.println("ERROR: yacy.parser not found in settings path");
+        } finally {
             if (bufferedIn != null) try{ bufferedIn.close(); }catch(Exception e){}
         }
-
+        
         // enable them ...
         setEnabledParserList(prop.keySet());
-	}
-
-	private static void loadAvailableParserList() {
+    }
+    
+    private static void loadAvailableParserList() {
         try {
             plasmaParser.availableParserList.clear();
             
@@ -405,24 +405,24 @@ public final class plasmaParser {
             String javaClassPath = System.getProperty("java.class.path");
             
             // getting the current package name
-			String plasmaParserPkgName = plasmaParser.class.getPackage().getName() + ".parser";
+            String plasmaParserPkgName = plasmaParser.class.getPackage().getName() + ".parser";
             serverLog.logInfo("PARSER","Searching for additional content parsers in package " + plasmaParserPkgName);
- 
+            
             // getting an uri to the parser subpackage
-	        String packageURI = plasmaParser.class.getResource("/"+plasmaParserPkgName.replace('.','/')).toString();
-			serverLog.logDebug("PARSER", "Parser directory is " + packageURI);           
- 
+            String packageURI = plasmaParser.class.getResource("/"+plasmaParserPkgName.replace('.','/')).toString();
+            serverLog.logDebug("PARSER", "Parser directory is " + packageURI);
+            
             // open the parser directory
-	        File parserDir = new File(new URI(packageURI));
+            File parserDir = new File(new URI(packageURI));
             if ((parserDir == null) || (!parserDir.exists()) || (!parserDir.isDirectory())) return;
             
-            /* 
-             * loop through all subdirectories and test if we can 
+            /*
+             * loop through all subdirectories and test if we can
              * find an additional parser class
              */
             File[] parserDirectories = parserDir.listFiles(parserDirectoryFilter);
             if (parserDirectories == null) return;
-			for (int parserDirNr=0; parserDirNr< parserDirectories.length; parserDirNr++) {
+            for (int parserDirNr=0; parserDirNr< parserDirectories.length; parserDirNr++) {
                 File currentDir = parserDirectories[parserDirNr];
                 serverLog.logDebug("PARSER", "Searching in directory " + currentDir.toString());
                 String[] parserClasses = currentDir.list(parserFileNameFilter);
@@ -432,7 +432,7 @@ public final class plasmaParser {
                     serverLog.logDebug("PARSER", "Testing parser class " + parserClasses[parserNr]);
                     String className = parserClasses[parserNr].substring(0,parserClasses[parserNr].indexOf(".class"));
                     String fullClassName = plasmaParserPkgName + "." + currentDir.getName() + "." + className;
-	                try {
+                    try {
                         // trying to load the parser class by its name
                         Class parserClass = Class.forName(fullClassName);
                         Object theParser = parserClass.newInstance();
@@ -446,7 +446,7 @@ public final class plasmaParser {
                                     throw new ParserException("Missing dependency detected: '" + neededLibx[libxId] + "'.");
                                 }
                             }
-                        }                        
+                        }
                         
                         // loading the list of mime-types that are supported by this parser class
                         Hashtable supportedMimeTypes = ((Parser)theParser).getSupportedMimeTypes();
@@ -456,31 +456,31 @@ public final class plasmaParser {
                             availableParserList.put(mimeType,fullClassName);
                             serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'.");
                         }
-                            
-	                } catch (Exception e) { /* we can ignore this for the moment */ 
+                        
+                    } catch (Exception e) { /* we can ignore this for the moment */
                         serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
-                    } catch (Error e) { /* we can ignore this for the moment */ 
+                    } catch (Error e) { /* we can ignore this for the moment */
                         serverLog.logWarning("PARSER", "Parser '" + className + "' doesn't work correctly and will be ignored.\n [" + e.getClass().getName() + "]: " + e.getMessage());
                     }
                 }
-			}
+            }
             
         } catch (Exception e) {
             serverLog.logError("PARSER", "Unable to determine all installed parsers. " + e.getMessage());
-        }		
-	}
-
-	public void close() {        
+        }
+    }
+    
+    public void close() {
         // clearing the parser list
         synchronized (this.enabledParserList) {
-	        this.enabledParserList.clear();
-		}
+            this.enabledParserList.clear();
+        }
         
         // closing the parser object pool
-        try {        
-	        this.theParserPool.close();
-        } catch (Exception e) { }        
-    }    
+        try {
+            this.theParserPool.close();
+        } catch (Exception e) { }
+    }
     
     public plasmaParserDocument parseSource(URL location, String mimeType, byte[] source) {
         
@@ -498,7 +498,6 @@ public final class plasmaParser {
                 // ... otherwise we make a html scraper and transformer
                 htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
                 OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
-    
                 hfos.write(source);
                 hfos.close();
                 return transformScraper(location, mimeType, scraper);
@@ -660,22 +659,24 @@ public final class plasmaParser {
         return v;
     }
     
-    public static void main(String[] args) {		
-	//javac -classpath lib/commons-collections.jar:lib/commons-pool-1.2.jar -sourcepath source source/de/anomic/plasma/plasmaParser.java
-	//java -cp source:lib/commons-collections.jar:lib/commons-pool-1.2.jar de.anomic.plasma.plasmaParser bug.html bug.out
-		try {
-			File in = new File(args[0]);
-			File out = new File(args[1]);
-			plasmaParser theParser = new plasmaParser();
+    public static void main(String[] args) {
+        //javac -classpath lib/commons-collections.jar:lib/commons-pool-1.2.jar -sourcepath source source/de/anomic/plasma/plasmaParser.java
+        //java -cp source:lib/commons-collections.jar:lib/commons-pool-1.2.jar de.anomic.plasma.plasmaParser bug.html bug.out
+        try {
+            File in = new File(args[0]);
+            //File out = new File(args[1]);
+            plasmaParser theParser = new plasmaParser();
             theParser.initRealtimeParsableMimeTypes("application/xhtml+xml,text/html,text/plain");
             theParser.initParseableMimeTypes("application/atom+xml,application/gzip,application/java-archive,application/msword,application/octet-stream,application/pdf,application/rdf+xml,application/rss+xml,application/rtf,application/x-gzip,application/x-tar,application/xml,application/zip,text/rss,text/rtf,text/xml,application/x-bzip2");
-			FileInputStream theInput = new FileInputStream(in);
-			ByteArrayOutputStream theOutput = new ByteArrayOutputStream();
-			serverFileUtils.copy(theInput, theOutput);
-			plasmaParserDocument document = theParser.parseSource(new URL("http://brain/~theli/test.pdf"), null, theOutput.toByteArray());
-			//plasmaParserDocument document = theParser.parseSource(new URL("http://brain.yacy"), "application/pdf", theOutput.toByteArray());
-			byte[] theText = document.getText();
-			serverFileUtils.write(theText, out);
+            FileInputStream theInput = new FileInputStream(in);
+            ByteArrayOutputStream theOutput = new ByteArrayOutputStream();
+            serverFileUtils.copy(theInput, theOutput);
+            plasmaParserDocument document = theParser.parseSource(new URL("http://brain/~theli/test.pdf"), null, theOutput.toByteArray());
+            //plasmaParserDocument document = theParser.parseSource(new URL("http://brain.yacy"), "application/pdf", theOutput.toByteArray());
+            //byte[] theText = document.getText();
+            //serverFileUtils.write(theText, out);
+            String[] sentences = document.getSentences();
+            for (int i = 0; i < sentences.length; i++) System.out.println("line " + i + ":" + sentences[i]);
         } catch (Exception e) {
             e.printStackTrace();
         }
