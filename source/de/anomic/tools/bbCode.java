@@ -41,25 +41,24 @@
 /**Some code to avoid people being able to mess with the message system
   *by using HTML.
   *@author Marc Nause
+  extended for bbCode by Alexander Schier
   */
   
 package de.anomic.tools;  
   
-public class unHtml {
+public class bbCode {
 	
 	String text;
-	/**Creates an object so un() has something to work on*/
-	public unHtml(String s)
+	/**init - no Code yet*/
+	public bbCode()
 	{
-		this.text = s;
 	}
 
-	/**Replaces all < and > with &lt; and &gt in a string.
+	/**Replaces all < and > with &lt; and &gt; in a string.
 	*@author Marc Nause
 	*@return String
 	*/
-	public String un(){
-		String input = this.text;
+	public String escapeHtml(String input){
 		String output = "";
 		int iter = 0;
 		
@@ -72,5 +71,17 @@ public class unHtml {
 		}
 	
 	return output;
+	}
+	
+	/**Parses parts of bbCode (will be extended).
+	*@author Alexander Schier
+	*@return String
+	*/
+	public String bb(String input){
+		String output = escapeHtml(input);
+
+		output = output.replaceAll("\\[b\\]", "<b>");
+		output = output.replaceAll("\\[/b\\]", "</b>");
+		return output;
 	}
 }
