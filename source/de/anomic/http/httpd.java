@@ -517,9 +517,14 @@ public final class httpd implements serverHandler {
             this.log.logInfo("Interruption detected");
         } else {
             String errorMsg = e.getMessage();
-            if ((errorMsg != null) && (errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
-                // client closed the connection, so we just end silently
-                this.log.logInfo("Client unexpectedly closed connection");
+            if (errorMsg != null) {
+                if (errorMsg.startsWith("Socket closed")) {
+                    this.log.logInfo("httpd shutdown detected ...");
+                }
+                else if ((errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
+                    // client closed the connection, so we just end silently
+                    this.log.logInfo("Client unexpectedly closed connection");
+                }
             } else {
                 this.log.logError("Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(),e);
             }

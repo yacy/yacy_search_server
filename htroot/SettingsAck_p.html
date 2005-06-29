@@ -80,7 +80,7 @@ Parsing of the following mime-types was enabled:<br>
 <li><font color="#556699">#[enabledMime]#</font></li>
 #{/parser}#
 </ul>
-::
+::<!-- 19 -->
 Seed Upload method was changed successfully.
 #(success)#::<br>You are now a principal peer.#(/success)#
 <p>
@@ -88,18 +88,34 @@ Seed Upload method was changed successfully.
 <tr><td>Seed Upload Method:</td><td><font color="#556699">#[seedUploadMethod]#</font></td></tr>
 <tr><td>Seed File URL:</td><td><a href="#[seedURL]#"><font color="#556699">#[seedURL]#</font></a></td></tr>
 </table>
-::
+::<!-- 20 -->
 <p><b>Your proxy networking settings have been changed.</b></p>
 <table>
 <tr>
-			    <td>Transparent Proxy Support is:</td>
+    <td>Transparent Proxy Support is:</td>
     <td><font color="#556699"><b>#[isTransparentProxy]#</b></font></td>
 </tr>
 <tr>
-	    <td>Connection Keep-Alive Support is:</td>
-	    <td><font color="#556699"><b>#[connectionKeepAliveSupport]#</b></font></td>
-	</tr>
-	</table>
+    <td>Connection Keep-Alive Support is:</td>
+    <td><font color="#556699"><b>#[connectionKeepAliveSupport]#</b></font></td>
+</tr>
+</table>
+::<!-- 21: message forwarding -->
+<p><b>Your message forwarding settings have been changed.</b></p>
+<table>
+<tr>
+    <td>Message Forwarding Support is:</td>
+    <td><font color="#556699"><b>#[msgForwardingEnabled]#</b></font></td>
+</tr>
+<tr>
+    <td>Message Forwarding Command:</td>
+    <td><font color="#556699"><b>#[msgForwardingCmd]#</b></font></td>
+</tr>
+<tr>
+    <td>Recipient Address:</td>
+    <td><font color="#556699"><b>#[msgForwardingTo]#</b></font></td>
+</tr>
+</table>
 #(/info)#
 </p>
 <p>You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.</p>

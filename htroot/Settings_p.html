@@ -30,11 +30,11 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 </tr>
 <tr>
 	<td><img src="env/grafics/down.gif" alt="down"><a href="#http">HTTP Networking</a></td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="#parser">Content Parser Settings</a></td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#messageForwarding">Message Forwarding</a></td>
 </tr>
 <tr>
 	<td><img src="env/grafics/down.gif" alt="down"><a href="#proxy">Remote Proxy (optional)</a></td>
-	<td>&nbsp;</td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#parser">Content Parser Settings</a></td>
 </tr>
 
 </table>
@@ -264,6 +264,37 @@ but only if there had been changes to the seed-list.
 #%[file]%#		
 #{/seedUploadMethods}#
 </fieldset>
+
+<br>
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend id="messageForwarding">Message Forwarding</legend>
+<p>With this settings you can activate or deactivate forwarding of yacy-messages via email.
+<p>
+<table border="0" cellspacing="5">
+  <tr valign="top">
+    <td>Enable message forwarding:</td>
+    <td><input type="checkbox" name="msgForwardingEnabled" align="top" #(msgForwardingEnabled)#::checked#(/msgForwardingEnabled)#></td>
+    <td><i>Enabling/Disabling message forwarding via email.</td>
+  </tr>
+  <tr valign="top">
+    <td>Forwarding Command:</td>
+    <td><input name="msgForwardingCmd" type="text" size="32" maxlength="128" value="#[msgForwardingCmd]#"></td>
+    <td><i>The command-line program that should be used to forward the message.<br>e.g.:</i>&nbsp;<code>/usr/sbin/sendmail -t</code></td>
+  </tr>
+  <tr valign="top">
+    <td>Forwarding To:</td>
+    <td><input name="msgForwardingTo" type="text" size="32" maxlength="128" value="#[msgForwardingTo]#"></td>
+    <td><i>The recipient email-address.<br> e.g.:</i>&nbsp;<code>root@localhost</code></td>
+  </tr>
+  <tr valign="top">
+    <td></td>
+    <td colspan="2"><input type="submit" name="msgForwarding" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
+  </tr>    
+  
+</table>
+</fieldset>
+</form><br>
+
 
 <br>
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">

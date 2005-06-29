@@ -188,6 +188,12 @@ public final class Settings_p {
         // general settings
         prop.put("seedURL", env.getConfig("seedURL", ""));
         
+        /*
+         * Message forwarding configuration
+         */
+        prop.put("msgForwardingEnabled",env.getConfig("msgForwardingEnabled","false").equals("true")? 1 : 0);
+        prop.put("msgForwardingCmd",env.getConfig("msgForwardingCmd", ""));
+        prop.put("msgForwardingTo",env.getConfig("msgForwardingTo", ""));
         
         /*
          * Parser Configuration

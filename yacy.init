@@ -489,3 +489,9 @@ portForwardingPort=
 portForwardingUser=
 portForwardingPwd=
 
+# Specifies if yacy should forward received messages via
+# email to the configured email address
+msgForwardingEnabled=false
+msgForwardingCmd=/usr/sbin/sendmail -t
+msgForwardingTo=root@localhost
+

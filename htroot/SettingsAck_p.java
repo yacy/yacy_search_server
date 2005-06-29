@@ -412,6 +412,25 @@ public class SettingsAck_p {
             }            
         }
         
+        /*
+         * Message forwarding configuration
+         */
+        if (post.containsKey("msgForwarding")) {
+            env.setConfig("msgForwardingEnabled",post.containsKey("msgForwardingEnabled")?"true":"false");
+            env.setConfig("msgForwardingCmd",(String) post.get("msgForwardingCmd"));
+            env.setConfig("msgForwardingTo",(String) post.get("msgForwardingTo"));
+            
+            prop.put("info", 21);
+            prop.put("info_msgForwardingEnabled", post.containsKey("msgForwardingEnabled") ? "on" : "off");
+            prop.put("info_msgForwardingCmd", (String) post.get("msgForwardingCmd"));
+            prop.put("info_msgForwardingTo", (String) post.get("msgForwardingTo"));
+            
+            return prop;
+        }
+        
+        /*
+         * Parser configuration
+         */
         if (post.containsKey("parserSettings")) {   
             plasmaSwitchboard sb = (plasmaSwitchboard)env;
 			post.remove("parserSettings");
