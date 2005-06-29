@@ -54,7 +54,6 @@ import java.util.Properties;
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.unHtml;
 
 public class EditProfile_p {
     
@@ -84,17 +83,17 @@ public class EditProfile_p {
             
             profile.setProperty("comment", (String)post.get("comment"));
         }
-        prop.put("name", (new unHtml(profile.getProperty("name", ""))).un());
-        prop.put("nickname", (new unHtml(profile.getProperty("nickname", ""))).un());
-        prop.put("homepage", (new unHtml(profile.getProperty("homepage", ""))).un());
-        prop.put("email", (new unHtml(profile.getProperty("email", ""))).un());
+        prop.put("name", profile.getProperty("name", ""));
+        prop.put("nickname", profile.getProperty("nickname", ""));
+        prop.put("homepage", profile.getProperty("homepage", ""));
+        prop.put("email", profile.getProperty("email", ""));
         
-        prop.put("icq", (new unHtml(profile.getProperty("icq", ""))).un());
-        prop.put("jabber", (new unHtml(profile.getProperty("jabber", ""))).un());
-        prop.put("yahoo", (new unHtml(profile.getProperty("yahoo", ""))).un());
-        prop.put("msn", (new unHtml(profile.getProperty("msn", ""))).un());
+        prop.put("icq", profile.getProperty("icq", ""));
+        prop.put("jabber", profile.getProperty("jabber", ""));
+        prop.put("yahoo", profile.getProperty("yahoo", ""));
+        prop.put("msn", profile.getProperty("msn", ""));
         
-        prop.put("comment", (new unHtml(profile.getProperty("comment", ""))).un());
+        prop.put("comment", profile.getProperty("comment", ""));
          
         FileOutputStream fileOut = null;
         try{

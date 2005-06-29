@@ -57,7 +57,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
-import de.anomic.tools.unHtml;
+import de.anomic.tools.bbCode;
 
 public class ViewProfile {
 
@@ -65,6 +65,7 @@ public class ViewProfile {
 	//listManager.switchboard = (plasmaSwitchboard) env;
 	serverObjects prop = new serverObjects();
 	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+	bbCode bb = new bbCode();
         
         if ((post != null) && (post.containsKey("hash")) && (yacyCore.seedDB != null)) { //no nullpointer error..
             yacySeed seed = yacyCore.seedDB.getConnected((String)post.get("hash"));
@@ -105,7 +106,7 @@ public class ViewProfile {
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
 		    String key=(String)entry.getKey();
-		    String value=(new unHtml(((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n"))).un();
+		    String value=bb.bb( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
 		    //all known Keys which should be set as they are
 		    if(knownKeys.contains(key)){
 			prop.put("success_"+key, 1);
