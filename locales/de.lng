@@ -1,6 +1,6 @@
 #English=German
 <!-- lang -->default\(english\)=Deutsch
-<!-- author -->=‹bersetzer eintragen
+<!-- author -->=Roland Ramthun
 
 #-----------------------------------------------------------
 #index.html
@@ -16,19 +16,24 @@ order by:=sortiert nach:
 >Date-Quality=>Datum-Qualit&auml;t
 Resource:=Quelle:
 Max. search time \(seconds\)=Max. Suchzeit (Sekunden)
-"URL mask":=URL-Maske
+URL mask:=URL-Maske:
 
 
 #-------------------------------------------------------
 #IndexCreate_p.html
 Index Creation=Index Erzeugung
-You can define url's as start points for Web page crawling and start that crawling here.=Du kannst hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten.
+You can define URLs as start points for Web page crawling and start that crawling here.=Du kannst hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten.
+Crawling Depth:=Crawl-Tiefe:
+Crawling Filter:=Crawl-Maske:
+<fehlt>
+Store to Proxy Cache:=In den Proxy-Cache speichern:
+Do Local Indexing:=Lokales Indexieren:
+Do Remote Indexing:=Indexieren auf anderen Peers:
+Exclude static Stop-Words:=Stop-Words ausschlieﬂen:
+Start Point:=Startpunkt:
 
 #-------------------------------------------------------
 #Status.html
-
-#Das passt hier, aber wenn wo anders Protection steht eher nicht..,
-Protection=Sicherheit
 
 Welcome to YaCy!=Willkommen bei YaCy!
 System version=Systemversion
