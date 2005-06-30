@@ -123,8 +123,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
 	//System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
 	if ((tagname.equals("a")) && (text.length < 2048)) anchors.put(absolutePath(tagopts.getProperty("href", "")), super.stripAll(new serverByteBuffer(text)).trim().toString());
-	if ((tagname.equals("h1")) && (text.length < 512)) headline = super.stripAll(new serverByteBuffer(text)).toString();
-	if ((tagname.equals("title")) && (text.length < 512)) title = super.stripAll(new serverByteBuffer(text)).toString();
+	if ((tagname.equals("h1")) && (text.length < 1024)) headline = super.stripAll(new serverByteBuffer(text)).toString();
+	if ((tagname.equals("title")) && (text.length < 1024)) title = super.stripAll(new serverByteBuffer(text)).toString();
+        if ((tagname.equals("base")) && (text.length < 512)) try {root = new URL(tagopts.getProperty("href", ""));} catch (MalformedURLException e) {}
     }
 
 
