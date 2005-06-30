@@ -95,8 +95,9 @@ public class Language_p {
 			env.setConfig("htLocaleSelection", "default");
 			return true;
 		}else{
-			File sourceDir = new File(env.getRootPath(), "htroot");
-			File destDir = new File(env.getRootPath(), "htroot/locale/"+lang.substring(0,lang.length()-4));//cut .lng
+			String htRootPath = env.getConfig("htRootPath", "htroot");
+			File sourceDir = new File(env.getRootPath(), htRootPath);
+			File destDir = new File(env.getRootPath(), htRootPath +  "/locale/"+lang.substring(0,lang.length()-4));//cut .lng
 			File translationFile = new File(langPath, lang);
 
 			if(translator.translateFiles(sourceDir, destDir, translationFile, "html")){

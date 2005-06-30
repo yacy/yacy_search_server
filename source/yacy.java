@@ -65,6 +65,9 @@
 
 
 import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -104,6 +107,7 @@ import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyCore;
+import de.anomic.data.translator;
 
 public final class yacy {
     
@@ -319,6 +323,34 @@ public final class yacy {
                     }catch(NullPointerException e){
                         serverLog.logError("STARTUP", "Nullpointer Exception while copying the default Locales");
                     }
+
+					//regenerate Locales from Translationlist, if needed
+					String lang = sb.getConfig("htLocaleSelection", "");
+					if(! lang.equals("") && ! lang.equals("default") ){ //locale is used
+						String currentRev = "";
+						try{
+	            		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File( sb.getConfig("htRootPath", "htroot"), "locale/"+lang+"/version" ))));
+						currentRev = br.readLine();
+						br.close();
+						}catch(IOException e){
+							//Error
+						}
+						
+						try{ //seperate try, because we want this, even when the File "version2 does not exist.
+						if(! currentRev.equals(sb.getConfig("svnRevision", "")) ){ //is this another version?!
+							File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
+							File destDir = new File(sourceDir, "locale/"+lang);
+							if(translator.translateFiles(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
+								//write the new Versionnumber
+					    		BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+								bw.write(sb.getConfig("svnRevision", "Error getting Version"));
+								bw.close();
+							}
+						}
+						}catch(IOException e){
+							//Error
+						}
+					}
                     
                     // registering shutdown hook
                     serverLog.logSystem("STARTUP", "Registering Shutdown Hook");
