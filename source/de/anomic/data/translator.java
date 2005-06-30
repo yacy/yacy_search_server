@@ -52,43 +52,66 @@ import java.io.InputStreamReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Properties;
+import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Vector;
 
 import de.anomic.server.logging.serverLog;
+import de.anomic.data.listManager;
 
 /**
  * Wordlist based translator
  *
- * Uses a Property file with phrases or single words to translate a string or a file
+ * Uses a Property like file with phrases or single words to translate a string or a file
  * */
 public class translator {
-	public static String translate(String source, Properties translationList){
-		Enumeration keys = translationList.propertyNames();
+	public static String translate(String source, Hashtable translationList){
+		Enumeration keys = translationList.keys();
 		String result = source;
 		String key = "";
 		while(keys.hasMoreElements()){
 			key = (String)keys.nextElement();
-			result = result.replaceAll(key, translationList.getProperty(key));
+			result = result.replaceAll(key, (String)translationList.get(key));
 			//System.out.println("Replaced \""+key+"\" by \""+translationList.getProperty(key)+"\""); //DEBUG
 		}
 		return result;
 	}
 	
-	public static boolean translateFile(File sourceFile, File destFile, File translationFile){
-		Properties translationList = new Properties();
+	public static Hashtable loadTranslationsList(File translationFile){
+		Hashtable translationList = new Hashtable();
         FileInputStream fileIn = null;
-		try{
-			translationList.load(fileIn = new FileInputStream(translationFile));
-			return translateFile(sourceFile, destFile, translationList);
-		}catch(IOException e){
-			return false;
-		} finally {
-            if (fileIn!=null)try{fileIn.close();}catch(Exception e){}
-        }
+
+		Vector list = listManager.getListArray(translationFile);
+		Iterator it = list.iterator();
+		String line = "";
+		String value = "";
+		String[] splitted;
+
+		while(it.hasNext()){
+			line = (String)it.next();
+			if(! line.startsWith("#")){
+				splitted = line.split("=");
+				if(splitted.length == 2){
+					translationList.put(splitted[0], splitted[1]);
+				}else if(splitted.length > 2){
+					value = "";
+					for(int i = splitted.length-1;i>=1;i--){
+						value += splitted[i];
+					}
+					translationList.put(splitted[0], value);
+				}else{ //Invalid line
+				}
+			}
+		}
+		return translationList;
+	}
+	public static boolean translateFile(File sourceFile, File destFile, File translationFile){
+		Hashtable translationList = loadTranslationsList(translationFile);
+		return translateFile(sourceFile, destFile, translationList);
 	}
 	
-	public static boolean translateFile(File sourceFile, File destFile, Properties translationList){
+	public static boolean translateFile(File sourceFile, File destFile, Hashtable translationList){
 
 		String content = "";
 		String line = "";
@@ -121,19 +144,11 @@ public class translator {
 	}
 
 	public static boolean translateFiles(File sourceDir, File destDir, File translationFile, String extension){
-		Properties translationList = new Properties();
-        FileInputStream fileIn = null;
-		try{
-			translationList.load(fileIn = new FileInputStream(translationFile));
+			Hashtable translationList = loadTranslationsList(translationFile);
 			return translateFiles(sourceDir, destDir, translationList, extension);
-		}catch(IOException e){
-			return false;
-		} finally {
-            if (fileIn!=null)try{fileIn.close();}catch(Exception e){}
-        }
 	}
 
-	public static boolean translateFiles(File sourceDir, File destDir, Properties translationList, String extension){
+	public static boolean translateFiles(File sourceDir, File destDir, Hashtable translationList, String extension){
 		destDir.mkdirs();
 		File[] sourceFiles = sourceDir.listFiles();
 		for(int i=0;i<sourceFiles.length;i++){

@@ -114,7 +114,7 @@ public class Language_p {
 	String langPath = new File(env.getRootPath(), env.getConfig("langPath", "DATA/LOCALE")).toString();
 
 	//Fallback
-	prop.put("currentlang", "");
+	//prop.put("currentlang", ""); //is done by Translationtemplate
 	prop.put("status", 0);//nothing
 	
 	String[] langFiles = listManager.getDirListing(langPath);
@@ -184,8 +184,9 @@ public class Language_p {
 	}
 	prop.put("langlist", (i+1));
 
-        langName = (String) langNames.get(env.getConfig("htLocaleSelection", "default"));
-	prop.put("currentlang", ((langName == null) ? "default" : langName));
+	//is done by Translationtemplate
+    //langName = (String) langNames.get(env.getConfig("htLocaleSelection", "default"));
+	//prop.put("currentlang", ((langName == null) ? "default" : langName));
 	return prop;
     }
 
