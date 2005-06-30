@@ -155,7 +155,7 @@ public class plasmaSnippetCache {
         }
 
         // we have found a parseable non-empty file: use the lines
-        line = computeSnippet(sentences, queryhashes, 12 * queryhashes.size(), 120);
+        line = computeSnippet(sentences, queryhashes, 8 + 6 * queryhashes.size(), 120);
         //System.out.println("loaded snippet for url " + url + ": " + line);
         if (line == null) return new result(null, ERROR_NO_MATCH, "no matching snippet found");
         if (line.length() > 120) line = line.substring(0, 120);
@@ -202,13 +202,19 @@ public class plasmaSnippetCache {
         if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
         kelondroMScoreCluster hitTable = new kelondroMScoreCluster();
         Iterator j;
-        HashSet hs;
+        HashMap hs;
+        String hash;
         for (int i = 0; i < sentences.length; i++) {
-            if ((sentences[i].length() > minLength) && (sentences[i].length() < maxLength)) {
+            System.out.println("Sentence " + i + ": " + sentences[i]);
+            if (sentences[i].length() > minLength) {
                 hs = hashSentence(sentences[i]);
                 j = queryhashes.iterator();
                 while (j.hasNext()) {
-                    if (hs.contains((String) j.next())) hitTable.incScore(new Integer(i));
+                    hash = (String) j.next();
+                    if (hs.containsKey(hash)) {
+                        System.out.println("hash " + hash + " appears in line " + i);
+			hitTable.incScore(new Integer(i));
+                    }
                 }
             }
         }
@@ -227,26 +233,59 @@ public class plasmaSnippetCache {
         }
         // find a first result
         String result = sentences[shortLineIndex];
-        if (score == queryhashes.size()) return result;
-        // the result has not all words in it.
-        // find another sentence that represents the missing other words
-        // first remove all words that appear in the result from the queryhashes
+        // remove all hashes that appear in the result
         hs = hashSentence(result);
         j = queryhashes.iterator();
+        Integer pos;
+        int p, minpos = maxLength, maxpos = -1;
         while (j.hasNext()) {
-            if (hs.contains((String) j.next())) j.remove();
+            pos = (Integer) hs.get((String) j.next());
+            if (pos != null) {
+                j.remove();
+                p = pos.intValue();
+                if (p > maxpos) maxpos = p;
+                if (p < minpos) minpos = p;
+            }
+        }
+        // check result size
+        maxpos = maxpos + 10;
+        if (maxpos > result.length()) maxpos = result.length();
+        if (minpos < 0) minpos = 0;
+        // we have a result, but is it short enough?
+        if (result.length() > maxLength) {
+            // trim result, 1st step (cut at right side)
+            result = result.substring(0, maxpos).trim() + " [..]";
+        }
+        if (result.length() > maxLength) {
+            // trim result, 2nd step (cut at left side)
+            result = "[..] " + result.substring(minpos).trim();
+        }
+        if (result.length() > maxLength) {
+            // trim result, 3rd step (cut in the middle)
+            result = result.substring(6, 20).trim() + " [..] " + result.substring(result.length() - 26, result.length() - 6).trim();
         }
         if (queryhashes.size() == 0) return result;
-        // now find recursively more sentences
+        // the result has not all words in it.
+        // find another sentence that represents the missing other words
+        // and find recursively more sentences
+        maxLength = maxLength - result.length();
+        if (maxLength < 20) maxLength = 20;
         String nextSnippet = computeSnippet(sentences, queryhashes, minLength, maxLength);
-        return result + ((nextSnippet == null) ? "" : (" ... " + nextSnippet));
+        return result + ((nextSnippet == null) ? "" : (" / " + nextSnippet));
     }
     
-    private HashSet hashSentence(String sentence) {
-        HashSet set = new HashSet();
+    private HashMap hashSentence(String sentence) {
+        // generates a word-wordPos mapping
+        HashMap map = new HashMap();
         Enumeration words = plasmaCondenser.wordTokenizer(sentence);
-        while (words.hasMoreElements()) set.add(plasmaWordIndexEntry.word2hash((String) words.nextElement()));
-        return set;
+        int pos = 0;
+        String word;
+        while (words.hasMoreElements()) {
+            word = (String) words.nextElement();
+            map.put(plasmaWordIndexEntry.word2hash(word), new Integer(pos));
+            pos += word.length() + 1;
+        }
+        return map;
     }
      
     public plasmaParserDocument parseDocument(URL url, byte[] resource) {

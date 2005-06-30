@@ -374,7 +374,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // test routine for snippet fetch
         // url = /www.heise.de/mobil/newsticker/meldung/mail/54980
-        //Set query = new HashSet(); query.add("0OQUNU3JSs05"); // 'heise'
+        //Set query = new HashSet();
+        //query.add(plasmaWordIndexEntry.word2hash("Weitergabe"));
+        //query.add(plasmaWordIndexEntry.word2hash("Zahl"));
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/mobil/newsticker/meldung/mail/54980"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
     }
