@@ -101,6 +101,13 @@ public class Language_p {
 
 			if(translator.translateFiles(sourceDir, destDir, translationFile, "html")){
 				env.setConfig("htLocaleSelection", lang.substring(0,lang.length()-4));
+				try{
+			    	BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+					bw.write(env.getConfig("svnRevision", "Error getting Version"));
+					bw.close();
+				}catch(IOException e){
+					//Error
+				}
 				return true;
 			}
 		}

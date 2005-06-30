@@ -78,6 +78,7 @@ public class Status {
             prop.put("protection", 1);//protected
         
         // version information
+		prop.put("svnRevision", env.getConfig("svnRevision", ""));
         if ((yacyCore.latestVersion == null) || (yacyCore.latestVersion.length() < 3) || (yacyCore.latestVersion.equals(env.getConfig("version",""))))
             prop.put("versioncomment", 0);//no commet
         else
