@@ -374,9 +374,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // test routine for snippet fetch
         // url = /www.heise.de/mobil/newsticker/meldung/mail/54980
-        Set query = new HashSet(); query.add("0OQUNU3JSs05"); // 'heise'
+        //Set query = new HashSet(); query.add("0OQUNU3JSs05"); // 'heise'
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/mobil/newsticker/meldung/mail/54980"), query, true);
-        plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
+        //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
     }
     
     private static String ppRamString(int bytes) {
@@ -1200,7 +1200,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logDebug("snippetFetcher: try to get URL " + url);
             plasmaSnippetCache.result snippet = snippetCache.retrieve(url, queryhashes, true);
             if (snippet.line == null)
-                log.logDebug("snippetFetcher: cannot get URL " + url + ". error: " + snippet.error);
+                log.logDebug("snippetFetcher: cannot get URL " + url + ". error(" + snippet.source + "): " + snippet.error);
             else
                 log.logDebug("snippetFetcher: got URL " + url + ", the snippet is '" + snippet.line + "', source=" + snippet.source);
         }
@@ -1313,20 +1313,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     //addScoreForked(ref, gs, descr.split(" "));
                     //addScoreForked(ref, gs, urlstring.split("/"));
                     if (urlstring.matches(urlmask)) { //.* is default
-			prop.put("results_" + i + "_description", descr);
-			prop.put("results_" + i + "_url", urlstring); 
-			prop.put("results_" + i + "_urlname", urlname); 
-			prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
-                        prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
                         snippet = snippetCache.retrieve(url, queryhashes, false);
-                        if (snippet.line == null) {
-                            prop.put("results_" + i + "_snippet", 0);
-                            prop.put("results_" + i + "_snippet_text", "");
+                        if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
+                            // suppress line: there is no match in that resource
                         } else {
-                            prop.put("results_" + i + "_snippet", 1);
-                            prop.put("results_" + i + "_snippet_text", snippet.line);
+                            prop.put("results_" + i + "_description", descr);
+                            prop.put("results_" + i + "_url", urlstring);
+                            prop.put("results_" + i + "_urlname", urlname);
+                            prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
+                            prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
+                            if (snippet.line == null) {
+                                prop.put("results_" + i + "_snippet", 0);
+                                prop.put("results_" + i + "_snippet_text", "");
+                            } else {
+                                prop.put("results_" + i + "_snippet", 1);
+                                prop.put("results_" + i + "_snippet_text", snippet.line);
+                            }
+                            i++;
                         }
-                        i++;
                     }
                 }
                 log.logDebug("SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
@@ -1396,14 +1400,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 while ((acc.hasMoreElements()) && (i < count)) {
                     urlentry = acc.nextElement();
                     snippet = snippetCache.retrieve(urlentry.url(), hashes, false);
-                    if (snippet.line == null) {
-                        resource = urlentry.toString();
+                    if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
+                        // suppress line: there is no match in that resource
                     } else {
-                        resource = urlentry.toString(snippet.line);
-                    }
-                    if (resource != null) {
-                        links.append("resource").append(i).append("=").append(resource).append(serverCore.crlfString);
-                        i++;
+                        if (snippet.line == null) {
+                            resource = urlentry.toString();
+                        } else {
+                            resource = urlentry.toString(snippet.line);
+                        }
+                        if (resource != null) {
+                            links.append("resource").append(i).append("=").append(resource).append(serverCore.crlfString);
+                            i++;
+                        }
                     }
                 }
                 prop.put("links", links.toString());
