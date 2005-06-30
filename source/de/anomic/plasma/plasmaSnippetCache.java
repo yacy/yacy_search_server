@@ -205,14 +205,14 @@ public class plasmaSnippetCache {
         HashMap hs;
         String hash;
         for (int i = 0; i < sentences.length; i++) {
-            System.out.println("Sentence " + i + ": " + sentences[i]);
+            //System.out.println("Sentence " + i + ": " + sentences[i]);
             if (sentences[i].length() > minLength) {
                 hs = hashSentence(sentences[i]);
                 j = queryhashes.iterator();
                 while (j.hasNext()) {
                     hash = (String) j.next();
                     if (hs.containsKey(hash)) {
-                        System.out.println("hash " + hash + " appears in line " + i);
+                        //System.out.println("hash " + hash + " appears in line " + i);
 			hitTable.incScore(new Integer(i));
                     }
                 }
