@@ -359,7 +359,8 @@ public final class httpHeader extends TreeMap implements Map {
     
     public long age() {
         Date lm = lastModified();
-        if (lm == null) return Long.MAX_VALUE; else return (new Date()).getTime() - lm.getTime();
+        Date sd = date();
+        if (lm == null) return Long.MAX_VALUE; else return ((sd == null) ? new Date() : sd).getTime() - lm.getTime();
     }
     
     public long contentLength() {

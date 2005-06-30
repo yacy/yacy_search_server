@@ -110,7 +110,7 @@ public class plasmaSnippetCache {
         return retrieveFromCache(yacySearch.set2string(queryhashes), plasmaURL.urlHash(url)) != null;
     }
     
-    public result retrieve(URL url, Set queryhashes, boolean fetchOnline) {
+    public result retrieve(URL url, Set queryhashes, boolean fetchOnline, int snippetMaxLength) {
         // heise = "0OQUNU3JSs05"
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for url retrieve " + url);
@@ -155,10 +155,10 @@ public class plasmaSnippetCache {
         }
 
         // we have found a parseable non-empty file: use the lines
-        line = computeSnippet(sentences, queryhashes, 8 + 6 * queryhashes.size(), 120);
+        line = computeSnippet(sentences, queryhashes, 8 + 6 * queryhashes.size(), snippetMaxLength);
         //System.out.println("loaded snippet for url " + url + ": " + line);
         if (line == null) return new result(null, ERROR_NO_MATCH, "no matching snippet found");
-        if (line.length() > 120) line = line.substring(0, 120);
+        if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
         storeToCache(wordhashes, urlhash, line);

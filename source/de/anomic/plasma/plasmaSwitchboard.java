@@ -1200,7 +1200,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         public void run() {
             log.logDebug("snippetFetcher: try to get URL " + url);
-            plasmaSnippetCache.result snippet = snippetCache.retrieve(url, queryhashes, true);
+            plasmaSnippetCache.result snippet = snippetCache.retrieve(url, queryhashes, true, 260);
             if (snippet.line == null)
                 log.logDebug("snippetFetcher: cannot get URL " + url + ". error(" + snippet.source + "): " + snippet.error);
             else
@@ -1315,7 +1315,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     //addScoreForked(ref, gs, descr.split(" "));
                     //addScoreForked(ref, gs, urlstring.split("/"));
                     if (urlstring.matches(urlmask)) { //.* is default
-                        snippet = snippetCache.retrieve(url, queryhashes, false);
+                        snippet = snippetCache.retrieve(url, queryhashes, false, 260);
                         if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
                             // suppress line: there is no match in that resource
                         } else {
@@ -1401,7 +1401,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 plasmaSnippetCache.result snippet;
                 while ((acc.hasMoreElements()) && (i < count)) {
                     urlentry = acc.nextElement();
-                    snippet = snippetCache.retrieve(urlentry.url(), hashes, false);
+                    snippet = snippetCache.retrieve(urlentry.url(), hashes, false, 260);
                     if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
                         // suppress line: there is no match in that resource
                     } else {
