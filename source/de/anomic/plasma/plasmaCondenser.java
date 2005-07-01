@@ -444,9 +444,9 @@ public class plasmaCondenser {
     }
 
 
-    public static Enumeration wordTokenizer(String s) {
+    public static Enumeration wordTokenizer(String s, int minLength) {
 	try {
-	    return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), 3);
+	    return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), minLength);
 	} catch (Exception e) {
 	    return null;
 	}

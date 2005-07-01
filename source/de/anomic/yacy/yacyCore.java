@@ -676,37 +676,4 @@ public class yacyCore {
         }
     }
 
-    private class vprobe implements Runnable {
-	public vprobe() {}
-	public final void run() {
-	    // read the probe URL
-	    String probeURL=switchboard.getConfig("onetimeAction", null);
-	    if ((probeURL == null) || (probeURL.length() == 0)) return; // not wanted
-	    // read version and date
-            String proxyHost = switchboard.getConfig("remoteProxyHost", "");
-            int proxyPort = Integer.parseInt(switchboard.getConfig("remoteProxyPort", "0"));
-            if (!(switchboard.getConfig("remoteProxyUse", "false").equals("true"))) {
-                proxyHost = null; proxyPort = 0;
-            }
-            String version = switchboard.getConfig("version", "");
-	    String date = switchboard.getConfig("vdate", "");
-	    probeURL = probeURL + "?version=" + version + "&date=" + date;
-	    // open new connection
-	    try {
-		latestVersion = new String(httpc.singleGET(new URL(probeURL), 10000, null, null, proxyHost, proxyPort)).trim();
-		float latest = Float.parseFloat(latestVersion);
-		float thisver = Float.parseFloat(version);
-		if (thisver > latest)  System.out.println("THIS SOFTWARE VERSION IS A PRE-RELEASE");
-		if (thisver < latest)  {
-		    log.logSystem("****************************************************************");
-		    log.logSystem("* THIS SOFTWARE VERSION IS OUTDATED.");
-		    log.logSystem("* PLEASE GO TO ANOMIC.DE AND DOWNLOAD THE LATEST VERSION " + latestVersion);
-		    log.logSystem("****************************************************************");
-		}
-	    } catch (Exception e) {
-		// we do nothing is this case
-	    }
-	}
-    }
-
 }

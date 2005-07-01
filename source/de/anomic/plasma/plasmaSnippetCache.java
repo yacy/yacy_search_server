@@ -107,7 +107,8 @@ public class plasmaSnippetCache {
     }
     
     public boolean existsInCache(URL url, Set queryhashes) {
-        return retrieveFromCache(yacySearch.set2string(queryhashes), plasmaURL.urlHash(url)) != null;
+        String hashes = yacySearch.set2string(queryhashes);
+        return retrieveFromCache(hashes, plasmaURL.urlHash(url)) != null;
     }
     
     public result retrieve(URL url, Set queryhashes, boolean fetchOnline, int snippetMaxLength) {
@@ -237,7 +238,7 @@ public class plasmaSnippetCache {
         hs = hashSentence(result);
         j = queryhashes.iterator();
         Integer pos;
-        int p, minpos = maxLength, maxpos = -1;
+        int p, minpos = result.length(), maxpos = -1;
         while (j.hasNext()) {
             pos = (Integer) hs.get((String) j.next());
             if (pos != null) {
@@ -252,6 +253,24 @@ public class plasmaSnippetCache {
         if (maxpos > result.length()) maxpos = result.length();
         if (minpos < 0) minpos = 0;
         // we have a result, but is it short enough?
+        if (maxpos - minpos + 10 > maxLength) {
+            // the string is too long, even if we cut at both ends
+            // so cut here in the middle of the string
+            int lenb = result.length();
+            result = result.substring(0, (minpos + 20 > result.length()) ? result.length() : minpos + 20).trim() +
+                     " [..] " +
+                     result.substring((maxpos + 26 > result.length()) ? result.length() : maxpos + 26).trim();
+            maxpos = maxpos + lenb - result.length() + 6;
+        }
+        if (maxpos > maxLength) {
+            // the string is too long, even if we cut it at the end
+            // so cut it here at both ends at once
+            int newlen = maxpos - minpos + 10;
+            int around = (maxLength - newlen) / 2;
+            result = "[..] " + result.substring(minpos - around, maxpos + around).trim() + " [..]";
+            minpos = around;
+            maxpos = result.length() - around - 5;
+        }
         if (result.length() > maxLength) {
             // trim result, 1st step (cut at right side)
             result = result.substring(0, maxpos).trim() + " [..]";
@@ -277,7 +296,7 @@ public class plasmaSnippetCache {
     private HashMap hashSentence(String sentence) {
         // generates a word-wordPos mapping
         HashMap map = new HashMap();
-        Enumeration words = plasmaCondenser.wordTokenizer(sentence);
+        Enumeration words = plasmaCondenser.wordTokenizer(sentence, 0);
         int pos = 0;
         String word;
         while (words.hasMoreElements()) {
