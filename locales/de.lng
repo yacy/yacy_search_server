@@ -21,11 +21,11 @@ URL mask:=URL-Maske:
 
 #-------------------------------------------------------
 #IndexCreate_p.html
+
 Index Creation=Index Erzeugung
 You can define URLs as start points for Web page crawling and start that crawling here.=Du kannst hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten.
 Crawling Depth:=Crawl-Tiefe:
 Crawling Filter:=Crawl-Maske:
-<fehlt>
 Store to Proxy Cache:=In den Proxy-Cache speichern:
 Do Local Indexing:=Lokales Indexieren:
 Do Remote Indexing:=Indexieren auf anderen Peers:
@@ -47,3 +47,17 @@ Other peers=Andere Peers
 Seed server=Seed Server
 Auto-popup on start-up=Popup bei YaCy-Start
 Online-mode=Onlinemodus
+
+#-------------------------------------------------------
+#Language_p.html
+
+Language selection=Sprachauswahl
+You can change the language of the YaCy-webinterface with translation files.=Sie können die Sprache des YaCy-Webinterfaces mit Sprachdateien verändern.
+Current language:=Aktuelle Sprache:
+Languagefile Author:=Autor der Sprachdatei:
+Languages:=Sprachen:
+Install new language from URL:=Neue Sprachdatei herunterladen:
+Use this language=Diese Sprachdatei sofort benutzen
+Use=Benutzen
+Delete=Löschen
+Install=Installieren
