@@ -1,3 +1,15 @@
+# de.lng
+# -----------------------
+# part of YaCy
+# (C) by Michael Peter Christen; mc@anomic.de
+# first published on http://www.anomic.de
+# Frankfurt, Germany, 2005
+#
+# This file is contributed by Roland Ramthun <admin@yacy-forum.de>
+# Last change: 02.07.2005
+
+# If you find any mistakes in this file please don't hesitate to email them to me.
+
 #English=German
 <!-- lang -->default\(english\)=Deutsch
 <!-- author -->=Roland Ramthun
@@ -85,15 +97,15 @@ Use this language=Diese Sprachdatei sofort benutzen
 #EditProfile_p.html
 
 Your Personal Profile=Dein persönliches Profil
-You can create a personal profile here. Other YaCy users can view these information using a link on the network page.=Hier kannst Du Dein persönliches Profil verwalten. Andere YaCy-Benutzer können dieses Profil über einen Link auf ihrer Netzwerkseite ansehen.
-You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.=Du musste hier keine persönlichen Daten eingeben, aber wenn Du Kontaktinformationen bereitstellen möchtest, kannst Du das hier machen.
-Name=Name
-Nick Name=Nick Name	
-Homepage=Homepage	
-eMail=eMail 	
-ICQ=ICQ
-Jabber=Jabber
-Yahoo!=Yahoo!
-MSN=MSN
-Comment=Kommentar 	
-Save=Speichern
+You can create a personal profile here. Other YaCy users can view these information using a link on the network page.=Hier können Sie Ihr persönliches Profil verwalten. Andere YaCy-Benutzer können dieses Profil über einen Link auf ihrer Netzwerkseite ansehen.
+You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.=Sie müssen hier keine persönlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen möchten, kann man das hier machen.
+#Name=Name
+#Nick Name=Nick Name	
+#Homepage=Homepage	
+#eMail=eMail 	
+#ICQ=ICQ
+#Jabber=Jabber
+#Yahoo!=Yahoo!
+#MSN=MSN
+"Comment"=Kommentar 	
+"Save"=Speichern
