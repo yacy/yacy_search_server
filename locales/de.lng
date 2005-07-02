@@ -35,6 +35,7 @@ Start Point:=Startpunkt:
 #-------------------------------------------------------
 #Status.html
 
+System-, Index- and Peer-Status=System-,Index- und Peer-Status
 Welcome to YaCy!=Willkommen bei YaCy!
 System version=Systemversion
 Proxy host=Proxy Host
@@ -47,6 +48,24 @@ Other peers=Andere Peers
 Seed server=Seed Server
 Auto-popup on start-up=Popup bei YaCy-Start
 Online-mode=Onlinemodus
+Your settings are protected by a password.=Ihre Einstellungen sind mit einem Kennwort geschützt.
+not used=nicht benutzt
+Your '.yacy' home at=Ihre YaCy-Domain ist
+Shutdown YaCy=YaCy herunterfahren
+Memory Usage=Speicherverbrauch
+Traffic=Netzwerkverkehr
+System Resources=Systemressourcen
+#"Uptime"=???
+#"Connects"=???
+peers/hour=Peers/Stunde
+other peers online.=andere Peers online.
+free:=Frei:
+total:=Gesamt:
+max:=Maximal:
+Processors:=Prozessoren:
+Do Garbage-Collect now=Garbage-Collect durchführen
+You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.=Sie sind im <i>permanenten</i> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein möchten, müssen Sie den Proxy abschalten um offline zu gehen.
+
 
 #-------------------------------------------------------
 #Language_p.html
@@ -65,16 +84,16 @@ Use this language=Diese Sprachdatei sofort benutzen
 #-------------------------------------------------------
 #EditProfile_p.html
 
-Your Personal Profile=Ihr persönliches Profil
-You can create a personal profile here. Other YaCy users can view these information using a link on the network page.=Hier können Sie Ihr persönliches Profil verwalten. Andere YaCy-Benutzer können dieses Profil über einen Link auf ihrer Netzwerkseite ansehen.
-You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.=Sie müssen hier keine persönlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen möchten, kann man das hier machen.
-#Name=Name
-#Nick Name=Nick Name	
-#Homepage=Homepage	
-#eMail=eMail 	
-#ICQ=ICQ
-#Jabber=Jabber
-#Yahoo!=Yahoo!
-#MSN=MSN
+Your Personal Profile=Dein persönliches Profil
+You can create a personal profile here. Other YaCy users can view these information using a link on the network page.=Hier kannst Du Dein persönliches Profil verwalten. Andere YaCy-Benutzer können dieses Profil über einen Link auf ihrer Netzwerkseite ansehen.
+You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.=Du musste hier keine persönlichen Daten eingeben, aber wenn Du Kontaktinformationen bereitstellen möchtest, kannst Du das hier machen.
+Name=Name
+Nick Name=Nick Name	
+Homepage=Homepage	
+eMail=eMail 	
+ICQ=ICQ
+Jabber=Jabber
+Yahoo!=Yahoo!
+MSN=MSN
 Comment=Kommentar 	
 Save=Speichern

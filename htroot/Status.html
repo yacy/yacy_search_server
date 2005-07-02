@@ -8,7 +8,7 @@
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #[header]#
 <br><br>
-<h2>System, Index and Peer Status</h2>
+<h2>System-, Index- and Peer-Status</h2>
 
 <p>Welcome to YaCy!</p>
 
@@ -58,7 +58,7 @@ see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installatio
 Unknown
 ::
 Uptime = #[uptime]#, Links# = #[links]#, RWIs# = #[words]#, 
-Connects(#[juniorConnects]#|#[seniorConnects]#|#[principalConnects]#|#[disconnects]#) #[connects]# peers/hour
+Connects (#[juniorConnects]#|#[seniorConnects]#|#[principalConnects]#|#[disconnects]#) #[connects]# peers/hour
 #(/peerStatistics)#
 </td></tr>
 <tr class="TableCellDark"><td>This peer's status</td><td>
@@ -108,12 +108,11 @@ To start permanent mode, press this button:
 </form>
 ::
 You are in <i>permanent</i> mode.
-Attention: If you don't have a flatrate or are always-on,
-you must switch off the proxy to go off-line.
+Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.
 #(/omode)#
 </td></tr>
 <tr class="TableCellLight"><td>Memory Usage</td><td>
-<form action="Status.html" method="get">free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]# | <input type="submit" name="gc" value="do Garbage-Collect now"></form>
+<form action="Status.html" method="get">free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]# | <input type="submit" name="gc" value="Do Garbage-Collect now"></form>
 </td></tr>
 <tr class="TableCellDark"><td>Traffic</td><td>
 In: #[trafficIn]# | Out: #[trafficOut]#
