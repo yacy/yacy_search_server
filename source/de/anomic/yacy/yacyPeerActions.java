@@ -268,6 +268,12 @@ public class yacyPeerActions {
                 ctime = yacyCore.universalTime();
             }
             
+            if (Math.abs(yacyCore.universalTime() - ctime) > 3600000) {
+                // the new connection is out-of-age, we reject the connection
+                yacyCore.log.logDebug("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getAddress());
+                return false;
+            }
+            
             // disconnection time
             long dtime;
             yacySeed disconnectedSeed = seedDB.getDisconnected(seed.hash);
@@ -286,7 +292,7 @@ public class yacyPeerActions {
                 seed.setFlagDirectConnect(true);
 	    } else {
                 // set connection flag
-                if ((yacyCore.universalTime() - ctime) > 120000) seed.setFlagDirectConnect(false); // 2 minutes
+                if (Math.abs(yacyCore.universalTime() - ctime) > 120000) seed.setFlagDirectConnect(false); // 2 minutes
             }
 
             // update latest version number
@@ -302,16 +308,6 @@ public class yacyPeerActions {
                     if (ctime < dtime) {
                         // the disconnection was later, we reject the connection
                         yacyCore.log.logDebug("connect: rejecting disconnected peer '" + seed.getName() + "' from " + seed.getAddress());
-                        return false;
-                    }
-                    if ((yacyCore.universalTime() - ctime) > 3600000) {
-                        // the new connection is out-of-age, we reject the connection
-                        yacyCore.log.logDebug("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getAddress());
-                        return false;
-                    }
-                    if ((yacyCore.universalTime() - ctime) > 3600000) {
-                        // the new connection is future-dated, we reject the connection
-                        yacyCore.log.logDebug("connect: rejecting future-dated peer '" + seed.getName() + "' from " + seed.getAddress());
                         return false;
                     }
                 }
