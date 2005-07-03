@@ -43,9 +43,11 @@ package de.anomic.htmlFilter;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Locale;
+import java.text.Collator;
 
 import de.anomic.server.serverByteBuffer;
 
@@ -54,15 +56,20 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
 
     // statics: for initialisation of the HTMLFilterAbstractScraper
-    private static HashSet linkTags0;
-    private static HashSet linkTags1;
-
+    private static TreeSet linkTags0;
+    private static TreeSet linkTags1;
+    private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
     static {
-	linkTags0 = new HashSet();
+	insensitiveCollator.setStrength(Collator.SECONDARY);
+	insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
+    }
+    
+    static {
+	linkTags0 = new TreeSet(insensitiveCollator);
 	linkTags0.add("img");
         linkTags0.add("base");
 
-	linkTags1 = new HashSet();
+	linkTags1 = new TreeSet(insensitiveCollator);
 	linkTags1.add("a");
 	linkTags1.add("h1");
 	linkTags1.add("title");

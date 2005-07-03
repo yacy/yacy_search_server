@@ -40,15 +40,15 @@
 
 package de.anomic.htmlFilter;
 
-import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.Properties;
 
 public abstract class htmlFilterAbstractTransformer implements htmlFilterTransformer {
 
-    private HashSet      tags0;
-    private HashSet      tags1;
+    private TreeSet      tags0;
+    private TreeSet      tags1;
 
-    public htmlFilterAbstractTransformer(HashSet tags0, HashSet tags1) {
+    public htmlFilterAbstractTransformer(TreeSet tags0, TreeSet tags1) {
 	this.tags0  = tags0;
 	this.tags1  = tags1;
     }

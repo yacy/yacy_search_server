@@ -43,23 +43,30 @@ package de.anomic.htmlFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.Locale;
+import java.text.Collator;
 
 import de.anomic.server.serverByteBuffer;
 
 public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer implements htmlFilterTransformer {
 
     // statics: for initialisation of the HTMLFilterAbstractTransformer
-    private static HashSet linkTags0;
-    private static HashSet linkTags1;
-
+    private static TreeSet linkTags0;
+    private static TreeSet linkTags1;
+    private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
     static {
-	linkTags0 = new HashSet();
+	insensitiveCollator.setStrength(Collator.SECONDARY);
+	insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
+    }
+    
+    static {
+	linkTags0 = new TreeSet(insensitiveCollator);
 	linkTags0.add("img");
 
-	linkTags1 = new HashSet();
+	linkTags1 = new TreeSet(insensitiveCollator);
 	linkTags1.add("a");
     }
 

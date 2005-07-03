@@ -244,7 +244,7 @@ public class plasmaSnippetCache {
             hash = (String) j.next();
             pos = (Integer) hs.get(hash);
             if (pos == null) {
-                remaininghashes.add(hash);
+                remaininghashes.add(new String(hash));
             } else {
                 p = pos.intValue();
                 if (p > maxpos) maxpos = p;

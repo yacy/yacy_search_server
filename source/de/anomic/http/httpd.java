@@ -223,6 +223,8 @@ public final class httpd implements serverHandler {
         int pos;
         while (st.hasMoreTokens()) {
             pattern = st.nextToken();
+            if (key.matches(pattern)) return true;
+            /*
             pos = pattern.indexOf("*");
             if (pos < 0) {
                 // no wild card: exact match
@@ -232,6 +234,7 @@ public final class httpd implements serverHandler {
                 if ((key.startsWith(pattern.substring(0, pos))) &&
                         (key.endsWith(pattern.substring(pos + 1)))) return true;
             }
+             */
         }
         return false;
     }
