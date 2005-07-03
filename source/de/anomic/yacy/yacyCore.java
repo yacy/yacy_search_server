@@ -91,7 +91,7 @@ public class yacyCore {
     public static yacyDHTAction dhtAgent = null;
     public static serverLog log;
     public static long lastOnlineTime = 0;
-    public static String latestVersion = "";
+    public static float latestVersion = (float) 0.1;
     public static long speedKey = 0;
     public static File yacyDBPath;
     

@@ -78,12 +78,14 @@ public class Status {
             prop.put("protection", 1);//protected
         
         // version information
-		prop.put("svnRevision", env.getConfig("svnRevision", ""));
-        if ((yacyCore.latestVersion == null) || (yacyCore.latestVersion.length() < 3) || (yacyCore.latestVersion.equals(env.getConfig("version",""))))
+	prop.put("svnRevision", env.getConfig("svnRevision", ""));
+        float thisVersion = yacyCore.latestVersion;
+        try {thisVersion = Float.parseFloat(env.getConfig("version","0.1"));} catch (NumberFormatException e) {}
+        if (yacyCore.latestVersion == thisVersion)
             prop.put("versioncomment", 0);//no commet
         else
             prop.put("versioncomment", 1);//new version
-        prop.put("versioncomment_latestVersion", yacyCore.latestVersion);
+        prop.put("versioncomment_latestVersion", "" + yacyCore.latestVersion);
         
         prop.put("host", serverCore.publicLocalIP());
         prop.put("port", env.getConfig("port", "<unknown>"));    

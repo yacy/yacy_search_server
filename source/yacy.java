@@ -1,4 +1,4 @@
-//yacy.java 
+//yacy.java
 //-----------------------
 //(C) by Michael Peter Christen; mc@anomic.de
 //first published on http://www.yacy.net
@@ -113,12 +113,15 @@ public final class yacy {
     
     // static objects
     private static String vString = "@REPL_VERSION@";
+    private static float version = (float) 0.1;
+    
     private static final String vDATE   = "@REPL_DATE@";
     private static final String copyright = "[ YACY Proxy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
-        
+    
     private static void startup(String homePath) {
         long startup = yacyCore.universalTime();
+        try {version = Float.parseFloat(vString);} catch (NumberFormatException e) {}
         try {
             // start up
             System.out.println(copyright);
@@ -157,15 +160,15 @@ public final class yacy {
             sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
             
             // if we are running an SVN version, we try to detect the used svn revision now ...
-                Properties buildProp = new Properties();
-                File buildPropFile = null;
-                try {
-                    buildPropFile = new File(homePath,"build.properties");
-                    buildProp.load(new FileInputStream(buildPropFile));
-                } catch (Exception e) {
-                    System.err.println("ERROR: " + buildPropFile.toString() + " not found in settings path");
-                }
-                
+            Properties buildProp = new Properties();
+            File buildPropFile = null;
+            try {
+                buildPropFile = new File(homePath,"build.properties");
+                buildProp.load(new FileInputStream(buildPropFile));
+            } catch (Exception e) {
+                System.err.println("ERROR: " + buildPropFile.toString() + " not found in settings path");
+            }
+            
             try {
                 if (buildProp.containsKey("releaseNr")) {
                     // this normally looks like this: $Revision: 181 $
@@ -174,9 +177,9 @@ public final class yacy {
                     Matcher matcher = pattern.matcher(svnReleaseNrStr);
                     if (matcher.find()) {
                         String svrReleaseNr = matcher.group(1);
-            		    if (vString.equals("@" + "REPL_VERSION" + "@")) {
-                            vString = "SVN " + svrReleaseNr;
-						}
+                        try {
+                            version = version + (Float.parseFloat(svrReleaseNr) / (float) 10000000.0);
+                        } catch (NumberFormatException e) {}
                         sb.setConfig("svnRevision", svrReleaseNr);
                     }
                 }
@@ -184,11 +187,12 @@ public final class yacy {
                 System.err.println("Unable to determine the currently used SVN revision number.");
             }
             
-            sb.setConfig("version", vString);
+            sb.setConfig("version", "" + version);
             sb.setConfig("vdate", vDATE);
             sb.setConfig("applicationRoot", homePath);
             sb.setConfig("startupTime", "" + startup);
-            serverLog.logSystem("STARTUP", "YACY Version: " + vString + ", Built " + vDATE);
+            serverLog.logSystem("STARTUP", "YACY Version: " + version + ", Built " + vDATE);
+            yacyCore.latestVersion = version;
             
             // read environment
             //new
@@ -216,9 +220,9 @@ public final class yacy {
                     "This directory shares it's content with the applications htroot path, so you\r\n" +
                     "may access your yacy search page with\r\n" +
                     "http://<your-peer-name>.yacy/\r\n" +
-            "\r\n").getBytes(), htdocsDefaultReadme);} catch (IOException e) {
-                System.out.println("Error creating htdocs readme: " + e.getMessage());
-            }
+                    "\r\n").getBytes(), htdocsDefaultReadme);} catch (IOException e) {
+                        System.out.println("Error creating htdocs readme: " + e.getMessage());
+                    }
             
             File wwwDefaultPath = new File(htDocsPath, "www");
             if (!(wwwDefaultPath.exists())) wwwDefaultPath.mkdir();
@@ -292,7 +296,7 @@ public final class yacy {
                         sb,
                         30000 /*command max length incl. GET args*/);
                 server.setName("httpd:"+port);
-                server.setPriority(Thread.MAX_PRIORITY); 
+                server.setPriority(Thread.MAX_PRIORITY);
                 if (server == null) {
                     serverLog.logFailure("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
                 } else {
@@ -307,50 +311,50 @@ public final class yacy {
                         String  browserPopUpApplication = sb.getConfig("browserPopUpApplication", "netscape");
                         serverSystem.openBrowser("http://localhost:" + port + "/" + browserPopUpPage, browserPopUpApplication);
                     }
-
+                    
                     //Copy the shipped locales into DATA
                     File localesPath = new File(sb.getRootPath(), sb.getConfig("localesPath", "DATA/LOCALE"));
-					File defaultLocalesPath = new File(sb.getRootPath(), "locales");
+                    File defaultLocalesPath = new File(sb.getRootPath(), "locales");
                     
                     try{
                         File[] defaultLocales = defaultLocalesPath.listFiles();
                         localesPath.mkdirs();
                         for(int i=0;i < defaultLocales.length; i++){
                             if(defaultLocales[i].getName().endsWith(".lng"))
-                               serverFileUtils.copy(defaultLocales[i], new File(localesPath, defaultLocales[i].getName()));
+                                serverFileUtils.copy(defaultLocales[i], new File(localesPath, defaultLocales[i].getName()));
                         }
                         serverLog.logInfo("STARTUP", "Copied the default lokales to DATA/LOCALE");
                     }catch(NullPointerException e){
                         serverLog.logError("STARTUP", "Nullpointer Exception while copying the default Locales");
                     }
-
-					//regenerate Locales from Translationlist, if needed
-					String lang = sb.getConfig("htLocaleSelection", "");
-					if(! lang.equals("") && ! lang.equals("default") ){ //locale is used
-						String currentRev = "";
-						try{
-	            		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File( sb.getConfig("htRootPath", "htroot"), "locale/"+lang+"/version" ))));
-						currentRev = br.readLine();
-						br.close();
-						}catch(IOException e){
-							//Error
-						}
-						
-						try{ //seperate try, because we want this, even when the File "version2 does not exist.
-						if(! currentRev.equals(sb.getConfig("svnRevision", "")) ){ //is this another version?!
-							File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
-							File destDir = new File(sourceDir, "locale/"+lang);
-							if(translator.translateFiles(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
-								//write the new Versionnumber
-					    		BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-								bw.write(sb.getConfig("svnRevision", "Error getting Version"));
-								bw.close();
-							}
-						}
-						}catch(IOException e){
-							//Error
-						}
-					}
+                    
+                    //regenerate Locales from Translationlist, if needed
+                    String lang = sb.getConfig("htLocaleSelection", "");
+                    if(! lang.equals("") && ! lang.equals("default") ){ //locale is used
+                        String currentRev = "";
+                        try{
+                            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File( sb.getConfig("htRootPath", "htroot"), "locale/"+lang+"/version" ))));
+                            currentRev = br.readLine();
+                            br.close();
+                        }catch(IOException e){
+                            //Error
+                        }
+                        
+                        try{ //seperate try, because we want this, even when the File "version2 does not exist.
+                            if(! currentRev.equals(sb.getConfig("svnRevision", "")) ){ //is this another version?!
+                                File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
+                                File destDir = new File(sourceDir, "locale/"+lang);
+                                if(translator.translateFiles(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
+                                    //write the new Versionnumber
+                                    BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+                                    bw.write(sb.getConfig("svnRevision", "Error getting Version"));
+                                    bw.close();
+                                }
+                            }
+                        }catch(IOException e){
+                            //Error
+                        }
+                    }
                     
                     // registering shutdown hook
                     serverLog.logSystem("STARTUP", "Registering Shutdown Hook");
@@ -501,7 +505,7 @@ public final class yacy {
         // finished
         serverLog.logSystem("GEN-WORDSTAT", "FINISHED");
     }
-
+    
     private static void checkMigrate(File dbroot, serverLog log, File file, plasmaWordIndex wordIndex) throws IOException {
         long length = file.length();
         if (length > 3000) {
@@ -705,8 +709,7 @@ public final class yacy {
     }
 }
 
-class shutdownHookThread extends Thread    
-{
+class shutdownHookThread extends Thread {
     private plasmaSwitchboard sb = null;
     private Thread mainThread = null;
     
@@ -715,14 +718,14 @@ class shutdownHookThread extends Thread
         this.mainThread = mainThread;
     }
     
-    public void run() {                
+    public void run() {
         
         try {
-            if (!this.sb.isTerminated()) {                
+            if (!this.sb.isTerminated()) {
                 serverLog.logSystem("SHUTDOWN","Shutdown via shutdown hook.");
                 
                 // sending the yacy main thread a shutdown signal
-                this.sb.terminate();    
+                this.sb.terminate();
                 
                 // waiting for the yacy thread to finish execution
                 this.mainThread.join();

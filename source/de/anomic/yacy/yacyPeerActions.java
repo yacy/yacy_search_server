@@ -289,6 +289,9 @@ public class yacyPeerActions {
                 if ((yacyCore.universalTime() - ctime) > 120000) seed.setFlagDirectConnect(false); // 2 minutes
             }
 
+            // update latest version number
+            if (seed.getVersion() > yacyCore.latestVersion) yacyCore.latestVersion = seed.getVersion();
+            
 	    // prepare to update
 	    if (disconnectedSeed != null) {
 		// if the indirect connect aims to announce a peer that we know has been disconnected
