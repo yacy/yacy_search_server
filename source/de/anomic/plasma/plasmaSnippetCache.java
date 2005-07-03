@@ -238,11 +238,14 @@ public class plasmaSnippetCache {
         hs = hashSentence(result);
         j = queryhashes.iterator();
         Integer pos;
+        Set remaininghashes = new HashSet();
         int p, minpos = result.length(), maxpos = -1;
         while (j.hasNext()) {
-            pos = (Integer) hs.get((String) j.next());
-            if (pos != null) {
-                j.remove();
+            hash = (String) j.next();
+            pos = (Integer) hs.get(hash);
+            if (pos == null) {
+                remaininghashes.add(hash);
+            } else {
                 p = pos.intValue();
                 if (p > maxpos) maxpos = p;
                 if (p < minpos) minpos = p;
@@ -267,7 +270,7 @@ public class plasmaSnippetCache {
             // so cut it here at both ends at once
             int newlen = maxpos - minpos + 10;
             int around = (maxLength - newlen) / 2;
-            result = "[..] " + result.substring(minpos - around, maxpos + around).trim() + " [..]";
+            result = "[..] " + result.substring(minpos - around, ((maxpos + around) > result.length()) ? result.length() : (maxpos + around)).trim() + " [..]";
             minpos = around;
             maxpos = result.length() - around - 5;
         }
@@ -289,7 +292,7 @@ public class plasmaSnippetCache {
         // and find recursively more sentences
         maxLength = maxLength - result.length();
         if (maxLength < 20) maxLength = 20;
-        String nextSnippet = computeSnippet(sentences, queryhashes, minLength, maxLength);
+        String nextSnippet = computeSnippet(sentences, remaininghashes, minLength, maxLength);
         return result + ((nextSnippet == null) ? "" : (" / " + nextSnippet));
     }
     
