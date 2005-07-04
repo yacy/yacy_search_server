@@ -665,7 +665,7 @@ public final class httpc {
     public response GET(String path, httpHeader requestHeader) throws IOException {
         //serverLog.logDebug("HTTPC", handle + " requested GET '" + path + "', time = " + (System.currentTimeMillis() - handle));
         try {
-            boolean zipped = (this.allowContentEncoding) ? true : httpd.shallTransportZipped(path);
+            boolean zipped = (!this.allowContentEncoding) ? false : httpd.shallTransportZipped(path);
             send(httpHeader.METHOD_GET, path, requestHeader, zipped);
             response r = new response(zipped);
             //serverLog.logDebug("HTTPC", handle + " returned GET '" + path + "', time = " + (System.currentTimeMillis() - handle));

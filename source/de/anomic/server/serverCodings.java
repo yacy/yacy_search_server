@@ -176,6 +176,7 @@ public final class serverCodings {
 	    return out;
 	} catch (ArrayIndexOutOfBoundsException e) {
 	    // maybe the input was not base64
+        e.printStackTrace();
 	    return null;
 	}
     }

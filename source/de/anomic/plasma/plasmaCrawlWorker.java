@@ -282,7 +282,7 @@ public final class plasmaCrawlWorker extends Thread {
             httpHeader requestHeader = new httpHeader();
             requestHeader.put("User-Agent", httpdProxyHandler.userAgent);
             requestHeader.put("Referer", referer);
-            requestHeader.put("Accept-Encoding", "gzip,deflate");
+            if (useContentEncodingGzip) requestHeader.put("Accept-Encoding", "gzip,deflate");
     
             //System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
                     
