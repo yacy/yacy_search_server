@@ -71,8 +71,7 @@ public class httpdSoapService
     /**
      * Constructor of this class
      */
-    public httpdSoapService()
-    {
+    public httpdSoapService() {
         super();
         
         // nothing special todo here at the moment
@@ -94,10 +93,8 @@ public class httpdSoapService
                 int maxSearchTime,
                 String urlMaskFilter            
             ) 
-        throws AxisFault
-    {        
-        try
-        {
+        throws AxisFault {        
+        try {
             // extracting the message context
             extractMessageContext();
             
@@ -123,9 +120,7 @@ public class httpdSoapService
             
             // sending back the result to the client
             return this.convertContentToXML(result);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e)  {
             throw new AxisFault(e.getMessage());
         }
     }
@@ -134,10 +129,8 @@ public class httpdSoapService
      * Service used to query the network properties
      * @throws AxisFault if the service could not be executed propery. 
      */
-    public String network() throws AxisFault
-    {
-        try
-        {
+    public String network() throws AxisFault {
+        try {
             // extracting the message context
             extractMessageContext();  
             
@@ -146,9 +139,7 @@ public class httpdSoapService
             
             // sending back the result to the client
             return result;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new AxisFault(e.getMessage());
         }
     }
@@ -161,10 +152,8 @@ public class httpdSoapService
      * 
      * @throws AxisFault if the service could not be executed propery. 
      */    
-    public String crawling(String crawlingURL) throws AxisFault
-    {
-        try
-        {
+    public String crawling(String crawlingURL) throws AxisFault {
+        try {
             // extracting the message context
             extractMessageContext();  
             
@@ -185,9 +174,7 @@ public class httpdSoapService
             
             // sending back the crawling status page to the user
             return result;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new AxisFault(e.getMessage());
         }        
     }
@@ -196,8 +183,7 @@ public class httpdSoapService
      * This function is called by the available service functions to
      * extract all needed informations from the SOAP message context.
      */
-    private void extractMessageContext()
-    {
+    private void extractMessageContext() {
         this.messageContext = MessageContext.getCurrentContext();
         
         this.rootPath      = (String) this.messageContext.getProperty(httpdSoapHandler.MESSAGE_CONTEXT_HTTP_ROOT_PATH);       
@@ -218,16 +204,13 @@ public class httpdSoapService
      * @throws AxisFault
      */
     private String writeTemplate(String templateName, serverObjects args) 
-        throws AxisFault
-    {
-        try
-        {
+        throws AxisFault {
+        try {
             // determining the proper class that should be invoked
             File file = new File(this.rootPath, templateName);    
             File rc = rewriteClassFile(file);
             
-            if (SERVICE_NEEDS_AUTHENTICATION.contains(templateName))
-            {
+            if (SERVICE_NEEDS_AUTHENTICATION.contains(templateName)) {
                 this.doAuthentication();
             }
             
@@ -250,9 +233,7 @@ public class httpdSoapService
             // convert it into a byte array and send it back as result
             byte[] result = o.toByteArray();            
             return new String(result); 
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new AxisFault(e.getMessage());
         }
     }    
@@ -268,8 +249,7 @@ public class httpdSoapService
         throws AxisFault
     {
         // check if the servlets requests authentification
-        if (tp.containsKey("AUTHENTICATE"))         
-        {
+        if (tp.containsKey("AUTHENTICATE")) {
             throw new AxisFault("log-in required");
         }             
     }    
@@ -281,8 +261,7 @@ public class httpdSoapService
      * @throws AxisFault if the authentication could not be done successfully
      */
     private void doAuthentication() 
-        throws AxisFault
-    {
+        throws AxisFault {
         // accessing the SOAP request message
         Message message = this.messageContext.getRequestMessage();
         
@@ -291,18 +270,14 @@ public class httpdSoapService
         
         // getting the proper soap header containing the authorization field
         SOAPHeaderElement authElement = envelope.getHeaderByName(httpdSoapHandler.serviceHeaderNamespace, "Authorization");
-        if (authElement != null)
-        {        
+        if (authElement != null) {        
             // the base64 encoded and md5 hashed authentication string 
             String authString = authElement.getValue();
             
             String adminAccountBase64MD5 = this.switchboard.getConfig("adminAccountBase64MD5","");
-            if (adminAccountBase64MD5.length() == 0)
-            {
+            if (adminAccountBase64MD5.length() == 0) {
                 throw new AxisFault("log-in required");
-            }
-            else if (!(adminAccountBase64MD5.equals(authString))) 
-            {
+            } else if (!(adminAccountBase64MD5.equals(authString))) {
                 throw new AxisFault("log-in required");
             }
         }
@@ -358,16 +333,13 @@ public class httpdSoapService
     throws Exception
     {
         Document doc = null;
-        try
-        {
+        try {
             DocumentBuilderFactory newDocBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder newDocBuilder = newDocBuilderFactory.newDocumentBuilder();          
             
             InputSource is = new InputSource(new StringReader(contentString));
             doc = newDocBuilder.parse(is);                      
-        }       
-        catch (Exception e)
-        {
+        }  catch (Exception e) {
             String errorMessage = "Unable to parse the search result XML data. " + e.getClass().getName() + ". " + e.getMessage();
             throw new Exception(errorMessage);
         }       

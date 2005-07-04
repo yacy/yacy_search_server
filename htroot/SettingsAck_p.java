@@ -53,13 +53,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.pool.impl.GenericObjectPool;
+
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedUploader;
@@ -131,14 +135,6 @@ public class SettingsAck_p {
             env.setConfig("port", port);
             prop.put("info_port", port);
             
-            // port forwarding configuration
-            env.setConfig("portForwardingEnabled", post.containsKey("portForwardingEnabled")?"true":"false");
-            env.setConfig("portForwardingHost", (String)post.get("portForwardingHost"));
-            env.setConfig("portForwardingPort", (String)post.get("portForwardingPort"));
-            env.setConfig("portForwardingUser", (String)post.get("portForwardingUser"));
-            env.setConfig("portForwardingPwd", (String)post.get("portForwardingPwd"));
-            prop.put("info_portForwardingEnabled",post.containsKey("portForwardingEnabled")?"on":"off");
-
             // read and process data
             String filter = (String) post.get("proxyfilter");
             String user   = (String) post.get("proxyuser");
@@ -193,6 +189,48 @@ public class SettingsAck_p {
             prop.put("info", 20);             
             return prop;
         }
+        
+        // port forwarding configuration
+        if (post.containsKey("portForwarding")) {            
+            env.setConfig("portForwardingEnabled", post.containsKey("portForwardingEnabled")?"true":"false");
+            env.setConfig("portForwardingUseProxy",post.containsKey("portForwardingUseProxy")?"true":"false");
+            env.setConfig("portForwardingPort",    (String)post.get("portForwardingPort"));
+                        
+            env.setConfig("portForwardingHost",    (String)post.get("portForwardingHost"));
+            env.setConfig("portForwardingHostPort",(String)post.get("portForwardingHostPort"));
+            env.setConfig("portForwardingHostUser",(String)post.get("portForwardingHostUser"));
+            env.setConfig("portForwardingHostPwd", (String)post.get("portForwardingHostPwd"));
+            
+            // trying to reconnect the port forwarding channel
+            try {
+                serverCore httpd = (serverCore) env.getThread("10_httpd");
+                if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
+                    // trying to shutdown the current port forwarding channel
+                    serverCore.portForwarding.disconnect();                
+                }            
+                // trying to reinitialize the port forwarding
+                httpd.initPortForwarding();
+                
+                // notifying publishSeed Thread
+                serverThread peerPing = env.getThread("30_peerping");
+                peerPing.notifyThread();
+            } catch (Exception e) {
+                prop.put("info", 23); 
+                prop.put("info_errormsg",(e.getMessage() == null) ? "unknown" : e.getMessage().replaceAll("\n","<br>"));
+                return prop;
+            }
+            
+            prop.put("info", 22); 
+            prop.put("info_portForwardingEnabled", post.containsKey("portForwardingEnabled")?"on":"off");  
+            prop.put("info_portForwardingUseProxy",post.containsKey("portForwardingUseProxy")?"on":"off");
+            prop.put("info_portForwardingPort",    (String)post.get("portForwardingPort"));
+            prop.put("info_portForwardingHost",    (String)post.get("portForwardingHost"));
+            prop.put("info_portForwardingHostPort",(String)post.get("portForwardingHostPort"));
+            prop.put("info_portForwardingHostUser",(String)post.get("portForwardingHostUser"));
+            prop.put("info_portForwardingHostPwd", (String)post.get("portForwardingHostPwd"));   
+            return prop;
+        }
+        
         
         // server password
         if (post.containsKey("serveraccount")) {

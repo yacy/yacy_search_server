@@ -63,7 +63,7 @@ import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 
 public class yacyClient {
-    
+       
     public static int publishMySeed(String address, String otherHash) {
         // this is called to enrich the seed information by
         // - own address (if peer is behind a nat/router)
@@ -127,7 +127,7 @@ public class yacyClient {
         if ((otherHash != null ) && (otherHash.length() > 0)) {
             otherPeer = yacySeed.genRemoteSeed((String) result.get("seed0"), key, remoteTime);
             if ((otherPeer == null) || (!(otherPeer.hash.equals(otherHash)))) {
-                yacyCore.log.logDebug("yacyClient.publishMySeed consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
+                yacyCore.log.logDebug("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
                 return -1; // no success
             }
             otherPeerVersion = otherPeer.getVersion();
@@ -152,13 +152,36 @@ public class yacyClient {
          */
         if ((!serverCore.portForwardingEnabled) || (otherPeerVersion >= (float)0.383)) {
             String mytype = (String) result.get("yourtype");
-            if (mytype == null) mytype = "junior";        
-            if ((yacyCore.seedDB.mySeed.get("PeerType", "junior").equals("principal")) && (mytype.equals("senior"))) mytype = "principal";
-            
-            if (mytype.equalsIgnoreCase("junior")) {
-                yacyCore.log.logInfo("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as junior.");
+            if (mytype == null) mytype = yacySeed.PEERTYPE_JUNIOR;        
+            if (
+                    (yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR).equals(yacySeed.PEERTYPE_PRINCIPAL)) && 
+                    (mytype.equals(yacySeed.PEERTYPE_SENIOR))
+            ) { 
+                mytype = yacySeed.PEERTYPE_PRINCIPAL;
             }
-            yacyCore.seedDB.mySeed.put("PeerType", mytype);
+            
+            /* 
+             * If we were reported as junior we have to check if your port forwarding channel is broken
+             * If this is true we try to reconnect the sch channel to the remote server now.
+             */
+            if (mytype.equalsIgnoreCase(yacySeed.PEERTYPE_JUNIOR)) {
+                yacyCore.log.logInfo("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as junior.");
+                if (serverCore.portForwardingEnabled) {
+                    if (
+                            (!Thread.currentThread().isInterrupted()) && 
+                            (serverCore.portForwarding != null) && 
+                            (!serverCore.portForwarding.isConnected())
+                    ) {
+                        yacyCore.log.logWarning("yacyClient.publishMySeed: Broken portForwarding channel detected. Trying to reconnect ...");                        
+                        try {
+                            serverCore.portForwarding.reconnect();
+                        } catch (IOException e) {
+                            yacyCore.log.logWarning("yacyClient.publishMySeed: Unable to reconnect to port forwarding host.");
+                        }
+                    }
+                }
+            }
+            yacyCore.seedDB.mySeed.put(yacySeed.PEERTYPE, mytype);
         }
         
         if (!(yacyCore.seedDB.mySeed.isProper())) {

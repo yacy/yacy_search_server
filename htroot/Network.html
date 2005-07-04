@@ -28,6 +28,8 @@
 <h2>Passive Peers</h2>
 ::
 <h2>Potential Peers</h2>
+::
+<h2>Manually contacting Peer</h2>
 #(/page)#
 <p>
 #(table)#
@@ -173,6 +175,28 @@ To do this, press this button:
 </form>
 #(/comment)#
 </p></font>
+::
+<p>
+#(comment)#
+::
+<font color="red"><code>#[status]#</code></font>
+::
+<font color="green"><code>#[status]#</code></font>
+</p>
+<p>
+<font color="green"><code><small>#[details]#</small></code></font>
+</p>
+#(/comment)#
+</p>
+<form action="Network.html" method="get">
+<input name="page" type="hidden" value="4">
+<table>
+<tr><td>Peer Hash</td><td><input name="peerHash" type="text" size="32" maxlength="128" value="#[peerHash]#"></td></tr>
+<tr><td>Peer IP</td><td><input name="peerIP" type="text" size="32" maxlength="128" value="#[peerIP]#"></td></tr>
+<tr><td>Peer Port</td><td><input name="peerPort" type="text" size="32" maxlength="128" value="#[peerPort]#"></td></tr>
+<tr><td>&nbsp;</td><td><input type="submit" name="addPeer" value="add Peer"></td></tr>
+</table>
+</form>
 #(/table)#
 #[footer]#
 </body>

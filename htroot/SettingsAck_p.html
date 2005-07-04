@@ -31,16 +31,14 @@ Your new administration account name is #[user]#. The password has been accepted
 <b>Your proxy access setting has been changed.<br>
 Your proxy account check has been disabled, since you did not supply a password.</b><p>
 The new proxy IP filter is set to #[filter]#<br>
-The proxy port is: <font color="#556699">#[port]#</font><br>
-Port Forwarding is: <font color="#556699">#[portForwardingEnabled]#</font><p>
+The proxy port is: <font color="#556699">#[port]#</font><p>
 <u>if you changed the Port or Port Forwarding Settings, you need to restart YaCy.</u>
 ::<!-- 7 -->
 <b>Your proxy access setting has been changed.</b><br>
 Your new proxy account name is #[user]#. The password has been accepted.<br>
 If you open any public web page through the proxy, you must log-in then.<p>
 The new proxy IP filter is set to #[filter]#.<br>
-The proxy port is: <font color="#556699">#[port]#</font><br>
-Port Forwarding is: <font color="#556699">#[portForwardingEnabled]#</font><p>
+The proxy port is: <font color="#556699">#[port]#</font><p>
 <u>if you changed the Port or Port Forwarding Settings, you need to restart YaCy.</u>
 ::<!-- 8 -->
 <b>Your server access filter is now set to #[filter]#</b><br>
@@ -116,6 +114,31 @@ Seed Upload method was changed successfully.
     <td><font color="#556699"><b>#[msgForwardingTo]#</b></font></td>
 </tr>
 </table>
+::<!-- 22 -->
+<p><b>Your port forwarding settings have been changed.</b></p>
+<table>
+<tr>
+    <td>Port Forwarding Support is:</td>
+    <td><font color="#556699"><b>#[portForwardingEnabled]#</b></font></td>
+</tr>
+<tr>
+    <td>Port Forwarding Port:</td>
+    <td><font color="#556699"><b>#[portForwardingPort]#</b></font></td>
+</tr>
+<tr>
+    <td>Port Forwarding Host:</td>
+    <td><font color="#556699"><b>#[portForwardingHostUser]#@#[portForwardingHost]#:#[portForwardingHostPort]#</b></font></td>
+</tr>
+<tr>
+    <td>Port Forwarding uses proxy:</td>
+    <td><font color="#556699"><b>#[portForwardingUseProxy]#</b></font></td>
+</tr>
+</table>
+::<!-- 23 : Port forwarding - error -->
+<p><b>Port Forwarding Settings changed, but something is wrong.</b></p>
+<p><font color="red">#[errormsg]#</font></p>
+Port Forwarding was deactivated automatically.<br>
+Please return to the settings page and modify the data.<br> 
 #(/info)#
 </p>
 <p>You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.</p>

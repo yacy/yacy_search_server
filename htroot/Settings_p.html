@@ -30,11 +30,15 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 </tr>
 <tr>
 	<td><img src="env/grafics/down.gif" alt="down"><a href="#http">HTTP Networking</a></td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="#messageForwarding">Message Forwarding</a></td>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#messageForwarding">Message Forwarding (optional)</a></td>
 </tr>
 <tr>
 	<td><img src="env/grafics/down.gif" alt="down"><a href="#proxy">Remote Proxy (optional)</a></td>
 	<td><img src="env/grafics/down.gif" alt="down"><a href="#parser">Content Parser Settings</a></td>
+</tr>
+<tr>
+	<td><img src="env/grafics/down.gif" alt="down"><a href="#portForwarding">Port Forwarding (optional)</a></td>
+	<td>&nbsp;</td>
 </tr>
 
 </table>
@@ -64,7 +68,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 <p>
 <table border="0" cellspacing="5">
   <tr valign="top">
-    <td>Peer Name:</td>
+    <td>Peer&nbsp;Name:</td>
     <td><input name="peername" type="text" size="32" maxlength="80" value="#[peerName]#"></td>
     <td><b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.
            Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.</b><br>
@@ -96,40 +100,6 @@ All traffic is routed throug one single port, for both proxy and server.<br>
     <td><i>Changes will take effect after restart only.</i></td>
   </tr> 
 </table>
-
-
-<p><b>Port Forwarding</b><br><br>
-You can use a remote server running a ssh demon to forward your server/proxy port.
-This is useful if you want to tunnel throug a NAT/router.
-Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.
-<table border="0" cellspacing="5">
-  <tr valign="top">
-    <td>Enable port forwarding:</td>
-    <td><input type="checkbox" name="portForwardingEnabled" align="top" #(portForwardingEnabled)#::checked#(/portForwardingEnabled)# DISABLED></td>
-    <td><i>Feature currently not available.&nbsp;</i></td>
-  </tr>
-  <tr valign="top">
-    <td>Forwarding host:</td>
-    <td><input name="portForwardingHost" type="text" size="32" maxlength="128" value="#[portForwardingHost]#"></td>
-    <td>&nbsp;</td>
-  </tr>
-  <tr valign="top">
-    <td>Forwarding port:</td>
-    <td><input name="portForwardingPort" type="text" size="5" maxlength="5" value="#[portForwardingPort]#"></td>
-    <td>&nbsp;</td>
-  </tr>
-  <tr valign="top">
-    <td>Remote host user:</td>
-    <td><input name="portForwardingUser" type="text" size="32" maxlength="128" value="#[portForwardingUser]#"></td>
-    <td>&nbsp;</td>
-  </tr>
-  <tr valign="top">
-    <td>Remote host password:</td>
-    <td><input name="portForwardingPwd" type="password" size="32" maxlength="128" value="#[portForwardingPwd]#"></td>
-    <td>&nbsp;</td>
-  </tr>  
-</table>
-</p>
 
 <p><b>Server Access Restrictions</b><br><br>You can restrict the access to this proxy/server using a two-stage security barrier:
 <ul>
@@ -194,11 +164,62 @@ Alternatively, you can simply set a virtual server port on your NAT/Server to en
   </tr>
   <tr valign="top">
     <td></td>
-    <td><input type="submit" name="proxysettings" value="submit"></td>
+    <td><input type="submit" name="proxysettings" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
   </tr>
 </table>
 </fieldset>
 </form><br>
+
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend id="portForwarding">Port Forwarding (optional)</legend>
+<p>You can use a remote server running a ssh demon to forward your server/proxy port.
+This is useful if you want to tunnel throug a NAT/router.
+Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.</p>
+<table border="0" cellspacing="5">
+  <tr valign="top">
+    <td>Enable&nbsp;port&nbsp;forwarding:</td>
+    <td><input type="checkbox" name="portForwardingEnabled" align="top" #(portForwardingEnabled)#::checked#(/portForwardingEnabled)#></td>
+    <td>Enabling disabling port forwarding via secure channel.</td>
+  </tr>
+  <tr valign="top">
+    <td>Forwarding&nbsp;via&nbsp;proxy:</td>
+    <td><input type="checkbox" name="portForwardingUseProxy" align="top" #(portForwardingUseProxy)#::checked#(/portForwardingUseProxy)# DISABLED></td>
+    <td><!-- Specifies if the connection should be established through the <a href="#proxy">remote proxy</a>.-->
+        <i>Function not available at the moment.</i></td>
+  </tr>    
+  <tr valign="top">
+    <td>Forwarding&nbsp;port:</td>
+    <td><input name="portForwardingPort" type="text" size="5" maxlength="5" value="#[portForwardingPort]#"></td>
+    <td>The port on the remote server that should be forwarded via the secure channel to the local host.</td>
+  </tr>  
+  <tr valign="top">
+    <td>Forwarding&nbsp;host:</td>
+    <td><input name="portForwardingHost" type="text" size="32" maxlength="128" value="#[portForwardingHost]#"></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td>Forwarding&nbsp;host&nbsp;port:</td>
+    <td><input name="portForwardingHostPort" type="text" size="5" maxlength="5" value="#[portForwardingHostPort]#"></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td>Forwarding&nbsp;host&nbsp;user:</td>
+    <td><input name="portForwardingHostUser" type="text" size="32" maxlength="128" value="#[portForwardingHostUser]#"></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td>Forwarding&nbsp;host&nbsp;password:</td>
+    <td><input name="portForwardingHostPwd" type="password" size="32" maxlength="128" value="#[portForwardingHostPwd]#"></td>
+    <td>&nbsp;</td>
+  </tr> 
+  <tr valign="top"> 
+    <td>&nbsp;</td>
+	<td colspan="2"><input type="submit" name="portForwarding" value="Submit">&nbsp;<i>Changes will take effect immediately.</i></td>
+  </tr>  
+</table>
+</fieldset>
+</form><br>
+
 
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <fieldset><legend id="ServerAccess">Server Access Settings</legend>
@@ -277,7 +298,7 @@ but only if there had been changes to the seed-list.
   </tr>
   <tr valign="top">
     <td>Forwarding Command:</td>
-    <td><input name="msgForwardingCmd" type="text" size="32" maxlength="512" value="#[msgForwardingCmd]#"></td>
+    <td><input name="msgForwardingCmd" type="text" size="32" value="#[msgForwardingCmd]#"></td>
     <td><i>The command-line program that should be used to forward the message.<br>e.g.:</i>&nbsp;<code>/usr/sbin/sendmail -t</code></td>
   </tr>
   <tr valign="top">

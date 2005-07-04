@@ -1,69 +1,116 @@
 package de.anomic.server;
 
 import java.io.IOException;
-
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.ProxyHTTP;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
+import de.anomic.server.logging.serverLog;
+
 public class serverPortForwardingSch implements serverPortForwarding{
     
-    String rHost;
-    int rPort;
-    String rUser;
-    String rPwd;
+    /* ========================================================================
+     * Constants needed to read properties from the configuration file
+     * ======================================================================== */
+    public static final String FORWARDING_HOST = "portForwardingHost";
+    public static final String FORWARDING_HOST_PORT = "portForwardingHostPort";
+    public static final String FORWARDING_HOST_USER = "portForwardingHostUser";
+    public static final String FORWARDING_HOST_PWD = "portForwardingHostPwd";
     
-    String lHost;
-    int lPort;
+    public static final String FORWARDING_PORT = "portForwardingPort";
+    public static final String FORWARDING_USE_PROXY = "portForwardingUseProxy";
     
-    Session session;
+    
+    /* ========================================================================
+     * Other object fields
+     * ======================================================================== */    
+    private serverSwitch switchboard;
+        
+    private String forwardingHost;
+    private int forwardingHostPort;
+    private String forwardingHostUser;
+    private String forwardingHostPwd;
+    
+    private int forwardingPort;
+    private boolean useProxy;
+    
+    private String remoteProxyHost;
+    private int remoteProxyPort;    
+    
+    private String localHost;
+    private int localHostPort;
+    
+    private static Session session;
+    private static serverInstantThread sessionWatcher;
+    
+    private serverLog log;
     
     public serverPortForwardingSch() {
         super();
+        this.log = new serverLog("PORT_FORWARDING_SCH");
     }
     
     public void init(
-            String remoteHost, 
-            int remotePort, 
-            String remoteUser, 
-            String remotePwd, 
+            serverSwitch switchboard,
             String localHost, 
             int localPort
-    ) {
-        this.rHost = remoteHost;
-        this.rPort = remotePort;
-        this.rUser = remoteUser;
-        this.rPwd = remotePwd;
-        
-        this.lHost = localHost;
-        this.lPort = localPort;        
-        
-        // checking if all needed libs are availalbe
-        String javaClassPath = System.getProperty("java.class.path");
-        if (javaClassPath.indexOf("jsch") == -1) {
-            throw new IllegalStateException("Missing library.");
+    ) throws Exception {
+        try {
+            this.log.logDebug("Initializing port forwarding via sch ...");
+            
+            this.switchboard = switchboard;
+            
+            this.forwardingHost     = switchboard.getConfig(FORWARDING_HOST,"localhost");
+            this.forwardingHostPort = Integer.valueOf(switchboard.getConfig(FORWARDING_HOST_PORT,"8080")).intValue();
+            this.forwardingHostUser = switchboard.getConfig(FORWARDING_HOST_USER,"xxx");
+            this.forwardingHostPwd  = switchboard.getConfig(FORWARDING_HOST_PWD,"xxx");
+
+            this.forwardingPort = Integer.valueOf(switchboard.getConfig(FORWARDING_PORT,"8080")).intValue(); 
+            this.useProxy = Boolean.valueOf(switchboard.getConfig(FORWARDING_USE_PROXY,"false")).booleanValue();
+            
+            this.localHost = localHost;
+            this.localHostPort = localPort;        
+            
+            // load remote proxy data
+            this.remoteProxyHost    = switchboard.getConfig("remoteProxyHost","");
+            try {
+                this.remoteProxyPort    = Integer.parseInt(switchboard.getConfig("remoteProxyPort","3128"));
+            } catch (NumberFormatException e) {
+                remoteProxyPort = 3128;
+            }
+            
+            // checking if all needed libs are availalbe
+            String javaClassPath = System.getProperty("java.class.path");
+            if (javaClassPath.indexOf("jsch") == -1) {
+                throw new IllegalStateException("Missing library.");
+            }
+        } catch (Exception e) {
+            this.log.logFailure("Unable to initialize port forwarding.",e);
+            throw e;
         }
     }
     
     public String getHost() {
-        return this.rHost;
+        return this.forwardingHost;
     }
     
     public int getPort() {
-        return this.rPort;
+        return this.forwardingPort;
     }
+
     
-    public String getUser() {
-        return this.rUser;
-    }
-    
-    public void connect() throws IOException {
-        
+    public synchronized void connect() throws IOException {
         try{
+            if ((session != null) && (session.isConnected()))
+                throw new IOException("Session already connected");
+            
+            this.log.logInfo("Trying to connect to remote port forwarding host " + this.forwardingHostUser + "@" + this.forwardingHost + ":" + this.forwardingHostPort);
+            
             JSch jsch=new JSch();
-            this.session=jsch.getSession(this.rUser, this.rHost, 22);
-            this.session.setPassword(this.rPwd);   
+            session=jsch.getSession(this.forwardingHostUser, this.forwardingHost, this.forwardingHostPort);
+            session.setPassword(this.forwardingHostPwd);   
 
             /*
              * Setting the StrictHostKeyChecking to ignore unknown
@@ -71,38 +118,70 @@ public class serverPortForwardingSch implements serverPortForwarding{
              */
             java.util.Properties config = new java.util.Properties();
             config.put("StrictHostKeyChecking","no");
-            this.session.setConfig(config);            
+            session.setConfig(config);            
+            
+            // setting the proxy that should be used
+            if (this.useProxy) {
+                session.setProxy(new ProxyHTTP(this.remoteProxyHost, this.remoteProxyPort));                
+            }
             
             // username and password will be given via UserInfo interface.
-            UserInfo ui= new MyUserInfo(this.rPwd);
-            this.session.setUserInfo(ui);
+            UserInfo ui= new MyUserInfo(this.forwardingHostPwd);
+            session.setUserInfo(ui);
             
             // trying to connect ...
-            this.session.connect();
+            session.connect();            
+   
+            // activating remote port forwarding 
+            session.setPortForwardingR(this.forwardingPort, this.localHost, this.localHostPort);
             
-            // Channel channel=session.openChannel("shell");
-            // channel.connect();
+            // using a timer task to control if the session remains open
+            if (sessionWatcher == null) {
+                this.log.logDebug("Deploying port forwarding session watcher thread.");
+                this.switchboard.deployThread("portForwardingWatcher", "Remote Port Forwarding Watcher", "this thread is used to detect broken connections and to re-establish it if necessary.",
+                        sessionWatcher = new serverInstantThread(this, "reconnect", null), 30000,30000,30000,1000);
+            }
             
-            this.session.setPortForwardingR(this.rPort, this.lHost, this.lPort);
+            this.log.logInfo("Remote port forwarding connection established: " + 
+                             this.forwardingHost+ ":" + this.forwardingPort + " -> " + 
+                             this.localHost + ":" + this.localHostPort);
         }
         catch(Exception e){
+            this.log.logError("Unable to connect to remote port forwarding host.",e);
             throw new IOException(e.getMessage());
         }
     }
     
-    public void disconnect() throws IOException {
-        if (this.session == null) throw new IllegalStateException("No connection established.");
+    public synchronized boolean reconnect() throws IOException {
+        if ((!this.isConnected()) && (!Thread.currentThread().isInterrupted())) {
+            this.log.logDebug("Trying to reconnect to port forwarding host.");
+            this.connect();
+            return this.isConnected();
+        }
+        return false;
+    }
+    
+    public synchronized void disconnect() throws IOException {
+        if (session == null) throw new IOException("No connection established.");
+
+        // terminating port watcher thread
+        this.log.logDebug("Terminating port forwarding session watcher thread.");
+        this.switchboard.terminateThread("portForwardingWatcher",true);     
+        sessionWatcher = null;
         
+        // disconnection the session
         try {
-            this.session.disconnect();
+            session.disconnect();
+            this.log.logDebug("Successfully disconnected from port forwarding host.");
         } catch (Exception e) {
+            this.log.logError("Error while trying to disconnect from port forwarding host.",e);
             throw new IOException(e.getMessage());
         }
     }
     
-    public boolean isConnected() {
-        if (this.session == null) return false;
-        return this.session.isConnected();
+    public synchronized boolean isConnected() {
+        if (session == null) return false;
+        return session.isConnected();
     }
     
     class MyUserInfo 

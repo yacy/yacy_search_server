@@ -79,10 +79,13 @@ public final class Settings_p {
         
         // remote port forwarding settings
         prop.put("portForwardingEnabled",env.getConfig("portForwardingEnabled","false").equals("true")? 1 : 0);
-        prop.put("portForwardingHost",env.getConfig("portForwardingHost", ""));
+        prop.put("portForwardingUseProxy",env.getConfig("portForwardingUseProxy", "false").equals("true")? 1 : 0);
         prop.put("portForwardingPort",env.getConfig("portForwardingPort", ""));
-        prop.put("portForwardingUser",env.getConfig("portForwardingUser", ""));
-        prop.put("portForwardingPwd",env.getConfig("portForwardingPwd", ""));
+        
+        prop.put("portForwardingHost",env.getConfig("portForwardingHost", ""));
+        prop.put("portForwardingHostPort",env.getConfig("portForwardingHostPort", ""));
+        prop.put("portForwardingHostUser",env.getConfig("portForwardingHostUser", ""));
+        prop.put("portForwardingHostPwd",env.getConfig("portForwardingHostPwd", ""));
         
         // set values
         String s;

@@ -478,9 +478,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 httpd.sendRespondError(conProp,out,3,404,"File not Found",null,null);
                 //textMessage(out, 404, "404 File not Found\r\n"); // would be a possible vuln to return original the original path
             }
-        } catch (Exception e) {            
+        } catch (Exception e) {     
             if (e instanceof InterruptedException) {
-                this.theLogger.logInfo("Interruption detected while processing query: " + path + "; '" + e.toString() + ":" + e.getMessage() + "'");
+                this.theLogger.logInfo("Interruption detected while processing query: " + path + 
+                                       "\nClient: " + conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP,"unknown") + 
+                                       "\nReason: " + e.toString());
                 if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     httpd.sendRespondError(conProp,out, 4, 503, null, "Exception with query: " + path + "; Service unavailable because of server shutdown.",e);
                 } else {
@@ -490,10 +492,14 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 String errorMsg = e.getMessage();
                 if ((errorMsg != null) && (errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
                     // client closed the connection, so we just end silently
-                    this.theLogger.logInfo("Client unexpectedly closed connection while processing query: " + path + "; '" + e.toString() + ":" + errorMsg + "'");
+                    this.theLogger.logInfo("Client unexpectedly closed connection while processing query " + path + 
+                                           "\nClient: " + conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP,"unknown")+ 
+                                           "\nReason: " + e.toString());
                     conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
                 } else {
-                    this.theLogger.logError("ERROR: Exception with query: " + path + "; '" + e.toString() + ":" + ((errorMsg ==null)?"":e.getMessage()) + "'");
+                    this.theLogger.logError("ERROR: Exception with query: " + path + 
+                                            "\nClient: " + conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP,"unknown") + 
+                                            "\nReason: " + e.toString());
                     if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                         httpd.sendRespondError(conProp,out, 4, 503, null, "Exception with query: " + path + "; '" + e.toString() + ":" + ((errorMsg ==null)?"":e.getMessage()) + "'",e);
                     } else {
@@ -505,7 +511,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             try {out.flush();}catch (Exception e) {}
             if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
                 // wait a little time until everything closes so that clients can read from the streams/sockets
-                try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
+                try {Thread.sleep(1000);} catch (InterruptedException e) {}
             }
         }
     }

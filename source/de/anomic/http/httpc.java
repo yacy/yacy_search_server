@@ -125,6 +125,7 @@ public final class httpc {
     private boolean remoteProxyUse = false;
     private String  savedRemoteHost = null;
     private String  requestPath = null;
+    private boolean allowContentEncoding = true;
     
     static {
         // set time-out of InetAddress.getByName cache ttl
@@ -221,6 +222,10 @@ public final class httpc {
         } catch (Exception e) {
             // we could ignore this error
         }
+    }
+    
+    public void setAllowContentEncoding(boolean status) {
+        this.allowContentEncoding = status;
     }
     
     public boolean isClosed() {
@@ -349,6 +354,7 @@ public final class httpc {
         this.savedRemoteHost = null;
         this.requestPath = null;
         
+        this.allowContentEncoding = true;
         
         // shrink readlinebuffer if it is to large
         this.readLineBuffer.reset(80);
@@ -659,7 +665,7 @@ public final class httpc {
     public response GET(String path, httpHeader requestHeader) throws IOException {
         //serverLog.logDebug("HTTPC", handle + " requested GET '" + path + "', time = " + (System.currentTimeMillis() - handle));
         try {
-            boolean zipped = httpd.shallTransportZipped(path);
+            boolean zipped = (this.allowContentEncoding) ? true : httpd.shallTransportZipped(path);
             send(httpHeader.METHOD_GET, path, requestHeader, zipped);
             response r = new response(zipped);
             //serverLog.logDebug("HTTPC", handle + " returned GET '" + path + "', time = " + (System.currentTimeMillis() - handle));

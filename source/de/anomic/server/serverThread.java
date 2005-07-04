@@ -122,4 +122,9 @@ public interface serverThread {
     // jobs that need to be done after termination
     // terminate must be called before
     
+    
+    public void setSyncObject(Object sync);    
+    public Object getSyncObject();    
+    public void notifyThread();
+    
 }

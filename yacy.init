@@ -484,10 +484,15 @@ connectionKeepAliveSupport=false
 
 # Configuration options needed to configure server port forwarding
 portForwardingEnabled=false
-portForwardingHost=
+portForwardingUseProxy=false
 portForwardingPort=
-portForwardingUser=
-portForwardingPwd=
+
+portForwardingHost=
+portForwardingHostPort=22
+portForwardingHostUser=
+portForwardingHostPwd=
+
+
 
 # Specifies if yacy should forward received messages via
 # email to the configured email address

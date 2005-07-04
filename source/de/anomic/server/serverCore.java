@@ -208,46 +208,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         } catch (java.net.BindException e) {
             System.out.println("FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number"); System.exit(0);
         }
-        
-        // doing the port forwarding stuff
-        if (switchboard.getConfig("portForwardingEnabled","false").equalsIgnoreCase("true")) {
-            try {
-                String portFwHost = switchboard.getConfig("portForwardingHost","localhost");
-                Integer portFwPort = Integer.valueOf(switchboard.getConfig("portForwardingPort","8080"));
-                String portFwUser = switchboard.getConfig("portForwardingUser","xxx");
-                
-                String localHost = this.socket.getInetAddress().getHostName();
-                Integer localPort = new Integer(this.socket.getLocalPort());
-                
-                this.log.logInfo("Trying to connect to remote port forwarding host " + portFwUser + "@" + portFwHost + ":" + portFwPort);
 
-                Class forwarderClass = Class.forName("de.anomic.server.serverPortForwardingSch");
-                serverCore.portForwarding = (serverPortForwarding) forwarderClass.newInstance();                
-                
-                serverCore.portForwarding.init(
-                        portFwHost,
-                        portFwPort.intValue(),
-                        portFwUser,
-                        switchboard.getConfig("portForwardingPwd","xxx"),
-                        localHost,
-                        localPort.intValue());
-                
-                serverCore.portForwarding.connect();
-                
-                serverCore.portForwardingEnabled = true;
-                yacyCore.seedDB.mySeed.put("IP",publicIP().getHostAddress());
-                yacyCore.seedDB.mySeed.put("Port",Integer.toString(serverCore.portForwarding.getPort()));
-                
-                this.log.logInfo("Remote port forwarding connection established: " + portFwHost+":"+portFwPort+" -> "+localHost+":"+localPort);                
-            } catch (Exception e) {
-                this.log.logError("Unable to initialize server port forwarding.",e);
-                switchboard.setConfig("portForwardingEnabled","false");
-            } catch (Error e) {
-                this.log.logError("Unable to initialize server port forwarding.",e);
-                switchboard.setConfig("portForwardingEnabled","false");
-            }
-        }
-        
         try {
             this.handlerPrototype = handlerPrototype;
             this.switchboard = switchboard;
@@ -258,6 +219,17 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.termSleepingThreads = termSleepingThreads;
         } catch (java.lang.ClassNotFoundException e) {
             System.out.println("FATAL ERROR: " + e.getMessage() + " - Class Not Found"); System.exit(0);
+        }
+
+        // init port forwarding            
+        try {
+            this.initPortForwarding();
+        } catch (Exception e) {
+            this.log.logError("Unable to initialize server port forwarding.",e);
+            this.switchboard.setConfig("portForwardingEnabled","false");
+        } catch (Error e) {
+            this.log.logError("Unable to initialize server port forwarding.",e);
+            this.switchboard.setConfig("portForwardingEnabled","false");
         }
         
         // implementation of session thread pool
@@ -285,6 +257,43 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
     }
     
+    public void initPortForwarding() throws Exception {
+        // doing the port forwarding stuff
+        if (this.switchboard.getConfig("portForwardingEnabled","false").equalsIgnoreCase("true")) {
+            try {
+                String localHost = this.socket.getInetAddress().getHostName();
+                Integer localPort = new Integer(this.socket.getLocalPort());
+                
+                this.log.logInfo("Trying to load port forwarding class");
+                
+                // loading port forwarding class
+                Class forwarderClass = Class.forName("de.anomic.server.serverPortForwardingSch");
+                serverCore.portForwarding = (serverPortForwarding) forwarderClass.newInstance();                
+                
+                // initializing port forwarding
+                serverCore.portForwarding.init(
+                        this.switchboard,
+                        localHost,
+                        localPort.intValue());
+                
+                // connection to port forwarding host
+                serverCore.portForwarding.connect();
+                
+                serverCore.portForwardingEnabled = true;
+                yacyCore.seedDB.mySeed.put("IP",publicIP().getHostAddress());
+                yacyCore.seedDB.mySeed.put("Port",Integer.toString(serverCore.portForwarding.getPort()));                               
+            } catch (Exception e) {
+                serverCore.portForwardingEnabled = false;
+                this.switchboard.setConfig("portForwardingEnabled", "false");
+                throw e;
+            } catch (Error e) {
+                serverCore.portForwardingEnabled = false;
+                this.switchboard.setConfig("portForwardingEnabled", "false");
+                throw e;                
+            }
+        }
+    }
+
     public GenericObjectPool.Config getPoolConfig() {
         return this.cralwerPoolConfig ;
     }
@@ -372,7 +381,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     }
 
     public void open() {
-        log.logSystem("* server started on " + publicIP() + ":" + port);
+        this.log.logSystem("* server started on " + publicLocalIP() + ":" + this.port);
     }
     
     // class body
@@ -502,7 +511,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             
             try {
                 // trying to gracefull stop all still running sessions ...
-                serverCore.this.log.logInfo("Trying to shutdown " + threadCount + " remaining session threads ...");
+                serverCore.this.log.logInfo("Signaling shutdown to " + threadCount + " remaining session threads ...");
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     ((Session)threadList[currentThreadIdx]).setStopped(true);
                 }          
@@ -514,10 +523,12 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     Session currentSession = (Session)threadList[currentThreadIdx];
                     if (currentSession.isAlive()) {
-                        if ((currentSession.controlSocket != null)&&(currentSession.controlSocket.isConnected())) {
-                            currentSession.controlSocket.close();
-                            serverCore.this.log.logInfo("Closing socket of thread '" + currentSession.getName() + "'");
-                        }
+                        try {
+                            if ((currentSession.controlSocket != null)&&(currentSession.controlSocket.isConnected())) {
+                                currentSession.controlSocket.close();
+                                serverCore.this.log.logInfo("Closing socket of thread '" + currentSession.getName() + "'");
+                            }
+                        } catch (IOException e) {}
                     }
                 }                
                 
@@ -525,9 +536,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     if (threadList[currentThreadIdx].isAlive()) threadList[currentThreadIdx].join(500);
                 }
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 serverCore.this.log.logWarning("Interruption while trying to shutdown all remaining session threads.");  
+            } catch (Exception e) {
+                serverCore.this.log.logError("Unexpected error while trying to shutdown all remaining session threads.",e);
             }
             
             this.isClosed = true;
@@ -885,7 +897,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         } else if (result instanceof Boolean) {
                             if (((Boolean) result).equals(TERMINATE_CONNECTION)) break;
                             // deactivating timeout. this is needed because of persistent connections
-                            this.controlSocket.setSoTimeout(0);
+                            if (!this.controlSocket.isClosed()) this.controlSocket.setSoTimeout(0);
                         } else if (result instanceof String) {
                             if (((String) result).startsWith("!")) {
                                 result = ((String) result).substring(1);

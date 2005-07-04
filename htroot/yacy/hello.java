@@ -43,9 +43,11 @@
 //javac -classpath .:../../Classes hello.java
 //if the shell's current path is HTROOT
 
+import java.net.InetAddress;
 import java.util.Date;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -84,6 +86,9 @@ public class hello {
         float clientversion = remoteSeed.getVersion();
 
         int urls = -1;
+        // if the remote client has reported its own IP address and the client supports
+        // the port forwarding feature (if client version >= 0.383) then we try to 
+        // connect to the reported IP address first
         if ((reportedip.length() > 0) && (!(clientip.equals(reportedip))) && (clientversion >= (float)0.383)) {
             // try first the reportedip, since this may be a connect from a port-forwarding host
             prop.put("yourip", reportedip);
@@ -91,11 +96,29 @@ public class hello {
             urls = yacyClient.queryUrlCount(remoteSeed);
         }
         
-        if (urls < 0) {
-            // if the previous attempt was not successful, try the ip where the request came from
-            prop.put("yourip", clientip);
-            remoteSeed.put("IP", clientip);
-            urls = yacyClient.queryUrlCount(remoteSeed);
+        // if the previous attempt (using the reported ip address) was not successful, try the ip where 
+        // the request came from
+        if (urls < 0) {                        
+            boolean isLocalIP = false;
+            if (serverCore.portForwardingEnabled) {
+                try {
+                    InetAddress clientAddress = InetAddress.getByName(clientip);
+                    InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
+                    for (int i=0; i<localAddress.length; i++) {
+                        if (localAddress[i].equals(clientAddress)) {
+                            isLocalIP = true;
+                            break;
+                        }
+                    }  
+                } catch (Exception e) {}
+            }
+            
+            // we are only allowed to connect to the client IP address if it's not our own address
+            if (!isLocalIP) {
+                prop.put("yourip", clientip);
+                remoteSeed.put("IP", clientip);
+                urls = yacyClient.queryUrlCount(remoteSeed);
+            }
         }
         
         //System.out.println("YACYHELLO: YOUR IP=" + clientip);
@@ -123,7 +146,7 @@ public class hello {
             if ((remoteSeed.hash != null) && (remoteSeed.isProper())) yacyCore.peerActions.peerPing(remoteSeed);
         }
         if (!((String)prop.get("yourtype")).equals(reportedPeerType)) {
-            yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() + "' [" + reportedip + "] peerType to '" + prop.get("yourtype") + "'.");
+            yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() + "' [" + reportedip + "] peerType from '" + reportedPeerType + "' to '" + prop.get("yourtype") + "'.");
         }
         
         String seeds = "";

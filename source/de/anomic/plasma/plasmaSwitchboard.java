@@ -356,8 +356,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                      new serverInstantThread(this, "coreCrawlJob", "coreCrawlJobSize"), 10000);
         deployThread("40_peerseedcycle", "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account",
                      new serverInstantThread(yc, "publishSeedList", null), 180000);
+        serverInstantThread peerPing = null;
         deployThread("30_peerping", "YaCy Core", "this is the p2p-control and peer-ping task",
-                     new serverInstantThread(yc, "peerPing", null), 2000);
+                     peerPing = new serverInstantThread(yc, "peerPing", null), 2000);
+        peerPing.setSyncObject(new Object());
         indexDistribution = new distributeIndex(100 /*indexCount*/, 8000, 1 /*peerCount*/);
         deployThread("20_dhtdistribution", "DHT Distribution (currently by juniors only)", "selection, transfer and deletion of index entries that are not searched on your peer, but on others",
                      new serverInstantThread(indexDistribution, "job", null), 120000);

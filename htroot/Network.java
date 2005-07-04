@@ -44,11 +44,13 @@
 // if the shell's current path is HTROOT
 
 import java.util.Enumeration;
+import java.util.HashMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverDate;
+import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
@@ -141,7 +143,47 @@ public class Network {
             }
             prop.put("table", 2); // triggers overview
             prop.put("page", 0);
-        } else {
+        } else if (Integer.parseInt(post.get("page", "1")) == 4) {
+            prop.put("table", 4); // triggers overview
+            prop.put("page", 4);          
+            
+            if (post.containsKey("addPeer")) {
+                
+                // AUTHENTICATE
+                if (!header.containsKey(httpHeader.AUTHORIZATION)) {
+                    prop.put("AUTHENTICATE","log-in");
+                    return prop;
+                }
+                
+                
+                HashMap map = new HashMap();
+                map.put("IP",(String) post.get("peerIP"));
+                map.put("Port",(String) post.get("peerPort"));
+                yacySeed peer = new yacySeed((String) post.get("peerHash"),map);
+                
+                int added = yacyClient.publishMySeed(peer.getAddress(), peer.hash);
+                
+                if (added < 0) {
+                    prop.put("table_comment",1);
+                    prop.put("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getAddress());
+                } else {
+                    peer = yacyCore.seedDB.getConnected(peer.hash);
+                    prop.put("table_comment",2);
+                    prop.put("table_comment_status","publish: handshaked " + peer.get("PeerType", "senior") + " peer '" + peer.getName() + "' at " + peer.getAddress());
+                    prop.put("table_comment_details",peer.toString());
+                }
+                
+                prop.put("table_peerHash",(String) post.get("peerHash"));
+                prop.put("table_peerIP",(String)post.get("peerIP"));
+                prop.put("table_peerPort",(String) post.get("peerPort"));                
+            } else {
+                prop.put("table_peerHash","");
+                prop.put("table_peerIP","");
+                prop.put("table_peerPort","");                
+
+                prop.put("table_comment",0);
+            }
+        }else {
             // generate table
             int page = Integer.parseInt(post.get("page", "1"));
             int conCount = 0;

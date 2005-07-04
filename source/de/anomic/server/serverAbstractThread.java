@@ -61,6 +61,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     private String shortDescr = "", longDescr = "";
     private long threadBlockTimestamp = System.currentTimeMillis();
     private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0;
+    private Object syncObject = null;
     
     protected final void announceThreadBlockApply() {
         // shall only be used, if a thread blocks for an important reason
@@ -261,12 +262,35 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
 //            try {this.sleep(millis);} catch (InterruptedException e) {}
 //        }
         try {
-            Thread.sleep(millis);
+            if (this.syncObject != null) {
+                synchronized(this.syncObject) {
+                    this.syncObject.wait(millis);
+                }
+            } else {
+                Thread.sleep(millis);
+            }
         } catch (InterruptedException e) {
-            if (this.log != null) log.logSystem(this.getName() + " interrupted because of shutdown.");
+            if (this.log != null) this.log.logSystem("thread '" + this.getName() + "' interrupted because of shutdown.");
         }
     }
     
     public void open() {} // dummy definition; should be overriden
     public void close() {} // dummy definition; should be overriden
+    
+    public void setSyncObject(Object sync) {
+        this.syncObject = sync;
+    }
+    
+    public Object getSyncObject() {
+        return this.syncObject;
+    }
+    
+    public void notifyThread() {
+        if (this.syncObject != null) {
+            synchronized(this.syncObject) {
+                if (this.log != null) this.log.logDebug("thread '" + this.getName() + "' has received a notification from thead '" + Thread.currentThread().getName() + "'.");
+                this.syncObject.notifyAll();
+            }
+        }            
+    }
 }

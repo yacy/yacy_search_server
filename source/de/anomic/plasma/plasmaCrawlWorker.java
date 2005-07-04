@@ -151,7 +151,7 @@ public final class plasmaCrawlWorker extends Thread {
         this.depth = 0;
         this.startdate = 0;
         this.profile = null;
-        //this.error = null;        
+        //this.error = null;   
     }
     
     public void run()  {
@@ -243,11 +243,12 @@ public final class plasmaCrawlWorker extends Thread {
              remoteProxyUse, 
              cacheManager, 
              log, 
-             0
+             0,
+             true
         );
     }
     
-    public static void load(
+    private static void load(
             URL url, 
             String referer, 
             String initiator, 
@@ -259,7 +260,8 @@ public final class plasmaCrawlWorker extends Thread {
             boolean remoteProxyUse,
             plasmaHTCache cacheManager,
             serverLog log,
-            int redirectionCount
+            int redirectionCount,
+            boolean useContentEncodingGzip
         ) throws IOException {
         if (url == null) return;
         Date requestDate = new Date(); // remember the time...
@@ -285,10 +287,11 @@ public final class plasmaCrawlWorker extends Thread {
             //System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
                     
             // open the connection
-            if (remoteProxyUse)
-                remote = httpc.getInstance(host, port, socketTimeout, ssl, remoteProxyHost, remoteProxyPort);
-            else
-                remote = httpc.getInstance(host, port, socketTimeout, ssl);
+            remote = (remoteProxyUse) ? httpc.getInstance(host, port, socketTimeout, ssl, remoteProxyHost, remoteProxyPort)
+                                      : httpc.getInstance(host, port, socketTimeout, ssl);
+            
+            // specifying if content encoding is allowed
+            remote.setAllowContentEncoding(useContentEncodingGzip);
             
             // send request
             httpc.response res = remote.GET(path, requestHeader);
@@ -369,7 +372,8 @@ public final class plasmaCrawlWorker extends Thread {
                              remoteProxyUse, 
                              cacheManager, 
                              log, 
-                             ++redirectionCount
+                             ++redirectionCount,
+                             useContentEncodingGzip
                         );
                     }
                 } else {
@@ -382,9 +386,28 @@ public final class plasmaCrawlWorker extends Thread {
             }
             if (remote != null) remote.close();
         } catch (Exception e) {
-            // this may happen if the targeted host does not exist or anything with the
-            // remote server was wrong.
-            log.logError("CRAWLER LOADER ERROR2 with url=" + url.toString() + ": " + e.toString(),e);
+            if ((e.getMessage() != null) && (e.getMessage().indexOf("Corrupt GZIP trailer") >= 0)) {
+                log.logWarning("Problems detected while receiving gzip encoded content from '" + url.toString() + 
+                               "'. Retrying request without using gzip content encoding.");
+                load(url,
+                        referer,
+                        initiator,
+                        depth, 
+                        profile,
+                        socketTimeout, 
+                        remoteProxyHost, 
+                        remoteProxyPort, 
+                        remoteProxyUse, 
+                        cacheManager, 
+                        log, 
+                        0,
+                        false
+                   );                
+            } else {
+                // this may happen if the targeted host does not exist or anything with the
+                // remote server was wrong.
+                log.logError("CRAWLER LOADER ERROR2 with url=" + url.toString() + ": " + e.toString(),e);
+            }
         } finally {
             if (remote != null) httpc.returnInstance(remote);
         }
