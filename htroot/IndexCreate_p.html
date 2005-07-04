@@ -6,29 +6,9 @@
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #[header]#
-<br><br>
+#[submenuIndexCreate]#
+<br>
 <h2>Index Creation</h2>
-<p>
-<table>
-<tr>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="#startCrawling">Start new crawling job</a></td>
-	<td rowspan="5" width="30">&nbsp;</td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="#rejectedURLs">Rejected URL List</a></td>
-</tr>
-<tr>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="#distributedIndexing">Distributed Indexing</a></td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="#indexingQueue">Indexing Queue</a></td>
-</tr>
-<tr>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="#crawlingProfiles">Crawl Profile List</a></td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="#loaderQueue">Loader Queue</a></td>
-</tr>
-<tr>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="#remoteCrawlPeers">Remote Crawling Peers</a></td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="#crawlingQueue">Crawling Queue</a></td>
-</tr>
-</table>
-</p>
 
 <p>
 <div class=small id="startCrawling"><b>Start Crawling Job:</b>&nbsp;
@@ -237,129 +217,18 @@ No remote crawl peers availible.<br>
 </tr>
 </table>
 #(/remoteCrawlPeers)#
-</a>
+</p>
 
-<br id="rejectedURLs">
-#(rejected)#
-::
+<p>
 <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-<b>Rejected URL List:</b>&nbsp;There are #[num]# entries in the rejected-urls list.
-#(only-latest)#
-::
-Showing latest #[num]# entries.
-<input type="hidden" name="showRejected" value="#[newnum]#">
-<input type="submit" name="moreRejected" value="show more">&nbsp;
-#(/only-latest)#
-<input type="submit" name="clearRejected" value="clear list">
-</form>
-There are #[num]# entries in the rejected-queue:<br>
-<table border="0" cellpadding="2" cellspacing="1" width="100%">
-<tr class="TableHeader">
-  <th class="small">Initiator</th>
-  <th class="small">Executor</th>
-  <th class="small">URL</th>
-  <th class="small">Fail-Reason</th>
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
-<td width="60" class="small">#[initiator]#</td>
-<td width="60" class="small">#[executor]#</td>
-<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
-<td class="small">#[failreason]#</td>
-</tr>
-#{/list}#
-</table>
-#(/rejected)#
-</a>
-
-<br>
-<b id="indexingQueue">Indexing Queue:</b>&nbsp;
-#(indexing-queue)#
-The indexing queue is empty<br>
-::
-There are #[num]# entries in the indexing queue:<br>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader">
-<th class="small">Initiator</th>
-<th class="small">Depth</th>
-<th class="small">Modified Date</th>
-<th class="small">#HREF</th>
-<td class="small">Anchor Name</th>
-<th class="small">URL</th>
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
-<td width="60" class="small">#[initiator]#</td>
-<td width="10" class="small">#[depth]#</td>
-<td width="80" class="small">#[modified]#</td>
-<td width="10" class="small">#[href]#</td>
-<td width="180" class="small">#[anchor]#</td>
-<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
-</tr>
-#{/list}#
-</table>
-#(/indexing-queue)#
-</a>
-
-<br>
-<b id="loaderQueue">Loader Set:</b>&nbsp;
-#(loader-set)#
-The loader set is empty<br>
-::
-There are #[num]# entries in the loader set:<br>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader">
-<th class="small">Initiator</th>
-<th class="small">Depth</td>
-<th class="small">URL</th>
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
-<td width="60" class="small">#[initiator]#</td>
-<td width="10" class="small">#[depth]#</td>
-<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
-</tr>
-#{/list}#
-</table>
-#(/loader-set)#
-</a>
-
-<br>
-<b id="crawlingQueue">Crawler Queue:</b>&nbsp;
-#(crawler-queue)#
-The crawler queue is empty<br><br>
-::
-There are #[num]# entries in the crawler queue. Showing #[show-num]# most recent entries:
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader">
-<th class="small">Initiator</th>
-<th class="small">Depth</th>
-<th class="small">Modified Date</th>
-<th class="small">Anchor Name</th>
-<th class="small">URL</th>
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
-<td width="60" class="small">#[initiator]#</td>
-<td width="10" class="small">#[depth]#</td>
-<td width="80" class="small">#[modified]#</td>
-<td width="180" class="small">#[anchor]#</td>
-<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
-</tr>
-#{/list}#
-</table>
-<br>
-<form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-<input type="submit" name="clearcrawlqueue" value="clear crawl queue">
-#(paused)#
+#(crawler-paused)#
 <input type="submit" name="continuecrawlqueue" value="continue crawling">
 ::
 <input type="submit" name="pausecrawlqueue" value="pause crawling">
-#(/paused)#
+#(/crawler-paused)#
 </form>
-#(/crawler-queue)#
-</a>
 </p>
+
 #[footer]#
 </body>
 </html>

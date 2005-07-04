@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy: Index Creation / Loader Queue</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+#[submenuIndexCreate]#
+<br>
+<h2>Index Creation: Loader Queue</h2>
+
+<p>
+#(loader-set)#
+The loader set is empty<br>
+::
+There are #[num]# entries in the loader set:<br>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader">
+<th class="small">Initiator</th>
+<th class="small">Depth</td>
+<th class="small">URL</th>
+</tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+<td width="60" class="small">#[initiator]#</td>
+<td width="10" class="small">#[depth]#</td>
+<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
+</tr>
+#{/list}#
+</table>
+#(/loader-set)#
+</p>
+
+#[footer]#
+</body>
+</html>

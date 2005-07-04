@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy: Index Creation/Indexing Queue</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+#[submenuIndexCreate]#
+<br>
+<h2>Index Creation: Indexing Queue</h2>
+
+<p>
+#(indexing-queue)#
+The indexing queue is empty<br>
+::
+There are #[num]# entries in the indexing queue:<br>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader">
+<th class="small">Initiator</th>
+<th class="small">Depth</th>
+<th class="small">Modified Date</th>
+<th class="small">#HREF</th>
+<td class="small">Anchor Name</th>
+<th class="small">URL</th>
+</tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+<td width="60" class="small">#[initiator]#</td>
+<td width="10" class="small">#[depth]#</td>
+<td width="80" class="small">#[modified]#</td>
+<td width="10" class="small">#[href]#</td>
+<td width="180" class="small">#[anchor]#</td>
+<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
+</tr>
+#{/list}#
+</table>
+#(/indexing-queue)#
+</p><br>
+
+<p>
+#(rejected)#
+::
+<form action="IndexCreateIndexingQueue_p.html" method="post" enctype="multipart/form-data">
+<b>Rejected URL List:</b>&nbsp;There are #[num]# entries in the rejected-urls list.
+#(only-latest)#
+::
+Showing latest #[num]# entries.
+<input type="hidden" name="showRejected" value="#[newnum]#">
+<input type="submit" name="moreRejected" value="show more">&nbsp;
+#(/only-latest)#
+<input type="submit" name="clearRejected" value="clear list">
+</form>
+There are #[num]# entries in the rejected-queue:<br>
+<table border="0" cellpadding="2" cellspacing="1" width="100%">
+<tr class="TableHeader">
+  <th class="small">Initiator</th>
+  <th class="small">Executor</th>
+  <th class="small">URL</th>
+  <th class="small">Fail-Reason</th>
+</tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+<td width="60" class="small">#[initiator]#</td>
+<td width="60" class="small">#[executor]#</td>
+<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
+<td class="small">#[failreason]#</td>
+</tr>
+#{/list}#
+</table>
+#(/rejected)#
+</p>
+
+#[footer]#
+</body>
+</html>

@@ -1,0 +1,39 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="SubMenu">
+<tr height="10"><td colspan="17" class="MenuHeader">&nbsp;Index Creation Menu</td></tr>
+<tr height="2"><td colspan="17"></td></tr>
+<tr class="TableHeader">
+<td class="MenuTopItem" colspan="5">&nbsp;Control Queues</td>
+<td class="MenuSubSpacer"></td>
+<td class="MenuTopItem" colspan="5">&nbsp;WWW Crawl Queues</td>
+<td class="MenuSubSpacer"></td>
+<td class="MenuTopItem" colspan="5">&nbsp;Media Crawl Queues</td>
+</tr>
+<tr class="TableHeader">
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<a href="/IndexCreate_p.html" class="MenuItemLink">Crawl Start</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<a href="/IndexCreateIndexingQueue_p.html" class="MenuItemLink">Indexing</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink">Loader</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<a href="/IndexCreateWWWLocalCrawlQueue_p.html" class="MenuItemLink">Local</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<!--<a href="/IndexCreateWWWRemoteQueue_p.html" class="MenuItemLink">-->Remote<!--</a>-->&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<!--<a href="/IndexCreateWWWOverhangQueue_p.html" class="MenuItemLink">-->Overhang<!--</a>-->&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<!--<a href="/IndexCreateImageQueue_p.html" class="MenuItemLink">-->Images<!--</a>-->&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<!--<a href="/IndexCreateMovieQueue_p.html" class="MenuItemLink">-->Movies<!--</a>-->&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<!--<a href="/IndexCreateMusicQueue_p.html" class="MenuItemLink">-->Music<!--</a>-->&nbsp;</td>
+</tr>
+</table>

@@ -80,8 +80,7 @@ public class IndexCreate_p {
         prop.put("error", 0);
         prop.put("info", 0);
         prop.put("refreshbutton", 0);
-        prop.put("rejected", 0);
-        int showRejectedCount = 10;
+        
         int i;
         
         if (post != null) {
@@ -156,34 +155,12 @@ public class IndexCreate_p {
                     }
                 }
             }
-            if (post.containsKey("clearRejected")) {
-                switchboard.urlPool.errorURL.clearStack();
-            }
-            if (post.containsKey("moreRejected")) {
-                showRejectedCount = Integer.parseInt(post.get("showRejected", "10"));
-            }
+
             if (post.containsKey("distributedcrawling")) {
                 boolean crawlResponse = ((String) post.get("crawlResponse", "")).equals("on");
                 env.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
             }
-            if (post.containsKey("clearcrawlqueue")) {
-                String urlHash;
-                int c = 0;
-                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) > 0) {
-                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE).hash();
-                    if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
-                }
-                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) > 0) {
-                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT).hash();
-                    if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
-                }
-                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) > 0) {
-                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT).hash();
-                    if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
-                }
-                prop.put("info", 3);//crawling queue cleared
-                prop.put("info_numEntries", c);
-            }
+
             
             if (post.containsKey("pausecrawlqueue")) {
                 switchboard.pauseCrawling();
@@ -277,137 +254,12 @@ public class IndexCreate_p {
                 prop.put("remoteCrawlPeers_busy", pendicount);
                 prop.put("remoteCrawlPeers_num", (availcount + pendicount));
             }
-            
-            // failure cases
-            if (switchboard.urlPool.errorURL.stackSize() != 0) {
-                if (showRejectedCount > switchboard.urlPool.errorURL.stackSize()) showRejectedCount = switchboard.urlPool.errorURL.stackSize();
-                prop.put("rejected", 1);
-                prop.put("rejected_num", switchboard.urlPool.errorURL.stackSize());
-                if (showRejectedCount != switchboard.urlPool.errorURL.stackSize()) {
-                    prop.put("rejected_only-latest", 1);
-                    prop.put("rejected_only-latest_num", showRejectedCount);
-                    prop.put("rejected_only-latest_newnum", ((int) (showRejectedCount * 1.5)));
-                }else{
-                    prop.put("rejected_only-latest", 0);
-                }
-                dark = true;
-                String url, initiatorHash, executorHash;
-                plasmaCrawlEURL.entry entry;
-                yacySeed initiatorSeed, executorSeed;
-                int j=0;
-                for (i = switchboard.urlPool.errorURL.stackSize() - 1; i >= (switchboard.urlPool.errorURL.stackSize() - showRejectedCount); i--) {
-                    entry = (plasmaCrawlEURL.entry) switchboard.urlPool.errorURL.getStack(i);
-                    initiatorHash = entry.initiator();
-                    executorHash = entry.executor();
-                    url = entry.url().toString();
-                    initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
-                    executorSeed = yacyCore.seedDB.getConnected(executorHash);
-                    prop.put("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
-                    prop.put("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
-                    prop.put("rejected_list_"+j+"_url", url);
-                    prop.put("rejected_list_"+j+"_failreason", entry.failreason());
-                    prop.put("rejected_list_"+j+"_dark", ((dark) ? 1 : 0));
-                    dark = !dark;
-                    j++;
-                }
-                prop.put("rejected_list", j);
-            }
-            
-            // now about the current processes
-            if (completequeue > 0) {
-                
-                yacySeed initiator;
-                
-                if (switchboard.queueStack.size() == 0) {
-                    prop.put("indexing-queue", 0); //is empty
-                } else {
-                    prop.put("indexing-queue", 1);
-                    prop.put("indexing-queue_num", switchboard.queueStack.size());//num entries in queue
-                    dark = true;
-                    plasmaHTCache.Entry pcentry;
-                    for (i = 0; i < switchboard.queueStack.size(); i++) {
-                        pcentry = (plasmaHTCache.Entry) switchboard.queueStack.get(i);
-                        if (pcentry != null) {
-                            initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
-                            prop.put("indexing-queue_list_"+i+"_dark", ((dark) ? 1 : 0));
-                            prop.put("indexing-queue_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
-                            prop.put("indexing-queue_list_"+i+"_depth", pcentry.depth);
-                            prop.put("indexing-queue_list_"+i+"_modified", daydate(pcentry.lastModified));
-                            prop.put("indexing-queue_list_"+i+"_href",((pcentry.scraper == null) ? "0" : ("" + pcentry.scraper.getAnchors().size())));
-                            prop.put("indexing-queue_list_"+i+"_anchor", ((pcentry.scraper == null) ? "-" : pcentry.scraper.getHeadline()) );
-                            prop.put("indexing-queue_list_"+i+"_url", pcentry.nomalizedURLString);
-                            dark = !dark;
-                        }
-                    }
-                    prop.put("indexing-queue_list", i);
-                }
-                
-                if (loaderThreadsSize == 0) {
-                    prop.put("loader-set", 0);
-                } else {
-                    prop.put("loader-set", 1);
-                    prop.put("loader-set_num", loaderThreadsSize);
-                    dark = true;                    
-                    //plasmaCrawlLoader.Exec[] loaderThreads = switchboard.cacheLoader.threadStatus();
-//                  for (i = 0; i < loaderThreads.length; i++) {
-//                  initiator = yacyCore.seedDB.getConnected(loaderThreads[i].initiator);
-//                  prop.put("loader-set_list_"+i+"_dark", ((dark) ? 1 : 0) );
-//                  prop.put("loader-set_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
-//                  prop.put("loader-set_list_"+i+"_depth", loaderThreads[i].depth );
-//                  prop.put("loader-set_list_"+i+"_url", loaderThreads[i].url ); // null pointer exception here !!! maybe url = null; check reason.
-//                  dark = !dark;
-//              }
-//              prop.put("loader-set_list", i );                    
-                    
-                    ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();
-                    
-                    int threadCount  = loaderThreads.activeCount();    
-                    Thread[] threadList = new Thread[threadCount*2];     
-                    threadCount = loaderThreads.enumerate(threadList);                    
-                    
-                    for (i = 0; i < threadCount; i++)  {                        
-                        plasmaCrawlWorker theWorker = (plasmaCrawlWorker)threadList[i];
-                        plasmaCrawlLoaderMessage theMsg = theWorker.theMsg;
-                        if (theMsg == null) continue;
-                        
-                        initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
-                        prop.put("loader-set_list_"+i+"_dark", ((dark) ? 1 : 0) );
-                        prop.put("loader-set_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
-                        prop.put("loader-set_list_"+i+"_depth", theMsg.depth );
-                        prop.put("loader-set_list_"+i+"_url", theMsg.url ); // null pointer exception here !!! maybe url = null; check reason.
-                        dark = !dark;                        
-                    }                    
-                    prop.put("loader-set_list", i );
-                }
-                
-                int localStackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-                if (localStackSize == 0) {
-                    prop.put("crawler-queue", 0);
-                } else {
-                    prop.put("crawler-queue", 1);
-                    plasmaCrawlNURL.entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, 20);
-                    prop.put("crawler-queue_num", localStackSize);//num Entries
-                    prop.put("crawler-queue_show-num", crawlerList.length); //showin sjow-num most recent
-                    plasmaCrawlNURL.entry urle;
-                    dark = true;
-                    for (i = 0; i < crawlerList.length; i++) {
-                        urle = crawlerList[i];
-                        if (urle != null) {
-                            initiator = yacyCore.seedDB.getConnected(urle.initiator());
-                            prop.put("crawler-queue_list_"+i+"_dark", ((dark) ? 1 : 0) );
-                            prop.put("crawler-queue_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
-                            prop.put("crawler-queue_list_"+i+"_depth", urle.depth());
-                            prop.put("crawler-queue_list_"+i+"_modified", daydate(urle.loaddate()) );
-                            prop.put("crawler-queue_list_"+i+"_anchor", urle.name());
-                            prop.put("crawler-queue_list_"+i+"_url", urle.url());
-                            dark = !dark;
-                        }
-                    }
-                    prop.put("crawler-queue_list", i);
-                }
-                prop.put("crawler-queue_paused",(switchboard.crawlingIsPaused())?0:1);
-            }
+
         }
+        
+        
+        prop.put("crawler-paused",(switchboard.crawlingIsPaused())?0:1);
+        
         // return rewrite properties
         return prop;
     }
