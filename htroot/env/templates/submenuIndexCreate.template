@@ -19,21 +19,21 @@
 <a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink">Loader</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
 <td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
-<a href="/IndexCreateWWWLocalCrawlQueue_p.html" class="MenuItemLink">Local</a>&nbsp;</td>
+<a href="/IndexCreateWWWLocalQueue_p.html" class="MenuItemLink">Local</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
 <td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
-<!--<a href="/IndexCreateWWWRemoteQueue_p.html" class="MenuItemLink">-->Remote<!--</a>-->&nbsp;</td>
+<a href="/IndexCreateWWWGlobalQueue_p.html" class="MenuItemLink">Global</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
 <td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
-<!--<a href="/IndexCreateWWWOverhangQueue_p.html" class="MenuItemLink">-->Overhang<!--</a>-->&nbsp;</td>
+<!--<a href="/IndexCreateWWWOverhangQueue_p.html" class="MenuItemLink">--><i>Overhang</i><!--</a>-->&nbsp;</td>
 <td class="MenuSubSpacer"></td>
 <td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
-<!--<a href="/IndexCreateImageQueue_p.html" class="MenuItemLink">-->Images<!--</a>-->&nbsp;</td>
+<!--<a href="/IndexCreateImageQueue_p.html" class="MenuItemLink">--><i>Images</i><!--</a>-->&nbsp;</td>
 <td class="MenuSubSpacer"></td>
 <td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
-<!--<a href="/IndexCreateMovieQueue_p.html" class="MenuItemLink">-->Movies<!--</a>-->&nbsp;</td>
+<!--<a href="/IndexCreateMovieQueue_p.html" class="MenuItemLink">--><i>Movies</i><!--</a>-->&nbsp;</td>
 <td class="MenuSubSpacer"></td>
 <td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
-<!--<a href="/IndexCreateMusicQueue_p.html" class="MenuItemLink">-->Music<!--</a>-->&nbsp;</td>
+<!--<a href="/IndexCreateMusicQueue_p.html" class="MenuItemLink">--><i>Music</i><!--</a>-->&nbsp;</td>
 </tr>
 </table>

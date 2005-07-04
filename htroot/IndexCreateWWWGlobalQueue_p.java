@@ -1,5 +1,5 @@
-// IndexCreateLoaderQueue_p.java
-// -----------------------------
+// IndexCreateWWWCrawlQueue_p.java
+// -------------------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
@@ -48,15 +48,14 @@ import java.util.Date;
 import java.util.Locale;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlLoaderMessage;
-import de.anomic.plasma.plasmaCrawlWorker;
+import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public class IndexCreateLoaderQueue_p {
+public class IndexCreateWWWGlobalQueue_p {
     
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(Date date) {
@@ -67,37 +66,48 @@ public class IndexCreateLoaderQueue_p {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        
+ 
+        if (post != null) {
+            if (post.containsKey("clearcrawlqueue")) {
+                String urlHash;
+                int c = 0;
+                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) > 0) {
+                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT).hash();
+                    if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
+                }
+                prop.put("info", 3);//crawling queue cleared
+                prop.put("info_numEntries", c);
+            }
+        }
 
-        if (switchboard.cacheLoader.size() == 0) {
-            prop.put("loader-set", 0);
+        int stackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+        if (stackSize == 0) {
+            prop.put("crawler-queue", 0);
         } else {
-            prop.put("loader-set", 1);
-            prop.put("loader-set_num", switchboard.cacheLoader.size());
+            prop.put("crawler-queue", 1);
+            plasmaCrawlNURL.entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, 100);
+            prop.put("crawler-queue_num", stackSize);//num Entries
+            prop.put("crawler-queue_show-num", crawlerList.length); //showin sjow-num most recent
+            plasmaCrawlNURL.entry urle;
             boolean dark = true;
-            
-            ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();
-            
-            int threadCount  = loaderThreads.activeCount();
-            Thread[] threadList = new Thread[threadCount*2];
-            threadCount = loaderThreads.enumerate(threadList);
             yacySeed initiator;
             int i;
-            for (i = 0; i < threadCount; i++)  {
-                plasmaCrawlWorker theWorker = (plasmaCrawlWorker)threadList[i];
-                plasmaCrawlLoaderMessage theMsg = theWorker.theMsg;
-                if (theMsg == null) continue;
-                
-                initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
-                prop.put("loader-set_list_"+i+"_dark", ((dark) ? 1 : 0) );
-                prop.put("loader-set_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
-                prop.put("loader-set_list_"+i+"_depth", theMsg.depth );
-                prop.put("loader-set_list_"+i+"_url", theMsg.url ); // null pointer exception here !!! maybe url = null; check reason.
-                dark = !dark;
+            for (i = 0; i < crawlerList.length; i++) {
+                urle = crawlerList[i];
+                if (urle != null) {
+                    initiator = yacyCore.seedDB.getConnected(urle.initiator());
+                    prop.put("crawler-queue_list_"+i+"_dark", ((dark) ? 1 : 0) );
+                    prop.put("crawler-queue_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
+                    prop.put("crawler-queue_list_"+i+"_depth", urle.depth());
+                    prop.put("crawler-queue_list_"+i+"_modified", daydate(urle.loaddate()) );
+                    prop.put("crawler-queue_list_"+i+"_anchor", urle.name());
+                    prop.put("crawler-queue_list_"+i+"_url", urle.url());
+                    dark = !dark;
+                }
             }
-            prop.put("loader-set_list", i );
+            prop.put("crawler-queue_list", i);
         }
-                
+
         // return rewrite properties
         return prop;
     }

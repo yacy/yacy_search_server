@@ -52,12 +52,7 @@ import java.util.Iterator;
 import java.util.Locale;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlEURL;
-import de.anomic.plasma.plasmaCrawlLoaderMessage;
-import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
-import de.anomic.plasma.plasmaCrawlWorker;
-import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;

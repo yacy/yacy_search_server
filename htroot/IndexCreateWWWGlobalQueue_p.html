@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy: Index Creation / WWW Global Crawl Queue</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+#[submenuIndexCreate]#
+<br>
+<h2>Index Creation: WWW Global Crawl Queue</h2>
+<p>
+This queue stores the urls that shall be sent to other peers to perform a remote crawl.
+If there is no peer for remote crawling available, the links are crawled locally.
+</p>
+<p>
+#(crawler-queue)#
+The global crawler queue is empty<br><br>
+::
+<form action="IndexCreateWWWGlobalQueue_p.html" method="post" enctype="multipart/form-data">
+<input type="submit" name="clearcrawlqueue" value="clear global crawl queue">
+</form>
+<br>
+There are #[num]# entries in the global crawler queue. Showing #[show-num]# most recent entries:
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader">
+<th class="small">Initiator</th>
+<th class="small">Depth</th>
+<th class="small">Modified Date</th>
+<th class="small">Anchor Name</th>
+<th class="small">URL</th>
+</tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+<td width="60" class="small">#[initiator]#</td>
+<td width="10" class="small">#[depth]#</td>
+<td width="80" class="small">#[modified]#</td>
+<td width="180" class="small">#[anchor]#</td>
+<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
+</tr>
+#{/list}#
+</table>
+#(/crawler-queue)#
+</p>
+
+#[footer]#
+</body>
+</html>

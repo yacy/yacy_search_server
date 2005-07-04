@@ -43,29 +43,19 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Locale;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlEURL;
-import de.anomic.plasma.plasmaCrawlLoaderMessage;
 import de.anomic.plasma.plasmaCrawlNURL;
-import de.anomic.plasma.plasmaCrawlProfile;
-import de.anomic.plasma.plasmaCrawlWorker;
-import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public class IndexCreateWWWLocalCrawlQueue_p {
+public class IndexCreateWWWLocalQueue_p {
     
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(Date date) {
@@ -85,26 +75,18 @@ public class IndexCreateWWWLocalCrawlQueue_p {
                     urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE).hash();
                     if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
                 }
-                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) > 0) {
-                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT).hash();
-                    if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
-                }
-                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) > 0) {
-                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT).hash();
-                    if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
-                }
                 prop.put("info", 3);//crawling queue cleared
                 prop.put("info_numEntries", c);
             }
         }
 
-        int localStackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-        if (localStackSize == 0) {
+        int stackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+        if (stackSize == 0) {
             prop.put("crawler-queue", 0);
         } else {
             prop.put("crawler-queue", 1);
             plasmaCrawlNURL.entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, 100);
-            prop.put("crawler-queue_num", localStackSize);//num Entries
+            prop.put("crawler-queue_num", stackSize);//num Entries
             prop.put("crawler-queue_show-num", crawlerList.length); //showin sjow-num most recent
             plasmaCrawlNURL.entry urle;
             boolean dark = true;
