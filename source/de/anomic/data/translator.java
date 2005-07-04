@@ -91,7 +91,7 @@ public class translator {
 		while(it.hasNext()){
 			line = (String)it.next();
 			if(! line.startsWith("#")){
-				splitted = line.split("=");
+				splitted = line.split("==");
 				if(splitted.length == 2){
 					translationList.put(splitted[0], splitted[1]);
 				}else if(splitted.length > 2){
