@@ -53,6 +53,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.Iterator;
 
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -201,6 +202,29 @@ public class listManager {
 			return fileListString;
 		}
 		return null;
+	}
+
+	/**
+	 * Returns a List of all dirs and subdirs as File Objects
+	 *
+	 * Warning: untested
+	 */
+	public static Vector getDirsRecursive(File dir){
+		File[] dirList = dir.listFiles();
+		Vector resultList = new Vector();
+		Vector recursive;
+		Iterator it;
+		for(int i=0;i<dirList.length;i++){
+			if(dirList[i].isDirectory()){
+				resultList.add(dirList[i]);
+				recursive = getDirsRecursive(dirList[i]);
+				it=recursive.iterator();
+				while(it.hasNext()){
+					resultList.add(it.next());
+				}
+			}
+		}
+		return resultList;
 	}
 
 
