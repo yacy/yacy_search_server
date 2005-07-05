@@ -44,6 +44,7 @@
 // if the shell's current path is HTROOT
 
 import java.text.DecimalFormat;
+import java.lang.Math;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdByteCountInputStream;
@@ -80,7 +81,7 @@ public class Status {
         // version information
 	prop.put("svnRevision", env.getConfig("svnRevision", ""));
         float thisVersion = yacyCore.latestVersion;
-        try {thisVersion = Float.parseFloat(env.getConfig("version","0.1"));} catch (NumberFormatException e) {}
+        try {thisVersion = Math.round(Float.parseFloat(env.getConfig("version","0.1")));} catch (NumberFormatException e) {}
         if (yacyCore.latestVersion == thisVersion)
             prop.put("versioncomment", 0);//no commet
         else
