@@ -95,7 +95,7 @@ Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
 Last upload:==Letzter Upload:
 Auto-popup on start-up==Popup bei YaCy-Start
 Disabled. To enable this again please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page==Deaktiviert. Um diese Funktion wieder zu aktivieren benutzen Sie bitte die <a href="Settings_p.html#SystemBehaviour">Einstellungen-Seite</a>.
-Enabled==Aktiviert
+Enabled ==Aktiviert 
 Online-mode==Onlinemodus
 #You are in <i>event-based</i> online mode.
 #The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.
