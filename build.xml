@@ -66,24 +66,72 @@
 <property name="htroot" location="htroot"/>
 <property name="locales" location="locales"/>
 <property name="release" location="RELEASE"/>
-
-<!-- loading some property values from file -->   
-<loadproperties srcFile="build.properties"> 
-    <filterchain>           
-        <tokenfilter>
-            <containsregex 
-                pattern="^releaseNr=\$Revision:\s(.*)\s\$"
-                replace="releaseNr=\1"/>
-        </tokenfilter>
-     </filterchain>   
-</loadproperties>   
-<loadproperties srcFile="build.properties"/>    
     
 <condition property="singleExtFile">
     <equals arg1="${extensionTarget}" arg2="copy"/>
 </condition> 
+
+<!-- determining if the .svn directory exists -->   
+<condition property="svnEntriesFileExists">
+    <available file=".svn/entries" />        
+</condition>       
+
+<!-- 
+    if the .svn directory exists we try to determine the real
+    svn revision number of the working base now
+-->
+<target name="determineRevisionNr" if="svnEntriesFileExists">
+    <!-- loading the entries file containing the revision number of the root directory -->
+    <xmlproperty file=".svn/entries" rootdirectory="false"/>
+ 
+    <!-- storing the list of read revision numbers into file -->   
+    <tempfile property="temp.file" prefix="svnRevNr" suffix=".properties" />   
+    <echo message="baseRevisionNr=${wc-entries.entry(revision)}" file="${temp.file}"/>          
+ 
+    <!-- reading out the first entry of the stored revision numbers-->   
+    <loadproperties srcFile="${temp.file}"> 
+        <filterchain>           
+            <tokenfilter>
+                <containsregex 
+                    pattern="^baseRevisionNr=(.*),(.*)$"
+                    replace="baseRevisionNr=\1"/>
+            </tokenfilter>
+         </filterchain>   
+    </loadproperties>         
+ 
+    <!-- deleting the temp file -->   
+    <delete file="${temp.file}"/>   
+ 
+    <!-- replacing the old with the new revision number -->   
+    <copy file="build.properties" tofile="build.properties.new">  
+        <filterchain>           
+            <tokenfilter>
+                <replaceregex 
+                    pattern="^releaseNr=(.*)"
+                    replace="releaseNr=$Revision: ${baseRevisionNr} $" />             
+            </tokenfilter>
+         </filterchain>           
+    </copy>
+    <delete file="build.properties"/>
+    <move file="build.properties.new" tofile="build.properties"/>
+</target>   
     
-<target name="init">
+<!-- reading the build properties from file -->   
+<target name="readBuildProperties" depends="determineRevisionNr">
+    <!-- loading some property values from file -->   
+    <loadproperties srcFile="build.properties"> 
+        <filterchain>           
+            <tokenfilter>
+                <replaceregex 
+                    pattern="^releaseNr=\$Revision:\s(.*)\s\$"
+                    replace="releaseNr=\1"/>
+            </tokenfilter>
+         </filterchain>   
+    </loadproperties>               
+</target>
+   
+<!-- initializing all needed variables -->    
+<target name="init" depends="readBuildProperties">
   <mkdir dir="${build}/de/anomic/data"/>
   <mkdir dir="${build}/de/anomic/htmlFilter"/>
   <mkdir dir="${build}/de/anomic/http"/>
