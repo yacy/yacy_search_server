@@ -93,7 +93,7 @@
         <filterchain>           
             <tokenfilter>
                 <containsregex 
-                    pattern="^baseRevisionNr=(.*),?(.*)$"
+                    pattern="^baseRevisionNr=([^,]*)(.*)$"
                     replace="baseRevisionNr=\1"/>
             </tokenfilter>
          </filterchain>   
