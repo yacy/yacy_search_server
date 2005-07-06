@@ -127,7 +127,10 @@
                     replace="releaseNr=\1"/>
             </tokenfilter>
          </filterchain>   
-    </loadproperties>               
+    </loadproperties> 
+	<condition property="singleExtFile">
+		<equals arg1="${extensionTarget}" arg2="copy"/>
+	</condition>	
 </target>
    
 <!-- initializing all needed variables -->    
