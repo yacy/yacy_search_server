@@ -56,7 +56,6 @@ import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
-
 public class bzipParser extends AbstractParser implements Parser {
 
     /**

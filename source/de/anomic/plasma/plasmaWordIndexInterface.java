@@ -42,7 +42,7 @@
 
 package de.anomic.plasma;
 
-import java.util.*;
+import java.util.Iterator;
 
 public interface plasmaWordIndexInterface {
     

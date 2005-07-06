@@ -45,9 +45,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearch;
+import de.anomic.plasma.plasmaSnippetCache;
 
 public class yacySearch extends Thread {
 

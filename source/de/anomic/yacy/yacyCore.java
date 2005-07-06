@@ -62,7 +62,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -70,15 +69,12 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.Vector;
 
-import de.anomic.http.httpc;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 
 public class yacyCore {
     

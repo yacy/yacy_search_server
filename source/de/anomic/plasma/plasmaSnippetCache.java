@@ -42,15 +42,17 @@
 
 package de.anomic.plasma;
 
-import java.util.*;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.server.serverFileUtils;
-import de.anomic.server.logging.serverLog;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
 
 public class plasmaSnippetCache {

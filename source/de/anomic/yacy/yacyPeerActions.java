@@ -266,6 +266,8 @@ public class yacyPeerActions {
                 }
             } catch (java.text.ParseException e) {
                 ctime = yacyCore.universalTime();
+            } catch (java.lang.NumberFormatException e) {
+                ctime = yacyCore.universalTime();
             }
             
             if (Math.abs(yacyCore.universalTime() - ctime) > 3600000) {

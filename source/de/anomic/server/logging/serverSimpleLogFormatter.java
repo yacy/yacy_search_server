@@ -5,14 +5,8 @@ import java.io.StringWriter;
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
-import org.apache.commons.collections.map.CaseInsensitiveMap;
 
 public class serverSimpleLogFormatter extends SimpleFormatter {
 

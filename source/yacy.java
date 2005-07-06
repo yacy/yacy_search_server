@@ -65,9 +65,6 @@
 
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -78,22 +75,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Enumeration;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndex;
@@ -107,7 +105,6 @@ import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyCore;
-import de.anomic.data.translator;
 
 public final class yacy {
     

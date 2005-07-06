@@ -52,13 +52,12 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
-import java.util.Map;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -76,9 +75,8 @@ public final class plasmaHTCache {
 
     private static final int stackLimit = 150;  // if we exceed that limit, we do not check idle
     private static final long idleDelay = 2000; // 2 seconds no hits until we think that we idle
-    private static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
+    public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
     
-    private final plasmaSwitchboard switchboard;
     private kelondroMap responseHeaderDB = null;
     private final LinkedList cacheStack;
     private final TreeMap cacheAge; // a <date+hash, cache-path> - relation
@@ -96,20 +94,21 @@ public final class plasmaHTCache {
     public static final int CACHE_STALE_RELOAD_BAD  = 5; // this updates only the responseHeader, not the content
     public static final int CACHE_PASSING           = 6; // does not touch cache, just passing
 
-    public plasmaHTCache(plasmaSwitchboard switchboard, int bufferkb) {
-	this.switchboard = switchboard;
+    public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb) {
+	//this.switchboard = switchboard;
         
         this.log = new serverLog("HTCACHE");
+        this.cachePath = htCachePath;
+        this.maxCacheSize = maxCacheSize;
         
 	// set cache path
-	cachePath = new File(switchboard.getRootPath(),switchboard.getConfig("proxyCache","HTCACHE"));
-	if (!(cachePath.exists())) {
+	if (!(htCachePath.exists())) {
 	    // make the cache path
-	    cachePath.mkdir();
+	    htCachePath.mkdir();
 	}
-	if (!(cachePath.isDirectory())) {
+	if (!(htCachePath.isDirectory())) {
 	    // if the cache does not exists or is a file and not a directory, panic
-	    System.out.println("the cache path " + cachePath.toString() + " is not a directory or does not exists and cannot be created");
+	    System.out.println("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
 	    System.exit(0);
 	}
 
@@ -134,11 +133,85 @@ public final class plasmaHTCache {
 	// init cache age and size management
 	cacheAge = new TreeMap();
 	currCacheSize = 0;
-	maxCacheSize = 1024 * 1024 * Long.parseLong(switchboard.getConfig("proxyCacheSize", "2")); // this is megabyte
+	this.maxCacheSize = maxCacheSize;
 	
 	// start the cache startup thread
 	// this will collect information about the current cache size and elements
 	serverInstantThread.oneTimeJob(this, "cacheScan", log, 5000);
+    }
+    
+    public int size() {
+        return cacheStack.size();
+    }
+    
+    public void push(Entry entry) {
+        cacheStack.add(entry);
+    }
+    
+    public Entry pop() {
+        return (Entry) cacheStack.removeFirst();
+    }
+    
+    public void storeHeader(String urlHash, httpHeader responseHeader) throws IOException {
+        responseHeaderDB.set(urlHash, responseHeader);
+    }
+    
+    public boolean deleteFile(URL url) {
+        File file = getCachePath(url);
+        if (file.exists()) {
+            currCacheSize -= file.length();
+            return file.delete();
+        } else {
+            return false;
+        }
+    }
+    
+    public boolean writeFile(URL url, byte[] array) {
+        if (array == null) return false;
+        try {
+            File file = getCachePath(url);
+            if (file.exists()) {
+                currCacheSize -= file.length();
+                file.delete();
+            }
+            file.getParentFile().mkdirs();
+            serverFileUtils.write(array, file);
+            currCacheSize += file.length();
+            cacheAge.put(ageString(file.lastModified(), file), file);
+        } catch (FileNotFoundException e) {
+            // this is the case of a "(Not a directory)" error, which should be prohibited
+            // by the shallStoreCache() property. However, sometimes the error still occurs
+            // In this case do nothing.
+            log.logError("File storage failed (not a directory): " + e.getMessage());
+            return false;
+        } catch (IOException e) {
+            log.logError("File storage failed (IO error): " + e.getMessage());
+            return false;
+        }
+        cleanup();
+        return true;
+    }
+    
+    private void cleanup() {
+        // clean up cache to have enough space for next entries
+        File f;
+        while (currCacheSize > maxCacheSize) {
+            f = (File) cacheAge.remove(cacheAge.firstKey());
+            if (f.exists()) {
+                currCacheSize -= f.length();
+                if (f.delete()) {
+                    log.logInfo("DELETED OLD CACHE : " + f.toString());
+                    f = f.getParentFile();
+                    if ((f.exists()) && (f.isDirectory())) {
+                        // check size of directory
+                        if (f.list().length == 0) {
+                            // the directory has no files in it; delete it also
+                            if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
+                        }
+                    }
+                }
+            }
+        }
     }
     
     public void close() throws IOException {
@@ -172,8 +245,13 @@ public final class plasmaHTCache {
 		cacheAge.put(ageString(d, f), f);
 	    }
 	    //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
-            long ageHours = (System.currentTimeMillis() -
-				 Long.parseLong(((String) cacheAge.firstKey()).substring(0, 16), 16)) / 3600000;
+            long ageHours = 0;
+            try {
+                ageHours = (System.currentTimeMillis() -
+                            Long.parseLong(((String) cacheAge.firstKey()).substring(0, 16), 16)) / 3600000;
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
             log.logSystem("CACHE SCANNED, CONTAINS " + c +
 				   " FILES = " + currCacheSize/1048576 + "MB, OLDEST IS " + 
 				   ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) +
@@ -224,145 +302,7 @@ public final class plasmaHTCache {
     public boolean empty() {
 	return (cacheStack.size() == 0);
     }
-
-    synchronized public void stackProcess(Entry entry) throws IOException {
-	lastAcc = System.currentTimeMillis();
-	if (full())
-	    process(entry);
-	else
-	    cacheStack.add(entry);
-    }
-	
-    synchronized public void stackProcess(Entry entry, byte[] cacheArray) throws IOException {
-	lastAcc = System.currentTimeMillis();
-	entry.cacheArray = cacheArray;
-	if (full())
-	    process(entry);
-	else
-	    cacheStack.add(entry);
-    }
-
-    public int size() {
-        return cacheStack.size();
-    }
     
-    synchronized public void process(Entry entry) throws IOException {
-        
-        if (entry == null) return;
-        
-        // store response header
-        if ((entry.status == CACHE_FILL) ||
-                (entry.status == CACHE_STALE_RELOAD_GOOD) ||
-                (entry.status == CACHE_STALE_RELOAD_BAD)) {
-            responseHeaderDB.set(entry.nomalizedURLHash, entry.responseHeader);
-        }
-        
-        // work off unwritten files and undone parsing
-        String storeError = null;
-        if (((entry.status == CACHE_FILL) || (entry.status == CACHE_STALE_RELOAD_GOOD)) &&
-                ((storeError = entry.shallStoreCache()) == null)) {
-            
-            // write file if not written yet
-            if (entry.cacheArray != null) try {
-                if (entry.cacheFile.exists()) {
-                    currCacheSize -= entry.cacheFile.length();
-                    entry.cacheFile.delete();
-                }
-                entry.cacheFile.getParentFile().mkdirs();
-                log.logInfo("WRITE FILE (" + entry.cacheArray.length + " bytes) " + entry.cacheFile);
-                serverFileUtils.write(entry.cacheArray, entry.cacheFile);
-                log.logDebug("AFTER WRITE cacheArray = " + entry.cacheFile + ": " + ((entry.cacheArray == null) ? "empty" : "full"));
-                //entry.cacheArray = null;
-            } catch (FileNotFoundException e) {
-                // this is the case of a "(Not a directory)" error, which should be prohibited
-                // by the shallStoreCache() property. However, sometimes the error still occurs
-                // In this case do nothing.
-                log.logError("File storage failed: " + e.getMessage());
-            }
-            
-            // update statistics
-            currCacheSize += entry.cacheFile.length();
-            cacheAge.put(ageString(entry.cacheFile.lastModified(), entry.cacheFile), entry.cacheFile);
-            
-            // enqueue in switchboard
-            switchboard.enQueue(entry);
-        } else if (entry.status == CACHE_PASSING) {
-            // even if the file should not be stored in the cache, it can be used to be indexed
-            if (storeError != null) log.logDebug("NOT STORED " + entry.cacheFile + ":" + storeError);
-            
-            // enqueue in switchboard
-            switchboard.enQueue(entry);
-        }
-        
-        // write log
-        
-        switch (entry.status) {
-            case CACHE_UNFILLED:
-                log.logInfo("CACHE UNFILLED: " + entry.cacheFile); break;
-            case CACHE_FILL:
-                log.logInfo("CACHE FILL: " + entry.cacheFile +
-                        ((entry.cacheArray == null) ? "" : " (cacheArray is filled)") +
-                        ((entry.scraper    == null) ? "" : " (scraper is filled)"));
-                break;
-            case CACHE_HIT:
-                log.logInfo("CACHE HIT: " + entry.cacheFile); break;
-            case CACHE_STALE_NO_RELOAD:
-                log.logInfo("CACHE STALE, NO RELOAD: " + entry.cacheFile); break;
-            case CACHE_STALE_RELOAD_GOOD:
-                log.logInfo("CACHE STALE, NECESSARY RELOAD: " + entry.cacheFile); break;
-            case CACHE_STALE_RELOAD_BAD:
-                log.logInfo("CACHE STALE, SUPERFLUOUS RELOAD: " + entry.cacheFile); break;
-            case CACHE_PASSING:
-                log.logInfo("PASSING: " + entry.cacheFile); break;
-            default:
-                log.logInfo("CACHE STATE UNKNOWN: " + entry.cacheFile); break;
-        }
-    }
-    
-
-    public boolean job() {
-        if (empty()) return false;
-        try {
-            File f;
-            int workoff;
-            workoff = 1 + cacheStack.size() / 10;
-            // we want to work off always 10 % to prevent that we collaps
-            while ((workoff-- > 0) && (!(empty()))) {
-                process((Entry) cacheStack.removeFirst());
-            }
-            
-            // loop until we are not idle or nothing more to do
-            while ((!empty()) && (idle())) {
-                // work off stack and store entries to file system
-                process((Entry) cacheStack.removeFirst());
-                
-                // clean up cache to have enough space for next entries
-                while (currCacheSize > maxCacheSize) {
-                    f = (File) cacheAge.remove(cacheAge.firstKey());
-                    if (f.exists()) {
-                        currCacheSize -= f.length();
-                        if (f.delete()) {
-                            log.logInfo("DELETED OLD CACHE : " + f.toString());
-                            f = f.getParentFile();
-                            if ((f.exists()) && (f.isDirectory())) {
-                                // check size of directory
-                                if (f.list().length == 0) {
-                                    // the directory has no files in it; delete it also
-                                    if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("The proxy cache manager has died because of an IO-problem: " + e.getMessage());
-            e.printStackTrace(System.out);
-            System.exit(-1);
-        }
-        return true;
-    }
-
     public static boolean isPicture(httpHeader response) {
         Object ct = response.get(httpHeader.CONTENT_TYPE);
         if (ct == null) return false;
@@ -803,184 +743,6 @@ public final class plasmaHTCache {
 	    return true;
 	}
         
-        	
-	public String shallIndexCacheForProxy() {
-	    // decide upon header information if a specific file should be indexed
-	    // this method returns null if the answer is 'YES'!
-	    // if the answer is 'NO' (do not index), it returns a string with the reason
-	    // to reject the crawling demand in clear text
-	    
-            // check profile
-            if (!(profile.localIndexing())) return "Indexing_Not_Allowed";
-            
-	    // -CGI access in request
-	    // CGI access makes the page very individual, and therefore not usable in caches
-	     if ((isPOST(nomalizedURLString)) && (!(profile.crawlingQ()))) return "Dynamic_(POST)";
-             if ((isCGI(nomalizedURLString)) && (!(profile.crawlingQ()))) return "Dynamic_(CGI)";
-	    
-	    // -authorization cases in request
-	    // we checked that in shallStoreCache
-	    
-	    // -ranges in request
-	    // we checked that in shallStoreCache
-	    
-	    // a picture cannot be indexed
-	    if (isPicture(responseHeader)) return "Media_Content_(Picture)";
-	    if (!(isText(responseHeader))) return "Media_Content_(not_text)";
-	    if (noIndexingURL(nomalizedURLString)) return "Media_Content_(forbidden)";
-
-	    
-	    // -if-modified-since in request
-	    // if the page is fresh at the very moment we can index it
-	    if ((requestHeader != null) &&
-                (requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) &&
-                (responseHeader.containsKey(httpHeader.LAST_MODIFIED))) {
-		// parse date
-                Date d1, d2;
-		d2 = responseHeader.lastModified(); if (d2 == null) d2 = new Date();
-		d1 = requestHeader.ifModifiedSince(); if (d1 == null) d1 = new Date();
-		// finally, we shall treat the cache as stale if the modification time is after the if-.. time
-		if (d2.after(d1)) {
-		    //System.out.println("***not indexed because if-modified-since");
-		    return "Stale_(Last-Modified>Modified-Since)";
-		}
-	    }
-	    
-	    // -cookies in request
-	    // unfortunately, we cannot index pages which have been requested with a cookie
-	    // because the returned content may be special for the client
-	    if ((requestHeader != null) && (requestHeader.containsKey(httpHeader.COOKIE))) {
-		//System.out.println("***not indexed because cookie");
-		return "Dynamic_(Requested_With_Cookie)";
-	    }
-
-	    // -set-cookie in response
-	    // the set-cookie from the server does not indicate that the content is special
-	    // thus we do not care about it here for indexing
-
-	    // -pragma in cached response
-	    if ((responseHeader.containsKey(httpHeader.PRAGMA)) &&
-		(((String) responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return "Denied_(pragma_no_cache)";
-            
-	    // see for documentation also:
-	    // http://www.web-caching.com/cacheability.html
-	    
-	    // calculate often needed values for freshness attributes
-	    Date date           = responseHeader.date();
-	    Date expires        = responseHeader.expires();
-	    Date lastModified   = responseHeader.lastModified();
-	    String cacheControl = (String) responseHeader.get(httpHeader.CACHE_CONTROL);
-	    
-	    // look for freshnes information
-	    
-	    // -expires in cached response
-	    // the expires value gives us a very easy hint when the cache is stale
-	    // sometimes, the expires date is set to the past to prevent that a page is cached
-	    // we use that information to see if we should index it
-	    if (expires != null) {
-		Date yesterday = new Date((new Date()).getTime() - oneday);
-		if (expires.before(yesterday)) return "Stale_(Expired)";
-	    }
-	    
-	    // -lastModified in cached response
-	    // this information is too weak to use it to prevent indexing
-	    // even if we can apply a TTL heuristic for cache usage
-	    
- 	    // -cache-control in cached response
-	    // the cache-control has many value options.
-	    if (cacheControl != null) {
-                cacheControl = cacheControl.trim().toUpperCase();
-                /* we have the following cases for cache-control:
-                "public" -- can be indexed
-                "private", "no-cache", "no-store" -- cannot be indexed
-                "max-age=<delta-seconds>" -- stale/fresh dependent on date
-                */
-                if (cacheControl.startsWith("PUBLIC")) {
-                    // ok, do nothing
-                } else if ((cacheControl.startsWith("PRIVATE")) ||
-                           (cacheControl.startsWith("NO-CACHE")) ||
-                           (cacheControl.startsWith("NO-STORE"))) {
-                    // easy case
-                    return "Stale_(denied_by_cache-control=" + cacheControl+ ")";
-                } else if (cacheControl.startsWith("MAX-AGE=")) {
-                    // we need also the load date
-                    if (date == null) return "Stale_(no_date_given_in_response)";
-                    try {
-                        long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                        if ((new Date()).getTime() - date.getTime() > ttl) {
-                            //System.out.println("***not indexed because cache-control");
-                            return "Stale_(expired_by_cache-control)";
-                        }
-                    } catch (Exception e) {
-                        return "Error_(" + e.getMessage() + ")";
-                    }
-                }
-	    }
-	    
-	    return null;
-	}
-        
-        	
-	public String shallIndexCacheForCrawler() {
-	    // decide upon header information if a specific file should be indexed
-	    // this method returns null if the answer is 'YES'!
-	    // if the answer is 'NO' (do not index), it returns a string with the reason
-	    // to reject the crawling demand in clear text
-	    
-            // check profile
-            if (!(profile.localIndexing())) return "Indexing_Not_Allowed";
-            
-	    // -CGI access in request
-	    // CGI access makes the page very individual, and therefore not usable in caches
-	     if ((isPOST(nomalizedURLString)) && (!(profile.crawlingQ()))) return "Dynamic_(POST)";
-             if ((isCGI(nomalizedURLString)) && (!(profile.crawlingQ()))) return "Dynamic_(CGI)";
-	    
-	    // -authorization cases in request
-	    // we checked that in shallStoreCache
-	    
-	    // -ranges in request
-	    // we checked that in shallStoreCache
-	    
-	    // a picture cannot be indexed
-	    if (isPicture(responseHeader)) return "Media_Content_(Picture)";
-	    if (!(isText(responseHeader))) return "Media_Content_(not_text)";
-	    if (noIndexingURL(nomalizedURLString)) return "Media_Content_(forbidden)";
-
-	    // -if-modified-since in request
-	    // if the page is fresh at the very moment we can index it
-            // -> this does not apply for the crawler
-	    
-	    // -cookies in request
-	    // unfortunately, we cannot index pages which have been requested with a cookie
-	    // because the returned content may be special for the client
-            // -> this does not apply for a crawler
-
-	    // -set-cookie in response
-	    // the set-cookie from the server does not indicate that the content is special
-	    // thus we do not care about it here for indexing
-            // -> this does not apply for a crawler
-
-	    // -pragma in cached response
-            // -> in the crawler we ignore this
-            
-	    // look for freshnes information
-	    
-	    // -expires in cached response
-	    // the expires value gives us a very easy hint when the cache is stale
-	    // sometimes, the expires date is set to the past to prevent that a page is cached
-	    // we use that information to see if we should index it
-	    // -> this does not apply for a crawler
-	    
-	    // -lastModified in cached response
-	    // this information is too weak to use it to prevent indexing
-	    // even if we can apply a TTL heuristic for cache usage
-	    
- 	    // -cache-control in cached response
-	    // the cache-control has many value options.
-	    // -> in the crawler we ignore this
-	    
-	    return null;
-	}
         
     }
     

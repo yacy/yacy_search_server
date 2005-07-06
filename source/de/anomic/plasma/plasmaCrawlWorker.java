@@ -53,7 +53,6 @@ import java.util.logging.Logger;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.logging.serverMiniLogFormatter;
@@ -331,13 +330,7 @@ public final class plasmaCrawlWorker extends Thread {
                     }
                     // enQueue new entry with response header
                     if (profile != null) {
-                        if ((initiator == null) || (initiator.length() == 0)) {
-                            // enqueued for proxy writings
-                            cacheManager.stackProcess(htCache);
-                        } else {
-                            // direct processing for crawling
-                            cacheManager.process(htCache);
-                        }
+                        cacheManager.push(htCache);
                     }
                 } catch (SocketException e) {
                     // this may happen if the client suddenly closes its connection

@@ -52,10 +52,13 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.util.*;
-import java.lang.RuntimeException;
-import de.anomic.kelondro.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroRecords;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexAssortment {

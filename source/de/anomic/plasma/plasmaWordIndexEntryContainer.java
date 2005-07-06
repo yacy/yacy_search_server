@@ -54,6 +54,7 @@ package de.anomic.plasma;
 
 import java.util.HashMap;
 import java.util.Iterator;
+
 import de.anomic.server.serverCodings;
 
 public class plasmaWordIndexEntryContainer implements Comparable {

@@ -76,8 +76,6 @@ import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
-
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -85,6 +83,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCore.Session;
 
+import org.apache.commons.pool.impl.GenericObjectPool;
 
 public final class httpc {
     

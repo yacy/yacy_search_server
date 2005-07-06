@@ -72,7 +72,6 @@ import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.Socket;
-import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Date;
@@ -637,18 +636,20 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
                         cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                        cacheManager.stackProcess(cacheEntry, cacheArray);
+                        cacheEntry.cacheArray = cacheArray;
+                        cacheManager.push(cacheEntry);
                         conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     } else if (sizeBeforeDelete == cacheArray.length) {
                         // before we came here we deleted a cache entry
                         cacheArray = null;
                         cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                        cacheManager.stackProcess(cacheEntry); // unnecessary update
+                        cacheManager.push(cacheEntry); // unnecessary update
                         conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REF_FAIL_HIT");                                
                     } else {
                         // before we came here we deleted a cache entry
                         cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                        cacheManager.stackProcess(cacheEntry, cacheArray); // necessary update, write response header to cache
+                        cacheEntry.cacheArray = cacheArray;
+                        cacheManager.push(cacheEntry); // necessary update, write response header to cache
                         conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
                     }                        
                 } else {
@@ -661,15 +662,15 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
                         cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                        cacheManager.stackProcess(cacheEntry);
+                        cacheManager.push(cacheEntry);
                     } else if (sizeBeforeDelete == cacheFile.length()) {
                         // before we came here we deleted a cache entry
                         cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                        cacheManager.stackProcess(cacheEntry); // unnecessary update
+                        cacheManager.push(cacheEntry); // unnecessary update
                     } else {
                         // before we came here we deleted a cache entry
                         cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                        cacheManager.stackProcess(cacheEntry); // necessary update, write response header to cache
+                        cacheManager.push(cacheEntry); // necessary update, write response header to cache
                     }
                     // beware! all these writings will not fill the cacheEntry.cacheArray
                     // that means they are not available for the indexer (except they are scraped before)
@@ -682,11 +683,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 if (sizeBeforeDelete == -1) {
                     // no old file and no load. just data passing
                     cacheEntry.status = plasmaHTCache.CACHE_PASSING;
-                    cacheManager.stackProcess(cacheEntry);
+                    cacheManager.push(cacheEntry);
                 } else {
                     // before we came here we deleted a cache entry
                     cacheEntry.status = plasmaHTCache.CACHE_STALE_NO_RELOAD;
-                    cacheManager.stackProcess(cacheEntry);
+                    cacheManager.push(cacheEntry);
                 }
             }
             

@@ -1,7 +1,6 @@
 package de.anomic.yacy.seedUpload;
 
 import java.io.File;
-import java.net.URL;
 
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSwitch;

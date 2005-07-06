@@ -68,17 +68,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.commons.pool.KeyedPoolableObjectFactory;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.apache.commons.pool.impl.GenericObjectPool;
-
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySeedUploader;
+
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool.KeyedPoolableObjectFactory;
+import org.apache.commons.pool.impl.GenericObjectPool;
 
 public final class plasmaParser {
 
@@ -264,15 +263,22 @@ public final class plasmaParser {
         }
     }
     
-    public static boolean supportedFileExtContains(String mediaExt) {
+    public static boolean supportedFileExt(URL url) {
+        String name = url.getFile();
+        int p = name.lastIndexOf('.');
+        if (p < 0) return true; // seams to be strange, but this is a directory entry or default file (html)
+        return supportedFileExtContains(name.substring(p + 1));
+    }
+    
+    public static boolean supportedFileExtContains(String fileExt) {
         if (supportedFileExt == null) return false;
         
         synchronized(supportedFileExt) {
-            if (supportedFileExt.contains(mediaExt)) return true;
+            if (supportedFileExt.contains(fileExt)) return true;
         }
         
         synchronized (supportedRealtimeFileExt) {
-            return supportedRealtimeFileExt.contains(mediaExt);
+            return supportedRealtimeFileExt.contains(fileExt);
         }
     }
     

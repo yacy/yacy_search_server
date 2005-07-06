@@ -46,11 +46,13 @@
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.io.IOException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -83,26 +85,27 @@ public class IndexCreateIndexingQueue_p {
         boolean dark;
         int i;
         
-        if (switchboard.queueStack.size() == 0) {
+        if (switchboard.sbQueue.size() == 0) {
             prop.put("indexing-queue", 0); //is empty
         } else {
             prop.put("indexing-queue", 1);
-            prop.put("indexing-queue_num", switchboard.queueStack.size());//num entries in queue
+            prop.put("indexing-queue_num", switchboard.sbQueue.size());//num entries in queue
             dark = true;
-            plasmaHTCache.Entry pcentry;
-            for (i = 0; i < switchboard.queueStack.size(); i++) {
-                pcentry = (plasmaHTCache.Entry) switchboard.queueStack.get(i);
+            plasmaSwitchboardQueue.Entry pcentry;
+            for (i = 0; i < switchboard.sbQueue.size(); i++) try {
+                pcentry = (plasmaSwitchboardQueue.Entry) switchboard.sbQueue.get(i);
                 if (pcentry != null) {
                     initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                     prop.put("indexing-queue_list_"+i+"_dark", ((dark) ? 1 : 0));
                     prop.put("indexing-queue_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
-                    prop.put("indexing-queue_list_"+i+"_depth", pcentry.depth);
-                    prop.put("indexing-queue_list_"+i+"_modified", daydate(pcentry.lastModified));
-                    prop.put("indexing-queue_list_"+i+"_href",((pcentry.scraper == null) ? "0" : ("" + pcentry.scraper.getAnchors().size())));
-                    prop.put("indexing-queue_list_"+i+"_anchor", ((pcentry.scraper == null) ? "-" : pcentry.scraper.getHeadline()) );
-                    prop.put("indexing-queue_list_"+i+"_url", pcentry.nomalizedURLString);
+                    prop.put("indexing-queue_list_"+i+"_depth", pcentry.depth());
+                    prop.put("indexing-queue_list_"+i+"_modified", (pcentry.responseHeader() == null) ? "null" : daydate(pcentry.responseHeader().lastModified()));
+                    prop.put("indexing-queue_list_"+i+"_href", pcentry.forkFactor());
+                    prop.put("indexing-queue_list_"+i+"_anchor", pcentry.anchorName());
+                    prop.put("indexing-queue_list_"+i+"_url", pcentry.normalizedURLString());
                     dark = !dark;
                 }
+            } catch (IOException e) {
             }
             prop.put("indexing-queue_list", i);
         }

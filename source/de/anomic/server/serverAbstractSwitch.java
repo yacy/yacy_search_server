@@ -48,11 +48,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 

@@ -47,7 +47,6 @@
 package de.anomic.server;
 
 import java.net.InetAddress;
-import java.util.Enumeration;
 import java.util.Iterator;
 
 import de.anomic.server.logging.serverLog;

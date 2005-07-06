@@ -60,11 +60,14 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.util.*;
-import de.anomic.server.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.logging.serverLog;
-import de.anomic.kelondro.*;
 
 public class plasmaWordIndexClassicCacheMigration {
 

@@ -44,21 +44,19 @@
 package de.anomic.data;
 
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Hashtable;
+import java.io.InputStreamReader;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
 import de.anomic.server.logging.serverLog;
-import de.anomic.data.listManager;
 
 /**
  * Wordlist based translator

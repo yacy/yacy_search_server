@@ -45,13 +45,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Hashtable;
-
-import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
+
+import org.apache.commons.pool.impl.GenericObjectPool;
 
 public final class plasmaCrawlLoader extends Thread {
 

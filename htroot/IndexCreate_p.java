@@ -181,7 +181,7 @@ public class IndexCreate_p {
         prop.put("xdstopwChecked", env.getConfig("xdstopw", "").equals("true") ? 1 : 0);
         prop.put("xpstopwChecked", env.getConfig("xpstopw", "").equals("true") ? 1 : 0);
         
-        int queueStackSize = switchboard.queueStack.size();
+        int queueStackSize = switchboard.sbQueue.size();
         int loaderThreadsSize = switchboard.cacheLoader.size();
         int crawlerListSize = switchboard.urlPool.noticeURL.stackSize();
         int completequeue = queueStackSize + loaderThreadsSize + crawlerListSize;

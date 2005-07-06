@@ -40,8 +40,8 @@
 
 package de.anomic.htmlFilter;
 
-import java.util.TreeSet;
 import java.util.Properties;
+import java.util.TreeSet;
 
 public abstract class htmlFilterAbstractTransformer implements htmlFilterTransformer {
 

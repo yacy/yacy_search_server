@@ -42,10 +42,17 @@
 
 package de.anomic.plasma;
 
-import java.io.*;
-import java.util.*;
-import java.lang.RuntimeException;
-import de.anomic.kelondro.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
+
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.kelondroMergeIterator;
+import de.anomic.kelondro.kelondroRecords;
+import de.anomic.kelondro.kelondroStack;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 

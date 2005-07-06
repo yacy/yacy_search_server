@@ -48,9 +48,9 @@ package de.anomic.plasma;
 import java.net.URL;
 import java.util.Properties;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 
 public class plasmaWordIndexEntry {
 	

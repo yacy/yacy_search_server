@@ -49,13 +49,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.yacy.yacySeedDB;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaWordIndex {
     

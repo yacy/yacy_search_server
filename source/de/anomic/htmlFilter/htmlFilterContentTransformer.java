@@ -43,11 +43,11 @@ package de.anomic.htmlFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.TreeSet;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.Locale;
 import java.text.Collator;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.TreeSet;
+import java.util.Vector;
 
 import de.anomic.server.serverByteBuffer;
 
