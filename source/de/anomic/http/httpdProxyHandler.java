@@ -576,9 +576,19 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     null, 
                     switchboard.defaultProxyProfile
             );
-            
-            // make output stream
-            hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
+
+            // handle file types and make (possibly transforming) output stream
+            if ((!(transformer.isIdentityTransformer())) &&
+                ((ext == null) || (!(plasmaParser.mediaExtContains(ext)))) &&
+                (plasmaParser.realtimeParsableMimeTypesContains(res.responseHeader.mime()))) {
+                // make a transformer
+                this.theLogger.logDebug("create transformer for url " + url);
+                hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
+            } else {
+                // simply pass through without parsing
+                this.theLogger.logDebug("create passthrough for url " + url + ", extension '" + ext + "', mime-type '" + res.responseHeader.mime() + "'");
+                hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
+            }
             
             // handle incoming cookies
             handleIncomingCookies(res.responseHeader, host, ip);
