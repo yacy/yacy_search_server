@@ -125,15 +125,15 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public void scrapeTag0(String tagname, Properties tagopts) {
-	if (tagname.equals("img")) images.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("alt",""));
-        if (tagname.equals("base")) try {root = new URL(tagopts.getProperty("href", ""));} catch (MalformedURLException e) {}
+	if (tagname.equalsIgnoreCase("img")) images.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("alt",""));
+        if (tagname.equalsIgnoreCase("base")) try {root = new URL(tagopts.getProperty("href", ""));} catch (MalformedURLException e) {}
     }
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
 	//System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
-	if ((tagname.equals("a")) && (text.length < 2048)) anchors.put(absolutePath(tagopts.getProperty("href", "")), super.stripAll(new serverByteBuffer(text)).trim().toString());
-	if ((tagname.equals("h1")) && (text.length < 1024)) headline = super.stripAll(new serverByteBuffer(text)).toString();
-	if ((tagname.equals("title")) && (text.length < 1024)) title = super.stripAll(new serverByteBuffer(text)).toString();        
+	if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) anchors.put(absolutePath(tagopts.getProperty("href", "")), super.stripAll(new serverByteBuffer(text)).trim().toString());
+	if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) headline = super.stripAll(new serverByteBuffer(text)).toString();
+	if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) title = super.stripAll(new serverByteBuffer(text)).toString();        
     }
 
 
