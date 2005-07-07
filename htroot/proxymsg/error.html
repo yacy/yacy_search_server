@@ -45,15 +45,15 @@
 			<tt>#[httpStatus]#</tt>
 			<p>
 				<b>
-					#(errorMessageType)#
+					#(errorMessageType)#<!-- 0 -->
 						unspecified error
-						::
+						::<!-- 1 -->
 						not-yet-assigned error
-						::
+						::<!-- 2 -->
 						You don't have an active internet connection. Please go online.
-						::
+						::<!-- 3 -->
 						Could not load resource. The file is not available.
-						::
+						::<!-- 4 -->
 						#[detailedErrorMsg]#
 					#(/errorMessageType)#
 				</b>

@@ -140,6 +140,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
                 this.log.logDebug("Deploying port forwarding session watcher thread.");
                 this.switchboard.deployThread("portForwardingWatcher", "Remote Port Forwarding Watcher", "this thread is used to detect broken connections and to re-establish it if necessary.",
                         sessionWatcher = new serverInstantThread(this, "reconnect", null), 30000,30000,30000,1000);
+                sessionWatcher.setSyncObject(new Object());
             }
             
             this.log.logInfo("Remote port forwarding connection established: " + 

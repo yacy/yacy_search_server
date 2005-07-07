@@ -110,7 +110,11 @@ public class yacyClient {
             yacyCore.seedDB.sb.remoteProxyPort,
             obj));
         } catch (Exception e) {
-            yacyCore.log.logDebug("yacyClient.publishMySeed exception:" + e.getMessage());
+            if (Thread.currentThread().isInterrupted()) {
+                yacyCore.log.logDebug("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
+            } else {
+                yacyCore.log.logDebug("yacyClient.publishMySeed exception:" + e.getMessage());
+            }
             return -1;
         }
         if ((result == null) || (result.size() < 3)) {

@@ -76,6 +76,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
+import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
@@ -405,7 +406,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.log.logInfo("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP);
             // add a delay to make brute-force harder
             announceThreadBlockApply();
-            try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {}
+            try {Thread.sleep(3000);} catch (InterruptedException e) {}
             announceThreadBlockRelease();
         }
         
@@ -434,13 +435,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
             }
         }
         
-        // close the session pool
-        try {
-            this.theSessionPool.close();
-        } catch (Exception e) {
-            this.log.logWarning("Unable to close the session pool.");
-        }
-        
         // closing the serverchannel and socket
         try {
             this.socket.close();
@@ -448,6 +442,13 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.log.logWarning("Unable to close the server socket."); 
         }
 
+        // closing the session pool
+        try {
+            this.theSessionPool.close();
+        } catch (Exception e) {
+            this.log.logWarning("Unable to close the session pool.");
+        }        
+        
         this.log.logSystem("* terminated");
     }
     
@@ -501,8 +502,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
             /*
              * shutdown all still running session threads ...
              */
-            // interrupting all still running or pooled threads ...
-            serverCore.this.theSessionThreadGroup.interrupt();
             
             /* waiting for all threads to finish */
             int threadCount  = serverCore.this.theSessionThreadGroup.activeCount();    
@@ -515,26 +514,28 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     ((Session)threadList[currentThreadIdx]).setStopped(true);
                 }          
+
+                // interrupting all still running or pooled threads ...
+                serverCore.this.log.logInfo("Sending interruption signal to " + threadCount + " remaining session threads ...");
+                serverCore.this.theSessionThreadGroup.interrupt();                
                 
                 // waiting a frew ms for the session objects to continue processing
                 Thread.sleep(500);
                 
                 // if there are some sessions that are blocking in IO, we simply close the socket
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    Session currentSession = (Session)threadList[currentThreadIdx];
-                    if (currentSession.isAlive()) {
-                        try {
-                            if ((currentSession.controlSocket != null)&&(currentSession.controlSocket.isConnected())) {
-                                currentSession.controlSocket.close();
-                                serverCore.this.log.logInfo("Closing socket of thread '" + currentSession.getName() + "'");
-                            }
-                        } catch (IOException e) {}
-                    }
+                    serverCore.this.log.logInfo("Trying to shutdown session thread '" + threadList[currentThreadIdx].getName() + "' [ID=" + threadList[currentThreadIdx].getId() + "].");
+                    ((Session)threadList[currentThreadIdx]).close();
                 }                
                 
                 // we need to use a timeout here because of missing interruptable session threads ...
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    if (threadList[currentThreadIdx].isAlive()) threadList[currentThreadIdx].join(500);
+                    if (threadList[currentThreadIdx].isAlive()) {
+                        serverCore.this.log.logDebug("Waiting for session thread '" + threadList[currentThreadIdx].getName() + "' [ID=" + threadList[currentThreadIdx].getId() + "] to finish shutdown.");
+                        try { 
+                            threadList[currentThreadIdx].join(500); 
+                        } catch (Exception ex) {}
+                    }
                 }
             } catch (InterruptedException e) {
                 serverCore.this.log.logWarning("Interruption while trying to shutdown all remaining session threads.");  
@@ -657,6 +658,27 @@ public final class serverCore extends serverAbstractThread implements serverThre
         public void setStopped(boolean stopped) {
             this.stopped = stopped;            
         }
+        
+        public void close() {
+            if (this.isAlive()) {
+                try {
+                    // trying to close all still open httpc-Sockets first                    
+                    int closedSockets = httpc.closeOpenSockets(new Long(this.getId()));
+                    if (closedSockets > 0) {
+                        serverCore.this.log.logInfo(closedSockets + " http-client sockets of thread '" + this.getName() + "' closed.");
+                    }
+                    
+                    // waiting some time 
+                    this.join(300);
+                    
+                    // closing the socket to the client
+                    if ((this.controlSocket != null)&&(this.controlSocket.isConnected())) {
+                        this.controlSocket.close();
+                        serverCore.this.log.logInfo("Closing main socket of thread '" + this.getName() + "'");
+                    }
+                } catch (Exception e) {}
+            }            
+        }
 
         public void execute(Socket controlSocket, int socketTimeout) {
             this.execute(controlSocket, socketTimeout, null);
@@ -765,7 +787,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     } finally  {
                         reset();
                         
-                        if (!this.stopped && !this.isInterrupted()) {
+                        if (!this.stopped && !this.isInterrupted() && !serverCore.this.theSessionPool.isClosed) {
                             try {
                                 this.setName("Session_inPool");
                                 serverCore.this.theSessionPool.returnObject(this);
@@ -857,7 +879,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     this.request = new String(requestBytes);
                     //log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
                     log(false, this.request);
-                    try {
+                    try {                        
                         // if we can not determine the proper command string we try to call function emptyRequest
                         // of the commandObject
                         if (this.request.trim().length() == 0) this.request = "EMPTY";

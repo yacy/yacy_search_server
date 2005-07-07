@@ -70,6 +70,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
+import de.anomic.http.httpc;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverSemaphore;
@@ -466,27 +467,39 @@ public class yacyCore {
             peerActions.saveMySeed();
             return 0;
         } catch (InterruptedException e) {
+            try {
             log.logInfo("publish: Interruption detected while publishing my seed.");
             
+                // consuming the theads interrupted signal
+                Thread.interrupted();
+                
             // interrupt all already started publishThreads
-            log.logInfo("publish: Trying to shutdown all remaining publishing threads ...");
+                log.logInfo("publish: Signaling shutdown to all remaining publishing threads ...");
             yacyCore.publishThreadGroup.interrupt();
             
-            // waiting some time for the publishThreads to finish handshake
+                // waiting some time for the publishThreads to finish execution
+                Thread.sleep(500);
+                
             int threadCount  = yacyCore.publishThreadGroup.activeCount();    
             Thread[] threadList = new Thread[threadCount];     
             threadCount = yacyCore.publishThreadGroup.enumerate(threadList);
-            try {
+                
                 // we need to use a timeout here because of missing interruptable session threads ...
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    if (threadList[currentThreadIdx].isAlive()) {
+                    Thread currentThread = threadList[currentThreadIdx];
+                    Long currentThreadID = new Long(currentThread.getId());
+                    
+                    if (currentThread.isAlive()) {
+                        log.logInfo("publish: Closing socket of publishing thread '" + threadList[currentThreadIdx].getName() + "'.");
+                        httpc.closeOpenSockets(currentThreadID);
+                        
                         log.logInfo("publish: Waiting for remaining publishing thread '" + threadList[currentThreadIdx].getName() + "' to finish shutdown");
-                        threadList[currentThreadIdx].join(500);
+                        try { threadList[currentThreadIdx].join(500); }catch (Exception ex) {}
                     }
                 }
             }
             catch (InterruptedException ee) {
-                log.logWarning("Interruption while trying to shutdown all remaining publishing threads.");  
+                log.logWarning("publish: Interruption while trying to shutdown all remaining publishing threads.");  
             }
             
             return 0;

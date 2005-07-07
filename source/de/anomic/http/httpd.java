@@ -1072,10 +1072,8 @@ public final class httpd implements serverHandler {
     ) throws IOException {
         
         FileInputStream fis = null;
+        ByteArrayOutputStream o = null;
         try {
-            
-            File htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
-            
             // setting the proper http status message
             String httpVersion = conProp.getProperty(httpd.CONNECTION_PROP_HTTP_VER,"HTTP/1.1");
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
@@ -1107,8 +1105,12 @@ public final class httpd implements serverHandler {
             // set rewrite values
             serverObjects tp = new serverObjects();
             
+//            tp.put("host", serverCore.publicIP().getHostAddress());
+//            tp.put("port", switchboard.getConfig("port", "8080"));            
             tp.put("host", serverCore.publicIP().getHostAddress());
-            tp.put("port", switchboard.getConfig("port", "8080"));
+            tp.put("port", (serverCore.portForwardingEnabled && (serverCore.portForwarding != null)) 
+                           ? Integer.toString(serverCore.portForwarding.getPort()) 
+                           : switchboard.getConfig("port", "8080"));
             
             tp.put("errorMessageType", errorcase);            
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
@@ -1117,27 +1119,32 @@ public final class httpd implements serverHandler {
             tp.put("errorMessageType_detailedErrorMsg",(detailedErrorMsg != null) ? detailedErrorMsg : "");
             
             // building the stacktrace            
-            if (stackTrace != null) {    
-                serverByteBuffer errorMsg = new serverByteBuffer(100);
-                errorMsg.append("Exception occurred:\r\n\r\n")
-                        .append(stackTrace.toString())
-                        .append("\r\n")
-                        .append("TRACE: ");
-                stackTrace.printStackTrace(new PrintStream(errorMsg));
-                errorMsg.write(("\r\n").getBytes());
+            if (stackTrace != null) {  
                 tp.put("printStackTrace",1);
+                
+                serverByteBuffer errorMsg = new serverByteBuffer(100);
+                errorMsg.append("<i>Exception occurred:</i>&nbsp;<b>")
+                        .append(stackTrace.toString())
+                        .append("</b>\r\n\r\n")
+                        .append("</i>TRACE:</i>\r\n");
+                stackTrace.printStackTrace(new PrintStream(errorMsg));
+                errorMsg.append("\r\n");
+                
                 tp.put("printStackTrace_stacktrace",errorMsg.toString().replaceAll("\n","<br>"));
             } else {
                 tp.put("printStackTrace",0);
             }
             
             // rewrite the file
-            File file = new File(htRootPath, "/proxymsg/error.html");
-            byte[] result;
-            ByteArrayOutputStream o = new ByteArrayOutputStream();
-            fis = new FileInputStream(file);
-            httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
-            result = o.toByteArray();
+            File htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
+            
+            httpTemplate.writeTemplate(
+                    fis = new FileInputStream(new File(htRootPath, "/proxymsg/error.html")), 
+                    o = new ByteArrayOutputStream(), 
+                    tp, 
+                    "-UNRESOLVED_PATTERN-".getBytes()
+            );
+            byte[] result = o.toByteArray();
             o.close(); o = null;
 
             httpHeader header = new httpHeader();            
@@ -1154,6 +1161,7 @@ public final class httpd implements serverHandler {
             throw new IOException(e.getMessage());
         } finally {
             if (fis != null) try { fis.close(); } catch (Exception e) {}
+            if (o != null)   try { o.close();   } catch (Exception e) {}
         }     
     }
     

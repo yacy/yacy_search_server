@@ -52,21 +52,28 @@
 package de.anomic.http;
 
 import java.text.SimpleDateFormat;
+import java.util.Properties;
+
+import de.anomic.server.logging.serverLog;
 
 public abstract class httpdAbstractHandler {
-
+    
     // static tools
-
+    
     private static int fileCounter = 0; // for unique file names
     
     private static SimpleDateFormat DateFileNameFormatter =
-	new SimpleDateFormat("yyyyMMddHHmmss");
-
+        new SimpleDateFormat("yyyyMMddHHmmss");
+    
     protected static String uniqueDateString() {
-	String c = "" + fileCounter;
-	fileCounter++; if (fileCounter>9999) fileCounter = 0;
-	while (c.length() < 4) { c = "0" + c; }
-	return "FILE" + DateFileNameFormatter.format(httpc.nowDate()) + c;
+        String c = "" + fileCounter;
+        fileCounter++; if (fileCounter>9999) fileCounter = 0;
+        while (c.length() < 4) { c = "0" + c; }
+        return "FILE" + DateFileNameFormatter.format(httpc.nowDate()) + c;
     } 
+    
+    protected Properties connectionProperties = null;
+    
+    protected serverLog theLogger;
     
 }

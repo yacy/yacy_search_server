@@ -145,6 +145,7 @@ public class yacyPeerActions {
         // - use the superseed to further fill up the seedDB
         int ssc = 0;
 	for (int i = 0; i < superseed.size(); i++) {
+        if (Thread.currentThread().isInterrupted()) break;
 	    seedListFileURL = (String) superseed.any();
 	    if (seedListFileURL.startsWith("http://")) {
 		// load the seed list

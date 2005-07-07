@@ -117,13 +117,13 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     private serverSwitch switchboard;
     private String adminAccountBase64MD5;
     
-    private Properties connectionProperties = null;    
     private MessageDigest md5Digest = null;
-    
-    private final serverLog theLogger = new serverLog("FILEHANDLER");
     
     public httpdFileHandler(serverSwitch switchboard) {
         this.switchboard = switchboard;
+        
+        // creating a logger
+        this.theLogger = new serverLog("FILEHANDLER");
         
         if (this.mimeTable == null) {
             // load the mime table
@@ -476,37 +476,58 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 serverFileUtils.write(result, out);
             } else {
                 httpd.sendRespondError(conProp,out,3,404,"File not Found",null,null);
-                //textMessage(out, 404, "404 File not Found\r\n"); // would be a possible vuln to return original the original path
+                return;
             }
         } catch (Exception e) {     
-            if (e instanceof InterruptedException) {
-                this.theLogger.logInfo("Interruption detected while processing query: " + path + 
-                                       "\nClient: " + conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP,"unknown") + 
-                                       "\nReason: " + e.toString());
-                if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                    httpd.sendRespondError(conProp,out, 4, 503, null, "Exception with query: " + path + "; Service unavailable because of server shutdown.",e);
+            try {
+                // doing some errorhandling ...
+                int httpStatusCode = 400; 
+                String httpStatusText = null; 
+                StringBuffer errorMessage = new StringBuffer(); 
+                Exception errorExc = null;            
+                
+                if (e instanceof InterruptedException) {
+                    errorMessage.append("Interruption detected while processing query.");
+                    httpStatusCode = 503;
                 } else {
-                    conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
-                }
-            } else {
-                String errorMsg = e.getMessage();
-                if ((errorMsg != null) && (errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
-                    // client closed the connection, so we just end silently
-                    this.theLogger.logInfo("Client unexpectedly closed connection while processing query " + path + 
-                                           "\nClient: " + conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP,"unknown")+ 
-                                           "\nReason: " + e.toString());
-                    conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
-                } else {
-                    this.theLogger.logError("ERROR: Exception with query: " + path + 
-                                            "\nClient: " + conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP,"unknown") + 
-                                            "\nReason: " + e.toString());
-                    if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                        httpd.sendRespondError(conProp,out, 4, 503, null, "Exception with query: " + path + "; '" + e.toString() + ":" + ((errorMsg ==null)?"":e.getMessage()) + "'",e);
+                    String errorMsg = e.getMessage();
+                    if ((errorMsg != null) && 
+                        (
+                           errorMsg.startsWith("Broken pipe") || 
+                           errorMsg.startsWith("Connection reset") ||
+                           errorMsg.startsWith("Software caused connection abort")
+                       )) {
+                        // client closed the connection, so we just end silently
+                        errorMessage.append("Client unexpectedly closed connection while processing query.");
                     } else {
-                        conProp.put(httpd.CONNECTION_PROP_PERSISTENT,"close");
+                        errorMessage.append("Unexpected error while processing query.");
+                        httpStatusCode = 500;
+                        errorExc = e;
                     }
                 }
-            }
+                
+                errorMessage.append("\nQuery:  ").append(path)
+                            .append("\nClient: ").append(conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP,"unknown")) 
+                            .append("\nReason: ").append(e.toString());    
+                
+                if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+                    // sending back an error message to the client 
+                    // if we have not already send an http header
+                    httpd.sendRespondError(conProp,out, 4, httpStatusCode, httpStatusText, errorMessage.toString(),errorExc);
+                } else {
+                    // otherwise we close the connection
+                    this.forceConnectionClose();
+                }    
+                
+                // if it is an unexpected error we log it 
+                if (httpStatusCode == 500) {
+                    this.theLogger.logWarning(errorMessage.toString(),e);
+                }
+                
+            } catch (Exception ee) {
+                this.forceConnectionClose();
+            }            
+            
         } finally {
             try {out.flush();}catch (Exception e) {}
             if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
@@ -516,6 +537,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         }
     }
     
+    private void forceConnectionClose() {
+        if (this.connectionProperties != null) {
+            this.connectionProperties.setProperty(httpd.CONNECTION_PROP_PERSISTENT,"close");            
+        }
+    }
+
     private static HashMap loadTemplates(File path) {
         // reads all templates from a path
         // we use only the folder from the given file path

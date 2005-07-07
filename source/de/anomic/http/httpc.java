@@ -63,6 +63,7 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -113,12 +114,13 @@ public final class httpc {
     
     // class variables
     private Socket socket = null; // client socket for commands
+    private Long socketOwnerID = null;
     private String host = null;
     private long timeout;
     private long handle;
     
     // output and input streams for client control connection
-    private PushbackInputStream clientInput = null;
+    PushbackInputStream clientInput = null;
     private OutputStream clientOutput = null;
     
     private boolean remoteProxyUse = false;
@@ -163,6 +165,8 @@ public final class httpc {
      * @see serverByteBuffer
      */
     final serverByteBuffer readLineBuffer = new serverByteBuffer(100);
+        
+    private static final Hashtable openSocketLookupTable = new Hashtable();
     
     public String toString() {
         return (this.savedRemoteHost == null) ? "Disconnected" : "Connected to " + this.savedRemoteHost +
@@ -316,19 +320,31 @@ public final class httpc {
                 hostip = dnsResolve(server);
                 if (hostip == null) throw new UnknownHostException(server);
             }
-            if (ssl)
-                socket = SSLSocketFactory.getDefault().createSocket(hostip, port);
-            else
-                socket = new Socket(hostip, port);
+            
+            // opening the socket
+            socket = (ssl) ? SSLSocketFactory.getDefault().createSocket(hostip, port)
+                    : new Socket(hostip, port);
+            
+            // registering the socket
+            this.socketOwnerID = this.registerOpenSocket(socket);
+            
+            // setting socket timeout and keep alive behaviour
             socket.setSoTimeout(timeout); // waiting time for write
             //socket.setSoLinger(true, timeout); // waiting time for read
             socket.setKeepAlive(true); //
+            
+            // getting input and output streams
             clientInput  = new PushbackInputStream(socket.getInputStream());
             clientOutput = socket.getOutputStream();
             // if we reached this point, we should have a connection
         } catch (UnknownHostException e) {
+            if (this.socket != null) {
+                this.unregisterOpenSocket(this.socket,this.socketOwnerID);
+            }
+            this.socket = null;
+            this.socketOwnerID = null;
             throw new IOException("unknown host: " + server);
-        }
+        } 
     }
     
     void reset() {
@@ -342,7 +358,9 @@ public final class httpc {
         }
         if (this.socket != null) {
             try {this.socket.close();} catch (Exception e) {}
+            this.unregisterOpenSocket(this.socket,this.socketOwnerID);
             this.socket = null;
+            this.socketOwnerID = null;
         }
         
         this.host = null;
@@ -1085,8 +1103,109 @@ do upload
         while (i.hasMoreElements()) System.out.println((String) i.nextElement());
     }
     
+    /**
+     * To register an open socket.
+     * This adds the socket to the list of open sockets where the current thread 
+     * is is the owner. 
+     * @param openedSocket the socket that should be registered
+     * @return the id of the current thread 
+     */
+    private Long registerOpenSocket(Socket openedSocket) {
+        Long currentThreadId = new Long(Thread.currentThread().getId());
+        synchronized (openSocketLookupTable) {
+            ArrayList openSockets = null;
+            if (openSocketLookupTable.containsKey(currentThreadId)) {
+                openSockets = (ArrayList) openSocketLookupTable.get(currentThreadId);
+            } else {
+                openSockets = new ArrayList(1);
+                openSocketLookupTable.put(currentThreadId,openSockets);
+            }
+            synchronized (openSockets) {
+                openSockets.add(openedSocket);
+            }
+            return currentThreadId;
+        }        
+    }
     
+    /**
+     * Closing all sockets that were opened in the context of the thread
+     * with the given thread id 
+     * @param threadId
+     */
+    public static int closeOpenSockets(Long threadId) {
+        
+        // getting all still opened sockets 
+        ArrayList openSockets = httpc.getRegisteredOpenSockets(threadId);
+        int closedSocketCount = 0;
+        
+        synchronized (openSockets) {        
+            // looping through the list of sockets and close each one
+            for (int socketCount = 0; socketCount < openSockets.size(); socketCount++) {
+                Socket openSocket = (Socket) openSockets.get(0);
+                try {
+                    // closing the socket
+                    if (!openSocket.isClosed()) {
+                        openSocket.close();
+                        closedSocketCount++;
+                    }
+                    // unregistering the socket
+                    httpc.unregisterOpenSocket(openSocket,threadId);
+                } catch (Exception ex) {}
+            }
+        }
+        
+        return closedSocketCount;
+    }
     
+    /**
+     * Unregistering the socket. 
+     * The socket will be removed from the list of sockets where the thread with the
+     * given thread id is the owner.
+     * @param closedSocket the socket that should be unregistered
+     * @param threadId the id of the owner thread
+     */
+    public static void unregisterOpenSocket(Socket closedSocket, Long threadId) {
+        synchronized (openSocketLookupTable) {
+            ArrayList openSockets = null;
+            if (openSocketLookupTable.containsKey(threadId)) {
+                openSockets = (ArrayList) openSocketLookupTable.get(threadId);
+                synchronized (openSockets) {
+                    openSockets.remove(closedSocket);
+                    if (openSockets.size() == 0) {
+                        openSocketLookupTable.remove(threadId);
+                    }
+                }
+            }
+        }          
+    }
+    
+    /**
+     * Getting a list of open sockets where the current thread is
+     * the owner 
+     * @return the list of open sockets
+     */
+    public static ArrayList getRegisteredOpenSockets() {
+        Long currentThreadId = new Long(Thread.currentThread().getId());
+        return getRegisteredOpenSockets(currentThreadId);      
+    }
+    
+    /**
+     * Getting a list of open sockets where the thread with the given
+     * thread id is the owner
+     * @param threadId the thread id of the owner thread
+     * @return the list of open sockets
+     */
+    public static ArrayList getRegisteredOpenSockets(Long threadId) {
+        synchronized (openSocketLookupTable) {
+            ArrayList openSockets = null;
+            if (openSocketLookupTable.containsKey(threadId)) {
+                openSockets = (ArrayList) openSocketLookupTable.get(threadId);
+            } else {
+                openSockets = new ArrayList(0);
+            }
+            return openSockets;
+        }        
+    }    
     
 }
 
