@@ -54,6 +54,7 @@ import java.util.logging.Logger;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpdProxyHandler;
+import de.anomic.server.serverCore;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.logging.serverMiniLogFormatter;
 
@@ -219,6 +220,18 @@ public final class plasmaCrawlWorker extends Thread {
     public boolean isRunning() {
         return this.running;
     }
+    
+    public void close() {
+        if (this.isAlive()) {
+            try {
+                // trying to close all still open httpc-Sockets first                    
+                int closedSockets = httpc.closeOpenSockets(this);
+                if (closedSockets > 0) {
+                    this.log.logInfo(closedSockets + " http-client sockets of thread '" + this.getName() + "' closed.");
+                }
+            } catch (Exception e) {}
+        }            
+    }    
 
     public static void load(
             URL url, 

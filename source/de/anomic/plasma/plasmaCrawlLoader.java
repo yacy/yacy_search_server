@@ -46,8 +46,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverCore.Session;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -310,32 +312,54 @@ final class CrawlerPool extends GenericObjectPool {
     }        
     
     public synchronized void close() throws Exception {
-        /*
-         * shutdown all still running session threads ...
-         */
-        // interrupting all still running or pooled threads ...
-        this.theThreadGroup.interrupt();
-        
-        /* waiting for all threads to finish */
-        int threadCount  = this.theThreadGroup.activeCount();    
-        Thread[] threadList = new Thread[threadCount];     
-        threadCount = this.theThreadGroup.enumerate(threadList);
-        
         try {
+            /*
+             * shutdown all still running session threads ...
+             */
+            this.isClosed  = true;
+            
+            /* waiting for all threads to finish */
+            int threadCount  = this.theThreadGroup.activeCount();    
+            Thread[] threadList = new Thread[threadCount];     
+            threadCount = this.theThreadGroup.enumerate(threadList);
+            
+            // signaling shutdown to all still running or pooled threads ...
+            serverLog.logInfo("CRAWLER","Signaling shutdown to " + threadCount + " remaining crawler threads ...");
             for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                 ((plasmaCrawlWorker)threadList[currentThreadIdx]).setStopped(true);
+            }   
+            
+            // giving the crawlers some time to finish shutdown
+            try { Thread.sleep(500); } catch(Exception e) {}            
+            
+            // sending interrupted signal to all remaining threads
+            serverLog.logInfo("CRAWLER","Sending interruption signal to " + this.theThreadGroup.activeCount() + " remaining crawler threads ...");
+            this.theThreadGroup.interrupt();        
+
+            // aborting all crawlers by closing all still open httpc sockets
+            serverLog.logInfo("CRAWLER","Trying to abort  " + this.theThreadGroup.activeCount() + " remaining crawler threads ...");
+            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
+                Thread currentThread = threadList[currentThreadIdx];
+                if (currentThread.isAlive()) {
+                    serverLog.logInfo("CRAWLER","Trying to shutdown crawler thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
+                    ((plasmaCrawlWorker)currentThread).close();
+                }
             }            
             
+            serverLog.logInfo("CRAWLER","Waiting for " + this.theThreadGroup.activeCount() + " remaining crawler threads to finish shutdown ...");
             for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                // we need to use a timeout here because of missing interruptable session threads ...
-                if (threadList[currentThreadIdx].isAlive()) threadList[currentThreadIdx].join(500);
+                Thread currentThread = threadList[currentThreadIdx];
+                if (currentThread.isAlive()) {
+                    serverLog.logInfo("CRAWLER","Waiting for crawler thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
+                    try { currentThread.join(500); } catch (InterruptedException ex) {}
+                }
             }
+            serverLog.logWarning("CRAWLER","Shutdown of remaining crawler threads finish.");
         }
-        catch (InterruptedException e) {
-            System.err.println("Interruption while trying to shutdown all crawler threads.");  
+        catch (Exception e) {
+            serverLog.logWarning("CRAWLER","Unexpected error while trying to shutdown all remaining crawler threads.",e);  
         }        
 
-        this.isClosed  = true;
         super.close();        
         
     }

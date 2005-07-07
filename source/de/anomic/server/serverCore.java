@@ -521,12 +521,12 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     ((Session)threadList[currentThreadIdx]).setStopped(true);
                 }          
 
+                // waiting a frew ms for the session objects to continue processing
+                try { Thread.sleep(500); } catch (InterruptedException ex) {}                
+                
                 // interrupting all still running or pooled threads ...
                 serverCore.this.log.logInfo("Sending interruption signal to " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads ...");
                 serverCore.this.theSessionThreadGroup.interrupt();                
-                
-                // waiting a frew ms for the session objects to continue processing
-                try { Thread.sleep(500); } catch (InterruptedException ex) {}
                 
                 // if there are some sessions that are blocking in IO, we simply close the socket
                 serverCore.this.log.logDebug("Trying to abort " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads ...");
@@ -675,10 +675,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     int closedSockets = httpc.closeOpenSockets(this);
                     if (closedSockets > 0) {
                         serverCore.this.log.logInfo(closedSockets + " http-client sockets of thread '" + this.getName() + "' closed.");
-                    }
-                    
-                    // waiting some time 
-                    this.join(300);
+                    }                    
                     
                     // closing the socket to the client
                     if ((this.controlSocket != null)&&(this.controlSocket.isConnected())) {
