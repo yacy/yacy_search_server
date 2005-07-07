@@ -524,14 +524,14 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 
                 // if there are some sessions that are blocking in IO, we simply close the socket
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    serverCore.this.log.logInfo("Trying to shutdown session thread '" + threadList[currentThreadIdx].getName() + "' [ID=" + threadList[currentThreadIdx].getId() + "].");
+                    serverCore.this.log.logInfo("Trying to shutdown session thread '" + threadList[currentThreadIdx].getName() + "'.");
                     ((Session)threadList[currentThreadIdx]).close();
                 }                
                 
                 // we need to use a timeout here because of missing interruptable session threads ...
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     if (threadList[currentThreadIdx].isAlive()) {
-                        serverCore.this.log.logDebug("Waiting for session thread '" + threadList[currentThreadIdx].getName() + "' [ID=" + threadList[currentThreadIdx].getId() + "] to finish shutdown.");
+                        serverCore.this.log.logDebug("Waiting for session thread '" + threadList[currentThreadIdx].getName() + "' to finish shutdown.");
                         try { 
                             threadList[currentThreadIdx].join(500); 
                         } catch (Exception ex) {}
@@ -663,7 +663,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             if (this.isAlive()) {
                 try {
                     // trying to close all still open httpc-Sockets first                    
-                    int closedSockets = httpc.closeOpenSockets(new Long(this.getId()));
+                    int closedSockets = httpc.closeOpenSockets(this);
                     if (closedSockets > 0) {
                         serverCore.this.log.logInfo(closedSockets + " http-client sockets of thread '" + this.getName() + "' closed.");
                     }

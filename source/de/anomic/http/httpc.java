@@ -114,7 +114,7 @@ public final class httpc {
     
     // class variables
     private Socket socket = null; // client socket for commands
-    private Long socketOwnerID = null;
+    private Thread socketOwner = null;
     private String host = null;
     private long timeout;
     private long handle;
@@ -326,7 +326,7 @@ public final class httpc {
                     : new Socket(hostip, port);
             
             // registering the socket
-            this.socketOwnerID = this.registerOpenSocket(socket);
+            this.socketOwner = this.registerOpenSocket(socket);
             
             // setting socket timeout and keep alive behaviour
             socket.setSoTimeout(timeout); // waiting time for write
@@ -339,10 +339,10 @@ public final class httpc {
             // if we reached this point, we should have a connection
         } catch (UnknownHostException e) {
             if (this.socket != null) {
-                this.unregisterOpenSocket(this.socket,this.socketOwnerID);
+                this.unregisterOpenSocket(this.socket,this.socketOwner);
             }
             this.socket = null;
-            this.socketOwnerID = null;
+            this.socketOwner = null;
             throw new IOException("unknown host: " + server);
         } 
     }
@@ -358,9 +358,9 @@ public final class httpc {
         }
         if (this.socket != null) {
             try {this.socket.close();} catch (Exception e) {}
-            this.unregisterOpenSocket(this.socket,this.socketOwnerID);
+            this.unregisterOpenSocket(this.socket,this.socketOwner);
             this.socket = null;
-            this.socketOwnerID = null;
+            this.socketOwner = null;
         }
         
         this.host = null;
@@ -1110,20 +1110,20 @@ do upload
      * @param openedSocket the socket that should be registered
      * @return the id of the current thread 
      */
-    private Long registerOpenSocket(Socket openedSocket) {
-        Long currentThreadId = new Long(Thread.currentThread().getId());
+    private Thread registerOpenSocket(Socket openedSocket) {
+        Thread currentThread = Thread.currentThread();
         synchronized (openSocketLookupTable) {
             ArrayList openSockets = null;
-            if (openSocketLookupTable.containsKey(currentThreadId)) {
-                openSockets = (ArrayList) openSocketLookupTable.get(currentThreadId);
+            if (openSocketLookupTable.containsKey(currentThread)) {
+                openSockets = (ArrayList) openSocketLookupTable.get(currentThread);
             } else {
                 openSockets = new ArrayList(1);
-                openSocketLookupTable.put(currentThreadId,openSockets);
+                openSocketLookupTable.put(currentThread,openSockets);
             }
             synchronized (openSockets) {
                 openSockets.add(openedSocket);
             }
-            return currentThreadId;
+            return currentThread;
         }        
     }
     
@@ -1132,26 +1132,24 @@ do upload
      * with the given thread id 
      * @param threadId
      */
-    public static int closeOpenSockets(Long threadId) {
+    public static int closeOpenSockets(Thread thread) {
         
         // getting all still opened sockets 
-        ArrayList openSockets = httpc.getRegisteredOpenSockets(threadId);
+        ArrayList openSockets = (ArrayList) httpc.getRegisteredOpenSockets(thread).clone();
         int closedSocketCount = 0;
         
-        synchronized (openSockets) {        
-            // looping through the list of sockets and close each one
-            for (int socketCount = 0; socketCount < openSockets.size(); socketCount++) {
-                Socket openSocket = (Socket) openSockets.get(0);
-                try {
-                    // closing the socket
-                    if (!openSocket.isClosed()) {
-                        openSocket.close();
-                        closedSocketCount++;
-                    }
-                    // unregistering the socket
-                    httpc.unregisterOpenSocket(openSocket,threadId);
-                } catch (Exception ex) {}
-            }
+        // looping through the list of sockets and close each one
+        for (int socketCount = 0; socketCount < openSockets.size(); socketCount++) {
+            Socket openSocket = (Socket) openSockets.get(0);
+            try {
+                // closing the socket
+                if (!openSocket.isClosed()) {
+                    openSocket.close();
+                    closedSocketCount++;
+                }
+                // unregistering the socket
+                httpc.unregisterOpenSocket(openSocket,thread);
+            } catch (Exception ex) {}
         }
         
         return closedSocketCount;
@@ -1164,15 +1162,15 @@ do upload
      * @param closedSocket the socket that should be unregistered
      * @param threadId the id of the owner thread
      */
-    public static void unregisterOpenSocket(Socket closedSocket, Long threadId) {
+    public static void unregisterOpenSocket(Socket closedSocket, Thread thread) {
         synchronized (openSocketLookupTable) {
             ArrayList openSockets = null;
-            if (openSocketLookupTable.containsKey(threadId)) {
-                openSockets = (ArrayList) openSocketLookupTable.get(threadId);
+            if (openSocketLookupTable.containsKey(thread)) {
+                openSockets = (ArrayList) openSocketLookupTable.get(thread);
                 synchronized (openSockets) {
                     openSockets.remove(closedSocket);
                     if (openSockets.size() == 0) {
-                        openSocketLookupTable.remove(threadId);
+                        openSocketLookupTable.remove(thread);
                     }
                 }
             }
@@ -1185,8 +1183,8 @@ do upload
      * @return the list of open sockets
      */
     public static ArrayList getRegisteredOpenSockets() {
-        Long currentThreadId = new Long(Thread.currentThread().getId());
-        return getRegisteredOpenSockets(currentThreadId);      
+        Thread currentThread = Thread.currentThread();
+        return getRegisteredOpenSockets(currentThread);      
     }
     
     /**
@@ -1195,11 +1193,11 @@ do upload
      * @param threadId the thread id of the owner thread
      * @return the list of open sockets
      */
-    public static ArrayList getRegisteredOpenSockets(Long threadId) {
+    public static ArrayList getRegisteredOpenSockets(Thread thread) {
         synchronized (openSocketLookupTable) {
             ArrayList openSockets = null;
-            if (openSocketLookupTable.containsKey(threadId)) {
-                openSockets = (ArrayList) openSocketLookupTable.get(threadId);
+            if (openSocketLookupTable.containsKey(thread)) {
+                openSockets = (ArrayList) openSocketLookupTable.get(thread);
             } else {
                 openSockets = new ArrayList(0);
             }

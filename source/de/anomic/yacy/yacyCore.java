@@ -468,37 +468,36 @@ public class yacyCore {
             return 0;
         } catch (InterruptedException e) {
             try {
-            log.logInfo("publish: Interruption detected while publishing my seed.");
-            
+                log.logInfo("publish: Interruption detected while publishing my seed.");
+                
                 // consuming the theads interrupted signal
                 Thread.interrupted();
                 
-            // interrupt all already started publishThreads
-                log.logInfo("publish: Signaling shutdown to all remaining publishing threads ...");
-            yacyCore.publishThreadGroup.interrupt();
-            
-                // waiting some time for the publishThreads to finish execution
-                Thread.sleep(500);
+                // interrupt all already started publishThreads
+                log.logInfo("publish: Signaling shutdown to " + yacyCore.publishThreadGroup.activeCount() +  " remaining publishing threads ...");
+                yacyCore.publishThreadGroup.interrupt();
                 
-            int threadCount  = yacyCore.publishThreadGroup.activeCount();    
-            Thread[] threadList = new Thread[threadCount];     
-            threadCount = yacyCore.publishThreadGroup.enumerate(threadList);
+                // waiting some time for the publishThreads to finish execution
+                try { Thread.sleep(500); } catch (Exception ex) {}
+                
+                int threadCount  = yacyCore.publishThreadGroup.activeCount();    
+                Thread[] threadList = new Thread[threadCount];     
+                threadCount = yacyCore.publishThreadGroup.enumerate(threadList);
                 
                 // we need to use a timeout here because of missing interruptable session threads ...
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     Thread currentThread = threadList[currentThreadIdx];
-                    Long currentThreadID = new Long(currentThread.getId());
                     
                     if (currentThread.isAlive()) {
                         log.logInfo("publish: Closing socket of publishing thread '" + threadList[currentThreadIdx].getName() + "'.");
-                        httpc.closeOpenSockets(currentThreadID);
+                        httpc.closeOpenSockets(currentThread);
                         
                         log.logInfo("publish: Waiting for remaining publishing thread '" + threadList[currentThreadIdx].getName() + "' to finish shutdown");
                         try { threadList[currentThreadIdx].join(500); }catch (Exception ex) {}
                     }
                 }
             }
-            catch (InterruptedException ee) {
+            catch (Exception ee) {
                 log.logWarning("publish: Interruption while trying to shutdown all remaining publishing threads.");  
             }
             
