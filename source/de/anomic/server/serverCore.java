@@ -429,7 +429,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
         // closing the port forwarding channel
         if ((portForwardingEnabled) && (portForwarding != null) ) {
             try {
+                this.log.logInfo("Shutdown port forwarding ...");
                 portForwarding.disconnect();
+                portForwardingEnabled = false;
+                portForwarding = null;
             } catch (Exception e) {
                 this.log.logWarning("Unable to shutdown the port forwarding channel.");
             }
@@ -437,6 +440,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         // closing the serverchannel and socket
         try {
+            this.log.logInfo("Closing server socket ...");
             this.socket.close();
         } catch (Exception e) {
             this.log.logWarning("Unable to close the server socket."); 
@@ -444,6 +448,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
 
         // closing the session pool
         try {
+            this.log.logInfo("Closing server session pool ...");
             this.theSessionPool.close();
         } catch (Exception e) {
             this.log.logWarning("Unable to close the session pool.");
@@ -502,6 +507,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             /*
              * shutdown all still running session threads ...
              */
+            this.isClosed = true;
             
             /* waiting for all threads to finish */
             int threadCount  = serverCore.this.theSessionThreadGroup.activeCount();    
@@ -516,34 +522,37 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 }          
 
                 // interrupting all still running or pooled threads ...
-                serverCore.this.log.logInfo("Sending interruption signal to " + threadCount + " remaining session threads ...");
+                serverCore.this.log.logInfo("Sending interruption signal to " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads ...");
                 serverCore.this.theSessionThreadGroup.interrupt();                
                 
                 // waiting a frew ms for the session objects to continue processing
-                Thread.sleep(500);
+                try { Thread.sleep(500); } catch (InterruptedException ex) {}
                 
                 // if there are some sessions that are blocking in IO, we simply close the socket
+                serverCore.this.log.logDebug("Trying to abort " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads ...");
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    serverCore.this.log.logInfo("Trying to shutdown session thread '" + threadList[currentThreadIdx].getName() + "'.");
-                    ((Session)threadList[currentThreadIdx]).close();
+                    Thread currentThread = threadList[currentThreadIdx];
+                    if (currentThread.isAlive()) {
+                        serverCore.this.log.logInfo("Trying to shutdown session thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
+                        ((Session)currentThread).close();
+                    }
                 }                
                 
                 // we need to use a timeout here because of missing interruptable session threads ...
+                serverCore.this.log.logDebug("Waiting for " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads to finish shutdown ...");
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    if (threadList[currentThreadIdx].isAlive()) {
-                        serverCore.this.log.logDebug("Waiting for session thread '" + threadList[currentThreadIdx].getName() + "' to finish shutdown.");
-                        try { 
-                            threadList[currentThreadIdx].join(500); 
-                        } catch (Exception ex) {}
+                    Thread currentThread = threadList[currentThreadIdx];
+                    if (currentThread.isAlive()) {
+                        serverCore.this.log.logDebug("Waiting for session thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
+                        try { currentThread.join(500); } catch (InterruptedException ex) {}
                     }
                 }
-            } catch (InterruptedException e) {
-                serverCore.this.log.logWarning("Interruption while trying to shutdown all remaining session threads.");  
+                
+                serverCore.this.log.logInfo("Shutdown of remaining session threads finish.");
             } catch (Exception e) {
                 serverCore.this.log.logError("Unexpected error while trying to shutdown all remaining session threads.",e);
             }
             
-            this.isClosed = true;
             super.close();  
         }
         
@@ -714,7 +723,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     
     	public void log(boolean outgoing, String request) {
     	    serverCore.this.log.logDebug(userAddress.getHostAddress() + "/" + this.identity + " " +
-    		     "[" + serverCore.this.theSessionPool.getNumActive() + ", " + this.commandCounter +
+    		     "[" + ((serverCore.this.theSessionPool.isClosed)? -1 : serverCore.this.theSessionPool.getNumActive()) + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
     	}

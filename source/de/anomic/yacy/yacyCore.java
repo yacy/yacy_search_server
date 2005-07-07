@@ -478,27 +478,40 @@ public class yacyCore {
                 yacyCore.publishThreadGroup.interrupt();
                 
                 // waiting some time for the publishThreads to finish execution
-                try { Thread.sleep(500); } catch (Exception ex) {}
+                try { Thread.sleep(500); } catch (InterruptedException ex) {}
                 
+                // getting the amount of remaining publishing threads
                 int threadCount  = yacyCore.publishThreadGroup.activeCount();    
                 Thread[] threadList = new Thread[threadCount];     
                 threadCount = yacyCore.publishThreadGroup.enumerate(threadList);
                 
                 // we need to use a timeout here because of missing interruptable session threads ...
+                log.logDebug("publish: Trying to abort " + yacyCore.publishThreadGroup.activeCount() +  " remaining publishing threads ...");
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     Thread currentThread = threadList[currentThreadIdx];
                     
                     if (currentThread.isAlive()) {
-                        log.logInfo("publish: Closing socket of publishing thread '" + threadList[currentThreadIdx].getName() + "'.");
+                        log.logDebug("publish: Closing socket of publishing thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
                         httpc.closeOpenSockets(currentThread);
-                        
-                        log.logInfo("publish: Waiting for remaining publishing thread '" + threadList[currentThreadIdx].getName() + "' to finish shutdown");
-                        try { threadList[currentThreadIdx].join(500); }catch (Exception ex) {}
                     }
                 }
+                
+                // we need to use a timeout here because of missing interruptable session threads ...
+                log.logDebug("publish: Waiting for " + yacyCore.publishThreadGroup.activeCount() +  " remaining publishing threads to finish shutdown ...");
+                for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
+                    Thread currentThread = threadList[currentThreadIdx];
+                    
+                    if (currentThread.isAlive()) {
+                        log.logDebug("publish: Waiting for remaining publishing thread '" + currentThread.getName() + "' to finish shutdown");
+                        try { currentThread.join(500); }catch (InterruptedException ex) {}
+                    }
+                }       
+                
+                log.logInfo("publish: Shutdown off all remaining publishing thread finished.");
+                
             }
             catch (Exception ee) {
-                log.logWarning("publish: Interruption while trying to shutdown all remaining publishing threads.");  
+                log.logWarning("publish: Unexpected error while trying to shutdown all remaining publishing threads.",e);  
             }
             
             return 0;

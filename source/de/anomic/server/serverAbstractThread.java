@@ -225,6 +225,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 // do job
                 timestamp = System.currentTimeMillis();
                 isBusy = this.job();
+                if ((!running) || (this.isInterrupted())) break;
                 busytime += (isBusy) ? System.currentTimeMillis() - timestamp : 0;
                 // interrupt loop if this is supposed to be a one-time job
                 if ((this.idlePause < 0) || (this.busyPause < 0)) break; // for one-time jobs
@@ -253,14 +254,6 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     }
     
     private void ratz(long millis) {
-//        int loop = 1;
-//        while (millis > 1000) {
-//            loop = loop * 2;
-//            millis = millis / 2;
-//        }
-//        while ((loop-- > 0) && (running)) {
-//            try {this.sleep(millis);} catch (InterruptedException e) {}
-//        }
         try {
             if (this.syncObject != null) {
                 synchronized(this.syncObject) {
