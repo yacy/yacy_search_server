@@ -47,6 +47,7 @@ import java.net.URL;
 public final class plasmaCrawlLoaderMessage {
     public final int crawlingPriority;
     public final URL url;
+    public final String name;
     public final String referer;
     public final String initiator;
     public final int depth;
@@ -54,13 +55,15 @@ public final class plasmaCrawlLoaderMessage {
     
     // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
     public plasmaCrawlLoaderMessage(
-            URL url, 
+            URL url,
+            String name,
             String referer, 
             String initiator, 
             int depth, 
             plasmaCrawlProfile.entry profile,
             int crawlingPriority) {
         this.url = url;
+        this.name = name;
         this.referer = referer;
         this.initiator = initiator;
         this.depth = depth;

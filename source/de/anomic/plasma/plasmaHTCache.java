@@ -431,13 +431,12 @@ public final class plasmaHTCache {
 		(urlString.toLowerCase().indexOf(".exe") >= 0));
     }
 
-    public Entry newEntry(Date initDate, int depth, URL url,
+    public Entry newEntry(Date initDate, int depth, URL url, String name,
 			  httpHeader requestHeader,
 			  String responseStatus, httpHeader responseHeader,
                           String initiator,
                           plasmaCrawlProfile.entry profile) {
-        //System.out.println("NEW ENTRY: " + url.toString()); // DEBUG
-	return new Entry(initDate, depth, url, requestHeader, responseStatus, responseHeader, initiator, profile);
+        return new Entry(initDate, depth, url, name, requestHeader, responseStatus, responseHeader, initiator, profile);
     }
 
     public final class Entry {
@@ -451,6 +450,7 @@ public final class plasmaHTCache {
 	public File                     cacheFile;      // the cache file
 	public byte[]                   cacheArray;     // or the cache as byte-array
 	public URL                      url;
+        public String                   name;           // the name of the link, read as anchor from an <a>-tag
 	public String                   nomalizedURLHash;
 	public String                   nomalizedURLString;
 	public int                      status;         // cache load/hit/stale etc status
@@ -459,10 +459,9 @@ public final class plasmaHTCache {
 	public String                   language;
         public plasmaCrawlProfile.entry profile;
         private String                  initiator;
-        public htmlFilterContentScraper scraper;
 
 	
-	public Entry(Date initDate, int depth, URL url,
+	public Entry(Date initDate, int depth, URL url, String name,
 		     httpHeader requestHeader,
 		     String responseStatus, httpHeader responseHeader,
                      String initiator,
@@ -476,6 +475,7 @@ public final class plasmaHTCache {
                 System.out.println("internal error at httpdProxyCache.Entry: " + e);
                 System.exit(-1);
             }
+            this.name           = name;
 	    this.cacheFile      = getCachePath(this.url);
 	    this.nomalizedURLHash        = plasmaCrawlLURL.urlHash(nomalizedURLString);
 	                 
@@ -510,9 +510,11 @@ public final class plasmaHTCache {
 	    // to be defined later:
 	    this.cacheArray     = null;
 	    this.status         = CACHE_UNFILLED;
-            this.scraper        = null;
 	}
 	
+        public String name() {
+            return name;
+        }        
         public String initiator() {
             return initiator;
         }

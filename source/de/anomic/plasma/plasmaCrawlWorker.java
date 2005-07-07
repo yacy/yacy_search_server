@@ -71,6 +71,7 @@ public final class plasmaCrawlWorker extends Thread {
     
     public plasmaCrawlLoaderMessage theMsg;
     private URL url;
+    private String name;
     private String referer;
     private String initiator;
     private int depth;
@@ -125,6 +126,7 @@ public final class plasmaCrawlWorker extends Thread {
         this.theMsg = theMsg;
         
         this.url = theMsg.url;
+        this.name = theMsg.name;
         this.referer = theMsg.referer;
         this.initiator = theMsg.initiator;
         this.depth = theMsg.depth;
@@ -198,7 +200,7 @@ public final class plasmaCrawlWorker extends Thread {
     public void execute() throws IOException {
         try {
             this.setName(this.threadBaseName + "_" + this.url);
-            load(this.url, this.referer, this.initiator, this.depth, this.profile,
+            load(this.url, this.name, this.referer, this.initiator, this.depth, this.profile,
                  this.socketTimeout, this.remoteProxyHost, this.remoteProxyPort, this.remoteProxyUse,
                  this.cacheManager, this.log);
             
@@ -220,6 +222,7 @@ public final class plasmaCrawlWorker extends Thread {
 
     public static void load(
             URL url, 
+            String name,
             String referer, 
             String initiator, 
             int depth, 
@@ -232,6 +235,7 @@ public final class plasmaCrawlWorker extends Thread {
             serverLog log
         ) throws IOException {
         load(url,
+             name,
              referer,
              initiator,
              depth, 
@@ -248,7 +252,8 @@ public final class plasmaCrawlWorker extends Thread {
     }
     
     private static void load(
-            URL url, 
+            URL url,
+            String name,
             String referer, 
             String initiator, 
             int depth, 
@@ -300,7 +305,7 @@ public final class plasmaCrawlWorker extends Thread {
                 long contentLength = res.responseHeader.contentLength();
                 
                 // reserve cache entry
-                plasmaHTCache.Entry htCache = cacheManager.newEntry(requestDate, depth, url, requestHeader, res.status, res.responseHeader, initiator, profile);
+                plasmaHTCache.Entry htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);
                 
                 // request has been placed and result has been returned. work off response
                 File cacheFile = cacheManager.getCachePath(url);
@@ -355,6 +360,7 @@ public final class plasmaCrawlWorker extends Thread {
                         log.logInfo("Redirection detected ('" + res.status + "') for url " + url.toString() + 
                                     "\nRedirecting request to: " + redirectionUrl);
                         load(redirectionUrl,
+                             name,
                              referer,
                              initiator,
                              depth, 
@@ -383,18 +389,19 @@ public final class plasmaCrawlWorker extends Thread {
                 log.logWarning("Problems detected while receiving gzip encoded content from '" + url.toString() + 
                                "'. Retrying request without using gzip content encoding.");
                 load(url,
-                        referer,
-                        initiator,
-                        depth, 
-                        profile,
-                        socketTimeout, 
-                        remoteProxyHost, 
-                        remoteProxyPort, 
-                        remoteProxyUse, 
-                        cacheManager, 
-                        log, 
-                        0,
-                        false
+                     name,
+                     referer,
+                     initiator,
+                     depth,
+                     profile,
+                     socketTimeout,
+                     remoteProxyHost,
+                     remoteProxyPort,
+                     remoteProxyUse,
+                     cacheManager,
+                     log,
+                     0,
+                     false
                    );                
             } else {
                 // this may happen if the targeted host does not exist or anything with the

@@ -76,8 +76,6 @@ public class plasmaSwitchboardQueue {
                 yacySeedDB.commonHashLength,
                 plasmaURL.urlCrawlDepthLength,
                 plasmaURL.urlCrawlProfileHandleLength,
-                plasmaURL.urlForkFactorLength,
-                plasmaURL.urlForkFactorLength,
                 plasmaURL.urlDescrLength
             });
         
@@ -96,8 +94,6 @@ public class plasmaSwitchboardQueue {
             (entry.initiator == null) ? plasmaURL.dummyHash.getBytes() : entry.initiator.getBytes(),
             serverCodings.enhancedCoder.encodeBase64Long((long) entry.depth, plasmaURL.urlCrawlDepthLength).getBytes(),
             (entry.profileHandle == null) ? plasmaURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
-            serverCodings.enhancedCoder.encodeBase64Long((long) entry.hrefCount, plasmaURL.urlForkFactorLength).getBytes(),
-            serverCodings.enhancedCoder.encodeBase64Long((long) entry.imageCount, plasmaURL.urlForkFactorLength).getBytes(),
             (entry.anchorName == null) ? "-".getBytes() : entry.anchorName.getBytes()
         });
     }
@@ -126,9 +122,8 @@ public class plasmaSwitchboardQueue {
     }
     
     public Entry newEntry(URL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
-                     String initiator, int depth, String profilehandle,
-                     int hrefCount, int imageCount, String anchorName) {
-        return new Entry(url, referrer, ifModifiedSince, requestWithCookie, initiator, depth, profilehandle, hrefCount, imageCount, anchorName);
+                     String initiator, int depth, String profilehandle, String anchorName) {
+        return new Entry(url, referrer, ifModifiedSince, requestWithCookie, initiator, depth, profilehandle, anchorName);
     }
     
     public class Entry {
@@ -139,8 +134,6 @@ public class plasmaSwitchboardQueue {
         private String initiator;     // yacySeedDB.commonHashLength
         private int depth;            // plasmaURL.urlCrawlDepthLength
         private String profileHandle; // plasmaURL.urlCrawlProfileHandleLength
-        private int hrefCount;        // plasmaURL.urlForkFactorLength
-        private int imageCount;        // plasmaURL.urlForkFactorLength
         private String anchorName;    // plasmaURL.urlDescrLength
         
         // computed values
@@ -149,8 +142,7 @@ public class plasmaSwitchboardQueue {
         private URL referrerURL;
         
         public Entry(URL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
-                     String initiator, int depth, String profileHandle,
-                     int hrefCount, int imageCount, String anchorName) {
+                     String initiator, int depth, String profileHandle, String anchorName) {
             this.url = url;
             this.referrerHash = referrer;
             this.ifModifiedSince = ifModifiedSince;
@@ -158,8 +150,6 @@ public class plasmaSwitchboardQueue {
             this.initiator = initiator;
             this.depth = depth;
             this.profileHandle = profileHandle;
-            this.hrefCount = hrefCount;
-            this.imageCount = imageCount;
             this.anchorName = anchorName;
             
             this.profileEntry = null;
@@ -181,9 +171,7 @@ public class plasmaSwitchboardQueue {
             this.initiator = new String(row[4]);
             this.depth = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(row[5]));
             this.profileHandle = new String(row[6]);
-            this.hrefCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(row[7]));
-            this.imageCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(row[8]));
-            this.anchorName = new String(row[9]);
+            this.anchorName = new String(row[7]);
             
             this.profileEntry = null;
             this.responseHeader = null;
@@ -247,14 +235,6 @@ public class plasmaSwitchboardQueue {
                 referrerURL = lurls.getEntry(referrerHash).url();
             }
             return referrerURL;
-        }
-
-        public int forkFactor() {
-            return hrefCount;
-        }
-        
-        public int images() {
-            return imageCount;
         }
         
         public String anchorName() {

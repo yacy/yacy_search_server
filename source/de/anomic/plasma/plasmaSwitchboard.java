@@ -264,7 +264,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.parser = new plasmaParser();
         
         // initialize switchboard queue
-        sbQueue = new plasmaSwitchboardQueue(this.cacheManager, urlPool.loadedURL, new File(plasmaPath, "switchboardQueue0.stack"), 10, profiles);
+        sbQueue = new plasmaSwitchboardQueue(this.cacheManager, urlPool.loadedURL, new File(plasmaPath, "switchboardQueue1.stack"), 10, profiles);
         
         // define an extension-blacklist
         log.logSystem("Parser: Initializing Extension Mappings for Media/Parser");
@@ -453,8 +453,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	    cacheManager.push(entry);
     }
 	
-    
-    
     synchronized public boolean htEntryStoreProcess(plasmaHTCache.Entry entry) throws IOException {
         
         if (entry == null) return false;
@@ -480,9 +478,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             enQueue(sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
                     entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
                     entry.initiator(), entry.depth, entry.profile.handle(),
-                    (entry.scraper == null) ? 0 : entry.scraper.getAnchors().size(),
-                    (entry.scraper == null) ? 0 : entry.scraper.getImages().size(),
-                    (entry.scraper == null) ? "" : entry.scraper.getHeadline()
+                    entry.name()
                     ));
         } else if (entry.status == plasmaHTCache.CACHE_PASSING) {
             // even if the file should not be stored in the cache, it can be used to be indexed
@@ -492,9 +488,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             enQueue(sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
                     entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
                     entry.initiator(), entry.depth, entry.profile.handle(),
-                    (entry.scraper == null) ? 0 : entry.scraper.getAnchors().size(),
-                    (entry.scraper == null) ? 0 : entry.scraper.getImages().size(),
-                    (entry.scraper == null) ? "" : entry.scraper.getHeadline()
+                    entry.name()
                     ));
         }
         
@@ -504,9 +498,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             case plasmaHTCache.CACHE_UNFILLED:
                 log.logInfo("CACHE UNFILLED: " + entry.cacheFile); break;
             case plasmaHTCache.CACHE_FILL:
-                log.logInfo("CACHE FILL: " + entry.cacheFile +
-                        ((entry.cacheArray == null) ? "" : " (cacheArray is filled)") +
-                        ((entry.scraper    == null) ? "" : " (scraper is filled)"));
+                log.logInfo("CACHE FILL: " + entry.cacheFile + ((entry.cacheArray == null) ? "" : " (cacheArray is filled)"));
                 break;
             case plasmaHTCache.CACHE_HIT:
                 log.logInfo("CACHE HIT: " + entry.cacheFile); break;
@@ -574,26 +566,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             profiles.close();
             parser.close();            
             cacheManager.close();
+            sbQueue.close();
 	} catch (IOException e) {}
         log.logSystem("SWITCHBOARD SHUTDOWN TERMINATED");
     }
-
-    /*
-    public int totalSize() {
-	return processStack.size() + cacheLoader.size() + noticeURL.stackSize();
-    }
-    */
     
     public int queueSize() {
         return sbQueue.size();
         //return processStack.size() + cacheLoader.size() + noticeURL.stackSize();
     }
-    
-    /*
-    public int lUrlSize() {
-	return urlPool.loadedURL.size();
-    }
-    */
     
     public int cacheSizeMin() {
 	return wordIndex.size();
@@ -812,13 +793,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // alternatively do a local crawl
-        if (sbQueue.size() >= crawlSlots) {
-            log.logDebug("LimitCrawl: too many processes in queue, dismissed (" +
+        if (sbQueue.size() >= indexingSlots) {
+            log.logDebug("LimitCrawl: too many processes in indexing queue, dismissed (" +
                     "sbQueueSize=" + sbQueue.size() + ")");
             return false;
         }
         if (cacheLoader.size() >= crawlSlots) {
-            log.logDebug("LimitCrawl: too many loader in queue, dismissed (" +
+            log.logDebug("LimitCrawl: too many processes in loader queue, dismissed (" +
                     "cacheLoader=" + cacheLoader.size() + ")");
             return false;
         }
@@ -924,7 +905,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // parse content
             plasmaParserDocument document = null;
-            
             if ((plasmaParser.supportedFileExt(entry.url())) ||
                 ((entry.responseHeader() != null) &&
                  (plasmaParser.supportedMimeTypesContains(entry.responseHeader().mime())))) {
@@ -944,8 +924,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 return;                
             }
             
-            Date loadDate = entry.responseHeader().lastModified();
-            if (loadDate == null) loadDate = entry.responseHeader().date();
+            Date loadDate = null;
+            if (entry.responseHeader() != null) {
+                loadDate = entry.responseHeader().lastModified();
+                if (loadDate == null) loadDate = entry.responseHeader().date();
+            }
             if (loadDate == null) loadDate = new Date();
             
             // put anchors on crawl stack
@@ -1055,7 +1038,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             
             // explicit delete/free resources
+            if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) cacheManager.deleteFile(entry.url());
             document = null; entry = null;
+            
+            
         } catch (IOException e) {
             log.logError("ERROR in plasmaSwitchboard.process(): " + e.toString());
         }
@@ -1166,7 +1152,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logInfo(stats + ": urlEntry=null");
             return;
         }
-        cacheLoader.loadParallel(urlEntry.url(), urlEntry.referrerHash(), urlEntry.initiator(), urlEntry.depth(), profile);
+        cacheLoader.loadParallel(urlEntry.url(), urlEntry.name(), urlEntry.referrerHash(), urlEntry.initiator(), urlEntry.depth(), profile);
         log.logInfo(stats + ": enqueued for load " + urlEntry.url());
         return;
     }

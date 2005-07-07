@@ -443,6 +443,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     requestDate,                     // init date 
                     0,                               // crawling depth
                     url,                             // url
+                    "",                              // name of the url is unknown
                     requestHeader,                   // request headers
                     "200 OK",                        // request status
                     cachedResponseHeader,            // response headers
@@ -486,7 +487,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         GZIPOutputStream gzippedOut = null; 
         httpChunkedOutputStream chunkedOut = null;
         OutputStream hfos = null;
-        htmlFilterContentScraper scraper = null;     
         
         httpc remote = null;
         httpc.response res = null;                
@@ -568,7 +568,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             plasmaHTCache.Entry cacheEntry = cacheManager.newEntry(
                     requestDate, 
                     0, 
-                    url, 
+                    url,
+                    "",
                     requestHeader, 
                     res.status, 
                     res.responseHeader, 
@@ -576,33 +577,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     switchboard.defaultProxyProfile
             );
             
-            // handle file types
-            if (((ext == null) || (!(plasmaParser.mediaExtContains(ext)))) &&
-                    (plasmaParser.realtimeParsableMimeTypesContains(res.responseHeader.mime()))) {
-                // this is a file that is a possible candidate for parsing by the indexer
-                if (transformer.isIdentityTransformer()) {
-                    this.theLogger.logDebug("create passthrough (parse candidate) for url " + url);
-                    // no transformation, only passthrough
-                    // this isng especially the case if the bluelist is empty
-                    // in that case, the content is not scraped here but later
-                    hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
-                } else {
-                    // make a scraper and transformer
-                    this.theLogger.logDebug("create scraper for url " + url);
-                    scraper = new htmlFilterContentScraper(url);
-                    hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), scraper, transformer, (ext.length() == 0));
-                    if (((htmlFilterOutputStream) hfos).binarySuspect()) {
-                        scraper = null; // forget it, may be rubbish
-                        this.theLogger.logDebug("Content of " + url + " is probably binary. deleted scraper.");
-                    }
-                    cacheEntry.scraper = scraper;
-                }
-            } else {
-                this.theLogger.logDebug("Resource " + url + " has wrong extension (" + ext + ") or wrong mime-type (" + res.responseHeader.mime() + "). not scraped");
-                scraper = null;
-                hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
-                cacheEntry.scraper = scraper;
-            }
+            // make output stream
+            hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
             
             // handle incoming cookies
             handleIncomingCookies(res.responseHeader, host, ip);

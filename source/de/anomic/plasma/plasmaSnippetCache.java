@@ -354,7 +354,8 @@ public class plasmaSnippetCache {
     
     private void loadResourceFromWeb(URL url, int socketTimeout) throws IOException {
         plasmaCrawlWorker.load(
-            url, 
+            url,
+            "",
             null, 
             null, 
             0, 

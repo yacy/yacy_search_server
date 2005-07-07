@@ -132,15 +132,15 @@ public final class plasmaCrawlLoader extends Thread {
     
     public void close() {
         try {
-	        // setting the stop flag to true
-	        this.stopped = true;
-	        
-	        // interrupting the plasmaCrawlLoader
-	        this.interrupt();
-	        
-	        // waiting for the thread to finish ...
+            // setting the stop flag to true
+            this.stopped = true;
+            
+            // interrupting the plasmaCrawlLoader
+            this.interrupt();
+            
+            // waiting for the thread to finish ...
             this.log.logInfo("Waiting for plasmaCrawlLoader shutdown ...");
-	        this.join(5000);  
+            this.join(5000);
         } catch (Exception e) {
             // we where interrupted while waiting for the crawlLoader Thread to finish
         }
@@ -186,6 +186,7 @@ public final class plasmaCrawlLoader extends Thread {
        
     public void loadParallel(
             URL url, 
+            String name,
             String referer, 
             String initiator, 
             int depth, 
@@ -195,7 +196,7 @@ public final class plasmaCrawlLoader extends Thread {
             int crawlingPriority = 5;
             
             // creating a new crawler queue object
-            plasmaCrawlLoaderMessage theMsg = new plasmaCrawlLoaderMessage(url, referer,initiator,depth,profile, crawlingPriority);
+            plasmaCrawlLoaderMessage theMsg = new plasmaCrawlLoaderMessage(url, name, referer, initiator, depth, profile, crawlingPriority);
             
             // adding the message to the queue
             try  {
@@ -287,8 +288,7 @@ class CrawlerMessageQueue {
 }
 
 
-final class CrawlerPool extends GenericObjectPool 
-{
+final class CrawlerPool extends GenericObjectPool {
     private final ThreadGroup theThreadGroup;
     public boolean isClosed = false;
     

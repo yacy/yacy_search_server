@@ -100,7 +100,6 @@ public class IndexCreateIndexingQueue_p {
                     prop.put("indexing-queue_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("indexing-queue_list_"+i+"_depth", pcentry.depth());
                     prop.put("indexing-queue_list_"+i+"_modified", (pcentry.responseHeader() == null) ? "null" : daydate(pcentry.responseHeader().lastModified()));
-                    prop.put("indexing-queue_list_"+i+"_href", pcentry.forkFactor());
                     prop.put("indexing-queue_list_"+i+"_anchor", pcentry.anchorName());
                     prop.put("indexing-queue_list_"+i+"_url", pcentry.normalizedURLString());
                     dark = !dark;
