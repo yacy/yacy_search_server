@@ -43,20 +43,30 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
@@ -104,49 +114,112 @@ public class IndexCreate_p {
                     boolean xpstopw = ((String) post.get("xpstopw", "")).equals("on");
                     env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
                     
-                    String crawlingStart = (String) post.get("crawlingURL");
-                    if (!(crawlingStart.startsWith("http"))) crawlingStart = "http://" + crawlingStart;
-                    
-                    // check if url is proper
-                    URL crawlingStartURL = null;
-                    try {
-                        crawlingStartURL = new URL(crawlingStart);
-                    } catch (MalformedURLException e) {
-                        crawlingStartURL = null;
-                    }
-                    
-                    // check if pattern matches
-                    if ((crawlingStartURL == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
-                        // print error message
-                        prop.put("error", 4); //crawlfilter does not match url
-                        prop.put("error_newcrawlingfilter", newcrawlingfilter);
-                        prop.put("error_crawlingStart", crawlingStart);
-                    } else try {
-                        // stack request
-                        // first delete old entry, if exists
-                        String urlhash = plasmaURL.urlHash(crawlingStart);
-                        switchboard.urlPool.loadedURL.remove(urlhash);
-                        switchboard.urlPool.noticeURL.remove(urlhash);
+                    String crawlingMode = post.get("crawlingMode","url");
+                    if (crawlingMode.equals("url")) {
+                        String crawlingStart = (String) post.get("crawlingURL");
+                        if (!(crawlingStart.startsWith("http"))) crawlingStart = "http://" + crawlingStart;
                         
-                        // stack url
-                        String reasonString = switchboard.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0,
-                        switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw));
-                        
-                        if (reasonString == null) {
-                            // liftoff!
-                            prop.put("info", 2);//start msg
-                            prop.put("info_crawlingURL", ((String) post.get("crawlingURL")));
-                        } else {
-                            prop.put("error", 5); //Crawling failed
-                            prop.put("error_crawlingURL", ((String) post.get("crawlingURL")));
-                            prop.put("error_reasonString", reasonString);
+                        // check if url is proper
+                        URL crawlingStartURL = null;
+                        try {
+                            crawlingStartURL = new URL(crawlingStart);
+                        } catch (MalformedURLException e) {
+                            crawlingStartURL = null;
                         }
-                    } catch (Exception e) {
-                        // mist
-                        prop.put("error", 6);//Error with url
-                        prop.put("error_crawlingStart", crawlingStart);
-                        prop.put("error_error", e.getMessage());
-                        e.printStackTrace();
+                        
+                        // check if pattern matches
+                        if ((crawlingStartURL == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
+                            // print error message
+                            prop.put("error", 4); //crawlfilter does not match url
+                            prop.put("error_newcrawlingfilter", newcrawlingfilter);
+                            prop.put("error_crawlingStart", crawlingStart);
+                        } else try {
+                            // stack request
+                            // first delete old entry, if exists
+                            String urlhash = plasmaURL.urlHash(crawlingStart);
+                            switchboard.urlPool.loadedURL.remove(urlhash);
+                            switchboard.urlPool.noticeURL.remove(urlhash);
+                            
+                            // stack url
+                            String reasonString = switchboard.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0,
+                            switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw));
+                            
+                            if (reasonString == null) {
+                                // liftoff!
+                                prop.put("info", 2);//start msg
+                                prop.put("info_crawlingURL", ((String) post.get("crawlingURL")));
+                            } else {
+                                prop.put("error", 5); //Crawling failed
+                                prop.put("error_crawlingURL", ((String) post.get("crawlingURL")));
+                                prop.put("error_reasonString", reasonString);
+                            }
+                        } catch (Exception e) {
+                            // mist
+                            prop.put("error", 6);//Error with url
+                            prop.put("error_crawlingStart", crawlingStart);
+                            prop.put("error_error", e.getMessage());
+                            e.printStackTrace();
+                        }                        
+                        
+                    } else if (crawlingMode.equals("file")) {                        
+                        if (post.containsKey("crawlingFile")) {
+                            // getting the name of the uploaded file
+                            String fileName = (String) post.get("crawlingFile");  
+                            try {                         
+                                File file = new File(fileName);
+                                
+                                // getting the content of the bookmark file
+                                byte[] fileContent = (byte[]) post.get("crawlingFile$file");
+                                
+                                // parsing the bookmark file and fetching the headline and contained links
+                                htmlFilterContentScraper scraper = new htmlFilterContentScraper(file.toURL());
+                                OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
+                                serverFileUtils.write(fileContent,os);
+                                os.close();
+                                
+                                String headline = scraper.getHeadline();
+                                HashMap hyperlinks = (HashMap) scraper.getAnchors();
+                                
+                                // creating a crawler profile
+                                plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, file.toURL().toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);                                
+                                
+                                // loop through the contained links
+                                Iterator interator = hyperlinks.entrySet().iterator();
+                                int c = 0;
+                                while (interator.hasNext()) {
+                                    Map.Entry e = (Map.Entry) interator.next();
+                                    String nexturlstring = (String) e.getKey();
+                                    
+                                    // generating an url object
+                                    URL nexturlURL = null;
+                                    try {
+                                        nexturlURL = new URL(nexturlstring);
+                                    } catch (MalformedURLException ex) {
+                                        nexturlURL = null;
+                                        c++;
+                                        continue;
+                                    }                                    
+                                    
+                                    // enqueuing the url for crawling
+                                    String rejectReason = switchboard.stackCrawl(nexturlstring, null, yacyCore.seedDB.mySeed.hash, (String)e.getValue(), new Date(), 1, profile);                                    
+                                    
+                                    // if something failed add the url into the errorURL list
+                                    if (rejectReason == null) {
+                                        c++;
+                                    } else {
+                                        switchboard.urlPool.errorURL.newEntry(nexturlURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
+                                       (String) e.getValue(), rejectReason, new bitfield(plasmaURL.urlFlagLength), false);
+                                    }
+                                }                             
+                                
+                            } catch (Exception e) {
+                                // mist
+                                prop.put("error", 7);//Error with file
+                                prop.put("error_crawlingStart", fileName);
+                                prop.put("error_error", e.getMessage());
+                                e.printStackTrace();                                
+                            }
+                        }                        
                     }
                 }
             }
