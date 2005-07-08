@@ -335,7 +335,9 @@ public final class plasmaCrawlWorker extends Thread {
                         FileOutputStream fos = null;
                         try {
                             fos = new FileOutputStream(cacheFile);
-                            htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
+                            res.writeContent(fos); // superfluous write to array
+                            htCache.cacheArray = null;
+                            //htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
                         } finally {
                             if (fos!=null)try{fos.close();}catch(Exception e){}
                         }

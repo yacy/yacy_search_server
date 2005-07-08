@@ -458,42 +458,27 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (entry == null) return false;
         
         // store response header
-        if ((entry.status == plasmaHTCache.CACHE_FILL) ||
-                (entry.status == plasmaHTCache.CACHE_STALE_RELOAD_GOOD) ||
-                (entry.status == plasmaHTCache.CACHE_STALE_RELOAD_BAD)) {
+        if (entry.responseHeader != null) {
             cacheManager.storeHeader(entry.nomalizedURLHash, entry.responseHeader);
+            log.logInfo("WROTE HEADER for " + entry.cacheFile);
         }
         
-        // work off unwritten files and undone parsing
-        String storeError = null;
-        if (((entry.status == plasmaHTCache.CACHE_FILL) || (entry.status == plasmaHTCache.CACHE_STALE_RELOAD_GOOD)) &&
-                ((storeError = entry.shallStoreCache()) == null)) {
-            
-            // write file if not written yet
-            if (entry.cacheArray != null)  {
-                cacheManager.writeFile(entry.url, entry.cacheArray);
-                log.logInfo("WRITE FILE (" + entry.cacheArray.length + " bytes) " + entry.cacheFile);
-            }
-            // enqueue for further crawling
-            enQueue(sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
-                    entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
-                    entry.initiator(), entry.depth, entry.profile.handle(),
-                    entry.name()
-                    ));
-        } else if (entry.status == plasmaHTCache.CACHE_PASSING) {
-            // even if the file should not be stored in the cache, it can be used to be indexed
-            if (storeError != null) log.logDebug("NOT STORED " + entry.cacheFile + ":" + storeError);
-            
-            // enqueue for further crawling
-            enQueue(sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
-                    entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
-                    entry.initiator(), entry.depth, entry.profile.handle(),
-                    entry.name()
-                    ));
+        // work off unwritten files
+        if (entry.cacheArray != null)  {
+            cacheManager.writeFile(entry.url, entry.cacheArray);
+            log.logInfo("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
         }
+
+        // enqueue for further crawling
+        enQueue(sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
+                entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
+                entry.initiator(), entry.depth, entry.profile.handle(),
+                entry.name()
+        ));
         
         // write log
-        
+
+        /*
         switch (entry.status) {
             case plasmaHTCache.CACHE_UNFILLED:
                 log.logInfo("CACHE UNFILLED: " + entry.cacheFile); break;
@@ -513,6 +498,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             default:
                 log.logInfo("CACHE STATE UNKNOWN: " + entry.cacheFile); break;
         }
+         */
         return true;
     }
     
