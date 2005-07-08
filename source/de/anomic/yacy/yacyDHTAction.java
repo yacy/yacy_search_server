@@ -177,6 +177,7 @@ public class yacyDHTAction implements yacyPeerAction {
             while (se.hasMoreElements()) {
                 s = (yacySeed) se.nextElement();
 		if (s == null) return null;
+                s.available = seedCrawlReady.getScore(s.hash);
                 if (available) {
                     if (seedCrawlReady.getScore(s.hash) < yacyCore.yacyTime()) return s;
                 } else {

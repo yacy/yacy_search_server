@@ -329,7 +329,7 @@ public final class plasmaCrawlWorker extends Thread {
                         remote.close();
                         log.logInfo("REJECTED WRONG MIME TYPE " + res.responseHeader.mime() + " for url " + url.toString());
                         htCache.status = plasmaHTCache.CACHE_UNFILLED;
-                    } else if ((profile == null) || ((profile.storeHTCache()) && ((error = htCache.shallStoreCache()) == null))) {
+                    } else {
                         // we write the new cache entry to file system directly
                         cacheFile.getParentFile().mkdirs();
                         FileOutputStream fos = null;
@@ -340,11 +340,6 @@ public final class plasmaCrawlWorker extends Thread {
                             if (fos!=null)try{fos.close();}catch(Exception e){}
                         }
                         htCache.status = plasmaHTCache.CACHE_FILL;
-                    } else {
-                        if (error != null) log.logDebug("CRAWLER NOT STORED RESOURCE " + url.toString() + ": " + error);
-                        // anyway, the content still lives in the content scraper
-                        htCache.cacheArray = res.writeContent(null); // writes only into cacheArray
-                        htCache.status = plasmaHTCache.CACHE_PASSING;
                     }
                     // enQueue new entry with response header
                     if (profile != null) {
