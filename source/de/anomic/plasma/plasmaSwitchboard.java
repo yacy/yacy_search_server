@@ -465,8 +465,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // work off unwritten files
         if (entry.cacheArray != null)  {
+            String error = entry.shallStoreCache();
+            if (error == null) {
             cacheManager.writeFile(entry.url, entry.cacheArray);
-            log.logInfo("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
+                log.logInfo("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
+            } else {
+                log.logInfo("WRITE OF FILE " + entry.cacheFile + " FORBIDDEN: " + error);
+            }
+        } else {
+            log.logInfo("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
         }
 
         // enqueue for further crawling
