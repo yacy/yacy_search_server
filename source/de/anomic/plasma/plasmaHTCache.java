@@ -86,6 +86,7 @@ public final class plasmaHTCache {
     public  final File cachePath;
     public  static serverLog log;
 
+    /*
     public static final int CACHE_UNFILLED          = 0; // default case without assignment
     public static final int CACHE_FILL              = 1; // this means: update == true
     public static final int CACHE_HIT               = 2; // the best case: reading from Cache
@@ -93,7 +94,8 @@ public final class plasmaHTCache {
     public static final int CACHE_STALE_RELOAD_GOOD = 4; // this means: update == true
     public static final int CACHE_STALE_RELOAD_BAD  = 5; // this updates only the responseHeader, not the content
     public static final int CACHE_PASSING           = 6; // does not touch cache, just passing
-
+    */
+    
     public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb) {
 	//this.switchboard = switchboard;
         
@@ -156,8 +158,7 @@ public final class plasmaHTCache {
         responseHeaderDB.set(urlHash, responseHeader);
     }
     
-    public boolean deleteFile(URL url) {
-        File file = getCachePath(url);
+    private boolean deleteFile(File file) {
         if (file.exists()) {
             currCacheSize -= file.length();
             return file.delete();
@@ -166,18 +167,17 @@ public final class plasmaHTCache {
         }
     }
     
+    public boolean deleteFile(URL url) {
+        return deleteFile(getCachePath(url));
+    }
+    
     public boolean writeFile(URL url, byte[] array) {
         if (array == null) return false;
+        File file = getCachePath(url);
         try {
-            File file = getCachePath(url);
-            if (file.exists()) {
-                currCacheSize -= file.length();
-                file.delete();
-            }
+            deleteFile(file);
             file.getParentFile().mkdirs();
             serverFileUtils.write(array, file);
-            currCacheSize += file.length();
-            cacheAge.put(ageString(file.lastModified(), file), file);
         } catch (FileNotFoundException e) {
             // this is the case of a "(Not a directory)" error, which should be prohibited
             // by the shallStoreCache() property. However, sometimes the error still occurs
@@ -188,8 +188,16 @@ public final class plasmaHTCache {
             log.logError("File storage failed (IO error): " + e.getMessage());
             return false;
         }
-        cleanup();
+        writeFileAnnouncement(file);
         return true;
+    }
+    
+    public void writeFileAnnouncement(File file) {
+        if (file.exists()) {
+            currCacheSize += file.length();
+            cacheAge.put(ageString(file.lastModified(), file), file);
+            cleanup();
+        }
     }
     
     private void cleanup() {
@@ -509,7 +517,6 @@ public final class plasmaHTCache {
 
 	    // to be defined later:
 	    this.cacheArray     = null;
-	    this.status         = CACHE_UNFILLED;
 	}
 	
         public String name() {
@@ -534,10 +541,11 @@ public final class plasmaHTCache {
             }
         }
         
+        /*
 	public boolean update() {
 	    return ((status == CACHE_FILL) || (status == CACHE_STALE_RELOAD_GOOD));
 	}
-	
+	*/
 
 	// the following three methods for cache read/write granting shall be as loose as possible
 	// but also as strict as necessary to enable caching of most items

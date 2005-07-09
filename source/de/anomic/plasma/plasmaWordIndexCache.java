@@ -216,7 +216,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     addEntry(wordHash, wordEntry, creationTime);
                     urlCount++;
                     // protect against memory shortage
-                    while (rt.freeMemory() < 1000000) flushFromMem();
+                    while (rt.freeMemory() < 1000000) {flushFromMem(); java.lang.System.gc();}
                     // write a log
                     if (System.currentTimeMillis() > messageTime) {
                         System.gc(); // for better statistic

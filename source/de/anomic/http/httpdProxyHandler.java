@@ -618,19 +618,19 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
-                        cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
+                        //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
                         cacheEntry.cacheArray = cacheArray;
                         cacheManager.push(cacheEntry);
                         conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     } else if (sizeBeforeDelete == cacheArray.length) {
                         // before we came here we deleted a cache entry
                         cacheArray = null;
-                        cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                        cacheManager.push(cacheEntry); // unnecessary update
+                        //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
+                        //cacheManager.push(cacheEntry); // unnecessary update
                         conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REF_FAIL_HIT");                                
                     } else {
                         // before we came here we deleted a cache entry
-                        cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
+                        //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
                         cacheEntry.cacheArray = cacheArray;
                         cacheManager.push(cacheEntry); // necessary update, write response header to cache
                         conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
@@ -644,17 +644,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     this.theLogger.logDebug("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
-                        cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
+                        //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
                         cacheManager.push(cacheEntry);
                         conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     } else if (sizeBeforeDelete == cacheFile.length()) {
                         // before we came here we deleted a cache entry
-                        cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
-                        cacheManager.push(cacheEntry); // unnecessary update
+                        //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_BAD;
+                        //cacheManager.push(cacheEntry); // unnecessary update
                         conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REF_FAIL_HIT");
                     } else {
                         // before we came here we deleted a cache entry
-                        cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
+                        //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
                         cacheManager.push(cacheEntry); // necessary update, write response header to cache
                         conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
                     }
@@ -668,12 +668,12 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
                 if (sizeBeforeDelete == -1) {
                     // no old file and no load. just data passing
-                    cacheEntry.status = plasmaHTCache.CACHE_PASSING;
-                    cacheManager.push(cacheEntry);
+                    //cacheEntry.status = plasmaHTCache.CACHE_PASSING;
+                    //cacheManager.push(cacheEntry);
                 } else {
                     // before we came here we deleted a cache entry
-                    cacheEntry.status = plasmaHTCache.CACHE_STALE_NO_RELOAD;
-                    cacheManager.push(cacheEntry);
+                    //cacheEntry.status = plasmaHTCache.CACHE_STALE_NO_RELOAD;
+                    //cacheManager.push(cacheEntry);
                 }
                 conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
             }

@@ -499,6 +499,13 @@ public final class httpc {
             return ((status.charAt(0) == '2') || (status.charAt(0) == '3'));
         }
         
+        public byte[] writeContent() throws IOException {
+            int contentLength = (int) this.responseHeader.contentLength();
+            serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
+            writeContentX(null, sbb, httpc.this.clientInput);
+            return sbb.getBytes();
+        }
+        
         public byte[] writeContent(OutputStream procOS) throws IOException {
             int contentLength = (int) this.responseHeader.contentLength();
             serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);

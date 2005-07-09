@@ -324,11 +324,11 @@ public final class plasmaCrawlWorker extends Thread {
                 File cacheFile = cacheManager.getCachePath(url);
                 try {
                     String error = null;
-                    if (!(plasmaParser.supportedMimeTypesContains(res.responseHeader.mime()))) {
+                    if ((!(plasmaParser.supportedMimeTypesContains(res.responseHeader.mime()))) &&
+                        (!(plasmaParser.supportedFileExt(url)))) {
                         // if the response has not the right file type then reject file
                         remote.close();
-                        log.logInfo("REJECTED WRONG MIME TYPE " + res.responseHeader.mime() + " for url " + url.toString());
-                        htCache.status = plasmaHTCache.CACHE_UNFILLED;
+                        log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for url " + url.toString());
                     } else {
                         // we write the new cache entry to file system directly
                         cacheFile.getParentFile().mkdirs();
@@ -337,11 +337,11 @@ public final class plasmaCrawlWorker extends Thread {
                             fos = new FileOutputStream(cacheFile);
                             res.writeContent(fos); // superfluous write to array
                             htCache.cacheArray = null;
+                            cacheManager.writeFileAnnouncement(cacheFile);
                             //htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
                         } finally {
                             if (fos!=null)try{fos.close();}catch(Exception e){}
                         }
-                        htCache.status = plasmaHTCache.CACHE_FILL;
                     }
                     // enQueue new entry with response header
                     if (profile != null) {
