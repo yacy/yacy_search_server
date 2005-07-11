@@ -81,6 +81,7 @@ public class IndexControl_p {
             prop.put("otherHosts", "");
             prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
             prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
+            prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "checked" : "");
             return prop; // be save
         }
         
@@ -113,6 +114,8 @@ public class IndexControl_p {
             boolean allowReceiveIndex = ((String) post.get("indexReceive", "")).equals("on");
             switchboard.setConfig("allowReceiveIndex", (allowReceiveIndex) ? "true" : "false");
             yacyCore.seedDB.mySeed.setFlagAcceptRemoteIndex(allowReceiveIndex);
+            boolean indexReceiveBlockBlacklist = ((String) post.get("indexReceiveBlockBlacklist", "")).equals("on");
+            switchboard.setConfig("indexReceiveBlockBlacklist", (indexReceiveBlockBlacklist) ? "true" : "false");
         }
         
         if (post.containsKey("keyhashdeleteall")) {
@@ -293,6 +296,7 @@ public class IndexControl_p {
         prop.put("ucount", "" + switchboard.urlPool.loadedURL.size());
 	prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
         prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
+        prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "checked" : "");
         // return rewrite properties
 	return prop;
     }

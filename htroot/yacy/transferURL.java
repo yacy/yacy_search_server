@@ -43,7 +43,11 @@
 // javac -classpath .:../classes transferRWI.java
 
 
+import java.net.URL;
+import java.net.MalformedURLException;
+
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -64,10 +68,12 @@ public class transferURL {
 	String key      = (String) post.get("key", "");      // transmission key
 	int urlc        = Integer.parseInt((String) post.get("urlc", ""));    // number of transported urls
         boolean granted = switchboard.getConfig("allowReceiveIndex", "false").equals("true");
-	
+	boolean blockBlacklist = switchboard.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
+
         // response values
         String result = "";
         String doublevalues = "0";
+        URL url;
         
         if (granted) {
             int received = 0;
@@ -76,9 +82,27 @@ public class transferURL {
             String urls;
             for (int i = 0; i < urlc; i++) {
                 urls = (String) post.get("url" + i);
-                if (urls != null) {
-                    switchboard.urlPool.loadedURL.newEntry(urls, true, iam, iam, 3);
-                    received++;
+                if (urls == null) {
+                    yacyCore.log.logDebug("transferURL: got null url-String from peer " + youare);
+                } else {
+                    try {
+                        url = new URL(urls);
+                    } catch (MalformedURLException e) {
+                        yacyCore.log.logDebug("transferURL: got malformed url-String '" + urls + "' from peer " + youare);
+                        urls = null;
+                        url = null;
+                    }
+                    if ((urls != null) && (blockBlacklist)) {
+                        if (switchboard.blacklistedURL(url.getHost().toLowerCase(), url.getPath())) {
+                            yacyCore.log.logDebug("transferURL: blocked blacklisted url '" + urls + "' from peer " + youare);
+                            urls = null;
+                        }
+                    }
+                    if (urls != null) {
+                        switchboard.urlPool.loadedURL.newEntry(urls, true, iam, iam, 3);
+                        yacyCore.log.logDebug("transferURL: received url '" + urls + "' from peer " + youare);
+                        received++;
+                    }
                 }
             }
             

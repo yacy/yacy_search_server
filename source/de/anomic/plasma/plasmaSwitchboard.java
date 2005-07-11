@@ -117,6 +117,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import de.anomic.data.messageBoard;
@@ -134,6 +135,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverFileUtils;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyClient;
@@ -152,6 +154,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     // couloured list management
     public static TreeSet blueList = null;
     public static TreeSet stopwords = null;
+    public static TreeMap blackListURLs = null;
     
     // storage management
     private File                   cachePath;
@@ -216,7 +219,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	    String f = getConfig("plasmaBlueList", null);
 	    if (f != null) blueList = loadList(new File(f)); else blueList= new TreeSet();
 	}
-
+        
+        // load the black-list / inspired by [AS]
+        String f = getConfig("proxyBlackListsActive", null);
+        if (f != null) {
+            blackListURLs = loadBlacklist("black", f, "/");
+            log.logSystem("loaded black-list from file " + f + ", " + blackListURLs.size() + " entries");
+        } else {
+            blackListURLs = new TreeMap();
+        }
+        log.logSystem("Proxy Handler Initialized");
+            
         // load stopwords
         if (stopwords == null) {
             stopwords = loadList(new File(rootPath, "yacy.stopwords"));
@@ -389,6 +402,42 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     }
     
+    public TreeMap loadBlacklist(String mapname, String filenames, String sep) {
+        TreeMap map = new TreeMap();
+        File listsPath = new File(getRootPath(), getConfig("listsPath", "DATA/LISTS"));
+        String filenamesarray[] = filenames.split(",");
+        
+        if(filenamesarray.length >0)
+            for(int i = 0; i < filenamesarray.length; i++)
+                map.putAll(serverFileUtils.loadMap(mapname, (new File(listsPath, filenamesarray[i])).toString(), sep));
+        return map;
+    }
+    
+    public boolean blacklistedURL(String hostlow, String path) {
+        if (blackListURLs == null) return false;
+        
+        String pp = ""; // path-pattern
+        
+        // first try to match the domain with wildcard '*'
+        // [TL] While "." are found within the string
+        int index = 0;
+        while ((index = hostlow.indexOf('.', index + 1)) != -1) {
+            if ((pp = (String) blackListURLs.get(hostlow.substring(0, index + 1) + "*")) != null) {
+                return ((pp.equals("*")) || (path.substring(1).matches(pp)));
+            }
+        }
+        index = hostlow.length();
+        while ((index = hostlow.lastIndexOf('.', index - 1)) != -1) {
+            if ((pp = (String) blackListURLs.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
+                return ((pp.equals("*")) || (path.substring(1).matches(pp)));
+            }
+        }
+        
+        // try to match without wildcard in domain
+        return (((pp = (String) blackListURLs.get(hostlow)) != null) &&
+                ((pp.equals("*")) || (path.substring(1).matches(pp))));
+    }
+        
     private static String ppRamString(int bytes) {
         if (bytes < 1024) return bytes + " KByte";
         bytes = bytes / 1024;

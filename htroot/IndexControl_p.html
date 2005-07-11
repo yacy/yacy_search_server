@@ -60,12 +60,20 @@ The local index currently consists of (at least) #[wcount]# reverse word indexes
 This enables automated, DHT-ruled Index Transmission to other peers. This is currently only activated for junior peers.</td>
 <td><input type="submit" name="setIndexDistribute" value="set"></td>
 </tr>
+</table>
 
+<table border="0" cellpadding="5" cellspacing="0">
 <tr valign="top" class="TableCellLight">
 <td width="100">Index Receive:</td>
 <td><input type="checkbox" name="indexReceive" align="top" #[indexReceiveChecked]#>
 Accept remote Index Transmissions. This works only if you are a senior peer. The DHT-rules do not work without this function.</td>
-<td><input type="submit" name="setIndexReceive" value="set"></td>
+</tr>
+<tr valign="top" class="TableCellLight">
+<td></td><td>&nbsp;&nbsp;<input type="checkbox" name="indexReceiveBlockBlacklist" align="top" #[indexReceiveBlockBlacklistChecked]#>
+If checked, your peer silently ignores transmitted URLs that match your blacklist</td>
+</tr>
+<tr valign="top" class="TableCellLight">
+<td></td><td><input type="submit" name="setIndexReceive" value="set"></td>
 </tr>
 </table>
 </form>

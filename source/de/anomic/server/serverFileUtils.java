@@ -48,7 +48,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.zip.GZIPOutputStream;
+import java.util.TreeMap;
+import java.util.HashSet;
 
 public final class serverFileUtils {
     
@@ -140,6 +144,43 @@ public final class serverFileUtils {
     
     public static void write(byte[] source, File dest) throws IOException {
         copy(new ByteArrayInputStream(source), dest);
+    }
+    
+    public static HashSet loadSet(String setname, String filename) {
+        HashSet set = new HashSet();
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if ((line.length() > 0) && (!(line.startsWith("#")))) set.add(line.trim().toLowerCase());
+            }
+            br.close();
+        } catch (IOException e) {
+        } finally {
+            if (br != null) try { br.close(); } catch (Exception e) {}
+        }
+        return set;
+    }
+    
+    public static TreeMap loadMap(String mapname, String filename, String sep) {
+        TreeMap map = new TreeMap();
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+            String line;
+            int pos;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0))
+                    map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
+            }
+        } catch (IOException e) {            
+        } finally {
+            if (br != null) try { br.close(); } catch (Exception e) {}
+        }
+        return map;
     }
     
 }

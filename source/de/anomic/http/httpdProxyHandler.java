@@ -106,12 +106,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     private static plasmaSwitchboard switchboard = null;
     private static plasmaHTCache  cacheManager = null;
     public  static HashSet yellowList = null;
-    public  static TreeMap blackListURLs = null;
     private static int timeout = 30000;
     private static boolean yacyTrigger = true;
-    
     public static boolean isTransparentProxy = false;
-    
     public static boolean remoteProxyUse = false;
     public static String remoteProxyHost = "";
     public static int remoteProxyPort = -1;
@@ -195,65 +192,13 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             String f;
             // load the yellow-list
             f = switchboard.getConfig("proxyYellowList", null);
-            if (f != null) yellowList = loadSet("yellow", f); else yellowList = new HashSet();
-            
-            // load the black-list / inspired by [AS]
-            f = switchboard.getConfig("proxyBlackListsActive", null);
-            if (f != null) blackListURLs = loadBlacklist("black", f, "/"); else blackListURLs = new TreeMap();
-            this.theLogger.logSystem("Proxy Handler Initialized");
-        }
-    }
-    
-    
-    private static HashSet loadSet(String setname, String filename) {
-        HashSet set = new HashSet();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-            String line;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if ((line.length() > 0) && (!(line.startsWith("#")))) set.add(line.trim().toLowerCase());
+            if (f != null) {
+                yellowList = serverFileUtils.loadSet("yellow", f); 
+                this.theLogger.logSystem("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
+            } else {
+                yellowList = new HashSet();
             }
-            br.close();
-            serverLog.logInfo("PROXY", "read " + setname + " set from file " + filename);
-        } catch (IOException e) {
-        } finally {
-            if (br != null) try { br.close(); } catch (Exception e) {}
         }
-        return set;
-    }
-    
-    private static TreeMap loadMap(String mapname, String filename, String sep) {
-        TreeMap map = new TreeMap();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-            String line;
-            int pos;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0))
-                    map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
-            }
-            serverLog.logInfo("PROXY", "read " + mapname + " map from file " + filename);
-        } catch (IOException e) {            
-        } finally {
-            if (br != null) try { br.close(); } catch (Exception e) {}
-        }
-        return map;
-    }
-    
-    public static TreeMap loadBlacklist(String mapname, String filenames, String sep) {
-        TreeMap map = new TreeMap();
-        if (switchboard == null) return map; // not initialized yet
-        File listsPath = new File(switchboard.getRootPath(), switchboard.getConfig("listsPath", "DATA/LISTS"));
-        String filenamesarray[] = filenames.split(",");
-        
-        if(filenamesarray.length >0)
-            for(int i = 0; i < filenamesarray.length; i++)
-                map.putAll(loadMap(mapname, (new File(listsPath, filenamesarray[i])).toString(), sep));
-        return map;
     }
     
     private static String domain(String host) {
@@ -269,31 +214,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             }
         }
         return domain;
-    }
-    
-    private boolean blacklistedURL(String hostlow, String path) {
-        if (blackListURLs == null) return false;
-        
-        String pp = ""; // path-pattern
-        
-        // first try to match the domain with wildcard '*'
-        // [TL] While "." are found within the string
-        int index = 0;
-        while ((index = hostlow.indexOf('.', index + 1)) != -1) {
-            if ((pp = (String) blackListURLs.get(hostlow.substring(0, index + 1) + "*")) != null) {
-                return ((pp.equals("*")) || (path.substring(1).matches(pp)));
-            }
-        }
-        index = hostlow.length();
-        while ((index = hostlow.lastIndexOf('.', index - 1)) != -1) {
-            if ((pp = (String) blackListURLs.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
-                return ((pp.equals("*")) || (path.substring(1).matches(pp)));
-            }
-        }
-        
-        // try to match without wildcard in domain
-        return (((pp = (String) blackListURLs.get(hostlow)) != null) &&
-                ((pp.equals("*")) || (path.substring(1).matches(pp))));
     }
     
     public void handleOutgoingCookies(httpHeader requestHeader, String targethost, String clienthost) {
@@ -391,7 +311,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // blacklist idea inspired by [AS]:
             // respond a 404 for all AGIS ("all you get is shit") servers
             String hostlow = host.toLowerCase();
-            if (blacklistedURL(hostlow, path)) {
+            if (switchboard.blacklistedURL(hostlow, path)) {
                 httpd.sendRespondError(conProp,respond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 this.theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
@@ -877,7 +797,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         
         // check the blacklist, inspired by [AS]: respond a 404 for all AGIS (all you get is shit) servers
         String hostlow = host.toLowerCase();
-        if (blacklistedURL(hostlow, path)) {
+        if (switchboard.blacklistedURL(hostlow, path)) {
             try {
                 byte[] errorMsg = ("404 (generated): URL '" + hostlow + "' blocked by yacy proxy (blacklisted)\r\n").getBytes();
                 httpd.sendRespondHeader(conProp,respond,httpVer,404,"Not Found (AGIS)",0);

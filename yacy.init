@@ -163,7 +163,7 @@ proxyBlueList=yacy.blue
 # if several ip's are allowed then they must be separated by a ','
 # any ip may contain the wildcard-sign '*'
 #proxyClient=192.168.0.4
-proxyClient=localhost,127.0.0.1,192.168*,10*
+proxyClient=localhost,127.0.0.1,192.168.*,10.*
 
 # serverClient: client-ip's that may connect to the web server,
 # thus are allowed to use the search service
@@ -325,6 +325,7 @@ yacyDB=DATA/YACYDB
 # local indexing, you may switch this off
 allowDistributeIndex=true
 allowReceiveIndex=true
+indexReceiveBlockBlacklist=false
 
 # the frequency is the number of links per minute, that the peer allowes
 # _every_ other peer to send to this peer

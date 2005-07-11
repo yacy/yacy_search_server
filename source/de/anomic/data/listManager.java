@@ -234,9 +234,9 @@ public class listManager {
 	public static void reloadBlacklists(){
                 String f = switchboard.getConfig("proxyBlackListsActive", "");
                 if (f != ""){
-			httpdProxyHandler.blackListURLs = httpdProxyHandler.loadBlacklist("black", f, "/");
+			switchboard.blackListURLs = switchboard.loadBlacklist("black", f, "/");
 		}else{
-			httpdProxyHandler.blackListURLs = new TreeMap();
+			switchboard.blackListURLs = new TreeMap();
 		}
         }
 

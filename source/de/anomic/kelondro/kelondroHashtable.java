@@ -132,13 +132,18 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 
+import de.anomic.server.serverCodings;
+
 public class kelondroHashtable {
     
-    kelondroArray hashArray;
-    int offset;
-    int maxk;
-    int maxrehash;
+    private kelondroArray hashArray;
+    private int offset;
+    private int maxk;
+    private int maxrehash;
+    private byte[][] dummyRow;
     
+    private static final byte[] dummyKey = serverCodings.enhancedCoder.encodeBase64Long(0, 5).getBytes();
+
     public kelondroHashtable(File file, int[] columns, int offset, int maxsize, int maxrehash) throws IOException {
 	// this creates a new hashtable
         // the key element is not part of the columns array
@@ -149,18 +154,25 @@ public class kelondroHashtable {
         // this number is needed to omit grow of the table in case of re-hashing
         // the maxsize is re-computed to a virtual folding height and will result in a tablesize
         // less than the given maxsize. The actual maxsize can be retrieved by maxsize()
-        hashArray = new kelondroArray(file, extCol(columns), 6);
+        this.hashArray = new kelondroArray(file, extCol(columns), 6);
         this.offset = offset;
-        this.maxk = kelondroMSetTools.log2a(maxsize); // equal to log2(maxsize) + 1
+        this.maxk = kelondroMSetTools.log2a(maxsize); // equal to |log2(maxsize)| + 1
         if (this.maxk >= kelondroMSetTools.log2a(maxsize + power2(offset + 1) + 1) - 1) this.maxk--;
+        this.maxrehash = maxrehash;
         hashArray.seti(0, this.offset);
         hashArray.seti(1, this.maxk);
-        hashArray.seti(1, this.maxk);
+        hashArray.seti(2, this.maxrehash);
+        dummyRow = new byte[hashArray.columns()][];
+        dummyRow[0] = dummyKey;
+        for (int i = 0; i < hashArray.columns(); i++) dummyRow[i] = new byte[0];
     }
 
     public kelondroHashtable(File file) throws IOException{
 	// this opens a file with an existing hashtable
-	hashArray = new kelondroArray(file);
+	this.hashArray = new kelondroArray(file);
+        this.offset    = hashArray.geti(0);
+        this.maxk      = hashArray.geti(1);
+        this.maxrehash = hashArray.geti(2);
     }
     
     private int[] extCol(int[] columns) {
@@ -175,15 +187,51 @@ public class kelondroHashtable {
 	while (x > 0) {p = p << 1; x--;}
 	return p;
     }
-    /*
+
     public synchronized byte[][] get(int key) throws IOException {
-        
+        Object[] search = search(new Hash(key));
+        if (search[1] == null) return null;
+        byte[][] row = (byte[][]) search[1];
+        byte[][] result = new byte[row.length - 1][];
+        System.arraycopy(row, 1, result, 0, row.length - 1);
+        return result;
     }
 
-    public synchronized byte[][] put(int key, byte[][] newrow) throws IOException {
-        
+    public synchronized byte[][] put(int key, byte[][] row) throws IOException {
+        Hash hash = new Hash(key);
+        // find row
+        Object[] search = search(hash);
+        byte[][] oldrow;
+        int rowNumber = ((Integer) search[0]).intValue();
+        if (search[1] == null) {
+            oldrow = null;
+        } else {
+            oldrow = (byte[][]) search[1];
+        }
+        // make space
+        while (rowNumber >= hashArray.size()) hashArray.set(hashArray.size(), dummyRow);
+        // write row
+        byte[][] newrow = new byte[hashArray.columns()][];
+        newrow[0] = serverCodings.enhancedCoder.encodeBase64Long(hash.key(), 5).getBytes();
+        System.arraycopy(row, 0, newrow, 1, row.length);
+        hashArray.set(rowNumber, row);
+        return oldrow;
     }
-    */
+    
+    private Object[] search(Hash hash) throws IOException {
+        byte[][] row;
+        int rowKey;
+        int rowNumber;
+        do {
+            rowNumber = hash.node();
+            if (rowNumber >= hashArray.size()) return new Object[]{new Integer(rowNumber), null};
+            row = hashArray.get(rowNumber);
+            rowKey = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(row[0]));
+            if (rowKey == 0) return new Object[]{new Integer(rowNumber), null};
+            hash.rehash();
+        } while (rowKey != hash.key());
+        return new Object[]{new Integer(rowNumber), row};
+    }
     
     
     private class Hash {
