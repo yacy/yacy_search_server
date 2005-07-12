@@ -79,10 +79,12 @@ public class plasmaURLPattern {
     }
     
     public void add(String host, String path) {
+        if (path.startsWith("/")) path = path.substring(1);
         hostpaths.put(host, path);
     }
     
     public boolean isListed(String hostlow, String path) {
+        if (path.startsWith("/")) path = path.substring(1);
         String pp = ""; // path-pattern
         
         // first try to match the domain with wildcard '*'
@@ -90,19 +92,19 @@ public class plasmaURLPattern {
         int index = 0;
         while ((index = hostlow.indexOf('.', index + 1)) != -1) {
             if ((pp = (String) hostpaths.get(hostlow.substring(0, index + 1) + "*")) != null) {
-                return ((pp.equals("*")) || (path.substring(1).matches(pp)));
+                return ((pp.equals("*")) || (path.matches(pp)));
             }
         }
         index = hostlow.length();
         while ((index = hostlow.lastIndexOf('.', index - 1)) != -1) {
             if ((pp = (String) hostpaths.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
-                return ((pp.equals("*")) || (path.substring(1).matches(pp)));
+                return ((pp.equals("*")) || (path.matches(pp)));
             }
         }
         
         // try to match without wildcard in domain
         return (((pp = (String) hostpaths.get(hostlow)) != null) &&
-                ((pp.equals("*")) || (path.substring(1).matches(pp))));
+                ((pp.equals("*")) || (path.matches(pp))));
     }
     
 }
