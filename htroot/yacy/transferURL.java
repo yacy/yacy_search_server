@@ -49,6 +49,7 @@ import java.net.MalformedURLException;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -73,34 +74,28 @@ public class transferURL {
         // response values
         String result = "";
         String doublevalues = "0";
-        URL url;
         
         if (granted) {
             int received = 0;
             int sizeBefore = switchboard.urlPool.loadedURL.size();
             // read the urls from the other properties and store
             String urls;
+            plasmaCrawlLURL.Entry lEntry;
             for (int i = 0; i < urlc; i++) {
                 urls = (String) post.get("url" + i);
                 if (urls == null) {
                     yacyCore.log.logDebug("transferURL: got null url-String from peer " + youare);
                 } else {
-                    try {
-                        url = new URL(urls);
-                    } catch (MalformedURLException e) {
-                        yacyCore.log.logDebug("transferURL: got malformed url-String '" + urls + "' from peer " + youare);
-                        urls = null;
-                        url = null;
-                    }
-                    if ((urls != null) && (blockBlacklist)) {
-                        if (switchboard.blacklistedURL(url.getHost().toLowerCase(), url.getPath())) {
-                            yacyCore.log.logDebug("transferURL: blocked blacklisted url '" + urls + "' from peer " + youare);
-                            urls = null;
+                    lEntry = switchboard.urlPool.loadedURL.newEntry(urls, true);
+                    if ((lEntry != null) && (blockBlacklist)) {
+                        if (switchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) {
+                            yacyCore.log.logDebug("transferURL: blocked blacklisted url '" + lEntry.url() + "' from peer " + youare);
+                            lEntry = null;
                         }
                     }
-                    if (urls != null) {
-                        switchboard.urlPool.loadedURL.newEntry(urls, true, iam, iam, 3);
-                        yacyCore.log.logDebug("transferURL: received url '" + urls + "' from peer " + youare);
+                    if (lEntry != null) {
+                        switchboard.urlPool.loadedURL.addEntry(lEntry, iam, iam, 3);
+                        yacyCore.log.logDebug("transferURL: received url '" + lEntry.url() + "' from peer " + youare);
                         received++;
                     }
                 }

@@ -241,8 +241,8 @@ public class sharedBlacklist_p {
 				out += newItem+"\n";
 				prop.put("status_list_"+count+"_entry", newItem);
 				count++;
-				if (switchboard.blackListURLs != null)
-				    switchboard.blackListURLs.put(newItem.substring(0, pos), newItem.substring(pos + 1));
+				if (switchboard.urlBlacklist != null)
+				    switchboard.urlBlacklist.add(newItem.substring(0, pos), newItem.substring(pos + 1));
 
 				//write the list
 				try{

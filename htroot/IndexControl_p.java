@@ -164,7 +164,7 @@ public class IndexControl_p {
         }
         
         if (post.containsKey("urlhashdelete")) {
-            plasmaCrawlLURL.entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
+            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
             URL url = entry.url();
             if (url == null) {
                 prop.put("result", "No Entry for url hash " + urlhash + "; nothing deleted.");
@@ -230,7 +230,7 @@ public class IndexControl_p {
                 URL url = new URL(urlstring);
                 urlhash = plasmaURL.urlHash(url);
                 prop.put("urlhash", urlhash);
-                plasmaCrawlLURL.entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
+                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
                 prop.put("result", genUrlProfile(switchboard, entry, urlhash));
             } catch (MalformedURLException e) {
                 prop.put("urlstring", "wrong url: " + urlstring);
@@ -239,7 +239,7 @@ public class IndexControl_p {
         }
         
         if (post.containsKey("urlhashsearch")) {
-            plasmaCrawlLURL.entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
+            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
             URL url = entry.url();
             if (url == null) {
                 prop.put("result", "No Entry for url hash " + urlhash);
@@ -301,7 +301,7 @@ public class IndexControl_p {
 	return prop;
     }
 
-    public static String genUrlProfile(plasmaSwitchboard switchboard, plasmaCrawlLURL.entry entry, String urlhash) {
+    public static String genUrlProfile(plasmaSwitchboard switchboard, plasmaCrawlLURL.Entry entry, String urlhash) {
         if (entry == null) return "No entry found for url-hash " + urlhash;
         URL url = entry.url();
         if (url == null) return "No entry found for url-hash " + urlhash;

@@ -311,7 +311,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // blacklist idea inspired by [AS]:
             // respond a 404 for all AGIS ("all you get is shit") servers
             String hostlow = host.toLowerCase();
-            if (switchboard.blacklistedURL(hostlow, path)) {
+            if (switchboard.urlBlacklist.isListed(hostlow, path)) {
                 httpd.sendRespondError(conProp,respond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 this.theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
@@ -797,7 +797,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         
         // check the blacklist, inspired by [AS]: respond a 404 for all AGIS (all you get is shit) servers
         String hostlow = host.toLowerCase();
-        if (switchboard.blacklistedURL(hostlow, path)) {
+        if (switchboard.urlBlacklist.isListed(hostlow, path)) {
             try {
                 byte[] errorMsg = ("404 (generated): URL '" + hostlow + "' blocked by yacy proxy (blacklisted)\r\n").getBytes();
                 httpd.sendRespondHeader(conProp,respond,httpVer,404,"Not Found (AGIS)",0);

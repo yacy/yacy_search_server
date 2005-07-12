@@ -233,11 +233,8 @@ public class listManager {
 	//load all active Blacklists in the Proxy
 	public static void reloadBlacklists(){
                 String f = switchboard.getConfig("proxyBlackListsActive", "");
-                if (f != ""){
-			switchboard.blackListURLs = switchboard.loadBlacklist("black", f, "/");
-		}else{
-			switchboard.blackListURLs = new TreeMap();
-		}
+                switchboard.urlBlacklist.clear();
+                if (f != "") switchboard.urlBlacklist.loadLists("black", f, "/");
         }
 
 

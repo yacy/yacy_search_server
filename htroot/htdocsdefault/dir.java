@@ -443,7 +443,7 @@ public class dir {
         try {
             URL url = new URL(urlstring);
             plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()));
-            plasmaCrawlLURL.entry newEntry = switchboard.urlPool.loadedURL.newEntry(
+            plasmaCrawlLURL.Entry newEntry = switchboard.urlPool.loadedURL.addEntry(
             url, "YaCyShare: " + descr, new Date(), new Date(),
             "____________", /*initiator*/
             yacyCore.seedDB.mySeed.hash, /*executor*/

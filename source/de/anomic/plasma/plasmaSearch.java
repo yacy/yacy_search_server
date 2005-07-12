@@ -361,9 +361,9 @@ public final class plasmaSearch {
             return pageAcc.size() > 0;
         }
         
-        public plasmaCrawlLURL.entry nextElement() {
+        public plasmaCrawlLURL.Entry nextElement() {
             Object top = pageAcc.lastKey();
-            return (plasmaCrawlLURL.entry) pageAcc.remove(top);
+            return (plasmaCrawlLURL.Entry) pageAcc.remove(top);
         }
 
         protected void addResult(plasmaWordIndexEntry indexEntry) {
@@ -373,7 +373,7 @@ public final class plasmaSearch {
             // 2. add reference to reference sorting table
             
             // find the url entry
-            plasmaCrawlLURL.entry page = urlStore.getEntry(indexEntry.getUrlHash());
+            plasmaCrawlLURL.Entry page = urlStore.getEntry(indexEntry.getUrlHash());
             
             // take out relevant information for reference computation
             URL url = page.url();
@@ -402,7 +402,7 @@ public final class plasmaSearch {
             
             Object[] resultVector;
             plasmaWordIndexEntry indexEntry;
-            plasmaCrawlLURL.entry page;
+            plasmaCrawlLURL.Entry page;
             String[] urlcomps;
             String[] descrcomps;
             long ranking;
@@ -412,7 +412,7 @@ public final class plasmaSearch {
                 // take out values from result array
                 resultVector = (Object[]) results.get(i);
                 indexEntry = (plasmaWordIndexEntry) resultVector[0];
-                page = (plasmaCrawlLURL.entry) resultVector[1];
+                page = (plasmaCrawlLURL.Entry) resultVector[1];
                 urlcomps = (String[]) resultVector[2];
                 descrcomps = (String[]) resultVector[3];
                 

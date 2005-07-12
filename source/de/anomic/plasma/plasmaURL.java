@@ -146,17 +146,4 @@ public class plasmaURL {
         return urlHashCache.rows(up, false, urlHash.getBytes());
     }
     
-    protected static Properties s2p(String s) {
-	Properties p = new Properties();
-	int pos;
-	StringTokenizer st = new StringTokenizer(s, ",");
-	String token;
-	while (st.hasMoreTokens()) {
-	    token = st.nextToken().trim();
-	    pos = token.indexOf("=");
-	    if (pos > 0) p.setProperty(token.substring(0, pos).trim(), token.substring(pos + 1).trim());
-	}
-	return p;
-    }
-    
 }

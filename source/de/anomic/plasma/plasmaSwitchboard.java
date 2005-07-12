@@ -154,7 +154,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     // couloured list management
     public static TreeSet blueList = null;
     public static TreeSet stopwords = null;
-    public static TreeMap blackListURLs = null;
+    public static plasmaURLPattern urlBlacklist;
     
     // storage management
     private File                   cachePath;
@@ -221,12 +221,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	}
         
         // load the black-list / inspired by [AS]
+        urlBlacklist = new plasmaURLPattern(new File(getRootPath(), getConfig("listsPath", "DATA/LISTS")));
         String f = getConfig("proxyBlackListsActive", null);
         if (f != null) {
-            blackListURLs = loadBlacklist("black", f, "/");
-            log.logSystem("loaded black-list from file " + f + ", " + blackListURLs.size() + " entries");
-        } else {
-            blackListURLs = new TreeMap();
+            urlBlacklist.loadLists("black", f, "/");
+            log.logSystem("loaded black-list from file " + f + ", " + urlBlacklist.size() + " entries");
         }
         log.logSystem("Proxy Handler Initialized");
             
@@ -402,41 +401,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     }
     
-    public TreeMap loadBlacklist(String mapname, String filenames, String sep) {
-        TreeMap map = new TreeMap();
-        File listsPath = new File(getRootPath(), getConfig("listsPath", "DATA/LISTS"));
-        String filenamesarray[] = filenames.split(",");
-        
-        if(filenamesarray.length >0)
-            for(int i = 0; i < filenamesarray.length; i++)
-                map.putAll(serverFileUtils.loadMap(mapname, (new File(listsPath, filenamesarray[i])).toString(), sep));
-        return map;
-    }
-    
-    public boolean blacklistedURL(String hostlow, String path) {
-        if (blackListURLs == null) return false;
-        
-        String pp = ""; // path-pattern
-        
-        // first try to match the domain with wildcard '*'
-        // [TL] While "." are found within the string
-        int index = 0;
-        while ((index = hostlow.indexOf('.', index + 1)) != -1) {
-            if ((pp = (String) blackListURLs.get(hostlow.substring(0, index + 1) + "*")) != null) {
-                return ((pp.equals("*")) || (path.substring(1).matches(pp)));
-            }
-        }
-        index = hostlow.length();
-        while ((index = hostlow.lastIndexOf('.', index - 1)) != -1) {
-            if ((pp = (String) blackListURLs.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
-                return ((pp.equals("*")) || (path.substring(1).matches(pp)));
-            }
-        }
-        
-        // try to match without wildcard in domain
-        return (((pp = (String) blackListURLs.get(hostlow)) != null) &&
-                ((pp.equals("*")) || (path.substring(1).matches(pp))));
-    }
+
         
     private static String ppRamString(int bytes) {
         if (bytes < 1024) return bytes + " KByte";
@@ -1022,7 +987,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     Date lastModified = entry.responseHeader().lastModified();
                     if (lastModified == null) lastModified = entry.responseHeader().date();
                     if (lastModified == null) lastModified = new Date();
-                    plasmaCrawlLURL.entry newEntry = urlPool.loadedURL.newEntry(
+                    plasmaCrawlLURL.Entry newEntry = urlPool.loadedURL.addEntry(
                                         entry.url(), descr, lastModified, new Date(),
                                         initiatorHash,
                                         yacyCore.seedDB.mySeed.hash,
@@ -1176,7 +1141,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (urlhash.equals(plasmaURL.dummyHash)) return null;
         plasmaCrawlNURL.entry ne = urlPool.noticeURL.getEntry(urlhash);
         if (ne != null) return ne.url();
-        plasmaCrawlLURL.entry le = urlPool.loadedURL.getEntry(urlhash);
+        plasmaCrawlLURL.Entry le = urlPool.loadedURL.getEntry(urlhash);
         if (le != null) return le.url();
         plasmaCrawlEURL.entry ee = urlPool.errorURL.getEntry(urlhash);
         if (ee != null) return ee.url();
@@ -1267,8 +1232,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 String lurl = (String) page.get("lurl");
                 if ((lurl != null) && (lurl.length() != 0)) {
                     String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));        
-                    plasmaCrawlLURL.entry entry = urlPool.loadedURL.newEntry(propStr, true, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1);
-                    urlPool.noticeURL.remove(entry.hash());
+                    plasmaCrawlLURL.Entry entry = urlPool.loadedURL.addEntry(
+                        urlPool.loadedURL.newEntry(propStr, true),
+                        yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1);
+                        urlPool.noticeURL.remove(entry.hash());
                     log.logInfo("REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + nexturlString + "). URL IS CONSIDERED AS 'LOADED!'");
                     return true;
                 } else {
@@ -1329,7 +1296,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public void fetchSnippets(plasmaSearch.result acc, Set queryhashes, String urlmask, int fetchcount) {
         // fetch the snippets
         int i = 0;
-        plasmaCrawlLURL.entry urlentry;
+        plasmaCrawlLURL.Entry urlentry;
         String urlstring;
         plasmaSnippetCache.result snippet;
         while ((acc.hasMoreElements()) && (i < fetchcount)) {
@@ -1398,7 +1365,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 int fetchpeers = ((int) time / 1000) * 3; // number of target peers; means 30 peers in 10 seconds
                 long fetchtime = time * 7 / 10;           // time to waste
                 if (fetchcount > count) fetchcount = count;
-                globalresults = yacySearch.searchHashes(queryhashes, urlPool.loadedURL, searchManager, fetchcount, fetchpeers, snippetCache, fetchtime);
+                globalresults = yacySearch.searchHashes(queryhashes, urlPool.loadedURL, searchManager, fetchcount, fetchpeers, urlBlacklist, snippetCache, fetchtime);
                 log.logDebug("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             }
             prop.put("globalresults", globalresults); // the result are written to the local DB
@@ -1425,7 +1392,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 int i = 0;
                 int p;
                 URL url;
-                plasmaCrawlLURL.entry urlentry;
+                plasmaCrawlLURL.Entry urlentry;
                 String urlstring, urlname, filename;
                 String host, hash, address, descr = "";
                 yacySeed seed;
@@ -1551,7 +1518,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 StringBuffer links = new StringBuffer();
                 String resource = "";
                 //plasmaIndexEntry pie;
-                plasmaCrawlLURL.entry urlentry;
+                plasmaCrawlLURL.Entry urlentry;
                 plasmaSnippetCache.result snippet;
                 while ((acc.hasMoreElements()) && (i < count)) {
                     urlentry = acc.nextElement();
@@ -1627,7 +1594,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // finally, delete the url entry
         
         // determine the url string
-        plasmaCrawlLURL.entry entry = urlPool.loadedURL.getEntry(urlhash);
+        plasmaCrawlLURL.Entry entry = urlPool.loadedURL.getEntry(urlhash);
         URL url = entry.url();
         if (url == null) return 0;
         // get set of words

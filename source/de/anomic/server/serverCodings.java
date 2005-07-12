@@ -45,6 +45,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.MessageDigest;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 
 public final class serverCodings {
@@ -261,6 +263,19 @@ public final class serverCodings {
 	return null;
     }
 
+    public static Properties s2p(String s) {
+	Properties p = new Properties();
+	int pos;
+	StringTokenizer st = new StringTokenizer(s, ",");
+	String token;
+	while (st.hasMoreTokens()) {
+	    token = st.nextToken().trim();
+	    pos = token.indexOf("=");
+	    if (pos > 0) p.setProperty(token.substring(0, pos).trim(), token.substring(pos + 1).trim());
+	}
+	return p;
+    }
+        
     public static void main(String[] s) {
 	serverCodings b64 = new serverCodings(true);
 	if (s.length == 0) {System.out.println("usage: -[ec|dc|es|ds] <arg>"); System.exit(0);}

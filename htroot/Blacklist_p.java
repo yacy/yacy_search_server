@@ -182,8 +182,8 @@ public class Blacklist_p {
 		}else{
 			prop.put("status", 1);//removed
 			prop.put("status_item", line);
-			if (listManager.switchboard.blackListURLs != null)
-			    listManager.switchboard.blackListURLs.remove(line);
+			if (listManager.switchboard.urlBlacklist != null)
+			    listManager.switchboard.urlBlacklist.remove(line);
 		}
 	}
 	prop.put("Itemlist", numItems);
@@ -215,8 +215,8 @@ public class Blacklist_p {
 		prop.put("status_item", newItem);//added
 
 		//add to blacklist
-		if (listManager.switchboard.blackListURLs != null)
-                    listManager.switchboard.blackListURLs.put(newItem.substring(0, pos), newItem.substring(pos + 1));
+		if (listManager.switchboard.urlBlacklist != null)
+                    listManager.switchboard.urlBlacklist.add(newItem.substring(0, pos), newItem.substring(pos + 1));
 	}
 	listManager.writeList(new File(listManager.listsPath, filename), out);
 

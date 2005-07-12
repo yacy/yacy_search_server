@@ -111,11 +111,11 @@ public class crawlReceipt {
             prop.put("delay", "3600");
         } else if (result.equals("fill")) {
             // put new data into database
-            switchboard.urlPool.loadedURL.newEntry(propStr, true, youare, iam, 1);
+            switchboard.urlPool.loadedURL.addEntry(switchboard.urlPool.loadedURL.newEntry(propStr, true), youare, iam, 1);
             switchboard.urlPool.noticeURL.remove(urlhash);
             
             // write log
-            plasmaCrawlLURL.entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
+            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
             if (entry == null) {
                 switchboard.getLog().logError("RECEIVED wrong RECEIPT for hash " + urlhash + " from peer " + iam);
             } else {

@@ -120,13 +120,13 @@ public class plasmaCrawlLURL extends plasmaURL {
         
     }
 
-    public synchronized entry newEntry(URL url, String descr, Date moddate, Date loaddate,
+    public synchronized Entry addEntry(URL url, String descr, Date moddate, Date loaddate,
                                        String initiatorHash, String executorHash,
 				       String referrerHash, int copyCount, boolean localNeed,
 				       int quality, String language, char doctype,
 				       long size, int wordCount,
                                        int stackType) {
-	entry e = new entry(url, descr, moddate, loaddate, referrerHash, copyCount, localNeed, quality, language, doctype, size, wordCount);
+	Entry e = new Entry(url, descr, moddate, loaddate, referrerHash, copyCount, localNeed, quality, language, doctype, size, wordCount);
         if (initiatorHash == null) initiatorHash = dummyHash;
         if (executorHash == null) executorHash = dummyHash;
         switch (stackType) {
@@ -137,16 +137,37 @@ public class plasmaCrawlLURL extends plasmaURL {
             case 4: proxyResultStack.add(e.urlHash + initiatorHash + executorHash); break;
             case 5: lcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
             case 6: gcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-            
         }
         return e;
     }
 
-    public synchronized entry newEntry(String propStr, boolean setGlobal, String initiatorHash, String executorHash, int stackType) {
+    public synchronized Entry addEntry(Entry e, String initiatorHash, String executorHash, int stackType) {
+        if (e == null) return null;
+        try {
+            if (initiatorHash == null) initiatorHash = dummyHash;
+            if (executorHash == null) executorHash = dummyHash;
+            switch (stackType) {
+                case 0: break;
+                case 1: externResultStack.add(e.urlHash + initiatorHash + executorHash); break;
+                case 2: searchResultStack.add(e.urlHash + initiatorHash + executorHash); break;
+                case 3: transfResultStack.add(e.urlHash + initiatorHash + executorHash); break;
+                case 4: proxyResultStack.add(e.urlHash + initiatorHash + executorHash); break;
+                case 5: lcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
+                case 6: gcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
+            }
+            return e;
+        } catch (Exception ex) {
+            System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
+            return null;
+        }
+    }
+    
+    /*
+    public synchronized Entry addEntry(String propStr, boolean setGlobal, String initiatorHash, String executorHash, int stackType) {
 	if ((propStr.startsWith("{")) && (propStr.endsWith("}"))) {
             //System.out.println("DEBUG: propStr=" + propStr);
             try {
-                entry e = new entry(s2p(propStr.substring(1, propStr.length() - 1)), setGlobal);
+                Entry e = new Entry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)), setGlobal);
                 if (initiatorHash == null) initiatorHash = dummyHash;
                 if (executorHash == null) executorHash = dummyHash;
                 switch (stackType) {
@@ -157,26 +178,34 @@ public class plasmaCrawlLURL extends plasmaURL {
                     case 4: proxyResultStack.add(e.urlHash + initiatorHash + executorHash); break;
                     case 5: lcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
                     case 6: gcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-                    
                 }
                 return e;
-            } catch (Exception e) {
-                System.out.println("INTERNAL ERROR in newEntry/2: " + e.toString());
+            } catch (Exception ex) {
+                System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
                 return null;
             }
         } else {
 	    return null;
         }
     }
-
+    */
+    
     public void notifyGCrawl(String urlHash, String initiatorHash, String executorHash) {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
     
-    public synchronized entry getEntry(String hash) {
-	return new entry(hash);
+    public synchronized Entry getEntry(String hash) {
+	return new Entry(hash);
     }
 
+    public synchronized Entry newEntry(String propStr, boolean setGlobal) {
+        if ((propStr.startsWith("{")) && (propStr.endsWith("}"))) {
+            return new Entry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)), setGlobal);    
+        } else {
+            return null;
+        }
+    }
+    
     public int getStackSize(int stack) {
         switch (stack) {
             case 1: return externResultStack.size();
@@ -282,7 +311,7 @@ public class plasmaCrawlLURL extends plasmaURL {
         
         boolean dark = true;
         String urlHash, initiatorHash, executorHash;
-        plasmaCrawlLURL.entry urle;
+        plasmaCrawlLURL.Entry urle;
         yacySeed initiatorSeed, executorSeed;
         String cachepath;
         int c = 0;
@@ -318,7 +347,7 @@ public class plasmaCrawlLURL extends plasmaURL {
         return prop;
     }
     
-    public class entry {
+    public class Entry {
 
 	private URL    url;
 	private String descr;
@@ -335,7 +364,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 	private int    wordCount;
         private String snippet;
 
-	public entry(URL url, String descr, Date moddate, Date loaddate,
+	public Entry(URL url, String descr, Date moddate, Date loaddate,
 		     String referrerHash, int copyCount, boolean localNeed,
 		     int quality, String language, char doctype, long size, int wordCount) {
 	    // create new entry and store it into database
@@ -356,7 +385,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 	    store();
 	}
 
-	public entry(String urlHash) {
+	public Entry(String urlHash) {
 	    // generates an plasmaLURLEntry using the url hash
 	    // to speed up the access, the url-hashes are buffered
 	    // in the hash cache.
@@ -389,7 +418,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 	    }
 	}
 
-	public entry(Properties prop, boolean setGlobal) {
+	public Entry(Properties prop, boolean setGlobal) {
 	    // generates an plasmaLURLEntry using the properties from the argument
 	    // the property names must correspond to the one from toString
 	    //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
@@ -591,7 +620,7 @@ public class plasmaCrawlLURL extends plasmaURL {
             return i.hasNext();
         }
 	public Object nextElement() {
-            return new entry(new String((byte[]) i.next()));
+            return new Entry(new String((byte[]) i.next()));
         }
     }
     
@@ -613,7 +642,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 	    plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), 1);
 	    Enumeration enu = urls.elements(true, false);
 	    while (enu.hasMoreElements()) {
-		((entry) enu.nextElement()).print();
+		((Entry) enu.nextElement()).print();
 	    }
 	} catch (Exception e) {
 	    e.printStackTrace();

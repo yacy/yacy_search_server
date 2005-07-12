@@ -57,6 +57,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
+import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.tools.crypt;
@@ -267,7 +268,8 @@ public class yacyClient {
     
     public static int search(String wordhashes, int count, boolean global,
                              yacySeed targetPeer, plasmaCrawlLURL urlManager,
-                             plasmaSearch searchManager, plasmaSnippetCache snippets,
+                             plasmaSearch searchManager, plasmaURLPattern blacklist,
+                             plasmaSnippetCache snippets,
                              long duetime) {
         // send a search request to peer with remote Hash
         // this mainly converts the words into word hashes
@@ -335,7 +337,7 @@ public class yacyClient {
             //System.out.println("yacyClient: search result = " + result.toString()); // debug
             int results = Integer.parseInt((String) result.get("count"));
             //System.out.println("***result count " + results);
-            plasmaCrawlLURL.entry link;
+            plasmaCrawlLURL.Entry link;
             
             // create containers
             int words = wordhashes.length() / plasmaWordIndexEntry.wordHashLength;
@@ -345,9 +347,12 @@ public class yacyClient {
             }
             
             // insert results to containers
+            plasmaCrawlLURL.Entry lEntry;
             for (int n = 0; n < results; n++) {
                 // get one single search result
-                link = urlManager.newEntry((String) result.get("resource" + n), true, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
+                lEntry = urlManager.newEntry((String) result.get("resource" + n), true);
+                if ((lEntry != null) && (blacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath()))) continue; // block with backlist
+                link = urlManager.addEntry(lEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
                 // save the url entry
                 plasmaWordIndexEntry entry = new plasmaWordIndexEntry(link.hash(), link.wordCount(), 0, 0, 0,
                                                                       plasmaSearch.calcVirtualAge(link.moddate()), link.quality(),
@@ -482,7 +487,7 @@ public class yacyClient {
         -er crawlt, Ergebnis erscheint aber unter falschem initiator
      */
     
-    public static HashMap crawlReceipt(yacySeed targetSeed, String process, String result, String reason, plasmaCrawlLURL.entry entry, String wordhashes) {
+    public static HashMap crawlReceipt(yacySeed targetSeed, String process, String result, String reason, plasmaCrawlLURL.Entry entry, String wordhashes) {
         if (targetSeed == null) return null;
         if (yacyCore.seedDB.mySeed == null) return null;
         if (yacyCore.seedDB.mySeed == targetSeed) return null;
@@ -553,9 +558,9 @@ public class yacyClient {
         if (uhs.length == 0) return null; // all url's known
         // extract the urlCache from the result
         HashMap urlCache = (HashMap) in.get("$URLCACHE$");
-        plasmaCrawlLURL.entry[] urls = new plasmaCrawlLURL.entry[uhs.length];
+        plasmaCrawlLURL.Entry[] urls = new plasmaCrawlLURL.Entry[uhs.length];
         for (int i = 0; i < uhs.length; i++) {
-            urls[i] = (plasmaCrawlLURL.entry) urlCache.get(uhs[i]);
+            urls[i] = (plasmaCrawlLURL.Entry) urlCache.get(uhs[i]);
             if (urls[i] == null) System.out.println("DEBUG transferIndex: error with requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
         }
         in = transferURL(targetSeed, urls);
@@ -583,7 +588,7 @@ public class yacyClient {
         Enumeration eenum;
         plasmaWordIndexEntry entry;
         HashMap urlCache = new HashMap();
-        plasmaCrawlLURL.entry urlentry;
+        plasmaCrawlLURL.Entry urlentry;
         HashSet unknownURLs = new HashSet();
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].elements(true);
@@ -646,7 +651,7 @@ public class yacyClient {
         }
     }
     
-    private static HashMap transferURL(yacySeed targetSeed, plasmaCrawlLURL.entry[] urls) {
+    private static HashMap transferURL(yacySeed targetSeed, plasmaCrawlLURL.Entry[] urls) {
         // this post a message to the remote message board
         String address = targetSeed.getAddress();
         if (address == null) return null;
