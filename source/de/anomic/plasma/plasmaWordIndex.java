@@ -67,6 +67,10 @@ public final class plasmaWordIndex {
         this.ramCache = new plasmaWordIndexCache(databaseRoot, fileDB, bufferkb, log);
     }
     
+    public File getRoot() {
+        return databaseRoot;
+    }
+    
     public int maxURLinWordCache() {
         return ramCache.maxURLinWordCache();
     }

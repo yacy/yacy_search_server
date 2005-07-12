@@ -51,7 +51,6 @@ import java.io.OutputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.zip.GZIPOutputStream;
-import java.util.TreeMap;
 import java.util.HashSet;
 
 public final class serverFileUtils {
@@ -163,24 +162,5 @@ public final class serverFileUtils {
         }
         return set;
     }
-    
-    public static TreeMap loadMap(String mapname, String filename, String sep) {
-        TreeMap map = new TreeMap();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-            String line;
-            int pos;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0))
-                    map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
-            }
-        } catch (IOException e) {            
-        } finally {
-            if (br != null) try { br.close(); } catch (Exception e) {}
-        }
-        return map;
-    }
-    
+
 }

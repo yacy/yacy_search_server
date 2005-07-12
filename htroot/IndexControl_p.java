@@ -108,6 +108,7 @@ public class IndexControl_p {
         if (post.containsKey("setIndexDistribute")) {
             boolean allowDistributeIndex = ((String) post.get("indexDistribute", "")).equals("on");
             switchboard.setConfig("allowDistributeIndex", (allowDistributeIndex) ? "true" : "false");
+            if (allowDistributeIndex) switchboard.indexDistribution.enable(); else switchboard.indexDistribution.disable(); 
         }
         
         if (post.containsKey("setIndexReceive")) {

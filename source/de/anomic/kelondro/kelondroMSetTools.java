@@ -40,6 +40,11 @@
 
 package de.anomic.kelondro;
 
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.FileInputStream;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -351,6 +356,48 @@ public class kelondroMSetTools {
     
     // ------------------------------------------------------------------------------------------------
 
+    public static TreeMap loadMap(String mapname, String filename, String sep) {
+        TreeMap map = new TreeMap();
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+            String line;
+            int pos;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0))
+                    map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
+            }
+        } catch (IOException e) {            
+        } finally {
+            if (br != null) try { br.close(); } catch (Exception e) {}
+        }
+        return map;
+    }
+    
+    public static TreeSet loadList(File file) {
+        TreeSet list = new TreeSet(kelondroMSetTools.fastStringComparator);
+        if (!(file.exists())) return list;
+        
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if ((line.length() > 0) && (!(line.startsWith("#")))) list.add(line.trim().toLowerCase());
+            }
+            br.close();
+        } catch (IOException e) {            
+        } finally {
+            if (br != null) try{br.close();}catch(Exception e){}
+        }
+        return list;
+    }
+    
+    // ------------------------------------------------------------------------------------------------
+
+    
     public static void main(String[] args) {
 	TreeMap m = new TreeMap();
 	TreeSet s = new TreeSet();

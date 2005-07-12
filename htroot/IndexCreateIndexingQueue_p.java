@@ -123,11 +123,11 @@ public class IndexCreateIndexingQueue_p {
             }
             dark = true;
             String url, initiatorHash, executorHash;
-            plasmaCrawlEURL.entry entry;
+            plasmaCrawlEURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
             for (i = switchboard.urlPool.errorURL.stackSize() - 1; i >= (switchboard.urlPool.errorURL.stackSize() - showRejectedCount); i--) {
-                entry = (plasmaCrawlEURL.entry) switchboard.urlPool.errorURL.getStack(i);
+                entry = (plasmaCrawlEURL.Entry) switchboard.urlPool.errorURL.getStack(i);
                 initiatorHash = entry.initiator();
                 executorHash = entry.executor();
                 url = entry.url().toString();

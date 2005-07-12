@@ -84,7 +84,7 @@ public class plasmaCrawlEURL extends plasmaURL {
 	}
     }
 
-    public synchronized entry newEntry(URL url, String referrer, String initiator, String executor,
+    public synchronized Entry newEntry(URL url, String referrer, String initiator, String executor,
 				       String name, String failreason, bitfield flags, boolean retry) {
         if ((referrer == null) || (referrer.length() < urlHashLength)) referrer = dummyHash;
         if ((initiator == null) || (initiator.length() < urlHashLength)) initiator = dummyHash;
@@ -101,15 +101,15 @@ public class plasmaCrawlEURL extends plasmaURL {
         map.put("failreason", failreason);
         map.put("flags", flags);
         rejectedStack.add(map);
-        entry e =  new entry(url, referrer, initiator, executor, name, failreason, flags);
+        Entry e = new Entry(url, referrer, initiator, executor, name, failreason, flags);
         
         // put in table
         if (retry) e.store();
         return e;
     }
 
-    public synchronized entry getEntry(String hash) {
-	return new entry(hash);
+    public synchronized Entry getEntry(String hash) {
+	return new Entry(hash);
     }
 
     public void clearStack() {
@@ -120,13 +120,13 @@ public class plasmaCrawlEURL extends plasmaURL {
         return rejectedStack.size();
     }
     
-    public entry getStack(int pos) {
+    public Entry getStack(int pos) {
         HashMap m = (HashMap) rejectedStack.get(pos);
-        return new entry((URL) m.get("url"), (String) m.get("referrer"), (String) m.get("initiator"), (String) m.get("executor"),
+        return new Entry((URL) m.get("url"), (String) m.get("referrer"), (String) m.get("initiator"), (String) m.get("executor"),
 			 (String) m.get("name"), (String) m.get("failreason"), (bitfield) m.get("flags"));
     }
     
-    public class entry {
+    public class Entry {
 
 	private String   hash;       // the url's hash
         private String   referrer;   // the url's referrer hash
@@ -140,7 +140,7 @@ public class plasmaCrawlEURL extends plasmaURL {
         private String   failreason; // string describing reason for load fail
         private bitfield flags;      // extra space
 
-	public entry(URL url, String referrer, String initiator, String executor, String name, String failreason, bitfield flags) {
+	public Entry(URL url, String referrer, String initiator, String executor, String name, String failreason, bitfield flags) {
 	    // create new entry and store it into database
 	    this.hash       = urlHash(url);
 	    this.referrer   = (referrer == null) ? dummyHash : referrer;
@@ -156,7 +156,7 @@ public class plasmaCrawlEURL extends plasmaURL {
 	    
 	}
 
-	public entry(String hash) {
+	public Entry(String hash) {
 	    // generates an plasmaEURLEntry using the url hash
 	    // to speed up the access, the url-hashes are buffered
 	    // in the hash cache.
@@ -265,7 +265,7 @@ public class plasmaCrawlEURL extends plasmaURL {
             return i.hasNext();
         }
 	public Object nextElement() {
-            return new entry(new String(((byte[][]) i.next())[0]));
+            return new Entry(new String(((byte[][]) i.next())[0]));
         }
     }
     

@@ -44,8 +44,11 @@
 
 package de.anomic.plasma;
 
+import java.net.URL;
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
+import java.util.Iterator;
 
 public class plasmaURLPool {
     
@@ -60,12 +63,24 @@ public class plasmaURLPool {
         errorURL = new plasmaCrawlEURL(new File(plasmaPath, "urlErr0.db"), ramEURL);
     }
     
-    public String testHash(String hash) {
+    public String exists(String hash) {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
         if (loadedURL.exists(hash)) return "loaded";
         if (noticeURL.existsInStack(hash)) return "crawler";
+        if (errorURL.exists(hash)) return "errors";
+        return null;
+    }
+    
+    public URL getURL(String urlhash) {
+        if (urlhash.equals(plasmaURL.dummyHash)) return null;
+        plasmaCrawlNURL.Entry ne = noticeURL.getEntry(urlhash);
+        if (ne != null) return ne.url();
+        plasmaCrawlLURL.Entry le = loadedURL.getEntry(urlhash);
+        if (le != null) return le.url();
+        plasmaCrawlEURL.Entry ee = errorURL.getEntry(urlhash);
+        if (ee != null) return ee.url();
         return null;
     }
     

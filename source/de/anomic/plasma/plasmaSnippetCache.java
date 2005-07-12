@@ -54,6 +54,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 
 public class plasmaSnippetCache {
 
@@ -366,6 +367,42 @@ public class plasmaSnippetCache {
             remoteProxyUse,
             cacheManager,
             log);
+    }
+    
+    public void fetch(plasmaSearch.result acc, Set queryhashes, String urlmask, int fetchcount) {
+        // fetch snippets
+        int i = 0;
+        plasmaCrawlLURL.Entry urlentry;
+        String urlstring;
+        plasmaSnippetCache.result snippet;
+        while ((acc.hasMoreElements()) && (i < fetchcount)) {
+            urlentry = acc.nextElement();
+            if (urlentry.url().getHost().endsWith(".yacyh")) continue;
+            urlstring = htmlFilterContentScraper.urlNormalform(urlentry.url());
+            if ((urlstring.matches(urlmask)) &&
+                (!(existsInCache(urlentry.url(), queryhashes)))) {
+                new Fetcher(urlentry.url(), queryhashes).start();
+                i++;
+            }
+        }
+    }
+        
+    public class Fetcher extends Thread {
+        URL url;
+        Set queryhashes;
+        public Fetcher(URL url, Set queryhashes) {
+            if (url.getHost().endsWith(".yacyh")) return;
+            this.url = url;
+            this.queryhashes = queryhashes;
+        }
+        public void run() {
+            log.logDebug("snippetFetcher: try to get URL " + url);
+            plasmaSnippetCache.result snippet = retrieve(url, queryhashes, true, 260);
+            if (snippet.line == null)
+                log.logDebug("snippetFetcher: cannot get URL " + url + ". error(" + snippet.source + "): " + snippet.error);
+            else
+                log.logDebug("snippetFetcher: got URL " + url + ", the snippet is '" + snippet.line + "', source=" + snippet.source);
+        }
     }
     
 }

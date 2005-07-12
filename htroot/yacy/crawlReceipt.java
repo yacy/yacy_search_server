@@ -125,7 +125,7 @@ public class crawlReceipt {
             // ready for more
             prop.put("delay", "10");
         } else {
-            plasmaCrawlNURL.entry en = switchboard.urlPool.noticeURL.getEntry(urlhash);
+            plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(urlhash);
             if (en != null) {
                 switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(plasmaURL.urlFlagLength), false);
                 switchboard.urlPool.noticeURL.remove(urlhash);

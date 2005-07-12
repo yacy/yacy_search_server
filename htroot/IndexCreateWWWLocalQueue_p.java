@@ -85,10 +85,10 @@ public class IndexCreateWWWLocalQueue_p {
             prop.put("crawler-queue", 0);
         } else {
             prop.put("crawler-queue", 1);
-            plasmaCrawlNURL.entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, 100);
+            plasmaCrawlNURL.Entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, 100);
             prop.put("crawler-queue_num", stackSize);//num Entries
             prop.put("crawler-queue_show-num", crawlerList.length); //showin sjow-num most recent
-            plasmaCrawlNURL.entry urle;
+            plasmaCrawlNURL.Entry urle;
             boolean dark = true;
             yacySeed initiator;
             int i;

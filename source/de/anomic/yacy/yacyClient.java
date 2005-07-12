@@ -450,7 +450,7 @@ public class yacyClient {
         }
     }
     
-    public static HashMap crawlOrder(yacySeed targetSeed, String url, String referrer, int depth) {
+    public static HashMap crawlOrder(yacySeed targetSeed, URL url, URL referrer, int depth) {
         // this post a message to the remote message board
         if (targetSeed == null) return null;
         if (yacyCore.seedDB.mySeed == null) return null;
@@ -467,8 +467,8 @@ public class yacyClient {
             "&process=crawl" +
             "&youare=" + targetSeed.hash +
             "&iam=" + yacyCore.seedDB.mySeed.hash +
-            "&url=" + crypt.simpleEncode(url) +
-            "&referrer=" + crypt.simpleEncode(referrer) +
+            "&url=" + crypt.simpleEncode(url.toString()) +
+            "&referrer=" + crypt.simpleEncode((referrer == null) ? "" : referrer.toString()) +
             "&depth=" + depth +
             "&ttl=0"
             ),

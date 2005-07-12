@@ -45,7 +45,7 @@ import java.lang.String;
 import java.util.HashMap;
 import java.io.File;
 
-import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.kelondroMSetTools;
 
 public class plasmaURLPattern {
     
@@ -71,7 +71,7 @@ public class plasmaURLPattern {
         
         if(filenamesarray.length >0)
             for(int i = 0; i < filenamesarray.length; i++)
-                hostpaths.putAll(serverFileUtils.loadMap(mapname, (new File(rootPath, filenamesarray[i])).toString(), sep));
+                hostpaths.putAll(kelondroMSetTools.loadMap(mapname, (new File(rootPath, filenamesarray[i])).toString(), sep));
     }
     
     public void remove(String host) {
