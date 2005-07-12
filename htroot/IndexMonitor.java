@@ -94,6 +94,11 @@ public class IndexMonitor {
             }
         }
         
+        // custom number of lines
+        if (post.containsKey("count")) {
+            showIndexedCount = Integer.parseInt((String) post.get("count", "40"));
+        }
+        
         // do the commands
         if (post.containsKey("clearlist")) switchboard.urlPool.loadedURL.clearStack(process);
         if (post.containsKey("deleteentry")) {
