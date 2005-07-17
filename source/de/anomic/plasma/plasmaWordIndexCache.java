@@ -318,9 +318,13 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         if (cache.size() == 0) return;
         flushThread.pause();
         try {
-            int count = hashScore.getMaxScore();
             String hash = (String) hashScore.getMaxObject();
-            long time = (hash == null) ? System.currentTimeMillis() : longTime(hashDate.getScore(hash));
+            if (hash == null) {
+                flushThread.proceed();
+                return;
+            }
+            int count = hashScore.getMaxScore();
+            long time = longTime(hashDate.getScore(hash));
             if ((count > ramcacheLimit) && (System.currentTimeMillis() - time > 10000)) {
                 // flush high-score entries
                 flushFromMem(hash, true);
@@ -364,7 +368,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(key, container);
             if (feedback == null) {
                 return container.size();
-            } else if (reintegrate) {
+            } else if ((container.size() != feedback.size()) && (reintegrate)) {
                 // put assortmentRecord together with container back to ram
                 synchronized (cache) {
                     cache.put(key, feedback);

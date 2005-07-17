@@ -932,13 +932,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             if (noIndexReason == null) {
                 // strip out words
-                log.logDebug("(Profile) Condensing for '" + entry.normalizedURLString() + "'");
+                log.logDebug("Condensing for '" + entry.normalizedURLString() + "'");
                 plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(document.getText()));
  
                 //log.logInfo("INDEXING HEADLINE:" + descr);
                 try {
-                    log.logDebug("(Profile) Create LURL-Entry for '" + entry.normalizedURLString() + "', " +
-                                 "responseHeader=" + entry.responseHeader().toString());
+                    //log.logDebug("Create LURL-Entry for '" + entry.normalizedURLString() + "', " +
+                    //             "responseHeader=" + entry.responseHeader().toString());
                     Date lastModified = entry.responseHeader().lastModified();
                     if (lastModified == null) lastModified = entry.responseHeader().date();
                     if (lastModified == null) lastModified = new Date();
@@ -957,20 +957,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                      );
                     
                     String urlHash = newEntry.hash();
-                    log.logDebug("(Profile) Remove NURL for '" + entry.normalizedURLString() + "'");
+                    //log.logDebug("Remove NURL for '" + entry.normalizedURLString() + "'");
                     urlPool.noticeURL.remove(urlHash); // worked-off
                     
                     if (((processCase == 4) || (processCase == 5) || (processCase == 6)) &&
 			(entry.profile().localIndexing())) {
                         // remove stopwords
-                        log.logDebug("(Profile) Exclude Stopwords for '" + entry.normalizedURLString() + "'");
                         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + entry.url());
-                        //System.out.println("DEBUG: words left to be indexed: " + condenser.getWords());
                         
                         // do indexing
-                        log.logDebug("(Profile) Create Index for '" + entry.normalizedURLString() + "'");
+                        //log.logDebug("Create Index for '" + entry.normalizedURLString() + "'");
                         int words = searchManager.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(entry.responseHeader().mime()));
-                        log.logInfo("Indexed " + words + " words in URL " + entry.url() + " (" + descr + ")");
+                        log.logInfo("*Indexed " + words + " words in URL " + entry.url() + " (" + descr + ")");
                         
                         // if this was performed for a remote crawl request, notify requester
                         if ((processCase == 6) && (initiator != null)) {
@@ -978,7 +976,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             yacyClient.crawlReceipt(initiator, "crawl", "fill", "indexed", newEntry, "");
                         }
                     } else {
-                        log.logDebug("Resource '" + entry.normalizedURLString() + "' not indexed (indexing is off)");
+                        log.logDebug("Not Indexed Resource '" + entry.normalizedURLString() + "': process case=" + processCase);
                     }
                 } catch (Exception ee) {
                     log.logError("Could not index URL " + entry.url() + ": " + ee.getMessage());
