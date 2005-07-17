@@ -94,6 +94,24 @@ public final class plasmaWordIndexAssortmentCluster {
 	// the assortmen(s) and returned together with the newRecord.
 	// if storage was successful, NULL is returned.
 	if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
+        plasmaWordIndexEntryContainer buffer;
+        while ((buffer = assortments[newContainer.size() - 1].remove(wordHash)) != null) {
+            newContainer.add(buffer);
+            if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
+        }
+        // the assortment (newContainer.size() - 1) should now be empty. put it in there
+        assortments[newContainer.size() - 1].store(wordHash, newContainer);
+        // return null to show that we have stored the new Record successfully
+        return null;
+    }
+    
+    /*
+    public plasmaWordIndexEntryContainer storeTry(String wordHash, plasmaWordIndexEntryContainer newContainer) {
+	// this tries to store the record. If the record does not fit, or a same hash already
+	// exists and would not fit together with the new record, then the record is deleted from
+	// the assortmen(s) and returned together with the newRecord.
+	// if storage was successful, NULL is returned.
+	if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
 	plasmaWordIndexEntryContainer buffer;
 	for (int i = 0; i < clusterCapacity; i++) {
 	    buffer = assortments[i].remove(wordHash);
@@ -105,6 +123,16 @@ public final class plasmaWordIndexAssortmentCluster {
         // return null to show that we have stored the new Record successfully
         return null;
     }
+    */
+    
+    /*
+    public plasmaWordIndexEntryContainer removeFromOne(String wordHash, int assortment) {
+        // collect one container from a specific assortment
+        plasmaWordIndexEntryContainer container = assortments[assortment].remove(wordHash);
+	if (container == null) return new plasmaWordIndexEntryContainer(wordHash);
+        return container;
+    }
+    */
     
     public plasmaWordIndexEntryContainer removeFromAll(String wordHash) {
         // collect all records from all the assortments and return them

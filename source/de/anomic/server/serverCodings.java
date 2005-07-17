@@ -46,6 +46,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.Properties;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 
@@ -275,7 +276,24 @@ public final class serverCodings {
 	}
 	return p;
     }
-        
+    
+    public static HashMap string2map(String string) {
+        // this can be used to parse a Map.toString() into a Map again
+	if (string == null) return null;
+	HashMap map = new HashMap();
+	int pos;
+	pos = string.indexOf("{"); if (pos >= 0) string = string.substring(pos + 1).trim();
+	pos = string.lastIndexOf("}"); if (pos >= 0) string = string.substring(0, pos).trim();
+	StringTokenizer st = new StringTokenizer(string, ",");
+	String token;
+	while (st.hasMoreTokens()) {
+	    token = st.nextToken().trim();
+	    pos = token.indexOf("=");
+	    if (pos > 0) map.put(token.substring(0, pos).trim(), token.substring(pos + 1).trim());
+	}
+	return map;
+    }
+    
     public static void main(String[] s) {
 	serverCodings b64 = new serverCodings(true);
 	if (s.length == 0) {System.out.println("usage: -[ec|dc|es|ds] <arg>"); System.exit(0);}

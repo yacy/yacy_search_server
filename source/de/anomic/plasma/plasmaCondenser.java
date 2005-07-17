@@ -202,7 +202,7 @@ public class plasmaCondenser {
 		}
 		words.put(word, sp);
 		// we now have the unique handle of the word, put it into the sentence:
-		sentence = sentence + intString(wordHandle, numlength);
+		sentence = sentence + intString(wordHandle, numlength); // thread hang error here
 	    }
 	}
 	// finnish last sentence

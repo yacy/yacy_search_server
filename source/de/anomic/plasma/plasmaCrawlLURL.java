@@ -162,34 +162,6 @@ public class plasmaCrawlLURL extends plasmaURL {
         }
     }
     
-    /*
-    public synchronized Entry addEntry(String propStr, boolean setGlobal, String initiatorHash, String executorHash, int stackType) {
-	if ((propStr.startsWith("{")) && (propStr.endsWith("}"))) {
-            //System.out.println("DEBUG: propStr=" + propStr);
-            try {
-                Entry e = new Entry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)), setGlobal);
-                if (initiatorHash == null) initiatorHash = dummyHash;
-                if (executorHash == null) executorHash = dummyHash;
-                switch (stackType) {
-                    case 0: break;
-                    case 1: externResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-                    case 2: searchResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-                    case 3: transfResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-                    case 4: proxyResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-                    case 5: lcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-                    case 6: gcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-                }
-                return e;
-            } catch (Exception ex) {
-                System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
-                return null;
-            }
-        } else {
-	    return null;
-        }
-    }
-    */
-    
     public void notifyGCrawl(String urlHash, String initiatorHash, String executorHash) {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }

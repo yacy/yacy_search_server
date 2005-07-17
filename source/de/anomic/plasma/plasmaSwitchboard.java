@@ -376,9 +376,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         deployThread("30_peerping", "YaCy Core", "this is the p2p-control and peer-ping task",
                      peerPing = new serverInstantThread(yc, "peerPing", null), 2000);
         peerPing.setSyncObject(new Object());
+        
         indexDistribution = new plasmaWordIndexDistribution(urlPool, wordIndex, log,
                                                             getConfig("allowDistributeIndex", "false").equals("true"));
-        indexDistribution.setCounts(100 /*indexCount*/, 1 /*peerCount*/, 8000);
+        indexDistribution.setCounts(100, 1, 8000);
         deployThread("20_dhtdistribution", "DHT Distribution (currently by juniors only)", "selection, transfer and deletion of index entries that are not searched on your peer, but on others",
                      new serverInstantThread(indexDistribution, "job", null), 120000);
             
@@ -400,7 +401,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
-    
+        log.logSystem("Finished Switchboard Initialization");
     }
     
     private static String ppRamString(int bytes) {

@@ -359,6 +359,54 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	}
         
         // now decide where to flush that container
+        if (container.size() <= assortmentLimit) {
+            // this fits into the assortments
+            plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(key, container);
+            if (feedback == null) {
+                return container.size();
+            } else if (reintegrate) {
+                // put assortmentRecord together with container back to ram
+                synchronized (cache) {
+                    cache.put(key, feedback);
+                    hashScore.setScore(key, feedback.size());
+                    hashDate.setScore(key, intTime(time));
+                }
+                return container.size() - feedback.size();
+            } else {
+                // *** should care about another option here ***
+                return backend.addEntries(feedback, time);
+            }
+        } else {
+            // store to back-end; this should be a rare case
+            return backend.addEntries(container, time);
+        }
+
+    }
+    
+    /*
+        private int flushFromMem(String key, boolean reintegrate) {
+        // this method flushes indexes out from the ram to the disc.
+        // at first we check the singleton database and act accordingly
+        // if we we are to flush an index, but see also an entry in the singletons, we
+        // decide upn the 'reintegrate'-Flag:
+        // true: do not flush to disc, but re-Integrate the singleton to the RAM
+        // false: flush the singleton together with container to disc
+        
+        plasmaWordIndexEntryContainer container = null;
+        long time;
+	synchronized (cache) {
+            // get the container
+            container = (plasmaWordIndexEntryContainer) cache.get(key);
+            if (container == null) return 0; // flushing of nonexisting key
+            time = getUpdateTime(key);
+
+            // remove it from the cache
+            cache.remove(key);
+	    hashScore.deleteScore(key);
+            hashDate.deleteScore(key);
+	}
+        
+        // now decide where to flush that container
         plasmaWordIndexEntryContainer flushedFromAssortment = assortmentCluster.removeFromAll(key);
         if ((flushedFromAssortment == null) || (flushedFromAssortment.size() == 0)) {
             // not found in assortments
@@ -394,6 +442,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             }
         }	
     }
+    */
     
     private int intTime(long longTime) {
         return (int) ((longTime - startTime) / 1000);

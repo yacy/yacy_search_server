@@ -123,7 +123,7 @@ public class kelondroStack extends kelondroRecords {
 	    // expand the list at the end
 	    Node n = newNode(row);
 	    n.save();
-	    n.setOHHandle(new Handle[] {getHandle(toor),null});
+	    n.setOHHandle(new Handle[] {getHandle(toor), null});
 	    Node n1 = getNode(getHandle(toor), null, 0);
 	    n1.setOHHandle(new Handle[] {n1.getOHHandle()[left], n.handle()});
 	    // assign handles
@@ -134,79 +134,111 @@ public class kelondroStack extends kelondroRecords {
 
     public synchronized byte[][] pop() throws IOException {
 	// return row ontop of the stack and shrink stack by one
-	Handle h = getHandle(toor);
-	if (h == null) return null;
-	Node n = getNode(h, null, 0);
-	byte[][] ret = n.getValues();
-	// shrink stack
-	Handle l = n.getOHHandle()[left];
-	if (l == null) {
-	    // the stack will be empty, write the root handle
-	    setHandle(root, null);
-	} else {
-	    // un-link the previous record
-	    Node k = getNode(l, null, 0);
-	    k.setOHHandle(new Handle[] {k.getOHHandle()[left], null});
-	}
-	setHandle(toor, l);
-	deleteNode(h);
-	return ret;
+	return pop(0);
     }
 
+    public synchronized byte[][] pop(int dist) throws IOException {
+	// return row relative to top of the stack and remove addressed element
+	Node n = topNode(dist);
+        if (n == null) return null;
+        byte[][] ret = n.getValues();
+
+        // remove node
+        unlinkNode(n);
+	deleteNode(n.handle());
+        
+	return ret;
+    }
+    
     public synchronized byte[][] top() throws IOException {
 	// return row ontop of the stack
-	Handle h = getHandle(toor);
-	if (h == null) return null;
-	return getNode(h, null, 0).getValues();
+	return top(0);
     }
 
     public synchronized byte[][] top(int dist) throws IOException {
 	// return row ontop of the stack
 	// with dist == 0 this is the same function as with top()
-	Handle h = getHandle(toor);
-	if (h == null) return null;
-	if (dist >= size()) return null; // that would exceed the stack
-	while (dist-- > 0) h = getNode(h, null, 0).getOHHandle()[left]; // track through elements
-	return getNode(h, null, 0).getValues();
+        Node n = topNode(dist);
+        if (n == null) return null;
+        return n.getValues();
     }
 
     public synchronized byte[][] pot() throws IOException {
 	// return row on the bottom of the stack and remove record
-	Handle h = getHandle(root);
-	if (h == null) return null;
-	Node n = getNode(h, null, 0);
+	return pot(0);
+    }
+
+    public synchronized byte[][] pot(int dist) throws IOException {
+	// return row relative to the bottom of the stack and remove addressed element
+	Node n = botNode(dist);
+        if (n == null) return null;
 	byte[][] ret = n.getValues();
-	// shrink stack
-	Handle r = n.getOHHandle()[right];
-	if (r == null) {
-	    // the stack will be empty, write the toor handle
-	    setHandle(toor, null);
-	} else {
-	    // un-link the next record
-	    Node k = getNode(r, null, 0);
-	    k.setOHHandle(new Handle[] {null, k.getOHHandle()[right]});
-	}
-	setHandle(root, r);
-	deleteNode(h);
+        
+        // remove node
+        unlinkNode(n);
+	deleteNode(n.handle());
+        
 	return ret;
     }
 
     public synchronized byte[][] bot() throws IOException {
 	// return row on the bottom of the stack
-	Handle h = getHandle(root);
-	if (h == null) return null;
-	return getNode(h, null, 0).getValues();
+	return bot(0);
     }
 
     public synchronized byte[][] bot(int dist) throws IOException {
 	// return row on bottom of the stack
 	// with dist == 0 this is the same function as with bot()
-	Handle h = getHandle(root);
+	Node n = botNode(dist);
+	if (n == null) return null;
+        return n.getValues();
+    }
+    
+    private void unlinkNode(Node n) throws IOException {
+        // join chaines over node
+	Handle l = n.getOHHandle()[left];
+        Handle r = n.getOHHandle()[right];
+        // look left
+	if (l == null) {
+	    // reached the root on left side
+	    setHandle(root, r);
+	} else {
+	    // un-link the previous record
+	    Node k = getNode(l, null, 0);
+	    k.setOHHandle(new Handle[] {k.getOHHandle()[left], r});
+	}
+        // look right
+        if (r == null) {
+	    // reached the root on right side
+	    setHandle(toor, l);
+	} else {
+	    // un-link the following record
+	    Node k = getNode(r, null, 0);
+	    k.setOHHandle(new Handle[] {l, k.getOHHandle()[right]});
+	}
+    }
+    
+    private Node topNode(int dist) throws IOException {
+	// return node ontop of the stack
+        return queueNode(dist, toor, left);
+    }
+    
+    private Node botNode(int dist) throws IOException {
+	// return node on bottom of the stack
+        return queueNode(dist, root, right);
+    }
+    
+    private Node queueNode(int dist, int side, int dir) throws IOException {
+	// with dist == 0 this is the same function as with getNode(getHandle(side), null, 0)
+	Handle h = getHandle(side);
 	if (h == null) return null;
 	if (dist >= size()) return null; // that would exceed the stack
-	while (dist-- > 0) h = getNode(h, null, 0).getOHHandle()[right]; // track through elements
-	return getNode(h, null, 0).getValues();
+	while (dist-- > 0) h = getNode(h, null, 0).getOHHandle()[dir]; // track through elements
+	return getNode(h, null, 0);
     }
+    
+    
+    
 
     /*
     public synchronized byte[][] seekPop(byte[] key, long maxdepth) throws IOException {
@@ -262,14 +294,13 @@ public class kelondroStack extends kelondroRecords {
 
     public void print() {
 	super.print(false);
-	Handle h;
 	Node n;
 	try {
 	    Iterator it = iterator();
 	    while (it.hasNext()) {
-		h = (Handle) it.next();
-		n = getNode(h, null, 0);
-		System.out.println("> NODE " + hp(h) +
+		n = (Node) it.next();
+		//n = getNode(h, null, 0);
+		System.out.println("> NODE " + hp(n.handle()) +
 				   "; left " + hp(n.getOHHandle()[left]) + ", right " + hp(n.getOHHandle()[right]));
 		System.out.print("  KEY:'" + (new String(n.getValues()[0])).trim() + "'");
 		for (int j = 1; j < columns(); j++)
@@ -323,6 +354,11 @@ public class kelondroStack extends kelondroRecords {
 			}
 		    }
 		    ret = null;
+		} else if (args[0].equals("-g")) {
+		    kelondroStack fm = new kelondroStack(new File(args[2]), 0x100000);
+		    byte[][] ret2 = fm.pop(Integer.parseInt(args[1]));
+		    ret = ((ret2 == null) ? null : ret2[1]); 
+		    fm.close();
 		}
 	    } else if (args.length == 4) {
 		if (args[0].equals("-c")) {
@@ -350,6 +386,14 @@ public class kelondroStack extends kelondroRecords {
     }
     
     public static void main(String[] args) {
+        // -c 10 20 test.stack
+        // -p a a1 test.stack
+        // -p b b1 test.stack
+        // -p c c1 test.stack
+        // -v test.stack
+        // -g test.stack
+        // -v test.stack
+        // -g 1 test.stack
 	cmd(args);
     }
     

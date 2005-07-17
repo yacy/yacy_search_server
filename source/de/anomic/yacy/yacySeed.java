@@ -349,18 +349,7 @@ public class yacySeed {
 	if (seedStr == null) return null;
 	String seed = crypt.simpleDecode(seedStr, key);
 	if (seed == null) return null;
-	HashMap dna = new HashMap();
-	int pos;
-	pos = seed.indexOf("{"); if (pos >= 0) seed = seed.substring(pos + 1).trim();
-	pos = seed.lastIndexOf("}"); if (pos >= 0) seed = seed.substring(0, pos).trim();
-	StringTokenizer st = new StringTokenizer(seed, ",");
-	String token;
-	while (st.hasMoreTokens()) {
-	    token = st.nextToken().trim();
-	    //System.out.println("PARSED TOKEN: " + token);
-	    pos = token.indexOf("=");
-	    if (pos > 0) dna.put(token.substring(0, pos).trim(), token.substring(pos + 1).trim());
-	}
+	HashMap dna = serverCodings.string2map(seed);
 	String hash = (String) dna.remove("Hash");
 	return new yacySeed(hash, dna);
     }

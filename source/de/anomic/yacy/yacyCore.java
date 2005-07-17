@@ -106,7 +106,8 @@ public class yacyCore {
     private plasmaSwitchboard switchboard;
     
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("America/Los_Angeles");
-    public static SimpleDateFormat shortFormatter = new SimpleDateFormat("yyyyMMddHHmmss");
+    public static String universalDatePattern = "yyyyMMddHHmmss";
+    public static SimpleDateFormat shortFormatter = new SimpleDateFormat(universalDatePattern);
     
     public static long universalTime() {
 	return universalDate().getTime();
@@ -117,7 +118,11 @@ public class yacyCore {
     }
 
     public static String universalDateShortString() {
-	return shortFormatter.format(universalDate());
+	return universalDateShortString(universalDate());
+    }
+
+    public static String universalDateShortString(Date date) {
+	return shortFormatter.format(date);
     }
 
     public static Date parseUniversalDate(String remoteTimeString) {
