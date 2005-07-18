@@ -205,7 +205,7 @@ public final class plasmaHTCache {
         File f;
         while (currCacheSize > maxCacheSize) {
             f = (File) cacheAge.remove(cacheAge.firstKey());
-            if (f.exists()) {
+            if ((f != null) && (f.exists())) {
                 currCacheSize -= f.length();
                 if (f.delete()) {
                     log.logInfo("DELETED OLD CACHE : " + f.toString());

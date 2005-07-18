@@ -54,6 +54,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyCore;
+import de.anomic.plasma.plasmaSwitchboard;
 
 public class Status {
 
@@ -117,8 +118,10 @@ public class Status {
             prop.put("peerAddress", 0);//not assigned
             prop.put("peerStatistics", 0);//unknown
         } else {
+            long uptime = 60000 * Long.parseLong(yacyCore.seedDB.mySeed.get("Uptime", "0"));
             prop.put("peerStatistics", 1);
-            prop.put("peerStatistics_uptime", serverDate.intervalToString(60000 * Long.parseLong(yacyCore.seedDB.mySeed.get("Uptime", "0"))));
+            prop.put("peerStatistics_uptime", serverDate.intervalToString(uptime));
+            prop.put("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed.get("ISpeed", "unknown"));
             prop.put("peerStatistics_links", yacyCore.seedDB.mySeed.get("LCount", "unknown"));
             prop.put("peerStatistics_words", yacyCore.seedDB.mySeed.get("ICount", "unknown"));
             prop.put("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);

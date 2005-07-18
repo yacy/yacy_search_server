@@ -383,7 +383,7 @@ public class yacyCore {
             
             // holding a reference to all started threads
             int contactedSeedCount = 0;
-            List syncList = Collections.synchronizedList(new LinkedList()); // memory for threads    
+            List syncList = Collections.synchronizedList(new LinkedList()); // memory for threads
             serverSemaphore sync = new serverSemaphore(attempts);
             
             // going through the peer list and starting a new publisher thread for each peer

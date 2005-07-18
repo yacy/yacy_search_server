@@ -106,7 +106,7 @@ public class yacySeed {
 	dna.put("Name", "&empty;");     // the name that the peer has given itself
 	dna.put("BDate", "&empty;");    // birthdate - first startup
 	// later during operation -
-	dna.put("ISpeed", "0");   // the speed of indexing (words/minute) of the peer
+	dna.put("ISpeed", "0");   // the speed of indexing (pages/minute) of the peer
 	dna.put("Uptime", "0");   // the number of minutes that the peer is up in minutes/day (moving average MA30)
 	dna.put("LCount", "0");   // the number of links that the peer has stored (LURL's)
         dna.put("NCount", "0");   // the number of links that the peer has noticed, but not loaded (NURL's)

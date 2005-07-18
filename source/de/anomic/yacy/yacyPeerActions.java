@@ -99,8 +99,9 @@ public class yacyPeerActions {
         } else {
             seedDB.mySeed.put("Port", sb.getConfig("port", "8080"));
         }
-        seedDB.mySeed.put("ISpeed", "unknown"); // the speed of indexing (words/minute) of the peer
         long uptime = ((yacyCore.universalTime() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000) / 60;
+        long indexedc = sb.getThread("80_indexing").getBusyCycles();
+        seedDB.mySeed.put("ISpeed", ((indexedc == 0) || (uptime == 0)) ? "unknown" : ("" + (indexedc / uptime))); // the speed of indexing (pages/minute) of the peer
         seedDB.mySeed.put("Uptime", "" + uptime); // the number of minutes that the peer is up in minutes/day (moving average MA30)
         seedDB.mySeed.put("LCount", "" + sb.urlPool.loadedURL.size()); // the number of links that the peer has stored (LURL's)
         seedDB.mySeed.put("NCount", "" + sb.urlPool.noticeURL.stackSize()); // the number of links that the peer has noticed, but not loaded (NURL's)

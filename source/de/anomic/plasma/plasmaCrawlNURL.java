@@ -191,21 +191,24 @@ public class plasmaCrawlNURL extends plasmaURL {
                 String profile, int depth, int anchors, int forkfactor, int stackMode) {
 	Entry e = new Entry(initiator, url, referrer, name, loaddate, profile,
                      depth, anchors, forkfactor);
-        try {
-            switch (stackMode) {
-                case STACK_TYPE_CORE:     coreStack.push(new byte[][] {e.hash.getBytes()}); break;
-                case STACK_TYPE_LIMIT:    limitStack.push(new byte[][] {e.hash.getBytes()}); break;
-                case STACK_TYPE_OVERHANG: overhangStack.push(new byte[][] {e.hash.getBytes()}); break;
-                case STACK_TYPE_REMOTE:   remoteStack.push(new byte[][] {e.hash.getBytes()}); break;
-                case STACK_TYPE_IMAGE:    imageStack.push(new byte[][] {e.hash.getBytes()}); break;
-                case STACK_TYPE_MOVIE:    movieStack.push(new byte[][] {e.hash.getBytes()}); break;
-                case STACK_TYPE_MUSIC:    musicStack.push(new byte[][] {e.hash.getBytes()}); break;
+        push(stackMode, e.hash);
+        return e;
+    }
+
+    private void push(int stackType, String hash) {
+	try {
+            switch (stackType) {
+                case STACK_TYPE_CORE:     coreStack.push(new byte[][] {hash.getBytes()}); break;
+                case STACK_TYPE_LIMIT:    limitStack.push(new byte[][] {hash.getBytes()}); break;
+                case STACK_TYPE_OVERHANG: overhangStack.push(new byte[][] {hash.getBytes()}); break;
+                case STACK_TYPE_REMOTE:   remoteStack.push(new byte[][] {hash.getBytes()}); break;
+                case STACK_TYPE_IMAGE:    imageStack.push(new byte[][] {hash.getBytes()}); break;
+                case STACK_TYPE_MOVIE:    movieStack.push(new byte[][] {hash.getBytes()}); break;
+                case STACK_TYPE_MUSIC:    musicStack.push(new byte[][] {hash.getBytes()}); break;
                 default: break;
             }
-            stackIndex.add(new String(e.hash.getBytes()));
-        } catch (IOException er) {
-        }
-        return e;
+            stackIndex.add(hash);
+        } catch (IOException er) {}
     }
 
     public Entry[] top(int stackType, int count) {
@@ -231,6 +234,19 @@ public class plasmaCrawlNURL extends plasmaURL {
             case STACK_TYPE_MOVIE:    return pop(movieStack);
             case STACK_TYPE_MUSIC:    return pop(musicStack);
             default: return null;
+        }
+    }
+    
+    public void shift(int fromStack, int toStack) throws IOException {
+        switch (fromStack) {
+            case STACK_TYPE_CORE:     push(toStack, new String(coreStack.pop()[0])); return;
+            case STACK_TYPE_LIMIT:    push(toStack, new String(limitStack.pop()[0])); return;
+            case STACK_TYPE_OVERHANG: push(toStack, new String(overhangStack.pop()[0])); return;
+            case STACK_TYPE_REMOTE:   push(toStack, new String(remoteStack.pop()[0])); return;
+            case STACK_TYPE_IMAGE:    push(toStack, new String(imageStack.pop()[0])); return;
+            case STACK_TYPE_MOVIE:    push(toStack, new String(movieStack.pop()[0])); return;
+            case STACK_TYPE_MUSIC:    push(toStack, new String(musicStack.pop()[0])); return;
+            default: return;
         }
     }
     

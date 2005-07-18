@@ -711,6 +711,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //log.logDebug("LimitCrawl: queue is empty");
             return false;
         }
+        
+        if ((coreCrawlJobSize() == 0) && (limitCrawlTriggerJobSize() > 100)) {
+            // it is not efficient if the core crawl job is empty and we have too much to do
+            // move some tasks to the core crawl job
+            int toshift = limitCrawlTriggerJobSize() / 10;
+            if (toshift > 1000) toshift = 1000;
+            try {
+                for (int i = 0; i < toshift; i++) {
+                    urlPool.noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);
+                }
+                log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl");
+            } catch (IOException e) {}
+        }
+        
         // if the server is busy, we do crawling more slowly
         //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         

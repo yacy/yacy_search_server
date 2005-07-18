@@ -113,6 +113,7 @@ public class Network {
                 prop.put("table_my-sU", seed.get("sU", "-"));
                 prop.put("table_my-rI", seed.get("rI", "-"));
                 prop.put("table_my-rU", seed.get("rU", "-"));
+                prop.put("table_my-ppm", seed.get("ISpeed", "-"));
                 prop.put("table_my-seeds", seed.get("SCount", "-"));
                 prop.put("table_my-connects", seed.get("CCount", "-"));
             }
@@ -262,6 +263,7 @@ public class Network {
                             prop.put("table_list_"+conCount+"_sU", seed.get("sU", "-"));
                             prop.put("table_list_"+conCount+"_rI", seed.get("rI", "-"));
                             prop.put("table_list_"+conCount+"_rU", seed.get("rU", "-"));
+                            prop.put("table_list_"+conCount+"_ppm", seed.get("ISpeed", "-"));
                             prop.put("table_list_"+conCount+"_seeds", seed.get("SCount", "-"));
                             prop.put("table_list_"+conCount+"_connects", seed.get("CCount", "-"));
                             conCount++;
