@@ -389,6 +389,7 @@ public final class yacy {
             }
         } catch (Exception ee) {
             serverLog.logFailure("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
+            ee.printStackTrace();
         }
         serverLog.logSystem("SHUTDOWN", "goodbye. (this is the last line)");
         try {
