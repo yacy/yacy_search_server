@@ -77,6 +77,8 @@ public class Network {
             int potCount = yacyCore.seedDB.sizePotential();
             
             boolean complete = ((post == null) ? false : post.get("links", "false").equals("true"));
+            long otherppm = yacyCore.seedDB.countActivePPM();
+            long myppm = 0;
             
             // create own peer info
             yacySeed seed = yacyCore.seedDB.mySeed;
@@ -103,6 +105,7 @@ public class Network {
                     accActLinks += links;
                     accActWords += words;
                 }
+                try {myppm = Long.parseLong(seed.get("ISpeed", "0"));} catch (NumberFormatException e) {}
                 prop.put("table_my-version", seed.get("Version", "-"));
                 prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", ""))));
                 prop.put("table_my-links", groupDigits(links));
@@ -113,7 +116,7 @@ public class Network {
                 prop.put("table_my-sU", seed.get("sU", "-"));
                 prop.put("table_my-rI", seed.get("rI", "-"));
                 prop.put("table_my-rU", seed.get("rU", "-"));
-                prop.put("table_my-ppm", seed.get("ISpeed", "-"));
+                prop.put("table_my-ppm", myppm);
                 prop.put("table_my-seeds", seed.get("SCount", "-"));
                 prop.put("table_my-connects", seed.get("CCount", "-"));
             }
@@ -132,6 +135,8 @@ public class Network {
             prop.put("table_all-count", (conCount + disconCount + potCount));
             prop.put("table_all-links", groupDigits(accActLinks + accPassLinks + accPotLinks));
             prop.put("table_all-words", groupDigits(accActWords + accPassWords + accPotWords));
+            
+            prop.put("table_gppm", otherppm + ((iAmActive) ? myppm : 0));
             
             String comment = "";
             prop.put("table_comment", 0);

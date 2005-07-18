@@ -106,7 +106,7 @@ public class kelondroMap {
                 }
                 
                 if (accfields != null) for (int i = 0; i < accfields.length; i++) {
-                    value = (String) map.get(sortfields[i]);
+                    value = (String) map.get(accfields[i]);
                     if (value != null) try {
                         valuel = Long.parseLong(value);
                         accumulator[i] = new Long(accumulator[i].longValue() + valuel);
