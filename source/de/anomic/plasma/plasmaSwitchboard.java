@@ -1145,7 +1145,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // do the request
-        HashMap page = yacyClient.crawlOrder(remoteSeed, urlEntry.url(), urlPool.getURL(urlEntry.referrerHash()), 0);
+        HashMap page = yacyClient.crawlOrder(remoteSeed, urlEntry.url(), urlPool.getURL(urlEntry.referrerHash()));
 
         
         // check success

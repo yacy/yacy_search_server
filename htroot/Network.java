@@ -105,7 +105,7 @@ public class Network {
                     accActLinks += links;
                     accActWords += words;
                 }
-                try {myppm = Long.parseLong(seed.get("ISpeed", "0"));} catch (NumberFormatException e) {}
+                myppm = seed.getPPM();
                 prop.put("table_my-version", seed.get("Version", "-"));
                 prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", ""))));
                 prop.put("table_my-links", groupDigits(links));

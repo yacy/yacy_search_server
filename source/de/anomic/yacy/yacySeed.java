@@ -203,6 +203,13 @@ public class yacySeed {
 	if ((ip != null) && (ip.length() >= 8) && (port != null) && (port.length() >= 2)) return ip + ":" + port; else return null;
     }
 
+    public int getPPM() {
+        try {
+            return Integer.parseInt(get("ISpeed", "0"));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
     private boolean getFlag(int flag) {
         String flags = get("Flags", "0000");
         return (new bitfield(flags.getBytes())).get(flag);

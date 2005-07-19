@@ -450,6 +450,7 @@ public class yacyClient {
         }
     }
     
+    /*
     public static HashMap crawlOrder(yacySeed targetSeed, URL url, URL referrer, int depth) {
         // this post a message to the remote message board
         if (targetSeed == null) return null;
@@ -473,6 +474,39 @@ public class yacyClient {
             "&ttl=0"
             ),
             10000, null, null, yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort));
+        } catch (Exception e) {
+            // most probably a network time-out exception
+            yacyCore.log.logError("yacyClient.crawlOrder error: peer=" + targetSeed.getName() + ", error=" + e.getMessage());
+            return null;
+        }
+    }
+    */
+    
+    public static HashMap crawlOrder(yacySeed targetSeed, URL url, URL referrer) {
+        // this post a message to the remote message board
+        if (targetSeed == null) return null;
+        if (yacyCore.seedDB.mySeed == null) return null;
+        if (yacyCore.seedDB.mySeed == targetSeed) return null;
+        
+        // construct request
+        serverObjects post = new serverObjects();
+        String key = crypt.randomSalt();
+        post.put("key", key);
+        post.put("process", "crawl");
+        post.put("iam", yacyCore.seedDB.mySeed.hash);
+        post.put("youare", targetSeed.hash);
+        post.put("mytime", yacyCore.universalDateShortString());
+        post.put("url", crypt.simpleEncode(url.toString()));
+        post.put("referrer", crypt.simpleEncode((referrer == null) ? "" : referrer.toString()));
+        post.put("depth", "0");
+        post.put("ttl", "0");
+        
+        String address = targetSeed.getAddress();
+        if (address == null) return null;
+        try {
+            return nxTools.table(httpc.wput(
+            new URL("http://" + address + "/yacy/crawlOrder.html"),
+            10000, null, null, yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort, post));
         } catch (Exception e) {
             // most probably a network time-out exception
             yacyCore.log.logError("yacyClient.crawlOrder error: peer=" + targetSeed.getName() + ", error=" + e.getMessage());

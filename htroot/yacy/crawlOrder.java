@@ -45,6 +45,7 @@
 
 import java.net.URL;
 import java.util.Date;
+import java.util.Vector;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -74,10 +75,8 @@ public class crawlOrder {
       	String youare     = (String) post.get("youare", "");    // seed hash of the target peer, needed for network stability
 	String process    = (String) post.get("process", "");   // process type
 	String key        = (String) post.get("key", "");       // transmission key
-	String url        = crypt.simpleDecode((String) post.get("url", ""), key); // the url string to crawl
-	String referrer   = crypt.simpleDecode((String) post.get("referrer", ""), key); // the referrer url
 	int    orderDepth = Integer.parseInt((String) post.get("depth", "0"));     // crawl depth
-
+        
 	// response values
         /*
          the result can have one of the following values:
@@ -101,7 +100,8 @@ public class crawlOrder {
         String  lurl        = "";
         boolean granted     = switchboard.getConfig("crawlResponse", "false").equals("true");
 	int     acceptDepth = Integer.parseInt(switchboard.getConfig("crawlResponseDepth", "0"));
-	int     acceptDelay = Integer.parseInt(switchboard.getConfig("crawlResponseDelay", "0"));
+        int     ppm         = yacyCore.seedDB.mySeed.getPPM();
+	int     acceptDelay = (ppm == 0) ? 10 : (2 + 60 / yacyCore.seedDB.mySeed.getPPM());
 	
         if (orderDepth > acceptDepth) orderDepth = acceptDepth;
 
@@ -113,7 +113,7 @@ public class crawlOrder {
             delay = "3600"; // may request one hour later again
 	} else if (orderDepth > 0) {
             response = "denied";
-            reason = "order must be 0";
+            reason = "order depth must be 0";
             delay = "3600"; // may request one hour later again
         } else if (!(granted)) {
             response = "denied";
@@ -121,8 +121,7 @@ public class crawlOrder {
             delay = "3600"; // may request one hour later again
         } else try {
             yacySeed requester = yacyCore.seedDB.getConnected(iam);
-            int queuesize = switchboard.queueSize();
-            String urlhash = plasmaURL.urlHash(new URL(url));
+            int queuesize = switchboard.coreCrawlJobSize() + switchboard.limitCrawlTriggerJobSize() + switchboard.remoteTriggeredCrawlJobSize();
             if (requester == null) {
                 response = "denied";
                 reason = "unknown-client";
@@ -131,40 +130,65 @@ public class crawlOrder {
                 response = "denied";
                 reason = "not-qualified";
                 delay = "240";
-            } else if (queuesize > 1) {
+            } else if (queuesize > 100) {
                 response = "rejected";
                 reason = "busy";
-                delay = "" + (queuesize * acceptDelay);
+                delay = "" + (30 + queuesize * acceptDelay);
             } else if (!(process.equals("crawl"))) {
                 response = "denied";
                 reason = "unknown-order";
                 delay = "9999";
             } else {
-		// stack url  
-		String reasonString = switchboard.stackCrawl(url, referrer, iam, "REMOTE-CRAWLING", new Date(), 0, switchboard.defaultRemoteProfile);
-                if (reasonString == null) {
-                    // liftoff!
-                    response = "stacked";
-                    reason = "ok";
-                    delay = "" + acceptDelay; // this value needs to be calculated individually
-                } else if (reasonString.equals("double_(already_loaded)")) {
-                    // case where we have already the url loaded;
-                    reason = reasonString;
-                    delay = "" + (acceptDelay / 4);
-                    // send lurl-Entry as response
-                    plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(plasmaCrawlLURL.urlHash(url));
-                    if (entry != null) {
-                        response = "double";
-                        switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
-                        lurl = crypt.simpleEncode(entry.toString());
-                        delay = "1";
-                    } else {
-                        response = "rejected";
-                    }
+                // read the urls/referrer-vector
+                Vector urlv = new Vector();
+                Vector refv = new Vector();
+                String refencoded = (String) post.get("referrer", null);
+                String urlencoded = (String) post.get("url", null);
+                if (urlencoded != null) {
+                    // old method: only one url
+                    urlv.add(crypt.simpleDecode(urlencoded, key)); // the url string to crawl
                 } else {
-                    response = "rejected";
-                    reason = reasonString;
-                    delay = "" + (acceptDelay / 4);
+                    // new method: read a vector of urls
+                    while ((urlencoded = (String) post.get("url" + urlv.size(), null)) != null) {
+                        urlv.add(crypt.simpleDecode(urlencoded, key));
+                    }
+                }
+                if (refencoded != null) {
+                    // old method: only one url
+                    refv.add(crypt.simpleDecode(refencoded, key)); // the referrer url
+                } else {
+                    // new method: read a vector of urls
+                    while ((refencoded = (String) post.get("ref" + refv.size(), null)) != null) {
+                        refv.add(crypt.simpleDecode(refencoded, key));
+                    }
+                }
+
+                // stack the urls
+                Object[] stackresult;
+                int count = Math.min(urlv.size(), refv.size());
+                if (count == 1) {
+                    // old method: only one url
+                    stackresult = stack(switchboard, (String) urlv.elementAt(0), (String) refv.elementAt(0), iam, youare);
+                    response = (String) stackresult[0];
+                    reason = (String) stackresult[1];
+                    lurl = (String) stackresult[2];
+                    delay = (response.equals("stacked")) ? "" + (5 + acceptDelay) : "1"; // this value needs to be calculated individually
+                } else {
+                    // new method: several urls
+                    int stackCount = 0;
+                    int doubleCount = 0;
+                    int rejectedCount = 0;
+                    for (int i = 0; i < count; i++) {
+                        stackresult = stack(switchboard, (String) urlv.elementAt(i), (String) refv.elementAt(i), iam, youare);
+                        response = (String) stackresult[0];
+                        prop.put("list_" + i + "_job", (String) stackresult[0] + "," + (String) stackresult[1]);
+                        prop.put("list_" + i + "_lurl", (String) stackresult[2]);
+                        prop.put("list_" + i + "_count", i);
+                    }
+                    response = "enqueued";
+                    reason = "ok";
+                    lurl = "";
+                    delay = "" + (stackCount * acceptDelay + 1);
                 }
 	    }
         } catch (Exception e) {
@@ -185,5 +209,36 @@ public class crawlOrder {
 	// return rewrite properties
 	return prop;
     }
+    
 
+    private static Object[] stack(plasmaSwitchboard switchboard, String url, String referrer, String iam, String youare) {
+        String response, reason, lurl;
+        // stack url
+        String reasonString = switchboard.stackCrawl(url, referrer, iam, "REMOTE-CRAWLING", new Date(), 0, switchboard.defaultRemoteProfile);
+        if (reasonString == null) {
+            // liftoff!
+            response = "stacked";
+            reason = "ok";
+            lurl = "";
+        } else if (reasonString.startsWith("double")) {
+            // case where we have already the url loaded;
+            reason = reasonString;
+            // send lurl-Entry as response
+            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(plasmaCrawlLURL.urlHash(url));
+            if (entry != null) {
+                response = "double";
+                switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
+                lurl = crypt.simpleEncode(entry.toString());
+            } else {
+                response = "rejected";
+                lurl = "";
+            }
+        } else {
+            response = "rejected";
+            reason = reasonString;
+            lurl = "";
+        }
+        return new Object[]{response, reason, lurl};
+    }
+    
 }

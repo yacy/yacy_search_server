@@ -376,7 +376,6 @@ crawlOrderDepth=0
 crawlOrderDelay=8
 crawlResponse=true
 crawlResponseDepth=0
-crawlResponseDelay=30
 
 # indexing-exclusion - rules
 # There rules are important to reduce the number of words that are indexed
@@ -387,7 +386,6 @@ crawlResponseDelay=30
 xsstopw=true
 xdstopw=true
 xpstopw=true
-
 
 # performance-settings
 # delay-times for permanent loops (milliseconds)
