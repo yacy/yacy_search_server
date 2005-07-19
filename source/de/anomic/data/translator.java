@@ -76,8 +76,9 @@ public class translator {
 		return result;
 	}
 	
-	public static Hashtable loadTranslationsList(File translationFile){
-		Hashtable translationList = new Hashtable();
+	public static Hashtable loadTranslationsLists(File translationFile){
+		Hashtable lists = new Hashtable(); //list of translationLists for different files.
+		Hashtable translationList = new Hashtable(); //current Translation Table
         FileInputStream fileIn = null;
 
 		Vector list = listManager.getListArray(translationFile);
@@ -85,6 +86,7 @@ public class translator {
 		String line = "";
 		String value = "";
 		String[] splitted;
+		String forFile="";
 
 		while(it.hasNext()){
 			line = (String)it.next();
@@ -100,12 +102,18 @@ public class translator {
 					translationList.put(splitted[0], value);
 				}else{ //Invalid line
 				}
+			}else if(line.startsWith("#File: ")){
+				if(forFile != ""){
+						lists.put(forFile, translationList);
+				}
+				forFile=line.substring(7);
+				translationList=new Hashtable();
 			}
 		}
-		return translationList;
+		return lists;
 	}
 	public static boolean translateFile(File sourceFile, File destFile, File translationFile){
-		Hashtable translationList = loadTranslationsList(translationFile);
+		Hashtable translationList = (Hashtable)loadTranslationsLists(translationFile).get(sourceFile.getName());
 		return translateFile(sourceFile, destFile, translationList);
 	}
 	
@@ -142,20 +150,24 @@ public class translator {
 	}
 
 	public static boolean translateFiles(File sourceDir, File destDir, File translationFile, String extension){
-			Hashtable translationList = loadTranslationsList(translationFile);
-			return translateFiles(sourceDir, destDir, translationList, extension);
+			Hashtable translationLists = loadTranslationsLists(translationFile);
+			return translateFiles(sourceDir, destDir, translationLists, extension);
 	}
 
-	public static boolean translateFiles(File sourceDir, File destDir, Hashtable translationList, String extension){
+	public static boolean translateFiles(File sourceDir, File destDir, Hashtable translationLists, String extension){
 		destDir.mkdirs();
 		File[] sourceFiles = sourceDir.listFiles();
 		for(int i=0;i<sourceFiles.length;i++){
 			
 			if(sourceFiles[i].getName().endsWith(extension)){
-				if(translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), translationList)){
-					serverLog.logInfo("Translator", "Translated File: "+ sourceFiles[i].getName());
+				if(translationLists.containsKey(sourceFiles[i].getName())){
+					if(translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), (Hashtable)translationLists.get(sourceFiles[i].getName()))){
+						serverLog.logInfo("Translator", "Translated File: "+ sourceFiles[i].getName());
+					}else{
+						serverLog.logError("Translator", "File Error while translating File "+sourceFiles[i].getName());
+					}
 				}else{
-					serverLog.logError("Translator", "File Error while translating File "+sourceFiles[i].getName());
+						serverLog.logInfo("Translator", "No translation for file: "+sourceFiles[i].getName());
 				}
 			}
 
