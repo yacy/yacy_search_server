@@ -46,7 +46,7 @@ Start Point:=Startpunkt:
 
 #-------------------------------------------------------
 #Status.html
-#Completely translated. If you find any untranslated string, send it to <admin@yacy-forum.de>
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 #"YaCy: Status"==YaCy: Status
 System-, Index- and Peer-Status==System-, Index- und Peer-Status
@@ -68,20 +68,24 @@ This peer's address==Adresse dieses Peers
 not used==wird nicht benutzt
 Not assigned==nicht zugewiesen
 Not assigned. The peer must go online to get an address.==Nicht zugewiesen. Ihr Peer muss online gehen, um eine Adresse zu bekommen.
-#The peer does not go online until you use the proxy to surf the internet,
-#thus proving that you <i>want</i> to go online.
-#If you don't know how to configure your system to use a proxy,
-#see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.
+#---
+The peer does not go online until you use the proxy to surf the internet,==Ihr Peer geht nicht online, bis Sie den Proxy benutzen, 
+thus proving that you <i>want</i> to go online.==wodurch Sie signalisieren, online gehen zu <i>wollen</i>.
+#---
+If you don't know how to configure your system to use a proxy,==Wenn Sie nicht wissen, wie Sie Ihr System konfigurieren, sodass es einen Proxy benutzt, 
+see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.==lesen Sie die <a href="http://www.yacy.net/yacy/Installation.html#wininst">Installationsanleitung</a>.
+#---
 Your '.yacy' home at==Ihre YaCy-Domain ist
 This peer's name==Name dieses Peers
 This peer's statistics==Statistik dieses Peers
 Unknown==unbekannt
 Uptime==Online seit
-#days==Tage
+days==Tage
+ago==
 "Connects"=="Verbindungen"
 peers/hour==Peers/Stunde
 This peer's status==Status dieses Peers
-#Virgin - You have not yet published your peer, because you have not yet used the proxy. If you configured your proxy settings (see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a> and go online by browsing the internet) you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers.==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil der Proxy noch nicht benutzt wurde. Wenn Sie Ihren Proxy eingestellt haben (Anleitung online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your br
+Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings (see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben (Anleitung online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">Browser konfigurieren</a>), laden Sie eine beliebige Seite über den Proxy, um zu beweisen, dass es funktioniert. Mit diesem Status können Sie keine anderen Peers durchsuchen!
 Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured (usually: 8080), or to set up a 'virtual server' in your router settings (often called DMZ). Please be fair, contribute your own index to the global index.==Junior - Ihr Peer kann nicht von außen erreicht werden. Ein möglicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Peers von Ihrer Suchseite aus benutzen. Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu öffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
 Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!=Senior - Sie lassen YaCy bei sich laufen und unterstützen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> können. Danke!
 Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zusätzlich Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
@@ -90,18 +94,18 @@ Other peers==Andere Peers
 other peers online.==andere Peers online.
 "not online"==nicht online
 Seed server==Seed Server
-#Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html">Settings page</a>.
+Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html">Settings page</a>.==Deaktiviert. Um dies zu aktivieren benötigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen können. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten für den FTP-Account können Sie in den <a href="Settings_p.html">Einstellungen</a> konfigurieren.
 Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
 Last upload:==Letzter Upload:
 Auto-popup on start-up==Popup bei YaCy-Start
 Disabled. To enable this again please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page==Deaktiviert. Um diese Funktion wieder zu aktivieren benutzen Sie bitte die <a href="Settings_p.html#SystemBehaviour">Einstellungen-Seite</a>.
 Enabled ==Aktiviert 
 Online-mode==Onlinemodus
-#You are in <i>event-based</i> online mode.
-#The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.
-#Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.
-#Use this only if you have a flatrate or you have an always-on connection.
-#To start permanent mode, press this button:
+You are in <i>event-based</i> online mode.=Sie sind im <i>aktivitätsbasierten</i> Onlinemodus.
+The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.==Das YaCy-P2P-Netzwerk wird aktiviert, wenn Sie den Proxy das erste Mal benutzen oder in den permanenten Modus wechseln. 
+Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.==Vorsicht: Das Benutzen des Proxys im permanenten Modus hält ihre Internetverbindung so lange offen, wie YaCy läuft.
+Use this only if you have a flatrate or you have an always-on connection.==Benutzen Sie das nur, wenn Sie eine Flatrate haben oder immer online sind.
+To start permanent mode, press this button:==Um den permanenten Modus zu aktivieren, klicken Sie auf diesen Button:
 Go on-line==Online gehen
 You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <i>permanenten</i> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein möchten, müssen Sie den Proxy abschalten um offline zu gehen.
 Memory Usage==Speicherverbrauch
