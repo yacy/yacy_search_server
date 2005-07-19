@@ -281,7 +281,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     public void notifyThread() {
         if (this.syncObject != null) {
             synchronized(this.syncObject) {
-                if (this.log != null) this.log.logDebug("thread '" + this.getName() + "' has received a notification from thead '" + Thread.currentThread().getName() + "'.");
+                if (this.log != null) this.log.logDebug("thread '" + this.getName() + "' has received a notification from thread '" + Thread.currentThread().getName() + "'.");
                 this.syncObject.notifyAll();
             }
         }            

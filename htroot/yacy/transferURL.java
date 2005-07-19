@@ -84,18 +84,18 @@ public class transferURL {
             for (int i = 0; i < urlc; i++) {
                 urls = (String) post.get("url" + i);
                 if (urls == null) {
-                    yacyCore.log.logDebug("transferURL: got null url-String from peer " + youare);
+                    yacyCore.log.logDebug("transferURL: got null URL-string from peer " + youare);
                 } else {
                     lEntry = switchboard.urlPool.loadedURL.newEntry(urls, true);
                     if ((lEntry != null) && (blockBlacklist)) {
                         if (switchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) {
-                            yacyCore.log.logDebug("transferURL: blocked blacklisted url '" + lEntry.url() + "' from peer " + youare);
+                            yacyCore.log.logDebug("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + youare);
                             lEntry = null;
                         }
                     }
                     if (lEntry != null) {
                         switchboard.urlPool.loadedURL.addEntry(lEntry, iam, iam, 3);
-                        yacyCore.log.logDebug("transferURL: received url '" + lEntry.url() + "' from peer " + youare);
+                        yacyCore.log.logDebug("transferURL: received URL '" + lEntry.url() + "' from peer " + youare);
                         received++;
                     }
                 }
@@ -106,8 +106,8 @@ public class transferURL {
             // return rewrite properties
             int more = switchboard.urlPool.loadedURL.size() - sizeBefore;
             doublevalues = "" + (received - more);
-            switchboard.getLog().logInfo("Received " + received + " URL's from peer " + iam);
-            if ((received - more) > 0) switchboard.getLog().logError("Received " + doublevalues + " double URL's from peer " + iam);
+            switchboard.getLog().logInfo("Received " + received + " URLs from peer " + iam);
+            if ((received - more) > 0) switchboard.getLog().logError("Received " + doublevalues + " double URLs from peer " + iam);
             result = "ok";
         } else {
             result = "error_not_granted";

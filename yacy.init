@@ -56,7 +56,7 @@ htLocaleSelection=default
 # for example http://<fileHost>/ shall access the file servlet and
 # return the defaultFile at rootPath
 # either way, http://<fileHost>/ denotes the same as http://localhost:<port>/
-# for the preconfigured value 'localpeer', the url is:
+# for the preconfigured value 'localpeer', the URL is:
 # http://localpeer/
 fileHost = localpeer
 
@@ -117,12 +117,12 @@ listsPath=DATA/LISTS
 # the path to the SKINS files.
 skinPath=DATA/SKINS
 
-# the yellow-list; url's elements
-# (the core of an url; like 'yahoo' in 'de.yahoo.com')
+# the yellow-list; URL's elements
+# (the core of an URL; like 'yahoo' in 'de.yahoo.com')
 # appearing in this list will not get a manipulated user agent string
 proxyYellowList=yacy.yellow
 
-# the black-list; url's appearing in this list will not be loaded;
+# the black-list; URLs appearing in this list will not be loaded;
 # instead always a 404 is returned
 # all these files will be placed in the listsPath
 proxyBlackLists=url.default.black
@@ -133,7 +133,7 @@ proxyCookieWhiteList=cookie.default.black
 
 # the blue-list; 
 # no search result is locally presented that has any word of the bluelist
-# in the search words, the url or the url's description
+# in the search words, the URL or the URL's description
 plasmaBlueList=yacy.blue
 
 # this proxy may in turn again access another proxy
@@ -219,7 +219,7 @@ adminAccountBase64MD5=
 # This superseed file is available then at two localtions:
 # - it is included in every distribution and
 # - updated through a specific URL-location
-# we see the file name and the url of the superseed here:
+# we see the file name and the URL of the superseed here:
 superseedFile=superseed.txt
 superseedLocation=http://www.yacy.net/superseed.txt
 
@@ -337,11 +337,11 @@ defaultLinkReceiveFrequency=30
 # prefetch parameters
 # the prefetch depth assigns a specific depth to the prefetch mechanism
 # prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all
-# embedded url's, but since embedded image links are loaded by the browser
+# embedded URLs, but since embedded image links are loaded by the browser
 # this means that only embedded anchors are prefetched additionally
 # a prefetch of 2 would result in loading of all images and anchor pages
 # of all embedded anchors. Be careful with this value, since even a prefetch
-# of 2 would result in hundreds of prefetched urls for each single proxy fill.
+# of 2 would result in hundreds of prefetched URLs for each single proxy fill.
 proxyPrefetchDepth=0
 proxyStoreHTCache=true
 
@@ -354,7 +354,7 @@ crawlingDepth=2
 localIndexing=true
 
 # Filter for crawlinig; may be used to restrict a crawl to a specific domain
-# URL's are only indexed and further crawled if they match this filter
+# URLs are only indexed and further crawled if they match this filter
 crawlingFilter=.*
 crawlingQ=false
 storeHTCache=false

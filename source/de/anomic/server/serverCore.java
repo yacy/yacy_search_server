@@ -674,7 +674,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     // trying to close all still open httpc-Sockets first                    
                     int closedSockets = httpc.closeOpenSockets(this);
                     if (closedSockets > 0) {
-                        serverCore.this.log.logInfo(closedSockets + " http-client sockets of thread '" + this.getName() + "' closed.");
+                        serverCore.this.log.logInfo(closedSockets + " HTTP-client sockets of thread '" + this.getName() + "' closed.");
                     }                    
                     
                     // closing the socket to the client
@@ -972,7 +972,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     }
                 } // end of while
             } catch (java.lang.ClassNotFoundException e) {
-                System.out.println("Internal Error: wrapper class not found: " + e.getMessage());
+                System.out.println("Internal error: Wrapper class not found: " + e.getMessage());
                 System.exit(0);
             } catch (java.io.IOException e) {
                 // connection interruption: more or less normal

@@ -227,7 +227,7 @@ public final class plasmaCrawlWorker extends Thread {
                 // trying to close all still open httpc-Sockets first                    
                 int closedSockets = httpc.closeOpenSockets(this);
                 if (closedSockets > 0) {
-                    this.log.logInfo(closedSockets + " http-client sockets of thread '" + this.getName() + "' closed.");
+                    this.log.logInfo(closedSockets + " HTTP-client sockets of thread '" + this.getName() + "' closed.");
                 }
             } catch (Exception e) {}
         }            
@@ -416,7 +416,7 @@ public final class plasmaCrawlWorker extends Thread {
             } else {
                 // this may happen if the targeted host does not exist or anything with the
                 // remote server was wrong.
-                log.logError("CRAWLER LOADER ERROR2 with url=" + url.toString() + ": " + e.toString(),e);
+                log.logError("CRAWLER LOADER ERROR2 with URL=" + url.toString() + ": " + e.toString(),e);
             }
         } finally {
             if (remote != null) httpc.returnInstance(remote);
