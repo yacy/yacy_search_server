@@ -106,7 +106,11 @@ public class translator {
 				if(forFile != ""){
 						lists.put(forFile, translationList);
 				}
-				forFile=line.substring(7);
+				if(line.charAt(6)==' '){
+					forFile=line.substring(7);
+				}else{
+					forFile=line.substring(6);
+				}
 				translationList=new Hashtable();
 			}
 		}
