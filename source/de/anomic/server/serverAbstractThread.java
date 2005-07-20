@@ -59,6 +59,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     private serverLog log = null;
     private long idletime = 0, busytime = 0, memprereq = 0;
     private String shortDescr = "", longDescr = "";
+    private String monitorURL = null;
     private long threadBlockTimestamp = System.currentTimeMillis();
     private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0;
     private Object syncObject = null;
@@ -87,10 +88,11 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         this.idletime += millis;
     }
         
-    public final void setDescription(String shortText, String longText) {
+    public final void setDescription(String shortText, String longText, String monitorURL) {
         // sets a visible description string
         this.shortDescr = shortText;
         this.longDescr  = longText;
+        this.monitorURL = monitorURL;
     }
     
     public final void setStartupSleep(long milliseconds) {
@@ -119,6 +121,10 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     
     public final String getLongDescription() {
         return this.longDescr;
+    }
+    
+    public String getMonitorURL() {
+        return this.monitorURL;
     }
     
     public final long getIdleCycles() {

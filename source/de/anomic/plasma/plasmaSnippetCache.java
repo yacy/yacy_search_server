@@ -202,6 +202,7 @@ public class plasmaSnippetCache {
     }
     
     private String computeSnippet(String[] sentences, Set queryhashes, int minLength, int maxLength) {
+        try {
         if ((sentences == null) || (sentences.length == 0)) return null;
         if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
         kelondroMScoreCluster hitTable = new kelondroMScoreCluster();
@@ -297,6 +298,10 @@ public class plasmaSnippetCache {
         if (maxLength < 20) maxLength = 20;
         String nextSnippet = computeSnippet(sentences, remaininghashes, minLength, maxLength);
         return result + ((nextSnippet == null) ? "" : (" / " + nextSnippet));
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
     
     private HashMap hashSentence(String sentence) {

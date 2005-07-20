@@ -118,13 +118,29 @@ public final class plasmaWordIndexAssortmentCluster {
     private void storeStretched(String wordHash, plasmaWordIndexEntryContainer newContainer) {
 	// this stores the record and stretches the storage over
         // all the assortments that are necessary to fit in the record
+        // IMPORTANT: it must be ensured that the wordHash does not exist in the cluster before
+        // i.e. by calling removeFromAll
 	if (newContainer.size() <= clusterCount) {
             storeForced(wordHash, newContainer);
             return;
         }
+        
+        // calculate appropriate cluster insert point
+        int clusterStart = clusterCount;
+        if ((((byte) wordHash.charAt(0)) & 1) == 1) {
+            // for every second hash, place the entries in the middle of the assortments
+            // this balances the entries within the assortments-cluster
+            int cap = clusterCapacity - newContainer.size() - 2 * clusterCount;
+            while (cap > 0) {
+                cap -= clusterStart;
+                clusterStart--;
+            }
+        }
+        
+        // do the insert
         plasmaWordIndexEntryContainer c;
         Iterator i = newContainer.entries();
-        for (int j = clusterCount; j >= 1; j--) {
+        for (int j = clusterStart; j >= 1; j--) {
             c = new plasmaWordIndexEntryContainer(wordHash);
             for (int k = 0; k < j; k++) {
                 if (i.hasNext()) {

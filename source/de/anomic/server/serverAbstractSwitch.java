@@ -257,9 +257,10 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             String threadName,
             String threadShortDescription,
             String threadLongDescription,
+            String threadMonitorURL,
             serverThread newThread,
             long startupDelay) {
-        deployThread(threadName, threadShortDescription, threadLongDescription,
+        deployThread(threadName, threadShortDescription, threadLongDescription, threadMonitorURL,
                      newThread, startupDelay,
                      Long.parseLong(getConfig(threadName + "_idlesleep" ,     "100")), 
                      Long.parseLong(getConfig(threadName + "_busysleep" ,    "1000")),
@@ -270,6 +271,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             String threadName,
             String threadShortDescription,
             String threadLongDescription,
+            String threadMonitorURL,
             serverThread newThread,
             long startupDelay,
             long initialIdleSleep,
@@ -300,7 +302,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             setConfig(threadName + "_memprereq", initialMemoryPreRequisite);
         }
         newThread.setLog(log);
-        newThread.setDescription(threadShortDescription, threadLongDescription);
+        newThread.setDescription(threadShortDescription, threadLongDescription, threadMonitorURL);
         workerThreads.put(threadName, newThread);
         // start the thread
         if (workerThreads.containsKey(threadName)) newThread.start();

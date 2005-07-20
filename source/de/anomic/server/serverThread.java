@@ -53,7 +53,7 @@ public interface serverThread {
     // these method are implemented by serverThread and do not need to be altered
     // this includes also the run()-Method
     
-    public void setDescription(String shortText, String longText);
+    public void setDescription(String shortText, String longText, String monitorURL);
     // sets a visible description string
     
     public void setStartupSleep(long milliseconds);
@@ -73,6 +73,9 @@ public interface serverThread {
     
     public String getLongDescription();
     // returns long description string for online display
+    
+    public String getMonitorURL();
+    // returns an URL that can be used to monitor the thread and it's queue
     
     public long getIdleCycles();
     // returns the total number of cycles of job execution with idle-result

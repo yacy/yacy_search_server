@@ -67,7 +67,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private static final String oldSingletonFileName = "indexSingletons0.db";
     private static final String newSingletonFileName = "indexAssortment001.db";
     private static final String indexAssortmentClusterPath = "ACLUSTER";
-    private static final int assortmentCount = 50;
+    private static final int assortmentCount = 64;
     private static final int ramCacheLimit = 200;
     
     
@@ -242,63 +242,6 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
         return urlCount;
     }
-
-    /*
-    private void dump(int waitingSeconds) throws IOException {
-        log.logSystem("creating dump for index cache, " + cache.size() + " words (and much more urls)");
-        File indexDumpFile = new File(databaseRoot, indexStackFileName);
-        if (indexDumpFile.exists()) indexDumpFile.delete();
-        kelondroStack dumpStack = new kelondroStack(indexDumpFile, 1024, plasmaWordIndexAssortment.bufferStructureBasis);
-        long startTime = System.currentTimeMillis();
-        long messageTime = System.currentTimeMillis() + 5000;
-        long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
-        synchronized (cache) {
-            Iterator i = cache.entrySet().iterator();
-            Map.Entry entry;
-            String wordHash;
-            plasmaWordIndexEntryContainer container;
-            long updateTime;
-            plasmaWordIndexEntry wordEntry;
-            byte[][] row = new byte[5][];
-            System.gc(); // this can speed up the assortment, because they may better use the cache
-            while (i.hasNext()) {
-                // get entries
-                entry = (Map.Entry) i.next();
-                wordHash = (String) entry.getKey();
-                updateTime = getUpdateTime(wordHash);
-                container = (plasmaWordIndexEntryContainer) entry.getValue();
-
-                // put entries on stack
-                if (container != null) {
-                    Iterator ci = container.entries();
-                    while (ci.hasNext()) {
-                        wordEntry = (plasmaWordIndexEntry) ci.next();
-                        row[0] = wordHash.getBytes();
-                        row[1] = kelondroRecords.long2bytes(container.size(), 4);
-                        row[2] = kelondroRecords.long2bytes(updateTime, 8);
-                        row[3] = wordEntry.getUrlHash().getBytes();
-                        row[4] = wordEntry.toEncodedForm(true).getBytes();
-                        dumpStack.push(row);
-                        urlcount++;
-                    }
-                }
-                wordcount++;
-                i.remove(); // free some mem
-                
-                // write a log
-                if (System.currentTimeMillis() > messageTime) {
-                    System.gc(); // for better statistic
-                    wordsPerSecond = wordcount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                    log.logInfo("dumping status: " + wordcount + " words done, " + (cache.size() / (wordsPerSecond + 1)) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
-                    messageTime = System.currentTimeMillis() + 5000;
-                }
-            }
-        }
-	dumpStack.close();
-        log.logSystem("dumped " + urlcount + " word/url relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
-    }
-        
-    */
     
     private long restoreStack() throws IOException {
         File indexDumpFile = new File(databaseRoot, indexStackFileName);

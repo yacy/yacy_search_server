@@ -91,8 +91,8 @@ public class Performance_p {
             thread = switchboard.getThread(threadName);
             
             // set values to templates
-            prop.put("table_" + c + "_threadname", threadName);
-            prop.put("table_" + c + "_shortdescr", thread.getShortDescription());
+            //prop.put("table_" + c + "_threadname", threadName);
+            prop.put("table_" + c + "_shortdescr", (thread.getMonitorURL() == null) ? thread.getShortDescription() : "<a href=\"" + thread.getMonitorURL() + "\" class=?\"small\">" + thread.getShortDescription() + "</a>");
             prop.put("table_" + c + "_longdescr", thread.getLongDescription());
             queuesize = thread.getJobCount();
             prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unlimited" : ("" + queuesize));
@@ -186,11 +186,18 @@ public class Performance_p {
         prop.put("wordCacheMax", switchboard.getConfig("wordCacheMax", "10000"));
         
         int[] asizes = switchboard.wordIndex.assortmentSizes();
-        for (int i = 0; i < asizes.length; i++) {
-            prop.put("assortmentCluster_" + i + "_assortmentSlot", i + 1);
-            prop.put("assortmentCluster_" + i + "_assortmentSize", asizes[i]);
+        for (int i = 0; i < asizes.length; i += 8) {
+            prop.put("assortmentCluster_" + (i/8) + "_assortmentSlots", (i + 1) + "-" + (i + 8));
+            prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeA", asizes[i]);
+            prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeB", asizes[i + 1]);
+            prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeC", asizes[i + 2]);
+            prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeD", asizes[i + 3]);
+            prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeE", asizes[i + 4]);
+            prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeF", asizes[i + 5]);
+            prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeG", asizes[i + 6]);
+            prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeH", asizes[i + 7]);
         }
-        prop.put("assortmentCluster", asizes.length);
+        prop.put("assortmentCluster", asizes.length / 8);
         
         // table thread pool settings
         GenericObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();

@@ -71,6 +71,7 @@ public interface serverSwitch {
     public void deployThread(String threadName,
 			     String threadShortDescription,
 			     String threadLongDescription,
+                             String threadMonitorURL,
                              serverThread newThread,
                              long startupDelay,
                              long initialIdleSleep, long initialBusySleep,

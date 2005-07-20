@@ -300,7 +300,7 @@ public final class yacy {
                     serverLog.logFailure("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
                 } else {
                     // first start the server
-                    sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", server, 0, 0, 0, 0);
+                    sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
                     //server.start();
                     
                     // open the browser window

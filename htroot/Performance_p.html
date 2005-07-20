@@ -22,8 +22,8 @@
 <td class="small">Idle<br>Cycles</td>
 <td class="small">Busy<br>Cycles</td>
 <td class="small">Short Mem<br>Cycles</td>
-<td class="small">Sleep Time<br>per Cycle<br>(milliseconds)</td>
-<td class="small">Exec Time<br>per Busy-Cycle<br>(milliseconds)</td>
+<td class="small">Sleep Time<br>per Cycle<br>(millis)</td>
+<td class="small">Exec Time<br>per Busy-Cycle<br>(millis)</td>
 <td class="small">Delay between<br>idle loops</td>
 <td class="small">Delay between<br>busy loops</td>
 <td class="small">Minimum of<br>Required Memory</td>
@@ -57,17 +57,13 @@
 Changes take effect immediately</td>
 </tr>
 </table>
-</p></form>
+</form>
+</p>
 
 <p>
 <div class=small><b>Indexing Cache Settings:</b></div>
-<table border="0" cellpadding="5" cellspacing="0" width="100%">
 <form action="Performance_p.html" method="post" enctype="multipart/form-data">
-  <tr valign="top" class="TableCellDark">
-    <td width="120"></td>
-    <td></td>
-    <td></td>
-  </tr>
+<table border="0" cellpadding="5" cellspacing="1" width="100%">
   <tr valign="top" class="TableCellDark">
     <td class=small>Words in RAM Cache:</td>
     <td class=small>#[wordCacheRAMSize]#</td>
@@ -85,13 +81,6 @@ Changes take effect immediately</td>
     If this is a big number, it shows that the caching works efficiently.
     </td>
   </tr>
-  #{assortmentCluster}#
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Assortment #[assortmentSlot]#:</td>
-    <td class=small>#[assortmentSize]#</td>
-    <td class=small>Buffer for words appearing exactly on #[assortmentSlot]# different pages.</td>
-  </tr>
-  #{/assortmentCluster}#
   <tr valign="top" class="TableCellDark">
     <td class=small>Maximum number of Word Caches:</td>
     <td class=small><input name="wordCacheMax" type="text" size="20" maxlength="100" value="#[wordCacheMax]#"></td>
@@ -101,27 +90,16 @@ Changes take effect immediately</td>
     flushed to disc; this may last some minutes.
     </td>
   </tr>
-  <!--
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Maximum waitingtime to flush word cache<br>during shut-down (seconds):</td>
-    <td class=small><input name="maxWaitingWordFlush" type="text" size="6" maxlength="6" value="#[maxWaitingWordFlush]#"></td>
-    <td class=small>
-    This gives the number of seconds that the shutdown
-    may last for the final word flush. Words that cannot be flushed within this
-    time are lost.
-    </td>
-  </tr>
-  -->
   <tr valign="top" class="TableCellLight">
-    <td class=small colspan="3"><input type="submit" name="cacheSizeSubmit" value="Enter New Cache Size">
+    <td class=small colspan="3">
+    <input type="submit" name="cacheSizeSubmit" value="Enter New Cache Size">
     Changes take effect immediately</td>
-    </td>
   </tr>
-
-</form>
 </table>
+</form>
 </p>
 
+<p>
 <div class=small><b>Thread pool settings:</b></div>
 <form action="Performance_p.html" method="post" enctype="multipart/form-data">
 <table border="0" cellpadding="2" cellspacing="1" width="100%">
@@ -148,6 +126,26 @@ Changes take effect immediately</td>
 </tr>
 </table>
 </p></form>
+
+<p>
+<div class=small><b>Index Assortments:</b></div>
+<table border="0" cellpadding="5" cellspacing="1" width="100%">
+  #{assortmentCluster}#
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Assortments #[assortmentSlots]#:</td>
+    <td class=small align="right">#[assortmentSizeA]#</td>
+    <td class=small align="right">#[assortmentSizeB]#</td>
+    <td class=small align="right">#[assortmentSizeC]#</td>
+    <td class=small align="right">#[assortmentSizeD]#</td>
+    <td class=small align="right">#[assortmentSizeE]#</td>
+    <td class=small align="right">#[assortmentSizeF]#</td>
+    <td class=small align="right">#[assortmentSizeG]#</td>
+    <td class=small align="right">#[assortmentSizeH]#</td>
+  </tr>
+  #{/assortmentCluster}#
+</table>
+</p>
+
 
 
 #[footer]#
