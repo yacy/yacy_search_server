@@ -57,47 +57,50 @@ public final class plasmaWordIndexAssortmentCluster {
     
     // class variables
     private File assortmentsPath;
-    private int clusterCapacity;
+    private int clusterCount;
+    public int clusterCapacity;
+    
     private serverLog log;
     private plasmaWordIndexAssortment[] assortments;
     private long completeBufferKB;
 
-    public plasmaWordIndexAssortmentCluster(File assortmentsPath, int clusterCapacity, int bufferkb, serverLog log) {
+    public plasmaWordIndexAssortmentCluster(File assortmentsPath, int clusterCount, int bufferkb, serverLog log) {
 	// set class variables
 	if (!(assortmentsPath.exists())) assortmentsPath.mkdirs();
-	this.clusterCapacity = clusterCapacity;
+	this.clusterCount = clusterCount;
+        this.clusterCapacity = clusterCount * (clusterCount + 1) / 2;
         this.completeBufferKB = bufferkb;
         this.log = log;
-	this.assortments = new plasmaWordIndexAssortment[clusterCapacity];
+	this.assortments = new plasmaWordIndexAssortment[clusterCount];
 
         // open cluster and close it directly again to detect the element sizes
-        int[] sizes = new int[clusterCapacity];
+        int[] sizes = new int[clusterCount];
         int sumSizes = 1;
         plasmaWordIndexAssortment testAssortment;
-        for (int i = 0; i < clusterCapacity; i++) {
+        for (int i = 0; i < clusterCount; i++) {
 	    testAssortment = new plasmaWordIndexAssortment(assortmentsPath, i + 1, 0, null);
-            sizes[i] = testAssortment.size() + clusterCapacity - i;
+            sizes[i] = testAssortment.size() + clusterCount - i;
             sumSizes += sizes[i];
             testAssortment.close();
             testAssortment = null;
 	}
         
 	// initialize cluster using the cluster elements size for optimal buffer size
-	for (int i = 0; i < clusterCapacity; i++) {
+	for (int i = 0; i < clusterCount; i++) {
 	    assortments[i] = new plasmaWordIndexAssortment(assortmentsPath, i + 1, (int) ((long) completeBufferKB * (long) sizes[i] / (long) sumSizes), log);
 	}
     }
 
-    public plasmaWordIndexEntryContainer storeTry(String wordHash, plasmaWordIndexEntryContainer newContainer) {
+    private plasmaWordIndexEntryContainer storeSingular(String wordHash, plasmaWordIndexEntryContainer newContainer) {
 	// this tries to store the record. If the record does not fit, or a same hash already
 	// exists and would not fit together with the new record, then the record is deleted from
 	// the assortmen(s) and returned together with the newRecord.
 	// if storage was successful, NULL is returned.
-	if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
+	if (newContainer.size() > clusterCount) return newContainer; // it will not fit
         plasmaWordIndexEntryContainer buffer;
         while ((buffer = assortments[newContainer.size() - 1].remove(wordHash)) != null) {
             newContainer.add(buffer);
-            if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
+            if (newContainer.size() > clusterCount) return newContainer; // it will not fit
         }
         // the assortment (newContainer.size() - 1) should now be empty. put it in there
         assortments[newContainer.size() - 1].store(wordHash, newContainer);
@@ -105,39 +108,50 @@ public final class plasmaWordIndexAssortmentCluster {
         return null;
     }
     
-    /*
-    public plasmaWordIndexEntryContainer storeTry(String wordHash, plasmaWordIndexEntryContainer newContainer) {
-	// this tries to store the record. If the record does not fit, or a same hash already
-	// exists and would not fit together with the new record, then the record is deleted from
-	// the assortmen(s) and returned together with the newRecord.
-	// if storage was successful, NULL is returned.
-	if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
-	plasmaWordIndexEntryContainer buffer;
-	for (int i = 0; i < clusterCapacity; i++) {
-	    buffer = assortments[i].remove(wordHash);
-	    if (buffer != null) newContainer.add(buffer);
-            if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
-	}
-        // we collected all records and the result will fit somewhere..
+    private void storeForced(String wordHash, plasmaWordIndexEntryContainer newContainer) {
+	// this stores the record and overwrites an existing record.
+        // this is safe of we can be shure that the record does not exist before.
+	if ((newContainer == null) || (newContainer.size() == 0) || (newContainer.size() > clusterCount)) return; // it will not fit
         assortments[newContainer.size() - 1].store(wordHash, newContainer);
-        // return null to show that we have stored the new Record successfully
+    }
+    
+    private void storeStretched(String wordHash, plasmaWordIndexEntryContainer newContainer) {
+	// this stores the record and stretches the storage over
+        // all the assortments that are necessary to fit in the record
+	if (newContainer.size() <= clusterCount) {
+            storeForced(wordHash, newContainer);
+            return;
+        }
+        plasmaWordIndexEntryContainer c;
+        Iterator i = newContainer.entries();
+        for (int j = clusterCount; j >= 1; j--) {
+            c = new plasmaWordIndexEntryContainer(wordHash);
+            for (int k = 0; k < j; k++) {
+                if (i.hasNext()) {
+                    c.add((plasmaWordIndexEntry) i.next(), newContainer.updated());
+                } else {
+                    storeForced(wordHash, c);
+                    return;
+                }
+            }
+            storeForced(wordHash, c);
+        }
+    }
+    
+    public plasmaWordIndexEntryContainer storeTry(String wordHash, plasmaWordIndexEntryContainer newContainer) {
+        if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
+        if (newContainer.size() <= clusterCount) newContainer = storeSingular(wordHash, newContainer);
+        if (newContainer == null) return null;
+        newContainer.add(removeFromAll(wordHash));
+        if (newContainer.size() > clusterCapacity) return newContainer;
+        storeStretched(wordHash, newContainer);
         return null;
     }
-    */
-    
-    /*
-    public plasmaWordIndexEntryContainer removeFromOne(String wordHash, int assortment) {
-        // collect one container from a specific assortment
-        plasmaWordIndexEntryContainer container = assortments[assortment].remove(wordHash);
-	if (container == null) return new plasmaWordIndexEntryContainer(wordHash);
-        return container;
-    }
-    */
     
     public plasmaWordIndexEntryContainer removeFromAll(String wordHash) {
         // collect all records from all the assortments and return them
         plasmaWordIndexEntryContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
-	for (int i = 0; i < clusterCapacity; i++) {
+	for (int i = 0; i < clusterCount; i++) {
 	    buffer = assortments[i].remove(wordHash);
 	    if (buffer != null) record.add(buffer);
 	}
@@ -146,24 +160,24 @@ public final class plasmaWordIndexAssortmentCluster {
 
     public Iterator hashConjunction(String startWordHash, boolean up) {
         HashSet iterators = new HashSet();
-        for (int i = 0; i < clusterCapacity; i++) iterators.add(assortments[i].hashes(startWordHash, up, true));
+        for (int i = 0; i < clusterCount; i++) iterators.add(assortments[i].hashes(startWordHash, up, true));
         return kelondroMergeIterator.cascade(iterators, up);
     }
 
     public int sizeTotal() {
         int total = 0;
-        for (int i = 0; i < clusterCapacity; i++) total += assortments[i].size();
+        for (int i = 0; i < clusterCount; i++) total += assortments[i].size();
         return total;
     }
 
     public int[] sizes() {
-        int[] sizes = new int[clusterCapacity];
-        for (int i = 0; i < clusterCapacity; i++) sizes[i] = assortments[i].size();
+        int[] sizes = new int[clusterCount];
+        for (int i = 0; i < clusterCount; i++) sizes[i] = assortments[i].size();
         return sizes;
     }
         
     public void close() {
-        for (int i = 0; i < clusterCapacity; i++) assortments[i].close();
+        for (int i = 0; i < clusterCount; i++) assortments[i].close();
     }
 
 }

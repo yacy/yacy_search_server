@@ -98,6 +98,8 @@ import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
+import de.anomic.plasma.plasmaWordIndexClassicDB;
+import de.anomic.plasma.plasmaWordIndexCache;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
@@ -504,40 +506,6 @@ public final class yacy {
         serverLog.logSystem("GEN-WORDSTAT", "FINISHED");
     }
     
-    private static void checkMigrate(File dbroot, serverLog log, File file, plasmaWordIndex wordIndex) throws IOException {
-        long length = file.length();
-        if (length > 3000) {
-            log.logInfo("SKIPPED  " + file.toString() + ": too big, size=" + (length / 1024) + "kb");
-            return;
-        }
-        kelondroTree db = new kelondroTree(file, 0);
-        String wordhash = file.getName().substring(0, 12);
-        int size = db.size();
-        db.close();
-        if (size <= 50) {
-            plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordhash);
-            plasmaWordIndexEntity entity = new plasmaWordIndexEntity(dbroot, wordhash, true);
-            Enumeration entries = entity.elements(true);
-            plasmaWordIndexEntry entry;
-            while (entries.hasMoreElements()) {
-                entry = (plasmaWordIndexEntry) entries.nextElement();
-                container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
-            }
-            wordIndex.addEntries(container);
-            entity.deleteComplete();
-            entity.close();
-            if (file.exists()) {
-                log.logInfo("MIGRATED " + file.toString() + ": " + size + " entries, " + (length / 1024) + "kb, delete fail at end");
-                file.delete();
-            } else {
-                log.logInfo("MIGRATED " + file.toString() + ": " + size + " entries, " + (length / 1024) + "kb");
-            }
-        } else {
-            log.logInfo("SKIPPED  " + file.toString() + ": " + size + " entries, " + (length / 1024) + "kb");
-        }
-        db.close();
-    }
-    
     public static void migrateWords(String homePath) {
         // run with "java -classpath classes yacy -migratewords"
         try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
@@ -545,15 +513,26 @@ public final class yacy {
         try {
             serverLog log = new serverLog("WORDMIGRATION");
             log.logInfo("STARTING MIGRATION");
-            plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, 20000, log);
+            plasmaWordIndexCache wordIndexCache = new plasmaWordIndexCache(dbroot, new plasmaWordIndexClassicDB(dbroot, log), 20000, log);
             enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
+            String wordhash;
+            File wordfile;
+            int migration;
             while (words.hasMoreElements()) try {
-                checkMigrate(dbroot, log, (File) words.nextElement(), wordIndex);
+                wordfile = (File) words.nextElement();
+                wordhash = wordfile.getName().substring(0, 12);
+                migration = wordIndexCache.migrateWords2Assortment(wordhash);
+                if (migration == 0)
+                    log.logInfo("SKIPPED  " + wordhash + ": too big");
+                else if (migration > 0)
+                    log.logInfo("MIGRATED " + wordhash + ": " + migration + " entries");
+                else
+                    log.logInfo("REVERSED " + wordhash + ": " + (-migration) + " entries");
             } catch (Exception e) {
                 e.printStackTrace();
             }
             log.logInfo("FINISHED MIGRATION JOB, WAIT FOR DUMP");
-            wordIndex.close(60);
+            wordIndexCache.close(60);
             log.logInfo("TERMINATED MIGRATION");
         } catch (IOException e) {
             e.printStackTrace();

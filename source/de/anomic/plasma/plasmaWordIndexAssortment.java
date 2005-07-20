@@ -75,7 +75,7 @@ public final class plasmaWordIndexAssortment {
     
     // class variables
     private File assortmentFile;
-    private int assortmentCapacity;
+    private int assortmentLength;
     private serverLog log;
     private kelondroTree assortments;
     private long bufferSize;
@@ -99,18 +99,18 @@ public final class plasmaWordIndexAssortment {
 	return structure;
     }
 
-    public plasmaWordIndexAssortment(File storagePath, int assortmentCapacity, int bufferkb, serverLog log) {
+    public plasmaWordIndexAssortment(File storagePath, int assortmentLength, int bufferkb, serverLog log) {
 	if (!(storagePath.exists())) storagePath.mkdirs();
-	this.assortmentFile = new File(storagePath, assortmentFileName + intx(assortmentCapacity) + ".db");
-	this.assortmentCapacity = assortmentCapacity;
-	this.bufferStructureLength = 3 + 2 * assortmentCapacity;
+	this.assortmentFile = new File(storagePath, assortmentFileName + intx(assortmentLength) + ".db");
+	this.assortmentLength = assortmentLength;
+	this.bufferStructureLength = 3 + 2 * assortmentLength;
         this.bufferSize = bufferkb * 1024;
         this.log = log;
         if (assortmentFile.exists()) {
             // open existing assortment tree file
             try {
                 assortments = new kelondroTree(assortmentFile, bufferSize);
-                if (log != null) log.logSystem("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentCapacity + ", " + bufferkb + "kb buffer"); 
+                if (log != null) log.logSystem("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
             } catch (IOException e){
                 if (log != null) log.logError("unable to open assortment database: " + e.getMessage());
                 e.printStackTrace();
@@ -118,8 +118,8 @@ public final class plasmaWordIndexAssortment {
         } else {
             // create new assortment tree file
             try {
-                assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentCapacity));
-                if (log != null) log.logSystem("Created new Assortment Database, width " + assortmentCapacity + ", " + bufferkb + "kb buffer"); 
+                assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
+                if (log != null) log.logSystem("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
             } catch (IOException e){
                 if (log != null) log.logError("unable to create assortment database: " + e.getMessage());
                 e.printStackTrace();
@@ -131,14 +131,14 @@ public final class plasmaWordIndexAssortment {
         // stores a word index to assortment database
         // this throws an exception if the word hash already existed
         //log.logDebug("storeAssortment: wordHash=" + wordHash + ", urlHash=" + entry.getUrlHash() + ", time=" + creationTime);
-        if (newContainer.size() != assortmentCapacity) throw new RuntimeException("plasmaWordIndexAssortment.store: wrong container size");
+        if (newContainer.size() != assortmentLength) throw new RuntimeException("plasmaWordIndexAssortment.store: wrong container size");
         byte[][] row = new byte[this.bufferStructureLength][];
         row[0] = wordHash.getBytes();
         row[1] = kelondroRecords.long2bytes(1, 4);
         row[2] = kelondroRecords.long2bytes(newContainer.updated(), 8);
         Iterator entries = newContainer.entries();
 	plasmaWordIndexEntry entry;
-        for (int i = 0; i < assortmentCapacity; i++) {
+        for (int i = 0; i < assortmentLength; i++) {
             entry = (plasmaWordIndexEntry) entries.next();
 	    row[3 + 2 * i] = entry.getUrlHash().getBytes();
 	    row[4 + 2 * i] = entry.toEncodedForm(true).getBytes();
@@ -179,7 +179,7 @@ public final class plasmaWordIndexAssortment {
         long updateTime = kelondroRecords.bytes2long(row[2]);
         plasmaWordIndexEntry[] wordEntries = new plasmaWordIndexEntry[this.bufferStructureLength];
         plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
-	for (int i = 0; i < assortmentCapacity; i++) {
+	for (int i = 0; i < assortmentLength; i++) {
             container.add(new plasmaWordIndexEntry[]{new plasmaWordIndexEntry(new String(row[3 + 2 * i]), new String(row[4 + 2 * i]))}, updateTime);
 	}
         return container;
@@ -192,7 +192,7 @@ public final class plasmaWordIndexAssortment {
         } catch (IOException e) {}
         if (!(assortmentFile.delete())) throw new RuntimeException("cannot delete assortment database");
         try {
-            assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentCapacity));
+            assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
         } catch (IOException e){
             log.logError("unable to re-create assortment database: " + e.getMessage());
             e.printStackTrace();

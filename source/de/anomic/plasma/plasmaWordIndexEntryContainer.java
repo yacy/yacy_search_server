@@ -81,6 +81,11 @@ public class plasmaWordIndexEntryContainer implements Comparable {
         return wordHash;
     }
 
+    public int add(plasmaWordIndexEntry entry, long updateTime) {
+        this.updateTime = java.lang.Math.max(this.updateTime, updateTime);
+        return (add(entry)) ? 1 : 0;
+    }
+    
     public int add(plasmaWordIndexEntry[] entries, long updateTime) {
         int c = 0;
         for (int i = 0; i < entries.length; i++) if (add(entries[i])) c++;

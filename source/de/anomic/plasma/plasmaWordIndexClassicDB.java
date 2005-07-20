@@ -226,20 +226,12 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
     public int addEntries(plasmaWordIndexEntryContainer container, long creationTime) {
 	//System.out.println("* adding " + newEntries.size() + " cached word index entries for word " + wordHash); // debug
 	// fetch the index cache
-        if (container.size() == 0) return 0;
+        if ((container == null) || (container.size() == 0)) return 0;
         
         // open file
         try {
             plasmaWordIndexEntity pi = new plasmaWordIndexEntity(databaseRoot, container.wordHash(), false);
-            int count = 0;
-            
-            // write from vector
-            if (container != null) {
-                Iterator i = container.entries();
-                while (i.hasNext()) {
-                    if (pi.addEntry((plasmaWordIndexEntry) i.next())) count++;
-                }
-            }
+            int count = pi.addEntries(container);
             
             // close and return
             pi.close();
