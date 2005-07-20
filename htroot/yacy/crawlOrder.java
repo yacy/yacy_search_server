@@ -185,6 +185,7 @@ public class crawlOrder {
                         prop.put("list_" + i + "_lurl", (String) stackresult[2]);
                         prop.put("list_" + i + "_count", i);
                     }
+                    prop.put("list", count);
                     response = "enqueued";
                     reason = "ok";
                     lurl = "";
