@@ -297,6 +297,8 @@ public class SettingsAck_p {
             
             // check if peer name already exists
             String peerName = (String) post.get("peername");
+			String staticIP =  (String)prop.get("staticIP");
+			env.setConfig("staticIP", staticIP);
             yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
             
             if ((oldSeed == null) || (env.getConfig("peerName","").equals(peerName))) {
@@ -314,6 +316,7 @@ public class SettingsAck_p {
                     env.setConfig("peerName", peerName);
                     prop.put("info", 12);//port or peername changed
                     prop.put("info_peerName", peerName);
+                    prop.put("info_staticIP", staticIP);
                 }
             } else {
                 // deny change

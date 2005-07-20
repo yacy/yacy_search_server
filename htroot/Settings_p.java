@@ -69,6 +69,7 @@ public final class Settings_p {
         prop.put("port", env.getConfig("port", "8080"));               
         
         prop.put("peerName", env.getConfig("peerName", "nameless"));
+        prop.put("staticIP", env.getConfig("staticIP", ""));
         String peerLang = env.getConfig("htLocaleSelection", "default");
         if (peerLang.equals("default")) peerLang = "en";
         prop.put("peerLang", peerLang);
