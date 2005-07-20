@@ -15,7 +15,7 @@
 <!-- author -->==Roland Ramthun
 
 #-----------------------------------------------------------
-#File:index.html
+#File: index.html
 
 P2P WEB SEARCH==P2P Web-Suche
 #only the Button
@@ -32,7 +32,7 @@ URL mask:==URL-Maske:
 
 
 #-------------------------------------------------------
-#File:IndexCreate_p.html
+#File: IndexCreate_p.html
 
 Index Creation=Index Erzeugung
 You can define URLs as start points for Web page crawling and start that crawling here.=Du kannst hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten.
@@ -45,7 +45,7 @@ Exclude static Stop-Words:=Stop-Words ausschließen:
 Start Point:=Startpunkt:
 
 #-------------------------------------------------------
-#File:Status.html
+#File: Status.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 #"YaCy: Status"==YaCy: Status
@@ -120,7 +120,7 @@ System Resources==Systemressourcen
 Processors:==Prozessoren:
 
 #-------------------------------------------------------
-#File:Language_p.html
+#File: Language_p.html
 
 Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Aktuelle Sprache:
@@ -133,7 +133,7 @@ Use this language==Diese Sprachdatei sofort benutzen
 "Install"==Installieren
 
 #-------------------------------------------------------
-#File:EditProfile_p.html
+#File: EditProfile_p.html
 
 Your Personal Profile==Dein persönliches Profil
 You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Hier können Sie Ihr persönliches Profil verwalten. Andere YaCy-Benutzer können dieses Profil über einen Link auf ihrer Netzwerkseite ansehen.
