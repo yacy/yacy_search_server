@@ -91,7 +91,7 @@ public class Performance_p {
             thread = switchboard.getThread(threadName);
             
             // set values to templates
-            //prop.put("table_" + c + "_threadname", threadName);
+            prop.put("table_" + c + "_threadname", threadName);
             prop.put("table_" + c + "_shortdescr", (thread.getMonitorURL() == null) ? thread.getShortDescription() : "<a href=\"" + thread.getMonitorURL() + "\" class=?\"small\">" + thread.getShortDescription() + "</a>");
             prop.put("table_" + c + "_longdescr", thread.getLongDescription());
             queuesize = thread.getJobCount();
