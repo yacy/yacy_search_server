@@ -44,6 +44,8 @@
 // if the shell's current path is HTROOT
 
 import java.util.Iterator;
+import java.util.Map;
+import java.io.File;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -54,6 +56,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
+import de.anomic.server.serverFileUtils;
 
 public class Performance_p {
     
@@ -61,7 +64,9 @@ public class Performance_p {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         serverObjects prop = new serverObjects();
-
+        File defaultSettingsFile = new File(switchboard.getRootPath(), "yacy.init");
+        Map defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
+        
         Iterator threads = switchboard.threadNames();
         String threadName;
         serverThread thread;
@@ -116,15 +121,31 @@ public class Performance_p {
             prop.put("table_" + c + "_sleeppercycle", ((idleCycles + busyCycles) == 0) ? "-" : ("" + (sleeptime / (idleCycles + busyCycles))));
             prop.put("table_" + c + "_execpercycle", (busyCycles == 0) ? "-" : ("" + (exectime / busyCycles)));
             
-            if ((post != null) && (post.containsKey("delaysubmit"))) {
+            if ((post != null) && (post.containsKey("submitdelay"))) {
                 // load with new values
-                idlesleep = Long.parseLong((String) post.get(threadName + "_idlesleep",  "100"));
-                busysleep = Long.parseLong((String) post.get(threadName + "_busysleep", "1000"));
+                idlesleep = Long.parseLong((String) post.get(threadName + "_idlesleep", "1000"));
+                busysleep = Long.parseLong((String) post.get(threadName + "_busysleep",  "100"));
                 memprereq = Long.parseLong((String) post.get(threadName + "_memprereq",    "0"));
                 
 		// check values to prevent short-cut loops
-		if (idlesleep == 0) idlesleep = 1000;
+		if (idlesleep < 1000) idlesleep = 1000;
+                if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
+            
+                // on-the-fly re-configuration
+                switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
+                switchboard.setConfig(threadName + "_idlesleep", idlesleep);
+                switchboard.setConfig(threadName + "_busysleep", busysleep);
+                switchboard.setConfig(threadName + "_memprereq", memprereq);
+            } if ((post != null) && (post.containsKey("submitdefault"))) {
+                // load with new values
+                idlesleep = Long.parseLong(d((String) defaultSettings.get(threadName + "_idlesleep"), "1000"));
+                busysleep = Long.parseLong(d((String) defaultSettings.get(threadName + "_busysleep"),  "100"));
+                memprereq = Long.parseLong(d((String) defaultSettings.get(threadName + "_memprereq"),    "0"));
                 
+		// check values to prevent short-cut loops
+		if (idlesleep < 1000) idlesleep = 1000;
+                if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
+            
                 // on-the-fly re-configuration
                 switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
                 switchboard.setConfig(threadName + "_idlesleep", idlesleep);
@@ -133,8 +154,8 @@ public class Performance_p {
             } else {
                 // load with old values
                 idlesleep = Long.parseLong(switchboard.getConfig(threadName + "_idlesleep" , "1000"));
-                busysleep = Long.parseLong(switchboard.getConfig(threadName + "_busysleep", "1000"));
-                memprereq = Long.parseLong(switchboard.getConfig(threadName + "_memprereq", "1000"));
+                busysleep = Long.parseLong(switchboard.getConfig(threadName + "_busysleep",   "100"));
+                memprereq = Long.parseLong(switchboard.getConfig(threadName + "_memprereq",     "0"));
             }
             prop.put("table_" + c + "_idlesleep", idlesleep);
             prop.put("table_" + c + "_busysleep", busysleep);
@@ -219,4 +240,7 @@ public class Performance_p {
         return prop;
     }
     
+    private static String d(String a, String b) {
+        return (a == null) ? b : a;
+    }
 }

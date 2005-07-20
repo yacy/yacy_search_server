@@ -85,10 +85,10 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
 	// predefine init's
 	Map initProps;
-	if (initFile.exists()) initProps = loadHashMap(initFile); else initProps = new HashMap();
+	if (initFile.exists()) initProps = serverFileUtils.loadHashMap(initFile); else initProps = new HashMap();
 
 	// load config's from last save
-	if (configFile.exists()) configProps = loadHashMap(configFile); else configProps = new HashMap();
+	if (configFile.exists()) configProps = serverFileUtils.loadHashMap(configFile); else configProps = new HashMap();
 	
 	synchronized (configProps) {
 
@@ -129,41 +129,6 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
     public serverLog getLog() {
 	return log;
-    }
-
-    public static Map loadHashMap(File f) {
-        // load props
-        Properties prop = new Properties();
-        BufferedInputStream bufferedIn = null;
-        try {
-            prop.load(bufferedIn = new BufferedInputStream(new FileInputStream(f)));
-        } catch (IOException e1) {
-            System.err.println("ERROR: " + f.toString() + " not found in settings path");
-            prop = null;
-        } finally {
-            if (bufferedIn != null)try{bufferedIn.close();}catch(Exception e){}
-        }
-        return (Hashtable) prop;
-    }
-
-    public static void saveMap(File f, Map props, String comment) throws IOException {
-        PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(f)));
-            pw.println("# " + comment);
-            Iterator i = props.entrySet().iterator();
-            String key, value;
-            Map.Entry entry;
-            while (i.hasNext()) {
-                entry  = (Map.Entry) i.next();
-                key = (String) entry.getKey();
-                value = ((String) entry.getValue()).replaceAll("\n", "\\\\n");
-                pw.println(key + "=" + value);
-            }
-            pw.println("# EOF");
-        } finally {
-          if (pw!=null)try{pw.close();}catch(Exception e){}  
-        }
     }
 
     public void setConfig(String key, long value) {
@@ -230,7 +195,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
     private void saveConfig() {
 	try {
-	    saveMap(configFile, configProps, configComment);
+	    serverFileUtils.saveMap(configFile, configProps, configComment);
 	} catch (IOException e) {
 	    System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
 	}

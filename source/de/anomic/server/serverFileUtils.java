@@ -50,8 +50,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.PrintWriter;
 import java.util.zip.GZIPOutputStream;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Hashtable;
+import java.util.Iterator;
 
 public final class serverFileUtils {
     
@@ -145,7 +153,7 @@ public final class serverFileUtils {
         copy(new ByteArrayInputStream(source), dest);
     }
     
-    public static HashSet loadSet(String setname, String filename) {
+    public static HashSet loadSet(String filename) {
         HashSet set = new HashSet();
         BufferedReader br = null;
         try {
@@ -163,4 +171,39 @@ public final class serverFileUtils {
         return set;
     }
 
+    public static Map loadHashMap(File f) {
+        // load props
+        Properties prop = new Properties();
+        BufferedInputStream bufferedIn = null;
+        try {
+            prop.load(bufferedIn = new BufferedInputStream(new FileInputStream(f)));
+        } catch (IOException e1) {
+            System.err.println("ERROR: " + f.toString() + " not found in settings path");
+            prop = null;
+        } finally {
+            if (bufferedIn != null)try{bufferedIn.close();}catch(Exception e){}
+        }
+        return (Hashtable) prop;
+    }
+
+    public static void saveMap(File f, Map props, String comment) throws IOException {
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(f)));
+            pw.println("# " + comment);
+            Iterator i = props.entrySet().iterator();
+            String key, value;
+            Map.Entry entry;
+            while (i.hasNext()) {
+                entry  = (Map.Entry) i.next();
+                key = (String) entry.getKey();
+                value = ((String) entry.getValue()).replaceAll("\n", "\\\\n");
+                pw.println(key + "=" + value);
+            }
+            pw.println("# EOF");
+        } finally {
+          if (pw!=null)try{pw.close();}catch(Exception e){}  
+        }
+    }
+    
 }
