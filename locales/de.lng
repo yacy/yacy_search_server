@@ -17,19 +17,26 @@
 #-----------------------------------------------------------
 #File: index.html
 
-P2P WEB SEARCH==P2P Web-Suche
-#only the Button
-"Search"=="Suchen"
-Enter search word list, separated by space:==Geben Sie hier die Suchworte getrennt durch Leerzeichen ein:
+YaCy: Search Page==YaCy: Suchseite
+Enter search word list, separated by space:==Geben Sie die Suchbegriffe hier ein:
 Max. number of results:==Max. Anzahl Ergebnisse:
-order by:==sortiert nach:
+order by:==sortieren nach:
 # ">" to avoid replacing value=
 >Quality-Date==>Qualit&auml;t-Datum
 >Date-Quality==>Datum-Qualit&auml;t
 Resource:==Quelle:
-Max. search time \(seconds\)==Max. Suchzeit (Sekunden)
-URL mask:==URL-Maske:
-
+global==global
+local==lokal
+Max. search time (seconds): ==Max. Suchdauer in Sekunden: 
+URL mask:==URL-Filter:
+restrict on==beschränken auf
+show all==Alles anzeigen
+The following words are stop-words and had been excluded from the search:==Folgende Worte sind Stopwords und wurden von der Suche ausgeschlossen:
+No Results.==Keine Ergebnisse.
+No Results. (length of search words must be at least 3 characters)==Keine Ergebnisse. (Die Länge der Suchbegriffe muss mindestens 3 Zeichen betragen)
+No Results. If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Keine Ergebnisse. Wenn Sie das unbefriedigend finden, sollten Sie überlegen, den globalen Index durch das Betreiben eines eigenen Proxies/Peers zu unterstützen.
+If everybody contributes, the results will get better.==Wenn jeder etwas beiträgt, werden die Ergebnisse besser.
+Other possible reasons for no result:==Andere mögliche Gründe dafür, dass Sie keine Ergebnisse erhalten haben:
 
 #-------------------------------------------------------
 #File: IndexCreate_p.html
@@ -82,12 +89,12 @@ Unknown==unbekannt
 Uptime==Online seit
 days==Tage
 ago==
-"Connects"=="Verbindungen"
+Connects==Verbindungen 
 peers/hour==Peers/Stunde
 This peer's status==Status dieses Peers
 Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings (see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben (Anleitung online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">Browser konfigurieren</a>), laden Sie eine beliebige Seite über den Proxy, um zu beweisen, dass es funktioniert. Mit diesem Status können Sie keine anderen Peers durchsuchen!
 Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured (usually: 8080), or to set up a 'virtual server' in your router settings (often called DMZ). Please be fair, contribute your own index to the global index.==Junior - Ihr Peer kann nicht von außen erreicht werden. Ein möglicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Peers von Ihrer Suchseite aus benutzen. Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu öffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
-Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!=Senior - Sie lassen YaCy bei sich laufen und unterstützen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> können. Danke!
+Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!==Senior - Sie lassen YaCy bei sich laufen und unterstützen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> können. Danke!
 Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zusätzlich Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
 You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.==Natürlich können Sie auch mithilfe des globalen Indexes von Ihrer Suchseite aus <a href="index.html">das Internet durchsuchen</a>.
 Other peers==Andere Peers
