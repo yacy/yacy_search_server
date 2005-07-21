@@ -165,8 +165,14 @@ Error with file input "#[crawlingStart]#": #[error]#
 Set new prefetch depth to "#[newproxyPrefetchDepth]#"
 ::
 Crawling of "#[crawlingURL]#" started.
-You can monitor the crawling progress with this page.
-<b>Please wait some seconds before refresh of this page, because the request is enqueued and delayed until the http server is idle for a certain time.</b>
+You can monitor the crawling progress either by watching the URL queues
+(<a href="/IndexCreateWWWLocalQueue_p.html">local queue</a>,
+<a href="/IndexCreateWWWGlobalQueue_p.html">global queue</a>,
+<a href="/IndexCreateLoaderQueue_p.html">loader queue</a>,
+<a href="/IndexCreateLoaderQueue_p.html">indexing queue</a>)
+or see the fill/process count of all queues on the
+<a href="/Performance_p.html">performance page</a>.
+<b>Please wait some seconds, because the request is enqueued and delayed until the http server is idle for a certain time.</b>
 The indexing result is presented on the
 <a href="IndexMonitor.html">Index Monitor</a>-page.
 <b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>

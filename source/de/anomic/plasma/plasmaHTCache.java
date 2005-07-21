@@ -74,7 +74,6 @@ import de.anomic.tools.enumerateFiles;
 public final class plasmaHTCache {
 
     private static final int stackLimit = 150;  // if we exceed that limit, we do not check idle
-    private static final long idleDelay = 2000; // 2 seconds no hits until we think that we idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
     
     private kelondroMap responseHeaderDB = null;
@@ -82,20 +81,9 @@ public final class plasmaHTCache {
     private final TreeMap cacheAge; // a <date+hash, cache-path> - relation
     public  long currCacheSize;
     public  long maxCacheSize;
-    private long lastAcc;
     public  final File cachePath;
     public  static serverLog log;
 
-    /*
-    public static final int CACHE_UNFILLED          = 0; // default case without assignment
-    public static final int CACHE_FILL              = 1; // this means: update == true
-    public static final int CACHE_HIT               = 2; // the best case: reading from Cache
-    public static final int CACHE_STALE_NO_RELOAD   = 3; // this shall be treated as a rare case that should not appear
-    public static final int CACHE_STALE_RELOAD_GOOD = 4; // this means: update == true
-    public static final int CACHE_STALE_RELOAD_BAD  = 5; // this updates only the responseHeader, not the content
-    public static final int CACHE_PASSING           = 6; // does not touch cache, just passing
-    */
-    
     public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb) {
 	//this.switchboard = switchboard;
         
@@ -129,10 +117,7 @@ public final class plasmaHTCache {
 	// init stack
 	cacheStack = new LinkedList();
 
-	// init idle check
-	lastAcc = System.currentTimeMillis();
-
-	// init cache age and size management
+        // init cache age and size management
 	cacheAge = new TreeMap();
 	currCacheSize = 0;
 	this.maxCacheSize = maxCacheSize;
@@ -299,10 +284,6 @@ public final class plasmaHTCache {
         return new httpHeader(null, hdb);
     }
 
-    public boolean idle() {
-	return (System.currentTimeMillis() > (idleDelay + lastAcc));
-    }
-    
     public boolean full() {
 	return (cacheStack.size() > stackLimit);
     }
@@ -414,20 +395,6 @@ public final class plasmaHTCache {
             return null;
         }
     }
-    
-    /*
-    public void saveResource(URL url, byte[] resource) {
-        File f = getCachePath(url);
-        f.getParentFile().mkdirs();
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(f);
-            htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
-        } finally {
-            if (fos!=null)try{fos.close();}catch(Exception e){}
-        }
-    }
-    */
     
     public static boolean isPOST(String urlString) {
 	return ((urlString.indexOf("?") >= 0) ||

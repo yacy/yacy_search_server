@@ -180,6 +180,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  kelondroTables              facilityDB;
     public  plasmaParser                parser;
     public  plasmaWordIndexClassicCacheMigration classicCache;
+    public  long                        proxyLastAccess;
     
     private serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
@@ -209,7 +210,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             remoteProxyHost = null;
             remoteProxyPort = 0;
         }
-        
+        proxyLastAccess = 0;
         
         if (!(listsPath.exists())) listsPath.mkdirs();
         
@@ -404,6 +405,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logSystem("Finished Switchboard Initialization");
     }
     
+    public boolean onlineCaution() {
+        return System.currentTimeMillis() - proxyLastAccess < 30000;
+    }
+    
     private static String ppRamString(int bytes) {
         if (bytes < 1024) return bytes + " KByte";
         bytes = bytes / 1024;
@@ -557,7 +562,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
     public boolean deQueue() {
 	// work off fresh entries from the proxy or from the crawler
-
+        if (onlineCaution()) {
+            log.logDebug("deQueue: online caution, omitting resource stack processing");
+            return false;
+        }
         plasmaSwitchboardQueue.Entry nextentry;
         synchronized (sbQueue) {
             if (sbQueue.size() == 0) {
@@ -565,12 +573,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 return false; // nothing to do
             }
             
-            // in case that the server is very busy we do not work off the queue too fast
-            if (!(cacheManager.idle())) try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {}
-            
             // do one processing step
-            log.logDebug("DEQUEUE: cacheManager=" + ((cacheManager.idle()) ? "idle" : "busy") +
-            ", sbQueueSize=" + sbQueue.size() +
+            log.logDebug("DEQUEUE: sbQueueSize=" + sbQueue.size() +
             ", coreStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
             ", limitStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) +
             ", overhangStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) +
@@ -666,7 +670,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     "cacheLoader=" + cacheLoader.size() + ")");
             return false;
         }
-        
+        if (onlineCaution()) {
+            log.logDebug("CoreCrawl: online caution, omitting processing");
+            return false;
+        }
         // if the server is busy, we do crawling more slowly
         //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         
@@ -797,21 +804,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
-        /*
-        if (queueStack.size() > 0) {
-            log.logDebug("GlobalCrawl: any processe is in queue, dismissed (" +
-                    "processStack=" + queueStack.size() + ")");
+        if (onlineCaution()) {
+            log.logDebug("GlobalCrawl: online caution, omitting processing");
             return false;
         }
-        if (noticeURL.coreStackSize() > 0) {
-            log.logDebug("GlobalCrawl: any local crawl is in queue, dismissed (" +
-                    "coreStackSize=" + noticeURL.coreStackSize() + ")");
-            return false;
-        }
-        */
-        
-        // if the server is busy, we do this more slowly
-        //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         
         // if crawling was paused we have to wait until we wer notified to continue
         synchronized(this.crawlingPausedSync) {

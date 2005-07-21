@@ -125,18 +125,17 @@ public final class plasmaWordIndexAssortmentCluster {
             return;
         }
         
-        // calculate appropriate cluster insert point
-        int clusterStart = clusterCount;
-        if ((((byte) wordHash.charAt(0)) & 1) == 1) {
-            // for every second hash, place the entries in the middle of the assortments
-            // this balances the entries within the assortments-cluster
-            int cap = clusterCapacity - newContainer.size() - 2 * clusterCount;
-            while (cap > 0) {
-                cap -= clusterStart;
-                clusterStart--;
-            }
+        // calculate minimum cluster insert point
+        int clusterMinStart = clusterCount;
+        int cap = clusterCapacity - newContainer.size() - 2 * clusterCount;
+        while (cap > 0) {
+            cap -= clusterMinStart;
+            clusterMinStart--;
         }
         
+        // point the real cluster insert point somewhere between the minimum and the maximum
+        int clusterStart = clusterCount - (int) (Math.random() * (clusterCount - clusterMinStart));
+
         // do the insert
         plasmaWordIndexEntryContainer c;
         Iterator i = newContainer.entries();

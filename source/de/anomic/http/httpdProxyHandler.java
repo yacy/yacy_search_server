@@ -272,6 +272,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             Date requestDate = new Date(); // remember the time...
             this.connectionProperties.put(httpd.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
             if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
+            switchboard.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
             respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE).length() + 2);
@@ -786,6 +787,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         String args = conProp.getProperty("ARGS"); // may be null if no args were given
         String httpVer = conProp.getProperty(httpd.CONNECTION_PROP_HTTP_VER);
         
+        switchboard.proxyLastAccess = System.currentTimeMillis();
+        
         int port;
         int pos;
         if ((pos = host.indexOf(":")) < 0) {
@@ -866,6 +869,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // remembering the starting time of the request
             Date requestDate = new Date(); // remember the time...
             this.connectionProperties.put(httpd.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
+            switchboard.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes
             respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE).length() + 2);
@@ -953,6 +957,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     
     public void doConnect(Properties conProp, de.anomic.http.httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) throws IOException {
         this.connectionProperties = conProp;
+        switchboard.proxyLastAccess = System.currentTimeMillis();
         
         String host = conProp.getProperty("HOST");
         int    port = Integer.parseInt(conProp.getProperty("PORT"));
