@@ -3,10 +3,10 @@
 ;part of YaCy (C) by Michael Peter Christen
 ;this file is contributed by Alexander Schier
 ;Cologne, 2005
-;last major change: 26.03.2005
+;last major change: 22.07.2005
 Name "YaCy"
 
-OutFile "yacy_v0.38_20050603.exe"
+OutFile "yacy_v0.39_20050722.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -19,7 +19,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.38(Build 20050603) on your computer. Select which optional things you want installed."
+ComponentText "This will install YaCy v0.39(Build 20050722) on your computer. Select which optional things you want installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old Version was installed into another locAtion(eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install in to:"
@@ -64,6 +64,7 @@ Section "Binaries (required)"
 	SetOutPath "$INSTDIR\htroot"
 	File "htroot\*.html"
 	File "htroot\*.xml"
+	File "htroot\*.xsl"
 	File "htroot\*.rss"
 	File "htroot\*.csv"
 	File "htroot\*.class"
