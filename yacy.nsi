@@ -46,6 +46,7 @@ Section "Binaries (required)"
 	File "gpl.txt"
 	File "superseed.txt"
 	File "yacy.stopwords"
+	File "yacy.logging"
 	
 	#lib
 	SetOutPath "$INSTDIR\lib"
@@ -67,7 +68,7 @@ Section "Binaries (required)"
 	File "htroot\*.csv"
 	File "htroot\*.class"
 	File "htroot\*.ico"
-	File "htroot\*.gif"
+	#File "htroot\*.gif"
 	File "htroot\*.pac" #proxy autoconfig
 
 	#yacy non-devel
