@@ -400,7 +400,7 @@ xpstopw=true
 20_dhtdistribution_memprereq=1000000
 30_peerping_idlesleep=120000
 30_peerping_busysleep=120000
-30_peerping_memprereq=20000
+30_peerping_memprereq=100000
 40_peerseedcycle_idlesleep=1800000
 40_peerseedcycle_busysleep=1200000
 40_peerseedcycle_memprereq=1000000
@@ -411,14 +411,14 @@ xpstopw=true
 61_globalcrawltrigger_busysleep=100
 61_globalcrawltrigger_memprereq=1000000
 62_remotetriggeredcrawl_idlesleep=10000
-62_remotetriggeredcrawl_busysleep=100
+62_remotetriggeredcrawl_busysleep=2000
 62_remotetriggeredcrawl_memprereq=1000000
 70_cachemanager_idlesleep=5000
 70_cachemanager_busysleep=0
-70_cachemanager_memprereq=10000
+70_cachemanager_memprereq=100000
 80_indexing_idlesleep=5000
 80_indexing_busysleep=0
-80_indexing_memprereq=2000000
+80_indexing_memprereq=1000000
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
 90_cleanup_memprereq=0
@@ -461,7 +461,7 @@ ramCacheWiki    =     8192
 # flushed to disc; this may last some minutes.
 # maxWaitingWordFlush gives the number of seconds that the shutdown
 # may last for the word flush
-wordCacheMax = 6000
+wordCacheMax = 10000
 maxWaitingWordFlush = 180
 
 # Specifies if yacy can be used as transparent http proxy.

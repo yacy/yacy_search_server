@@ -7,7 +7,7 @@ under certain conditions; see file gpl.txt for details.
 ---------------------------------------------------------------------------
 
 This is a P2P-based Web Search Engine
-and also a http/https proxy.
+and also a caching http/https proxy.
 
 The complete documentation can be found inside the 'doc' subdirectory
 in this release. Start browsing the manual by opening the index.html
@@ -16,22 +16,34 @@ file with your web browser.
 YOU NEED JAVA 1.4.2 OR LATER TO RUN THIS APPLICATION!
 PLEASE DOWNLOAD JAVA FROM http://java.sun.com
 
-Startup of YaCy:
+Startup and Shutdown of YaCy:
 
-- on Linux        : start startYACY.sh
-- on Windows      : double-click startYACY.bat
-- on Mac OS X     : double-click startYACY.command (alias possible!)
-- on any other OS : set your classpath to the 'classes' folder
-                    and execute yacy.class, while your current system
-                    path must target the release directory to access the
-                    configuration files.
+- on Linux:
+to start: execute startYACY.sh
+to stop : execute stopYACY.sh
 
-Then start using YaCy with the applications on-line interface:
+- on Windows:
+to start: double-click startYACY.bat
+to stop : double-click stopYACY.bat
+
+- on Mac OS X:
+to start: double-click startYACY.command (alias possible!)
+to stop : double-click stopYACY.command
+
+- on any other OS:
+to start: execute java as
+          java -classpath classes:htroot:lib/commons-collections.jar:lib/commons-pool-1.2.jar yacy -startup <yacy-release-path>
+to stop : execute java as
+          java -classpath classes:htroot:lib/commons-collections.jar:lib/commons-pool-1.2.jar yacy -shutdown
+
+
+YaCy is a server process that can be administrated and used
+with your web browser:
 browse to http://localhost:8080 where you can see your personal
 search, configuration and administration interface.
 
-If you want to use the proxy, simply configure your internet connection
-to use YaCy at port 8080. You can also change the default proxy port.
+If you want to use the built-in proxy, simply configure your internet connection
+to use a proxy at port 8080. You can also change this default proxy port.
 
 If you like to use YaCy not as proxy but only as distributed
 crawling/search engine, you can do so.
@@ -47,5 +59,5 @@ feel free to ask the author for a business proposal to customize YaCy
 according to your needs. We also provide integration solutions if the
 software is about to be integrated into your enterprise application.
 
-Germany, Frankfurt a.M., 03.05.2005
+Germany, Frankfurt a.M., 22.07.2005
 Michael Peter Christen

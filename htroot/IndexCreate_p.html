@@ -133,11 +133,28 @@ Crawling and indexing can be done by remote peers.
 Your peer can search and index for other peers and they can search for you.</div>
 <table border="0" cellpadding="5" cellspacing="0" width="100%">
   <tr valign="top" class="TableCellDark">
-    <td width="30%">
-        <input type="checkbox" name="crawlResponse" align="top" #(crawlResponseChecked)#::checked#(/crawlResponseChecked)#>
-        Accept remote crawling requests</td>
-    <td>
+    <td width="10%">
+        <input type="radio" name="dcr" value="acceptCrawlMax" align="top" #(acceptCrawlMaxChecked)#::checked#(/acceptCrawlMaxChecked)#>
+    </td><td>
+        Accept remote crawling requests and perform crawl at maximum load
+    </td>
+  </tr><tr valign="top" class="TableCellDark">
+    <td width="10%">
+        <input type="radio" name="dcr" value="acceptCrawlLimited" align="top" #(acceptCrawlLimitedChecked)#::checked#(/acceptCrawlLimitedChecked)#>
+    </td><td>
+        Accept remote crawling requests and perform crawl at maximum of
+        <input name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[PPM]#"> Pages Per Minute (minimum is 1, low system load at PPM <= 30)
+    </td>
+  </tr><tr valign="top" class="TableCellDark">
+    <td width="10%">
+        <input type="radio" name="dcr" value="acceptCrawlDenied" align="top" #(acceptCrawlDeniedChecked)#::checked#(/acceptCrawlDeniedChecked)#>
+    </td><td>
+        Do not accept remote crawling requests (please set this only if you cannot accept to crawl only one page per minute; see option above)</td>
+    </td>
+  </tr><tr valign="top" class="TableCellLight">
+    <td width="10%"></td><td>
         <input type="submit" name="distributedcrawling" value="set"></td>
+    </tr>
 </table>
 </form></p>
 
@@ -238,9 +255,7 @@ No remote crawl peers availible.<br>
 </tr>
 </table>
 #(/remoteCrawlPeers)#
-</p>
-
-<p>
+<br>
 <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
 #(crawler-paused)#
 <input type="submit" name="continuecrawlqueue" value="continue crawling">

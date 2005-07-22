@@ -66,6 +66,7 @@ import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverThread;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -224,9 +225,27 @@ public class IndexCreate_p {
                 }
             }
 
+            
+            
             if (post.containsKey("distributedcrawling")) {
-                boolean crawlResponse = ((String) post.get("crawlResponse", "")).equals("on");
-                env.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
+                long newBusySleep = Integer.parseInt(env.getConfig("62_remotetriggeredcrawl_busysleep", "100"));
+                if (((String) post.get("dcr", "")).equals("acceptCrawlMax")) {
+                    env.setConfig("crawlResponse", "true");
+                    newBusySleep = 100;
+                } else if (((String) post.get("dcr", "")).equals("acceptCrawlLimited")) {
+                    env.setConfig("crawlResponse", "true");
+                    int newppm = Integer.parseInt(post.get("acceptCrawlLimit", "1"));
+                    if (newppm < 1) newppm = 1;
+                    newBusySleep = 60000 / newppm;
+                    if (newBusySleep < 100) newBusySleep = 100;
+                } else if (((String) post.get("dcr", "")).equals("acceptCrawlDenied")) {
+                    env.setConfig("crawlResponse", "false");
+                }
+                serverThread rct = switchboard.getThread("62_remotetriggeredcrawl");
+                rct.setBusySleep(newBusySleep);
+                env.setConfig("62_remotetriggeredcrawl_busysleep", "" + newBusySleep);
+                //boolean crawlResponse = ((String) post.get("acceptCrawlMax", "")).equals("on");
+                //env.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
             }
 
             
@@ -249,7 +268,25 @@ public class IndexCreate_p {
         prop.put("storeHTCacheChecked", env.getConfig("storeHTCache", "").equals("true") ? 1 : 0);
         prop.put("localIndexingChecked", env.getConfig("localIndexing", "").equals("true") ? 1 : 0);
         prop.put("crawlOrderChecked", env.getConfig("crawlOrder", "").equals("true") ? 1 : 0);
-        prop.put("crawlResponseChecked", env.getConfig("crawlResponse", "").equals("true") ? 1 : 0);
+        long busySleep = Integer.parseInt(env.getConfig("62_remotetriggeredcrawl_busysleep", "100"));
+        if (env.getConfig("crawlResponse", "").equals("true")) {
+            if (busySleep <= 100) {
+                prop.put("acceptCrawlMaxChecked", 1);
+                prop.put("acceptCrawlLimitedChecked", 0);
+                prop.put("acceptCrawlDeniedChecked", 0);
+            } else {
+                prop.put("acceptCrawlMaxChecked", 0);
+                prop.put("acceptCrawlLimitedChecked", 1);
+                prop.put("acceptCrawlDeniedChecked", 0);
+            }
+        } else {
+            prop.put("acceptCrawlMaxChecked", 0);
+            prop.put("acceptCrawlLimitedChecked", 0);
+            prop.put("acceptCrawlDeniedChecked", 1);
+        }
+        int ppm = (int) ((long) 60000 / busySleep);
+        if (ppm > 60) ppm = 60;
+        prop.put("PPM", ppm);
         prop.put("xsstopwChecked", env.getConfig("xsstopw", "").equals("true") ? 1 : 0);
         prop.put("xdstopwChecked", env.getConfig("xdstopw", "").equals("true") ? 1 : 0);
         prop.put("xpstopwChecked", env.getConfig("xpstopw", "").equals("true") ? 1 : 0);

@@ -322,8 +322,6 @@
     <include name="yacy.logging"/>
     <include name="yacy.init"/>
     <include name="yacy.yellow"/>
-    <include name="yacy.black"/>
-    <include name="yacy.blue"/>
     <include name="yacy.stopwords"/>
     <include name="yacy.parser"/>
     <include name="httpd.mime"/>

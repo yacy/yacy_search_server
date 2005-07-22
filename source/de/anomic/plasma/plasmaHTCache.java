@@ -136,7 +136,10 @@ public final class plasmaHTCache {
     }
     
     public Entry pop() {
-        return (Entry) cacheStack.removeFirst();
+        if (cacheStack.size() > 0)
+            return (Entry) cacheStack.removeFirst();
+        else
+            return null;
     }
     
     public void storeHeader(String urlHash, httpHeader responseHeader) throws IOException {
@@ -243,7 +246,7 @@ public final class plasmaHTCache {
                 ageHours = (System.currentTimeMillis() -
                             Long.parseLong(((String) cacheAge.firstKey()).substring(0, 16), 16)) / 3600000;
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             log.logSystem("CACHE SCANNED, CONTAINS " + c +
 				   " FILES = " + currCacheSize/1048576 + "MB, OLDEST IS " + 

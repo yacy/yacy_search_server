@@ -43,6 +43,42 @@ globalheader();
 </ul>
 -->
 
+<br><p>v0.39_20050722_424
+<ul>
+<li>New Features:</li>
+  <ul>
+  <li>Added snippets to search results. Snippets are fetched by searching peer from original web sites and are also transported during result transmission from remote search results.</li>
+  <li>Proxy shows now an error page in case of errors.</li>
+  <li>Preparation for localization: started (not finished) German translation</li>
+  <li>Status page shows now memory amount, transfer volume and indexing speed as PPM (pages per minute). A global PPM (sum over all peers) is also computed.</li>
+  <li>Re-Structuring of Index-Creation Menue: added more submenues and queue monitors</li>
+  <li>Added feature to start crawling on bookmark files</li>
+  <li>Added blocking of blacklistet urls in indexReceive (remote DHT index transmissions)</li>
+  <li>Added port forwarding for remote peer connections (the peer may now be connected to an configurable address)</li>
+  <li>Added bbCode for Profiles</li>
+  <li>Memory Management in Performance Menu: a memory-limit can be set as condition for queue execution.</li>
+  <li>Added option to do performance-limited remote crawls (use this instead to switch off remote indexing if you are scared about too much performance loss on your machine)</li>
+  <li>Enhanced logging, configuration with yacy.logging</li>
+  </ul>
+<li>Performance: enhanced indexing speed</li>
+  <ul>
+  <li>Implemented indexing/loading multithreading</li>
+  <li>Enhanced caching in database (less memory occupation)</li>
+  <li>Replaced RAM-queue after indexing by a file-based queue (makes long queues possible)</li>
+  <li>Changed assortment cache-flush procedure: words may now appear in any assortment, not only one assortment. This prevents assortment-flushes, increases the capacity and prevents creation of files in DATA/PLASMADB/WORDS, which further speeds up indexing.</li>
+  <li>Speed-up of start-up and shut-down by replacement of stack by array. The dumped index takes also less memory on disk now. Because dumping is faster, the cache may be bigger which also increases indexing speed.</li>
+  </ul>
+<li>Bugfixes:</li>
+  <ul>
+  <li>Better shut-down behavior, time-out on sockets, less exceptions</li>
+  <li>Fixed gzip decoding and content-length in http-client</li>
+  <li>Better httpd header validation</li>
+  <li>Fixed possible memory leaks</li>
+  <li>Fixed 100% CPU bug (caused by repeated GC when memory was low)</li>
+  <li>Fixed UTF8-decoding for parser</li>
+  </ul>
+</ul>
+
 <br><p>v0.38_20050603_208
 <ul>
 <li>Enhanced Crawling:
