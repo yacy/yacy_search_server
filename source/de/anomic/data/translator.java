@@ -166,9 +166,9 @@ public class translator {
 			if(sourceFiles[i].getName().endsWith(extension)){
 				if(translationLists.containsKey(sourceFiles[i].getName())){
 					if(translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), (Hashtable)translationLists.get(sourceFiles[i].getName()))){
-						serverLog.logInfo("Translator", "Translated File: "+ sourceFiles[i].getName());
+						serverLog.logInfo("Translator", "Translated file: "+ sourceFiles[i].getName());
 					}else{
-						serverLog.logError("Translator", "File Error while translating File "+sourceFiles[i].getName());
+						serverLog.logError("Translator", "File error while translating file "+sourceFiles[i].getName());
 					}
 				}else{
 						serverLog.logInfo("Translator", "No translation for file: "+sourceFiles[i].getName());

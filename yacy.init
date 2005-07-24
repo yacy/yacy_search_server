@@ -99,7 +99,7 @@ parseableMimeTypes=
 # a comma-separated list of extensions that denote media file formats
 # this is important to recognize <a href> - tags as not-html reference
 # These files will be excluded from indexing _(Please keep extensions in alphabetical order)_
-mediaExt=ace,arj,asf,avi,bin,bz2,css,deb,doc,dmg,gif,gz,hqx,img,iso,jar,jpe,jpg,jpeg,mpeg,mov,mp3,mpg,ogg,png,pdf,ppt,ps,ram,rar,rm,rpm,sit,swf,sxc,sxd,sxi,sxw,tar,tgz,torrent,wmv,xcf,xls,zip
+mediaExt=ace,arj,asf,avi,bin,bz2,css,deb,doc,dmg,gif,gz,hqx,ico,img,iso,jar,jpe,jpg,jpeg,mpeg,mov,mp3,mpg,ogg,png,pdf,ppt,ps,ram,rar,rm,rpm,sit,swf,sxc,sxd,sxi,sxw,tar,tgz,torrent,wmv,xcf,xls,zip
 parseableExt=html,htm,txt,php,shtml,asp
 
 # Promotion Strings
