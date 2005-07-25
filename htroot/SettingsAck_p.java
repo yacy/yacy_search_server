@@ -297,7 +297,7 @@ public class SettingsAck_p {
             
             // check if peer name already exists
             String peerName = (String) post.get("peername");
-			String staticIP =  (String)prop.get("staticIP");
+			String staticIP =  (String)post.get("staticIP");
 			env.setConfig("staticIP", staticIP);
             yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
             
