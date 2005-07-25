@@ -338,7 +338,7 @@ public class yacySeedDB {
     public long countPotentialURL() { return seedPotentialDB.getAcc("LCount"); }
     public long countPotentialRWI() { return seedPotentialDB.getAcc("ICount"); }
 
-    public void addConnected(yacySeed seed) {
+    public synchronized void addConnected(yacySeed seed) {
 	if ((seed == null) || (!(seed.isProper()))) return;
         //seed.put("LastSeen", yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
@@ -361,7 +361,7 @@ public class yacySeedDB {
 	}
     }
     
-    public void addDisconnected(yacySeed seed) {
+    public synchronized void addDisconnected(yacySeed seed) {
 	if (seed == null) return;
         try {
             nameLookupCache.remove(seed.getName());
@@ -386,7 +386,7 @@ public class yacySeedDB {
 	}
     }
     
-    public void addPotential(yacySeed seed) {
+    public synchronized void addPotential(yacySeed seed) {
         if (seed == null) return;
         try {
             nameLookupCache.remove(seed.getName());

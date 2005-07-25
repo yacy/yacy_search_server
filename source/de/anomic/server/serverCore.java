@@ -185,7 +185,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         this.port = port;
         this.commandMaxLength = commandMaxLength;
         this.denyHost = (blockAttack) ? new Hashtable() : null;
-        
+
         // initialize logger
         this.log = new serverLog("SERVER");
         
@@ -403,11 +403,17 @@ public final class serverCore extends serverAbstractThread implements serverThre
         String cIP = clientAddress(controlSocket);
         //System.out.println("server bfHosts=" + bfHost.toString());
         if (bfHost.get(cIP) != null) {
-            this.log.logInfo("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP);
+            Integer attempts = (Integer) bfHost.get(cIP);
+            if (attempts == null) attempts = new Integer(1); else attempts = new Integer(attempts.intValue() + 1);
+            bfHost.put(cIP, attempts);
+            this.log.logInfo("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP + ", ATTEMPT " + attempts.intValue());
             // add a delay to make brute-force harder
             announceThreadBlockApply();
-            try {Thread.sleep(3000);} catch (InterruptedException e) {}
+            try {Thread.sleep(attempts.intValue() * 2000);} catch (InterruptedException e) {}
             announceThreadBlockRelease();
+            if ((attempts.intValue() >= 10) && (denyHost != null)) {
+                denyHost.put(cIP, "deny");
+            }
         }
         
         if ((this.denyHost == null) || (this.denyHost.get(cIP) == null)) {

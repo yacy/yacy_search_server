@@ -264,7 +264,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 // a wrong authentication was given. Ask again
                 String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
                 serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                serverCore.bfHost.put(clientIP, "sleep");
+                Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
+                if (attempts == null)
+                    serverCore.bfHost.put(clientIP, new Integer(1));
+                else
+                    serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
 
                 httpHeader headers = getDefaultHeaders();
                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
