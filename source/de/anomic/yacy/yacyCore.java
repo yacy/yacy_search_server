@@ -222,11 +222,11 @@ public class yacyCore {
         
         /*
         if (oldIPStamp.equals((String) seedDB.mySeed.get("IP", "127.0.0.1")))
-            System.out.println("***DEBUG publishSeedList: oldIP is equal");
+            yacyCore.log.logDebug("***DEBUG publishSeedList: oldIP is equal");
         if (seedCacheSizeStamp == seedDB.sizeConnected())
-            System.out.println("***DEBUG publishSeedList: sizeConnected is equal");
+            yacyCore.log.logDebug("***DEBUG publishSeedList: sizeConnected is equal");
         if (canReachMyself())
-            System.out.println("***DEBUG publishSeedList: I can reach myself");
+            yacyCore.log.logDebug("***DEBUG publishSeedList: I can reach myself");
         */
         
         if (
@@ -463,7 +463,7 @@ public class yacyCore {
             if(ip.equals("")){
                 ip = natLib.retrieveIP(DI604use, DI604pw, (switchboard.getConfig("yacyDebugMode", "false")=="false" ? false : true));
             }
-            //System.out.println("DEBUG: new IP=" + ip);
+            //yacyCore.log.logDebug("DEBUG: new IP=" + ip);
             seedDB.mySeed.put("IP", ip);
             if (seedDB.mySeed.get("PeerType", "junior").equals("junior")) // ???????????????
                 seedDB.mySeed.put("PeerType", "senior"); // to start bootstraping, we need to be recognised as "senior" peer

@@ -96,7 +96,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public void scrapeText(byte[] newtext) {
-	//System.out.println("SCRAPE: " + new String(newtext));
+	//yacyCore.log.logDebug("SCRAPE: " + new String(newtext));
 	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append(32);
 	text.append(super.stripAll(new serverByteBuffer(newtext, newtext.length + 1)).trim()).append(32);
     }
@@ -130,7 +130,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
-	//System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
+	//yacyCore.log.logDebug("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
 	if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) anchors.put(absolutePath(tagopts.getProperty("href", "")), super.stripAll(new serverByteBuffer(text)).trim().toString());
 	if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) headline = super.stripAll(new serverByteBuffer(text)).toString();
 	if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) title = super.stripAll(new serverByteBuffer(text)).toString();        
@@ -181,11 +181,11 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
     
     public void print() {
-	System.out.println("TITLE   :" + title);
-	System.out.println("HEADLINE:" + headline);
-	System.out.println("ANCHORS :" + anchors.toString());
-	System.out.println("IMAGES  :" + images.toString());
-	System.out.println("TEXT    :" + new String(text.getBytes()));
+	yacyCore.log.logInfo("TITLE   :" + title);
+	yacyCore.log.logInfo("HEADLINE:" + headline);
+	yacyCore.log.logInfo("ANCHORS :" + anchors.toString());
+	yacyCore.log.logInfo("IMAGES  :" + images.toString());
+	yacyCore.log.logInfo("TEXT    :" + new String(text.getBytes()));
     }
 
     
@@ -194,7 +194,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         try {
             htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL("http://localhost"));
             scraper.scrapeText(test.getBytes());
-            System.out.println(new String(scraper.getText()));
+            yacyCore.log.logInfo(new String(scraper.getText()));
         } catch (MalformedURLException e) {}
     }
     

@@ -117,7 +117,7 @@ public class wikiBoard {
     
     public String guessAuthor(String ip) {
         String author = (String) authors.get(ip);
-        //System.out.println("DEBUG: guessing author for ip = " + ip + " is '" + author + "', authors = " + authors.toString());
+        //yacyCore.log.logDebug("DEBUG: guessing author for ip = " + ip + " is '" + author + "', authors = " + authors.toString());
         return author;
     }
 
@@ -146,7 +146,7 @@ public class wikiBoard {
 	    else
 		record.put("page", serverCodings.enhancedCoder.encodeBase64(page));
             authors.put(ip, author);
-            //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
+            //yacyCore.log.logDebug("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
 	}
 
 	private entry(String key, Map record) {
@@ -259,9 +259,9 @@ public class wikiBoard {
 	    page.setAncestorDate(oldDate);
             oldEntry.setChild(page.subject());
 	    // write the backup
-            //System.out.println("key = " + page.key);
-            //System.out.println("oldDate = " + oldDate);
-            //System.out.println("record = " + oldEntry.record.toString());
+            //yacyCore.log.logDebug("key = " + page.key);
+            //yacyCore.log.logDebug("oldDate = " + oldDate);
+            //yacyCore.log.logDebug("record = " + oldEntry.record.toString());
 	    bkpbase.set(page.key + dateString(oldDate), oldEntry.record);
 	    // write the new page
 	    datbase.set(page.key, page.record);

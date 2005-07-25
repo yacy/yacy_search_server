@@ -172,7 +172,7 @@ public class yacySearch extends Thread {
                 if (searchThreads[i].links() < 0) anyIdle = true; else c = c + searchThreads[i].links();
             }
             if ((c >= count * 3) && ((System.currentTimeMillis() - start) > (waitingtime * 2 / 3))) {
-                System.out.println("DEBUG yacySearch: c=" + c + ", count=" + count + ", waitingtime=" + waitingtime);
+                yacyCore.log.logDebug("DEBUG yacySearch: c=" + c + ", count=" + count + ", waitingtime=" + waitingtime);
                 break; // we have enough
             }
             if (c >= count * 5) break;
