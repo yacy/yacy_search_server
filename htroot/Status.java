@@ -80,11 +80,10 @@ public class Status {
             prop.put("protection", 1);//protected
         
         // version information
-	prop.put("svnRevision", env.getConfig("svnRevision", ""));
-        double thisVersion = Float.parseFloat(env.getConfig("version","0.1"));
+        prop.put("versionpp", yacy.combinedVersionString2PrettyString(env.getConfig("version","0.1")));
+	double thisVersion = Double.parseDouble(env.getConfig("version","0.1"));
 		//cut off the SVN Rev in the Version
-        try {thisVersion = Math.round(thisVersion*100.0)/100.0;} catch (NumberFormatException e) {}
-		prop.put("version", thisVersion.toString()); //???
+        try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}
 		//System.out.println("TEST: "+thisVersion);
         if (yacyCore.latestVersion >= (thisVersion+0.01)) //only new Versions(not new SVN)
             prop.put("versioncomment", 1);//new version

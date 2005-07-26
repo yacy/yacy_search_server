@@ -145,7 +145,11 @@ public class Performance_p {
 		// check values to prevent short-cut loops
 		if (idlesleep < 1000) idlesleep = 1000;
                 if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
-            
+                if ((threadName.equals("50_localcrawl")) && (busysleep < 100)) busysleep = 100;
+                if ((threadName.equals("61_globalcrawltrigger")) && (busysleep < 100)) busysleep = 100;
+                if ((threadName.equals("62_remotetriggeredcrawl")) && (busysleep < 100)) busysleep = 100;
+                
+                
                 // on-the-fly re-configuration
                 switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
                 switchboard.setConfig(threadName + "_idlesleep", idlesleep);

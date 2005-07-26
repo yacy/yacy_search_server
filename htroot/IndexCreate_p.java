@@ -269,6 +269,10 @@ public class IndexCreate_p {
         prop.put("localIndexingChecked", env.getConfig("localIndexing", "").equals("true") ? 1 : 0);
         prop.put("crawlOrderChecked", env.getConfig("crawlOrder", "").equals("true") ? 1 : 0);
         long busySleep = Integer.parseInt(env.getConfig("62_remotetriggeredcrawl_busysleep", "100"));
+        if (busySleep < 100) {
+            busySleep = 100;
+            env.setConfig("62_remotetriggeredcrawl_busysleep", "" + busySleep);
+        }
         if (env.getConfig("crawlResponse", "").equals("true")) {
             if (busySleep <= 100) {
                 prop.put("acceptCrawlMaxChecked", 1);

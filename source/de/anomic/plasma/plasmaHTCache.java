@@ -181,17 +181,19 @@ public final class plasmaHTCache {
     }
     
     public void writeFileAnnouncement(File file) {
-        if (file.exists()) {
-            currCacheSize += file.length();
-            cacheAge.put(ageString(file.lastModified(), file), file);
-            cleanup();
+        synchronized (cacheAge) {
+            if (file.exists()) {
+                currCacheSize += file.length();
+                cacheAge.put(ageString(file.lastModified(), file), file);
+                cleanup();
+            }
         }
     }
     
     private void cleanup() {
         // clean up cache to have enough space for next entries
         File f;
-        while (currCacheSize > maxCacheSize) {
+        while ((currCacheSize > maxCacheSize) && (cacheAge.size() > 0)) {
             f = (File) cacheAge.remove(cacheAge.firstKey());
             if ((f != null) && (f.exists())) {
                 currCacheSize -= f.length();

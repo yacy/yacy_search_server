@@ -105,7 +105,7 @@ public class kelondroRecords {
     // POS_NODES : (USEDC + FREEC) * (overhead + sum(all: COLWIDTHS)) : Node Objects
 
     // values that are only present at run-time
-    protected   String     filename;     // the database's file name
+    protected String     filename;     // the database's file name
     protected kelondroRA entryFile;    // the database file
     private   int        overhead;     // OHBYTEC + 4 * OHHANDLEC = size of additional control bytes
     private   int        recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record

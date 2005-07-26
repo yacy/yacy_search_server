@@ -77,7 +77,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     }
 
     public void init(String initarg) {
-        //yacyCore.log.logDebug("Transformer init: " + initarg);
+        //System.out.println("Transformer init: " + initarg);
 	if (bluelist == null) {
 	    // here, the initarg is used to load a list of bluelisted words
 	    bluelist = new Vector();
@@ -91,7 +91,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
 		r.close();
 	    } catch (Exception e) {
 	    }
-            //if (bluelist.size() == 0) yacyCore.log.logInfo("BLUELIST is empty");
+            //if (bluelist.size() == 0) System.out.println("BLUELIST is empty");
 	}
     }
 
@@ -117,7 +117,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
 
     public byte[] transformText(byte[] text) {
 	if (hit(text)) {
-	    yacyCore.log.logInfo("FILTERHIT: " + text); 
+	    //System.out.println("FILTERHIT: " + text); 
 	    return genBlueLetters(text.length); 
 	} else
 	    return text;

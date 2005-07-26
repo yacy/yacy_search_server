@@ -71,7 +71,7 @@ public class translator {
 		while(keys.hasMoreElements()){
 			key = (String)keys.nextElement();
 			result = result.replaceAll(key, (String)translationList.get(key));
-			//yacyCore.log.logDebug("Replaced \""+key+"\" by \""+translationList.getProperty(key)+"\""); //DEBUG
+			//System.out.println("Replaced \""+key+"\" by \""+translationList.getProperty(key)+"\""); //DEBUG
 		}
 		return result;
 	}

@@ -193,7 +193,7 @@ public class Network {
             // generate table
             int page = Integer.parseInt(post.get("page", "1"));
             int conCount = 0;
-            int maxCount = 100;
+            int maxCount = 500;
             if (yacyCore.seedDB == null) {
                 prop.put("table", 0);//no remote senior/principal proxies known"
             } else {
@@ -256,7 +256,7 @@ public class Network {
                                 prop.put("table_list_"+conCount+"_type", 2);
                                 prop.put("table_list_"+conCount+"_type_url", seed.get("seedURL", "http://nowhere/") );
                             }
-                            prop.put("table_list_"+conCount+"_version", seed.get("Version", "-"));
+                            prop.put("table_list_"+conCount+"_version", yacy.combinedVersionString2PrettyString(seed.get("Version", "0.1")));
                             prop.put("table_list_"+conCount+"_contact", (seed.getFlagDirectConnect() ? 1 : 0) );
                             prop.put("table_list_"+conCount+"_lastSeen", lastSeen(seed.get("LastSeen", "-")) );
                             prop.put("table_list_"+conCount+"_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", "0"))));

@@ -159,7 +159,7 @@ public final class htmlFilterOutputStream extends OutputStream {
     }
 
     private byte[] filterTag(String tag, boolean opening, byte[] content, byte quotechar) {
-	//yacyCore.log.logDebug("FILTER1: filterTag=" + ((filterTag == null) ? "null" : filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + new String(content)); // debug
+	//System.out.println("FILTER1: filterTag=" + ((filterTag == null) ? "null" : filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + new String(content)); // debug
 	if (filterTag == null) {
 	    // we are not collection tag text
 	    if (tag == null) {
@@ -245,7 +245,7 @@ public final class htmlFilterOutputStream extends OutputStream {
 
     private byte[] filterSentence(byte[] in, byte quotechar) {
 	if (in.length == 0) return in;
-	//yacyCore.log.logDebug("FILTER0: " + new String(in)); // debug
+	//System.out.println("FILTER0: " + new String(in)); // debug
 	// scan the string and parse structure
 	if ((in.length > 2) && (in[0] == lb)) {
 	    // a tag
@@ -290,7 +290,7 @@ public final class htmlFilterOutputStream extends OutputStream {
     }
 
     private void write(byte b) throws IOException {
-	//yacyCore.log.logDebug((char) b);
+	//System.out.println((char) b);
         if ((binaryUnsuspect) && (binaryHint(b))) {
             binaryUnsuspect = false;
             if (passbyIfBinarySuspect) finalize();
@@ -423,7 +423,7 @@ public final class htmlFilterOutputStream extends OutputStream {
     }
 
     public void write(byte b[], int off, int len) throws IOException {
-	//yacyCore.log.logDebug(new String(b, off, len));
+	//System.out.println(new String(b, off, len));
 	if ((off | len | (b.length - (len + off)) | (off + len)) < 0) throw new IndexOutOfBoundsException();
 	for (int i = off ; i < (len - off) ; i++) this.write(b[i]);
     }
@@ -469,7 +469,7 @@ public final class htmlFilterOutputStream extends OutputStream {
         if (b > 31) return false;
         if ((b == 8) || (b == 9) || (b == 10) || (b == 13)) return false;
 	//return false;
-        yacyCore.log.logInfo("BINARY HINT: " + (int) b);
+        //System.out.println("BINARY HINT: " + (int) b);
 	return true;
     }
 
