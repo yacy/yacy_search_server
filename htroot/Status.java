@@ -81,12 +81,16 @@ public class Status {
         
         // version information
 	prop.put("svnRevision", env.getConfig("svnRevision", ""));
-        float thisVersion = yacyCore.latestVersion;
-        try {thisVersion = Math.round(Float.parseFloat(env.getConfig("version","0.1")));} catch (NumberFormatException e) {}
-        if (yacyCore.latestVersion == thisVersion)
-            prop.put("versioncomment", 0);//no commet
-        else
+        double thisVersion = Float.parseFloat(env.getConfig("version","0.1"));
+		//cut off the SVN Rev in the Version
+        try {thisVersion = Math.round(thisVersion*100.0)/100.0;} catch (NumberFormatException e) {}
+		prop.put("version", thisVersion.toString()); //???
+		//System.out.println("TEST: "+thisVersion);
+        if (yacyCore.latestVersion >= (thisVersion+0.01)) //only new Versions(not new SVN)
             prop.put("versioncomment", 1);//new version
+        else
+            prop.put("versioncomment", 0);//no commet
+
         prop.put("versioncomment_latestVersion", "" + yacyCore.latestVersion);
         
         prop.put("host", serverCore.publicLocalIP());
