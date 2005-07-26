@@ -204,11 +204,18 @@ public class Performance_p {
             ((serverCore)httpd).setPoolConfig(httpdPoolConfig);            
         }        
         
+        if ((post != null) && (post.containsKey("proxyControlSubmit"))) {
+            int onlineCautionDelay = Integer.parseInt((String) post.get("onlineCautionDelay", "30000"));
+            switchboard.setConfig("onlineCautionDelay", "" + onlineCautionDelay);
+        }
+        
         // table cache settings
         prop.put("wordCacheRAMSize", switchboard.wordIndex.wordCacheRAMSize());
         prop.put("maxURLinWordCache", "" + switchboard.wordIndex.maxURLinWordCache());
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
         prop.put("wordCacheMax", switchboard.getConfig("wordCacheMax", "10000"));
+        prop.put("onlineCautionDelay", switchboard.getConfig("onlineCautionDelay", "30000"));
+        prop.put("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
         
         int[] asizes = switchboard.wordIndex.assortmentSizes();
         for (int i = 0; i < asizes.length; i += 8) {

@@ -147,6 +147,28 @@ Changes take effect immediately</td>
 </table>
 </p>
 
+<p>
+<div class=small><b>Proxy Performance Settings:</b></div>
+<form action="Performance_p.html" method="post" enctype="multipart/form-data">
+<table border="0" cellpadding="5" cellspacing="1" width="100%">
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Online Caution Delay (milliseconds):</td>
+    <td class=small><input name="onlineCautionDelay" type="text" size="20" maxlength="100" value="#[onlineCautionDelay]#"></td>
+    <td class=small>
+    This is the time that the crawler idles when the proxy is accessed. The delay is extended by this time
+    each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.
+    (current delta is #[onlineCautionDelayCurrent]# milliseconds since last proxy access.)
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellLight">
+    <td class=small colspan="3">
+    <input type="submit" name="proxyControlSubmit" value="Enter New Parameters">
+    Changes take effect immediately</td>
+  </tr>
+</table>
+</form>
+</p>
+
 #[footer]#
 </body>
 </html>

@@ -112,7 +112,7 @@ public final class yacy {
     
     // static objects
     private static String vString = "@REPL_VERSION@";
-    private static double version = (double) 0.1;
+    private static float version = (float) 0.1;
     
     private static final String vDATE   = "@REPL_DATE@";
     private static final String copyright = "[ YACY Proxy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
@@ -120,19 +120,23 @@ public final class yacy {
     
     public static String combinedVersionString2PrettyString(String s) {
         long svn;
-        try {svn = (long) ((double) 10000000 * Double.parseDouble(s));} catch (NumberFormatException ee) {svn = 1000000;}
-        double version = (Math.floor((double) svn / (double) 10000) / (double) 1000);
-        svn = svn % 10000;
-        return ((version < 0.11) ? "dev" : "" + version) + "/" + ((svn == 0) ? "000" : ("" + svn));
+        try {svn = (long) (100000000.0 * Double.parseDouble(s));} catch (NumberFormatException ee) {svn = 0;}
+        double version = (Math.floor((double) svn / (double) 100000) / (double) 1000);
+        String vStr = (version < 0.11) ? "dev" : "" + version;
+        //while (vStr.length() < 5) vStr = vStr + "0";
+        svn = svn % 100000;
+        if (svn > 4000) svn=svn / 10; // fix a previous bug online
+        String svnStr = "" + svn;
+        while (svnStr.length() < 5) svnStr = "0" + svnStr;
+        return vStr + "/" + svnStr;
     }
     
-    public static double versvn2combinedVersionString(double version, int svn) {
-        return version + (((double) svn) / 10000000.0);
+    public static float versvn2combinedVersion(float version, int svn) {
+        return (float) (((double) version * 100000000.0 + ((double) svn)) / 100000000.0);
     }
     
     private static void startup(String homePath) {
         long startup = yacyCore.universalTime();
-        try {version = Double.parseDouble(vString);} catch (NumberFormatException e) {version = (double) 0.1;}
         try {
             // start up
             System.out.println(copyright);
@@ -189,7 +193,8 @@ public final class yacy {
                     if (matcher.find()) {
                         String svrReleaseNr = matcher.group(1);
                         try {
-                            version = versvn2combinedVersionString(version, Integer.parseInt(svrReleaseNr));
+                            try {version = Float.parseFloat(vString);} catch (NumberFormatException e) {version = (float) 0.1;}
+                            version = versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
                         } catch (NumberFormatException e) {}
                         sb.setConfig("svnRevision", svrReleaseNr);
                     }

@@ -210,7 +210,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             remoteProxyHost = null;
             remoteProxyPort = 0;
         }
-        proxyLastAccess = 0;
+        proxyLastAccess = System.currentTimeMillis() - 60000;
         
         if (!(listsPath.exists())) listsPath.mkdirs();
         
@@ -406,7 +406,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public boolean onlineCaution() {
-        return System.currentTimeMillis() - proxyLastAccess < 30000;
+        try {
+            return System.currentTimeMillis() - proxyLastAccess < Integer.parseInt(getConfig("onlineCautionDelay", "30000"));
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
     
     private static String ppRamString(int bytes) {
