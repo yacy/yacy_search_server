@@ -89,9 +89,7 @@ Last upload: #[lastUpload]# ago.
 #(popup)#
 Disabled. To enable this again please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page
 ::
-<form action="Status.html" method="get">
-Enabled <input type="submit" name="dispop" value="Disable pop-up">
-</form>
+Enabled. To disable this please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page
 #(/popup)#
 </td></tr>
 <tr class="TableCellDark"><td>Online-mode</td><td>
@@ -111,7 +109,10 @@ You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are
 #(/omode)#
 </td></tr>
 <tr class="TableCellLight"><td>Memory Usage</td><td>
+<!--
 <form action="Status.html" method="get">free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]# | <input type="submit" name="gc" value="Do Garbage-Collect now"></form>
+-->
+free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]#
 </td></tr>
 <tr class="TableCellDark"><td>Traffic</td><td>
 Out: #[trafficIn]# | In: #[trafficOut]#

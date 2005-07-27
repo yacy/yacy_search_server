@@ -195,9 +195,7 @@ public class Status {
 
         // pop-up trigger management and gc
         if (post != null) {
-            if (post.containsKey("dispop")) env.setConfig("browserPopUpTrigger", "false");
-            if (post.containsKey("enpop")) env.setConfig("browserPopUpTrigger", "true");
-            if (post.containsKey("gc")) rt.gc();
+            //if (post.containsKey("gc")) rt.gc();
         }
         
         if (env.getConfig("browserPopUpTrigger", "false").equals("false")) {
