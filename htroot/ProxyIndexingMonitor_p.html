@@ -12,7 +12,8 @@
 This is the control page for web pages that your peer has indexed during the current application run-time
 as result of proxy fetch/prefetch.
 <b>No personal or protected page is indexed</b>;
-those pages are detected by Cookie-Use or POST-Parameters (either in URL or as HTTP protocol)
+those pages are detected by properties in the HTTP header (like Cookie-Use, or HTTP Authorization)
+or by POST-Parameters (either in URL or as HTTP protocol)
 and automatically excluded from indexing.
 </p>
 
@@ -54,46 +55,8 @@ Please delete that file and restart.</b><br>
 <br><b>An error has occurred: #[error]#.</b><br>
 #(/info)#
 
-<p>Snapshot of recently indexed web pages that passed the proxy:<br>
-#(table4)#
-<i>The stack is empty.</i>
-::
-<i>
-#(size)#
-Showing all #[all]# entries in this stack.
-::
-Showing latest #[count]# lines from a stack of #[all]# entries.
-#(/size)#
-</i>
-<table border="0" cellpadding="2" cellspacing="1" width="100%">
-<tr class="TableHeader">
-<td class="small"><form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
-<input type="submit" name="clearlist#[tabletype]#" value="clear list"></form></td>
-#(showInit)#::<td class="small"><b>Initiator</b></td>#(/showInit)#
-#(showExec)#::<td class="small"><b>Executor</b></td>#(/showExec)#
-<td class="small"><b>Modified Date</b></td>
-<td class="small"><b>#Words</b></td>
-<td class="small"><b>Title</b></td>
-<td class="small"><b>URL</b></td>
-</tr>
-#{indexed}#
-<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
-<td width="30" class="small">
-<form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
-<input type="submit" name="deleteentry" value="delete" class="small">
-<input type="hidden" name="table" value="#[tabletype]#">
-<input type="hidden" name="hash" value="#[urlhash]#">
-</form></td>
-#(showInit)#::<td width="60" class="small">#[initiatorSeed]#</td>#(/showInit)#
-#(showExec)#::<td width="60" class="small">#[executorSeed]#</td>#(/showExec)#
-<td width="80" class="small">#[moddate]#</td>
-<td width="40" class="small">#[wordcount]#</td>
-<td width="180" class="small">#[urldescr]#</td>
-<td class="small">#[url]#</td>
-</tr>
-#{/indexed}#
-</table><br>
-#(/table4)#
+<p>You can see a snapshot of recently indexed pages
+on the <a href="http://localhost:8000/IndexMonitor.html?process=4">Proxy Index Monitor</a> Page.
 </p>
 
 #[footer]#

@@ -119,6 +119,11 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	super(ra, buffersize);
     }
 
+    public void clear() throws IOException {
+        super.clear();
+        setHandle(root, null); // reset the root value
+    }
+
     // Returns the value to which this map maps the specified key.
     public synchronized byte[][] get(byte[] key) throws IOException {
 	//System.out.println("kelondroTree.get " + new String(key) + " in " + filename);

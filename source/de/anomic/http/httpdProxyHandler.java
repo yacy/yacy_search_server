@@ -563,6 +563,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     res.writeContent(hfos, cacheFile);
                     if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
                     this.theLogger.logDebug("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
+                    cacheManager.writeFileAnnouncement(cacheFile);
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
                         //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert

@@ -70,11 +70,15 @@ public class IndexCreateWWWGlobalQueue_p {
         if (post != null) {
             if (post.containsKey("clearcrawlqueue")) {
                 String urlHash;
+                int c = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+                switchboard.urlPool.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+                /*
                 int c = 0;
                 while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) > 0) {
                     urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT).hash();
                     if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
                 }
+                */
                 prop.put("info", 3);//crawling queue cleared
                 prop.put("info_numEntries", c);
             }

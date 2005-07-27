@@ -239,6 +239,17 @@ public class kelondroRecords {
 	// thats it!
     }
 
+    public void clear() throws IOException {
+        // Removes all mappings from this map
+	//throw new UnsupportedOperationException("clear not supported");
+        USEDC = 0;
+	FREEC = 0;
+	FREEH = new Handle(NUL);
+	entryFile.seek(POS_USEDC); entryFile.writeInt(this.USEDC);
+	entryFile.seek(POS_FREEC); entryFile.writeInt(this.FREEC);
+	entryFile.seek(POS_FREEH); entryFile.writeInt(this.FREEH.index);
+    }
+
     public kelondroRecords(File file, long buffersize) throws IOException{
 	// opens an existing tree
 	if (!file.exists()) throw new IOException("kelondroRecords: file " + file.getAbsoluteFile().toString() + " does not exist");
@@ -776,11 +787,6 @@ public class kelondroRecords {
 	return TXTPROPS[pos];
     }
     
-    // Removes all mappings from this map (optional operation).
-    public void clear() {
-	throw new UnsupportedOperationException("clear not supported");
-    }
-
     // Returns true if this map contains no key-value mappings.
     public boolean isEmpty() {
 	return (USEDC == 0);

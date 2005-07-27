@@ -12,7 +12,7 @@
 # INFO    regular action information (i.e. any httpd request URL)
 # FINEST  in-function status debug output
 PARSER.level = INFO
-YACY.level = INFO
+YACY.level = FINEST
 HTCACHE.level = INFO
 PLASMA.level = FINEST
 SERVER.level = INFO

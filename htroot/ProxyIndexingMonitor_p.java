@@ -74,21 +74,7 @@ public class ProxyIndexingMonitor_p {
         prop.put("info_message", "");
                     
         if (post != null) {
-            if (post.containsKey("clearlist4")) switchboard.urlPool.loadedURL.clearStack(4); // local: by proxy crawl
-            if (post.containsKey("deleteentry")) {
-                String hash = post.get("hash", null);
-                if (hash != null) {
-                    // delete from database
-                    switchboard.urlPool.loadedURL.remove(hash);
-                }
-            }
             
-            if (post.containsKey("moreIndexed")) {
-                showIndexedCount = Integer.parseInt(post.get("showIndexed", "40"));
-            }
-            
-            if (post.get("se") != null) se = true;
-
             if (post.containsKey("proxyprofileset")) try {
                 // read values and put them in global settings
                 int newProxyPrefetchDepth = Integer.parseInt((String) post.get("proxyPrefetchDepth", "0"));
@@ -121,10 +107,6 @@ public class ProxyIndexingMonitor_p {
             }
         }
          
-        // create tables
-        String myname = yacyCore.seedDB.mySeed.getName();
-        prop.putAll(switchboard.urlPool.loadedURL.genTableProps(4, showIndexedCount, false, false, "proxy", null, "ProxyIndexingMonitor_p.html", true));
-        
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("proxyStoreHTCacheChecked", env.getConfig("proxyStoreHTCache", "").equals("true") ? 1 : 0);
         // return rewrite properties

@@ -254,7 +254,8 @@ public final class plasmaHTCache {
 				   " FILES = " + currCacheSize/1048576 + "MB, OLDEST IS " + 
 				   ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) +
 				   " OLD");
-
+            cleanup();
+            
             // start to prefetch ip's from dns                       
             String dom;
             long start = System.currentTimeMillis();

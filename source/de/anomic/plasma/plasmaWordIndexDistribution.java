@@ -17,75 +17,99 @@ import de.anomic.kelondro.kelondroException;
 
 public class plasmaWordIndexDistribution {
     
-        // distributes parts of the index to other peers
-        // stops as soon as an error occurrs
- 
-        private int indexCount;
-        private int peerCount;
-        private long maxTime;
-        
-        private plasmaURLPool urlPool;
-        private plasmaWordIndex wordIndex;
-        private serverLog log;
-        private boolean enabled;
-        
-	public plasmaWordIndexDistribution(plasmaURLPool urlPool, plasmaWordIndex wordIndex, serverLog log,
-                                           boolean enable) {
-            this.urlPool = urlPool;
-            this.wordIndex = wordIndex;
-            setCounts(100 /*indexCount*/,  1 /*peerCount*/, 8000);
-	}
+    // distributes parts of the index to other peers
+    // stops as soon as an error occurrs
+    
+    private int indexCount;
+    private int juniorPeerCount, seniorPeerCount;
+    private long maxTime;
+    
+    private plasmaURLPool urlPool;
+    private plasmaWordIndex wordIndex;
+    private serverLog log;
+    private boolean enabled;
+    
+    public plasmaWordIndexDistribution(plasmaURLPool urlPool, plasmaWordIndex wordIndex, serverLog log,
+    boolean enable) {
+        this.urlPool = urlPool;
+        this.wordIndex = wordIndex;
+        this.enabled = enable;
+        this.log = log;
+        setCounts(100 /*indexCount*/,  1 /*juniorPeerCount*/, 3 /*seniorPeerCount*/, 8000);
+    }
+    
+    public void enable() {
+        enabled = true;
+    }
+    
+    public void disable() {
+        enabled = false;
+    }
+    
+    public boolean job() {
 
-        public void enable() {
-            enabled = true;
+        if (yacyCore.seedDB == null) {
+            log.logDebug("no word distribution: seedDB == null");
+            return false;
+        }
+        if (yacyCore.seedDB.mySeed == null) {
+            log.logDebug("no word distribution: mySeed == null");
+            return false;
+        }
+        if (yacyCore.seedDB.mySeed.isVirgin()) {
+            log.logDebug("no word distribution: status is virgin");
+            return false;
+        }
+        if (!(enabled)) {
+            log.logDebug("no word distribution: not enabled");
+            return false;
+        }
+        if (urlPool.loadedURL.size() < 10) {
+            log.logDebug("no word distribution: loadedURL.size() = " + urlPool.loadedURL.size());
+            return false;
+        }
+        if (wordIndex.size() < 100) {
+            log.logDebug("no word distribution: not enough words - wordIndex.size() = " + wordIndex.size());
+            return false;
+        }
+        if (urlPool.noticeURL.stackSize() > 0) {
+            log.logDebug("no word distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize());
+            return false;
         }
         
-        public void disable() {
-            enabled = false;
-        }
+        // do the transfer
+        int peerCount = (yacyCore.seedDB.mySeed.isJunior()) ? juniorPeerCount : seniorPeerCount;
+        long starttime = System.currentTimeMillis();
+        int transferred = performTransferIndex(indexCount, peerCount, true);
         
-	public boolean job() {
-            if ((yacyCore.seedDB == null) ||
-                (yacyCore.seedDB.mySeed == null) ||
-                (yacyCore.seedDB.mySeed.isVirgin()) ||
-                (urlPool.loadedURL.size() < 10) ||
-                (wordIndex.size() < 100) ||
-                (!(yacyCore.seedDB.mySeed.isJunior()))) return false;
-
-            int transferred;
-            long starttime = System.currentTimeMillis();
-            try {
-                if (
-                (urlPool.noticeURL.stackSize() == 0) &&
-                (enabled) &&
-                ((transferred = performTransferIndex(indexCount, peerCount, true)) > 0)) {
-                    indexCount = transferred;
-                    if ((System.currentTimeMillis() - starttime) > (maxTime * peerCount)) indexCount--; else indexCount++;
-                    if (indexCount < 30) indexCount = 30;
-                    return true;
-                } else {
-                    // make a long pause
-                    return false;
-                }
-            } catch (IllegalArgumentException ee) {
-                // this is a bug that occurres if a not-fixeable data-inconsistency in the table structure was detected
-                // make a long pause
-                log.logError("very bad data inconsistency: " + ee.getMessage());
-                //ee.printStackTrace();
-                return false;
-            }
-	}
-
-        public void setCounts(int indexCount, int peerCount, long maxTimePerTransfer) {
-            this.maxTime = maxTimePerTransfer;
-            this.indexCount = indexCount;
-            if (indexCount < 30) indexCount = 30;
-            this.peerCount = peerCount;
+        if (transferred <= 0) {
+            log.logDebug("no word distribution: transfer failed");
+            return false;
         }
-        
-        public int performTransferIndex(int indexCount, int peerCount, boolean delete) {
-	if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return -1;
 
+        // adopt transfer count
+        if ((System.currentTimeMillis() - starttime) > (maxTime * peerCount))
+            indexCount--;
+        else
+            indexCount++;
+        if (indexCount < 30) indexCount = 30;
+
+        // show success
+        return true;
+        
+    }
+    
+    public void setCounts(int indexCount, int juniorPeerCount, int seniorPeerCount, long maxTimePerTransfer) {
+        this.maxTime = maxTimePerTransfer;
+        this.indexCount = indexCount;
+        if (indexCount < 30) indexCount = 30;
+        this.juniorPeerCount = juniorPeerCount;
+        this.seniorPeerCount = seniorPeerCount;
+    }
+    
+    public int performTransferIndex(int indexCount, int peerCount, boolean delete) {
+        if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return -1;
+        
         // collect index
         //String startPointHash = yacyCore.seedCache.mySeed.hash;
         String startPointHash = serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true).substring(0, yacySeedDB.commonHashLength);
@@ -140,18 +164,18 @@ public class plasmaWordIndexDistribution {
                     return -1;
                 }
             } else {
-		// simply close the indexEntities
-		for (int i = 0; i < indexEntities.length; i++) try {
-		    indexEntities[i].close();
-		} catch (IOException ee) {}
-	    }
+                // simply close the indexEntities
+                for (int i = 0; i < indexEntities.length; i++) try {
+                    indexEntities[i].close();
+                } catch (IOException ee) {}
+            }
             return indexCount;
         } else {
             log.logError("Index distribution failed. Too less peers (" + hc + ") received the index, not deleted locally.");
             return -1;
         }
     }
-
+    
     private plasmaWordIndexEntity[] selectTransferIndexes(String hash, int count) {
         Vector tmpEntities = new Vector();
         String nexthash = "";
@@ -161,7 +185,7 @@ public class plasmaWordIndexDistribution {
             Enumeration urlEnum;
             plasmaWordIndexEntry indexEntry;
             while ((count > 0) && (wordHashIterator.hasNext()) &&
-                   ((nexthash = (String) wordHashIterator.next()) != null) && (nexthash.trim().length() > 0)) {
+            ((nexthash = (String) wordHashIterator.next()) != null) && (nexthash.trim().length() > 0)) {
                 indexEntity = wordIndex.getEntity(nexthash, true);
                 if (indexEntity.size() == 0) {
                     indexEntity.deleteComplete();
@@ -229,7 +253,7 @@ public class plasmaWordIndexDistribution {
                 /*
                 if (wordIndex.getEntity(indexEntities[i].wordHash()).deleteComplete())
                     System.out.println("DEBUG: trial delete of partial word index " + indexEntities[i].wordHash() + " SUCCESSFULL");
-                else 
+                else
                     System.out.println("DEBUG: trial delete of partial word index " + indexEntities[i].wordHash() + " FAILED");
                  */
                 // end debug
@@ -238,7 +262,7 @@ public class plasmaWordIndexDistribution {
                 // delete complete file
                 if (indexEntities[i].deleteComplete()) {
                     indexEntities[i].close();
-		} else {
+                } else {
                     indexEntities[i].close();
                     // have another try...
                     if (!(plasmaWordIndexEntity.wordHash2path(wordIndex.getRoot() /*PLASMADB*/, indexEntities[i].wordHash()).delete())) {
@@ -247,7 +271,7 @@ public class plasmaWordIndexDistribution {
                     }
                 }
             }
-	    indexEntities[i] = null;
+            indexEntities[i] = null;
         }
         return success;
     }

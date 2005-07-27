@@ -82,6 +82,12 @@ public class kelondroStack extends kelondroRecords {
 	super(file, buffersize);
     }
 
+    public void clear() throws IOException {
+        super.clear();
+        setHandle(root, null); // reset the root value
+	setHandle(toor, null); // reset the toor value
+    }
+
     public class Counter implements Iterator {
 	Handle nextHandle = null;
 	public Counter() throws IOException {

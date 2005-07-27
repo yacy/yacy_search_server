@@ -250,6 +250,21 @@ public class plasmaCrawlNURL extends plasmaURL {
         }
     }
     
+    public void clear(int stackType) {
+        try {
+            switch (stackType) {
+                case STACK_TYPE_CORE:     coreStack.clear(); break;
+                case STACK_TYPE_LIMIT:    limitStack.clear(); break;
+                case STACK_TYPE_OVERHANG: overhangStack.clear(); break;
+                case STACK_TYPE_REMOTE:   remoteStack.clear(); break;
+                case STACK_TYPE_IMAGE:    imageStack.clear(); break;
+                case STACK_TYPE_MOVIE:    movieStack.clear(); break;
+                case STACK_TYPE_MUSIC:    musicStack.clear(); break;
+                default: return;
+            }
+        } catch (IOException e) {}
+    }
+    
     private Entry pop(kelondroStack stack) {
 	// this is a filo - pop
 	try {

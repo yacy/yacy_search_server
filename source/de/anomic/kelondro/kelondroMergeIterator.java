@@ -44,6 +44,7 @@ package de.anomic.kelondro;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.ConcurrentModificationException;
 
 public class kelondroMergeIterator implements Iterator {
     
@@ -72,10 +73,18 @@ public class kelondroMergeIterator implements Iterator {
     }
     
     private void nexta() {
-        if (a.hasNext()) na = (String) a.next(); else na = null;
+        try {
+            if (a.hasNext()) na = (String) a.next(); else na = null;
+        } catch (ConcurrentModificationException e) {
+            na = null;
+        }
     }
     private void nextb() {
-        if (b.hasNext()) nb = (String) b.next(); else nb = null;
+        try {
+            if (b.hasNext()) nb = (String) b.next(); else nb = null;
+        } catch (ConcurrentModificationException e) {
+            nb = null;
+        }
     }
     
     public boolean hasNext() {

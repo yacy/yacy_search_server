@@ -12,6 +12,7 @@
 		<item>
 			<title>#[description]#</title>
 			<link>#[url]#</link>
+                        #(snippet)#::<description>#[text]#</description>#(/snippet)#
 			<pubDate>#[date]#</pubDate>
 		</item>
 		#{/results}#
