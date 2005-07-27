@@ -114,6 +114,7 @@ public class translator {
 				translationList=new Hashtable();
 			}
 		}
+		lists.put(forFile, translationList);
 		return lists;
 	}
 	public static boolean translateFile(File sourceFile, File destFile, File translationFile){
