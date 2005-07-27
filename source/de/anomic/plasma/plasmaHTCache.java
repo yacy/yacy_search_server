@@ -408,8 +408,10 @@ public final class plasmaHTCache {
     }
 
     public static boolean isCGI(String urlString) {
-	return ((urlString.toLowerCase().indexOf(".cgi") >= 0) ||
-		(urlString.toLowerCase().indexOf(".exe") >= 0));
+        String ls = urlString.toLowerCase();
+	return ((ls.indexOf(".cgi") >= 0) ||
+		(ls.indexOf(".exe") >= 0) ||
+                (ls.indexOf(";jsessionid=") >= 0));
     }
 
     public Entry newEntry(Date initDate, int depth, URL url, String name,
