@@ -7,15 +7,13 @@
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #[header]#
-<br><br>
-<center><h2><font size="2" face="Helvetica, Arial" color="#212942"><img src="/env/grafics/kaskelix.png" align="middle" alt="YaCy logo Kaskelix"><br>P2P WEB SEARCH</font></h2></center><br><br>
+<br>
+<center><h2><font size="2" face="Helvetica, Arial" color="#212942"><img src="/env/grafics/kaskelix.png" align="middle" alt="YaCy logo Kaskelix"><br>P2P WEB SEARCH</font></h2></center><br>
 <center>#[promoteSearchPageGreeting]#</center><br>
 
 <!-- <form action="yacy/search.html" method="get"> -->
 <form action="index.html" method="get">
 <center><table border="0" cellspacing="0" cellpadding="0"><tr><td>
-Enter search word list, separated by space:
-</td></tr><tr><td>
 <input name="search" type="text" size="52" maxlength="80" value="#[former]#">
 <input type="submit" name="Enter" value="Search">
 </td></tr><tr><td>
@@ -61,6 +59,7 @@ URL mask:
 <b>The following words are stop-words and had been excluded from the search: #[stopwords]#.</b>
 #(/excluded)#
 #(num-results)#
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ::
 No Results.
 ::
@@ -84,13 +83,12 @@ then please run your own peer and start a crawl of your wanted information to ma
 available for everyone. Then stay online to support crawls from other peers. Thank you!</p>
 ::
 #[linkcount]# results from a total number of #[totalcount]# known links.
-You can try to
-<a href="/index.html?search=#[former]#&Enter=Search&count=#[count]#&order=#[order]#&resource=#[resource]#&time=#[time]#&urlmaskfilter=.*">catch up more links</a>
-from 'late' peers to enrich this search result.
+&rarr; <a href="/index.html?search=#[former]#&Enter=Search&count=#[count]#&order=#[order]#&resource=#[resource]#&time=#[time]#&urlmaskfilter=.*">Catch up more links</a>
+from 'late' peers.
 #(/num-results)#
 #(combine)#
 ::
-<br><b>Please search for several words simultaneously!</b> Click on one of these constraints:<br>
+<br><br><b>Topwords</b> (to refine search):
 #{words}#
 <a href="index.html?search=#[newsearch]#&Enter=Search&count=#[count]#&order=#[order]#&resource=#[resource]#&time=#[time]#">#[word]#</a>
 #{/words}#
