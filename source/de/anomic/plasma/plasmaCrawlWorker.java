@@ -328,7 +328,7 @@ public final class plasmaCrawlWorker extends Thread {
                         (!(plasmaParser.supportedFileExt(url)))) {
                         // if the response has not the right file type then reject file
                         remote.close();
-                        log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for url " + url.toString());
+                        log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + url.toString());
                     } else {
                         // we write the new cache entry to file system directly
                         cacheFile.getParentFile().mkdirs();
@@ -354,7 +354,7 @@ public final class plasmaCrawlWorker extends Thread {
                     // but we clean the cache also, since it may be only partial
                     // and most possible corrupted
                     if (cacheFile.exists()) cacheFile.delete();
-                    log.logError("CRAWLER LOADER ERROR1: with url=" + url.toString() + ": " + e.toString());
+                    log.logError("CRAWLER LOADER ERROR1: with URL=" + url.toString() + ": " + e.toString());
                 }
             } else if (res.status.startsWith("30")) {
                 if (redirectionCount < 5) {                    
@@ -367,7 +367,7 @@ public final class plasmaCrawlWorker extends Thread {
                         remote = null;
                         
                         // restart crawling with new url
-                        log.logInfo("Redirection detected ('" + res.status + "') for url " + url.toString() + 
+                        log.logInfo("Redirection detected ('" + res.status + "') for URL " + url.toString() + 
                                     "\nRedirecting request to: " + redirectionUrl);
                         load(redirectionUrl,
                              name,
