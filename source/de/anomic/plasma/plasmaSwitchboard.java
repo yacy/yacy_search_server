@@ -450,7 +450,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             initProfiles();
         } catch (IOException e) {}
     }
-    private void cleanProfiles() {
+    public void cleanProfiles() {
         if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (urlPool.noticeURL.stackSize() > 0)) return;
 	Iterator i = profiles.profiles(true);
 	plasmaCrawlProfile.entry entry;

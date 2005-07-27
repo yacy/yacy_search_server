@@ -72,6 +72,7 @@ public class IndexCreateWWWGlobalQueue_p {
                 String urlHash;
                 int c = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
                 switchboard.urlPool.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+                switchboard.cleanProfiles();
                 /*
                 int c = 0;
                 while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) > 0) {

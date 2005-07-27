@@ -86,6 +86,8 @@ public class IndexCreate_p {
         prop.put("error", 0);
         prop.put("info", 0);
         prop.put("refreshbutton", 0);
+                            
+        switchboard.cleanProfiles();
         
         int i;
         

@@ -72,6 +72,8 @@ public class IndexCreateWWWLocalQueue_p {
                 String urlHash;
                 int c = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
                 switchboard.urlPool.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
+                switchboard.cleanProfiles();
+                
                 prop.put("info", 3);//crawling queue cleared
                 prop.put("info_numEntries", c);
             }
