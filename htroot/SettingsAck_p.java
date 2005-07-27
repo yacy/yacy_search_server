@@ -345,59 +345,51 @@ public class SettingsAck_p {
         }
         
         if (post.containsKey("seedUploadRetry")) {
-            try {
-                // trying to upload the seed-list file
-                yacyCore.saveSeedList(env);     
+            String error;
+            if ((error = yacyCore.saveSeedList(env)) == null) {
+                // trying to upload the seed-list file    
                 prop.put("info", 13);
                 prop.put("info_success",1);
-            } catch (Exception e) {
+            } else {
                 prop.put("info",14);
-                prop.put("info_errormsg",e.getMessage().replaceAll("\n","<br>"));                
+                prop.put("info_errormsg",error.replaceAll("\n","<br>"));                
                 env.setConfig("seedUploadMethod","none");                 
             }
             return prop;
         }
         
-        if (post.containsKey("seedSettings")) {            
-            try {
-                // getting the currently used uploading method
-                String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
-                String newSeedUploadMethod = (String)post.get("seedUploadMethod");
-                String oldSeedURLStr = env.getConfig("seedURL","");
-                String newSeedURLStr = (String)post.get("seedURL");
-                new URL(newSeedURLStr);
+        if (post.containsKey("seedSettings")) {
+            // getting the currently used uploading method
+            String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
+            String newSeedUploadMethod = (String)post.get("seedUploadMethod");
+            String oldSeedURLStr = env.getConfig("seedURL","");
+            String newSeedURLStr = (String)post.get("seedURL");
+            
+            boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
+            boolean uploadMethodChanged = !oldSeedUploadMethod.equals(newSeedUploadMethod);
+            if (uploadMethodChanged) {
+                uploadMethodChanged = yacyCore.changeSeedUploadMethod(newSeedUploadMethod);
+            }
+            
+            if (seedUrlChanged || uploadMethodChanged) {
+                env.setConfig("seedUploadMethod", newSeedUploadMethod);
+                env.setConfig("seedURL", newSeedURLStr);
                 
-                boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
-                boolean uploadMethodChanged = !oldSeedUploadMethod.equals(newSeedUploadMethod);
-                if (uploadMethodChanged) {
-                    uploadMethodChanged = yacyCore.changeSeedUploadMethod(newSeedUploadMethod); 
-                }
-
-                if (seedUrlChanged || uploadMethodChanged) {
-                    env.setConfig("seedUploadMethod", newSeedUploadMethod);
-                    env.setConfig("seedURL", newSeedURLStr);
-                    
-                    // trying to upload the seed-list file
-                    yacyCore.saveSeedList(env);
-                    
+                // try an upload
+                String error;
+                if ((error = yacyCore.saveSeedList(env)) == null) {
                     // we have successfully uploaded the seed-list file
                     prop.put("info_seedUploadMethod",newSeedUploadMethod);
                     prop.put("info_seedURL",newSeedURLStr);
                     prop.put("info_success",(newSeedUploadMethod.equalsIgnoreCase("none")?0:1));
-                    prop.put("info", 19);                                     
+                    prop.put("info", 19);
                 } else {
-                    prop.put("info_seedUploadMethod",newSeedUploadMethod);
-                    prop.put("info_seedURL",newSeedURLStr);
-                    prop.put("info_success",0);
-                    prop.put("info", 19);                    
-                    
+                    prop.put("info",14);
+                    prop.put("info_errormsg",error.replaceAll("\n","<br>"));                
+                    env.setConfig("seedUploadMethod","none");
                 }
-            } catch (Exception e) {
-                prop.put("info",14);
-                prop.put("info_errormsg",e.getMessage().replaceAll("\n","<br>"));                
-                env.setConfig("seedUploadMethod","none"); 
+                return prop;
             }
-            return prop;            
         }
         
         /* 
@@ -430,16 +422,16 @@ public class SettingsAck_p {
                     // if the seed upload method is equal to the seed uploader whose settings
                     // were changed, we now try to upload the seed list with the new settings
                     if (env.getConfig("seedUploadMethod","none").equalsIgnoreCase(uploaderName)) {
-                        try {
-                            yacyCore.saveSeedList(env);
+                        String error;
+                        if ((error = yacyCore.saveSeedList(env)) == null) {;
                             
                             // we have successfully uploaded the seed file
                             prop.put("info", 13);
                             prop.put("info_success",1);
-                        } catch (Exception e) {
+                        } else {
                             // if uploading failed we print out an error message
                             prop.put("info", 14);
-                            prop.put("info_errormsg",e.getMessage().replaceAll("\n","<br>"));
+                            prop.put("info_errormsg",error.replaceAll("\n","<br>"));
                             env.setConfig("seedUploadMethod","none");                            
                         }                       
                     } else {

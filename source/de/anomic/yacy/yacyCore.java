@@ -607,24 +607,20 @@ public class yacyCore {
         }        
     }
     
-    public boolean saveSeedList() {
-        try {
-            saveSeedList(this.switchboard);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public String saveSeedList() {
+        // return an error if this is not successful, and NULL if everything is fine
+        return saveSeedList(this.switchboard);
     }
     
-    public static void saveSeedList(serverSwitch sb) 
-    throws Exception {
+    public static String saveSeedList(serverSwitch sb) {
+        // return an error if this is not successful, and NULL if everything is fine
         String logt;
         
         // be shure that we have something to say
         if (seedDB.mySeed.getAddress() == null) {
             String errorMsg = "We have no valid IP address until now";
             log.logWarning("SaveSeedList: " + errorMsg);
-            throw new Exception (errorMsg);        
+            return errorMsg;
         }
         
         // getting the configured seed uploader
@@ -648,14 +644,14 @@ public class yacyCore {
         }
 
         //  determine the seed uploader that should be used ...       
-        if (seedUploadMethod.equalsIgnoreCase("none")) return;
+        if (seedUploadMethod.equalsIgnoreCase("none")) return "no uploader specified";
 
         yacySeedUploader uploader = getSeedUploader(seedUploadMethod);
         if (uploader == null) {
             String errorMsg = "Unable to get the proper uploader-class for seed uploading method '" + seedUploadMethod + "'.";
             log.logWarning("SaveSeedList: " + errorMsg);
-            throw new Exception (errorMsg);               
-        }        
+            return errorMsg;               
+        }
         
         // ensure that the seed file url is configured properly
         URL seedURL;
@@ -667,7 +663,7 @@ public class yacyCore {
         }catch(MalformedURLException e){
             String errorMsg = "Malformed seed file URL '" + sb.getConfig("seedURL","") + "'. " + e.getMessage();
             log.logWarning("SaveSeedList: " + errorMsg);            
-            throw new Exception(errorMsg);
+            return errorMsg;
         }              
         
         // upload the seed-list using the configured uploader class
@@ -685,20 +681,22 @@ public class yacyCore {
             if (logt != null) {
                 if (logt.indexOf("Error") >= 0) {
                     seedDB.mySeed.put("PeerType", prevStatus);
-                    log.logError("SaveSeedList: seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6));
-                    throw new Exception("Seed-list uploading failed using uploader '" + uploader.getClass().getName() + "'\n(error): " + logt.substring(logt.indexOf("Error") + 6));                    
+                    String errorMsg = "SaveSeedList: seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6);
+                    log.logError(errorMsg);
+                    return errorMsg;
                 }
                 log.logInfo(logt);
             }
             
             // finally, set the principal status
             sb.setConfig("yacyStatus","principal");
-            return;
+            return null;
         } catch (Exception e) {
             seedDB.mySeed.put("PeerType", prevStatus);
             sb.setConfig("yacyStatus", prevStatus);
-            log.logInfo("SaveSeedList: Seed upload failed (IO error): " + e.getMessage());
-            throw new Exception("Seed-list uploading failed using uploader '" + uploader.getClass().getName() + "'\n(error): " + e.getMessage());
+            String errorMsg = "SaveSeedList: Seed upload failed (IO error): " + e.getMessage();
+            log.logInfo(errorMsg);
+            return errorMsg;
         }
     }
 
