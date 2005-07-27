@@ -9,9 +9,9 @@
 <br><br>
 <h2>Index Administration</h2>
 
+<form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
 <p>
 The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references<br>
-<form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
 <table border="0" cellpadding="5" cellspacing="0">
 <tr valign="top" class="TableCellDark">
 <td width="70">Word</td>
@@ -50,34 +50,43 @@ The local index currently consists of (at least) #[wcount]# reverse word indexes
 <td><input type="submit" name="urlhashsearch" value="Show Details for URL-Hash">
 </td>
 </tr>
-</table><p>
+</table></p>
 
+
+<p>
+DHT Transmission control:<br>
+The transmission is necessary for the functionality of global search on other peers.
+If you switch off distribution or receipt of RWIs you will be banned from global search.
 <table border="0" cellpadding="5" cellspacing="0">
-
 <tr valign="top" class="TableCellDark">
 <td width="100">Index Distribution:</td>
-<td><input type="checkbox" name="indexDistribute" align="top" #[indexDistributeChecked]#>
-This enables automated, DHT-ruled Index Transmission to other peers. This is currently only activated for junior peers.</td>
-<td><input type="submit" name="setIndexDistribute" value="set"></td>
+<td><input type="checkbox" name="indexDistribute" align="top" #[indexDistributeChecked]#></td>
+<td></td>
+<td>This enables automated, DHT-ruled Index Transmission to other peers.
+</td>
 </tr>
-</table>
-
-<table border="0" cellpadding="5" cellspacing="0">
-<tr valign="top" class="TableCellLight">
+<tr valign="top" class="TableCellDark">
 <td width="100">Index Receive:</td>
-<td><input type="checkbox" name="indexReceive" align="top" #[indexReceiveChecked]#>
-Accept remote Index Transmissions. This works only if you are a senior peer. The DHT-rules do not work without this function.</td>
+<td><input type="checkbox" name="indexReceive" align="top" #[indexReceiveChecked]#></td>
+<td></td>
+<td>Accept remote Index Transmissions. This works only if you are a senior peer.
+The DHT-rules do not work without this function.</td>
+</tr>
+<tr valign="top" class="TableCellDark">
+<td width="100"></td>
+<td>&nbsp;&nbsp;</td>
+<td><input type="checkbox" name="indexReceiveBlockBlacklist" align="top" #[indexReceiveBlockBlacklistChecked]#></td>
+<td>If checked, your peer silently ignores transmitted URLs that match your blacklist</td>
 </tr>
 <tr valign="top" class="TableCellLight">
-<td></td><td>&nbsp;&nbsp;<input type="checkbox" name="indexReceiveBlockBlacklist" align="top" #[indexReceiveBlockBlacklistChecked]#>
-If checked, your peer silently ignores transmitted URLs that match your blacklist</td>
-</tr>
-<tr valign="top" class="TableCellLight">
-<td></td><td><input type="submit" name="setIndexReceive" value="set"></td>
+<td></td>
+<td><input type="submit" name="setIndexTransmission" value="set"></td>
+<td></td>
+<td>Changes will take effect immediately</td>
 </tr>
 </table>
-</form>
 </p>
+</form>
 
 #[result]#
 

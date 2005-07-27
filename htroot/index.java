@@ -66,7 +66,12 @@ public class index {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
-	// case if no values are requested
+	boolean global = (post == null) ? true : ((String) post.get("resource", "global")).equals("global");
+        boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
+        boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
+        if ((!indexDistributeGranted) || (!indexReceiveGranted)) global = false;
+        
+        // case if no values are requested
 	if ((post == null) || (env == null)) {
             
             // save referrer
@@ -99,8 +104,8 @@ public class index {
             prop.put("count-1000", 0);
 	    prop.put("order-quality", 0);
 	    prop.put("order-date", 0);
-	    prop.put("resource-global", 0);
-	    prop.put("resource-local", 0);
+	    prop.put("resource-global", ((global) ? 1 : 0));
+            prop.put("resource-local", ((global) ? 0 : 1));
 	    prop.put("time-1", 0);
 	    prop.put("time-3", 0);
 	    prop.put("time-10", 1);
@@ -123,7 +128,8 @@ public class index {
         // prepare search order
 	String order = (String) post.get("order", "");
 	int count = Integer.parseInt((String) post.get("count", "10"));
-	boolean global = ((String) post.get("resource", "global")).equals("global");
+	
+        
 	long searchtime = 1000 * Long.parseLong((String) post.get("time", "1"));
 	boolean yacyonline = ((yacyCore.seedDB != null) &&
                               (yacyCore.seedDB.mySeed != null) &&
@@ -227,7 +233,7 @@ public class index {
 	prop.put("order-quality", ((order.equals("Quality-Date")) ? 1 : 0));
 	prop.put("order-date", ((order.equals("Date-Quality")) ? 1 : 0));
 	prop.put("resource-global", ((global) ? 1 : 0));
-	prop.put("resource-local", ((!global) ? 1 : 0));
+	prop.put("resource-local", ((global) ? 0 : 1));
 	prop.put("time-1", ((searchtime == 1000) ? 1 : 0));
 	prop.put("time-3", ((searchtime == 3000) ? 1 : 0));
 	prop.put("time-10", ((searchtime == 10000) ? 1 : 0));

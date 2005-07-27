@@ -105,13 +105,10 @@ public class IndexControl_p {
         boolean delurlref = post.containsKey("delurlref");
         //System.out.println("DEBUG CHECK: " + ((delurl) ? "delurl" : "") + " " + ((delurlref) ? "delurlref" : ""));
         
-        if (post.containsKey("setIndexDistribute")) {
+        if (post.containsKey("setIndexTransmission")) {
             boolean allowDistributeIndex = ((String) post.get("indexDistribute", "")).equals("on");
             switchboard.setConfig("allowDistributeIndex", (allowDistributeIndex) ? "true" : "false");
             if (allowDistributeIndex) switchboard.indexDistribution.enable(); else switchboard.indexDistribution.disable(); 
-        }
-        
-        if (post.containsKey("setIndexReceive")) {
             boolean allowReceiveIndex = ((String) post.get("indexReceive", "")).equals("on");
             switchboard.setConfig("allowReceiveIndex", (allowReceiveIndex) ? "true" : "false");
             yacyCore.seedDB.mySeed.setFlagAcceptRemoteIndex(allowReceiveIndex);
