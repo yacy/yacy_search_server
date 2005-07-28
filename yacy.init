@@ -449,6 +449,9 @@ ramCacheNURL    =   524288
 # ram cache for urlErr.db 
 ramCacheEURL    =   131072
 
+# ram cache for seedDBs
+ramCacheDHT     =   131072
+
 # ram cache for message.db
 ramCacheMessage =     8192
 

@@ -153,8 +153,7 @@ public class yacyCore {
         if (!(yacyDBPath.exists())) yacyDBPath.mkdir();
         
         // read memory amount
-        int mem = Integer.parseInt(switchboard.getConfig("ramCacheSize", "1")) * 0x400 *
-        Integer.parseInt(switchboard.getConfig("ramCachePercentDHT", "1")) / 100;
+        int mem = Integer.parseInt(switchboard.getConfig("ramCacheDHT", "1024")) / 1024;
         log.logSystem("DHT Cache memory = " + mem + " KB");
         
         // create or init seed cache
