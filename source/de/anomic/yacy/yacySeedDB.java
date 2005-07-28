@@ -154,6 +154,9 @@ public class yacySeedDB {
         } catch (kelondroException e) {
             // if we have an error, we start with a fresh database
             if (seedDBFile.exists()) seedDBFile.delete();
+        } catch (IOException e) {
+            // if we have an error, we start with a fresh database
+            if (seedDBFile.exists()) seedDBFile.delete();
         }
         // create new seed database
         new File(seedDBFile.getParent()).mkdir();
