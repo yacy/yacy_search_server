@@ -62,7 +62,7 @@ globalheader();
   <li>Status page shows now memory amount, transfer volume and indexing speed as PPM (pages per minute). A global PPM (sum over all peers) is also computed.</li>
   <li>Re-Structuring of Index-Creation Menue: added more submenues and queue monitors</li>
   <li>Added feature to start crawling on bookmark files</li>
-  <li>Added blocking of blacklistet urls in indexReceive (remote DHT index transmissions)</li>
+  <li>Added blocking of blacklistet URLs in indexReceive (remote DHT index transmissions)</li>
   <li>Added port forwarding for remote peer connections (the peer may now be connected to an configurable address)</li>
   <li>Added bbCode for Profiles</li>
   <li>Memory Management in Performance Menu: a memory-limit can be set as condition for queue execution.</li>
@@ -223,7 +223,7 @@ globalheader();
 <li>New Crawling-Profiles for Crawl-Threads
   <ul>
   <li>every crawl start now defines it's own crawl job; new crawls do not interfere with previously started and still running jobs; all started jobs may run concurrently</li>
-  <li>new crawl properties: accept url's containing '?'; flag for storage of pages in proxy cache; flags for local and remote indexing</li>
+  <li>new crawl properties: accept urls containing '?'; flag for storage of pages in proxy cache; flags for local and remote indexing</li>
   </ul>
 </li>
 <li>New Design, new documentation, new mascot 'Kaskelix' (appears on search page), new home page location <a href="http://www.yacy.net/yacy">http://www.yacy.net/yacy</a></li>
@@ -254,8 +254,8 @@ globalheader();
 <ul>
 <li>Implemented Remote Crawling
   <ul>
-  <li>Every Senior and Principal Peer may now start Remote Crawls: The initiating peer starts with the crawl and may assign URL's to qualified other peers. Those peers load the assigned resource, index them and return the index statistics back to the initiator. Executing peer may only be a Senior or Principal peer.</li>
-  <li>Extended URL management: URL's are now organized in three different sets: Noticed-URL's (not loaded but possibly queued for crawling), Error-URL's (not loaded but may be re-loaded to avoid index loss in case of temporary target server downtime or network problems) and Loaded-URL's. The Loaded-URL's are again divided into six categories:</li>
+  <li>Every Senior and Principal Peer may now start Remote Crawls: The initiating peer starts with the crawl and may assign URLs to qualified other peers. Those peers load the assigned resource, index them and return the index statistics back to the initiator. Executing peer may only be a Senior or Principal peer.</li>
+  <li>Extended URL management: URLs are now organized in three different sets: Noticed-URLs (not loaded but possibly queued for crawling), Error-URLs (not loaded but may be re-loaded to avoid index loss in case of temporary target server downtime or network problems) and Loaded-URLs. The Loaded-URLs are again divided into six categories:</li>
 <ol>
 <li>remote index: retrieved by other peers</li>
 <li>partly remote/local index: result of search queries</li>
@@ -310,7 +310,7 @@ remote crawling requests.
 </li>
 <li>New caching procedure for database requests on file-system level.
 </li>
-<li>Extended blacklist url matching: parts of a domain may now be matched with wildcards '*'. (the url's path may be matched with regular expressions)</li>
+<li>Extended blacklist url matching: parts of a domain may now be matched with wildcards '*'. (the URL's path may be matched with regular expressions)</li>
 <li>The application will be re-named. Many parts now refer to the new application name 'yacy', but not all.</li>
 </ul>
 
@@ -369,7 +369,7 @@ patterns and rapid bootstraping. May help in future releases to speed up indexin
 <ul>
 <li>New Index Administration Menu Item: RWI's (Reverse Word Indexes) may now be inspected.
 Each reference in a word index can be displayed in detail, and optionally be deleted.</li>
-<li>Minor bug fixes in Bootstraping. Major Bug fixes in Index Storage (better Normal Form of URL's).</li>
+<li>Minor bug fixes in Bootstraping. Major Bug fixes in Index Storage (better Normal Form of URLs).</li>
 <li>Better display of cache content in the Cache Administration.</li>
 </ul>
 
@@ -487,7 +487,7 @@ HTTPS proxy, the proxy can now be considered as 'complete'.
   <li>Bug fixes:</li>
   <ul>
   <li>Found and eliminated nasty bug that prevented using yahoo mail. (they send several cookies at once)</li>
-  <li>No more indexing of url's with 'cgi' in name or ending with '.js', '.ico', or '.css' (checking content-type for 'text' is not enough; some servers do not transfer right value)</li>
+  <li>No more indexing of URLs with 'cgi' in name or ending with '.js', '.ico', or '.css' (checking content-type for 'text' is not enough; some servers do not transfer right value)</li>
   <li>Fixed search for words containing numbers and german Umlaute</li>
   <li>adopted acrypt.java to no using javax.crypt, this was not supported by debian blackdown java 1.3.1. Furthermore, removed -server - flag from httpProxy.sh, that also made blackdown to crash. (you probably want to insert that flag again in your installation)</li>
   </ul>

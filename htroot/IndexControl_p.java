@@ -370,8 +370,8 @@ public class IndexControl_p {
                 "<input type=\"hidden\" name=\"urlstring\" value=\"\">" +
                 "<input type=\"hidden\" name=\"urlhash\" value=\"\">" +
                 "<br><fieldset><legend>Reference Deletion</legend><table border=\"0\" cellspacing=\"5\" cellpadding=\"5\"><tr valign=\"top\"><td><br><br>" +
-                "<input type=\"submit\" value=\"Delete reference to selected URL's\" name=\"keyhashdelete\"><br><br>" +
-                "<input type=\"submit\" value=\"Delete reference to ALL URL's\" name=\"keyhashdeleteall\"><span class=\"small\"><br>&nbsp;&nbsp;(= delete Word)</span>" +
+                "<input type=\"submit\" value=\"Delete reference to selected URLs\" name=\"keyhashdelete\"><br><br>" +
+                "<input type=\"submit\" value=\"Delete reference to ALL URLs\" name=\"keyhashdeleteall\"><span class=\"small\"><br>&nbsp;&nbsp;(= delete Word)</span>" +
                 "</td><td width=\"150\">" +
                 "<center><input type=\"checkbox\" name=\"delurl\" value=\"\" align=\"top\" checked></center><br>" +
                 "<span class=\"small\">delete also the referenced URL itself (reasonable and recommended, may produce unresolved references at other word indexes but they do not harm)</span>" +

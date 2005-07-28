@@ -5,18 +5,19 @@
 # first published on http://www.anomic.de
 # Frankfurt, Germany, 2005
 #
-# This file is maintained (and partly written) by Roland Ramthun <admin@yacy-forum.de>
-# This file is partly written by Oliver Wunder <webmaster@daburna.de>
+# This file is maintained by Roland Ramthun <admin@yacy-forum.de>
+# This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>
 
 # If you find any mistakes in this file please don't hesitate to email them to me.
 # If you find any untranslated string in the webinterface do so, too.
 
 #English=German
-<!-- lang -->default(english)==Deutsch
+<!-- lang -->default\(english\)==Deutsch
 <!-- author -->==Roland Ramthun, Oliver Wunder
 
 #-----------------------------------------------------------
 #File: Blacklist_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy: Blacklist Manager==YaCy: Blacklist Manager
 Blacklist==Blacklist
@@ -53,6 +54,47 @@ Import blacklist items from file:==Importiere Blacklist aus Datei:
 was removed from blacklist==wurde aus Blacklist entfernt
 was added to the blackList==wurde zu Blacklist hinzugefügt
 
+#-----------------------------------------------------------
+#File: CacheAdmin_p.html
+
+YaCy: Local Cache Management==YaCy: Lokale Cache Verwaltung
+Local Cache==Lokaler Cache
+The current cache size is==Die aktuelle Größe des Cache beträgt
+The maximum cache size is==Die maximale Größe ist
+
+#-----------------------------------------------------------
+#File: Config_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy advanced Config==YaCy: erweiterte Einstellungen
+Advanced Config==Erweiterte Einstellungen
+Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie können alles ändern, bedenken Sie aber, dass einige Änderungen einen Neustart von YaCy erfordern und andere Änderungen YaCy ganz zum Absturz bringen können.
+For explanation please look into yacy.init==Eine Erklärung finden Sie in der Datei yacy.init
+"Save"==Speichern
+
+#-------------------------------------------------------
+#File: CookieMonitorIncoming_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy: Incoming Cookies Monitor==YaCy: Überwachung eingehender Cookies
+Cookie Monitor: Incoming Cookies==Cookie Überwachung: eingehende Cookies
+This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Auflistung aller Cookies, die ein Web Server an diesen YaCy Proxy geschickt hat:
+Showing==Angezeigt werden
+entries from a total of==Einträge von insgesamt
+Cookies==Cookies
+
+#-------------------------------------------------------
+#File: CookieMonitorOutgoing_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy: Outgoing Cookies Monitor==YaCy: Überwachung ausgehender Cookies
+Cookie Monitor: Outgoing Cookies==Cookie Überwachung: ausgehende Cookies
+This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Dies ist eine Auflistung aller Cookies, die Ihr Browser an einen Web Server geschickt hat:
+Showing==Angezeigt werden
+entries from a total of==Einträge von insgesamt
+Cookies==Cookies
+
 #-------------------------------------------------------
 #File: EditProfile_p.html
 
@@ -67,27 +109,54 @@ You do not need to provide any personal data here, but if you want to distribute
 #Jabber==Jabber
 #Yahoo!==Yahoo!
 #MSN=MSN
-"Comment"==Kommentar
+Comment==Kommentar
 "Save"==Speichern
 
 #-----------------------------------------------------------
 #File: Help.html
 
-YaCy: Help=YaCy: Hilfeseiten
-Help=Hilfe
-This is a distributed web crawler and also a caching HTTP proxy. You are using the=Dies ist eine Suchmaschine,  die ähnlich dem Prinzip des verteilten Rechnen (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und indizieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das
-online-interface=online-interface
-of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the=von YaCy. Sie können dieses Interface auch zum konfigurieren Ihrer persönlichen Einstellungen, Proxy Einstellungen, der Zugriffs Kontrolle und den crawl Einstellungen benutzen. Sie können das Interface auch zum starten von crawls, senden von Nachrichten an andere YaCy-Nutzer, überwachen Ihres Index, Cache Status und des crawl Prozesses benutzen. Besonders interssant ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den
-global=globalen
-index.=Index zu durchsuchen.
-For more detailed information, visit the <a href="http://www.yacy.net/yacy">YaCy homepage</a>=Für mehr Informationen besuchen Sie bitte die <a href="http://www.yacy.net/yacy">YaCy Homepage</a>
-Local and Global Search: Options and Functions=Lokale und globale Suche: Optionen und Funktionen
-The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.=Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Weseiten zusammensetzt, die Sie mit dem Proxy besuchen.
-The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results=Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie können aber auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
+YaCy: Help==YaCy: Hilfeseiten
+Help==Hilfe
+This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==YaCy ist eine Suchmaschine,  die ähnlich dem Prinzip des verteilten Rechnen (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und indizieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <i>online-Interface</i> von YaCy. Sie können dieses Interface auch zum konfigurieren Ihrer persönlichen Einstellungen, Proxy Einstellungen, der Zugriffs Kontrolle und den crawl Einstellungen benutzen. Sie können das Interface auch zum Starten von crawls, Nachrichtenversand an andere YaCy-Nutzer und zur Überwachung Ihres Index, Cache Status und des crawl Prozesses benutzen. Besonders interssant ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <i>globalen</i> Index zu durchsuchen.
+For more detailed information, visit the <a href="http://www.yacy.net/yacy">YaCy homepage</a>==Für mehr Informationen besuchen Sie bitte die <a href="http://www.yacy.net/yacy">YaCy Homepage</a>
+Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
+The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Weseiten zusammensetzt, die Sie mit dem Proxy besuchen.
+The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie können aber auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
 Search Word List==Such Wort Liste
-You can search for several words simultanous. Words must be separated by a single space.=Sie können eine Suche mit mehreren Wörtern gleichzeitig starten. Die Wörter müssen durch ein Leerzeichen getrennt sein.
-The words are treated conjunctive, that means every must occur in the result, not any.=
-If you do a global search (see below) you may get different results each time you do a search.=
+You can search for several words simultanous. Words must be separated by a single space.==Sie können eine Suche mit mehreren Wörtern gleichzeitig starten. Die Wörter müssen durch ein Leerzeichen getrennt sein.
+The words are treated conjunctive, that means every must occur in the result, not any.==
+If you do a global search \(see below\) you may get different results each time you do a search.==Wenn Sie eine globale Suche (siehe unten) durchführen, kann es sein, dass Sie bei wiederholten Suchanfragen jedesmal andere Ergebnisse erhalten.
+Maximum Number of Results==Maximale Anzahl an Ergebnissen
+You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Sie können auswählen, wieviele Links Ihnen angezeigt werden sollen. Wir unterstützen im Moment keine mehrfachen Ergebnisseiten für jeden möglichen Link.
+Instead we encourage you to enhance the search result by submitting more search words.==Stattdessen möchten wir Sie dazu auffordern, Ihre Suchergebnisse durch das Eingeben von mehreren Suchwörtern, zu vergrößern.
+Result Order Options==Reihenfolge der Ergebnisse
+The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Die Suchmaschine bietet ein experimentelles 'Qualitäts' Ranking an. Im Gegensatz zu anderen üblichen Suchmaschinen bieten wir
+a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==auch die Sortierung nach Datum an. Wenn Sie die Reihenfolge in 'Datum-Qualität' ändern, werden die als letztes überarbeiteten Webseiten aus den Suchergebnissen ganz oben aufgelistet.
+For pages that have the same date the second order, 'Quality' is applied.==Für Seiten die das gleiche Datum haben, wird dann nach der 'Qualität' geordnet.
+Resource Domain==Quelle der Suche
+This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==Diese Suchmaschine ist so aufgebaut, dass sie die Seiten durchsucht, die mit dem Proxy besucht wurden. Aber der Suchindex ist auch auf andere Peers verteilt,
+so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==so dass Sie auch global suchen können: diese Funktion ist veraltet, aber Sie können sie zum testen benutzen. Neue Versionen werden
+automatically distribute index information <i>before</i> a search happends to form a performant distributed hash table -- a very fast global search.==automatisch einen verteilten Index erstellen <i>bevor</i> es geschieht, dass eine Suche, eine verteilte Hash-Tabelle erstellt --  eine sehr schnelle globale Suche.
+Maximum Search Time==Maximale Zeit zum Suchen
+Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Den lokalen Index zu durchsuchen, geht extrem schnell. Es geschieht innerhalb von Millisekunden auch bei einer großen Anzahl (ein paar Millionen) von Seiten.
+global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==Im Gegensatz dazu braucht es mehr Zeit den globalen Index zu durchsuchen, da erst der richtige Peer, der die besten Ergbnisse liefern kann, gefunden werden muss. Dies ist vermutlich auch der Grund warum
+distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==diese Art von Suchmaschine noch in der Testphase ist. Die Suchergebnisse werden immer besser (eine wiederholte globale Suche bringt mehr gleiche Ergebnisse), je länger
+the search time is.==die Zeit zum Suchen ist.
+You may want to use accesskeys to navigate through the YaCy webinterface:==Sie können durch das YaCy Web Interface auch mit Hilfe von Tastenkombinationen navigieren. Drücken Sie dazu eine der folgenden Kombinationen ('Taste' steht für einen der drei unten genannten Buchstaben):
+Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows und Internet Explorer: Alt + Taste + Enter
+Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows und Mozilla/Firefox/Netscape: Alt + Taste
+Windows and Opera: Shift \+ Esc \+ Accesskey==Windows und Opera: Shift + Esc + Taste
+Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter=Macintosh und Internet Explorer: Str + Taste + Enter
+Macintosh and Safari: Strg \+ Accesskey==Macintosh und Safari: Strg + Taste
+Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh und Mozilla/Firefox/Netscape: Strg + Taste
+Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh und Opera: Shift + Esc + Taste
+Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Linux Mandrake und Galeon/Mozilla: Alt + Taste
+All OS and Amaya: Strg \+ Accesskey==Alle OS Versionen und Amaya: Strg + Taste
+
+Search Page==Suchseite
+Network==Netzwerk
+Status==Status
+
 
 #-----------------------------------------------------------
 #File: index.html
@@ -108,7 +177,7 @@ Resource:==Quelle:
 global==global
 local==lokal
 Max. search time==Max. Suchdauer
-seconds==in Sekunden
+\(seconds\)==in Sekunden
 URL mask:==URL-Filter:
 restrict on==beschränken auf
 show all==Alles anzeigen
@@ -139,7 +208,6 @@ Click on one of these constraints:==Klicken Sie bitte auf einen dieser Vorschläg
 The global search resulted in==Die globale Suche hat
 link contributions from other YaCy peers==Links, beigesteuert von anderen YaCy Peers, gefunden.
 You can enrich the search results by using the 'global' option: This will search also other YaCy peers==Sie können die Anzahl Ihrer Treffer erhöhen, wenn Sie die 'global' Option benutzen. So werden auch andere YaCy Peers zum suchen benutzt.
-
 You cannot get global search results because you are not connected to another YaCy peer.==Sie können keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
 To connect you must first use the proxy.==Um sich neu zu verbinden, müssen Sie erst den Proxy benutzen.
 See here for an==Sehen Sie hier
@@ -174,16 +242,43 @@ YaCy: Language selection==YaCy: Sprachauswahl
 Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier können Sie die Sprache ändern. Wählen Sie die gewünschte Sprache aus der Liste aus.
 Current language:==Aktuelle Sprache
+default\(english\)==Deutsch
 Languagefile Author:==Autor der Sprachdatei:
-<!-- author -->==Roland Ramthun modified by Oliver Wunder
+<!-- author -->==Roland Ramthun, Oliver Wunder
 Languages:==Sprachen:
 Install new language from URL:==Neue Sprachdatei herunterladen:
+
 Use this language==Diese Sprachdatei sofort benutzen
 "Use"==Benutzen
 "Delete"==Löschen
 "Install"==Installieren
 Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu installieren:
 Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
+
+#-------------------------------------------------------
+#File: Lab.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+YaCy: Lab==YaCy: Labor
+The YACY Lab==Das YaCy Labor
+This is the place where we try new functions of the YaCy search engine.==Dies ist ein Platz, an dem wir neue Funktionen der YaCy Suchmaschine testen.
+All these things here are to be considered as probably unstable, and/or experimental.==Alle neuen Funktionen hier sind wahrscheinlich noch unstabil und in einer Experementierphase.
+You may try out these things but please do not care about bugs.==Sie können die neuen Funktionen gerne ausprobieren. Kümmern Sie sich bitte nicht um die Fehler.
+The <a href="Wiki.html">Wiki</a>==Das <a href="Wiki.html">Wiki</a>
+Advanced <a href="/Config_p.html">Configuration</a>==erweiterte <a href="/Config_p.html">Einstellungen</a>
+
+#-------------------------------------------------------
+#File: Messages_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy: Messages==YaCy Nachrichtenverwaltung
+Messages==Nachrichten
+
+#-------------------------------------------------------
+#File: MessageSend_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy: Send message==YaCy: Nachrichten Versand
+Send message==Nachrichten Versand
 
 #-------------------------------------------------------
 #File: Skins_p.html
@@ -241,9 +336,7 @@ Uptime==Online seit
 Connects ==Verbindungen
 peers/hour==Peers/Stunde
 This peer's status==Status dieses Peers
-Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben
-see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>==Anleitung online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">Browser konfigurieren</a>
-you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!==laden Sie eine beliebige Seite über den Proxy, um zu beweisen, dass es funktioniert. Mit diesem Status können Sie keine anderen Peers durchsuchen!
+Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings \(see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>\), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben (Anleitung online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">Browser konfigurieren</a>) laden Sie eine beliebige Seite über den Proxy, um zu beweisen, dass es funktioniert. Mit diesem Status können Sie keine anderen Peers durchsuchen!
 Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured (usually: 8080), or to set up a 'virtual server' in your router settings (often called DMZ). Please be fair, contribute your own index to the global index.==Junior - Ihr Peer kann nicht von außen erreicht werden. Ein möglicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Peers von Ihrer Suchseite aus benutzen. Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu öffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
 Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!==Senior - Sie lassen YaCy bei sich laufen und unterstützen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> können. Danke!
 Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zusätzlich Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
@@ -276,3 +369,34 @@ Out:==Ausgehend:
 In:==Eingehend:
 System Resources==Systemressourcen
 Processors:==Prozessoren:
+
+#-------------------------------------------------------
+#File: ViewLog_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy: Log==YaCy: Log
+Log==Log
+Lines==Zeilen
+reversed order==in umgekehrter Reihenfolge
+"refresh"==aktualisieren
+
+#-------------------------------------------------------
+#File: ViewProfile.html
+
+YaCy: Remote Peer Profile==YaCy: Remote Peer Profil
+Remote Peer Profile:==Remote Peer Profil:
+Wrong access of this page==Falscher Zugriff auf diese Seite
+The requested peer is not known or a potential peer, what means the peer's profile can't be fetched, because he is behind a firewall.==Der gewünschte Peer ist nicht bekannt oder ein potenzieller Peer, das bedeutet, das Profil kann nicht geladen werden, da der Peer hinter einer Firewall ist.
+The peer==Der Peer
+is not online.==ist nicht online.
+This is==Dies ist
+'s Profile:==s Profil
+#Name==Name
+#Nick Name==Nick Name
+#Homepage==Homepage
+#eMail==eMail
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN=MSN
+Comment==Kommentar

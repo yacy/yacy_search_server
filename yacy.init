@@ -202,9 +202,9 @@ adminAccountBase64MD5=
 
 # peer-to-peer construction for distributed search
 # we have several stages:
-# 1st: a file within every distribution that has a list of URL's:
+# 1st: a file within every distribution that has a list of URLs:
 #      -> this is the superseed file
-# 2nd: the files that can be retrieved by the superseed's URL's
+# 2nd: the files that can be retrieved by the superseeds' URLs
 #      are called seed list-files.
 #      -> the seed list-files contain IP/port combinations of running
 #         AnomicHTTPProxies

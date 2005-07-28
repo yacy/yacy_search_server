@@ -123,9 +123,9 @@ public class transferRWI {
             while (it.hasNext()) unknownURLs += "," + (String) it.next();
             if (unknownURLs.length() > 0) unknownURLs = unknownURLs.substring(1);
             if (wordhashes.length == 0)
-                switchboard.getLog().logInfo("Received 0 Words from peer " + iam + ", requested " + unknownURL.size() + " URL's");
+                switchboard.getLog().logInfo("Received 0 Words from peer " + iam + ", requested " + unknownURL.size() + " URLs");
             else
-                switchboard.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[wordhashes.length - 1] + "] from peer " + iam + ", requested " + unknownURL.size() + " URL's");
+                switchboard.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[wordhashes.length - 1] + "] from peer " + iam + ", requested " + unknownURL.size() + " URLs");
             result = "ok";
         } else {
             result = "error_not_granted";
