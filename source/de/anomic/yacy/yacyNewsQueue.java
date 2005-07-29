@@ -112,8 +112,10 @@ public class yacyNewsQueue {
     public synchronized yacyNewsRecord topInc() throws IOException {
         if (queueStack.size() == 0) return null;
         yacyNewsRecord entry = pop(0);
-        entry.incDistribution();
-        push(entry);
+        if (entry != null) {
+            entry.incDistribution();
+            push(entry);
+        }
         return entry;
     }
     

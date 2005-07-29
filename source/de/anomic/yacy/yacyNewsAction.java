@@ -53,8 +53,10 @@ public class yacyNewsAction implements yacyPeerAction {
     
     public void processPeerArrival(yacySeed peer, boolean direct) {
         String recordString = peer.get("news", null);
+        System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
         if (recordString == null) return;
         yacyNewsRecord record = new yacyNewsRecord(de.anomic.tools.crypt.simpleDecode(recordString, ""));
+        System.out.println("### news arrival from peer " + peer.getName() + ", news=" + record.toString());
         try {
             this.pool.enqueueGlobalNews(record);
         } catch (IOException e) {e.printStackTrace();}
