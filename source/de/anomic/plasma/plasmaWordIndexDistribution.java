@@ -28,6 +28,7 @@ public class plasmaWordIndexDistribution {
     private plasmaWordIndex wordIndex;
     private serverLog log;
     private boolean enabled;
+    private boolean closed;
     
     public plasmaWordIndexDistribution(plasmaURLPool urlPool, plasmaWordIndex wordIndex, serverLog log,
     boolean enable) {
@@ -35,6 +36,7 @@ public class plasmaWordIndexDistribution {
         this.wordIndex = wordIndex;
         this.enabled = enable;
         this.log = log;
+        this.closed = false;
         setCounts(100 /*indexCount*/,  1 /*juniorPeerCount*/, 3 /*seniorPeerCount*/, 8000);
     }
     
@@ -46,8 +48,16 @@ public class plasmaWordIndexDistribution {
         enabled = false;
     }
     
+    public void close() {
+        closed = true;
+    }
+    
     public boolean job() {
 
+        if (this.closed) {
+            log.logDebug("no word distribution: closed");
+            return false;
+        }
         if (yacyCore.seedDB == null) {
             log.logDebug("no word distribution: seedDB == null");
             return false;
@@ -131,6 +141,10 @@ public class plasmaWordIndexDistribution {
         String error;
         String peerNames = "";
         while ((e.hasMoreElements()) && (hc < peerCount)) {
+            if (closed) {
+                log.logError("Index distribution interrupted by close, nothing deleted locally.");
+                return -1; // interrupted
+            }
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
                 error = yacyClient.transferIndex(seed, indexEntities, urlPool.loadedURL);

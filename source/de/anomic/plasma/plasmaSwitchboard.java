@@ -529,6 +529,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         wordIndex.close(waitingBoundSeconds);
         log.logSystem("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
         try {
+            indexDistribution.close();
             cacheLoader.close();
             wikiDB.close();
             messageDB.close();
@@ -736,6 +737,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } catch (IOException e) {}
         }
         
+        
+        if (sbQueue.size() >= indexingSlots) {
+            log.logDebug("LimitCrawl: too many processes in indexing queue, dismissed to protect emergency case (" +
+                    "sbQueueSize=" + sbQueue.size() + ")");
+            return false;
+        }
+        if (cacheLoader.size() >= crawlSlots) {
+            log.logDebug("LimitCrawl: too many processes in loader queue, dismissed to protect emergency case (" +
+                    "cacheLoader=" + cacheLoader.size() + ")");
+            return false;
+        }
+        
+        
         // if the server is busy, we do crawling more slowly
         //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         
@@ -777,18 +791,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (tryRemote) {
             boolean success = processRemoteCrawlTrigger(urlEntry);
             if (success) return true;
-        }
-        
-        // alternatively do a local crawl
-        if (sbQueue.size() >= indexingSlots) {
-            log.logDebug("LimitCrawl: too many processes in indexing queue, dismissed (" +
-                    "sbQueueSize=" + sbQueue.size() + ")");
-            return false;
-        }
-        if (cacheLoader.size() >= crawlSlots) {
-            log.logDebug("LimitCrawl: too many processes in loader queue, dismissed (" +
-                    "cacheLoader=" + cacheLoader.size() + ")");
-            return false;
         }
         
         processLocalCrawling(urlEntry, profile, stats);
