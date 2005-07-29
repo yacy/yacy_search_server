@@ -50,10 +50,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Map;
+import java.util.HashMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacyCore;
+
 
 public class EditProfile_p {
     
@@ -82,7 +87,22 @@ public class EditProfile_p {
             profile.setProperty("msn", (String)post.get("msn"));
             
             profile.setProperty("comment", (String)post.get("comment"));
+            
+            // write new values
+            FileOutputStream fileOut = null;
+            try{
+                fileOut = new FileOutputStream(new File("DATA/SETTINGS/profile.txt"));
+                profile.store(fileOut , null );
+                
+                // generate a news message
+                //HashMap map = new HashMap();
+                yacyCore.newsPool.enqueueMyNews(new yacyNewsRecord("updprfle", profile));
+            }catch(IOException e){
+            } finally {
+                if (fileOut != null) try { fileOut.close(); } catch (Exception e) {}
+            }
         }
+        
         prop.put("name", profile.getProperty("name", ""));
         prop.put("nickname", profile.getProperty("nickname", ""));
         prop.put("homepage", profile.getProperty("homepage", ""));
@@ -95,15 +115,6 @@ public class EditProfile_p {
         
         prop.put("comment", profile.getProperty("comment", ""));
          
-        FileOutputStream fileOut = null;
-        try{
-            fileOut = new FileOutputStream(new File("DATA/SETTINGS/profile.txt"));
-            profile.store(fileOut , null );
-        }catch(IOException e){             
-        } finally {
-            if (fileOut != null) try { fileOut.close(); } catch (Exception e) {}
-        }
-        
         return prop;
     }
     

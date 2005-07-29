@@ -52,6 +52,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyNewsRecord;
 
 public class News {
@@ -78,13 +79,17 @@ public class News {
                 if (maxCount > 500) maxCount = 500;
                 
                 yacyNewsRecord record;
+                yacySeed seed;
                 for (int i = 0; i < maxCount; i++) try {
                     record = yacyCore.newsPool.get(tableID, i);
-                    prop.put("table_list_" + i + "_ori", record.originator());
+                    seed = yacyCore.seedDB.getConnected(record.originator());
+                    if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
+                    prop.put("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
                     prop.put("table_list_" + i + "_cre", yacyCore.universalDateShortString(record.created()));
                     prop.put("table_list_" + i + "_cat", record.category());
-                    prop.put("table_list_" + i + "_rec", record.received());
-                    prop.put("table_list_" + i + "_dis", record.attributes().toString());
+                    prop.put("table_list_" + i + "_rec", yacyCore.universalDateShortString(record.received()));
+                    prop.put("table_list_" + i + "_dis", record.distributed());
+                    prop.put("table_list_" + i + "_att", record.attributes().toString());
                 } catch (IOException e) {e.printStackTrace();}
                 prop.put("table_list", maxCount);
             }
