@@ -83,6 +83,7 @@ public class yacyCore {
     public static ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
     public static long startupTime = System.currentTimeMillis();
     public static yacySeedDB seedDB = null;
+    public static yacyNewsPool newsPool = null;
     public static final Hashtable seedUploadMethods = new Hashtable();
     public static yacyPeerActions peerActions = null;
     public static yacyDHTAction dhtAgent = null;
@@ -164,13 +165,18 @@ public class yacyCore {
                 new File(yacyDBPath, "seed.pot.db"),
                 mem);
         
+        // create or init news database
+        newsPool = new yacyNewsPool(yacyDBPath, 1024);
+        
         loadSeedUploadMethods();
         
+        // deploy peer actions
         peerActions = new yacyPeerActions(seedDB, switchboard,
                 new File(sb.getRootPath(), sb.getConfig("superseedFile", "superseed.txt")),
                 switchboard.getConfig("superseedLocation", "http://www.yacy.net/yacy/superseed.txt"));
         dhtAgent = new yacyDHTAction(seedDB);
         peerActions.deploy(dhtAgent);
+        peerActions.deploy(new yacyNewsAction(newsPool));
         
         // create or init index sharing
         //shareManager = new yacyShare(switchboard);
@@ -277,6 +283,7 @@ public class yacyCore {
         // before publishing, update some seed data
         peerActions.updateMySeed();
         
+        
         // publish own seed to other peer, this can every peer, but makes only sense for senior peers
         int oldSize = seedDB.sizeConnected();
         if (oldSize == 0) {
@@ -379,6 +386,14 @@ public class yacyCore {
                 seeds = seedDB.seedsByAge(false, attempts); // best for seed list maintenance/cleaning
             }
             if (seeds == null) return 0;
+            
+            // include a YaCyNews record to my seed
+            try {
+                yacyNewsRecord record = newsPool.dequeueMyNews();
+                if (record != null) seedDB.mySeed.put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             
             // holding a reference to all started threads
             int contactedSeedCount = 0;
