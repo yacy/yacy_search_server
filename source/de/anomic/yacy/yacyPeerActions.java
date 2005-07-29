@@ -91,8 +91,12 @@ public class yacyPeerActions {
     }
     
     public void updateMySeed() {
-        if (sb.getConfig("peerName", "nameless").equals("nameless")) 
-            sb.setConfig("peerName", serverCore.publicIP().getHostName() + yacyCore.speedKey + serverSystem.infoKey() + (System.currentTimeMillis() & 99));
+        if (sb.getConfig("peerName", "nameless").equals("nameless")) {
+            // generate new peer name
+            String newPeerName = serverCore.publicIP().getHostName() + yacyCore.speedKey + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
+            newPeerName = newPeerName.replace('.', '_');
+            sb.setConfig("peerName", newPeerName);
+        }
         seedDB.mySeed.put("Name", sb.getConfig("peerName", "nameless"));
         if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
             seedDB.mySeed.put("Port", Integer.toString(serverCore.portForwarding.getPort()));
