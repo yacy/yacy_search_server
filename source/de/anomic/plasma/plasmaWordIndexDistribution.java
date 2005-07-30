@@ -125,7 +125,7 @@ public class plasmaWordIndexDistribution {
         String startPointHash = serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true).substring(0, yacySeedDB.commonHashLength);
         plasmaWordIndexEntity[] indexEntities = selectTransferIndexes(startPointHash, indexCount);
         if ((indexEntities == null) || (indexEntities.length == 0)) {
-            log.logDebug("No Index available for Index Transfer, hash start-point " + startPointHash);
+            log.logDebug("No index available for index transfer, hash start-point " + startPointHash);
             return -1;
         }
         // count the indexes again, can be smaller as expected
@@ -149,11 +149,11 @@ public class plasmaWordIndexDistribution {
             if (seed != null) {
                 error = yacyClient.transferIndex(seed, indexEntities, urlPool.loadedURL);
                 if (error == null) {
-                    log.logInfo("Index Transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "] to peer " + seed.getName() + ":" + seed.hash + " successfull");
+                    log.logInfo("Index transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "] to peer " + seed.getName() + ":" + seed.hash + " successfull");
                     peerNames += ", " + seed.getName();
                     hc++;
                 } else {
-                    log.logWarning("Index Transfer to peer " + seed.getName() + ":" + seed.hash + " failed:'" + error + "', disconnecting peer");
+                    log.logWarning("Index transfer to peer " + seed.getName() + ":" + seed.hash + " failed:'" + error + "', disconnecting peer");
                     yacyCore.peerActions.peerDeparture(seed);
                 }
             }
@@ -173,7 +173,7 @@ public class plasmaWordIndexDistribution {
                         return -1;
                     }
                 } catch (IOException ee) {
-                    log.logError("Deletion of Indexes not possible:" + ee.getMessage());
+                    log.logError("Deletion of indexes not possible:" + ee.getMessage());
                     ee.printStackTrace();
                     return -1;
                 }
@@ -206,7 +206,7 @@ public class plasmaWordIndexDistribution {
                 } else if (indexEntity.size() <= count) {
                     // take the whole entity
                     tmpEntities.add(indexEntity);
-                    log.logDebug("Selected Whole Index (" + indexEntity.size() + " urls) for word " + indexEntity.wordHash());
+                    log.logDebug("Selected whole index (" + indexEntity.size() + " URLs) for word " + indexEntity.wordHash());
                     count -= indexEntity.size();
                 } else {
                     // make an on-the-fly entity and insert values
@@ -218,7 +218,7 @@ public class plasmaWordIndexDistribution {
                         count--;
                     }
                     urlEnum = null;
-                    log.logDebug("Selected Partial Index (" + tmpEntity.size() + " from " + indexEntity.size() +" urls) for word " + tmpEntity.wordHash());
+                    log.logDebug("Selected partial index (" + tmpEntity.size() + " from " + indexEntity.size() +" URLs) for word " + tmpEntity.wordHash());
                     tmpEntities.add(tmpEntity);
                     indexEntity.close(); // important: is not closed elswhere and cannot be deleted afterwards
                     indexEntity = null;
@@ -262,7 +262,7 @@ public class plasmaWordIndexDistribution {
                 indexEntity = wordIndex.getEntity(indexEntities[i].wordHash(), true);
                 sz = indexEntity.size();
                 indexEntity.close();
-                log.logDebug("Deleted Partinal Index (" + c + " urls) for word " + indexEntities[i].wordHash() + "; " + sz + " entries left");
+                log.logDebug("Deleted partial index (" + c + " URLs) for word " + indexEntities[i].wordHash() + "; " + sz + " entries left");
                 // DEBUG: now try to delete the remaining index. If this works, this routine is fine
                 /*
                 if (wordIndex.getEntity(indexEntities[i].wordHash()).deleteComplete())
@@ -281,7 +281,7 @@ public class plasmaWordIndexDistribution {
                     // have another try...
                     if (!(plasmaWordIndexEntity.wordHash2path(wordIndex.getRoot() /*PLASMADB*/, indexEntities[i].wordHash()).delete())) {
                         success = false;
-                        log.logError("Could not delete whole Index for word " + indexEntities[i].wordHash());
+                        log.logError("Could not delete whole index for word " + indexEntities[i].wordHash());
                     }
                 }
             }
