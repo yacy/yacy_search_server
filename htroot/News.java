@@ -54,23 +54,50 @@ import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.plasma.plasmaSwitchboard;
 
 public class News {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
-        // return variable that accumulates replacements
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         boolean overview = (post == null) || (((String) post.get("page", "0")).equals("0"));
+        int tableID = (overview) ? -1 : Integer.parseInt((String) post.get("page", "0")) - 1;
+
+        // execute commands
+        if (post != null) {
+            if (switchboard.adminAuthenticated(header) < 2) {
+                // not authenticated, force log-in
+                prop.put("AUTHENTICATE", "admin log-in");
+                return prop;
+            }
+            
+            if ((post.containsKey("delete")) && (tableID >= 0)) {
+            Enumeration e = post.keys();
+            String check;
+            String id;
+            while (e.hasMoreElements()) {
+                check = (String) e.nextElement();
+                if ((check.startsWith("del_")) && (post.get(check, "off").equals("on"))) {
+                    id = check.substring(4);
+                    try {
+                        yacyCore.newsPool.moveOff(tableID, id);
+                    } catch (IOException ee) {ee.printStackTrace();}
+                }
+            }
+            }
+        }
         
+        // generate properties for output
         if (overview) {
             // show overview
             prop.put("table", 0);
             prop.put("page", 0);
         } else {
             // generate table
-            int tableID = Integer.parseInt((String) post.get("page", "1")) - 1;
             prop.put("table", 1);
             prop.put("page", tableID + 1);
+            prop.put("table_page", tableID + 1);
             
             if (yacyCore.seedDB == null) {
                 
@@ -84,6 +111,7 @@ public class News {
                     record = yacyCore.newsPool.get(tableID, i);
                     seed = yacyCore.seedDB.getConnected(record.originator());
                     if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
+                    prop.put("table_list_" + i + "_id", record.id());
                     prop.put("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
                     prop.put("table_list_" + i + "_cre", yacyCore.universalDateShortString(record.created()));
                     prop.put("table_list_" + i + "_cat", record.category());

@@ -101,6 +101,10 @@ public class yacyNewsDB {
     public int size() {
         return news.size();
     }
+    
+    public void remove(String id) throws IOException {
+        news.remove(id.getBytes());
+    }
 
     public synchronized yacyNewsRecord put(yacyNewsRecord record) throws IOException {
         try {

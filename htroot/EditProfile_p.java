@@ -96,7 +96,7 @@ public class EditProfile_p {
                 
                 // generate a news message
                 //HashMap map = new HashMap();
-                yacyCore.newsPool.enqueueMyNews(new yacyNewsRecord("updprfle", profile));
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("updprfle", profile));
             }catch(IOException e){
             } finally {
                 if (fileOut != null) try { fileOut.close(); } catch (Exception e) {}

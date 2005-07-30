@@ -389,8 +389,11 @@ public class yacyCore {
             
             // include a YaCyNews record to my seed
             try {
-                yacyNewsRecord record = newsPool.dequeueMyNews();
-                if (record != null) seedDB.mySeed.put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
+                yacyNewsRecord record = newsPool.myPublication();
+                if (record == null) 
+                    seedDB.mySeed.put("news", "");
+                else
+                    seedDB.mySeed.put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
             } catch (IOException e) {
                 e.printStackTrace();
             }

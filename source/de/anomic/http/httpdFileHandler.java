@@ -113,10 +113,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     private String[] defaultFiles = null;
     private File htDefaultPath = null;
     private File htLocalePath = null;
-    
     private serverSwitch switchboard;
-    private String adminAccountBase64MD5;
-    
     private MessageDigest md5Digest = null;
     
     public httpdFileHandler(serverSwitch switchboard) {
@@ -179,7 +176,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
              for (int i = 0; i < ps.length; i++) System.out.println("PACKAGE IN PROVIDER: " + ps[i].toString());
              */
         }
-        adminAccountBase64MD5 = null;
         
         // initialise an message digest for Content-MD5 support ...
         try {
@@ -247,17 +243,17 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         }
         
         // check permission/granted access
-        if ((path.endsWith("_p.html")) &&
-                ((adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "")).length() != 0)) {
+        String authorization = (String) requestHeader.get(httpHeader.AUTHORIZATION);
+        String adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "");
+        if ((path.endsWith("_p.html")) && (adminAccountBase64MD5.length() != 0)) {
             // authentication required
-            String auth = (String) requestHeader.get(httpHeader.AUTHORIZATION);
-            if (auth == null) {
+            if (authorization == null) {
                 // no authorization given in response. Ask for that
                 httpHeader headers = getDefaultHeaders();
                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                 return;
-            } else if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(auth.trim().substring(6)))) {
+            } else if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6)))) {
                 // remove brute-force flag
                 serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
             } else {
@@ -275,6 +271,14 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                 return;
             }
+        }
+        
+        // handle bfHost in case we have authentified correctly
+        if ((authorization != null) &&
+            (adminAccountBase64MD5.length() != 0) &&
+            (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6))))) {
+            // remove brute-force flag
+            serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
         }
         
         // parse arguments
@@ -409,6 +413,17 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             if (tp == null) tp = new serverObjects();
                             // check if the servlets requests authentification
                             if (tp.containsKey("AUTHENTICATE")) {
+                                // handle brute-force protection
+                                if (authorization != null) {
+                                    String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
+                                    serverLog.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
+                                    Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
+                                    if (attempts == null)
+                                        serverCore.bfHost.put(clientIP, new Integer(1));
+                                    else
+                                        serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
+                                }
+                                // send authentication request to browser
                                 httpHeader headers = getDefaultHeaders();
                                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"" + tp.get("AUTHENTICATE", "") + "\"");
                                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);

@@ -40,8 +40,12 @@ This is the news system (currently under testing).
 </p>
 ::
 <p>
+<form action="News.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="page" value="#[page]#">
+<input type="submit" name="delete" value="#(page)#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News#(/page)#"><br><br>
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader" valign="bottom">
+<td class="small"></td>
 <td class="small">Originator</td>
 <td class="small">Created</td>
 <td class="small">Category</td>
@@ -51,6 +55,7 @@ This is the news system (currently under testing).
 </tr>
 #{list}#
 <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+<td class="small" align="left"><input type="checkbox" name="del_#[id]#"></td>
 <td class="small" align="left">#[ori]#</td>
 <td class="small" align="left">#[cre]#</td>
 <td class="small" align="left">#[cat]#</td>
@@ -60,6 +65,7 @@ This is the news system (currently under testing).
 </tr>
 #{/list}#
 </table>
+</form>
 </p>
 #(/table)#
 #[footer]#

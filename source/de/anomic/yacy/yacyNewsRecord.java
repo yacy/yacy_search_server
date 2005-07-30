@@ -58,9 +58,8 @@ public class yacyNewsRecord {
     private int    distributed; // counter that counts number of distributions of this news record
     private Map    attributes;  // elemets of the news for a special category
     
-    public yacyNewsRecord(String encodedNewsString) {
-        String decodedString = serverCodings.enhancedCoder.decodeBase64String(encodedNewsString);
-        this.attributes = serverCodings.string2map(decodedString);
+    public yacyNewsRecord(String newsString) {
+        this.attributes = serverCodings.string2map(newsString);
         this.received = (attributes.containsKey("rec")) ? yacyCore.parseUniversalDate((String) attributes.get("rec")) : new Date();
         this.created = (attributes.containsKey("cre")) ? yacyCore.parseUniversalDate((String) attributes.get("cre")) : new Date();
         this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : null;
@@ -101,11 +100,11 @@ public class yacyNewsRecord {
     public String toString() {
         // this creates the string that shall be distributed
         // attention: this has no additional encoding
-        if (originator != null) attributes.put("ori", originator);
-        if (category != null) attributes.put("cat", category);
-        attributes.put("cre", yacyCore.universalDateShortString(created));
-        attributes.put("rec", yacyCore.universalDateShortString(received));
-        attributes.put("dis", "" + distributed);
+        if (this.originator != null) attributes.put("ori", this.originator);
+        if (this.category != null) attributes.put("cat", this.category);
+        attributes.put("cre", yacyCore.universalDateShortString(this.created));
+        attributes.put("rec", yacyCore.universalDateShortString(this.received));
+        attributes.put("dis", "" +this. distributed);
         String theString = attributes.toString();
         removeStandards();
         return theString;

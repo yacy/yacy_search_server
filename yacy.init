@@ -482,7 +482,7 @@ maxWaitingWordFlush = 180
 isTransparentProxy=false
 
 # Specifies if yacy should use the http connection keep-alive feature
-connectionKeepAliveSupport=false
+connectionKeepAliveSupport=true
 
 # Configuration options needed to configure server port forwarding
 portForwardingEnabled=false

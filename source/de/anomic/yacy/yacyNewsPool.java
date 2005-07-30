@@ -64,11 +64,12 @@ public class yacyNewsPool {
         maxDistribution = 30;
     }
     
-    public void enqueueMyNews(yacyNewsRecord record) throws IOException {
+    public void publishMyNews(yacyNewsRecord record) throws IOException {
+        // this shall be called if our peer generated a new news record and wants to publish it
         if (newsDB.get(record.id()) == null) outgoingNews.push(record);
     }
     
-    public yacyNewsRecord dequeueMyNews() throws IOException {
+    public yacyNewsRecord myPublication() throws IOException {
         // generate a record for next peer-ping
         if (outgoingNews.size() == 0) return null;
         yacyNewsRecord record = outgoingNews.topInc();
@@ -79,15 +80,13 @@ public class yacyNewsPool {
         return record;
     }
     
-    public void enqueueGlobalNews(yacyNewsRecord record) throws IOException {
+    public void enqueueIncomingNews(yacyNewsRecord record) throws IOException {
+        // called if a news is attached to a seed
         if (newsDB.get(record.id()) == null) incomingNews.push(record);
     }
     
-    public yacyNewsRecord getGlobalNews(int job) throws IOException {
-        return incomingNews.top(job);
-    }
-    
-    public synchronized boolean removeGlobalNews(String id) throws IOException {
+    public synchronized boolean commitIncomingNews(String id) throws IOException {
+        // called if a incoming news was processed
         yacyNewsRecord record;
         for (int i = 0; i < incomingNews.size(); i++) {
             record = incomingNews.top(i);
@@ -100,23 +99,78 @@ public class yacyNewsPool {
         return false;
     }
     
+    public synchronized boolean deleteProcessedNews(String id) throws IOException {
+        // called if a processed news shall be removed
+        // the news stays in the news database to prevent
+        // that it is loaded again from the net
+        yacyNewsRecord record;
+        for (int i = 0; i < processedNews.size(); i++) {
+            record = processedNews.top(i);
+            if (record.id().equals(id)) {
+                processedNews.pop(i);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public synchronized boolean interruptPublication(String id) throws IOException {
+        // called if a outgoing news shall not be published any more
+        yacyNewsRecord record;
+        for (int i = 0; i < outgoingNews.size(); i++) {
+            record = outgoingNews.top(i);
+            if (record.id().equals(id)) {
+                outgoingNews.pop(i);
+                publishedNews.push(record);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public synchronized boolean deletePublishedNews(String id) throws IOException {
+        // called if a published news shall be removed
+        // the news is also removed from the news database
+        yacyNewsRecord record;
+        for (int i = 0; i < publishedNews.size(); i++) {
+            record = publishedNews.top(i);
+            if (record.id().equals(id)) {
+                publishedNews.pop(i);
+                newsDB.remove(id);
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public int size(int dbKey) {
         switch (dbKey) {
-            case OUTGOING_DB:   return outgoingNews.size();
-            case PUBLISHED_DB:  return publishedNews.size();
             case INCOMING_DB:	return incomingNews.size();
             case PROCESSED_DB:  return processedNews.size();
+            case OUTGOING_DB:   return outgoingNews.size();
+            case PUBLISHED_DB:  return publishedNews.size();
             default: return -1;
         }
     }
     
     public yacyNewsRecord get(int dbKey, int element) throws IOException {
         switch (dbKey) {
-            case OUTGOING_DB:   return outgoingNews.top(element);
-            case PUBLISHED_DB:  return publishedNews.top(element);
             case INCOMING_DB:	return incomingNews.top(element);
             case PROCESSED_DB:  return processedNews.top(element);
+            case OUTGOING_DB:   return outgoingNews.top(element);
+            case PUBLISHED_DB:  return publishedNews.top(element);
             default: return null;
+        }
+    }
+    
+    public void moveOff(int dbKey, String id) throws IOException {
+        // this is called if a queue element shall be moved to another queue or off the queue
+        // it depends on the dbKey how the record is handled
+        switch (dbKey) {
+            case INCOMING_DB:	commitIncomingNews(id); break;
+            case PROCESSED_DB:  deleteProcessedNews(id); break;
+            case OUTGOING_DB:   interruptPublication(id); break;
+            case PUBLISHED_DB:  deletePublishedNews(id); break;
         }
     }
     

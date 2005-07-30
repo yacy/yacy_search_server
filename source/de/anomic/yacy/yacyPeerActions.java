@@ -323,7 +323,7 @@ public class yacyPeerActions {
 		// this is a return of a lost peer
 		yacyCore.log.logDebug("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
 		seedDB.addConnected(seed);
-		return false;
+		return true;
 	    } else {
                 yacySeed connectedSeed = seedDB.getConnected(seed.hash);
                 if (connectedSeed != null) {
@@ -337,7 +337,7 @@ public class yacyPeerActions {
                     } catch (java.text.ParseException e) {}
                     yacyCore.log.logDebug("connect: updated KNOWN " + ((direct) ? "direct " : "") +  peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
 		    seedDB.addConnected(seed);
-                    return false;
+                    return true;
                 } else {
                     // the seed is new
                     if (((String) seed.get("IP", "127.0.0.1")).equals((String) seedDB.mySeed.get("IP", "127.0.0.1"))) {
