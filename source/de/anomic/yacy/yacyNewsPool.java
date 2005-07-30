@@ -51,9 +51,38 @@ public class yacyNewsPool {
     public static final int OUTGOING_DB  = 2;
     public static final int PUBLISHED_DB = 3;
     
+    public static final String[] category = {
+        "prfleupd", // a profile entry was updated (implemented)
+        "crwlstrt", // a crawl with remote indexing was startet
+        "crwlstop", // a crawl with remote indexing was stopped
+        "crwlcomm", // a comment on a crawl with remote indexing
+        "blckladd", // a public blacklist entry was added
+        "blcklavt", // a vote and comment on a public blacklist add
+        "blckldel", // a public blacklist entry was deleted
+        "blckldvt", // a vote and comment on a public blacklist delete
+        "flshradd", // a file was added to the file share
+        "flshrdel", // a file was added to the file share
+        "flshrcom", // a comment to a file share entry
+        "brdcstin", // a broadcast news in rss format
+        "brdcstup", // an update to a broadcast
+        "brdcstvt", // a vote on a broadcast
+        "brdcstco", // a comment on a broadcast
+        "bkmrkadd", // a bookmark was added/created
+        "bkmrkavt", // a vote and comment on a bookmark add
+        "bkmrkmov", // a bookmark was moved
+        "bkmrkmvt", // a vote and comment on a bookmark move
+        "bkmrkdel", // a bookmark was deleted
+        "bkmrkdvt", // a vote and comment on a bookmark delete
+        "wiki_add", // a wiki page was created
+        "wiki_upd", // a wiki page was updated
+        "wiki_del"  // a wiki page das deleted
+        // urlvotes
+    }; 
+    
     private yacyNewsDB newsDB;
     private yacyNewsQueue outgoingNews, publishedNews, incomingNews, processedNews;
     private int maxDistribution;
+    
     
     public yacyNewsPool(File yacyDBPath, int bufferkb) throws IOException {
         newsDB = new yacyNewsDB(new File(yacyDBPath, "news0.db"), bufferkb);

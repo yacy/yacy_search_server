@@ -435,8 +435,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if ((profiles.size() == 1) ||
             (getConfig("defaultRemoteProfile", "").length() == 0) ||
             (profiles.getEntry(getConfig("defaultRemoteProfile", "")) == null)) {
-            // generate new default entry for proxy crawling
-            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, false, false, true, true, false, true, true, false);
+            // generate new default entry for remote crawling
+            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, false, true, true, false, true, true, false);
             setConfig("defaultRemoteProfile", defaultRemoteProfile.handle());
         } else {
             defaultRemoteProfile = profiles.getEntry(getConfig("defaultRemoteProfile", ""));

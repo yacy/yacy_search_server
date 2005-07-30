@@ -63,6 +63,7 @@ import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -70,6 +71,7 @@ import de.anomic.server.serverThread;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyNewsRecord;
 
 public class IndexCreate_p {
     
@@ -144,13 +146,19 @@ public class IndexCreate_p {
                             switchboard.urlPool.noticeURL.remove(urlhash);
                             
                             // stack url
-                            String reasonString = switchboard.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0,
-                            switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw));
+                            plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
+                            String reasonString = switchboard.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
                                 // liftoff!
                                 prop.put("info", 2);//start msg
                                 prop.put("info_crawlingURL", ((String) post.get("crawlingURL")));
+                                
+                                // generate a YaCyNews if the global flag was set
+                                if (crawlOrder) {
+                                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord("crwlstrt", pe.map()));
+                                }
+                                
                             } else {
                                 prop.put("error", 5); //Crawling failed
                                 prop.put("error_crawlingURL", ((String) post.get("crawlingURL")));
