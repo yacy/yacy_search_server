@@ -55,8 +55,9 @@ public class yacyNewsAction implements yacyPeerAction {
         String recordString = peer.get("news", null);
         //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
         if ((recordString == null) || (recordString.length() == 0)) return;
-        yacyNewsRecord record = new yacyNewsRecord(de.anomic.tools.crypt.simpleDecode(recordString, ""));
-        //System.out.println("### news arrival from peer " + peer.getName() + ", news=" + record.toString());
+        String decodedString = de.anomic.tools.crypt.simpleDecode(recordString, "");
+        yacyNewsRecord record = new yacyNewsRecord(decodedString);
+        System.out.println("### news arrival from peer " + peer.getName() + ", decoded=" + decodedString + ", record=" + recordString + ", news=" + record.toString());
         try {
             this.pool.enqueueIncomingNews(record);
         } catch (IOException e) {e.printStackTrace();}

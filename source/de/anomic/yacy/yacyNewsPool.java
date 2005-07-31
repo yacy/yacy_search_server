@@ -43,6 +43,7 @@ package de.anomic.yacy;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 
 public class yacyNewsPool {
     
@@ -77,7 +78,12 @@ public class yacyNewsPool {
         "wiki_upd", // a wiki page was updated
         "wiki_del"  // a wiki page das deleted
         // urlvotes
-    }; 
+    };
+    public static HashSet categories;
+    static {
+        categories = new HashSet();
+        for (int i = 0; i < category.length; i++) categories.add(category[i]);
+    }
     
     private yacyNewsDB newsDB;
     private yacyNewsQueue outgoingNews, publishedNews, incomingNews, processedNews;
@@ -85,11 +91,11 @@ public class yacyNewsPool {
     
     
     public yacyNewsPool(File yacyDBPath, int bufferkb) throws IOException {
-        newsDB = new yacyNewsDB(new File(yacyDBPath, "news0.db"), bufferkb);
-        outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut0.stack"), newsDB);
-        publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished0.stack"), newsDB);
-        incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn0.stack"), newsDB);
-        processedNews = new yacyNewsQueue(new File(yacyDBPath, "newsProcessed0.stack"), newsDB);
+        newsDB = new yacyNewsDB(new File(yacyDBPath, "news1.db"), bufferkb);
+        outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut1.stack"), newsDB);
+        publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished1.stack"), newsDB);
+        incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn1.stack"), newsDB);
+        processedNews = new yacyNewsQueue(new File(yacyDBPath, "newsProcessed1.stack"), newsDB);
         maxDistribution = 30;
     }
     
@@ -111,7 +117,15 @@ public class yacyNewsPool {
     
     public void enqueueIncomingNews(yacyNewsRecord record) throws IOException {
         // called if a news is attached to a seed
+
+        // check consistency
+        if (record.id() == null) return;
+        if (record.id().length() != yacyNewsRecord.idLength()) return;
+        if (record.category() == null) return;
+        if (!(categories.contains(record.category()))) return;
         if (record.created().getTime() == 0) return;
+        
+        // double-check with old news
         if (newsDB.get(record.id()) != null) return;
         incomingNews.push(record);
     }

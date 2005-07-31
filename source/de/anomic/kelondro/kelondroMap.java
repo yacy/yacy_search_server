@@ -196,6 +196,7 @@ public class kelondroMap {
     
     public synchronized void remove(String key) throws IOException {
         // update elementCount
+        if (key == null) return;
         if ((sortfields != null) || (accfields != null)) {
             Map map = get(key);
             if (map != null) {
@@ -219,6 +220,7 @@ public class kelondroMap {
     }
     
     private void deleteSortCluster(String key) {
+        if (key == null) return;
         kelondroMScoreCluster cluster;
         for (int i = 0; i < sortfields.length; i++) {
             cluster = (kelondroMScoreCluster) sortClusterMap.get(sortfields[i]);
@@ -228,6 +230,7 @@ public class kelondroMap {
     }
         
     public synchronized Map get(String key) throws IOException {
+        if (key == null) return null;
         return get(key, true);
     }
     

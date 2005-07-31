@@ -298,7 +298,7 @@ public class kelondroDyn extends kelondroTree {
     }
 
     public synchronized boolean existsDyn(String key) throws IOException {
-	return (getValueCached(dynKey(key, 0)) != null);
+	return (key != null) && (getValueCached(dynKey(key, 0)) != null);
     }
 
     public synchronized kelondroRA getRA(String filekey) throws IOException {

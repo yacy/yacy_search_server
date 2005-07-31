@@ -63,16 +63,16 @@ public class yacyNewsQueue {
         this.path = path;
         this.newsDB = newsDB;
         
-        if (path.exists())
+        if (path.exists()) {
             queueStack = new kelondroStack(path, 0);
-        else
+        } else
             queueStack = createStack(path);
     }
     
     private static kelondroStack createStack(File path) throws IOException {
         return new kelondroStack(path, 0, new int[] {
                 yacyNewsRecord.idLength(), // id = created + originator
-                yacyCore.universalDatePattern.length() // last touched
+                yacyCore.universalDateShortPattern.length() // last touched
             });
     }
     

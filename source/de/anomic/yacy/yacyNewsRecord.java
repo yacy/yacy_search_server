@@ -61,7 +61,6 @@ public class yacyNewsRecord {
     public yacyNewsRecord(String newsString) {
         this.attributes = serverCodings.string2map(newsString);
         this.received = (attributes.containsKey("rec")) ? yacyCore.parseUniversalDate((String) attributes.get("rec")) : new Date();
-        //this.received = new Date();
         this.created = (attributes.containsKey("cre")) ? yacyCore.parseUniversalDate((String) attributes.get("cre")) : new Date();
         this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : null;
         this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt((String) attributes.get("dis")) : 0;
@@ -83,10 +82,10 @@ public class yacyNewsRecord {
     protected yacyNewsRecord(String id, String category, Date received, int distributed, Map attributes) {
         this.attributes = attributes;
         this.received = received;
-        this.created = yacyCore.parseUniversalDate(id.substring(0, yacyCore.universalDatePattern.length()));
+        this.created = yacyCore.parseUniversalDate(id.substring(0, yacyCore.universalDateShortPattern.length()));
         this.category = category;
         this.distributed = distributed;
-        this.originator = id.substring(yacyCore.universalDatePattern.length());
+        this.originator = id.substring(yacyCore.universalDateShortPattern.length());
         removeStandards();
     }
 
@@ -116,7 +115,7 @@ public class yacyNewsRecord {
     }
     
     public static int idLength() {
-        return yacyCore.universalDatePattern.length() + yacySeedDB.commonHashLength;
+        return yacyCore.universalDateShortPattern.length() + yacySeedDB.commonHashLength;
     }
     
     public String originator() {

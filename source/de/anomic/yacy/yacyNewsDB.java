@@ -60,7 +60,7 @@ public class yacyNewsDB {
     public static final int attributesMaxLength = yacyNewsRecord.maxNewsRecordLength
                  - yacyNewsRecord.idLength()
                  - yacyNewsRecord.categoryStringLength
-                 - yacyCore.universalDatePattern.length()
+                 - yacyCore.universalDateShortPattern.length()
                  - 2;
     
     public yacyNewsDB(File path, int bufferkb) throws IOException {
@@ -77,7 +77,7 @@ public class yacyNewsDB {
         return new kelondroTree(path, bufferkb, new int[] {
                 yacyNewsRecord.idLength(), // id = created + originator
                 yacyNewsRecord.categoryStringLength,    // category
-                yacyCore.universalDatePattern.length(), // received
+                yacyCore.universalDateShortPattern.length(), // received
                 2,
                 attributesMaxLength
             });

@@ -66,13 +66,12 @@ public class News {
 
         // execute commands
         if (post != null) {
-            if (switchboard.adminAuthenticated(header) < 2) {
-                // not authenticated, force log-in
-                prop.put("AUTHENTICATE", "admin log-in");
-                return prop;
-            }
             
             if ((post.containsKey("deletespecific")) && (tableID >= 0)) {
+                if (switchboard.adminAuthenticated(header) < 2) {
+                    prop.put("AUTHENTICATE", "admin log-in");
+                    return prop; // this button needs authentication, force log-in
+                }
                 Enumeration e = post.keys();
                 String check;
                 String id;
@@ -88,6 +87,10 @@ public class News {
             }
             
             if ((post.containsKey("deleteall")) && (tableID >= 0)) {
+                if (switchboard.adminAuthenticated(header) < 2) {
+                    prop.put("AUTHENTICATE", "admin log-in");
+                    return prop; // this button needs authentication, force log-in
+                }
                 yacyNewsRecord record;
                 try {
                     while (yacyCore.newsPool.size(tableID) > 0) {
