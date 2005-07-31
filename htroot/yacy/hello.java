@@ -143,7 +143,7 @@ public class hello {
             remoteSeed.put("PeerType", "junior");
             yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);
             // no connection here, instead store junior in connection cache
-            if ((remoteSeed.hash != null) && (remoteSeed.isProper())) yacyCore.peerActions.peerPing(remoteSeed);
+            if ((remoteSeed.hash != null) && (remoteSeed.isProper() == null)) yacyCore.peerActions.peerPing(remoteSeed);
         }
         if (!((String)prop.get("yourtype")).equals(reportedPeerType)) {
             yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() + "' [" + reportedip + "] peerType from '" + reportedPeerType + "' to '" + prop.get("yourtype") + "'.");
@@ -161,7 +161,7 @@ public class hello {
             yacySeed[] ys = yacyCore.seedDB.seedsByAge(true, count); // latest seeds
             int c = 1;
             for (int i = 1; i < ys.length; i++) {
-                if ((ys[i] != null) && (ys[i].isProper())) {
+                if ((ys[i] != null) && (ys[i].isProper() == null)) {
                     seeds += "seed" + c + "=" + ys[i].genSeedStr(key) + serverCore.crlfString;
                     c++;
                 }

@@ -169,7 +169,7 @@ public class yacyPeerActions {
                         lc = 0;
                         while (enu.hasMoreElements()) {
                             ys = yacySeed.genRemoteSeed((String) enu.nextElement(), null, new Date());
-                            if ((ys != null) && (ys.isProper()) &&
+                            if ((ys != null) && (ys.isProper() == null) &&
                             ((seedDB.mySeed == null) || (seedDB.mySeed.hash != ys.hash))) {
                                 if (connectPeer(ys, false)) lc++;
                                 //seedDB.writeMap(ys.hash, ys.getMap(), "init");
@@ -239,11 +239,12 @@ public class yacyPeerActions {
     synchronized public boolean connectPeer(yacySeed seed, boolean direct) {
 	// store a remote peer's seed
 	// returns true if the peer is new and previously unknown
-	if (seed == null) {
-	    yacyCore.log.logInfo("connect: WRONG seed (NULL)");
+        String error;
+        if (seed == null) {
+	    yacyCore.log.logError("connect: WRONG seed (NULL)");
 	    return false;
-	} else if (!(seed.isProper())) {
-	    yacyCore.log.logInfo("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + ")");
+	} else if ((error = seed.isProper()) != null) {
+	    yacyCore.log.logError("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
 	    return false;
 	} else if ((seedDB.mySeed != null) && (seed.hash.equals(seedDB.mySeed.hash))) {
 	    yacyCore.log.logInfo("connect: SELF reference " + seed.getAddress());

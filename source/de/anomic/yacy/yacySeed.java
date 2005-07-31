@@ -381,13 +381,15 @@ public class yacySeed {
 	return crypt.simpleEncode(toString(), key, method);
     }
 
-    public boolean isProper() {
+    public String isProper() {
 	// checks if everything is ok with that seed
-        if (this.hash == null) return false;
-        if (this.hash.length() != yacySeedDB.commonHashLength) return false;
+        if (this.hash == null) return "hash is null";
+        if (this.hash.length() != yacySeedDB.commonHashLength) return "wrong hash length (" + this.hash.length() + ")";
 	String ip = (String) dna.get("IP");
-	if ((ip == null) || (ip.length() < 8)) return false;
-	return (natLib.isProper(ip));
+	if (ip == null) return "IP is null";
+        if (ip.length() < 8) return "IP is too short: " + ip;
+	if (!(natLib.isProper(ip))) return "IP is not proper: " + ip;
+        return null;
     }
 
     public void save(File f) throws IOException {

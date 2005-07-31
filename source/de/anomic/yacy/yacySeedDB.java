@@ -342,7 +342,7 @@ public class yacySeedDB {
     public long countPotentialRWI() { return seedPotentialDB.getAcc("ICount"); }
 
     public synchronized void addConnected(yacySeed seed) {
-	if ((seed == null) || (!(seed.isProper()))) return;
+	if ((seed == null) || (seed.isProper() != null)) return;
         //seed.put("LastSeen", yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             nameLookupCache.put(seed.getName(), seed);
@@ -396,7 +396,7 @@ public class yacySeedDB {
             seedActiveDB.remove(seed.hash);
             seedPassiveDB.remove(seed.hash);
         } catch (Exception e) {}
-	if (!(seed.isProper())) return;
+	if (seed.isProper() != null) return;
 	//seed.put("LastSeen", yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             seedPotentialDB.set(seed.hash, seed.getMap());
@@ -476,13 +476,13 @@ public class yacySeedDB {
             seed = (yacySeed) e.nextElement();
 	    if (seed != null) {
 		name = seed.getName().toLowerCase();
-		if (seed.isProper()) nameLookupCache.put(name, seed);
+		if (seed.isProper() == null) nameLookupCache.put(name, seed);
 		if (name.equals(peerName)) return seed;
 	    }
         }
         // check local seed
         name = mySeed.getName().toLowerCase();
-        if (mySeed.isProper()) nameLookupCache.put(name, mySeed);
+        if (mySeed.isProper() == null) nameLookupCache.put(name, mySeed);
         if (name.equals(peerName)) return mySeed;
         // nothing found
         return null;

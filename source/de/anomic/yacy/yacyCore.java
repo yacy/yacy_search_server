@@ -409,7 +409,7 @@ public class yacyCore {
                 
                 String address = seeds[i].getAddress();
                 log.logDebug("HELLO #" + i + " to peer '" + seeds[i].get("Name", "") + "' at " + address); // debug            
-                if ((address == null) || (!(seeds[i].isProper()))) {
+                if ((address == null) || (seeds[i].isProper() != null)) {
                     // we don't like that address, delete it
                     peerActions.peerDeparture(seeds[i]);
                     sync.V();
@@ -471,7 +471,7 @@ public class yacyCore {
 //            }
             
             // if we have an address, we do nothing
-            if ((seedDB.mySeed.isProper()) && (!(force))) return 0;
+            if ((seedDB.mySeed.isProper() == null) && (!(force))) return 0;
             
             // still no success: ask own NAT or internet responder
             boolean DI604use = switchboard.getConfig("DI604use", "false").equals("true");

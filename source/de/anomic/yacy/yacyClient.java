@@ -189,9 +189,10 @@ public class yacyClient {
             yacyCore.seedDB.mySeed.put(yacySeed.PEERTYPE, mytype);
         }
         
-        if (!(yacyCore.seedDB.mySeed.isProper())) {
+        String error;
+        if ((error = yacyCore.seedDB.mySeed.isProper()) != null) {
             yacyCore.seedDB.mySeed = mySeedBkp;
-            yacyCore.log.logDebug("yacyClient.publishMySeed mySeed error: not proper");
+            yacyCore.log.logDebug("yacyClient.publishMySeed mySeed error - not proper: " + error);
             return -1;
         }
         
