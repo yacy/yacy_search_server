@@ -111,7 +111,9 @@ public class yacyNewsPool {
     
     public void enqueueIncomingNews(yacyNewsRecord record) throws IOException {
         // called if a news is attached to a seed
-        if (newsDB.get(record.id()) == null) incomingNews.push(record);
+        if (record.created().getTime() == 0) return;
+        if (newsDB.get(record.id()) != null) return;
+        incomingNews.push(record);
     }
     
     public synchronized boolean commitIncomingNews(String id) throws IOException {
@@ -202,5 +204,5 @@ public class yacyNewsPool {
             case PUBLISHED_DB:  deletePublishedNews(id); break;
         }
     }
-    
+
 }

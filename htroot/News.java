@@ -72,19 +72,31 @@ public class News {
                 return prop;
             }
             
-            if ((post.containsKey("delete")) && (tableID >= 0)) {
-            Enumeration e = post.keys();
-            String check;
-            String id;
-            while (e.hasMoreElements()) {
-                check = (String) e.nextElement();
-                if ((check.startsWith("del_")) && (post.get(check, "off").equals("on"))) {
-                    id = check.substring(4);
-                    try {
-                        yacyCore.newsPool.moveOff(tableID, id);
-                    } catch (IOException ee) {ee.printStackTrace();}
+            if ((post.containsKey("deletespecific")) && (tableID >= 0)) {
+                Enumeration e = post.keys();
+                String check;
+                String id;
+                while (e.hasMoreElements()) {
+                    check = (String) e.nextElement();
+                    if ((check.startsWith("del_")) && (post.get(check, "off").equals("on"))) {
+                        id = check.substring(4);
+                        try {
+                            yacyCore.newsPool.moveOff(tableID, id);
+                        } catch (IOException ee) {ee.printStackTrace();}
+                    }
                 }
             }
+            
+            if ((post.containsKey("deleteall")) && (tableID >= 0)) {
+                yacyNewsRecord record;
+                try {
+                    while (yacyCore.newsPool.size(tableID) > 0) {
+                        record = yacyCore.newsPool.get(tableID, 0);
+                        yacyCore.newsPool.moveOff(tableID, record.id());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
         
@@ -115,7 +127,7 @@ public class News {
                     prop.put("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
                     prop.put("table_list_" + i + "_cre", yacyCore.universalDateShortString(record.created()));
                     prop.put("table_list_" + i + "_cat", record.category());
-                    prop.put("table_list_" + i + "_rec", yacyCore.universalDateShortString(record.received()));
+                    prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : yacyCore.universalDateShortString(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
                     prop.put("table_list_" + i + "_att", record.attributes().toString());
                 } catch (IOException e) {e.printStackTrace();}

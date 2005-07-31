@@ -159,7 +159,7 @@ public class yacyNewsDB {
         return new yacyNewsRecord(
             new String(b[0]),
             new String(b[1]),
-            yacyCore.parseUniversalDate(new String(b[2])),
+            (b[2] == null) ? null : yacyCore.parseUniversalDate(new String(b[2])),
             (int) serverCodings.enhancedCoder.decodeBase64Long(new String(b[3])),
             serverCodings.string2map(new String(b[4]))
         );
@@ -172,7 +172,7 @@ public class yacyNewsDB {
         byte[][] b = new byte[5][];
         b[0] = r.id().getBytes();
         b[1] = r.category().getBytes();
-        b[2] = yacyCore.universalDateShortString(r.created()).getBytes();
+        b[2] = (r.received() == null) ? null : yacyCore.universalDateShortString(r.received()).getBytes();
         b[3] = serverCodings.enhancedCoder.encodeBase64Long(r.distributed(), 2).getBytes();
         b[4] = attributes.getBytes();
         return b;

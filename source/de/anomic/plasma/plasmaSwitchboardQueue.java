@@ -159,7 +159,7 @@ public class plasmaSwitchboardQueue {
         
         public Entry(byte[][] row) {
             long ims = serverCodings.enhancedCoder.decodeBase64Long(new String(row[2]));
-            byte flags = row[3][0];
+            byte flags = (row[3] == null) ? 0 : row[3][0];
             try {
                 this.url = new URL(new String(row[0]));
             } catch (MalformedURLException e) {

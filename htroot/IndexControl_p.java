@@ -91,7 +91,7 @@ public class IndexControl_p {
         String urlstring = ((String) post.get("urlstring")).trim();
         String urlhash = ((String) post.get("urlhash")).trim();
         
-        if (!(urlstring.startsWith("http://"))) urlstring = "http://" + urlstring;
+        if ((!(urlstring.startsWith("http://"))) && (!(urlstring.startsWith("https://")))) urlstring = "http://" + urlstring;
         
         prop.put("keystring", keystring);
         prop.put("keyhash", keyhash);

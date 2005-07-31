@@ -370,7 +370,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 		byte[][] entry = urlHashCache.get(urlHash.getBytes());
 		if (entry != null) {
 		    this.url = new URL(new String(entry[1]).trim());
-		    this.descr = new String(entry[2]).trim();
+		    this.descr = (entry[2] == null) ? "" : new String(entry[2]).trim();
 		    this.moddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[3])));
 		    this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[4])));
 		    this.referrerHash = new String(entry[5]);

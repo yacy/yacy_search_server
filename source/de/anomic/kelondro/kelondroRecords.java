@@ -588,7 +588,7 @@ public class kelondroRecords {
 			    for (int j = values[i].length; j < COLWIDTHS[i]; j++)
 				entryFile.writeByte(0);
 			}
-			seek = seek + COLWIDTHS[i];
+			seek += COLWIDTHS[i];
 		    }
 		}
                 updateNodeCache();
@@ -630,7 +630,8 @@ public class kelondroRecords {
 			    entryFile.seek(seek);
 			    values[i] = new byte[COLWIDTHS[i]];
 			    entryFile.read(values[i], 0, values[i].length);
-			    seek = seek + COLWIDTHS[i];
+                            if (values[i][0] == 0) values[i] = null;
+			    seek += COLWIDTHS[i];
 			}
 		    }
 		    return values;
@@ -643,7 +644,8 @@ public class kelondroRecords {
 			entryFile.seek(seek);
 			values[i] = new byte[COLWIDTHS[i]];
 			entryFile.read(values[i], 0, values[i].length);
-			seek = seek + COLWIDTHS[i];
+                        if (values[i][0] == 0) values[i] = null;
+			seek += COLWIDTHS[i];
 		    }
 		}
 		return values;
@@ -865,6 +867,7 @@ public class kelondroRecords {
     }
     
     public static long bytes2long(byte[] b) {
+        if (b == null) return 0;
         long x = 0;
         for (int i = 0; i < b.length; i++) x = (x << 8) | (0xff & (int) b[i]);
         return x;

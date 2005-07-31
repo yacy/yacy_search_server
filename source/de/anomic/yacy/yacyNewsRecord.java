@@ -61,6 +61,7 @@ public class yacyNewsRecord {
     public yacyNewsRecord(String newsString) {
         this.attributes = serverCodings.string2map(newsString);
         this.received = (attributes.containsKey("rec")) ? yacyCore.parseUniversalDate((String) attributes.get("rec")) : new Date();
+        //this.received = new Date();
         this.created = (attributes.containsKey("cre")) ? yacyCore.parseUniversalDate((String) attributes.get("cre")) : new Date();
         this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : null;
         this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt((String) attributes.get("dis")) : 0;
@@ -101,10 +102,10 @@ public class yacyNewsRecord {
         // this creates the string that shall be distributed
         // attention: this has no additional encoding
         if (this.originator != null) attributes.put("ori", this.originator);
-        if (this.category != null) attributes.put("cat", this.category);
-        attributes.put("cre", yacyCore.universalDateShortString(this.created));
-        attributes.put("rec", yacyCore.universalDateShortString(this.received));
-        attributes.put("dis", "" +this. distributed);
+        if (this.category != null)   attributes.put("cat", this.category);
+        if (this.created != null)    attributes.put("cre", yacyCore.universalDateShortString(this.created));
+        if (this.received != null)   attributes.put("rec", yacyCore.universalDateShortString(this.received));
+        attributes.put("dis", "" + this.distributed);
         String theString = attributes.toString();
         removeStandards();
         return theString;

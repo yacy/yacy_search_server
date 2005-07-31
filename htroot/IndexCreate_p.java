@@ -144,6 +144,7 @@ public class IndexCreate_p {
                             String urlhash = plasmaURL.urlHash(crawlingStart);
                             switchboard.urlPool.loadedURL.remove(urlhash);
                             switchboard.urlPool.noticeURL.remove(urlhash);
+                            switchboard.urlPool.errorURL.remove(urlhash);
                             
                             // stack url
                             plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
@@ -156,7 +157,18 @@ public class IndexCreate_p {
                                 
                                 // generate a YaCyNews if the global flag was set
                                 if (crawlOrder) {
-                                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord("crwlstrt", pe.map()));
+                                    Map m = new HashMap(pe.map()); // must be cloned
+                                    m.remove("specificDepth");
+                                    m.remove("localIndexing");
+                                    m.remove("remoteIndexing");
+                                    m.remove("xsstopw");
+                                    m.remove("xpstopw");
+                                    m.remove("xdstopw");
+                                    m.remove("storeTXCache");
+                                    m.remove("storeHTCache");
+                                    m.remove("generalFilter");
+                                    m.remove("specificFilter");
+                                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord("crwlstrt", m));
                                 }
                                 
                             } else {
