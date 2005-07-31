@@ -231,7 +231,7 @@ public final class httpTemplate {
 			    writeTemplate(pis2, out, pattern, dflt, multi_key + "_" + i + "_");
 			}//for
 		    }else{//transferUntil
-				System.out.println("TEMPLATE ERROR: No Close Key found for #{"+multi_key+"}#");
+				serverLog.logError("TEMPLATE", "No Close Key found for #{"+multi_key+"}#");
 			}
 		}
 	    }else if( (bb & 0xFF) == lrbr ){ //alternatives
@@ -314,7 +314,7 @@ public final class httpTemplate {
 		    if(!found){
 			text += (char)bb;
 			if(pis.available()==0){
-				System.out.println("TEMPLATE ERROR: No Close Key found for #("+key+")#");
+				serverLog.logError("TEMPLATE", "No Close Key found for #("+key+")#");
 				found=true;
 			}
 		    }
