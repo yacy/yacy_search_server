@@ -218,6 +218,8 @@ public class Network {
                     
                     // find updated Information using YaCyNews
                     HashSet updatedProfile = new HashSet();
+                    HashSet updatedWiki = new HashSet();
+                    HashMap isCrawling = new HashMap();
                     int availableNews = yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB);
                     if (availableNews > 500) availableNews = 500;
                     yacyNewsRecord record;
@@ -226,8 +228,11 @@ public class Network {
                             record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, c);
                             if (record.category().equals("prfleupd")) {
                                 updatedProfile.add(record.originator());
+                            } else if (record.category().equals("wiki_upd")) {
+                                updatedWiki.add(record.originator());
+                            } else if (record.category().equals("crwlstrt")) {
+                                isCrawling.put(record.originator(), record.attributes().get("startURL"));
                             }
-                            
                         }
                     } catch (IOException e) {}
                     
@@ -240,6 +245,8 @@ public class Network {
                         case 2 : e = yacyCore.seedDB.seedsSortedDisconnected(post.get("order", "up").equals("up"), post.get("sort", "LastSeen")); break;
                         case 3 : e = yacyCore.seedDB.seedsSortedPotential(post.get("order", "up").equals("up"), post.get("sort", "LastSeen")); break;
                     }
+                    String startURL;
+                    int PPM;
                     while ((e.hasMoreElements()) && (conCount < maxCount)) {
                         seed = (yacySeed) e.nextElement();
                         if (seed != null) {
@@ -250,6 +257,20 @@ public class Network {
                                 prop.put("table_list_"+conCount+"_dark", ((dark) ? 1 : 0) ); dark=!dark;
                             }
                             prop.put("table_list_"+conCount+"_updatedProfile", (((updatedProfile.contains(seed.hash))) ? 1 : 0) );
+                            prop.put("table_list_"+conCount+"_updatedWiki", (((updatedWiki.contains(seed.hash))) ? 1 : 0) );
+                            try {
+                                PPM = Integer.parseInt(seed.get("ISpeed", "-"));
+                            } catch (NumberFormatException ee) {
+                                PPM = 0;
+                            }
+                            if (((startURL = (String) isCrawling.get(seed.hash)) == null) || (PPM < 10)) {
+                                prop.put("table_list_"+conCount+"_isCrawling", 0);
+                                prop.put("table_list_"+conCount+"_isCrawling_startURL", "");
+                            } else {
+                                prop.put("table_list_"+conCount+"_isCrawling", 1);
+                                prop.put("table_list_"+conCount+"_isCrawling_startURL", startURL);
+                            }
+                            
                             long links, words;
                             try {
                                 links = Long.parseLong(seed.get("LCount", "0"));
@@ -289,7 +310,7 @@ public class Network {
                             prop.put("table_list_"+conCount+"_sU", seed.get("sU", "-"));
                             prop.put("table_list_"+conCount+"_rI", seed.get("rI", "-"));
                             prop.put("table_list_"+conCount+"_rU", seed.get("rU", "-"));
-                            prop.put("table_list_"+conCount+"_ppm", seed.get("ISpeed", "-"));
+                            prop.put("table_list_"+conCount+"_ppm", PPM);
                             prop.put("table_list_"+conCount+"_seeds", seed.get("SCount", "-"));
                             prop.put("table_list_"+conCount+"_connects", seed.get("CCount", "-"));
                             conCount++;

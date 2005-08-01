@@ -101,7 +101,10 @@ public class yacyNewsPool {
     
     public void publishMyNews(yacyNewsRecord record) throws IOException {
         // this shall be called if our peer generated a new news record and wants to publish it
-        if (newsDB.get(record.id()) == null) outgoingNews.push(record);
+        if (newsDB.get(record.id()) == null) {
+            incomingNews.push(record); // we want to see our own news..
+            outgoingNews.push(record); // .. and put it on the publishing list
+        }
     }
     
     public yacyNewsRecord myPublication() throws IOException {

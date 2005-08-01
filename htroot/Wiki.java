@@ -53,6 +53,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.HashMap;
 
 import de.anomic.data.wikiBoard;
 import de.anomic.http.httpHeader;
@@ -60,6 +61,9 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacyNewsPool;
+import de.anomic.yacy.yacyCore;
 
 public class Wiki {
 
@@ -95,9 +99,17 @@ public class Wiki {
         
 	if (post.containsKey("submit")) {
 	    // store a new page
-	    switchboard.wikiDB.write(switchboard.wikiDB.newEntry(pagename, author, ip,
+            switchboard.wikiDB.write(switchboard.wikiDB.newEntry(pagename, author, ip,
 								 post.get("reason", "edit"),
 								 ((String) post.get("content", "")).getBytes()));
+            // create a news message
+            HashMap map = new HashMap();
+            map.put("page", pagename);
+            map.put("author", author);
+            map.put("ip", ip);
+            try {
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("wiki_upd", map));
+            } catch (IOException e) {}
 	}
 
 	wikiBoard.entry page = switchboard.wikiDB.read(pagename);
