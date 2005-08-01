@@ -171,7 +171,7 @@ public class plasmaSwitchboardQueue {
             this.initiator = new String(row[4]);
             this.depth = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(row[5]));
             this.profileHandle = new String(row[6]);
-            this.anchorName = new String(row[7]);
+            this.anchorName = (row[7] == null) ? null : new String(row[7]);
             
             this.profileEntry = null;
             this.responseHeader = null;
