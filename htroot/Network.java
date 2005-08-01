@@ -218,7 +218,7 @@ public class Network {
                     
                     // find updated Information using YaCyNews
                     HashSet updatedProfile = new HashSet();
-                    HashSet updatedWiki = new HashSet();
+                    HashMap updatedWiki = new HashMap();
                     HashMap isCrawling = new HashMap();
                     int availableNews = yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB);
                     if (availableNews > 500) availableNews = 500;
@@ -229,7 +229,7 @@ public class Network {
                             if (record.category().equals("prfleupd")) {
                                 updatedProfile.add(record.originator());
                             } else if (record.category().equals("wiki_upd")) {
-                                updatedWiki.add(record.originator());
+                                updatedWiki.put(record.originator(), record.attributes().get("page"));
                             } else if (record.category().equals("crwlstrt")) {
                                 isCrawling.put(record.originator(), record.attributes().get("startURL"));
                             }
@@ -246,6 +246,7 @@ public class Network {
                         case 3 : e = yacyCore.seedDB.seedsSortedPotential(post.get("order", "up").equals("up"), post.get("sort", "LastSeen")); break;
                     }
                     String startURL;
+                    String wikiPage;
                     int PPM;
                     while ((e.hasMoreElements()) && (conCount < maxCount)) {
                         seed = (yacySeed) e.nextElement();
@@ -256,8 +257,14 @@ public class Network {
                             } else {
                                 prop.put("table_list_"+conCount+"_dark", ((dark) ? 1 : 0) ); dark=!dark;
                             }
-                            prop.put("table_list_"+conCount+"_updatedProfile", (((updatedProfile.contains(seed.hash))) ? 1 : 0) );
-                            prop.put("table_list_"+conCount+"_updatedWiki", (((updatedWiki.contains(seed.hash))) ? 1 : 0) );
+                            prop.put("table_list_"+conCount+"_updatedProfile", (((updatedProfile.contains(seed.hash))) ? 1 : 0));
+                            if ((wikiPage = (String) updatedWiki.get(seed.hash)) == null) {
+                                prop.put("table_list_"+conCount+"_updatedWiki", 0);
+                                prop.put("table_list_"+conCount+"_updatedWikiPage", "");
+                            } else {
+                                prop.put("table_list_"+conCount+"_updatedWiki", 1);
+                                prop.put("table_list_"+conCount+"_updatedWikiPage", "?page=" + wikiPage);
+                            }
                             try {
                                 PPM = Integer.parseInt(seed.get("ISpeed", "-"));
                             } catch (NumberFormatException ee) {
