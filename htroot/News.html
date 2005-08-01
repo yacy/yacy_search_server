@@ -36,7 +36,29 @@
 <p>
 #(table)#
 <p>
-This is the news system (currently under testing).
+This is the YaCyNews system (currently under testing).
+</p>
+<p>
+The news service is controlled by several entry points:
+<ul>
+<li>A crawl start with remote indexing will automatically create a news entry.
+Other peers may use this information to prevent double-crawls from the same start point.
+A table with recently started crawls is presented on the Index Create - page</li>
+<li>A change in the personal profile will create a news entry. You can see recently made changes of
+profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.</li>
+</ul><br>
+More news services will follow.</p>
+<p>
+Above you can see four menues:
+<ul>
+<li><b>Incoming News</b>: latest news that arrived your peer.
+Only these news will be used to display specific news services as explained above.
+You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page</li>
+<li><b>Processed News</b>: this is simply an archive of incoming news that you removed by processing.</li>
+<li><b>Outgoing News</b>: here your can see news entries that you have created. These news are currently broadcasted to other peers.
+you can stop the broadcast if you want.</li>
+<li><b>Published News</b>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.</li>
+</ul><br>
 </p>
 ::
 <p>

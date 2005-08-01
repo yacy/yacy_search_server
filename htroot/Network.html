@@ -38,33 +38,32 @@
 <p>Showing #[num]# entries from a total of #[total]# peers.<br>
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader" valign="bottom">
-<td class="small">Profile<br>&nbsp;</td>
-<td class="small">Message<br>&nbsp;</td>
-<td class="small">Name<br>&nbsp;</td>
+<td class="small">send&nbsp;<b>M</b>essage/<br>show&nbsp;<b>P</b>rofile/<br>edit&nbsp;<b>W</b>iki<br>(* = updated)</td>
+<td class="small"><b>Name</b><br>&nbsp;</td>
 #(complete)#::
-<td class="small">Address<br>&nbsp;</td>
-<td class="small">Hash<br>&nbsp;</td>
+<td class="small"><b>Address</b><br>&nbsp;</td>
+<td class="small"><b>Hash</b><br>&nbsp;</td>
 #(/complete)#
-<td class="small">Type<br>&nbsp;</td>
-<td class="small">Release/<br>SVN<br>&nbsp;</td>
-<td class="small">Contact<br>&nbsp;</td>
-<td class="small">Last Seen<br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=LastSeen&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=LastSeen&order=down">&gt;</a></td>
-<td class="small">Uptime<br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=Uptime&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=Uptime&order=down">&gt;</a></td>
-<td class="small">#Links<br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=LCount&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=LCount&order=down">&gt;</a></td>
-<td class="small">#RWIs<br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=ICount&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=ICount&order=down">&gt;</a></td>
-<td class="small">Accept<br>Crawl<br>&nbsp;</td>
-<td class="small">Accept<br>Index<br>&nbsp;</td>
-<td class="small">Sent<br>Words<br>&nbsp;</td>
-<td class="small">Sent<br>URLs<br>&nbsp;</td>
-<td class="small">Received<br>Words<br>&nbsp;</td>
-<td class="small">Received<br>URLs<br>&nbsp;</td>
-<td class="small">Indexed Pages<br>per Minute<br>&nbsp;</td>
-<td class="small">#Seeds<br>&nbsp;</td>
-<td class="small">#Connects<br>per hour<br>&nbsp;</td></tr>
+<td class="small"><b>Type</b><br>&nbsp;</td>
+<td class="small"><b>Release/<br>SVN</b><br>&nbsp;</td>
+<td class="small"><b>Contact</b><br>&nbsp;</td>
+<td class="small"><b>Last Seen</b><br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=LastSeen&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=LastSeen&order=down">&gt;</a></td>
+<td class="small"><b>Uptime</b><br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=Uptime&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=Uptime&order=down">&gt;</a></td>
+<td class="small"><b>#Links</b><br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=LCount&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=LCount&order=down">&gt;</a></td>
+<td class="small"><b>#RWIs</b><br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=ICount&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=ICount&order=down">&gt;</a></td>
+<td class="small">accept<br><b>Crawl</b>/<br><b>Index</b><br>&nbsp;</td>
+<td class="small"><b>Sent<br>Words</b><br>&nbsp;</td>
+<td class="small"><b>Sent<br>URLs</b><br>&nbsp;</td>
+<td class="small"><b>Received<br>Words</b><br>&nbsp;</td>
+<td class="small"><b>Received<br>URLs</b><br>&nbsp;</td>
+<td class="small"><b>PPM</b><br>&nbsp;</td>
+<td class="small"><b>#Seeds</b><br>&nbsp;</td>
+<td class="small"><b>#Connects<br>per hour</b><br>&nbsp;</td></tr>
 #{list}#
 <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-<td class="small"><a href="ViewProfile.html?hash=#[hash]#" class="small">view</a></td>
-<td class="small"><a href="MessageSend_p.html?hash=#[hash]#" class="small">send</a></td>
+<td class="small"><a href="MessageSend_p.html?hash=#[hash]#" class="small">m</a>&nbsp;&nbsp;&nbsp;
+                  <a href="ViewProfile.html?hash=#[hash]#" class="small">p</a>#(updatedProfile)#&nbsp;::*#(/updatedProfile)#&nbsp;&nbsp;
+                  <a href="http://#[fullname]#.yacy/Wiki.html" class="small">w</a></td>
 <td class="small"><a href="http://www.#[fullname]#.yacy" class="small">#[shortname]#</a></td>
 #(complete)#
 ::
@@ -78,8 +77,8 @@
 <td class="small" align="right"><NOBR>#[uptime]#</NOBR></td>
 <td class="small" align="right">#[links]#</td>
 <td class="small" align="right">#[words]#</td>
-<td class="small" align="right">#(acceptcrawl)#no::yes#(/acceptcrawl)#</td>
-<td class="small" align="right">#(acceptindex)#no::yes#(/acceptindex)#</td>
+<td class="small" align="right">#(acceptcrawl)#-::C#(/acceptcrawl)#&nbsp;/&nbsp;
+                                #(acceptindex)#-::I#(/acceptindex)#</td>
 <td class="small" align="right">#[sI]#</td>
 <td class="small" align="right">#[sU]#</td>
 <td class="small" align="right">#[rI]#</td>

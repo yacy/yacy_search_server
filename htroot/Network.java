@@ -45,6 +45,8 @@
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.io.IOException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
@@ -53,6 +55,8 @@ import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacyNewsPool;
 
 public class Network {
     
@@ -211,6 +215,22 @@ public class Network {
                         yacyCore.peerActions.updateMySeed();
                         yacyCore.seedDB.addConnected(yacyCore.seedDB.mySeed);
                     }
+                    
+                    // find updated Information using YaCyNews
+                    HashSet updatedProfile = new HashSet();
+                    int availableNews = yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB);
+                    if (availableNews > 500) availableNews = 500;
+                    yacyNewsRecord record;
+                    try {
+                        for (int c = 0; c < availableNews; c++) {
+                            record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, c);
+                            if (record.category().equals("prfleupd")) {
+                                updatedProfile.add(record.originator());
+                            }
+                            
+                        }
+                    } catch (IOException e) {}
+                    
                     boolean dark = true;
                     yacySeed seed;
                     boolean complete = post.containsKey("ip");
@@ -228,7 +248,8 @@ public class Network {
                                 prop.put("table_list_"+conCount+"_dark", 2);
                             } else {
                                 prop.put("table_list_"+conCount+"_dark", ((dark) ? 1 : 0) ); dark=!dark;
-                            }                            
+                            }
+                            prop.put("table_list_"+conCount+"_updatedProfile", (((updatedProfile.contains(seed.hash))) ? 1 : 0) );
                             long links, words;
                             try {
                                 links = Long.parseLong(seed.get("LCount", "0"));

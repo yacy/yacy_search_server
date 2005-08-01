@@ -18,15 +18,13 @@ You can define URLs as start points for Web page crawling and start that crawlin
 <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
   <tr valign="top" class="TableCellDark">
     <td width="120"></td>
-    <td></td>
-    <td width="120"></td>
-    <td></td>
+    <td width="120" colspan="2"></td>
     <td></td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Crawling Depth:</td>
     <td class=small><input name="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#"></td>
-    <td class=small colspan="3">
+    <td class=small colspan="2">
     A minimum of 1 is recommended.
     Be careful with the prefetch number. Consider a branching factor of average 20;
     A prefetch-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
@@ -35,7 +33,7 @@ You can define URLs as start points for Web page crawling and start that crawlin
   <tr valign="top" class="TableCellDark">
     <td class=small>Crawling Filter:</td>
     <td class=small><input name="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#"></td>
-    <td class=small colspan="3">
+    <td class=small colspan="2">
     This is an emacs-like regular expression that must match with the crawled URL.
     Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase
     the crawl depth.
@@ -44,7 +42,7 @@ You can define URLs as start points for Web page crawling and start that crawlin
   <tr valign="top" class="TableCellDark">
     <td class=small>Accept URL's with '?' / dynamic URL's:</td>
     <td class=small><input type="checkbox" name="crawlingQ" align="top" #(crawlingQChecked)#::checked#(/crawlingQChecked)#></td>
-    <td class=small colspan="3">
+    <td class=small colspan="2">
     URL's pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
     is accessed with URL's containing question marks. If you are unsure, do not check this to avoid crawl loops.
     </td>
@@ -52,7 +50,7 @@ You can define URLs as start points for Web page crawling and start that crawlin
   <tr valign="top" class="TableCellDark">
     <td class=small>Store to Proxy Cache:</td>
     <td class=small><input type="checkbox" name="storeHTCache" align="top" #(storeHTCacheChecked)#::checked#(/storeHTCacheChecked)#></td>
-    <td class=small colspan="3">
+    <td class=small colspan="2">
     This option is used by default for proxy prefetch, but is not needed for explicit crawling.
     We recommend to leave this switched off unless you want to control the crawl results with the
     <a href="CacheAdmin_p.html" class=small>Cache Monitor</a>.
@@ -61,25 +59,29 @@ You can define URLs as start points for Web page crawling and start that crawlin
   <tr valign="top" class="TableCellDark">
     <td class=small>Do Local Indexing:</td>
     <td class=small><input type="checkbox" name="localIndexing" align="top" #(localIndexingChecked)#::checked#(/localIndexingChecked)#></td>
-    <td class=small colspan="3">
+    <td class=small colspan="2">
     This should be switched on by default, unless you want to crawl only to fill the
     <a href="CacheAdmin_p.html" class=small>Proxy Cache</a> without indexing.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Do Remote Indexing:</td>
-    <td class=small><input type="checkbox" name="crawlOrder" align="top" #(crawlOrderChecked)#::checked#(/crawlOrderChecked)#></td>
-    <td class=small colspan="3">
+    <td class=small><input type="checkbox" name="crawlOrder" align="top" #(crawlOrderChecked)#::checked#(/crawlOrderChecked)#><br>
+                    Describe your intention to start this global crawl (optional):<br>
+                    <input name="intention" type="text" size="40" maxlength="100" value=""><br>
+                    This message will appear in the 'Other Peer Crawl Start' table of other peers.
+    </td>
+    <td class=small colspan="2">
     If checked, the crawl will try to assign the leaf nodes of the search tree to remote peers.
     If you need your crawling results locally, you must switch this off.
     Only senior and principal peer's can initiate or receive remote crawls.
-    A News message will be created to inform all peers about a global crawl, so they can ommit starting a crawl with the same start point.
+    <b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can ommit starting a crawl with the same start point.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Exclude <i>static</i> Stop-Words</td>
     <td class=small><input type="checkbox" name="xsstopw" align="top" #(xsstopwChecked)#::checked#(/xsstopwChecked)#></td>
-    <td class=small colspan="3">
+    <td class=small colspan="2">
     To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,
     check this box.
     </td>
@@ -103,8 +105,8 @@ You can define URLs as start points for Web page crawling and start that crawlin
   </tr>
   -->
   <tr valign="top" class="TableCellLight">
-    <td class="small" rowspan="3">Starting Point:</td>
-    <td class="small">
+    <td class="small">Starting Point:</td>
+    <td class="small" colspan="2">
     	<table cellpadding="0" cellspacing="0">
     	<tr><td class="small">From&nbsp;File:</td>
     	    <td class="small"><input type="radio" name="crawlingMode" value="file"></td>
@@ -134,22 +136,22 @@ Crawling and indexing can be done by remote peers.
 Your peer can search and index for other peers and they can search for you.</div>
 <table border="0" cellpadding="5" cellspacing="0" width="100%">
   <tr valign="top" class="TableCellDark">
-    <td width="10%">
+    <td class=small width="10%">
         <input type="radio" name="dcr" value="acceptCrawlMax" align="top" #(acceptCrawlMaxChecked)#::checked#(/acceptCrawlMaxChecked)#>
-    </td><td>
+    </td><td class=small>
         Accept remote crawling requests and perform crawl at maximum load
     </td>
   </tr><tr valign="top" class="TableCellDark">
-    <td width="10%">
+    <td class=small width="10%">
         <input type="radio" name="dcr" value="acceptCrawlLimited" align="top" #(acceptCrawlLimitedChecked)#::checked#(/acceptCrawlLimitedChecked)#>
-    </td><td>
+    </td><td class=small>
         Accept remote crawling requests and perform crawl at maximum of
         <input name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[PPM]#"> Pages Per Minute (minimum is 1, low system load at PPM <= 30)
     </td>
   </tr><tr valign="top" class="TableCellDark">
-    <td width="10%">
+    <td class=small width="10%">
         <input type="radio" name="dcr" value="acceptCrawlDenied" align="top" #(acceptCrawlDeniedChecked)#::checked#(/acceptCrawlDeniedChecked)#>
-    </td><td>
+    </td><td class=small>
         Do not accept remote crawling requests (please set this only if you cannot accept to crawl only one page per minute; see option above)</td>
     </td>
   </tr><tr valign="top" class="TableCellLight">
@@ -210,6 +212,14 @@ Continue crawling.
 </form>
 <br>
 #(/refreshbutton)#
+<br>
+<form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+#(crawler-paused)#
+<input type="submit" name="continuecrawlqueue" value="continue crawling">
+::
+<input type="submit" name="pausecrawlqueue" value="pause crawling">
+#(/crawler-paused)#
+</form>
 <b id="crawlingProfiles">Crawl Profile List:</b><br>
 <table border="0" cellpadding="2" cellspacing="1" width="100%">
   <tr class="TableHeader">
@@ -236,6 +246,28 @@ Continue crawling.
 #{/crawlProfiles}#
 </table>
 <br>
+<b id="crawlingStarts">Other Peer Crawl Starts (recently started with remote indexing; this is a YaCyNews Service):</b><br>
+<table border="0" cellpadding="2" cellspacing="1" width="100%">
+  <tr class="TableHeader">
+    <td class="small"><b>Start Time</b></td>
+    <td class="small"><b>Peer Name</b></td>
+    <td class="small"><b>Start URL</b></td>
+    <td class="small"><b>Intention/Description</b></td>
+    <td class="small"><b>Depth</b></td>
+    <td class="small"><b>Accept '?'</b></td>
+  </tr>
+#{otherCrawlStart}#
+  <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+    <td class="small">#[cre]#</td>
+    <td class="small">#[peername]#</td>
+    <td class="small"><a class="small" href="#[startURL]#">#[startURL]#</a></td>
+    <td class="small">#[intention]#</td>
+    <td class="small">#[generalDepth]#</td>
+    <td class="small">#(crawlingQ)#no::yes#(/withQuery)#</td>
+  </tr>
+#{/otherCrawlStart}#
+</table>
+<br>
 <b id="remoteCrawlPeers">Remote Crawling Peers:</b>&nbsp;
 #(remoteCrawlPeers)#
 No remote crawl peers availible.<br>
@@ -256,14 +288,6 @@ No remote crawl peers availible.<br>
 </tr>
 </table>
 #(/remoteCrawlPeers)#
-<br>
-<form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-#(crawler-paused)#
-<input type="submit" name="continuecrawlqueue" value="continue crawling">
-::
-<input type="submit" name="pausecrawlqueue" value="pause crawling">
-#(/crawler-paused)#
-</form>
 </p>
 
 #[footer]#

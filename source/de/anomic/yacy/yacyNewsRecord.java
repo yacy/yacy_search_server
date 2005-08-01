@@ -145,4 +145,8 @@ public class yacyNewsRecord {
     public Map attributes() {
         return attributes;
     }
+    
+    public static void main(String[] args) {
+        System.out.println((new yacyNewsRecord(args[0])).toString());
+    }
 }

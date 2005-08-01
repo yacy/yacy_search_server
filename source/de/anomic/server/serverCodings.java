@@ -296,7 +296,7 @@ public final class serverCodings {
     
     public static void main(String[] s) {
 	serverCodings b64 = new serverCodings(true);
-	if (s.length == 0) {System.out.println("usage: -[ec|dc|es|ds] <arg>"); System.exit(0);}
+	if (s.length == 0) {System.out.println("usage: -[ec|dc|es|ds|s2m] <arg>"); System.exit(0);}
 	if (s[0].equals("-ec")) {
 	    // generate a b64 encoding from a given cardinal
 	    System.out.println(b64.encodeBase64Long(Long.parseLong(s[1]), 4));
@@ -312,6 +312,10 @@ public final class serverCodings {
 	if (s[0].equals("-ds")) {
 	    // generate a b64 decoding from a given string
 	    System.out.println(b64.decodeBase64String(s[1]));
+	}
+	if (s[0].equals("-s2m")) {
+	    // generate a b64 decoding from a given string
+	    System.out.println(string2map(s[1]).toString());
 	}
     }
 

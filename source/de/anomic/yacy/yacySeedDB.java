@@ -459,6 +459,17 @@ public class yacySeedDB {
         return get(hash, seedPassiveDB);
     }
         
+    public yacySeed getPotential(String hash) {
+        return get(hash, seedPotentialDB);
+    }
+    
+    public yacySeed get(String hash) {
+        yacySeed seed = getConnected(hash);
+        if (seed == null) seed = getDisconnected(hash);
+        if (seed == null) seed = getPotential(hash);
+        return seed;
+    }
+    
     public yacySeed lookupByName(String peerName) {
         // reads a seed by searching by name
         

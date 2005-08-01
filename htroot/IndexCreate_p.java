@@ -45,6 +45,7 @@
 
 import java.io.File;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -72,6 +73,7 @@ import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacyNewsPool;
 
 public class IndexCreate_p {
     
@@ -168,6 +170,7 @@ public class IndexCreate_p {
                                     m.remove("storeHTCache");
                                     m.remove("generalFilter");
                                     m.remove("specificFilter");
+                                    m.put("intention", ((String) post.get("intention", "")));
                                     yacyCore.newsPool.publishMyNews(new yacyNewsRecord("crwlstrt", m));
                                 }
                                 
@@ -353,6 +356,35 @@ public class IndexCreate_p {
         }
         //}catch(IOException e){};
         prop.put("crawlProfiles", count);
+        
+        
+        // create other peer crawl table using YaCyNews
+        int availableNews = yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB);
+        int showedCrawl = 0;
+        yacyNewsRecord record;
+        yacySeed peer;
+        String peername;
+        try {
+            for (int c = 0; c < availableNews; c++) {
+                record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, c);
+                if (record.category().equals("crwlstrt")) {
+                    peer = yacyCore.seedDB.get(record.originator());
+                    if (peer == null) peername = record.originator(); else peername = peer.getName();
+                    prop.put("otherCrawlStart_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
+                    prop.put("otherCrawlStart_" + showedCrawl + "_cre", record.created());
+                    prop.put("otherCrawlStart_" + showedCrawl + "_peername", peername);
+                    prop.put("otherCrawlStart_" + showedCrawl + "_startURL", record.attributes().get("startURL"));
+                    prop.put("otherCrawlStart_" + showedCrawl + "_intention", record.attributes().get("intention"));
+                    prop.put("otherCrawlStart_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
+                    prop.put("otherCrawlStart_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? 1 : 0);
+                    showedCrawl++;
+                    if (showedCrawl > 20) break;
+                }
+                
+            }
+        } catch (IOException e) {}
+        prop.put("otherCrawlStart", showedCrawl);
+
         
         // remote crawl peers
         if (yacyCore.seedDB == null) {
