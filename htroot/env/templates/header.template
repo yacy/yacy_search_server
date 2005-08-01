@@ -53,6 +53,7 @@
   <tr><td class="MenuHeader">&nbsp;Communication / Publication</td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/www/" class="MenuItemLink">Home&nbsp;Page</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/share/" class="MenuItemLink">File&nbsp;Share</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/Wiki.html" class="MenuItemLink">Wiki</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Messages_p.html" class="MenuItemLink">Messages</a>&nbsp;<img border="0" src="/env/grafics/notifier.gif" align="bottom"></td></tr>
   <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/EditProfile_p.html" class="MenuItemLink">Personal Profile</a></td></tr>
   <tr><td class="MenuSpacer"></td></tr>
@@ -76,9 +77,11 @@
   <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy.net/yacy/Download.html" class="MenuItemLink">Download YaCy</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy.net/yacy/Contact.html" class="MenuItemLink">Contact</a></td></tr>
   <tr><td class="MenuSpacer"></td></tr>
-  
+
+  <!--
   <tr><td class="MenuHeader">&nbsp;Experimental</b></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/Lab.html" class="MenuItemLink">The Lab</a></td></tr>
+  -->
 </table>
 </td><td width="6" valign="top"></td><td valign="top">
 <table width="100%" border="0" cellspacing="0" cellpadding="0">

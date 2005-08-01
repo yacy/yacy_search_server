@@ -224,7 +224,7 @@ public class Network {
                     if (availableNews > 500) availableNews = 500;
                     yacyNewsRecord record;
                     try {
-                        for (int c = 0; c < availableNews; c++) {
+                        for (int c = availableNews - 1; c >= 0; c--) {
                             record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, c);
                             if (record.category().equals("prfleupd")) {
                                 updatedProfile.add(record.originator());
