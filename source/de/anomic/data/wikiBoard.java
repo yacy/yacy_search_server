@@ -58,7 +58,7 @@ import de.anomic.server.serverCodings;
 
 public class wikiBoard {
     
-    private static final int keyLength = 64;
+    public  static final int keyLength = 64;
     private static final String dateFormat = "yyyyMMddHHmmss";
     private static final int recordSize = 512;
 
@@ -278,6 +278,7 @@ public class wikiBoard {
     private entry read(String key, kelondroMap base) {
 	try {
             key = normalize(key);
+            if (key.length() > keyLength) key = key.substring(0, keyLength);
 	    Map record = base.get(key);
 	    if (record == null)
 		return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
