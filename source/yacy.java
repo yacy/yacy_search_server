@@ -38,31 +38,6 @@
 //the intact and unchanged copyright notice.
 //Contributions and changes to the program code must be marked as such.
 
-/*
- This is the main class of the proxy.
- From here, several threads are started:
- 
- - one single instance of the plasmaSwitchboard is generated,
- which itself starts a thread with a plasmaHTMLCache object. This object simply counts
- files sizes in the cache and terminates then.
- It also generates a plasmaCrawlerLoader object, which may itself start
- some more httpc-calling threads to load web pages. They terminate automatically when a page has loaded
- - one serverCore - thread is started, which implements a multi-threaded server.
- The process may start itself many more processes that handle connections.
- - finally, all idle-dependent processes are written in a queue in plasmaSwitchboard
- which are worked off inside an idle-sensitive loop of the main process. (here)
- 
- On termination, the following must be done:
- - stop feeding of the crawling process because it othervise fills the indexing queue.
- - say goodbye to connected peers and disable new connections. Don't wait for success.
- - first terminate the serverCore thread. This prevents that new cache objects are queued
- - wait that the plasmaHTMLCache terminates (it should be normal that this process already has terminated)
- - then wait for termination of all loader process of the plasmaCrawlerLoader
- - work off the indexing and cache storage queue. These values are inside a RAM cache and would be lost othervise
- - write all settings
- - terminate
- */
-
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -108,16 +83,59 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyCore;
 
+/**
+* This is the main class of the proxy. Several threads are started from here:
+* <ul>
+* <li>one single instance of the plasmaSwitchboard is generated, which itself
+* starts a thread with a plasmaHTMLCache object. This object simply counts
+* files sizes in the cache and terminates them. It also generates a
+* plasmaCrawlerLoader object, which may itself start some more httpc-calling
+* threads to load web pages. They terminate automatically when a page has
+* loaded.
+* <li>one serverCore - thread is started, which implements a multi-threaded
+* server. The process may start itself many more processes that handle
+* connections.
+* <li>finally, all idle-dependent processes are written in a queue in
+* plasmaSwitchboard which are worked off inside an idle-sensitive loop of the
+* main process. (here)
+* </ul>
+*
+* On termination, the following must be done:
+* <ul>
+* <li>stop feeding of the crawling process because it othervise fills the
+* indexing queue.
+* <li>say goodbye to connected peers and disable new connections. Don't wait for
+* success.
+* <li>first terminate the serverCore thread. This prevents that new cache
+* objects are queued.
+* <li>wait that the plasmaHTMLCache terminates (it should be normal that this
+* process already has terminated).
+* <li>then wait for termination of all loader process of the
+* plasmaCrawlerLoader.
+* <li>work off the indexing and cache storage queue. These values are inside a
+* RAM cache and would be lost otherwise.
+* <li>write all settings.
+* <li>terminate.
+* </ul>
+*/
 public final class yacy {
-    
+
     // static objects
     private static String vString = "@REPL_VERSION@";
     private static float version = (float) 0.1;
-    
+
     private static final String vDATE   = "@REPL_DATE@";
     private static final String copyright = "[ YACY Proxy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
-    
+
+    /**
+    * Convert the combined versionstring into a pretty string.
+    * FIXME: Why is this so complicated?
+    *
+    * @param s Combined version string
+    * @return Pretty string where version and svn-Version are separated by an
+    * slash
+    */
     public static String combinedVersionString2PrettyString(String s) {
         long svn;
         try {svn = (long) (100000000.0 * Double.parseDouble(s));} catch (NumberFormatException ee) {svn = 0;}
@@ -130,18 +148,32 @@ public final class yacy {
         while (svnStr.length() < 5) svnStr = "0" + svnStr;
         return vStr + "/" + svnStr;
     }
-    
+
+    /**
+    * Combines the version of the proxy with the versionnumber from svn to a
+    * combined Version
+    *
+    * @param version Current given version for this proxy.
+    * @param svn Current version given from svn.
+    * @return String with the combined version
+    */
     public static float versvn2combinedVersion(float version, int svn) {
         return (float) (((double) version * 100000000.0 + ((double) svn)) / 100000000.0);
     }
-    
+
+    /**
+    * Starts up the whole application. Sets up all datastructures and starts
+    * the main threads.
+    *
+    * @param homePath Root-path where all information is to be found.
+    */
     private static void startup(String homePath) {
         long startup = yacyCore.universalTime();
         try {
             // start up
             System.out.println(copyright);
             System.out.println(hline);
-            
+
             // check java version
             try {
                 String[] check = "a,b".split(","); // split needs java 1.4
@@ -150,7 +182,7 @@ public final class yacy {
                 Thread.currentThread().sleep(3000);
                 System.exit(-1);
             }
-            
+
             // setting up logging
             try {
                 serverLog.configureLogging(new File(homePath, "yacy.logging"));
@@ -160,20 +192,20 @@ public final class yacy {
             }
             serverLog.logSystem("STARTUP", copyright);
             serverLog.logSystem("STARTUP", hline);
-            
+
             serverLog.logSystem("STARTUP", "java version " + System.getProperty("java.version", "no-java-version"));
             serverLog.logSystem("STARTUP", "Application Root Path: " + homePath.toString());
-            
+
             // create data folder
             File dataFolder = new File(homePath, "DATA");
             if (!(dataFolder.exists())) dataFolder.mkdir();
-            
+
             plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
-            
+
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
             sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
-            
+
             // if we are running an SVN version, we try to detect the used svn revision now ...
             Properties buildProp = new Properties();
             File buildPropFile = null;
@@ -183,7 +215,7 @@ public final class yacy {
             } catch (Exception e) {
                 System.err.println("ERROR: " + buildPropFile.toString() + " not found in settings path");
             }
-            
+
             try {
                 if (buildProp.containsKey("releaseNr")) {
                     // this normally looks like this: $Revision: 181 $
@@ -202,32 +234,32 @@ public final class yacy {
             } catch (Exception e) {
                 System.err.println("Unable to determine the currently used SVN revision number.");
             }
-            
+
             sb.setConfig("version", "" + version);
             sb.setConfig("vdate", vDATE);
             sb.setConfig("applicationRoot", homePath);
             sb.setConfig("startupTime", "" + startup);
             serverLog.logSystem("STARTUP", "YACY Version: " + version + ", Built " + vDATE);
             yacyCore.latestVersion = (float) version;
-            
+
             // read environment
             //new
             int port          = Integer.parseInt(sb.getConfig("port", "8080"));
             int timeout       = Integer.parseInt(sb.getConfig("httpdTimeout", "60000"));
             if (timeout < 60000) timeout = 60000;
             int maxSessions   = Integer.parseInt(sb.getConfig("httpdMaxSessions", "100"));
-            
+
             // create some directories
             File htRootPath = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot"));
             File htDocsPath = new File(sb.getRootPath(), sb.getConfig("htDocsPath", "DATA/HTDOCS"));
             File htTemplatePath = new File(sb.getRootPath(), sb.getConfig("htTemplatePath","htdocs"));
-            
+
             // create default notifier picture
             if (!((new File(htRootPath, "env/pictures/notifier.gif")).exists())) try {
                 serverFileUtils.copy(new File(htRootPath, "env/pictures/empty.gif"), 
                                      new File(htRootPath, "env/pictures/notifier.gif"));
             } catch (IOException e) {}
-            
+
             if (!(htDocsPath.exists())) htDocsPath.mkdir();
             File htdocsDefaultReadme = new File(htDocsPath, "readme.txt");
             if (!(htdocsDefaultReadme.exists())) try {serverFileUtils.write((
@@ -245,10 +277,10 @@ public final class yacy {
                     "\r\n").getBytes(), htdocsDefaultReadme);} catch (IOException e) {
                         System.out.println("Error creating htdocs readme: " + e.getMessage());
                     }
-            
+
             File wwwDefaultPath = new File(htDocsPath, "www");
             if (!(wwwDefaultPath.exists())) wwwDefaultPath.mkdir();
-            
+
             File wwwDefaultClass = new File(wwwDefaultPath, "welcome.class");
             //if ((!(wwwDefaultClass.exists())) || (wwwDefaultClass.length() != (new File(htRootPath, "htdocsdefault/welcome.class")).length())) try {
             if((new File(htRootPath, "htdocsdefault/welcome.java")).exists())
@@ -256,10 +288,10 @@ public final class yacy {
             serverFileUtils.copy(new File(htRootPath, "htdocsdefault/welcome.class"), wwwDefaultClass);
             serverFileUtils.copy(new File(htRootPath, "htdocsdefault/welcome.html"), new File(wwwDefaultPath, "welcome.html"));
             //} catch (IOException e) {}
-            
+
             File shareDefaultPath = new File(htDocsPath, "share");
             if (!(shareDefaultPath.exists())) shareDefaultPath.mkdir();
-            
+
             File shareDefaultClass = new File(shareDefaultPath, "dir.class");
             //if ((!(shareDefaultClass.exists())) || (shareDefaultClass.length() != (new File(htRootPath, "htdocsdefault/dir.class")).length())) try {
             if((new File(htRootPath, "htdocsdefault/dir.java")).exists())
@@ -267,8 +299,8 @@ public final class yacy {
             serverFileUtils.copy(new File(htRootPath, "htdocsdefault/dir.class"), shareDefaultClass);
             serverFileUtils.copy(new File(htRootPath, "htdocsdefault/dir.html"), new File(shareDefaultPath, "dir.html"));
             //} catch (IOException e) {}
-            
-            
+
+
             // set preset accounts/passwords
             String acc;
             if ((acc = sb.getConfig("proxyAccount", "")).length() > 0) {
@@ -283,7 +315,7 @@ public final class yacy {
                 sb.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
                 sb.setConfig("adminAccount", "");
             }
-            
+
             // fix unsafe old passwords
             if ((acc = sb.getConfig("proxyAccountBase64", "")).length() > 0) {
                 sb.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
@@ -305,7 +337,7 @@ public final class yacy {
                 sb.setConfig("downloadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
                 sb.setConfig("downloadAccountBase64", "");
             }
-            
+
             // start main threads
             try {
                 httpd protocolHandler = new httpd(sb, new httpdFileHandler(sb), new httpdProxyHandler(sb));
@@ -325,7 +357,7 @@ public final class yacy {
                     // first start the server
                     sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
                     //server.start();
-                    
+
                     // open the browser window
                     boolean browserPopUpTrigger = sb.getConfig("browserPopUpTrigger", "true").equals("true");
                     if (browserPopUpTrigger) {
@@ -333,11 +365,11 @@ public final class yacy {
                         String  browserPopUpApplication = sb.getConfig("browserPopUpApplication", "netscape");
                         serverSystem.openBrowser("http://localhost:" + port + "/" + browserPopUpPage, browserPopUpApplication);
                     }
-                    
+
                     //Copy the shipped locales into DATA
                     File localesPath = new File(sb.getRootPath(), sb.getConfig("localesPath", "DATA/LOCALE"));
                     File defaultLocalesPath = new File(sb.getRootPath(), "locales");
-                    
+
                     try{
                         File[] defaultLocales = defaultLocalesPath.listFiles();
                         localesPath.mkdirs();
@@ -349,7 +381,7 @@ public final class yacy {
                     }catch(NullPointerException e){
                         serverLog.logError("STARTUP", "Nullpointer Exception while copying the default Locales");
                     }
-                    
+
                     //regenerate Locales from Translationlist, if needed
                     String lang = sb.getConfig("htLocaleSelection", "");
                     if(! lang.equals("") && ! lang.equals("default") ){ //locale is used
@@ -361,7 +393,7 @@ public final class yacy {
                         }catch(IOException e){
                             //Error
                         }
-                        
+
                         try{ //seperate try, because we want this, even when the File "version2 does not exist.
                             if(! currentRev.equals(sb.getConfig("svnRevision", "")) ){ //is this another version?!
                                 File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
@@ -377,19 +409,19 @@ public final class yacy {
                             //Error
                         }
                     }
-                    
+
                     // registering shutdown hook
                     serverLog.logSystem("STARTUP", "Registering Shutdown Hook");
                     Runtime run = Runtime.getRuntime();
                     run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
-                    
+
                     // wait for server shutdown
                     try {
                         sb.waitForShutdown();
                     } catch (Exception e) {
                         serverLog.logError("MAIN CONTROL LOOP", "PANIK: " + e.getMessage(),e);
                     }
-                    
+
                     // shut down
                     serverLog.logSystem("SHUTDOWN", "caught termination signal");
                     server.terminate(false);
@@ -400,7 +432,7 @@ public final class yacy {
                     } catch (IOException ee) {
                         serverLog.logSystem("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
                     }
-                    
+
                     // idle until the processes are down
                     while (server.isAlive()) {
                         Thread.currentThread().sleep(2000); // wait a while
@@ -421,19 +453,27 @@ public final class yacy {
             System.exit(0);
         } catch (Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
     }
-    
-    
-    
+
+    /**
+    * Loads the configuration from the data-folder.
+    * FIXME: Why is this called over and over again from every method, instead
+    * of setting the configurationdata once for this class in main?
+    *
+    * @param mes Where are we called from, so that the errormessages can be
+    * more descriptive.
+    * @param homePath Root-path where all the information is to be found.
+    * @return Properties read from the configurationfile.
+    */
     private static Properties configuration(String mes, String homePath) {
         serverLog.logSystem(mes, "Application Root Path: " + homePath.toString());
-        
+
         // read data folder
         File dataFolder = new File(homePath, "DATA");
         if (!(dataFolder.exists())) {
             serverLog.logError(mes, "Application was never started or root path wrong.");
             System.exit(-1);
         }
-        
+
         Properties config = new Properties();
         try {
             config.load(new FileInputStream(new File(homePath, "DATA/SETTINGS/httpProxy.conf")));
@@ -444,31 +484,37 @@ public final class yacy {
             serverLog.logError(mes, "could not read configuration file.");
             System.exit(-1);
         }
-        
+
         return config;
     }
-    
+
+    /**
+    * Call the shutdown-page from yacy to tell it to shut down. This method is
+    * called if you start yacy with the argument -shutdown.
+    *
+    * @param homePath Root-path where all the information is to be found.
+    */
     static void shutdown(String homePath) {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
-        
+
         Properties config = configuration("REMOTE-SHUTDOWN", homePath);
-        
+
         // read port
         int port = Integer.parseInt((String) config.get("port"));
-        
+
         // read password
         String encodedPassword = (String) config.get("adminAccountBase64MD5");
         if (encodedPassword == null) encodedPassword = ""; // not defined
-        
+
         // send 'wget' to web interface
         httpHeader requestHeader = new httpHeader();
         requestHeader.put("Authorization", "realm=" + encodedPassword); // for http-authentify
         try {
             httpc con = httpc.getInstance("localhost", port, 10000, false);
             httpc.response res = con.GET("Steering.html?shutdown=", requestHeader);
-            
+
             // read response
             if (res.status.startsWith("2")) {
                 serverLog.logSystem("REMOTE-SHUTDOWN", "YACY accepted shutdown command.");
@@ -484,23 +530,33 @@ public final class yacy {
             serverLog.logError("REMOTE-SHUTDOWN", "could not establish connection to YACY socket: " + e.getMessage());
             System.exit(-1);
         }
-        
+
         // finished
         serverLog.logSystem("REMOTE-SHUTDOWN", "SUCCESSFULLY FINISHED remote-shutdown:");
         serverLog.logSystem("REMOTE-SHUTDOWN", "YACY will terminate after working off all enqueued tasks.");
     }
-    
+
+    /**
+    * This method gets all found words and outputs a statistic about the score
+    * of the words. The output of this method can be used to create stop-word
+    * lists. This method will be called if you start yacy with the argument
+    * -genwordstat.
+    * FIXME: How can stop-word list be created from this output? What type of
+    * score is output?
+    *
+    * @param homePath Root-Path where all the information is to be found.
+    */
     private static void genWordstat(String homePath) {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
-        
+
         Properties config = configuration("GEN-WORDSTAT", homePath);
-        
+
         // load words
         serverLog.logInfo("GEN-WORDSTAT", "loading words...");
         HashMap words = loadWordMap(new File(homePath, "yacy.words"));
-        
+
         // find all hashes
         serverLog.logInfo("GEN-WORDSTAT", "searching all word-hash databases...");
         File dbRoot = new File(homePath, config.getProperty("dbPath"));
@@ -513,7 +569,7 @@ public final class yacy {
             h = f.getName().substring(0, plasmaURL.urlHashLength);
             hs.addScore(h, (int) f.length());
         }
-        
+
         // list the hashes in reverse order
         serverLog.logInfo("GEN-WORDSTAT", "listing words in reverse size order...");
         String w;
@@ -524,11 +580,20 @@ public final class yacy {
             if (w == null) System.out.print("# " + h); else System.out.print(w);
             System.out.println(" - " + hs.getScore(h));
         }
-        
+
         // finished
         serverLog.logSystem("GEN-WORDSTAT", "FINISHED");
     }
-    
+
+    /**
+    * Migrates the PLASMA WORDS structure to the assortment cache if possible.
+    * This method will be called if you start yacy with the argument
+    * -migratewords.
+    * Caution: This might take a long time to finish. Don't interrupt it!
+    * FIXME: Shouldn't this method be private?
+    *
+    * @param homePath Root-path where all the information is to be found.
+    */
     public static void migrateWords(String homePath) {
         // run with "java -classpath classes yacy -migratewords"
         try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
@@ -561,7 +626,14 @@ public final class yacy {
             e.printStackTrace();
         }
     }
-    
+
+    /**
+    * Reads all words from the given file and creates a hashmap, where key is
+    * the plasma word hash and value is the word itself.
+    *
+    * @param wordlist File where the words are stored.
+    * @return HashMap with the hash-word - relation.
+    */
     private static HashMap loadWordMap(File wordlist) {
         // returns a hash-word - Relation
         HashMap wordmap = new HashMap();
@@ -573,7 +645,14 @@ public final class yacy {
         } catch (IOException e) {}
         return wordmap;
     }
-    
+
+    /**
+    * Reads all words from the given file and creats as HashSet, which contains
+    * all found words.
+    *
+    * @param wordlist File where the words are stored.
+    * @return HashSet with the words
+    */
     private static HashSet loadWordSet(File wordlist) {
         // returns a set of words
         HashSet wordset = new HashSet();
@@ -585,13 +664,22 @@ public final class yacy {
         } catch (IOException e) {}
         return wordset;
     }
-    
+
+    /**
+    * Cleans a wordlist in a file according to the length of the words. The
+    * file with the given filename is read and then only the words in the given
+    * length-range are written back to the file.
+    *
+    * @param wordlist Name of the file the words are stored in.
+    * @param minlength Minimal needed length for each word to be stored.
+    * @param maxlength Maximal allowed length for each word to be stored.
+    */
     private static void cleanwordlist(String wordlist, int minlength, int maxlength) {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
         serverLog.logSystem("CLEAN-WORDLIST", "START");
-        
+
         String word;
         TreeSet wordset = new TreeSet();
         int count = 0;
@@ -607,7 +695,7 @@ public final class yacy {
                 count++;
             }
             br.close();
-            
+
             if (wordset.size() != count) {
                 count = count - wordset.size();
                 BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(wordlist)));
@@ -625,24 +713,30 @@ public final class yacy {
             serverLog.logError("CLEAN-WORDLIST", "ERROR: " + e.getMessage());
             System.exit(-1);
         }
-        
+
         // finished
         serverLog.logSystem("CLEAN-WORDLIST", "FINISHED");
     }
-    
+
+    /**
+    * Gets all words from the stopword-list and removes them in the databases.
+    * FIXME: Really? Don't know if I read this correctly.
+    *
+    * @param homePath Root-Path where all information is to be found.
+    */
     private static void deleteStopwords(String homePath) {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
         serverLog.logSystem("DELETE-STOPWORDS", "START");
-        
+
         Properties config = configuration("DELETE-STOPWORDS", homePath);
         File dbRoot = new File(homePath, config.getProperty("dbPath"));
-        
+
         // load stopwords
         HashSet stopwords = loadWordSet(new File(homePath, "yacy.stopwords"));
         serverLog.logInfo("DELETE-STOPWORDS", "loaded stopwords, " + stopwords.size() + " entries in list, starting scanning");
-        
+
         // find all hashes
         File f;
         String w;
@@ -661,14 +755,19 @@ public final class yacy {
                 }
             }
         }
-        
+
         serverLog.logInfo("DELETE-STOPWORDS", "TOTALS: deleted " + count + " indexes; " + (totalamount / 1024) + " kbytes");
-        
+
         // finished
         serverLog.logSystem("DELETE-STOPWORDS", "FINISHED");
     }
-    
-    // application wrapper
+
+    /**
+    * Main-method which is started by java. Checks for special arguments or
+    * starts up the application.
+    *
+    * @param args Given arguments from the command line.
+    */
     public static void main(String args[]) {
         String applicationRoot = System.getProperty("user.dir");
         //System.out.println("args.length=" + args.length);
@@ -709,24 +808,28 @@ public final class yacy {
     }
 }
 
+/**
+* This class is a helper class whose instance is started, when the java virtual
+* machine shuts down. Signals the plasmaSwitchboard to shut down.
+*/
 class shutdownHookThread extends Thread {
     private plasmaSwitchboard sb = null;
     private Thread mainThread = null;
-    
+
     public shutdownHookThread(Thread mainThread, plasmaSwitchboard sb) {
         this.sb = sb;
         this.mainThread = mainThread;
     }
-    
+
     public void run() {
-        
+
         try {
             if (!this.sb.isTerminated()) {
                 serverLog.logSystem("SHUTDOWN","Shutdown via shutdown hook.");
-                
+
                 // sending the yacy main thread a shutdown signal
                 this.sb.terminate();
-                
+
                 // waiting for the yacy thread to finish execution
                 this.mainThread.join();
             }
