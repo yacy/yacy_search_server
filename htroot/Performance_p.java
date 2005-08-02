@@ -1,47 +1,47 @@
-// Performace_p.java
-// -----------------------
-// part of YaCy
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004, 2005
-// last major change: 16.02.2005
+//Performace_p.java
+//-----------------------
+//part of YaCy
+//(C) by Michael Peter Christen; mc@anomic.de
+//first published on http://www.anomic.de
+//Frankfurt, Germany, 2004, 2005
+//last major change: 16.02.2005
 //
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
+//This program is free software; you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation; either version 2 of the License, or
+//(at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
+//Using this software in any meaning (reading, learning, copying, compiling,
+//running) means that you agree that the Author(s) is (are) not responsible
+//for cost, loss of data or any harm that may be caused directly or indirectly
+//by usage of this softare or this documentation. The usage of this software
+//is on your own risk. The installation and usage (starting/running) of this
+//software may allow other people or application to access your computer and
+//any attached devices and is highly dependent on the configuration of the
+//software which must be done by the user of the software; the author(s) is
+//(are) also not responsible for proper configuration and usage of the
+//software, even if provoked by documentation provided together with
+//the software.
 //
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
+//Any changes to this file according to the GPL as documented in the file
+//gpl.txt aside this file in the shipment you received can be done to the
+//lines that follows this copyright notice here, but changes must not be
+//done inside the copyright notive above. A re-distribution must contain
+//the intact and unchanged copyright notice.
+//Contributions and changes to the program code must be marked as such.
 
-// You must compile this file with
-// javac -classpath .:../classes Network.java
-// if the shell's current path is HTROOT
+//You must compile this file with
+//javac -classpath .:../classes Network.java
+//if the shell's current path is HTROOT
 
 import java.util.Iterator;
 import java.util.Map;
@@ -70,7 +70,7 @@ public class Performance_p {
         Iterator threads = switchboard.threadNames();
         String threadName;
         serverThread thread;
-         
+        
         // calculate totals
         long blocktime_total = 0, sleeptime_total = 0, exectime_total = 0;
         while (threads.hasNext()) {
@@ -127,10 +127,10 @@ public class Performance_p {
                 busysleep = Long.parseLong((String) post.get(threadName + "_busysleep",  "100"));
                 memprereq = Long.parseLong((String) post.get(threadName + "_memprereq",    "0"));
                 
-		// check values to prevent short-cut loops
-		if (idlesleep < 1000) idlesleep = 1000;
+                // check values to prevent short-cut loops
+                if (idlesleep < 1000) idlesleep = 1000;
                 if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
-            
+                
                 // on-the-fly re-configuration
                 switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
                 switchboard.setConfig(threadName + "_idlesleep", idlesleep);
@@ -142,8 +142,8 @@ public class Performance_p {
                 busysleep = Long.parseLong(d((String) defaultSettings.get(threadName + "_busysleep"),  "100"));
                 memprereq = Long.parseLong(d((String) defaultSettings.get(threadName + "_memprereq"),    "0"));
                 
-		// check values to prevent short-cut loops
-		if (idlesleep < 1000) idlesleep = 1000;
+                // check values to prevent short-cut loops
+                if (idlesleep < 1000) idlesleep = 1000;
                 if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
                 if ((threadName.equals("50_localcrawl")) && (busysleep < 100)) busysleep = 100;
                 if ((threadName.equals("61_globalcrawltrigger")) && (busysleep < 100)) busysleep = 100;

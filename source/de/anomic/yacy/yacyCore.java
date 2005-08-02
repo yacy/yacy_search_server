@@ -98,7 +98,7 @@ public class yacyCore {
 
     // class variables
     private int        lastSeedUpload_seedDBSize = 0;
-    public static long lastSeedUpload_timeStamp = System.currentTimeMillis();
+    public long lastSeedUpload_timeStamp = System.currentTimeMillis();
     private String lastSeedUpload_myPeerType = "";    
     private String lastSeedUpload_myIP = "";
     
@@ -238,7 +238,7 @@ public class yacyCore {
                 (this.lastSeedUpload_myIP.equals(seedDB.mySeed.get("IP", "127.0.0.1"))) &&
                 (this.lastSeedUpload_seedDBSize == seedDB.sizeConnected()) &&
                 (canReachMyself()) &&
-                (System.currentTimeMillis() - yacyCore.lastSeedUpload_timeStamp < 1000*60*60*24) &&
+                (System.currentTimeMillis() - this.lastSeedUpload_timeStamp < 1000*60*60*24) &&
                 (seedDB.mySeed.isPrincipal())
         ) {
             log.logDebug("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
@@ -260,14 +260,7 @@ public class yacyCore {
                     this.switchboard.setConfig("seedUploadMethod","File");                
             }
             // we want to be a principal...
-            saveSeedList();
-            
-            this.lastSeedUpload_seedDBSize = seedDB.sizeConnected();
-            this.lastSeedUpload_timeStamp = System.currentTimeMillis();
-            
-            this.lastSeedUpload_myIP = seedDB.mySeed.get("IP", "127.0.0.1");  
-            this.lastSeedUpload_myPeerType = seedDB.mySeed.get("PeerType", yacySeed.PEERTYPE_JUNIOR);
-            
+            saveSeedList();            
         } else {
             if (seedUploadMethod.equals("")) this.switchboard.setConfig("seedUploadMethod","none");
             log.logDebug("yacyCore.publishSeedList: No uploading method configured");
@@ -629,91 +622,99 @@ public class yacyCore {
         return saveSeedList(this.switchboard);
     }
     
-    public static String saveSeedList(serverSwitch sb) {
-        // return an error if this is not successful, and NULL if everything is fine
-        String logt;
-        
-        // be shure that we have something to say
-        if (seedDB.mySeed.getAddress() == null) {
-            String errorMsg = "We have no valid IP address until now";
-            log.logWarning("SaveSeedList: " + errorMsg);
-            return errorMsg;
-        }
-        
-        // getting the configured seed uploader
-        String seedUploadMethod = sb.getConfig("seedUploadMethod","");
-        
-        // for backward compatiblity ....
-        if (
-                (seedUploadMethod.equalsIgnoreCase("Ftp")) || 
-                ((seedUploadMethod.equals("")) &&
-                 (sb.getConfig("seedFTPPassword","").length() > 0))
-        ) {
-            seedUploadMethod = "Ftp";
-            sb.setConfig("seedUploadMethod",seedUploadMethod);
-        } else if (
-                (seedUploadMethod.equalsIgnoreCase("File")) ||
-                ((seedUploadMethod.equals("")) &&
-                 (sb.getConfig("seedFilePath", "").length() > 0))                
-        ) {
-            seedUploadMethod = "File";
-            sb.setConfig("seedUploadMethod",seedUploadMethod);            
-        }
-
-        //  determine the seed uploader that should be used ...       
-        if (seedUploadMethod.equalsIgnoreCase("none")) return "no uploader specified";
-
-        yacySeedUploader uploader = getSeedUploader(seedUploadMethod);
-        if (uploader == null) {
-            String errorMsg = "Unable to get the proper uploader-class for seed uploading method '" + seedUploadMethod + "'.";
-            log.logWarning("SaveSeedList: " + errorMsg);
-            return errorMsg;               
-        }
-        
-        // ensure that the seed file url is configured properly
-        URL seedURL;
-        try{
-            String seedURLStr = sb.getConfig("seedURL","");
-            if (seedURLStr.length() == 0) throw new MalformedURLException("The seed-file url must not be empty.");
-            if (!seedURLStr.toLowerCase().startsWith("http://")) throw new MalformedURLException("Unsupported protocol.");
-            seedURL = new URL(seedURLStr);
-        }catch(MalformedURLException e){
-            String errorMsg = "Malformed seed file URL '" + sb.getConfig("seedURL","") + "'. " + e.getMessage();
-            log.logWarning("SaveSeedList: " + errorMsg);            
-            return errorMsg;
-        }              
-        
-        // upload the seed-list using the configured uploader class
-        String prevStatus = seedDB.mySeed.get("PeerType", "junior");
-        if (prevStatus.equals("principal")) prevStatus = "senior";
-
+    public String saveSeedList(serverSwitch sb) {
         try {
-            seedDB.mySeed.put("PeerType", "principal"); // this information shall also be uploaded
+            // return an error if this is not successful, and NULL if everything is fine
+            String logt;
             
-            log.logDebug("SaveSeedList: Using seed uploading method '" + seedUploadMethod + "' for seed-list uploading." +
-                         "\n\tPrevious peerType is '" + seedDB.mySeed.get("PeerType", "junior") + "'.");
-            
-            //logt = seedDB.uploadCache(seedFTPServer, seedFTPAccount, seedFTPPassword, seedFTPPath, seedURL);
-            logt = seedDB.uploadCache(uploader,sb, seedDB, seedURL);
-            if (logt != null) {
-                if (logt.indexOf("Error") >= 0) {
-                    seedDB.mySeed.put("PeerType", prevStatus);
-                    String errorMsg = "SaveSeedList: seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6);
-                    log.logError(errorMsg);
-                    return errorMsg;
-                }
-                log.logInfo(logt);
+            // be shure that we have something to say
+            if (seedDB.mySeed.getAddress() == null) {
+                String errorMsg = "We have no valid IP address until now";
+                log.logWarning("SaveSeedList: " + errorMsg);
+                return errorMsg;
             }
             
-            // finally, set the principal status
-            sb.setConfig("yacyStatus","principal");
-            return null;
-        } catch (Exception e) {
-            seedDB.mySeed.put("PeerType", prevStatus);
-            sb.setConfig("yacyStatus", prevStatus);
-            String errorMsg = "SaveSeedList: Seed upload failed (IO error): " + e.getMessage();
-            log.logInfo(errorMsg);
-            return errorMsg;
+            // getting the configured seed uploader
+            String seedUploadMethod = sb.getConfig("seedUploadMethod","");
+            
+            // for backward compatiblity ....
+            if (
+                    (seedUploadMethod.equalsIgnoreCase("Ftp")) || 
+                    ((seedUploadMethod.equals("")) &&
+                            (sb.getConfig("seedFTPPassword","").length() > 0))
+            ) {
+                seedUploadMethod = "Ftp";
+                sb.setConfig("seedUploadMethod",seedUploadMethod);
+            } else if (
+                    (seedUploadMethod.equalsIgnoreCase("File")) ||
+                    ((seedUploadMethod.equals("")) &&
+                            (sb.getConfig("seedFilePath", "").length() > 0))                
+            ) {
+                seedUploadMethod = "File";
+                sb.setConfig("seedUploadMethod",seedUploadMethod);            
+            }
+            
+            //  determine the seed uploader that should be used ...       
+            if (seedUploadMethod.equalsIgnoreCase("none")) return "no uploader specified";
+            
+            yacySeedUploader uploader = getSeedUploader(seedUploadMethod);
+            if (uploader == null) {
+                String errorMsg = "Unable to get the proper uploader-class for seed uploading method '" + seedUploadMethod + "'.";
+                log.logWarning("SaveSeedList: " + errorMsg);
+                return errorMsg;               
+            }
+            
+            // ensure that the seed file url is configured properly
+            URL seedURL;
+            try{
+                String seedURLStr = sb.getConfig("seedURL","");
+                if (seedURLStr.length() == 0) throw new MalformedURLException("The seed-file url must not be empty.");
+                if (!seedURLStr.toLowerCase().startsWith("http://")) throw new MalformedURLException("Unsupported protocol.");
+                seedURL = new URL(seedURLStr);
+            }catch(MalformedURLException e){
+                String errorMsg = "Malformed seed file URL '" + sb.getConfig("seedURL","") + "'. " + e.getMessage();
+                log.logWarning("SaveSeedList: " + errorMsg);            
+                return errorMsg;
+            }              
+            
+            // upload the seed-list using the configured uploader class
+            String prevStatus = seedDB.mySeed.get("PeerType", "junior");
+            if (prevStatus.equals("principal")) prevStatus = "senior";
+            
+            try {
+                seedDB.mySeed.put("PeerType", "principal"); // this information shall also be uploaded
+                
+                log.logDebug("SaveSeedList: Using seed uploading method '" + seedUploadMethod + "' for seed-list uploading." +
+                        "\n\tPrevious peerType is '" + seedDB.mySeed.get("PeerType", "junior") + "'.");
+                
+                //logt = seedDB.uploadCache(seedFTPServer, seedFTPAccount, seedFTPPassword, seedFTPPath, seedURL);
+                logt = seedDB.uploadCache(uploader,sb, seedDB, seedURL);
+                if (logt != null) {
+                    if (logt.indexOf("Error") >= 0) {
+                        seedDB.mySeed.put("PeerType", prevStatus);
+                        String errorMsg = "SaveSeedList: seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6);
+                        log.logError(errorMsg);
+                        return errorMsg;
+                    }
+                    log.logInfo(logt);
+                }
+                
+                // finally, set the principal status
+                sb.setConfig("yacyStatus","principal");
+                return null;
+            } catch (Exception e) {
+                seedDB.mySeed.put("PeerType", prevStatus);
+                sb.setConfig("yacyStatus", prevStatus);
+                String errorMsg = "SaveSeedList: Seed upload failed (IO error): " + e.getMessage();
+                log.logInfo(errorMsg);
+                return errorMsg;
+            }
+        } finally {
+            this.lastSeedUpload_seedDBSize = seedDB.sizeConnected();
+            this.lastSeedUpload_timeStamp = System.currentTimeMillis();
+            
+            this.lastSeedUpload_myIP = seedDB.mySeed.get("IP", "127.0.0.1");  
+            this.lastSeedUpload_myPeerType = seedDB.mySeed.get("PeerType", yacySeed.PEERTYPE_JUNIOR);            
         }
     }
 

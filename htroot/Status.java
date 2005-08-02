@@ -179,7 +179,7 @@ public class Status {
                 prop.put("seedServer_seedFile", env.getConfig("seedFilePath",""));
             }
             prop.put("seedServer_lastUpload",
-                    serverDate.intervalToString(System.currentTimeMillis()-yacyCore.lastSeedUpload_timeStamp));
+                    serverDate.intervalToString(System.currentTimeMillis()-((plasmaSwitchboard)env).yc.lastSeedUpload_timeStamp));
         } else {
             prop.put("seedServer", 0);//disabled
         }

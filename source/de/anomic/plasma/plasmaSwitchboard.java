@@ -156,7 +156,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static TreeSet stopwords = null;
     public static plasmaURLPattern urlBlacklist;
     
-    // storage management
+    // storage management    
     private File                        cachePath;
     private File                        plasmaPath;
     public  File                        listsPath;
@@ -181,6 +181,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaParser                parser;
     public  plasmaWordIndexClassicCacheMigration classicCache;
     public  long                        proxyLastAccess;
+    public  yacyCore                    yc;
     
     private serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
@@ -342,7 +343,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // start yacy core
         log.logSystem("Starting YaCy Protocol Core");
         //try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
-        yacyCore yc = new yacyCore(this);
+        this.yc = new yacyCore(this);
         //log.logSystem("Started YaCy Protocol Core");
         //System.gc(); try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
         serverInstantThread.oneTimeJob(yc, "loadSeeds", yc.log, 3000);

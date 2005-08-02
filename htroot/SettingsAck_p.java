@@ -346,7 +346,7 @@ public class SettingsAck_p {
         
         if (post.containsKey("seedUploadRetry")) {
             String error;
-            if ((error = yacyCore.saveSeedList(env)) == null) {
+            if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {
                 // trying to upload the seed-list file    
                 prop.put("info", 13);
                 prop.put("info_success",1);
@@ -377,7 +377,7 @@ public class SettingsAck_p {
                 
                 // try an upload
                 String error;
-                if ((error = yacyCore.saveSeedList(env)) == null) {
+                if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {
                     // we have successfully uploaded the seed-list file
                     prop.put("info_seedUploadMethod",newSeedUploadMethod);
                     prop.put("info_seedURL",newSeedURLStr);
@@ -423,7 +423,7 @@ public class SettingsAck_p {
                     // were changed, we now try to upload the seed list with the new settings
                     if (env.getConfig("seedUploadMethod","none").equalsIgnoreCase(uploaderName)) {
                         String error;
-                        if ((error = yacyCore.saveSeedList(env)) == null) {;
+                        if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {;
                             
                             // we have successfully uploaded the seed file
                             prop.put("info", 13);
