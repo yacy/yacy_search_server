@@ -308,7 +308,7 @@ public class plasmaCrawlLURL extends plasmaURL {
                 prop.put("table_indexed_" + c + "_moddate", daydate(urle.moddate()));
                 prop.put("table_indexed_" + c + "_wordcount", urle.wordCount());
                 prop.put("table_indexed_" + c + "_urldescr", urle.descr());
-                prop.put("table_indexed_" + c + "_url", (makeLink) ? ("<a href=\"CacheAdmin_p.html?action=info&path=" + cachepath + "\" class=\"small\">" + urle.url().toString() + "</a>") : urle.url().toString());
+                prop.put("table_indexed_" + c + "_url", (urle.url() == null) ? "-not-cached-" : ((makeLink) ? ("<a href=\"CacheAdmin_p.html?action=info&path=" + cachepath + "\" class=\"small\">" + urle.url().toString() + "</a>") : urle.url().toString()));
                 dark = !dark;
                 c++;
             } catch (Exception e) {
