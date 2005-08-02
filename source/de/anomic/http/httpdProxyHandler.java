@@ -500,7 +500,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 ((ext == null) || (!(plasmaParser.mediaExtContains(ext)))) &&
                 (plasmaParser.realtimeParsableMimeTypesContains(res.responseHeader.mime()))) {
                 // make a transformer
-                this.theLogger.logDebug("create transformer for url " + url);
+                this.theLogger.logDebug("create transformer for URL " + url);
                 hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
             } else {
                 // simply pass through without parsing

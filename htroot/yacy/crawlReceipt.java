@@ -119,7 +119,7 @@ public class crawlReceipt {
             if (entry == null) {
                 switchboard.getLog().logError("RECEIVED wrong RECEIPT for hash " + urlhash + " from peer " + iam);
             } else {
-                switchboard.getLog().logInfo("RECEIVED RECEIPT for url " + entry.url().toString());
+                switchboard.getLog().logInfo("RECEIVED RECEIPT for URL " + entry.url().toString());
             }
             
             // ready for more

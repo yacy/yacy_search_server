@@ -438,7 +438,7 @@ public final class plasmaSearch {
                 }
             
                 // insert value
-                //System.out.println("Ranking " + ranking + " for url " + url.toString());
+                //System.out.println("Ranking " + ranking + " for URL " + url.toString());
                 pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), page);
             }
 	    // flush memory

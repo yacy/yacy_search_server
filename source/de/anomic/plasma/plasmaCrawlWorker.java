@@ -386,11 +386,11 @@ public final class plasmaCrawlWorker extends Thread {
                         );
                     }
                 } else {
-                    log.logInfo("Redirection counter exceeded for url " + url.toString() + ". Processing aborted.");
+                    log.logInfo("Redirection counter exceeded for URL " + url.toString() + ". Processing aborted.");
                 }
             }else {
                 // if the response has not the right response type then reject file
-                log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for url " + url.toString());
+                log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for URL " + url.toString());
                 // not processed any further
             }
             if (remote != null) remote.close();

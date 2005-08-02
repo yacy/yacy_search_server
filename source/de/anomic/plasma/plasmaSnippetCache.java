@@ -117,7 +117,7 @@ public class plasmaSnippetCache {
     public result retrieve(URL url, Set queryhashes, boolean fetchOnline, int snippetMaxLength) {
         // heise = "0OQUNU3JSs05"
         if (queryhashes.size() == 0) {
-            //System.out.println("found no queryhashes for url retrieve " + url);
+            //System.out.println("found no queryhashes for URL retrieve " + url);
             return new result(null, ERROR_NO_HASH_GIVEN, "no query hashes given");
         }
         String urlhash = plasmaURL.urlHash(url);
@@ -127,7 +127,7 @@ public class plasmaSnippetCache {
         String wordhashes = yacySearch.set2string(queryhashes);
         String line = retrieveFromCache(wordhashes, urlhash);
         if (line != null) {
-            //System.out.println("found snippet for url " + url + " in cache: " + line);
+            //System.out.println("found snippet for URL " + url + " in cache: " + line);
             return new result(line, source, null);
         }
         
@@ -144,13 +144,13 @@ public class plasmaSnippetCache {
             return new result(null, ERROR_SOURCE_LOADING, "error loading resource from web: " + e.getMessage());
         }
         if (resource == null) {
-            //System.out.println("cannot load document for url " + url);
+            //System.out.println("cannot load document for URL " + url);
             return new result(null, ERROR_RESOURCE_LOADING, "error loading resource from web, cacheManager returned NULL");
         }
         plasmaParserDocument document = parseDocument(url, resource);
         
         if (document == null) return new result(null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
-        //System.out.println("loaded document for url " + url);
+        //System.out.println("loaded document for URL " + url);
         String[] sentences = document.getSentences();
         //System.out.println("----" + url.toString()); for (int l = 0; l < sentences.length; l++) System.out.println(sentences[l]);
         if ((sentences == null) || (sentences.length == 0)) {
@@ -160,7 +160,7 @@ public class plasmaSnippetCache {
 
         // we have found a parseable non-empty file: use the lines
         line = computeSnippet(sentences, queryhashes, 8 + 6 * queryhashes.size(), snippetMaxLength);
-        //System.out.println("loaded snippet for url " + url + ": " + line);
+        //System.out.println("loaded snippet for URL " + url + ": " + line);
         if (line == null) return new result(null, ERROR_NO_MATCH, "no matching snippet found");
         if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
 

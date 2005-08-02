@@ -39,7 +39,7 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-// Contains contributions from Alexandier Schier [AS]
+// Contains contributions from Alexander Schier [AS]
 // and Marc Nause [MN]
 
 // You must compile this file with

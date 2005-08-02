@@ -165,7 +165,7 @@ public class IndexControl_p {
             plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
             URL url = entry.url();
             if (url == null) {
-                prop.put("result", "No Entry for url hash " + urlhash + "; nothing deleted.");
+                prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
                 urlstring = htmlFilterContentScraper.urlNormalform(url);
                 prop.put("urlstring", "");
@@ -240,7 +240,7 @@ public class IndexControl_p {
             plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
             URL url = entry.url();
             if (url == null) {
-                prop.put("result", "No Entry for url hash " + urlhash);
+                prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
                 urlstring = url.toString();
                 prop.put("urlstring", urlstring);
@@ -300,9 +300,9 @@ public class IndexControl_p {
     }
 
     public static String genUrlProfile(plasmaSwitchboard switchboard, plasmaCrawlLURL.Entry entry, String urlhash) {
-        if (entry == null) return "No entry found for url-hash " + urlhash;
+        if (entry == null) return "No entry found for URL-hash " + urlhash;
         URL url = entry.url();
-        if (url == null) return "No entry found for url-hash " + urlhash;
+        if (url == null) return "No entry found for URL-hash " + urlhash;
         String result = "<table>" +
         "<tr><td class=\"small\">URL String</td><td class=\"tt\">" + htmlFilterContentScraper.urlNormalform(url) + "</td></tr>" +
         "<tr><td class=\"small\">Hash</td><td class=\"tt\">" + urlhash + "</td></tr>" +
