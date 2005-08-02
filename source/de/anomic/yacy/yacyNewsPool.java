@@ -137,6 +137,43 @@ public class yacyNewsPool {
         return switchQueue(dbKey).size();
     }
     
+    public int automaticProcess() throws IOException {
+        // processes news in the incoming-db
+        // returns number of processes
+        yacyNewsRecord record;
+        int pc = 0;
+        synchronized (incomingNews) {
+            for (int i = incomingNews.size() - 1; i >= 0; i--) {
+                record = incomingNews.top(i);
+                if (automaticProcessP(record)) {
+                    incomingNews.pop(i);
+                    processedNews.push(record);
+                    //newsDB.remove(id);
+                    pc++;
+                }
+            }
+        }
+        return pc;
+    }
+    
+    private boolean automaticProcessP(yacyNewsRecord record) {
+        if (record == null) return false;
+        if ((record.category().equals("wiki_upd")) &&
+            (yacyCore.universalTime() - record.created().getTime() > 1000 * 60 * 60 * 24 /* 1 Day */)) {
+            return true;
+        }
+        if ((record.category().equals("crwlstrt")) &&
+            (yacyCore.universalTime() - record.created().getTime() > 1000 * 60 * 60 /* 1 Hour */)) {
+            yacySeed seed = yacyCore.seedDB.get(record.originator());
+            try {
+                return (Integer.parseInt(seed.get("ISpeed", "-")) < 10);
+            } catch (NumberFormatException ee) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public yacyNewsRecord get(int dbKey, int element) throws IOException {
         yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record;

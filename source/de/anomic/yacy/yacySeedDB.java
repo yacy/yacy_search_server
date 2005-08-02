@@ -680,8 +680,10 @@ public class yacySeedDB {
 		e.printStackTrace();
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
+                if (database == seedPotentialDB) seedPotentialDB = resetSeedTable(seedPotentialDB, seedPotentialDBFile);
 		it = null;
-	    }	}
+	    }
+        }
                 
 	public boolean hasMoreElements() {
 	    return (nextSeed != null);

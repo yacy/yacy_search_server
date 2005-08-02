@@ -283,6 +283,7 @@ public class kelondroMap {
         if (sortClusterMap == null) return null;
         kelondroMScoreCluster cluster = (kelondroMScoreCluster) sortClusterMap.get(field);
         if (cluster == null) return null; // sort field does not exist
+        //System.out.println("DEBUG: cluster for field " + field + ": " + cluster.toString());
         return cluster.scores(up);
     }
     

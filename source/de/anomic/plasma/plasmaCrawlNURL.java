@@ -362,7 +362,10 @@ public class plasmaCrawlNURL extends plasmaURL {
                     this.flags         = new bitfield(entry[10]);
                     this.handle        = Integer.parseInt(new String(entry[11]));
 		    return;
-		}
+		} else {
+                    // show that we found nothing
+                    this.url = null;
+                }
 	    } catch (Exception e) {
 	    }
 	}

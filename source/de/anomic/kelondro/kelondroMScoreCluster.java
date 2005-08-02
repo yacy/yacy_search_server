@@ -48,8 +48,8 @@ import java.util.TreeMap;
 
 public class kelondroMScoreCluster {
     
-    private TreeMap refkeyDB;
-    private TreeMap keyrefDB;
+    private TreeMap refkeyDB; // a mapping from a reference to the cluster key
+    private TreeMap keyrefDB; // a mapping from the cluster key to the reference
     private long gcount;
     private int encnt;
     
@@ -125,78 +125,92 @@ public class kelondroMScoreCluster {
         addScore(obj, 1);
     }
     
-    public synchronized void addScore(Object obj, int count) {
-        if (obj == null) return;
-        Long cs = (Long) refkeyDB.get(obj);
-        long c;
-        int ec = count;
-        int en;
-        if (cs == null) {
-            // new entry
-            en = encnt++;
-        } else {
-            // delete old entry
-            keyrefDB.remove(cs);
-            c = cs.longValue();
-            ec += (int) ((c & 0xFFFFFFFF00000000L) >> 32);
-            //System.out.println("Debug:" + ec);
-            en =  (int)  (c & 0xFFFFFFFFL);
-        }
-        
-        // set new value
-        c = scoreKey(en, ec);
-        cs = new Long(c);
-        Object oldcs = refkeyDB.remove(obj); if (oldcs != null) keyrefDB.remove(oldcs); // avoid memory leak
-        refkeyDB.put(obj, cs);
-        keyrefDB.put(cs, obj);
-        
-        // increase overall counter
-        gcount += count;
-    }
-    
-    public synchronized void setScore(Object obj, int count) {
+    public synchronized void setScore(Object obj, int newScore) {
         if (obj == null) return;
         //System.out.println("setScore " + obj.getClass().getName());
-        Long cs = (Long) refkeyDB.get(obj);
-        long c;
-        int ec = count;
-        int en;
-        if (cs == null) {
-            // new entry
-            en = encnt++;
+        Long usk = (Long) refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
+        
+        if (usk == null) {
+            // set new value
+            usk = new Long(scoreKey(encnt++, newScore));
+            
+            // put new value into cluster
+            refkeyDB.put(obj, usk);
+            keyrefDB.put(usk, obj);
+            
         } else {
             // delete old entry
-            keyrefDB.remove(cs);
-            c = cs.longValue();
-            gcount -= (c & 0xFFFFFFFF00000000L) >> 32;
-            en = (int) (c & 0xFFFFFFFFL);
+            keyrefDB.remove(usk);
+            
+            // get previous handle and score
+            long c = usk.longValue();
+            int oldScore = (int) ((c & 0xFFFFFFFF00000000L) >> 32);
+            int oldHandle = (int) (c & 0xFFFFFFFFL);
+            gcount -= oldScore;
+            
+            // set new value
+            usk = new Long(scoreKey(oldHandle, newScore)); // generates an unique key for a specific score
+            refkeyDB.put(obj, usk);
+            keyrefDB.put(usk, obj);
         }
         
-        // set new value
-        c = scoreKey(en, ec);
-        cs = new Long(c);
-        Object oldcs = refkeyDB.remove(obj); if (oldcs != null) keyrefDB.remove(oldcs); // avoid memory leak
-        refkeyDB.put(obj, cs);
-        keyrefDB.put(cs, obj);
+        // increase overall counter
+        gcount += newScore;
+    }
+    
+    public synchronized void addScore(Object obj, int incrementScore) {
+        if (obj == null) return;
+        //System.out.println("setScore " + obj.getClass().getName());
+        Long usk = (Long) refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
+        
+        if (usk == null) {
+            // set new value
+            usk = new Long(scoreKey(encnt++, incrementScore));
+            
+            // put new value into cluster
+            refkeyDB.put(obj, usk);
+            keyrefDB.put(usk, obj);
+            
+        } else {
+            // delete old entry
+            keyrefDB.remove(usk);
+            
+            // get previous handle and score
+            long c = usk.longValue();
+            int oldScore = (int) ((c & 0xFFFFFFFF00000000L) >> 32);
+            int oldHandle = (int) (c & 0xFFFFFFFFL);
+            
+            // set new value
+            usk = new Long(scoreKey(oldHandle, oldScore + incrementScore)); // generates an unique key for a specific score
+            refkeyDB.put(obj, usk);
+            keyrefDB.put(usk, obj);
+            
+        }
         
         // increase overall counter
-        gcount += count;
+        gcount += incrementScore;
     }
     
     public synchronized int deleteScore(Object obj) {
-        if (obj == null) return -1;
-        Long cs = (Long) refkeyDB.get(obj);
-        if (cs == null) {
-            return -1;
+        // deletes entry and returns previous score
+        if (obj == null) return 0;
+        //System.out.println("setScore " + obj.getClass().getName());
+        Long usk = (Long) refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
+        
+        if (usk == null) {
+            return 0;
         } else {
-            // delete entry
-            keyrefDB.remove(cs);
-            refkeyDB.remove(obj);
+            // delete old entry
+            keyrefDB.remove(usk);
+            
+            // get previous handle and score
+            int oldScore = (int) ((usk.longValue() & 0xFFFFFFFF00000000L) >> 32);
+
             // decrease overall counter
-            long oldScore = (cs.longValue() & 0xFFFFFFFF00000000L) >> 32;
             gcount -= oldScore;
-            return (int) oldScore;
-        }
+            
+            return oldScore;
+        }        
     }
 
     public synchronized boolean existsScore(Object obj) {
@@ -255,6 +269,10 @@ public class kelondroMScoreCluster {
         return s;
     }
     
+    public String toString() {
+        return refkeyDB + " / " + keyrefDB;
+    }
+    
     public synchronized Iterator scores(boolean up) {
         if (up) return new simpleScoreIterator();
         else return scores(false, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -288,8 +306,7 @@ public class kelondroMScoreCluster {
             int score = (max + min) / 2;
             while (keyrefDBcopy.size() > 0) {
                 key = (Long) ((up) ? keyrefDBcopy.firstKey() : keyrefDBcopy.lastKey());
-                n = keyrefDBcopy.get(key);
-                keyrefDBcopy.remove(key);
+                n = keyrefDBcopy.remove(key);
                 score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
                 if ((score >= min) && (score <= max)) return;
                 if (((up) && (score > max)) || ((!(up)) && (score < min))) {
@@ -338,6 +355,10 @@ public class kelondroMScoreCluster {
     }
         
     public static void main(String[] args) {
+        
+        if (args.length > 0) System.out.println("score of " + args[0] + ": " + string2score(args[0]));
+        //System.exit(0);
+        
         System.out.println("Test for Score: start");
         kelondroMScoreCluster s = new kelondroMScoreCluster();
 	int c = 0;

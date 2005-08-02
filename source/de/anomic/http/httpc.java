@@ -344,7 +344,7 @@ public final class httpc {
             this.socket = null;
             this.socketOwner = null;
             throw new IOException("unknown host: " + server);
-        } 
+        }
     }
     
     void reset() {

@@ -451,18 +451,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             initProfiles();
         } catch (IOException e) {}
     }
-    public void cleanProfiles() {
-        if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (urlPool.noticeURL.stackSize() > 0)) return;
+    public boolean cleanProfiles() {
+        if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (urlPool.noticeURL.stackSize() > 0)) return false;
 	Iterator i = profiles.profiles(true);
 	plasmaCrawlProfile.entry entry;
+        boolean hasDoneSomething = false;
         try {
             while (i.hasNext()) {
                 entry = (plasmaCrawlProfile.entry) i.next();
-                if (!((entry.name().equals("proxy")) || (entry.name().equals("remote")))) i.remove();
+                if (!((entry.name().equals("proxy")) || (entry.name().equals("remote")))) {
+                    i.remove();
+                    hasDoneSomething = true;
+                }
             }
         } catch (kelondroException e) {
             resetProfiles();
+            hasDoneSomething = true;
         }
+        return hasDoneSomething;
     }
 
     public plasmaHTCache getCacheManager() {
@@ -623,7 +629,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	    }
 	}
         // clean up profiles
-        cleanProfiles();
+        if (cleanProfiles()) hasDoneSomething = true;
+        
+        // clean up news
+        try {
+            if (yacyCore.newsPool.automaticProcess() > 0) hasDoneSomething = true;
+        } catch (IOException e) {}
+        
         return hasDoneSomething;
     }
     
@@ -696,7 +708,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // do a local crawl
         plasmaCrawlNURL.Entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
         String stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
-        if (urlEntry.url() == null) {
+        if ((urlEntry.url() == null) || (urlEntry.url().toString().length() < 10)) {
             log.logError(stats + ": urlEntry.url() == null");
             return true;
         }
