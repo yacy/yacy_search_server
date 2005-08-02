@@ -170,7 +170,7 @@ public class IndexCreate_p {
                                     m.remove("storeHTCache");
                                     m.remove("generalFilter");
                                     m.remove("specificFilter");
-                                    m.put("intention", ((String) post.get("intention", "")));
+                                    m.put("intention", ((String) post.get("intention", "")).replace(',', '/'));
                                     yacyCore.newsPool.publishMyNews(new yacyNewsRecord("crwlstrt", m));
                                 }
                                 

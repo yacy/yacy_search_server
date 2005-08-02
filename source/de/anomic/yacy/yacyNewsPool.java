@@ -134,44 +134,56 @@ public class yacyNewsPool {
     }
     
     public int size(int dbKey) {
-        switch (dbKey) {
-            case INCOMING_DB:	return incomingNews.size();
-            case PROCESSED_DB:  return processedNews.size();
-            case OUTGOING_DB:   return outgoingNews.size();
-            case PUBLISHED_DB:  return publishedNews.size();
-            default: return -1;
-        }
+        return switchQueue(dbKey).size();
     }
     
     public yacyNewsRecord get(int dbKey, int element) throws IOException {
+        yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record;
-        switch (dbKey) {
-            case INCOMING_DB:
-                synchronized (incomingNews) {
-                    record = incomingNews.top(element);
-                    if (record == null) incomingNews.pop(element);
-                }
-                return record;
-            case PROCESSED_DB:
-                synchronized (processedNews) {
-                    record = processedNews.top(element);
-                    if (record == null) processedNews.pop(element);
-                }
-                return record;
-            case OUTGOING_DB:
-                synchronized (outgoingNews) {
-                    record = outgoingNews.top(element);
-                    if (record == null) outgoingNews.pop(element);
-                }
-                return record;
-            case PUBLISHED_DB:
-                synchronized (publishedNews) {
-                    record = publishedNews.top(element);
-                    if (record == null) publishedNews.pop(element);
-                }
-                return record;
-            default: return null;
+        synchronized (queue) {
+            record = queue.top(element);
+            if (record == null) queue.pop(element);
         }
+        return record;
+    }
+    
+    public synchronized yacyNewsRecord getSpecific(int dbKey, String category, String key, String value) throws IOException {
+        yacyNewsQueue queue = switchQueue(dbKey);
+        yacyNewsRecord record;
+        String s;
+        for (int i = queue.size() - 1; i >= 0; i--) {
+            record = queue.top(i);
+            if ((record != null) && (record.category().equals(category))) {
+                s = (String) record.attributes().get(key);
+                if ((s != null) && (s.equals(value))) return record;
+            }
+        }
+        return null;
+    }
+    
+    public synchronized yacyNewsRecord getByOriginator(int dbKey, String category, String originatorHash) throws IOException {
+        yacyNewsQueue queue = switchQueue(dbKey);
+        yacyNewsRecord record;
+        String s;
+        for (int i = queue.size() - 1; i >= 0; i--) {
+            record = queue.top(i);
+            if ((record != null) &&
+                (record.category().equals(category)) &&
+                (record.originator().equals(originatorHash))) {
+                return record;
+            }
+        }
+        return null;
+    }
+    
+    private yacyNewsQueue switchQueue(int dbKey) {
+        switch (dbKey) {
+            case INCOMING_DB:	return incomingNews;
+            case PROCESSED_DB:  return processedNews;
+            case OUTGOING_DB:   return outgoingNews;
+            case PUBLISHED_DB:  return publishedNews;
+        }
+        return null;
     }
     
     public void moveOff(int dbKey, String id) throws IOException {

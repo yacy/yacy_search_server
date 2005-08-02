@@ -45,6 +45,7 @@
 // javac -classpath .:../Classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -57,6 +58,8 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyNewsPool;
+import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.tools.bbCode;
 
 public class ViewProfile {
@@ -79,6 +82,13 @@ public class ViewProfile {
                 }
             } else {
                 prop.put("success","3"); // everything ok
+                // process news if existent
+                try {
+                    yacyNewsRecord record = yacyCore.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, "prfleupd", seed.hash);
+                    if (record != null) yacyCore.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
+                } catch (IOException e) {}
+                
+                // read profile from other peer
                 HashMap profile = yacyClient.getProfile(seed);
                 yacyCore.log.logInfo("fetched profile:" + profile);
                 Iterator i = profile.entrySet().iterator();

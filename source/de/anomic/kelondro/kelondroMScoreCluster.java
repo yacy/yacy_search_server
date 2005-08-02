@@ -97,35 +97,35 @@ public class kelondroMScoreCluster {
         return (((long) (elementCount & 0xFFFFFFFFL)) << 32) | ((long) (elementNr & 0xFFFFFFFFL));
     }
     
-    public long totalCount() {
+    public synchronized long totalCount() {
         return gcount;
     }
     
-    public int size() {
+    public synchronized int size() {
         return refkeyDB.size();
     }
     
-    public void incScore(Object[] objs) {
+    public synchronized void incScore(Object[] objs) {
         addScore(objs, 1);
     }
     
-    public void addScore(Object[] objs, int count) {
+    public synchronized void addScore(Object[] objs, int count) {
         if (objs != null)
             for (int i = 0; i < objs.length; i++)
                 addScore(objs[i], count);
     }
     
-    public void setScore(Object[] objs, int count) {
+    public synchronized void setScore(Object[] objs, int count) {
         if (objs != null)
             for (int i = 0; i < objs.length; i++)
                 setScore(objs[i], count);
     }
      
-    public void incScore(Object obj) {
+    public synchronized void incScore(Object obj) {
         addScore(obj, 1);
     }
     
-    public void addScore(Object obj, int count) {
+    public synchronized void addScore(Object obj, int count) {
         if (obj == null) return;
         Long cs = (Long) refkeyDB.get(obj);
         long c;
@@ -154,7 +154,7 @@ public class kelondroMScoreCluster {
         gcount += count;
     }
     
-    public void setScore(Object obj, int count) {
+    public synchronized void setScore(Object obj, int count) {
         if (obj == null) return;
         //System.out.println("setScore " + obj.getClass().getName());
         Long cs = (Long) refkeyDB.get(obj);
@@ -183,7 +183,7 @@ public class kelondroMScoreCluster {
         gcount += count;
     }
     
-    public int deleteScore(Object obj) {
+    public synchronized int deleteScore(Object obj) {
         if (obj == null) return -1;
         Long cs = (Long) refkeyDB.get(obj);
         if (cs == null) {
@@ -199,11 +199,11 @@ public class kelondroMScoreCluster {
         }
     }
 
-    public boolean existsScore(Object obj) {
+    public synchronized boolean existsScore(Object obj) {
         return (refkeyDB.get(obj) != null);
     }
     
-    public int getScore(Object obj) {
+    public synchronized int getScore(Object obj) {
         if (obj == null) return 0;
         Long cs = (Long) refkeyDB.get(obj);
         if (cs == null) {
@@ -213,7 +213,7 @@ public class kelondroMScoreCluster {
         }
     }
     
-    public int getMaxScore() {
+    public synchronized int getMaxScore() {
         if (refkeyDB.size() == 0) return -1;
 	return (int) ((((Long) keyrefDB.lastKey()).longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
@@ -223,23 +223,23 @@ public class kelondroMScoreCluster {
 	return (int) ((((Long) keyrefDB.firstKey()).longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
-    public Object getMaxObject() {
+    public synchronized Object getMaxObject() {
         if (refkeyDB.size() == 0) return null;
         //return getScores(1, false)[0];
 	return keyrefDB.get((Long) keyrefDB.lastKey());
     }
     
-    public Object getMinObject() {
+    public synchronized Object getMinObject() {
         if (refkeyDB.size() == 0) return null;
         //return getScores(1, true)[0];
 	return keyrefDB.get((Long) keyrefDB.firstKey());
     }
     
-    public Object[] getScores(int maxCount, boolean up) {
+    public synchronized Object[] getScores(int maxCount, boolean up) {
         return getScores(maxCount, up, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
     
-    public Object[] getScores(int maxCount, boolean up, int minScore, int maxScore) {
+    public synchronized Object[] getScores(int maxCount, boolean up, int minScore, int maxScore) {
         if (maxCount > refkeyDB.size()) maxCount = refkeyDB.size();
         Object[] s = new Object[maxCount];
         Iterator it = scores(up, minScore, maxScore);
@@ -255,12 +255,12 @@ public class kelondroMScoreCluster {
         return s;
     }
     
-    public Iterator scores(boolean up) {
+    public synchronized Iterator scores(boolean up) {
         if (up) return new simpleScoreIterator();
         else return scores(false, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
     
-    public Iterator scores(boolean up, int minScore, int maxScore) {
+    public synchronized Iterator scores(boolean up, int minScore, int maxScore) {
         return new komplexScoreIterator(up, minScore, maxScore);
     }
     

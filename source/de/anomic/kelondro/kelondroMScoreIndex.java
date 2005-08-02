@@ -74,35 +74,35 @@ public class kelondroMScoreIndex {
         scoreCluster = new kelondroMScoreCluster();  // scores for int-handles
     }
     
-    public long totalCount() {
+    public synchronized long totalCount() {
         return scoreCluster.totalCount();
     }
     
-    public int size() {
+    public synchronized int size() {
         return handles.size();
     }
     
-    public void incScore(Object[] objs) {
+    public synchronized void incScore(Object[] objs) {
         addScore(objs, 1);
     }
     
-    public void addScore(Object[] objs, int count) {
+    public synchronized void addScore(Object[] objs, int count) {
         if (objs != null)
             for (int i = 0; i < objs.length; i++)
                 addScore(objs[i], count);
     }
     
-    public void setScore(Object[] objs, int count) {
+    public synchronized void setScore(Object[] objs, int count) {
         if (objs != null)
             for (int i = 0; i < objs.length; i++)
                 setScore(objs[i], count);
     }
      
-    public void incScore(Object obj) {
+    public synchronized void incScore(Object obj) {
         addScore(obj, 1);
     }
     
-    public void addScore(Object obj, int count) {
+    public synchronized void addScore(Object obj, int count) {
         // get handle
         Integer handle = (Integer) handles.get(obj);
         if (handle == null) {
@@ -115,7 +115,7 @@ public class kelondroMScoreIndex {
         scoreCluster.addScore(handle, count);
     }
     
-    public void setScore(Object obj, int count) {
+    public synchronized void setScore(Object obj, int count) {
         // get handle
         Integer handle = (Integer) handles.get(obj);
         if (handle == null) {
@@ -128,7 +128,7 @@ public class kelondroMScoreIndex {
         scoreCluster.setScore(handle, count);
     }
     
-    public void deleteScore(Object obj) {
+    public synchronized void deleteScore(Object obj) {
         // get handle
         Integer handle = (Integer) handles.get(obj);
         if (handle != null) {
@@ -138,22 +138,22 @@ public class kelondroMScoreIndex {
         }
     }
 
-    public int getScore(Object obj) {
+    public synchronized int getScore(Object obj) {
         // get handle
         Integer handle = (Integer) handles.get(obj);
         if (handle == null) return -1;
         return scoreCluster.getScore(handle);
     }
     
-    public Object[] getScores(int count, boolean up, boolean weight, char weightsep) {
+    public synchronized Object[] getScores(int count, boolean up, boolean weight, char weightsep) {
         return new Object[1];
     }
     
-    public Object[] getScores(int maxCount, boolean up) {
+    public synchronized Object[] getScores(int maxCount, boolean up) {
         return getScores(maxCount, up, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
     
-    public Object[] getScores(int maxCount, boolean up, int minScore, int maxScore) {
+    public synchronized Object[] getScores(int maxCount, boolean up, int minScore, int maxScore) {
         if (maxCount > handles.size()) maxCount = handles.size();
         Object[] s = new Object[maxCount];
         Iterator it = scores(up, minScore, maxScore);
@@ -169,11 +169,11 @@ public class kelondroMScoreIndex {
         return s;
     }
     
-    public Iterator scores(boolean up) {
+    public synchronized Iterator scores(boolean up) {
         return scores(up, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
     
-    public Iterator scores(boolean up, int minScore, int maxScore) {
+    public synchronized Iterator scores(boolean up, int minScore, int maxScore) {
         return new scoreIterator(up, minScore, maxScore);
     }
     

@@ -207,6 +207,11 @@ public final class plasmaWordIndexAssortment {
             e.printStackTrace();
             resetDatabase();
             return null;
+        } catch (kelondroException e) {
+            log.logFailure("iterateAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB");
+            e.printStackTrace();
+            resetDatabase();
+            return null;
         }
     }
 

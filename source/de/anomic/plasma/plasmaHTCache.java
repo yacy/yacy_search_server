@@ -217,12 +217,12 @@ public final class plasmaHTCache {
     }
     
     private String ageString(long date, File f) {
-	String s = Integer.toHexString(f.hashCode());
-        StringBuffer sb = new StringBuffer(32);
-	for (int i = s.length(); i < 8; i++) sb.append('0');
-        sb.append(s);
-	s = Long.toHexString(date);
+	StringBuffer sb = new StringBuffer(32);
+	String s = Long.toHexString(date);
 	for (int i = s.length(); i < 16; i++) sb.append('0');
+        sb.append(s);
+	s = Integer.toHexString(f.hashCode());
+        for (int i = s.length(); i < 8; i++) sb.append('0');
         sb.append(s);
 	return sb.toString();
     }

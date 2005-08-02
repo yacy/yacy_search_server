@@ -68,6 +68,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 	linkTags0 = new TreeSet(insensitiveCollator);
 	linkTags0.add("img");
         linkTags0.add("base");
+        linkTags0.add("frame");
 
 	linkTags1 = new TreeSet(insensitiveCollator);
 	linkTags1.add("a");
@@ -127,6 +128,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     public void scrapeTag0(String tagname, Properties tagopts) {
 	if (tagname.equalsIgnoreCase("img")) images.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("alt",""));
         if (tagname.equalsIgnoreCase("base")) try {root = new URL(tagopts.getProperty("href", ""));} catch (MalformedURLException e) {}
+        if (tagname.equalsIgnoreCase("frame")) anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
     }
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
@@ -135,7 +137,6 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 	if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) headline = super.stripAll(new serverByteBuffer(text)).toString();
 	if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) title = super.stripAll(new serverByteBuffer(text)).toString();        
     }
-
 
     public String getHeadline() {
 	String hl = "";
