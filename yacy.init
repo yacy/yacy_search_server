@@ -19,9 +19,16 @@ port = 8080
 clientTimeout = 8000
 
 # maximal number of httpd sessions
-# a client may open several connections at one, and the maxSessions value sets
+# a client may open several connections at one, and the httpdMaxActiveSessions value sets
 # a limit on the number of concurrent connections
-httpdMaxSessions = 150
+httpdMaxActiveSessions = 150
+httpdMaxIdleSessions = 75
+httpdMinIdleSessions = 5
+
+# maximum number of crawler threads
+crawlerMaxActiveThreads = 10
+crawlerMaxIdleThreads = 7
+crawlerMinIdleThreads = 5
 
 # default root path for the file server
 # may be overridden by the htdocs parameter

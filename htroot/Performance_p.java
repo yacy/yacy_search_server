@@ -178,6 +178,11 @@ public class Performance_p {
         }
         
         if ((post != null) && (post.containsKey("poolConfig"))) {
+            
+            /* 
+             * configuring the crawler pool 
+             */
+            // getting the current crawler pool configuration
             GenericObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
             int maxActive = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
             int maxIdle = Integer.parseInt(post.get("Crawler Pool_maxIdle","4"));
@@ -187,9 +192,18 @@ public class Performance_p {
             crawlerPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
             crawlerPoolConfig.maxActive = maxActive;    
             
+            // accept new crawler pool settings
             plasmaSwitchboard.crawlSlots = maxActive;
             switchboard.cacheLoader.setPoolConfig(crawlerPoolConfig);
             
+            // storing the new values into configfile
+            switchboard.setConfig("crawlerMaxActiveThreads",maxActive);
+            switchboard.setConfig("crawlerMaxIdleThreads",maxIdle);
+            switchboard.setConfig("crawlerMinIdleThreads",minIdle);
+            
+            /* 
+             * configuring the http pool 
+             */
             serverThread httpd = switchboard.getThread("10_httpd");
             GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();
             maxActive = Integer.parseInt(post.get("httpd Session Pool_maxActive","8"));
@@ -200,8 +214,12 @@ public class Performance_p {
             httpdPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
             httpdPoolConfig.maxActive = maxActive;    
             
-            ((serverCore)httpd).maxSessions = maxActive;
-            ((serverCore)httpd).setPoolConfig(httpdPoolConfig);            
+            ((serverCore)httpd).setPoolConfig(httpdPoolConfig);     
+            
+            // storing the new values into configfile
+            switchboard.setConfig("httpdMaxActiveSessions",maxActive);
+            switchboard.setConfig("httpdMaxIdleSessions",maxIdle);
+            switchboard.setConfig("httpdMinIdleSessions",minIdle);
         }        
         
         if ((post != null) && (post.containsKey("proxyControlSubmit"))) {
@@ -236,14 +254,14 @@ public class Performance_p {
         prop.put("pool_0_name","Crawler Pool");
         prop.put("pool_0_maxActive",crawlerPoolConfig.maxActive);
         prop.put("pool_0_maxIdle",crawlerPoolConfig.maxIdle);
-        prop.put("pool_0_minIdle",crawlerPoolConfig.maxIdle);
+        prop.put("pool_0_minIdle",crawlerPoolConfig.minIdle);
         
         serverThread httpd = switchboard.getThread("10_httpd");
         GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();
         prop.put("pool_1_name","httpd Session Pool");
         prop.put("pool_1_maxActive",httpdPoolConfig.maxActive);
         prop.put("pool_1_maxIdle",httpdPoolConfig.maxIdle);
-        prop.put("pool_1_minIdle",httpdPoolConfig.maxIdle);                
+        prop.put("pool_1_minIdle",httpdPoolConfig.minIdle);                
         prop.put("pool",2);
         
         

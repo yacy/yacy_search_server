@@ -588,14 +588,14 @@ public final class plasmaParser {
 			}
             
             // fetching a new parser object from pool  
-			Parser theParser = (Parser) this.theParserPool.borrowObject(parserClassName);
+			Parser theParser = (Parser) theParserPool.borrowObject(parserClassName);
             
             // checking if the created parser really supports the given mimetype 
             Hashtable supportedMimeTypes = theParser.getSupportedMimeTypes();
             if ((supportedMimeTypes != null) && (supportedMimeTypes.containsKey(mimeType))) {
 				return theParser;
             }
-            this.theParserPool.returnObject(parserClassName,theParser);
+            theParserPool.returnObject(parserClassName,theParser);
             
         } catch (Exception e) {
             System.err.println("ERROR: Unable to load the correct parser for type " + mimeType);
@@ -673,11 +673,11 @@ public final class plasmaParser {
             //File out = new File(args[1]);
             plasmaParser theParser = new plasmaParser();
             theParser.initRealtimeParsableMimeTypes("application/xhtml+xml,text/html,text/plain");
-            theParser.initParseableMimeTypes("application/atom+xml,application/gzip,application/java-archive,application/msword,application/octet-stream,application/pdf,application/rdf+xml,application/rss+xml,application/rtf,application/x-gzip,application/x-tar,application/xml,application/zip,text/rss,text/rtf,text/xml,application/x-bzip2");
+            theParser.initParseableMimeTypes("application/atom+xml,application/gzip,application/java-archive,application/msword,application/octet-stream,application/pdf,application/rdf+xml,application/rss+xml,application/rtf,application/x-gzip,application/x-tar,application/xml,application/zip,text/rss,text/rtf,text/xml,application/x-bzip2,application/postscript");
             FileInputStream theInput = new FileInputStream(in);
             ByteArrayOutputStream theOutput = new ByteArrayOutputStream();
             serverFileUtils.copy(theInput, theOutput);
-            plasmaParserDocument document = theParser.parseSource(new URL("http://brain/~theli/test.pdf"), null, theOutput.toByteArray());
+            plasmaParserDocument document = theParser.parseSource(new URL("http://brain/~theli/test.ps"), null, theOutput.toByteArray());
             //plasmaParserDocument document = theParser.parseSource(new URL("http://brain.yacy"), "application/pdf", theOutput.toByteArray());
             //byte[] theText = document.getText();
             //serverFileUtils.write(theText, out);

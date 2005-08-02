@@ -294,12 +294,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int remoteport;
         try { remoteport = Integer.parseInt(getConfig("remoteProxyPort","3128")); }
         catch (NumberFormatException e) { remoteport = 3128; }
-        this.cacheLoader = new plasmaCrawlLoader(this.cacheManager, this.log,
-                Integer.parseInt(getConfig("clientTimeout", "10000")),
-                5000, crawlSlots,
-                getConfig("remoteProxyUse","false").equals("true"),
-                getConfig("remoteProxyHost",""),
-                remoteport);
+        
+        crawlSlots = Integer.parseInt(getConfig("crawlerMaxActiveThreads", "10"));
+        this.cacheLoader = new plasmaCrawlLoader(
+                this,
+                this.cacheManager, 
+                this.log);
 
 	// init boards
         log.logSystem("Starting Message Board");
