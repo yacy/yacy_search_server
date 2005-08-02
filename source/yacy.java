@@ -222,6 +222,12 @@ public final class yacy {
             File htDocsPath = new File(sb.getRootPath(), sb.getConfig("htDocsPath", "DATA/HTDOCS"));
             File htTemplatePath = new File(sb.getRootPath(), sb.getConfig("htTemplatePath","htdocs"));
             
+            // create default notifier picture
+            if (!((new File(htRootPath, "env/pictures/notifier.gif")).exists())) try {
+                serverFileUtils.copy(new File(htRootPath, "env/pictures/empty.gif"), 
+                                     new File(htRootPath, "env/pictures/notifier.gif"));
+            } catch (IOException e) {}
+            
             if (!(htDocsPath.exists())) htDocsPath.mkdir();
             File htdocsDefaultReadme = new File(htDocsPath, "readme.txt");
             if (!(htdocsDefaultReadme.exists())) try {serverFileUtils.write((

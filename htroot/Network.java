@@ -257,27 +257,25 @@ public class Network {
                             } else {
                                 prop.put("table_list_"+conCount+"_dark", ((dark) ? 1 : 0) ); dark=!dark;
                             }
-                            prop.put("table_list_"+conCount+"_updatedProfile", (((updatedProfile.contains(seed.hash))) ? 1 : 0));
+                            String alert = "";
+                            if (updatedProfile.contains(seed.hash)) {
+                                alert += "<a href=\"ViewProfile.html?hash=" + seed.hash + "\"><img border=\"0\" src=\"/env/grafics/profile.gif\" align=\"bottom\"></a>";
+                            }
                             if ((wikiPage = (String) updatedWiki.get(seed.hash)) == null) {
-                                prop.put("table_list_"+conCount+"_updatedWiki", 0);
                                 prop.put("table_list_"+conCount+"_updatedWikiPage", "");
                             } else {
-                                prop.put("table_list_"+conCount+"_updatedWiki", 1);
                                 prop.put("table_list_"+conCount+"_updatedWikiPage", "?page=" + wikiPage);
+                                alert += "<a href=\"http://" + seed.get("Name", "deadlink") + ".yacy/Wiki.html?page=" + wikiPage + "\"><img border=\"0\" src=\"/env/grafics/wiki.gif\" align=\"bottom\"></a>";
                             }
                             try {
                                 PPM = Integer.parseInt(seed.get("ISpeed", "-"));
                             } catch (NumberFormatException ee) {
                                 PPM = 0;
                             }
-                            if (((startURL = (String) isCrawling.get(seed.hash)) == null) || (PPM < 10)) {
-                                prop.put("table_list_"+conCount+"_isCrawling", 0);
-                                prop.put("table_list_"+conCount+"_isCrawling_startURL", "");
-                            } else {
-                                prop.put("table_list_"+conCount+"_isCrawling", 1);
-                                prop.put("table_list_"+conCount+"_isCrawling_startURL", startURL);
+                            if (((startURL = (String) isCrawling.get(seed.hash)) != null) && (PPM >= 10)) {
+                                alert += "<a href=\"" + startURL + "\"><img border=\"0\" src=\"/env/grafics/crawl.gif\" align=\"bottom\"></a>";
                             }
-                            
+                            prop.put("table_list_"+conCount+"_alert", alert);
                             long links, words;
                             try {
                                 links = Long.parseLong(seed.get("LCount", "0"));

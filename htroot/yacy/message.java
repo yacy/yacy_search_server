@@ -134,7 +134,7 @@ public class message {
             messageForwardingViaEmail(env,msgEntry);
             
             // finally write notification
-            File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/notifierActive.gif");
+            File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
             File notifierDest   = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/notifier.gif");
             try {
                 serverFileUtils.copy(notifierSource, notifierDest);

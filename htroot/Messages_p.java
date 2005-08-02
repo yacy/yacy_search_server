@@ -76,7 +76,7 @@ public class Messages_p {
         messageBoard.entry message;
         
         // first reset notification
-        File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/notifierInactive.gif");
+        File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/empty.gif");
         File notifierDest   = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/notifier.gif");
         try {serverFileUtils.copy(notifierSource, notifierDest);} catch (IOException e) {};
 
