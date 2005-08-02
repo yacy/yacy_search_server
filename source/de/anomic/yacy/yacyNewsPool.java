@@ -133,64 +133,6 @@ public class yacyNewsPool {
         incomingNews.push(record);
     }
     
-    public synchronized boolean commitIncomingNews(String id) throws IOException {
-        // called if a incoming news was processed
-        yacyNewsRecord record;
-        for (int i = 0; i < incomingNews.size(); i++) {
-            record = incomingNews.top(i);
-            if (record.id().equals(id)) {
-                incomingNews.pop(i);
-                processedNews.push(record);
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public synchronized boolean deleteProcessedNews(String id) throws IOException {
-        // called if a processed news shall be removed
-        // the news stays in the news database to prevent
-        // that it is loaded again from the net
-        yacyNewsRecord record;
-        for (int i = 0; i < processedNews.size(); i++) {
-            record = processedNews.top(i);
-            if (record.id().equals(id)) {
-                processedNews.pop(i);
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public synchronized boolean interruptPublication(String id) throws IOException {
-        // called if a outgoing news shall not be published any more
-        yacyNewsRecord record;
-        for (int i = 0; i < outgoingNews.size(); i++) {
-            record = outgoingNews.top(i);
-            if (record.id().equals(id)) {
-                outgoingNews.pop(i);
-                publishedNews.push(record);
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public synchronized boolean deletePublishedNews(String id) throws IOException {
-        // called if a published news shall be removed
-        // the news is also removed from the news database
-        yacyNewsRecord record;
-        for (int i = 0; i < publishedNews.size(); i++) {
-            record = publishedNews.top(i);
-            if (record.id().equals(id)) {
-                publishedNews.pop(i);
-                newsDB.remove(id);
-                return true;
-            }
-        }
-        return false;
-    }
-    
     public int size(int dbKey) {
         switch (dbKey) {
             case INCOMING_DB:	return incomingNews.size();
@@ -202,11 +144,32 @@ public class yacyNewsPool {
     }
     
     public yacyNewsRecord get(int dbKey, int element) throws IOException {
+        yacyNewsRecord record;
         switch (dbKey) {
-            case INCOMING_DB:	return incomingNews.top(element);
-            case PROCESSED_DB:  return processedNews.top(element);
-            case OUTGOING_DB:   return outgoingNews.top(element);
-            case PUBLISHED_DB:  return publishedNews.top(element);
+            case INCOMING_DB:
+                synchronized (incomingNews) {
+                    record = incomingNews.top(element);
+                    if (record == null) incomingNews.pop(element);
+                }
+                return record;
+            case PROCESSED_DB:
+                synchronized (processedNews) {
+                    record = processedNews.top(element);
+                    if (record == null) processedNews.pop(element);
+                }
+                return record;
+            case OUTGOING_DB:
+                synchronized (outgoingNews) {
+                    record = outgoingNews.top(element);
+                    if (record == null) outgoingNews.pop(element);
+                }
+                return record;
+            case PUBLISHED_DB:
+                synchronized (publishedNews) {
+                    record = publishedNews.top(element);
+                    if (record == null) publishedNews.pop(element);
+                }
+                return record;
             default: return null;
         }
     }
@@ -215,11 +178,30 @@ public class yacyNewsPool {
         // this is called if a queue element shall be moved to another queue or off the queue
         // it depends on the dbKey how the record is handled
         switch (dbKey) {
-            case INCOMING_DB:	commitIncomingNews(id); break;
-            case PROCESSED_DB:  deleteProcessedNews(id); break;
-            case OUTGOING_DB:   interruptPublication(id); break;
-            case PUBLISHED_DB:  deletePublishedNews(id); break;
+            case INCOMING_DB:	moveOff(incomingNews, processedNews, id); break;
+            case PROCESSED_DB:  moveOff(processedNews, null,id); break;
+            case OUTGOING_DB:   moveOff(outgoingNews, publishedNews, id); break;
+            case PUBLISHED_DB:  moveOff(publishedNews, null, id); break;
         }
     }
 
+    private boolean moveOff(yacyNewsQueue fromqueue, yacyNewsQueue toqueue, String id) throws IOException {
+        // called if a published news shall be removed
+        // the news is also removed from the news database
+        yacyNewsRecord record;
+        synchronized (fromqueue) {
+            for (int i = fromqueue.size() - 1; i >= 0; i--) {
+                record = fromqueue.top(i);
+                if ((record != null) && (record.id().equals(id))) {
+                    fromqueue.pop(i);
+                    if (toqueue != null) toqueue.push(record);
+                    //newsDB.remove(id);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    
 }

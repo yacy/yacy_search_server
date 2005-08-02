@@ -367,6 +367,7 @@ public class IndexCreate_p {
         try {
             for (int c = 0; c < availableNews; c++) {
                 record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, c);
+                if (record == null) continue;
                 if (record.category().equals("crwlstrt")) {
                     peer = yacyCore.seedDB.get(record.originator());
                     if (peer == null) peername = record.originator(); else peername = peer.getName();

@@ -124,6 +124,7 @@ public class News {
                 yacySeed seed;
                 for (int i = 0; i < maxCount; i++) try {
                     record = yacyCore.newsPool.get(tableID, i);
+                    if (record == null) continue;
                     seed = yacyCore.seedDB.getConnected(record.originator());
                     if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
                     prop.put("table_list_" + i + "_id", record.id());
