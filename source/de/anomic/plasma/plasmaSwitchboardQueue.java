@@ -51,6 +51,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverDate;
 import de.anomic.yacy.yacySeedDB;
 
 public class plasmaSwitchboardQueue {
@@ -287,7 +288,7 @@ public class plasmaSwitchboardQueue {
                 if ((ifModifiedSince != null) && (responseHeader().containsKey(httpHeader.LAST_MODIFIED))) {
                     // parse date
                     Date d = responseHeader().lastModified();
-                    if (d == null) d = new Date();
+                    if (d == null) d = serverDate.correctedGMTDate();
                     // finally, we shall treat the cache as stale if the modification time is after the if-.. time
                     if (d.after(ifModifiedSince)) {
                         //System.out.println("***not indexed because if-modified-since");
@@ -316,8 +317,7 @@ public class plasmaSwitchboardQueue {
                 // sometimes, the expires date is set to the past to prevent that a page is cached
                 // we use that information to see if we should index it
                 if (expires != null) {
-                    Date yesterday = new Date((new Date()).getTime() - plasmaHTCache.oneday);
-                    if (expires.before(yesterday)) return "Stale_(Expired)";
+                    if (expires.before(serverDate.correctedGMTDate())) return "Stale_(Expired)";
                 }
                 
                 // -lastModified in cached response
@@ -345,7 +345,7 @@ public class plasmaSwitchboardQueue {
                         if (date == null) return "Stale_(no_date_given_in_response)";
                         try {
                             long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                            if ((new Date()).getTime() - date.getTime() > ttl) {
+                            if (serverDate.correctedGMTDate().getTime() - date.getTime() > ttl) {
                                 //System.out.println("***not indexed because cache-control");
                                 return "Stale_(expired_by_cache-control)";
                             }
