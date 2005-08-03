@@ -101,11 +101,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static serverPortForwarding portForwarding = null;
     
     private ServerSocket socket;           // listener
-    public int maxSessions = 0;            // max. number of sessions; 0=unlimited
     serverLog log;                         // log object
     private int timeout;                   // connection time-out of the socket
     
-    private boolean termSleepingThreads;   // if true then threads over sleepthreashold are killed
     private int thresholdActive = 5000;    // after that time a thread should have got a command line
     private int thresholdSleep = 30000;    // after that time a thread is considered as beeing sleeping (30 seconds)
     private int thresholdDead = 3600000;   // after that time a thread is considered as beeing dead-locked (1 hour)
@@ -174,9 +172,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     // class initializer
     public serverCore(
             int port, 
-            int maxSessions, 
             int timeout,
-            boolean termSleepingThreads, 
             boolean blockAttack,
             serverHandler handlerPrototype, 
             serverSwitch switchboard,
@@ -215,9 +211,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.switchboard = switchboard;
             this.initHandlerClasses = new Class[] {Class.forName("de.anomic.server.serverSwitch")};
             this.initSessionClasses = new Class[] {Class.forName("de.anomic.server.serverCore$Session")};
-            this.maxSessions = maxSessions;
             this.timeout = timeout;
-            this.termSleepingThreads = termSleepingThreads;
         } catch (java.lang.ClassNotFoundException e) {
             System.out.println("FATAL ERROR: " + e.getMessage() + " - Class Not Found"); System.exit(0);
         }
@@ -238,12 +232,12 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         // The maximum number of active connections that can be allocated from pool at the same time,
         // 0 for no limit
-        this.cralwerPoolConfig.maxActive = this.maxSessions;
+        this.cralwerPoolConfig.maxActive = Integer.valueOf(switchboard.getConfig("httpdMaxActiveSessions","150")).intValue();
         
         // The maximum number of idle connections connections in the pool
         // 0 = no limit.        
-        this.cralwerPoolConfig.maxIdle = this.maxSessions / 2;
-        this.cralwerPoolConfig.minIdle = this.maxSessions / 4;    
+        this.cralwerPoolConfig.maxIdle = Integer.valueOf(switchboard.getConfig("httpdMaxIdleSessions","75")).intValue();
+        this.cralwerPoolConfig.minIdle = Integer.valueOf(switchboard.getConfig("httpdMinIdleSessions","5")).intValue();    
         
         // block undefinitely 
         this.cralwerPoolConfig.maxWait = timeout; 
@@ -580,7 +574,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
          * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
          */
         public Object makeObject() {
-            return new Session(this.sessionThreadGroup);
+            Session newSession = new Session(this.sessionThreadGroup);
+            newSession.setPriority(Thread.MAX_PRIORITY);
+            return newSession;
         }
         
          /**

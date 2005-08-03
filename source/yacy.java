@@ -247,7 +247,6 @@ public final class yacy {
             int port          = Integer.parseInt(sb.getConfig("port", "8080"));
             int timeout       = Integer.parseInt(sb.getConfig("httpdTimeout", "60000"));
             if (timeout < 60000) timeout = 60000;
-            int maxSessions   = Integer.parseInt(sb.getConfig("httpdMaxSessions", "100"));
 
             // create some directories
             File htRootPath = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot"));
@@ -342,9 +341,7 @@ public final class yacy {
             try {
                 httpd protocolHandler = new httpd(sb, new httpdFileHandler(sb), new httpdProxyHandler(sb));
                 serverCore server = new serverCore(port,
-                        maxSessions /*sessions*/,
                         timeout /*control socket timeout in milliseconds*/,
-                        true /* terminate sleeping threads */,
                         true /* block attacks (wrong protocol) */,
                         protocolHandler /*command class*/,
                         sb,
