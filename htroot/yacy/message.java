@@ -98,8 +98,8 @@ public class message {
             return prop;
         }
         
-        prop.put("messagesize", "" + messagesize);
-        prop.put("attachmentsize", "" + attachmentsize);
+        prop.put("messagesize", Integer.toString(messagesize));
+        prop.put("attachmentsize", Integer.toString(attachmentsize));
         
         if (process.equals("permission")) {
             // permission: respond with accceptabeale message and attachment size

@@ -78,7 +78,7 @@ public class ProxyIndexingMonitor_p {
             if (post.containsKey("proxyprofileset")) try {
                 // read values and put them in global settings
                 int newProxyPrefetchDepth = Integer.parseInt((String) post.get("proxyPrefetchDepth", "0"));
-                env.setConfig("proxyPrefetchDepth", "" + newProxyPrefetchDepth);
+                env.setConfig("proxyPrefetchDepth", Integer.toString(newProxyPrefetchDepth));
                 boolean proxyStoreHTCache = ((String) post.get("proxyStoreHTCache", "")).equals("on");
                 env.setConfig("proxyStoreHTCache", (proxyStoreHTCache) ? "true" : "false");
 
@@ -88,7 +88,7 @@ public class ProxyIndexingMonitor_p {
 		    prop.put("info", 1);//delete DATA/PLASMADB/crawlProfiles0.db
                 } else {
                     try {
-			profile.changeEntry("generalDepth", "" + newProxyPrefetchDepth);
+			profile.changeEntry("generalDepth", Integer.toString(newProxyPrefetchDepth));
                         profile.changeEntry("storeHTCache", (proxyStoreHTCache) ? "true": "false");
 			prop.put("info", 2);//new proxyPrefetchdepth
 			prop.put("info_message", newProxyPrefetchDepth);

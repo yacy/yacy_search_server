@@ -105,7 +105,7 @@ public class transferURL {
             
             // return rewrite properties
             int more = switchboard.urlPool.loadedURL.size() - sizeBefore;
-            doublevalues = "" + (received - more);
+            doublevalues = Integer.toString(received - more);
             switchboard.getLog().logInfo("Received " + received + " URLs from peer " + iam);
             if ((received - more) > 0) switchboard.getLog().logError("Received " + doublevalues + " double URLs from peer " + iam);
             result = "ok";

@@ -133,7 +133,7 @@ public class crawlOrder {
             } else if (queuesize > 100) {
                 response = "rejected";
                 reason = "busy";
-                delay = "" + (30 + queuesize * acceptDelay);
+                delay = Integer.toString(30 + queuesize * acceptDelay);
             } else if (!(process.equals("crawl"))) {
                 response = "denied";
                 reason = "unknown-order";
@@ -172,7 +172,7 @@ public class crawlOrder {
                     response = (String) stackresult[0];
                     reason = (String) stackresult[1];
                     lurl = (String) stackresult[2];
-                    delay = (response.equals("stacked")) ? "" + (5 + acceptDelay) : "1"; // this value needs to be calculated individually
+                    delay = (response.equals("stacked")) ? Integer.toString(5 + acceptDelay) : "1"; // this value needs to be calculated individually
                 } else {
                     // new method: several urls
                     int stackCount = 0;
@@ -189,7 +189,7 @@ public class crawlOrder {
                     response = "enqueued";
                     reason = "ok";
                     lurl = "";
-                    delay = "" + (stackCount * acceptDelay + 1);
+                    delay = Integer.toString(stackCount * acceptDelay + 1);
                 }
 	    }
         } catch (Exception e) {

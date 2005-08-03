@@ -90,7 +90,7 @@ public class Status {
         else
             prop.put("versioncomment", 0);//no commet
 
-        prop.put("versioncomment_latestVersion", "" + yacyCore.latestVersion);
+        prop.put("versioncomment_latestVersion", Float.toString(yacyCore.latestVersion));
         
         prop.put("host", serverCore.publicLocalIP());
         prop.put("port", env.getConfig("port", "<unknown>"));    

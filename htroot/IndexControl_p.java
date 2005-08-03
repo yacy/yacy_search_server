@@ -76,8 +76,8 @@ public class IndexControl_p {
             prop.put("urlstring", "");
             prop.put("urlhash", "");
             prop.put("result", "");
-            prop.put("wcount", "" + switchboard.wordIndex.size());
-            prop.put("ucount", "" + switchboard.urlPool.loadedURL.size());
+            prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
+            prop.put("ucount", Integer.toString(switchboard.urlPool.loadedURL.size()));
             prop.put("otherHosts", "");
             prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
             prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
@@ -284,14 +284,14 @@ public class IndexControl_p {
                     hc++;
                 }
 	    }
-            prop.put("hosts", "" + hc);
+            prop.put("hosts", Integer.toString(hc));
 	} else {
             prop.put("hosts", "0");
 	}
         
         // insert constants
-        prop.put("wcount", "" + switchboard.wordIndex.size());
-        prop.put("ucount", "" + switchboard.urlPool.loadedURL.size());
+        prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
+        prop.put("ucount", Integer.toString(switchboard.urlPool.loadedURL.size()));
 	prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
         prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
         prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "checked" : "");

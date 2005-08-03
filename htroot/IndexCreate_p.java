@@ -105,7 +105,7 @@ public class IndexCreate_p {
                     String newcrawlingfilter = post.get("crawlingFilter", ".*");
                     env.setConfig("crawlingFilter", newcrawlingfilter);
                     int newcrawlingdepth = Integer.parseInt((String) post.get("crawlingDepth", "0"));
-                    env.setConfig("crawlingDepth", ("" + newcrawlingdepth));
+                    env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                     boolean crawlingQ = ((String) post.get("crawlingQ", "")).equals("on");
                     env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
                     boolean storeHTCache = ((String) post.get("storeHTCache", "")).equals("on");
@@ -268,7 +268,7 @@ public class IndexCreate_p {
                 }
                 serverThread rct = switchboard.getThread("62_remotetriggeredcrawl");
                 rct.setBusySleep(newBusySleep);
-                env.setConfig("62_remotetriggeredcrawl_busysleep", "" + newBusySleep);
+                env.setConfig("62_remotetriggeredcrawl_busysleep", Long.toString(newBusySleep));
                 //boolean crawlResponse = ((String) post.get("acceptCrawlMax", "")).equals("on");
                 //env.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
             }
@@ -296,7 +296,7 @@ public class IndexCreate_p {
         long busySleep = Integer.parseInt(env.getConfig("62_remotetriggeredcrawl_busysleep", "100"));
         if (busySleep < 100) {
             busySleep = 100;
-            env.setConfig("62_remotetriggeredcrawl_busysleep", "" + busySleep);
+            env.setConfig("62_remotetriggeredcrawl_busysleep", Long.toString(busySleep));
         }
         if (env.getConfig("crawlResponse", "").equals("true")) {
             if (busySleep <= 100) {
