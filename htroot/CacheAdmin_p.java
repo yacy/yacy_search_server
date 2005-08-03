@@ -142,8 +142,8 @@ public class CacheAdmin_p {
         }
         
         //
-	prop.put("cachesize", "" + (switchboard.cacheManager.currCacheSize/1024));
-	prop.put("cachemax", "" + (switchboard.cacheManager.maxCacheSize/1024));
+	prop.put("cachesize", Long.toString(switchboard.cacheManager.currCacheSize/1024));
+	prop.put("cachemax", Long.toString(switchboard.cacheManager.maxCacheSize/1024));
         prop.put("tree", tree);
         prop.put("info", info);
         // return rewrite properties

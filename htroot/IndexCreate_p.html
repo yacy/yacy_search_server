@@ -246,7 +246,7 @@ Continue crawling.
 #{/crawlProfiles}#
 </table>
 <br>
-<b id="crawlingStarts">Other Peer Crawl Starts (recently started with remote indexing; this is a YaCyNews Service):</b><br>
+<b id="crawlingStarts">Recently started remote crawls in progress:</b><br>
 <table border="0" cellpadding="2" cellspacing="1" width="100%">
   <tr class="TableHeader">
     <td class="small"><b>Start Time</b></td>
@@ -256,7 +256,7 @@ Continue crawling.
     <td class="small"><b>Depth</b></td>
     <td class="small"><b>Accept '?'</b></td>
   </tr>
-#{otherCrawlStart}#
+#{otherCrawlStartInProgress}#
   <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
     <td class="small">#[cre]#</td>
     <td class="small">#[peername]#</td>
@@ -265,7 +265,29 @@ Continue crawling.
     <td class="small">#[generalDepth]#</td>
     <td class="small">#(crawlingQ)#no::yes#(/crawlingQ)#</td>
   </tr>
-#{/otherCrawlStart}#
+#{/otherCrawlStartInProgress}#
+</table>
+<br>
+<b>Recently started remote crawls, finished:</b><br>
+<table border="0" cellpadding="2" cellspacing="1" width="100%">
+  <tr class="TableHeader">
+    <td class="small"><b>Start Time</b></td>
+    <td class="small"><b>Peer Name</b></td>
+    <td class="small"><b>Start URL</b></td>
+    <td class="small"><b>Intention/Description</b></td>
+    <td class="small"><b>Depth</b></td>
+    <td class="small"><b>Accept '?'</b></td>
+  </tr>
+#{otherCrawlStartFinished}#
+  <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+    <td class="small">#[cre]#</td>
+    <td class="small">#[peername]#</td>
+    <td class="small"><a class="small" href="#[startURL]#">#[startURL]#</a></td>
+    <td class="small">#[intention]#</td>
+    <td class="small">#[generalDepth]#</td>
+    <td class="small">#(crawlingQ)#no::yes#(/crawlingQ)#</td>
+  </tr>
+#{/otherCrawlStartFinished}#
 </table>
 <br>
 <b id="remoteCrawlPeers">Remote Crawling Peers:</b>&nbsp;

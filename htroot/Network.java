@@ -114,8 +114,8 @@ public class Network {
                 prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", ""))));
                 prop.put("table_my-links", groupDigits(links));
                 prop.put("table_my-words", groupDigits(words));
-                prop.put("table_my-acceptcrawl", "" + (seed.getFlagAcceptRemoteCrawl() ? 1 : 0) );
-                prop.put("table_my-acceptindex", "" + (seed.getFlagAcceptRemoteIndex() ? 1 : 0) );
+                prop.put("table_my-acceptcrawl", Integer.toString(seed.getFlagAcceptRemoteCrawl() ? 1 : 0) );
+                prop.put("table_my-acceptindex", Integer.toString(seed.getFlagAcceptRemoteIndex() ? 1 : 0) );
                 prop.put("table_my-sI", seed.get("sI", "-"));
                 prop.put("table_my-sU", seed.get("sU", "-"));
                 prop.put("table_my-rI", seed.get("rI", "-"));
@@ -351,11 +351,11 @@ public class Network {
             } catch (java.text.ParseException e) {
                 l = 999;
             }
-        if (l == 999) return "-"; else return "" + l;
+        if (l == 999) return "-"; else return Long.toString(l);
     }
     
     private static String groupDigits(long Number) {
-        String s = "" + Number;
+        String s = Long.toString(Number);
         String t = "";
         for (int i = 0; i < s.length(); i++)  t = s.charAt(s.length() - i - 1) + (((i % 3) == 0) ? "," : "") + t;
         return t.substring(0, t.length() - 1);

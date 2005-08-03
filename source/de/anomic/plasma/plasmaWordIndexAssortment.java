@@ -82,7 +82,7 @@ public final class plasmaWordIndexAssortment {
     private int bufferStructureLength;
 
     private static String intx(int x) {
-	String s = "" + x;
+	String s = Integer.toString(x);
 	while (s.length() < 3) s = "0" + s;
 	return s;
     }

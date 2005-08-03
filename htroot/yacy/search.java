@@ -88,7 +88,7 @@ public class search {
         }
         long timestamp = System.currentTimeMillis();
 	prop = switchboard.searchFromRemote(keyhashes, count, global, duetime);
-        prop.put("searchtime", "" + (System.currentTimeMillis() - timestamp));
+        prop.put("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
         
         int links = Integer.parseInt(prop.get("linkcount","0"));
         yacyCore.seedDB.mySeed.incSI(links);

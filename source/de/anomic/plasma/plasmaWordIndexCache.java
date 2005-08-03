@@ -215,6 +215,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 while (i-- > 0) {
                     // get out one entry
                     row = dumpArray.get(i);
+                    if (row[0] == null) continue;
                     wordHash = new String(row[0]);
                     creationTime = kelondroRecords.bytes2long(row[2]);
                     wordEntry = new plasmaWordIndexEntry(new String(row[3]), new String(row[4]));

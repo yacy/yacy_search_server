@@ -100,7 +100,7 @@ public class Performance_p {
             prop.put("table_" + c + "_shortdescr", (thread.getMonitorURL() == null) ? thread.getShortDescription() : "<a href=\"" + thread.getMonitorURL() + "\" class=?\"small\">" + thread.getShortDescription() + "</a>");
             prop.put("table_" + c + "_longdescr", thread.getLongDescription());
             queuesize = thread.getJobCount();
-            prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unlimited" : ("" + queuesize));
+            prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(queuesize));
             
             blocktime = thread.getBlockTime();
             sleeptime = thread.getSleepTime();
@@ -109,17 +109,17 @@ public class Performance_p {
             busyCycles = thread.getBusyCycles();
             memshortageCycles = thread.getOutOfMemoryCycles();
             prop.put("table_" + c + "_blocktime", blocktime / 1000);
-            prop.put("table_" + c + "_blockpercent", "" + (100 * blocktime / blocktime_total));
+            prop.put("table_" + c + "_blockpercent", Long.toString(100 * blocktime / blocktime_total));
             prop.put("table_" + c + "_sleeptime", sleeptime / 1000);
-            prop.put("table_" + c + "_sleeppercent", "" + (100 * sleeptime / sleeptime_total));
+            prop.put("table_" + c + "_sleeppercent", Long.toString(100 * sleeptime / sleeptime_total));
             prop.put("table_" + c + "_exectime", exectime / 1000);
-            prop.put("table_" + c + "_execpercent", "" + (100 * exectime / exectime_total));
-            prop.put("table_" + c + "_totalcycles", "" + (idleCycles + busyCycles + memshortageCycles));
-            prop.put("table_" + c + "_idlecycles", "" + idleCycles);
-            prop.put("table_" + c + "_busycycles", "" + busyCycles);
-            prop.put("table_" + c + "_memscycles", "" + memshortageCycles);
-            prop.put("table_" + c + "_sleeppercycle", ((idleCycles + busyCycles) == 0) ? "-" : ("" + (sleeptime / (idleCycles + busyCycles))));
-            prop.put("table_" + c + "_execpercycle", (busyCycles == 0) ? "-" : ("" + (exectime / busyCycles)));
+            prop.put("table_" + c + "_execpercent", Long.toString(100 * exectime / exectime_total));
+            prop.put("table_" + c + "_totalcycles", Long.toString(idleCycles + busyCycles + memshortageCycles));
+            prop.put("table_" + c + "_idlecycles", Long.toString(idleCycles));
+            prop.put("table_" + c + "_busycycles", Long.toString(busyCycles));
+            prop.put("table_" + c + "_memscycles", Long.toString(memshortageCycles));
+            prop.put("table_" + c + "_sleeppercycle", ((idleCycles + busyCycles) == 0) ? "-" : Long.toString(sleeptime / (idleCycles + busyCycles)));
+            prop.put("table_" + c + "_execpercycle", (busyCycles == 0) ? "-" : Long.toString(exectime / busyCycles));
             
             if ((post != null) && (post.containsKey("submitdelay"))) {
                 // load with new values
@@ -171,10 +171,10 @@ public class Performance_p {
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             int wordCacheMax = Integer.parseInt((String) post.get("wordCacheMax", "10000"));
-            switchboard.setConfig("wordCacheMax", "" + wordCacheMax);
+            switchboard.setConfig("wordCacheMax", Integer.toString(wordCacheMax));
             switchboard.wordIndex.setMaxWords(wordCacheMax);
             int maxWaitingWordFlush = Integer.parseInt((String) post.get("maxWaitingWordFlush", "180"));
-            switchboard.setConfig("maxWaitingWordFlush", "" + maxWaitingWordFlush);
+            switchboard.setConfig("maxWaitingWordFlush", Integer.toString(maxWaitingWordFlush));
         }
         
         if ((post != null) && (post.containsKey("poolConfig"))) {
@@ -224,7 +224,7 @@ public class Performance_p {
         
         if ((post != null) && (post.containsKey("proxyControlSubmit"))) {
             int onlineCautionDelay = Integer.parseInt((String) post.get("onlineCautionDelay", "30000"));
-            switchboard.setConfig("onlineCautionDelay", "" + onlineCautionDelay);
+            switchboard.setConfig("onlineCautionDelay", Integer.toString(onlineCautionDelay));
         }
         
         // table cache settings

@@ -105,7 +105,7 @@ public class yacyNewsRecord {
         if (this.category != null)   attributes.put("cat", this.category);
         if (this.created != null)    attributes.put("cre", yacyCore.universalDateShortString(this.created));
         if (this.received != null)   attributes.put("rec", yacyCore.universalDateShortString(this.received));
-        attributes.put("dis", "" + this.distributed);
+        attributes.put("dis", Integer.toString(this.distributed));
         String theString = attributes.toString();
         removeStandards();
         return theString;

@@ -140,11 +140,11 @@ public final class yacy {
         long svn;
         try {svn = (long) (100000000.0 * Double.parseDouble(s));} catch (NumberFormatException ee) {svn = 0;}
         double version = (Math.floor((double) svn / (double) 100000) / (double) 1000);
-        String vStr = (version < 0.11) ? "dev" : "" + version;
+        String vStr = (version < 0.11) ? "dev" : Double.toString(version);
         //while (vStr.length() < 5) vStr = vStr + "0";
         svn = svn % 100000;
         if (svn > 4000) svn=svn / 10; // fix a previous bug online
-        String svnStr = "" + svn;
+        String svnStr = Long.toString(svn);
         while (svnStr.length() < 5) svnStr = "0" + svnStr;
         return vStr + "/" + svnStr;
     }
@@ -235,10 +235,10 @@ public final class yacy {
                 System.err.println("Unable to determine the currently used SVN revision number.");
             }
 
-            sb.setConfig("version", "" + version);
+            sb.setConfig("version", Float.toString(version));
             sb.setConfig("vdate", vDATE);
             sb.setConfig("applicationRoot", homePath);
-            sb.setConfig("startupTime", "" + startup);
+            sb.setConfig("startupTime", Long.toString(startup));
             serverLog.logSystem("STARTUP", "YACY Version: " + version + ", Built " + vDATE);
             yacyCore.latestVersion = (float) version;
 

@@ -307,7 +307,7 @@ public class yacyClient {
             obj.put("resource", ((global) ? "global" : "local"));
             obj.put("query", wordhashes);
             obj.put("ttl", "0");
-            obj.put("duetime", "" + duetime);
+            obj.put("duetime", Long.toString(duetime));
             obj.put("mytime", yacyCore.universalDateShortString());
             //yacyCore.log.logDebug("yacyClient.search url=" + url);
             long timestamp = System.currentTimeMillis();
@@ -376,7 +376,7 @@ public class yacyClient {
             // generate statistics
             long searchtime;
             try {
-                searchtime = Integer.parseInt("" + (String) result.get("searchtime"));
+                searchtime = Integer.parseInt((String) result.get("searchtime"));
             } catch (NumberFormatException e) {
                 searchtime = totalrequesttime;
             }
@@ -617,7 +617,7 @@ public class yacyClient {
         post.put("key", key);
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);
-        post.put("wordc", "" + indexes.length);
+        post.put("wordc", Integer.toString(indexes.length));
         int indexcount = 0;
         String entrypost = "";
         Enumeration eenum;
@@ -666,7 +666,7 @@ public class yacyClient {
             }
         }
         
-        post.put("entryc", "" + indexcount);
+        post.put("entryc", Integer.toString(indexcount));
         post.put("indexes", entrypost);
         try {
             Vector v = httpc.wput(new URL("http://" + address + "/yacy/transferRWI.html"), 60000, null, null,
@@ -678,7 +678,7 @@ public class yacyClient {
             
             HashMap result = nxTools.table(v);
             result.put("$URLCACHE$", urlCache);
-            result.put("$UNKNOWNC$", "" + unknownURLs.size());
+            result.put("$UNKNOWNC$", Integer.toString(unknownURLs.size()));
             return result;
         } catch (Exception e) {
             yacyCore.log.logError("yacyClient.transferRWI error:" + e.getMessage());
@@ -707,7 +707,7 @@ public class yacyClient {
                 }
             }
         }
-        post.put("urlc", "" + urlc);
+        post.put("urlc", Integer.toString(urlc));
         try {
             Vector v = httpc.wput(new URL("http://" + address + "/yacy/transferURL.html"), 60000, null, null,
             yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort, post);

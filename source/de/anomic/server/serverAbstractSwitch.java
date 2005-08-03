@@ -132,7 +132,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     }
 
     public void setConfig(String key, long value) {
-        setConfig(key, "" + value);
+        setConfig(key, Long.toString(value));
     }
 
     public void setConfig(String key, String value) {

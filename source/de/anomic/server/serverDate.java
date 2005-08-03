@@ -219,14 +219,6 @@ public final class serverDate {
         return new String(result);
     }
     
-    /*
-    private static String format(int c, int len) {
-        String s = "" + c;
-        while (s.length() < len) s = "0" + s;
-        return s;
-    }
-    */
-    
     // the following is only here to compare the kelondroDate with java-Date:
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
     private static Calendar gregorian = new GregorianCalendar(GMTTimeZone);

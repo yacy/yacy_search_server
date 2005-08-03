@@ -882,7 +882,7 @@ cd ..
       else s = s + "?";
       if (inode.canRead()) s = s + "r"; else s = s + "-";
       if (inode.canWrite()) s = s + "w"; else s = s + "-";
-      s = s + " " + lenformatted("" + inode.length(),9);
+      s = s + " " + lenformatted(Long.toString(inode.length()),9);
       DateFormat df = DateFormat.getDateTimeInstance();
       s = s + " " + df.format(new Date(inode.lastModified()));
       s = s + " " + inode.getName();

@@ -105,7 +105,7 @@ public final class serverObjects extends Hashtable implements Cloneable {
 
     // long variant
     public long put(String key, long value) {
-	String result = this.put(key, "" + value);
+	String result = this.put(key, Long.toString(value));
 	if (result == null) return 0; else try {
             return Long.parseLong(result);
         } catch (NumberFormatException e) {
@@ -118,7 +118,7 @@ public final class serverObjects extends Hashtable implements Cloneable {
 	String c = (String) super.get(key);
 	if (c == null) c = "0";
 	long l = Long.parseLong(c) + 1;
-	super.put(key, "" + l);
+	super.put(key, Long.toString(l));
 	return l;
     }
 

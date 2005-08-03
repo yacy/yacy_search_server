@@ -107,13 +107,13 @@ public class yacyPeerActions {
         }
         long uptime = ((yacyCore.universalTime() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000) / 60;
         long indexedc = sb.getThread("80_indexing").getBusyCycles();
-        seedDB.mySeed.put("ISpeed", ((indexedc == 0) || (uptime == 0)) ? "unknown" : ("" + (indexedc / uptime))); // the speed of indexing (pages/minute) of the peer
-        seedDB.mySeed.put("Uptime", "" + uptime); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        seedDB.mySeed.put("LCount", "" + sb.urlPool.loadedURL.size()); // the number of links that the peer has stored (LURL's)
-        seedDB.mySeed.put("NCount", "" + sb.urlPool.noticeURL.stackSize()); // the number of links that the peer has noticed, but not loaded (NURL's)
-        seedDB.mySeed.put("ICount", "" + sb.cacheSizeMin()); // the minimum number of words that the peer has indexed (as it says)
-        seedDB.mySeed.put("SCount", "" + seedDB.sizeConnected()); // the number of seeds that the peer has stored
-        seedDB.mySeed.put("CCount", "" + (((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
+        seedDB.mySeed.put("ISpeed", ((indexedc == 0) || (uptime == 0)) ? "unknown" : Long.toString(indexedc / uptime)); // the speed of indexing (pages/minute) of the peer
+        seedDB.mySeed.put("Uptime", Long.toString(uptime)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        seedDB.mySeed.put("LCount", Integer.toString(sb.urlPool.loadedURL.size())); // the number of links that the peer has stored (LURL's)
+        seedDB.mySeed.put("NCount", Integer.toString(sb.urlPool.noticeURL.stackSize())); // the number of links that the peer has noticed, but not loaded (NURL's)
+        seedDB.mySeed.put("ICount", Integer.toString(sb.cacheSizeMin())); // the minimum number of words that the peer has indexed (as it says)
+        seedDB.mySeed.put("SCount", Integer.toString(seedDB.sizeConnected())); // the number of seeds that the peer has stored
+        seedDB.mySeed.put("CCount", Double.toString(((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
         seedDB.mySeed.put("Version", sb.getConfig("version", ""));
         if (seedDB.mySeed.get("PeerType","").equals("principal")) {
             // attach information about seed location

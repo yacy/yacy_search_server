@@ -87,7 +87,7 @@ public class messageBoard {
     }
 
     private String snString() {
-	String s = "" + sn;
+	String s = Integer.toString(sn);
 	if (s.length() == 1) s = "0" + s;
 	sn++;
 	if (sn > 99) sn = 0;

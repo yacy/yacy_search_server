@@ -169,15 +169,15 @@ public class plasmaCrawlProfile {
                      boolean storeHTCache, boolean storeTXCache,
                      boolean localIndexing, boolean remoteIndexing,
                      boolean xsstopw, boolean xdstopw, boolean xpstopw) {
-            String handle = serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true).substring(0, plasmaURL.urlCrawlProfileHandleLength);
+            String handle = serverCodings.encodeMD5B64(Long.toString(System.currentTimeMillis()), true).substring(0, plasmaURL.urlCrawlProfileHandleLength);
             mem = new HashMap();
             mem.put("handle", handle);
             mem.put("name", name);
             mem.put("startURL", startURL);
             mem.put("generalFilter", generalFilter);
             mem.put("specificFilter", specificFilter);
-            mem.put("generalDepth", "" + generalDepth);
-            mem.put("specificDepth", "" + specificDepth);
+            mem.put("generalDepth", Integer.toString(generalDepth));
+            mem.put("specificDepth", Integer.toString(specificDepth));
             mem.put("crawlingQ", (crawlingQ) ? "true" : "false"); // crawling of urls with '?'
             mem.put("storeHTCache", (storeHTCache) ? "true" : "false");
             mem.put("storeTXCache", (storeTXCache) ? "true" : "false");

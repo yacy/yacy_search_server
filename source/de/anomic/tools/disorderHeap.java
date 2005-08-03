@@ -55,7 +55,7 @@ public class disorderHeap {
 	// create a disorder heap with numbers in it
 	// the numbers are 0..numbers-1
 	this();
-	for (int i = 0; i < numbers; i++) add("" + i);
+	for (int i = 0; i < numbers; i++) add(Integer.toString(i));
     }
     
     public synchronized void add(Object element) {

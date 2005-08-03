@@ -337,7 +337,7 @@ public class SettingsAck_p {
             httpdProxyHandler.remoteProxyNoProxy = (String) post.get("remoteProxyNoProxy", "");
             httpdProxyHandler.remoteProxyNoProxyPatterns = httpdProxyHandler.remoteProxyNoProxy.split(",");
             env.setConfig("remoteProxyHost", httpdProxyHandler.remoteProxyHost);
-            env.setConfig("remoteProxyPort", "" + httpdProxyHandler.remoteProxyPort);
+            env.setConfig("remoteProxyPort", Integer.toString(httpdProxyHandler.remoteProxyPort));
             env.setConfig("remoteProxyNoProxy", httpdProxyHandler.remoteProxyNoProxy);
             env.setConfig("remoteProxyUse", (httpdProxyHandler.remoteProxyUse) ? "true" : "false");
             prop.put("info", 15); // The remote-proxy setting has been changed

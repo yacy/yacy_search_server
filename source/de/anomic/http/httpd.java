@@ -698,7 +698,7 @@ public final class httpd implements serverHandler {
         // prepare to pass values
         Properties prop = new Properties();
         prop.setProperty("HOST", arg);
-        prop.setProperty("PORT", "" + port);
+        prop.setProperty("PORT", Integer.toString(port));
         prop.setProperty("HTTP", httpVersion);
         
         // pass to proxy
@@ -989,7 +989,7 @@ public final class httpd implements serverHandler {
             line = readLine(p, buffer);
             pos = nextPos;
         }
-        header.put("ARGC", ("" + argc)); // store argument count
+        header.put("ARGC", Integer.toString(argc)); // store argument count
         return files;
     }
     
@@ -1150,7 +1150,7 @@ public final class httpd implements serverHandler {
             httpHeader header = new httpHeader();            
             header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
             header.put(httpHeader.CONTENT_TYPE, "text/html");
-            header.put(httpHeader.CONTENT_LENGTH, "" + result.length);
+            header.put(httpHeader.CONTENT_LENGTH, Integer.toString(result.length));
             header.put(httpHeader.PRAGMA, "no-cache");
             sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,header);
             

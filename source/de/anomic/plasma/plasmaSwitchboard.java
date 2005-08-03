@@ -893,8 +893,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             log.logDebug("processResourceStack processCase=" + processCase +
                     ", depth=" + entry.depth() +
-                    ", maxDepth=" + ((entry.profile() == null) ? "null" : "" + entry.profile().generalDepth()) +
-                    ", filter=" + ((entry.profile() == null) ? "null" : "" + entry.profile().generalFilter()) +
+                    ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().generalDepth())) +
+                    ", filter=" + ((entry.profile() == null) ? "null" : entry.profile().generalFilter()) +
                     ", initiatorHash=" + initiatorHash +
                     ", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
                     ", url=" + entry.url()); // DEBUG
@@ -1321,7 +1321,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 prop.put("totalcount", "0");
                 prop.put("linkcount", "0");
             } else {
-                prop.put("totalcount", "" + acc.sizeOrdered());
+                prop.put("totalcount", Integer.toString(acc.sizeOrdered()));
                 int i = 0;
                 int p;
                 URL url;
@@ -1414,8 +1414,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     System.out.println(" all words = " + ref.getElementCount() + ", total count = " + ref.getTotalCount());
                      */
                 prop.put("references", ws);
-                prop.put("linkcount", "" + i);
-                prop.put("results", "" + i);
+                prop.put("linkcount", Integer.toString(i));
+                prop.put("results", Integer.toString(i));
             }
             
             // log
@@ -1446,7 +1446,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 prop.put("linkcount", "0");
                 prop.put("references", "");
             } else {
-                prop.put("totalcount", "" + acc.sizeOrdered());
+                prop.put("totalcount", Integer.toString(acc.sizeOrdered()));
                 int i = 0;
                 StringBuffer links = new StringBuffer();
                 String resource = "";
@@ -1471,7 +1471,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     }
                 }
                 prop.put("links", links.toString());
-                prop.put("linkcount", "" + i);
+                prop.put("linkcount", Integer.toString(i));
                 
                 // prepare reference hints
                 Object[] ws = acc.getReferences(16);
@@ -1502,7 +1502,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
 	if (actionName.equals("urlcount")) {
 	    serverObjects result = new serverObjects();
-	    result.put("urls","" + urlPool.loadedURL.size());
+	    result.put("urls", Integer.toString(urlPool.loadedURL.size()));
 	    return result;
 	}
 

@@ -164,19 +164,19 @@ public class yacySeed {
 
     public void incSI(int count) {
         String v = (String) dna.get("sI"); if (v == null) v = "0";
-        dna.put("sI", "" + (Integer.parseInt(v) + count));
+        dna.put("sI", Integer.toString(Integer.parseInt(v) + count));
     }
     public void incRI(int count) {
         String v = (String) dna.get("rI"); if (v == null) v = "0";
-        dna.put("rI", "" + (Integer.parseInt(v) + count));
+        dna.put("rI", Integer.toString(Integer.parseInt(v) + count));
     }
     public void incSU(int count) {
         String v = (String) dna.get("sU"); if (v == null) v = "0";
-        dna.put("sU", "" + (Integer.parseInt(v) + count));
+        dna.put("sU", Integer.toString(Integer.parseInt(v) + count));
     }
     public void incRU(int count) {
         String v = (String) dna.get("rU"); if (v == null) v = "0";
-        dna.put("rU", "" + (Integer.parseInt(v) + count));
+        dna.put("rU", Integer.toString(Integer.parseInt(v) + count));
     }
 
     // 12 * 6 bit = 72 bit = 9 byte
@@ -317,7 +317,7 @@ public class yacySeed {
 	    sp.getProperty("java.version","") +
 	    sp.getProperty("os.version","") +
 	    sb.getConfig("peerName", "noname");
-	String fast = "" + System.currentTimeMillis();
+	String fast = Long.toString(System.currentTimeMillis());
 	// the resultinh hash does not have any information than can be used to reconstruct the
 	// original system information that has been collected here to create the hash
 	// We simply distinuguish three parts of the hash: slow, medium and fast changing character of system idenfification

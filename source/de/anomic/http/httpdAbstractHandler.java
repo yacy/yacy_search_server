@@ -66,7 +66,7 @@ public abstract class httpdAbstractHandler {
         new SimpleDateFormat("yyyyMMddHHmmss");
     
     protected static String uniqueDateString() {
-        String c = "" + fileCounter;
+        String c = Integer.toString(fileCounter);
         fileCounter++; if (fileCounter>9999) fileCounter = 0;
         while (c.length() < 4) { c = "0" + c; }
         return "FILE" + DateFileNameFormatter.format(httpc.nowDate()) + c;

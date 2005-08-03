@@ -371,20 +371,45 @@ public class IndexCreate_p {
                 if (record.category().equals("crwlstrt")) {
                     peer = yacyCore.seedDB.get(record.originator());
                     if (peer == null) peername = record.originator(); else peername = peer.getName();
-                    prop.put("otherCrawlStart_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
-                    prop.put("otherCrawlStart_" + showedCrawl + "_cre", record.created());
-                    prop.put("otherCrawlStart_" + showedCrawl + "_peername", peername);
-                    prop.put("otherCrawlStart_" + showedCrawl + "_startURL", record.attributes().get("startURL"));
-                    prop.put("otherCrawlStart_" + showedCrawl + "_intention", record.attributes().get("intention"));
-                    prop.put("otherCrawlStart_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
-                    prop.put("otherCrawlStart_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? 1 : 0);
+                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
+                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_cre", record.created());
+                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_peername", peername);
+                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_startURL", record.attributes().get("startURL"));
+                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_intention", record.attributes().get("intention"));
+                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
+                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? 1 : 0);
                     showedCrawl++;
                     if (showedCrawl > 20) break;
                 }
                 
             }
         } catch (IOException e) {}
-        prop.put("otherCrawlStart", showedCrawl);
+        prop.put("otherCrawlStartInProgress", showedCrawl);
+        
+        // finished remote crawls
+        availableNews = yacyCore.newsPool.size(yacyNewsPool.PROCESSED_DB);
+        showedCrawl = 0;
+        try {
+            for (int c = 0; c < availableNews; c++) {
+                record = yacyCore.newsPool.get(yacyNewsPool.PROCESSED_DB, c);
+                if (record == null) continue;
+                if (record.category().equals("crwlstrt")) {
+                    peer = yacyCore.seedDB.get(record.originator());
+                    if (peer == null) peername = record.originator(); else peername = peer.getName();
+                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
+                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_cre", record.created());
+                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_peername", peername);
+                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_startURL", record.attributes().get("startURL"));
+                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_intention", record.attributes().get("intention"));
+                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
+                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? 1 : 0);
+                    showedCrawl++;
+                    if (showedCrawl > 20) break;
+                }
+                
+            }
+        } catch (IOException e) {}
+        prop.put("otherCrawlStartFinished", showedCrawl);
 
         
         // remote crawl peers

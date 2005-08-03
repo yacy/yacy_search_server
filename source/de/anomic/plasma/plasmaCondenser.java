@@ -123,12 +123,12 @@ public class plasmaCondenser {
 	    this.hash = new HashSet();
 	}
 	public void inc() {count++;}
-	public void check(int i) {hash.add("" + i);}
+	public void check(int i) {hash.add(Integer.toString(i));}
 	
     }
 
-    public static String intString(int number, int length) {
-	String s = "" + number;
+    public String intString(int number, int length) {
+	String s = Integer.toString(number);
 	while (s.length() < length) s = "0" + s;
 	return s;
     }

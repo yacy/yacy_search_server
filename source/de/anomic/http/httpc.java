@@ -730,7 +730,7 @@ public final class httpc {
                     clientOutput.write(buffer, 0, c);
                     len += c;
                 }
-                requestHeader.put(httpHeader.CONTENT_LENGTH, "" + len);
+                requestHeader.put(httpHeader.CONTENT_LENGTH, Integer.toString(len));
             }
             clientOutput.flush();
             return new response(false);
@@ -809,7 +809,7 @@ public final class httpc {
         byte[] body = buf.toByteArray();
         //System.out.println("DEBUG: PUT BODY=" + new String(body));
         // size of that body
-        requestHeader.put(httpHeader.CONTENT_LENGTH, "" + body.length);
+        requestHeader.put(httpHeader.CONTENT_LENGTH, Integer.toString(body.length));
         // send the header
         //System.out.println("header=" + requestHeader);
         send(httpHeader.METHOD_POST, path, requestHeader, false);
