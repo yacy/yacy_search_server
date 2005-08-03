@@ -59,6 +59,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
@@ -69,6 +72,7 @@ import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverDate;
 import de.anomic.tools.enumerateFiles;
 
 public final class plasmaHTCache {
@@ -680,8 +684,11 @@ public final class plasmaHTCache {
 	    // -expires in cached response
 	    // the expires value gives us a very easy hint when the cache is stale
 	    if (expires != null) {
-		Date yesterday = new Date((new Date()).getTime() - oneday);
-		if (expires.before(yesterday)) return false;
+		//Date yesterday = new Date((new Date()).getTime() - oneday);
+                //long now = new GregorianCalendar(TimeZone.getTimeZone("GMT+0")).getTimeInMillis();
+                //System.out.println("EXPIRES-TEST: expires=" + expires.getTime()) + ", NOW=" + now + ", System.currentTimeMillis=" + System.currentTimeMillis() + ", url=" + url);
+                System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
+		if (expires.before(serverDate.correctedGMTDate())) return false;
 	    }
 	    
 	    // -lastModified in cached response
@@ -731,4 +738,21 @@ public final class plasmaHTCache {
         
     }
     
+    /*
+    public static void main(String[] args) {
+        //String[] s = TimeZone.getAvailableIDs();
+        //for (int i = 0; i < s.length; i++) System.out.println("ZONE=" + s[i]);
+        Calendar c = GregorianCalendar.getInstance();
+        int zoneOffset = c.get(Calendar.ZONE_OFFSET)/(60*60*1000);
+        int DSTOffset = c.get(Calendar.DST_OFFSET)/(60*60*1000);
+        System.out.println("This Offset = " + (zoneOffset + DSTOffset));
+        for (int i = 0; i < 12; i++) {
+            c = new GregorianCalendar(TimeZone.getTimeZone("Etc/GMT-" + i));
+            //c.setTimeZone(TimeZone.getTimeZone("Etc/GMT+0"));
+            System.out.println("Zone offset: "+
+                     c.get(Calendar.ZONE_OFFSET)/(60*60*1000));
+            System.out.println(c.get(GregorianCalendar.HOUR) + ", " + c.getTime() + ", " + c.getTimeInMillis());
+        }
+    }
+     **/
 }

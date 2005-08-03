@@ -68,6 +68,12 @@ public final class serverDate {
     private final static String[] wkday = {"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
     private final static String[] month = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
+    // find out time zone and DST offset
+    private static Calendar thisCalendar = GregorianCalendar.getInstance();
+    private static long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
+    private static long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
+    private static long offsetHours = zoneOffsetHours + DSTOffsetHours; // this must be subtracted from current Date().getTime() to produce a GMT Time
+
     // pre-calculation of time tables
     private final static long[] dimnormalacc, dimleapacc;
     private static long[] utimeyearsacc;
@@ -96,6 +102,10 @@ public final class serverDate {
     private int milliseconds, seconds, minutes, hours, days, months, years; // years since 1970
     private int dow; // day-of-week
     private long utime;
+
+    public static Date correctedGMTDate() {
+        return new Date(System.currentTimeMillis() - offsetHours);
+    }
     
     public serverDate() {
         this(System.currentTimeMillis());
@@ -253,6 +263,7 @@ public final class serverDate {
         
     public static void main(String[] args) {
         //System.out.println("kelondroDate is (" + new kelondroDate().toString() + ")");
+        System.out.println("offset is " + (offsetHours/1000/60/60/24) + " hours, javaDate is " + new Date() + ", correctedDate is " + correctedGMTDate());
         System.out.println("serverDate : " + new serverDate().toShortString(false));
         System.out.println("  javaDate : " + testSDateShortString());
         System.out.println("serverDate : " + new serverDate().toString());

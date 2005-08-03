@@ -174,7 +174,7 @@ public final class httpHeader extends TreeMap implements Map {
         http1_1.put("504","Gateway Time-out");
         http1_1.put("505","HTTP Version not supported");        
     }
-    
+
     private final HashMap reverseMappingCache;
 
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
@@ -333,7 +333,7 @@ public final class httpHeader extends TreeMap implements Map {
     }
 
     private Date headerDate(String kind) {
-        if (containsKey(kind)) return parseHTTPDate((String) get(kind));
+        if (containsKey(kind)) return new Date(parseHTTPDate((String) get(kind)).getTime());
         else return null;
     }
     

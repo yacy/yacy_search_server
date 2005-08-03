@@ -127,7 +127,7 @@ public class yacyCore {
     }
 
     public static Date parseUniversalDate(String remoteTimeString) {
-        if (remoteTimeString == null) return new Date();
+        if ((remoteTimeString == null) || (remoteTimeString.length() == 0)) return new Date();
         try {
             return yacyCore.shortFormatter.parse(remoteTimeString);
         } catch (java.text.ParseException e) {
