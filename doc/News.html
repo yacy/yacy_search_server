@@ -43,6 +43,27 @@ globalheader();
 </ul>
 -->
 
+
+<br><p>v0.394_20050803_489
+<ul>
+<li>New YaCyNews feature</li>
+  <ul>
+  <li>A new menu 'News' shows the news processing queues for incoming and outgoing news. However, news shall not be monitored here but they influence the presentation of other information throughout the system:</li>
+  <li>The Index-Create menu now shows a list of previously started crawls of other peers. They are distinguished between Crawls in progress and finished crawls.</li>
+  <li>When a Crawl in the Index-Create menu is started with the 'RemoteIndexing' - flag set on, then automatically a YaCyNews is generated to inform other peers about that crawl start. A message can be attached to explain why this crawl was startet.</li>
+  <li>When a personal profile is changed, a News Message is generated.</li>
+  <li>When a Wiki entry is changed, a Message is generated.</li>
+  <li>Within the Network menu, Alerts for Profile Updates, Wiki Updates and Cralws in Progress may appear.</li>
+  </ul>
+<li>Index distribution to DHT now fully active</li>
+  <ul>
+  <li>All peers, principal, senior and junior peers distribute their index to other principal or senior peers. Juniors send their index to only one principal/senior peer, while principal/senior peers distribute to 3 redundant other peers.</li>
+  <li>The index distribution and the index receive flag on Index-Control must be set to enable global search on the own peer</li>
+  </ul>
+<li>Added Wiki to main menue. The Wiki-System now supports embedded images.</li>
+</ul>
+
+
 <br><p>v0.391_20050726_434 (bugfix release)
 <ul>
 <li>Fixed name-entry bug on Settings-page</li>
