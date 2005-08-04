@@ -505,19 +505,24 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 StringBuffer errorMessage = new StringBuffer(); 
                 Exception errorExc = null;            
                 
-                if (e instanceof InterruptedException) {
+                String errorMsg = e.getMessage();
+                if (
+                        (e instanceof InterruptedException) ||
+                        ((errorMsg != null) && (errorMsg.startsWith("Socket closed")) && (Thread.currentThread().isInterrupted()))
+                   ) {
                     errorMessage.append("Interruption detected while processing query.");
                     httpStatusCode = 503;
                 } else {
-                    String errorMsg = e.getMessage();
                     if ((errorMsg != null) && 
                         (
                            errorMsg.startsWith("Broken pipe") || 
                            errorMsg.startsWith("Connection reset") ||
-                           errorMsg.startsWith("Software caused connection abort")
+                           errorMsg.startsWith("Software caused connection abort")                           
                        )) {
                         // client closed the connection, so we just end silently
                         errorMessage.append("Client unexpectedly closed connection while processing query.");
+                    } else if ((errorMsg != null) && (errorMsg.startsWith("Connection timed out"))) {
+                        errorMessage.append("Connection timed out.");
                     } else {
                         errorMessage.append("Unexpected error while processing query.");
                         httpStatusCode = 500;
@@ -525,9 +530,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     }
                 }
                 
-                errorMessage.append("\nQuery:  ").append(path)
-                            .append("\nClient: ").append(conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP,"unknown")) 
-                            .append("\nReason: ").append(e.toString());    
+                errorMessage.append("\nSession: ").append(Thread.currentThread().getName())
+                            .append("\nQuery:   ").append(path)
+                            .append("\nClient:  ").append(conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP,"unknown")) 
+                            .append("\nReason:  ").append(e.toString());    
                 
                 if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     // sending back an error message to the client 

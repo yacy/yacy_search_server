@@ -60,7 +60,8 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.server.logging.serverMiniLogFormatter;
 
 public final class plasmaCrawlWorker extends Thread {
-
+    
+    private static final int DEFAULT_CRAWLING_RETRY_COUNT = 5;   
     private static final String threadBaseName = "CrawlerWorker";
     
     private final CrawlerPool     myPool;
@@ -260,7 +261,7 @@ public final class plasmaCrawlWorker extends Thread {
              remoteProxyUse, 
              cacheManager, 
              log, 
-             0,
+             DEFAULT_CRAWLING_RETRY_COUNT,
              true
         );
     }
@@ -278,10 +279,12 @@ public final class plasmaCrawlWorker extends Thread {
             boolean remoteProxyUse,
             plasmaHTCache cacheManager,
             serverLog log,
-            int redirectionCount,
+            int crawlingRetryCount,
             boolean useContentEncodingGzip
         ) throws IOException {
         if (url == null) return;
+        if (crawlingRetryCount < 0) return;
+        
         Date requestDate = new Date(); // remember the time...
         String host = url.getHost();
         String path = url.getPath();
@@ -358,7 +361,7 @@ public final class plasmaCrawlWorker extends Thread {
                     log.logError("CRAWLER LOADER ERROR1: with URL=" + url.toString() + ": " + e.toString());
                 }
             } else if (res.status.startsWith("30")) {
-                if (redirectionCount < 5) {                    
+                if (crawlingRetryCount < 0) {                    
                     if (res.responseHeader.containsKey(httpHeader.LOCATION)) {
                         // generating the new url
                         URL redirectionUrl = new URL(url, (String) res.responseHeader.get(httpHeader.LOCATION));
@@ -382,7 +385,7 @@ public final class plasmaCrawlWorker extends Thread {
                              remoteProxyUse, 
                              cacheManager, 
                              log, 
-                             ++redirectionCount,
+                             --crawlingRetryCount,
                              useContentEncodingGzip
                         );
                     }
@@ -396,24 +399,38 @@ public final class plasmaCrawlWorker extends Thread {
             }
             if (remote != null) remote.close();
         } catch (Exception e) {
-            if ((e.getMessage() != null) && (e.getMessage().indexOf("Corrupt GZIP trailer") >= 0)) {
-                log.logWarning("Problems detected while receiving gzip encoded content from '" + url.toString() + 
-                               "'. Retrying request without using gzip content encoding.");
-                load(url,
-                     name,
-                     referer,
-                     initiator,
-                     depth,
-                     profile,
-                     socketTimeout,
-                     remoteProxyHost,
-                     remoteProxyPort,
-                     remoteProxyUse,
-                     cacheManager,
-                     log,
-                     0,
-                     false
-                   );                
+            boolean retryCrawling = false;
+            String errorMsg = e.getMessage();
+            if (errorMsg != null) {
+                if (errorMsg.indexOf("Corrupt GZIP trailer") >= 0) {
+                    log.logWarning("Problems detected while receiving gzip encoded content from '" + url.toString() + 
+                                   "'. Retrying request without using gzip content encoding.");
+                    retryCrawling = true;
+                } else if (errorMsg.indexOf("Socket time-out: Read timed out") >= 0) {
+                    log.logWarning("Read timeout while receiving content from '" + url.toString() + 
+                                   "'. Retrying request.");
+                    retryCrawling = true;
+                }
+                
+                if (retryCrawling) {
+                    load(url,
+                         name,
+                         referer,
+                         initiator,
+                         depth,
+                         profile,
+                         socketTimeout,
+                         remoteProxyHost,
+                         remoteProxyPort,
+                         remoteProxyUse,
+                         cacheManager,
+                         log,
+                         0,
+                         false
+                    );         
+                } else {
+                    log.logError("CRAWLER LOADER ERROR2 with URL=" + url.toString() + ": " + e.toString(),e);
+                }
             } else {
                 // this may happen if the targeted host does not exist or anything with the
                 // remote server was wrong.
