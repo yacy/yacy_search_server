@@ -84,18 +84,18 @@ public class transferURL {
             for (int i = 0; i < urlc; i++) {
                 urls = (String) post.get("url" + i);
                 if (urls == null) {
-                    yacyCore.log.logDebug("transferURL: got null URL-string from peer " + youare);
+                    yacyCore.log.logDebug("transferURL: got null URL-string from peer " + iam);
                 } else {
                     lEntry = switchboard.urlPool.loadedURL.newEntry(urls, true);
                     if ((lEntry != null) && (blockBlacklist)) {
                         if (switchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) {
-                            yacyCore.log.logDebug("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + youare);
+                            yacyCore.log.logDebug("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + iam);
                             lEntry = null;
                         }
                     }
                     if (lEntry != null) {
                         switchboard.urlPool.loadedURL.addEntry(lEntry, iam, iam, 3);
-                        yacyCore.log.logDebug("transferURL: received URL '" + lEntry.url() + "' from peer " + youare);
+                        yacyCore.log.logDebug("transferURL: received URL '" + lEntry.url() + "' from peer " + iam);
                         received++;
                     }
                 }
