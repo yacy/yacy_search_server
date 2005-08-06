@@ -402,7 +402,11 @@ public final class plasmaCrawlWorker extends Thread {
             boolean retryCrawling = false;
             String errorMsg = e.getMessage();
             if (errorMsg != null) {
-                if (errorMsg.indexOf("Corrupt GZIP trailer") >= 0) {
+                if (e instanceof java.net.BindException) {
+                    log.logWarning("BindException detected while trying to download content from '" + url.toString() + 
+                                   "'. Retrying request.");
+                    retryCrawling = true;
+                } else if (errorMsg.indexOf("Corrupt GZIP trailer") >= 0) {
                     log.logWarning("Problems detected while receiving gzip encoded content from '" + url.toString() + 
                                    "'. Retrying request without using gzip content encoding.");
                     retryCrawling = true;
