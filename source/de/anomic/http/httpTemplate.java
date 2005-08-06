@@ -252,12 +252,20 @@ public final class httpTemplate {
 
 		keyStream=new ByteArrayOutputStream(); //clear
 		
+        boolean byName=false;
 		int whichPattern=0;
+        String patternName="";
 		if(pattern.containsKey(prefix + key) && pattern.get(prefix + key) != null){
 		    try{
-			whichPattern=(int)Integer.parseInt((String)pattern.get(prefix + key)); //which alternative(index)
+            Object tmp=pattern.get(prefix + key); //lookup by index OR Name
+            if(tmp instanceof String){
+                byName=true;
+                patternName=(String)tmp;//Name
+            }else{
+    			whichPattern=(int)Integer.parseInt((String)pattern.get(prefix + key)); //index
+            }
 		    }catch(NumberFormatException e){
-			whichPattern=0;
+    			whichPattern=0;
 		    }
 		}else{
 		    //System.out.println("Pattern \""+new String(prefix + key)+"\" is not set"); //DEBUG
@@ -266,59 +274,76 @@ public final class httpTemplate {
 		int currentPattern=0;
 		boolean found=false;
 		keyStream = new ByteArrayOutputStream(); //reset stream
-		while(!found){
-		    bb=pis.read();
-		    if( (bb & 0xFF) == hash){
-			bb=pis.read();
-			if( (bb & 0xFF) == lrbr){
-			    transferUntil(pis, keyStream, aClose);
-
-				//reached the end. output last string.
-				if(keyStream.toString().equals("/" + key)){
-					pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
-					//this maybe the wrong, but its the last
-					writeTemplate(pis2, out, pattern, dflt, prefix + key + "_");
-					found=true;
-				}else if(others >0 && keyStream.toString().startsWith("/")){ //close nested
-					others--;
-					text += "#("+keyStream.toString()+")#";
-				}else{ //nested
-					others++;
-					text += "#("+keyStream.toString()+")#";
-				}
-		    	keyStream = new ByteArrayOutputStream(); //reset stream
-				continue;
-			}else{ //is not #(
-				pis.unread(bb);//is processed in next loop
-				bb = (hash);//will be added to text this loop
-			    //text += "#";
-			}
-		    }else if( (bb & 0xFF) == ':' && others==0){//ignore :: in nested Expressions
-			bb=pis.read();
-			if( (bb & 0xFF) == ':'){
-			    if(currentPattern == whichPattern){ //found the pattern
-				pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
-				writeTemplate(pis2, out, pattern, dflt, prefix + key + "_");
-
-				transferUntil(pis, keyStream, (new String("#(/"+key+")#")).getBytes());//to #(/key)#.
-
-				found=true;
-			    }
-			    currentPattern++;
-			    text="";
-			    continue;
-			}else{
-			    text += ":";
-			}
-		    }
-		    if(!found){
-			text += (char)bb;
-			if(pis.available()==0){
-				serverLog.logError("TEMPLATE", "No Close Key found for #("+key+")#");
-				found=true;
-			}
-		    }
-		}//while
+        if(byName){
+            //TODO: better Error Handling
+            transferUntil(pis, keyStream, (new String("%%"+patternName)).getBytes());
+    		if(pis.available()==0){
+    			serverLog.logError("TEMPLATE", "No such Template: %%"+patternName);
+                return;
+            }
+            keyStream=new ByteArrayOutputStream();
+            transferUntil(pis, keyStream, "::".getBytes());
+            pis2 = new PushbackInputStream(new ByteArrayInputStream(keyStream.toString().getBytes()));
+            writeTemplate(pis2, out, pattern, dflt, prefix + key + "_");
+    		transferUntil(pis, keyStream, (new String("#(/"+key+")#")).getBytes());
+    		if(pis.available()==0){
+    			serverLog.logError("TEMPLATE", "No Close Key found for #("+key+")# (by Name)");
+            }
+        }else{
+    		while(!found){
+    		    bb=pis.read();
+    		    if( (bb & 0xFF) == hash){
+    			bb=pis.read();
+    			if( (bb & 0xFF) == lrbr){
+    			    transferUntil(pis, keyStream, aClose);
+    
+    				//reached the end. output last string.
+    				if(keyStream.toString().equals("/" + key)){
+    					pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
+    					//this maybe the wrong, but its the last
+    					writeTemplate(pis2, out, pattern, dflt, prefix + key + "_");
+    					found=true;
+    				}else if(others >0 && keyStream.toString().startsWith("/")){ //close nested
+    					others--;
+    					text += "#("+keyStream.toString()+")#";
+    				}else{ //nested
+    					others++;
+    					text += "#("+keyStream.toString()+")#";
+    				}
+    		    	keyStream = new ByteArrayOutputStream(); //reset stream
+    				continue;
+    			}else{ //is not #(
+    				pis.unread(bb);//is processed in next loop
+    				bb = (hash);//will be added to text this loop
+    			    //text += "#";
+    			}
+    		    }else if( (bb & 0xFF) == ':' && others==0){//ignore :: in nested Expressions
+    			bb=pis.read();
+    			if( (bb & 0xFF) == ':'){
+    			    if(currentPattern == whichPattern){ //found the pattern
+    				pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
+    				writeTemplate(pis2, out, pattern, dflt, prefix + key + "_");
+    
+    				transferUntil(pis, keyStream, (new String("#(/"+key+")#")).getBytes());//to #(/key)#.
+    
+    				found=true;
+    			    }
+    			    currentPattern++;
+    			    text="";
+    			    continue;
+    			}else{
+    			    text += ":";
+    			}
+    		    }
+    		    if(!found){
+    			text += (char)bb;
+    			if(pis.available()==0){
+    				serverLog.logError("TEMPLATE", "No Close Key found for #("+key+")# (by Index)");
+    				found=true;
+    			}
+    		    }
+            }//while
+        }//if(byName) (else branch)
 	    }else if( (bb & 0xFF) == lbr ){ //normal
 		if (transferUntil(pis, keyStream, pClose)) {
     	            // pattern detected, write replacement
