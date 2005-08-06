@@ -256,16 +256,13 @@ public final class httpTemplate {
 		int whichPattern=0;
         String patternName="";
 		if(pattern.containsKey(prefix + key) && pattern.get(prefix + key) != null){
+			String patternId=(String)pattern.get(prefix + key);
 		    try{
-            Object tmp=pattern.get(prefix + key); //lookup by index OR Name
-            if(tmp instanceof String){
-                byName=true;
-                patternName=(String)tmp;//Name
-            }else{
-    			whichPattern=(int)Integer.parseInt((String)pattern.get(prefix + key)); //index
-            }
+    	        whichPattern=(int)Integer.parseInt(patternId); //index
 		    }catch(NumberFormatException e){
     			whichPattern=0;
+				byName=true;
+                patternName=patternId;
 		    }
 		}else{
 		    //System.out.println("Pattern \""+new String(prefix + key)+"\" is not set"); //DEBUG
