@@ -67,7 +67,7 @@ public class transferURL {
 	String iam      = (String) post.get("iam", "");      // seed hash of requester
         String youare   = (String) post.get("youare", "");   // seed hash of the target peer, needed for network stability
 	String key      = (String) post.get("key", "");      // transmission key
-	int urlc        = Integer.parseInt((String) post.get("urlc", ""));    // number of transported urls
+	int urlc        = Integer.parseInt((String) post.get("urlc", ""));    // number of transported urls 
         boolean granted = switchboard.getConfig("allowReceiveIndex", "false").equals("true");
 	boolean blockBlacklist = switchboard.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
 

@@ -80,6 +80,7 @@ public class IndexControl_p {
             prop.put("ucount", Integer.toString(switchboard.urlPool.loadedURL.size()));
             prop.put("otherHosts", "");
             prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
+            prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? "checked" : "");            
             prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
             prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "checked" : "");
             return prop; // be save
@@ -108,10 +109,16 @@ public class IndexControl_p {
         if (post.containsKey("setIndexTransmission")) {
             boolean allowDistributeIndex = ((String) post.get("indexDistribute", "")).equals("on");
             switchboard.setConfig("allowDistributeIndex", (allowDistributeIndex) ? "true" : "false");
-            if (allowDistributeIndex) switchboard.indexDistribution.enable(); else switchboard.indexDistribution.disable(); 
+            if (allowDistributeIndex) switchboard.indexDistribution.enable(); else switchboard.indexDistribution.disable();
+
+            boolean allowDistributeIndexWhileCrawling = post.containsKey("indexDistributeWhileCrawling");
+            switchboard.setConfig("allowDistributeIndexWhileCrawling", (allowDistributeIndexWhileCrawling) ? "true" : "false");
+            if (allowDistributeIndexWhileCrawling) switchboard.indexDistribution.enableWhileCrawling(); else switchboard.indexDistribution.disableWhileCrawling();           
+            
             boolean allowReceiveIndex = ((String) post.get("indexReceive", "")).equals("on");
             switchboard.setConfig("allowReceiveIndex", (allowReceiveIndex) ? "true" : "false");
             yacyCore.seedDB.mySeed.setFlagAcceptRemoteIndex(allowReceiveIndex);
+            
             boolean indexReceiveBlockBlacklist = ((String) post.get("indexReceiveBlockBlacklist", "")).equals("on");
             switchboard.setConfig("indexReceiveBlockBlacklist", (indexReceiveBlockBlacklist) ? "true" : "false");
         }
@@ -204,6 +211,7 @@ public class IndexControl_p {
 	    try {indexes[0].close();} catch (IOException e) {}
         }
         
+        
 	if (post.containsKey("keyhashsimilar")) {
                 Iterator hashIt = switchboard.wordIndex.wordHashes(keyhash, true, true);
                 String result = "Sequential List of Word-Hashes:<br>";
@@ -293,6 +301,7 @@ public class IndexControl_p {
         prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
         prop.put("ucount", Integer.toString(switchboard.urlPool.loadedURL.size()));
 	prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
+    prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? "checked" : "");
         prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
         prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "checked" : "");
         // return rewrite properties

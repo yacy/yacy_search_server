@@ -59,11 +59,17 @@ The transmission is necessary for the functionality of global search on other pe
 If you switch off distribution or receipt of RWIs you will be banned from global search.
 <table border="0" cellpadding="5" cellspacing="0">
 <tr valign="top" class="TableCellDark">
-<td width="100">Index Distribution:</td>
+<td width="100">Index&nbsp;Distribution:</td>
 <td><input type="checkbox" name="indexDistribute" align="top" #[indexDistributeChecked]#></td>
 <td></td>
 <td>This enables automated, DHT-ruled Index Transmission to other peers.
 </td>
+</tr>
+<tr valign="top" class="TableCellDark">
+<td width="100"></td>
+<td>&nbsp;&nbsp;</td>
+<td><input type="checkbox" name="indexDistributeWhileCrawling" align="top" #[indexDistributeWhileCrawling]#></td>
+<td>If checked, DHT-Transmission is enabled even during crawling.</td>
 </tr>
 <tr valign="top" class="TableCellDark">
 <td width="100">Index Receive:</td>

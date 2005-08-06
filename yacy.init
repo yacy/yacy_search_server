@@ -331,6 +331,7 @@ yacyDB=DATA/YACYDB
 # by default, sharing is on. If you want to use the proxy only for
 # local indexing, you may switch this off
 allowDistributeIndex=true
+allowDistributeIndexWhileCrawling=false
 allowReceiveIndex=true
 indexReceiveBlockBlacklist=false
 

@@ -28,13 +28,15 @@ public class plasmaWordIndexDistribution {
     private plasmaWordIndex wordIndex;
     private serverLog log;
     private boolean enabled;
+    private boolean enabledWhileCrawling;
     private boolean closed;
     
     public plasmaWordIndexDistribution(plasmaURLPool urlPool, plasmaWordIndex wordIndex, serverLog log,
-    boolean enable) {
+    boolean enable, boolean enabledWhileCrawling) {
         this.urlPool = urlPool;
         this.wordIndex = wordIndex;
         this.enabled = enable;
+        this.enabledWhileCrawling = enabledWhileCrawling;
         this.log = log;
         this.closed = false;
         setCounts(100 /*indexCount*/,  1 /*juniorPeerCount*/, 3 /*seniorPeerCount*/, 8000);
@@ -46,6 +48,14 @@ public class plasmaWordIndexDistribution {
     
     public void disable() {
         enabled = false;
+    }
+    
+    public void enableWhileCrawling() {
+        this.enabledWhileCrawling = true;
+    }
+    
+    public void disableWhileCrawling() {
+        this.enabledWhileCrawling = false;
     }
     
     public void close() {
@@ -82,7 +92,7 @@ public class plasmaWordIndexDistribution {
             log.logDebug("no word distribution: not enough words - wordIndex.size() = " + wordIndex.size());
             return false;
         }
-        if (urlPool.noticeURL.stackSize() > 0) {
+        if ((!enabledWhileCrawling) && (urlPool.noticeURL.stackSize() > 0)) {
             log.logDebug("no word distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize());
             return false;
         }
@@ -116,6 +126,68 @@ public class plasmaWordIndexDistribution {
         this.juniorPeerCount = juniorPeerCount;
         this.seniorPeerCount = seniorPeerCount;
     }
+    
+// For testing purposes only ...    
+//    public int performTransferWholeIndex() {
+//        
+//        boolean success = true;
+//        int indexCount = 1000;
+//        int totalCount = 0;
+//        String peerHash = "Z-X31fMiBs9h";
+//        yacySeed seed = (yacySeed) yacyCore.seedDB.getConnected(peerHash);
+//        String startPointHash = serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true).substring(0, yacySeedDB.commonHashLength);
+//        
+//        if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return -1;
+//        
+//        while (success) {
+//        // collect index
+//        //String startPointHash = yacyCore.seedCache.mySeed.hash;
+//        
+//        plasmaWordIndexEntity[] indexEntities = selectTransferIndexes(startPointHash, indexCount);
+//        if ((indexEntities == null) || (indexEntities.length == 0)) {
+//            log.logDebug("No index available for index transfer, hash start-point " + startPointHash);
+//            return -1;
+//        }
+//        // count the indexes again, can be smaller as expected
+//        indexCount = 0; for (int i = 0; i < indexEntities.length; i++) indexCount += indexEntities[i].size();
+//        
+//        // iterate over DHT-peers and send away the indexes
+//        String error;
+//        String peerNames = "";
+//
+//        
+//        if ((seed != null) && (indexCount > 0)) {
+//            error = yacyClient.transferIndex(seed,indexEntities, urlPool.loadedURL);
+//            if (error == null) {
+//                log.logInfo("Index transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "] to peer " + seed.getName() + ":" + seed.hash + " successfull");
+//                peerNames += ", " + seed.getName();
+//                
+//            } else {
+//                log.logWarning("Index transfer to peer " + seed.getName() + ":" + seed.hash + " failed:'" + error + "', disconnecting peer");
+//                yacyCore.peerActions.peerDeparture(seed);
+//                success = false;
+//            }
+//        } else {
+//            success = false;
+//        }
+//
+//            try {
+//                if (deleteTransferIndexes(indexEntities)) {
+//                    log.logDebug("Deleted all transferred whole-word indexes locally");
+//                    totalCount += indexCount;;
+//                    startPointHash = indexEntities[indexEntities.length - 1].wordHash();
+//                } else {
+//                    log.logError("Deleted not all transferred whole-word indexes");
+//                    return -1;
+//                }
+//            } catch (IOException ee) {
+//                log.logError("Deletion of indexes not possible:" + ee.getMessage());
+//                ee.printStackTrace();
+//                return -1;
+//            }    
+//        }
+//        return totalCount;
+//    }
     
     public int performTransferIndex(int indexCount, int peerCount, boolean delete) {
         if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return -1;
