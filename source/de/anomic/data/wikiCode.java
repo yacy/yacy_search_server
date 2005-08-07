@@ -66,7 +66,16 @@ import de.anomic.yacy.yacyCore;
 public class wikiCode {
     private String numListLevel="";
     private String ListLevel="";
-    public wikiCode(){
+    private plasmaSwitchboard sb;
+    public wikiCode(plasmaSwitchboard switchboard){
+        sb=switchboard;
+    }
+
+    public String transform(String content){
+        return transform(content.getBytes(), sb);
+    }
+    public String transform(byte[] content){
+        return transform(content, sb);
     }
 
     public String transform(byte[] content, plasmaSwitchboard switchboard) {

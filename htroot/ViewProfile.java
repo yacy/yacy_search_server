@@ -60,7 +60,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.tools.bbCode;
+import de.anomic.data.wikiCode;
 
 public class ViewProfile {
 
@@ -68,7 +68,7 @@ public class ViewProfile {
 	//listManager.switchboard = (plasmaSwitchboard) env;
 	serverObjects prop = new serverObjects();
 	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	bbCode bb = new bbCode();
+	wikiCode wikiTransformer = new wikiCode(switchboard);
         
         if ((post != null) && (post.containsKey("hash")) && (yacyCore.seedDB != null)) { //no nullpointer error..
             yacySeed seed = yacyCore.seedDB.getConnected((String)post.get("hash"));
@@ -116,7 +116,7 @@ public class ViewProfile {
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
 		    String key=(String)entry.getKey();
-		    String value=bb.bb( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
+		    String value=wikiTransformer.transform( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
 		    //all known Keys which should be set as they are
 		    if(knownKeys.contains(key)){
 			prop.put("success_"+key, 1);

@@ -160,7 +160,7 @@ public class Wiki {
 		     "<input type=\"button\" name=\"demo\" value=\"Start Page\" onClick=\"self.location.href='Wiki.html'\">" + 
 		     "</form>");
 	} else {
-        wikiCode wikiTransformer=new wikiCode();
+        wikiCode wikiTransformer=new wikiCode(switchboard);
 	    // show page
 	    prop.put("pagecontent",
 		     "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">" +
@@ -169,7 +169,7 @@ public class Wiki {
                      "</b></font></td></tr>" +
 		     "<tr class=\"WikiBackground\"><td>" + 
 		     "<table width=\"100%\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\"><tr><td>" +
-                     wikiTransformer.transform(page.page(), switchboard) +
+                     wikiTransformer.transform(page.page()) +
                      "</td></tr></table>" +
 		     "</td></tr></table>");
 

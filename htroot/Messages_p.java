@@ -56,7 +56,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.bbCode;
+import de.anomic.data.wikiCode;
 
 public class Messages_p {
 
@@ -69,7 +69,7 @@ public class Messages_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
 	serverObjects prop = new serverObjects();
-	bbCode bb = new bbCode();
+	wikiCode wikiTransformer = new wikiCode(switchboard);
 
         String action = ((post == null) ? "list" : post.get("action", "list"));
         String messages = "";
@@ -102,7 +102,7 @@ public class Messages_p {
                 messages += "<td>" + dateString(message.date()) + "</td>";
                 messages += "<td>" + message.author() + "</td>";
                 messages += "<td>" + message.recipient() + "</td>";
-                messages += "<td>" + bb.bb(message.subject()) + "</td>";
+                messages += "<td>" + wikiTransformer.transform(message.subject()) + "</td>";
                 messages += "<td>" +
                             "<a href=\"Messages_p.html?action=view&object=" + key + "\">view</a>&nbsp;/&nbsp;" +
                             "<a href=\"MessageSend_p.html?hash=" + message.authorHash() + "&subject=Re: " + message.subject() + "\">reply</a>&nbsp;/&nbsp;" +
@@ -123,8 +123,8 @@ public class Messages_p {
             messages += "<tr><td class=\"MenuHeader\">From:</td><td class=\"MessageBackground\">" + message.author() + "</td></tr>";
             messages += "<tr><td class=\"MenuHeader\">To:</td><td class=\"MessageBackground\">" + message.recipient() + "</td></tr>";
             messages += "<tr><td class=\"MenuHeader\">Send Date:</td><td class=\"MessageBackground\">" + dateString(message.date()) + "</td></tr>";
-            messages += "<tr><td class=\"MenuHeader\">Subject:</td><td class=\"MessageBackground\">" + bb.bb(message.subject()) + "</td></tr>";
-            messages += "<tr><td class=\"MessageBackground\" colspan=\"2\">" + bb.bb(new String(message.message())) + "</td></tr>";
+            messages += "<tr><td class=\"MenuHeader\">Subject:</td><td class=\"MessageBackground\">" + wikiTransformer.transform(message.subject()) + "</td></tr>";
+            messages += "<tr><td class=\"MessageBackground\" colspan=\"2\">" + wikiTransformer.transform(new String(message.message())) + "</td></tr>";
 	    messages += "<tr><td class=\"MenuHeader\">Action:</td>" +	    
 	    		"<td class=\"MessageBackground\">" +
 			"<a href=\"Messages_p.html\">inbox</a>&nbsp;/&nbsp;" +
