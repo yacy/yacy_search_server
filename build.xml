@@ -342,6 +342,9 @@
     <include name="startYACY.bat"/>
     <include name="startYACY_noconsole.bat"/>
     <include name="stopYACY.bat"/>
+	<include name="startYACY_Win9x.bat"/>
+    <include name="startYACY_noconsole_Win9x.bat"/>
+    <include name="stopYACY_Win9x.bat"/>
   </tarfileset>
 
   <!-- copy locales  -->

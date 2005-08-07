@@ -207,11 +207,11 @@ public class yacyPeerActions {
             }
             br.close();
             lc = supsee.size();
-            yacyCore.log.logInfo("BOOTSTRAP: " + lc + " seed-list urls from superseed file " + local.toString());
+            yacyCore.log.logInfo("BOOTSTRAP: " + lc + " seed-list URLs from superseed file " + local.toString());
         } catch (IOException e) {
             //e.printStackTrace();
             supsee = new disorderSet();
-            yacyCore.log.logInfo("BOOTSTRAP: failed to load seed-list urls from superseed file " + local.toString() + ": " + e.getMessage());
+            yacyCore.log.logInfo("BOOTSTRAP: failed to load seed-list URLs from superseed file " + local.toString() + ": " + e.getMessage());
         } finally {
             if (br!=null)try{br.close();}catch(Exception e){}
         }
@@ -229,10 +229,10 @@ public class yacyPeerActions {
                     }
                 }
             }
-            yacyCore.log.logInfo("BOOTSTRAP: " + (supsee.size() - lc) + " seed-list urls from superseed URL " + url);
+            yacyCore.log.logInfo("BOOTSTRAP: " + (supsee.size() - lc) + " seed-list URLs from superseed URL " + url);
         } catch (Exception e) {
 	    supsee = new disorderSet();
-            yacyCore.log.logInfo("BOOTSTRAP: failed to load seed-list urls from superseed URL " + url + ": " + e.getMessage());        
+            yacyCore.log.logInfo("BOOTSTRAP: failed to load seed-list URLs from superseed URL " + url + ": " + e.getMessage());        
         }
 	return supsee;
     }
