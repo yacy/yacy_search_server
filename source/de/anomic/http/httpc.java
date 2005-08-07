@@ -78,19 +78,24 @@ import de.anomic.server.serverCore.Session;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 /**
-*  This class implements an http client. While http access is built-in in java
-*  libraries, it is still necessary to implement the network interface since
-*  otherwise there is no access to the HTTP/1.0 / HTTP/1.1 header information
-*  that comes along each connection.
+* This class implements an http client. While http access is built-in in java
+* libraries, it is still necessary to implement the network interface since
+* otherwise there is no access to the HTTP/1.0 / HTTP/1.1 header information
+* that comes along each connection.
+* FIXME: Add some information about the usage of the threadpool.
 */
 public final class httpc {
 
     // statics
     private static final String vDATE = "20040602";
     private static String userAgent;
-    public static String systemOST;
     private static final int terminalMaxLength = 30000;
     private static final TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
+    /**
+    * This string is initialized on loading of this class and contains
+    * information about the current OS.
+    */
+    public static String systemOST;
 
     // --- The GMT standard date format used in the HTTP protocol
     private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
@@ -165,11 +170,28 @@ public final class httpc {
 
     private static final Hashtable openSocketLookupTable = new Hashtable();
 
+    /**
+    * Convert the status of this class into an String object to output it.
+    */
     public String toString() {
         return (this.savedRemoteHost == null) ? "Disconnected" : "Connected to " + this.savedRemoteHost +
                 ((this.remoteProxyUse) ? " via " + this.host : "");
     }
 
+    /**
+    * This method gets a new httpc instance from the object pool and
+    * initializes it with the given parameters. Use this method if you have to
+    * use a proxy to access the pages.
+    *
+    * @param server
+    * @param port
+    * @param timeout
+    * @param ssl
+    * @param remoteProxyHost
+    * @param remoteProxyPort
+    * @throws IOException
+    * @see httpc#init
+    */
     public static httpc getInstance(
             String server,
             int port,
@@ -192,6 +214,17 @@ public final class httpc {
         return newHttpc;
     }
 
+    /**
+    * This method gets a new httpc instance from the object pool and
+    * initializes it with the given parameters.
+    *
+    * @param server
+    * @param port
+    * @param timeout
+    * @param ssl
+    * @throws IOException
+    * @see httpc#init
+    */
     public static httpc getInstance(String server, int port, int timeout, boolean ssl) throws IOException {
 
         httpc newHttpc = null;
@@ -215,6 +248,11 @@ public final class httpc {
 
     }
 
+    /**
+    * Put back a used instance into the instance pool of httpc.
+    *
+    * @param theHttpc The instance of httpc which should be returned to the pool
+    */
     public static void returnInstance(httpc theHttpc) {
         try {
             theHttpc.reset();
@@ -224,17 +262,34 @@ public final class httpc {
         }
     }
 
+    /**
+    * Sets wether the content is allowed to be unzipped while getting?
+    * FIXME: The name of this method seems misleading, if I read the usage of
+    * this method correctly?
+    *
+    * @param status true, if the content is allowed to be decoded on the fly?
+    */
     public void setAllowContentEncoding(boolean status) {
         this.allowContentEncoding = status;
     }
 
+    /**
+    * Check wether the connection of this instance is closed.
+    *
+    * @return true if the connection is no longer open.
+    */
     public boolean isClosed() {
         if (this.socket == null) return true;
         else return (!this.socket.isConnected()) || (this.socket.isClosed());
     }
 
+    /**
+    * Does an DNS-Check to resolve a hostname to an IP.
+    *
+    * @param host Hostname of the host in demand.
+    * @return String with the ip. null, if the host could not be resolved.
+    */
     public static String dnsResolve(String host) {
-        // looks for the ip of host <host> and returns ip number as string
         String ip = (String) nameCacheHit.get(host);
         if (ip != null) return ip;
         // if (nameCacheMiss.contains(host)) return null;
@@ -252,9 +307,14 @@ public final class httpc {
         return null;
     }
 
+    /**
+    * Checks wether an hostname already is in the DNS-cache.
+    * FIXME: This method should use dnsResolve, as the code is 90% identical?
+    *
+    * @param host Searched for hostname.
+    * @return true, if the hostname already is in the cache.
+    */
     public static boolean dnsFetch(String host) {
-        // looks for the ip of host <host> and returns false if the host was in the cache
-        // if it is not in the cache the ip is fetched and this resturns true
         if ((nameCacheHit.get(host) != null) /*|| (nameCacheMiss.contains(host)) */) return false;
         try {
             String ip = InetAddress.getByName(host).getHostAddress();
@@ -270,15 +330,28 @@ public final class httpc {
         }
     }
 
-    // provide HTTP date handling static methods
+    /**
+    * Returns the given date in an HTTP-usable format.
+    *
+    * @param date The Date-Object to be converted.
+    * @return String with the date.
+    */
     public static String dateString(Date date) {
         if (date == null) return ""; else return HTTPGMTFormatter.format(date);
     }
 
+    /**
+    * Returns the current date as Date-Object.
+    *
+    * @return Date-object with the current time.
+    */
     public static Date nowDate() {
         return new GregorianCalendar(GMTTimeZone).getTime();
     }
 
+    // FIXME: Why weren't all static parts put together? They are run one after
+    // each other on class loading? Hopefully. So why not put them into one
+    // static block?
     static {
         // provide system information for client identification
         String loc = System.getProperty("user.timezone", "nowhere");
@@ -292,8 +365,15 @@ public final class httpc {
         userAgent = "yacy (www.yacy.net; v" + vDATE + "; " + systemOST + ")";
     }
 
-    // http client
-
+    /**
+    * Initialize the httpc-instance with the given data. This method is used,
+    * if you have to use a proxy to access the pages. This just calls init
+    * without proxy information and adds the proxy information.
+    *
+    * @param remoteProxyHost
+    * @param remoteProxyPort
+    * @throws IOException
+    */
     void init(String server, int port, int timeout, boolean ssl,
             String remoteProxyHost,  int remoteProxyPort) throws IOException {
         this.init(remoteProxyHost, remoteProxyPort, timeout, ssl);
@@ -301,6 +381,16 @@ public final class httpc {
         this.savedRemoteHost = server + ((port == 80) ? "" : (":" + port));
     }
 
+    /**
+    * Initialize the https-instance with the given data. Opens the sockets to
+    * the remote server and creats input and output streams.
+    *
+    * @param server Hostname of the server to connect to.
+    * @param port On which port should we connect.
+    * @param timeout How long do we wait for answers?
+    * @param ssl Wether we should use SSL.
+    * @throws IOException
+    */
     void init(String server, int port, int timeout, boolean ssl) throws IOException {
         handle = System.currentTimeMillis();
         //serverLog.logDebug("HTTPC", handle + " initialized");
@@ -344,6 +434,11 @@ public final class httpc {
         }
     }
 
+    /**
+    * This method resets an httpc-instance, so that it can be used for the next
+    * connection. This is called before the instance is put back to the pool.
+    * All streams and sockets are closed and set to null.
+    */
     void reset() {
         if (this.clientInput != null) {
             try {this.clientInput.close();} catch (Exception e) {}
@@ -374,10 +469,19 @@ public final class httpc {
         this.readLineBuffer.reset(80);
     }
 
+    /**
+    * Just calls reset to close all connections.
+    */
     public void close() {
         reset();
     }
 
+    /**
+    * If this instance is garbage-collected we check if the object was returned
+    * to the pool. if not, we invalidate the object from the pool.
+    *
+    * @see httpcPool#invalidateObject
+    */
     protected void finalize() throws Throwable {
         if (!(this.removedFromPool)) {
             System.err.println("Httpc object was not returned to object pool.");
