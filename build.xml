@@ -467,5 +467,14 @@
     <arg line=""/>
   </java>
 </target>
-    
+
+<!-- create the html-documentation from javadoc  -->
+<target name="create-doc" description="Create the javadoc-HTML-Pages">
+  <javadoc destdir="doc/api" version="no" use="yes" encoding="iso-8859-1" windowtitle="YaCy API Documentation">
+    <fileset dir="source" defaultexcludes="yes">
+      <include name="**/*.java" />
+    </fileset>
+  </javadoc>
+</target>
+
 </project>
