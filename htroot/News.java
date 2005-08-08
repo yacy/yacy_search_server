@@ -118,7 +118,7 @@ public class News {
                 
             } else {
                 int maxCount = yacyCore.newsPool.size(tableID);
-                if (maxCount > 500) maxCount = 500;
+                if (maxCount > 300) maxCount = 300;
                 
                 yacyNewsRecord record;
                 yacySeed seed;

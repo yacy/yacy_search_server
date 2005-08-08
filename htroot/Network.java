@@ -197,7 +197,7 @@ public class Network {
             // generate table
             int page = Integer.parseInt(post.get("page", "1"));
             int conCount = 0;
-            int maxCount = 500;
+            int maxCount = 300;
             if (yacyCore.seedDB == null) {
                 prop.put("table", 0);//no remote senior/principal proxies known"
             } else {
@@ -221,7 +221,7 @@ public class Network {
                     HashMap updatedWiki = new HashMap();
                     HashMap isCrawling = new HashMap();
                     int availableNews = yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB);
-                    if (availableNews > 500) availableNews = 500;
+                    if (availableNews > 300) availableNews = 300;
                     yacyNewsRecord record;
                     try {
                         for (int c = availableNews - 1; c >= 0; c--) {
