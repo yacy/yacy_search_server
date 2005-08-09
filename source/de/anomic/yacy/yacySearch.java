@@ -81,7 +81,7 @@ public class yacySearch extends Thread {
     public void run() {
         this.links = yacyClient.search(set2string(wordhashes), count, global, targetPeer, urlManager, searchManager, blacklist, snippetCache, duetime);
         if (links != 0) {
-            //yacyCore.log.logInfo("REMOTE SEARCH - remote peer '" + targetPeer.get("Name", "anonymous") + "' contributed " + links + " links for word hash " + wordhashes);
+            //yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + links + " links for word hash " + wordhashes);
             yacyCore.seedDB.mySeed.incRI(links);
             yacyCore.seedDB.mySeed.incRU(links);
         }
@@ -120,10 +120,9 @@ public class yacySearch extends Thread {
         }
         if (ranking.size() < seedcount) seedcount = ranking.size();
         yacySeed[] result = new yacySeed[seedcount];
-        Iterator e = ranking.scores(true);
+        Iterator e = ranking.scores(true); // lower are better
         c = 0;
-        while ((e.hasNext()) && (c < result.length))
-            result[c++] = yacyCore.seedDB.getConnected((String) e.next());
+        while ((e.hasNext()) && (c < result.length)) result[c++] = yacyCore.seedDB.getConnected((String) e.next());
             
 	//System.out.println("DEBUG yacySearch.selectPeers = " + seedcount + " seeds:"); for (int i = 0; i < seedcount; i++) System.out.println(" #" + i + ":" + result[i]); // debug
 	return result;

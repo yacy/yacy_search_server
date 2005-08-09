@@ -233,7 +233,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         while (running) {
 	    if (this.intermission > 0) {
 		if (this.intermission > System.currentTimeMillis()) {
-		    ratz(System.currentTimeMillis() - this.intermission);
+		    ratz(this.intermission - System.currentTimeMillis());
 		}
 		this.intermission = 0;
 	    }

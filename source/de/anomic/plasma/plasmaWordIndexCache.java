@@ -295,6 +295,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return urlCount;
     }
     
+    public void intermission(long pause) {
+	flushThread.intermission(pause);
+    }
+
     // cache settings
     
     public int maxURLinWordCache() {
@@ -334,16 +338,27 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     
     private class flush extends Thread {
         boolean terminate, pause;
+	long intermission;
         
         public flush() {
             terminate = false;
-            pause = false;
+            intermission = 0;
         }
-        
+
+	public void intermission(long pause) {
+	    this.intermission = System.currentTimeMillis() + pause;
+	}
+
         public void run() {
             String nextHash;
             Runtime rt = Runtime.getRuntime();
             while (!terminate) {
+		if (intermission > 0) {
+		    if (this.intermission > System.currentTimeMillis()) {
+			try {this.sleep(this.intermission - System.currentTimeMillis());} catch (InterruptedException e) {}
+		    }
+		    this.intermission = 0;
+		}
                 if (pause) {
                     try {this.sleep(300);} catch (InterruptedException e) {}
                 } else {

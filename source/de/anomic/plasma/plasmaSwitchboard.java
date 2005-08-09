@@ -261,7 +261,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // start indexing management
         log.logSystem("Starting Indexing Management");
         urlPool = new plasmaURLPool(plasmaPath, ramLURL, ramNURL, ramEURL);
-        
 
         wordIndex = new plasmaWordIndex(plasmaPath, ramRWI, log);
         int wordCacheMax = Integer.parseInt((String) getConfig("wordCacheMax", "10000"));
@@ -1265,6 +1264,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public serverObjects searchFromLocal(Set querywords, String order1, String order2, int count, boolean global, long time /*milliseconds*/, String urlmask) {
         
+	// tell all threads to do nothing for a specific time
+	wordIndex.intermission(time);
+	intermissionAllThreads(time);
+
         serverObjects prop = new serverObjects();
         try {
             char[] order = new char[2];
@@ -1282,7 +1285,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             Set queryhashes = plasmaSearch.words2hashes(querywords);
             
             // log
-            log.logInfo("INIT WORD SEARCH: " + gs + " - " + count + " links, " + (time / 1000) + " seconds");
+            log.logInfo("INIT WORD SEARCH: " + gs + ":" + queryhashes + " - " + count + " links, " + (time / 1000) + " seconds");
             long timestamp = System.currentTimeMillis();
             
             // start a presearch, which makes only sense if we idle afterwards.
@@ -1431,8 +1434,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public serverObjects searchFromRemote(Set hashes, int count, boolean global, long duetime) {
+
+	// tell all threads to do nothing for a specific time
+	wordIndex.intermission(duetime);
+	intermissionAllThreads(duetime);
+
         if (hashes == null) hashes = new HashSet();
-        
         serverObjects prop = new serverObjects();
         try {
             log.logInfo("INIT HASH SEARCH: " + hashes + " - " + count + " links");

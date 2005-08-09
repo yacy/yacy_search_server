@@ -127,68 +127,6 @@ public class plasmaWordIndexDistribution {
         this.seniorPeerCount = seniorPeerCount;
     }
     
-// For testing purposes only ...    
-//    public int performTransferWholeIndex() {
-//        
-//        boolean success = true;
-//        int indexCount = 1000;
-//        int totalCount = 0;
-//        String peerHash = "Z-X31fMiBs9h";
-//        yacySeed seed = (yacySeed) yacyCore.seedDB.getConnected(peerHash);
-//        String startPointHash = serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true).substring(0, yacySeedDB.commonHashLength);
-//        
-//        if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return -1;
-//        
-//        while (success) {
-//        // collect index
-//        //String startPointHash = yacyCore.seedCache.mySeed.hash;
-//        
-//        plasmaWordIndexEntity[] indexEntities = selectTransferIndexes(startPointHash, indexCount);
-//        if ((indexEntities == null) || (indexEntities.length == 0)) {
-//            log.logDebug("No index available for index transfer, hash start-point " + startPointHash);
-//            return -1;
-//        }
-//        // count the indexes again, can be smaller as expected
-//        indexCount = 0; for (int i = 0; i < indexEntities.length; i++) indexCount += indexEntities[i].size();
-//        
-//        // iterate over DHT-peers and send away the indexes
-//        String error;
-//        String peerNames = "";
-//
-//        
-//        if ((seed != null) && (indexCount > 0)) {
-//            error = yacyClient.transferIndex(seed,indexEntities, urlPool.loadedURL);
-//            if (error == null) {
-//                log.logInfo("Index transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "] to peer " + seed.getName() + ":" + seed.hash + " successfull");
-//                peerNames += ", " + seed.getName();
-//                
-//            } else {
-//                log.logWarning("Index transfer to peer " + seed.getName() + ":" + seed.hash + " failed:'" + error + "', disconnecting peer");
-//                yacyCore.peerActions.peerDeparture(seed);
-//                success = false;
-//            }
-//        } else {
-//            success = false;
-//        }
-//
-//            try {
-//                if (deleteTransferIndexes(indexEntities)) {
-//                    log.logDebug("Deleted all transferred whole-word indexes locally");
-//                    totalCount += indexCount;;
-//                    startPointHash = indexEntities[indexEntities.length - 1].wordHash();
-//                } else {
-//                    log.logError("Deleted not all transferred whole-word indexes");
-//                    return -1;
-//                }
-//            } catch (IOException ee) {
-//                log.logError("Deletion of indexes not possible:" + ee.getMessage());
-//                ee.printStackTrace();
-//                return -1;
-//            }    
-//        }
-//        return totalCount;
-//    }
-    
     public int performTransferIndex(int indexCount, int peerCount, boolean delete) {
         if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return -1;
         
@@ -204,7 +142,7 @@ public class plasmaWordIndexDistribution {
         indexCount = 0; for (int i = 0; i < indexEntities.length; i++) indexCount += indexEntities[i].size();
         
         // find start point for DHT-selection
-        String keyhash = indexEntities[indexEntities.length - 1].wordHash();
+        String keyhash = indexEntities[indexEntities.length - 1].wordHash(); // DHT targets must have greater hashes
         
         // iterate over DHT-peers and send away the indexes
         yacySeed seed;
@@ -271,7 +209,7 @@ public class plasmaWordIndexDistribution {
             Enumeration urlEnum;
             plasmaWordIndexEntry indexEntry;
             while ((count > 0) && (wordHashIterator.hasNext()) &&
-            ((nexthash = (String) wordHashIterator.next()) != null) && (nexthash.trim().length() > 0)) {
+                   ((nexthash = (String) wordHashIterator.next()) != null) && (nexthash.trim().length() > 0)) {
                 indexEntity = wordIndex.getEntity(nexthash, true);
                 if (indexEntity.size() == 0) {
                     indexEntity.deleteComplete();

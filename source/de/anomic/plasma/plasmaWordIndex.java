@@ -103,6 +103,10 @@ public final class plasmaWordIndex {
         return ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
     }
     
+    public void intermission(long pause) {
+	this.ramCache.intermission(pause);
+    }
+
     public void close(int waitingBoundSeconds) {
         ramCache.close(waitingBoundSeconds);
     }
