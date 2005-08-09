@@ -292,6 +292,13 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             workerThreads.remove(threadName);
         }
     }
+
+    public void intermissionAllThreads(long pause) {
+        Iterator e = workerThreads.keySet().iterator();
+        while (e.hasNext()) {
+            ((serverThread) workerThreads.get((String) e.next())).intermission(pause);
+        }
+    }
     
     public synchronized void terminateAllThreads(boolean waitFor) {
         Iterator e = workerThreads.keySet().iterator();

@@ -79,7 +79,9 @@ public interface serverSwitch {
     public serverThread getThread(String threadName);
     public void setThreadPerformance(String threadName, long idleMillis, long busyMillis, long memprereq);
     public void terminateThread(String threadName, boolean waitFor);
+    public void intermissionAllThreads(long pause);
     public void terminateAllThreads(boolean waitFor);
+
     public Iterator /*of serverThread-Names (String)*/ threadNames();
     
     // the switchboard can be used to set and read properties

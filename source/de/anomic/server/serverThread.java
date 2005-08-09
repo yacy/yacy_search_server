@@ -102,6 +102,10 @@ public interface serverThread {
     public void jobExceptionHandler(Exception e);
     // handles any action necessary during job execution
     
+    public void intermission(long pause);
+    // the thread is forced to pause for a specific time
+    // if the thread is busy meanwhile, the pause is ommitted
+    
     public void terminate(boolean waitFor);
     // after calling this method, the thread shall terminate
     // if waitFor is true, the method waits until the process has died

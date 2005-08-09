@@ -54,7 +54,7 @@ import de.anomic.server.logging.serverLog;
 
 public abstract class serverAbstractThread extends Thread implements serverThread {
 
-    private long startup = 0, idlePause = 0, busyPause = 0, blockPause = 0;
+    private long startup = 0, intermission = 0, idlePause = 0, busyPause = 0, blockPause = 0;
     private boolean running = true;
     private serverLog log = null;
     private long idletime = 0, busytime = 0, memprereq = 0;
@@ -163,6 +163,10 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         this.log = log;
     }
 
+    public void intermission(long pause) {
+	this.intermission = System.currentTimeMillis() + pause;
+    }
+
     public void terminate(boolean waitFor) {
         // after calling this method, the thread shall terminate
         this.running = false;
@@ -227,6 +231,12 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         Runtime rt = Runtime.getRuntime();
                 
         while (running) {
+	    if (this.intermission > 0) {
+		if (this.intermission > System.currentTimeMillis()) {
+		    ratz(System.currentTimeMillis() - this.intermission);
+		}
+		this.intermission = 0;
+	    }
             if (rt.freeMemory() > memprereq) try {
                 // do job
                 timestamp = System.currentTimeMillis();
