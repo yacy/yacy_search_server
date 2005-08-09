@@ -210,7 +210,12 @@ public final class httpc {
         }
 
         // initialize it
-        newHttpc.init(server,port,timeout,ssl,remoteProxyHost, remoteProxyPort);
+        try {
+            newHttpc.init(server,port,timeout,ssl,remoteProxyHost, remoteProxyPort);
+        } catch (IOException e) {
+            try{ httpc.theHttpcPool.returnObject(newHttpc); } catch (Exception e1) {}
+            throw e;
+        }
         return newHttpc;
     }
 

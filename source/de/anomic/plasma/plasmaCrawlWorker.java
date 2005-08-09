@@ -414,6 +414,8 @@ public final class plasmaCrawlWorker extends Thread {
                     log.logWarning("Read timeout while receiving content from '" + url.toString() + 
                                    "'. Retrying request.");
                     retryCrawling = true;
+                } else if (errorMsg.indexOf("Connection refused") >= 0) {
+                    log.logError("CRAWLER LOADER ERROR2 with URL=" + url.toString() + ": Connection refused");                    
                 }
                 
                 if (retryCrawling) {

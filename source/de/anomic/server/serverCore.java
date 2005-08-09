@@ -518,7 +518,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 // trying to gracefull stop all still running sessions ...
                 serverCore.this.log.logInfo("Signaling shutdown to " + threadCount + " remaining session threads ...");
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    ((Session)threadList[currentThreadIdx]).setStopped(true);
+                    Thread currentThread = threadList[currentThreadIdx];
+                    if (currentThread.isAlive()) {
+                        ((Session)currentThread).setStopped(true);
+                    }
                 }          
 
                 // waiting a frew ms for the session objects to continue processing
