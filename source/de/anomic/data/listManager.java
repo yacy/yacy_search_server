@@ -204,18 +204,21 @@ public class listManager {
 		return null;
 	}
 
+	public static Vector getDirsRecursive(File dir){
+        return getDirsRecursive(dir, true);  
+    }
 	/**
 	 * Returns a List of all dirs and subdirs as File Objects
 	 *
 	 * Warning: untested
 	 */
-	public static Vector getDirsRecursive(File dir){
+	public static Vector getDirsRecursive(File dir, boolean excludeDotfiles){
 		File[] dirList = dir.listFiles();
 		Vector resultList = new Vector();
 		Vector recursive;
 		Iterator it;
 		for(int i=0;i<dirList.length;i++){
-			if(dirList[i].isDirectory()){
+			if(dirList[i].isDirectory() && (!excludeDotfiles || !dirList[i].getName().startsWith(".")) ){
 				resultList.add(dirList[i]);
 				recursive = getDirsRecursive(dirList[i]);
 				it=recursive.iterator();

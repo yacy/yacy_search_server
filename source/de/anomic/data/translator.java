@@ -57,6 +57,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import de.anomic.server.logging.serverLog;
+import de.anomic.data.listManager;
 
 /**
  * Wordlist based translator
@@ -169,10 +170,10 @@ public class translator {
 					if(translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), (Hashtable)translationLists.get(sourceFiles[i].getName()))){
 						serverLog.logInfo("Translator", "Translated file: "+ sourceFiles[i].getName());
 					}else{
-						serverLog.logError("Translator", "File error while translating file "+sourceFiles[i].getName());
+						serverLog.logError("Translator", "File error while translating file "+sourceFiles[i].getPath());
 					}
 				}else{
-						serverLog.logInfo("Translator", "No translation for file: "+sourceFiles[i].getName());
+						serverLog.logInfo("Translator", "No translation for file: "+sourceFiles[i].getPath());
 				}
 			}
 
@@ -180,5 +181,19 @@ public class translator {
 		return true;
 	}
 
+    public static boolean translateFilesRecursive(File sourceDir, File destDir, File translationFile, String extension){
+        Vector dirList=listManager.getDirsRecursive(sourceDir);
+        Iterator it=dirList.iterator();
+        String sourceName=sourceDir.getPath();
+        String destName=destDir.getPath();
+        File dir=null;
+        File dir2=null;
+        while(it.hasNext()){
+            dir=(File)it.next();
+            dir2=new File(dir.getPath().replaceFirst(sourceName, destName));
+            translateFiles(dir, dir2, translationFile, extension);
+        }
+        return true;
+    }
 
 }
