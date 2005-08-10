@@ -1424,7 +1424,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // log
             log.logInfo("EXIT WORD SEARCH: " + gs + " - " +
-            prop.get("totalcount", "0") + " links, " +
+            prop.get("totalcount", "0") + " links found, " +
+	    prop.get("linkcount", "?") + " links selected, " +
             ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             if (idx != null) idx.close();
             return prop;
@@ -1495,7 +1496,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // log
             log.logInfo("EXIT HASH SEARCH: " + hashes + " - " +
-            ((idx == null) ? "0" : (""+idx.size())) + " links, " +
+            ((idx == null) ? "0" : (""+idx.size())) + " links found, " +
+	    prop.get("linkcount", "?") + " links selected, " +
             ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             if (idx != null) idx.close();
             return prop;
