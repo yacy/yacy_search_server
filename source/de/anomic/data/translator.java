@@ -190,7 +190,7 @@ public class translator {
         File dir2=null;
         while(it.hasNext()){
             dir=(File)it.next();
-            dir2=new File(dir.getPath().replaceFirst(sourceName, destName));
+            dir2=new File(dir.getPath().replaceFirst(sourceName.replaceAll("\\\\", "\\\\"), destName));
             translateFiles(dir, dir2, translationFile, extension);
         }
         return true;
