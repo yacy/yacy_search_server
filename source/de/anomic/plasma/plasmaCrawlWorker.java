@@ -403,20 +403,25 @@ public final class plasmaCrawlWorker extends Thread {
             String errorMsg = e.getMessage();
             if (errorMsg != null) {
                 if (e instanceof java.net.BindException) {
-                    log.logWarning("BindException detected while trying to download content from '" + url.toString() + 
+                    log.logWarning("CRAWLER BindException detected while trying to download content from '" + url.toString() + 
                                    "'. Retrying request.");
                     retryCrawling = true;
                 } else if (errorMsg.indexOf("Corrupt GZIP trailer") >= 0) {
-                    log.logWarning("Problems detected while receiving gzip encoded content from '" + url.toString() + 
+                    log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + url.toString() + 
                                    "'. Retrying request without using gzip content encoding.");
                     retryCrawling = true;
                 } else if (errorMsg.indexOf("Socket time-out: Read timed out") >= 0) {
-                    log.logWarning("Read timeout while receiving content from '" + url.toString() + 
+                    log.logWarning("CRAWLER Read timeout while receiving content from '" + url.toString() + 
                                    "'. Retrying request.");
                     retryCrawling = true;
+                } else if (errorMsg.indexOf("Connection timed out") >= 0) {
+                    log.logWarning("CRAWLER Connection timeout while receiving content from '" + url.toString() + 
+                                   "'. Retrying request."); 
+                    retryCrawling = true;                                                       
                 } else if (errorMsg.indexOf("Connection refused") >= 0) {
-                    log.logError("CRAWLER LOADER ERROR2 with URL=" + url.toString() + ": Connection refused");                    
+                    log.logError("CRAWLER LOADER ERROR2 with URL=" + url.toString() + ": Connection refused");
                 }
+
                 
                 if (retryCrawling) {
                     load(url,
