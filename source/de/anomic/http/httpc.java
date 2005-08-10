@@ -495,201 +495,16 @@ public final class httpc {
         this.reset();
     }
 
-    public final class response {
-        // Response-Header  = Date | Pragma | Allow | Content-Encoding | Content-Length | Content-Type |
-        //                    Expires | Last-Modified | HTTP-header
-        /*
-          Status-Line = HTTP-Version SP Status-Code SP Reason-Phrase CRLF
-          1xx: Informational - Not used, but reserved for future use
-          2xx: Success - The action was successfully received, understood, and accepted.
-          3xx: Redirection - Further action must be taken in order to complete the request
-          4xx: Client Error - The request contains bad syntax or cannot be fulfilled
-          5xx: Server Error - The server failed to fulfill an apparently valid request
-         */
-
-        // header information
-        public httpHeader responseHeader = null;
-        public String httpVer = "HTTP/0.9";
-        public String status; // the success/failure response string starting with status-code
-        private boolean gzip; // for gunzipping on-the-fly
-        private String encoding;
-
-        public response(boolean zipped) throws IOException {
-
-            // lets start with worst-case attributes as set-up
-            responseHeader = new httpHeader(reverseMappingCache);
-            status = "503 internal error";
-            gzip   = false;
-
-            // check connection status
-            if (clientInput == null) {
-                // the server has meanwhile disconnected
-                status = "503 lost connection to server";
-                return; // in bad mood
-            }
-
-            // reads in the http header, right now, right here
-            byte[] b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false);
-            if (b == null) {
-                // the server has meanwhile disconnected
-                status = "503 server has closed connection";
-                return; // in bad mood
-            }
-            String buffer = new String(b); // this is the status response line
-            //System.out.println("#S#" + buffer);
-            int p = buffer.indexOf(" ");
-            if (p < 0) {
-                status = "500 status line parse error";
-                // flush in anything that comes without parsing
-                while ((b != null) && (b.length != 0)) b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false);
-                return; // in bad mood
-            }
-            // the http version reported by the server
-            this.httpVer = buffer.substring(0,p);
-
-            // we have a status
-            status = buffer.substring(p + 1).trim(); // the status code plus reason-phrase
-
-            // check validity
-            if (status.startsWith("400")) {
-                // bad request
-                // flush in anything that comes without parsing
-                while ((b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false)).length != 0) {}
-                return; // in bad mood
-            }
-
-            // at this point we should have a valid response. read in the header properties
-            String key = "";
-            while ((b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false)) != null) {
-                if (b.length == 0) break;
-                buffer = new String(b);
-                //System.out.println("#H#" + buffer); // debug
-                if (buffer.charAt(0) <= 32) {
-                    // use old entry
-                    if (key.length() == 0) throw new IOException("header corrupted - input error");
-                    // attach new line
-                    if (!(responseHeader.containsKey(key))) throw new IOException("header corrupted - internal error");
-                    responseHeader.put(key, (String) responseHeader.get(key) + " " + buffer.trim());
-                } else {
-                    // create new entry
-                    p = buffer.indexOf(":");
-                    if (p > 0) {
-                        responseHeader.add(buffer.substring(0, p).trim(), buffer.substring(p + 1).trim());
-                    } else {
-                        serverLog.logError("HTTPC", "RESPONSE PARSE ERROR: HOST='" + host + "', PATH='" + requestPath + "', STATUS='" + status + "'");
-                        serverLog.logError("HTTPC", "..............BUFFER: " + buffer);
-                    }
-                }
-            }
-            // finished with reading header
-
-            // we will now manipulate the header if the content is gzip encoded, because
-            // reading the content with "writeContent" will gunzip on-the-fly
-            gzip = ((zipped) && (responseHeader.gzip()));
-
-            if (gzip) {
-                responseHeader.remove("CONTENT-ENCODING"); // we fake that we don't have encoding, since what comes out does not have gzip and we also don't know what was encoded
-                responseHeader.remove("CONTENT-LENGTH"); // we cannot use the length during gunzippig yet; still we can hope that it works
-            }
-        }
-
-        public String toString() {
-            StringBuffer toStringBuffer = new StringBuffer();
-            toStringBuffer.append((this.status == null) ? "Status: Unknown" : "Status: " + this.status)
-            .append(" | Headers: ")
-            .append((this.responseHeader == null) ? "none" : this.responseHeader.toString());
-            return toStringBuffer.toString();
-        }
-
-        public boolean success() {
-            return ((status.charAt(0) == '2') || (status.charAt(0) == '3'));
-        }
-
-        public byte[] writeContent() throws IOException {
-            int contentLength = (int) this.responseHeader.contentLength();
-            serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-            writeContentX(null, sbb, httpc.this.clientInput);
-            return sbb.getBytes();
-        }
-
-        public byte[] writeContent(OutputStream procOS) throws IOException {
-            int contentLength = (int) this.responseHeader.contentLength();
-            serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-            writeContentX(procOS, sbb, httpc.this.clientInput);
-            return sbb.getBytes();
-        }
-
-        public void writeContent(OutputStream procOS, File file) throws IOException {
-            // this writes the input stream to either another output stream or
-            // a file or both.
-            FileOutputStream bufferOS = null;
-            try {
-                if (file != null) bufferOS = new FileOutputStream(file);
-                writeContentX(procOS, bufferOS, httpc.this.clientInput);
-            } finally {
-                if (bufferOS != null) {
-                    bufferOS.close();
-                    if (file.length() == 0) file.delete();
-                }
-            }
-        }
-
-        public void writeContentX(OutputStream procOS, OutputStream bufferOS, InputStream clientInput) throws IOException {
-            // we write length bytes, but if length == -1 (or < 0) then we
-            // write until the input stream closes
-            // procOS == null -> no write to procOS
-            // file == null -> no write to file
-            // If the Content-Encoding is gzip, we gunzip on-the-fly
-            // and change the Content-Encoding and Content-Length attributes in the header
-            byte[] buffer = new byte[2048];
-            int l;
-            long len = 0;
-
-            // find out length
-            long length = this.responseHeader.contentLength();
-
-            // using the proper intput stream
-            InputStream dis = (this.gzip) ? (InputStream) new GZIPInputStream(clientInput) : (InputStream) clientInput;
-
-            // we have three methods of reading: length-based, length-based gzip and connection-close-based
-            try {
-                if (length > 0) {
-                    // we read exactly 'length' bytes
-                    while ((len < length) && ((l = dis.read(buffer)) >= 0)) {
-                        if (procOS != null) procOS.write(buffer, 0, l);
-                        if (bufferOS != null) bufferOS.write(buffer, 0, l);
-                        len += l;
-                    }
-                } else {
-                    // no content-length was given, thus we read until the connection closes
-                    while ((l = dis.read(buffer, 0, buffer.length)) >= 0) {
-                        if (procOS != null) procOS.write(buffer, 0, l);
-                        if (bufferOS != null) bufferOS.write(buffer, 0, l);
-                    }
-                }
-            } catch (java.net.SocketException e) {
-                throw new IOException("Socket exception: " + e.getMessage());
-            } catch (java.net.SocketTimeoutException e) {
-                throw new IOException("Socket time-out: " + e.getMessage());
-            } finally {
-                // close the streams
-                if (procOS != null) {
-                    if (procOS instanceof httpChunkedOutputStream)
-                        ((httpChunkedOutputStream)procOS).finish();
-                    procOS.flush();
-                }
-                if (bufferOS != null) bufferOS.flush();
-                buffer = null;
-            }
-        }
-
-        public void print() {
-            serverLog.logInfo("HTTPC", "RESPONSE: status=" + status + ", header=" + responseHeader.toString());
-        }
-
-    }
-
-    // method is either GET, HEAD or POST
+    /**
+    * This method invokes a call to the given server.
+    *
+    * @param method Which method should be called? GET, POST, HEAD or CONNECT
+    * @param path String with the path on the server to be get.
+    * @param header The prefilled header (if available) from the calling
+    * browser.
+    * @param zipped Is encoded content (gzip) allowed or not?
+    * @throws IOException
+    */
     private void send(String method, String path, httpHeader header, boolean zipped) throws IOException {
         // scheduled request through request-response objects/threads
 
@@ -792,6 +607,14 @@ public final class httpc {
         // this is the place where www.stern.de refuses to answer ..???
     }
 
+    /**
+    * This method GETs a page from the server.
+    *
+    * @param path The path to the page which should be GET.
+    * @param requestHeader Prefilled httpHeader.
+    * @param return Instance of response with the content.
+    * @throws IOException
+    */
     public response GET(String path, httpHeader requestHeader) throws IOException {
         //serverLog.logDebug("HTTPC", handle + " requested GET '" + path + "', time = " + (System.currentTimeMillis() - handle));
         try {
@@ -805,6 +628,14 @@ public final class httpc {
         }
     }
 
+    /**
+    * This method gets only the header of a page.
+    *
+    * @param path The path to the page whose header should be get.
+    * @param requestHeader Prefilled httpHeader.
+    * @param return Instance of response with the content.
+    * @throws IOException
+    */
     public response HEAD(String path, httpHeader requestHeader) throws IOException {
         try {
             send(httpHeader.METHOD_HEAD, path, requestHeader, false);
@@ -816,6 +647,15 @@ public final class httpc {
         }
     }
 
+    /**
+    * This method POSTs some data to a page.
+    *
+    * @param path The path to the page which the post is sent to.
+    * @param requestHeader Prefilled httpHeader.
+    * @param ins InputStream with the data to be posted to the server.
+    * @param return Instance of response with the content.
+    * @throws IOException
+    */
     public response POST(String path, httpHeader requestHeader, InputStream ins) throws IOException {
         try {
             send(httpHeader.METHOD_POST, path, requestHeader, false);
@@ -845,6 +685,14 @@ public final class httpc {
         }
     }
 
+    /**
+    * Call the server with the CONNECT-method.
+    *
+    * @param host To which host should a connection be made?
+    * @param port Which port should be connected?
+    * @param requestHeader prefilled httpHeader.
+    * @return Instance of response with the content.
+    */
     public response CONNECT(String host, int port, httpHeader requestHeader) throws IOException {
         try {
             send(httpHeader.METHOD_CONNECT, host + ":" + port, requestHeader, false);
@@ -854,7 +702,19 @@ public final class httpc {
         }
     }
 
-
+    /**
+    * This method sends several files at once via a POST request. Only those
+    * files in the Hashtable files are written whose names are contained in
+    * args.
+    *
+    * @param path The path to the page which the post is sent to.
+    * @param requestHeader Prefilled httpHeader.
+    * @param args serverObjects with the names of the files to send.
+    * @param files Hashtable with the names of the files as key and the content
+    * of the files as value.
+    * @return Instance of response with the content.
+    * @throws IOException
+    */
     public response POST(String path, httpHeader requestHeader, serverObjects args, Hashtable files) throws IOException {
         // make shure, the header has a boundary information like
         // CONTENT-TYPE=multipart/form-data; boundary=----------0xKhTmLbOuNdArY
@@ -1219,7 +1079,7 @@ do upload
     /**
      * To register an open socket.
      * This adds the socket to the list of open sockets where the current thread
-     * is is the owner.
+     * is the owner.
      * @param openedSocket the socket that should be registered
      * @return the id of the current thread
      */
@@ -1316,6 +1176,262 @@ do upload
             }
             return openSockets;
         }
+    }
+
+    /**
+    * Inner Class to get the response of an http-request and parse it.
+    */
+    public final class response {
+        // Response-Header  = Date | Pragma | Allow | Content-Encoding | Content-Length | Content-Type |
+        //                    Expires | Last-Modified | HTTP-header
+        /*
+          Status-Line = HTTP-Version SP Status-Code SP Reason-Phrase CRLF
+          1xx: Informational - Not used, but reserved for future use
+          2xx: Success - The action was successfully received, understood, and accepted.
+          3xx: Redirection - Further action must be taken in order to complete the request
+          4xx: Client Error - The request contains bad syntax or cannot be fulfilled
+          5xx: Server Error - The server failed to fulfill an apparently valid request
+         */
+
+        // header information
+        public httpHeader responseHeader = null;
+        public String httpVer = "HTTP/0.9";
+        public String status; // the success/failure response string starting with status-code
+        private boolean gzip; // for gunzipping on-the-fly
+        private String encoding;
+
+        /**
+        * Constructor for this class. Reads in the content for the given outer
+        * instance and parses it.
+        *
+        * @param zipped true, if the content of this response is gzipped.
+        * @throws IOException
+        */
+        public response(boolean zipped) throws IOException {
+
+            // lets start with worst-case attributes as set-up
+            responseHeader = new httpHeader(reverseMappingCache);
+            status = "503 internal error";
+            gzip   = false;
+
+            // check connection status
+            if (clientInput == null) {
+                // the server has meanwhile disconnected
+                status = "503 lost connection to server";
+                return; // in bad mood
+            }
+
+            // reads in the http header, right now, right here
+            byte[] b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false);
+            if (b == null) {
+                // the server has meanwhile disconnected
+                status = "503 server has closed connection";
+                return; // in bad mood
+            }
+            String buffer = new String(b); // this is the status response line
+            //System.out.println("#S#" + buffer);
+            int p = buffer.indexOf(" ");
+            if (p < 0) {
+                status = "500 status line parse error";
+                // flush in anything that comes without parsing
+                while ((b != null) && (b.length != 0)) b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false);
+                return; // in bad mood
+            }
+            // the http version reported by the server
+            this.httpVer = buffer.substring(0,p);
+
+            // we have a status
+            status = buffer.substring(p + 1).trim(); // the status code plus reason-phrase
+
+            // check validity
+            if (status.startsWith("400")) {
+                // bad request
+                // flush in anything that comes without parsing
+                while ((b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false)).length != 0) {}
+                return; // in bad mood
+            }
+
+            // at this point we should have a valid response. read in the header properties
+            String key = "";
+            while ((b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false)) != null) {
+                if (b.length == 0) break;
+                buffer = new String(b);
+                //System.out.println("#H#" + buffer); // debug
+                if (buffer.charAt(0) <= 32) {
+                    // use old entry
+                    if (key.length() == 0) throw new IOException("header corrupted - input error");
+                    // attach new line
+                    if (!(responseHeader.containsKey(key))) throw new IOException("header corrupted - internal error");
+                    responseHeader.put(key, (String) responseHeader.get(key) + " " + buffer.trim());
+                } else {
+                    // create new entry
+                    p = buffer.indexOf(":");
+                    if (p > 0) {
+                        responseHeader.add(buffer.substring(0, p).trim(), buffer.substring(p + 1).trim());
+                    } else {
+                        serverLog.logError("HTTPC", "RESPONSE PARSE ERROR: HOST='" + host + "', PATH='" + requestPath + "', STATUS='" + status + "'");
+                        serverLog.logError("HTTPC", "..............BUFFER: " + buffer);
+                    }
+                }
+            }
+            // finished with reading header
+
+            // we will now manipulate the header if the content is gzip encoded, because
+            // reading the content with "writeContent" will gunzip on-the-fly
+            gzip = ((zipped) && (responseHeader.gzip()));
+
+            if (gzip) {
+                responseHeader.remove("CONTENT-ENCODING"); // we fake that we don't have encoding, since what comes out does not have gzip and we also don't know what was encoded
+                responseHeader.remove("CONTENT-LENGTH"); // we cannot use the length during gunzippig yet; still we can hope that it works
+            }
+        }
+
+        /**
+        * Converts an instance of this class into a readable string.
+        *
+        * @return String with some information about this instance.
+        */
+        public String toString() {
+            StringBuffer toStringBuffer = new StringBuffer();
+            toStringBuffer.append((this.status == null) ? "Status: Unknown" : "Status: " + this.status)
+            .append(" | Headers: ")
+            .append((this.responseHeader == null) ? "none" : this.responseHeader.toString());
+            return toStringBuffer.toString();
+        }
+
+        /**
+        * Returns wether this request was successful or not. Stati beginning
+        * with 2 or 3 are considered successful.
+        *
+        * @return True, if the request was successfull.
+        */
+        public boolean success() {
+            return ((status.charAt(0) == '2') || (status.charAt(0) == '3'));
+        }
+
+        /**
+        * This method just output the found content into an byte-array and
+        * returns it.
+        *
+        * @return 
+        * @throws IOException 
+        */
+        public byte[] writeContent() throws IOException {
+            int contentLength = (int) this.responseHeader.contentLength();
+            serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
+            writeContentX(null, sbb, httpc.this.clientInput);
+            return sbb.getBytes();
+        }
+
+        /**
+        * This method outputs the found content into an byte-array and
+        * additionally outputs it to procOS.
+        *
+        * @param procOS
+        * @return 
+        * @throws IOException
+        */
+        public byte[] writeContent(OutputStream procOS) throws IOException {
+            int contentLength = (int) this.responseHeader.contentLength();
+            serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
+            writeContentX(procOS, sbb, httpc.this.clientInput);
+            return sbb.getBytes();
+        }
+
+        /**
+        * This method writes the input stream to either another output stream
+        * or a file or both.
+        *
+        * @param procOS
+        * @param file
+        * @throws IOException
+        */
+        public void writeContent(OutputStream procOS, File file) throws IOException {
+            // this writes the input stream to either another output stream or
+            // a file or both.
+            FileOutputStream bufferOS = null;
+            try {
+                if (file != null) bufferOS = new FileOutputStream(file);
+                writeContentX(procOS, bufferOS, httpc.this.clientInput);
+            } finally {
+                if (bufferOS != null) {
+                    bufferOS.close();
+                    if (file.length() == 0) file.delete();
+                }
+            }
+        }
+
+        /**
+        * This method outputs the input stream to either an output socket or an
+        * file or both. If the length of the input stream is given in the
+        * header, exactly that lenght is written. Otherwise the stream is
+        * written, till it is closed. If this instance is zipped, stream the
+        * input stream through gzip to unzip it on the fly.
+        *
+        * @param procOS OutputStream where the stream is to be written. If null
+        * no write happens.
+        * @param bufferOS OutputStream where the stream is to be written too.
+        * If null no write happens.
+        * @param clientInput InputStream where the content is to be read from.
+        * @throws IOException
+        */
+        public void writeContentX(OutputStream procOS, OutputStream bufferOS, InputStream clientInput) throws IOException {
+            // we write length bytes, but if length == -1 (or < 0) then we
+            // write until the input stream closes
+            // procOS == null -> no write to procOS
+            // file == null -> no write to file
+            // If the Content-Encoding is gzip, we gunzip on-the-fly
+            // and change the Content-Encoding and Content-Length attributes in the header
+            byte[] buffer = new byte[2048];
+            int l;
+            long len = 0;
+
+            // find out length
+            long length = this.responseHeader.contentLength();
+
+            // using the proper intput stream
+            InputStream dis = (this.gzip) ? (InputStream) new GZIPInputStream(clientInput) : (InputStream) clientInput;
+
+            // we have three methods of reading: length-based, length-based gzip and connection-close-based
+            try {
+                if (length > 0) {
+                    // we read exactly 'length' bytes
+                    while ((len < length) && ((l = dis.read(buffer)) >= 0)) {
+                        if (procOS != null) procOS.write(buffer, 0, l);
+                        if (bufferOS != null) bufferOS.write(buffer, 0, l);
+                        len += l;
+                    }
+                } else {
+                    // no content-length was given, thus we read until the connection closes
+                    while ((l = dis.read(buffer, 0, buffer.length)) >= 0) {
+                        if (procOS != null) procOS.write(buffer, 0, l);
+                        if (bufferOS != null) bufferOS.write(buffer, 0, l);
+                    }
+                }
+            } catch (java.net.SocketException e) {
+                throw new IOException("Socket exception: " + e.getMessage());
+            } catch (java.net.SocketTimeoutException e) {
+                throw new IOException("Socket time-out: " + e.getMessage());
+            } finally {
+                // close the streams
+                if (procOS != null) {
+                    if (procOS instanceof httpChunkedOutputStream)
+                        ((httpChunkedOutputStream)procOS).finish();
+                    procOS.flush();
+                }
+                if (bufferOS != null) bufferOS.flush();
+                buffer = null;
+            }
+        }
+
+        /**
+        * This method outputs a logline to the serverlog with the current
+        * status of this instance.
+        */
+        public void print() {
+            serverLog.logInfo("HTTPC", "RESPONSE: status=" + status + ", header=" + responseHeader.toString());
+        }
+
     }
 
 }
