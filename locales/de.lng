@@ -60,7 +60,7 @@ was added to the blacklist==wurde zur Blacklist hinzugefügt
 YaCy: Local Cache Management==YaCy: Lokale Cache Verwaltung
 Local Cache==Lokaler Cache
 The current cache size is==Die aktuelle Größe des Cache beträgt
-The maximum cache size is==Die maximale Größe ist
+The maximum cache size is==Die maximale Größe beträgt
 
 #-----------------------------------------------------------
 #File: Config_p.html
@@ -203,6 +203,9 @@ known links.==bekannten Links.
 You can try to==Sie können versuchen
 catch up more links==mehr Links zu sammeln
 from 'late' peers to enrich this search result.==um mehr Treffer zu erzielen.
+Catch up more links==Sammel mehr Links
+from 'late' peers.==von spät antwortenden Peers.
+<b>Topwords</b> \(to refine search\):==<b>Topwörter</b> (um Suche zu verfeinern):
 Please search for several words simultaneously!==Bitte suchen Sie gleichzeitig nach ähnlichen Wörtern.
 Click on one of these constraints:==Klicken Sie bitte auf einen dieser Vorschläge:
 The global search resulted in==Die globale Suche hat
@@ -281,6 +284,120 @@ YaCy: Send message==YaCy: Nachrichten Versand
 Send message==Nachrichten Versand
 
 #-------------------------------------------------------
+#File: Network.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy: Network Overview==YaCy: Netzwerk Überblick
+Network Menu==Netzwerk Menü
+Network&nbsp;Overview==Netzwerk Überblick
+Active&nbsp;Peers==Aktive Peers
+Passive&nbsp;Peers==Passive Peers
+Potential&nbsp;Peers==Potenzielle Peers
+Network Overview==Netzwerk Überblick
+Active Peers==Aktive Peers
+Passive Peers==Passive Peers
+Potential Peers==Potenzielle Peers
+Manually contacting Peer==
+no remote==Kein
+peer for this list known==Peer bekannt oder online.
+Showing==Gezeigt werden
+entries from a total of==Einträge von insgesamt
+peers==Peers
+send&nbsp;<b>M</b>essage/<br>show&nbsp;<b>P</b>rofile/<br>edit&nbsp;<b>W</b>iki==Sende Nachricht (<b>m</b>)/<br>Zeige Profil (<b>p</b>)/<br>Ändere Wiki (<b>w</b>)
+Name==Name
+Address==Adresse
+Hash==Hash
+Type==Typ
+Release/<br>SVN==YaCy Version/<br>SVN
+Contact==Kontakt
+Last<br>Seen==Zuletzt<br>online
+Uptime==Uptime
+Links==Links
+RWIs==RWIs
+accept<br><b>Crawl</b>/<br><b>Index==Akzeptiert<br><b>Crawl</b>/<br><b>Index</b>
+Sent<br>Words==Gesendete<br>Wörter
+Sent<br>URLs==Gesendete<br>URLs
+Received<br>Words==Empfangene<br>Wörter
+Received<br>URLs==Empfangene<br>URLs
+PPM==PPM
+Seeds==Seeds
+Connects<br>per hour==Verbindungen<br>pro Stunde
+Send message to peer==Sende Nachricht an Peer
+View profile of peer==Zeige Profil vom Peer
+Read and edit wiki on peer==Lese und ändere Wiki von Peer
+All Peers:==Alle Peers:
+Branch==Typ
+Peers==Peers
+All Links==Alle Links
+All Words==Alle Wörter
+Active \(connected Senior and Principal\)==Aktive (verbundene Senior und Principal)
+Passive \(disconnected Senior and Principal\)==Passive (nicht verbundene Senior und Principal)
+Potential \(Junior\)==Potenzielle (Junior)
+Network Total==Netzwerk insgesamt
+YaCy Cluster Indexing Speed:==YaCy Cluster Index Geschwindigkeit:
+Pages Per Minute \(Accumulated PPM over Active Peers\).==Seiten pro Minute (PPM von Aktiven Peers)
+Your Peer:==Ihr Peer:
+Name==Name
+Type=Typ
+Version==Version
+Uptime==Uptime
+Links==Links
+RWIs==RWIs
+Accept<br>Crawl==Akzeptiert<br>Crawl
+Accept<br>Index==Akzeptiert<br>Index
+Sent<br>Words==Gesendete<br>Wörter
+Sent<br>URLs==Gesendete<br>URLs
+Received<br>Words==Empfangene<br>Wörter
+Received<br>URLs==Empfangene<br>URLs
+PPM==PPM
+Seeds==Seeds
+Connects<br>per hour==Verbindungen<br>pro Stunde
+You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online Modus, aber zur Zeit besteht keine Internetverbindung. Bitte überprüfen Sie Ihre Internetverbindung.
+You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online Modus oder Sie benutzen nicht die Proxy Option.
+To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy Netzwerk zu verbinden, müssen Sie den Proxy benutzen, in dem Sie die Browser Einstellungen auf
+\('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>==('on-demand - Modus', siehe <a href="http://www.yacy.net/yacy/Installation.html#wininst">hier</a>
+for an installation guide\) or you can go online by activating the permanent online mode.==für eine Installationsanleitung) stellen. Sie können aber auch online gehen, in dem Sie den Permanent Online Modus aktivieren.
+To do this, press this button:==Um dies zu tun, drücken Sie bitte diesen Knopf:
+"go online"==Geh online
+
+#-------------------------------------------------------
+#File: News.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy: News==YaCy: News
+Network Menu==Netzwerk Menü
+News&nbsp;Overview==News Überblick
+Incoming&nbsp;News==eingehende News
+Processed&nbsp;News==gelesene News
+Outgoing&nbsp;News==ausgehende News
+Published&nbsp;News==veröffentlichte News
+News Overview==News Überblick
+This is the YaCyNews system \(currently under testing\).==Dies ist das YaCy News System (zur Zeit noch im Test).
+The news service is controlled by several entry points:==Dieser News Service wird von folgenden Punkten initiert:
+A crawl start with remote indexing will automatically create a news entry.==Wird ein Crawl von einem anderen Peer initiert, dann wird automatisch ein News-Eintrag erstellt.
+Other peers may use this information to prevent double-crawls from the same start point.==Andere Peers können diese Informationen benutzen, um einen doppelten Crawl vom selben Startpunkt zu vermeiden.
+A table with recently started crawls is presented on the Index Create - page==Eine Tabelle mit gerade gestarteten Crawls wird auf der Index Create Seite angezeigt.
+A change in the personal profile will create a news entry. You can see recently made changes of==Durch eine Änderung im Profil, wird auch ein News-Eintrag erstellt.
+profile entries on the Network page, where that profile change is visualized with a '\*' beside the 'P' \(profile\) - selector.==Profil Einträge auf der Netzwerk Seite werden nach einer Änderung mit einem '*' neben dem 'P' (Profil) gekennzeichnet.
+More news services will follow.==Mehr News Services werden folgen.
+Above you can see four menues:==Sie können diese vier Menüs sehen:
+<b>Incoming News</b>: latest news that arrived your peer.==<b>Eingehende News:</b> die neusten News, die Ihren Peer erreicht haben.
+Only these news will be used to display specific news services as explained above.==Nur diese News werden benutzt, um spezifische News Services anzuzeigen.
+You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Sie können diese News mit einem Button auf der Seite abarbeiten (als "gelesen" markieren). Dann werden diese Nachrichten nicht mehr auf der Netzwerk und der Index Create Seite erscheinen.
+<b>Processed News</b>: this is simply an archive of incoming news that you removed by processing.==<b>Gelesene News</b>: Hier ist ein simples Archiv der bereits gelesenen News.
+<b>Outgoing News</b>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<b>Ausgehende News</b>: Hier können Sie die News sehen, die durch Sie enstanden sind. Diese News werden sofort an andere Peers übertragen.
+you can stop the broadcast if you want.==Sie können die Weiterverteilung stoppen, wenn Sie wollen.
+<b>Published News</b>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<b>Veröffentlichte News</b>: Ihre News, die genügend verbreitet oder aus der Verbreitungsliste gelöscht wurden.
+Originator==Initiator
+Created==Geschaffen
+Category==Kategorie
+Received==Erhalten
+Distributed==Verteilt
+Attributes==Attribute
+"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Gewählte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::gewählte&nbsp;News&nbsp;Löschen::Breche&nbsp;Verbreitung&nbsp;gewählter&nbsp;News&nbsp;ab::gewählte&nbsp;News&nbsp;Löschen#(/page)#
+"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Markiere&nbsp;alle&nbsp;News&nbsp;als&nbsp;gelesen::Lösche&nbsp;alle&nbsp;News::Breche&nbsp;Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;ab::Lösche&nbsp;alle&nbsp;News#(/page)#
+
+#-------------------------------------------------------
 #File: Skins_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
@@ -337,7 +454,7 @@ Connects ==Verbindungen
 peers/hour==Peers/Stunde
 This peer's status==Status dieses Peers
 Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings \(see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>\), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben (Anleitung online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">Browser konfigurieren</a>) laden Sie eine beliebige Seite über den Proxy, um zu beweisen, dass es funktioniert. Mit diesem Status können Sie keine anderen Peers durchsuchen!
-Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured (usually: 8080), or to set up a 'virtual server' in your router settings (often called DMZ). Please be fair, contribute your own index to the global index.==Junior - Ihr Peer kann nicht von außen erreicht werden. Ein möglicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Peers von Ihrer Suchseite aus benutzen. Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu öffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
+Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured \(usually: 8080\), or to set up a 'virtual server' in your router settings \(often called DMZ\). Please be fair, contribute your own index to the global index.==Junior - Ihr Peer kann nicht von außen erreicht werden. Ein möglicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Peers von Ihrer Suchseite aus benutzen. Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu öffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
 Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!==Senior - Sie lassen YaCy bei sich laufen und unterstützen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> können. Danke!
 Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zusätzlich Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
 You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.==Natürlich können Sie auch mithilfe des globalen Indexes von Ihrer Suchseite aus <a href="index.html">das Internet durchsuchen</a>.
@@ -371,6 +488,22 @@ System Resources==Systemressourcen
 Processors:==Prozessoren:
 
 #-------------------------------------------------------
+#File: Steering.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy: Settings Acknowledge==YaCy: Einstellungen bestätigen
+Steering Receipt:==Steuerungsanleitung:
+No information has been submitted==Es wurden keine Informationen übermittelt
+Nothing changed==Nichts wurde verändert
+Your system is not protected by a password==Ihr System wird nicht von einem Passwort geschützt
+Please go to the <a href="/Settings_p.html">Settings</a> page and set an administration password==Bitte gehen Sie auf die <a href="/Settings_p.html">Einstellungen</a> Seite und geben ein Administrator Passwort ein
+You don't have the correct access right to perform this task.==Sie haben nicht die Erlaubnis diese Anwendung auszuführen.
+Please log in.==Bitte melden Sie sich an.
+Shutting down.==Runterfahren
+Application will terminate after working off all scheduled tasks.==Der YaCy Proxy fährt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
+You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie Änderungen vornehmen wollen.
+
+#-------------------------------------------------------
 #File: ViewLog_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
@@ -382,21 +515,66 @@ reversed order==in umgekehrter Reihenfolge
 
 #-------------------------------------------------------
 #File: ViewProfile.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy: Remote Peer Profile==YaCy: Remote Peer Profil
 Remote Peer Profile:==Remote Peer Profil:
-Wrong access of this page==Falscher Zugriff auf diese Seite
+Wrong access of this page==Kein Zugriff auf diese Seite
 The requested peer is not known or a potential peer, what means the peer's profile can't be fetched, because he is behind a firewall.==Der gewünschte Peer ist nicht bekannt oder ein potenzieller Peer, das bedeutet, das Profil kann nicht geladen werden, da der Peer hinter einer Firewall ist.
 The peer==Der Peer
 is not online.==ist nicht online.
 This is==Dies ist
 's Profile:==s Profil
-#Name==Name
-#Nick Name==Nick Name
-#Homepage==Homepage
-#eMail==eMail
-#ICQ==ICQ
-#Jabber==Jabber
-#Yahoo!==Yahoo!
-#MSN=MSN
+Name==Name
+Nick Name==Nick Name
+Homepage==Homepage
+eMail==eMail
+ICQ==ICQ
+Jabber==Jabber
+Yahoo!==Yahoo!
+MSN=MSN
 Comment==Kommentar
+
+#-------------------------------------------------------
+#File: Wiki.html
+
+yacyWiki==YaCyWiki
+Changes will be published as announcement on YaCyNews==Änderungen werden über den YaCy News Service bekannt gegeben.
+
+#--------------------------------------------------------
+#File: header.template
+
+Global Index==Globaler Index
+Distributed Crawler==Verteilter Crawler
+Local Proxy==Lokaler Proxy
+Communication / Publication==Kommunikation / Publikation
+Peer Control==Peer Verwaltung
+The Project==Das Projekt
+Search Page==Sucheite
+Help==Hilfe
+Index Create==Index erzeugen
+Index Control==Index kontrollieren
+#Index Monitor==Index Monitor
+#Blacklist==Blacklist
+#Proxy Indexing==Proxy Indexing
+#Cache Monitor==Cache Monitor
+#Cookie Monitor==Cookie Monitor
+#Home Page==Homepage
+File Share==Dateifreigabe
+#Wiki==Wiki
+Messages==Nachrichten
+Personal Profile==Persönliches Profil
+#Status==Status
+Network==Netzwerk
+#News==News
+#Log==Log
+Settings==Einstellungen
+#Performance==Performance
+Language==Sprache
+#Skins==Skins
+Project Home==Pojektseite
+Project News==Neuigkeiten
+English Forum==Englisches Forum
+#Deutsches Forum==Deutsches Forum
+Download YaCy==YaCy herunterladen
+Contact==Kontakt
