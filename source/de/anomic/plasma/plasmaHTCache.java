@@ -529,7 +529,7 @@ public final class plasmaHTCache {
 	// the following three methods for cache read/write granting shall be as loose as possible
 	// but also as strict as necessary to enable caching of most items
 	
-	public String shallStoreCache() {
+	public String shallStoreCacheForProxy() {
             // returns NULL if the answer is TRUE
             // in case of FALSE, the reason as String is returned
 	    
@@ -612,7 +612,7 @@ public final class plasmaHTCache {
 	    return null;
 	}
 
-        public boolean shallUseCache() {
+        public boolean shallUseCacheForProxy() {
 	    // decide upon header information if a specific file should be taken from the cache or not
 	    
 	    //System.out.println("SHALL READ CACHE: requestHeader = " + requestHeader.toString() + ", responseHeader = " + responseHeader.toString());

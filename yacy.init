@@ -404,7 +404,7 @@ xpstopw=true
 # be available/free in the heap; othervise the loop is not executed
 # and another idlesleep is performed
 20_dhtdistribution_idlesleep=20000
-20_dhtdistribution_busysleep=1000
+20_dhtdistribution_busysleep=10000
 20_dhtdistribution_memprereq=1000000
 30_peerping_idlesleep=120000
 30_peerping_busysleep=120000

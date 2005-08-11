@@ -369,7 +369,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     switchboard.defaultProxyProfile  // profile
             );
             
-            if (cacheExists && cacheEntry.shallUseCache()) {
+            if (cacheExists && cacheEntry.shallUseCacheForProxy()) {
                 fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);
             } else {            
                 fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);
@@ -527,7 +527,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                             res.responseHeader);
             
             String storeError;
-            if ((storeError = cacheEntry.shallStoreCache()) == null) {
+            if ((storeError = cacheEntry.shallStoreCacheForProxy()) == null) {
                 // we write a new cache entry
                 if ((contentLength > 0) && (contentLength < 1048576)) // if the length is known and < 1 MB
                 {

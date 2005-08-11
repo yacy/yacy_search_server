@@ -495,7 +495,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // work off unwritten files
         if (entry.cacheArray != null)  {
-            String error = entry.shallStoreCache();
+            String error = entry.shallStoreCacheForProxy();
             if (error == null) {
             cacheManager.writeFile(entry.url, entry.cacheArray);
                 log.logInfo("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);

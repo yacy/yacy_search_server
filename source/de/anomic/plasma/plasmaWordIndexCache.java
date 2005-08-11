@@ -352,6 +352,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         public void run() {
             String nextHash;
             Runtime rt = Runtime.getRuntime();
+            long pausetime;
             while (!terminate) {
 		if (intermission > 0) {
 		    if (this.intermission > System.currentTimeMillis()) {
@@ -363,8 +364,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     try {this.sleep(300);} catch (InterruptedException e) {}
                 } else {
                     flushFromMem();
-                    if ((rt.freeMemory() > 1000000) || (cache.size() == 0)) try {
-                        this.sleep(10 + java.lang.Math.min(1000, 10 * maxWords/(cache.size() + 1)));
+                    try {
+                        pausetime = 1 + java.lang.Math.min(1000, 5 * maxWords/(cache.size() + 1));
+                        if (cache.size() == 0) pausetime = 2000;
+                        this.sleep(pausetime);
                     } catch (InterruptedException e) {}
                 }              
             }
@@ -510,14 +513,22 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     
     public synchronized int addEntries(plasmaWordIndexEntryContainer container, long updateTime) {
         // this puts the entries into the cache, not into the assortment directly
+
+        // check cache space
+        if (cache.size() > 0) try {
+            // pause until space is in the cache
+            while (cache.size() >= this.maxWords) Thread.sleep(1000);
+            
+            // slow down if we reach cache limit
+            long pausetime = java.lang.Math.min(10, 3 * cache.size() / (maxWords + 1));
+            //System.out.println("Pausetime=" + pausetime);
+            Thread.sleep(pausetime);
+        } catch (InterruptedException e) {}
+        
+        // stop flushing now for one moment
         flushThread.pause();
 	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
-        while (cache.size() >= this.maxWords) flushFromMem();
-        if ((cache.size() > 10000) && (Runtime.getRuntime().freeMemory() < 5000000)) flushFromMem();
-        if ((cache.size() > 0) && (Runtime.getRuntime().freeMemory() < 1000000)) flushFromMem();
         
-	//if (flushc > 0) serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem - flushed " + flushc + " entries");
-
 	// put new words into cache
         int added = 0;
 	synchronized (cache) {
