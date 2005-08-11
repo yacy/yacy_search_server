@@ -395,7 +395,8 @@ public final class yacy {
                             if(! currentRev.equals(sb.getConfig("svnRevision", "")) ){ //is this another version?!
                                 File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
                                 File destDir = new File(sourceDir, "locale/"+lang);
-                                if(translator.translateFilesRecursive(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
+                                if(translator.translateFiles(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
+                                //if(translator.translateFilesRecursive(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
                                     //write the new Versionnumber
                                     BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
                                     bw.write(sb.getConfig("svnRevision", "Error getting Version"));
