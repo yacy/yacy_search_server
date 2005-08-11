@@ -1,30 +1,28 @@
-var appname  = "YACY: a Java Freeware P2P-Based Search Engine with Caching HTTP Proxy";
 var thismenu = new Array(
     "index","FAQ","Details","Technology","Platforms","News","Demo","License","Download",
-    "Installation","Volunteers","Deutsches Forum@http://www.yacy-forum.de","English Forum@http://sourceforge.net/forum/?group_id=116142","Material","Links","Contact","","Impressum");
-var mainmenu = new Array(
-    "YACY Home@http://www.yacy.net/index.html",
-    "Products@http://www.yacy.net/Products/index.html",
-    "Consulting@http://www.yacy.net/Consulting/index.html",
-    "Profile@http://www.yacy.net/Profile/index.html",
-    "Impressum@http://www.yacy.net/Impressum/index.html");
+    "Installation","Volunteers","Material","Links","Contact","",
+    "Deutsches Forum@http://www.yacy-forum.de","English Forum@http://sourceforge.net/forum/?group_id=116142","",
+    "Impressum");
 var root = "http://www.yacy.net/";
 
 function headline() {
   document.writeln("<table bgcolor=\"#4070A0\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\">");
   document.writeln(
     "<tr>" +
-      	"<td width=\"230\" height=\"80\" rowspan=\"2\"><a href=\"" + root + "\">" +
+      	"<td width=\"180\" height=\"80\" rowspan=\"3\"><a href=\"" + root + "\">" +
 	"<img border=\"0\" src=\"grafics/yacy.gif\" align=\"top\"></a></td>" +
-	"<!--<td align=\"center\" valign=\"bottom\"><font size=\"3\" face=\"Helvetica, Arial\" color=\"#ffffff\"><b>N&nbsp;E&nbsp;T&nbsp;W&nbsp;O&nbsp;R&nbsp;K&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;P&nbsp;P&nbsp;L&nbsp;I&nbsp;A&nbsp;N&nbsp;C&nbsp;E&nbsp;S&nbsp;&nbsp;&nbsp;&amp;&nbsp;&nbsp;C&nbsp;O&nbsp;N&nbsp;S&nbsp;U&nbsp;L&nbsp;T&nbsp;I&nbsp;N&nbsp;G</b></font></td>-->" +
-	"<td align=\"center\" valign=\"top\"><font size=\"3\" face=\"Helvetica, Arial\" color=\"#ffffff\"><br><br><b>Y&nbsp;A&nbsp;C&nbsp;Y&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;D&nbsp;I&nbsp;S&nbsp;T&nbsp;R&nbsp;I&nbsp;B&nbsp;U&nbsp;T&nbsp;E&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;P&nbsp;2&nbsp;P&nbsp;-&nbsp;B&nbsp;A&nbsp;S&nbsp;E&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;W&nbsp;E&nbsp;B&nbsp;&nbsp;&nbsp;I&nbsp;N&nbsp;D&nbsp;E&nbsp;X&nbsp;I&nbsp;N&nbsp;G</b></font></td>" +
-	"<td width=\"140\"></td>" +
+	"<td align=\"center\"><br><H1 class=\"white\"><font size=\"5\">YACY&nbsp;- DISTRIBUTED&nbsp;P2P-BASED WEB&nbsp;INDEXING</font></H1></td>" +
+	"<td width=\"120\"></td>" +
     "</tr>" +
-    "<tr>" +
-     	"<td colspan=\"3\" align=\"right\">");
-	//tmenu();
-  document.writeln("<br>");
-  document.writeln("</td></tr></table>");
+    "<tr><td align=\"center\" class=\"white\">" +
+        "<a href=\"http://www.yacy.net/index.html\" class=\"white\">Anomic + YaCy Home</a>&nbsp;&nbsp;|&nbsp;" +
+        "<a href=\"http://www.yacy.net/Products/index.html\" class=\"white\">Products</a>&nbsp;&nbsp;|&nbsp;" +
+        "<a href=\"http://www.yacy.net/Consulting/index.html\" class=\"white\">Consulting</a>&nbsp;&nbsp;|&nbsp;" +
+        "<a href=\"http://www.yacy.net/Profile/index.html\" class=\"white\">Profile</a>&nbsp;&nbsp;|&nbsp;" +
+        "<a href=\"http://www.yacy.net/Impressum/index.html\" class=\"white\">Impressum</a>" +
+    "</td><td></td></tr>" +
+    "<tr><td colspan=\"3\">&nbsp;</td></tr>" +
+    "</table>");
 }
 
 function filename() {
@@ -60,39 +58,12 @@ function lmenu() {
   document.writeln("</table>");
 }
 
-function tmenu() {
-  //document.writeln("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\">");
-
-  //document.writeln("<tr><td height=\"20\" class=\"white\" bgcolor=\"#BDCDD4\" align=\"center\" valign=\"middle\">"); 
-  var linkpath;
-  var printname;
-  var pos;
-    pos = mainmenu[0].indexOf("@");
-    linkpath = mainmenu[0].substring(pos + 1);
-    printname = mainmenu[0].substring(0, pos);
-    document.writeln("<a href=\"" + linkpath + "\" class=\"white\"><font size=\"1\">" + printname + "</font></a>&nbsp;"); 
-  for (var i = 1; i < mainmenu.length; ++i) {
-    pos = mainmenu[i].indexOf("@");
-    linkpath = mainmenu[i].substring(pos + 1);
-    printname = mainmenu[i].substring(0, pos);
-    document.writeln("<font class=\"white\" size=\"2\">&middot;</font>&nbsp;&nbsp;<a href=\"" + linkpath + "\" class=\"white\"><font size=\"1\">" + printname + "</font></a>&nbsp;"); 
-  }
-  //document.writeln("</td></tr>"); 
-  //document.writeln("</table>"); 
-}
-
-
 function globalheader() {
   document.writeln("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\">");
-
   document.writeln("<tr><td>");
-  //tmenu();
   document.writeln("</td></tr>");
-  //document.writeln("<tr><td height=\"1\" bgcolor=\"#000000\"></td></tr>");
   document.writeln("<tr><td>"); headline(); document.writeln("</td></tr>");
-  //document.writeln("<tr><td height=\"1\" bgcolor=\"#000000\"></td></tr>");
   document.writeln("<tr><td height=\"2\"></td></tr>");
-
   document.writeln("<tr><td>" +
 		   "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\">" +
 		   "  <tr>" +
@@ -103,12 +74,6 @@ function globalheader() {
 		   "  <td valign=\"top\">");
   document.writeln("  <table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\">");
   document.writeln("  <tr><td height=\"2\"></td></tr>");
-
-  //if ((docname() != "index") && (docname() != "indexd")) {
-  //   document.writeln("  <tr><td height=\"20\" class=\"black\" align=\"center\" valign=\"middle\">" + appname + "</td></tr>");
-  //   document.writeln("  <tr><td height=\"1\" bgcolor=\"#000000\"></td></tr>");
-  //}
-
   document.writeln("  <tr><td><br>");
 }
 

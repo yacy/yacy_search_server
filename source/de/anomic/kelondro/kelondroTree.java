@@ -1267,9 +1267,9 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     }
 
     public static void main(String[] args) {
-	//cmd(args);
+	cmd(args);
         //bigtest(Integer.parseInt(args[0]));
-        randomtest(Integer.parseInt(args[0]));
+        //randomtest(Integer.parseInt(args[0]));
         //smalltest();
     }
  
