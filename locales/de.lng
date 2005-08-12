@@ -22,27 +22,27 @@
 YaCy: Blacklist Manager==YaCy: Blacklist Manager
 Blacklist==Blacklist
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion  stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
-from being loaded. You can define several blacklists and activate them separately.==Sie können mehrere Blacklists anlegen und getrennt aktivieren.
-You may also provide your blacklist to other peers by sharing them; in return you may==Sie können ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
-collect blacklist entries from other peers.==Im Gegenzug können Sie sich selber von anderen Peers Blacklists runterladen.
+from being loaded. You can define several blacklists and activate them separately.==Sie k&ouml;nnen mehrere Blacklists anlegen und getrennt aktivieren.
+You may also provide your blacklist to other peers by sharing them; in return you may==Sie k&ouml;nnen ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
+collect blacklist entries from other peers.==Im Gegenzug k&ouml;nnen Sie sich selber von anderen Peers Blacklists runterladen.
 Edit list:==Liste bearbeiten:
 "active"==aktiv
 not active==nicht aktiv
 "shared"==freigegeben
 "not shared"==nicht freigegeben
-"select"==wähle
+"select"==w&auml;hle
 New list:==Neue Liste:
 "create"==anlegen
 Enable/disable this list==Liste an/ausschalten
 Share/don't share this list==Liste teilen/nicht teilen
-Delete this list==Liste löschen
+Delete this list==Liste l&ouml;schen
 Active list:==Aktivierte Liste:
 These are the domain name / path patterns in this blacklist:==Dies sind die Domainnamen / -pfade die in der Blackliste sind:
-You can select them here for deletion==Sie können sie einzeln zum Löschen wählen
-Delete URL pattern==URL aus der Liste löschen
+You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
+Delete URL pattern==URL aus der Liste l&ouml;schen
 Enter new domain name / path pattern in the form:==Geben Sie eine neue Domain/einen neuen Pfad in dieser Form ein:
 "&lt;domain&gt;/&lt;path-regexpr&gt;":=="&lt;Domain&gt;/&lt;Pfad&gt;"
-Add URL pattern==Füge URL hinzu
+Add URL pattern==F&uuml;ge URL hinzu
 Import blacklist items from other YaCy peers:==Importiere Blacklist von anderen YaCy Peers:
 Host:==Host:
 "Load new blacklist items"==Lade neue Blacklist
@@ -52,15 +52,15 @@ URL:==URL:
 Import blacklist items from file:==Importiere Blacklist aus Datei:
 "Load new blacklist items"==Lade neue Blacklist
 was removed from blacklist==wurde aus Blacklist entfernt
-was added to the blacklist==wurde zur Blacklist hinzugefügt
+was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
 
 #-----------------------------------------------------------
 #File: CacheAdmin_p.html
 
 YaCy: Local Cache Management==YaCy: Lokale Cache Verwaltung
 Local Cache==Lokaler Cache
-The current cache size is==Die aktuelle Größe des Cache beträgt
-The maximum cache size is==Die maximale Größe beträgt
+The current cache size is==Die aktuelle Gr&ouml;&szlig;e des Cache betr&auml;gt
+The maximum cache size is==Die maximale Gr&ouml;&szlig;e betr&auml;gt
 
 #-----------------------------------------------------------
 #File: Config_p.html
@@ -69,38 +69,38 @@ The maximum cache size is==Die maximale Größe beträgt
 YaCy advanced Config==YaCy: erweiterte Einstellungen
 Advanced Config==Erweiterte Einstellungen
 Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie können alles ändern, bedenken Sie aber, dass einige Änderungen einen Neustart von YaCy erfordern und andere Änderungen YaCy ganz zum Absturz bringen können.
-For explanation please look into yacy.init==Eine Erklärung finden Sie in der Datei yacy.init
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie k&ouml;nnen alles &auml;ndern, bedenken Sie aber, dass einige &Auml;nderungen einen Neustart von YaCy erfordern und andere &Auml;nderungen YaCy ganz zum Absturz bringen k&ouml;nnen.
+For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in der Datei yacy.init
 "Save"==Speichern
 
 #-------------------------------------------------------
 #File: CookieMonitorIncoming_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Incoming Cookies Monitor==YaCy: Überwachung eingehender Cookies
-Cookie Monitor: Incoming Cookies==Cookie Überwachung: eingehende Cookies
+YaCy: Incoming Cookies Monitor==YaCy: &Uuml;berwachung eingehender Cookies
+Cookie Monitor: Incoming Cookies==Cookie &Uuml;berwachung: eingehende Cookies
 This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Auflistung aller Cookies, die ein Web Server an diesen YaCy Proxy geschickt hat:
 Showing==Angezeigt werden
-entries from a total of==Einträge von insgesamt
+entries from a total of==Eintr&auml;ge von insgesamt
 Cookies==Cookies
 
 #-------------------------------------------------------
 #File: CookieMonitorOutgoing_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Outgoing Cookies Monitor==YaCy: Überwachung ausgehender Cookies
-Cookie Monitor: Outgoing Cookies==Cookie Überwachung: ausgehende Cookies
+YaCy: Outgoing Cookies Monitor==YaCy: &Uuml;berwachung ausgehender Cookies
+Cookie Monitor: Outgoing Cookies==Cookie &Uuml;berwachung: ausgehende Cookies
 This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Dies ist eine Auflistung aller Cookies, die Ihr Browser an einen Web Server geschickt hat:
 Showing==Angezeigt werden
-entries from a total of==Einträge von insgesamt
+entries from a total of==Eintr&auml;ge von insgesamt
 Cookies==Cookies
 
 #-------------------------------------------------------
 #File: EditProfile_p.html
 
-Your Personal Profile==Dein persönliches Profil
-You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Hier können Sie Ihr persönliches Profil verwalten. Andere YaCy-Benutzer können dieses Profil über einen Link auf ihrer Netzwerkseite ansehen.
-You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie müssen hier keine persönlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen möchten, kann man das hier machen.
+Your Personal Profile==Dein pers&ouml;nliches Profil
+You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten. Andere YaCy-Benutzer k&ouml;nnen dieses Profil &uuml;ber einen Link auf ihrer Netzwerkseite ansehen.
+You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie m&uuml;ssen hier keine pers&ouml;nlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen m&ouml;chten, kann man das hier machen.
 #Name==Name
 #Nick Name==Nick Name
 #Homepage==Homepage
@@ -117,32 +117,32 @@ Comment==Kommentar
 
 YaCy: Help==YaCy: Hilfeseiten
 Help==Hilfe
-This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==YaCy ist eine Suchmaschine,  die ähnlich dem Prinzip des verteilten Rechnen (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und indizieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <i>online-Interface</i> von YaCy. Sie können dieses Interface auch zum konfigurieren Ihrer persönlichen Einstellungen, Proxy Einstellungen, der Zugriffs Kontrolle und den crawl Einstellungen benutzen. Sie können das Interface auch zum Starten von crawls, Nachrichtenversand an andere YaCy-Nutzer und zur Überwachung Ihres Index, Cache Status und des crawl Prozesses benutzen. Besonders interssant ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <i>globalen</i> Index zu durchsuchen.
-For more detailed information, visit the <a href="http://www.yacy.net/yacy">YaCy homepage</a>==Für mehr Informationen besuchen Sie bitte die <a href="http://www.yacy.net/yacy">YaCy Homepage</a>
+This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==YaCy ist eine Suchmaschine,  die &auml;hnlich dem Prinzip des verteilten Rechnen (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und indizieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <i>online-Interface</i> von YaCy. Sie k&ouml;nnen dieses Interface auch zum konfigurieren Ihrer pers&ouml;nlichen Einstellungen, Proxy Einstellungen, der Zugriffs Kontrolle und den crawl Einstellungen benutzen. Sie k&ouml;nnen das Interface auch zum Starten von crawls, Nachrichtenversand an andere YaCy-Nutzer und zur &Uuml;berwachung Ihres Index, Cache Status und des crawl Prozesses benutzen. Besonders interssant ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <i>globalen</i> Index zu durchsuchen.
+For more detailed information, visit the <a href="http://www.yacy.net/yacy">YaCy homepage</a>==F&uuml;r mehr Informationen besuchen Sie bitte die <a href="http://www.yacy.net/yacy">YaCy Homepage</a>
 Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
 The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Weseiten zusammensetzt, die Sie mit dem Proxy besuchen.
-The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie können aber auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
+The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie k&ouml;nnen aber auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
 Search Word List==Such Wort Liste
-You can search for several words simultanous. Words must be separated by a single space.==Sie können eine Suche mit mehreren Wörtern gleichzeitig starten. Die Wörter müssen durch ein Leerzeichen getrennt sein.
+You can search for several words simultanous. Words must be separated by a single space.==Sie k&ouml;nnen eine Suche mit mehreren W&ouml;rtern gleichzeitig starten. Die W&ouml;rter m&uuml;ssen durch ein Leerzeichen getrennt sein.
 The words are treated conjunctive, that means every must occur in the result, not any.==
-If you do a global search \(see below\) you may get different results each time you do a search.==Wenn Sie eine globale Suche (siehe unten) durchführen, kann es sein, dass Sie bei wiederholten Suchanfragen jedesmal andere Ergebnisse erhalten.
+If you do a global search \(see below\) you may get different results each time you do a search.==Wenn Sie eine globale Suche (siehe unten) durchf&uuml;hren, kann es sein, dass Sie bei wiederholten Suchanfragen jedesmal andere Ergebnisse erhalten.
 Maximum Number of Results==Maximale Anzahl an Ergebnissen
-You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Sie können auswählen, wieviele Links Ihnen angezeigt werden sollen. Wir unterstützen im Moment keine mehrfachen Ergebnisseiten für jeden möglichen Link.
-Instead we encourage you to enhance the search result by submitting more search words.==Stattdessen möchten wir Sie dazu auffordern, Ihre Suchergebnisse durch das Eingeben von mehreren Suchwörtern, zu vergrößern.
+You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Sie k&ouml;nnen ausw&auml;hlen, wieviele Links Ihnen angezeigt werden sollen. Wir unterst&uuml;tzen im Moment keine mehrfachen Ergebnisseiten f&uuml;r jeden m&ouml;glichen Link.
+Instead we encourage you to enhance the search result by submitting more search words.==Stattdessen m&ouml;chten wir Sie dazu auffordern, Ihre Suchergebnisse durch das Eingeben von mehreren Suchw&ouml;rtern, zu vergr&ouml;&szlig;ern.
 Result Order Options==Reihenfolge der Ergebnisse
-The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Die Suchmaschine bietet ein experimentelles 'Qualitäts' Ranking an. Im Gegensatz zu anderen üblichen Suchmaschinen bieten wir
-a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==auch die Sortierung nach Datum an. Wenn Sie die Reihenfolge in 'Datum-Qualität' ändern, werden die als letztes überarbeiteten Webseiten aus den Suchergebnissen ganz oben aufgelistet.
-For pages that have the same date the second order, 'Quality' is applied.==Für Seiten die das gleiche Datum haben, wird dann nach der 'Qualität' geordnet.
+The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Die Suchmaschine bietet ein experimentelles 'Qualit&auml;ts' Ranking an. Im Gegensatz zu anderen &uuml;blichen Suchmaschinen bieten wir
+a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==auch die Sortierung nach Datum an. Wenn Sie die Reihenfolge in 'Datum-Qualit&auml;t' &auml;ndern, werden die als letztes &uuml;berarbeiteten Webseiten aus den Suchergebnissen ganz oben aufgelistet.
+For pages that have the same date the second order, 'Quality' is applied.==F&uuml;r Seiten die das gleiche Datum haben, wird dann nach der 'Qualit&auml;t' geordnet.
 Resource Domain==Quelle der Suche
 This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==Diese Suchmaschine ist so aufgebaut, dass sie die Seiten durchsucht, die mit dem Proxy besucht wurden. Aber der Suchindex ist auch auf andere Peers verteilt,
-so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==so dass Sie auch global suchen können: diese Funktion ist veraltet, aber Sie können sie zum testen benutzen. Neue Versionen werden
+so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==so dass Sie auch global suchen k&ouml;nnen: diese Funktion ist veraltet, aber Sie k&ouml;nnen sie zum testen benutzen. Neue Versionen werden
 automatically distribute index information <i>before</i> a search happends to form a performant distributed hash table -- a very fast global search.==automatisch einen verteilten Index erstellen <i>bevor</i> es geschieht, dass eine Suche, eine verteilte Hash-Tabelle erstellt --  eine sehr schnelle globale Suche.
 Maximum Search Time==Maximale Zeit zum Suchen
-Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Den lokalen Index zu durchsuchen, geht extrem schnell. Es geschieht innerhalb von Millisekunden auch bei einer großen Anzahl (ein paar Millionen) von Seiten.
+Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Den lokalen Index zu durchsuchen, geht extrem schnell. Es geschieht innerhalb von Millisekunden auch bei einer gro&szlig;en Anzahl (ein paar Millionen) von Seiten.
 global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==Im Gegensatz dazu braucht es mehr Zeit den globalen Index zu durchsuchen, da erst der richtige Peer, der die besten Ergbnisse liefern kann, gefunden werden muss. Dies ist vermutlich auch der Grund warum
-distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==diese Art von Suchmaschine noch in der Testphase ist. Die Suchergebnisse werden immer besser (eine wiederholte globale Suche bringt mehr gleiche Ergebnisse), je länger
+distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==diese Art von Suchmaschine noch in der Testphase ist. Die Suchergebnisse werden immer besser (eine wiederholte globale Suche bringt mehr gleiche Ergebnisse), je l&auml;nger
 the search time is.==die Zeit zum Suchen ist.
-You may want to use accesskeys to navigate through the YaCy webinterface:==Sie können durch das YaCy Web Interface auch mit Hilfe von Tastenkombinationen navigieren. Drücken Sie dazu eine der folgenden Kombinationen ('Taste' steht für einen der drei unten genannten Buchstaben):
+You may want to use accesskeys to navigate through the YaCy webinterface:==Sie k&ouml;nnen durch das YaCy Web Interface auch mit Hilfe von Tastenkombinationen navigieren. Dr&uuml;cken Sie dazu eine der folgenden Kombinationen ('Taste' steht f&uuml;r einen der drei unten genannten Buchstaben):
 Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows und Internet Explorer: Alt + Taste + Enter
 Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows und Mozilla/Firefox/Netscape: Alt + Taste
 Windows and Opera: Shift \+ Esc \+ Accesskey==Windows und Opera: Shift + Esc + Taste
@@ -157,9 +157,9 @@ Search Page==Suchseite
 Network==Netzwerk
 Status==Status
 
-YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy benutzt reguläre Ausdrücke für einige Funktionen, z.B. die Blacklist.
-There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Es gibt einige Standards für diese Ausdrücke, YaCy orientiert sich an der Syntax von Perl 5.
-Here ist a short overview about the functions, which should fir for most cases\:<==Hier finden Sie einen kurzen Überblick über die Funktionen, der die meisten Anwenungsfälle abdecken sollte:<
+YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy benutzt regul&auml;re Ausdr&uuml;cke f&uuml;r einige Funktionen, z.B. die Blacklist.
+There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Es gibt einige Standards f&uuml;r diese Ausdr&uuml;cke, YaCy orientiert sich an der Syntax von Perl 5.
+Here ist a short overview about the functions, which should fir for most cases\:<==Hier finden Sie einen kurzen &Uuml;berblick &uuml;ber die Funktionen, der die meisten Anwenungsf&auml;lle abdecken sollte:<
 arbitrary character==beliebiges Zeichen
 character x==Zeichen x
 not x==nicht x
@@ -173,14 +173,14 @@ a or b or c (same as above)==a oder b oder c (dasselbe wie oben)
 exactly n appearances of x==genau n Vorkommen von x
 at least n appearances of x==mindestens n Vorkommen von x
 at least n, maximum m appearanches of x==mindestens n, maximal m Vorkommen von m
-Modify priority of instructions==Priorität der Befehle ändern
+Modify priority of instructions==Priorit&auml;t der Befehle &auml;ndern
 Escape-Character, used to escape special characters \(for example "\[" or "\*"\), so that they loose their special meaning==Escape-Zeichen, das benutzt wird, um Zeichen mit Sonderbedeutung (z.B. "[" oder "*"),  zu "escapen", d.h. ihre Sonderbedeutung verlieren.
-Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==Regex folgen Prioritäten (absteigend): Verkettung, unäre Operatore (*,+,^,{}), binäre Operatoren (|). Die Reihenfolge kann durch setzen von Klammern geändert werden.
+Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==Regex folgen Priorit&auml;ten (absteigend): Verkettung, un&auml;re Operatore (*,+,^,{}), bin&auml;re Operatoren (|). Die Reihenfolge kann durch setzen von Klammern ge&auml;ndert werden.
 Example:==Beispiel:
-This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Dies erfüllt heise.de/ mit einem String davor, z.B. "http://www.". Es folgt ein beliebiger String, dann ein Slash und eine Zahl. Der Punkt in "heise.de" ist nicht escaped, weil der Punkt für ein beliebiges Zeichen steht, folglich auch für "." selbst.
-A possible URL which would match this regexp is\:==Eine URL, die den regulären Ausdruck erfüllen würde, ist:
-An URL which would not match is:==Eine URL die diese Regex nicht erfüllen würde ist: 
-There is ".html" at the end, which is not included with the Regular Expression.==Hier ist ".html" am Ende angehängt, das nicht in der Regex enthalten ist.
+This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Dies erf&uuml;llt heise.de/ mit einem String davor, z.B. "http://www.". Es folgt ein beliebiger String, dann ein Slash und eine Zahl. Der Punkt in "heise.de" ist nicht escaped, weil der Punkt f&uuml;r ein beliebiges Zeichen steht, folglich auch f&uuml;r "." selbst.
+A possible URL which would match this regexp is\:==Eine URL, die den regul&auml;ren Ausdruck erf&uuml;llen w&uuml;rde, ist:
+An URL which would not match is:==Eine URL die diese Regex nicht erf&uuml;llen w&uuml;rde ist: 
+There is ".html" at the end, which is not included with the Regular Expression.==Hier ist ".html" am Ende angeh&auml;ngt, das nicht in der Regex enthalten ist.
 
 #-----------------------------------------------------------
 #File: index.html
@@ -203,47 +203,47 @@ local==lokal
 Max. search time==Max. Suchdauer
 \(seconds\)==in Sekunden
 URL mask:==URL-Filter:
-restrict on==beschränken auf
+restrict on==beschr&auml;nken auf
 show all==Alles anzeigen
 The following words are stop-words and had been excluded from the search:==Folgende Worte sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
-No Results. (length of search words must be at least 3 characters)==Keine Ergebnisse. (Die Länge der Suchbegriffe muss mindestens 3 Zeichen betragen)
-No Results. If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Keine Ergebnisse. Wenn Sie das unbefriedigend finden, sollten Sie überlegen, den globalen Index durch das Betreiben eines eigenen Proxies/Peers zu unterstützen.
-If everybody contributes, the results will get better.==Wenn jeder etwas beiträgt, werden die Ergebnisse besser.
-Other possible reasons for no result:==Andere mögliche Gründe dafür, dass Sie keine Ergebnisse erhalten haben:
-The search time was too short. Search again with same query to catch up 'late peers'==Die Zeit zum suchen war zu kurz. Suchen Sie erneut mit erhöhter max. Suchdauer nach dem gleichen Begriff, um so auch Ergebnisse von langsameren Peers zu erhalten.
-There is currently no support for german umlaute. Please use ae/oe/ue instead==Zur Zeit gibt es keine Unterstützung der deutschen Umlaute. Bitte benutzen Sie stattdessen ae/oe/ue.
-Words of length < 3 are not indexed. Please omit such words==Wörter mit weniger als drei Buchstaben werden nicht indiziert.
+No Results. (length of search words must be at least 3 characters)==Keine Ergebnisse. (Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen)
+No Results. If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Keine Ergebnisse. Wenn Sie das unbefriedigend finden, sollten Sie &uuml;berlegen, den globalen Index durch das Betreiben eines eigenen Proxies/Peers zu unterst&uuml;tzen.
+If everybody contributes, the results will get better.==Wenn jeder etwas beitr&auml;gt, werden die Ergebnisse besser.
+Other possible reasons for no result:==Andere m&ouml;gliche Gr&uuml;nde daf&uuml;r, dass Sie keine Ergebnisse erhalten haben:
+The search time was too short. Search again with same query to catch up 'late peers'==Die Zeit zum suchen war zu kurz. Suchen Sie erneut mit erh&ouml;hter max. Suchdauer nach dem gleichen Begriff, um so auch Ergebnisse von langsameren Peers zu erhalten.
+There is currently no support for german umlaute. Please use ae/oe/ue instead==Zur Zeit gibt es keine Unterst&uuml;tzung der deutschen Umlaute. Bitte benutzen Sie stattdessen ae/oe/ue.
+Words of length < 3 are not indexed. Please omit such words==W&ouml;rter mit weniger als drei Buchstaben werden nicht indiziert.
 YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indiziert nur den Singular eines Wortes. Bitte suchen Sie daher auch nur nach dem Singular.
-Only complete words are indexed, not parts of words==Nur komplette Wörter sind indiziert, keine Teile eines Wortes.
+Only complete words are indexed, not parts of words==Nur komplette W&ouml;rter sind indiziert, keine Teile eines Wortes.
 Don't use stopwords as search words==Benutzen Sie bitte keine Stopwords in der Suche.
-During this test phase the reaction time of remote peers is unknown.==Während dieser Testphase ist die Reaktionszeit des remote Peers unbekannt.
+During this test phase the reaction time of remote peers is unknown.==W&auml;hrend dieser Testphase ist die Reaktionszeit des remote Peers unbekannt.
 Please repeat your search to see if there are late-responses from remote peers==Bitte wiederholen Sie jede Suche, um zu sehen, wie lange der remote Peer zum antworten braucht.
 If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
 then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen crawl nach der gesuchten Information, um sie
-available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verfügung zu stellen. Bleiben Sie bitte online um crawls von anderen Peers zu erlauben. Danke!
+available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um crawls von anderen Peers zu erlauben. Danke!
 results from a total number of==Resulate aus
 known links.==bekannten Links.
-You can try to==Sie können versuchen
+You can try to==Sie k&ouml;nnen versuchen
 catch up more links==mehr Links zu sammeln
 from 'late' peers to enrich this search result.==um mehr Treffer zu erzielen.
 Catch up more links==Sammel mehr Links
-from 'late' peers.==von spät antwortenden Peers.
-<b>Topwords</b> \(to refine search\):==<b>Topwörter</b> (um Suche zu verfeinern):
-Please search for several words simultaneously!==Bitte suchen Sie gleichzeitig nach ähnlichen Wörtern.
-Click on one of these constraints:==Klicken Sie bitte auf einen dieser Vorschläge:
+from 'late' peers.==von sp&auml;t antwortenden Peers.
+<b>Topwords</b> \(to refine search\):==<b>Topw&ouml;rter</b> (um Suche zu verfeinern):
+Please search for several words simultaneously!==Bitte suchen Sie gleichzeitig nach &auml;hnlichen W&ouml;rtern.
+Click on one of these constraints:==Klicken Sie bitte auf einen dieser Vorschl&auml;ge:
 The global search resulted in==Die globale Suche hat
 link contributions from other YaCy peers==Links, beigesteuert von anderen YaCy Peers, gefunden.
-You can enrich the search results by using the 'global' option: This will search also other YaCy peers==Sie können die Anzahl Ihrer Treffer erhöhen, wenn Sie die 'global' Option benutzen. So werden auch andere YaCy Peers zum suchen benutzt.
-You cannot get global search results because you are not connected to another YaCy peer.==Sie können keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
-To connect you must first use the proxy.==Um sich neu zu verbinden, müssen Sie erst den Proxy benutzen.
+You can enrich the search results by using the 'global' option: This will search also other YaCy peers==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen. So werden auch andere YaCy Peers zum suchen benutzt.
+You cannot get global search results because you are not connected to another YaCy peer.==Sie k&ouml;nnen keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
+To connect you must first use the proxy.==Um sich neu zu verbinden, m&uuml;ssen Sie erst den Proxy benutzen.
 See here for an==Sehen Sie hier
-installation guide==für eine Anleitung
-Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativ können Sie auch den Proxy im permanent online Modus laufen lassen. Dies garantiert eine globale Suche.
+installation guide==f&uuml;r eine Anleitung
+Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativ k&ouml;nnen Sie auch den Proxy im permanent online Modus laufen lassen. Dies garantiert eine globale Suche.
 To do this, press this button:==Um dies zu tun, klicken Sie bitte folgenden Button:
 "go online"==gehe online
-You can enrich the search results by using the 'global' option; you must also switch to online mode==Sie können die Anzahl Ihrer Treffer erhöhen, wenn sie die 'global' Option benutzen. Sie müssen aber erst in den online Modus wechseln,
-(by using the proxy) to contribute to the global index.==(in dem Sie den Proxy benutzen) um im globalen Index suchen zu können.
+You can enrich the search results by using the 'global' option; you must also switch to online mode==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn sie die 'global' Option benutzen. Sie m&uuml;ssen aber erst in den online Modus wechseln,
+(by using the proxy) to contribute to the global index.==(in dem Sie den Proxy benutzen) um im globalen Index suchen zu k&ouml;nnen.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu erschaffen.
 Architecture and implementation==Architektur und Implementierung
@@ -258,7 +258,7 @@ Crawling Filter:=Crawl-Maske:
 Store to Proxy Cache:=In den Proxy-Cache speichern:
 Do Local Indexing:=Lokales Indexieren:
 Do Remote Indexing:=Indexieren auf anderen Peers:
-Exclude static Stop-Words:=Stop-Words ausschließen:
+Exclude static Stop-Words:=Stop-Words ausschlie&szlig;en:
 Start Point:=Startpunkt:
 
 #-------------------------------------------------------
@@ -267,7 +267,7 @@ Start Point:=Startpunkt:
 
 YaCy: Language selection==YaCy: Sprachauswahl
 Language selection==Sprachauswahl
-You can change the language of the YaCy-webinterface with translation files.==Hier können Sie die Sprache ändern. Wählen Sie die gewünschte Sprache aus der Liste aus.
+You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
 Current language:==Aktuelle Sprache
 default\(english\)==Deutsch
 Languagefile Author:==Autor der Sprachdatei:
@@ -277,9 +277,9 @@ Install new language from URL:==Neue Sprachdatei herunterladen:
 
 Use this language==Diese Sprachdatei sofort benutzen
 "Use"==Benutzen
-"Delete"==Löschen
+"Delete"==L&ouml;schen
 "Install"==Installieren
-Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu installieren:
+Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
 Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
 
 #-------------------------------------------------------
@@ -289,7 +289,7 @@ YaCy: Lab==YaCy: Labor
 The YACY Lab==Das YaCy Labor
 This is the place where we try new functions of the YaCy search engine.==Dies ist ein Platz, an dem wir neue Funktionen der YaCy Suchmaschine testen.
 All these things here are to be considered as probably unstable, and/or experimental.==Alle neuen Funktionen hier sind wahrscheinlich noch unstabil und in einer Experementierphase.
-You may try out these things but please do not care about bugs.==Sie können die neuen Funktionen gerne ausprobieren. Kümmern Sie sich bitte nicht um die Fehler.
+You may try out these things but please do not care about bugs.==Sie k&ouml;nnen die neuen Funktionen gerne ausprobieren. K&uuml;mmern Sie sich bitte nicht um die Fehler.
 The <a href="Wiki.html">Wiki</a>==Das <a href="Wiki.html">Wiki</a>
 Advanced <a href="/Config_p.html">Configuration</a>==erweiterte <a href="/Config_p.html">Einstellungen</a>
 
@@ -311,13 +311,13 @@ Send message==Nachrichten Versand
 #File: Network.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Network Overview==YaCy: Netzwerk Überblick
-Network Menu==Netzwerk Menü
-Network&nbsp;Overview==Netzwerk Überblick
+YaCy: Network Overview==YaCy: Netzwerk &Uuml;berblick
+Network Menu==Netzwerk Men&uuml;
+Network&nbsp;Overview==Netzwerk &Uuml;berblick
 Active&nbsp;Peers==Aktive Peers
 Passive&nbsp;Peers==Passive Peers
 Potential&nbsp;Peers==Potenzielle Peers
-Network Overview==Netzwerk Überblick
+Network Overview==Netzwerk &Uuml;berblick
 Active Peers==Aktive Peers
 Passive Peers==Passive Peers
 Potential Peers==Potenzielle Peers
@@ -325,9 +325,9 @@ Manually contacting Peer==
 no remote==Kein
 peer for this list known==Peer bekannt oder online.
 Showing==Gezeigt werden
-entries from a total of==Einträge von insgesamt
+entries from a total of==Eintr&auml;ge von insgesamt
 peers==Peers
-send&nbsp;<b>M</b>essage/<br>show&nbsp;<b>P</b>rofile/<br>edit&nbsp;<b>W</b>iki==Sende Nachricht (<b>m</b>)/<br>Zeige Profil (<b>p</b>)/<br>Ändere Wiki (<b>w</b>)
+send&nbsp;<b>M</b>essage/<br>show&nbsp;<b>P</b>rofile/<br>edit&nbsp;<b>W</b>iki==Sende Nachricht (<b>m</b>)/<br>Zeige Profil (<b>p</b>)/<br>&Auml;ndere Wiki (<b>w</b>)
 Name==Name
 Address==Adresse
 Hash==Hash
@@ -339,21 +339,21 @@ Uptime==Uptime
 Links==Links
 RWIs==RWIs
 accept<br><b>Crawl</b>/<br><b>Index==Akzeptiert<br><b>Crawl</b>/<br><b>Index</b>
-Sent<br>Words==Gesendete<br>Wörter
+Sent<br>Words==Gesendete<br>W&ouml;rter
 Sent<br>URLs==Gesendete<br>URLs
-Received<br>Words==Empfangene<br>Wörter
+Received<br>Words==Empfangene<br>W&ouml;rter
 Received<br>URLs==Empfangene<br>URLs
 PPM==PPM
 Seeds==Seeds
 Connects<br>per hour==Verbindungen<br>pro Stunde
 Send message to peer==Sende Nachricht an Peer
 View profile of peer==Zeige Profil vom Peer
-Read and edit wiki on peer==Lese und ändere Wiki von Peer
+Read and edit wiki on peer==Lese und &auml;ndere Wiki von Peer
 All Peers:==Alle Peers:
 Branch==Typ
 Peers==Peers
 All Links==Alle Links
-All Words==Alle Wörter
+All Words==Alle W&ouml;rter
 Active \(connected Senior and Principal\)==Aktive (verbundene Senior und Principal)
 Passive \(disconnected Senior and Principal\)==Passive (nicht verbundene Senior und Principal)
 Potential \(Junior\)==Potenzielle (Junior)
@@ -369,19 +369,19 @@ Links==Links
 RWIs==RWIs
 Accept<br>Crawl==Akzeptiert<br>Crawl
 Accept<br>Index==Akzeptiert<br>Index
-Sent<br>Words==Gesendete<br>Wörter
+Sent<br>Words==Gesendete<br>W&ouml;rter
 Sent<br>URLs==Gesendete<br>URLs
-Received<br>Words==Empfangene<br>Wörter
+Received<br>Words==Empfangene<br>W&ouml;rter
 Received<br>URLs==Empfangene<br>URLs
 PPM==PPM
 Seeds==Seeds
 Connects<br>per hour==Verbindungen<br>pro Stunde
-You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online Modus, aber zur Zeit besteht keine Internetverbindung. Bitte überprüfen Sie Ihre Internetverbindung.
+You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
 You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online Modus oder Sie benutzen nicht die Proxy Option.
-To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy Netzwerk zu verbinden, müssen Sie den Proxy benutzen, in dem Sie die Browser Einstellungen auf
+To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy Netzwerk zu verbinden, m&uuml;ssen Sie den Proxy benutzen, in dem Sie die Browser Einstellungen auf
 \('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>==('on-demand - Modus', siehe <a href="http://www.yacy.net/yacy/Installation.html#wininst">hier</a>
-for an installation guide\) or you can go online by activating the permanent online mode.==für eine Installationsanleitung) stellen. Sie können aber auch online gehen, in dem Sie den Permanent Online Modus aktivieren.
-To do this, press this button:==Um dies zu tun, drücken Sie bitte diesen Knopf:
+for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, in dem Sie den Permanent Online Modus aktivieren.
+To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Knopf:
 "go online"==Geh online
 
 #-------------------------------------------------------
@@ -389,37 +389,37 @@ To do this, press this button:==Um dies zu tun, drücken Sie bitte diesen Knopf:
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy: News==YaCy: News
-Network Menu==Netzwerk Menü
-News&nbsp;Overview==News Überblick
+Network Menu==Netzwerk Men&uuml;
+News&nbsp;Overview==News &Uuml;berblick
 Incoming&nbsp;News==eingehende News
 Processed&nbsp;News==gelesene News
 Outgoing&nbsp;News==ausgehende News
-Published&nbsp;News==veröffentlichte News
-News Overview==News Überblick
+Published&nbsp;News==ver&ouml;ffentlichte News
+News Overview==News &Uuml;berblick
 This is the YaCyNews system \(currently under testing\).==Dies ist das YaCy News System (zur Zeit noch im Test).
 The news service is controlled by several entry points:==Dieser News Service wird von folgenden Punkten initiert:
 A crawl start with remote indexing will automatically create a news entry.==Wird ein Crawl von einem anderen Peer initiert, dann wird automatisch ein News-Eintrag erstellt.
-Other peers may use this information to prevent double-crawls from the same start point.==Andere Peers können diese Informationen benutzen, um einen doppelten Crawl vom selben Startpunkt zu vermeiden.
+Other peers may use this information to prevent double-crawls from the same start point.==Andere Peers k&ouml;nnen diese Informationen benutzen, um einen doppelten Crawl vom selben Startpunkt zu vermeiden.
 A table with recently started crawls is presented on the Index Create - page==Eine Tabelle mit gerade gestarteten Crawls wird auf der Index Create Seite angezeigt.
-A change in the personal profile will create a news entry. You can see recently made changes of==Durch eine Änderung im Profil, wird auch ein News-Eintrag erstellt.
-profile entries on the Network page, where that profile change is visualized with a '\*' beside the 'P' \(profile\) - selector.==Profil Einträge auf der Netzwerk Seite werden nach einer Änderung mit einem '*' neben dem 'P' (Profil) gekennzeichnet.
+A change in the personal profile will create a news entry. You can see recently made changes of==Durch eine &Auml;nderung im Profil, wird auch ein News-Eintrag erstellt.
+profile entries on the Network page, where that profile change is visualized with a '\*' beside the 'P' \(profile\) - selector.==Profil Eintr&auml;ge auf der Netzwerk Seite werden nach einer &Auml;nderung mit einem '*' neben dem 'P' (Profil) gekennzeichnet.
 More news services will follow.==Mehr News Services werden folgen.
-Above you can see four menues:==Sie können diese vier Menüs sehen:
+Above you can see four menues:==Sie k&ouml;nnen diese vier Men&uuml;s sehen:
 <b>Incoming News</b>: latest news that arrived your peer.==<b>Eingehende News:</b> die neusten News, die Ihren Peer erreicht haben.
 Only these news will be used to display specific news services as explained above.==Nur diese News werden benutzt, um spezifische News Services anzuzeigen.
-You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Sie können diese News mit einem Button auf der Seite abarbeiten (als "gelesen" markieren). Dann werden diese Nachrichten nicht mehr auf der Netzwerk und der Index Create Seite erscheinen.
+You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Sie k&ouml;nnen diese News mit einem Button auf der Seite abarbeiten (als "gelesen" markieren). Dann werden diese Nachrichten nicht mehr auf der Netzwerk und der Index Create Seite erscheinen.
 <b>Processed News</b>: this is simply an archive of incoming news that you removed by processing.==<b>Gelesene News</b>: Hier ist ein simples Archiv der bereits gelesenen News.
-<b>Outgoing News</b>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<b>Ausgehende News</b>: Hier können Sie die News sehen, die durch Sie enstanden sind. Diese News werden sofort an andere Peers übertragen.
-you can stop the broadcast if you want.==Sie können die Weiterverteilung stoppen, wenn Sie wollen.
-<b>Published News</b>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<b>Veröffentlichte News</b>: Ihre News, die genügend verbreitet oder aus der Verbreitungsliste gelöscht wurden.
+<b>Outgoing News</b>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<b>Ausgehende News</b>: Hier k&ouml;nnen Sie die News sehen, die durch Sie enstanden sind. Diese News werden sofort an andere Peers &uuml;bertragen.
+you can stop the broadcast if you want.==Sie k&ouml;nnen die Weiterverteilung stoppen, wenn Sie wollen.
+<b>Published News</b>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<b>Ver&ouml;ffentlichte News</b>: Ihre News, die gen&uuml;gend verbreitet oder aus der Verbreitungsliste gel&ouml;scht wurden.
 Originator==Initiator
 Created==Geschaffen
 Category==Kategorie
 Received==Erhalten
 Distributed==Verteilt
 Attributes==Attribute
-"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Gewählte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::gewählte&nbsp;News&nbsp;Löschen::Breche&nbsp;Verbreitung&nbsp;gewählter&nbsp;News&nbsp;ab::gewählte&nbsp;News&nbsp;Löschen#(/page)#
-"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Markiere&nbsp;alle&nbsp;News&nbsp;als&nbsp;gelesen::Lösche&nbsp;alle&nbsp;News::Breche&nbsp;Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;ab::Lösche&nbsp;alle&nbsp;News#(/page)#
+"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Gew&auml;hlte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::gew&auml;hlte&nbsp;News&nbsp;L&ouml;schen::Breche&nbsp;Verbreitung&nbsp;gew&auml;hlter&nbsp;News&nbsp;ab::gew&auml;hlte&nbsp;News&nbsp;L&ouml;schen#(/page)#
+"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Markiere&nbsp;alle&nbsp;News&nbsp;als&nbsp;gelesen::L&ouml;sche&nbsp;alle&nbsp;News::Breche&nbsp;Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;ab::L&ouml;sche&nbsp;alle&nbsp;News#(/page)#
 
 #-------------------------------------------------------
 #File: Skins_p.html
@@ -427,15 +427,15 @@ Attributes==Attribute
 
 YaCy: Skins==YaCy: Skins
 Skin selection==Skinauswahl
-You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie können hier das Aussehen von YaCy mit Skins ändern. Wählen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
+You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie k&ouml;nnen hier das Aussehen von YaCy mit Skins &auml;ndern. W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
 Current skin:==Verwendeter Skin:
 Skins:==Skins:
 "Use"==Benutze
-"Delete"==Lösche
+"Delete"==L&ouml;sche
 Install new Skin from URL:==Installiere einen neuen Skin von folgender URL:
 Use this skin==Benutze diesen Skin
 "install"==installiere
-Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu installieren:
+Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
 Error saving the skin.==Es trat ein Fehler beim Speichern des Skin auf.
 
 #-------------------------------------------------------
@@ -448,14 +448,14 @@ Welcome to YaCy!==Willkommen bei YaCy!
 Shutdown YaCy==YaCy herunterfahren
 System Properties==Systemangaben
 Protection==Sicherheit
-<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html#admin">settings</a> page <b>immediately</b> and set an administration password.==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort geschützt!</b> Bitte geben Sie auf der <a href="Settings_p.html#admin">Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
-Your settings are protected by a password.==Ihre Einstellungen sind mit einem Kennwort geschützt.
+<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html#admin">settings</a> page <b>immediately</b> and set an administration password.==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der <a href="Settings_p.html#admin">Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
+Your settings are protected by a password.==Ihre Einstellungen sind mit einem Kennwort gesch&uuml;tzt.
 System version==Systemversion
 the latest public version is==Die neueste stabile Version ist
 Click here to <a href="http://www.yacy.net/yacy/Download.html">download</a> it.==Klicken Sie <a href="http://www.yacy.net/yacy/Download.html">hier</a>, um sie herunterzuladen.
 Proxy host==Proxy Host
 Port forwarding host==Port-forwarding-Host
-broken==gestört
+broken==gest&ouml;rt
 connected==verbunden
 Remote proxy==Zweiter Proxy
 This peer's address==Adresse dieses Peers
@@ -477,34 +477,34 @@ Uptime==Online seit
 Connects ==Verbindungen
 peers/hour==Peers/Stunde
 This peer's status==Status dieses Peers
-Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings \(see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>\), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben (Anleitung online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">Browser konfigurieren</a>) laden Sie eine beliebige Seite über den Proxy, um zu beweisen, dass es funktioniert. Mit diesem Status können Sie keine anderen Peers durchsuchen!
-Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured \(usually: 8080\), or to set up a 'virtual server' in your router settings \(often called DMZ\). Please be fair, contribute your own index to the global index.==Junior - Ihr Peer kann nicht von außen erreicht werden. Ein möglicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Peers von Ihrer Suchseite aus benutzen. Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu öffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
-Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!==Senior - Sie lassen YaCy bei sich laufen und unterstützen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> können. Danke!
-Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zusätzlich Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
-You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.==Natürlich können Sie auch mithilfe des globalen Indexes von Ihrer Suchseite aus <a href="index.html">das Internet durchsuchen</a>.
+Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings \(see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>\), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben (Anleitung online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">Browser konfigurieren</a>) laden Sie eine beliebige Seite &uuml;ber den Proxy, um zu beweisen, dass es funktioniert. Mit diesem Status k&ouml;nnen Sie keine anderen Peers durchsuchen!
+Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured \(usually: 8080\), or to set up a 'virtual server' in your router settings \(often called DMZ\). Please be fair, contribute your own index to the global index.==Junior - Ihr Peer kann nicht von au&szlig;en erreicht werden. Ein m&ouml;glicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem k&ouml;nnen Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Peers von Ihrer Suchseite aus benutzen. Wir m&ouml;chten Sie ermutigen den Port, den Sie f&uuml;r YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu &ouml;ffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
+Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!==Senior - Sie lassen YaCy bei sich laufen und unterst&uuml;tzen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> k&ouml;nnen. Danke!
+Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zus&auml;tzlich Ihre Seed-Liste auf einen &ouml;ffentlich zug&auml;nglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
+You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.==Nat&uuml;rlich k&ouml;nnen Sie auch mithilfe des globalen Indexes von Ihrer Suchseite aus <a href="index.html">das Internet durchsuchen</a>.
 Other peers==Andere Peers
 other peers online.==andere Peers online.
 not online==nicht online
 Seed server==Seed Server
-Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html">Settings page</a>.==Deaktiviert. Um dies zu aktivieren benötigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen können. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten für den FTP-Account können Sie in den <a href="Settings_p.html">Einstellungen</a> konfigurieren.
+Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html">Settings page</a>.==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten f&uuml;r den FTP-Account k&ouml;nnen Sie in den <a href="Settings_p.html">Einstellungen</a> konfigurieren.
 Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
 Last upload:==Letzter Upload:
 Auto-popup on start-up==Popup bei YaCy-Start
 Disabled. To enable this again please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page==Deaktiviert. Um diese Funktion wieder zu aktivieren benutzen Sie bitte die <a href="Settings_p.html#SystemBehaviour">Einstellungen-Seite</a>.
 Enabled ==Aktiviert
 Online-mode==Onlinemodus
-You are in <i>event-based</i> online mode.=Sie sind im <i>aktivitätsbasierten</i> Onlinemodus.
+You are in <i>event-based</i> online mode.=Sie sind im <i>aktivit&auml;tsbasierten</i> Onlinemodus.
 The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.==Das YaCy-P2P-Netzwerk wird aktiviert, wenn Sie den Proxy das erste Mal benutzen oder in den permanenten Modus wechseln.
-Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.==Vorsicht: Das Benutzen des Proxys im permanenten Modus hält ihre Internetverbindung so lange offen, wie YaCy läuft.
+Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.==Vorsicht: Das Benutzen des Proxys im permanenten Modus h&auml;lt ihre Internetverbindung so lange offen, wie YaCy l&auml;uft.
 Use this only if you have a flatrate or you have an always-on connection.==Benutzen Sie das nur, wenn Sie eine Flatrate haben oder immer online sind.
 To start permanent mode, press this button:==Um den permanenten Modus zu aktivieren, klicken Sie auf diesen Button:
 Go on-line==Online gehen
-You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <i>permanenten</i> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein möchten, müssen Sie den Proxy abschalten um offline zu gehen.
+You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <i>permanenten</i> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein m&ouml;chten, m&uuml;ssen Sie den Proxy abschalten um offline zu gehen.
 Memory Usage==Speicherverbrauch
 free:==Frei:
 total:==Gesamt:
 max:==Maximal:
-Do Garbage-Collect now==Garbage-Collect durchführen
+Do Garbage-Collect now==Garbage-Collect durchf&uuml;hren
 Traffic==Netzwerkverkehr
 Out:==Ausgehend:
 In:==Eingehend:
@@ -515,17 +515,17 @@ Processors:==Prozessoren:
 #File: Steering.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Settings Acknowledge==YaCy: Einstellungen bestätigen
+YaCy: Settings Acknowledge==YaCy: Einstellungen best&auml;tigen
 Steering Receipt:==Steuerungsanleitung:
-No information has been submitted==Es wurden keine Informationen übermittelt
-Nothing changed==Nichts wurde verändert
-Your system is not protected by a password==Ihr System wird nicht von einem Passwort geschützt
+No information has been submitted==Es wurden keine Informationen &uuml;bermittelt
+Nothing changed==Nichts wurde ver&auml;ndert
+Your system is not protected by a password==Ihr System wird nicht von einem Passwort gesch&uuml;tzt
 Please go to the <a href="/Settings_p.html">Settings</a> page and set an administration password==Bitte gehen Sie auf die <a href="/Settings_p.html">Einstellungen</a> Seite und geben ein Administrator Passwort ein
-You don't have the correct access right to perform this task.==Sie haben nicht die Erlaubnis diese Anwendung auszuführen.
+You don't have the correct access right to perform this task.==Sie haben nicht die Erlaubnis diese Anwendung auszuf&uuml;hren.
 Please log in.==Bitte melden Sie sich an.
 Shutting down.==Runterfahren
-Application will terminate after working off all scheduled tasks.==Der YaCy Proxy fährt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
-You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie Änderungen vornehmen wollen.
+Application will terminate after working off all scheduled tasks.==Der YaCy Proxy f&auml;hrt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
+You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie k&ouml;nnen nun zur&uuml;ck auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie &Auml;nderungen vornehmen wollen.
 
 #-------------------------------------------------------
 #File: ViewLog_p.html
@@ -544,7 +544,7 @@ reversed order==in umgekehrter Reihenfolge
 YaCy: Remote Peer Profile==YaCy: Remote Peer Profil
 Remote Peer Profile:==Remote Peer Profil:
 Wrong access of this page==Falscher Zugriff auf diese Seite
-The requested peer is not known or a potential peer, what means the peer's profile can't be fetched, because he is behind a firewall.==Der gewünschte Peer ist nicht bekannt oder ein potenzieller Peer, das bedeutet, das Profil kann nicht geladen werden, da der Peer hinter einer Firewall ist.
+The requested peer is not known or a potential peer, what means the peer's profile can't be fetched, because he is behind a firewall.==Der gew&uuml;nschte Peer ist nicht bekannt oder ein potenzieller Peer, das bedeutet, das Profil kann nicht geladen werden, da der Peer hinter einer Firewall ist.
 The peer==Der Peer
 is not online.==ist nicht online.
 This is==Dies ist
@@ -563,7 +563,7 @@ Comment==Kommentar
 #File: Wiki.html
 
 yacyWiki==YaCyWiki
-Changes will be published as announcement on YaCyNews==Änderungen werden über den YaCy News Service bekannt gegeben.
+Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &uuml;ber den YaCy News Service bekannt gegeben.
 
 #--------------------------------------------------------
 #File: header.template
@@ -587,7 +587,7 @@ Index Control==Index kontrollieren
 File Share==Dateifreigabe
 #Wiki==Wiki
 Messages==Nachrichten
-Personal Profile==Persönliches Profil
+Personal Profile==Pers&ouml;nliches Profil
 #Status==Status
 Network==Netzwerk
 #News==News
