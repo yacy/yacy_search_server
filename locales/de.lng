@@ -43,7 +43,7 @@ Delete URL pattern==URL aus der Liste löschen
 Enter new domain name / path pattern in the form:==Geben Sie eine neue Domain/einen neuen Pfad in dieser Form ein:
 "&lt;domain&gt;/&lt;path-regexpr&gt;":=="&lt;Domain&gt;/&lt;Pfad&gt;"
 Add URL pattern==Füge URL hinzu
-Import blacklist items from other YaCy peers:==Importiere Blacklists von anderen YaCy Peers:
+Import blacklist items from other YaCy peers:==Importiere Blacklist von anderen YaCy Peers:
 Host:==Host:
 "Load new blacklist items"==Lade neue Blacklist
 Import blacklist items from URL:==Importiere Blacklist von URL:
@@ -157,6 +157,30 @@ Search Page==Suchseite
 Network==Netzwerk
 Status==Status
 
+YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy benutzt reguläre Ausdrücke für einige Funktionen, z.B. die Blacklist.
+There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Es gibt einige Standards für diese Ausdrücke, YaCy orientiert sich an der Syntax von Perl 5.
+Here ist a short overview about the functions, which should fir for most cases\:<==Hier finden Sie einen kurzen Überblick über die Funktionen, der die meisten Anwenungsfälle abdecken sollte:<
+arbitrary character==beliebiges Zeichen
+character x==Zeichen x
+not x==nicht x
+0 or more times x==0 oder mehr Vorkommen von x
+0 or 1 time x==0 oder 1 Vorkommen von x
+1 or more times x==1 oder mehr Vorkommen von x
+concatenation of x and y==Verkettung von x und y
+x or y==x oder y
+a or b or c (same as a\|b\|c)==a oder b oder c (dasselbe wie a|b|c)
+a or b or c (same as above)==a oder b oder c (dasselbe wie oben)
+exactly n appearances of x==genau n Vorkommen von x
+at least n appearances of x==mindestens n Vorkommen von x
+at least n, maximum m appearanches of x==mindestens n, maximal m Vorkommen von m
+Modify priority of instructions==Priorität der Befehle ändern
+Escape-Character, used to escape special characters \(for example "\[" or "\*"\), so that they loose their special meaning==Escape-Zeichen, das benutzt wird, um Zeichen mit Sonderbedeutung (z.B. "[" oder "*"),  zu "escapen", d.h. ihre Sonderbedeutung verlieren.
+Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==Regex folgen Prioritäten (absteigend): Verkettung, unäre Operatore (*,+,^,{}), binäre Operatoren (|). Die Reihenfolge kann durch setzen von Klammern geändert werden.
+Example:==Beispiel:
+This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Dies erfüllt heise.de/ mit einem String davor, z.B. "http://www.". Es folgt ein beliebiger String, dann ein Slash und eine Zahl. Der Punkt in "heise.de" ist nicht escaped, weil der Punkt für ein beliebiges Zeichen steht, folglich auch für "." selbst.
+A possible URL which would match this regexp is\:==Eine URL, die den regulären Ausdruck erfüllen würde, ist:
+An URL which would not match is:==Eine URL die diese Regex nicht erfüllen würde ist: 
+There is ".html" at the end, which is not included with the Regular Expression.==Hier ist ".html" am Ende angehängt, das nicht in der Regex enthalten ist.
 
 #-----------------------------------------------------------
 #File: index.html
@@ -519,7 +543,7 @@ reversed order==in umgekehrter Reihenfolge
 
 YaCy: Remote Peer Profile==YaCy: Remote Peer Profil
 Remote Peer Profile:==Remote Peer Profil:
-Wrong access of this page==Kein Zugriff auf diese Seite
+Wrong access of this page==Falscher Zugriff auf diese Seite
 The requested peer is not known or a potential peer, what means the peer's profile can't be fetched, because he is behind a firewall.==Der gewünschte Peer ist nicht bekannt oder ein potenzieller Peer, das bedeutet, das Profil kann nicht geladen werden, da der Peer hinter einer Firewall ist.
 The peer==Der Peer
 is not online.==ist nicht online.

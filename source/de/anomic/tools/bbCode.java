@@ -73,15 +73,23 @@ public class bbCode {
 	return output;
 	}
 	
-	/**Parses parts of bbCode (will be extended).
+	/**Parses parts of bbCode (to-do: [Img],[URL],[List],[List=]).
 	*@author Alexander Schier
+	*@author Roland Ramthun
 	*@return String
 	*/
 	public String bb(String input){
 		String output = escapeHtml(input);
-
+		//Parse bold
 		output = output.replaceAll("\\[b\\]", "<b>");
 		output = output.replaceAll("\\[/b\\]", "</b>");
+		//Parse italic
+		output = output.replaceAll("\\[i\\]", "<i>");
+		output = output.replaceAll("\\[/i\\]", "</i>");
+		//Parse underlined
+		output = output.replaceAll("\\[u\\]", "<u>");
+		output = output.replaceAll("\\[/u\\]", "</u>");
+		
 		return output;
 	}
 }

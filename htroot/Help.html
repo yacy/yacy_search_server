@@ -66,7 +66,44 @@ s --> Search Page<br>
 n --> News<br>
 w --> Network<br>
 t --> Status<br>
-
+<br>
+<br>
+<hr>
+YaCy uses Regular Expressions for some functions, for example in the blacklist.<br>
+<br>
+There are some standards for these regexps, YaCy uses the syntax used by Perl 5.<br>
+Here ist a short overview about the functions, which should fir for most cases:<br>
+<br>
+<br>
+<table>
+<tr><td>.</td><td>: arbitrary character</td></tr>
+<tr><td>x</td><td>: character x</td></tr>
+<tr><td>^x</td><td>: not x</td></tr>
+<tr><td>x*</td><td>: 0 or more times x</td></tr>
+<tr><td>x?</td><td>: 0 or 1 time x</td></tr>
+<tr><td>x+</td><td>: 1 or more times x</td></tr>
+<tr><td>xy</td><td>: concatenation of x and y</td></tr>
+<tr><td>x|y</td><td>: x or y</td></tr>
+<tr><td>[abc]</td><td>: a or b or c (same as a|b|c)</td></tr>
+<tr><td>[a-c]</td><td>: a or b or c (same as above)</td></tr>
+<tr><td>x{n}</td><td>: exactly n appearances of x</td></tr>
+<tr><td>x{n,}</td><td>: at least n appearances of x</td></tr>
+<tr><td>x{n,m}</td><td>: at least n, maximum m appearanches of x</td></tr>
+<tr><td>( )</td><td>: Modify priority of instructions</td></tr>
+<tr><td>\</td><td>: Escape-Character, used to escape special characters (for example "[" or "*"), so that they loose their special meaning</td></tr>
+</table>
+<br>
+<br>
+Regex follow a special priority (descending): concatenation, unary operators (*,+,^,{}), binary operators (|). This can be overridden with brackets.<br>
+<br>
+Example:<br>
+<br>
+.*heise.de/.*/[0-9]+<br>
+<br>
+This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\", because it represents any character, thus the "." itself, too.<br>
+A possible URL which would match this regexp is: http://www.heise.de/newsticker/meldung/59421<br>
+An URL which would not match is: http://www.heise.de/tp/r4/artikel/20/20701/1.html<br>
+There is ".html" at the end, which is not included with the Regular Expression.
 #[footer]#
 </body>
 </html>
