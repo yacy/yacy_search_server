@@ -230,19 +230,25 @@ public class plasmaWordIndexDistribution {
                     // fist check if we know all urls
                     urlEnum = indexEntity.elements(true);
                     unknownURLEntries = new HashSet();
-                    while (urlEnum.hasMoreElements()) {
-                        indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();
-                        lurl = urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
-                        if ((lurl == null) || (lurl.toString() == null)) {
-                            unknownURLEntries.add(indexEntry.getUrlHash());
-                        } else {
-                            if (lurl.toString() == null) {
-                                urlPool.loadedURL.remove(indexEntry.getUrlHash());
+                    try {
+                        while (urlEnum.hasMoreElements()) {
+                            indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();
+                            lurl = urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
+                            if ((lurl == null) || (lurl.toString() == null)) {
                                 unknownURLEntries.add(indexEntry.getUrlHash());
                             } else {
-                                knownURLs.put(indexEntry.getUrlHash(), lurl);
+                                if (lurl.toString() == null) {
+                                    urlPool.loadedURL.remove(indexEntry.getUrlHash());
+                                    unknownURLEntries.add(indexEntry.getUrlHash());
+                                } else {
+                                    knownURLs.put(indexEntry.getUrlHash(), lurl);
+                                }
                             }
                         }
+                    } catch (kelondroException e) {
+                        log.logError("plasmaWordIndexDistribution/1: deleted DB for word " + indexEntity.wordHash());
+                        e.printStackTrace();
+                        try {indexEntity.deleteComplete();} catch (IOException ee) {}
                     }
                     // now delete all entries that have no url entry
                     hashIter = unknownURLEntries.iterator();
@@ -258,21 +264,27 @@ public class plasmaWordIndexDistribution {
                     tmpEntity = new plasmaWordIndexEntity(indexEntity.wordHash());
                     urlEnum = indexEntity.elements(true);
                     unknownURLEntries = new HashSet();
-                    while ((urlEnum.hasMoreElements()) && (count > 0)) {
-                        indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();
-                        lurl = urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
-                        if (lurl == null) {
-                            unknownURLEntries.add(indexEntry.getUrlHash());
-                        } else {
-                            if (lurl.toString() == null) {
-                                urlPool.loadedURL.remove(indexEntry.getUrlHash());
+                    try {
+                        while ((urlEnum.hasMoreElements()) && (count > 0)) {
+                            indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();
+                            lurl = urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
+                            if (lurl == null) {
                                 unknownURLEntries.add(indexEntry.getUrlHash());
                             } else {
-                                knownURLs.put(indexEntry.getUrlHash(), lurl);
-                                tmpEntity.addEntry(indexEntry);
-                                count--;
+                                if (lurl.toString() == null) {
+                                    urlPool.loadedURL.remove(indexEntry.getUrlHash());
+                                    unknownURLEntries.add(indexEntry.getUrlHash());
+                                } else {
+                                    knownURLs.put(indexEntry.getUrlHash(), lurl);
+                                    tmpEntity.addEntry(indexEntry);
+                                    count--;
+                                }
                             }
                         }
+                    } catch (kelondroException e) {
+                        log.logError("plasmaWordIndexDistribution/2: deleted DB for word " + indexEntity.wordHash());
+                        e.printStackTrace();
+                        try {indexEntity.deleteComplete();} catch (IOException ee) {}
                     }
                     // now delete all entries that have no url entry
                     hashIter = unknownURLEntries.iterator();
