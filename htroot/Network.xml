@@ -29,6 +29,7 @@
         <version>#[my-version]#</version>
         <uptime>#[my-uptime]#</uptime>
         <links>#[my-links]#</links>
+        <words>#[my-words]#</words> 
         <acceptcrawl>#[my-acceptcrawl]#</acceptcrawl>
         <acceptindex>#[my-acceptindex]#</acceptindex>
         <sentwords>#[my-sI]#</sentwords>
