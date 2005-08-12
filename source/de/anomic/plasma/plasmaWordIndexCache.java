@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Enumeration;
 
 import de.anomic.kelondro.kelondroException;
@@ -329,7 +330,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         if (!(up)) throw new RuntimeException("plasmaWordIndexCache.wordHashes can only count up");
         return new kelondroMergeIterator(
                         new kelondroMergeIterator(
-                                 cache.keySet().iterator(),
+                                 cache.tailMap(startWordHash).keySet().iterator(),
                                  assortmentCluster.hashConjunction(startWordHash, true),
                                  true),
                         backend.wordHashes(startWordHash, true),

@@ -131,8 +131,8 @@ public class plasmaWordIndexDistribution {
         if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return -1;
         
         // collect index
-        //String startPointHash = yacyCore.seedCache.mySeed.hash;
-        String startPointHash = serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true).substring(0, yacySeedDB.commonHashLength);
+        String startPointHash = yacyCore.seedDB.mySeed.hash;
+        //String startPointHash = serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true).substring(0, yacySeedDB.commonHashLength);
         plasmaWordIndexEntity[] indexEntities = selectTransferIndexes(startPointHash, indexCount);
         if ((indexEntities == null) || (indexEntities.length == 0)) {
             log.logDebug("No index available for index transfer, hash start-point " + startPointHash);

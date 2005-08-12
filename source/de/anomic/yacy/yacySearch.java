@@ -43,6 +43,7 @@ package de.anomic.yacy;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.HashMap;
 
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -106,23 +107,32 @@ public class yacySearch extends Thread {
 	if (seedcount > yacyCore.seedDB.sizeConnected()) seedcount = yacyCore.seedDB.sizeConnected();
 
         kelondroMScoreCluster ranking = new kelondroMScoreCluster();
+        HashMap seeds = new HashMap();
         yacySeed seed;
         Enumeration dhtEnum; 
         Iterator i = wordhashes.iterator();
         int c;
+        String wordhash;
         while (i.hasNext()) {
-            dhtEnum = yacyCore.dhtAgent.getDHTSeeds(true, (String) i.next());
+            wordhash = (String) i.next();
+            dhtEnum = yacyCore.dhtAgent.getDHTSeeds(true, wordhash);
             c = 0;
             while ((dhtEnum.hasMoreElements()) && (c < seedcount)) {
                 seed = (yacySeed) dhtEnum.nextElement();
+                //System.out.println("Selected peer " + seed.hash + " for wordhash " + wordhash + ", score " + c);
                 ranking.addScore(seed.hash, c++);
+                seeds.put(seed.hash, seed);
             }
         }
         if (ranking.size() < seedcount) seedcount = ranking.size();
         yacySeed[] result = new yacySeed[seedcount];
         Iterator e = ranking.scores(true); // lower are better
         c = 0;
-        while ((e.hasNext()) && (c < result.length)) result[c++] = yacyCore.seedDB.getConnected((String) e.next());
+        while ((e.hasNext()) && (c < result.length)) {
+            seed = (yacySeed) seeds.get((String) e.next());
+            seed.selectscore = c;
+            result[c++] = seed;
+        }
             
 	//System.out.println("DEBUG yacySearch.selectPeers = " + seedcount + " seeds:"); for (int i = 0; i < seedcount; i++) System.out.println(" #" + i + ":" + result[i]); // debug
 	return result;
@@ -162,8 +172,6 @@ public class yacySearch extends Thread {
         // wait until wanted delay passed or wanted result appeared
         boolean anyIdle = true;
         while ((anyIdle) && ((System.currentTimeMillis() - start) < waitingtime)) {
-            // wait..
-            try {Thread.currentThread().sleep(200);} catch (InterruptedException e) {}
             // check if all threads have been finished or results so far are enough
             c = 0;
             anyIdle = false;
@@ -175,6 +183,8 @@ public class yacySearch extends Thread {
                 break; // we have enough
             }
             if (c >= count * 5) break;
+            // wait a little time ..
+            try {Thread.currentThread().sleep(100);} catch (InterruptedException e) {}
         }
 
         // collect results

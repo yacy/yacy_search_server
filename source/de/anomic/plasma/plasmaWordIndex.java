@@ -116,10 +116,58 @@ public final class plasmaWordIndex {
     }
     
     public Iterator wordHashes(String startHash, boolean up, boolean rot) {
-        return ramCache.wordHashes(startHash, up);
+        //return ramCache.wordHashes(startHash, up);
+        return new correctedWordIterator(up, rot, startHash); // use correction until bug is found
     }
 
+    private class correctedWordIterator implements Iterator {
+	
+        Iterator ii;
+        String nextWord;
+        
+        public correctedWordIterator(boolean up, boolean rotating, String firstWord) {
+            ii = ramCache.wordHashes(firstWord, up);
+            nextWord = (ii.hasNext()) ? (String) ii.next() : null;
+            boolean corrected = true;
+            int cc = 0; // to avoid rotation loops
+            while ((nextWord != null) && (corrected) && (cc < 50)) {
+                int c = firstWord.compareTo(nextWord);
+                corrected = false;
+                if ((c > 0) && (up)) {
+                    // firstKey > nextNode.getKey()
+                    //System.out.println("CORRECTING WORD ITERATOR: firstWord=" + firstWord + ", nextWord=" + nextWord);
+                    nextWord = (ii.hasNext()) ? (String) ii.next() : null;
+                    corrected = true;
+                    cc++;
+                }
+                if ((c < 0) && (!(up))) {
+                    nextWord = (ii.hasNext()) ? (String) ii.next() : null;
+                    corrected = true;
+                    cc++;
+                }
+            }
+        }
+        
+        public void finalize() {
+            ii = null;
+            nextWord = null;
+        }
+            
+	public boolean hasNext() {
+            return nextWord != null;
+	}
 
+        public Object next() {
+            String r = nextWord;
+            nextWord = (ii.hasNext()) ? (String) ii.next() : null;                        
+            return r;
+        }
+        
+        public void remove() {
+            throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro Tables not yet supported");
+	}
+    }
+    
     public Iterator fileIterator(String startHash, boolean up, boolean deleteEmpty) {
         return new iterateFiles(startHash, up, deleteEmpty);
     }

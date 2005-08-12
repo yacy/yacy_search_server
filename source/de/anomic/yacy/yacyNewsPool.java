@@ -169,6 +169,7 @@ public class yacyNewsPool {
         if ((record.category().equals("crwlstrt")) &&
             ((yacyCore.universalTime() - record.created().getTime()) > (1000 * 60 * 60 * 24) /* 1 Day */)) {
             yacySeed seed = yacyCore.seedDB.get(record.originator());
+            if (seed == null) return false;
             try {
                 return (Integer.parseInt(seed.get("ISpeed", "-")) < 10);
             } catch (NumberFormatException ee) {

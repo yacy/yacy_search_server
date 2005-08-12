@@ -1298,8 +1298,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // do global fetching
             int globalresults = 0;
             if (global) {
-                int fetchcount = ((int) time / 1000) * 4; // number of wanted results until break in search
-                int fetchpeers = ((int) time / 1000) * 3; // number of target peers; means 30 peers in 10 seconds
+                int fetchcount =      ((int) time / 1000) * 4; // number of wanted results until break in search
+                int fetchpeers = 10 + ((int) time / 1000) * 3; // number of target peers; means 30 peers in 10 seconds
                 long fetchtime = time * 7 / 10;           // time to waste
                 if (fetchcount > count) fetchcount = count;
                 globalresults = yacySearch.searchHashes(queryhashes, urlPool.loadedURL, searchManager, fetchcount, fetchpeers, urlBlacklist, snippetCache, fetchtime);

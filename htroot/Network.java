@@ -193,7 +193,7 @@ public class Network {
 
                 prop.put("table_comment",0);
             }
-        }else {
+        } else {
             // generate table
             int page = Integer.parseInt(post.get("page", "1"));
             int conCount = 0;
@@ -226,7 +226,9 @@ public class Network {
                     try {
                         for (int c = availableNews - 1; c >= 0; c--) {
                             record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, c);
-                            if (record.category().equals("prfleupd")) {
+                            if (record == null) {
+                                break;
+                            } else if (record.category().equals("prfleupd")) {
                                 updatedProfile.add(record.originator());
                             } else if (record.category().equals("wiki_upd")) {
                                 updatedWiki.put(record.originator(), record.attributes().get("page"));

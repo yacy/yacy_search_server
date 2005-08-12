@@ -241,6 +241,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
                 }
             }
 	    // we reached a node where we must insert the new value
+            // the parent of this new value can be obtained by getParent()
 	    // all values are set, just return
 	}
 
@@ -737,11 +738,55 @@ public class kelondroTree extends kelondroRecords implements Comparator {
                 if (nn == null) {
                     return (new HashSet()).iterator(); // an empty iterator
                 } else {
-                    return new nodeIterator(up, rotating, nn);
+                    // the node nn may be greater or smaller than the firstKey
+                    // depending on the ordering direction,
+                    // we must find the next smaller or greater node
+                    return new correctedNodeIterator(up, rotating, nn, firstKey);
                 }
             }
 	} catch (IOException e) {
 	    throw new RuntimeException("error creating an iteration: " + e.getMessage());
+	}
+    }
+    
+    private class correctedNodeIterator implements Iterator {
+	
+        Iterator ii;
+        Node nextNode;
+        
+        public correctedNodeIterator(boolean up, boolean rotating, Node start, byte[] firstKey) throws IOException {
+            ii = new nodeIterator(up, rotating, start);
+            nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
+            if (nextNode != null) {
+                int c = compare(firstKey, nextNode.getKey());
+                if ((c > 0) && (up)) {
+                    // firstKey > nextNode.getKey()
+                    System.out.println("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
+                    nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
+                }
+                if ((c < 0) && (!(up))) {
+                    nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
+                }
+            }
+        }
+        
+        public void finalize() {
+            ii = null;
+            nextNode = null;
+        }
+            
+	public boolean hasNext() {
+            return nextNode != null;
+	}
+
+        public Object next() {
+            Node r = nextNode;
+            nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
+            return r;
+        }
+        
+        public void remove() {
+            throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro Tables not yet supported");
 	}
     }
     

@@ -89,6 +89,7 @@ public class yacySeed {
     public String hash;
     private Map dna;
     public int available;
+    public int selectscore = -1; // only for debugging
 
     public yacySeed(String hash, Map dna) {
 	// create a seed with a pre-defined hash map
