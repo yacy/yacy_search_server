@@ -382,7 +382,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         indexDistribution = new plasmaWordIndexDistribution(urlPool, wordIndex, log,
                                                             getConfig("allowDistributeIndex", "false").equals("true"),
                                                             getConfig("allowDistributeIndexWhileCrawling","false").equals("true"));
-        indexDistribution.setCounts(100, 1, 3, 8000);
+        indexDistribution.setCounts(150, 1, 3, 10000);
         deployThread("20_dhtdistribution", "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
                      new serverInstantThread(indexDistribution, "job", null), 12000);
             

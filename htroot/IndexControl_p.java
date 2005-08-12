@@ -48,6 +48,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -206,7 +207,33 @@ public class IndexControl_p {
             String result;
             long starttime = System.currentTimeMillis();
             indexes[0] = switchboard.wordIndex.getEntity(keyhash, true);
-            result = yacyClient.transferIndex(yacyCore.seedDB.getConnected(post.get("hostHash", "")), indexes, switchboard.urlPool.loadedURL);
+            // built urlCache
+            Enumeration urlEnum = indexes[0].elements(true);
+            HashMap knownURLs = new HashMap();
+            HashSet unknownURLEntries = new HashSet();
+            plasmaWordIndexEntry indexEntry;
+            plasmaCrawlLURL.Entry lurl;
+            while (urlEnum.hasMoreElements()) {
+                indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();
+                lurl = switchboard.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
+                if (lurl == null) {
+                    unknownURLEntries.add(indexEntry.getUrlHash());
+                } else {
+                    if (lurl.toString() == null) {
+                        switchboard.urlPool.loadedURL.remove(indexEntry.getUrlHash());
+                        unknownURLEntries.add(indexEntry.getUrlHash());
+                    } else {
+                        knownURLs.put(indexEntry.getUrlHash(), lurl);
+                    }
+                }
+            }
+            // now delete all entries that have no url entry
+            Iterator hashIter = unknownURLEntries.iterator();
+            while (hashIter.hasNext()) try {
+                indexes[0].removeEntry((String) hashIter.next(), false);
+            } catch (IOException e) {}
+            // use whats remaining
+            result = yacyClient.transferIndex(yacyCore.seedDB.getConnected(post.get("hostHash", "")), indexes, knownURLs);
             prop.put("result", (result == null) ? ("Successfully transferred " + indexes[0].size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds") : result);
 	    try {indexes[0].close();} catch (IOException e) {}
         }

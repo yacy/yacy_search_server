@@ -537,7 +537,9 @@ public class plasmaCrawlLURL extends plasmaURL {
 		    ",url=" + crypt.simpleEncode(url.toString()) +
 		    ",descr=" + crypt.simpleEncode(descr);
 	    } catch (Exception e) {
-		serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
+		//serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
+                //if (moddate == null) serverLog.logFailure("plasmaLURL.corePropList", "moddate=null");
+                //if (loaddate == null) serverLog.logFailure("plasmaLURL.corePropList", "loaddate=null");
                 //e.printStackTrace();
 		return null;
 	    }

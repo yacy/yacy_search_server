@@ -451,38 +451,6 @@ public class yacyClient {
         }
     }
     
-    /*
-    public static HashMap crawlOrder(yacySeed targetSeed, URL url, URL referrer, int depth) {
-        // this post a message to the remote message board
-        if (targetSeed == null) return null;
-        if (yacyCore.seedDB.mySeed == null) return null;
-        if (yacyCore.seedDB.mySeed == targetSeed) return null;
-        
-        // construct request
-        String key = crypt.randomSalt();
-        String address = targetSeed.getAddress();
-        if (address == null) return null;
-        try {
-            return nxTools.table(httpc.wget(
-            new URL("http://" + address + "/yacy/crawlOrder.html?"+
-            "key=" + key +
-            "&process=crawl" +
-            "&youare=" + targetSeed.hash +
-            "&iam=" + yacyCore.seedDB.mySeed.hash +
-            "&url=" + crypt.simpleEncode(url.toString()) +
-            "&referrer=" + crypt.simpleEncode((referrer == null) ? "" : referrer.toString()) +
-            "&depth=" + depth +
-            "&ttl=0"
-            ),
-            10000, null, null, yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort));
-        } catch (Exception e) {
-            // most probably a network time-out exception
-            yacyCore.log.logError("yacyClient.crawlOrder error: peer=" + targetSeed.getName() + ", error=" + e.getMessage());
-            return null;
-        }
-    }
-    */
-    
     public static HashMap crawlOrder(yacySeed targetSeed, URL url, URL referrer) {
         // this post a message to the remote message board
         if (targetSeed == null) return null;
@@ -578,8 +546,8 @@ public class yacyClient {
                                    httpHeader requestHeader) throws IOException {
      */
     
-    public static String transferIndex(yacySeed targetSeed, plasmaWordIndexEntity[] indexes, plasmaCrawlLURL urlDB) {
-        HashMap in = transferRWI(targetSeed, indexes, urlDB);
+    public static String transferIndex(yacySeed targetSeed, plasmaWordIndexEntity[] indexes, HashMap urlCache) {
+        HashMap in = transferRWI(targetSeed, indexes);
         if (in == null) return "no_connection_1";
         String result = (String) in.get("result");
         if (result == null) return "no_result_1";
@@ -592,7 +560,6 @@ public class yacyClient {
         //System.out.println("DEBUG yacyClient.transferIndex: " + uhs.length + " urls unknown");
         if (uhs.length == 0) return null; // all url's known
         // extract the urlCache from the result
-        HashMap urlCache = (HashMap) in.get("$URLCACHE$");
         plasmaCrawlLURL.Entry[] urls = new plasmaCrawlLURL.Entry[uhs.length];
         for (int i = 0; i < uhs.length; i++) {
             urls[i] = (plasmaCrawlLURL.Entry) urlCache.get(uhs[i]);
@@ -608,7 +575,7 @@ public class yacyClient {
         return null;
     }
     
-    private static HashMap transferRWI(yacySeed targetSeed, plasmaWordIndexEntity[] indexes, plasmaCrawlLURL urlDB) {
+    private static HashMap transferRWI(yacySeed targetSeed, plasmaWordIndexEntity[] indexes) {
         String address = targetSeed.getAddress();
         if (address == null) return null;
         // prepare post values
@@ -622,48 +589,21 @@ public class yacyClient {
         String entrypost = "";
         Enumeration eenum;
         plasmaWordIndexEntry entry;
-        HashMap urlCache = new HashMap();
-        plasmaCrawlLURL.Entry urlentry;
-        HashSet unknownURLs = new HashSet();
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].elements(true);
             while (eenum.hasMoreElements()) {
                 entry = (plasmaWordIndexEntry) eenum.nextElement();
-                // check if an LURL-Entry exists
-                if (urlCache.containsKey(entry.getUrlHash())) {
-                    // easy case: the url is known and in the cache
-                    entrypost += indexes[i].wordHash() + entry.toExternalForm() + serverCore.crlfString;
-                    indexcount++;
-                } else if (unknownURLs.contains(entry.getUrlHash())) {
-                    // in this case, we do nothing
-                } else {
-                    // try to get the entry from the urlDB
-                    if ((urlDB.exists(entry.getUrlHash())) &&
-                    ((urlentry = urlDB.getEntry(entry.getUrlHash())) != null)) {
-                        // good case: store the urlentry to the cache
-                        urlCache.put(entry.getUrlHash(), urlentry);
-                        // add index to list
-                        entrypost += indexes[i].wordHash() + entry.toExternalForm() + serverCore.crlfString;
-                        indexcount++;
-                    } else {
-                        // this is bad: the url is unknown. We put the link to a set and delete then later
-                        unknownURLs.add(entry.getUrlHash());
-                    }
-                }
+                entrypost += indexes[i].wordHash() + entry.toExternalForm() + serverCore.crlfString;
+                indexcount++;
             }
         }
         
-        // we loop again and delete all links where the url is unknown
-        Iterator it;
-        String urlhash;
-        for (int i = 0; i < indexes.length; i++) {
-            it = unknownURLs.iterator();
-            while (it.hasNext()) {
-                urlhash = (String) it.next();
-                try {
-                    if (indexes[i].contains(urlhash)) indexes[i].removeEntry(urlhash, true);
-                } catch (IOException e) {}
-            }
+        if (indexcount == 0) {
+            // nothing to do but everything ok
+            HashMap result = new HashMap();
+            result.put("result", "ok");
+            result.put("unknownURL", "");
+            return result;
         }
         
         post.put("entryc", Integer.toString(indexcount));
@@ -677,8 +617,6 @@ public class yacyClient {
             }
             
             HashMap result = nxTools.table(v);
-            result.put("$URLCACHE$", urlCache);
-            result.put("$UNKNOWNC$", Integer.toString(unknownURLs.size()));
             return result;
         } catch (Exception e) {
             yacyCore.log.logError("yacyClient.transferRWI error:" + e.getMessage());

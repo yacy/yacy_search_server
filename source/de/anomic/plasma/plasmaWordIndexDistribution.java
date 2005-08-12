@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.HashSet;
+import java.util.HashMap;
 
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -133,13 +135,18 @@ public class plasmaWordIndexDistribution {
         // collect index
         String startPointHash = yacyCore.seedDB.mySeed.hash;
         //String startPointHash = serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true).substring(0, yacySeedDB.commonHashLength);
-        plasmaWordIndexEntity[] indexEntities = selectTransferIndexes(startPointHash, indexCount);
+        Object[] selectResult = selectTransferIndexes(startPointHash, indexCount);
+        plasmaWordIndexEntity[] indexEntities = (plasmaWordIndexEntity[]) selectResult[0];
+        HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry 
         if ((indexEntities == null) || (indexEntities.length == 0)) {
             log.logDebug("No index available for index transfer, hash start-point " + startPointHash);
             return -1;
         }
         // count the indexes again, can be smaller as expected
-        indexCount = 0; for (int i = 0; i < indexEntities.length; i++) indexCount += indexEntities[i].size();
+        indexCount = 0;
+        for (int i = 0; i < indexEntities.length; i++) {
+            indexCount += indexEntities[i].size();
+        }
         
         // find start point for DHT-selection
         String keyhash = indexEntities[indexEntities.length - 1].wordHash(); // DHT targets must have greater hashes
@@ -157,7 +164,7 @@ public class plasmaWordIndexDistribution {
             }
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
-                error = yacyClient.transferIndex(seed, indexEntities, urlPool.loadedURL);
+                error = yacyClient.transferIndex(seed, indexEntities, urlCache);
                 if (error == null) {
                     log.logInfo("Index transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "] to peer " + seed.getName() + ":" + seed.hash + " successfull");
                     peerNames += ", " + seed.getName();
@@ -176,7 +183,7 @@ public class plasmaWordIndexDistribution {
             if (delete) {
                 try {
                     if (deleteTransferIndexes(indexEntities)) {
-                        log.logDebug("Deleted all transferred whole-word indexes locally");
+                        log.logDebug("Deleted all " + indexEntities.length + " transferred whole-word indexes locally");
                         return indexCount;
                     } else {
                         log.logError("Deleted not all transferred whole-word indexes");
@@ -200,14 +207,19 @@ public class plasmaWordIndexDistribution {
         }
     }
     
-    private plasmaWordIndexEntity[] selectTransferIndexes(String hash, int count) {
+    private Object[] /* of {plasmaWordIndexEntity[], HashMap(String, plasmaCrawlLURL.Entry)}*/
+            selectTransferIndexes(String hash, int count) {
         Vector tmpEntities = new Vector();
         String nexthash = "";
         try {
             Iterator wordHashIterator = wordIndex.wordHashes(hash, true, true);
             plasmaWordIndexEntity indexEntity, tmpEntity;
             Enumeration urlEnum;
+            Iterator hashIter;
             plasmaWordIndexEntry indexEntry;
+            plasmaCrawlLURL.Entry lurl;
+            HashSet unknownURLEntries;
+            HashMap knownURLs = new HashMap();
             while ((count > 0) && (wordHashIterator.hasNext()) &&
                    ((nexthash = (String) wordHashIterator.next()) != null) && (nexthash.trim().length() > 0)) {
                 indexEntity = wordIndex.getEntity(nexthash, true);
@@ -215,20 +227,60 @@ public class plasmaWordIndexDistribution {
                     indexEntity.deleteComplete();
                 } else if (indexEntity.size() <= count) {
                     // take the whole entity
+                    // fist check if we know all urls
+                    urlEnum = indexEntity.elements(true);
+                    unknownURLEntries = new HashSet();
+                    while (urlEnum.hasMoreElements()) {
+                        indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();
+                        lurl = urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
+                        if ((lurl == null) || (lurl.toString() == null)) {
+                            unknownURLEntries.add(indexEntry.getUrlHash());
+                        } else {
+                            if (lurl.toString() == null) {
+                                urlPool.loadedURL.remove(indexEntry.getUrlHash());
+                                unknownURLEntries.add(indexEntry.getUrlHash());
+                            } else {
+                                knownURLs.put(indexEntry.getUrlHash(), lurl);
+                            }
+                        }
+                    }
+                    // now delete all entries that have no url entry
+                    hashIter = unknownURLEntries.iterator();
+                    while (hashIter.hasNext()) {
+                        indexEntity.removeEntry((String) hashIter.next(), false);
+                    }
+                    // use whats remaining
                     tmpEntities.add(indexEntity);
-                    log.logDebug("Selected whole index (" + indexEntity.size() + " URLs) for word " + indexEntity.wordHash());
+                    log.logDebug("Selected whole index (" + indexEntity.size() + " URLs, " + unknownURLEntries.size() + " not bound) for word " + indexEntity.wordHash());
                     count -= indexEntity.size();
                 } else {
                     // make an on-the-fly entity and insert values
                     tmpEntity = new plasmaWordIndexEntity(indexEntity.wordHash());
                     urlEnum = indexEntity.elements(true);
+                    unknownURLEntries = new HashSet();
                     while ((urlEnum.hasMoreElements()) && (count > 0)) {
                         indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();
-                        tmpEntity.addEntry(indexEntry);
-                        count--;
+                        lurl = urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
+                        if (lurl == null) {
+                            unknownURLEntries.add(indexEntry.getUrlHash());
+                        } else {
+                            if (lurl.toString() == null) {
+                                urlPool.loadedURL.remove(indexEntry.getUrlHash());
+                                unknownURLEntries.add(indexEntry.getUrlHash());
+                            } else {
+                                knownURLs.put(indexEntry.getUrlHash(), lurl);
+                                tmpEntity.addEntry(indexEntry);
+                                count--;
+                            }
+                        }
                     }
-                    urlEnum = null;
-                    log.logDebug("Selected partial index (" + tmpEntity.size() + " from " + indexEntity.size() +" URLs) for word " + tmpEntity.wordHash());
+                    // now delete all entries that have no url entry
+                    hashIter = unknownURLEntries.iterator();
+                    while (hashIter.hasNext()) {
+                        indexEntity.removeEntry((String) hashIter.next(), true);
+                    }
+                    // use whats remaining
+                    log.logDebug("Selected partial index (" + tmpEntity.size() + " from " + indexEntity.size() +" URLs, " + unknownURLEntries.size() + " not bound) for word " + tmpEntity.wordHash());
                     tmpEntities.add(tmpEntity);
                     indexEntity.close(); // important: is not closed elswhere and cannot be deleted afterwards
                     indexEntity = null;
@@ -238,15 +290,15 @@ public class plasmaWordIndexDistribution {
             // transfer to array
             plasmaWordIndexEntity[] indexEntities = new plasmaWordIndexEntity[tmpEntities.size()];
             for (int i = 0; i < tmpEntities.size(); i++) indexEntities[i] = (plasmaWordIndexEntity) tmpEntities.elementAt(i);
-            return indexEntities;
+            return new Object[]{indexEntities, knownURLs};
         } catch (IOException e) {
             log.logError("selectTransferIndexes IO-Error (hash=" + nexthash + "): " + e.getMessage());
             e.printStackTrace();
-            return new plasmaWordIndexEntity[0];
+            return new Object[]{new plasmaWordIndexEntity[0], new HashMap()};
         } catch (kelondroException e) {
             log.logError("selectTransferIndexes database corrupted: " + e.getMessage());
             e.printStackTrace();
-            return new plasmaWordIndexEntity[0];
+            return new Object[]{new plasmaWordIndexEntity[0], new HashMap()};
         }
     }
     
