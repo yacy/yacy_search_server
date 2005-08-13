@@ -1047,13 +1047,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         String reason = null; // failure reason
 
-	// strange error
+	// strange errors
 	if (nexturlString == null) {
 	    reason = "denied_(url_null)";
             log.logError("Wrong URL in stackCrawl: url=null");
 	    return reason;
 	}
-
+        /*
+        if (profile == null) {
+            reason = "denied_(profile_null)";
+            log.logError("Wrong Profile for stackCrawl: profile=null");
+	    return reason;
+        }
+        */
         URL nexturl = null;
         if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = plasmaURL.dummyHash;
         String referrerHash = plasmaURL.urlHash(referrerString);
@@ -1066,7 +1072,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // filter deny
-        if ((currentdepth > 0) && (!(nexturlString.matches(profile.generalFilter())))) {
+        if ((currentdepth > 0) && (profile != null) && (!(nexturlString.matches(profile.generalFilter())))) {
             reason = "denied_(does_not_match_filter)";
             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
                     name, reason, new bitfield(plasmaURL.urlFlagLength), false);
@@ -1082,7 +1088,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
 
         // deny post properties
-        if ((plasmaHTCache.isPOST(nexturlString)) && (!(profile.crawlingQ())))  {
+        if ((plasmaHTCache.isPOST(nexturlString)) && (profile != null) && (!(profile.crawlingQ())))  {
             reason = "denied_(post_url)";
             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
                                   name, reason, new bitfield(plasmaURL.urlFlagLength), false);
@@ -1102,6 +1108,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // store information
         boolean local = ((initiatorHash.equals(plasmaURL.dummyHash)) || (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)));
         boolean global = 
+            (profile != null) &&
             (profile.remoteIndexing()) /* granted */ &&
             (currentdepth == profile.generalDepth()) /* leaf node */ && 
             (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
@@ -1113,7 +1120,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                            loadDate, /* load date */
                            referrerHash, /* last url in crawling queue */
                            name, /* the anchor name */
-                           profile.handle(), 
+                           (profile == null) ? null : profile.handle(), 
                            currentdepth, /*depth so far*/
                            0, /*anchors, default value */
                            0, /*forkfactor, default value */

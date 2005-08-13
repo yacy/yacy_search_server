@@ -363,14 +363,17 @@ public class yacySeed {
     }
 
     public String toString() {
-	// set hash into seed code structure
-	dna.put("Hash", this.hash);
-	// generate string representation
-	String s = dna.toString();
-	// reconstruct original: hash is stored external
-	dna.remove("Hash");
-	// return string
-	return s;
+        String s = null;
+        synchronized (dna) {
+            // set hash into seed code structure
+            dna.put("Hash", this.hash);
+            // generate string representation
+            s = dna.toString();
+            // reconstruct original: hash is stored external
+            dna.remove("Hash");
+            // return string
+        }
+        return s;
     }
 
     public String genSeedStr(String key) {
