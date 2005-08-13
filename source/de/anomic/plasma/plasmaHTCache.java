@@ -415,7 +415,8 @@ public final class plasmaHTCache {
         String ls = urlString.toLowerCase();
 	return ((ls.indexOf(".cgi") >= 0) ||
 		(ls.indexOf(".exe") >= 0) ||
-                (ls.indexOf(";jsessionid=") >= 0));
+                (ls.indexOf(";jsessionid=") >= 0) ||
+                (ls.indexOf("SESSIONID/") >= 0));
     }
 
     public Entry newEntry(Date initDate, int depth, URL url, String name,
