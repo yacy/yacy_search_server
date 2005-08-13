@@ -168,6 +168,7 @@ not x==nicht x
 1 or more times x==1 oder mehr Vorkommen von x
 concatenation of x and y==Verkettung von x und y
 x or y==x oder y
+String "foo" or string "bar"==String "foo" oder String "bar"
 a or b or c (same as a\|b\|c)==a oder b oder c (dasselbe wie a|b|c)
 a or b or c (same as above)==a oder b oder c (dasselbe wie oben)
 exactly n appearances of x==genau n Vorkommen von x

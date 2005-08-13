@@ -78,12 +78,13 @@ Here ist a short overview about the functions, which should fir for most cases:<
 <table>
 <tr><td>.</td><td>: arbitrary character</td></tr>
 <tr><td>x</td><td>: character x</td></tr>
-<tr><td>^x</td><td>: not x</td></tr>
+<tr><td>[^x]</td><td>: not x</td></tr>
 <tr><td>x*</td><td>: 0 or more times x</td></tr>
 <tr><td>x?</td><td>: 0 or 1 time x</td></tr>
 <tr><td>x+</td><td>: 1 or more times x</td></tr>
 <tr><td>xy</td><td>: concatenation of x and y</td></tr>
 <tr><td>x|y</td><td>: x or y</td></tr>
+<tr><td>(foo|bar)</td><td>: String "foo" or string "bar"</td></tr>
 <tr><td>[abc]</td><td>: a or b or c (same as a|b|c)</td></tr>
 <tr><td>[a-c]</td><td>: a or b or c (same as above)</td></tr>
 <tr><td>x{n}</td><td>: exactly n appearances of x</td></tr>
