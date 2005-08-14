@@ -55,6 +55,7 @@ import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyDHTAction;
 
 public class transferRWI {
 
@@ -124,8 +125,10 @@ public class transferRWI {
             if (unknownURLs.length() > 0) unknownURLs = unknownURLs.substring(1);
             if (wordhashes.length == 0)
                 switchboard.getLog().logInfo("Received 0 Words from peer " + iam + ", requested " + unknownURL.size() + " URLs");
-            else
-                switchboard.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[wordhashes.length - 1] + "] from peer " + iam + ", requested " + unknownURL.size() + " URLs");
+            else {
+                double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[wordhashes.length - 1])) / 2.0;
+                switchboard.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[wordhashes.length - 1] + "]/" + avdist + " from peer " + iam + ", requested " + unknownURL.size() + " URLs");
+            }
             result = "ok";
         } else {
             result = "error_not_granted";

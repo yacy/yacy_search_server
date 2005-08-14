@@ -380,7 +380,7 @@ public class yacyClient {
             } catch (NumberFormatException e) {
                 searchtime = totalrequesttime;
             }
-            yacyCore.log.logDebug("yacyClient.search: processed " + results + " links from peer " + targetPeer.hash + ", score " + targetPeer.selectscore + "; duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
+            yacyCore.log.logDebug("yacyClient.search: processed " + results + " links from peer " + targetPeer.hash + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes) + ", duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
             return results;
         } catch (Exception e) {
             yacyCore.log.logError("yacyClient.search error: '" + targetPeer.get("Name", "anonymous") + "' failed - " + e);

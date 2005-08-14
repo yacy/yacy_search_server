@@ -13,6 +13,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyClient;
+import de.anomic.yacy.yacyDHTAction;
 import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
 import de.anomic.kelondro.kelondroException;
@@ -133,8 +134,8 @@ public class plasmaWordIndexDistribution {
         if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return -1;
         
         // collect index
-        String startPointHash = yacyCore.seedDB.mySeed.hash;
-        //String startPointHash = serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true).substring(0, yacySeedDB.commonHashLength);
+        String startPointHash = selectTransferStart();
+        log.logDebug("Selected hash " + startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash));
         Object[] selectResult = selectTransferIndexes(startPointHash, indexCount);
         plasmaWordIndexEntity[] indexEntities = (plasmaWordIndexEntity[]) selectResult[0];
         HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry 
@@ -157,6 +158,7 @@ public class plasmaWordIndexDistribution {
         Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(keyhash);
         String error;
         String peerNames = "";
+        double avdist;
         while ((e.hasMoreElements()) && (hc < peerCount)) {
             if (closed) {
                 log.logError("Index distribution interrupted by close, nothing deleted locally.");
@@ -166,7 +168,8 @@ public class plasmaWordIndexDistribution {
             if (seed != null) {
                 error = yacyClient.transferIndex(seed, indexEntities, urlCache);
                 if (error == null) {
-                    log.logInfo("Index transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "] to peer " + seed.getName() + ":" + seed.hash + " successfull");
+                    avdist = (yacyDHTAction.dhtDistance(seed.hash, indexEntities[0].wordHash()) + yacyDHTAction.dhtDistance(seed.hash, indexEntities[indexEntities.length-1].wordHash())) / 2.0;
+                    log.logInfo("Index transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "]/" + avdist + " to peer " + seed.getName() + ":" + seed.hash + " successfull");
                     peerNames += ", " + seed.getName();
                     hc++;
                 } else {
@@ -207,8 +210,21 @@ public class plasmaWordIndexDistribution {
         }
     }
     
+    private String selectTransferStart() {
+        String startPointHash;
+        // first try to select with increasing probality a good start point
+        for (int i = 9; i > 0; i--) {
+            startPointHash = serverCodings.encodeMD5B64(Long.toString(i + System.currentTimeMillis()), true).substring(2, 2 + yacySeedDB.commonHashLength);
+            if (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash) > ((double) i / (double) 10)) return startPointHash;
+        }
+        // if that fails, take simply the best start point (this is usually avoided, since that leads to always the same target peers)
+        startPointHash = yacyCore.seedDB.mySeed.hash.substring(0, 11) + "z";
+        return startPointHash;
+    }
+    
     private Object[] /* of {plasmaWordIndexEntity[], HashMap(String, plasmaCrawlLURL.Entry)}*/
             selectTransferIndexes(String hash, int count) {
+        // the hash is a start hash from where the indexes are picked
         Vector tmpEntities = new Vector();
         String nexthash = "";
         try {

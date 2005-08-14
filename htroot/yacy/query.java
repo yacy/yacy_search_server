@@ -44,6 +44,7 @@
 // if the shell's current path is HTROOT
 
 import java.util.Hashtable;
+import java.io.IOException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -79,39 +80,30 @@ public class query {
 
 	// requests about environment
 
-	if (obj.equals("wordcount")) {
-	    // the total number of different words in the rwi is returned
-	    prop.put("response", "0"); // dummy response
-	    return prop;
+	if (obj.equals("rwiurlcount")) {
+	    // the total number of different urls in the rwi is returned
+            // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
+            try {
+                de.anomic.plasma.plasmaWordIndexEntity entity = switchboard.wordIndex.getEntity(env, true);
+                prop.put("response", entity.size());
+                entity.close();
+            } catch (IOException e) {
+                prop.put("response", -1);
+            }
+            return prop;
 	}
 
 	if (obj.equals("rwicount")) {
-	    // return the number of available word indexes
-	    // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
-	    prop.put("response", "0"); // dummy response
+	    // return the total number of available word indexes
+	    prop.put("response", switchboard.wordIndex.size());
 	    return prop;
 	}
 
 	if (obj.equals("lurlcount")) {
 	    // return the number of all available l-url's
-	    Hashtable result = switchboard.action("urlcount", null);
-	    //System.out.println("URLCOUNT result = " + ((result == null) ? "NULL" : result.toString()));
-	    prop.put("response", ((result == null) ? "-1" : (String) result.get("urls")));
+	    prop.put("response", switchboard.urlPool.loadedURL.size());
 	    return prop;
 	}
-
-	if (obj.equals("purlcount")) {
-	    // return number of stacked prefetch urls
-	    prop.put("response", "0"); // dummy response
-	    return prop;
-	}
-
-	if (obj.equals("seedcount")) {
-	    // return number of stacked prefetch urls
-	    prop.put("response", "0"); // dummy response
-	    return prop;
-	}
-
 
 	// requests about requirements
 

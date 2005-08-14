@@ -226,4 +226,38 @@ public class yacyDHTAction implements yacyPeerAction {
     
     public void processPeerPing(yacySeed peer) {
     }
+    
+    
+    
+    public static double dhtDistance(String peer, String word) {
+        // the dht distance is a positive value between 0 and 1
+        // if the distance is small, the word more probably belongs to the peer
+        double d = hashDistance(peer, word);
+        if (d > 0) {
+            return d; // case where the word is 'before' the peer
+        } else {
+            return 1 + d; // wrap-around case
+        }
+    }
+    
+    private static double hashDistance(String from, String to) {
+        // computes the distance between two hashes.
+        // the maximum distance between two hashes is 1, the minimum -1
+        // this can be used like "from - to"
+        // the result is positive if from > to
+        if ((from == null) || (to == null) || 
+            (from.length() == 0) || (to.length() == 0) ||
+            (from.length() != to.length())) return (double) 0.0;
+        return hashDistance(from.charAt(0), to.charAt(0)) + hashDistance(from.substring(1), to.substring(1)) / maxAtomarDistance;
+    }
+    
+    private static final double maxAtomarDistance = (double) (1+ ((byte) 'z') - ((byte) '-'));
+    
+    private static double hashDistance(char from, char to) {
+        // the distance is a little bit fuzzy, since not all characters are used in a hash.
+        if (from < to)
+            return -hashDistance(to, from);
+        else
+            return ((double) (((byte) from) - ((byte) to))) / maxAtomarDistance;
+    }
 }

@@ -517,11 +517,11 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
         // check cache space
         if (cache.size() > 0) try {
-            // pause until space is in the cache
-            while (cache.size() >= this.maxWords) Thread.sleep(1000);
+            // pause to get space in the cache (while it is flushed)
+            if (cache.size() + 1000 >= this.maxWords) Thread.sleep(java.lang.Math.min(1000, cache.size() - this.maxWords + 1000));
             
             // slow down if we reach cache limit
-            long pausetime = java.lang.Math.min(10, 3 * cache.size() / (maxWords + 1));
+            long pausetime = java.lang.Math.min(10, 2 * cache.size() / (maxWords + 1));
             //System.out.println("Pausetime=" + pausetime);
             Thread.sleep(pausetime);
         } catch (InterruptedException e) {}

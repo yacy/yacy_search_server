@@ -1515,15 +1515,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     
     public serverObjects action(String actionName, serverObjects actionInput) {
-	// perform an action.
+	// perform an action. (not used)
 
-	if (actionName.equals("urlcount")) {
-	    serverObjects result = new serverObjects();
-	    result.put("urls", Integer.toString(urlPool.loadedURL.size()));
-	    return result;
-	}
-
-	// not a correct query
 	return null;
     }
 
