@@ -12,14 +12,17 @@ else
 	for N in `ls -1 lib/*.jar`; do CLASSPATH="$CLASSPATH$N:"; done	
 	for N in `ls -1 libx/*.jar`; do CLASSPATH="$CLASSPATH$N:"; done
 	
-	if [ x$1 != x-d ]
+	if [ x$1 == x-d ] #debug
+	then
+		java -classpath classes:$CLASSPATH yacy
+		exit 0
+	elif [ x$1 == x-l ] #logging
 	then
 		nohup java -classpath classes:htroot:$CLASSPATH yacy >> yacy.log &
-		echo "YaCy started as daemon process. View it's activity in yacy.log"
-		echo "To stop YaCy, please execute stopYACY.sh and wait some seconds"
-		echo "To administrate YaCy, start your web browser and open http://localhost:8080"
 	else
-		java -classpath classes:$CLASSPATH yacy
-		#java -Xms16m -Xmx200m -classpath classes:htroot:$CLASSPATH yacy
+		nohup java -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
 	fi
+	echo "YaCy started as daemon process. View it's activity in yacy.log"
+	echo "To stop YaCy, please execute stopYACY.sh and wait some seconds"
+	echo "To administrate YaCy, start your web browser and open http://localhost:8080"
 fi
