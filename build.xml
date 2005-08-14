@@ -468,6 +468,22 @@
   </java>
 </target>
 
+<!-- stop YaCy (needed for Eclipse) -->
+<target name="stop" description="stop YaCy">
+  <java classname="yacy" fork="yes">
+    <classpath>    
+      <pathelement location="${build}"/>
+      <pathelement location="${htroot}"/>
+      <pathelement location="${lib}/commons-collections.jar" />
+      <pathelement location="${lib}/commons-pool-1.2.jar" />        
+      <pathelement location="${libx}" />                 
+      <fileset dir="${libx}" includes="**/*.jar" />
+    </classpath>
+    <arg line="-stop"/>
+  </java>
+</target>
+	
+	
 <!-- create the html-documentation from javadoc  -->
 <target name="create-doc" description="Create the javadoc-HTML-Pages">
   <javadoc destdir="doc/api" version="no" use="yes" encoding="iso-8859-1" windowtitle="YaCy API Documentation">
