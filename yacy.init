@@ -276,7 +276,7 @@ seedScpPath=
 # which is necessary for internal organization of the index sharing, but the
 # peer's name is purely informal. No function but information is applied.
 # please change this at your pleasure
-peerName=nameless
+peerName=anomic
 
 # every peer periodically scans for other peers. you can set the time
 # of the period here (minutes)

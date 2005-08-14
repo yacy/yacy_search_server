@@ -429,9 +429,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                                 return;
                             }
-                            // add the application version to every rewrite table
+                            // add the application version, the uptime and the client name to every rewrite table
                             tp.put("version", switchboard.getConfig("version", ""));
                             tp.put("uptime", ((System.currentTimeMillis() - Long.parseLong(switchboard.getConfig("startupTime","0"))) / 1000) / 60); // uptime in minutes
+                            tp.put("clientname", switchboard.getConfig("peerName", "anomic"));
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (InvocationTargetException e) {
                             this.theLogger.logError("INTERNAL ERROR: " + e.toString() + ":" +
