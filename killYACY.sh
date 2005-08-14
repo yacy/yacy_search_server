@@ -4,7 +4,7 @@
 # To stop YaCy, use stopYACY.sh
 
 cd `dirname $0`
-PID=`fuser yacy.log | awk '{print $2}'`
+PID=`fuser log/yacy00.log | awk '{print $2}'`
 echo "process-id is " $PID
 kill -3 $PID
 sleep 1
