@@ -14,6 +14,7 @@
 #English=German
 <!-- lang -->default\(english\)==Deutsch
 <!-- author -->==Roland Ramthun, Oliver Wunder
+<!-- maintainer -->==Roland Ramthun <admin@yacy-forum.de>
 
 #-----------------------------------------------------------
 #File: Blacklist_p.html
@@ -169,8 +170,8 @@ not x==nicht x
 concatenation of x and y==Verkettung von x und y
 x or y==x oder y
 String "foo" or string "bar"==String "foo" oder String "bar"
-a or b or c (same as a\|b\|c)==a oder b oder c (dasselbe wie a|b|c)
-a or b or c (same as above)==a oder b oder c (dasselbe wie oben)
+a or b or c \(same as a\|b\|c\)==a oder b oder c (dasselbe wie a|b|c)
+a or b or c \(same as above\)==a oder b oder c (dasselbe wie oben)
 exactly n appearances of x==genau n Vorkommen von x
 at least n appearances of x==mindestens n Vorkommen von x
 at least n, maximum m appearanches of x==mindestens n, maximal m Vorkommen von m
@@ -377,6 +378,8 @@ Received<br>URLs==Empfangene<br>URLs
 PPM==PPM
 Seeds==Seeds
 Connects<br>per hour==Verbindungen<br>pro Stunde
+no==nein
+yes==ja
 You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
 You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online Modus oder Sie benutzen nicht die Proxy Option.
 To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy Netzwerk zu verbinden, m&uuml;ssen Sie den Proxy benutzen, in dem Sie die Browser Einstellungen auf

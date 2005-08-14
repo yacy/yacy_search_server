@@ -88,7 +88,7 @@ public class Status {
         if (yacyCore.latestVersion >= (thisVersion+0.01)) //only new Versions(not new SVN)
             prop.put("versioncomment", 1);//new version
         else
-            prop.put("versioncomment", 0);//no commet
+            prop.put("versioncomment", 0);//no comment
 
         prop.put("versioncomment_latestVersion", Float.toString(yacyCore.latestVersion));
         
