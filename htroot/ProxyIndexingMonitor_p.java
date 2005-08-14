@@ -53,6 +53,7 @@ import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 
 public class ProxyIndexingMonitor_p {
@@ -102,8 +103,7 @@ public class ProxyIndexingMonitor_p {
             } catch (Exception e) {
                 prop.put("info", 2); //Error: errmsg
                 prop.put("info_error", e.getMessage());
-                System.out.println("Case3");
-                e.printStackTrace();
+                serverLog.logError("SERVLET", "ProxyIndexingMonitor.case3", e);
             }
         }
          

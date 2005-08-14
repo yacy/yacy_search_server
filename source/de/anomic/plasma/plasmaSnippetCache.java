@@ -203,103 +203,103 @@ public class plasmaSnippetCache {
     
     private String computeSnippet(String[] sentences, Set queryhashes, int minLength, int maxLength) {
         try {
-        if ((sentences == null) || (sentences.length == 0)) return null;
-        if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
-        kelondroMScoreCluster hitTable = new kelondroMScoreCluster();
-        Iterator j;
-        HashMap hs;
-        String hash;
-        for (int i = 0; i < sentences.length; i++) {
-            //System.out.println("Sentence " + i + ": " + sentences[i]);
-            if (sentences[i].length() > minLength) {
-                hs = hashSentence(sentences[i]);
-                j = queryhashes.iterator();
-                while (j.hasNext()) {
-                    hash = (String) j.next();
-                    if (hs.containsKey(hash)) {
-                        //System.out.println("hash " + hash + " appears in line " + i);
-			hitTable.incScore(new Integer(i));
+            if ((sentences == null) || (sentences.length == 0)) return null;
+            if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
+            kelondroMScoreCluster hitTable = new kelondroMScoreCluster();
+            Iterator j;
+            HashMap hs;
+            String hash;
+            for (int i = 0; i < sentences.length; i++) {
+                //System.out.println("Sentence " + i + ": " + sentences[i]);
+                if (sentences[i].length() > minLength) {
+                    hs = hashSentence(sentences[i]);
+                    j = queryhashes.iterator();
+                    while (j.hasNext()) {
+                        hash = (String) j.next();
+                        if (hs.containsKey(hash)) {
+                            //System.out.println("hash " + hash + " appears in line " + i);
+                            hitTable.incScore(new Integer(i));
+                        }
                     }
                 }
             }
-        }
-        int score = hitTable.getMaxScore(); // best number of hits
-        if (score <= 0) return null;
-        // we found (a) line(s) that have <score> hits.
-        // now find the shortest line of these hits
-        int shortLineIndex = -1;
-        int shortLineLength = Integer.MAX_VALUE;
-        for (int i = 0; i < sentences.length; i++) {
-            if ((hitTable.getScore(new Integer(i)) == score) &&
+            int score = hitTable.getMaxScore(); // best number of hits
+            if (score <= 0) return null;
+            // we found (a) line(s) that have <score> hits.
+            // now find the shortest line of these hits
+            int shortLineIndex = -1;
+            int shortLineLength = Integer.MAX_VALUE;
+            for (int i = 0; i < sentences.length; i++) {
+                if ((hitTable.getScore(new Integer(i)) == score) &&
                 (sentences[i].length() < shortLineLength)) {
-                shortLineIndex = i;
-                shortLineLength = sentences[i].length();
+                    shortLineIndex = i;
+                    shortLineLength = sentences[i].length();
+                }
             }
-        }
-        // find a first result
-        String result = sentences[shortLineIndex];
-        // remove all hashes that appear in the result
-        hs = hashSentence(result);
-        j = queryhashes.iterator();
-        Integer pos;
-        Set remaininghashes = new HashSet();
-        int p, minpos = result.length(), maxpos = -1;
-        while (j.hasNext()) {
-            hash = (String) j.next();
-            pos = (Integer) hs.get(hash);
-            if (pos == null) {
-                remaininghashes.add(new String(hash));
-            } else {
-                p = pos.intValue();
-                if (p > maxpos) maxpos = p;
-                if (p < minpos) minpos = p;
+            // find a first result
+            String result = sentences[shortLineIndex];
+            // remove all hashes that appear in the result
+            hs = hashSentence(result);
+            j = queryhashes.iterator();
+            Integer pos;
+            Set remaininghashes = new HashSet();
+            int p, minpos = result.length(), maxpos = -1;
+            while (j.hasNext()) {
+                hash = (String) j.next();
+                pos = (Integer) hs.get(hash);
+                if (pos == null) {
+                    remaininghashes.add(new String(hash));
+                } else {
+                    p = pos.intValue();
+                    if (p > maxpos) maxpos = p;
+                    if (p < minpos) minpos = p;
+                }
             }
-        }
-        // check result size
-        maxpos = maxpos + 10;
-        if (maxpos > result.length()) maxpos = result.length();
-        if (minpos < 0) minpos = 0;
-        // we have a result, but is it short enough?
-        if (maxpos - minpos + 10 > maxLength) {
-            // the string is too long, even if we cut at both ends
-            // so cut here in the middle of the string
-            int lenb = result.length();
-            result = result.substring(0, (minpos + 20 > result.length()) ? result.length() : minpos + 20).trim() +
-                     " [..] " +
-                     result.substring((maxpos + 26 > result.length()) ? result.length() : maxpos + 26).trim();
-            maxpos = maxpos + lenb - result.length() + 6;
-        }
-        if (maxpos > maxLength) {
-            // the string is too long, even if we cut it at the end
-            // so cut it here at both ends at once
-            int newlen = maxpos - minpos + 10;
-            int around = (maxLength - newlen) / 2;
-            result = "[..] " + result.substring(minpos - around, ((maxpos + around) > result.length()) ? result.length() : (maxpos + around)).trim() + " [..]";
-            minpos = around;
-            maxpos = result.length() - around - 5;
-        }
-        if (result.length() > maxLength) {
-            // trim result, 1st step (cut at right side)
-            result = result.substring(0, maxpos).trim() + " [..]";
-        }
-        if (result.length() > maxLength) {
-            // trim result, 2nd step (cut at left side)
-            result = "[..] " + result.substring(minpos).trim();
-        }
-        if (result.length() > maxLength) {
-            // trim result, 3rd step (cut in the middle)
-            result = result.substring(6, 20).trim() + " [..] " + result.substring(result.length() - 26, result.length() - 6).trim();
-        }
-        if (queryhashes.size() == 0) return result;
-        // the result has not all words in it.
-        // find another sentence that represents the missing other words
-        // and find recursively more sentences
-        maxLength = maxLength - result.length();
-        if (maxLength < 20) maxLength = 20;
-        String nextSnippet = computeSnippet(sentences, remaininghashes, minLength, maxLength);
-        return result + ((nextSnippet == null) ? "" : (" / " + nextSnippet));
+            // check result size
+            maxpos = maxpos + 10;
+            if (maxpos > result.length()) maxpos = result.length();
+            if (minpos < 0) minpos = 0;
+            // we have a result, but is it short enough?
+            if (maxpos - minpos + 10 > maxLength) {
+                // the string is too long, even if we cut at both ends
+                // so cut here in the middle of the string
+                int lenb = result.length();
+                result = result.substring(0, (minpos + 20 > result.length()) ? result.length() : minpos + 20).trim() +
+                " [..] " +
+                result.substring((maxpos + 26 > result.length()) ? result.length() : maxpos + 26).trim();
+                maxpos = maxpos + lenb - result.length() + 6;
+            }
+            if (maxpos > maxLength) {
+                // the string is too long, even if we cut it at the end
+                // so cut it here at both ends at once
+                int newlen = maxpos - minpos + 10;
+                int around = (maxLength - newlen) / 2;
+                result = "[..] " + result.substring(minpos - around, ((maxpos + around) > result.length()) ? result.length() : (maxpos + around)).trim() + " [..]";
+                minpos = around;
+                maxpos = result.length() - around - 5;
+            }
+            if (result.length() > maxLength) {
+                // trim result, 1st step (cut at right side)
+                result = result.substring(0, maxpos).trim() + " [..]";
+            }
+            if (result.length() > maxLength) {
+                // trim result, 2nd step (cut at left side)
+                result = "[..] " + result.substring(minpos).trim();
+            }
+            if (result.length() > maxLength) {
+                // trim result, 3rd step (cut in the middle)
+                result = result.substring(6, 20).trim() + " [..] " + result.substring(result.length() - 26, result.length() - 6).trim();
+            }
+            if (queryhashes.size() == 0) return result;
+            // the result has not all words in it.
+            // find another sentence that represents the missing other words
+            // and find recursively more sentences
+            maxLength = maxLength - result.length();
+            if (maxLength < 20) maxLength = 20;
+            String nextSnippet = computeSnippet(sentences, remaininghashes, minLength, maxLength);
+            return result + ((nextSnippet == null) ? "" : (" / " + nextSnippet));
         } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+            log.logError("computeSnippet: error with string generation", e);
             return "";
         }
     }

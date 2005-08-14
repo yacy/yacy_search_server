@@ -192,7 +192,7 @@ public final class plasmaCrawlWorker extends Thread {
                             this.setName(this.threadBaseName + "_inPool");
                         }
                         catch (Exception e1) {
-                            e1.printStackTrace();
+                            log.logError("pool error", e1);
                         }
                     }
                 }

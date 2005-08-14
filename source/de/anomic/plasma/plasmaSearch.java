@@ -313,8 +313,7 @@ public final class plasmaSearch {
 		acc.addResult(entry);
 	    }
 	} catch (kelondroException ee) {
-	    serverLog.logError("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage());
-	    ee.printStackTrace();
+	    serverLog.logError("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
 	}
         long startSortTime = System.currentTimeMillis();
         acc.sortResults();

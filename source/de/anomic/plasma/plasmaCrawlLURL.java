@@ -312,7 +312,7 @@ public class plasmaCrawlLURL extends plasmaURL {
                 dark = !dark;
                 c++;
             } catch (Exception e) {
-                e.printStackTrace();
+                serverLog.logError("PLASMA", "genTableProps", e);
             }
         }
         prop.put("table_indexed", c);
@@ -385,8 +385,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 		    return;
 		}
 	    } catch (Exception e) {
-                System.out.println("INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString());
-                e.printStackTrace();
+                serverLog.logError("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString(), e);
 	    }
 	}
 
@@ -418,8 +417,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 		    store();
 		    //}
 	    } catch (Exception e) {
-		System.out.println("INTERNAL ERROR in plasmaLURL.entry/2: " + e.toString());
-		e.printStackTrace();
+		serverLog.logError("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/2: " + e.toString(), e);
 	    }
 	}
 
@@ -448,8 +446,7 @@ public class plasmaCrawlLURL extends plasmaURL {
 		};
 		urlHashCache.put(entry);
 	    } catch (Exception e) {
-		System.out.println("INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString());
-                e.printStackTrace();
+		serverLog.logError("PLASMA", "INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString(), e);
 	    }
 	}
 

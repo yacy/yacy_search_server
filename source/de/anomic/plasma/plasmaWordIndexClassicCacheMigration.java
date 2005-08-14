@@ -171,8 +171,7 @@ public class plasmaWordIndexClassicCacheMigration {
             remove(hash);
             return true;
         } catch (Exception e) {
-            serverLog.logError("PLASMA MIGRATION", "oneStepMigration error: " + e.getMessage());
-            e.printStackTrace();
+            serverLog.logError("PLASMA MIGRATION", "oneStepMigration error: " + e.getMessage(), e);
             return false;
         }
     }

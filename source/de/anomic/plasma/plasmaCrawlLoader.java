@@ -161,7 +161,7 @@ public final class plasmaCrawlLoader extends Thread {
                 this.stopped = true;
             }
             catch (Exception e) {
-                e.printStackTrace();
+                this.log.logError("plasmaCrawlLoader.run/loop", e);
             }
         }
         
@@ -174,7 +174,7 @@ public final class plasmaCrawlLoader extends Thread {
         }
         catch (Exception e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            this.log.logError("plasmaCrawlLoader.run/close", e);
         }
         
     }
@@ -198,7 +198,7 @@ public final class plasmaCrawlLoader extends Thread {
                 this.theQueue.addMessage(theMsg);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                this.log.logError("plasmaCrawlLoader.loadParallel", e);
             }
         }
     }

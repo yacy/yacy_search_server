@@ -111,19 +111,17 @@ public final class plasmaWordIndexAssortment {
             try {
                 assortments = new kelondroTree(assortmentFile, bufferSize);
                 if (log != null) log.logSystem("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
+                return;
             } catch (IOException e){
-                if (log != null) log.logError("unable to open assortment database: " + e.getMessage());
-                e.printStackTrace();
+                if (log != null) log.logError("unable to open assortment database, creating new: " + e.getMessage(), e);
             }
-        } else {
-            // create new assortment tree file
-            try {
-                assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
-                if (log != null) log.logSystem("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
-            } catch (IOException e){
-                if (log != null) log.logError("unable to create assortment database: " + e.getMessage());
-                e.printStackTrace();
-            }
+        }
+        // create new assortment tree file
+        try {
+            assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
+            if (log != null) log.logSystem("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
+        } catch (IOException e){
+            if (log != null) log.logError("unable to create assortment database: " + e.getMessage(), e);
         }
     }
 
@@ -147,12 +145,10 @@ public final class plasmaWordIndexAssortment {
         try {
             oldrow = assortments.put(row);
         } catch (IOException e) {
-            log.logFailure("storeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB");
-            e.printStackTrace();
+            log.logFailure("storeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
         } catch (kelondroException e) {
-            log.logFailure("storeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB");
-            e.printStackTrace();
+            log.logFailure("storeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
         }
         if (oldrow != null) throw new RuntimeException("Store to assortment ambiguous");
@@ -165,13 +161,11 @@ public final class plasmaWordIndexAssortment {
         try {
             row = assortments.remove(wordHash.getBytes());
         } catch (IOException e) {
-            log.logFailure("removeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB");
-            e.printStackTrace();
+            log.logFailure("removeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
 	    return null;
         } catch (kelondroException e) {
-            log.logFailure("removeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB");
-            e.printStackTrace();
+            log.logFailure("removeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
 	    return null;
         }
@@ -194,8 +188,7 @@ public final class plasmaWordIndexAssortment {
         try {
             assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
         } catch (IOException e){
-            log.logError("unable to re-create assortment database: " + e.getMessage());
-            e.printStackTrace();
+            log.logError("unable to re-create assortment database: " + e.getMessage(), e);
         }
     }
     
@@ -203,13 +196,11 @@ public final class plasmaWordIndexAssortment {
         try {
             return assortments.keys(up, rot, startWordHash.getBytes());
         } catch (IOException e) {
-            log.logFailure("iterateAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB");
-            e.printStackTrace();
+            log.logFailure("iterateAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
             return null;
         } catch (kelondroException e) {
-            log.logFailure("iterateAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB");
-            e.printStackTrace();
+            log.logFailure("iterateAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
             return null;
         }
@@ -223,8 +214,7 @@ public final class plasmaWordIndexAssortment {
         try {
             assortments.close();
         } catch (IOException e){
-            log.logError("unable to close assortment database: " + e.getMessage());
-            e.printStackTrace();
+            log.logError("unable to close assortment database: " + e.getMessage(), e);
         }
     }
 

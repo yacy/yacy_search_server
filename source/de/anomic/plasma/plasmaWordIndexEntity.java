@@ -170,29 +170,24 @@ public class plasmaWordIndexEntity {
 	}
     }
     
-    public int addEntries(plasmaWordIndexEntryContainer container) {
+    public int addEntries(plasmaWordIndexEntryContainer container) throws IOException {
 	//System.out.println("* adding " + newEntries.size() + " cached word index entries for word " + wordHash); // debug
 	// fetch the index cache
         if ((container == null) || (container.size() == 0)) return 0;
         
         // open file
-        try {
-            int count = 0;
-            
-            // write from vector
-            if (container != null) {
-                Iterator i = container.entries();
-                while (i.hasNext()) {
-                    if (addEntry((plasmaWordIndexEntry) i.next())) count++;
-                }
+        int count = 0;
+        
+        // write from vector
+        if (container != null) {
+            Iterator i = container.entries();
+            while (i.hasNext()) {
+                if (addEntry((plasmaWordIndexEntry) i.next())) count++;
             }
-            
-            // close and return
-            return count;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return 0;
         }
+        
+        // close and return
+        return count;
     }
     
     public boolean deleteComplete() throws IOException {

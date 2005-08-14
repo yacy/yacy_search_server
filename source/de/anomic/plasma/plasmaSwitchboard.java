@@ -568,8 +568,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         try {
             sbQueue.push((plasmaSwitchboardQueue.Entry) job);
         } catch (IOException e) {
-            log.logError("IOError in plasmaSwitchboard.enQueue: " + e.getMessage());
-            e.printStackTrace();
+            log.logError("IOError in plasmaSwitchboard.enQueue: " + e.getMessage(), e);
         }
     }
 
@@ -595,8 +594,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             try {
                 nextentry = sbQueue.pop();
             } catch (IOException e) {
-                log.logError("IOError in plasmaSwitchboard.deQueue: " + e.getMessage());
-                e.printStackTrace();
+                log.logError("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
                 return false;
             }
         }
@@ -1013,8 +1011,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         log.logDebug("Not Indexed Resource '" + entry.normalizedURLString() + "': process case=" + processCase);
                     }
                 } catch (Exception ee) {
-                    log.logError("Could not index URL " + entry.url() + ": " + ee.getMessage());
-                    ee.printStackTrace();
+                    log.logError("Could not index URL " + entry.url() + ": " + ee.getMessage(), ee);
                     if ((processCase == 6) && (initiator != null)) {
                         yacyClient.crawlReceipt(initiator, "crawl", "exception", ee.getMessage(), null, "");
                     }
@@ -1225,8 +1222,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
         } catch (Exception e) {
             // wrong values
-            log.logError("REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CLIENT RETURNED: " + page.toString());
-            e.printStackTrace();
+            log.logError("REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CLIENT RETURNED: " + page.toString(), e);
             return false;
         }
     }
@@ -1263,7 +1259,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 // take some elements and fetch the snippets
                 snippetCache.fetch(acc, queryhashes, urlmask, fetchcount);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.logError("presearch: failed", e);
             }
             log.logDebug("presearch: job terminated");
         }

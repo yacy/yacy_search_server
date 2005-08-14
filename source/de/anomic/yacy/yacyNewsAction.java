@@ -42,7 +42,9 @@
 package de.anomic.yacy;
 
 import java.io.IOException;
+
 import de.anomic.server.serverCodings;
+import de.anomic.server.logging.serverLog;
 
 public class yacyNewsAction implements yacyPeerAction {
     
@@ -67,7 +69,9 @@ public class yacyNewsAction implements yacyPeerAction {
         }
         try {
             synchronized (pool) {this.pool.enqueueIncomingNews(record);}
-        } catch (IOException e) {e.printStackTrace();}
+        } catch (IOException e) {
+            serverLog.logError("YACY", "processPeerArrival", e);
+        }
     }
     
     public void processPeerDeparture(yacySeed peer) {

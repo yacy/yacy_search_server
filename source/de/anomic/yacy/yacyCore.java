@@ -337,8 +337,7 @@ public class yacyCore {
                     log.logInfo("publish: handshaked " + this.seed.get("PeerType", "senior") + " peer '" + this.seed.getName() + "' at " + this.seed.getAddress());
                 }
             } catch (Exception e) {
-                log.logError("publishThread: error with target seed " + seed.getMap() + ": " + e.getMessage());
-                e.printStackTrace();
+                log.logError("publishThread: error with target seed " + seed.getMap() + ": " + e.getMessage(), e);
                 this.error = e;
             } finally {
                 this.syncList.add(this);
@@ -388,7 +387,7 @@ public class yacyCore {
                 else
                     seedDB.mySeed.put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
             } catch (IOException e) {
-                e.printStackTrace();
+                log.logError("publishMySeed: problem with news encoding", e);
             }
             
             // holding a reference to all started threads

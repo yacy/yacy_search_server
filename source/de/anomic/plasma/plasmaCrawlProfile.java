@@ -52,6 +52,7 @@ import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.serverCodings;
+import de.anomic.server.logging.serverLog;
 
 public class plasmaCrawlProfile {
     
@@ -78,7 +79,7 @@ public class plasmaCrawlProfile {
             profileTableFile.getParentFile().mkdirs();
             profileTable = new kelondroMap(new kelondroDyn(profileTableFile, 32000, plasmaURL.urlCrawlProfileHandleLength, 2000));
         } catch (IOException e){
-            e.printStackTrace();
+            serverLog.logError("PLASMA", "plasmaCrawlProfile.resetDatabase", e);
         }
     }
     

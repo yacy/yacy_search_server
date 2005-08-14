@@ -354,7 +354,7 @@ public final class plasmaParser {
                         newEnabledParsers.put(mimeType,availableParserList.get(mimeType));
                         
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        serverLog.logError("PARSER", "error in setEnabledParserList", e);
                     } finally {
                         if (theParser != null)
                             try { plasmaParser.theParserPool.returnObject(mimeType,theParser); } catch (Exception e) {}

@@ -63,6 +63,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
@@ -470,8 +471,7 @@ public class dir {
             switchboard.removeReferences(urlhash, words);
             switchboard.urlPool.loadedURL.remove(urlhash);
         } catch (Exception e) {
-            System.out.println("INTERNAL ERROR in dir.deletePhrase:");
-            e.printStackTrace();
+            serverLog.logError("DIR", "INTERNAL ERROR in dir.deletePhrase", e);
         }
     }
 }

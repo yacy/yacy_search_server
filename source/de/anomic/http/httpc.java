@@ -1038,8 +1038,7 @@ do upload
         try {
             return wput(url, 5000, null, null, null, 0, props);
         } catch (IOException e) {
-            serverLog.logError("HTTPC", "wput exception for URL " + url + ": " + e.getMessage());
-            e.printStackTrace();
+            serverLog.logError("HTTPC", "wput exception for URL " + url + ": " + e.getMessage(), e);
             Vector ll = new Vector();
             ll.add("503 " + e.getMessage());
             return ll;

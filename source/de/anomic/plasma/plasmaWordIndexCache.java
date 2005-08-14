@@ -64,7 +64,6 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
-    private static final String indexStackFileName = "indexDump0.stack";
     private static final String oldSingletonFileName = "indexSingletons0.db";
     private static final String newSingletonFileName = "indexAssortment001.db";
     private static final String indexAssortmentClusterPath = "ACLUSTER";
@@ -128,8 +127,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         try {
             restore();
         } catch (IOException e){
-            log.logError("unable to restore cache dump: " + e.getMessage());
-            e.printStackTrace();
+            log.logError("unable to restore cache dump: " + e.getMessage(), e);
         }
         
         // start permanent flushing
@@ -190,13 +188,6 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
     
     private long restore() throws IOException {
-        if ((new File(databaseRoot, indexArrayFileName)).exists())
-            return restoreArray();
-        else
-            return restoreStack();
-    }
-    
-    private long restoreArray() throws IOException {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (!(indexDumpFile.exists())) return 0;
         kelondroArray dumpArray = new kelondroArray(indexDumpFile);
@@ -239,60 +230,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             log.logSystem("restored " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         } catch (kelondroException e) {
             // restore failed
-            log.logError("restore of indexCache array dump failed: " + e.getMessage());
-            e.printStackTrace();
+            log.logError("restore of indexCache array dump failed: " + e.getMessage(), e);
         }
-        return urlCount;
-    }
-    
-    private long restoreStack() throws IOException {
-        File indexDumpFile = new File(databaseRoot, indexStackFileName);
-        if (!(indexDumpFile.exists())) return 0;
-        kelondroStack dumpStack = new kelondroStack(indexDumpFile, 1024);
-        log.logSystem("restore stack dump of index cache, " + dumpStack.size() + " word/url relations");
-        long startTime = System.currentTimeMillis();
-        long messageTime = System.currentTimeMillis() + 5000;
-        long urlCount = 0, urlsPerSecond = 0;
-        try {
-            synchronized (cache) {
-                Iterator i = dumpStack.iterator();
-                kelondroRecords.Node node;
-                String wordHash;
-                plasmaWordIndexEntryContainer container;
-                long creationTime;
-                plasmaWordIndexEntry wordEntry;
-                byte[][] row;
-                Runtime rt = Runtime.getRuntime();
-                while (i.hasNext()) {
-                    // get out one entry
-                    node = (kelondroRecords.Node) i.next();
-                    row = node.getValues();
-                    wordHash = new String(row[0]);
-                    creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new plasmaWordIndexEntry(new String(row[3]), new String(row[4]));
-                    // store to cache
-                    addEntry(wordHash, wordEntry, creationTime);
-                    urlCount++;
-                    // protect against memory shortage
-                    while (rt.freeMemory() < 1000000) {flushFromMem(); java.lang.System.gc();}
-                    // write a log
-                    if (System.currentTimeMillis() > messageTime) {
-                        System.gc(); // for better statistic
-                        urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                        log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpStack.size() - urlCount) / urlsPerSecond) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
-                        messageTime = System.currentTimeMillis() + 5000;
-                    }
-                }
-            }
-            
-            dumpStack.close();
-            log.logSystem("restored " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
-        } catch (kelondroException e) {
-            // restore failed
-            log.logError("restore of indexCache dump failed: " + e.getMessage());
-            e.printStackTrace();
-        }
-        indexDumpFile.delete();
         return urlCount;
     }
     
@@ -412,8 +351,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 flushFromMem(hash);
             }
         } catch (Exception e) {
-            log.logError("flushFromMem: " + e.getMessage());
-            e.printStackTrace();
+            log.logError("flushFromMem: " + e.getMessage(), e);
         }
         flushThread.proceed();
     }
@@ -574,8 +512,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         try {
             dump(waitingSeconds);
         } catch (IOException e){
-            log.logError("unable to dump cache: " + e.getMessage());
-            e.printStackTrace();
+            log.logError("unable to dump cache: " + e.getMessage(), e);
         }
     }
 
