@@ -1,4 +1,4 @@
-# de.lng
+﻿# de.lng
 # -----------------------
 # part of YaCy
 # (C) by Michael Peter Christen; mc@anomic.de
@@ -22,7 +22,7 @@
 YaCy: Blacklist Manager==YaCy: Blacklist Manager
 Blacklist==Blacklist
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion  stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
-from being loaded. You can define several blacklists and activate them separately.==Sie k&ouml;nnen mehrere Blacklists anlegen und getrennt aktivieren.
+from being loaded. You can define several blacklists and activate them separately.==Sie können mehrere Blacklists anlegen und getrennt aktivieren.
 You may also provide your blacklist to other peers by sharing them; in return you may==Sie k&ouml;nnen ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
 collect blacklist entries from other peers.==Im Gegenzug k&ouml;nnen Sie sich selber von anderen Peers Blacklists runterladen.
 Edit list:==Liste bearbeiten:
