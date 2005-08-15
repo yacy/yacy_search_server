@@ -22,7 +22,7 @@ else
 	else
 		nohup java -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
 	fi
-	echo "YaCy started as daemon process. View it's activity in yacy.log"
+	echo "YaCy started as daemon process. View it's activity in log/yacy00.log"
 	echo "To stop YaCy, please execute stopYACY.sh and wait some seconds"
 	echo "To administrate YaCy, start your web browser and open http://localhost:8080"
 fi

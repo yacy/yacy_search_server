@@ -106,6 +106,7 @@ public class yacySearch extends Thread {
 	if (yacyCore.seedDB == null) return null;
 	if (seedcount > yacyCore.seedDB.sizeConnected()) seedcount = yacyCore.seedDB.sizeConnected();
 
+        // put in seeds according to dht
         kelondroMScoreCluster ranking = new kelondroMScoreCluster();
         HashMap seeds = new HashMap();
         yacySeed seed;
@@ -116,17 +117,33 @@ public class yacySearch extends Thread {
         while (i.hasNext()) {
             wordhash = (String) i.next();
             dhtEnum = yacyCore.dhtAgent.getDHTSeeds(true, wordhash);
-            c = 0;
-            while ((dhtEnum.hasMoreElements()) && (c < seedcount)) {
+            c = seedcount;
+            while ((dhtEnum.hasMoreElements()) && (c > 0)) {
                 seed = (yacySeed) dhtEnum.nextElement();
-                //System.out.println("Selected peer " + seed.hash + " for wordhash " + wordhash + ", score " + c);
-                ranking.addScore(seed.hash, c++);
+                //System.out.println("Selected peer " + seed.hash + "/" + seed.getName() + " for wordhash " + wordhash + ", score " + c);
+                ranking.addScore(seed.hash, c--);
                 seeds.put(seed.hash, seed);
             }
         }
+        
+        // put in seeds according to size of peer
+        dhtEnum = yacyCore.seedDB.seedsSortedConnected(false, "ICount");
+        c = seedcount;
+        int score;
+        if (c > yacyCore.seedDB.sizeConnected()) c = yacyCore.seedDB.sizeConnected();
+        while ((dhtEnum.hasMoreElements()) && (c > 0)) {
+            seed = (yacySeed) dhtEnum.nextElement();
+            score = (int) Math.round(Math.random() * c / 2);
+            //System.out.println("Selected peer " + seed.hash + "/" + seed.getName() + " for maxRWI=" + seed.getMap().get("ICount") + ", score " + score);
+            ranking.addScore(seed.hash, score);
+            seeds.put(seed.hash, seed);
+            c--;
+        }
+        
+        // evaluate the ranking score and select seeds
         if (ranking.size() < seedcount) seedcount = ranking.size();
         yacySeed[] result = new yacySeed[seedcount];
-        Iterator e = ranking.scores(true); // lower are better
+        Iterator e = ranking.scores(false); // higher are better
         c = 0;
         while ((e.hasNext()) && (c < result.length)) {
             seed = (yacySeed) seeds.get((String) e.next());

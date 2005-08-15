@@ -168,11 +168,13 @@ public class index {
 
 	} else {
 	    int linkcount = Integer.parseInt(prop.get("linkcount", "0"));
+            int orderedcount = Integer.parseInt(prop.get("orderedcount", "0"));
             int totalcount = Integer.parseInt(prop.get("totalcount", "0"));
 	    if (totalcount > 10) {
                 Object[] references = (Object[]) prop.get("references", new String[0]);
 		prop.put("num-results", 4);
 		prop.put("num-results_linkcount", linkcount);
+                prop.put("num-results_orderedcount", orderedcount);
 		prop.put("num-results_totalcount", totalcount);
                 int hintcount = references.length;
                 if (hintcount > 0) {
@@ -199,6 +201,7 @@ public class index {
 		else {
 		    prop.put("num-results", 4);
 		    prop.put("num-results_linkcount", linkcount);
+                    prop.put("num-results_orderedcount", orderedcount);
 		    prop.put("num-results_totalcount", totalcount);
 		}
 	    }

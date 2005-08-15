@@ -1301,10 +1301,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // do global fetching
             int globalresults = 0;
             if (global) {
-                int fetchcount =      ((int) time / 1000) * 4; // number of wanted results until break in search
-                int fetchpeers = 10 + ((int) time / 1000) * 3; // number of target peers; means 30 peers in 10 seconds
-                long fetchtime = time * 7 / 10;           // time to waste
-                if (fetchcount > count) fetchcount = count;
+                int fetchcount = ((int) time / 1000) * 5; // number of wanted results until break in search
+                int fetchpeers = ((int) time / 1000) * 2; // number of target peers; means 30 peers in 10 seconds
+                long fetchtime = time * 6 / 10;           // time to waste
+                if (fetchpeers < 10) fetchpeers = 10;
+                if (fetchcount > count * 10) fetchcount = count * 10;
                 globalresults = yacySearch.searchHashes(queryhashes, urlPool.loadedURL, searchManager, fetchcount, fetchpeers, urlBlacklist, snippetCache, fetchtime);
                 log.logDebug("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             }
@@ -1326,9 +1327,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // result is a List of urlEntry elements: prepare answer
             if (acc == null) {
                 prop.put("totalcount", "0");
+                prop.put("orderedcount", "0");
                 prop.put("linkcount", "0");
             } else {
-                prop.put("totalcount", Integer.toString(acc.sizeOrdered()));
+                prop.put("totalcount", Integer.toString(idx.size()));
+                prop.put("orderedcount", Integer.toString(acc.sizeOrdered()));
                 int i = 0;
                 int p;
                 URL url;
@@ -1428,6 +1431,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // log
             log.logInfo("EXIT WORD SEARCH: " + gs + " - " +
             prop.get("totalcount", "0") + " links found, " +
+            prop.get("orderedcount", "0") + " links ordered, " +
 	    prop.get("linkcount", "?") + " links selected, " +
             ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             if (idx != null) idx.close();
