@@ -128,10 +128,48 @@ public class Wiki {
 			 "<input type=\"hidden\" name=\"page\" value=\"" + pagename + "\">" +
 			 "<input type=\"hidden\" name=\"reason\" value=\"edit\">" +
 			 "<input type=\"submit\" name=\"submit\" value=\"Submit\">" +
+			 "<input type=\"submit\" name=\"preview\" value=\"Preview\">" +
 			 "<input type=\"submit\" name=\"view\" value=\"Discard\">" +
 			 "</form>");
 	    } catch (UnsupportedEncodingException e) {}
-	} else if (post.containsKey("index")) {
+	} 
+
+	//contributed by [MN]
+	else if (post.containsKey("preview")) {
+		// preview the page
+		wikiCode wikiTransformer=new wikiCode(switchboard);
+		
+		prop.put("pagecontent",
+		     "<h2>Preview</h2><p>No changes have been submitted so far!</p>" +
+		     "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">" +
+		     "<tr class=\"TableHeader\" width=\"100%\" ><td height=\"10\" class=\"TableHeader\" class=\"black\"><font size=\"1\">&nbsp;<b>" +
+                     "yacyWiki page: " + pagename + ",&nbsp;&nbsp;&nbsp;last edited by " + author + 
+		     ",&nbsp;&nbsp;&nbsp;change date " + dateString(new Date()) +
+                     "</b></font></td></tr>" +
+		     "<tr class=\"WikiBackground\"><td>" + 
+		     "<table width=\"100%\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\"><tr><td>" +
+                     wikiTransformer.transform(((String) post.get("content", ""))) +
+                     "</td></tr></table>" +
+		     "</td></tr></table>");
+		     
+		prop.put("pageedit",
+			 "<form action=\"Wiki.html\" method=\"post\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\">" +
+			 //"<form action=\"Wiki.html\" method=\"post\" enctype=\"application/x-www-form-urlencoded\">" +
+			 "<input type=\"submit\" name=\"submit\" value=\"Submit\">" +
+			 "<input type=\"submit\" name=\"view\" value=\"Discard\"><br><br><br>" +
+			 "<h2>Edit</h2>"+
+			 "<p>Author:<br><input name=\"author\" type=\"text\" size=\"80\" maxlength=\"80\" value=\"" + author + "\"></p>" +
+			 "<p>Text:<br><textarea name=\"content\" cols=\"80\" rows=\"24\">" + ((String) post.get("content", "")) + "</textarea></p>" +
+			 "<input type=\"hidden\" name=\"page\" value=\"" + pagename + "\">" +
+			 "<input type=\"hidden\" name=\"reason\" value=\"edit\">" +
+			 "<input type=\"submit\" name=\"submit\" value=\"Submit\">" +
+			 "<input type=\"submit\" name=\"preview\" value=\"Preview\">" +
+			 "<input type=\"submit\" name=\"view\" value=\"Discard\">" +
+			 "</form>");
+	} 
+	//end contrib of [MN]
+			
+	else if (post.containsKey("index")) {
 	    // view an index
 	    String index = "<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\">" +
                 "<tr class=\"TableHeader\"><td>Subject</td><td>Change Date</td><td>Author</td></tr>";
@@ -159,7 +197,9 @@ public class Wiki {
 		     "<input type=\"hidden\" name=\"page\" value=\"" + pagename + "\">" +
 		     "<input type=\"button\" name=\"demo\" value=\"Start Page\" onClick=\"self.location.href='Wiki.html'\">" + 
 		     "</form>");
-	} else {
+	} 
+	
+	else {
         wikiCode wikiTransformer=new wikiCode(switchboard);
 	    // show page
 	    prop.put("pagecontent",
