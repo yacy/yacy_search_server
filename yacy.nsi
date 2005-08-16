@@ -6,7 +6,7 @@
 ;last major change: 22.07.2005
 Name "YaCy"
 
-OutFile "yacy_v0.394_20050803_489.exe"
+OutFile "yacy_v0.40_20050816_547.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -19,7 +19,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.394(Build 20050803) on your computer. Select which optional things you want installed."
+ComponentText "This will install YaCy v0.40(Build 20050816) on your computer. Select which optional things you want installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old Version was installed into another locAtion(eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install in to:"
@@ -33,8 +33,11 @@ Section "Binaries (required)"
 	#main files
 	File "httpd.mime"
 	File "startYACY.bat"
+	File "startYACY_Win9x.bat"
+	File "startYACY_noconsole_Win9x.bat"
 	File "startYACY_noconsole.bat"
 	File "stopYACY.bat"
+	File "stopYACY_Win9x.bat"
 	#File "httpProxy.command" ##Apple
 	File "yacy.init"
 	#File "httpProxy.sh"      ##UNIX
@@ -63,6 +66,7 @@ Section "Binaries (required)"
 	#htroot non devel
 	SetOutPath "$INSTDIR\htroot"
 	File "htroot\*.html"
+	File "htroot\*.soap"
 	File "htroot\*.xml"
 	File "htroot\*.xsl"
 	File "htroot\*.rss"
