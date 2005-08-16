@@ -175,7 +175,7 @@ public class plasmaWordIndexDistribution {
                     log.logInfo("Index transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "]/" +
                                  avdist + " to peer " + seed.getName() + ":" + seed.hash + " in " +
                                  ((System.currentTimeMillis() - start) / 1000) + " seconds successfull (" +
-                                 (indexCount / ((System.currentTimeMillis() - start) / 1000)) + " words/s)");
+                                 (1000 * indexCount / (System.currentTimeMillis() - start + 1)) + " words/s)");
                     peerNames += ", " + seed.getName();
                     hc++;
                 } else {

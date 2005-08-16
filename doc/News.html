@@ -73,9 +73,14 @@ globalheader();
 </ul>
 -->
 
-
-<br><p>v0.394_20050803_489
+<br><p>v0.40_20050816_548
 <ul>
+<li>Index distribution to DHT now fully active</li>
+  <ul>
+  <li>All peers, principal, senior and junior peers distribute their index to other principal or senior peers. Juniors send their index to only one principal/senior peer, while principal/senior peers distribute to 3 redundant other peers.</li>
+  <li>The index distribution and the index receive flag on Index-Control must be set to enable global search on the own peer</li>
+  <li>For a global search, only relevant peers according to DHT rules are selected</li>
+  </ul>
 <li>New YaCyNews feature</li>
   <ul>
   <li>A new menu 'News' shows the news processing queues for incoming and outgoing news. However, news shall not be monitored here but they influence the presentation of other information throughout the system:</li>
@@ -85,22 +90,12 @@ globalheader();
   <li>When a Wiki entry is changed, a Message is generated.</li>
   <li>Within the Network menu, Alerts for Profile Updates, Wiki Updates and Cralws in Progress may appear.</li>
   </ul>
-<li>Index distribution to DHT now fully active</li>
-  <ul>
-  <li>All peers, principal, senior and junior peers distribute their index to other principal or senior peers. Juniors send their index to only one principal/senior peer, while principal/senior peers distribute to 3 redundant other peers.</li>
-  <li>The index distribution and the index receive flag on Index-Control must be set to enable global search on the own peer</li>
-  </ul>
-<li>Added Wiki to main menue. The Wiki-System now supports embedded images.</li>
-</ul>
-
-
-<br><p>v0.391_20050726_434 (bugfix release)
-<ul>
-<li>Fixed name-entry bug on Settings-page</li>
-<li>Fixed division by zero on IndexCreate-page</li>
-<li>Forcing delays of at least 100 milliseconds on Performance-page to prevent DoS behavior</li>
-<li>Fixed release number display</li>
+<li>The YaCy wiki has enhanced and was moved out from the 'Lab' to the main menu. The Wiki-System now supports embedded images and can show a preview.</li>
+<li>New logging policy: logs are now exclusively written to the rotating logs in <app-home>/log/</li>
+<li>Search was enhanced using the intermission feature (all other processes are paused while search is in progress)</li>
+<li>Enhancements to Translation/Localization</li>
 <li>Proxy-Caution-Delay (forced idle time of the crawler after a proxy access) is now configurable in the Performance menue</li>
+<li>Many bugfixes for time-out problems, database crashes, DHT management, version numbers</li>
 </ul>
 
 <br><p>v0.39_20050722_424
