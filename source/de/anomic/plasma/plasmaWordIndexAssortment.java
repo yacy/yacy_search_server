@@ -113,15 +113,16 @@ public final class plasmaWordIndexAssortment {
                 if (log != null) log.logSystem("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
                 return;
             } catch (IOException e){
-                if (log != null) log.logError("unable to open assortment database, creating new: " + e.getMessage(), e);
+                serverLog.logError("PLASMA", "unable to open assortment database, creating new: " + e.getMessage(), e);
             }
+            assortmentFile.delete(); // make space for new one
         }
         // create new assortment tree file
         try {
             assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
             if (log != null) log.logSystem("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
         } catch (IOException e){
-            if (log != null) log.logError("unable to create assortment database: " + e.getMessage(), e);
+            serverLog.logError("PLASMA", "unable to create assortment database: " + e.getMessage(), e);
         }
     }
 

@@ -127,7 +127,7 @@ public class transferRWI {
             yacySeed otherPeer = yacyCore.seedDB.get(iam);
             String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
             if (wordhashes.length == 0)
-                switchboard.getLog().logInfo("Received 0 Words from " + otherPeerName + ", requested " + unknownURL.size() + " URLs");
+                switchboard.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", requested " + unknownURL.size() + " URLs");
             else {
                 double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[wordhashes.length - 1])) / 2.0;
                 switchboard.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[wordhashes.length - 1] + "]/" + avdist + " from " + otherPeerName + ", requested " + unknownURL.size() + " URLs");
