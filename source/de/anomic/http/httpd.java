@@ -613,7 +613,14 @@ public final class httpd implements serverHandler {
                     if (this.prop.containsKey("PATH") && this.prop.getProperty("PATH").startsWith("/soap")) {
                         if (soapHandler == null) {
                             try {
-                                soapHandler  = (httpdHandler) Class.forName("de.anomic.soap.httpdSoapHandler").newInstance();
+                                // creating the soap handler class by name
+                                Class soapHandlerClass = Class.forName("de.anomic.soap.httpdSoapHandler");
+                                
+                                // Look for the proper constructor  
+                                Constructor soapHandlerConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
+                                
+                                // creating the new object
+                                soapHandler = (httpdHandler)soapHandlerConstructor.newInstance( new Object[] { this.switchboard } );   
                             } catch (Exception e) {
                                 sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
                                 return serverCore.TERMINATE_CONNECTION;
