@@ -14,7 +14,7 @@
 #English=German
 <!-- lang -->default\(english\)==Deutsch
 <!-- author -->==Roland Ramthun, Oliver Wunder
-<!-- maintainer -->==Roland Ramthun <admin@yacy-forum.de>
+<!-- maintainer -->==<admin@yacy-forum.de>
 
 #-----------------------------------------------------------
 #File: Blacklist_p.html
@@ -490,7 +490,7 @@ Other peers==Andere Peers
 other peers online.==andere Peers online.
 not online==nicht online
 Seed server==Seed Server
-Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html">Settings page</a>.==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten f&uuml;r den FTP-Account k&ouml;nnen Sie in den <a href="Settings_p.html">Einstellungen</a> konfigurieren.
+Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html#seed">Settings page</a>.==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten f&uuml;r den FTP-Account k&ouml;nnen Sie in den <a href="Settings_p.html#seed">Einstellungen</a> konfigurieren.
 Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
 Last upload:==Letzter Upload:
 Auto-popup on start-up==Popup bei YaCy-Start
