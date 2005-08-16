@@ -50,6 +50,7 @@ import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.plasma.plasmaSearch;
 import de.anomic.plasma.plasmaSnippetCache;
+import de.anomic.server.logging.serverLog;
 
 public class yacySearch extends Thread {
 
@@ -114,13 +115,17 @@ public class yacySearch extends Thread {
         Iterator i = wordhashes.iterator();
         int c;
         String wordhash;
+        double distance;
         while (i.hasNext()) {
             wordhash = (String) i.next();
             dhtEnum = yacyCore.dhtAgent.getDHTSeeds(true, wordhash);
             c = seedcount;
             while ((dhtEnum.hasMoreElements()) && (c > 0)) {
                 seed = (yacySeed) dhtEnum.nextElement();
-                //System.out.println("Selected peer " + seed.hash + "/" + seed.getName() + " for wordhash " + wordhash + ", score " + c);
+                if (seed == null) continue;
+                distance = yacyDHTAction.dhtDistance(seed.hash, wordhash);
+                if (distance > 0.9) continue; // catch bug in peer selection
+                serverLog.logDebug("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/" + distance + " for wordhash " + wordhash + ", score " + c);
                 ranking.addScore(seed.hash, c--);
                 seeds.put(seed.hash, seed);
             }
@@ -133,8 +138,9 @@ public class yacySearch extends Thread {
         if (c > yacyCore.seedDB.sizeConnected()) c = yacyCore.seedDB.sizeConnected();
         while ((dhtEnum.hasMoreElements()) && (c > 0)) {
             seed = (yacySeed) dhtEnum.nextElement();
-            score = (int) Math.round(Math.random() * c / 2);
-            //System.out.println("Selected peer " + seed.hash + "/" + seed.getName() + " for maxRWI=" + seed.getMap().get("ICount") + ", score " + score);
+            if (seed == null) continue;
+            score = (int) Math.round(Math.random() * ((c / 3) + 3));
+            serverLog.logDebug("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.getMap().get("ICount") + ", score " + score);
             ranking.addScore(seed.hash, score);
             seeds.put(seed.hash, seed);
             c--;
@@ -148,6 +154,7 @@ public class yacySearch extends Thread {
         while ((e.hasNext()) && (c < result.length)) {
             seed = (yacySeed) seeds.get((String) e.next());
             seed.selectscore = c;
+            serverLog.logDebug("PLASMA", "selectPeers/_lineup_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
             result[c++] = seed;
         }
             

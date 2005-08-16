@@ -302,14 +302,16 @@ public final class plasmaSearch {
 
 	plasmaSearch.result acc = new result(searchhashes, stopwords, priority);
 	if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
-
+        if (searchResult.size() == 0) return acc; // case that we have nothing to do
+        
 	Enumeration e = searchResult.elements(true);
 	plasmaWordIndexEntry entry;
         long startCreateTime = System.currentTimeMillis();
 	try {
-	    while ((e.hasMoreElements()) &&
-		   ((acc.sizeFetched() < minEntries) || (System.currentTimeMillis() - startCreateTime < maxTime))) {
-		entry = (plasmaWordIndexEntry) e.nextElement();
+	    while (e.hasMoreElements()) {
+                if ((acc.sizeFetched() >= minEntries) &&
+                    (System.currentTimeMillis() - startCreateTime >= maxTime)) break;
+                entry = (plasmaWordIndexEntry) e.nextElement();
 		acc.addResult(entry);
 	    }
 	} catch (kelondroException ee) {
@@ -317,7 +319,7 @@ public final class plasmaSearch {
 	}
         long startSortTime = System.currentTimeMillis();
         acc.sortResults();
-        System.out.println("plasmaSearch.order: minEntries = " + minEntries + ", effectiveEntries = " + acc.sizeOrdered() + ", demanded Time = " + maxTime + ", effectiveTime = " + (System.currentTimeMillis() - startCreateTime) + ", createTime = " + (startSortTime - startCreateTime) + ", sortTime = " + (System.currentTimeMillis() - startSortTime));
+        serverLog.logDebug("PLASMA", "plasmaSearch.order: minEntries = " + minEntries + ", effectiveEntries = " + acc.sizeOrdered() + ", demanded Time = " + maxTime + ", effectiveTime = " + (System.currentTimeMillis() - startCreateTime) + ", createTime = " + (startSortTime - startCreateTime) + ", sortTime = " + (System.currentTimeMillis() - startSortTime));
 	return acc;
     }
     

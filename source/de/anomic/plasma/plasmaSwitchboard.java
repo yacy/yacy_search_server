@@ -1454,6 +1454,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             long timestamp = System.currentTimeMillis();
             plasmaWordIndexEntity idx = searchManager.searchHashes(hashes, duetime * 8 / 10); // a nameless temporary index, not sorted by special order but by hash
             long remainingTime = duetime - (System.currentTimeMillis() - timestamp);
+            if (remainingTime < 500) remainingTime = 500;
             plasmaSearch.result acc = searchManager.order(idx, hashes, stopwords, new char[]{plasmaSearch.O_QUALITY, plasmaSearch.O_AGE}, remainingTime, 10);
             
             // result is a List of urlEntry elements
