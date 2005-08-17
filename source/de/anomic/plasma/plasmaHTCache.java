@@ -417,7 +417,7 @@ public final class plasmaHTCache {
                 (ls.indexOf(".exe") >= 0) ||
                 (ls.indexOf(";jsessionid=") >= 0) ||
                 (ls.indexOf("sessionid/") >= 0) ||
-                (ls.indexOf("PHPSESSID=") >= 0));
+                (ls.indexOf("phpsessid=") >= 0));
     }
 
     public Entry newEntry(Date initDate, int depth, URL url, String name,
