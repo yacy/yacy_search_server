@@ -283,6 +283,8 @@ public final class plasmaCrawlWorker extends Thread {
             boolean useContentEncodingGzip
         ) throws IOException {
         if (url == null) return;
+        
+        // if the recrawling limit was exceeded we stop crawling now
         if (crawlingRetryCount < 0) return;
         
         Date requestDate = new Date(); // remember the time...
@@ -424,6 +426,7 @@ public final class plasmaCrawlWorker extends Thread {
 
                 
                 if (retryCrawling) {
+                    if (crawlingRetryCount > 1) crawlingRetryCount = 1;
                     load(url,
                          name,
                          referer,
@@ -436,7 +439,7 @@ public final class plasmaCrawlWorker extends Thread {
                          remoteProxyUse,
                          cacheManager,
                          log,
-                         0,
+                         --crawlingRetryCount,
                          false
                     );         
                 } else {
