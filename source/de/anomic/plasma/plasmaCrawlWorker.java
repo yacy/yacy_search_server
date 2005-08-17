@@ -369,12 +369,20 @@ public final class plasmaCrawlWorker extends Thread {
                         URL redirectionUrl = new URL(url, (String) res.responseHeader.get(httpHeader.LOCATION));
                         
                         // returning the used httpc
-                        httpc.returnInstance(remote);
+                        httpc.returnInstance(remote); 
                         remote = null;
                         
                         // restart crawling with new url
-                        log.logInfo("Redirection detected ('" + res.status + "') for URL " + url.toString() + 
+                        log.logInfo("CRAWLER Redirection detected ('" + res.status + "') for URL " + url.toString() + 
                                     "\nRedirecting request to: " + redirectionUrl);
+                        
+                        // if we are already doing a shutdown we don't need to retry crawling
+                        if (Thread.currentThread().isInterrupted()) {
+                            log.logError("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
+                            return;
+                        }                        
+                        
+                        // retry crawling with new url
                         load(redirectionUrl,
                              name,
                              referer,
@@ -425,8 +433,21 @@ public final class plasmaCrawlWorker extends Thread {
                 }
 
                 
-                if (retryCrawling) {
+                if (retryCrawling) {    
+                    // if we are already doing a shutdown we don't need to retry crawling
+                    if (Thread.currentThread().isInterrupted()) {
+                        log.logError("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
+                        return;
+                    }
+                    
+                    // returning the used httpc
+                    httpc.returnInstance(remote);
+                    remote = null;                    
+                    
+                    // setting the retry counter to 1 
                     if (crawlingRetryCount > 1) crawlingRetryCount = 1;
+                    
+                    // retry crawling
                     load(url,
                          name,
                          referer,
