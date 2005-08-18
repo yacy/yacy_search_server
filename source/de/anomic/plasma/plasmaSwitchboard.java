@@ -573,7 +573,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
 
     public boolean deQueue() {
-	// work off fresh entries from the proxy or from the crawler
+        // work off fresh entries from the proxy or from the crawler
         if (onlineCaution()) {
             log.logDebug("deQueue: online caution, omitting resource stack processing");
             return false;
@@ -587,19 +587,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // do one processing step
             log.logDebug("DEQUEUE: sbQueueSize=" + sbQueue.size() +
-            ", coreStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
-            ", limitStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) +
-            ", overhangStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) +
-            ", remoteStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE));
+                         ", coreStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
+                         ", limitStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) +
+                         ", overhangStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) +
+                         ", remoteStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE));
             try {
                 nextentry = sbQueue.pop();
+                if (nextentry == null) return false;
             } catch (IOException e) {
                 log.logError("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
                 return false;
             }
         }
-	processResourceStack(nextentry);
-	return true;
+        processResourceStack(nextentry);
+        return true;
     }
     
     public int cleanupJobSize() {
