@@ -246,7 +246,8 @@ public class plasmaWordIndexDistribution {
                 indexEntity = wordIndex.getEntity(nexthash, true);
                 if (indexEntity.size() == 0) {
                     indexEntity.deleteComplete();
-                } else if (indexEntity.size() <= count) {
+                } else if ((indexEntity.size() <= count)||        // if we havn't exceeded the limit
+                           (Math.abs(indexEntity.size() - count) <= 10)){  // or there are only at most 10 entries left
                     // take the whole entity
                     try {
                         // fist check if we know all urls
