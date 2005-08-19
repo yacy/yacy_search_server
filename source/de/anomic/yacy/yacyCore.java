@@ -705,7 +705,7 @@ public class yacyCore {
                 seedDB.mySeed.put("PeerType", prevStatus);
                 sb.setConfig("yacyStatus", prevStatus);
                 String errorMsg = "SaveSeedList: Seed upload failed (IO error): " + e.getMessage();
-                log.logInfo(errorMsg);
+                log.logInfo(errorMsg,e);
                 return errorMsg;
             }
         } finally {
