@@ -459,7 +459,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     if (httpVer.equals("HTTP/0.9") || httpVer.equals("HTTP/1.0")) {
                         conProp.setProperty(httpd.CONNECTION_PROP_PERSISTENT,"close");
                     } else {
-                        res.responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
                         chunkedOut = new httpChunkedOutputStream(respond);
                     }
                     res.responseHeader.remove(httpHeader.CONTENT_LENGTH);
@@ -518,13 +517,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             String[] resStatus = res.status.split(" ");
             
             // sending the respond header back to the client
+            if (chunkedOut != null) {
+                res.responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
+            }
+            
             httpd.sendRespondHeader(
                     conProp,
                     respond,
                     httpVer,
                     Integer.parseInt((resStatus.length > 0) ? resStatus[0]:"503"),
                     (resStatus.length > 1) ? resStatus[1] : null, 
-                            res.responseHeader);
+                    res.responseHeader);
             
             String storeError;
             if ((storeError = cacheEntry.shallStoreCacheForProxy()) == null) {
@@ -678,6 +681,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         
         // we respond on the request by using the cache, the cache is fresh        
         try {
+            // remove hop by hop headers
+            this.removeHopByHopHeaders(cachedResponseHeader);
+            
             // replace date field in old header by actual date, this is according to RFC
             cachedResponseHeader.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
             
@@ -770,7 +776,14 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         
         // special headers inserted by squid
         headers.remove(httpHeader.X_CACHE);
-        headers.remove(httpHeader.X_CACHE_LOOKUP);        
+        headers.remove(httpHeader.X_CACHE_LOOKUP);     
+        
+        // remove transfer encoding header
+        headers.remove(httpHeader.TRANSFER_ENCODING);
+        
+        //removing yacy status headers
+        headers.remove(httpHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT);
+        headers.remove(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
     }
         
     private void forceConnectionClose() {

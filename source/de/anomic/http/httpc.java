@@ -421,7 +421,7 @@ public final class httpc {
             // creating a socket address
             InetSocketAddress address = new InetSocketAddress(hostip, port);
 
-            // trying to establis a connection to the address
+            // trying to establish a connection to the address
             this.socket.connect(address,timeout);
             
             // registering the socket
