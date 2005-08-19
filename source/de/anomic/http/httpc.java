@@ -48,6 +48,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
@@ -413,25 +414,32 @@ public final class httpc {
                 if (hostip == null) throw new UnknownHostException(server);
             }
 
-            // opening the socket
-            socket = (ssl) ? SSLSocketFactory.getDefault().createSocket(hostip, port)
-                    : new Socket(hostip, port);
+            // creating a socket
+            this.socket = (ssl) ? SSLSocketFactory.getDefault().createSocket()
+                                : new Socket();
+            
+            // creating a socket address
+            InetSocketAddress address = new InetSocketAddress(hostip, port);
 
+            // trying to establis a connection to the address
+            this.socket.connect(address,timeout);
+            
             // registering the socket
-            this.socketOwner = this.registerOpenSocket(socket);
+            this.socketOwner = this.registerOpenSocket(this.socket);
 
             // setting socket timeout and keep alive behaviour
-            socket.setSoTimeout(timeout); // waiting time for write
-            //socket.setSoLinger(true, timeout); // waiting time for read
-            socket.setKeepAlive(true); //
+            this.socket.setSoTimeout(timeout); // waiting time for read
+            //socket.setSoLinger(true, timeout);
+            this.socket.setKeepAlive(true); //
 
             // getting input and output streams
-            clientInput  = new PushbackInputStream(socket.getInputStream());
-            clientOutput = socket.getOutputStream();
+            this.clientInput  = new PushbackInputStream(this.socket.getInputStream());
+            this.clientOutput = this.socket.getOutputStream();
+            
             // if we reached this point, we should have a connection
         } catch (UnknownHostException e) {
             if (this.socket != null) {
-                this.unregisterOpenSocket(this.socket,this.socketOwner);
+                httpc.unregisterOpenSocket(this.socket,this.socketOwner);
             }
             this.socket = null;
             this.socketOwner = null;
