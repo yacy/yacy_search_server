@@ -921,6 +921,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             try {
                 remote = (yAddress == null) ? newhttpc(host, port, timeout) : newhttpc(yAddress, timeout);                
                 res = remote.POST(remotePath, requestHeader, body);
+
+                // filtering out unwanted headers
+                this.removeHopByHopHeaders(res.responseHeader);                
                 
                 // if the content length is not set we need to use chunked content encoding
                 long contentLength = res.responseHeader.contentLength();
@@ -931,9 +934,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     chunked = new httpChunkedOutputStream(respond);
                 }
                 
-                // filtering out unwanted headers
-                this.removeHopByHopHeaders(res.responseHeader);
-                
+                // sending response headers
                 httpd.sendRespondHeader(conProp,respond,httpVer,Integer.parseInt(res.status.split(" ")[0]),res.responseHeader);
                 // respondHeader(respond, res.status, res.responseHeader);
                 res.writeContent((chunked != null) ? chunked : respond, null);
