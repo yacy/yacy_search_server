@@ -580,9 +580,15 @@ public class yacySeedDB {
     private boolean checkCache(Vector uv, URL seedURL) throws IOException {        
         // check if the result can be retrieved again
         Vector check  = httpc.wget(seedURL, 10000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
+        
+        if (check == null) {
+            serverLog.logDebug("YACY","SaveSeedList: Testing download failed ...");
+        }
+                
         if ((check == null) || (uv == null) || (uv.size() != check.size())) {
             return false;
         } else {
+            serverLog.logDebug("YACY","SaveSeedList: Comparing local and uploades seed-list ...");
             int i;
             for (i = 0; i < uv.size(); i++) {
                 if (!(((String) uv.elementAt(i)).equals((String) check.elementAt(i)))) return false;
