@@ -41,6 +41,9 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
+// Contains contributions from Alexander Schier [AS]
+// and Marc Nause [MN]
+
 package de.anomic.data;
 
 import java.io.BufferedReader;
@@ -108,6 +111,19 @@ public class wikiCode {
         // format lines
         if (result.startsWith(" ")) result = "<tt>" + result + "</tt>";
         if (result.startsWith("----")) result = "<hr>";
+	
+	// citings contributed by [MN]
+	if(result.startsWith(":")){
+		String head = "";
+		String tail = "";
+		while(result.startsWith(":")){
+			head = head + "<blockquote>";
+			tail = tail + "</blockquote>";
+			result = result.substring(1);
+		}	
+		result = head + result + tail +"\n";
+	}
+	// end contrib [MN]	
 
         // format headers
         if ((p0 = result.indexOf("====")) >= 0) {
@@ -148,6 +164,14 @@ public class wikiCode {
                                   result.substring(p1 + 2);
         }
 
+	//* definition lists contributed by [MN] (primitive prototype, needs work)
+	if(result.startsWith(";")){
+		if((p0 = result.indexOf(":")) > 0){
+			result = "<dl>\n<dt>" + result.substring(1,p0) + "</dt>\n<dd>" + result.substring(p0+1) +"</dd><dl>\n";
+		}	
+	}	
+	// end contrib [MN]
+	
 	//* unorderd Lists contributed by [AS]
 	//** Sublist
 	if(result.startsWith(ListLevel + "*")){ //more stars
