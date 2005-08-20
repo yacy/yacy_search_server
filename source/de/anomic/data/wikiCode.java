@@ -69,6 +69,7 @@ import de.anomic.yacy.yacyCore;
 public class wikiCode {
     private String numListLevel="";
     private String ListLevel="";
+    private String defListLevel="";
     private plasmaSwitchboard sb;
     public wikiCode(plasmaSwitchboard switchboard){
         sb=switchboard;
@@ -99,6 +100,7 @@ public class wikiCode {
     public String transformLine(String result, plasmaSwitchboard switchboard) {
 	// transform page
 	int p0, p1;
+	boolean defList = false;    //needed for definition lists
         
 	// avoide html inside
 	//p0 = 0; while ((p0 = result.indexOf("&", p0+1)) >= 0) result = result.substring(0, p0) + "&amp;" + result.substring(p0 + 1);
@@ -121,7 +123,7 @@ public class wikiCode {
 			tail = tail + "</blockquote>";
 			result = result.substring(1);
 		}	
-		result = head + result + tail +"\n";
+		result = head + result + tail;
 	}
 	// end contrib [MN]	
 
@@ -163,14 +165,7 @@ public class wikiCode {
                                   result.substring(p0 + 2, p1) + "</i>" +
                                   result.substring(p1 + 2);
         }
-
-	//* definition lists contributed by [MN] (primitive prototype, needs work)
-	if(result.startsWith(";")){
-		if((p0 = result.indexOf(":")) > 0){
-			result = "<dl>\n<dt>" + result.substring(1,p0) + "</dt>\n<dd>" + result.substring(p0+1) +"</dd><dl>\n";
-		}	
-	}	
-	// end contrib [MN]
+	
 	
 	//* unorderd Lists contributed by [AS]
 	//** Sublist
@@ -249,6 +244,59 @@ public class wikiCode {
 		}
 	}
 	// end contrib [AS]
+	
+	//* definition Lists contributed by [MN] based on unordered list code by [AS]
+	if(result.startsWith(defListLevel + ";")){ //more semicolons
+		String dt = ""; 
+		String dd = "";
+		p0 = result.indexOf(defListLevel);
+		p1 = result.length();
+		String resultCopy = result.substring(defListLevel.length() + 1, p1);
+		if((p0 = resultCopy.indexOf(":")) > 0){
+			dt = resultCopy.substring(0,p0);
+			dd = resultCopy.substring(p0+1);
+			result = "<dl>" + "<dt>" + dt + "</dt>" + "<dd>" + dd;
+			defList = true;
+		}
+		defListLevel += ";";
+	}else if(defListLevel.length() > 0 && result.startsWith(defListLevel)){ //equal number of semicolons
+		String dt = ""; 
+		String dd = "";
+		p0 = result.indexOf(defListLevel);
+		p1 = result.length();
+		String resultCopy = result.substring(defListLevel.length(), p1);
+		if((p0 = resultCopy.indexOf(":")) > 0){
+			dt = resultCopy.substring(0,p0);
+			dd = resultCopy.substring(p0+1);
+			result = "<dt>" + dt + "</dt>" + "<dd>" + dd;
+			defList = true;
+		}
+	}else if(defListLevel.length() > 0){ //less semicolons
+		String dt = ""; 
+		String dd = "";
+		int i = defListLevel.length();
+		String tmp = "";
+		while(! result.startsWith(defListLevel.substring(0,i)) ){
+			tmp += "</dd></dl>";
+			i--;
+		}
+		defListLevel = defListLevel.substring(0,i);
+		p0 = defListLevel.length();
+		p1 = result.length();
+		if(defListLevel.length() > 0){
+			String resultCopy = result.substring(p0, p1);
+			if((p0 = resultCopy.indexOf(":")) > 0){
+				dt = resultCopy.substring(0,p0);
+				dd = resultCopy.substring(p0+1);
+				result = tmp + "<dt>" + dt + "</dt>" + "<dd>" + dd;
+				defList = true;
+			}
+		
+		}else{
+			result = tmp + result.substring(p0, p1);
+		}
+	}
+	// end contrib [MN]	
 
 
         // create  links
@@ -325,8 +373,8 @@ public class wikiCode {
 		    result.substring(p1 + 1);
 	    }
 	}
-        
-        if (result.endsWith("</li>")) return result; else return result + "<br>";
+	
+	if ((result.endsWith("</li>"))||(defList)) return result; else return result + "<br>";
     }
     /*
       what we need:
