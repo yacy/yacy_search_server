@@ -181,7 +181,7 @@ Regex follow a special priority \(descending\)\: concatenation, unary operators 
 Example:==Beispiel:
 This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Dies erf&uuml;llt heise.de/ mit einem String davor, z.B. "http://www.". Es folgt ein beliebiger String, dann ein Slash und eine Zahl. Der Punkt in "heise.de" ist nicht escaped, weil der Punkt f&uuml;r ein beliebiges Zeichen steht, folglich auch f&uuml;r "." selbst.
 A possible URL which would match this regexp is\:==Eine URL, die den regul&auml;ren Ausdruck erf&uuml;llen w&uuml;rde, ist:
-An URL which would not match is:==Eine URL die diese Regex nicht erf&uuml;llen w&uuml;rde ist: 
+An URL which would not match is:==Eine URL die diese Regex nicht erf&uuml;llen w&uuml;rde ist:
 There is ".html" at the end, which is not included with the Regular Expression.==Hier ist ".html" am Ende angeh&auml;ngt, das nicht in der Regex enthalten ist.
 
 #-----------------------------------------------------------
@@ -196,8 +196,10 @@ Max. number of results:==Max. Anzahl Ergebnisse:
 order by:==sortieren nach:
 # ">" to avoid replacing value=
 
->>Quality-Date==>Qualit&auml;t-Datum
->>Date-Quality==>Datum-Qualit&auml;t
+"Quality-Date"==Qualit&auml;t-Datum
+"Date-Quality"==Datum-Qualit&auml;t
+Quality-Date==Qualit&auml;t-Datum
+Date-Quality==Datum-Qualit&auml;t
 
 Resource:==Quelle:
 global==global
@@ -207,7 +209,7 @@ Max. search time==Max. Suchdauer
 URL mask:==URL-Filter:
 restrict on==beschr&auml;nken auf
 show all==Alles anzeigen
-The following words are stop-words and had been excluded from the search:==Folgende Worte sind Stopwords und wurden von der Suche ausgeschlossen:
+The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
 No Results. (length of search words must be at least 3 characters)==Keine Ergebnisse. (Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen)
 No Results. If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Keine Ergebnisse. Wenn Sie das unbefriedigend finden, sollten Sie &uuml;berlegen, den globalen Index durch das Betreiben eines eigenen Proxies/Peers zu unterst&uuml;tzen.
@@ -234,8 +236,9 @@ from 'late' peers.==von sp&auml;t antwortenden Peers.
 <b>Topwords</b> \(to refine search\):==<b>Topw&ouml;rter</b> (um Suche zu verfeinern):
 Please search for several words simultaneously!==Bitte suchen Sie gleichzeitig nach &auml;hnlichen W&ouml;rtern.
 Click on one of these constraints:==Klicken Sie bitte auf einen dieser Vorschl&auml;ge:
-The global search resulted in==Die globale Suche hat
-link contributions from other YaCy peers==Links, beigesteuert von anderen YaCy Peers, gefunden.
+results from==Resultate aus
+ordered links of a total number of==gefunden Links von insgesamt
+known.==bekannten Links.
 You can enrich the search results by using the 'global' option: This will search also other YaCy peers==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen. So werden auch andere YaCy Peers zum suchen benutzt.
 You cannot get global search results because you are not connected to another YaCy peer.==Sie k&ouml;nnen keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
 To connect you must first use the proxy.==Um sich neu zu verbinden, m&uuml;ssen Sie erst den Proxy benutzen.
@@ -249,6 +252,35 @@ You can enrich the search results by using the 'global' option; you must also sw
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu erschaffen.
 Architecture and implementation==Architektur und Implementierung
+
+#-------------------------------------------------------
+#File: IndexControl_p.html
+
+Index Control==Index Kontrolle
+Index Administration==Index Administration
+The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Der lokale Index besteht im Moment aus #[wcount]# W&ouml;rtern und #[ucount]# URL-Links.
+Word==Wort:
+value="Show URL Entries for Wort:">==value="Zeige URL Eintr&auml;ge f&uuml;r Wort:">
+Word-Hash:==Wort-Hash:
+"Generate List"=="Erstelle Liste"
+value="Show URL Entries for Wort:-Hash">==value="Zeige Eintr&auml;ge f&uuml;r Wort-Hash">
+"Transfer to other peer"=="Sende an anderen Peer"
+URL==URL
+"Show Details for URL"=="Zeige Details f&uuml;r URL"
+URL-Hash:==URL-Hash
+"Show Details for URL-Hash"=="Zeige Details f&uuml;r URL-Hash"
+DHT Transmission control:==DHT-Verteilungs Kontrolle:
+The transmission is necessary for the functionality of global search on other peers.==Die Verteilung ist notwendig, damit auf anderen Peers die globale Suche funktioniert.
+If you switch off distribution or receipt of RWIs you will be banned from global search.==Wenn Sie die Verteilung oder den Erhalt von RWIs nicht erlauben, werden Sie von der globalen Suche ausgeschlossen.
+Index&nbsp;Distribution:==Index Verteilung:
+This enables automated, DHT-ruled Index Transmission to other peers.==Dies erlaubt die automatische DHT-basierte Index Verteilung zu anderen Peers.
+If checked, DHT-Transmission is enabled even during crawling.==Wenn aktiviert, ist die DHT-Verteilung w&auml;hrend des Crawlens erlaubt.
+Index Receive:==Index Empfang:
+Accept remote Index Transmissions. This works only if you are a senior peer.==Akzeptiere remote Index Empfang. Dies funktioniert nur, wenn Sie Senior-Peer sind.
+The DHT-rules do not work without this function.==Die DHT-Regeln funktionieren nicht ohne Aktivierung dieser Funktion.
+If checked, your peer silently ignores transmitted URLs that match your blacklist==Wenn aktiviert, ignoriert Ihr Peer stillschweigend eingehende URLs, die auf Ihrer Blacklist stehen.
+"set"=="Speichern"
+Changes will take effect immediately==&Auml;nderungen sind sofort aktiv
 
 #-------------------------------------------------------
 #File: IndexCreate_p.html
@@ -356,9 +388,9 @@ Branch==Typ
 Peers==Peers
 All Links==Alle Links
 All Words==Alle W&ouml;rter
-Active \(connected Senior and Principal\)==Aktive (verbundene Senior und Principal)
-Passive \(disconnected Senior and Principal\)==Passive (nicht verbundene Senior und Principal)
-Potential \(Junior\)==Potenzielle (Junior)
+Active \(connected Senior and Principal\)==Aktiv (verbundene Senior und Principal)
+Passive \(disconnected Senior and Principal\)==Passiv (nicht verbundene Senior und Principal)
+Potential \(Junior\)==Potenziell (Junior)
 Network Total==Netzwerk insgesamt
 YaCy Cluster Indexing Speed:==YaCy Cluster Index Geschwindigkeit:
 Pages Per Minute \(Accumulated PPM over Active Peers\).==Seiten pro Minute (PPM von Aktiven Peers)
@@ -424,6 +456,37 @@ Distributed==Verteilt
 Attributes==Attribute
 "\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Gew&auml;hlte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::gew&auml;hlte&nbsp;News&nbsp;L&ouml;schen::Breche&nbsp;Verbreitung&nbsp;gew&auml;hlter&nbsp;News&nbsp;ab::gew&auml;hlte&nbsp;News&nbsp;L&ouml;schen#(/page)#
 "\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Markiere&nbsp;alle&nbsp;News&nbsp;als&nbsp;gelesen::L&ouml;sche&nbsp;alle&nbsp;News::Breche&nbsp;Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;ab::L&ouml;sche&nbsp;alle&nbsp;News#(/page)#
+
+#-------------------------------------------------------
+#File: ProxyIndexingMonitor_p.html
+
+Index Monitor for Proxy Indexing==Index Profil f&uuml;r den Proxy Index
+This is the control page for web pages that your peer has indexed during the current application run-time==Dies ist die Kontrollseite f&uuml;r Internetseiten, die Ihr Peer w&auml;hrend der aktuellen Sitzung
+as result of proxy fetch/prefetch.==durch Besuchen einer Seite indiziert.
+No personal or protected page is indexed==Pers&ouml;nliche Seiten und gesch&uuml;tze Seiten werden nicht indiziert
+those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==solche Seiten werden entweder durch Merkmale im HTTP Header (Kopf der Seite) (z.B.: Cookies oder HTTP Authorisierung)
+or by POST-Parameters \(either in URL or as HTTP protocol\)==oder durch POST-Parameter (z.B. in einer URL oder im HTTP Protokoll) erkannt
+and automatically excluded from indexing.==und automatisch von der Indizierung ausgeschlossen.
+Proxy pre-fetch setting:==Proxy Indizier Einstellung:
+this is an automated html page loading procedure that takes actual proxy-requested==Dies ist eine automatische Web Seiten Lade Funktion, die aktuell besuchte
+URLs as crawling start points for crawling.==URLs als Startpunkt zum Indizieren benutzt.
+Prefetch Depth:==Indizier Tiefe:
+A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==Bei einer Tiefe von 0 wird nur die besuchte Seite indiziert; eine Tiefe von 1 bedeutet, dass alle Seiten
+embedded URLs, but since embedded image links are loaded by the browser==die auf dieser Seite verlinkt sind, geladen und indexiert werden; Da Links auf Bilder sowieso schon vom Browser geladen werden,
+this means that only embedded href-anchors are prefetched additionally.==trifft dies nur auf eingebettet HREF-Anker zu.
+Store to Cache:==Speicher im Cache:
+It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Es wird empfohlen diese Option immer zu aktivieren. Einzige Ausnahme: Sie haben einen zweiten Proxy als Cache laufen und Yacy soll im "Proxy-zu-Proxy"-Modus laufen.
+"set proxy profile"=="Speicher Proxy Profil"
+The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die datei DATA/PLASMADB/crawlProfiles0.db ist entweder nicht vorhanden oder defekt.
+Please delete that file and restart.==Bitte löschen Sie diese Datei und starten Sie neu.
+Proxy pre-fetch is now set to depth==Proxy Indizierung erfolgt nun bis zu einer Tiefe von
+Proxy caching is now set \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cache ist nun #(caching)#aus::an#(/caching)#.
+An error has occurred:==Es trat ein Fehler auf:
+You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransichten von frisch indizierten Seiten
+on the==auf der
+<a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a><a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a>
+Page.==Seite ansehen.
+
 
 #-------------------------------------------------------
 #File: Skins_p.html
@@ -519,8 +582,8 @@ Processors:==Prozessoren:
 #File: Steering.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Settings Acknowledge==YaCy: Einstellungen best&auml;tigen
-Steering Receipt:==Steuerungsanleitung:
+Steering==Steureung
+Steering Receipt:==Steuerung:
 No information has been submitted==Es wurden keine Informationen &uuml;bermittelt
 Nothing changed==Nichts wurde ver&auml;ndert
 Your system is not protected by a password==Ihr System wird nicht von einem Passwort gesch&uuml;tzt
