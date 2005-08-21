@@ -320,40 +320,48 @@ public class plasmaCrawlNURL extends plasmaURL {
         private bitfield flags;
         private int      handle;
         
-	public Entry(String initiator, URL url, String referrer, String name, Date loaddate, String profileHandle,
-                     int depth, int anchors, int forkfactor) {
-	    // create new entry and store it into database
-	    this.hash          = urlHash(url);
+        public Entry(String initiator, 
+                     URL url, 
+                     String referrer, 
+                     String name, 
+                     Date loaddate, 
+                     String profileHandle,
+                     int depth, 
+                     int anchors, 
+                     int forkfactor
+        ) {
+            // create new entry and store it into database
+            this.hash          = urlHash(url);
             this.initiator     = initiator;
-	    this.url           = url;
+            this.url           = url;
             this.referrer      = (referrer == null) ? "------------" : referrer;
-            this.name          = name;
-            this.loaddate      = loaddate;
+            this.name          = (name == null) ? "" : name;
+            this.loaddate      = (loaddate == null) ? new Date() : loaddate;
             this.profileHandle = profileHandle;
             this.depth         = depth;
             this.anchors       = anchors;
             this.forkfactor    = forkfactor;
             this.flags         = new bitfield(urlFlagLength);
             this.handle        = 0;
-	    store();
+            store();
 	}
 
-	public Entry(String hash) {
-	    // generates an plasmaNURLEntry using the url hash
-	    // to speed up the access, the url-hashes are buffered
-	    // in the hash cache.
-	    // we have two options to find the url:
-	    // - look into the hash cache
-	    // - look into the filed properties
-	    // if the url cannot be found, this returns null
-	    this.hash = hash;
-	    try {
-		byte[][] entry = urlHashCache.get(hash.getBytes());
-		if (entry != null) {
+        public Entry(String hash) {
+            // generates an plasmaNURLEntry using the url hash
+            // to speed up the access, the url-hashes are buffered
+            // in the hash cache.
+            // we have two options to find the url:
+            // - look into the hash cache
+            // - look into the filed properties
+            // if the url cannot be found, this returns null
+            this.hash = hash;
+            try {
+                byte[][] entry = urlHashCache.get(hash.getBytes());
+                if (entry != null) {
                     this.initiator     = new String(entry[1]);
-		    this.url           = new URL(new String(entry[2]).trim());
+                    this.url           = new URL(new String(entry[2]).trim());
                     this.referrer      = new String(entry[3]);
-                    this.name          = new String(entry[4]).trim();
+                    this.name          = (entry[4] == null) ? "" : new String(entry[4]).trim();
                     this.loaddate      = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[5])));
                     this.profileHandle = new String(entry[6]).trim();
                     this.depth         = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[7]));
@@ -361,14 +369,14 @@ public class plasmaCrawlNURL extends plasmaURL {
                     this.forkfactor    = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[9]));
                     this.flags         = new bitfield(entry[10]);
                     this.handle        = Integer.parseInt(new String(entry[11]));
-		    return;
-		} else {
+                    return;
+                } else {
                     // show that we found nothing
                     this.url = null;
                 }
-	    } catch (Exception e) {
-	    }
-	}
+            } catch (Exception e) {
+            }
+        }
 
 	private void store() {
 	    // stores the values from the object variables into the database
