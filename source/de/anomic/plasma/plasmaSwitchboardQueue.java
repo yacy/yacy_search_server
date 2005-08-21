@@ -167,10 +167,10 @@ public class plasmaSwitchboardQueue {
             } catch (MalformedURLException e) {
                 this.url = null;
             }
-            this.referrerHash = new String(row[1]);
+            this.referrerHash = (row[1] == null) ? null : new String(row[1]);
             this.ifModifiedSince = (ims == 0) ? null : new Date(ims);
             this.flags = ((flags & 1) == 1) ? (byte) 1 : (byte) 0;
-            this.initiator = new String(row[4]);
+            this.initiator = (row[4] == null) ? null : new String(row[4]);
             this.depth = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(row[5]));
             this.profileHandle = new String(row[6]);
             this.anchorName = (row[7] == null) ? null : new String(row[7]);
