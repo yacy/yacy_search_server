@@ -248,8 +248,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 		if( authorization != null && adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6))) ){
             requestHeader.put("IS_ADMIN", "true");
 		}else{
-			//WARNING: This Line ist very Important, do not remove!
-			//It resetzt the virtuel header to false, so nobody can provide
+			//WARNING: This line ist very important, do not remove!
+			//It resets the virtual header to false, so nobody can provide
 			//a real header IS_ADMIN: true to gain adminrights
             requestHeader.put("IS_ADMIN", "false");
         }

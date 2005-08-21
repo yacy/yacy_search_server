@@ -1,0 +1,38 @@
+YaCy CHANGELOG
+--------------
+
+2005.08.21 | YaCy 0.41 (vorne wird das Release-Datum von 0.41 eingesetzt)
+
+FEATURE: Server		| Now supports virtual header field IS_ADMIN, to show certain information only to peer-owner [Alexander]
+
+CHANGE: GUI			| Improved german translation [Roland, Oliver Wunder]
+CHANGE: Wiki		| Better implementation of definition lists [Marc Nause]
+CHANGE: Wiki		| Implemented citings (blockquote) [Marc Nause]
+CHANGE: DHT			| If there are at most 10 entries left while doing an index transfer, these entries will also be appended to the index list [Martin]
+CHANGE:	Crawler		| Before the crawler retries to download an URL it checks if the server is already doing a shutdown [Martin]
+CHANGE: Crawler		| Using timeout also to establish a connection [Martin]
+
+BUGFIX: ??????		| Trying to solve "de.anomic.plasma.plasmaSwitchboard.deQueue': null" Bug [Martin]
+
+--------------
+
+Definitions:
+
+Feature: Something completely new.
+Change: Additions or changes to an existing part
+Bugfix: Fix for an misbehaviour
+
+Available Categories (to be continued?!):
+GUI
+Server (HTTP, Files)
+Proxy
+Crawler
+Parser 
+Indexer
+DHT
+IndexDB
+PeerDB
+Scripts
+Wiki
+Message
+YacyBar
