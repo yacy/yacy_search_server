@@ -62,6 +62,7 @@ import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
+import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaCrawlProfile;
@@ -123,8 +124,15 @@ public class IndexCreate_p {
                     
                     String crawlingMode = post.get("crawlingMode","url");
                     if (crawlingMode.equals("url")) {
-                        String crawlingStart = (String) post.get("crawlingURL");
+                        // getting the crawljob start url
+                        String crawlingStart = post.get("crawlingURL","");
+                        crawlingStart = crawlingStart.trim();
+                        
+                        // adding the prefix http:// if necessary
                         if (!(crawlingStart.startsWith("http"))) crawlingStart = "http://" + crawlingStart;
+
+                        // normalizing URL
+                        crawlingStart = plasmaParser.urlNormalform(crawlingStart);
                         
                         // check if url is proper
                         URL crawlingStartURL = null;
@@ -215,6 +223,13 @@ public class IndexCreate_p {
                                 while (interator.hasNext()) {
                                     Map.Entry e = (Map.Entry) interator.next();
                                     String nexturlstring = (String) e.getKey();
+                                    
+                                    if (nexturlstring == null) continue;
+                                    
+                                    nexturlstring = nexturlstring.trim();
+                                    
+                                    // normalizing URL
+                                    nexturlstring = plasmaParser.urlNormalform(nexturlstring);                                    
                                     
                                     // generating an url object
                                     URL nexturlURL = null;

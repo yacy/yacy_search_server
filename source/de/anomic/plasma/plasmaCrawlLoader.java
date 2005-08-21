@@ -55,6 +55,8 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 public final class plasmaCrawlLoader extends Thread {
 
+    static plasmaSwitchboard switchboard;
+    
     private final plasmaHTCache   cacheManager;
     private final int             socketTimeout;
     private final serverLog       log;   
@@ -66,7 +68,6 @@ public final class plasmaCrawlLoader extends Thread {
     private boolean stopped = false;
     
     public plasmaCrawlLoader(
-            plasmaSwitchboard sb,
             plasmaHTCache cacheManager, 
             serverLog log) {
         
@@ -75,7 +76,7 @@ public final class plasmaCrawlLoader extends Thread {
     	this.cacheManager    = cacheManager;
     	this.log             = log;
         
-    	this.socketTimeout   = Integer.parseInt(sb.getConfig("clientTimeout", "10000"));
+    	this.socketTimeout   = Integer.parseInt(switchboard.getConfig("clientTimeout", "10000"));
         
         // configuring the crawler messagequeue
         this.theQueue = new CrawlerMessageQueue();
@@ -86,12 +87,12 @@ public final class plasmaCrawlLoader extends Thread {
         
         // The maximum number of active connections that can be allocated from pool at the same time,
         // 0 for no limit
-        this.cralwerPoolConfig.maxActive = Integer.parseInt(sb.getConfig("crawlerMaxActiveThreads","10"));
+        this.cralwerPoolConfig.maxActive = Integer.parseInt(switchboard.getConfig("crawlerMaxActiveThreads","10"));
         
         // The maximum number of idle connections connections in the pool
         // 0 = no limit.        
-        this.cralwerPoolConfig.maxIdle = Integer.parseInt(sb.getConfig("crawlerMaxIdleThreads","7"));
-        this.cralwerPoolConfig.minIdle = Integer.parseInt(sb.getConfig("crawlerMinIdleThreads","5"));    
+        this.cralwerPoolConfig.maxIdle = Integer.parseInt(switchboard.getConfig("crawlerMaxIdleThreads","7"));
+        this.cralwerPoolConfig.minIdle = Integer.parseInt(switchboard.getConfig("crawlerMinIdleThreads","5"));    
         
         // block undefinitely 
         this.cralwerPoolConfig.maxWait = -1; 
@@ -106,9 +107,9 @@ public final class plasmaCrawlLoader extends Thread {
                 this.theThreadGroup,
                 cacheManager,
                 socketTimeout,
-                sb.getConfig("remoteProxyUse","false").equals("true"),
-                sb.getConfig("remoteProxyHost",""),
-                Integer.parseInt(sb.getConfig("remoteProxyPort","3128")),
+                switchboard.getConfig("remoteProxyUse","false").equals("true"),
+                switchboard.getConfig("remoteProxyHost",""),
+                Integer.parseInt(switchboard.getConfig("remoteProxyPort","3128")),
                 log);
         
         this.crawlwerPool = new CrawlerPool(theFactory,this.cralwerPoolConfig,this.theThreadGroup);        

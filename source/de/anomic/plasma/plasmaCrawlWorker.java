@@ -365,8 +365,15 @@ public final class plasmaCrawlWorker extends Thread {
             } else if (res.status.startsWith("30")) {
                 if (crawlingRetryCount < 0) {                    
                     if (res.responseHeader.containsKey(httpHeader.LOCATION)) {
-                        // generating the new url
-                        URL redirectionUrl = new URL(url, (String) res.responseHeader.get(httpHeader.LOCATION));
+                        // getting redirection URL
+                        String redirectionUrlString = (String) res.responseHeader.get(httpHeader.LOCATION);
+                        redirectionUrlString = redirectionUrlString.trim();
+                        
+                        // normalizing URL
+                        redirectionUrlString = plasmaParser.urlNormalform(redirectionUrlString);
+                        
+                        // generating the new URL object
+                        URL redirectionUrl = new URL(url, redirectionUrlString);
                         
                         // returning the used httpc
                         httpc.returnInstance(remote); 
@@ -381,6 +388,12 @@ public final class plasmaCrawlWorker extends Thread {
                             log.logError("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
                             return;
                         }                        
+                        
+                        // generating url hash 
+                        String urlhash = plasmaURL.urlHash(redirectionUrl);
+
+                        // removing url from loader queue
+                        plasmaCrawlLoader.switchboard.urlPool.noticeURL.remove(urlhash);                        
                         
                         // retry crawling with new url
                         load(redirectionUrl,

@@ -297,8 +297,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         catch (NumberFormatException e) { remoteport = 3128; }
         
         crawlSlots = Integer.parseInt(getConfig("crawlerMaxActiveThreads", "10"));
+        plasmaCrawlLoader.switchboard = this;
         this.cacheLoader = new plasmaCrawlLoader(
-                this,
                 this.cacheManager, 
                 this.log);
 
