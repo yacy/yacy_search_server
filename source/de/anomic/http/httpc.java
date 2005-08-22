@@ -75,6 +75,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCore.Session;
+import de.anomic.plasma.plasmaSwitchboard;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -401,7 +402,11 @@ public final class httpc {
         handle = System.currentTimeMillis();
         //serverLog.logDebug("HTTPC", handle + " initialized");
         this.remoteProxyUse = false;
+		plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         this.timeout = timeout;
+		if(sb != null && sb.getConfig("yacyDebugMode", "false").equals("true")){
+			this.timeout=60000;
+		}
         this.savedRemoteHost = server;
 
         try {
