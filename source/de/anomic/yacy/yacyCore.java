@@ -470,7 +470,7 @@ public class yacyCore {
             String  DI604pw  = switchboard.getConfig("DI604pw", "");
             String  ip       = switchboard.getConfig("staticIP", "");
             if(ip.equals("")){
-                ip = natLib.retrieveIP(DI604use, DI604pw, (switchboard.getConfig("yacyDebugMode", "false")=="false" ? false : true));
+                ip = natLib.retrieveIP(DI604use, DI604pw);
             }
             //yacyCore.log.logDebug("DEBUG: new IP=" + ip);
             seedDB.mySeed.put("IP", ip);

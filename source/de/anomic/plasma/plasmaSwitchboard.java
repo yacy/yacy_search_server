@@ -189,6 +189,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     private Object  crawlingPausedSync = new Object();
     private boolean crawlingIsPaused = false;  
+	private static plasmaSwitchboard sb;
     
     public plasmaSwitchboard(String rootPath, String initPath, String configPath) throws IOException {
 	super(rootPath, initPath, configPath);
@@ -404,8 +405,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
+		sb=this;
         log.logSystem("Finished Switchboard Initialization");
     }
+
+	public static plasmaSwitchboard getSwitchboard(){
+		return sb;
+	}
     
     public boolean onlineCaution() {
         try {

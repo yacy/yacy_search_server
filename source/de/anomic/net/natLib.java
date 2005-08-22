@@ -48,6 +48,7 @@ import de.anomic.http.httpc;
 import de.anomic.server.serverCore;
 import de.anomic.tools.disorderHeap;
 import de.anomic.tools.nxTools;
+import de.anomic.plasma.plasmaSwitchboard;
 
 public class natLib {
 
@@ -122,9 +123,14 @@ public class natLib {
     }
 
     public static boolean isProper(String ip) {
+	plasmaSwitchboard sb=plasmaSwitchboard.getSwitchboard();
+	String yacyDebugMode = sb.getConfig("yacyDebugMode", "false");
+	if(yacyDebugMode.equals("true")){
+		return true;
+	}
 	if (ip == null) return false;
 	if (ip.indexOf(":") >= 0) return false; // ipv6...
-	return ((isNotLocal(ip)) && (isIP(ip)));
+		return ( isNotLocal(ip)) && (isIP(ip) );
     }
 
     private static int retrieveOptions() {
@@ -139,12 +145,12 @@ public class natLib {
 	return null;
     }
 
-    public static String retrieveIP(boolean DI604, String password, boolean yacyDebugMode) {
+    public static String retrieveIP(boolean DI604, String password) {
 	String ip;
 	if (DI604) {
 	    // first try the simple way...
 	    ip = getDI604(password);
-	    if (isProper(ip)||yacyDebugMode) {
+	    if (isProper(ip)) {
 		//System.out.print("{DI604}");
 		return ip;
 	    }
@@ -154,7 +160,7 @@ public class natLib {
 	InetAddress ia = serverCore.publicIP();
 	if (ia != null) {
 	    ip = ia.getHostAddress();
-	    if (isProper(ip)||yacyDebugMode) return ip;
+	    if (isProper(ip)) return ip;
 	}
 
 	// now go the uneasy way and ask some web responder
