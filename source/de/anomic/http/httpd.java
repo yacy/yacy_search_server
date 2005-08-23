@@ -69,6 +69,9 @@ import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyDHTAction;
+import de.anomic.yacy.yacySeed;
 
 /**
  * Instances of this class can be passed as argument to the serverCore.
@@ -307,7 +310,13 @@ public final class httpd implements serverHandler {
             
             if (dstPort.intValue() == 80) {
                 if (dstHost.endsWith(".yacy")) {
-                    this.prop.setProperty(httpd.CONNECTION_PROP_HOST,dstHostSocket);
+                    // if this peer is accessed via its yacy domain name we need to set the
+                    // host property to virtualHost to redirect the request to the yacy server
+                    if (dstHost.endsWith(yacyCore.seedDB.mySeed.getName()+".yacy")) {
+                        this.prop.setProperty(httpd.CONNECTION_PROP_HOST,virtualHost);
+                    } else {
+                        this.prop.setProperty(httpd.CONNECTION_PROP_HOST,dstHostSocket);
+                    }
                 } else {
                     InetAddress dstHostAddress = InetAddress.getByName(dstHost);
                     if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
@@ -1113,7 +1122,8 @@ public final class httpd implements serverHandler {
             serverObjects tp = new serverObjects();
             
 //            tp.put("host", serverCore.publicIP().getHostAddress());
-//            tp.put("port", switchboard.getConfig("port", "8080"));            
+//            tp.put("port", switchboard.getConfig("port", "8080"));        
+            tp.put("peerName", yacyCore.seedDB.mySeed.getName());
             tp.put("host", serverCore.publicIP().getHostAddress());
             tp.put("port", (serverCore.portForwardingEnabled && (serverCore.portForwarding != null)) 
                            ? Integer.toString(serverCore.portForwarding.getPort()) 
