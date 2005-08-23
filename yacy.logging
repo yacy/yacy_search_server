@@ -39,5 +39,7 @@ de.anomic.server.logging.ConsoleOutErrHandler.level = ALL
 de.anomic.server.logging.ConsoleOutErrHandler.levelStdOut = ALL
 de.anomic.server.logging.ConsoleOutErrHandler.levelSplit = WARNING
 de.anomic.server.logging.ConsoleOutErrHandler.levelStdErr = ALL
+de.anomic.server.logging.ConsoleOutErrHandler.ignoreChr7 = FALSE
 de.anomic.server.logging.ConsoleOutErrHandler.formatter=de.anomic.server.logging.serverSimpleLogFormatter
+de.anomic.server.logging.ConsoleOutErrHandler.ignoreCtrlChr=true
 

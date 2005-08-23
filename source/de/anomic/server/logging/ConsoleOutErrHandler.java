@@ -9,8 +9,9 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-public class ConsoleOutErrHandler extends Handler{
+public final class ConsoleOutErrHandler extends Handler{
 
+    private boolean ignoreCtrlChr = false;
     private Level splitLevel = Level.WARNING;
     private final Handler stdOutHandler = new ConsoleOutHandler();
     private final Handler stdErrHandler = new ConsoleHandler();    
@@ -41,6 +42,10 @@ public class ConsoleOutErrHandler extends Handler{
         
         String formatter = manager.getProperty(className + ".formatter");
         setFormatter(makeFormatter(formatter));
+        
+        String ignoreCtrlChrStr = manager.getProperty(className + ".ignoreCtrlChr");
+        this.ignoreCtrlChr = (ignoreCtrlChrStr.equalsIgnoreCase("true"));
+        
     }    
     
     private Level parseLevel(String levelName) {
@@ -82,6 +87,14 @@ public class ConsoleOutErrHandler extends Handler{
     
     public void publish(LogRecord record) {
         if (!isLoggable(record)) return;
+        
+        if (this.ignoreCtrlChr) {
+            String msg = record.getMessage();
+            if (msg != null) {
+                msg = msg.replaceAll("[\u0000-\u0008\u000B\u000C\u000E-\u001F]"," ");
+            }
+            record.setMessage(msg);
+        }
         
         if (record.getLevel().intValue() >= splitLevel.intValue()) {
             this.stdErrHandler.publish(record);
