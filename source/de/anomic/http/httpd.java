@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -1152,6 +1153,11 @@ public final class httpd implements serverHandler {
                 tp.put("printStackTrace",0);
             }
             
+            // Generated Tue, 23 Aug 2005 11:19:14 GMT by brain.wg (squid/2.5.STABLE3)
+            // adding some system information
+            String systemDate = httpc.dateString(httpc.nowDate());
+            tp.put("date",systemDate);
+            
             // rewrite the file
             File htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
             
@@ -1165,7 +1171,7 @@ public final class httpd implements serverHandler {
             o.close(); o = null;
 
             httpHeader header = new httpHeader();            
-            header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
+            header.put(httpHeader.DATE, systemDate);
             header.put(httpHeader.CONTENT_TYPE, "text/html");
             header.put(httpHeader.CONTENT_LENGTH, Integer.toString(result.length));
             header.put(httpHeader.PRAGMA, "no-cache");
