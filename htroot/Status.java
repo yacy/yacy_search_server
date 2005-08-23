@@ -53,6 +53,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverDate;
+import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyCore;
 import de.anomic.plasma.plasmaSwitchboard;
 
@@ -73,6 +74,12 @@ public class Status {
         // update seed info
         yacyCore.peerActions.updateMySeed();
         
+        if (header.get("IS_ADMIN","false").equals("true")) {
+            prop.put("privateStatusTable","Status_p.inc");
+        } else {
+            prop.put("privateStatusTable","");
+        }
+        
         // password protection
         if (env.getConfig("adminAccountBase64MD5", "").length() == 0)
             prop.put("protection", 0);//not protected
@@ -92,23 +99,23 @@ public class Status {
 
         prop.put("versioncomment_latestVersion", Float.toString(yacyCore.latestVersion));
         
-        //prop.put("host", serverCore.publicLocalIP());
-        //prop.put("port", env.getConfig("port", "<unknown>"));    
+        prop.put("host", serverCore.publicLocalIP());
+        prop.put("port", env.getConfig("port", "<unknown>"));    
         
         // port forwarding: hostname and port
         if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
             prop.put("portForwarding", 1);
-            //prop.put("portForwarding_host", serverCore.portForwarding.getHost());
-            //prop.put("portForwarding_port", Integer.toString(serverCore.portForwarding.getPort()));
-            //prop.put("portForwarding_status", serverCore.portForwarding.isConnected() ? 1:0);
+            prop.put("portForwarding_host", serverCore.portForwarding.getHost());
+            prop.put("portForwarding_port", Integer.toString(serverCore.portForwarding.getPort()));
+            prop.put("portForwarding_status", serverCore.portForwarding.isConnected() ? 1:0);
         } else {
             prop.put("portForwarding", 0);
         }        
         
         if (env.getConfig("remoteProxyUse", "false").equals("true")) {
             prop.put("remoteProxy", 1);
-            //prop.put("remoteProxy_host", env.getConfig("remoteProxyHost", "<unknown>"));
-            //prop.put("remoteProxy_port", env.getConfig("remoteProxyPort", "<unknown>"));
+            prop.put("remoteProxy_host", env.getConfig("remoteProxyHost", "<unknown>"));
+            prop.put("remoteProxy_port", env.getConfig("remoteProxyPort", "<unknown>"));
         } else {
             prop.put("remoteProxy", 0);//not used
         }
@@ -220,6 +227,18 @@ public class Status {
         prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
         prop.put("trafficOut",bytesToString(httpdByteCountOutputStream.getGlobalCount()));
         
+        // Queue information
+        plasmaSwitchboard switchboard = (plasmaSwitchboard)env;
+        prop.put("indexingQueueSize", Integer.toString(switchboard.getThread("80_indexing").getJobCount()));
+        prop.put("indexingQueueMax", Integer.toString(plasmaSwitchboard.indexingSlots));
+        
+        prop.put("loaderQueueSize", Integer.toString(switchboard.cacheLoader.size()));        
+        prop.put("loaderQueueMax", Integer.toString(plasmaSwitchboard.crawlSlots));
+        prop.put("loaderPaused",switchboard.crawlingIsPaused()?1:0);
+        
+        prop.put("localCrawlQueueSize", Integer.toString(switchboard.getThread("50_localcrawl").getJobCount()));        
+        prop.put("remoteCrawlQueueSize", Integer.toString(switchboard.getThread("61_globalcrawltrigger").getJobCount()));
+
         // return rewrite properties
         return prop;
     }

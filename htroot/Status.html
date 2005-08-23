@@ -25,23 +25,11 @@
 <p>
 <!-- <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#000000"><tr><td> -->
 <table border="0" cellpadding="2" cellspacing="1" width="100%">
-<tr class="TableHeader"><td colspan="2"><b>System Properties</b></td></tr>
-<tr class="TableCellDark"><td width="150">Protection</td><td>
-#(protection)#
-<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html#admin">settings</a> page <b>immediately</b> and set an administration password.
-::
-Your settings are protected by a password.
-#(/protection)#
-</td></tr>
-<tr class="TableCellLight"><td>System version</td><td>
+<tr class="TableHeader"><td colspan="2"><b>Public System Properties</b></td></tr>
+<tr class="TableCellDark"><td>System version</td><td>
 #[versionpp]# #(versioncomment)#:: - the latest public version is #[latestVersion]#. Click here to <a href="http://www.yacy.net/yacy/Download.html">download</a> it.#(/versioncomment)#
 </td></tr>
-<!--
-<tr class="TableCellDark"><td>Proxy host</td><td>#[host]#:#[port]#</td></tr>
-<tr class="TableCellLight"><td>Port forwarding host</td><td>#(portForwarding)#not used::#[host]#:#[port]# (#(status)#broken::connected#(/status)#)#(/portForwarding)#</td></tr>
-<tr class="TableCellDark"><td>Remote proxy</td><td>#(remoteProxy)#not used::#[host]#:#[port]##(/remoteProxy)#</td></tr>
--->
-<tr class="TableCellDark"><td>This peer's address</td><td>
+<tr class="TableCellLight"><td>This&nbsp;peer's&nbsp;address</td><td>
 #(peerAddress)#
 Not assigned
 ::
@@ -54,8 +42,8 @@ see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installatio
 #[address]# ; Your '.yacy' home at http://www.#[peername]#.yacy
 #(/peerAddress)#
 </td></tr>
-<tr class="TableCellLight"><td>This peer's name</td><td>#[peerName]#/#[hash]#</td></tr>
-<tr class="TableCellDark"><td>This peer's statistics</td><td>
+<tr class="TableCellDark"><td>This peer's name</td><td>#[peerName]#/#[hash]#</td></tr>
+<tr class="TableCellLight"><td>This peer's statistics</td><td>
 #(peerStatistics)#
 Unknown
 ::
@@ -63,7 +51,7 @@ Uptime = #[uptime]#, Links# = #[links]#, RWIs# = #[words]#, PPM = #[pagesperminu
 Connects (#[juniorConnects]#|#[seniorConnects]#|#[principalConnects]#|#[disconnects]#) #[connects]# peers/hour
 #(/peerStatistics)#
 </td></tr>
-<tr class="TableCellLight"><td>This peer's status</td><td>
+<tr class="TableCellDark"><td>This peer's status</td><td>
 #(peerStatus)#
 Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings (see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!
 ::
@@ -75,8 +63,8 @@ Principal - You are senior and you publish your seed-list to a public accessible
 You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.
 #(/peerStatus)#
 </td></tr>
-<tr class="TableCellDark"><td>Other peers</td><td>#(otherPeers)#not online::#[num]# other peers online.#(/otherPeers)#</td></tr>
-<tr class="TableCellLight"><td>Seed server</td><td>
+<tr class="TableCellLight"><td>Other peers</td><td>#(otherPeers)#not online::#[num]# other peers online.#(/otherPeers)#</td></tr>
+<tr class="TableCellDark"><td>Seed server</td><td>
 #(seedServer)#
 Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html#seed">Settings page</a>.
 ::
@@ -86,13 +74,6 @@ Last upload: #[lastUpload]# ago.
 Enabled: Updating periodically to file #[seedFile]#.
 Last upload: #[lastUpload]# ago.
 #(/seedServer)#
-</td></tr>
-<tr class="TableCellDark"><td>Auto-popup on start-up</td><td>
-#(popup)#
-Disabled. To enable this again please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page
-::
-Enabled. To disable this please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page
-#(/popup)#
 </td></tr>
 <tr class="TableCellLight"><td>Online-mode</td><td>
 #(omode)#
@@ -110,22 +91,10 @@ To start permanent mode, press this button:
 You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.
 #(/omode)#
 </td></tr>
-<tr class="TableCellLight"><td>Memory Usage</td><td>
-<!--
-<form action="Status.html" method="get">free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]# | <input type="submit" name="gc" value="Do Garbage-Collect now"></form>
--->
-free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]#
-</td></tr>
-<tr class="TableCellLight"><td>Traffic</td><td>
-Out: #[trafficIn]# | In: #[trafficOut]#
-</td></tr>
-<tr class="TableCellDark"><td>System Resources</td><td>
-Processors: #[processors]#
-</td></tr>
-
 </table>
 <!-- </td></tr></table> -->
 </p>
+#%[privateStatusTable]%#
 
 #[footer]#
 </body>
