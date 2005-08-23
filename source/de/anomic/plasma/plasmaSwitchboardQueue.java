@@ -152,7 +152,7 @@ public class plasmaSwitchboardQueue {
             this.initiator = initiator;
             this.depth = depth;
             this.profileHandle = profileHandle;
-            this.anchorName = anchorName;
+            this.anchorName = (anchorName==null)?"":anchorName.trim();
             
             this.profileEntry = null;
             this.responseHeader = null;
@@ -173,7 +173,7 @@ public class plasmaSwitchboardQueue {
             this.initiator = (row[4] == null) ? null : new String(row[4]);
             this.depth = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(row[5]));
             this.profileHandle = new String(row[6]);
-            this.anchorName = (row[7] == null) ? null : new String(row[7]);
+            this.anchorName = (row[7] == null) ? null : (new String(row[7])).trim();
             
             this.profileEntry = null;
             this.responseHeader = null;
