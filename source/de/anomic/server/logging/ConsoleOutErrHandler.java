@@ -44,7 +44,7 @@ public final class ConsoleOutErrHandler extends Handler{
         setFormatter(makeFormatter(formatter));
         
         String ignoreCtrlChrStr = manager.getProperty(className + ".ignoreCtrlChr");
-        this.ignoreCtrlChr = (ignoreCtrlChrStr.equalsIgnoreCase("true"));
+        this.ignoreCtrlChr = (ignoreCtrlChrStr==null)?false:ignoreCtrlChrStr.equalsIgnoreCase("true");
         
     }    
     
