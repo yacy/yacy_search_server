@@ -50,7 +50,6 @@ import java.io.File;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpd;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;

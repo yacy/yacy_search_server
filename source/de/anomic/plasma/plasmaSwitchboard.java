@@ -356,14 +356,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (indexing_cluster < 1) indexing_cluster = 1;
         deployThread("90_cleanup", "Cleanup", "simple cleaning process for monitoring information", null,
                      new serverInstantThread(this, "cleanupJob", "cleanupJobSize"), 10000); // all 5 Minutes
+        serverInstantThread indexingThread = null;
         deployThread("80_indexing", "Parsing/Indexing", "thread that performes document parsing and indexing", "/IndexCreateIndexingQueue_p.html",
-                     new serverInstantThread(this, "deQueue", "queueSize"), 10000);
+                    indexingThread = new serverInstantThread(this, "deQueue", "queueSize"), 10000);
         
         for (int i = 1; i < indexing_cluster; i++) {
             setConfig((i + 80) + "_indexing_idlesleep", getConfig("80_indexing_idlesleep", ""));
             setConfig((i + 80) + "_indexing_busysleep", getConfig("80_indexing_busysleep", ""));
             deployThread((i + 80) + "_indexing", "Parsing/Indexing (cluster job)", "thread that performes document parsing and indexing", null,
-                     new serverInstantThread(this, "deQueue", "queueSize"), 10000 + (i * 1000));
+                     new serverInstantThread(this, "deQueue", "queueSize"), 10000 + (i * 1000),
+                     Long.parseLong(getConfig("80_indexing_idlesleep" , "5000")),
+                     Long.parseLong(getConfig("80_indexing_busysleep" , "0")),
+                     Long.parseLong(getConfig("80_indexing_memprereq" , "1000000")));
         }
         deployThread("70_cachemanager", "Proxy Cache Enqueue", "job takes new proxy files from RAM stack, stores them, and hands over to the Indexing Stack", null,
                      new serverInstantThread(this, "htEntryStoreJob", "htEntrySize"), 10000);
