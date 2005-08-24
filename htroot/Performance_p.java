@@ -197,9 +197,9 @@ public class Performance_p {
             switchboard.cacheLoader.setPoolConfig(crawlerPoolConfig);
             
             // storing the new values into configfile
-            switchboard.setConfig("crawlerMaxActiveThreads",maxActive);
-            switchboard.setConfig("crawlerMaxIdleThreads",maxIdle);
-            switchboard.setConfig("crawlerMinIdleThreads",minIdle);
+            switchboard.setConfig("crawler.MaxActiveThreads",maxActive);
+            switchboard.setConfig("crawler.MaxIdleThreads",maxIdle);
+            switchboard.setConfig("crawler.MinIdleThreads",minIdle);
             
             /* 
              * configuring the http pool 

@@ -25,11 +25,6 @@ httpdMaxActiveSessions = 150
 httpdMaxIdleSessions = 75
 httpdMinIdleSessions = 5
 
-# maximum number of crawler threads
-crawlerMaxActiveThreads = 10
-crawlerMaxIdleThreads = 7
-crawlerMinIdleThreads = 5
-
 # default root path for the file server
 # may be overridden by the htdocs parameter
 # users shall be encouraged to use the htdocs path for individual content,
@@ -510,3 +505,13 @@ msgForwardingTo=root@localhost
 
 #onlineCautionDelay: delay time after proxy usage before crawling is resumed
 onlineCautionDelay=30000
+
+# Some configuration values for the crawler
+crawler.acceptLanguage=en-us,en;q=0.5
+crawler.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
+crawler.clientTimeout=9000
+
+# maximum number of crawler threads
+crawler.MaxActiveThreads = 10
+crawler.MaxIdleThreads = 7
+crawler.MinIdleThreads = 5

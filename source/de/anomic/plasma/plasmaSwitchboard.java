@@ -297,7 +297,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         try { remoteport = Integer.parseInt(getConfig("remoteProxyPort","3128")); }
         catch (NumberFormatException e) { remoteport = 3128; }
         
-        crawlSlots = Integer.parseInt(getConfig("crawlerMaxActiveThreads", "10"));
+        crawlSlots = Integer.parseInt(getConfig("crawler.MaxActiveThreads", "10"));
         plasmaCrawlLoader.switchboard = this;
         this.cacheLoader = new plasmaCrawlLoader(
                 this.cacheManager, 
@@ -953,7 +953,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 				       (String) e.getValue(), rejectReason, new bitfield(plasmaURL.urlFlagLength), false);
                     }
                 }
-                log.logInfo("CRAWL: ADDED " + c + " LINKS FROM " + entry.url().toString() +
+                log.logInfo("CRAWL: ADDED " + c + " LINKS FROM " + entry.normalizedURLString() +
                             ", NEW CRAWL STACK SIZE IS " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
             }
             
@@ -1035,13 +1035,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 }
             }
             
-            // explicit delete/free resources
-            if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) cacheManager.deleteFile(entry.url());
-            document = null; entry = null;
-            
+            document = null; 
             
         } catch (IOException e) {
             log.logError("ERROR in plasmaSwitchboard.process(): " + e.toString());
+        } finally {
+            // explicit delete/free resources
+            if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) cacheManager.deleteFile(entry.url());
+            entry = null;            
         }
     }
 
@@ -1142,7 +1143,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return;
         }
         cacheLoader.loadParallel(urlEntry.url(), urlEntry.name(), urlEntry.referrerHash(), urlEntry.initiator(), urlEntry.depth(), profile);
-        log.logInfo(stats + ": enqueued for load " + urlEntry.url());
+        log.logInfo(stats + ": enqueued for load " + urlEntry.url() + " [" + urlEntry.hash() + "]");
         return;
     }
     

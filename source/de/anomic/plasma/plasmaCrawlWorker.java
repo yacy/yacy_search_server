@@ -301,11 +301,15 @@ public final class plasmaCrawlWorker extends Thread {
         // take a file from the net
         httpc remote = null;
         try {
+            plasmaSwitchboard sb = plasmaCrawlLoader.switchboard;
+            
             // create a request header
             httpHeader requestHeader = new httpHeader();
-            requestHeader.put("User-Agent", httpdProxyHandler.userAgent);
-            requestHeader.put("Referer", referer);
-            if (useContentEncodingGzip) requestHeader.put("Accept-Encoding", "gzip,deflate");
+            requestHeader.put(httpHeader.USER_AGENT, httpdProxyHandler.userAgent);
+            requestHeader.put(httpHeader.REFERER, referer);
+            requestHeader.put(httpHeader.ACCEPT_LANGUAGE, sb.getConfig("crawler.acceptLanguage","en-us,en;q=0.5"));
+            requestHeader.put(httpHeader.ACCEPT_CHARSET, sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"));
+            if (useContentEncodingGzip) requestHeader.put(httpHeader.ACCEPT_ENCODING, "gzip,deflate");
     
             //System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
                     
@@ -433,6 +437,7 @@ public final class plasmaCrawlWorker extends Thread {
                     log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + url.toString() + 
                                    "'. Retrying request without using gzip content encoding.");
                     retryCrawling = true;
+// java.net.SocketTimeoutException: connect timed out                    
                 } else if (errorMsg.indexOf("Socket time-out: Read timed out") >= 0) {
                     log.logWarning("CRAWLER Read timeout while receiving content from '" + url.toString() + 
                                    "'. Retrying request.");

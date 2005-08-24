@@ -46,10 +46,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverCore.Session;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -76,7 +74,7 @@ public final class plasmaCrawlLoader extends Thread {
     	this.cacheManager    = cacheManager;
     	this.log             = log;
         
-    	this.socketTimeout   = Integer.parseInt(switchboard.getConfig("clientTimeout", "10000"));
+    	this.socketTimeout   = Integer.parseInt(switchboard.getConfig("crawler.clientTimeout", "10000"));
         
         // configuring the crawler messagequeue
         this.theQueue = new CrawlerMessageQueue();
@@ -87,12 +85,12 @@ public final class plasmaCrawlLoader extends Thread {
         
         // The maximum number of active connections that can be allocated from pool at the same time,
         // 0 for no limit
-        this.cralwerPoolConfig.maxActive = Integer.parseInt(switchboard.getConfig("crawlerMaxActiveThreads","10"));
+        this.cralwerPoolConfig.maxActive = Integer.parseInt(switchboard.getConfig("crawler.MaxActiveThreads","10"));
         
         // The maximum number of idle connections connections in the pool
         // 0 = no limit.        
-        this.cralwerPoolConfig.maxIdle = Integer.parseInt(switchboard.getConfig("crawlerMaxIdleThreads","7"));
-        this.cralwerPoolConfig.minIdle = Integer.parseInt(switchboard.getConfig("crawlerMinIdleThreads","5"));    
+        this.cralwerPoolConfig.maxIdle = Integer.parseInt(switchboard.getConfig("crawler.MaxIdleThreads","7"));
+        this.cralwerPoolConfig.minIdle = Integer.parseInt(switchboard.getConfig("crawler.MinIdleThreads","5"));    
         
         // block undefinitely 
         this.cralwerPoolConfig.maxWait = -1; 
