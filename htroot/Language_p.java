@@ -78,18 +78,6 @@ public class Language_p {
 	return map;
     }
         
-	private static boolean copyFile(File from, File to){
-			if(from == null || to == null){
-			return false;
-		}
-		try{
-			serverFileUtils.copy(from, to);
-			return true;
-		}catch(IOException e){
-			return false;
-		}
-	}
-
 	private static boolean changeLang(serverSwitch env, String langPath, String lang){
 		if(lang.equals("default")){
 			env.setConfig("htLocaleSelection", "default");
