@@ -298,6 +298,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         catch (NumberFormatException e) { remoteport = 3128; }
         
         crawlSlots = Integer.parseInt(getConfig("crawler.MaxActiveThreads", "10"));
+        this.crawlingIsPaused = Boolean.valueOf(getConfig("crawler.isPaused", "false")).booleanValue();
         plasmaCrawlLoader.switchboard = this;
         this.cacheLoader = new plasmaCrawlLoader(
                 this.cacheManager, 
@@ -656,6 +657,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         synchronized(this.crawlingPausedSync) {
             this.crawlingIsPaused = true;
         }
+        setConfig("crawler.isPaused", "true");
     }
     
     /**
@@ -668,6 +670,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 this.crawlingPausedSync.notifyAll();
             }
         }
+        setConfig("crawler.isPaused", "false");
     }
     
     /**

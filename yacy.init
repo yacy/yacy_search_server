@@ -510,6 +510,7 @@ onlineCautionDelay=30000
 crawler.acceptLanguage=en-us,en;q=0.5
 crawler.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
 crawler.clientTimeout=9000
+crawler.isPaused=false
 
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 10
