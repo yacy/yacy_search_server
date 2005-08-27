@@ -437,7 +437,7 @@ public final class plasmaCrawlWorker extends Thread {
                     log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + url.toString() + 
                                    "'. Retrying request without using gzip content encoding.");
                     retryCrawling = true;                  
-                } else if (errorMsg.indexOf("Socket time-out: Read timed out") >= 0) {
+                } else if (errorMsg.indexOf("Read timed out") >= 0) {
                     log.logWarning("CRAWLER Read timeout while receiving content from '" + url.toString() + 
                                    "'. Retrying request.");
                     retryCrawling = true;
