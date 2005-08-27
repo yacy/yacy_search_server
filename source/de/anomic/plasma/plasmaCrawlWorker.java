@@ -285,7 +285,7 @@ public final class plasmaCrawlWorker extends Thread {
         if (url == null) return;
         
         // if the recrawling limit was exceeded we stop crawling now
-        if (crawlingRetryCount < 0) return;
+        if (crawlingRetryCount <= 0) return;
         
         Date requestDate = new Date(); // remember the time...
         String host = url.getHost();
@@ -367,7 +367,7 @@ public final class plasmaCrawlWorker extends Thread {
                     log.logError("CRAWLER LOADER ERROR1: with URL=" + url.toString() + ": " + e.toString());
                 }
             } else if (res.status.startsWith("30")) {
-                if (crawlingRetryCount < 0) {                    
+                if (crawlingRetryCount > 0) {                    
                     if (res.responseHeader.containsKey(httpHeader.LOCATION)) {
                         // getting redirection URL
                         String redirectionUrlString = (String) res.responseHeader.get(httpHeader.LOCATION);
@@ -463,7 +463,7 @@ public final class plasmaCrawlWorker extends Thread {
                     remote = null;                    
                     
                     // setting the retry counter to 1 
-                    if (crawlingRetryCount > 1) crawlingRetryCount = 1;
+                    if (crawlingRetryCount > 2) crawlingRetryCount = 2;
                     
                     // retry crawling
                     load(url,
