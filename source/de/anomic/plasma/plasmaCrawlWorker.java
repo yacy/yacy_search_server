@@ -436,12 +436,15 @@ public final class plasmaCrawlWorker extends Thread {
                 } else if (errorMsg.indexOf("Corrupt GZIP trailer") >= 0) {
                     log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + url.toString() + 
                                    "'. Retrying request without using gzip content encoding.");
-                    retryCrawling = true;
-// java.net.SocketTimeoutException: connect timed out                    
+                    retryCrawling = true;                  
                 } else if (errorMsg.indexOf("Socket time-out: Read timed out") >= 0) {
                     log.logWarning("CRAWLER Read timeout while receiving content from '" + url.toString() + 
                                    "'. Retrying request.");
                     retryCrawling = true;
+                } else if (errorMsg.indexOf("connect timed out") >= 0) {
+                    log.logWarning("CRAWLER Timeout while trying to connect to '" + url.toString() + 
+                                   "'. Retrying request."); 
+                    retryCrawling = true;                                                                           
                 } else if (errorMsg.indexOf("Connection timed out") >= 0) {
                     log.logWarning("CRAWLER Connection timeout while receiving content from '" + url.toString() + 
                                    "'. Retrying request."); 
