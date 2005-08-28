@@ -46,6 +46,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -429,7 +430,10 @@ public final class plasmaCrawlWorker extends Thread {
             boolean retryCrawling = false;
             String errorMsg = e.getMessage();
             if (errorMsg != null) {
-                if (e instanceof java.net.BindException) {
+                if ((e instanceof UnknownHostException) || (errorMsg.indexOf("unknown host") >= 0)) {                    
+                    log.logWarning("CRAWLER Unknown host in URL '" + url.toString() + "'. " +
+                                   "Referer URL: " + ((referer == null) ?"Unknown":referer));
+                } else if (e instanceof java.net.BindException) {
                     log.logWarning("CRAWLER BindException detected while trying to download content from '" + url.toString() + 
                                    "'. Retrying request.");
                     retryCrawling = true;
@@ -450,7 +454,7 @@ public final class plasmaCrawlWorker extends Thread {
                                    "'. Retrying request."); 
                     retryCrawling = true;                                                       
                 } else if (errorMsg.indexOf("Connection refused") >= 0) {
-                    log.logError("CRAWLER LOADER ERROR2 with URL=" + url.toString() + ": Connection refused");
+                    log.logWarning("CRAWLER Connection refused while trying to connect to '" + url.toString() + "'.");
                 }
 
                 
