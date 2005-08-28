@@ -1125,7 +1125,7 @@ public final class httpd implements serverHandler {
 //            tp.put("host", serverCore.publicIP().getHostAddress());
 //            tp.put("port", switchboard.getConfig("port", "8080"));        
             tp.put("peerName", yacyCore.seedDB.mySeed.getName());
-            tp.put("host", serverCore.publicIP().getHostAddress());
+            tp.put("host", serverCore.publicIP());
             tp.put("port", (serverCore.portForwardingEnabled && (serverCore.portForwarding != null)) 
                            ? Integer.toString(serverCore.portForwarding.getPort()) 
                            : switchboard.getConfig("port", "8080"));

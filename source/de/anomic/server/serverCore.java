@@ -80,6 +80,7 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
+import de.anomic.plasma.plasmaSwitchboard;
 
 public final class serverCore extends serverAbstractThread implements serverThread {
     
@@ -275,7 +276,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 serverCore.portForwarding.connect();
                 
                 serverCore.portForwardingEnabled = true;
-                yacyCore.seedDB.mySeed.put("IP",publicIP().getHostAddress());
+                yacyCore.seedDB.mySeed.put("IP",publicIP());
                 yacyCore.seedDB.mySeed.put("Port",Integer.toString(serverCore.portForwarding.getPort()));                               
             } catch (Exception e) {
                 serverCore.portForwardingEnabled = false;
@@ -310,14 +311,22 @@ public final class serverCore extends serverAbstractThread implements serverThre
 	return true;
     }
     
-    public static InetAddress publicIP() {
+    public static String publicIP() {
         try {
             
             // If port forwarding was enabled we need to return the remote IP Address           
+			plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+			if(sb != null){
+			String staticIP=sb.getConfig("staticIP", "");
+				if( (!staticIP.equals("")) && sb.getConfig("yacyDebugMode", "false").equals("true") ){
+					return staticIP;
+				}
+			}
             if ((serverCore.portForwardingEnabled)&&(serverCore.portForwarding != null)) {
-                return InetAddress.getByName(serverCore.portForwarding.getHost());
+				//does not return serverCore.portForwarding.getHost(), because hostnames are not valid, except in DebugMode
+                return InetAddress.getByName(serverCore.portForwarding.getHost()).getHostAddress();
             } else {
-                return publicLocalIP();
+                return publicLocalIP().getHostAddress();
             }
         } catch (java.net.UnknownHostException e) {
             System.err.println("ERROR: (internal) " + e.getMessage());

@@ -157,11 +157,13 @@ public class natLib {
 	}
 
 	// maybe this is a dial-up connection (or LAN and DebugMode) and we can get it from java variables
-	InetAddress ia = serverCore.publicIP();
+	/*InetAddress ia = serverCore.publicIP();
 	if (ia != null) {
 	    ip = ia.getHostAddress();
 	    if (isProper(ip)) return ip;
-	}
+	}*/
+	ip = serverCore.publicIP();
+	if (isProper(ip)) return ip;
 
 	// now go the uneasy way and ask some web responder
 	disorderHeap random = new disorderHeap(retrieveOptions());

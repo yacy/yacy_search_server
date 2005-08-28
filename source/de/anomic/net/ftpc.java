@@ -1549,11 +1549,12 @@ cd ..
     int DataPort = DataSocketActive.getLocalPort();
 
     // client ip
-    InetAddress LocalIp = serverCore.publicIP();
+    //InetAddress LocalIp = serverCore.publicIP();
     //    InetAddress LocalIp = DataSocketActive.getInetAddress().getLocalHost();
       
     // save ip address in high byte order
-    byte[] Bytes = LocalIp.getAddress();
+    //byte[] Bytes = LocalIp.getAddress();
+    byte[] Bytes = serverCore.publicIP().getBytes();
 
     // bytes greater than 127 should not be printed as negative
     short Shorts[] = new short[4];

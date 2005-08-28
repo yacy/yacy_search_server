@@ -145,7 +145,7 @@ public class yacyClient {
         if (!serverCore.portForwardingEnabled) {
             yacyCore.seedDB.mySeed.put("IP", (String) result.get("yourip"));
         } else {
-            yacyCore.seedDB.mySeed.put("IP", serverCore.publicIP().getHostAddress());
+            yacyCore.seedDB.mySeed.put("IP", serverCore.publicIP());
         }
         
         /* If we have port forwarding enabled but the other peer uses a too old yacy version

@@ -94,7 +94,7 @@ public class yacyPeerActions {
     public void updateMySeed() {
         if (sb.getConfig("peerName", "nameless").equals("nameless")) {
             // generate new peer name
-            String newPeerName = serverCore.publicIP().getHostName() + yacyCore.speedKey + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
+            String newPeerName = serverCore.publicIP() + yacyCore.speedKey + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
             newPeerName = newPeerName.replace('.', '-');
             newPeerName = newPeerName.replace('_', '-');
             sb.setConfig("peerName", newPeerName);

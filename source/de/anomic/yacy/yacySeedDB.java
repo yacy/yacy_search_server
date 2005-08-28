@@ -632,7 +632,7 @@ public class yacySeedDB {
             if (seed == null) return null;
             if ((seed == mySeed) && (!(seed.isOnline()))) {
                 // take local ip instead of external
-                return serverCore.publicIP().getHostAddress() + ":" + sb.getConfig("port", "8080") + ((subdom == null) ? "" : ("/" + subdom));
+                return serverCore.publicIP() + ":" + sb.getConfig("port", "8080") + ((subdom == null) ? "" : ("/" + subdom));
             }
             return seed.getAddress() + ((subdom == null) ? "" : ("/" + subdom));
         } else {
