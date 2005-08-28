@@ -722,7 +722,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         plasmaCrawlNURL.Entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
         String stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
         if ((urlEntry.url() == null) || (urlEntry.url().toString().length() < 10)) {
-            log.logError(stats + ": urlEntry.url() == null");
+            log.logError(stats + ": urlEntry.url() == null. URL-Hash: " + ((urlEntry.hash()==null)?"Unknown":urlEntry.hash()));
             return true;
         }
         String profileHandle = urlEntry.profileHandle();

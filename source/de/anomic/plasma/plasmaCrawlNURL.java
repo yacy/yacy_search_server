@@ -345,6 +345,24 @@ public class plasmaCrawlNURL extends plasmaURL {
             this.handle        = 0;
             store();
 	}
+        
+        public String toString() {
+            StringBuffer str = new StringBuffer();
+            
+            str.append("hash: ").append(url==null ? "null" : urlHash(url)).append(" | ")
+               .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
+               .append("url: ").append(url==null?"null":url.toString()).append(" | ")
+               .append("referrer: ").append((referrer == null) ? "------------" : referrer).append(" | ")
+               .append("name: ").append((name == null) ? "null" : name).append(" | ")
+               .append("loaddate: ").append((loaddate == null) ? new Date() : loaddate).append(" | ")
+               .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")
+               .append("depth: ").append(Integer.toString(depth)).append(" | ")
+               .append("forkfactor: ").append(Integer.toString(forkfactor)).append(" | ")
+               .append("flags: ").append((flags==null) ? "null" : flags.toString());
+            
+            
+            return str.toString();
+        }
 
         public Entry(String hash) {
             // generates an plasmaNURLEntry using the url hash
