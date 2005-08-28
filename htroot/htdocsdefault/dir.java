@@ -51,6 +51,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCondenser;
@@ -94,8 +96,12 @@ public class dir {
         prop.put("peername", env.getConfig("peerName", "<nameless>"));
         prop.put("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
 	prop.put("peeraddress", yacyCore.seedDB.mySeed.getAddress());
-        prop.put("hostname", serverCore.publicIP().getHostName());
-        prop.put("hostip", serverCore.publicIP().getHostAddress());
+        prop.put("hostname", serverCore.publicIP());
+		try{
+	        prop.put("hostip", InetAddress.getByName(serverCore.publicIP()).getHostAddress());
+		}catch(UnknownHostException e){
+	        prop.put("hostip", "Unknown Host Exception");
+		}
 	prop.put("port", env.getConfig("port", "8080"));
         
         // generate upload/download authorizations
