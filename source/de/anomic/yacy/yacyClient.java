@@ -185,6 +185,8 @@ public class yacyClient {
                         }
                     }
                 }
+            } else {
+                yacyCore.log.logDebug("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ".");
             }
             yacyCore.seedDB.mySeed.put(yacySeed.PEERTYPE, mytype);
         }

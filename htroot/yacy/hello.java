@@ -102,14 +102,18 @@ public class hello {
             boolean isLocalIP = false;
             if (serverCore.portForwardingEnabled) {
                 try {
-                    InetAddress clientAddress = InetAddress.getByName(clientip);
-                    InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
-                    for (int i=0; i<localAddress.length; i++) {
-                        if (localAddress[i].equals(clientAddress)) {
-                            isLocalIP = true;
-                            break;
-                        }
-                    }  
+                    InetAddress clientAddress = InetAddress.getByName(clientip);                    
+                    if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) {
+                        isLocalIP = true;
+                    } else {
+                        InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
+                        for (int i=0; i<localAddress.length; i++) {
+                            if (localAddress[i].equals(clientAddress)) {
+                                isLocalIP = true;
+                                break;
+                            }
+                        }  
+                    }
                 } catch (Exception e) {}
             }
             

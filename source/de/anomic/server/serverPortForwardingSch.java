@@ -8,6 +8,8 @@ import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyClient;
+import de.anomic.yacy.yacyCore;
 
 public class serverPortForwardingSch implements serverPortForwarding{
     
@@ -182,7 +184,9 @@ public class serverPortForwardingSch implements serverPortForwarding{
     
     public synchronized boolean isConnected() {
         if (session == null) return false;
-        return session.isConnected();
+        if (!session.isConnected()) return false;        
+        int urls = yacyClient.queryUrlCount(yacyCore.seedDB.mySeed);
+        return !(urls < 0); 
     }
     
     class MyUserInfo 
