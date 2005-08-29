@@ -59,12 +59,9 @@
 
 package de.anomic.http;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.net.BindException;
@@ -77,13 +74,12 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.TreeMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.htmlFilter.htmlFilterTransformer;
@@ -124,21 +120,51 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     private File   htRootPath = null;
     
     private static boolean doAccessLogging = false; 
+    
     /**
      * Do logging configuration for special proxy access log file
      */
     static {
         try {
-            Logger proxyLogger = Logger.getLogger("PROXY.access");
-            proxyLogger.setUseParentHandlers(false);
-            FileHandler txtLog = new FileHandler("log/proxyAccess%u%g.log",1024*1024, 20, true);
-            txtLog.setFormatter(new serverMiniLogFormatter());
-            txtLog.setLevel(Level.FINEST);
-            proxyLogger.addHandler(txtLog);     
+            serverLog.logInfo("PROXY","Configuring proxy access logging ...");            
             
-            doAccessLogging = true;
+            // getting the logging manager
+            LogManager manager = LogManager.getLogManager();
+            String className = httpdProxyHandler.class.getName();
+            
+            // determining if proxy access logging is enabled
+            String enabled = manager.getProperty("de.anomic.http.httpdProxyHandler.logging.enabled");
+            if ("true".equalsIgnoreCase(enabled)) {
+                
+                // reading out some needed configuration properties
+                int limit = 1024*1024, count = 20;
+                String pattern = manager.getProperty(className + ".logging.FileHandler.pattern");
+                if (pattern == null) pattern = "log/proxyAccess%u%g.log";
+                
+                String limitStr = manager.getProperty(className + ".logging.FileHandler.limit");
+                if (limitStr != null) try { limit = Integer.valueOf(limitStr).intValue(); } catch (NumberFormatException e) {}
+                
+                String countStr = manager.getProperty(className + ".logging.FileHandler.count");
+                if (countStr != null) try { count = Integer.valueOf(countStr).intValue(); } catch (NumberFormatException e) {}
+                
+                // creating the proxy access logger
+                Logger proxyLogger = Logger.getLogger("PROXY.access");
+                proxyLogger.setUseParentHandlers(false);
+                FileHandler txtLog = new FileHandler(pattern,limit,count,true);
+                txtLog.setFormatter(new serverMiniLogFormatter());
+                txtLog.setLevel(Level.FINEST);
+                proxyLogger.addHandler(txtLog);     
+                
+                doAccessLogging = true; 
+                serverLog.logInfo("PROXY","Proxy access logging configuration done." + 
+                                  "\n\tFilename: " + pattern + 
+                                  "\n\tLimit: " + limitStr + 
+                                  "\n\tCount: " + countStr);
+            } else {
+                serverLog.logInfo("PROXY","Proxy access logging is deactivated.");
+            }
         } catch (Exception e) { 
-            System.err.println("PROXY: Unable to configure proxy access logging.");        
+            serverLog.logError("PROXY","Unable to configure proxy access logging.",e);        
         }
     }
     

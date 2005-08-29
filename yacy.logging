@@ -12,7 +12,7 @@
 # INFO    regular action information (i.e. any httpd request URL)
 # FINEST  in-function status debug output
 PARSER.level = INFO
-YACY.level = INFO
+YACY.level = FINEST
 HTCACHE.level = INFO
 PLASMA.level = INFO
 SERVER.level = INFO
@@ -39,7 +39,12 @@ de.anomic.server.logging.ConsoleOutErrHandler.level = ALL
 de.anomic.server.logging.ConsoleOutErrHandler.levelStdOut = ALL
 de.anomic.server.logging.ConsoleOutErrHandler.levelSplit = WARNING
 de.anomic.server.logging.ConsoleOutErrHandler.levelStdErr = ALL
-de.anomic.server.logging.ConsoleOutErrHandler.ignoreChr7 = FALSE
 de.anomic.server.logging.ConsoleOutErrHandler.formatter=de.anomic.server.logging.serverSimpleLogFormatter
 #de.anomic.server.logging.ConsoleOutErrHandler.ignoreCtrlChr=true
+
+# Properties for the proxy access logger
+de.anomic.http.httpdProxyHandler.logging.enabled = TRUE
+de.anomic.http.httpdProxyHandler.logging.FileHandler.limit = 1048576
+de.anomic.http.httpdProxyHandler.logging.FileHandler.count = 20
+de.anomic.http.httpdProxyHandler.logging.FileHandler.pattern = log/proxyAccess%u%g.log
 

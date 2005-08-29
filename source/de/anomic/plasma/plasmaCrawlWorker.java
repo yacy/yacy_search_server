@@ -87,24 +87,24 @@ public final class plasmaCrawlWorker extends Thread {
     private boolean stopped = false;
     private boolean done = false;   
     
-    private static boolean doAccessLogging = false; 
+    private static boolean doCrawlerLogging = false; 
     /**
      * Do logging configuration for special proxy access log file
      */
-    static {
-        try {
-            Logger crawlerLogger = Logger.getLogger("CRAWLER.access");
-            crawlerLogger.setUseParentHandlers(false);
-            FileHandler txtLog = new FileHandler("log/crawlerAccess%u%g.log",1024*1024, 20, true);
-            txtLog.setFormatter(new serverMiniLogFormatter());
-            txtLog.setLevel(Level.FINEST);
-            crawlerLogger.addHandler(txtLog);     
-            
-            doAccessLogging = true;
-        } catch (Exception e) { 
-            System.err.println("PROXY: Unable to configure proxy access logging.");        
-        }
-    }    
+//    static {
+//        try {
+//            Logger crawlerLogger = Logger.getLogger("CRAWLER.access");
+//            crawlerLogger.setUseParentHandlers(false);
+//            FileHandler txtLog = new FileHandler("log/crawlerAccess%u%g.log",1024*1024, 20, true);
+//            txtLog.setFormatter(new serverMiniLogFormatter());
+//            txtLog.setLevel(Level.FINEST);
+//            crawlerLogger.addHandler(txtLog);     
+//            
+//            doAccessLogging = true;
+//        } catch (Exception e) { 
+//            System.err.println("PROXY: Unable to configure proxy access logging.");        
+//        }
+//    }    
         
     public plasmaCrawlWorker(
             ThreadGroup theTG, 
