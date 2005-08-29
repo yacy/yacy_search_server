@@ -486,6 +486,12 @@ public final class httpd implements serverHandler {
                             } catch (Exception e) {
                                 sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
                                 return serverCore.TERMINATE_CONNECTION;
+                            } catch (NoClassDefFoundError e) {
+                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",null);
+                                return serverCore.TERMINATE_CONNECTION;
+                            } catch (Error e) {
+                                sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
+                                return serverCore.TERMINATE_CONNECTION;                                
                             }
                         }
                         soapHandler.doGet(this.prop, header, this.session.out);
@@ -634,6 +640,12 @@ public final class httpd implements serverHandler {
                             } catch (Exception e) {
                                 sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
                                 return serverCore.TERMINATE_CONNECTION;
+                            } catch (NoClassDefFoundError e) {
+                                sendRespondError(this.prop,this.session.out,4,503,"SOAP Extension not installed","SOAP Extension not installed",null);
+                                return serverCore.TERMINATE_CONNECTION;                                
+                            } catch (Error e) {
+                                sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
+                                return serverCore.TERMINATE_CONNECTION;                                
                             }
                         }
                         soapHandler.doPost(prop, header, this.session.out, this.session.in);                
