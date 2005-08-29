@@ -116,7 +116,17 @@ public class ViewProfile {
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
 		    String key=(String)entry.getKey();
-		    String value=wikiTransformer.transform( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
+		    String value=new String();
+		    
+		    //only comments get "wikified"
+		    //this prevents broken links
+		    if(key.equals("comment")){
+		        value=wikiTransformer.transform( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
+		    }    
+		    else{
+		        value=((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n");
+		    }
+
 		    //all known Keys which should be set as they are
 		    if(knownKeys.contains(key)){
 			prop.put("success_"+key, 1);
