@@ -82,6 +82,8 @@ public class ProxyIndexingMonitor_p {
             if (post.containsKey("proxyprofileset")) try {
                 // read values and put them in global settings
                 int newProxyPrefetchDepth = Integer.parseInt((String) post.get("proxyPrefetchDepth", "0"));
+                if (newProxyPrefetchDepth < 0) newProxyPrefetchDepth = 0; 
+                if (newProxyPrefetchDepth > 25) newProxyPrefetchDepth = 25; // self protection ?
                 env.setConfig("proxyPrefetchDepth", Integer.toString(newProxyPrefetchDepth));
                 boolean proxyStoreHTCache = ((String) post.get("proxyStoreHTCache", "")).equals("on");
                 env.setConfig("proxyStoreHTCache", (proxyStoreHTCache) ? "true" : "false");
