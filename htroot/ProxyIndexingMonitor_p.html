@@ -18,12 +18,16 @@ and automatically excluded from indexing.
 </p>
 
 <p><form action="ProxyIndexingMonitor_p.html" method="post" enctype="multipart/form-data">
-<div class=small><b>Proxy pre-fetch setting:</b>
-this is an automated html page loading procedure that takes actual proxy-requested
-URLs as crawling start points for crawling.</div>
+
 <table border="0" cellpadding="5" cellspacing="0" width="100%">
+  <tr class="TableCellLight">
+  <td colspan="3"><div class=small><b>Proxy pre-fetch setting:</b>
+this is an automated html page loading procedure that takes actual proxy-requested
+URLs as crawling start points for crawling.</div></td> 
+  </tr>
+
   <tr valign="top" class="TableCellDark">
-    <td class=small>Prefetch Depth:</td>
+    <td class=small>Prefetch Depth</td>
     <td class=small><input name="proxyPrefetchDepth" type="text" size="2" maxlength="2" value="#[proxyPrefetchDepth]#"></td>
     <td class=small>
         A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all
@@ -31,29 +35,52 @@ URLs as crawling start points for crawling.</div>
         this means that only embedded href-anchors are prefetched additionally.</td>
   </tr>
   <tr valign="top" class="TableCellDark">
-    <td class=small>Store to Cache:</td>
+    <td class=small>Store to Cache</td>
     <td class=small><input type="checkbox" name="proxyStoreHTCache" align="top" #(proxyStoreHTCacheChecked)#::checked#(/proxyStoreHTCacheChecked)#></td>
     <td class=small>It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.</td>
   </tr>
+
+  <tr class="TableCellLight">
+  <td colspan="3"><div class=small><b>Proxy generally</b></div></td> 
+  </tr>
+
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Path</td>
+    <td class=small><input name="proxyCache" type="text" size="20" maxlength="80" value="#[proxyCache]#"></td>
+    <td class=small>The path where the pages are stored (max. length 80)</td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Size</td>
+    <td class=small><input name="proxyCacheSize" type="text" size="8" maxlength="24" value="#[proxyCacheSize]#"></td>
+    <td class=small>The size in MB of the cache.</td>
+  </tr>
+
   <tr valign="top" class="TableCellLight">
-    <td class=small></td>
-    <td class=small></td>
-    <td class=small><input type="submit" name="proxyprofileset" value="set proxy profile"></td>
+    <td class=small colspan="1">&nbsp;</td>
+    <td class=small colspan="2"><input type="submit" name="proxyprofileset" value="set proxy profile"></td>
   </tr>
 </table>
 </form></p>
 
+<p>
 #(info)#
+<!-- info 0 -->
 ::
-<br><b>The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.
+<!-- info 1 -->
+<b>The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.
 Please delete that file and restart.</b><br>
 ::
-<br>
-<b>Proxy pre-fetch is now set to depth-#[message]#.</b><br>
-<b>Proxy caching is now set #(caching)#off::on#(/caching)#.</b><br>
+<!-- info 2 -->
+<b>Pre-fetch is now set to depth-#[message]#.</b><br>
+<b>Caching is now #(caching)#off::on#(/caching)#.</b><br>
+#(path)#::<b>Cachepath is now set to '#[return]#'.</b> Please move the old data in the new directory.<br>#(/path)#
+#(size)#::<b>Cachesize is now set to #[return]#MB.</b><br>#(/size)#
+#(restart)#::<br><font color="red"><b>Changes will take effect after restart only.</b></font><br>#(/restart)#
 ::
-<br><b>An error has occurred: #[error]#.</b><br>
+<!-- info 3 -->
+<b>An error has occurred: #[error]#.</b><br>
 #(/info)#
+</p>
 
 <p>You can see a snapshot of recently indexed pages
 on the <a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a> Page.

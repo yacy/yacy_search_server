@@ -41,7 +41,7 @@
 
 
 // You must compile this file with
-// javac -classpath .:../Classes Message.java
+// javac -classpath .:../classes CacheResource_p.java
 // if the shell's current path is HTROOT
 
 import java.io.File;
@@ -56,11 +56,14 @@ import de.anomic.server.serverSwitch;
 public class CacheResource_p {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
+        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        serverObjects prop = new serverObjects();
 
-        String path   = ((post == null) ? "" : post.get("path", ""));
-        File   cache  = new File(switchboard.getRootPath(), switchboard.getConfig("proxyCache", "DATA/HTCACHE"));
+        String path = ((post == null) ? "" : post.get("path", ""));
+
+        // we dont need check the path, because we have do that in plasmaSwitchboard.java - Borg-0300
+        File cache = new File(switchboard.getConfig("proxyCache", "DATA/HTCACHE").toString());    
+
         File f = new File(cache, path);
         byte[] resource;
 
@@ -70,7 +73,6 @@ public class CacheResource_p {
         } catch (IOException e) {
             prop.put("resource", new byte[0]);
         }
-	return prop;
+        return prop;
     }
-
 }

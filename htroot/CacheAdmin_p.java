@@ -50,7 +50,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.http.httpHeader;
@@ -67,18 +66,20 @@ public class CacheAdmin_p {
 
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     public static String dateString(Date date) {
-	return SimpleFormatter.format(date);
+    return SimpleFormatter.format(date);
     }
-
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
 	serverObjects prop = new serverObjects();
 
         String action = ((post == null) ? "info" : post.get("action", "info"));
-        String pathString   = ((post == null) ? "" : post.get("path", "/"));
+        String pathString = ((post == null) ? "" : post.get("path", "/"));
         String fileString = pathString;
-        File   cache  = new File(switchboard.getRootPath(), switchboard.getConfig("proxyCache", "DATA/HTCACHE"));
+
+        // we dont need check the path, because we have do that in plasmaSwitchboard.java - Borg-0300
+        File cache = new File(switchboard.getConfig("proxyCache", "DATA/HTCACHE").toString());    
+
         File   file   = new File(cache, pathString);
         File   dir;
         URL    url    = plasmaHTCache.getURL(cache, file);
@@ -89,6 +90,7 @@ public class CacheAdmin_p {
             dir = file.getParentFile();
             pathString = (new File(pathString)).getParent().replace('\\','/');
         }
+
         // generate dir listing
         String[] list = dir.list();
         File f; String tree  = "Directory of<br>" + ((pathString.length() == 0) ? "domain list" : linkPathString(pathString)) + "<br><br>";
@@ -97,18 +99,19 @@ public class CacheAdmin_p {
         else {
             for (int i = 0; i < list.length; i++) {
                 f = new File(dir, list[i]);
-                if (f.isDirectory())
-                    tree += "<img src=\"/env/grafics/folderIconSmall.gif\" align=\"top\" alt=\"Folder\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString;
-                else
-                    tree += "<img src=\"/env/grafics/fileIconSmall.gif\" align=\"top\" alt=\"File\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString;
+                if (!f.getName().equalsIgnoreCase("responseHeader.db"))
+                    if (f.isDirectory())
+                        tree += "<img src=\"/env/grafics/folderIconSmall.gif\" align=\"top\" alt=\"Folder\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString;
+                    else
+                        tree += "<img src=\"/env/grafics/fileIconSmall.gif\" align=\"top\" alt=\"File\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString;
             }
         }
-        
+
         String info = "";
 
         if (action.equals("info")) {
             if (!(file.isDirectory())) {
-		String urls = htmlFilterContentScraper.urlNormalform(url);
+                String urls = htmlFilterContentScraper.urlNormalform(url);
                 info += "<b>Info for URL <a href=\"" + urls + "\">" + urls + "</a>:</b><br><br>";
                 try {
                     httpHeader fileheader = switchboard.cacheManager.getCachedResponse(plasmaURL.urlHash(url));
@@ -140,14 +143,13 @@ public class CacheAdmin_p {
                 }
             }
         }
-        
-        //
-	prop.put("cachesize", Long.toString(switchboard.cacheManager.currCacheSize/1024));
-	prop.put("cachemax", Long.toString(switchboard.cacheManager.maxCacheSize/1024));
+
+        prop.put("cachesize", Long.toString(switchboard.cacheManager.currCacheSize/1024));
+        prop.put("cachemax", Long.toString(switchboard.cacheManager.maxCacheSize/1024));
         prop.put("tree", tree);
         prop.put("info", info);
         // return rewrite properties
-	return prop;
+        return prop;
     }
 
     private static String formatHeader(httpHeader header) {
@@ -193,5 +195,4 @@ public class CacheAdmin_p {
         }
         return result;
     }
-
 }

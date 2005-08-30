@@ -59,9 +59,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+//import java.util.Calendar;
+//import java.util.GregorianCalendar;
+//import java.util.TimeZone;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
@@ -79,7 +79,7 @@ public final class plasmaHTCache {
 
     private static final int stackLimit = 150;  // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
-    
+
     private kelondroMap responseHeaderDB = null;
     private final LinkedList cacheStack;
     private final TreeMap cacheAge; // a <date+hash, cache-path> - relation
@@ -89,67 +89,68 @@ public final class plasmaHTCache {
     public  static serverLog log;
 
     public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb) {
-	//this.switchboard = switchboard;
-        
+        // this.switchboard = switchboard;
+
         this.log = new serverLog("HTCACHE");
         this.cachePath = htCachePath;
         this.maxCacheSize = maxCacheSize;
-        
-	// set cache path
-	if (!(htCachePath.exists())) {
-	    // make the cache path
-	    htCachePath.mkdir();
-	}
-	if (!(htCachePath.isDirectory())) {
-	    // if the cache does not exists or is a file and not a directory, panic
-	    System.out.println("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
-	    System.exit(0);
-	}
 
-	// open the response header database
-	File dbfile = new File(cachePath, "responseHeader.db");
-	try {
+        // we dont need check the path, because we have do that in plasmaSwitchboard.java - Borg-0300
+/*      // set cache path
+        if (!(htCachePath.exists())) {
+            // make the cache path
+            htCachePath.mkdir();
+        }
+        if (!(htCachePath.isDirectory())) {
+            // if the cache does not exists or is a file and not a directory, panic
+            System.out.println("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
+            System.exit(0);
+        }*/
+
+        // open the response header database
+        File dbfile = new File(cachePath, "responseHeader.db");
+        try {
             if (dbfile.exists())
-		responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400));
-	    else
-		responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, plasmaCrawlLURL.urlHashLength, 150));
-	} catch (IOException e) {
-	    System.out.println("the request header database could not be opened: " + e.getMessage());
-	    System.exit(0);
-	}
+                responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400));
+            else
+                responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, plasmaCrawlLURL.urlHashLength, 150));
+        } catch (IOException e) {
+            System.out.println("the request header database could not be opened: " + e.getMessage());
+            System.exit(0);
+        }
 
-	// init stack
-	cacheStack = new LinkedList();
+        // init stack
+        cacheStack = new LinkedList();
 
         // init cache age and size management
-	cacheAge = new TreeMap();
-	currCacheSize = 0;
-	this.maxCacheSize = maxCacheSize;
-	
-	// start the cache startup thread
-	// this will collect information about the current cache size and elements
-	serverInstantThread.oneTimeJob(this, "cacheScan", log, 5000);
+        cacheAge = new TreeMap();
+        currCacheSize = 0;
+        this.maxCacheSize = maxCacheSize;
+
+        // start the cache startup thread
+        // this will collect information about the current cache size and elements
+        serverInstantThread.oneTimeJob(this, "cacheScan", log, 5000);
     }
-    
+
     public int size() {
         return cacheStack.size();
     }
-    
+
     public void push(Entry entry) {
         cacheStack.add(entry);
     }
-    
+
     public Entry pop() {
         if (cacheStack.size() > 0)
             return (Entry) cacheStack.removeFirst();
         else
             return null;
     }
-    
+
     public void storeHeader(String urlHash, httpHeader responseHeader) throws IOException {
         responseHeaderDB.set(urlHash, responseHeader);
     }
-    
+
     private boolean deleteFile(File file) {
         if (file.exists()) {
             currCacheSize -= file.length();
@@ -158,11 +159,11 @@ public final class plasmaHTCache {
             return false;
         }
     }
-    
+
     public boolean deleteFile(URL url) {
         return deleteFile(getCachePath(url));
     }
-    
+
     public boolean writeFile(URL url, byte[] array) {
         if (array == null) return false;
         File file = getCachePath(url);
@@ -183,7 +184,7 @@ public final class plasmaHTCache {
         writeFileAnnouncement(file);
         return true;
     }
-    
+
     public void writeFileAnnouncement(File file) {
         synchronized (cacheAge) {
             if (file.exists()) {
@@ -193,101 +194,99 @@ public final class plasmaHTCache {
             }
         }
     }
-    
+
     private void cleanup() {
         // clean up cache to have enough space for next entries
         File f;
         while ((currCacheSize > maxCacheSize) && (cacheAge.size() > 0)) {
             f = (File) cacheAge.remove(cacheAge.firstKey());
             if ((f != null) && (f.exists())) {
-                currCacheSize -= f.length();
+                long size = f.length();
+                //currCacheSize -= f.length();
                 if (f.delete()) {
                     log.logInfo("DELETED OLD CACHE : " + f.toString());
+                    currCacheSize -= size;
                     f = f.getParentFile();
-                    if ((f.exists()) && (f.isDirectory())) {
-                        // check size of directory
-                        if (f.list().length == 0) {
-                            // the directory has no files in it; delete it also
-                            if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
-                        }
+                    if (f.isDirectory() && (f.list().length == 0)) {
+                        // the directory has no files in it; delete it also
+                        if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
                     }
                 }
             }
         }
     }
-    
+
     public void close() throws IOException {
         responseHeaderDB.close();
     }
-    
-    private String ageString(long date, File f) {
-	StringBuffer sb = new StringBuffer(32);
-	String s = Long.toHexString(date);
-	for (int i = s.length(); i < 16; i++) sb.append('0');
-        sb.append(s);
-	s = Integer.toHexString(f.hashCode());
-        for (int i = s.length(); i < 8; i++) sb.append('0');
-        sb.append(s);
-	return sb.toString();
-    }
-    
-	public void cacheScan() {
-	    //log.logSystem("STARTING CACHE SCANNING");
-            kelondroMScoreCluster doms = new kelondroMScoreCluster();
-	    int c = 0;
-	    enumerateFiles ef = new enumerateFiles(cachePath, true, false, true, true);
-	    File f;
-	    while (ef.hasMoreElements()) {
-		c++;
-		f = (File) ef.nextElement();
-		long d = f.lastModified();
-                //System.out.println("Cache: " + dom(f));
-                doms.incScore(dom(f));
-		currCacheSize += f.length();
-		cacheAge.put(ageString(d, f), f);
-	    }
-	    //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
-            long ageHours = 0;
-            try {
-                ageHours = (System.currentTimeMillis() -
-                            Long.parseLong(((String) cacheAge.firstKey()).substring(0, 16), 16)) / 3600000;
-            } catch (NumberFormatException e) {
-                //e.printStackTrace();
-            }
-            log.logSystem("CACHE SCANNED, CONTAINS " + c +
-				   " FILES = " + currCacheSize/1048576 + "MB, OLDEST IS " + 
-				   ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) +
-				   " OLD");
-            cleanup();
-            
-            // start to prefetch ip's from dns                       
-            String dom;
-            long start = System.currentTimeMillis();
-            String ip, result = "";
-            c = 0;
-            while ((doms.size() > 0) && (c < 50) && ((System.currentTimeMillis() - start) < 60000)) {
-                dom = (String) doms.getMaxObject();
-                ip = httpc.dnsResolve(dom);
-                if (ip == null) break;
-                result += ", " + dom + "=" + ip;
-                log.logSystem("PRE-FILLED " + dom + "=" + ip);
-                c++;
-                doms.deleteScore(dom);
-                // wait a short while to prevent that this looks like a DoS
-                try {Thread.currentThread().sleep(100);} catch (InterruptedException e) {}
-            }
-            if (result.length() > 2) log.logSystem("PRE-FILLED DNS CACHE, FETCHED " + c +
-				   " ADDRESSES: " + result.substring(2));
-	}
 
-        private String dom(File f) {
-            String s = f.toString().substring(cachePath.toString().length() + 1);
-            int p = s.indexOf("/");
-            if (p < 0) p = s.indexOf("\\");
-            if (p < 0) return null;
-            return s.substring(0, p);
+    private String ageString(long date, File f) {
+        StringBuffer sb = new StringBuffer(32);
+        String s = Long.toHexString(date);
+        for (int i = s.length(); i < 16; i++) sb.append('0');
+            sb.append(s);
+            s = Integer.toHexString(f.hashCode());
+            for (int i = s.length(); i < 8; i++) sb.append('0');
+            sb.append(s);
+        return sb.toString();
+    }
+
+    public void cacheScan() {
+        //log.logSystem("STARTING CACHE SCANNING");
+        kelondroMScoreCluster doms = new kelondroMScoreCluster();
+        int c = 0;
+        enumerateFiles ef = new enumerateFiles(cachePath, true, false, true, true);
+        File f;
+        while (ef.hasMoreElements()) {
+            c++;
+            f = (File) ef.nextElement();
+            long d = f.lastModified();
+            //System.out.println("Cache: " + dom(f));
+            doms.incScore(dom(f));
+            currCacheSize += f.length();
+            cacheAge.put(ageString(d, f), f);
         }
-    
+        //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
+        long ageHours = 0;
+        try {
+            ageHours = (System.currentTimeMillis() -
+                            Long.parseLong(((String) cacheAge.firstKey()).substring(0, 16), 16)) / 3600000;
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        log.logSystem("CACHE SCANNED, CONTAINS " + c +
+                      " FILES = " + currCacheSize/1048576 + "MB, OLDEST IS " + 
+            ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) + " OLD");
+        cleanup();
+
+        // start to prefetch ip's from dns                       
+        String dom;
+        long start = System.currentTimeMillis();
+        String ip, result = "";
+        c = 0;
+        while ((doms.size() > 0) && (c < 50) && ((System.currentTimeMillis() - start) < 60000)) {
+            dom = (String) doms.getMaxObject();
+            ip = httpc.dnsResolve(dom);
+            if (ip == null) break;
+            result += ", " + dom + "=" + ip;
+            log.logSystem("PRE-FILLED " + dom + "=" + ip);
+            c++;
+            doms.deleteScore(dom);
+            // wait a short while to prevent that this looks like a DoS
+            try {Thread.currentThread().sleep(100);} catch (InterruptedException e) {}
+        }
+        if (result.length() > 2) log.logSystem("PRE-FILLED DNS CACHE, FETCHED " + c +
+                                               " ADDRESSES: " + result.substring(2));
+    }
+
+    private String dom(File f) {
+        String s = f.toString().substring(cachePath.toString().length() + 1);
+        int p = s.indexOf("/");
+        if (p < 0) p = s.indexOf("\\");
+        if (p < 0) return null;
+        return s.substring(0, p);
+    }
+
     public httpHeader getCachedResponse(String urlHash) throws IOException {
         Map hdb = responseHeaderDB.get(urlHash);
         if (hdb == null) return null;
@@ -295,19 +294,19 @@ public final class plasmaHTCache {
     }
 
     public boolean full() {
-	return (cacheStack.size() > stackLimit);
+        return (cacheStack.size() > stackLimit);
     }
 
     public boolean empty() {
-	return (cacheStack.size() == 0);
+        return (cacheStack.size() == 0);
     }
-    
+
     public static boolean isPicture(httpHeader response) {
         Object ct = response.get(httpHeader.CONTENT_TYPE);
         if (ct == null) return false;
         return ((String)ct).toUpperCase().startsWith("IMAGE");
     }
-    
+
     public static boolean isText(httpHeader response) {
 //      Object ct = response.get(httpHeader.CONTENT_TYPE);
 //      if (ct == null) return false;
@@ -336,64 +335,76 @@ public final class plasmaHTCache {
 //        );
         int idx = urlString.indexOf("?");
         if (idx > 0) urlString = urlString.substring(0,idx);
-        
+
         idx = urlString.lastIndexOf(".");
         if (idx > 0) urlString = urlString.substring(idx+1);
-        
+
         return plasmaParser.mediaExtContains(urlString);
     }
-        
-    // this method creates from a given host and path a cache path
+
+    /** 
+     * this method creates from a given host and path a cache path
+     * from a given host (which may also be an IPv4 - number, but not IPv6 or
+     * a domain; all without leading 'http://') and a path (which must start
+     * with a leading '/', and may also end in an '/') a path to a file
+     * in the file system with root as given in cachePath is constructed
+     * it will also be ensured, that the complete path exists; if necessary
+     * that path will be generated
+     * @return URL
+     */
     public File getCachePath(URL url) {
-	// from a given host (which may also be an IPv4 - number, but not IPv6 or
-	// a domain; all without leading 'http://') and a path (which must start
-	// with a leading '/', and may also end in an '/') a path to a file
-	// in the file system with root as given in cachePath is constructed
-	// it will also be ensured, that the complete path exists; if necessary
-	// that path will be generated
-        //System.out.println("DEBUG: getCachedPath=" + url.toString());
-	String remotePath = url.getPath();
-	if (!(remotePath.startsWith("/"))) remotePath = "/" + remotePath;
-	if (remotePath.endsWith("/")) remotePath = remotePath + "ndx";
+        // System.out.println("DEBUG: getCachePath:  IN=" + url.toString());
+        String remotePath = url.getPath();
+        if (!(remotePath.startsWith("/"))) remotePath = "/" + remotePath;
+        if (remotePath.endsWith("/")) remotePath = remotePath + "ndx";
         if (remotePath.indexOf('#') > 0) remotePath.substring(0, remotePath.indexOf('#'));
         remotePath = remotePath.replace('?', '_'); 
         remotePath = remotePath.replace('&', '_'); // yes this is not reversible, but that is not needed
         remotePath = remotePath.replace(':', '_'); // yes this is not reversible, but that is not needed
-	int port = url.getPort();
-	if (port < 0) port = 80;
-	return new File(this.cachePath, url.getHost() + ((port == 80) ? "" : ("+" + port)) + remotePath);
+        int port = url.getPort();
+        if (port < 0) port = 80;
+        // System.out.println("DEBUG: getCachePath: OUT=" + url.getHost() + ((port == 80) ? "" : ("+" + port)) + remotePath);
+        return new File(this.cachePath, url.getHost() + ((port == 80) ? "" : ("+" + port)) + remotePath);
     }
 
+    /**
+     * this is the reverse function to getCachePath: it constructs the url as string
+     * from a given storage path
+     */
     public static URL getURL(File cachePath, File f) {
-	// this is the reverse function to getCachePath: it constructs the url as string
-	// from a given storage path
-	String s = f.toString().replace('\\', '/');
-	String c = cachePath.toString().replace('\\', '/');    
-        //System.out.println("DEBUG: getURL for c=" + c + ", s=" + s);
-	int p = s.lastIndexOf(c);
-	if (p >= 0) {
-	    s = s.substring(p + c.length());
-	    while (s.startsWith("/")) s = s.substring(1);
-	    if ((p = s.indexOf("+")) >= 0) {
+        // System.out.println("DEBUG: getURL:  IN: Path=[" + cachePath + "]");
+        // System.out.println("DEBUG: getURL:  IN: File=[" + f + "]");
+        String s = f.toString().replace('\\', '/');
+        String c = cachePath.toString().replace('\\', '/');
+        int p = s.lastIndexOf(c);
+        if (p >= 0) {
+            s = s.substring(p + c.length());
+            while (s.startsWith("/")) s = s.substring(1);
+            if ((p = s.indexOf("+")) >= 0) {
                 s = s.substring(0, p) + ":" + s.substring(p + 1);
-            } else {
+/*          } else {
                 p = s.indexOf("/");
                 if (p < 0)
                     s = s + ":80/";
                 else
-                    s = s.substring(0, p) + ":80" + s.substring(p);
+                    s = s.substring(0, p) + ":80" + s.substring(p);*/
             }
-	    if (s.endsWith("ndx")) s = s.substring(0, s.length() - 3);
-            //System.out.println("DEBUG: getURL url=" + s);
+            if (s.endsWith("ndx")) s = s.substring(0, s.length() - 3);
+            // System.out.println("DEBUG: getURL: OUT=" + s);
+	
             try {
+/*              URL url = null;
+                url = new URL("http://" + s);
+                System.out.println("DEBUG: getURL: URL=" + url.toString());
+                return url;//new URL("http://" + s); */
                 return new URL("http://" + s);
             } catch (Exception e) {
                 return null;
             }
-	}
-	return null;
+        }
+	    return null;
     }
-    
+
     public byte[] loadResource(URL url) {
         // load the url as resource from the cache
         File f = getCachePath(url);
@@ -405,10 +416,10 @@ public final class plasmaHTCache {
             return null;
         }
     }
-    
+
     public static boolean isPOST(String urlString) {
-	return ((urlString.indexOf("?") >= 0) ||
-		(urlString.indexOf("&") >= 0));
+        return ((urlString.indexOf("?") >= 0) ||
+                (urlString.indexOf("&") >= 0));
     }
 
     public static boolean isCGI(String urlString) {
@@ -421,8 +432,8 @@ public final class plasmaHTCache {
     }
 
     public Entry newEntry(Date initDate, int depth, URL url, String name,
-			  httpHeader requestHeader,
-			  String responseStatus, httpHeader responseHeader,
+                          httpHeader requestHeader,
+                          String responseStatus, httpHeader responseHeader,
                           String initiator,
                           plasmaCrawlProfile.entry profile) {
         return new Entry(initDate, depth, url, name, requestHeader, responseStatus, responseHeader, initiator, profile);
@@ -430,108 +441,108 @@ public final class plasmaHTCache {
 
     public final class Entry {
 
-	// the class objects
-	public Date                     initDate;       // the date when the request happened; will be used as a key
-	public int                      depth;          // the depth of prefetching
-	public httpHeader               requestHeader;  // we carry also the header to prevent too many file system access
-	public String                   responseStatus;
-	public httpHeader               responseHeader; // we carry also the header to prevent too many file system access
-	public File                     cacheFile;      // the cache file
-	public byte[]                   cacheArray;     // or the cache as byte-array
-	public URL                      url;
-        public String                   name;           // the name of the link, read as anchor from an <a>-tag
-	public String                   nomalizedURLHash;
-	public String                   nomalizedURLString;
-	public int                      status;         // cache load/hit/stale etc status
-	public Date                     lastModified;
-	public char                     doctype;
-	public String                   language;
-        public plasmaCrawlProfile.entry profile;
-        private String                  initiator;
+    // the class objects
+    public Date                     initDate;       // the date when the request happened; will be used as a key
+    public int                      depth;          // the depth of prefetching
+    public httpHeader               requestHeader;  // we carry also the header to prevent too many file system access
+    public String                   responseStatus;
+    public httpHeader               responseHeader; // we carry also the header to prevent too many file system access
+    public File                     cacheFile;      // the cache file
+    public byte[]                   cacheArray;     // or the cache as byte-array
+    public URL                      url;
+    public String                   name;           // the name of the link, read as anchor from an <a>-tag
+    public String                   nomalizedURLHash;
+    public String                   nomalizedURLString;
+    public int                      status;         // cache load/hit/stale etc status
+    public Date                     lastModified;
+    public char                     doctype;
+    public String                   language;
+    public plasmaCrawlProfile.entry profile;
+    private String                  initiator;
 
+    public Entry(Date initDate, int depth, URL url, String name,
+                 httpHeader requestHeader,
+                 String responseStatus, httpHeader responseHeader,
+                 String initiator,
+                 plasmaCrawlProfile.entry profile) {
+
+        // normalize url - Borg-0300
+        serverLog.logDebug("PLASMA", "Entry: URL=" + url.toString());
+        this.nomalizedURLString = htmlFilterContentScraper.urlNormalform(url);
+        try {
+            this.url            = new URL(nomalizedURLString);
+        } catch (MalformedURLException e) {
+            System.out.println("internal error at httpdProxyCache.Entry: " + e);
+            System.exit(-1);
+        }
+        this.name           = name;
+        this.cacheFile      = getCachePath(this.url);
+        this.nomalizedURLHash        = plasmaCrawlLURL.urlHash(nomalizedURLString);
+
+       // assigned:
+        this.initDate       = initDate;
+        this.depth          = depth;
+        this.requestHeader  = requestHeader;
+        this.responseStatus = responseStatus;
+        this.responseHeader = responseHeader;
+        this.profile        = profile;
+        this.initiator      = (initiator == null) ? null : ((initiator.length() == 0) ? null: initiator);
+
+        // calculated:
+        if (responseHeader == null) {
+           try {
+               throw new RuntimeException("RESPONSE HEADER = NULL");
+           } catch (Exception e) {
+               System.out.println("RESPONSE HEADER = NULL in " + url);
+               e.printStackTrace();
+               System.exit(0);
+           }
+
+           lastModified = serverDate.correctedGMTDate();
+        } else {
+            lastModified = responseHeader.lastModified();
+            if (lastModified == null) lastModified = serverDate.correctedGMTDate(); // does not exist in header
+        }
+        this.doctype = plasmaWordIndexEntry.docType(responseHeader.mime());
+        if (this.doctype == plasmaWordIndexEntry.DT_UNKNOWN) this.doctype = plasmaWordIndexEntry.docType(url);
+        this.language = plasmaWordIndexEntry.language(url);
+
+        // to be defined later:
+        this.cacheArray     = null;
+    }
 	
-	public Entry(Date initDate, int depth, URL url, String name,
-		     httpHeader requestHeader,
-		     String responseStatus, httpHeader responseHeader,
-                     String initiator,
-                     plasmaCrawlProfile.entry profile) {
+    public String name() {
+        return name;
+    }        
+    public String initiator() {
+        return initiator;
+    }
+    public boolean proxy() {
+        return initiator() == null;
+    }
+    public long size() {
+       if (cacheArray == null) return 0; else return cacheArray.length;
+    }
 
-            // normalize url
-            this.nomalizedURLString = htmlFilterContentScraper.urlNormalform(url);
-            try {
-                this.url            = new URL(nomalizedURLString);
-            } catch (MalformedURLException e) {
-                System.out.println("internal error at httpdProxyCache.Entry: " + e);
-                System.exit(-1);
-            }
-            this.name           = name;
-	    this.cacheFile      = getCachePath(this.url);
-	    this.nomalizedURLHash        = plasmaCrawlLURL.urlHash(nomalizedURLString);
-	                 
-	    // assigned:
-	    this.initDate       = initDate;
-	    this.depth          = depth;
-	    this.requestHeader  = requestHeader;
-	    this.responseStatus = responseStatus;
-	    this.responseHeader = responseHeader;
-	    this.profile        = profile;
-            this.initiator      = (initiator == null) ? null : ((initiator.length() == 0) ? null: initiator);
-
-            // calculated:
-	    if (responseHeader == null) {
-		try {
-		    throw new RuntimeException("RESPONSE HEADER = NULL");
-		} catch (Exception e) {
-		    System.out.println("RESPONSE HEADER = NULL in " + url);
-		    e.printStackTrace();
-		    System.exit(0);
-		}
-
-		lastModified = serverDate.correctedGMTDate();
-	    } else {
-		lastModified = responseHeader.lastModified();
-                if (lastModified == null) lastModified = serverDate.correctedGMTDate(); // does not exist in header
-	    }
-	    this.doctype = plasmaWordIndexEntry.docType(responseHeader.mime());
-            if (this.doctype == plasmaWordIndexEntry.DT_UNKNOWN) this.doctype = plasmaWordIndexEntry.docType(url);
-	    this.language = plasmaWordIndexEntry.language(url);
-
-	    // to be defined later:
-	    this.cacheArray     = null;
-	}
-	
-        public String name() {
-            return name;
-        }        
-        public String initiator() {
-            return initiator;
+    public URL referrerURL() {
+        if (requestHeader == null) return null;
+        try {
+            return new URL((String) requestHeader.get(httpHeader.REFERER, ""));
+        } catch (Exception e) {
+            return null;
         }
-        public boolean proxy() {
-            return initiator() == null;
-        }
-	public long size() {
-	    if (cacheArray == null) return 0; else return cacheArray.length;
-	}
+    }
 
-        public URL referrerURL() {
-            if (requestHeader == null) return null;
-            try {
-                return new URL((String) requestHeader.get(httpHeader.REFERER, ""));
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        
-        /*
+    /*
 	public boolean update() {
 	    return ((status == CACHE_FILL) || (status == CACHE_STALE_RELOAD_GOOD));
 	}
 	*/
 
-	// the following three methods for cache read/write granting shall be as loose as possible
-	// but also as strict as necessary to enable caching of most items
+    // the following three methods for cache read/write granting shall be as loose as possible
+    // but also as strict as necessary to enable caching of most items
 	
-	public String shallStoreCacheForProxy() {
+    public String shallStoreCacheForProxy() {
             // returns NULL if the answer is TRUE
             // in case of FALSE, the reason as String is returned
 	    

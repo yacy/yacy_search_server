@@ -100,25 +100,25 @@
 
 package de.anomic.plasma;
 
-import java.io.BufferedReader;
+// import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
+// import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+// import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
+// import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.TreeMap;
-import java.util.Vector;
+// import java.util.TreeMap;
+// import java.util.Vector;
 
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
@@ -130,23 +130,22 @@ import de.anomic.kelondro.kelondroTables;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
+// import de.anomic.server.serverDate;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverFileUtils;
+// import de.anomic.server.serverFileUtils;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacySeedDB;
+// import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
-
 
     // load slots
     public static int crawlSlots = 10;
@@ -158,7 +157,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static plasmaURLPattern urlBlacklist;
     
     // storage management    
-    private File                        cachePath;
+    private File                        cachePath; // do we need that ?
     private File                        plasmaPath;
     public  File                        listsPath;
     public  plasmaURLPool               urlPool;
@@ -190,15 +189,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private Object  crawlingPausedSync = new Object();
     private boolean crawlingIsPaused = false;  
 	private static plasmaSwitchboard sb;
-    
+
     public plasmaSwitchboard(String rootPath, String initPath, String configPath) throws IOException {
-	super(rootPath, initPath, configPath);
-        
+        super(rootPath, initPath, configPath);
+
         // set loglevel and log
-	setLog(new serverLog("PLASMA"));
-        
-	// load values from configs
-	plasmaPath   = new File(rootPath, getConfig("dbPath", "PLASMADB"));
+        setLog(new serverLog("PLASMA"));
+
+        // load values from configs
+        plasmaPath   = new File(rootPath, getConfig("dbPath", "PLASMADB"));
         listsPath      = new File(rootPath, getConfig("listsPath", "LISTS"));
         remoteProxyHost = getConfig("remoteProxyHost", "");
         try {
@@ -216,14 +215,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         proxyLastAccess = System.currentTimeMillis() - 60000;
         
         if (!(listsPath.exists())) listsPath.mkdirs();
-        
-	// load coloured lists
-	if (blueList == null) {
-	    // read only once upon first instantiation of this class
-	    String f = getConfig("plasmaBlueList", null);
-	    if (f != null) blueList = kelondroMSetTools.loadList(new File(f)); else blueList= new TreeSet();
-	}
-        
+
+        // load coloured lists
+        if (blueList == null) {
+            // read only once upon first instantiation of this class
+            String f = getConfig("plasmaBlueList", null);
+            if (f != null) blueList = kelondroMSetTools.loadList(new File(f)); else blueList= new TreeSet();
+        }
+
         // load the black-list / inspired by [AS]
         urlBlacklist = new plasmaURLPattern(new File(getRootPath(), getConfig("listsPath", "DATA/LISTS")));
         String f = getConfig("proxyBlackListsActive", null);
@@ -237,8 +236,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (stopwords == null) {
             stopwords = kelondroMSetTools.loadList(new File(rootPath, "yacy.stopwords"));
         }
-        
-	// read memory amount
+
+        // read memory amount
         int ramLURL    = Integer.parseInt(getConfig("ramCacheLURL", "1024")) / 1024;
         int ramNURL    = Integer.parseInt(getConfig("ramCacheNURL", "1024")) / 1024;
         int ramEURL    = Integer.parseInt(getConfig("ramCacheEURL", "1024")) / 1024;
@@ -254,7 +253,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logSystem("Message Cache memory = " + ppRamString(ramMessage));
         log.logSystem("Wiki    Cache memory = " + ppRamString(ramWiki));
         
-	// make crawl profiles database and default profiles
+        // make crawl profiles database and default profiles
         log.logSystem("Initializing Crawl Profiles");
         profiles = new plasmaCrawlProfile(new File(plasmaPath, "crawlProfiles0.db"));
         initProfiles();
@@ -270,7 +269,21 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // start a cache manager
         log.logSystem("Starting HT Cache Manager");
-        File htCachePath = new File(getRootPath(), getConfig("proxyCache","HTCACHE"));
+
+        // create the Cache directorie - Borg-0300
+        String cp = getConfig("proxyCache", "DATA/HTCACHE");
+        cp = cp.replace('\\', '/');
+        if (cp.endsWith("/")) cp = cp.substring(0,cp.length() - 1);                 
+        File htCachePath = new File(cp);
+        if (!(htCachePath.exists())) htCachePath.mkdirs();
+        if (!(htCachePath.isDirectory())) {
+            // if the cache does not exists or is a file and not a directory, panic
+            serverLog.logSystem("PLASMA", "the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");        		
+            System.exit(0);
+        } else {
+            serverLog.logInfo("PLASMA", "proxyCache=" + cp);
+        }
+
         long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig("proxyCacheSize", "2")); // this is megabyte
         this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP);
         
@@ -309,7 +322,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	messageDB = new messageBoard(new File(getRootPath(), "DATA/SETTINGS/message.db"), ramMessage);
 	log.logSystem("Starting Wiki Board");
         wikiDB = new wikiBoard(new File(getRootPath(), "DATA/SETTINGS/wiki.db"),
-			       new File(getRootPath(), "DATA/SETTINGS/wiki-bkp.db"), ramWiki);
+                 new File(getRootPath(), "DATA/SETTINGS/wiki-bkp.db"), ramWiki);
 
         // init cookie-Monitor
         log.logSystem("Starting Cookie Monitor");
