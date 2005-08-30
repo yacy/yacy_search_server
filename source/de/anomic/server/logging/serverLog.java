@@ -57,6 +57,8 @@ public final class serverLog {
     public static final int LOGLEVEL_CONFIG  = Level.CONFIG.intValue(); // regular system status information (i.e. start-up messages)
     public static final int LOGLEVEL_INFO    = Level.INFO.intValue(); // regular action information (i.e. any httpd request URL)
     public static final int LOGLEVEL_FINE    = Level.FINE.intValue(); // in-function status debug output
+    public static final int LOGLEVEL_FINER    = Level.FINER.intValue(); // in-function status debug output
+    public static final int LOGLEVEL_FINEST    = Level.FINEST.intValue(); // in-function status debug output
 
     // these categories are also present as character tokens
     public static final char LOGTOKEN_ZERO    = 'Z';
@@ -65,6 +67,8 @@ public final class serverLog {
     public static final char LOGTOKEN_CONFIG  = 'S';
     public static final char LOGTOKEN_INFO    = 'I';
     public static final char LOGTOKEN_FINE    = 'D';
+    public static final char LOGTOKEN_FINER   = 'D';
+    public static final char LOGTOKEN_FINEST  = 'D';
 
     private final Logger theLogger;
 
@@ -92,6 +96,12 @@ public final class serverLog {
     public void logFine(String message) {this.theLogger.fine(message);}
     public void logFine(String message, Throwable thrown) {this.theLogger.log(Level.FINE,message,thrown);}
 
+    public void logFiner(String message) {this.theLogger.finer(message);}
+    public void logFiner(String message, Throwable thrown) {this.theLogger.log(Level.FINER,message,thrown);}    
+    
+    public void logFinest(String message) {this.theLogger.finest(message);}
+    public void logFinest(String message, Throwable thrown) {this.theLogger.log(Level.FINEST,message,thrown);}      
+    
     // static log messages: log everything
     private static void log(String appName, int messageLevel, String message) {
         Logger.getLogger(appName).log(Level.parse(Integer.toString(messageLevel)),message);
@@ -124,11 +134,26 @@ public final class serverLog {
         Logger.getLogger(appName).log(Level.INFO,message,thrown);
     }
     public static void logFine(String appName, String message) {
-        Logger.getLogger(appName).finest(message);
+        Logger.getLogger(appName).fine(message);
     }
     public static void logFine(String appName, String message, Throwable thrown) {
-        Logger.getLogger(appName).log(Level.FINEST,message,thrown);
+        Logger.getLogger(appName).log(Level.FINER,message,thrown);
     }
+    
+    public static void logFiner(String appName, String message) {
+        Logger.getLogger(appName).finer(message);
+    }
+    public static void logFiner(String appName, String message, Throwable thrown) {
+        Logger.getLogger(appName).log(Level.FINER,message,thrown);
+    }
+    
+    public static void logFinest(String appName, String message) {
+        Logger.getLogger(appName).finest(message);
+    }
+    public static void logFinest(String appName, String message, Throwable thrown) {
+        Logger.getLogger(appName).log(Level.FINEST,message,thrown);
+    }    
+    
     public static final void configureLogging(File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
         FileInputStream fileIn = null;
         try {

@@ -33,8 +33,6 @@ public class serverSimpleLogFormatter extends SimpleFormatter {
           int logLevel = record.getLevel().intValue();
           if (logLevel == serverLog.LOGLEVEL_SEVERE) 
               this.buffer.append(serverLog.LOGTOKEN_SEVERE); 
-          else if (logLevel == serverLog.LOGLEVEL_SEVERE)
-              this.buffer.append(serverLog.LOGTOKEN_SEVERE); 
           else if (logLevel == serverLog.LOGLEVEL_WARNING) 
               this.buffer.append(serverLog.LOGTOKEN_WARNING);
           else if (logLevel == serverLog.LOGLEVEL_CONFIG)
@@ -43,6 +41,10 @@ public class serverSimpleLogFormatter extends SimpleFormatter {
               this.buffer.append(serverLog.LOGTOKEN_INFO);
           else if (logLevel == serverLog.LOGLEVEL_FINE) 
               this.buffer.append(serverLog.LOGTOKEN_FINE);
+          else if (logLevel == serverLog.LOGLEVEL_FINER) 
+              this.buffer.append(serverLog.LOGTOKEN_FINER);        
+          else if (logLevel == serverLog.LOGLEVEL_FINEST) 
+              this.buffer.append(serverLog.LOGTOKEN_FINEST);            
           else 
               this.buffer.append(serverLog.LOGTOKEN_FINE);
           this.buffer.append(' ');
