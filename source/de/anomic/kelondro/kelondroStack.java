@@ -264,34 +264,39 @@ public class kelondroStack extends kelondroRecords {
     }
 
     public int imp(File file, String separator) throws IOException {
-	// imports a value-separated file, returns number of records that have been read
-	RandomAccessFile f = new RandomAccessFile(file,"r");
-	String s;
-	StringTokenizer st;
-	int recs = 0;
-	byte[][] buffer = new byte[columns()][];
-	int c;
-	int line = 0;
-	while ((s = f.readLine()) != null) {
-	    s = s.trim();
-	    line++;
-	    if ((s.length() > 0) && (!(s.startsWith("#")))) {
-		st = new StringTokenizer(s, separator);
-		// buffer the entry
-		c = 0;
-		while ((c < columns()) && (st.hasMoreTokens())) {
-		    buffer[c++] = st.nextToken().trim().getBytes();
-		}
-		if ((st.hasMoreTokens()) || (c != columns())) {
-		    System.err.println("inapropriate number of entries in line " + line);
-		} else {
-		    push(buffer);
-		    recs++;
-		}
-
-	    }
-	}
-	return recs;
+        // imports a value-separated file, returns number of records that have been read
+        RandomAccessFile f = null;
+        try {
+            f = new RandomAccessFile(file,"r");
+            String s;
+            StringTokenizer st;
+            int recs = 0;
+            byte[][] buffer = new byte[columns()][];
+            int c;
+            int line = 0;
+            while ((s = f.readLine()) != null) {
+                s = s.trim();
+                line++;
+                if ((s.length() > 0) && (!(s.startsWith("#")))) {
+                    st = new StringTokenizer(s, separator);
+                    // buffer the entry
+                    c = 0;
+                    while ((c < columns()) && (st.hasMoreTokens())) {
+                        buffer[c++] = st.nextToken().trim().getBytes();
+                    }
+                    if ((st.hasMoreTokens()) || (c != columns())) {
+                        System.err.println("inapropriate number of entries in line " + line);
+                    } else {
+                        push(buffer);
+                        recs++;
+                    }
+                    
+                }
+            }
+            return recs; 
+        } finally {
+            if (f!=null) try{f.close();}catch(Exception e){}
+        }
     }
 
     public String hp(Handle h) {
@@ -349,17 +354,23 @@ public class kelondroStack extends kelondroRecords {
 		    ret = (i + " records imported").getBytes();
 		} else if (args[0].equals("-s")) {
 		    String db = args[2];
-		    BufferedReader f = new BufferedReader(new FileReader(args[1]));
-		    String m;
-		    while (true) {
-			m = f.readLine();
-			if (m == null) break;
-			if ((m.length() > 1) && (!m.startsWith("#"))) {
-			    m = m + " " + db;
-			    cmd(line2args(m));
-			}
-		    }
-		    ret = null;
+		    BufferedReader f = null;
+            try {
+                f = new BufferedReader(new FileReader(args[1]));
+                
+                String m;
+                while (true) {
+                    m = f.readLine();
+                    if (m == null) break;
+                    if ((m.length() > 1) && (!m.startsWith("#"))) {
+                        m = m + " " + db;
+                        cmd(line2args(m));
+                    }
+                }
+                ret = null;            
+            } finally {
+                if (f != null) try {f.close();}catch(Exception e) {}
+            }
 		} else if (args[0].equals("-g")) {
 		    kelondroStack fm = new kelondroStack(new File(args[2]), 0x100000);
 		    byte[][] ret2 = fm.pop(Integer.parseInt(args[1]));

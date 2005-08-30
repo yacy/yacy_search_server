@@ -85,9 +85,16 @@ public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
 
     public void close() throws IOException {
 	RAFile.close();
+    RAFile = null;
     }
 
-
+    protected void finalize() throws Throwable {
+        if (RAFile != null) {
+            this.close();
+        }
+        super.finalize();
+    }
+    
     // some static tools
     public static void writeProperties(File f, Properties props, String comment) throws IOException {
 	File fp = f.getParentFile();

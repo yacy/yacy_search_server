@@ -1216,17 +1216,22 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 		    ret = (i + " records imported").getBytes();
 		} else if (args[0].equals("-s")) {
 		    String db = args[2];
-		    BufferedReader f = new BufferedReader(new FileReader(args[1]));
-		    String m;
-		    while (true) {
-			m = f.readLine();
-			if (m == null) break;
-			if ((m.length() > 1) && (!m.startsWith("#"))) {
-			    m = m + " " + db;
-			    cmd(line2args(m));
-			}
-		    }
-		    ret = null;
+		    BufferedReader f = null;
+            try {
+                f = new BufferedReader(new FileReader(args[1]));
+                String m;
+                while (true) {
+                    m = f.readLine();
+                    if (m == null) break;
+                    if ((m.length() > 1) && (!m.startsWith("#"))) {
+                        m = m + " " + db;
+                        cmd(line2args(m));
+                    }
+                }
+                ret = null;
+            } finally {
+                if (f != null) try {f.close();}catch(Exception e){}
+            }
 		} else if (args[0].equals("-g")) {
 		    kelondroTree fm = new kelondroTree(new File(args[1]), 0x100000);
 		    byte[][] ret2 = fm.get(args[2].getBytes());

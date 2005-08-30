@@ -205,8 +205,19 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
             bufferTail.force();
             System.out.println("wrote " + name + " tail");
         }
-        RAChannel.close();
-        RAFile.close();
+        RAChannel.close(); 
+        RAChannel = null;
+        RAFile.close(); 
+        RAFile = null;
+    }
+    
+    protected void finalize() throws Throwable {
+        if (RAChannel != null) {
+            try {RAChannel.close();}catch(Exception e){}
+        }
+        if (RAFile != null) {
+            try {RAFile.close();}catch(Exception e){}
+        }
     }
     
     
