@@ -49,114 +49,103 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public final class serverLog {
-    
-//    // log-level categories
+
+    // log-level categories
     public static final int LOGLEVEL_ZERO    = Level.OFF.intValue(); // no output at all
-    public static final int LOGLEVEL_SEVERE = Level.SEVERE.intValue(); // system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
+    public static final int LOGLEVEL_SEVERE  = Level.SEVERE.intValue(); // system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
     public static final int LOGLEVEL_WARNING = Level.WARNING.intValue(); // uncritical service failure, may require user activity (i.e. input required, wrong authorization)
     public static final int LOGLEVEL_CONFIG  = Level.CONFIG.intValue(); // regular system status information (i.e. start-up messages)
     public static final int LOGLEVEL_INFO    = Level.INFO.intValue(); // regular action information (i.e. any httpd request URL)
-    public static final int LOGLEVEL_FINE   = Level.FINE.intValue(); // in-function status debug output
-//    
-//    // these categories are also present as character tokens
+    public static final int LOGLEVEL_FINE    = Level.FINE.intValue(); // in-function status debug output
+
+    // these categories are also present as character tokens
     public static final char LOGTOKEN_ZERO    = 'Z';
-    public static final char LOGTOKEN_SEVERE = 'E';
+    public static final char LOGTOKEN_SEVERE  = 'E';
     public static final char LOGTOKEN_WARNING = 'W';
     public static final char LOGTOKEN_CONFIG  = 'S';
     public static final char LOGTOKEN_INFO    = 'I';
     public static final char LOGTOKEN_FINE    = 'D';
 
     private final Logger theLogger;
-    
+
     public serverLog(String appName) {
         this.theLogger = Logger.getLogger(appName);
         //this.theLogger.setLevel(Level.FINEST); // set a default level
     }
-       
+
     public void setLevel(Level newLevel) {
         this.theLogger.setLevel(newLevel);
     }
-    
-    public void logSevere(String message)   {this.theLogger.severe(message);}
-    public void logSevere(String message, Throwable thrown)   {this.theLogger.log(Level.SEVERE,message,thrown);}
-    
+
+    public void logSevere(String message) {this.theLogger.severe(message);}
+    public void logSevere(String message, Throwable thrown) {this.theLogger.log(Level.SEVERE,message,thrown);}
+
     public void logWarning(String message) {this.theLogger.warning(message);}
     public void logWarning(String message, Throwable thrown) {this.theLogger.log(Level.WARNING,message,thrown);}
-    
-    public void logConfig(String message)  {this.theLogger.config(message);}
-    public void logConfig(String message, Throwable thrown)  {this.theLogger.log(Level.CONFIG,message,thrown);}
-    
-    public void logInfo(String message)    {this.theLogger.info(message);}
-    public void logInfo(String message, Throwable thrown)    {this.theLogger.log(Level.INFO,message,thrown);}
-    
-    public void logFine(String message)   {this.theLogger.fine(message);}
-    public void logFine(String message, Throwable thrown)   {this.theLogger.log(Level.FINE,message,thrown);}
 
-    
+    public void logConfig(String message) {this.theLogger.config(message);}
+    public void logConfig(String message, Throwable thrown) {this.theLogger.log(Level.CONFIG,message,thrown);}
+
+    public void logInfo(String message) {this.theLogger.info(message);}
+    public void logInfo(String message, Throwable thrown) {this.theLogger.log(Level.INFO,message,thrown);}
+
+    public void logFine(String message) {this.theLogger.fine(message);}
+    public void logFine(String message, Throwable thrown) {this.theLogger.log(Level.FINE,message,thrown);}
+
     // static log messages: log everything
     private static void log(String appName, int messageLevel, String message) {
         Logger.getLogger(appName).log(Level.parse(Integer.toString(messageLevel)),message);
     }
-    
     private void log(Level level, String msg, Throwable thrown) {
         this.theLogger.log(level, msg, thrown);
     }
-        
-    public static void logSevere(String appName, String message)   {
+    public static void logSevere(String appName, String message) {
         Logger.getLogger(appName).severe(message);
     }
-    public static void logSevere(String appName, String message, Throwable thrown)   {
+    public static void logSevere(String appName, String message, Throwable thrown) {
         Logger.getLogger(appName).log(Level.SEVERE,message,thrown);
     }
-    
     public static void logWarning(String appName, String message) {
         Logger.getLogger(appName).warning(message);
     }
     public static void logWarning(String appName, String message, Throwable thrown) {
         Logger.getLogger(appName).log(Level.WARNING,message,thrown);
     }
-    
-    public static void logConfig(String appName, String message)  {
+    public static void logConfig(String appName, String message) {
         Logger.getLogger(appName).config(message);
     }
-    public static void logConfig(String appName, String message, Throwable thrown)  {
+    public static void logConfig(String appName, String message, Throwable thrown) {
         Logger.getLogger(appName).log(Level.CONFIG,message,thrown);
     }    
-    
-    public static void logInfo(String appName, String message)    {
+    public static void logInfo(String appName, String message) {
         Logger.getLogger(appName).info(message);
     }
-    public static void logInfo(String appName, String message, Throwable thrown)    {
+    public static void logInfo(String appName, String message, Throwable thrown) {
         Logger.getLogger(appName).log(Level.INFO,message,thrown);
     }
-    
-    public static void logFine(String appName, String message)   {
+    public static void logFine(String appName, String message) {
         Logger.getLogger(appName).finest(message);
     }
-    public static void logFine(String appName, String message, Throwable thrown)   {
+    public static void logFine(String appName, String message, Throwable thrown) {
         Logger.getLogger(appName).log(Level.FINEST,message,thrown);
-    }    
-    
-    
+    }
     public static final void configureLogging(File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
-        
         FileInputStream fileIn = null;
         try {
-            System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());            
+            System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());
             fileIn = new FileInputStream(loggingConfigFile);
-            
+
             // loading the logger configuration from file
             LogManager logManager = LogManager.getLogManager();
             logManager.readConfiguration(fileIn);
-            
+
             // creating the logging directory
             File log = new File("./log/");
-            if(!log.canRead()) log.mkdir();            
-            
+            if(!log.canRead()) log.mkdir();
+
             // generating the root logger
             Logger logger = Logger.getLogger("");
-            
-            
+
 //          System.setOut(new PrintStream(new LoggerOutputStream(Logger.getLogger("STDOUT"),Level.FINEST)));
 //          System.setErr(new PrintStream(new LoggerOutputStream(Logger.getLogger("STDERR"),Level.SEVERE)));
         } finally {
