@@ -586,9 +586,13 @@ public class yacySeedDB {
         }
                 
         if ((check == null) || (uv == null) || (uv.size() != check.size())) {
+            serverLog.logDebug("YACY","SaveSeedList: Local and uploades seed-list " +
+                               "contains varying numbers of entries." +
+                               "\n\tLocal seed-list:  " + uv.size() + " entries" + 
+                               "\n\tRemote seed-list: " + check.size() + " enties");
             return false;
         } else {
-            serverLog.logDebug("YACY","SaveSeedList: Comparing local and uploades seed-list ...");
+            serverLog.logDebug("YACY","SaveSeedList: Comparing local and uploades seed-list entries ...");
             int i;
             for (i = 0; i < uv.size(); i++) {
                 if (!(((String) uv.elementAt(i)).equals((String) check.elementAt(i)))) return false;

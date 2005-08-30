@@ -1863,34 +1863,45 @@ cd ..
     }
 
     public static String put(String host,
-			   File localFile, String remotePath, String remoteName,
-			   String account, String password) {
-	// returns the log
-	try {
-	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    PrintStream out = new PrintStream(baos);
-	    ftpc c = new ftpc(System.in, out, out);
-	    c.exec("open " + host, false);
-	    c.exec("user " + account + " " + password, false);
-	    if (remotePath != null) {
-            remotePath = remotePath.replace('\\', '/');
+            File localFile, String remotePath, String remoteName,
+            String account, String password) throws IOException {
+        // returns the log
+        try {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            PrintStream out = new PrintStream(bout);
+            
+            ByteArrayOutputStream berr = new ByteArrayOutputStream();
+            PrintStream err = new PrintStream(berr);            
+            
+            ftpc c = new ftpc(System.in, out, err);
+            c.exec("open " + host, false);
+            c.exec("user " + account + " " + password, false);
+            if (remotePath != null) {
+                remotePath = remotePath.replace('\\', '/');
                 c.exec("cd " + remotePath, false);
             }
-	    c.exec("binary", false);
-	    c.exec("put " + localFile.toString() + ((remoteName.length() == 0) ? "" : (" " + remoteName)), false);
-	    c.exec("close", false);
-	    c.exec("exit", false);
-	    out.close();
-	    String log = baos.toString();
-	    baos.close();
-	    return log;
-	} catch (IOException e) {
-	    return "";
-	} catch (java.security.AccessControlException e) {
-	    System.out.println("ERROR: ftp put failed:" + e.getMessage());
-	    e.printStackTrace();
-	    return "";
-	}
+            c.exec("binary", false);
+            c.exec("put " + localFile.toString() + ((remoteName.length() == 0) ? "" : (" " + remoteName)), false);
+            c.exec("close", false);
+            c.exec("exit", false);
+            
+            out.close();
+            err.close();
+            
+            String outLog = bout.toString();
+            bout.close();
+            
+            String errLog = berr.toString();
+            berr.close();
+            
+            if (errLog.length() > 0) {
+                throw new IOException ("Ftp put failed:\n" + errLog);
+            }
+            
+            return outLog;
+        } catch (IOException e) {
+            throw e;
+        }
     }
 
     public static void get(String host,
@@ -1925,9 +1936,13 @@ cd ..
 	public pt(String h, File l, String rp, String rn, String a, String p) {
 	    host = h; localFile = l; remotePath = rp; remoteName = rn; account = a; password = p;
 	}
-	public final void run() {
-	    put(host, localFile, remotePath, remoteName, account, password);
-	}
+    public final void run() {
+        try {
+            put(host, localFile, remotePath, remoteName, account, password);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     }
 
     public static Thread putAsync(String host,
@@ -1989,7 +2004,12 @@ cd ..
 	    if (args[0].equals("-get")) {
 		get(args[1], args[2], new File(args[3]), args[4], args[5]);
 	    } else if (args[0].equals("-put")) {
-		put(args[1], new File(args[2]), args[3], "", args[4], args[5]);
+            try {
+                put(args[1], new File(args[2]), args[3], "", args[4], args[5]);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 	    } else {
 		printHelp();
 	    }
