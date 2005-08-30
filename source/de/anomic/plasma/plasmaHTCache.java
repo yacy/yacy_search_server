@@ -133,18 +133,24 @@ public final class plasmaHTCache {
     }
 
     public int size() {
-        return cacheStack.size();
+        synchronized (this.cacheStack) {
+            return this.cacheStack.size();
+        }        
     }
 
     public void push(Entry entry) {
-        cacheStack.add(entry);
+        synchronized (this.cacheStack) {
+            this.cacheStack.add(entry);
+        }
     }
 
     public Entry pop() {
-        if (cacheStack.size() > 0)
-            return (Entry) cacheStack.removeFirst();
+        synchronized (this.cacheStack) {
+        if (this.cacheStack.size() > 0)
+            return (Entry) this.cacheStack.removeFirst();
         else
             return null;
+        }
     }
 
     public void storeHeader(String urlHash, httpHeader responseHeader) throws IOException {
