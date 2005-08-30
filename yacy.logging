@@ -16,6 +16,7 @@ YACY.level = FINEST
 HTCACHE.level = INFO
 PLASMA.level = INFO
 SERVER.level = INFO
+WORDMIGRATION.level = FINEST
 
 # List of global handlers
 handlers = java.util.logging.FileHandler,\
