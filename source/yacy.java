@@ -236,6 +236,7 @@ public final class yacy {
             }
 
             sb.setConfig("version", Float.toString(version));
+            sb.setConfig("vString", combinedVersionString2PrettyString(Float.toString(version)));
             sb.setConfig("vdate", vDATE);
             sb.setConfig("applicationRoot", homePath);
             sb.setConfig("startupTime", Long.toString(startup));

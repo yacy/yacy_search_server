@@ -116,7 +116,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     
     
     private static htmlFilterTransformer transformer = null;
-    public  static final String userAgent = "yacy (" + httpc.systemOST +") yacy.net";
+    public static final String userAgent = "yacy (" + httpc.systemOST +") yacy.net";
     private File   htRootPath = null;
     
     private static boolean doAccessLogging = false; 
@@ -178,6 +178,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
      * Reusable {@link StringBuffer} for logging
      */
     private final StringBuffer logMessage = new StringBuffer();
+    
+    /**
+     * Reusable {@link StringBuffer} to generate the useragent string
+     */
+    private final StringBuffer userAgentStr = new StringBuffer();
     
     // class methods
     public httpdProxyHandler(serverSwitch sb) {
@@ -351,7 +356,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // set another userAgent, if not yellowlisted
             if ((yellowList != null) && (!(yellowList.contains(domain(hostlow))))) {
                 // change the User-Agent
-                requestHeader.put(httpHeader.USER_AGENT, userAgent);
+                requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
             }
             
             // decide wether to use a cache entry or connect to the network
@@ -852,7 +857,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         // set another userAgent, if not yellowlisted
         if (!(yellowList.contains(domain(hostlow)))) {
             // change the User-Agent
-            requestHeader.put(httpHeader.USER_AGENT, userAgent);
+            requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
         }
         
         // resolve yacy and yacyh domains
@@ -930,7 +935,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // set another userAgent, if not yellowlisted
             if (!(yellowList.contains(domain(host).toLowerCase()))) {
                 // change the User-Agent
-                requestHeader.put(httpHeader.USER_AGENT, userAgent);
+                requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
             }
             
             // resolve yacy and yacyh domains
@@ -1167,6 +1172,25 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         out.flush();
         out.write(body.getBytes());
         out.flush();
+    }
+    
+    private String generateUserAgent(httpHeader requestHeaders) {
+        this.userAgentStr.setLength(0);
+        
+        String browserUserAgent = (String) requestHeaders.get(httpHeader.USER_AGENT, userAgent);
+        int pos = browserUserAgent.lastIndexOf(')');
+        if (pos >= 0) {
+            this.userAgentStr
+            .append(browserUserAgent.substring(0,pos))
+            .append("; YaCy ")
+            .append(switchboard.getConfig("vString","0.1"))
+            .append("; yacy.net")
+            .append(browserUserAgent.substring(pos));
+        } else {
+            this.userAgentStr.append(browserUserAgent);
+        }
+        
+        return this.userAgentStr.toString();
     }
     
     /**
