@@ -455,6 +455,8 @@ public final class plasmaCrawlWorker extends Thread {
                     retryCrawling = true;                                                       
                 } else if (errorMsg.indexOf("Connection refused") >= 0) {
                     log.logWarning("CRAWLER Connection refused while trying to connect to '" + url.toString() + "'.");
+                } else {
+                    log.logError("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
                 }
 
                 
@@ -488,8 +490,6 @@ public final class plasmaCrawlWorker extends Thread {
                          --crawlingRetryCount,
                          false
                     );         
-                } else {
-                    log.logError("CRAWLER LOADER ERROR2 with URL=" + url.toString() + ": " + e.toString(),e);
                 }
             } else {
                 // this may happen if the targeted host does not exist or anything with the
