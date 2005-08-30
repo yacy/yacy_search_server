@@ -53,20 +53,18 @@ public final class serverLog {
 //    // log-level categories
     public static final int LOGLEVEL_ZERO    = Level.OFF.intValue(); // no output at all
     public static final int LOGLEVEL_FAILURE = Level.SEVERE.intValue(); // system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
-    public static final int LOGLEVEL_ERROR   = 950; // exceptional error, catcheable and non-critical (i.e. file error)
     public static final int LOGLEVEL_WARNING = Level.WARNING.intValue(); // uncritical service failure, may require user activity (i.e. input required, wrong authorization)
-    public static final int LOGLEVEL_SYSTEM  = Level.CONFIG.intValue(); // regular system status information (i.e. start-up messages)
+    public static final int LOGLEVEL_CONFIG  = Level.CONFIG.intValue(); // regular system status information (i.e. start-up messages)
     public static final int LOGLEVEL_INFO    = Level.INFO.intValue(); // regular action information (i.e. any httpd request URL)
-    public static final int LOGLEVEL_DEBUG   = Level.FINEST.intValue(); // in-function status debug output
+    public static final int LOGLEVEL_FINE   = Level.FINE.intValue(); // in-function status debug output
 //    
 //    // these categories are also present as character tokens
     public static final char LOGTOKEN_ZERO    = 'Z';
-    public static final char LOGTOKEN_FAILURE = 'F';
-    public static final char LOGTOKEN_ERROR   = 'E';
+    public static final char LOGTOKEN_FAILURE = 'E';
     public static final char LOGTOKEN_WARNING = 'W';
-    public static final char LOGTOKEN_SYSTEM  = 'S';
+    public static final char LOGTOKEN_CONFIG  = 'S';
     public static final char LOGTOKEN_INFO    = 'I';
-    public static final char LOGTOKEN_DEBUG   = 'D';
+    public static final char LOGTOKEN_FINE    = 'D';
 
     private final Logger theLogger;
     
@@ -79,24 +77,20 @@ public final class serverLog {
         this.theLogger.setLevel(newLevel);
     }
     
-    // class log messages
-    public void logFailure(String message) {this.theLogger.severe(message);}
-    public void logFailure(String message, Throwable thrown) {this.theLogger.log(Level.SEVERE,message,thrown);}
-    
-    public void logError(String message)   {this.theLogger.severe(message);}
-    public void logError(String message, Throwable thrown)   {this.theLogger.log(Level.SEVERE,message,thrown);}
+    public void logFailure(String message)   {this.theLogger.severe(message);}
+    public void logFailure(String message, Throwable thrown)   {this.theLogger.log(Level.SEVERE,message,thrown);}
     
     public void logWarning(String message) {this.theLogger.warning(message);}
     public void logWarning(String message, Throwable thrown) {this.theLogger.log(Level.WARNING,message,thrown);}
     
-    public void logSystem(String message)  {this.theLogger.config(message);}
-    public void logSystem(String message, Throwable thrown)  {this.theLogger.log(Level.CONFIG,message,thrown);}
+    public void logConfig(String message)  {this.theLogger.config(message);}
+    public void logConfig(String message, Throwable thrown)  {this.theLogger.log(Level.CONFIG,message,thrown);}
     
     public void logInfo(String message)    {this.theLogger.info(message);}
     public void logInfo(String message, Throwable thrown)    {this.theLogger.log(Level.INFO,message,thrown);}
     
-    public void logDebug(String message)   {this.theLogger.finest(message);}
-    public void logDebug(String message, Throwable thrown)   {this.theLogger.log(Level.FINEST,message,thrown);}
+    public void logFine(String message)   {this.theLogger.fine(message);}
+    public void logFine(String message, Throwable thrown)   {this.theLogger.log(Level.FINE,message,thrown);}
 
     
     // static log messages: log everything
@@ -107,18 +101,11 @@ public final class serverLog {
     private void log(Level level, String msg, Throwable thrown) {
         this.theLogger.log(level, msg, thrown);
     }
-    
-    public static void logFailure(String appName, String message) {
+        
+    public static void logFailure(String appName, String message)   {
         Logger.getLogger(appName).severe(message);
     }
-    public static void logFailure(String appName, String message, Throwable thrown) {
-        Logger.getLogger(appName).log(Level.SEVERE,message,thrown);
-    }
-    
-    public static void logError(String appName, String message)   {
-        Logger.getLogger(appName).severe(message);
-    }
-    public static void logError(String appName, String message, Throwable thrown)   {
+    public static void logFailure(String appName, String message, Throwable thrown)   {
         Logger.getLogger(appName).log(Level.SEVERE,message,thrown);
     }
     
@@ -129,10 +116,10 @@ public final class serverLog {
         Logger.getLogger(appName).log(Level.WARNING,message,thrown);
     }
     
-    public static void logSystem(String appName, String message)  {
+    public static void logConfig(String appName, String message)  {
         Logger.getLogger(appName).config(message);
     }
-    public static void logSystem(String appName, String message, Throwable thrown)  {
+    public static void logConfig(String appName, String message, Throwable thrown)  {
         Logger.getLogger(appName).log(Level.CONFIG,message,thrown);
     }    
     
@@ -143,10 +130,10 @@ public final class serverLog {
         Logger.getLogger(appName).log(Level.INFO,message,thrown);
     }
     
-    public static void logDebug(String appName, String message)   {
+    public static void logFine(String appName, String message)   {
         Logger.getLogger(appName).finest(message);
     }
-    public static void logDebug(String appName, String message, Throwable thrown)   {
+    public static void logFine(String appName, String message, Throwable thrown)   {
         Logger.getLogger(appName).log(Level.FINEST,message,thrown);
     }    
     

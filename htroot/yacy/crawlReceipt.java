@@ -117,7 +117,7 @@ public class crawlReceipt {
             // write log
             plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
             if (entry == null) {
-                switchboard.getLog().logError("RECEIVED wrong RECEIPT for hash " + urlhash + " from peer " + iam);
+                switchboard.getLog().logFailure("RECEIVED wrong RECEIPT for hash " + urlhash + " from peer " + iam);
             } else {
                 switchboard.getLog().logInfo("RECEIVED RECEIPT for URL " + entry.url().toString());
             }

@@ -164,7 +164,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 serverLog.logInfo("PROXY","Proxy access logging is deactivated.");
             }
         } catch (Exception e) { 
-            serverLog.logError("PROXY","Unable to configure proxy access logging.",e);        
+            serverLog.logFailure("PROXY","Unable to configure proxy access logging.",e);        
         }
     }
     
@@ -225,7 +225,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             f = switchboard.getConfig("proxyYellowList", null);
             if (f != null) {
                 yellowList = serverFileUtils.loadSet(f); 
-                this.theLogger.logSystem("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
+                this.theLogger.logConfig("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
             } else {
                 yellowList = new HashSet();
             }
@@ -334,7 +334,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             } catch (MalformedURLException e) {
                 String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
-                serverLog.logError("PROXY", errorMsg);
+                serverLog.logFailure("PROXY", errorMsg);
                 httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
                 return;
             }
@@ -414,7 +414,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
                     httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
-                    this.theLogger.logError(errorMsg);
+                    this.theLogger.logFailure(errorMsg);
                 } else {
                     this.forceConnectionClose();                    
                 }
@@ -530,11 +530,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 ((ext == null) || (!(plasmaParser.mediaExtContains(ext)))) &&
                 (plasmaParser.realtimeParsableMimeTypesContains(res.responseHeader.mime()))) {
                 // make a transformer
-                this.theLogger.logDebug("create transformer for URL " + url);
+                this.theLogger.logFine("create transformer for URL " + url);
                 hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
             } else {
                 // simply pass through without parsing
-                this.theLogger.logDebug("create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + res.responseHeader.mime() + "'");
+                this.theLogger.logFine("create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + res.responseHeader.mime() + "'");
                 hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
             }
             
@@ -567,7 +567,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 {
                     // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
                     byte[] cacheArray = res.writeContent(hfos);
-                    this.theLogger.logDebug("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
+                    this.theLogger.logFine("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
                     
                     if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
                     
@@ -596,7 +596,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     cacheFile.getParentFile().mkdirs();
                     res.writeContent(hfos, cacheFile);
                     if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
-                    this.theLogger.logDebug("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
+                    this.theLogger.logFine("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                     cacheManager.writeFileAnnouncement(cacheFile);
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
@@ -619,7 +619,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 }
             } else {
                 // no caching
-                this.theLogger.logDebug(cacheFile.toString() + " not cached: " + storeError);
+                this.theLogger.logFine(cacheFile.toString() + " not cached: " + storeError);
                 res.writeContent(hfos, null);
                 if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
                 if (sizeBeforeDelete == -1) {
@@ -669,7 +669,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 } else {
                     if (e.getMessage().indexOf("Corrupt GZIP trailer") >= 0) {
                         // just do nothing, we leave it this way
-                        this.theLogger.logDebug("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
+                        this.theLogger.logFine("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
                         this.forceConnectionClose();
                     } else if ((remote != null)&&(remote.isClosed())) { 
                         // TODO: query for broken pipe
@@ -892,7 +892,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
                     httpd.sendRespondError(conProp,respond,4,503,null,errorMsg,e);
-                    this.theLogger.logError(errorMsg);
+                    this.theLogger.logFailure(errorMsg);
                 } else {
                     this.forceConnectionClose();                    
                 }
@@ -984,7 +984,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
                     httpd.sendRespondError(conProp,respond,4,503,null,errorMsg,e);
-                    this.theLogger.logError(errorMsg);
+                    this.theLogger.logFailure(errorMsg);
                 } else {
                     this.forceConnectionClose();                    
                 }
@@ -1278,7 +1278,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         this.logMessage.append(mime);        
         
         // sending the logging message to the logger
-        this.proxyLog.logDebug(this.logMessage.toString());
+        this.proxyLog.logFine(this.logMessage.toString());
     }
     
 }

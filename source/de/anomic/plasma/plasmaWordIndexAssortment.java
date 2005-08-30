@@ -110,19 +110,19 @@ public final class plasmaWordIndexAssortment {
             // open existing assortment tree file
             try {
                 assortments = new kelondroTree(assortmentFile, bufferSize);
-                if (log != null) log.logSystem("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
+                if (log != null) log.logConfig("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
                 return;
             } catch (IOException e){
-                serverLog.logError("PLASMA", "unable to open assortment database, creating new: " + e.getMessage(), e);
+                serverLog.logFailure("PLASMA", "unable to open assortment database, creating new: " + e.getMessage(), e);
             }
             assortmentFile.delete(); // make space for new one
         }
         // create new assortment tree file
         try {
             assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
-            if (log != null) log.logSystem("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
+            if (log != null) log.logConfig("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
         } catch (IOException e){
-            serverLog.logError("PLASMA", "unable to create assortment database: " + e.getMessage(), e);
+            serverLog.logFailure("PLASMA", "unable to create assortment database: " + e.getMessage(), e);
         }
     }
 
@@ -189,7 +189,7 @@ public final class plasmaWordIndexAssortment {
         try {
             assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
         } catch (IOException e){
-            log.logError("unable to re-create assortment database: " + e.getMessage(), e);
+            log.logFailure("unable to re-create assortment database: " + e.getMessage(), e);
         }
     }
     
@@ -215,7 +215,7 @@ public final class plasmaWordIndexAssortment {
         try {
             assortments.close();
         } catch (IOException e){
-            log.logError("unable to close assortment database: " + e.getMessage(), e);
+            log.logFailure("unable to close assortment database: " + e.getMessage(), e);
         }
     }
 

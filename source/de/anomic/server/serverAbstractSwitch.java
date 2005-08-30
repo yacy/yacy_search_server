@@ -146,7 +146,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	    try {
 		action.doBevoreSetConfig(key, value);
 	    } catch (Exception e) {
-		log.logError("serverAction bevoreSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
+		log.logFailure("serverAction bevoreSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
 	    }
 	}
 
@@ -162,7 +162,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	    try {
 		action.doAfterSetConfig(key, value, oldValue);
 	    } catch (Exception e) {
-		log.logError("serverAction afterSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
+		log.logFailure("serverAction afterSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
 	    }
 	}
     }
@@ -181,7 +181,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	    try {
 		action.doWhenGetConfig(key, s, dflt);
 	    } catch (Exception e) {
-		log.logError("serverAction whenGetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
+		log.logFailure("serverAction whenGetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
 	    }
 	}
 

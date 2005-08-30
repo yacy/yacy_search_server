@@ -185,7 +185,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         try {
             return new plasmaWordIndexEntity(databaseRoot, wordHash, deleteIfEmpty);
         } catch (IOException e) {
-            log.logError("plasmaWordIndexClassic.getIndex: " + e.getMessage());
+            log.logFailure("plasmaWordIndexClassic.getIndex: " + e.getMessage());
             return null;
         }
     }
@@ -200,7 +200,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         try {
             plasmaWordIndexEntity.removePlasmaIndex(databaseRoot, wordHash);
         } catch (IOException e) {
-            log.logError("plasmaWordIndexClassic.deleteIndex: " + e.getMessage());
+            log.logFailure("plasmaWordIndexClassic.deleteIndex: " + e.getMessage());
             return;
         }
     }
@@ -218,7 +218,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
             if ((deleteComplete) && (size == 0)) deleteIndex(wordHash);
             return count;
         } catch (IOException e) {
-            log.logError("plasmaWordIndexClassic.removeEntries: " + e.getMessage());
+            log.logFailure("plasmaWordIndexClassic.removeEntries: " + e.getMessage());
             return count;
         }
     }
@@ -238,7 +238,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
             pi = null;
             return count;
         } catch (IOException e) {
-            log.logError("plasmaWordIndexClassic.addEntries: " + e.getMessage());
+            log.logFailure("plasmaWordIndexClassic.addEntries: " + e.getMessage());
             return 0;
         }
     }

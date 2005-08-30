@@ -125,7 +125,7 @@ public class yacySearch extends Thread {
                 if (seed == null) continue;
                 distance = yacyDHTAction.dhtDistance(seed.hash, wordhash);
                 if (distance > 0.9) continue; // catch bug in peer selection
-                serverLog.logDebug("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/" + distance + " for wordhash " + wordhash + ", score " + c);
+                serverLog.logFine("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/" + distance + " for wordhash " + wordhash + ", score " + c);
                 ranking.addScore(seed.hash, c--);
                 seeds.put(seed.hash, seed);
             }
@@ -140,7 +140,7 @@ public class yacySearch extends Thread {
             seed = (yacySeed) dhtEnum.nextElement();
             if (seed == null) continue;
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
-            serverLog.logDebug("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.getMap().get("ICount") + ", score " + score);
+            serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.getMap().get("ICount") + ", score " + score);
             ranking.addScore(seed.hash, score);
             seeds.put(seed.hash, seed);
             c--;
@@ -154,7 +154,7 @@ public class yacySearch extends Thread {
         while ((e.hasNext()) && (c < result.length)) {
             seed = (yacySeed) seeds.get((String) e.next());
             seed.selectscore = c;
-            serverLog.logDebug("PLASMA", "selectPeers/_lineup_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
+            serverLog.logFine("PLASMA", "selectPeers/_lineup_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
             result[c++] = seed;
         }
             
@@ -203,7 +203,7 @@ public class yacySearch extends Thread {
                 if (searchThreads[i].links() < 0) anyIdle = true; else c = c + searchThreads[i].links();
             }
             if ((c >= count * 3) && ((System.currentTimeMillis() - start) > (waitingtime * 2 / 3))) {
-                yacyCore.log.logDebug("DEBUG yacySearch: c=" + c + ", count=" + count + ", waitingtime=" + waitingtime);
+                yacyCore.log.logFine("DEBUG yacySearch: c=" + c + ", count=" + count + ", waitingtime=" + waitingtime);
                 break; // we have enough
             }
             if (c >= count * 5) break;

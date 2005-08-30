@@ -155,7 +155,7 @@ public class yacyCore {
         
         // read memory amount
         int mem = Integer.parseInt(switchboard.getConfig("ramCacheDHT", "1024")) / 1024;
-        log.logSystem("DHT Cache memory = " + mem + " KB");
+        log.logConfig("DHT Cache memory = " + mem + " KB");
         
         // create or init seed cache
         seedDB = new yacySeedDB(
@@ -183,7 +183,7 @@ public class yacyCore {
         
         lastSeedUpload_seedDBSize = seedDB.sizeConnected();
         
-        log.logSystem("CORE INITIALIZED");
+        log.logConfig("CORE INITIALIZED");
         // ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!
         
         speedKey = System.currentTimeMillis() - time;
@@ -196,12 +196,12 @@ public class yacyCore {
         // cycle
         // within cycle: update seed file, strengthen network, pass news (new, old seed's)
         if (online())
-            log.logSystem("you are in online mode");
+            log.logConfig("you are in online mode");
         else {
-            log.logSystem("YOU ARE OFFLINE! ---");
-            log.logSystem("--- TO START BOOTSTRAPING, YOU MUST USE THE PROXY,");
-            log.logSystem("--- OR HIT THE BUTTON 'go online'");
-            log.logSystem("--- ON THE STATUS PAGE http://localhost:" + switchboard.getConfig("port", "8080") + "/Status.html");
+            log.logConfig("YOU ARE OFFLINE! ---");
+            log.logConfig("--- TO START BOOTSTRAPING, YOU MUST USE THE PROXY,");
+            log.logConfig("--- OR HIT THE BUTTON 'go online'");
+            log.logConfig("--- ON THE STATUS PAGE http://localhost:" + switchboard.getConfig("port", "8080") + "/Status.html");
         }
     }
 
@@ -223,7 +223,7 @@ public class yacyCore {
     
     public void publishSeedList() {
         
-        log.logDebug("yacyCore.publishSeedList: Triggered Seed Publish");
+        log.logFine("yacyCore.publishSeedList: Triggered Seed Publish");
         
         /*
         if (oldIPStamp.equals((String) seedDB.mySeed.get("IP", "127.0.0.1")))
@@ -241,7 +241,7 @@ public class yacyCore {
                 (System.currentTimeMillis() - this.lastSeedUpload_timeStamp < 1000*60*60*24) &&
                 (seedDB.mySeed.isPrincipal())
         ) {
-            log.logDebug("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
+            log.logFine("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
             return;
         }
         
@@ -263,7 +263,7 @@ public class yacyCore {
             saveSeedList();            
         } else {
             if (seedUploadMethod.equals("")) this.switchboard.setConfig("seedUploadMethod","none");
-            log.logDebug("yacyCore.publishSeedList: No uploading method configured");
+            log.logFine("yacyCore.publishSeedList: No uploading method configured");
             return;
         }
         
@@ -337,7 +337,7 @@ public class yacyCore {
                     log.logInfo("publish: handshaked " + this.seed.get("PeerType", "senior") + " peer '" + this.seed.getName() + "' at " + this.seed.getAddress());
                 }
             } catch (Exception e) {
-                log.logError("publishThread: error with target seed " + seed.getMap() + ": " + e.getMessage(), e);
+                log.logFailure("publishThread: error with target seed " + seed.getMap() + ": " + e.getMessage(), e);
                 this.error = e;
             } finally {
                 this.syncList.add(this);
@@ -387,7 +387,7 @@ public class yacyCore {
                 else
                     seedDB.mySeed.put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
             } catch (IOException e) {
-                log.logError("publishMySeed: problem with news encoding", e);
+                log.logFailure("publishMySeed: problem with news encoding", e);
             }
             
             // holding a reference to all started threads
@@ -400,7 +400,7 @@ public class yacyCore {
                 if (seeds[i] == null) continue;
                 
                 String address = seeds[i].getAddress();
-                log.logDebug("HELLO #" + i + " to peer '" + seeds[i].get("Name", "") + "' at " + address); // debug            
+                log.logFine("HELLO #" + i + " to peer '" + seeds[i].get("Name", "") + "' at " + address); // debug            
                 if ((address == null) || (seeds[i].isProper() != null)) {
                     // we don't like that address, delete it
                     peerActions.peerDeparture(seeds[i]);
@@ -500,23 +500,23 @@ public class yacyCore {
                 threadCount = yacyCore.publishThreadGroup.enumerate(threadList);
                 
                 // we need to use a timeout here because of missing interruptable session threads ...
-                log.logDebug("publish: Trying to abort " + yacyCore.publishThreadGroup.activeCount() +  " remaining publishing threads ...");
+                log.logFine("publish: Trying to abort " + yacyCore.publishThreadGroup.activeCount() +  " remaining publishing threads ...");
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     Thread currentThread = threadList[currentThreadIdx];
                     
                     if (currentThread.isAlive()) {
-                        log.logDebug("publish: Closing socket of publishing thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
+                        log.logFine("publish: Closing socket of publishing thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
                         httpc.closeOpenSockets(currentThread);
                     }
                 }
                 
                 // we need to use a timeout here because of missing interruptable session threads ...
-                log.logDebug("publish: Waiting for " + yacyCore.publishThreadGroup.activeCount() +  " remaining publishing threads to finish shutdown ...");
+                log.logFine("publish: Waiting for " + yacyCore.publishThreadGroup.activeCount() +  " remaining publishing threads to finish shutdown ...");
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     Thread currentThread = threadList[currentThreadIdx];
                     
                     if (currentThread.isAlive()) {
-                        log.logDebug("publish: Waiting for remaining publishing thread '" + currentThread.getName() + "' to finish shutdown");
+                        log.logFine("publish: Waiting for remaining publishing thread '" + currentThread.getName() + "' to finish shutdown");
                         try { currentThread.join(500); }catch (InterruptedException ex) {}
                     }
                 }       
@@ -683,7 +683,7 @@ public class yacyCore {
             try {
                 seedDB.mySeed.put("PeerType", "principal"); // this information shall also be uploaded
                 
-                log.logDebug("SaveSeedList: Using seed uploading method '" + seedUploadMethod + "' for seed-list uploading." +
+                log.logFine("SaveSeedList: Using seed uploading method '" + seedUploadMethod + "' for seed-list uploading." +
                         "\n\tPrevious peerType is '" + seedDB.mySeed.get("PeerType", "junior") + "'.");
                 
                 //logt = seedDB.uploadCache(seedFTPServer, seedFTPAccount, seedFTPPassword, seedFTPPath, seedURL);
@@ -692,7 +692,7 @@ public class yacyCore {
                     if (logt.indexOf("Error") >= 0) {
                         seedDB.mySeed.put("PeerType", prevStatus);
                         String errorMsg = "SaveSeedList: seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6);
-                        log.logError(errorMsg);
+                        log.logFailure(errorMsg);
                         return errorMsg;
                     }
                     log.logInfo(logt);

@@ -299,7 +299,7 @@ public class plasmaSnippetCache {
             String nextSnippet = computeSnippet(sentences, remaininghashes, minLength, maxLength);
             return result + ((nextSnippet == null) ? "" : (" / " + nextSnippet));
         } catch (IndexOutOfBoundsException e) {
-            log.logError("computeSnippet: error with string generation", e);
+            log.logFailure("computeSnippet: error with string generation", e);
             return "";
         }
     }
@@ -401,12 +401,12 @@ public class plasmaSnippetCache {
             this.queryhashes = queryhashes;
         }
         public void run() {
-            log.logDebug("snippetFetcher: try to get URL " + url);
+            log.logFine("snippetFetcher: try to get URL " + url);
             plasmaSnippetCache.result snippet = retrieve(url, queryhashes, true, 260);
             if (snippet.line == null)
-                log.logDebug("snippetFetcher: cannot get URL " + url + ". error(" + snippet.source + "): " + snippet.error);
+                log.logFine("snippetFetcher: cannot get URL " + url + ". error(" + snippet.source + "): " + snippet.error);
             else
-                log.logDebug("snippetFetcher: got URL " + url + ", the snippet is '" + snippet.line + "', source=" + snippet.source);
+                log.logFine("snippetFetcher: got URL " + url + ", the snippet is '" + snippet.line + "', source=" + snippet.source);
         }
     }
     

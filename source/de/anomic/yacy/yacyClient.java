@@ -112,14 +112,14 @@ public class yacyClient {
             obj));
         } catch (Exception e) {
             if (Thread.currentThread().isInterrupted()) {
-                yacyCore.log.logDebug("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
+                yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
             } else {
-                yacyCore.log.logDebug("yacyClient.publishMySeed exception:" + e.getMessage());
+                yacyCore.log.logFine("yacyClient.publishMySeed exception:" + e.getMessage());
             }
             return -1;
         }
         if ((result == null) || (result.size() < 3)) {
-            yacyCore.log.logDebug("yacyClient.publishMySeed result error: " +
+            yacyCore.log.logFine("yacyClient.publishMySeed result error: " +
             ((result == null) ? "result null" : ("result=" + result.toString())));
             return -1;
         }
@@ -132,7 +132,7 @@ public class yacyClient {
         if ((otherHash != null ) && (otherHash.length() > 0)) {
             otherPeer = yacySeed.genRemoteSeed((String) result.get("seed0"), key, remoteTime);
             if ((otherPeer == null) || (!(otherPeer.hash.equals(otherHash)))) {
-                yacyCore.log.logDebug("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
+                yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
                 return -1; // no success
             }
             otherPeerVersion = otherPeer.getVersion();
@@ -186,7 +186,7 @@ public class yacyClient {
                     }
                 }
             } else {
-                yacyCore.log.logDebug("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ".");
+                yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ".");
             }
             yacyCore.seedDB.mySeed.put(yacySeed.PEERTYPE, mytype);
         }
@@ -194,7 +194,7 @@ public class yacyClient {
         String error;
         if ((error = yacyCore.seedDB.mySeed.isProper()) != null) {
             yacyCore.seedDB.mySeed = mySeedBkp;
-            yacyCore.log.logDebug("yacyClient.publishMySeed mySeed error - not proper: " + error);
+            yacyCore.log.logFine("yacyClient.publishMySeed mySeed error - not proper: " + error);
             return -1;
         }
         
@@ -224,7 +224,7 @@ public class yacyClient {
             Date remoteTime = yacyCore.parseUniversalDate((String) result.get("mytime")); // read remote time
             return yacySeed.genRemoteSeed((String) result.get("response"), key, remoteTime);
         } catch (Exception e) {
-            yacyCore.log.logError("yacyClient.querySeed error:" + e.getMessage());
+            yacyCore.log.logFailure("yacyClient.querySeed error:" + e.getMessage());
             return null;
         }
     }
@@ -241,7 +241,7 @@ public class yacyClient {
             if ((result == null) || (result.size() == 0)) return -1;
             return Integer.parseInt((String) result.get("response"));
         } catch (Exception e) {
-            yacyCore.log.logError("yacyClient.queryRWICount error:" + e.getMessage());
+            yacyCore.log.logFailure("yacyClient.queryRWICount error:" + e.getMessage());
             return -1;
         }
     }
@@ -264,7 +264,7 @@ public class yacyClient {
             String resp = (String) result.get("response");
             if (resp == null) return -1; else return Integer.parseInt(resp);
         } catch (Exception e) {
-            yacyCore.log.logError("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
+            yacyCore.log.logFailure("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
             return -1;
         }
     }
@@ -382,10 +382,10 @@ public class yacyClient {
             } catch (NumberFormatException e) {
                 searchtime = totalrequesttime;
             }
-            yacyCore.log.logDebug("yacyClient.search: processed " + results + " links from peer " + targetPeer.hash + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes) + ", duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
+            yacyCore.log.logFine("yacyClient.search: processed " + results + " links from peer " + targetPeer.hash + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes) + ", duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
             return results;
         } catch (Exception e) {
-            yacyCore.log.logError("yacyClient.search error: '" + targetPeer.get("Name", "anonymous") + "' failed - " + e);
+            yacyCore.log.logFailure("yacyClient.search error: '" + targetPeer.get("Name", "anonymous") + "' failed - " + e);
             //e.printStackTrace();
             return 0;
         }
@@ -419,7 +419,7 @@ public class yacyClient {
             8000, null, null, yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort, post));
         } catch (Exception e) {
             // most probably a network time-out exception
-            yacyCore.log.logError("yacyClient.permissionMessage error:" + e.getMessage());
+            yacyCore.log.logFailure("yacyClient.permissionMessage error:" + e.getMessage());
             return null;
         }
     }
@@ -448,7 +448,7 @@ public class yacyClient {
             //System.out.println("V=" + v.toString());
             return nxTools.table(v);
         } catch (Exception e) {
-            yacyCore.log.logError("yacyClient.postMessage error:" + e.getMessage());
+            yacyCore.log.logFailure("yacyClient.postMessage error:" + e.getMessage());
             return null;
         }
     }
@@ -480,7 +480,7 @@ public class yacyClient {
             10000, null, null, yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort, post));
         } catch (Exception e) {
             // most probably a network time-out exception
-            yacyCore.log.logError("yacyClient.crawlOrder error: peer=" + targetSeed.getName() + ", error=" + e.getMessage());
+            yacyCore.log.logFailure("yacyClient.crawlOrder error: peer=" + targetSeed.getName() + ", error=" + e.getMessage());
             return null;
         }
     }
@@ -538,7 +538,7 @@ public class yacyClient {
             60000, null, null, yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort));
         } catch (Exception e) {
             // most probably a network time-out exception
-            yacyCore.log.logError("yacyClient.crawlReceipt error:" + e.getMessage());
+            yacyCore.log.logFailure("yacyClient.crawlReceipt error:" + e.getMessage());
             return null;
         }
     }
@@ -621,7 +621,7 @@ public class yacyClient {
             HashMap result = nxTools.table(v);
             return result;
         } catch (Exception e) {
-            yacyCore.log.logError("yacyClient.transferRWI error:" + e.getMessage());
+            yacyCore.log.logFailure("yacyClient.transferRWI error:" + e.getMessage());
             return null;
         }
     }
@@ -656,7 +656,7 @@ public class yacyClient {
             }
             return nxTools.table(v);
         } catch (Exception e) {
-            yacyCore.log.logError("yacyClient.transferRWI error:" + e.getMessage());
+            yacyCore.log.logFailure("yacyClient.transferRWI error:" + e.getMessage());
             return null;
         }
     }
@@ -673,7 +673,7 @@ public class yacyClient {
             yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort, post);
             return nxTools.table(v);
         } catch (Exception e) {
-            yacyCore.log.logError("yacyClient.getProfile error:" + e.getMessage());
+            yacyCore.log.logFailure("yacyClient.getProfile error:" + e.getMessage());
             return null;
         }
     }

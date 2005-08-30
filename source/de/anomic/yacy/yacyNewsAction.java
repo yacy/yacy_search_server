@@ -70,7 +70,7 @@ public class yacyNewsAction implements yacyPeerAction {
         try {
             synchronized (pool) {this.pool.enqueueIncomingNews(record);}
         } catch (IOException e) {
-            serverLog.logError("YACY", "processPeerArrival", e);
+            serverLog.logFailure("YACY", "processPeerArrival", e);
         }
     }
     

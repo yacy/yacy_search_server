@@ -128,11 +128,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             String mimeTablePath = switchboard.getConfig("mimeConfig","");
             FileInputStream mimeTableInputStream = null;
             try {
-                serverLog.logSystem("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
+                serverLog.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
                 mimeTableInputStream = new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath));
                 this.mimeTable.load(mimeTableInputStream);
             } catch (Exception e) {                
-                serverLog.logError("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
+                serverLog.logFailure("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
                 System.exit(1);
             } finally {
                 if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}                
@@ -184,7 +184,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             serverLog.logWarning("HTTPDFileHandler", "Content-MD5 support not availabel ...");
         }
         
-        serverLog.logSystem("HTTPDFileHandler", "File Handler Initialized");
+        serverLog.logConfig("HTTPDFileHandler", "File Handler Initialized");
     }
     
 //    private void textMessage(OutputStream out, int retcode, String body) throws IOException {
@@ -444,7 +444,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             tp.put("clientname", switchboard.getConfig("peerName", "anomic"));
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (InvocationTargetException e) {
-                            this.theLogger.logError("INTERNAL ERROR: " + e.toString() + ":" +
+                            this.theLogger.logFailure("INTERNAL ERROR: " + e.toString() + ":" +
                                     e.getMessage() +
                                     " target exception at " + rc + ": " +
                                     e.getTargetException().toString() + ":" +

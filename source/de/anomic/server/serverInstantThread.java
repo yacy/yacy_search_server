@@ -84,7 +84,7 @@ public final class serverInstantThread extends serverAbstractThread implements s
         } catch (IllegalArgumentException e) {
             return -1;
         } catch (InvocationTargetException e) {
-            serverLog.logError("SERVER", "invocation serverInstantThread of thread '" + this.getName() + "': " + e.getMessage(), e);
+            serverLog.logFailure("SERVER", "invocation serverInstantThread of thread '" + this.getName() + "': " + e.getMessage(), e);
             return -1;
         }
     }
@@ -96,15 +96,15 @@ public final class serverInstantThread extends serverAbstractThread implements s
             if (result == null) jobHasDoneSomething = true;
             else if (result instanceof Boolean) jobHasDoneSomething = ((Boolean) result).booleanValue();
         } catch (IllegalAccessException e) {
-            serverLog.logError("SERVER", "Internal Error in serverInstantThread: " + e.getMessage());
-            serverLog.logError("SERVER", "shutting down thread '" + this.getName() + "'");
+            serverLog.logFailure("SERVER", "Internal Error in serverInstantThread: " + e.getMessage());
+            serverLog.logFailure("SERVER", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (IllegalArgumentException e) {
-            serverLog.logError("SERVER", "Internal Error in serverInstantThread: " + e.getMessage());
-            serverLog.logError("SERVER", "shutting down thread '" + this.getName() + "'");
+            serverLog.logFailure("SERVER", "Internal Error in serverInstantThread: " + e.getMessage());
+            serverLog.logFailure("SERVER", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (InvocationTargetException e) {
-            serverLog.logError("SERVER", "Runtime Error in serverInstantThread, thread '" + this.getName() + "': " + e.getMessage(), e);
+            serverLog.logFailure("SERVER", "Runtime Error in serverInstantThread, thread '" + this.getName() + "': " + e.getMessage(), e);
         }
         return jobHasDoneSomething;
     }

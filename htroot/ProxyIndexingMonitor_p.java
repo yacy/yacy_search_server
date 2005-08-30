@@ -146,7 +146,7 @@ public class ProxyIndexingMonitor_p {
             } catch (Exception e) {
                 prop.put("info", 2); //Error: errmsg
                 prop.put("info_error", e.getMessage());
-                serverLog.logError("SERVLET", "ProxyIndexingMonitor.case3", e);
+                serverLog.logFailure("SERVLET", "ProxyIndexingMonitor.case3", e);
             }
         }
 

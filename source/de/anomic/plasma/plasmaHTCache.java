@@ -181,10 +181,10 @@ public final class plasmaHTCache {
             // this is the case of a "(Not a directory)" error, which should be prohibited
             // by the shallStoreCache() property. However, sometimes the error still occurs
             // In this case do nothing.
-            log.logError("File storage failed (not a directory): " + e.getMessage());
+            log.logFailure("File storage failed (not a directory): " + e.getMessage());
             return false;
         } catch (IOException e) {
-            log.logError("File storage failed (IO error): " + e.getMessage());
+            log.logFailure("File storage failed (IO error): " + e.getMessage());
             return false;
         }
         writeFileAnnouncement(file);
@@ -260,7 +260,7 @@ public final class plasmaHTCache {
         } catch (NumberFormatException e) {
             //e.printStackTrace();
         }
-        log.logSystem("CACHE SCANNED, CONTAINS " + c +
+        log.logConfig("CACHE SCANNED, CONTAINS " + c +
                       " FILES = " + currCacheSize/1048576 + "MB, OLDEST IS " + 
             ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) + " OLD");
         cleanup();
@@ -275,13 +275,13 @@ public final class plasmaHTCache {
             ip = httpc.dnsResolve(dom);
             if (ip == null) break;
             result += ", " + dom + "=" + ip;
-            log.logSystem("PRE-FILLED " + dom + "=" + ip);
+            log.logConfig("PRE-FILLED " + dom + "=" + ip);
             c++;
             doms.deleteScore(dom);
             // wait a short while to prevent that this looks like a DoS
             try {Thread.currentThread().sleep(100);} catch (InterruptedException e) {}
         }
-        if (result.length() > 2) log.logSystem("PRE-FILLED DNS CACHE, FETCHED " + c +
+        if (result.length() > 2) log.logConfig("PRE-FILLED DNS CACHE, FETCHED " + c +
                                                " ADDRESSES: " + result.substring(2));
     }
 
@@ -473,7 +473,7 @@ public final class plasmaHTCache {
                  plasmaCrawlProfile.entry profile) {
 
         // normalize url - Borg-0300
-        serverLog.logDebug("PLASMA", "Entry: URL=" + url.toString());
+        serverLog.logFine("PLASMA", "Entry: URL=" + url.toString());
         this.nomalizedURLString = htmlFilterContentScraper.urlNormalform(url);
         try {
             this.url            = new URL(nomalizedURLString);

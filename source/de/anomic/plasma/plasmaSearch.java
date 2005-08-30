@@ -224,7 +224,7 @@ public final class plasmaSearch {
                 if (large.contains(ie)) conj.addEntry(ie);
             }
         }  catch (kelondroException e) {
-            serverLog.logError("PLASMA", "joinConstructiveByTest: Database corrupt (" + e.getMessage() + "), deleting index");
+            serverLog.logFailure("PLASMA", "joinConstructiveByTest: Database corrupt (" + e.getMessage() + "), deleting index");
             small.deleteComplete();
             return conj;
         }
@@ -243,14 +243,14 @@ public final class plasmaSearch {
             try {
                 ie1 = (plasmaWordIndexEntry) e1.nextElement();
             }  catch (kelondroException e) {
-                serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database corrupt 1 (" + e.getMessage() + "), deleting index");
+                serverLog.logFailure("PLASMA", "joinConstructiveByEnumeration: Database corrupt 1 (" + e.getMessage() + "), deleting index");
                 i1.deleteComplete();
                 return conj;
             }
             try {
                 ie2 = (plasmaWordIndexEntry) e2.nextElement();
             }  catch (kelondroException e) {
-                serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database corrupt 2 (" + e.getMessage() + "), deleting index");
+                serverLog.logFailure("PLASMA", "joinConstructiveByEnumeration: Database corrupt 2 (" + e.getMessage() + "), deleting index");
                 i2.deleteComplete();
                 return conj;
             }
@@ -261,7 +261,7 @@ public final class plasmaSearch {
                     try {
                         if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
                     } catch (kelondroException e) {
-                        serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
+                        serverLog.logFailure("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
                         i1.deleteComplete();
                         break;
                     }
@@ -269,7 +269,7 @@ public final class plasmaSearch {
                     try {
                         if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
                     } catch (kelondroException e) {
-                        serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
+                        serverLog.logFailure("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
                         i2.deleteComplete();
                         break;
                     }
@@ -279,14 +279,14 @@ public final class plasmaSearch {
                     try {
                         if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
                     } catch (kelondroException e) {
-                        serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
+                        serverLog.logFailure("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
                         i1.deleteComplete();
                         break;
                     }
                     try {
                         if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
                     }  catch (kelondroException e) {
-                        serverLog.logError("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
+                        serverLog.logFailure("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
                         i2.deleteComplete();
                         break;
                     }
@@ -315,11 +315,11 @@ public final class plasmaSearch {
 		acc.addResult(entry);
 	    }
 	} catch (kelondroException ee) {
-	    serverLog.logError("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
+	    serverLog.logFailure("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
 	}
         long startSortTime = System.currentTimeMillis();
         acc.sortResults();
-        serverLog.logDebug("PLASMA", "plasmaSearch.order: minEntries = " + minEntries + ", effectiveEntries = " + acc.sizeOrdered() + ", demanded Time = " + maxTime + ", effectiveTime = " + (System.currentTimeMillis() - startCreateTime) + ", createTime = " + (startSortTime - startCreateTime) + ", sortTime = " + (System.currentTimeMillis() - startSortTime));
+        serverLog.logFine("PLASMA", "plasmaSearch.order: minEntries = " + minEntries + ", effectiveEntries = " + acc.sizeOrdered() + ", demanded Time = " + maxTime + ", effectiveTime = " + (System.currentTimeMillis() - startCreateTime) + ", createTime = " + (startSortTime - startCreateTime) + ", sortTime = " + (System.currentTimeMillis() - startSortTime));
 	return acc;
     }
     

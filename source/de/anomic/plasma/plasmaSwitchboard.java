@@ -228,9 +228,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String f = getConfig("proxyBlackListsActive", null);
         if (f != null) {
             urlBlacklist.loadLists("black", f, "/");
-            log.logSystem("loaded black-list from file " + f + ", " + urlBlacklist.size() + " entries");
+            log.logConfig("loaded black-list from file " + f + ", " + urlBlacklist.size() + " entries");
         }
-        log.logSystem("Proxy Handler Initialized");
+        log.logConfig("Proxy Handler Initialized");
             
         // load stopwords
         if (stopwords == null) {
@@ -245,21 +245,21 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int ramHTTP    = Integer.parseInt(getConfig("ramCacheHTTP", "1024")) / 1024;
         int ramMessage = Integer.parseInt(getConfig("ramCacheMessage", "1024")) / 1024;
         int ramWiki    = Integer.parseInt(getConfig("ramCacheWiki", "1024")) / 1024;
-        log.logSystem("LURL    Cache memory = " + ppRamString(ramLURL));
-        log.logSystem("NURL    Cache memory = " + ppRamString(ramNURL));
-        log.logSystem("EURL    Cache memory = " + ppRamString(ramEURL));
-        log.logSystem("RWI     Cache memory = " + ppRamString(ramRWI));
-        log.logSystem("HTTP    Cache memory = " + ppRamString(ramHTTP));
-        log.logSystem("Message Cache memory = " + ppRamString(ramMessage));
-        log.logSystem("Wiki    Cache memory = " + ppRamString(ramWiki));
+        log.logConfig("LURL    Cache memory = " + ppRamString(ramLURL));
+        log.logConfig("NURL    Cache memory = " + ppRamString(ramNURL));
+        log.logConfig("EURL    Cache memory = " + ppRamString(ramEURL));
+        log.logConfig("RWI     Cache memory = " + ppRamString(ramRWI));
+        log.logConfig("HTTP    Cache memory = " + ppRamString(ramHTTP));
+        log.logConfig("Message Cache memory = " + ppRamString(ramMessage));
+        log.logConfig("Wiki    Cache memory = " + ppRamString(ramWiki));
         
         // make crawl profiles database and default profiles
-        log.logSystem("Initializing Crawl Profiles");
+        log.logConfig("Initializing Crawl Profiles");
         profiles = new plasmaCrawlProfile(new File(plasmaPath, "crawlProfiles0.db"));
         initProfiles();
         
         // start indexing management
-        log.logSystem("Starting Indexing Management");
+        log.logConfig("Starting Indexing Management");
         urlPool = new plasmaURLPool(plasmaPath, ramLURL, ramNURL, ramEURL);
 
         wordIndex = new plasmaWordIndex(plasmaPath, ramRWI, log);
@@ -268,7 +268,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         searchManager = new plasmaSearch(urlPool.loadedURL, wordIndex);
         
         // start a cache manager
-        log.logSystem("Starting HT Cache Manager");
+        log.logConfig("Starting HT Cache Manager");
 
         // create the Cache directorie - Borg-0300
         String cp = getConfig("proxyCache", "DATA/HTCACHE");
@@ -278,7 +278,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (!(htCachePath.exists())) htCachePath.mkdirs();
         if (!(htCachePath.isDirectory())) {
             // if the cache does not exists or is a file and not a directory, panic
-            serverLog.logSystem("PLASMA", "the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");        		
+            serverLog.logConfig("PLASMA", "the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");        		
             System.exit(0);
         } else {
             serverLog.logInfo("PLASMA", "proxyCache=" + cp);
@@ -288,24 +288,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP);
         
         // make parser
-        log.logSystem("Starting Parser");
+        log.logConfig("Starting Parser");
         this.parser = new plasmaParser();
         
         // initialize switchboard queue
         sbQueue = new plasmaSwitchboardQueue(this.cacheManager, urlPool.loadedURL, new File(plasmaPath, "switchboardQueue1.stack"), 10, profiles);
         
         // define an extension-blacklist
-        log.logSystem("Parser: Initializing Extension Mappings for Media/Parser");
+        log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
         plasmaParser.initMediaExt(plasmaParser.extString2extList(getConfig("mediaExt","")));
         plasmaParser.initSupportedRealtimeFileExt(plasmaParser.extString2extList(getConfig("parseableExt","")));
 
         // define a realtime parsable mimetype list
-        log.logSystem("Parser: Initializing Mime Types");
+        log.logConfig("Parser: Initializing Mime Types");
         plasmaParser.initRealtimeParsableMimeTypes(getConfig("parseableRealtimeMimeTypes","application/xhtml+xml,text/html,text/plain"));
         plasmaParser.initParseableMimeTypes(getConfig("parseableMimeTypes",null));
         
         // start a loader
-        log.logSystem("Starting Crawl Loader");
+        log.logConfig("Starting Crawl Loader");
         int remoteport;
         try { remoteport = Integer.parseInt(getConfig("remoteProxyPort","3128")); }
         catch (NumberFormatException e) { remoteport = 3128; }
@@ -318,19 +318,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 this.log);
 
 	// init boards
-        log.logSystem("Starting Message Board");
+        log.logConfig("Starting Message Board");
 	messageDB = new messageBoard(new File(getRootPath(), "DATA/SETTINGS/message.db"), ramMessage);
-	log.logSystem("Starting Wiki Board");
+	log.logConfig("Starting Wiki Board");
         wikiDB = new wikiBoard(new File(getRootPath(), "DATA/SETTINGS/wiki.db"),
                  new File(getRootPath(), "DATA/SETTINGS/wiki-bkp.db"), ramWiki);
 
         // init cookie-Monitor
-        log.logSystem("Starting Cookie Monitor");
+        log.logConfig("Starting Cookie Monitor");
         outgoingCookies = new HashMap();
         incomingCookies = new HashMap();
             
         // clean up profiles
-        log.logSystem("Cleaning Profiles");
+        log.logConfig("Cleaning Profiles");
         cleanProfiles();
 
         // init facility DB
@@ -350,13 +350,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         */
         
         // generate snippets cache
-        log.logSystem("Initializing Snippet Cache");
+        log.logConfig("Initializing Snippet Cache");
         snippetCache = new plasmaSnippetCache(cacheManager, parser,
                                               remoteProxyHost, remoteProxyPort, remoteProxyUse,
                                               log);
         
         // start yacy core
-        log.logSystem("Starting YaCy Protocol Core");
+        log.logConfig("Starting YaCy Protocol Core");
         //try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
         this.yc = new yacyCore(this);
         //log.logSystem("Started YaCy Protocol Core");
@@ -364,7 +364,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         serverInstantThread.oneTimeJob(yc, "loadSeeds", yc.log, 3000);
         
         // deploy threads
-        log.logSystem("Starting Threads");
+        log.logConfig("Starting Threads");
         System.gc(); // help for profiler
         int indexing_cluster = Integer.parseInt(getConfig("80_indexing_cluster", "1"));
         if (indexing_cluster < 1) indexing_cluster = 1;
@@ -424,7 +424,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
 		sb=this;
-        log.logSystem("Finished Switchboard Initialization");
+        log.logConfig("Finished Switchboard Initialization");
     }
 
 	public static plasmaSwitchboard getSwitchboard(){
@@ -554,12 +554,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
 
     public void close() {
-        log.logSystem("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
+        log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         terminateAllThreads(true);
-        log.logSystem("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing (stand by..)");
+        log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing (stand by..)");
         int waitingBoundSeconds = Integer.parseInt(getConfig("maxWaitingWordFlush", "120"));
         wordIndex.close(waitingBoundSeconds);
-        log.logSystem("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
+        log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
         try {
             indexDistribution.close();
             cacheLoader.close();
@@ -572,7 +572,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             cacheManager.close();
             sbQueue.close();
 	} catch (IOException e) {}
-        log.logSystem("SWITCHBOARD SHUTDOWN TERMINATED");
+        log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
     public int queueSize() {
@@ -592,14 +592,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         try {
             sbQueue.push((plasmaSwitchboardQueue.Entry) job);
         } catch (IOException e) {
-            log.logError("IOError in plasmaSwitchboard.enQueue: " + e.getMessage(), e);
+            log.logFailure("IOError in plasmaSwitchboard.enQueue: " + e.getMessage(), e);
         }
     }
 
     public boolean deQueue() {
         // work off fresh entries from the proxy or from the crawler
         if (onlineCaution()) {
-            log.logDebug("deQueue: online caution, omitting resource stack processing");
+            log.logFine("deQueue: online caution, omitting resource stack processing");
             return false;
         }
         plasmaSwitchboardQueue.Entry nextentry;
@@ -610,7 +610,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             
             // do one processing step
-            log.logDebug("DEQUEUE: sbQueueSize=" + sbQueue.size() +
+            log.logFine("DEQUEUE: sbQueueSize=" + sbQueue.size() +
                          ", coreStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
                          ", limitStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) +
                          ", overhangStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) +
@@ -619,7 +619,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 nextentry = sbQueue.pop();
                 if (nextentry == null) return false;
             } catch (IOException e) {
-                log.logError("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
+                log.logFailure("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
                 return false;
             }
         }
@@ -705,17 +705,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
         if (sbQueue.size() >= indexingSlots) {
-            log.logDebug("CoreCrawl: too many processes in indexing queue, dismissed (" +
+            log.logFine("CoreCrawl: too many processes in indexing queue, dismissed (" +
                     "sbQueueSize=" + sbQueue.size() + ")");
             return false;
         }
         if (cacheLoader.size() >= crawlSlots) {
-            log.logDebug("CoreCrawl: too many processes in loader queue, dismissed (" +
+            log.logFine("CoreCrawl: too many processes in loader queue, dismissed (" +
                     "cacheLoader=" + cacheLoader.size() + ")");
             return false;
         }
         if (onlineCaution()) {
-            log.logDebug("CoreCrawl: online caution, omitting processing");
+            log.logFine("CoreCrawl: online caution, omitting processing");
             return false;
         }
         // if the server is busy, we do crawling more slowly
@@ -735,21 +735,21 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         plasmaCrawlNURL.Entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
         String stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
         if ((urlEntry.url() == null) || (urlEntry.url().toString().length() < 10)) {
-            log.logError(stats + ": urlEntry.url() == null. URL-Hash: " + ((urlEntry.hash()==null)?"Unknown":urlEntry.hash()));
+            log.logFailure(stats + ": urlEntry.url() == null. URL-Hash: " + ((urlEntry.hash()==null)?"Unknown":urlEntry.hash()));
             return true;
         }
         String profileHandle = urlEntry.profileHandle();
         //System.out.println("DEBUG plasmaSwitchboard.processCrawling: profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
         if (profileHandle == null) {
-            log.logError(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
+            log.logFailure(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
             return true;
         }
         plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
         if (profile == null) {
-            log.logError(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
+            log.logFailure(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
             return true;
         }
-        log.logDebug("LOCALCRAWL: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
+        log.logFine("LOCALCRAWL: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
 		     ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter() +
 		     ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
 
@@ -782,12 +782,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         
         if (sbQueue.size() >= indexingSlots) {
-            log.logDebug("LimitCrawl: too many processes in indexing queue, dismissed to protect emergency case (" +
+            log.logFine("LimitCrawl: too many processes in indexing queue, dismissed to protect emergency case (" +
                     "sbQueueSize=" + sbQueue.size() + ")");
             return false;
         }
         if (cacheLoader.size() >= crawlSlots) {
-            log.logDebug("LimitCrawl: too many processes in loader queue, dismissed to protect emergency case (" +
+            log.logFine("LimitCrawl: too many processes in loader queue, dismissed to protect emergency case (" +
                     "cacheLoader=" + cacheLoader.size() + ")");
             return false;
         }
@@ -810,17 +810,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         plasmaCrawlNURL.Entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT);
         String stats = "REMOTECRAWLTRIGGER[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
         if (urlEntry.url() == null) {
-            log.logError(stats + ": urlEntry.url() == null");
+            log.logFailure(stats + ": urlEntry.url() == null");
             return true;
         }
         String profileHandle = urlEntry.profileHandle();
         //System.out.println("DEBUG plasmaSwitchboard.processCrawling: profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
         plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
         if (profile == null) {
-            log.logError(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
+            log.logFailure(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
             return true;
         }
-        log.logDebug("plasmaSwitchboard.limitCrawlTriggerJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
+        log.logFine("plasmaSwitchboard.limitCrawlTriggerJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
 		     ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter() +
 		     ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
 
@@ -854,7 +854,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
         if (onlineCaution()) {
-            log.logDebug("GlobalCrawl: online caution, omitting processing");
+            log.logFine("GlobalCrawl: online caution, omitting processing");
             return false;
         }
         
@@ -872,7 +872,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         plasmaCrawlNURL.Entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_REMOTE);
         String stats = "REMOTETRIGGEREDCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
         if (urlEntry.url() == null) {
-            log.logError(stats + ": urlEntry.url() == null");
+            log.logFailure(stats + ": urlEntry.url() == null");
             return false;
         }
         String profileHandle = urlEntry.profileHandle();
@@ -880,10 +880,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
         
         if (profile == null) {
-            log.logError(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
+            log.logFailure(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
             return false;
         }
-        log.logDebug("plasmaSwitchboard.remoteTriggeredCrawlJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
+        log.logFine("plasmaSwitchboard.remoteTriggeredCrawlJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
 		     ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter() +
 		     ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
 
@@ -916,7 +916,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 processCase = 6;
             }
             
-            log.logDebug("processResourceStack processCase=" + processCase +
+            log.logFine("processResourceStack processCase=" + processCase +
                     ", depth=" + entry.depth() +
                     ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().generalDepth())) +
                     ", filter=" + ((entry.profile() == null) ? "null" : entry.profile().generalFilter()) +
@@ -930,18 +930,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 ((entry.responseHeader() != null) &&
                  (plasmaParser.supportedMimeTypesContains(entry.responseHeader().mime())))) {
                 if (entry.cacheFile().exists()) {
-                    log.logDebug("(Parser) '" + entry.normalizedURLString() + "' is not parsed yet, parsing now from File");
+                    log.logFine("(Parser) '" + entry.normalizedURLString() + "' is not parsed yet, parsing now from File");
                     document = parser.parseSource(entry.url(), (entry.responseHeader() == null) ? null : entry.responseHeader().mime(), entry.cacheFile());
                 } else {
-                    log.logDebug("(Parser) '" + entry.normalizedURLString() + "' cannot be parsed, no resource available");
+                    log.logFine("(Parser) '" + entry.normalizedURLString() + "' cannot be parsed, no resource available");
                     return;
                 }
                 if (document == null) {
-                    log.logError("(Parser) '" + entry.normalizedURLString() + "' parse failure");
+                    log.logFailure("(Parser) '" + entry.normalizedURLString() + "' parse failure");
                     return;
                 }
             } else {
-                log.logDebug("(Parser) '" + entry.normalizedURLString() + "'. Unsupported mimeType '" + ((entry.responseHeader() == null) ? null : entry.responseHeader().mime()) + "'.");
+                log.logFine("(Parser) '" + entry.normalizedURLString() + "'. Unsupported mimeType '" + ((entry.responseHeader() == null) ? null : entry.responseHeader().mime()) + "'.");
                 return;                
             }
             
@@ -991,7 +991,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             if (noIndexReason == null) {
                 // strip out words
-                log.logDebug("Condensing for '" + entry.normalizedURLString() + "'");
+                log.logFine("Condensing for '" + entry.normalizedURLString() + "'");
                 plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(document.getText()));
  
                 //log.logInfo("INDEXING HEADLINE:" + descr);
@@ -1035,10 +1035,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             yacyClient.crawlReceipt(initiator, "crawl", "fill", "indexed", newEntry, "");
                         }
                     } else {
-                        log.logDebug("Not Indexed Resource '" + entry.normalizedURLString() + "': process case=" + processCase);
+                        log.logFine("Not Indexed Resource '" + entry.normalizedURLString() + "': process case=" + processCase);
                     }
                 } catch (Exception ee) {
-                    log.logError("Could not index URL " + entry.url() + ": " + ee.getMessage(), ee);
+                    log.logFailure("Could not index URL " + entry.url() + ": " + ee.getMessage(), ee);
                     if ((processCase == 6) && (initiator != null)) {
                         yacyClient.crawlReceipt(initiator, "crawl", "exception", ee.getMessage(), null, "");
                     }
@@ -1058,7 +1058,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             document = null; 
             
         } catch (IOException e) {
-            log.logError("ERROR in plasmaSwitchboard.process(): " + e.toString());
+            log.logFailure("ERROR in plasmaSwitchboard.process(): " + e.toString());
         } finally {
             // explicit delete/free resources
             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) cacheManager.deleteFile(entry.url());
@@ -1075,7 +1075,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	// strange errors
 	if (nexturlString == null) {
 	    reason = "denied_(url_null)";
-            log.logError("Wrong URL in stackCrawl: url=null");
+            log.logFailure("Wrong URL in stackCrawl: url=null");
 	    return reason;
 	}
         /*
@@ -1092,7 +1092,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             nexturl = new URL(nexturlString);
         } catch (MalformedURLException e) {
             reason = "denied_(url_'" + nexturlString + "'_wrong)";
-            log.logError("Wrong URL in stackCrawl: " + nexturlString);
+            log.logFailure("Wrong URL in stackCrawl: " + nexturlString);
             return reason;
         }
         
@@ -1177,13 +1177,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // are we qualified?
         if ((yacyCore.seedDB.mySeed == null) ||
             (yacyCore.seedDB.mySeed.isJunior())) {
-            log.logDebug("plasmaSwitchboard.processRemoteCrawlTrigger: no permission");
+            log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: no permission");
             return false;
         }
 
         // check url
         if (urlEntry.url() == null) {
-            log.logDebug("ERROR: plasmaSwitchboard.processRemoteCrawlTrigger - url is null. name=" + urlEntry.name());
+            log.logFine("ERROR: plasmaSwitchboard.processRemoteCrawlTrigger - url is null. name=" + urlEntry.name());
             return true;
         }
         String urlhash = plasmaURL.urlHash(urlEntry.url());
@@ -1192,7 +1192,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         yacySeed remoteSeed = yacyCore.dhtAgent.getCrawlSeed(urlhash);
         
         if (remoteSeed == null) {
-            log.logDebug("plasmaSwitchboard.processRemoteCrawlTrigger: no remote crawl seed available");
+            log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: no remote crawl seed available");
             return false;            
         }
         
@@ -1222,7 +1222,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if (remoteSeed != null) yacyCore.peerActions.peerDeparture(remoteSeed);
             return false;
         } else try {
-            log.logDebug("plasmaSwitchboard.processRemoteCrawlTrigger: remoteSeed=" + remoteSeed.getName() + ", url=" + urlEntry.url().toString() + ", response=" + page.toString()); // DEBUG
+            log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: remoteSeed=" + remoteSeed.getName() + ", url=" + urlEntry.url().toString() + ", response=" + page.toString()); // DEBUG
         
             int newdelay = Integer.parseInt((String) page.get("delay"));
             yacyCore.dhtAgent.setCrawlDelay(remoteSeed.hash, newdelay);
@@ -1250,7 +1250,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
         } catch (Exception e) {
             // wrong values
-            log.logError("REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CLIENT RETURNED: " + page.toString(), e);
+            log.logFailure("REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CLIENT RETURNED: " + page.toString(), e);
             return false;
         }
     }
@@ -1277,19 +1277,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         public void run() {
             try {
                 // search the database locally
-                log.logDebug("presearch: started job");
+                log.logFine("presearch: started job");
                 plasmaWordIndexEntity idx = searchManager.searchHashes(queryhashes, time);
-                log.logDebug("presearch: found " + idx.size() + " results");
+                log.logFine("presearch: found " + idx.size() + " results");
                 plasmaSearch.result acc = searchManager.order(idx, queryhashes, stopwords, order, time, searchcount);
                 if (acc == null) return;
-                log.logDebug("presearch: ordered results, now " + acc.sizeOrdered() + " URLs ready for fetch");
+                log.logFine("presearch: ordered results, now " + acc.sizeOrdered() + " URLs ready for fetch");
                 
                 // take some elements and fetch the snippets
                 snippetCache.fetch(acc, queryhashes, urlmask, fetchcount);
             } catch (IOException e) {
-                log.logError("presearch: failed", e);
+                log.logFailure("presearch: failed", e);
             }
-            log.logDebug("presearch: job terminated");
+            log.logFine("presearch: job terminated");
         }
     }
     
@@ -1335,7 +1335,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (fetchpeers < 10) fetchpeers = 10;
                 if (fetchcount > count * 10) fetchcount = count * 10;
                 globalresults = yacySearch.searchHashes(queryhashes, urlPool.loadedURL, searchManager, fetchcount, fetchpeers, urlBlacklist, snippetCache, fetchtime);
-                log.logDebug("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+                log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             }
             prop.put("globalresults", globalresults); // the result are written to the local DB
             
@@ -1343,14 +1343,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // now search locally (the global results should be now in the local db)
             long remainingTime = time - (System.currentTimeMillis() - timestamp);
             plasmaWordIndexEntity idx = searchManager.searchHashes(queryhashes, remainingTime * 8 / 10); // the search
-            log.logDebug("SEARCH TIME AFTER FINDING " + idx.size() + " ELEMENTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+            log.logFine("SEARCH TIME AFTER FINDING " + idx.size() + " ELEMENTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
             remainingTime = time - (System.currentTimeMillis() - timestamp);
             if (remainingTime < 500) remainingTime = 500;
             if (remainingTime > 3000) remainingTime = 3000;
             plasmaSearch.result acc = searchManager.order(idx, queryhashes, stopwords, order, remainingTime, 10);
             if (!(global)) snippetCache.fetch(acc.cloneSmart(), queryhashes, urlmask, 10);
-            log.logDebug("SEARCH TIME AFTER ORDERING OF SEARCH RESULT: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+            log.logFine("SEARCH TIME AFTER ORDERING OF SEARCH RESULT: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
             // result is a List of urlEntry elements: prepare answer
             if (acc == null) {
@@ -1427,7 +1427,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         }
                     }
                 }
-                log.logDebug("SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+                log.logFine("SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
                 // calc some more cross-reference
                 remainingTime = time - (System.currentTimeMillis() - timestamp);
@@ -1444,7 +1444,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                  **/
                 //Object[] ws = ref.getScores(16, false, 2, Integer.MAX_VALUE);
                 Object[] ws = acc.getReferences(16);
-                log.logDebug("SEARCH TIME AFTER XREF PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+                log.logFine("SEARCH TIME AFTER XREF PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
                     /*
                     System.out.print("DEBUG WORD-SCORE: ");

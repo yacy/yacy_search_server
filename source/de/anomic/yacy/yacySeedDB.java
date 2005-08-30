@@ -166,14 +166,14 @@ public class yacySeedDB {
     private synchronized kelondroMap resetSeedTable(kelondroMap seedDB, File seedDBFile) {
         // this is an emergency function that should only be used if any problem with the
         // seed.db is detected
-	yacyCore.log.logDebug("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
+	yacyCore.log.logFine("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
         try {
             seedDB.close();
             seedDBFile.delete();
             // create new seed database
             seedDB = openSeedTable(seedDBFile);
         } catch (IOException e) {
-            yacyCore.log.logDebug("resetSeedTable", e);
+            yacyCore.log.logFine("resetSeedTable", e);
         }
         return seedDB;
     }
@@ -187,7 +187,7 @@ public class yacySeedDB {
             seedActiveDB.close();
             seedPassiveDB.close();
         } catch (IOException e) {
-            yacyCore.log.logDebug("close", e);
+            yacyCore.log.logFine("close", e);
         }
     }
 
@@ -233,7 +233,7 @@ public class yacySeedDB {
             try {
                 keyIt = seedActiveDB.keys(true, false); // iteration of String - Objects
             } catch (IOException e) {
-                yacyCore.log.logError("yacySeedCache.anySeed: seed.db not available: " + e.getMessage());
+                yacyCore.log.logFailure("yacySeedCache.anySeed: seed.db not available: " + e.getMessage());
                 keyIt = (new HashSet()).iterator();
             }
 	    String seedHash;
@@ -300,7 +300,7 @@ public class yacySeedDB {
             return result;
         } catch (kelondroException e) {
             seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
-            yacyCore.log.logDebug("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
+            yacyCore.log.logFine("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
             return null;
         }
     }
@@ -349,13 +349,13 @@ public class yacySeedDB {
             seedPassiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
 	} catch (IOException e){
-            yacyCore.log.logDebug("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
 	    seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);            
 	} catch (kelondroException e){
-	    yacyCore.log.logDebug("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+	    yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
 	    seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);            
         } catch (IllegalArgumentException e) {
-	    yacyCore.log.logDebug("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+	    yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
 	    seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
 	}
     }
@@ -371,13 +371,13 @@ public class yacySeedDB {
         try {
             seedPassiveDB.set(seed.hash, seed.getMap());
 	} catch (IOException e) {
-	    yacyCore.log.logDebug("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+	    yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
 	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 	} catch (kelondroException e) {
-	    yacyCore.log.logDebug("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+	    yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
 	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
         } catch (IllegalArgumentException e) {
-	    yacyCore.log.logDebug("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+	    yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
 	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 	}
     }
@@ -394,13 +394,13 @@ public class yacySeedDB {
         try {
             seedPotentialDB.set(seed.hash, seed.getMap());
 	} catch (IOException e) {
-	    yacyCore.log.logDebug("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+	    yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
 	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 	} catch (kelondroException e) {
-	    yacyCore.log.logDebug("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+	    yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
 	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 	} catch (IllegalArgumentException e) {
-	    yacyCore.log.logDebug("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+	    yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
 	    seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 	}
     }
@@ -542,15 +542,15 @@ public class yacySeedDB {
         try {            
             // create a seed file which for uploading ...            
             seedFile = new File("seedFile.txt");
-            serverLog.logDebug("YACY","SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
+            serverLog.logFine("YACY","SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             Vector uv = storeCache(seedFile, true);            
             
             // uploading the seed file
-            serverLog.logDebug("YACY","SaveSeedList: Trying to upload seed-file ...");
+            serverLog.logFine("YACY","SaveSeedList: Trying to upload seed-file ...");
             log = uploader.uploadSeedFile(sb,seedDB,seedFile);
             
             // check also if the result can be retrieved again
-            serverLog.logDebug("YACY","SaveSeedList: Checking uploading success ...");
+            serverLog.logFine("YACY","SaveSeedList: Checking uploading success ...");
             if (checkCache(uv, seedURL))
                 log = log + "UPLOAD CHECK - Success: the result vectors are equal" + serverCore.crlfString;
             else {
@@ -582,17 +582,17 @@ public class yacySeedDB {
         Vector check  = httpc.wget(seedURL, 10000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
         
         if (check == null) {
-            serverLog.logDebug("YACY","SaveSeedList: Testing download failed ...");
+            serverLog.logFine("YACY","SaveSeedList: Testing download failed ...");
         }
                 
         if ((check == null) || (uv == null) || (uv.size() != check.size())) {
-            serverLog.logDebug("YACY","SaveSeedList: Local and uploades seed-list " +
+            serverLog.logFine("YACY","SaveSeedList: Local and uploades seed-list " +
                                "contains varying numbers of entries." +
                                "\n\tLocal seed-list:  " + uv.size() + " entries" + 
                                "\n\tRemote seed-list: " + check.size() + " enties");
             return false;
         } else {
-            serverLog.logDebug("YACY","SaveSeedList: Comparing local and uploades seed-list entries ...");
+            serverLog.logFine("YACY","SaveSeedList: Comparing local and uploades seed-list entries ...");
             int i;
             for (i = 0; i < uv.size(); i++) {
                 if (!(((String) uv.elementAt(i)).equals((String) check.elementAt(i)))) return false;
@@ -656,12 +656,12 @@ public class yacySeedDB {
 		it = (firstKey == null) ? database.maps(up, rot) : database.maps(up, rot, firstKey);
 		nextSeed = internalNext();
 	    } catch (IOException e) {
-		yacyCore.log.logDebug("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+		yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 		it = null;
 	    } catch (kelondroException e) {
-		yacyCore.log.logDebug("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+		yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
 		it = null;
@@ -674,7 +674,7 @@ public class yacySeedDB {
 		it = database.maps(up, field);
 		nextSeed = internalNext();
 	    } catch (kelondroException e) {
-		yacyCore.log.logDebug("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+		yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
                 if (database == seedPotentialDB) seedPotentialDB = resetSeedTable(seedPotentialDB, seedPotentialDBFile);

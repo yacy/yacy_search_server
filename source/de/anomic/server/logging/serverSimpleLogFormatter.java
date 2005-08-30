@@ -33,18 +33,18 @@ public class serverSimpleLogFormatter extends SimpleFormatter {
           int logLevel = record.getLevel().intValue();
           if (logLevel == serverLog.LOGLEVEL_FAILURE) 
               this.buffer.append(serverLog.LOGTOKEN_FAILURE); 
-          else if (logLevel == serverLog.LOGLEVEL_ERROR)
-              this.buffer.append(serverLog.LOGTOKEN_ERROR); 
+          else if (logLevel == serverLog.LOGLEVEL_FAILURE)
+              this.buffer.append(serverLog.LOGTOKEN_FAILURE); 
           else if (logLevel == serverLog.LOGLEVEL_WARNING) 
               this.buffer.append(serverLog.LOGTOKEN_WARNING);
-          else if (logLevel == serverLog.LOGLEVEL_SYSTEM)
-              this.buffer.append(serverLog.LOGTOKEN_SYSTEM);
+          else if (logLevel == serverLog.LOGLEVEL_CONFIG)
+              this.buffer.append(serverLog.LOGTOKEN_CONFIG);
           else if (logLevel == serverLog.LOGLEVEL_INFO)
               this.buffer.append(serverLog.LOGTOKEN_INFO);
-          else if (logLevel == serverLog.LOGLEVEL_DEBUG) 
-              this.buffer.append(serverLog.LOGTOKEN_DEBUG);
+          else if (logLevel == serverLog.LOGLEVEL_FINE) 
+              this.buffer.append(serverLog.LOGTOKEN_FINE);
           else 
-              this.buffer.append(serverLog.LOGTOKEN_DEBUG);
+              this.buffer.append(serverLog.LOGTOKEN_FINE);
           this.buffer.append(' ');
           
           // adding the logging date

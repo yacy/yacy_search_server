@@ -184,23 +184,23 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     }
     
     private final void logError(String text) {
-        if (log == null) serverLog.logError("THREAD-CONTROL", text);
-        else log.logError(text);
+        if (log == null) serverLog.logFailure("THREAD-CONTROL", text);
+        else log.logFailure(text);
     }    
     
     private final void logError(String text,Throwable thrown) {
-        if (log == null) serverLog.logError("THREAD-CONTROL", text, thrown);
-        else log.logError(text,thrown);
+        if (log == null) serverLog.logFailure("THREAD-CONTROL", text, thrown);
+        else log.logFailure(text,thrown);
     }
     
     private void logSystem(String text) {
-        if (log == null) serverLog.logSystem("THREAD-CONTROL", text);
-        else log.logSystem(text);
+        if (log == null) serverLog.logConfig("THREAD-CONTROL", text);
+        else log.logConfig(text);
     }
     
     private void logSystem(String text, Throwable thrown) {
-        if (log == null) serverLog.logSystem("THREAD-CONTROL", text, thrown);
-        else log.logSystem(text,thrown);
+        if (log == null) serverLog.logConfig("THREAD-CONTROL", text, thrown);
+        else log.logConfig(text,thrown);
     }    
     
     public void jobExceptionHandler(Exception e) {
@@ -279,7 +279,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 Thread.sleep(millis);
             }
         } catch (InterruptedException e) {
-            if (this.log != null) this.log.logSystem("thread '" + this.getName() + "' interrupted because of shutdown.");
+            if (this.log != null) this.log.logConfig("thread '" + this.getName() + "' interrupted because of shutdown.");
         }
     }
     
@@ -297,7 +297,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     public void notifyThread() {
         if (this.syncObject != null) {
             synchronized(this.syncObject) {
-                if (this.log != null) this.log.logDebug("thread '" + this.getName() + "' has received a notification from thread '" + Thread.currentThread().getName() + "'.");
+                if (this.log != null) this.log.logFine("thread '" + this.getName() + "' has received a notification from thread '" + Thread.currentThread().getName() + "'.");
                 this.syncObject.notifyAll();
             }
         }            

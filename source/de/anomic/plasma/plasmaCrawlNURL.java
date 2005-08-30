@@ -421,7 +421,7 @@ public class plasmaCrawlNURL extends plasmaURL {
 	    } catch (IOException e) {
 		System.out.println("INTERNAL ERROR AT plasmaNURL:store:" + e.toString());
 	    } catch (kelondroException e) {
-                serverLog.logError("PLASMA", "plasmaCrawlNURL.store failed: " + e.getMessage());
+                serverLog.logFailure("PLASMA", "plasmaCrawlNURL.store failed: " + e.getMessage());
             }
 	}
         

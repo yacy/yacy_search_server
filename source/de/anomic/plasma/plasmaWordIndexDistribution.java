@@ -68,35 +68,35 @@ public class plasmaWordIndexDistribution {
     public boolean job() {
 
         if (this.closed) {
-            log.logDebug("no word distribution: closed");
+            log.logFine("no word distribution: closed");
             return false;
         }
         if (yacyCore.seedDB == null) {
-            log.logDebug("no word distribution: seedDB == null");
+            log.logFine("no word distribution: seedDB == null");
             return false;
         }
         if (yacyCore.seedDB.mySeed == null) {
-            log.logDebug("no word distribution: mySeed == null");
+            log.logFine("no word distribution: mySeed == null");
             return false;
         }
         if (yacyCore.seedDB.mySeed.isVirgin()) {
-            log.logDebug("no word distribution: status is virgin");
+            log.logFine("no word distribution: status is virgin");
             return false;
         }
         if (!(enabled)) {
-            log.logDebug("no word distribution: not enabled");
+            log.logFine("no word distribution: not enabled");
             return false;
         }
         if (urlPool.loadedURL.size() < 10) {
-            log.logDebug("no word distribution: loadedURL.size() = " + urlPool.loadedURL.size());
+            log.logFine("no word distribution: loadedURL.size() = " + urlPool.loadedURL.size());
             return false;
         }
         if (wordIndex.size() < 100) {
-            log.logDebug("no word distribution: not enough words - wordIndex.size() = " + wordIndex.size());
+            log.logFine("no word distribution: not enough words - wordIndex.size() = " + wordIndex.size());
             return false;
         }
         if ((!enabledWhileCrawling) && (urlPool.noticeURL.stackSize() > 0)) {
-            log.logDebug("no word distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize());
+            log.logFine("no word distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize());
             return false;
         }
         
@@ -106,7 +106,7 @@ public class plasmaWordIndexDistribution {
         int transferred = performTransferIndex(indexCount, peerCount, true);
         
         if (transferred <= 0) {
-            log.logDebug("no word distribution: transfer failed");
+            log.logFine("no word distribution: transfer failed");
             return false;
         }
 
@@ -135,12 +135,12 @@ public class plasmaWordIndexDistribution {
         
         // collect index
         String startPointHash = selectTransferStart();
-        log.logDebug("Selected hash " + startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash));
+        log.logFine("Selected hash " + startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash));
         Object[] selectResult = selectTransferIndexes(startPointHash, indexCount);
         plasmaWordIndexEntity[] indexEntities = (plasmaWordIndexEntity[]) selectResult[0];
         HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry 
         if ((indexEntities == null) || (indexEntities.length == 0)) {
-            log.logDebug("No index available for index transfer, hash start-point " + startPointHash);
+            log.logFine("No index available for index transfer, hash start-point " + startPointHash);
             return -1;
         }
         // count the indexes again, can be smaller as expected
@@ -162,7 +162,7 @@ public class plasmaWordIndexDistribution {
         long start;
         while ((e.hasMoreElements()) && (hc < peerCount)) {
             if (closed) {
-                log.logError("Index distribution interrupted by close, nothing deleted locally.");
+                log.logFailure("Index distribution interrupted by close, nothing deleted locally.");
                 return -1; // interrupted
             }
             seed = (yacySeed) e.nextElement();
@@ -192,14 +192,14 @@ public class plasmaWordIndexDistribution {
             if (delete) {
                 try {
                     if (deleteTransferIndexes(indexEntities)) {
-                        log.logDebug("Deleted all " + indexEntities.length + " transferred whole-word indexes locally");
+                        log.logFine("Deleted all " + indexEntities.length + " transferred whole-word indexes locally");
                         return indexCount;
                     } else {
-                        log.logError("Deleted not all transferred whole-word indexes");
+                        log.logFailure("Deleted not all transferred whole-word indexes");
                         return -1;
                     }
                 } catch (IOException ee) {
-                    log.logError("Deletion of indexes not possible:" + ee.getMessage(), ee);
+                    log.logFailure("Deletion of indexes not possible:" + ee.getMessage(), ee);
                     return -1;
                 }
             } else {
@@ -210,7 +210,7 @@ public class plasmaWordIndexDistribution {
             }
             return indexCount;
         } else {
-            log.logError("Index distribution failed. Too less peers (" + hc + ") received the index, not deleted locally.");
+            log.logFailure("Index distribution failed. Too less peers (" + hc + ") received the index, not deleted locally.");
             return -1;
         }
     }
@@ -274,10 +274,10 @@ public class plasmaWordIndexDistribution {
                         }
                         // use whats remaining
                         tmpEntities.add(indexEntity);
-                        log.logDebug("Selected whole index (" + indexEntity.size() + " URLs, " + unknownURLEntries.size() + " not bound) for word " + indexEntity.wordHash());
+                        log.logFine("Selected whole index (" + indexEntity.size() + " URLs, " + unknownURLEntries.size() + " not bound) for word " + indexEntity.wordHash());
                         count -= indexEntity.size();
                     } catch (kelondroException e) {
-                        log.logError("plasmaWordIndexDistribution/1: deleted DB for word " + indexEntity.wordHash(), e);
+                        log.logFailure("plasmaWordIndexDistribution/1: deleted DB for word " + indexEntity.wordHash(), e);
                         try {indexEntity.deleteComplete();} catch (IOException ee) {}
                     }
                 } else {
@@ -308,10 +308,10 @@ public class plasmaWordIndexDistribution {
                             indexEntity.removeEntry((String) hashIter.next(), true);
                         }
                         // use whats remaining
-                        log.logDebug("Selected partial index (" + tmpEntity.size() + " from " + indexEntity.size() +" URLs, " + unknownURLEntries.size() + " not bound) for word " + tmpEntity.wordHash());
+                        log.logFine("Selected partial index (" + tmpEntity.size() + " from " + indexEntity.size() +" URLs, " + unknownURLEntries.size() + " not bound) for word " + tmpEntity.wordHash());
                         tmpEntities.add(tmpEntity);
                     } catch (kelondroException e) {
-                        log.logError("plasmaWordIndexDistribution/2: deleted DB for word " + indexEntity.wordHash(), e);
+                        log.logFailure("plasmaWordIndexDistribution/2: deleted DB for word " + indexEntity.wordHash(), e);
                         try {indexEntity.deleteComplete();} catch (IOException ee) {}
                     }
                     indexEntity.close(); // important: is not closed elswhere and cannot be deleted afterwards
@@ -324,10 +324,10 @@ public class plasmaWordIndexDistribution {
             for (int i = 0; i < tmpEntities.size(); i++) indexEntities[i] = (plasmaWordIndexEntity) tmpEntities.elementAt(i);
             return new Object[]{indexEntities, knownURLs};
         } catch (IOException e) {
-            log.logError("selectTransferIndexes IO-Error (hash=" + nexthash + "): " + e.getMessage(), e);
+            log.logFailure("selectTransferIndexes IO-Error (hash=" + nexthash + "): " + e.getMessage(), e);
             return new Object[]{new plasmaWordIndexEntity[0], new HashMap()};
         } catch (kelondroException e) {
-            log.logError("selectTransferIndexes database corrupted: " + e.getMessage(), e);
+            log.logFailure("selectTransferIndexes database corrupted: " + e.getMessage(), e);
             return new Object[]{new plasmaWordIndexEntity[0], new HashMap()};
         }
     }
@@ -354,7 +354,7 @@ public class plasmaWordIndexDistribution {
                 indexEntity = wordIndex.getEntity(indexEntities[i].wordHash(), true);
                 sz = indexEntity.size();
                 indexEntity.close();
-                log.logDebug("Deleted partial index (" + c + " URLs) for word " + indexEntities[i].wordHash() + "; " + sz + " entries left");
+                log.logFine("Deleted partial index (" + c + " URLs) for word " + indexEntities[i].wordHash() + "; " + sz + " entries left");
                 // DEBUG: now try to delete the remaining index. If this works, this routine is fine
                 /*
                 if (wordIndex.getEntity(indexEntities[i].wordHash()).deleteComplete())
@@ -373,7 +373,7 @@ public class plasmaWordIndexDistribution {
                     // have another try...
                     if (!(plasmaWordIndexEntity.wordHash2path(wordIndex.getRoot() /*PLASMADB*/, indexEntities[i].wordHash()).delete())) {
                         success = false;
-                        log.logError("Could not delete whole index for word " + indexEntities[i].wordHash());
+                        log.logFailure("Could not delete whole index for word " + indexEntities[i].wordHash());
                     }
                 }
             }

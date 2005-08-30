@@ -1281,8 +1281,8 @@ do upload
                     if (p > 0) {
                         responseHeader.add(buffer.substring(0, p).trim(), buffer.substring(p + 1).trim());
                     } else {
-                        serverLog.logError("HTTPC", "RESPONSE PARSE ERROR: HOST='" + host + "', PATH='" + requestPath + "', STATUS='" + status + "'");
-                        serverLog.logError("HTTPC", "..............BUFFER: " + buffer);
+                        serverLog.logFailure("HTTPC", "RESPONSE PARSE ERROR: HOST='" + host + "', PATH='" + requestPath + "', STATUS='" + status + "'");
+                        serverLog.logFailure("HTTPC", "..............BUFFER: " + buffer);
                     }
                 }
             }
@@ -1331,7 +1331,7 @@ do upload
         public byte[] writeContent() throws IOException {
             int contentLength = (int) this.responseHeader.contentLength();
             serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-            writeContentX(null, sbb, httpc.this.clientInput);
+            writeContentX(null, sbb, clientInput);
             return sbb.getBytes();
         }
 
@@ -1346,7 +1346,7 @@ do upload
         public byte[] writeContent(OutputStream procOS) throws IOException {
             int contentLength = (int) this.responseHeader.contentLength();
             serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-            writeContentX(procOS, sbb, httpc.this.clientInput);
+            writeContentX(procOS, sbb, clientInput);
             return sbb.getBytes();
         }
 
@@ -1364,7 +1364,7 @@ do upload
             FileOutputStream bufferOS = null;
             try {
                 if (file != null) bufferOS = new FileOutputStream(file);
-                writeContentX(procOS, bufferOS, httpc.this.clientInput);
+                writeContentX(procOS, bufferOS, clientInput);
             } finally {
                 if (bufferOS != null) {
                     bufferOS.close();

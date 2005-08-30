@@ -354,7 +354,7 @@ public final class plasmaParser {
                         newEnabledParsers.put(mimeType,availableParserList.get(mimeType));
                         
                     } catch (Exception e) {
-                        serverLog.logError("PARSER", "error in setEnabledParserList", e);
+                        serverLog.logFailure("PARSER", "error in setEnabledParserList", e);
                     } finally {
                         if (theParser != null)
                             try { plasmaParser.theParserPool.returnObject(mimeType,theParser); } catch (Exception e) {}
@@ -416,7 +416,7 @@ public final class plasmaParser {
             
             // getting an uri to the parser subpackage
             String packageURI = plasmaParser.class.getResource("/"+plasmaParserPkgName.replace('.','/')).toString();
-            serverLog.logDebug("PARSER", "Parser directory is " + packageURI);
+            serverLog.logFine("PARSER", "Parser directory is " + packageURI);
             
             // open the parser directory
             File parserDir = new File(new URI(packageURI));
@@ -430,12 +430,12 @@ public final class plasmaParser {
             if (parserDirectories == null) return;
             for (int parserDirNr=0; parserDirNr< parserDirectories.length; parserDirNr++) {
                 File currentDir = parserDirectories[parserDirNr];
-                serverLog.logDebug("PARSER", "Searching in directory " + currentDir.toString());
+                serverLog.logFine("PARSER", "Searching in directory " + currentDir.toString());
                 String[] parserClasses = currentDir.list(parserFileNameFilter);
                 if (parserClasses == null) continue;
                 
                 for (int parserNr=0; parserNr<parserClasses.length; parserNr++) {
-                    serverLog.logDebug("PARSER", "Testing parser class " + parserClasses[parserNr]);
+                    serverLog.logFine("PARSER", "Testing parser class " + parserClasses[parserNr]);
                     String className = parserClasses[parserNr].substring(0,parserClasses[parserNr].indexOf(".class"));
                     String fullClassName = plasmaParserPkgName + "." + currentDir.getName() + "." + className;
                     try {
@@ -472,7 +472,7 @@ public final class plasmaParser {
             }
             
         } catch (Exception e) {
-            serverLog.logError("PARSER", "Unable to determine all installed parsers. " + e.getMessage());
+            serverLog.logFailure("PARSER", "Unable to determine all installed parsers. " + e.getMessage());
         }
     }
     

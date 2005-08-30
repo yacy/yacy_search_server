@@ -61,7 +61,6 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -71,8 +70,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyDHTAction;
-import de.anomic.yacy.yacySeed;
+
 
 /**
  * Instances of this class can be passed as argument to the serverCore.
@@ -126,9 +124,9 @@ public final class httpd implements serverHandler {
     public static final String hline = "-------------------------------------------------------------------------------";
     
     private static HashMap reverseMappingCache = new HashMap();
-    private static httpdHandler proxyHandler = null;   // a servlet that holds the proxy functions
-    private static httpdHandler fileHandler = null;    // a servlet that holds the file serving functions
-    private static httpdHandler soapHandler = null;
+    private httpdHandler proxyHandler = null;   // a servlet that holds the proxy functions
+    private httpdHandler fileHandler = null;    // a servlet that holds the file serving functions
+    private httpdHandler soapHandler = null;
     private static serverSwitch switchboard = null;
     private static String virtualHost = null;
     
@@ -158,8 +156,8 @@ public final class httpd implements serverHandler {
     public httpd(serverSwitch s, httpdHandler fileHandler, httpdHandler proxyHandler) {
         // handler info
         httpd.switchboard = s;
-        httpd.fileHandler = fileHandler;
-        httpd.proxyHandler = proxyHandler;
+        this.fileHandler = fileHandler;
+        this.proxyHandler = proxyHandler;
         httpd.virtualHost = switchboard.getConfig("fileHost","localhost");
         
         // authentication: by default none
@@ -252,7 +250,7 @@ public final class httpd implements serverHandler {
     public String error(Throwable e) { // OBLIGATORIC FUNCTION
         // return string in case of any error that occurs during communication
         // is always (but not only) called if an IO-dependent exception occurrs.
-        this.log.logError("Unexpected Error. " + e.getClass().getName(),e);
+        this.log.logFailure("Unexpected Error. " + e.getClass().getName(),e);
         return "501 Exception occurred: " + e.getMessage();
     }
     
@@ -543,10 +541,10 @@ public final class httpd implements serverHandler {
                     // client closed the connection, so we just end silently
                     this.log.logInfo("Client unexpectedly closed connection");
                 } else {
-                    this.log.logError("Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(),e);
+                    this.log.logFailure("Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(),e);
                 }
             } else {
-                this.log.logError("Unexpected Error. " + e.getClass().getName(),e);
+                this.log.logFailure("Unexpected Error. " + e.getClass().getName(),e);
             }
         }        
     }
@@ -988,7 +986,7 @@ public final class httpd implements serverHandler {
             
             // if we can't find another boundary, then this is an error in the input
             if (p < 0) {
-                serverLog.logError("HTTPD", "ERROR in PUT body: no ending boundary. probably missing values");
+                serverLog.logFailure("HTTPD", "ERROR in PUT body: no ending boundary. probably missing values");
                 break;
             }
             
@@ -1078,7 +1076,7 @@ public final class httpd implements serverHandler {
     }
     
     public Object clone() {
-        return new httpd(this.switchboard, this.fileHandler, this.proxyHandler);        
+        return new httpd(this.switchboard, new httpdFileHandler(this.switchboard), new httpdProxyHandler(this.switchboard));        
     }
     
     public static final void sendRespondBody(

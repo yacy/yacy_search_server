@@ -79,7 +79,7 @@ public class plasmaCrawlProfile {
             profileTableFile.getParentFile().mkdirs();
             profileTable = new kelondroMap(new kelondroDyn(profileTableFile, 32000, plasmaURL.urlCrawlProfileHandleLength, 2000));
         } catch (IOException e){
-            serverLog.logError("PLASMA", "plasmaCrawlProfile.resetDatabase", e);
+            serverLog.logFailure("PLASMA", "plasmaCrawlProfile.resetDatabase", e);
         }
     }
     

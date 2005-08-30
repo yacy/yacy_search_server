@@ -323,11 +323,11 @@ public final class httpHeader extends TreeMap implements Map {
 	    return EMLFormatter.parse(s);
 	} catch (java.text.ParseException e) {
 	    //System.out.println("ERROR long version parse: " + e.getMessage() +  " at position " +  e.getErrorOffset());
-	    serverLog.logError("HTTPC-header", "DATE ERROR (Parse): " + s);
+	    serverLog.logFailure("HTTPC-header", "DATE ERROR (Parse): " + s);
 	    return new Date();
 	} catch (java.lang.NumberFormatException e) {
 	    //System.out.println("ERROR long version parse: " + e.getMessage() +  " at position " +  e.getErrorOffset());
-	    serverLog.logError("HTTPC-header", "DATE ERROR (NumberFormat): " + s);
+	    serverLog.logFailure("HTTPC-header", "DATE ERROR (NumberFormat): " + s);
 	    return new Date();
 	}
     }

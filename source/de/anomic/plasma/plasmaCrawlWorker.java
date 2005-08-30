@@ -194,7 +194,7 @@ public final class plasmaCrawlWorker extends Thread {
                             this.setName(this.threadBaseName + "_inPool");
                         }
                         catch (Exception e1) {
-                            log.logError("pool error", e1);
+                            log.logFailure("pool error", e1);
                         }
                     }
                 }
@@ -366,7 +366,7 @@ public final class plasmaCrawlWorker extends Thread {
                     // but we clean the cache also, since it may be only partial
                     // and most possible corrupted
                     if (cacheFile.exists()) cacheFile.delete();
-                    log.logError("CRAWLER LOADER ERROR1: with URL=" + url.toString() + ": " + e.toString());
+                    log.logFailure("CRAWLER LOADER ERROR1: with URL=" + url.toString() + ": " + e.toString());
                 }
             } else if (res.status.startsWith("30")) {
                 if (crawlingRetryCount > 0) {                    
@@ -391,7 +391,7 @@ public final class plasmaCrawlWorker extends Thread {
                         
                         // if we are already doing a shutdown we don't need to retry crawling
                         if (Thread.currentThread().isInterrupted()) {
-                            log.logError("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
+                            log.logFailure("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
                             return;
                         }                        
                         
@@ -463,14 +463,14 @@ public final class plasmaCrawlWorker extends Thread {
                                    "Pausing crawlers. ");
                     plasmaCrawlLoader.switchboard.pauseCrawling();
                 } else {
-                    log.logError("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
+                    log.logFailure("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
                 }
 
                 
                 if (retryCrawling) {    
                     // if we are already doing a shutdown we don't need to retry crawling
                     if (Thread.currentThread().isInterrupted()) {
-                        log.logError("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
+                        log.logFailure("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
                         return;
                     }
                     
@@ -501,7 +501,7 @@ public final class plasmaCrawlWorker extends Thread {
             } else {
                 // this may happen if the targeted host does not exist or anything with the
                 // remote server was wrong.
-                log.logError("CRAWLER LOADER ERROR2 with URL=" + url.toString() + ": " + e.toString(),e);
+                log.logFailure("CRAWLER LOADER ERROR2 with URL=" + url.toString() + ": " + e.toString(),e);
             }
         } finally {
             if (remote != null) httpc.returnInstance(remote);

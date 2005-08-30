@@ -225,7 +225,7 @@ public class plasmaSwitchboardQueue {
             if (responseHeader == null) try {
                 responseHeader = htCache.getCachedResponse(plasmaURL.urlHash(url));
             } catch (IOException e) {
-                serverLog.logError("PLASMA", "responseHeader: failed to get header", e);
+                serverLog.logFailure("PLASMA", "responseHeader: failed to get header", e);
                 return null;
             }
             return responseHeader;

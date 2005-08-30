@@ -60,7 +60,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
             int localPort
     ) throws Exception {
         try {
-            this.log.logDebug("Initializing port forwarding via sch ...");
+            this.log.logFine("Initializing port forwarding via sch ...");
             
             this.switchboard = switchboard;
             
@@ -139,7 +139,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
             
             // using a timer task to control if the session remains open
             if (sessionWatcher == null) {
-                this.log.logDebug("Deploying port forwarding session watcher thread.");
+                this.log.logFine("Deploying port forwarding session watcher thread.");
                 this.switchboard.deployThread("portForwardingWatcher", "Remote Port Forwarding Watcher", "this thread is used to detect broken connections and to re-establish it if necessary.", null,
                         sessionWatcher = new serverInstantThread(this, "reconnect", null), 30000,30000,30000,1000);
                 sessionWatcher.setSyncObject(new Object());
@@ -150,14 +150,14 @@ public class serverPortForwardingSch implements serverPortForwarding{
                              this.localHost + ":" + this.localHostPort);
         }
         catch(Exception e){
-            this.log.logError("Unable to connect to remote port forwarding host.",e);
+            this.log.logFailure("Unable to connect to remote port forwarding host.",e);
             throw new IOException(e.getMessage());
         }
     }
     
     public synchronized boolean reconnect() throws IOException {
         if ((!this.isConnected()) && (!Thread.currentThread().isInterrupted())) {
-            this.log.logDebug("Trying to reconnect to port forwarding host.");
+            this.log.logFine("Trying to reconnect to port forwarding host.");
             this.connect();
             return this.isConnected();
         }
@@ -168,16 +168,16 @@ public class serverPortForwardingSch implements serverPortForwarding{
         if (session == null) throw new IOException("No connection established.");
 
         // terminating port watcher thread
-        this.log.logDebug("Terminating port forwarding session watcher thread.");
+        this.log.logFine("Terminating port forwarding session watcher thread.");
         this.switchboard.terminateThread("portForwardingWatcher",true);     
         sessionWatcher = null;
         
         // disconnection the session
         try {
             session.disconnect();
-            this.log.logDebug("Successfully disconnected from port forwarding host.");
+            this.log.logFine("Successfully disconnected from port forwarding host.");
         } catch (Exception e) {
-            this.log.logError("Error while trying to disconnect from port forwarding host.",e);
+            this.log.logFailure("Error while trying to disconnect from port forwarding host.",e);
             throw new IOException(e.getMessage());
         }
     }

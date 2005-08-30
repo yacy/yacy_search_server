@@ -221,10 +221,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
         try {
             this.initPortForwarding();
         } catch (Exception e) {
-            this.log.logError("Unable to initialize server port forwarding.",e);
+            this.log.logFailure("Unable to initialize server port forwarding.",e);
             this.switchboard.setConfig("portForwardingEnabled","false");
         } catch (Error e) {
-            this.log.logError("Unable to initialize server port forwarding.",e);
+            this.log.logFailure("Unable to initialize server port forwarding.",e);
             this.switchboard.setConfig("portForwardingEnabled","false");
         }
         
@@ -385,7 +385,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     }
 
     public void open() {
-        this.log.logSystem("* server started on " + publicLocalIP() + ":" + this.port);
+        this.log.logConfig("* server started on " + publicLocalIP() + ":" + this.port);
     }
     
     // class body
@@ -394,7 +394,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         // idleThreadCheck();
         this.switchboard.handleBusyState(this.theSessionPool.getNumActive() /*activeThreads.size() */);
 
-        log.logDebug(
+        log.logFine(
         "* waiting for connections, " + this.theSessionPool.getNumActive() + " sessions running, " +
         this.theSessionPool.getNumIdle() + " sleeping");
         
@@ -463,7 +463,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.log.logWarning("Unable to close the session pool.");
         }        
         
-        this.log.logSystem("* terminated");
+        this.log.logConfig("* terminated");
     }
     
     public int getJobCount() {
@@ -541,7 +541,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 serverCore.this.theSessionThreadGroup.interrupt();                
                 
                 // if there are some sessions that are blocking in IO, we simply close the socket
-                serverCore.this.log.logDebug("Trying to abort " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads ...");
+                serverCore.this.log.logFine("Trying to abort " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads ...");
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     Thread currentThread = threadList[currentThreadIdx];
                     if (currentThread.isAlive()) {
@@ -551,18 +551,18 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 }                
                 
                 // we need to use a timeout here because of missing interruptable session threads ...
-                serverCore.this.log.logDebug("Waiting for " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads to finish shutdown ...");
+                serverCore.this.log.logFine("Waiting for " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads to finish shutdown ...");
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     Thread currentThread = threadList[currentThreadIdx];
                     if (currentThread.isAlive()) {
-                        serverCore.this.log.logDebug("Waiting for session thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
+                        serverCore.this.log.logFine("Waiting for session thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
                         try { currentThread.join(500); } catch (InterruptedException ex) {}
                     }
                 }
                 
                 serverCore.this.log.logInfo("Shutdown of remaining session threads finish.");
             } catch (Exception e) {
-                serverCore.this.log.logError("Unexpected error while trying to shutdown all remaining session threads.",e);
+                serverCore.this.log.logFailure("Unexpected error while trying to shutdown all remaining session threads.",e);
             }
             
             super.close();  
@@ -733,7 +733,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	*/
     
     	public void log(boolean outgoing, String request) {
-    	    serverCore.this.log.logDebug(userAddress.getHostAddress() + "/" + this.identity + " " +
+    	    serverCore.this.log.logFine(userAddress.getHostAddress() + "/" + this.identity + " " +
     		     "[" + ((serverCore.this.theSessionPool.isClosed)? -1 : serverCore.this.theSessionPool.getNumActive()) + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
@@ -1016,10 +1016,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	    
             return readLineBuffer.toByteArray();
         } catch (ClosedByInterruptException e) {
-            if (logerr) serverLog.logError("SERVER", "receive interrupted - timeout");
+            if (logerr) serverLog.logFailure("SERVER", "receive interrupted - timeout");
             return null;            
         } catch (IOException e) {
-            if (logerr) serverLog.logError("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
+            if (logerr) serverLog.logFailure("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
             return null;
         }
     }
