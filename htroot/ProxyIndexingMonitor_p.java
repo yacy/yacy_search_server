@@ -90,7 +90,7 @@ public class ProxyIndexingMonitor_p {
                 // proxyCache - check and create the directory
                 oldProxyCache = env.getConfig("proxyCache", "DATA/HTCACHE");
                 newProxyCache = ((String) post.get("proxyCache", "DATA/HTCACHE"));
-                newProxyCache = newProxyCache.replace("\\", "/");
+                newProxyCache = newProxyCache.replace('\\', '/');
                 if (newProxyCache.endsWith("/")) newProxyCache.substring(0, newProxyCache.length() - 1);
                 File cp = new File(newProxyCache);
                 if ((!cp.isDirectory()) && (!cp.isFile())) cp.mkdirs();                
