@@ -127,7 +127,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         try {
             restore();
         } catch (IOException e){
-            log.logFailure("unable to restore cache dump: " + e.getMessage(), e);
+            log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
         }
         
         // start permanent flushing
@@ -236,7 +236,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             log.logConfig("restored " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         } catch (kelondroException e) {
             // restore failed
-            log.logFailure("restore of indexCache array dump failed: " + e.getMessage(), e);
+            log.logSevere("restore of indexCache array dump failed: " + e.getMessage(), e);
         } finally {
             if (dumpArray != null) try {dumpArray.close();}catch(Exception e){}
         }
@@ -359,7 +359,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 flushFromMem(hash);
             }
         } catch (Exception e) {
-            log.logFailure("flushFromMem: " + e.getMessage(), e);
+            log.logSevere("flushFromMem: " + e.getMessage(), e);
         }
         flushThread.proceed();
     }
@@ -520,7 +520,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         try {
             dump(waitingSeconds);
         } catch (IOException e){
-            log.logFailure("unable to dump cache: " + e.getMessage(), e);
+            log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }
     }
 

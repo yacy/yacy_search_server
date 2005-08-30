@@ -299,7 +299,7 @@ public class plasmaSnippetCache {
             String nextSnippet = computeSnippet(sentences, remaininghashes, minLength, maxLength);
             return result + ((nextSnippet == null) ? "" : (" / " + nextSnippet));
         } catch (IndexOutOfBoundsException e) {
-            log.logFailure("computeSnippet: error with string generation", e);
+            log.logSevere("computeSnippet: error with string generation", e);
             return "";
         }
     }

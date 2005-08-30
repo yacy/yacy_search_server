@@ -231,7 +231,7 @@ public final class httpTemplate {
 			    writeTemplate(pis2, out, pattern, dflt, multi_key + "_" + i + "_");
 			}//for
 		    }else{//transferUntil
-				serverLog.logFailure("TEMPLATE", "No Close Key found for #{"+multi_key+"}#");
+				serverLog.logSevere("TEMPLATE", "No Close Key found for #{"+multi_key+"}#");
 			}
 		}
 	    }else if( (bb & 0xFF) == lrbr ){ //alternatives
@@ -275,7 +275,7 @@ public final class httpTemplate {
             //TODO: better Error Handling
             transferUntil(pis, keyStream, (new String("%%"+patternName)).getBytes());
     		if(pis.available()==0){
-    			serverLog.logFailure("TEMPLATE", "No such Template: %%"+patternName);
+    			serverLog.logSevere("TEMPLATE", "No such Template: %%"+patternName);
                 return;
             }
             keyStream=new ByteArrayOutputStream();
@@ -284,7 +284,7 @@ public final class httpTemplate {
             writeTemplate(pis2, out, pattern, dflt, prefix + key + "_");
     		transferUntil(pis, keyStream, (new String("#(/"+key+")#")).getBytes());
     		if(pis.available()==0){
-    			serverLog.logFailure("TEMPLATE", "No Close Key found for #("+key+")# (by Name)");
+    			serverLog.logSevere("TEMPLATE", "No Close Key found for #("+key+")# (by Name)");
             }
         }else{
     		while(!found){
@@ -335,7 +335,7 @@ public final class httpTemplate {
     		    if(!found){
     			text += (char)bb;
     			if(pis.available()==0){
-    				serverLog.logFailure("TEMPLATE", "No Close Key found for #("+key+")# (by Index)");
+    				serverLog.logSevere("TEMPLATE", "No Close Key found for #("+key+")# (by Index)");
     				found=true;
     			}
     		    }
@@ -380,7 +380,7 @@ public final class httpTemplate {
 					}
 				}catch(IOException e){
 					//file not found?                    
-					serverLog.logFailure("FILEHANDLER","Include Error with file: "+filename);
+					serverLog.logSevere("FILEHANDLER","Include Error with file: "+filename);
 				} finally {
                     if (br!=null) try{br.close(); br=null;}catch(Exception e){}
                 }

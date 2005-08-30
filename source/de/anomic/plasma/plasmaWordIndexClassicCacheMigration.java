@@ -127,7 +127,7 @@ public class plasmaWordIndexClassicCacheMigration {
         try {
             return indexCache.rows(true, false, null);
         } catch (kelondroException e) {
-            de.anomic.server.logging.serverLog.logFailure("PLASMA", "kelondro error in plasmaWordIndexFileCache: " + e.getMessage());
+            de.anomic.server.logging.serverLog.logSevere("PLASMA", "kelondro error in plasmaWordIndexFileCache: " + e.getMessage());
             return new HashSet().iterator();
         }
     }
@@ -171,7 +171,7 @@ public class plasmaWordIndexClassicCacheMigration {
             remove(hash);
             return true;
         } catch (Exception e) {
-            serverLog.logFailure("PLASMA MIGRATION", "oneStepMigration error: " + e.getMessage(), e);
+            serverLog.logSevere("PLASMA MIGRATION", "oneStepMigration error: " + e.getMessage(), e);
             return false;
         }
     }

@@ -350,7 +350,7 @@ public final class yacy {
                 server.setName("httpd:"+port);
                 server.setPriority(Thread.MAX_PRIORITY);
                 if (server == null) {
-                    serverLog.logFailure("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
+                    serverLog.logSevere("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
                 } else {
                     // first start the server
                     sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
@@ -377,7 +377,7 @@ public final class yacy {
                         }
                         serverLog.logInfo("STARTUP", "Copied the default lokales to DATA/LOCALE");
                     }catch(NullPointerException e){
-                        serverLog.logFailure("STARTUP", "Nullpointer Exception while copying the default Locales");
+                        serverLog.logSevere("STARTUP", "Nullpointer Exception while copying the default Locales");
                     }
 
                     //regenerate Locales from Translationlist, if needed
@@ -418,7 +418,7 @@ public final class yacy {
                     try {
                         sb.waitForShutdown();
                     } catch (Exception e) {
-                        serverLog.logFailure("MAIN CONTROL LOOP", "PANIK: " + e.getMessage(),e);
+                        serverLog.logSevere("MAIN CONTROL LOOP", "PANIK: " + e.getMessage(),e);
                     }
 
                     // shut down
@@ -440,11 +440,11 @@ public final class yacy {
                     sb.close();
                 }
             } catch (Exception e) {
-                serverLog.logFailure("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
+                serverLog.logSevere("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
                 //System.exit(1);
             }
         } catch (Exception ee) {
-            serverLog.logFailure("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
+            serverLog.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         }
         serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
         try {
@@ -468,7 +468,7 @@ public final class yacy {
         // read data folder
         File dataFolder = new File(homePath, "DATA");
         if (!(dataFolder.exists())) {
-            serverLog.logFailure(mes, "Application was never started or root path wrong.");
+            serverLog.logSevere(mes, "Application was never started or root path wrong.");
             System.exit(-1);
         }
 
@@ -476,10 +476,10 @@ public final class yacy {
         try {
             config.load(new FileInputStream(new File(homePath, "DATA/SETTINGS/httpProxy.conf")));
         } catch (FileNotFoundException e) {
-            serverLog.logFailure(mes, "could not find configuration file.");
+            serverLog.logSevere(mes, "could not find configuration file.");
             System.exit(-1);
         } catch (IOException e) {
-            serverLog.logFailure(mes, "could not read configuration file.");
+            serverLog.logSevere(mes, "could not read configuration file.");
             System.exit(-1);
         }
 
@@ -521,11 +521,11 @@ public final class yacy {
                 res.writeContent(bos, null);
                 con.close();
             } else {
-                serverLog.logFailure("REMOTE-SHUTDOWN", "error response from YACY socket: " + res.status);
+                serverLog.logSevere("REMOTE-SHUTDOWN", "error response from YACY socket: " + res.status);
                 System.exit(-1);
             }
         } catch (IOException e) {
-            serverLog.logFailure("REMOTE-SHUTDOWN", "could not establish connection to YACY socket: " + e.getMessage());
+            serverLog.logSevere("REMOTE-SHUTDOWN", "could not establish connection to YACY socket: " + e.getMessage());
             System.exit(-1);
         }
 
@@ -708,7 +708,7 @@ public final class yacy {
                 serverLog.logInfo("CLEAN-WORDLIST", "not necessary to change wordlist");
             }
         } catch (IOException e) {
-            serverLog.logFailure("CLEAN-WORDLIST", "ERROR: " + e.getMessage());
+            serverLog.logSevere("CLEAN-WORDLIST", "ERROR: " + e.getMessage());
             System.exit(-1);
         }
 
@@ -832,7 +832,7 @@ class shutdownHookThread extends Thread {
                 this.mainThread.join();
             }
         } catch (Exception e) {
-            serverLog.logFailure("SHUTDOWN","Unexpected error. " + e.getClass().getName(),e);
+            serverLog.logSevere("SHUTDOWN","Unexpected error. " + e.getClass().getName(),e);
         }
     }
 }

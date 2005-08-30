@@ -170,7 +170,7 @@ public class translator {
 					if(translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), (Hashtable)translationLists.get(sourceFiles[i].getName()))){
 						serverLog.logInfo("Translator", "Translated file: "+ sourceFiles[i].getName());
 					}else{
-						serverLog.logFailure("Translator", "File error while translating file "+sourceFiles[i].getPath());
+						serverLog.logSevere("Translator", "File error while translating file "+sourceFiles[i].getPath());
 					}
 				}else{
 						serverLog.logInfo("Translator", "No translation for file: "+sourceFiles[i].getPath());

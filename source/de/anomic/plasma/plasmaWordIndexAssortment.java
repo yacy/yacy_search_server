@@ -113,7 +113,7 @@ public final class plasmaWordIndexAssortment {
                 if (log != null) log.logConfig("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
                 return;
             } catch (IOException e){
-                serverLog.logFailure("PLASMA", "unable to open assortment database, creating new: " + e.getMessage(), e);
+                serverLog.logSevere("PLASMA", "unable to open assortment database, creating new: " + e.getMessage(), e);
             }
             assortmentFile.delete(); // make space for new one
         }
@@ -122,7 +122,7 @@ public final class plasmaWordIndexAssortment {
             assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
             if (log != null) log.logConfig("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
         } catch (IOException e){
-            serverLog.logFailure("PLASMA", "unable to create assortment database: " + e.getMessage(), e);
+            serverLog.logSevere("PLASMA", "unable to create assortment database: " + e.getMessage(), e);
         }
     }
 
@@ -146,10 +146,10 @@ public final class plasmaWordIndexAssortment {
         try {
             oldrow = assortments.put(row);
         } catch (IOException e) {
-            log.logFailure("storeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB", e);
+            log.logSevere("storeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
         } catch (kelondroException e) {
-            log.logFailure("storeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB", e);
+            log.logSevere("storeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
         }
         if (oldrow != null) throw new RuntimeException("Store to assortment ambiguous");
@@ -162,11 +162,11 @@ public final class plasmaWordIndexAssortment {
         try {
             row = assortments.remove(wordHash.getBytes());
         } catch (IOException e) {
-            log.logFailure("removeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB", e);
+            log.logSevere("removeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
 	    return null;
         } catch (kelondroException e) {
-            log.logFailure("removeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB", e);
+            log.logSevere("removeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
 	    return null;
         }
@@ -189,7 +189,7 @@ public final class plasmaWordIndexAssortment {
         try {
             assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
         } catch (IOException e){
-            log.logFailure("unable to re-create assortment database: " + e.getMessage(), e);
+            log.logSevere("unable to re-create assortment database: " + e.getMessage(), e);
         }
     }
     
@@ -197,11 +197,11 @@ public final class plasmaWordIndexAssortment {
         try {
             return assortments.keys(up, rot, startWordHash.getBytes());
         } catch (IOException e) {
-            log.logFailure("iterateAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB", e);
+            log.logSevere("iterateAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
             return null;
         } catch (kelondroException e) {
-            log.logFailure("iterateAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB", e);
+            log.logSevere("iterateAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB", e);
             resetDatabase();
             return null;
         }
@@ -215,7 +215,7 @@ public final class plasmaWordIndexAssortment {
         try {
             assortments.close();
         } catch (IOException e){
-            log.logFailure("unable to close assortment database: " + e.getMessage(), e);
+            log.logSevere("unable to close assortment database: " + e.getMessage(), e);
         }
     }
 

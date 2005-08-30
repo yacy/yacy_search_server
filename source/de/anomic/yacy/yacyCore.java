@@ -337,7 +337,7 @@ public class yacyCore {
                     log.logInfo("publish: handshaked " + this.seed.get("PeerType", "senior") + " peer '" + this.seed.getName() + "' at " + this.seed.getAddress());
                 }
             } catch (Exception e) {
-                log.logFailure("publishThread: error with target seed " + seed.getMap() + ": " + e.getMessage(), e);
+                log.logSevere("publishThread: error with target seed " + seed.getMap() + ": " + e.getMessage(), e);
                 this.error = e;
             } finally {
                 this.syncList.add(this);
@@ -387,7 +387,7 @@ public class yacyCore {
                 else
                     seedDB.mySeed.put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
             } catch (IOException e) {
-                log.logFailure("publishMySeed: problem with news encoding", e);
+                log.logSevere("publishMySeed: problem with news encoding", e);
             }
             
             // holding a reference to all started threads
@@ -692,7 +692,7 @@ public class yacyCore {
                     if (logt.indexOf("Error") >= 0) {
                         seedDB.mySeed.put("PeerType", prevStatus);
                         String errorMsg = "SaveSeedList: seed upload failed using " + uploader.getClass().getName() + " (error): " + logt.substring(logt.indexOf("Error") + 6);
-                        log.logFailure(errorMsg);
+                        log.logSevere(errorMsg);
                         return errorMsg;
                     }
                     log.logInfo(logt);

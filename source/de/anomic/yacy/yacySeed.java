@@ -332,7 +332,7 @@ public class yacySeed {
 	yacyCore.log.logInfo("init: OWN SEED = " + hash);
 
 	if (hash.length() != yacySeedDB.commonHashLength) {
-	    yacyCore.log.logFailure("YACY Internal error: distributed hash conceptual error");
+	    yacyCore.log.logSevere("YACY Internal error: distributed hash conceptual error");
 	    System.exit(-1);
 	}
 

@@ -89,7 +89,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
                 throw new IllegalStateException("Missing library.");
             }
         } catch (Exception e) {
-            this.log.logFailure("Unable to initialize port forwarding.",e);
+            this.log.logSevere("Unable to initialize port forwarding.",e);
             throw e;
         }
     }
@@ -150,7 +150,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
                              this.localHost + ":" + this.localHostPort);
         }
         catch(Exception e){
-            this.log.logFailure("Unable to connect to remote port forwarding host.",e);
+            this.log.logSevere("Unable to connect to remote port forwarding host.",e);
             throw new IOException(e.getMessage());
         }
     }
@@ -177,7 +177,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
             session.disconnect();
             this.log.logFine("Successfully disconnected from port forwarding host.");
         } catch (Exception e) {
-            this.log.logFailure("Error while trying to disconnect from port forwarding host.",e);
+            this.log.logSevere("Error while trying to disconnect from port forwarding host.",e);
             throw new IOException(e.getMessage());
         }
     }

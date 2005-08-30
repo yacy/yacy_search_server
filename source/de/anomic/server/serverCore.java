@@ -221,10 +221,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
         try {
             this.initPortForwarding();
         } catch (Exception e) {
-            this.log.logFailure("Unable to initialize server port forwarding.",e);
+            this.log.logSevere("Unable to initialize server port forwarding.",e);
             this.switchboard.setConfig("portForwardingEnabled","false");
         } catch (Error e) {
-            this.log.logFailure("Unable to initialize server port forwarding.",e);
+            this.log.logSevere("Unable to initialize server port forwarding.",e);
             this.switchboard.setConfig("portForwardingEnabled","false");
         }
         
@@ -562,7 +562,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 
                 serverCore.this.log.logInfo("Shutdown of remaining session threads finish.");
             } catch (Exception e) {
-                serverCore.this.log.logFailure("Unexpected error while trying to shutdown all remaining session threads.",e);
+                serverCore.this.log.logSevere("Unexpected error while trying to shutdown all remaining session threads.",e);
             }
             
             super.close();  
@@ -1016,10 +1016,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	    
             return readLineBuffer.toByteArray();
         } catch (ClosedByInterruptException e) {
-            if (logerr) serverLog.logFailure("SERVER", "receive interrupted - timeout");
+            if (logerr) serverLog.logSevere("SERVER", "receive interrupted - timeout");
             return null;            
         } catch (IOException e) {
-            if (logerr) serverLog.logFailure("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
+            if (logerr) serverLog.logSevere("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
             return null;
         }
     }

@@ -1281,8 +1281,8 @@ do upload
                     if (p > 0) {
                         responseHeader.add(buffer.substring(0, p).trim(), buffer.substring(p + 1).trim());
                     } else {
-                        serverLog.logFailure("HTTPC", "RESPONSE PARSE ERROR: HOST='" + host + "', PATH='" + requestPath + "', STATUS='" + status + "'");
-                        serverLog.logFailure("HTTPC", "..............BUFFER: " + buffer);
+                        serverLog.logSevere("HTTPC", "RESPONSE PARSE ERROR: HOST='" + host + "', PATH='" + requestPath + "', STATUS='" + status + "'");
+                        serverLog.logSevere("HTTPC", "..............BUFFER: " + buffer);
                     }
                 }
             }

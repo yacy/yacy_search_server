@@ -233,7 +233,7 @@ public class yacySeedDB {
             try {
                 keyIt = seedActiveDB.keys(true, false); // iteration of String - Objects
             } catch (IOException e) {
-                yacyCore.log.logFailure("yacySeedCache.anySeed: seed.db not available: " + e.getMessage());
+                yacyCore.log.logSevere("yacySeedCache.anySeed: seed.db not available: " + e.getMessage());
                 keyIt = (new HashSet()).iterator();
             }
 	    String seedHash;

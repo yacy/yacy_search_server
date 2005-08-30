@@ -250,7 +250,7 @@ public final class httpd implements serverHandler {
     public String error(Throwable e) { // OBLIGATORIC FUNCTION
         // return string in case of any error that occurs during communication
         // is always (but not only) called if an IO-dependent exception occurrs.
-        this.log.logFailure("Unexpected Error. " + e.getClass().getName(),e);
+        this.log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
         return "501 Exception occurred: " + e.getMessage();
     }
     
@@ -541,10 +541,10 @@ public final class httpd implements serverHandler {
                     // client closed the connection, so we just end silently
                     this.log.logInfo("Client unexpectedly closed connection");
                 } else {
-                    this.log.logFailure("Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(),e);
+                    this.log.logSevere("Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(),e);
                 }
             } else {
-                this.log.logFailure("Unexpected Error. " + e.getClass().getName(),e);
+                this.log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
             }
         }        
     }
@@ -986,7 +986,7 @@ public final class httpd implements serverHandler {
             
             // if we can't find another boundary, then this is an error in the input
             if (p < 0) {
-                serverLog.logFailure("HTTPD", "ERROR in PUT body: no ending boundary. probably missing values");
+                serverLog.logSevere("HTTPD", "ERROR in PUT body: no ending boundary. probably missing values");
                 break;
             }
             

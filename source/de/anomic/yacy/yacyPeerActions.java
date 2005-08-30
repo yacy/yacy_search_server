@@ -184,7 +184,7 @@ public class yacyPeerActions {
 		} catch (Exception e) {
 		    // this is when wget fails; may be because of missing internet connection
 		    // we do nothing here and go silently over it
-                    yacyCore.log.logFailure("BOOTSTRAP: failed to load seeds from seed-list URL " + seedListFileURL);
+                    yacyCore.log.logSevere("BOOTSTRAP: failed to load seeds from seed-list URL " + seedListFileURL);
 		}
 	    }
   	}
@@ -242,10 +242,10 @@ public class yacyPeerActions {
 	// returns true if the peer is new and previously unknown
         String error;
         if (seed == null) {
-	    yacyCore.log.logFailure("connect: WRONG seed (NULL)");
+	    yacyCore.log.logSevere("connect: WRONG seed (NULL)");
 	    return false;
 	} else if ((error = seed.isProper()) != null) {
-	    yacyCore.log.logFailure("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
+	    yacyCore.log.logSevere("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
 	    return false;
 	} else if ((seedDB.mySeed != null) && (seed.hash.equals(seedDB.mySeed.hash))) {
 	    yacyCore.log.logInfo("connect: SELF reference " + seed.getAddress());

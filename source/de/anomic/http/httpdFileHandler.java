@@ -132,7 +132,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 mimeTableInputStream = new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath));
                 this.mimeTable.load(mimeTableInputStream);
             } catch (Exception e) {                
-                serverLog.logFailure("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
+                serverLog.logSevere("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
                 System.exit(1);
             } finally {
                 if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}                
@@ -444,7 +444,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             tp.put("clientname", switchboard.getConfig("peerName", "anomic"));
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (InvocationTargetException e) {
-                            this.theLogger.logFailure("INTERNAL ERROR: " + e.toString() + ":" +
+                            this.theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                                     e.getMessage() +
                                     " target exception at " + rc + ": " +
                                     e.getTargetException().toString() + ":" +

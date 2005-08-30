@@ -181,10 +181,10 @@ public final class plasmaHTCache {
             // this is the case of a "(Not a directory)" error, which should be prohibited
             // by the shallStoreCache() property. However, sometimes the error still occurs
             // In this case do nothing.
-            log.logFailure("File storage failed (not a directory): " + e.getMessage());
+            log.logSevere("File storage failed (not a directory): " + e.getMessage());
             return false;
         } catch (IOException e) {
-            log.logFailure("File storage failed (IO error): " + e.getMessage());
+            log.logSevere("File storage failed (IO error): " + e.getMessage());
             return false;
         }
         writeFileAnnouncement(file);

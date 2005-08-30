@@ -164,7 +164,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 serverLog.logInfo("PROXY","Proxy access logging is deactivated.");
             }
         } catch (Exception e) { 
-            serverLog.logFailure("PROXY","Unable to configure proxy access logging.",e);        
+            serverLog.logSevere("PROXY","Unable to configure proxy access logging.",e);        
         }
     }
     
@@ -334,7 +334,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             } catch (MalformedURLException e) {
                 String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
-                serverLog.logFailure("PROXY", errorMsg);
+                serverLog.logSevere("PROXY", errorMsg);
                 httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
                 return;
             }
@@ -414,7 +414,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
                     httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
-                    this.theLogger.logFailure(errorMsg);
+                    this.theLogger.logSevere(errorMsg);
                 } else {
                     this.forceConnectionClose();                    
                 }
@@ -892,7 +892,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
                     httpd.sendRespondError(conProp,respond,4,503,null,errorMsg,e);
-                    this.theLogger.logFailure(errorMsg);
+                    this.theLogger.logSevere(errorMsg);
                 } else {
                     this.forceConnectionClose();                    
                 }
@@ -984,7 +984,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
                     httpd.sendRespondError(conProp,respond,4,503,null,errorMsg,e);
-                    this.theLogger.logFailure(errorMsg);
+                    this.theLogger.logSevere(errorMsg);
                 } else {
                     this.forceConnectionClose();                    
                 }

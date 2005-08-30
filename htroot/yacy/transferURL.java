@@ -107,7 +107,7 @@ public class transferURL {
             int more = switchboard.urlPool.loadedURL.size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
             switchboard.getLog().logInfo("Received " + received + " URLs from peer " + iam);
-            if ((received - more) > 0) switchboard.getLog().logFailure("Received " + doublevalues + " double URLs from peer " + iam);
+            if ((received - more) > 0) switchboard.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + iam);
             result = "ok";
         } else {
             result = "error_not_granted";

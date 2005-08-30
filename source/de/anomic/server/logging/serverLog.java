@@ -52,7 +52,7 @@ public final class serverLog {
     
 //    // log-level categories
     public static final int LOGLEVEL_ZERO    = Level.OFF.intValue(); // no output at all
-    public static final int LOGLEVEL_FAILURE = Level.SEVERE.intValue(); // system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
+    public static final int LOGLEVEL_SEVERE = Level.SEVERE.intValue(); // system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
     public static final int LOGLEVEL_WARNING = Level.WARNING.intValue(); // uncritical service failure, may require user activity (i.e. input required, wrong authorization)
     public static final int LOGLEVEL_CONFIG  = Level.CONFIG.intValue(); // regular system status information (i.e. start-up messages)
     public static final int LOGLEVEL_INFO    = Level.INFO.intValue(); // regular action information (i.e. any httpd request URL)
@@ -60,7 +60,7 @@ public final class serverLog {
 //    
 //    // these categories are also present as character tokens
     public static final char LOGTOKEN_ZERO    = 'Z';
-    public static final char LOGTOKEN_FAILURE = 'E';
+    public static final char LOGTOKEN_SEVERE = 'E';
     public static final char LOGTOKEN_WARNING = 'W';
     public static final char LOGTOKEN_CONFIG  = 'S';
     public static final char LOGTOKEN_INFO    = 'I';
@@ -77,8 +77,8 @@ public final class serverLog {
         this.theLogger.setLevel(newLevel);
     }
     
-    public void logFailure(String message)   {this.theLogger.severe(message);}
-    public void logFailure(String message, Throwable thrown)   {this.theLogger.log(Level.SEVERE,message,thrown);}
+    public void logSevere(String message)   {this.theLogger.severe(message);}
+    public void logSevere(String message, Throwable thrown)   {this.theLogger.log(Level.SEVERE,message,thrown);}
     
     public void logWarning(String message) {this.theLogger.warning(message);}
     public void logWarning(String message, Throwable thrown) {this.theLogger.log(Level.WARNING,message,thrown);}
@@ -102,10 +102,10 @@ public final class serverLog {
         this.theLogger.log(level, msg, thrown);
     }
         
-    public static void logFailure(String appName, String message)   {
+    public static void logSevere(String appName, String message)   {
         Logger.getLogger(appName).severe(message);
     }
-    public static void logFailure(String appName, String message, Throwable thrown)   {
+    public static void logSevere(String appName, String message, Throwable thrown)   {
         Logger.getLogger(appName).log(Level.SEVERE,message,thrown);
     }
     

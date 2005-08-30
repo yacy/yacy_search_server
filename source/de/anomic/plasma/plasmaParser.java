@@ -354,7 +354,7 @@ public final class plasmaParser {
                         newEnabledParsers.put(mimeType,availableParserList.get(mimeType));
                         
                     } catch (Exception e) {
-                        serverLog.logFailure("PARSER", "error in setEnabledParserList", e);
+                        serverLog.logSevere("PARSER", "error in setEnabledParserList", e);
                     } finally {
                         if (theParser != null)
                             try { plasmaParser.theParserPool.returnObject(mimeType,theParser); } catch (Exception e) {}
@@ -472,7 +472,7 @@ public final class plasmaParser {
             }
             
         } catch (Exception e) {
-            serverLog.logFailure("PARSER", "Unable to determine all installed parsers. " + e.getMessage());
+            serverLog.logSevere("PARSER", "Unable to determine all installed parsers. " + e.getMessage());
         }
     }
     

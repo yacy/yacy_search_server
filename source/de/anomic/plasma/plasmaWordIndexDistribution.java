@@ -162,7 +162,7 @@ public class plasmaWordIndexDistribution {
         long start;
         while ((e.hasMoreElements()) && (hc < peerCount)) {
             if (closed) {
-                log.logFailure("Index distribution interrupted by close, nothing deleted locally.");
+                log.logSevere("Index distribution interrupted by close, nothing deleted locally.");
                 return -1; // interrupted
             }
             seed = (yacySeed) e.nextElement();
@@ -195,11 +195,11 @@ public class plasmaWordIndexDistribution {
                         log.logFine("Deleted all " + indexEntities.length + " transferred whole-word indexes locally");
                         return indexCount;
                     } else {
-                        log.logFailure("Deleted not all transferred whole-word indexes");
+                        log.logSevere("Deleted not all transferred whole-word indexes");
                         return -1;
                     }
                 } catch (IOException ee) {
-                    log.logFailure("Deletion of indexes not possible:" + ee.getMessage(), ee);
+                    log.logSevere("Deletion of indexes not possible:" + ee.getMessage(), ee);
                     return -1;
                 }
             } else {
@@ -210,7 +210,7 @@ public class plasmaWordIndexDistribution {
             }
             return indexCount;
         } else {
-            log.logFailure("Index distribution failed. Too less peers (" + hc + ") received the index, not deleted locally.");
+            log.logSevere("Index distribution failed. Too less peers (" + hc + ") received the index, not deleted locally.");
             return -1;
         }
     }
@@ -277,7 +277,7 @@ public class plasmaWordIndexDistribution {
                         log.logFine("Selected whole index (" + indexEntity.size() + " URLs, " + unknownURLEntries.size() + " not bound) for word " + indexEntity.wordHash());
                         count -= indexEntity.size();
                     } catch (kelondroException e) {
-                        log.logFailure("plasmaWordIndexDistribution/1: deleted DB for word " + indexEntity.wordHash(), e);
+                        log.logSevere("plasmaWordIndexDistribution/1: deleted DB for word " + indexEntity.wordHash(), e);
                         try {indexEntity.deleteComplete();} catch (IOException ee) {}
                     }
                 } else {
@@ -311,7 +311,7 @@ public class plasmaWordIndexDistribution {
                         log.logFine("Selected partial index (" + tmpEntity.size() + " from " + indexEntity.size() +" URLs, " + unknownURLEntries.size() + " not bound) for word " + tmpEntity.wordHash());
                         tmpEntities.add(tmpEntity);
                     } catch (kelondroException e) {
-                        log.logFailure("plasmaWordIndexDistribution/2: deleted DB for word " + indexEntity.wordHash(), e);
+                        log.logSevere("plasmaWordIndexDistribution/2: deleted DB for word " + indexEntity.wordHash(), e);
                         try {indexEntity.deleteComplete();} catch (IOException ee) {}
                     }
                     indexEntity.close(); // important: is not closed elswhere and cannot be deleted afterwards
@@ -324,10 +324,10 @@ public class plasmaWordIndexDistribution {
             for (int i = 0; i < tmpEntities.size(); i++) indexEntities[i] = (plasmaWordIndexEntity) tmpEntities.elementAt(i);
             return new Object[]{indexEntities, knownURLs};
         } catch (IOException e) {
-            log.logFailure("selectTransferIndexes IO-Error (hash=" + nexthash + "): " + e.getMessage(), e);
+            log.logSevere("selectTransferIndexes IO-Error (hash=" + nexthash + "): " + e.getMessage(), e);
             return new Object[]{new plasmaWordIndexEntity[0], new HashMap()};
         } catch (kelondroException e) {
-            log.logFailure("selectTransferIndexes database corrupted: " + e.getMessage(), e);
+            log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
             return new Object[]{new plasmaWordIndexEntity[0], new HashMap()};
         }
     }
@@ -373,7 +373,7 @@ public class plasmaWordIndexDistribution {
                     // have another try...
                     if (!(plasmaWordIndexEntity.wordHash2path(wordIndex.getRoot() /*PLASMADB*/, indexEntities[i].wordHash()).delete())) {
                         success = false;
-                        log.logFailure("Could not delete whole index for word " + indexEntities[i].wordHash());
+                        log.logSevere("Could not delete whole index for word " + indexEntities[i].wordHash());
                     }
                 }
             }

@@ -77,7 +77,7 @@ public class search {
 	boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
         Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime")); // read remote time
         if (yacyCore.seedDB == null) {
-            yacyCore.log.logFailure("yacy.search: seed cache not initialized");
+            yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
             yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(oseed, key, remoteTime), true);
         }

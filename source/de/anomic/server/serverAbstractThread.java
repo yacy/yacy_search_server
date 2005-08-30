@@ -184,13 +184,13 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     }
     
     private final void logError(String text) {
-        if (log == null) serverLog.logFailure("THREAD-CONTROL", text);
-        else log.logFailure(text);
+        if (log == null) serverLog.logSevere("THREAD-CONTROL", text);
+        else log.logSevere(text);
     }    
     
     private final void logError(String text,Throwable thrown) {
-        if (log == null) serverLog.logFailure("THREAD-CONTROL", text, thrown);
-        else log.logFailure(text,thrown);
+        if (log == null) serverLog.logSevere("THREAD-CONTROL", text, thrown);
+        else log.logSevere(text,thrown);
     }
     
     private void logSystem(String text) {
