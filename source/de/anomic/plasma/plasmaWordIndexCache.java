@@ -139,7 +139,9 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         log.logSystem("creating dump for index cache, " + cache.size() + " words (and much more urls)");
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
-        kelondroArray dumpArray = new kelondroArray(indexDumpFile, plasmaWordIndexAssortment.bufferStructureBasis, 0);
+        kelondroArray dumpArray = null;
+        try {
+        dumpArray = new kelondroArray(indexDumpFile, plasmaWordIndexAssortment.bufferStructureBasis, 0);
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;
         long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
@@ -183,8 +185,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 }
             }
         }
-	dumpArray.close();
+        dumpArray.close();
+        dumpArray = null;
         log.logSystem("dumped " + urlcount + " word/url relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+        } finally {
+            if (dumpArray != null) try {dumpArray.close();}catch(Exception e){}
+        }
     }
     
     private long restore() throws IOException {
@@ -207,7 +213,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 while (i-- > 0) {
                     // get out one entry
                     row = dumpArray.get(i);
-                    if ((row[0] == null) || (row[1] == null) || (row[2] == null) || (row[3] == null) || (row[4] == null)) continue;
+                    if ((row[0] == null)/* || (row[1] == null) || (row[2] == null)*/ || (row[3] == null) || (row[4] == null)) continue;
                     wordHash = new String(row[0]);
                     creationTime = kelondroRecords.bytes2long(row[2]);
                     wordEntry = new plasmaWordIndexEntry(new String(row[3]), new String(row[4]));
@@ -231,6 +237,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         } catch (kelondroException e) {
             // restore failed
             log.logError("restore of indexCache array dump failed: " + e.getMessage(), e);
+        } finally {
+            if (dumpArray != null) try {dumpArray.close();}catch(Exception e){}
         }
         return urlCount;
     }

@@ -97,33 +97,53 @@ public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
     
     // some static tools
     public static void writeProperties(File f, Properties props, String comment) throws IOException {
-	File fp = f.getParentFile();
-	if (fp != null) fp.mkdirs();
-	kelondroRA kra = new kelondroFileRA(f);
-	kra.writeProperties(props, comment);
-	kra.close();
+        File fp = f.getParentFile();
+        if (fp != null) fp.mkdirs();
+        kelondroRA kra = null;
+        try {
+            kra = new kelondroFileRA(f);
+            kra.writeProperties(props, comment);
+            kra.close();
+        } finally {
+            if (kra != null) try {kra.close();}catch(Exception e){}
+        }
     }
 
     public static Properties readProperties(File f) throws IOException {
-	kelondroRA kra = new kelondroFileRA(f);
-	Properties props = kra.readProperties();
-	kra.close();
-	return props;
+        kelondroRA kra = null;
+        try {
+            kra = new kelondroFileRA(f);
+            Properties props = kra.readProperties();
+            kra.close();
+            return props;
+        } finally {
+            if (kra != null) try{kra.close();}catch(Exception e) {}
+        }
     }
 
     public static void writeMap(File f, Map map, String comment) throws IOException {
-	File fp = f.getParentFile();
-	if (fp != null) fp.mkdirs();
-	kelondroRA kra = new kelondroFileRA(f);
-	kra.writeMap(map, comment);
-	kra.close();
+        File fp = f.getParentFile();
+        if (fp != null) fp.mkdirs();
+        kelondroRA kra = null;
+        try {
+            kra = new kelondroFileRA(f);
+            kra.writeMap(map, comment);
+            kra.close();
+        } finally {
+            if (kra != null) try {kra.close();}catch(Exception e){}
+        }
     }
 
     public static Map readMap(File f) throws IOException {
-	kelondroRA kra = new kelondroFileRA(f);
-	Map map = kra.readMap();
-	kra.close();
-	return map;
+        kelondroRA kra = null;
+        try {
+            kra = new kelondroFileRA(f);
+            Map map = kra.readMap();
+            kra.close();
+            return map;
+        } finally {
+            if (kra != null) try {kra.close();}catch(Exception e){}
+        }
     }
 
 }
