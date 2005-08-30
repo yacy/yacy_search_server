@@ -455,6 +455,10 @@ public final class plasmaCrawlWorker extends Thread {
                     retryCrawling = true;                                                       
                 } else if (errorMsg.indexOf("Connection refused") >= 0) {
                     log.logWarning("CRAWLER Connection refused while trying to connect to '" + url.toString() + "'.");
+                } else if (errorMsg.indexOf("There is not enough space on the disk") >= 0) {
+                    log.logFailure("CRAWLER Not enough space on the disk detected while crawling '" + url.toString() + "'. " + 
+                                   "Pausing crawlers. ");
+                    plasmaCrawlLoader.switchboard.pauseCrawling();
                 } else {
                     log.logError("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
                 }
