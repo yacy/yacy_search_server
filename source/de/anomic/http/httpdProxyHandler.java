@@ -1223,8 +1223,13 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         this.logMessage.append(' ');  
         
         // URL
-        String requestURL = this.connectionProperties.getProperty(httpd.CONNECTION_PROP_URL); 
+        String requestURL = this.connectionProperties.getProperty(httpd.CONNECTION_PROP_URL);
+        String requestArgs = this.connectionProperties.getProperty(httpd.CONNECTION_PROP_ARGS);
         this.logMessage.append(requestURL);
+        if (requestArgs != null) {
+            this.logMessage.append("?")
+                           .append(requestArgs);
+        }
         this.logMessage.append(' ');          
         
         // Rfc931
