@@ -44,6 +44,7 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -430,7 +431,9 @@ public final class plasmaCrawlWorker extends Thread {
             boolean retryCrawling = false;
             String errorMsg = e.getMessage();
             if (errorMsg != null) {
-                if ((e instanceof UnknownHostException) || (errorMsg.indexOf("unknown host") >= 0)) {                    
+                if (e instanceof MalformedURLException) {
+                    log.logWarning("CRAWLER Malformed URL '" + url.toString() + "' detected. ");                    
+                } else if ((e instanceof UnknownHostException) || (errorMsg.indexOf("unknown host") >= 0)) {                    
                     log.logWarning("CRAWLER Unknown host in URL '" + url.toString() + "'. " +
                                    "Referer URL: " + ((referer == null) ?"Unknown":referer));
                 } else if (e instanceof java.net.BindException) {
