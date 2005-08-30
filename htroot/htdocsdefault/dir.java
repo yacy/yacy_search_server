@@ -477,7 +477,7 @@ public class dir {
             switchboard.removeReferences(urlhash, words);
             switchboard.urlPool.loadedURL.remove(urlhash);
         } catch (Exception e) {
-            serverLog.logFailure("DIR", "INTERNAL ERROR in dir.deletePhrase", e);
+            serverLog.logSevere("DIR", "INTERNAL ERROR in dir.deletePhrase", e);
         }
     }
 }
