@@ -104,7 +104,7 @@ import de.anomic.server.logging.serverLog;
 public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
     
     // class variables   
-    private Properties mimeTable = null;
+    private static final Properties mimeTable = new Properties();
     private serverClassLoader provider = null;
     private File htRootPath = null;
     private File htDocsPath = null;
@@ -122,15 +122,14 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         // creating a logger
         this.theLogger = new serverLog("FILEHANDLER");
         
-        if (this.mimeTable == null) {
+        if (mimeTable.size() == 0) {
             // load the mime table
-            this.mimeTable = new Properties();
             String mimeTablePath = switchboard.getConfig("mimeConfig","");
             FileInputStream mimeTableInputStream = null;
             try {
                 serverLog.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
                 mimeTableInputStream = new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath));
-                this.mimeTable.load(mimeTableInputStream);
+                mimeTable.load(mimeTableInputStream);
             } catch (Exception e) {                
                 serverLog.logSevere("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
                 System.exit(1);
@@ -401,7 +400,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 // re-write - method to create an result
                 serverObjects tp = new serverObjects();
                 filedate = new Date(localizedFile.lastModified());
-                String mimeType = this.mimeTable.getProperty(conProp.getProperty("EXT",""),"text/html");
+                String mimeType = mimeTable.getProperty(conProp.getProperty("EXT",""),"text/html");
                 byte[] result;
                 boolean zipContent = requestHeader.acceptGzip() && httpd.shallTransportZipped("." + conProp.getProperty("EXT",""));
                 String md5String = null;
