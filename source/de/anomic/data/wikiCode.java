@@ -71,6 +71,9 @@ public class wikiCode {
     private String ListLevel="";
     private String defListLevel="";
     private plasmaSwitchboard sb;
+    private boolean escape = false;     //needed for escape
+    private boolean escapeSpan = false; //needed for escape symbols [= and =] spanning over several lines    
+    
     public wikiCode(plasmaSwitchboard switchboard){
         sb=switchboard;
     }
@@ -109,272 +112,305 @@ public class wikiCode {
 	p0 = 0; while ((p0 = result.indexOf(">", p0+1)) >= 0) result = result.substring(0, p0) + "&gt;" + result.substring(p0 + 1);
 	//p0 = 0; while ((p0 = result.indexOf("*", p0+1)) >= 0) result = result.substring(0, p0) + "&#149;" + result.substring(p0 + 1);
 	p0 = 0; while ((p0 = result.indexOf("(C)", p0+1)) >= 0) result = result.substring(0, p0) + "&copy;" + result.substring(p0 + 3);
+	
+	
+	//check if line contains any escape symbol of if we are in an esacpe sequence already
+	//if that's the case the program will continue further below [MN]
+	if((result.indexOf("[=")<0)&&(result.indexOf("=]")<0)&&(!escapeSpan)){
         
-        // format lines
-        if (result.startsWith(" ")) result = "<tt>" + result + "</tt>";
-        if (result.startsWith("----")) result = "<hr>";
+            // format lines
+            if (result.startsWith(" ")) result = "<tt>" + result + "</tt>";
+            if (result.startsWith("----")) result = "<hr>";
 	
-	// citings contributed by [MN]
-	if(result.startsWith(":")){
-		String head = "";
-		String tail = "";
-		while(result.startsWith(":")){
-			head = head + "<blockquote>";
-			tail = tail + "</blockquote>";
-			result = result.substring(1);
-		}	
-		result = head + result + tail;
-	}
-	// end contrib [MN]	
+	    // citings contributed by [MN]
+	    if(result.startsWith(":")){
+		    String head = "";
+		    String tail = "";
+		    while(result.startsWith(":")){
+			    head = head + "<blockquote>";
+			    tail = tail + "</blockquote>";
+			    result = result.substring(1);
+		    }
+		    result = head + result + tail;
+	    }
+	    // end contrib [MN]	
 
-        // format headers
-        if ((p0 = result.indexOf("====")) >= 0) {
-            p1 = result.indexOf("====", p0 + 4);
-            if (p1 >= 0) result = result.substring(0, p0) + "<h4>" +
-                                  result.substring(p0 + 4, p1) + "</h4>" +
-                                  result.substring(p1 + 4);
-        }
-        if ((p0 = result.indexOf("===")) >= 0) {
-            p1 = result.indexOf("===", p0 + 3);
-            if (p1 >= 0) result = result.substring(0, p0) + "<h3>" +
-                                  result.substring(p0 + 3, p1) + "</h3>" +
-                                  result.substring(p1 + 3);
-        }
-        if ((p0 = result.indexOf("==")) >= 0) {
-            p1 = result.indexOf("==", p0 + 2);
-            if (p1 >= 0) result = result.substring(0, p0) + "<h2>" +
-                                  result.substring(p0 + 2, p1) + "</h2>" +
-                                  result.substring(p1 + 2);
-        }
+            // format headers
+            if ((p0 = result.indexOf("====")) >= 0) {
+                p1 = result.indexOf("====", p0 + 4);
+                if (p1 >= 0) result = result.substring(0, p0) + "<h4>" +
+                                      result.substring(p0 + 4, p1) + "</h4>" +
+                                      result.substring(p1 + 4);
+            }
+            if ((p0 = result.indexOf("===")) >= 0) {
+                p1 = result.indexOf("===", p0 + 3);
+                if (p1 >= 0) result = result.substring(0, p0) + "<h3>" +
+                                      result.substring(p0 + 3, p1) + "</h3>" +
+                                      result.substring(p1 + 3);
+            }
+            if ((p0 = result.indexOf("==")) >= 0) {
+                p1 = result.indexOf("==", p0 + 2);
+                if (p1 >= 0) result = result.substring(0, p0) + "<h2>" +
+                                      result.substring(p0 + 2, p1) + "</h2>" +
+                                      result.substring(p1 + 2);
+            }
 
-        if ((p0 = result.indexOf("''''")) >= 0) {
-            p1 = result.indexOf("''''", p0 + 4);
-            if (p1 >= 0) result = result.substring(0, p0) + "<b><i>" +
-                                  result.substring(p0 + 4, p1) + "</i></b>" +
-                                  result.substring(p1 + 4);
-        }
-        if ((p0 = result.indexOf("'''")) >= 0) {
-            p1 = result.indexOf("'''", p0 + 3);
-            if (p1 >= 0) result = result.substring(0, p0) + "<b>" +
-                                  result.substring(p0 + 3, p1) + "</b>" +
-                                  result.substring(p1 + 3);
-        }
-        if ((p0 = result.indexOf("''")) >= 0) {
-            p1 = result.indexOf("''", p0 + 2);
-            if (p1 >= 0) result = result.substring(0, p0) + "<i>" +
-                                  result.substring(p0 + 2, p1) + "</i>" +
-                                  result.substring(p1 + 2);
-        }
+            if ((p0 = result.indexOf("''''")) >= 0) {
+                p1 = result.indexOf("''''", p0 + 4);
+                if (p1 >= 0) result = result.substring(0, p0) + "<b><i>" +
+                                      result.substring(p0 + 4, p1) + "</i></b>" +
+                                      result.substring(p1 + 4);
+            }
+            if ((p0 = result.indexOf("'''")) >= 0) {
+                p1 = result.indexOf("'''", p0 + 3);
+                if (p1 >= 0) result = result.substring(0, p0) + "<b>" +
+                                      result.substring(p0 + 3, p1) + "</b>" +
+                                      result.substring(p1 + 3);
+            }
+            if ((p0 = result.indexOf("''")) >= 0) {
+                p1 = result.indexOf("''", p0 + 2);
+                if (p1 >= 0) result = result.substring(0, p0) + "<i>" +
+                                      result.substring(p0 + 2, p1) + "</i>" +
+                                      result.substring(p1 + 2);
+            }
 	
 	
-	//* unorderd Lists contributed by [AS]
-	//** Sublist
-	if(result.startsWith(ListLevel + "*")){ //more stars
-		p0 = result.indexOf(ListLevel);
-		p1 = result.length();
-		result = "<ul>" + serverCore.crlfString +
-			 "<li>" +
-			 result.substring(ListLevel.length() + 1, p1) +
-			 "</li>";
-		ListLevel += "*";
-	}else if(ListLevel.length() > 0 && result.startsWith(ListLevel)){ //equal number of stars
-		p0 = result.indexOf(ListLevel);
-		p1 = result.length();
-		result = "<li>" +
-			 result.substring(ListLevel.length(), p1) +
-			 "</li>";
-	}else if(ListLevel.length() > 0){ //less stars
-		int i = ListLevel.length();
-		String tmp = "";
+	    //* unorderd Lists contributed by [AS]
+	    //** Sublist
+	    if(result.startsWith(ListLevel + "*")){ //more stars
+    		    p0 = result.indexOf(ListLevel);
+		    p1 = result.length();
+		    result = "<ul>" + serverCore.crlfString +
+			     "<li>" +
+			     result.substring(ListLevel.length() + 1, p1) +
+			     "</li>";
+		    ListLevel += "*";
+	    }else if(ListLevel.length() > 0 && result.startsWith(ListLevel)){ //equal number of stars
+		    p0 = result.indexOf(ListLevel);
+		    p1 = result.length();
+		    result = "<li>" +
+			     result.substring(ListLevel.length(), p1) +
+			     "</li>";
+	    }else if(ListLevel.length() > 0){ //less stars
+		    int i = ListLevel.length();
+		    String tmp = "";
 		
-		while(! result.startsWith(ListLevel.substring(0,i)) ){
-			tmp += "</ul>";
-			i--;
-		}
-		ListLevel = ListLevel.substring(0,i);
-		p0 = ListLevel.length();
-		p1 = result.length();
+		    while(! result.startsWith(ListLevel.substring(0,i)) ){
+			    tmp += "</ul>";
+			    i--;
+		    }
+		    ListLevel = ListLevel.substring(0,i);
+		    p0 = ListLevel.length();
+		    p1 = result.length();
 		
-		if(ListLevel.length() > 0){
-			result = tmp +
-				 "<li>" +
-				 result.substring(p0, p1) +
-				 "</li>";
-		}else{
+		    if(ListLevel.length() > 0){
+			    result = tmp +
+				     "<li>" +
+				     result.substring(p0, p1) +
+				     "</li>";
+		    }else{
 			result = tmp + result.substring(p0, p1);
-		}
-	}
+		    }
+	    }
 
 
-	//# sorted Lists contributed by [AS]
-	//## Sublist
-	if(result.startsWith(numListLevel + "#")){ //more #
-		p0 = result.indexOf(numListLevel);
-		p1 = result.length();
-		result = "<ol>" + serverCore.crlfString +
-			 "<li>" +
-			 result.substring(numListLevel.length() + 1, p1) +
-			 "</li>";
-		numListLevel += "#";
-	}else if(numListLevel.length() > 0 && result.startsWith(numListLevel)){ //equal number of #
-		p0 = result.indexOf(numListLevel);
-		p1 = result.length();
-		result = "<li>" +
-			 result.substring(numListLevel.length(), p1) +
-			 "</li>";
-	}else if(numListLevel.length() > 0){ //less #
-		int i = numListLevel.length();
-		String tmp = "";
+	    //# sorted Lists contributed by [AS]
+	    //## Sublist
+	    if(result.startsWith(numListLevel + "#")){ //more #
+		    p0 = result.indexOf(numListLevel);
+		    p1 = result.length();
+		    result = "<ol>" + serverCore.crlfString +
+			     "<li>" +
+			     result.substring(numListLevel.length() + 1, p1) +
+			     "</li>";
+		    numListLevel += "#";
+	    }else if(numListLevel.length() > 0 && result.startsWith(numListLevel)){ //equal number of #
+		    p0 = result.indexOf(numListLevel);
+		    p1 = result.length();
+		    result = "<li>" +
+			     result.substring(numListLevel.length(), p1) +
+			     "</li>";
+	    }else if(numListLevel.length() > 0){ //less #
+		    int i = numListLevel.length();
+		    String tmp = "";
 		
-		while(! result.startsWith(numListLevel.substring(0,i)) ){
-			tmp += "</ol>";
-			i--;
-		}
-		numListLevel = numListLevel.substring(0,i);
-		p0 = numListLevel.length();
-		p1 = result.length();
+		    while(! result.startsWith(numListLevel.substring(0,i)) ){
+			    tmp += "</ol>";
+			    i--;
+		    }
+		    numListLevel = numListLevel.substring(0,i);
+		    p0 = numListLevel.length();
+		    p1 = result.length();
 		
-		if(numListLevel.length() > 0){
-			result = tmp +
-				 "<li>" +
-				 result.substring(p0, p1) +
-				 "</li>";
-		}else{
-			result = tmp + result.substring(p0, p1);
-		}
-	}
-	// end contrib [AS]
+		    if(numListLevel.length() > 0){
+			    result = tmp +
+				     "<li>" +
+				     result.substring(p0, p1) +
+				     "</li>";
+		    }else{
+			    result = tmp + result.substring(p0, p1);
+		    }
+	    }
+	    // end contrib [AS]
 	
-	//* definition Lists contributed by [MN] based on unordered list code by [AS]
-	if(result.startsWith(defListLevel + ";")){ //more semicolons
-		String dt = ""; 
-		String dd = "";
-		p0 = result.indexOf(defListLevel);
-		p1 = result.length();
-		String resultCopy = result.substring(defListLevel.length() + 1, p1);
-		if((p0 = resultCopy.indexOf(":")) > 0){
-			dt = resultCopy.substring(0,p0);
-			dd = resultCopy.substring(p0+1);
-			result = "<dl>" + "<dt>" + dt + "</dt>" + "<dd>" + dd;
-			defList = true;
-		}
-		defListLevel += ";";
-	}else if(defListLevel.length() > 0 && result.startsWith(defListLevel)){ //equal number of semicolons
-		String dt = ""; 
-		String dd = "";
-		p0 = result.indexOf(defListLevel);
-		p1 = result.length();
-		String resultCopy = result.substring(defListLevel.length(), p1);
-		if((p0 = resultCopy.indexOf(":")) > 0){
-			dt = resultCopy.substring(0,p0);
-			dd = resultCopy.substring(p0+1);
-			result = "<dt>" + dt + "</dt>" + "<dd>" + dd;
-			defList = true;
-		}
-	}else if(defListLevel.length() > 0){ //less semicolons
-		String dt = ""; 
-		String dd = "";
-		int i = defListLevel.length();
-		String tmp = "";
-		while(! result.startsWith(defListLevel.substring(0,i)) ){
-			tmp += "</dd></dl>";
-			i--;
-		}
-		defListLevel = defListLevel.substring(0,i);
-		p0 = defListLevel.length();
-		p1 = result.length();
-		if(defListLevel.length() > 0){
-			String resultCopy = result.substring(p0, p1);
-			if((p0 = resultCopy.indexOf(":")) > 0){
-				dt = resultCopy.substring(0,p0);
-				dd = resultCopy.substring(p0+1);
-				result = tmp + "<dt>" + dt + "</dt>" + "<dd>" + dd;
-				defList = true;
-			}
+	    //* definition Lists contributed by [MN] based on unordered list code by [AS]
+	    if(result.startsWith(defListLevel + ";")){ //more semicolons
+		    String dt = ""; 
+		    String dd = "";
+		    p0 = result.indexOf(defListLevel);
+		    p1 = result.length();
+		    String resultCopy = result.substring(defListLevel.length() + 1, p1);
+		    if((p0 = resultCopy.indexOf(":")) > 0){
+			    dt = resultCopy.substring(0,p0);
+			    dd = resultCopy.substring(p0+1);
+			    result = "<dl>" + "<dt>" + dt + "</dt>" + "<dd>" + dd;
+			    defList = true;
+		    }
+		    defListLevel += ";";
+	    }else if(defListLevel.length() > 0 && result.startsWith(defListLevel)){ //equal number of semicolons
+		    String dt = ""; 
+		    String dd = "";
+		    p0 = result.indexOf(defListLevel);
+		    p1 = result.length();
+		    String resultCopy = result.substring(defListLevel.length(), p1);
+		    if((p0 = resultCopy.indexOf(":")) > 0){
+			    dt = resultCopy.substring(0,p0);
+			    dd = resultCopy.substring(p0+1);
+			    result = "<dt>" + dt + "</dt>" + "<dd>" + dd;
+			    defList = true;
+		    }
+	    }else if(defListLevel.length() > 0){ //less semicolons
+		    String dt = ""; 
+		    String dd = "";
+		    int i = defListLevel.length();
+		    String tmp = "";
+		    while(! result.startsWith(defListLevel.substring(0,i)) ){
+			    tmp += "</dd></dl>";
+			    i--;
+		    }
+		    defListLevel = defListLevel.substring(0,i);
+		    p0 = defListLevel.length();
+		    p1 = result.length();
+		    if(defListLevel.length() > 0){
+			    String resultCopy = result.substring(p0, p1);
+			    if((p0 = resultCopy.indexOf(":")) > 0){
+				    dt = resultCopy.substring(0,p0);
+				    dd = resultCopy.substring(p0+1);
+				    result = tmp + "<dt>" + dt + "</dt>" + "<dd>" + dd;
+				    defList = true;
+			    }
 		
-		}else{
-			result = tmp + result.substring(p0, p1);
-		}
-	}
-	// end contrib [MN]	
+		    }else{
+			    result = tmp + result.substring(p0, p1);
+		    }
+	    }
+	    // end contrib [MN]	
 
 
-        // create  links
-	String kl, kv, alt, align;
-        int p;
-        // internal links and images
-        while ((p0 = result.indexOf("[[")) >= 0) {
-	    p1 = result.indexOf("]]", p0 + 2);
-	    if (p1 <= p0) break; else; {
-		kl = result.substring(p0 + 2, p1);
+            // create  links
+	    String kl, kv, alt, align;
+            int p;
+            // internal links and images
+            while ((p0 = result.indexOf("[[")) >= 0) {
+	        p1 = result.indexOf("]]", p0 + 2);
+	        if (p1 <= p0) break; else; {
+		    kl = result.substring(p0 + 2, p1);
 		
-		// this is the part of the code that's responsible for images
-		// contibuted by [MN]
-		if(kl.startsWith("Image:")){
-			alt = "";
-			align = "";
-			kv = "";
-			kl = kl.substring(6);
+		    // this is the part of the code that's responsible for images
+		    // contibuted by [MN]
+		    if(kl.startsWith("Image:")){
+			    alt = "";
+			    align = "";
+			    kv = "";
+			    kl = kl.substring(6);
 			
-			// are there any arguments for the image?
-			if ((p = kl.indexOf("|")) > 0) {
-                	    kv = kl.substring(p+1);
-                	    kl = kl.substring(0, p);
+			    // are there any arguments for the image?
+			    if ((p = kl.indexOf("|")) > 0) {
+                	        kv = kl.substring(p+1);
+                	        kl = kl.substring(0, p);
 			
-			    	// if there are 2 arguments, write them into ALIGN and ALT
-				if ((p = kv.indexOf("|")) > 0) {
-				    align = " align=\"" + kv.substring(0, p) +"\"";
-                		    alt = " alt=\"" + kv.substring(p + 1) +"\"";
-                		}
+			    	    // if there are 2 arguments, write them into ALIGN and ALT
+				    if ((p = kv.indexOf("|")) > 0) {
+				        align = " align=\"" + kv.substring(0, p) +"\"";
+                		        alt = " alt=\"" + kv.substring(p + 1) +"\"";
+                		    }
 				
-				// if there is just one, put it into ALT
-				else alt = " alt=\"" + kv +"\"";
-			}
+				    // if there is just one, put it into ALT
+				    else alt = " alt=\"" + kv +"\"";
+			    }
 			
-			result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt +">" + result.substring(p1 + 2);
-		}
-		// end contrib [MN]
+			    result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt +">" + result.substring(p1 + 2);
+		    }
+		    // end contrib [MN]
 		
-		// if it's no image, it might be an internal link
-                else {
+		    // if it's no image, it might be an internal link
+                    else {
 		
-			if ((p = kl.indexOf("|")) > 0) {
-                	    kv = kl.substring(p + 1);
-                	    kl = kl.substring(0, p);
-                	} else {
-                	    kv = kl;
-                	}
-			if (switchboard.wikiDB.read(kl) != null)
-		    	result = result.substring(0, p0) +
-				"<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" +
-				result.substring(p1 + 2);
-			else
-			    result = result.substring(0, p0) +
-				"<a class=\"unknown\" href=\"Wiki.html?page=" + kl + "&edit=Edit\">" + kv + "</a>" +
-				result.substring(p1 + 2);
-		}
+			    if ((p = kl.indexOf("|")) > 0) {
+                	        kv = kl.substring(p + 1);
+                	        kl = kl.substring(0, p);
+                	    } else {
+                	        kv = kl;
+                	    }
+			    if (switchboard.wikiDB.read(kl) != null)
+		    	    result = result.substring(0, p0) +
+				    "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" +
+				    result.substring(p1 + 2);
+			    else
+			        result = result.substring(0, p0) +
+				    "<a class=\"unknown\" href=\"Wiki.html?page=" + kl + "&edit=Edit\">" + kv + "</a>" +
+				    result.substring(p1 + 2);
+		    }
+	        }
 	    }
-	}
         
-        // external links
-        while ((p0 = result.indexOf("[")) >= 0) {
-	    p1 = result.indexOf("]", p0 + 1);
-            if (p1 <= p0) break; else {
-		kl = result.substring(p0 + 1, p1);
-                if ((p = kl.indexOf(" ")) > 0) {
-                    kv = kl.substring(p + 1);
-                    kl = kl.substring(0, p);
-                } else {
-                    kv = kl;
-                }
-                if (!(kl.startsWith("http://"))) kl = "http://" + kl;
-		result = result.substring(0, p0) +
-		    "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" +
-		    result.substring(p1 + 1);
+            // external links
+            while ((p0 = result.indexOf("[")) >= 0) {
+	        p1 = result.indexOf("]", p0 + 1);
+                if (p1 <= p0) break; else {
+		    kl = result.substring(p0 + 1, p1);
+                    if ((p = kl.indexOf(" ")) > 0) {
+                        kv = kl.substring(p + 1);
+                        kl = kl.substring(0, p);
+                    } else {
+                        kv = kl;
+                    }
+                    if (!(kl.startsWith("http://"))) kl = "http://" + kl;
+		    result = result.substring(0, p0) +
+		        "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" +
+		        result.substring(p1 + 1);
+	        }
 	    }
 	}
 	
-	if ((result.endsWith("</li>"))||(defList)) return result; else return result + "<br>";
+	//escape code contributed by [MN]
+	//both [= and =] in the same line
+	else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>=0)){
+	    String escapeText = result.substring(p0+2,p1);
+	    result = transformLine(result.substring(0,p0)+"!escape!!Text!"+result.substring(p1+2), switchboard);
+	    result = result.replaceAll("!escape!!Text!", escapeText);
+	}
+	
+	//start [=
+	else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)){
+	    escape = true;    //prevent surplus line breaks
+	    String escapeText = result.substring(p0+2);
+	    result = transformLine(result.substring(0,p0)+"!escape!!Text!", switchboard);
+	    result = result.replaceAll("!escape!!Text!", escapeText);
+	    escape = false;
+	    escapeSpan = true;
+	}
+	
+	//end =]
+	else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)){
+	    escapeSpan = false;
+	    String escapeText = result.substring(0,p0);
+	    result = transformLine("!escape!!Text!"+result.substring(p0+2), switchboard);
+	    result = result.replaceAll("!escape!!Text!", escapeText);
+	}
+	//end contrib [MN]
+	
+	if ((result.endsWith("</li>"))||(defList)||(escape)) return result; else return result + "<br>";
     }
     /*
       what we need:
@@ -402,6 +438,11 @@ public class wikiCode {
 
       A picture: [[Image:Wiki.png]]
       [[Image:Wiki.png|right|jigsaw globe]] (floating right-side with caption)
+      
+      
+      what we got in addition to that:
+      
+      [= escape characters =]
 
     */
 
