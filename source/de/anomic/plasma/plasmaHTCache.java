@@ -201,7 +201,34 @@ public final class plasmaHTCache {
         }
     }
 
+    private void cleanupDoIt(long newCacheSize) {
+        File f;
+        long size;
+        while ((currCacheSize >= newCacheSize) && (cacheAge.size() > 0)) {
+            f = (File) cacheAge.remove(cacheAge.firstKey());
+            if ((f != null) && (f.exists())) {
+                size = f.length();
+                if (f.delete()) {
+                    log.logInfo("DELETED OLD CACHE : " + f.toString());
+                    currCacheSize -= size;
+                    f = f.getParentFile();
+                    if (f.isDirectory() && (f.list().length == 0)) {
+                        // the directory has no files in it; delete it also
+                        if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
+                    }
+                }
+            }
+        }
+    }
+
     private void cleanup() {
+        // clean up cache to have 8% (enough) space for next entries
+        if ((currCacheSize >= maxCacheSize) && (cacheAge.size() > 0)) {
+            if (maxCacheSize > 0) cleanupDoIt(maxCacheSize - ((maxCacheSize / 100) * 8));
+        }
+    }
+
+/*  private void cleanupOld() {
         // clean up cache to have enough space for next entries
         File f;
         while ((currCacheSize > maxCacheSize) && (cacheAge.size() > 0)) {
@@ -220,7 +247,7 @@ public final class plasmaHTCache {
                 }
             }
         }
-    }
+    }*/
 
     public void close() throws IOException {
         responseHeaderDB.close();
