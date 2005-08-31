@@ -188,6 +188,17 @@ public class plasmaCrawlProfile {
             mem.put("xdstopw", (xdstopw) ? "true" : "false"); // exclude dynamic stop-word
             mem.put("xpstopw", (xpstopw) ? "true" : "false"); // exclude parent stop-words
         }
+        
+        public String toString() {
+            StringBuffer str = new StringBuffer();
+            
+            if (this.mem != null) {     
+                str.append(this.mem.toString());
+            }
+            
+            return str.toString();
+        }        
+        
         public entry(Map mem) {
             this.mem = mem;
         }
