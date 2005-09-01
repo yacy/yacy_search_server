@@ -258,7 +258,7 @@ public final class plasmaHTCache {
     private void cleanup() {
         // clean up cache to have 3% (enough) space for next entries
         if ((currCacheSize >= maxCacheSize) && (cacheAge.size() > 0)) {
-            if (maxCacheSize > 0) cleanupDoIt((maxCacheSize - ((maxCacheSize / 100) * 3));
+            if (maxCacheSize > 0) cleanupDoIt(maxCacheSize - ((maxCacheSize / 100) * 3));
         }
     }
 
