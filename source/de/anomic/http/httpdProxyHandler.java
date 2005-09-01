@@ -503,16 +503,16 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 //          res.responseHeader.put(httpHeader.CONTENT_ENCODING, "gzip");
 //          res.responseHeader.remove(httpHeader.CONTENT_LENGTH);
 //          }
-            
+
             // the cache does either not exist or is (supposed to be) stale
             long sizeBeforeDelete = -1;
             if ((cacheFile.exists()) && (cacheFile.isFile()) && (cachedResponseHeader != null)) {
                 // delete the cache
                 sizeBeforeDelete = cacheFile.length();
-                cacheFile.delete();
+                cacheManager.deleteFile(url);
                 conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
             }            
-            
+
             // reserver cache entry
             Date requestDate = new Date(((Long)conProp.get(httpd.CONNECTION_PROP_REQUEST_START)).longValue()); 
             plasmaHTCache.Entry cacheEntry = cacheManager.newEntry(

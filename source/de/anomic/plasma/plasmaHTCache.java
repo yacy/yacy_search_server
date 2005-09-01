@@ -159,15 +159,48 @@ public final class plasmaHTCache {
 
     private boolean deleteFile(File file) {
         if (file.exists()) {
-            currCacheSize -= file.length();
-            return file.delete();
-        } else {
-            return false;
+            long size = file.length();
+            if (file.delete()) {
+                currCacheSize -= size;
+                return true;
+            }
         }
+       return false;
+    }
+
+    private boolean deleteFileandDirs (File f, String msg) {
+        if (deleteFile (f)) {
+            log.logInfo("DELETED " + msg + " CACHE : " + f.toString());
+            f = f.getParentFile();
+            // If the has been emptied, remove it
+            // Loop as long as we produce empty driectoriers, but stop at HTCACHE
+            while ((!(f.equals(cachePath))) && (f.isDirectory()) && (f.list().length == 0)) {
+                if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
+                f = f.getParentFile();
+            }
+            return true;
+         } else {
+             return false;
+         }
+    }
+
+    private boolean deleteURLfromCache (URL url, String msg) {
+        if (deleteFileandDirs(getCachePath(url), msg)) {
+            try {
+                // As the file is gone, the entry in responseHeader.db is not needed anymore
+                log.logFinest("Trying to remove responseHeader from URL: " + url.toString());
+                responseHeaderDB.remove(plasmaURL.urlHash(url));
+            } catch (IOException e) {
+                log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
+            }
+           return true;
+       } else {
+           return false;
+       }
     }
 
     public boolean deleteFile(URL url) {
-        return deleteFile(getCachePath(url));
+        return deleteURLfromCache(url, "FROM");
     }
 
     public boolean writeFile(URL url, byte[] array) {
@@ -203,18 +236,19 @@ public final class plasmaHTCache {
 
     private void cleanupDoIt(long newCacheSize) {
         File f;
-        long size;
         while ((currCacheSize >= newCacheSize) && (cacheAge.size() > 0)) {
             f = (File) cacheAge.remove(cacheAge.firstKey());
-            if ((f != null) && (f.exists())) {
-                size = f.length();
-                if (f.delete()) {
-                    log.logInfo("DELETED OLD CACHE : " + f.toString());
-                    currCacheSize -= size;
-                    f = f.getParentFile();
-                    if (f.isDirectory() && (f.list().length == 0)) {
-                        // the directory has no files in it; delete it also
-                        if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
+            if (f != null) {
+                log.logFinest("Trying to delete old file: " + f.toString());
+                if (deleteFileandDirs (f, "OLD")) {
+                    try {
+                        // As the file is gone, the entry in responseHeader.db is not needed anymore
+                        log.logFinest("Trying to remove responseHeader for URL: " +
+                            getURL(cachePath ,f).toString());
+                        responseHeaderDB.remove(plasmaURL.urlHash(getURL(cachePath ,f)));
+                    } catch (IOException e) {
+                        log.logInfo("IOExeption removing response header from DB: " +
+                            e.getMessage(), e);
                     }
                 }
             }
@@ -227,27 +261,6 @@ public final class plasmaHTCache {
             if (maxCacheSize > 0) cleanupDoIt(maxCacheSize - ((maxCacheSize / 100) * 8));
         }
     }
-
-/*  private void cleanupOld() {
-        // clean up cache to have enough space for next entries
-        File f;
-        while ((currCacheSize > maxCacheSize) && (cacheAge.size() > 0)) {
-            f = (File) cacheAge.remove(cacheAge.firstKey());
-            if ((f != null) && (f.exists())) {
-                long size = f.length();
-                //currCacheSize -= f.length();
-                if (f.delete()) {
-                    log.logInfo("DELETED OLD CACHE : " + f.toString());
-                    currCacheSize -= size;
-                    f = f.getParentFile();
-                    if (f.isDirectory() && (f.list().length == 0)) {
-                        // the directory has no files in it; delete it also
-                        if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
-                    }
-                }
-            }
-        }
-    }*/
 
     public void close() throws IOException {
         responseHeaderDB.close();
