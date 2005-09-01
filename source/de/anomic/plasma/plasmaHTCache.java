@@ -256,9 +256,9 @@ public final class plasmaHTCache {
     }
 
     private void cleanup() {
-        // clean up cache to have 8% (enough) space for next entries
+        // clean up cache to have 3% (enough) space for next entries
         if ((currCacheSize >= maxCacheSize) && (cacheAge.size() > 0)) {
-            if (maxCacheSize > 0) cleanupDoIt(maxCacheSize - ((maxCacheSize / 100) * 8));
+            if (maxCacheSize > 0) cleanupDoIt((maxCacheSize - ((maxCacheSize / 100) * 3));
         }
     }
 
@@ -468,7 +468,7 @@ public final class plasmaHTCache {
                 (urlString.indexOf("&") >= 0));
     }
 
-    public static boolean isCGI(String urlString) {
+    public static boolean isCGI(String urlString) { // Borg-0300
         String ls = urlString.toLowerCase();
         return ((ls.indexOf(".cgi") >= 0) ||
                 (ls.indexOf(".exe") >= 0) ||
