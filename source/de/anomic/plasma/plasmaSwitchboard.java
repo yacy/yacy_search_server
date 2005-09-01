@@ -1101,6 +1101,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             reason = "denied_(does_not_match_filter)";
             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
                     name, reason, new bitfield(plasmaURL.urlFlagLength), false);
+            log.logFine("URL '" + nexturlString + "' does not match crawling filter '" + profile.generalFilter() + "'.");
             return reason;
         }
         
@@ -1109,6 +1110,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             reason = "denied_(cgi_url)";
             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
                                   name, reason, new bitfield(plasmaURL.urlFlagLength), false);
+            log.logFine("URL '" + nexturlString + "' is cgi URL.");
             return reason;
         }
 
@@ -1117,6 +1119,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             reason = "denied_(post_url)";
             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
                                   name, reason, new bitfield(plasmaURL.urlFlagLength), false);
+            log.logFine("URL '" + nexturlString + "' is post URL.");
             return reason;
         }
 
@@ -1127,6 +1130,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             reason = "double_(registered_in_" + dbocc + ")";
             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
                                   name, reason, new bitfield(plasmaURL.urlFlagLength), false);
+            log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'.");
             return reason;
         }
         
@@ -1139,6 +1143,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
             ((yacyCore.seedDB.mySeed.isSenior()) ||
              (yacyCore.seedDB.mySeed.isPrincipal())) /* qualified */;
+        
+        if ((!local)&&(!global)) {
+            log.logFine("URL '" + nexturlString + "' can neither be crawled local nor global.");
+        }
         
         urlPool.noticeURL.newEntry(initiatorHash, /* initiator, needed for p2p-feedback */
                            nexturl, /* url clear text string */
@@ -1158,7 +1166,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     private void processLocalCrawling(plasmaCrawlNURL.Entry urlEntry, plasmaCrawlProfile.entry profile, String stats) {
         // work off one Crawl stack entry
-        if ((urlEntry == null) && (urlEntry.url() == null)) {
+        if ((urlEntry == null) || (urlEntry.url() == null)) {
             log.logInfo(stats + ": urlEntry=null");
             return;
         }
