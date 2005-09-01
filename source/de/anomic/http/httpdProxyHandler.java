@@ -690,6 +690,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     httpd.sendRespondError(conProp,respond,4,httpStatusCode,httpStatusText,errorMessage,errorExc);
                 } else {
+                    this.theLogger.logFine("Error while processing request '" + 
+                            conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
+                            "\n" + errorMessage,e);
                     this.forceConnectionClose();
                 }                
             } catch (Exception ee) {
