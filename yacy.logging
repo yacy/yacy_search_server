@@ -11,7 +11,7 @@
 # CONFIG  regular system status information (i.e. start-up messages)
 # FINE  in-function status debug output
 PARSER.level = INFO
-YACY.level = FINE
+YACY.level = INFO
 HTCACHE.level = INFO
 PLASMA.level = INFO
 SERVER.level = INFO
@@ -25,7 +25,7 @@ handlers = java.util.logging.FileHandler,\
 # Properties for the FileHandler
 java.util.logging.FileHandler.limit = 1048576
 java.util.logging.FileHandler.count = 20
-java.util.logging.FileHandler.pattern = log/yacy%u%g.log
+java.util.logging.FileHandler.pattern = DATA/LOG/yacy%u%g.log
 java.util.logging.FileHandler.level = ALL
 java.util.logging.FileHandler.formatter=de.anomic.server.logging.serverSimpleLogFormatter
 
@@ -46,5 +46,5 @@ de.anomic.server.logging.ConsoleOutErrHandler.formatter=de.anomic.server.logging
 de.anomic.http.httpdProxyHandler.logging.enabled = TRUE
 de.anomic.http.httpdProxyHandler.logging.FileHandler.limit = 1048576
 de.anomic.http.httpdProxyHandler.logging.FileHandler.count = 20
-de.anomic.http.httpdProxyHandler.logging.FileHandler.pattern = log/proxyAccess%u%g.log
+de.anomic.http.httpdProxyHandler.logging.FileHandler.pattern = DATA/LOG/proxyAccess%u%g.log
 

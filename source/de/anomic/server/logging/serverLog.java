@@ -165,7 +165,7 @@ public final class serverLog {
             logManager.readConfiguration(fileIn);
 
             // creating the logging directory
-            File log = new File("./log/");
+            File log = new File("./DATA/LOG/");
             if(!log.canRead()) log.mkdir();
 
             // generating the root logger

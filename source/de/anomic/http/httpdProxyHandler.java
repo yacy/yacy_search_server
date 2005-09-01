@@ -139,7 +139,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 // reading out some needed configuration properties
                 int limit = 1024*1024, count = 20;
                 String pattern = manager.getProperty(className + ".logging.FileHandler.pattern");
-                if (pattern == null) pattern = "log/proxyAccess%u%g.log";
+                if (pattern == null) pattern = "DATA/LOG/proxyAccess%u%g.log";
                 
                 String limitStr = manager.getProperty(className + ".logging.FileHandler.limit");
                 if (limitStr != null) try { limit = Integer.valueOf(limitStr).intValue(); } catch (NumberFormatException e) {}
