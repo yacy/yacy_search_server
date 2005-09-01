@@ -50,7 +50,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.Enumeration;
+// import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,13 +66,13 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroTree;
+// import de.anomic.kelondro.kelondroTree;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.plasma.plasmaWordIndex;
+// import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
-import de.anomic.plasma.plasmaWordIndexEntryContainer;
+// import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.plasma.plasmaWordIndexClassicDB;
 import de.anomic.plasma.plasmaWordIndexCache;
 import de.anomic.server.serverCodings;
@@ -192,9 +192,8 @@ public final class yacy {
             }
             serverLog.logConfig("STARTUP", copyright);
             serverLog.logConfig("STARTUP", hline);
-
             serverLog.logConfig("STARTUP", "java version " + System.getProperty("java.version", "no-java-version"));
-            serverLog.logConfig("STARTUP", "Application Root Path: " + homePath.toString());
+            serverLog.logConfig("STARTUP", "Application Root Path: " + homePath);
 
             // create data folder
             File dataFolder = new File(homePath, "DATA");
@@ -256,7 +255,7 @@ public final class yacy {
 
             // create default notifier picture
             if (!((new File(htRootPath, "env/grafics/notifier.gif")).exists())) try {
-                serverFileUtils.copy(new File(htRootPath, "env/grafics/empty.gif"), 
+                serverFileUtils.copy(new File(htRootPath, "env/grafics/empty.gif"),
                                      new File(htRootPath, "env/grafics/notifier.gif"));
             } catch (IOException e) {}
 
@@ -767,7 +766,7 @@ public final class yacy {
     * @param args Given arguments from the command line.
     */
     public static void main(String args[]) {
-        String applicationRoot = System.getProperty("user.dir");
+        String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
         //System.out.println("args.length=" + args.length);
         //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
         if ((args.length >= 1) && ((args[0].equals("-startup")) || (args[0].equals("-start")))) {
