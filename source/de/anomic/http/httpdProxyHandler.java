@@ -478,9 +478,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // send request
             res = remote.GET(remotePath, requestHeader);
             conProp.put(httpd.CONNECTION_PROP_CLIENT_REQUEST_HEADER,requestHeader);
-            long contentLength = res.responseHeader.contentLength();
+            
+            // request has been placed and result has been returned. work off response            
+            String[] resStatus = res.status.split(" ");
+            
+            // determine if it's an internal error of the httpc
+            if (res.responseHeader.size() == 0) {
+                throw new Exception((resStatus.length > 1) ? resStatus[1] : "Internal httpc error");
+            }
             
             // if the content length is not set we have to use chunked transfer encoding
+            long contentLength = res.responseHeader.contentLength();
             if (contentLength < 0) {
                 // according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
                 // a 204,304 message must not contain a message body.
@@ -545,9 +553,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // remove hop by hop headers
             this.removeHopByHopHeaders(res.responseHeader);
-            
-            // request has been placed and result has been returned. work off response            
-            String[] resStatus = res.status.split(" ");
             
             // sending the respond header back to the client
             if (chunkedOut != null) {
