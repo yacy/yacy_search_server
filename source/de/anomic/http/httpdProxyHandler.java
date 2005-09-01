@@ -150,6 +150,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 // creating the proxy access logger
                 Logger proxyLogger = Logger.getLogger("PROXY.access");
                 proxyLogger.setUseParentHandlers(false);
+                proxyLogger.setLevel(Level.FINEST);
+                
                 FileHandler txtLog = new FileHandler(pattern,limit,count,true);
                 txtLog.setFormatter(new serverMiniLogFormatter());
                 txtLog.setLevel(Level.FINEST);
