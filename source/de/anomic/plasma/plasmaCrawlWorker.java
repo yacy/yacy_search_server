@@ -430,78 +430,74 @@ public final class plasmaCrawlWorker extends Thread {
         } catch (Exception e) {
             boolean retryCrawling = false;
             String errorMsg = e.getMessage();
-            if (errorMsg != null) {
-                if (e instanceof MalformedURLException) {
-                    log.logWarning("CRAWLER Malformed URL '" + url.toString() + "' detected. ");                    
-                } else if ((e instanceof UnknownHostException) || (errorMsg.indexOf("unknown host") >= 0)) {                    
-                    log.logWarning("CRAWLER Unknown host in URL '" + url.toString() + "'. " +
-                                   "Referer URL: " + ((referer == null) ?"Unknown":referer));
-                } else if (e instanceof java.net.BindException) {
-                    log.logWarning("CRAWLER BindException detected while trying to download content from '" + url.toString() + 
-                                   "'. Retrying request.");
-                    retryCrawling = true;
-                } else if (errorMsg.indexOf("Corrupt GZIP trailer") >= 0) {
-                    log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + url.toString() + 
-                                   "'. Retrying request without using gzip content encoding.");
-                    retryCrawling = true;                  
-                } else if (errorMsg.indexOf("Read timed out") >= 0) {
-                    log.logWarning("CRAWLER Read timeout while receiving content from '" + url.toString() + 
-                                   "'. Retrying request.");
-                    retryCrawling = true;
-                } else if (errorMsg.indexOf("connect timed out") >= 0) {
-                    log.logWarning("CRAWLER Timeout while trying to connect to '" + url.toString() + 
-                                   "'. Retrying request."); 
-                    retryCrawling = true;                                                                           
-                } else if (errorMsg.indexOf("Connection timed out") >= 0) {
-                    log.logWarning("CRAWLER Connection timeout while receiving content from '" + url.toString() + 
-                                   "'. Retrying request."); 
-                    retryCrawling = true;                                                       
-                } else if (errorMsg.indexOf("Connection refused") >= 0) {
-                    log.logWarning("CRAWLER Connection refused while trying to connect to '" + url.toString() + "'.");
-                } else if (errorMsg.indexOf("There is not enough space on the disk") >= 0) {
-                    log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + url.toString() + "'. " + 
-                                   "Pausing crawlers. ");
-                    plasmaCrawlLoader.switchboard.pauseCrawling();
-                } else {
-                    log.logSevere("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
-                }
-
-                
-                if (retryCrawling) {    
-                    // if we are already doing a shutdown we don't need to retry crawling
-                    if (Thread.currentThread().isInterrupted()) {
-                        log.logSevere("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
-                        return;
-                    }
-                    
-                    // returning the used httpc
-                    httpc.returnInstance(remote);
-                    remote = null;                    
-                    
-                    // setting the retry counter to 1 
-                    if (crawlingRetryCount > 2) crawlingRetryCount = 2;
-                    
-                    // retry crawling
-                    load(url,
-                         name,
-                         referer,
-                         initiator,
-                         depth,
-                         profile,
-                         socketTimeout,
-                         remoteProxyHost,
-                         remoteProxyPort,
-                         remoteProxyUse,
-                         cacheManager,
-                         log,
-                         --crawlingRetryCount,
-                         false
-                    );         
-                }
+            
+            if (e instanceof MalformedURLException) {
+                log.logWarning("CRAWLER Malformed URL '" + url.toString() + "' detected. ");                    
+            } else if ((e instanceof UnknownHostException) || 
+                       ((errorMsg != null) && (errorMsg.indexOf("unknown host") >= 0))) {                    
+                log.logWarning("CRAWLER Unknown host in URL '" + url.toString() + "'. " +
+                        "Referer URL: " + ((referer == null) ?"Unknown":referer));
+            } else if (e instanceof java.net.BindException) {
+                log.logWarning("CRAWLER BindException detected while trying to download content from '" + url.toString() + 
+                "'. Retrying request.");
+                retryCrawling = true;
+            } else if ((errorMsg != null) && (errorMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
+                log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + url.toString() + 
+                "'. Retrying request without using gzip content encoding.");
+                retryCrawling = true;                  
+            } else if ((errorMsg != null) && (errorMsg.indexOf("Read timed out") >= 0)) {
+                log.logWarning("CRAWLER Read timeout while receiving content from '" + url.toString() + 
+                "'. Retrying request.");
+                retryCrawling = true;
+            } else if ((errorMsg != null) && (errorMsg.indexOf("connect timed out") >= 0)) {
+                log.logWarning("CRAWLER Timeout while trying to connect to '" + url.toString() + 
+                "'. Retrying request."); 
+                retryCrawling = true;                                                                           
+            } else if ((errorMsg != null) && (errorMsg.indexOf("Connection timed out") >= 0)) {
+                log.logWarning("CRAWLER Connection timeout while receiving content from '" + url.toString() + 
+                "'. Retrying request."); 
+                retryCrawling = true;                                                       
+            } else if ((errorMsg != null) && (errorMsg.indexOf("Connection refused") >= 0)) {
+                log.logWarning("CRAWLER Connection refused while trying to connect to '" + url.toString() + "'.");
+            } else if ((errorMsg != null) && (errorMsg.indexOf("There is not enough space on the disk") >= 0)) {
+                log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + url.toString() + "'. " + 
+                "Pausing crawlers. ");
+                plasmaCrawlLoader.switchboard.pauseCrawling();
             } else {
-                // this may happen if the targeted host does not exist or anything with the
-                // remote server was wrong.
-                log.logSevere("CRAWLER LOADER ERROR2 with URL=" + url.toString() + ": " + e.toString(),e);
+                log.logSevere("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
+            }
+            
+            
+            if (retryCrawling) {    
+                // if we are already doing a shutdown we don't need to retry crawling
+                if (Thread.currentThread().isInterrupted()) {
+                    log.logSevere("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
+                    return;
+                }
+                
+                // returning the used httpc
+                httpc.returnInstance(remote);
+                remote = null;                    
+                
+                // setting the retry counter to 1 
+                if (crawlingRetryCount > 2) crawlingRetryCount = 2;
+                
+                // retry crawling
+                load(url,
+                        name,
+                        referer,
+                        initiator,
+                        depth,
+                        profile,
+                        socketTimeout,
+                        remoteProxyHost,
+                        remoteProxyPort,
+                        remoteProxyUse,
+                        cacheManager,
+                        log,
+                        --crawlingRetryCount,
+                        false
+                );         
             }
         } finally {
             if (remote != null) httpc.returnInstance(remote);
