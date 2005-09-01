@@ -50,7 +50,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.StringTokenizer;
 
 public class kelondroStack extends kelondroRecords {
@@ -198,6 +200,14 @@ public class kelondroStack extends kelondroRecords {
 	Node n = botNode(dist);
 	if (n == null) return null;
         return n.getValues();
+    }
+    
+    public synchronized ArrayList botList(int dist) throws IOException {
+        ArrayList botList = new ArrayList(size());
+        for (int i=dist; i < size(); i++) {
+            botList.add(bot(i));
+        }
+        return botList;
     }
     
     private void unlinkNode(Node n) throws IOException {

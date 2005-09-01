@@ -76,6 +76,11 @@ public class IndexCreateWWWLocalQueue_p {
                 
                 prop.put("info", 3);//crawling queue cleared
                 prop.put("info_numEntries", c);
+            } else if (post.containsKey("deleteEntry")) {
+                String urlHash = (String) post.get("deleteEntry");
+                switchboard.urlPool.noticeURL.remove(urlHash);
+                prop.put("LOCATION","");
+                return prop;
             }
         }
 
@@ -101,6 +106,7 @@ public class IndexCreateWWWLocalQueue_p {
                     prop.put("crawler-queue_list_"+i+"_modified", daydate(urle.loaddate()) );
                     prop.put("crawler-queue_list_"+i+"_anchor", urle.name());
                     prop.put("crawler-queue_list_"+i+"_url", urle.url());
+                    prop.put("crawler-queue_list_"+i+"_hash", urle.hash());
                     dark = !dark;
                 }
             }

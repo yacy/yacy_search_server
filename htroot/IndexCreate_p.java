@@ -186,6 +186,9 @@ public class IndexCreate_p {
                                 prop.put("error", 5); //Crawling failed
                                 prop.put("error_crawlingURL", ((String) post.get("crawlingURL")));
                                 prop.put("error_reasonString", reasonString);
+                                
+                                switchboard.urlPool.errorURL.newEntry(crawlingStartURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
+                                                                      crawlingStartURL.getHost(), reasonString, new bitfield(plasmaURL.urlFlagLength), false);                                
                             }
                         } catch (Exception e) {
                             // mist

@@ -158,6 +158,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
     public synchronized boolean reconnect() throws IOException {
         if ((!this.isConnected()) && (!Thread.currentThread().isInterrupted())) {
             this.log.logFine("Trying to reconnect to port forwarding host.");
+            this.disconnect();
             this.connect();
             return this.isConnected();
         }

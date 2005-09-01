@@ -182,8 +182,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         } catch (NoSuchAlgorithmException e) {
             serverLog.logWarning("HTTPDFileHandler", "Content-MD5 support not availabel ...");
         }
-        
-        serverLog.logConfig("HTTPDFileHandler", "File Handler Initialized");
     }
     
 //    private void textMessage(OutputStream out, int retcode, String body) throws IOException {
@@ -435,6 +433,14 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 httpHeader headers = getDefaultHeaders();
                                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"" + tp.get("AUTHENTICATE", "") + "\"");
                                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
+                                return;
+                            } else if (tp.containsKey("LOCATION")) {
+                                String location = tp.get("LOCATION","");
+                                if (location.length() == 0) location = path;
+                                
+                                httpHeader headers = getDefaultHeaders();
+                                headers.put(httpHeader.LOCATION,location);
+                                httpd.sendRespondHeader(conProp,out,httpVersion,307,headers);
                                 return;
                             }
                             // add the application version, the uptime and the client name to every rewrite table

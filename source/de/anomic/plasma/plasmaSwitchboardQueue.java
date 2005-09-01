@@ -45,7 +45,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
@@ -108,6 +110,19 @@ public class plasmaSwitchboardQueue {
     public Entry get(int index) throws IOException {
         if ((index < 0) || (index >= sbQueueStack.size())) throw new ArrayIndexOutOfBoundsException();
         return new Entry(sbQueueStack.bot(index));
+    }
+    
+    public ArrayList list() throws IOException {
+        return list(0);
+    }
+    
+    public ArrayList list(int index) throws IOException {
+        if ((index < 0) || (index >= sbQueueStack.size())) throw new ArrayIndexOutOfBoundsException();
+        ArrayList list = sbQueueStack.botList(index);
+        for (int i=0; i < list.size(); i++) {
+            list.set(i,new Entry((byte[][])list.get(i)));
+        }
+        return list;
     }
     
     public void close() {
