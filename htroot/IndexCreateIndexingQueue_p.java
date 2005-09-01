@@ -46,6 +46,7 @@
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 import java.io.IOException;
 
@@ -86,15 +87,21 @@ public class IndexCreateIndexingQueue_p {
         boolean dark;
         int i=0;
         
-        if (switchboard.sbQueue.size() == 0) {
+        if ((switchboard.sbQueue.size() == 0) && (switchboard.indexingTasksInProcess.size() == 0)) {
             prop.put("indexing-queue", 0); //is empty
         } else {
             prop.put("indexing-queue", 1);
-            prop.put("indexing-queue_num", switchboard.sbQueue.size());//num entries in queue
+            prop.put("indexing-queue_num", switchboard.sbQueue.size() + switchboard.indexingTasksInProcess.size());//num entries in queue
             dark = true;
             plasmaSwitchboardQueue.Entry pcentry;
             try {
-                ArrayList entryList = switchboard.sbQueue.list(0);
+                ArrayList entryList = new ArrayList();
+                
+                synchronized (switchboard.indexingTasksInProcess) {
+                    entryList.addAll(switchboard.indexingTasksInProcess.values());
+                }
+                
+                entryList.addAll(switchboard.sbQueue.list(0));
                 for (i = 0; i < entryList.size(); i++) {
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
                     if (pcentry != null) {

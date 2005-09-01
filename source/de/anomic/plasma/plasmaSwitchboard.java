@@ -100,25 +100,19 @@
 
 package de.anomic.plasma;
 
-// import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-// import java.io.FileInputStream;
 import java.io.IOException;
-// import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-// import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-// import java.util.TreeMap;
-// import java.util.Vector;
 
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
@@ -130,20 +124,17 @@ import de.anomic.kelondro.kelondroTables;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
-// import de.anomic.server.serverDate;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-// import de.anomic.server.serverFileUtils;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
-// import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
 
@@ -182,6 +173,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaWordIndexClassicCacheMigration classicCache;
     public  long                        proxyLastAccess;
     public  yacyCore                    yc;
+    public  HashMap                     indexingTasksInProcess;
     
     private serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
@@ -293,6 +285,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // initialize switchboard queue
         sbQueue = new plasmaSwitchboardQueue(this.cacheManager, urlPool.loadedURL, new File(plasmaPath, "switchboardQueue1.stack"), 10, profiles);
+        indexingTasksInProcess = new HashMap();
         
         // define an extension-blacklist
         log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
@@ -618,6 +611,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             try {
                 nextentry = sbQueue.pop();
                 if (nextentry == null) return false;
+                
+                synchronized (this.indexingTasksInProcess) {
+                    this.indexingTasksInProcess.put(nextentry.urlHash(),nextentry);
+                }
+                
             } catch (IOException e) {
                 log.logSevere("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
                 return false;
@@ -1060,9 +1058,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         } catch (IOException e) {
             log.logSevere("ERROR in plasmaSwitchboard.process(): " + e.toString());
         } finally {
+            synchronized (this.indexingTasksInProcess) {
+                this.indexingTasksInProcess.remove(entry.urlHash());
+            }            
+            
             // explicit delete/free resources
             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) cacheManager.deleteFile(entry.url());
-            entry = null;            
+            entry = null;              
         }
     }
 
