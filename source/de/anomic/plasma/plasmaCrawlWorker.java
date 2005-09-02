@@ -60,6 +60,8 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.logging.serverMiniLogFormatter;
+import de.anomic.tools.bitfield;
+import de.anomic.yacy.yacyCore;
 
 public final class plasmaCrawlWorker extends Thread {
     
@@ -289,6 +291,9 @@ public final class plasmaCrawlWorker extends Thread {
         // if the recrawling limit was exceeded we stop crawling now
         if (crawlingRetryCount <= 0) return;
         
+        // getting a reference to the plasmaSwitchboard
+        plasmaSwitchboard sb = plasmaCrawlLoader.switchboard;           
+        
         Date requestDate = new Date(); // remember the time...
         String host = url.getHost();
         String path = url.getPath();
@@ -296,6 +301,14 @@ public final class plasmaCrawlWorker extends Thread {
         boolean ssl = url.getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443 : 80;
     
+        // check if url is in blacklist
+        String hostlow = host.toLowerCase();
+        if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
+            log.logInfo("CRAWLER Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
+            sb.urlPool.errorURL.newEntry(url, referer,initiator, yacyCore.seedDB.mySeed.hash,
+                    name, "denied_(url_in_blacklist)", new bitfield(plasmaURL.urlFlagLength), true);
+        }            
+        
         // set referrer; in some case advertise a little bit:
         referer = (referer == null) ? "" : referer.trim();
         if (referer.length() == 0) referer = "http://www.yacy.net/yacy/";
@@ -303,8 +316,6 @@ public final class plasmaCrawlWorker extends Thread {
         // take a file from the net
         httpc remote = null;
         try {
-            plasmaSwitchboard sb = plasmaCrawlLoader.switchboard;
-            
             // create a request header
             httpHeader requestHeader = new httpHeader();
             requestHeader.put(httpHeader.USER_AGENT, httpdProxyHandler.userAgent);

@@ -118,6 +118,7 @@ import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroTables;
@@ -1097,6 +1098,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logSevere("Wrong URL in stackCrawl: " + nexturlString);
             return reason;
         }
+        
+        // check blacklist
+        String hostlow = nexturl.getHost().toLowerCase();
+        if (urlBlacklist.isListed(hostlow, nexturl.getPath())) {
+            reason = "denied_(url_in_blacklist)";
+            return reason;
+        }        
         
         // filter deny
         if ((currentdepth > 0) && (profile != null) && (!(nexturlString.matches(profile.generalFilter())))) {
