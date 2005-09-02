@@ -733,8 +733,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         plasmaCrawlNURL.Entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
         String stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
         if ((urlEntry.url() == null) || (urlEntry.url().toString().length() < 10)) {
-            log.logSevere(stats + ": urlEntry.url() == null. URL-Hash: " + ((urlEntry.hash()==null)?"Unknown":urlEntry.hash()));
-            return true;
+            log.logInfo(stats + ": URL with hash " + ((urlEntry.hash()==null)?"Unknown":urlEntry.hash()) + " already removed from queue.");
+            return true;            
         }
         String profileHandle = urlEntry.profileHandle();
         //System.out.println("DEBUG plasmaSwitchboard.processCrawling: profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
@@ -747,7 +747,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logSevere(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
             return true;
         }
-        log.logFine("LOCALCRAWL: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
+        log.logFine("LOCALCRAWL: URL=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + 
 		     ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter() +
 		     ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
 

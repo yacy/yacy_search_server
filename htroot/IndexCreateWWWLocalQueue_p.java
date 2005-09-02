@@ -84,33 +84,38 @@ public class IndexCreateWWWLocalQueue_p {
             }
         }
 
-        int stackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+        int showNum = 0, stackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
         if (stackSize == 0) {
             prop.put("crawler-queue", 0);
         } else {
             prop.put("crawler-queue", 1);
-            plasmaCrawlNURL.Entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, 100);
-            prop.put("crawler-queue_num", stackSize);//num Entries
-            prop.put("crawler-queue_show-num", crawlerList.length); //showin sjow-num most recent
+            plasmaCrawlNURL.Entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, 120);
+
             plasmaCrawlNURL.Entry urle;
             boolean dark = true;
             yacySeed initiator;
             int i;
-            for (i = 0; i < crawlerList.length; i++) {
+            for (i = 0; (i < crawlerList.length) && (showNum < 100); i++) {
                 urle = crawlerList[i];
-                if (urle != null) {
+                if ((urle != null)&&(urle.url()!=null)) {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());
-                    prop.put("crawler-queue_list_"+i+"_dark", ((dark) ? 1 : 0) );
-                    prop.put("crawler-queue_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
-                    prop.put("crawler-queue_list_"+i+"_depth", urle.depth());
-                    prop.put("crawler-queue_list_"+i+"_modified", daydate(urle.loaddate()) );
-                    prop.put("crawler-queue_list_"+i+"_anchor", urle.name());
-                    prop.put("crawler-queue_list_"+i+"_url", urle.url());
-                    prop.put("crawler-queue_list_"+i+"_hash", urle.hash());
+                    prop.put("crawler-queue_list_"+showNum+"_dark", ((dark) ? 1 : 0) );
+                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
+                    prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
+                    prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
+                    prop.put("crawler-queue_list_"+showNum+"_anchor", urle.name());
+                    prop.put("crawler-queue_list_"+showNum+"_url", urle.url());
+                    prop.put("crawler-queue_list_"+showNum+"_hash", urle.hash());
                     dark = !dark;
+                    showNum++;
+                } else {
+                    stackSize--;
                 }
             }
-            prop.put("crawler-queue_list", i);
+            prop.put("crawler-queue_list", showNum);
+            prop.put("crawler-queue_num", stackSize);//num Entries
+            prop.put("crawler-queue_show-num", showNum); //showin sjow-num most recent
+
         }
 
         // return rewrite properties

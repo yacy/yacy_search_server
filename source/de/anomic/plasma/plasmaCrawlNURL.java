@@ -46,6 +46,7 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -281,17 +282,19 @@ public class plasmaCrawlNURL extends plasmaURL {
     }
 
     private Entry[] top(kelondroStack stack, int count) {
-	// this is a filo - top
+        // this is a filo - top
         if (count > stack.size()) count = stack.size();
-        Entry[] list = new Entry[count];
-	try {
+        ArrayList list = new ArrayList(count);
+        try {
             for (int i = 0; i < count; i++) {
-		list[i] = new Entry(new String(stack.top(i)[0]));
-	    }
-            return list;
+                byte[] hash = stack.top(i)[0];
+                if (hash == null) continue;
+                list.add(new Entry(new String(hash)));
+            }
+            return (Entry[])list.toArray(new Entry[list.size()]);
         } catch (IOException e) {
-	    return null;
-	}
+            return null;
+        }
     }
 
     public synchronized Entry getEntry(String hash) {
@@ -349,7 +352,7 @@ public class plasmaCrawlNURL extends plasmaURL {
         public String toString() {
             StringBuffer str = new StringBuffer();
             
-            str.append("hash: ").append(url==null ? "null" : urlHash(url)).append(" | ")
+            str.append("hash: ").append(hash==null ? "null" : hash).append(" | ")
                .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
                .append("url: ").append(url==null?"null":url.toString()).append(" | ")
                .append("referrer: ").append((referrer == null) ? dummyHash : referrer).append(" | ")

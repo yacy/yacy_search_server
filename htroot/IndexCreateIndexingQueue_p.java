@@ -113,13 +113,13 @@ public class IndexCreateIndexingQueue_p {
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
                     if ((pcentry != null)&&(pcentry.url() != null)) {
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
-                        prop.put("indexing-queue_list_"+i+"_dark", ((dark) ? 1 : 0));
-                        prop.put("indexing-queue_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
-                        prop.put("indexing-queue_list_"+i+"_depth", pcentry.depth());
-                        prop.put("indexing-queue_list_"+i+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
-                        prop.put("indexing-queue_list_"+i+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
-                        prop.put("indexing-queue_list_"+i+"_url", pcentry.normalizedURLString());
-                        prop.put("indexing-queue_list_"+i+"_size", Status.bytesToString(pcentry.size()));
+                        prop.put("indexing-queue_list_"+entryCount+"_dark", ((dark) ? 1 : 0));
+                        prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
+                        prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
+                        prop.put("indexing-queue_list_"+entryCount+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
+                        prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
+                        prop.put("indexing-queue_list_"+entryCount+"_url", pcentry.normalizedURLString());
+                        prop.put("indexing-queue_list_"+entryCount+"_size", Status.bytesToString(pcentry.size()));
                         dark = !dark;
                         entryCount++;
                     }
