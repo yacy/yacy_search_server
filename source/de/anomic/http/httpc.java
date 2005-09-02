@@ -131,11 +131,17 @@ public final class httpc {
     private String  savedRemoteHost = null;
     private String  requestPath = null;
     private boolean allowContentEncoding = true;
+	private static plasmaSwitchboard sb;
+	private static boolean useYacyReferer = true;
+	private static boolean yacyDebugMode = false;
 
     static {
         // set time-out of InetAddress.getByName cache ttl
         java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
-        java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
+		java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
+		sb = plasmaSwitchboard.getSwitchboard();
+		useYacyReferer = sb.getConfig("useYacyReferer", "true").equals("true");
+		yacyDebugMode = sb.getConfig("yacyDebugMode", "false").equals("true");
     }
 
     /**
@@ -402,9 +408,8 @@ public final class httpc {
         handle = System.currentTimeMillis();
         //serverLog.logDebug("HTTPC", handle + " initialized");
         this.remoteProxyUse = false;
-		plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         this.timeout = timeout;
-		if(sb != null && sb.getConfig("yacyDebugMode", "false").equals("true")){
+		if(sb != null && yacyDebugMode){
 			this.timeout=60000;
 		}
         this.savedRemoteHost = server;
@@ -559,8 +564,7 @@ public final class httpc {
         }
 
         // advertise a little bit...
-        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-        if ( (!(header.containsKey(httpHeader.REFERER))) || (((String) header.get(httpHeader.REFERER)).trim().length() == 0)&& sb.getConfig("useYacyReferer", "true").equals("true") )  {
+        if ( (!(header.containsKey(httpHeader.REFERER))) || (((String) header.get(httpHeader.REFERER)).trim().length() == 0)&& useYacyReferer )  {
             header.put(httpHeader.REFERER,
                     (((System.currentTimeMillis() >> 10) & 1) == 0) ?
                         "http://www.anomic.de" :
