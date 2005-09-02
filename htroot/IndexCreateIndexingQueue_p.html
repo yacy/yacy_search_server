@@ -14,6 +14,10 @@
 #(indexing-queue)#
 The indexing queue is empty<br>
 ::
+<form action="IndexCreateIndexingQueue_p.html" method="post" enctype="multipart/form-data">
+<input type="submit" name="clearIndexingQueue" value="clear indexing queue">
+</form>
+<br>
 There are #[num]# entries in the indexing queue:<br>
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader">
@@ -23,15 +27,17 @@ There are #[num]# entries in the indexing queue:<br>
 <td class="small">Anchor Name</th>
 <th class="small">URL</th>
 <th class="small">Size</th>
+<th class="small">Delete</th>
 </tr>
 #{list}#
-<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
+<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" class="small">
 <td width="60" class="small">#[initiator]#</td>
 <td width="10" class="small">#[depth]#</td>
 <td width="80" class="small">#[modified]#</td>
 <td width="180" class="small">#[anchor]#</td>
 <td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
-<td width="80" class="small" align="right">#[size]#</td>
+<td width="80" class="small" align="right"><nobr>#[size]#</nobr></td>
+<td width="10" class="small">#(inProcess)#<a class="small" href="IndexCreateIndexingQueue_p.html?deleteEntry=#[hash]#">[Delete]</a>::#(/inProcess)#</td>
 </tr>
 #{/list}#
 </table>

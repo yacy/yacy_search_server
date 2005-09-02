@@ -107,6 +107,11 @@ public class plasmaSwitchboardQueue {
         return new Entry(sbQueueStack.pot());
     }
     
+    public Entry remove(int index) throws IOException {
+        if (sbQueueStack.size() == 0) return null;
+        return new Entry(sbQueueStack.pot(index));
+    }
+    
     public Entry get(int index) throws IOException {
         if ((index < 0) || (index >= sbQueueStack.size())) throw new ArrayIndexOutOfBoundsException();
         return new Entry(sbQueueStack.bot(index));
@@ -123,6 +128,10 @@ public class plasmaSwitchboardQueue {
             list.set(i,new Entry((byte[][])list.get(i)));
         }
         return list;
+    }
+    
+    public void clear() throws IOException {
+        sbQueueStack.clear();
     }
     
     public void close() {

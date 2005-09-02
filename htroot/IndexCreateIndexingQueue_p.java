@@ -77,18 +77,37 @@ public class IndexCreateIndexingQueue_p {
         if (post != null) {
             if (post.containsKey("clearRejected")) {
                 switchboard.urlPool.errorURL.clearStack();
-            }
+            } 
             if (post.containsKey("moreRejected")) {
                 showRejectedCount = Integer.parseInt(post.get("showRejected", "10"));
             }
-            if (post.containsKey("clearsbqueue")) {
-                //switchboard.sbQueue.
+            if (post.containsKey("clearIndexingQueue")) {
+                try {
+                    synchronized (switchboard.sbQueue) {
+                        switchboard.sbQueue.clear();
+                    } 
+                } catch (Exception e) {}
+            } else if (post.containsKey("deleteEntry")) {
+                String urlHash = (String) post.get("deleteEntry");
+                try {
+                    synchronized (switchboard.sbQueue) {
+                        ArrayList entries = switchboard.sbQueue.list(0);
+                        for (int i=entries.size()-1; i >= 0; i--) {
+                            plasmaSwitchboardQueue.Entry pcentry = (plasmaSwitchboardQueue.Entry) entries.get(i);
+                            if (pcentry.urlHash().equals(urlHash)) {
+                                switchboard.sbQueue.remove(i);
+                                break;
+                            }
+                        }
+                    } 
+                } catch (Exception e) {}
+                prop.put("LOCATION","");
+                return prop;
             }
         }
 
         yacySeed initiator;
         boolean dark;
-        int i=0;
         
         if ((switchboard.sbQueue.size() == 0) && (switchboard.indexingTasksInProcess.size() == 0)) {
             prop.put("indexing-queue", 0); //is empty
@@ -97,29 +116,35 @@ public class IndexCreateIndexingQueue_p {
             
             dark = true;
             plasmaSwitchboardQueue.Entry pcentry;
-            int entryCount = 0;
+            int inProcessCount = 0, entryCount = 0;
             try {
                 ArrayList entryList = new ArrayList();
                 
                 // getting all entries that are currently in process
                 synchronized (switchboard.indexingTasksInProcess) {
+                    inProcessCount = switchboard.indexingTasksInProcess.size();
                     entryList.addAll(switchboard.indexingTasksInProcess.values());
                 }
                 
                 // getting all enqueued entries
-                entryList.addAll(switchboard.sbQueue.list(0));                
+                if ((switchboard.sbQueue.size() > 0)) {
+                    entryList.addAll(switchboard.sbQueue.list(0));
+                }
                                 
-                for (i = 0; i < entryList.size(); i++) {
+                for (int i = 0; i < entryList.size(); i++) {
+                    boolean inProcess = i < inProcessCount;
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
                     if ((pcentry != null)&&(pcentry.url() != null)) {
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
-                        prop.put("indexing-queue_list_"+entryCount+"_dark", ((dark) ? 1 : 0));
+                        prop.put("indexing-queue_list_"+entryCount+"_dark", (inProcess)? 2: ((dark) ? 1 : 0));
                         prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                         prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
                         prop.put("indexing-queue_list_"+entryCount+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
                         prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
                         prop.put("indexing-queue_list_"+entryCount+"_url", pcentry.normalizedURLString());
                         prop.put("indexing-queue_list_"+entryCount+"_size", Status.bytesToString(pcentry.size()));
+                        prop.put("indexing-queue_list_"+entryCount+"_inProcess", (inProcess)?1:0);
+                        prop.put("indexing-queue_list_"+entryCount+"_0_hash", pcentry.urlHash());
                         dark = !dark;
                         entryCount++;
                     }
@@ -147,7 +172,7 @@ public class IndexCreateIndexingQueue_p {
             plasmaCrawlEURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
-            for (i = switchboard.urlPool.errorURL.stackSize() - 1; i >= (switchboard.urlPool.errorURL.stackSize() - showRejectedCount); i--) {
+            for ( int i = switchboard.urlPool.errorURL.stackSize() - 1; i >= (switchboard.urlPool.errorURL.stackSize() - showRejectedCount); i--) {
                 entry = (plasmaCrawlEURL.Entry) switchboard.urlPool.errorURL.getStack(i);
                 initiatorHash = entry.initiator();
                 executorHash = entry.executor();

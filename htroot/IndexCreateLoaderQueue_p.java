@@ -73,11 +73,9 @@ public class IndexCreateLoaderQueue_p {
             prop.put("loader-set", 0);
         } else {
             prop.put("loader-set", 1);
-            prop.put("loader-set_num", switchboard.cacheLoader.size());
             boolean dark = true;
             
-            ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();
-            
+            ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();            
             int threadCount  = loaderThreads.activeCount();
             Thread[] threadList = new Thread[threadCount*2];
             threadCount = loaderThreads.enumerate(threadList);
@@ -96,6 +94,7 @@ public class IndexCreateLoaderQueue_p {
                 dark = !dark;
             }
             prop.put("loader-set_list", i );
+            prop.put("loader-set_num", i);
         }
                 
         // return rewrite properties
