@@ -151,7 +151,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	}
 
 	// set the value
-	String oldValue = (String) configProps.put(key, value);
+	Object oldValue = configProps.put(key, value);
 	saveConfig();
 
 	// perform actions afterwards
@@ -160,7 +160,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	    entry = (Map.Entry) i.next();
 	    action = (serverSwitchAction) entry.getValue();
 	    try {
-		action.doAfterSetConfig(key, value, oldValue);
+		action.doAfterSetConfig(key, value, (oldValue==null)?null:(String)oldValue);
 	    } catch (Exception e) {
 		log.logSevere("serverAction afterSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
 	    }
@@ -169,7 +169,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
     public String getConfig(String key, String dflt) {
 	// get the value
-	String s = (String) configProps.get(key);
+	Object s = configProps.get(key);
 
 	// do action
 	Map.Entry entry;
@@ -179,14 +179,14 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	    entry = (Map.Entry) i.next();
 	    action = (serverSwitchAction) entry.getValue();
 	    try {
-		action.doWhenGetConfig(key, s, dflt);
+		action.doWhenGetConfig(key, (s==null)?null:(String)s, dflt);
 	    } catch (Exception e) {
 		log.logSevere("serverAction whenGetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
 	    }
 	}
 
 	// return value
-	if (s == null) return dflt; else return s;
+	if (s == null) return dflt; else return (String)s;
     }
 
     public Iterator configKeys() {
