@@ -81,6 +81,9 @@ public class IndexCreateIndexingQueue_p {
             if (post.containsKey("moreRejected")) {
                 showRejectedCount = Integer.parseInt(post.get("showRejected", "10"));
             }
+            if (post.containsKey("clearsbqueue")) {
+                //switchboard.sbQueue.
+            }
         }
 
         yacySeed initiator;
@@ -90,33 +93,41 @@ public class IndexCreateIndexingQueue_p {
         if ((switchboard.sbQueue.size() == 0) && (switchboard.indexingTasksInProcess.size() == 0)) {
             prop.put("indexing-queue", 0); //is empty
         } else {
-            prop.put("indexing-queue", 1);
-            prop.put("indexing-queue_num", switchboard.sbQueue.size() + switchboard.indexingTasksInProcess.size());//num entries in queue
+            prop.put("indexing-queue", 1); // there are entries in the queue or in process
+            
             dark = true;
             plasmaSwitchboardQueue.Entry pcentry;
+            int entryCount = 0;
             try {
                 ArrayList entryList = new ArrayList();
                 
+                // getting all entries that are currently in process
                 synchronized (switchboard.indexingTasksInProcess) {
                     entryList.addAll(switchboard.indexingTasksInProcess.values());
                 }
                 
-                entryList.addAll(switchboard.sbQueue.list(0));
+                // getting all enqueued entries
+                entryList.addAll(switchboard.sbQueue.list(0));                
+                                
                 for (i = 0; i < entryList.size(); i++) {
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
-                    if (pcentry != null) {
+                    if ((pcentry != null)&&(pcentry.url() != null)) {
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                         prop.put("indexing-queue_list_"+i+"_dark", ((dark) ? 1 : 0));
                         prop.put("indexing-queue_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                         prop.put("indexing-queue_list_"+i+"_depth", pcentry.depth());
-                        prop.put("indexing-queue_list_"+i+"_modified", (pcentry.responseHeader() == null) ? "null" : daydate(pcentry.responseHeader().lastModified()));
+                        prop.put("indexing-queue_list_"+i+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
                         prop.put("indexing-queue_list_"+i+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
                         prop.put("indexing-queue_list_"+i+"_url", pcentry.normalizedURLString());
+                        prop.put("indexing-queue_list_"+i+"_size", Status.bytesToString(pcentry.size()));
                         dark = !dark;
+                        entryCount++;
                     }
                 }
             } catch (IOException e) {}
-            prop.put("indexing-queue_list", i);
+
+            prop.put("indexing-queue_num", entryCount);//num entries in queue            
+            prop.put("indexing-queue_list", entryCount);
         }
         
         // failure cases

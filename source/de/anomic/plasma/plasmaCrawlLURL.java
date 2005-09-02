@@ -342,14 +342,14 @@ public class plasmaCrawlLURL extends plasmaURL {
 	    // create new entry and store it into database
 	    this.urlHash = urlHash(url);
 	    this.url = url;
-	    this.descr = descr;
+	    this.descr = (descr==null)?this.url.toString():descr;
 	    this.moddate = moddate;
 	    this.loaddate = loaddate;
 	    this.referrerHash = (referrerHash == null) ? dummyHash : referrerHash;
 	    this.copyCount = copyCount; // the number of remote (global) copies of this object without this one
 	    this.flags = (localNeed) ? "L " : "  ";
 	    this.quality = quality;
-	    this.language = language;
+	    this.language = (language==null)?"uk":language;
 	    this.doctype = doctype;
 	    this.size = size;
 	    this.wordCount = wordCount;
@@ -370,10 +370,10 @@ public class plasmaCrawlLURL extends plasmaURL {
 		byte[][] entry = urlHashCache.get(urlHash.getBytes());
 		if (entry != null) {
 		    this.url = new URL(new String(entry[1]).trim());
-		    this.descr = (entry[2] == null) ? "" : new String(entry[2]).trim();
+		    this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2]).trim();
 		    this.moddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[3])));
 		    this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[4])));
-		    this.referrerHash = new String(entry[5]);
+		    this.referrerHash = (entry[5]==null)?dummyHash:new String(entry[5]);
 		    this.copyCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6]));
 		    this.flags = new String(entry[7]);
 		    this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));

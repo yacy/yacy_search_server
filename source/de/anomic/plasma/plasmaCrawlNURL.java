@@ -334,7 +334,7 @@ public class plasmaCrawlNURL extends plasmaURL {
             this.hash          = urlHash(url);
             this.initiator     = initiator;
             this.url           = url;
-            this.referrer      = (referrer == null) ? "------------" : referrer;
+            this.referrer      = (referrer == null) ? dummyHash : referrer;
             this.name          = (name == null) ? "" : name;
             this.loaddate      = (loaddate == null) ? new Date() : loaddate;
             this.profileHandle = profileHandle;
@@ -352,7 +352,7 @@ public class plasmaCrawlNURL extends plasmaURL {
             str.append("hash: ").append(url==null ? "null" : urlHash(url)).append(" | ")
                .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
                .append("url: ").append(url==null?"null":url.toString()).append(" | ")
-               .append("referrer: ").append((referrer == null) ? "------------" : referrer).append(" | ")
+               .append("referrer: ").append((referrer == null) ? dummyHash : referrer).append(" | ")
                .append("name: ").append((name == null) ? "null" : name).append(" | ")
                .append("loaddate: ").append((loaddate == null) ? new Date() : loaddate).append(" | ")
                .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")
@@ -378,7 +378,7 @@ public class plasmaCrawlNURL extends plasmaURL {
                 if (entry != null) {
                     this.initiator     = new String(entry[1]);
                     this.url           = new URL(new String(entry[2]).trim());
-                    this.referrer      = new String(entry[3]);
+                    this.referrer      = (entry[3]==null) ? dummyHash : new String(entry[3]);
                     this.name          = (entry[4] == null) ? "" : new String(entry[4]).trim();
                     this.loaddate      = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[5])));
                     this.profileHandle = new String(entry[6]).trim();
