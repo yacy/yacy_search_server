@@ -559,7 +559,8 @@ public final class httpc {
         }
 
         // advertise a little bit...
-        if ((!(header.containsKey(httpHeader.REFERER))) || (((String) header.get(httpHeader.REFERER)).trim().length() == 0))  {
+        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        if ( (!(header.containsKey(httpHeader.REFERER))) || (((String) header.get(httpHeader.REFERER)).trim().length() == 0)&& sb.getConfig("useYacyReferer", "true").equals("true") )  {
             header.put(httpHeader.REFERER,
                     (((System.currentTimeMillis() >> 10) & 1) == 0) ?
                         "http://www.anomic.de" :

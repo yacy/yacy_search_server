@@ -516,3 +516,5 @@ crawler.isPaused=false
 crawler.MaxActiveThreads = 10
 crawler.MaxIdleThreads = 7
 crawler.MinIdleThreads = 5
+
+useYacyReferer = true
