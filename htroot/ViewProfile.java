@@ -119,7 +119,7 @@ public class ViewProfile {
 		    String value=new String();
 		    
 		    //only comments get "wikified"
-		    //this prevents broken links
+		    //this prevents broken links ending in <br>
 		    if(key.equals("comment")){
 		        value=wikiTransformer.transform( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
 		    }    

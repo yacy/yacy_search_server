@@ -5,6 +5,6 @@ function FindProxyForURL(url,host) {
 		return "DIRECT";
 	    
 	} else  {
-		return "PROXY #[host]#:#[port]#";
+		return "PROXY #[host]#:#[port]#, DIRECT";
 	}
 }
