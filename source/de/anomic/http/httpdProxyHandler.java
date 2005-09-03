@@ -668,10 +668,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 String httpStatusText = null; 
                 String errorMessage = null; 
                 Exception errorExc = e;
+                boolean unknownError = false;
                 
                 if (e instanceof ConnectException) {
                     httpStatusCode = 403; httpStatusText = "Connection refused"; 
-                    errorMessage = "Connection refused by destination host";             
+                    errorMessage = "Connection refused by destination host";
                 } else if (e instanceof BindException) {
                     errorMessage = "Unable to establish a connection to the destination host";               
                 } else if (e instanceof NoRouteToHostException) {
@@ -679,15 +680,19 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 } else if (e instanceof UnknownHostException) {
                     errorMessage = "IP address of the destination host could not be determined";                    
                 } else {
-                    if (e.getMessage().indexOf("Corrupt GZIP trailer") >= 0) {
+                    String exceptionMsg = e.getMessage();
+                    if ((exceptionMsg != null) && (exceptionMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
                         // just do nothing, we leave it this way
                         this.theLogger.logFine("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
                         this.forceConnectionClose();
+                    } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("Connection reset")>= 0)) {
+                        errorMessage = "Connection reset"; 
                     } else if ((remote != null)&&(remote.isClosed())) { 
                         // TODO: query for broken pipe
-                        errorMessage = "destination host unexpectedly closed connection";                 
+                        errorMessage = "Destination host unexpectedly closed connection";                 
                     } else {
                         errorMessage = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
+                        unknownError = true;
                     }
                 }
                 
@@ -695,9 +700,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     httpd.sendRespondError(conProp,respond,4,httpStatusCode,httpStatusText,errorMessage,errorExc);
                 } else {
-                    this.theLogger.logFine("Error while processing request '" + 
-                            conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
-                            "\n" + errorMessage,e);
+                    if (unknownError) {
+                        this.theLogger.logFine("Error while processing request '" + 
+                                conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
+                                "\n" + Thread.currentThread().getName() + 
+                                "\n" + errorMessage,e);
+                    } else {
+                        this.theLogger.logFine("Error while processing request '" + 
+                                conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
+                                "\n" + Thread.currentThread().getName() + 
+                                "\n" + errorMessage);                        
+                    }
                     this.forceConnectionClose();
                 }                
             } catch (Exception ee) {
