@@ -125,6 +125,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
      * Do logging configuration for special proxy access log file
      */
     static {
+        // Doing logger initialisation
         try {
             serverLog.logInfo("PROXY","Configuring proxy access logging ...");            
             
@@ -197,6 +198,10 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             cacheManager = switchboard.getCacheManager();
             
             isTransparentProxy = Boolean.valueOf(switchboard.getConfig("isTransparentProxy","false")).booleanValue();
+            
+            // doing httpc init
+            httpc.useYacyReferer = sb.getConfig("useYacyReferer", "true").equals("true");
+            httpc.yacyDebugMode = sb.getConfig("yacyDebugMode", "false").equals("true");
             
             // load remote proxy data
             remoteProxyHost    = switchboard.getConfig("remoteProxyHost","");

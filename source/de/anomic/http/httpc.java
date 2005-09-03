@@ -75,7 +75,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCore.Session;
-import de.anomic.plasma.plasmaSwitchboard;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -131,19 +130,13 @@ public final class httpc {
     private String  savedRemoteHost = null;
     private String  requestPath = null;
     private boolean allowContentEncoding = true;
-	private static plasmaSwitchboard sb;
-	private static boolean useYacyReferer = true;
-	private static boolean yacyDebugMode = false;
+	static boolean useYacyReferer = true;
+	static boolean yacyDebugMode = false;
 
     static {
         // set time-out of InetAddress.getByName cache ttl
         java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
 		java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
-		sb = plasmaSwitchboard.getSwitchboard();
-        if (sb != null) {
-            useYacyReferer = sb.getConfig("useYacyReferer", "true").equals("true");
-            yacyDebugMode = sb.getConfig("yacyDebugMode", "false").equals("true");
-        }
     }
 
     /**
@@ -411,7 +404,7 @@ public final class httpc {
         //serverLog.logDebug("HTTPC", handle + " initialized");
         this.remoteProxyUse = false;
         this.timeout = timeout;
-		if(sb != null && yacyDebugMode){
+		if(yacyDebugMode){
 			this.timeout=60000;
 		}
         this.savedRemoteHost = server;
