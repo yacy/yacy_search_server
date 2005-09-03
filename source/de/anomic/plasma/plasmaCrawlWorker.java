@@ -41,7 +41,7 @@
 
 package de.anomic.plasma;
 
-import java.io.File;
+import java.io.File; 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -477,6 +477,8 @@ public final class plasmaCrawlWorker extends Thread {
                 log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + url.toString() + "'. " + 
                 "Pausing crawlers. ");
                 plasmaCrawlLoader.switchboard.pauseCrawling();
+            } else if ((errorMsg != null) && (errorMsg.indexOf("Network is unreachable") >=0)) {
+                log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + url.toString() + "'. ");                             
             } else {
                 log.logSevere("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
             }
