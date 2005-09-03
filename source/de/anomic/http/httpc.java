@@ -140,8 +140,10 @@ public final class httpc {
         java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
 		java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
 		sb = plasmaSwitchboard.getSwitchboard();
-		useYacyReferer = sb.getConfig("useYacyReferer", "true").equals("true");
-		yacyDebugMode = sb.getConfig("yacyDebugMode", "false").equals("true");
+        if (sb != null) {
+            useYacyReferer = sb.getConfig("useYacyReferer", "true").equals("true");
+            yacyDebugMode = sb.getConfig("yacyDebugMode", "false").equals("true");
+        }
     }
 
     /**
