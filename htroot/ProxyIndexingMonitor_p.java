@@ -83,7 +83,7 @@ public class ProxyIndexingMonitor_p {
                 // read values and put them in global settings
                 int newProxyPrefetchDepth = Integer.parseInt((String) post.get("proxyPrefetchDepth", "0"));
                 if (newProxyPrefetchDepth < 0) newProxyPrefetchDepth = 0; 
-                if (newProxyPrefetchDepth > 25) newProxyPrefetchDepth = 25; // self protection ?
+                if (newProxyPrefetchDepth > 20) newProxyPrefetchDepth = 20; // self protection ?
                 env.setConfig("proxyPrefetchDepth", Integer.toString(newProxyPrefetchDepth));
                 boolean proxyStoreHTCache = ((String) post.get("proxyStoreHTCache", "")).equals("on");
                 env.setConfig("proxyStoreHTCache", (proxyStoreHTCache) ? "true" : "false");
@@ -93,9 +93,11 @@ public class ProxyIndexingMonitor_p {
                 oldProxyCache = env.getConfig("proxyCache", "DATA/HTCACHE");
                 newProxyCache = ((String) post.get("proxyCache", "DATA/HTCACHE"));
                 newProxyCache = newProxyCache.replace('\\', '/');
-                if (newProxyCache.endsWith("/")) newProxyCache.substring(0, newProxyCache.length() - 1);
-                File cp = new File(newProxyCache);
-                if ((!cp.isDirectory()) && (!cp.isFile())) cp.mkdirs();                
+                if (newProxyCache.endsWith("/")) {
+                    newProxyCache.substring(0, newProxyCache.length() - 1);
+                }
+                final File cache = new File(newProxyCache);
+                if ((!cache.isDirectory()) && (!cache.isFile())) cache.mkdirs();                
                 env.setConfig("proxyCache", newProxyCache);
 
                 // proxyCacheSize 
@@ -116,7 +118,7 @@ public class ProxyIndexingMonitor_p {
                         prop.put("info_caching", (proxyStoreHTCache) ? 1 : 0);
 
                         // proxyCache - only display on change
-                        if (oldProxyCache.compareTo(newProxyCache) == 0) {
+                        if (oldProxyCache.equals(newProxyCache)) {
                             prop.put("info_path", 0);
                             prop.put("info_path_return", oldProxyCache);
                         } else {
@@ -124,7 +126,7 @@ public class ProxyIndexingMonitor_p {
                             prop.put("info_path_return", newProxyCache);
                         }
                         // proxyCacheSize - only display on change
-                        if (oldProxyCacheSize.compareTo(newProxyCacheSize) == 0) {
+                        if (oldProxyCacheSize.equals(newProxyCacheSize)) {
                             prop.put("info_size", 0);
                             prop.put("info_size_return", oldProxyCacheSize);
                         } else {
@@ -134,8 +136,8 @@ public class ProxyIndexingMonitor_p {
                         // proxyCache, proxyCacheSize we need a restart 
                         prop.put("info_restart", 0);
                         prop.put("info_restart_return", 0);
-                        if (oldProxyCache.compareTo(newProxyCache) != 0) prop.put("info_restart", 1); 
-                        if (oldProxyCacheSize.compareTo(newProxyCacheSize) != 0) prop.put("info_restart", 1);
+                        if (!oldProxyCache.equals(newProxyCache)) prop.put("info_restart", 1); 
+                        if (!oldProxyCacheSize.equals(newProxyCacheSize)) prop.put("info_restart", 1);
 
                     } catch (IOException e) {
                         prop.put("info", 3); //Error: errmsg
