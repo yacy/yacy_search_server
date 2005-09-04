@@ -479,15 +479,15 @@ It is almost always recommended to set this on. The only exception is that you h
 Proxy generally==Allgemeine Proxy-Einstellungen
 Path==Pfad
 The path where the pages are stored (max. length 300)==Der Pfad, in dem die Seiten zwischengespeichert werden (max. 300 Zeichen).
-Size==Größe
+Size</td>==Größe</td>
 The size in MB of the cache.==Die Größe des Caches (in MB).
-"Set proxy profile"=="Proxy Profil speichern"
+"Set proxy profile">=="Proxy Profil speichern">
 The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DATA/PLASMADB/crawlProfiles0.db ist entweder nicht vorhanden oder defekt.
 Please delete that file and restart.==Bitte löschen Sie diese Datei und starten Sie neu.
 Proxy pre-fetch is now set to depth==Proxy Pre-Fetch erfolgt nun bis zu einer Tiefe von
 Caching is now==Chaching ist nun
-on==an
-off==aus
+"on"=="an"
+"off"=="aus"
 Cachepath is now set to==Der Pfad des Caches ist nun
 Please move the old data in the new directory\.==Bitte verschieben Sie die alten Daten in das neue Verzeichnis.
 Cachesize is now set to==Die Cache-Größe beträgt nun
