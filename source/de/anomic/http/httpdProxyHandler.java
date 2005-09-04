@@ -370,7 +370,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             File cacheFile = cacheManager.getCachePath(url);
             String urlHash = plasmaURL.urlHash(url);
             httpHeader cachedResponseHeader = cacheManager.getCachedResponse(urlHash);
-            boolean cacheExists = ((cacheFile.exists()) && (cacheFile.isFile()) && (cachedResponseHeader != null));
+            boolean cacheExists = ((cacheFile.isFile()) && (cachedResponseHeader != null));
             
             // why are files unzipped upon arrival? why not zip all files in cache?
             // This follows from the following premises
@@ -519,10 +519,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 
             // the cache does either not exist or is (supposed to be) stale
             long sizeBeforeDelete = -1;
-            if ((cacheFile.exists()) && (cacheFile.isFile()) && (cachedResponseHeader != null)) {
+            if ((cacheFile.isFile()) && (cachedResponseHeader != null)) {
                 // delete the cache
                 sizeBeforeDelete = cacheFile.length();
-                cacheManager.deleteFile(url);
+                cacheFile.delete();
+                //cacheManager.deleteFile(url); // Hermes
                 conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
             }            
 

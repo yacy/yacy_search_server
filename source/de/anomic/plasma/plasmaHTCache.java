@@ -157,52 +157,6 @@ public final class plasmaHTCache {
         responseHeaderDB.set(urlHash, responseHeader);
     }
 
-    private boolean deleteFile(File file) {
-        if (file.exists()) {
-            long size = file.length();
-            if (file.delete()) {
-                currCacheSize -= size;
-                return true;
-            }
-        }
-       return false;
-    }
-
-    private boolean deleteFileandDirs (File f, String msg) {
-        if (deleteFile (f)) {
-            log.logInfo("DELETED " + msg + " CACHE : " + f.toString());
-            f = f.getParentFile();
-            // If the has been emptied, remove it
-            // Loop as long as we produce empty driectoriers, but stop at HTCACHE
-            while ((!(f.equals(cachePath))) && (f.isDirectory()) && (f.list().length == 0)) {
-                if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
-                f = f.getParentFile();
-            }
-            return true;
-         } else {
-             return false;
-         }
-    }
-
-    private boolean deleteURLfromCache (URL url, String msg) {
-        if (deleteFileandDirs(getCachePath(url), msg)) {
-            try {
-                // As the file is gone, the entry in responseHeader.db is not needed anymore
-                log.logFinest("Trying to remove responseHeader from URL: " + url.toString());
-                responseHeaderDB.remove(plasmaURL.urlHash(url));
-            } catch (IOException e) {
-                log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
-            }
-           return true;
-       } else {
-           return false;
-       }
-    }
-
-    public boolean deleteFile(URL url) {
-        return deleteURLfromCache(url, "FROM");
-    }
-
     public boolean writeFile(URL url, byte[] array) {
         if (array == null) return false;
         File file = getCachePath(url);
@@ -234,6 +188,48 @@ public final class plasmaHTCache {
         }
     }
 
+/*    
+    private boolean deleteFile(File file) {
+        if (file.exists()) {
+            long size = file.length();
+            if (file.delete()) {
+                currCacheSize -= size;
+                return true;
+            }
+        }
+       return false;
+    }
+
+    private boolean deleteFileandDirs (File f, String msg) {
+        if (deleteFile (f)) {
+            log.logInfo("DELETED " + msg + " CACHE : " + f.toString());
+            f = f.getParentFile();
+            // If the has been emptied, remove it
+            // Loop as long as we produce empty driectoriers, but stop at HTCACHE
+            while ((!(f.equals(cachePath))) && (f.isDirectory()) && (f.list().length == 0)) {
+                if (f.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + f.toString());
+                f = f.getParentFile();
+            }
+            return true;
+         } else {
+             return false;
+         }
+    }
+    
+    private boolean deleteURLfromCache (URL url, String msg) {
+        if (deleteFileandDirs(getCachePath(url), msg)) {
+            try {
+                // As the file is gone, the entry in responseHeader.db is not needed anymore
+                log.logFinest("Trying to remove responseHeader from URL: " + url.toString());
+                responseHeaderDB.remove(plasmaURL.urlHash(url));
+            } catch (IOException e) {
+                log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
+            }
+           return true;
+       } else {
+           return false;
+       }
+    }    
     private void cleanupDoIt(long newCacheSize) {
         File f;
         while ((currCacheSize >= newCacheSize) && (cacheAge.size() > 0)) {
@@ -254,11 +250,52 @@ public final class plasmaHTCache {
             }
         }
     }
+*/
 
+    private boolean deleteFile(File file) {
+        long size = file.length();
+        if (file.exists()) {
+            currCacheSize -= size;
+            return file.delete();
+        } else {
+            return false;
+        }
+    }
+
+    public boolean deleteFile(URL url) {
+        return deleteFile(getCachePath(url));
+    }
+
+    private void cleanupCache(long newCacheSize) {
+        File object;
+        long size;
+        while (currCacheSize > maxCacheSize && cacheAge.size() > 0) {
+            object = (File) cacheAge.remove(cacheAge.firstKey());
+            if (object != null) {
+                size = object.length();
+                if (object.isFile() && object.delete()) {
+                    currCacheSize -= size; 
+                    log.logInfo("DELETED OLD CACHE: " + object.toString());
+                    object = object.getParentFile();
+                    if (object.isDirectory() && object.list().length == 0) {
+                        if (object.delete()) {
+                            try {
+                                log.logInfo("DELETED EMPTY DIRECTORY: " + object.toString());
+                                responseHeaderDB.remove(plasmaURL.urlHash(getURL(cachePath , object)));
+                            } catch (IOException e) {
+                                log.logWarning("HTCACHE: IOExeption removing response header from DB: " + e.getMessage());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+   
     private void cleanup() {
-        // clean up cache to have 3% (enough) space for next entries
+        // clean up cache to have 4% (enough) space for next entries
         if ((currCacheSize >= maxCacheSize) && (cacheAge.size() > 0)) {
-            if (maxCacheSize > 0) cleanupDoIt(maxCacheSize - ((maxCacheSize / 100) * 3));
+            if (maxCacheSize > 0) cleanupCache(maxCacheSize - ((maxCacheSize / 100) * 4));
         }
     }
 
