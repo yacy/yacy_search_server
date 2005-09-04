@@ -353,9 +353,9 @@ public final class plasmaCrawlWorker extends Thread {
                         remote.close();
                         log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + url.toString());
                     } else {
-                        //if (cacheFile.isFile()) { // Hermes
-                        //    cacheManager.deleteFile(url);
-                        //}                        
+                        if (cacheFile.isFile()) {
+                            cacheManager.deleteFile(url);
+                        }                        
                         // we write the new cache entry to file system directly
                         cacheFile.getParentFile().mkdirs();
                         FileOutputStream fos = null;
@@ -521,4 +521,3 @@ public final class plasmaCrawlWorker extends Thread {
     }
     
 }
-

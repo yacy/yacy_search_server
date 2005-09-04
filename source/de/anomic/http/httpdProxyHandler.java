@@ -79,7 +79,6 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
-
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.htmlFilter.htmlFilterTransformer;
@@ -93,7 +92,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.logging.serverMiniLogFormatter;
 import de.anomic.yacy.yacyCore;
-
 
 public final class httpdProxyHandler extends httpdAbstractHandler implements httpdHandler {
     
@@ -110,15 +108,14 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     public static int remoteProxyPort = -1;
     public static String remoteProxyNoProxy = "";
     public static String[] remoteProxyNoProxyPatterns = null;
-    
+
     private static final HashSet remoteProxyAllowProxySet = new HashSet();
-    private static final HashSet remoteProxyDisallowProxySet = new HashSet();
-    
-    
+    private static final HashSet remoteProxyDisallowProxySet = new HashSet();    
+
     private static htmlFilterTransformer transformer = null;
     public static final String userAgent = "yacy (" + httpc.systemOST +") yacy.net";
     private File   htRootPath = null;
-    
+
     private static boolean doAccessLogging = false; 
     
     /**
@@ -522,8 +519,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             if ((cacheFile.isFile()) && (cachedResponseHeader != null)) {
                 // delete the cache
                 sizeBeforeDelete = cacheFile.length();
-                cacheFile.delete();
-                //cacheManager.deleteFile(url); // Hermes
+                cacheManager.deleteFile(url);
                 conProp.setProperty(httpd.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
             }            
 
