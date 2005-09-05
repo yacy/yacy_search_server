@@ -55,11 +55,13 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.data.wikiCode;
 
 public class News {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+	wikiCode wikiTransformer = new wikiCode(switchboard);
         serverObjects prop = new serverObjects();
         boolean overview = (post == null) || (((String) post.get("page", "0")).equals("0"));
         int tableID = (overview) ? -1 : Integer.parseInt((String) post.get("page", "0")) - 1;
@@ -133,7 +135,7 @@ public class News {
                     prop.put("table_list_" + i + "_cat", record.category());
                     prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : yacyCore.universalDateShortString(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
-                    prop.put("table_list_" + i + "_att", record.attributes().toString());
+                    prop.put("table_list_" + i + "_att", wikiTransformer.replaceHTML(record.attributes().toString()) );
                 } catch (IOException e) {e.printStackTrace();}
                 prop.put("table_list", maxCount);
             }
