@@ -106,12 +106,12 @@ public class wikiCode {
 	boolean defList = false;    //needed for definition lists
         
 	// avoide html inside
-	//p0 = 0; while ((p0 = result.indexOf("&", p0+1)) >= 0) result = result.substring(0, p0) + "&amp;" + result.substring(p0 + 1);
-	p0 = 0; while ((p0 = result.indexOf('"', p0+1)) >= 0) result = result.substring(0, p0) + "&quot;" + result.substring(p0 + 1);
-	p0 = 0; while ((p0 = result.indexOf("<", p0+1)) >= 0) result = result.substring(0, p0) + "&lt;" + result.substring(p0 + 1);
-	p0 = 0; while ((p0 = result.indexOf(">", p0+1)) >= 0) result = result.substring(0, p0) + "&gt;" + result.substring(p0 + 1);
-	//p0 = 0; while ((p0 = result.indexOf("*", p0+1)) >= 0) result = result.substring(0, p0) + "&#149;" + result.substring(p0 + 1);
-	p0 = 0; while ((p0 = result.indexOf("(C)", p0+1)) >= 0) result = result.substring(0, p0) + "&copy;" + result.substring(p0 + 3);
+	//p0 = 0; while ((p0 = result.indexOf("&", p0)) >= 0) result = result.substring(0, p0) + "&amp;" + result.substring(p0 + 1);
+	p0 = 0; while ((p0 = result.indexOf('"', p0)) >= 0) result = result.substring(0, p0) + "&quot;" + result.substring(p0 + 1);
+	p0 = 0; while ((p0 = result.indexOf("<", p0)) >= 0) result = result.substring(0, p0) + "&lt;" + result.substring(p0 + 1);
+	p0 = 0; while ((p0 = result.indexOf(">", p0)) >= 0) result = result.substring(0, p0) + "&gt;" + result.substring(p0 + 1);
+	//p0 = 0; while ((p0 = result.indexOf("*", p0)) >= 0) result = result.substring(0, p0) + "&#149;" + result.substring(p0 + 1);
+	p0 = 0; while ((p0 = result.indexOf("(C)", p0)) >= 0) result = result.substring(0, p0) + "&copy;" + result.substring(p0 + 3);
 	
 	
 	//check if line contains any escape symbol of if we are in an esacpe sequence already
