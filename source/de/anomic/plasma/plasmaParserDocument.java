@@ -97,6 +97,10 @@ public class plasmaParserDocument {
         }
     }
     
+    public String getMimeType() {
+        return this.mimeType;
+    }
+    
     public String getMainShortTitle() {
         if (shortTitle != null) return shortTitle; else return longTitle;
     }

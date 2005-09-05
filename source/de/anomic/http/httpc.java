@@ -131,7 +131,7 @@ public final class httpc {
     private String  requestPath = null;
     private boolean allowContentEncoding = true;
 	static boolean useYacyReferer = true;
-	static boolean yacyDebugMode = false;
+	public static boolean yacyDebugMode = false;
 
     static {
         // set time-out of InetAddress.getByName cache ttl

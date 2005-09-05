@@ -118,6 +118,7 @@ import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -191,7 +192,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         // load values from configs
         plasmaPath   = new File(rootPath, getConfig("dbPath", "PLASMADB"));
-        listsPath      = new File(rootPath, getConfig("listsPath", "LISTS"));
+        listsPath      = new File(rootPath, getConfig("listsPath", "LISTS"));        
+        
+        // remote proxy configuration
         remoteProxyHost = getConfig("remoteProxyHost", "");
         try {
             remoteProxyPort = Integer.parseInt(getConfig("remoteProxyPort", "3128"));
@@ -199,13 +202,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             remoteProxyPort = 3128;
         }
         if (getConfig("remoteProxyUse", "false").equals("true")) {
-            remoteProxyUse = true;
+            remoteProxyUse = true;            
+            log.logConfig("Using remote proxy:" + 
+                          "\n\tHost: " + remoteProxyHost + 
+                          "\n\tPort: " + remoteProxyPort);
         } else {
             remoteProxyUse = false;
             remoteProxyHost = null;
             remoteProxyPort = 0;
         }
-        proxyLastAccess = System.currentTimeMillis() - 60000;
+        proxyLastAccess = System.currentTimeMillis() - 60000;        
         
         if (!(listsPath.exists())) listsPath.mkdirs();
 
@@ -214,6 +220,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // read only once upon first instantiation of this class
             String f = getConfig("plasmaBlueList", null);
             if (f != null) blueList = kelondroMSetTools.loadList(new File(f)); else blueList= new TreeSet();
+            this.log.logConfig("loaded blue-list from file " + f + ", " + blueList.size() + " entries");
         }
 
         // load the black-list / inspired by [AS]
@@ -221,13 +228,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String f = getConfig("proxyBlackListsActive", null);
         if (f != null) {
             urlBlacklist.loadLists("black", f, "/");
-            log.logConfig("loaded black-list from file " + f + ", " + urlBlacklist.size() + " entries");
+            this.log.logConfig("loaded black-list from file " + f + ", " + urlBlacklist.size() + " entries");
         }
-        log.logConfig("Proxy Handler Initialized");
             
         // load stopwords
         if (stopwords == null) {
-            stopwords = kelondroMSetTools.loadList(new File(rootPath, "yacy.stopwords"));
+            File stopwordsFile = new File(rootPath, "yacy.stopwords");
+            stopwords = kelondroMSetTools.loadList(stopwordsFile);
+            this.log.logConfig("loaded stopwords from file " + stopwordsFile + ", " + stopwords.size() + " entries");
         }
 
         // read memory amount
@@ -238,18 +246,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int ramHTTP    = Integer.parseInt(getConfig("ramCacheHTTP", "1024")) / 1024;
         int ramMessage = Integer.parseInt(getConfig("ramCacheMessage", "1024")) / 1024;
         int ramWiki    = Integer.parseInt(getConfig("ramCacheWiki", "1024")) / 1024;
-        log.logConfig("LURL    Cache memory = " + ppRamString(ramLURL));
-        log.logConfig("NURL    Cache memory = " + ppRamString(ramNURL));
-        log.logConfig("EURL    Cache memory = " + ppRamString(ramEURL));
-        log.logConfig("RWI     Cache memory = " + ppRamString(ramRWI));
-        log.logConfig("HTTP    Cache memory = " + ppRamString(ramHTTP));
-        log.logConfig("Message Cache memory = " + ppRamString(ramMessage));
-        log.logConfig("Wiki    Cache memory = " + ppRamString(ramWiki));
+        this.log.logConfig("LURL    Cache memory = " + ppRamString(ramLURL));
+        this.log.logConfig("NURL    Cache memory = " + ppRamString(ramNURL));
+        this.log.logConfig("EURL    Cache memory = " + ppRamString(ramEURL));
+        this.log.logConfig("RWI     Cache memory = " + ppRamString(ramRWI));
+        this.log.logConfig("HTTP    Cache memory = " + ppRamString(ramHTTP));
+        this.log.logConfig("Message Cache memory = " + ppRamString(ramMessage));
+        this.log.logConfig("Wiki    Cache memory = " + ppRamString(ramWiki));
         
         // make crawl profiles database and default profiles
-        log.logConfig("Initializing Crawl Profiles");
-        profiles = new plasmaCrawlProfile(new File(plasmaPath, "crawlProfiles0.db"));
+        this.log.logConfig("Initializing Crawl Profiles");
+        File profilesFile = new File(this.plasmaPath, "crawlProfiles0.db");
+        this.profiles = new plasmaCrawlProfile(new File(this.plasmaPath, "crawlProfiles0.db"));
         initProfiles();
+        log.logConfig("Loaded profiles from file " + profilesFile + ", " + this.profiles.size() + " entries");
         
         // start indexing management
         log.logConfig("Starting Indexing Management");
@@ -342,6 +352,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         long[] testresult = facilityDB.selectLong("statistik", "yyyyMMddHHm");
         testresult = facilityDB.selectLong("statistik", (new serverDate()).toShortString(false).substring(0, 11));
         */
+        
+        // initializing yacyDebugMode
+        httpc.yacyDebugMode = sb.getConfig("yacyDebugMode", "false").equals("true");
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");

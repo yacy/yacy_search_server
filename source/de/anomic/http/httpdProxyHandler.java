@@ -199,7 +199,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // doing httpc init
             httpc.useYacyReferer = sb.getConfig("useYacyReferer", "true").equals("true");
-            httpc.yacyDebugMode = sb.getConfig("yacyDebugMode", "false").equals("true");
             
             // load remote proxy data
             remoteProxyHost    = switchboard.getConfig("remoteProxyHost","");
