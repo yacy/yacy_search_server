@@ -537,12 +537,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logInfo("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
         }
 
-        // enqueue for further crawling
-        enQueue(sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
-                entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
-                entry.initiator(), entry.depth, entry.profile.handle(),
-                entry.name()
-        ));
+        if (plasmaParser.supportedMimeTypesContains(entry.responseHeader.mime()) ||
+            plasmaParser.supportedFileExt(entry.url)) {
+            
+            // enqueue for further crawling
+            enQueue(sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
+                    entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
+                    entry.initiator(), entry.depth, entry.profile.handle(),
+                    entry.name()
+            ));
+        }
         
         return true;
     }
