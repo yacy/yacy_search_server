@@ -348,7 +348,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // blacklist idea inspired by [AS]:
             // respond a 404 for all AGIS ("all you get is shit") servers
             String hostlow = host.toLowerCase();
-            if (switchboard.urlBlacklist.isListed(hostlow, path)) {
+            if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
                 httpd.sendRespondError(conProp,respond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 this.theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
@@ -652,70 +652,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 chunkedOut.flush();
             }
         } catch (Exception e) {
-            // this may happen if 
-            // - the targeted host does not exist 
-            // - anything with the remote server was wrong.
-            // - the client unexpectedly closed the connection ...
-            try {
-                
-                // deleting cached content
-                if (cacheFile.exists()) cacheFile.delete();                
-                
-                // doing some errorhandling ...
-                int httpStatusCode = 404; 
-                String httpStatusText = null; 
-                String errorMessage = null; 
-                Exception errorExc = e;
-                boolean unknownError = false;
-                
-                if (e instanceof ConnectException) {
-                    httpStatusCode = 403; httpStatusText = "Connection refused"; 
-                    errorMessage = "Connection refused by destination host";
-                } else if (e instanceof BindException) {
-                    errorMessage = "Unable to establish a connection to the destination host";               
-                } else if (e instanceof NoRouteToHostException) {
-                    errorMessage = "No route to destination host";                    
-                } else if (e instanceof UnknownHostException) {
-                    errorMessage = "IP address of the destination host could not be determined";                    
-                } else {
-                    String exceptionMsg = e.getMessage();
-                    if ((exceptionMsg != null) && (exceptionMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
-                        // just do nothing, we leave it this way
-                        this.theLogger.logFine("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
-                        this.forceConnectionClose();
-                    } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("Connection reset")>= 0)) {
-                        errorMessage = "Connection reset";
-                    } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("unknown host")>=0)) {
-                        errorMessage = exceptionMsg;
-                    } else if ((remote != null)&&(remote.isClosed())) { 
-                        // TODO: query for broken pipe
-                        errorMessage = "Destination host unexpectedly closed connection";                 
-                    } else {
-                        errorMessage = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
-                        unknownError = true;
-                    }
-                }
-                
-                // sending back an error message to the client
-                if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                    httpd.sendRespondError(conProp,respond,4,httpStatusCode,httpStatusText,errorMessage,errorExc);
-                } else {
-                    if (unknownError) {
-                        this.theLogger.logFine("Error while processing request '" + 
-                                conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
-                                "\n" + Thread.currentThread().getName() + 
-                                "\n" + errorMessage,e);
-                    } else {
-                        this.theLogger.logFine("Error while processing request '" + 
-                                conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
-                                "\n" + Thread.currentThread().getName() + 
-                                "\n" + errorMessage);                        
-                    }
-                    this.forceConnectionClose();
-                }                
-            } catch (Exception ee) {
-                this.forceConnectionClose();
-            }
+            // deleting cached content
+            if (cacheFile.exists()) cacheFile.delete();                            
+            handleProxyException(e,remote,conProp,respond,url);
         } finally {
             if (remote != null) httpc.returnInstance(remote);
         } 
@@ -852,58 +791,76 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     }
     
     public void doHead(Properties conProp, httpHeader requestHeader, OutputStream respond) throws IOException {
-        this.connectionProperties = conProp;
-        
-        String method = conProp.getProperty("METHOD");
-        String host = conProp.getProperty("HOST");
-        String path = conProp.getProperty("PATH");
-        String args = conProp.getProperty("ARGS"); // may be null if no args were given
-        String httpVer = conProp.getProperty(httpd.CONNECTION_PROP_HTTP_VER);
-        
-        switchboard.proxyLastAccess = System.currentTimeMillis();
-        
-        int port;
-        int pos;
-        if ((pos = host.indexOf(":")) < 0) {
-            port = 80;
-        } else {
-            port = Integer.parseInt(host.substring(pos + 1));
-            host = host.substring(0, pos);
-        }
-        
-        // check the blacklist, inspired by [AS]: respond a 404 for all AGIS (all you get is shit) servers
-        String hostlow = host.toLowerCase();
-        if (switchboard.urlBlacklist.isListed(hostlow, path)) {
-            try {
-                byte[] errorMsg = ("404 (generated): URL '" + hostlow + "' blocked by yacy proxy (blacklisted)\r\n").getBytes();
-                httpd.sendRespondHeader(conProp,respond,httpVer,404,"Not Found (AGIS)",0);
-                this.theLogger.logInfo("AGIS blocking of host '" + hostlow + "'"); // debug
-                return;
-            } catch (Exception ee) {}
-        }
-        
-        // set another userAgent, if not yellowlisted
-        if (!(yellowList.contains(domain(hostlow)))) {
-            // change the User-Agent
-            requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
-        }
-        
-        // setting the X-Forwarded-For Header
-        requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP));        
-        
-        // resolve yacy and yacyh domains
-        String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
-        
-        // re-calc the url path
-        String remotePath = (args == null) ? path : (path + "?" + args);
-        
-        // attach possible yacy-sublevel-domain
-        if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
+        this.connectionProperties = conProp;        
         
         httpc remote = null;
         httpc.response res = null;
-        
+        URL url = null;
         try {
+            // remembering the starting time of the request
+            Date requestDate = new Date(); // remember the time...
+            this.connectionProperties.put(httpd.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
+            if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
+            switchboard.proxyLastAccess = System.currentTimeMillis();            
+            
+            // using an ByteCount OutputStream to count the send bytes
+            respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE).length() + 2);                                   
+            
+            String host = conProp.getProperty(httpd.CONNECTION_PROP_HOST);
+            String path = conProp.getProperty(httpd.CONNECTION_PROP_PATH);
+            String args = conProp.getProperty(httpd.CONNECTION_PROP_ARGS); 
+            String httpVer = conProp.getProperty(httpd.CONNECTION_PROP_HTTP_VER);
+            
+            switchboard.proxyLastAccess = System.currentTimeMillis();
+            
+            int port, pos;
+            if ((pos = host.indexOf(":")) < 0) {
+                port = 80;
+            } else {
+                port = Integer.parseInt(host.substring(pos + 1));
+                host = host.substring(0, pos);
+            }
+            
+            try {
+                url = new URL("http", host, port, (args == null) ? path : path + "?" + args);
+            } catch (MalformedURLException e) {
+                String errorMsg = "ERROR: internal error with url generation: host=" +
+                                  host + ", port=" + port + ", path=" + path + ", args=" + args;
+                serverLog.logSevere("PROXY", errorMsg);
+                httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
+                return;
+            } 
+            
+            // check the blacklist, inspired by [AS]: respond a 404 for all AGIS (all you get is shit) servers
+            String hostlow = host.toLowerCase();
+            if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
+                httpd.sendRespondError(conProp,respond,4,403,null,
+                        "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
+                this.theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
+                return;
+            }                   
+            
+            // set another userAgent, if not yellowlisted
+            if (!(yellowList.contains(domain(hostlow)))) {
+                // change the User-Agent
+                requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
+            }
+            
+            // setting the X-Forwarded-For Header
+            requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP));        
+            
+            // resolve yacy and yacyh domains
+            String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
+            
+            // re-calc the url path
+            String remotePath = (args == null) ? path : (path + "?" + args);
+            
+            // attach possible yacy-sublevel-domain
+            if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
+            
+            // removing hop by hop headers
+            this.removeHopByHopHeaders(requestHeader);            
+            
             // open the connection: second is needed for [AS] patch
             remote = (yAddress == null) ? newhttpc(host, port, timeout): newhttpc(yAddress, timeout);
             
@@ -919,22 +876,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             this.removeHopByHopHeaders(res.responseHeader);
             
             // sending the server respond back to the client
-            httpd.sendRespondHeader(conProp,respond,httpVer,Integer.parseInt(res.status.split(" ")[0]),res.responseHeader);
+            httpd.sendRespondHeader(conProp,respond,httpVer,res.statusCode,res.statusText,res.responseHeader);
         } catch (Exception e) {
-            try {
-                String exTxt = e.getMessage();
-                if ((exTxt!=null)&&(exTxt.startsWith("Socket closed"))) {
-                    this.forceConnectionClose();
-                } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                    String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
-                    httpd.sendRespondError(conProp,respond,4,503,null,errorMsg,e);
-                    this.theLogger.logSevere(errorMsg);
-                } else {
-                    this.forceConnectionClose();                    
-                }
-            } catch (Exception ee) {
-                this.forceConnectionClose();
-            }   
+            handleProxyException(e,remote,conProp,respond,url); 
         } finally {
             if (remote != null) httpc.returnInstance(remote);
         }
@@ -946,10 +890,13 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         
         this.connectionProperties = conProp;
         
+        httpc remote = null;
+        URL url = null;
         try {
             // remembering the starting time of the request
             Date requestDate = new Date(); // remember the time...
             this.connectionProperties.put(httpd.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
+            if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
             switchboard.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes
@@ -968,6 +915,16 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 host = host.substring(0, pos);
             }
             
+            try {
+                url = new URL("http", host, port, (args == null) ? path : path + "?" + args);
+            } catch (MalformedURLException e) {
+                String errorMsg = "ERROR: internal error with url generation: host=" +
+                                  host + ", port=" + port + ", path=" + path + ", args=" + args;
+                serverLog.logSevere("PROXY", errorMsg);
+                httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
+                return;
+            }                             
+            
             // set another userAgent, if not yellowlisted
             if (!(yellowList.contains(domain(host).toLowerCase()))) {
                 // change the User-Agent
@@ -985,59 +942,68 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // attach possible yacy-sublevel-domain
             if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
+                  
+            // removing hop by hop headers
+            this.removeHopByHopHeaders(requestHeader);
             
-            httpc remote = null;
-            httpc.response res = null;            
-            try {
-                remote = (yAddress == null) ? newhttpc(host, port, timeout) : newhttpc(yAddress, timeout);                
-                res = remote.POST(remotePath, requestHeader, body);
-
-                // determine if it's an internal error of the httpc
-                if (res.responseHeader.size() == 0) {
-                    throw new Exception(res.statusText);
-                }                       
-                
-                // filtering out unwanted headers
-                this.removeHopByHopHeaders(res.responseHeader);                
-                
-                // if the content length is not set we need to use chunked content encoding
-                long contentLength = res.responseHeader.contentLength();
-                httpChunkedOutputStream chunked = null;
-                if (contentLength <= 0) {
-                    res.responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
+            // sending the request
+            remote = (yAddress == null) ? newhttpc(host, port, timeout) : newhttpc(yAddress, timeout);                
+            httpc.response res = remote.POST(remotePath, requestHeader, body);
+            
+            // determine if it's an internal error of the httpc
+            if (res.responseHeader.size() == 0) {
+                throw new Exception(res.statusText);
+            }                                  
+            
+            // if the content length is not set we need to use chunked content encoding
+            long contentLength = res.responseHeader.contentLength();
+            httpChunkedOutputStream chunked = null;
+            if (contentLength <= 0) {
+                // according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+                // a 204,304 message must not contain a message body.
+                // Therefore we need to set the content-length to 0.
+                if (res.status.startsWith("204") || 
+                    res.status.startsWith("304")) {
+                    res.responseHeader.put(httpHeader.CONTENT_LENGTH,"0");
+                } else {                
+                    if (httpVer.equals("HTTP/0.9") || httpVer.equals("HTTP/1.0")) {
+                        forceConnectionClose();
+                    } else {
+                        chunked = new httpChunkedOutputStream(respond);
+                    }
                     res.responseHeader.remove(httpHeader.CONTENT_LENGTH);                
-                    chunked = new httpChunkedOutputStream(respond);
                 }
-                
-                // sending response headers
-                httpd.sendRespondHeader(conProp,respond,httpVer,Integer.parseInt(res.status.split(" ")[0]),res.responseHeader);
-                // respondHeader(respond, res.status, res.responseHeader);
-                res.writeContent((chunked != null) ? chunked : respond, null);
-                if (chunked != null)  chunked.finish();
-                
-                remote.close();
-            } finally {
-                if (remote != null) httpc.returnInstance(remote);
             }
+            
+            // remove hop by hop headers
+            this.removeHopByHopHeaders(res.responseHeader);
+            
+            // sending the respond header back to the client
+            if (chunked != null) {
+                res.responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
+            }            
+            
+            // sending response headers
+            httpd.sendRespondHeader(conProp,
+                                    respond,
+                                    httpVer,
+                                    res.statusCode,
+                                    res.statusText,
+                                    res.responseHeader);
+            
+            // respondHeader(respond, res.status, res.responseHeader);
+            res.writeContent((chunked != null) ? chunked : respond, null);
+            if (chunked != null)  chunked.finish();
+            
+            remote.close();
             respond.flush();
         } catch (Exception e) {
-            try {
-                String exTxt = e.getMessage();
-                if ((exTxt!=null)&&(exTxt.startsWith("Socket closed"))) {
-                    this.forceConnectionClose();
-                } else if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                    String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
-                    httpd.sendRespondError(conProp,respond,4,503,null,errorMsg,e);
-                    this.theLogger.logSevere(errorMsg);
-                } else {
-                    this.forceConnectionClose();                    
-                }
-            } catch (Exception ee) {
-                this.forceConnectionClose();
-            }                    
+            handleProxyException(e,remote,conProp,respond,url);                 
         } finally {
+            if (remote != null) httpc.returnInstance(remote);
+            
             respond.flush();
-            if (respond instanceof httpdByteCountOutputStream) ((httpdByteCountOutputStream)respond).finish();
+            if (respond instanceof httpdByteCountOutputStream) ((httpdByteCountOutputStream)respond).finish();           
             
             this.connectionProperties.put(httpd.CONNECTION_PROP_REQUEST_END,new Long(System.currentTimeMillis()));
             this.connectionProperties.put(httpd.CONNECTION_PROP_PROXY_RESPOND_SIZE,new Long(((httpdByteCountOutputStream)respond).getCount()));
@@ -1068,7 +1034,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     // go on (see below)
                 } else {
                     // pass error response back to client
-                    httpd.sendRespondHeader(conProp,clientOut,httpVersion,Integer.parseInt(response.status.split(" ")[0]),response.responseHeader);
+                    httpd.sendRespondHeader(conProp,clientOut,httpVersion,response.statusCode,response.statusText,response.responseHeader);
                     //respondHeader(clientOut, response.status, response.responseHeader);
                     return;
                 }
@@ -1216,6 +1182,72 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         out.flush();
         out.write(body.getBytes());
         out.flush();
+    }
+    
+    private void handleProxyException(Exception e, httpc remote, Properties conProp, OutputStream respond, URL url) {
+        // this may happen if 
+        // - the targeted host does not exist 
+        // - anything with the remote server was wrong.
+        // - the client unexpectedly closed the connection ...
+        try {
+            
+
+            // doing some errorhandling ...
+            int httpStatusCode = 404; 
+            String httpStatusText = null; 
+            String errorMessage = null; 
+            Exception errorExc = e;
+            boolean unknownError = false;
+            
+            if (e instanceof ConnectException) {
+                httpStatusCode = 403; httpStatusText = "Connection refused"; 
+                errorMessage = "Connection refused by destination host";
+            } else if (e instanceof BindException) {
+                errorMessage = "Unable to establish a connection to the destination host";               
+            } else if (e instanceof NoRouteToHostException) {
+                errorMessage = "No route to destination host";                    
+            } else if (e instanceof UnknownHostException) {
+                errorMessage = "IP address of the destination host could not be determined";                    
+            } else {
+                String exceptionMsg = e.getMessage();
+                if ((exceptionMsg != null) && (exceptionMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
+                    // just do nothing, we leave it this way
+                    this.theLogger.logFine("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
+                    this.forceConnectionClose();
+                } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("Connection reset")>= 0)) {
+                    errorMessage = "Connection reset";
+                } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("unknown host")>=0)) {
+                    errorMessage = exceptionMsg;
+                } else if ((remote != null)&&(remote.isClosed())) { 
+                    // TODO: query for broken pipe
+                    errorMessage = "Destination host unexpectedly closed connection";                 
+                } else {
+                    errorMessage = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
+                    unknownError = true;
+                }
+            }
+            
+            // sending back an error message to the client
+            if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+                httpd.sendRespondError(conProp,respond,4,httpStatusCode,httpStatusText,errorMessage,errorExc);
+            } else {
+                if (unknownError) {
+                    this.theLogger.logFine("Error while processing request '" + 
+                            conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
+                            "\n" + Thread.currentThread().getName() + 
+                            "\n" + errorMessage,e);
+                } else {
+                    this.theLogger.logFine("Error while processing request '" + 
+                            conProp.getProperty(httpd.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
+                            "\n" + Thread.currentThread().getName() + 
+                            "\n" + errorMessage);                        
+                }
+                this.forceConnectionClose();
+            }                
+        } catch (Exception ee) {
+            this.forceConnectionClose();
+        }
+        
     }
     
     private String generateUserAgent(httpHeader requestHeaders) {

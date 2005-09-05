@@ -940,7 +940,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     return;
                 }
             } else {
-                log.logFine("(Parser) '" + entry.normalizedURLString() + "'. Unsupported mimeType '" + ((entry.responseHeader() == null) ? null : entry.responseHeader().mime()) + "'.");
+                log.logFine("(Parser) '" + entry.normalizedURLString() + "'. Unsupported mimeType '" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().mime()) + "'.");
                 return;                
             }
             
@@ -997,9 +997,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 try {
                     //log.logDebug("Create LURL-Entry for '" + entry.normalizedURLString() + "', " +
                     //             "responseHeader=" + entry.responseHeader().toString());
-                    Date lastModified = entry.responseHeader().lastModified();
-                    if (lastModified == null) lastModified = entry.responseHeader().date();
-                    if (lastModified == null) lastModified = new Date();
+                    
+                    Date lastModified = null;
+                    if (entry.responseHeader() == null) {
+                        lastModified = new Date();
+                    } else {
+                        lastModified = entry.responseHeader().lastModified();
+                        if (lastModified == null) lastModified = entry.responseHeader().date();
+                        if (lastModified == null) lastModified = new Date();
+                    }
                     plasmaCrawlLURL.Entry newEntry = urlPool.loadedURL.addEntry(
                                         entry.url(), descr, lastModified, new Date(),
                                         initiatorHash,
@@ -1008,7 +1014,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                         0, true,
                                         Integer.parseInt(condenser.getAnalysis().getProperty("INFORMATION_VALUE","0"), 16),
                                         plasmaWordIndexEntry.language(entry.url()),
-                                        plasmaWordIndexEntry.docType(entry.responseHeader().mime()),
+                                        plasmaWordIndexEntry.docType(document.getMimeType()),
                                         entry.size(),
                                         (int) Long.parseLong(condenser.getAnalysis().getProperty("NUMB_WORDS","0"), 16),
                                         processCase
@@ -1025,7 +1031,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         
                         // do indexing
                         //log.logDebug("Create Index for '" + entry.normalizedURLString() + "'");
-                        int words = searchManager.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(entry.responseHeader().mime()));
+                        int words = searchManager.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
                         log.logInfo("*Indexed " + words + " words in URL " + entry.url() + " (" + descr + ")");
                         
                         // if this was performed for a remote crawl request, notify requester

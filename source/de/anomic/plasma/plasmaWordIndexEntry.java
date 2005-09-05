@@ -128,19 +128,20 @@ public class plasmaWordIndexEntry {
 
     public static char docType(String mime) {
         char doctype = DT_UNKNOWN;
-        if (mime.endsWith("/jpeg")) doctype = DT_IMAGE;
-        if (mime.endsWith("/rtf")) doctype = DT_DOC;
-        if (mime.endsWith("/msword")) doctype = DT_DOC;
-        if (mime.endsWith("/mspowerpoint")) doctype = DT_DOC;
-        if (mime.endsWith("/postscript")) doctype = DT_PDFPS;
-        if (mime.endsWith("/pdf")) doctype = DT_PDFPS;
-        if (mime.endsWith("/octet-stream")) doctype = DT_BINARY;
-        if (mime.endsWith("/x-shockwave-flash")) doctype = DT_FLASH;
-        if (mime.startsWith("audio/")) doctype = DT_AUDIO;
-        if (mime.startsWith("video/")) doctype = DT_MOVIE;
-        if (mime.startsWith("text/")) doctype = DT_TEXT;
-        if (mime.startsWith("image/")) doctype = DT_IMAGE;
-        if (mime.endsWith("/html")) doctype = DT_HTML;
+        if (mime == null) doctype = DT_UNKNOWN;
+        else if (mime.endsWith("/jpeg")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/rtf")) doctype = DT_DOC;
+        else if (mime.endsWith("/msword")) doctype = DT_DOC;
+        else if (mime.endsWith("/mspowerpoint")) doctype = DT_DOC;
+        else if (mime.endsWith("/postscript")) doctype = DT_PDFPS;
+        else if (mime.endsWith("/pdf")) doctype = DT_PDFPS;
+        else if (mime.endsWith("/octet-stream")) doctype = DT_BINARY;
+        else if (mime.endsWith("/x-shockwave-flash")) doctype = DT_FLASH;
+        else if (mime.startsWith("audio/")) doctype = DT_AUDIO;
+        else if (mime.startsWith("video/")) doctype = DT_MOVIE;
+        else if (mime.startsWith("text/")) doctype = DT_TEXT;
+        else if (mime.startsWith("image/")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/html")) doctype = DT_HTML;
         //bz2     = application/x-bzip2
         //dvi     = application/x-dvi
         //gz      = application/gzip
