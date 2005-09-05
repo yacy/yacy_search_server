@@ -41,6 +41,8 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
+package de.anomic.data;
+
 import java.lang.String;
 import java.util.Vector;
 import java.util.Iterator;
