@@ -354,7 +354,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         */
         
         // initializing yacyDebugMode
-        httpc.yacyDebugMode = sb.getConfig("yacyDebugMode", "false").equals("true");
+        httpc.yacyDebugMode = getConfig("yacyDebugMode", "false").equals("true");
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
