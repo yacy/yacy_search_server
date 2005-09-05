@@ -6,7 +6,8 @@
 //Frankfurt, Germany, 2005
 //
 //this file is contributed by Martin Thelian
-//last major change: 24.04.2005
+//last major change: $LastChangedDate$ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by

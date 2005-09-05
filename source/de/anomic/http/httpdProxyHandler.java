@@ -4,7 +4,8 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 10.05.2004
+//last major change: $LastChangedDate$ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -363,6 +364,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
             }
             
+            // setting the X-Forwarded-For Header
+            requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP));
+            
             // decide wether to use a cache entry or connect to the network
             File cacheFile = cacheManager.getCachePath(url);
             String urlHash = plasmaURL.urlHash(url);
@@ -481,12 +485,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             res = remote.GET(remotePath, requestHeader);
             conProp.put(httpd.CONNECTION_PROP_CLIENT_REQUEST_HEADER,requestHeader);
             
-            // request has been placed and result has been returned. work off response            
-            String[] resStatus = res.status.split(" ");
-            
             // determine if it's an internal error of the httpc
             if (res.responseHeader.size() == 0) {
-                throw new Exception((resStatus.length > 1) ? resStatus[1] : "Internal httpc error");
+                throw new Exception(res.statusText);
             }
             
             // if the content length is not set we have to use chunked transfer encoding
@@ -565,8 +566,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     conProp,
                     respond,
                     httpVer,
-                    Integer.parseInt((resStatus.length > 0) ? resStatus[0]:"503"),
-                    (resStatus.length > 1) ? resStatus[1] : null, 
+                    res.statusCode,
+                    res.statusText, 
                     res.responseHeader);
             
             String storeError;
@@ -683,7 +684,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                         this.theLogger.logFine("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
                         this.forceConnectionClose();
                     } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("Connection reset")>= 0)) {
-                        errorMessage = "Connection reset"; 
+                        errorMessage = "Connection reset";
+                    } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("unknown host")>=0)) {
+                        errorMessage = exceptionMsg;
                     } else if ((remote != null)&&(remote.isClosed())) { 
                         // TODO: query for broken pipe
                         errorMessage = "Destination host unexpectedly closed connection";                 
@@ -885,6 +888,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
         }
         
+        // setting the X-Forwarded-For Header
+        requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP));        
+        
         // resolve yacy and yacyh domains
         String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
         
@@ -903,6 +909,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // sending the http-HEAD request to the server
             res = remote.HEAD(remotePath, requestHeader);
+            
+            // determine if it's an internal error of the httpc
+            if (res.responseHeader.size() == 0) {
+                throw new Exception(res.statusText);
+            }            
             
             // removing hop by hop headers
             this.removeHopByHopHeaders(res.responseHeader);
@@ -963,6 +974,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
             }
             
+            // setting the X-Forwarded-For Header
+            requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP));            
+            
             // resolve yacy and yacyh domains
             String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
             
@@ -978,6 +992,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 remote = (yAddress == null) ? newhttpc(host, port, timeout) : newhttpc(yAddress, timeout);                
                 res = remote.POST(remotePath, requestHeader, body);
 
+                // determine if it's an internal error of the httpc
+                if (res.responseHeader.size() == 0) {
+                    throw new Exception(res.statusText);
+                }                       
+                
                 // filtering out unwanted headers
                 this.removeHopByHopHeaders(res.responseHeader);                
                 

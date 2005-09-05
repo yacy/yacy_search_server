@@ -93,6 +93,7 @@ public final class httpd implements serverHandler {
     public static final String CONNECTION_PROP_PERSISTENT = "PERSISTENT";
     public static final String CONNECTION_PROP_KEEP_ALIVE_COUNT = "KEEP-ALIVE_COUNT";
     public static final String CONNECTION_PROP_REQUESTLINE = "REQUESTLINE";
+    public static final String CONNECTION_PROP_PREV_REQUESTLINE = "PREVREQUESTLINE";
     public static final String CONNECTION_PROP_REQUEST_START = "REQUEST_START";
     public static final String CONNECTION_PROP_REQUEST_END = "REQUEST_END";
     
@@ -745,6 +746,10 @@ public final class httpd implements serverHandler {
     
     private final Properties parseQuery(String cmd, String s) {
         
+        // getting the last request line for debugging purposes
+        String prevRequestLine = this.prop.containsKey(CONNECTION_PROP_REQUESTLINE)?
+                this.prop.getProperty(CONNECTION_PROP_REQUESTLINE) : "";
+        
         // reset property from previous run   
         this.prop.clear();
         this.emptyRequestCount = 0;
@@ -752,6 +757,7 @@ public final class httpd implements serverHandler {
         // storing informations about the request
         this.prop.setProperty(CONNECTION_PROP_METHOD, cmd);
         this.prop.setProperty(CONNECTION_PROP_REQUESTLINE,cmd + " " + s);
+        this.prop.setProperty(CONNECTION_PROP_PREV_REQUESTLINE,prevRequestLine);
         this.prop.setProperty(CONNECTION_PROP_CLIENTIP, this.clientIP);
         
         // counting the amount of received requests within this permanent conneciton
@@ -1292,6 +1298,8 @@ public final class httpd implements serverHandler {
             // adding some yacy specific headers
             header.put(httpHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT,conProp.getProperty(CONNECTION_PROP_KEEP_ALIVE_COUNT));
             header.put(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE,conProp.getProperty(CONNECTION_PROP_REQUESTLINE));
+            header.put(httpHeader.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(CONNECTION_PROP_PREV_REQUESTLINE));
+            
             
             StringBuffer headerStringBuffer = new StringBuffer(560);
             

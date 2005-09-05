@@ -1209,6 +1209,8 @@ do upload
         public httpHeader responseHeader = null;
         public String httpVer = "HTTP/0.9";
         public String status; // the success/failure response string starting with status-code
+        public int statusCode = 503;
+        public String statusText = "internal error";
         private boolean gzip; // for gunzipping on-the-fly
         private String encoding;
 
@@ -1223,13 +1225,17 @@ do upload
 
             // lets start with worst-case attributes as set-up
             responseHeader = new httpHeader(reverseMappingCache);
-            status = "503 internal error";
+            statusCode = 503;
+            statusText = "internal httpc error";
+            status = Integer.toString(statusCode) + " " + statusText;
             gzip   = false;
 
             // check connection status
             if (clientInput == null) {
                 // the server has meanwhile disconnected
-                status = "503 lost connection to server";
+                statusCode = 503;
+                statusText = "lost connection to server";
+                status = Integer.toString(statusCode) + " " + statusText;                
                 return; // in bad mood
             }
 
@@ -1237,26 +1243,41 @@ do upload
             byte[] b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false);
             if (b == null) {
                 // the server has meanwhile disconnected
-                status = "503 server has closed connection";
+                statusCode = 503;
+                statusText = "server has closed connection";
+                status = Integer.toString(statusCode) + " " + statusText;
                 return; // in bad mood
             }
             String buffer = new String(b); // this is the status response line
             //System.out.println("#S#" + buffer);
             int p = buffer.indexOf(" ");
             if (p < 0) {
-                status = "500 status line parse error";
+                statusCode = 500;
+                statusText = "status line parse error";
+                status = Integer.toString(statusCode) + " " + statusText;
                 // flush in anything that comes without parsing
                 while ((b != null) && (b.length != 0)) b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false);
                 return; // in bad mood
             }
+            
             // the http version reported by the server
             this.httpVer = buffer.substring(0,p);
-
-            // we have a status
-            status = buffer.substring(p + 1).trim(); // the status code plus reason-phrase
-
+            
+            // Status of the request, e.g. "200 OK"
+            this.status = buffer.substring(p + 1).trim(); // the status code plus reason-phrase
+            
+            // splitting the status into statuscode and statustext
+            p = this.status.indexOf(" ");
+            try {
+                this.statusCode = Integer.parseInt((p < 0) ? this.status.trim() : this.status.substring(0,p).trim());
+                this.statusText = (p < 0) ? "" : this.status.substring(p+1).trim();
+            } catch (Exception e) {
+                this.statusCode = 500;
+                this.statusText = this.status;
+            }
+            
             // check validity
-            if (status.startsWith("400")) {
+            if (this.status.startsWith("400")) {
                 // bad request
                 // flush in anything that comes without parsing
                 while ((b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false)).length != 0) {}

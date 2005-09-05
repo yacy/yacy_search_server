@@ -109,9 +109,11 @@ public final class httpHeader extends TreeMap implements Map {
     
     public static final String X_CACHE = "X-Cache";
     public static final String X_CACHE_LOOKUP = "X-Cache-Lookup";
+    public static final String X_FORWARDED_FOR = "X-Forwarded-For";
     
     public static final String X_YACY_KEEP_ALIVE_REQUEST_COUNT = "X-Keep-Alive-Request-Count";
     public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
+    public static final String X_YACY_PREVIOUS_REQUEST_LINE = "X-Previous-Request-Line";
     
     /* =============================================================
      * Constants defining http methods
