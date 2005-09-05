@@ -247,6 +247,7 @@ installation guide==f&uuml;r eine Anleitung
 Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativ k&ouml;nnen Sie auch den Proxy im permanent online Modus laufen lassen. Dies garantiert eine globale Suche.
 To do this, press this button:==Um dies zu tun, klicken Sie bitte folgenden Button:
 "go online"==gehe online
+The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers==Die globale Suche hat #[globalresults]# Resulate, bereitgestellt von anderen YaCy Peers, gefunden.
 You can enrich the search results by using the 'global' option; you must also switch to online mode==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn sie die 'global' Option benutzen. Sie m&uuml;ssen aber erst in den online Modus wechseln,
 (by using the proxy) to contribute to the global index.==(in dem Sie den Proxy benutzen) um im globalen Index suchen zu k&ouml;nnen.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
@@ -296,6 +297,70 @@ Exclude static Stop-Words:=Stop-Words ausschlie&szlig;en:
 Start Point:=Startpunkt:
 
 #-------------------------------------------------------
+#File: IndexMonitor.html
+
+#YaCy '#[clientname]#': Index Monitor
+Index Monitor Menu==Index Monitor Men&uuml;
+Index&nbsp;Monitor&nbsp;Overview==Index Monitor &Uuml;berblick
+Receipts</a>==R&uuml;ckmeldungen</a>
+Queries</a>==Suchanfragen</a>
+DHT&nbsp;Transfer==DHT-Verteilung
+Proxy&nbsp;Use==Proxy Benutzung
+Local&nbsp;Crawling==Lokales Crawlen
+Global&nbsp;Crawling==Globales Crawlen
+Indexing Queues Monitor Overview==Index Reihen Monitor &Uuml;berblick
+These are monitoring pages for the different indexing queues.==Dies sind die Monitor Seiten f&uuml;r die unterschiedlichen Index Varianten.
+YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermen&uuml;s oben beschrieben.
+above which also will show you a table with indexing results so far. The information in these tables is considered as private,==Dort kann man ausserdem eine Tabelle mit den Resultaten des Index sehen. Informationen in diesen Tabellen sind als privat eingestuft,
+so you need to log-in with your administration password.==also m&uuml;ssen Sie sich mit Ihrem Administrator Passwort einloggen, um sie zu sehen.
+Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==Fall (6) ist ein Monitor des lokalen Empfangs-Generator, der Gegensatz zu (1). Er enth&auml;lt ausserdem einen Index Resulate Monitor, ist aber nicht privat,
+since it shows crawl requests from other peers.==da er Crawl Anfragen von anderen Peers zeigt.
+The image above illustrates the data flow initiated by web index acquisition.==Das obige Bild zeigt den Daten Fluss, der durch Internet Index Erwerbung entsteht.
+Some processes occur double to document the complex index migration structure.==Einige Prozesse erscheinen doppelt, um die Komplexizit&auml;t der Index Verteilungs Struktur zu erkl&auml;ren.
+\(1\) Index Monitor of Remote Crawl Receipts==(1) Index Monitor f&uuml;r Remote Crawl R&uuml;ckmeldungen
+This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
+but had been crawled by <i>other</i> peers.==die aber von <i>anderen</i> Peers gecrawlt wurden.
+This is the 'mirror'-case of process \(6\).==Dies ist der 'Gegensatz' Prozess zu (6)
+<i>Use Case:</i> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<i>Anwendung:</i> Sie erhalten hier Eintr&auml;ge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
+'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
+is reported back and can be monitored here.==wird nun zur&uuml;ck gemeldet und hier angezeigt.
+\(2\) Index Monitor for Result of Search Queries==(2) Index Monitor f&uuml;r Resultate bei Suchanfragen
+This index transfer was initiated by your peer by doing a search query.==Der Index Transfer von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
+The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecawlt und nun Ihnen breitgestellt.
+<i>Use Case:</i> This list fills up if you do a search query on the 'Search Page'==<i>Anwendung:</i> Diese Liste f&uuml;llt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
+\(3\) Index Monitor for Index Transfer.==(3) Index Monitor f&uuml;r die DHT-Verteilung
+The url fetch was initiated and executed by other peers.==Die URL Indexierung wurde von anderen Peers initiiert und durchgef&uuml;hrt.
+These links here have been transmitted to you because your peer is the most appropriate for storage according to==Diese Links wurden an Ihren Peer &uuml;bermittelt, da er am angemessensten zur Speicherung
+the logic of the Global Distributed Hash Table.==&uuml;bereinstimmend mit der Logic der verteilten Hash Tabelle ist.
+<i>Use Case:</i> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<i>Anwendung:</i> Dies Liste f&uuml;llt sich, wenn Sie die 'Index Empfang' Option auf der 'Index Kontrolle' Seite aktiviert haben.
+\(4\) Index Monitor for Proxy Indexing==(4) Index Monitor f&uuml;r die Proxy Indexierung
+These web pages had been indexed as result of your proxy usage.==Diese Internetseiten wurden durch die Benutzung des Proxy indexiert.
+No personal or protected page is indexed==Weder pers&ouml;nliche noch gesch&uuml;tzte Seiten werden indexiert
+such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Solche Seiten werden durch die Benutzung von Cookies oder POST-Parametern (in der URL oder im HTTP Protokoll) identifiziert
+and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
+<i>Use Case:</i> You must use YaCy as proxy to fill up this table.==<i>Anwendung:</i> Sie m&uuml;ssen YaCy als Proxy benutzen, um diese Tabelle zu f&uuml;llen.
+Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihrese Browsers auf den selben Port, der
+on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
+\(5\) Index Monitor for Local Crawling.==(5) Index Monitor f&uuml;r das lokale Crawlen
+These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen lokalen Crawl auf der 'Index erzeugen' Seite gestartet haben.
+<i>Use Case:</i> start a crawl by setting a crawl start point on the 'Index Create' page.==<i>Anwendung:</i> Starten Sie einen Crawl, in dem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
+\(6\) Index Monitor for Global Crawling==(6) Index Monitor f&uuml;r das globale Crawlen
+These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen remote Peer initiiert.
+This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
+<i>Use Case:</i> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<i>Anwendung:</i> Diese Liste f&uuml;llt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
+The stack is empty.==Die Liste ist leer.
+Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Eintr&auml;ge in diesem Bereich.
+Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Eintr&auml;ge aus diesem Bereich von insgesamt #[all]# Eintr&auml;gen.
+"clear list"=="Leere Liste"
+#Initiator==Initiator
+Executor==Ausf&uuml;hrender
+Modified Date==&Auml;nderungsdatum Datum
+Words==W&ouml;rter
+Title==Titel
+#URL==URL
+"delete"=="L&ouml;sche"
+
+#-------------------------------------------------------
 #File: Language_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
@@ -306,6 +371,8 @@ Current language:==Aktuelle Sprache
 default\(english\)==Deutsch
 Languagefile Author:==Autor der Sprachdatei:
 <!-- author -->==Roland Ramthun, Oliver Wunder
+Send additions to maintainer:==Schicken Sie Erg&auml;nzungen an:
+<!-- maintainer -->==admin@yacy-forum.de
 Languages:==Sprachen:
 Install new language from URL:==Neue Sprachdatei herunterladen:
 
@@ -462,42 +529,35 @@ Attributes==Attribute
 
 Index Monitor for Proxy Indexing==Index Profil f&uuml;r den Proxy Index
 This is the control page for web pages that your peer has indexed during the current application run-time==Dies ist die Kontrollseite f&uuml;r Internetseiten, die Ihr Peer w&auml;hrend der aktuellen Sitzung
-as result of proxy fetch/prefetch.==durch Besuchen einer Seite indiziert.
-No personal or protected page is indexed==Pers&ouml;nliche Seiten und gesch&uuml;tze Seiten werden nicht indiziert
+as result of proxy fetch/prefetch.==durch Besuchen einer Seite indexiert.
+No personal or protected page is indexed==Pers&ouml;nliche Seiten und gesch&uuml;tze Seiten werden nicht indexiert
 those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==solche Seiten werden entweder durch Merkmale im HTTP Header (Kopf der Seite) (z.B.: Cookies oder HTTP Authorisierung)
 or by POST-Parameters \(either in URL or as HTTP protocol\)==oder durch POST-Parameter (z.B. in einer URL oder im HTTP Protokoll) erkannt
-and automatically excluded from indexing.==und automatisch von der Indizierung ausgeschlossen.
-Proxy pre-fetch setting:==Proxy Indizier Einstellung:
+and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
+Proxy pre-fetch setting:==Proxy Indexier Einstellung:
 this is an automated html page loading procedure that takes actual proxy-requested==Dies ist eine automatische Web Seiten Lade Funktion, die aktuell besuchte
-URLs as crawling start points for crawling.==URLs als Startpunkt zum Indizieren benutzt.
-Prefetch Depth:==Indizier Tiefe:
-A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==Bei einer Tiefe von 0 wird nur die besuchte Seite indiziert; eine Tiefe von 1 bedeutet, dass alle Seiten
+URLs as crawling start points for crawling.==URLs als Startpunkt zum Indexieren benutzt.
+Prefetch Depth==Indizier Tiefe
+A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==Bei einer Tiefe von 0 wird nur die besuchte Seite indexiert; eine Tiefe von 1 bedeutet, dass alle Seiten
 embedded URLs, but since embedded image links are loaded by the browser==die auf dieser Seite verlinkt sind, geladen und indexiert werden; Da Links auf Bilder sowieso schon vom Browser geladen werden,
 this means that only embedded href-anchors are prefetched additionally.==trifft dies nur auf eingebettet HREF-Anker zu.
-Store to Cache:==Speicher im Cache:
+Store to Cache==Speicher im Cache
 It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Es wird empfohlen diese Option immer zu aktivieren. Einzige Ausnahme: Sie haben einen zweiten Proxy als Cache laufen und Yacy soll im "Proxy-zu-Proxy"-Modus laufen.
-Proxy generally==Allgemeine Proxy-Einstellungen
-Path==Pfad
-The path where the pages are stored (max. length 300)==Der Pfad, in dem die Seiten zwischengespeichert werden (max. 300 Zeichen).
-Size</td>==Größe</td>
-The size in MB of the cache.==Die Größe des Caches (in MB).
-"Set proxy profile">=="Proxy Profil speichern">
-The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DATA/PLASMADB/crawlProfiles0.db ist entweder nicht vorhanden oder defekt.
-Please delete that file and restart.==Bitte löschen Sie diese Datei und starten Sie neu.
-Proxy pre-fetch is now set to depth==Proxy Pre-Fetch erfolgt nun bis zu einer Tiefe von
-Caching is now==Chaching ist nun
-"on"=="an"
-"off"=="aus"
-Cachepath is now set to==Der Pfad des Caches ist nun
-Please move the old data in the new directory\.==Bitte verschieben Sie die alten Daten in das neue Verzeichnis.
-Cachesize is now set to==Die Cache-Größe beträgt nun
-Changes will take effect after restart only\.==Änderungen werden erst nach einem Neustart wirksam.
+Proxy generally==Proxy Allgemein
+Path==Verzeichnis
+The path where the pages are stored \(max. length 300\)==Verzeichnis in dem die Seiten gecachet werden (max. 300 Zeichen)
+Size</td>==Gr&ouml;sse</td>
+The size in MB of the cache.==Die Gr&ouml;sse in MB vom Cache.
+"set proxy profile"=="Speicher Proxy Profil"
+The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DATA/PLASMADB/crawlProfiles0.db fehlt entweder oder ist defekt.
+Please delete that file and restart.==Bitte l&ouml;schen Sie diese Datei und starten Sie YaCy neu.
+Proxy pre-fetch is now set to depth==Proxy Indizierung erfolgt nun bis zu einer Tiefe von
+Proxy caching is now set \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cache ist nun #(caching)#aus::an#(/caching)#.
 An error has occurred:==Es trat ein Fehler auf:
-You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransichten von frisch indizierten Seiten
+You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransichten von frisch indexierten Seiten
 on the==auf der
 <a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a><a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a>
 Page.==Seite ansehen.
-
 
 #-------------------------------------------------------
 #File: Skins_p.html
@@ -524,7 +584,7 @@ YaCy: Status==YaCy: Status
 System-, Index- and Peer-Status==System-, Index- und Peer-Status
 Welcome to YaCy!==Willkommen bei YaCy!
 Shutdown YaCy==YaCy herunterfahren
-System Properties==Systemangaben
+Public System Properties==Allgemeine Systemangaben
 Protection==Sicherheit
 <b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html#admin">settings</a> page <b>immediately</b> and set an administration password.==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der <a href="Settings_p.html#admin">Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
 Your settings are protected by a password.==Ihre Einstellungen sind mit einem Kennwort gesch&uuml;tzt.
@@ -536,9 +596,9 @@ Port forwarding host==Port-forwarding-Host
 broken==gest&ouml;rt
 connected==verbunden
 Remote proxy==Zweiter Proxy
-This peer's address==Adresse dieses Peers
+This&nbsp;peer's&nbsp;address==Adresse dieses Peers
 not used==wird nicht benutzt
-Not assigned==nicht zugewiesen
+#Not assigned==nicht zugewiesen
 Not assigned. The peer must go online to get an address.==Nicht zugewiesen. Ihr Peer muss online gehen, um eine Adresse zu bekommen.
 #---
 The peer does not go online until you use the proxy to surf the internet,==Ihr Peer geht nicht online, bis Sie den Proxy benutzen,
@@ -593,7 +653,7 @@ Processors:==Prozessoren:
 #File: Steering.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Steering==Steureung
+Steering==Steuerung
 Steering Receipt:==Steuerung:
 No information has been submitted==Es wurden keine Informationen &uuml;bermittelt
 Nothing changed==Nichts wurde ver&auml;ndert
