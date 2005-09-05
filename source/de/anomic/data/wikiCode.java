@@ -99,12 +99,10 @@ public class wikiCode {
             return "internal error: " + e.getMessage();
         }
     }
-
-    public String transformLine(String result, plasmaSwitchboard switchboard) {
-	// transform page
-	int p0, p1;
-	boolean defList = false;    //needed for definition lists
-        
+    
+    public String replaceHTML(String result) {
+        int p0;
+	
 	// avoide html inside
 	//p0 = 0; while ((p0 = result.indexOf("&", p0)) >= 0) result = result.substring(0, p0) + "&amp;" + result.substring(p0 + 1);
 	p0 = 0; while ((p0 = result.indexOf('"', p0)) >= 0) result = result.substring(0, p0) + "&quot;" + result.substring(p0 + 1);
@@ -113,6 +111,15 @@ public class wikiCode {
 	//p0 = 0; while ((p0 = result.indexOf("*", p0)) >= 0) result = result.substring(0, p0) + "&#149;" + result.substring(p0 + 1);
 	p0 = 0; while ((p0 = result.indexOf("(C)", p0)) >= 0) result = result.substring(0, p0) + "&copy;" + result.substring(p0 + 3);
 	
+	return result;
+    }
+
+    public String transformLine(String result, plasmaSwitchboard switchboard) {
+	// transform page
+	int p0, p1;
+	boolean defList = false;    //needed for definition lists
+        
+	result = replaceHTML(result);	
 	
 	//check if line contains any escape symbol of if we are in an esacpe sequence already
 	//if that's the case the program will continue further below [MN]

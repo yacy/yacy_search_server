@@ -122,9 +122,10 @@ public class ViewProfile {
 		    //this prevents broken links ending in <br>
 		    if(key.equals("comment")){
 		        value=wikiTransformer.transform( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
-		    }    
+		    }
+		    //else only HTML tags get transformed to regular text    
 		    else{
-		        value=((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n");
+		        value=wikiTransformer.replaceHTML( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
 		    }
 
 		    //all known Keys which should be set as they are
