@@ -51,6 +51,7 @@ import java.util.Properties;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
+// import de.anomic.server.logging.serverLog;
 
 public class plasmaWordIndexEntry {
 	
@@ -105,43 +106,46 @@ public class plasmaWordIndexEntry {
     // doctype calculation
     public static char docType(URL url) {
         String path = htmlFilterContentScraper.urlNormalform(url);
-        char doctype = DT_UNKNOWN;
-        if (path.endsWith(".gif")) doctype = DT_IMAGE;
-        if (path.endsWith(".jpg")) doctype = DT_IMAGE;
-        if (path.endsWith(".jpeg")) doctype = DT_IMAGE;
-        if (path.endsWith(".png")) doctype = DT_IMAGE;
-        if (path.endsWith(".html")) doctype = DT_HTML;
-        if (path.endsWith(".txt")) doctype = DT_TEXT;
-        if (path.endsWith(".doc")) doctype = DT_DOC;
-        if (path.endsWith(".rtf")) doctype = DT_DOC;
-        if (path.endsWith(".pdf")) doctype = DT_PDFPS;
-        if (path.endsWith(".ps")) doctype = DT_PDFPS;
-        if (path.endsWith(".avi")) doctype = DT_MOVIE;
-        if (path.endsWith(".mov")) doctype = DT_MOVIE;
-        if (path.endsWith(".qt")) doctype = DT_MOVIE;
-        if (path.endsWith(".mpg")) doctype = DT_MOVIE;
-        if (path.endsWith(".md5")) doctype = DT_SHARE;
-        if (path.endsWith(".mpeg")) doctype = DT_MOVIE;
-        if (path.endsWith(".asf")) doctype = DT_FLASH;
+        // serverLog.logFinest("PLASMA", "docType URL=" + path);
+        char doctype = doctype = DT_UNKNOWN;
+        if (path.endsWith(".gif"))       { doctype = DT_IMAGE; }
+        else if (path.endsWith(".jpg"))  { doctype = DT_IMAGE; }
+        else if (path.endsWith(".jpeg")) { doctype = DT_IMAGE; }
+        else if (path.endsWith(".png"))  { doctype = DT_IMAGE; }
+        else if (path.endsWith(".html")) { doctype = DT_HTML;  }
+        else if (path.endsWith(".txt"))  { doctype = DT_TEXT;  }
+        else if (path.endsWith(".doc"))  { doctype = DT_DOC;   }
+        else if (path.endsWith(".rtf"))  { doctype = DT_DOC;   }
+        else if (path.endsWith(".pdf"))  { doctype = DT_PDFPS; }
+        else if (path.endsWith(".ps"))   { doctype = DT_PDFPS; }
+        else if (path.endsWith(".avi"))  { doctype = DT_MOVIE; }
+        else if (path.endsWith(".mov"))  { doctype = DT_MOVIE; }
+        else if (path.endsWith(".qt"))   { doctype = DT_MOVIE; }
+        else if (path.endsWith(".mpg"))  { doctype = DT_MOVIE; }
+        else if (path.endsWith(".md5"))  { doctype = DT_SHARE; }
+        else if (path.endsWith(".mpeg")) { doctype = DT_MOVIE; }
+        else if (path.endsWith(".asf"))  { doctype = DT_FLASH; }
         return doctype;
     }
 
     public static char docType(String mime) {
+        // serverLog.logFinest("PLASMA", "docType mime=" + mime);
         char doctype = DT_UNKNOWN;
         if (mime == null) doctype = DT_UNKNOWN;
+        else if (mime.endsWith("/gif")) doctype = DT_IMAGE;
         else if (mime.endsWith("/jpeg")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/html")) doctype = DT_HTML;
         else if (mime.endsWith("/rtf")) doctype = DT_DOC;
-        else if (mime.endsWith("/msword")) doctype = DT_DOC;
-        else if (mime.endsWith("/mspowerpoint")) doctype = DT_DOC;
-        else if (mime.endsWith("/postscript")) doctype = DT_PDFPS;
         else if (mime.endsWith("/pdf")) doctype = DT_PDFPS;
         else if (mime.endsWith("/octet-stream")) doctype = DT_BINARY;
         else if (mime.endsWith("/x-shockwave-flash")) doctype = DT_FLASH;
-        else if (mime.startsWith("audio/")) doctype = DT_AUDIO;
-        else if (mime.startsWith("video/")) doctype = DT_MOVIE;
+        else if (mime.endsWith("/msword")) doctype = DT_DOC;
+        else if (mime.endsWith("/mspowerpoint")) doctype = DT_DOC;
+        else if (mime.endsWith("/postscript")) doctype = DT_PDFPS;
         else if (mime.startsWith("text/")) doctype = DT_TEXT;
         else if (mime.startsWith("image/")) doctype = DT_IMAGE;
-        else if (mime.endsWith("/html")) doctype = DT_HTML;
+        else if (mime.startsWith("audio/")) doctype = DT_AUDIO;
+        else if (mime.startsWith("video/")) doctype = DT_MOVIE;
         //bz2     = application/x-bzip2
         //dvi     = application/x-dvi
         //gz      = application/gzip
@@ -165,14 +169,14 @@ public class plasmaWordIndexEntry {
         //zip     = application/zip
         return doctype;
     }
-    
+
     // language calculation
     public static String language(URL url) {
-	String host = url.getHost();
-	int pos = host.lastIndexOf(".");
-	String language = "uk";
-	if ((pos > 0) && (host.length() - pos == 3)) language = host.substring(pos + 1).toLowerCase();
-	return language;
+        String language = "uk";
+        String host = url.getHost();
+        int pos = host.lastIndexOf(".");
+        if ((pos > 0) && (host.length() - pos == 3)) language = host.substring(pos + 1).toLowerCase();
+        return language;
     }
 
     // the class instantiation can only be done by a plasmaStore method
