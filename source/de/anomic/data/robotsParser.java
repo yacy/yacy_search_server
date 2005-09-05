@@ -104,7 +104,7 @@ public class robotsParser{
 			line=lines[i];
 			if(line.startsWith("Disallow:")){
 				line=line.substring(9);
-				line=line.trim()
+				line=line.trim();
 				deny.add(line);
 			}
 		}
@@ -118,7 +118,7 @@ public class robotsParser{
 			Iterator it=deny.iterator();
 			allowed=true;
 			while(it.hasNext()){
-				if(url.startsWith((String)it.next()){
+				if(url.startsWith((String)it.next())){
 					allowed=false;
 					break;
 				}
