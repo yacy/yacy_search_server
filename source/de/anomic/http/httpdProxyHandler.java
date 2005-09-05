@@ -1215,7 +1215,12 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     this.forceConnectionClose();
                 } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("Connection reset")>= 0)) {
                     errorMessage = "Connection reset";
-                } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("unknown host")>=0)) {
+                } else if ((exceptionMsg != null) && 
+                  (
+                     (exceptionMsg.indexOf("unknown host")>=0) ||
+                     (exceptionMsg.indexOf("socket write error")>=0) ||
+                     (exceptionMsg.indexOf("Read timed out") >= 0)
+                  )) {
                     errorMessage = exceptionMsg;
                 } else if ((remote != null)&&(remote.isClosed())) { 
                     // TODO: query for broken pipe
