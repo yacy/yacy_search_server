@@ -41,52 +41,53 @@
 
 package de.anomic.plasma;
 
-import java.lang.String;
-import java.util.HashMap;
 import java.io.File;
-
+import java.util.HashMap;
 import de.anomic.kelondro.kelondroMSetTools;
 
 public class plasmaURLPattern {
-    
+
     private File rootPath = null;
     private HashMap hostpaths = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
-    
+
     public plasmaURLPattern(File rootPath) {
+        super();
         this.rootPath = rootPath;
         this.hostpaths = new HashMap();
     }
-    
+
     public void clear() {
         this.hostpaths = new HashMap();
     }
-    
+
     public int size() {
         return hostpaths.size();
     }
-    
+
     public void loadLists(String mapname, String filenames, String sep) {
-        //File listsPath = new File(getRootPath(), getConfig("listsPath", "DATA/LISTS"));
-        String filenamesarray[] = filenames.split(",");
-        
-        if(filenamesarray.length >0)
-            for(int i = 0; i < filenamesarray.length; i++)
+        // File listsPath = new File(getRootPath(), getConfig("listsPath", "DATA/LISTS"));
+        final String[] filenamesarray = filenames.split(",");
+
+        if( filenamesarray.length > 0) {
+            for (int i = 0; i < filenamesarray.length; i++) {
                 hostpaths.putAll(kelondroMSetTools.loadMap(mapname, (new File(rootPath, filenamesarray[i])).toString(), sep));
+            }
+        }
     }
-    
+
     public void remove(String host) {
         hostpaths.remove(host);
     }
-    
+
     public void add(String host, String path) {
-        if (path.startsWith("/")) path = path.substring(1);
+        if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
         hostpaths.put(host, path);
     }
-    
+
     public boolean isListed(String hostlow, String path) {
-        if (path.startsWith("/")) path = path.substring(1);
+        if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
         String pp = ""; // path-pattern
-        
+
         // first try to match the domain with wildcard '*'
         // [TL] While "." are found within the string
         int index = 0;
@@ -101,10 +102,10 @@ public class plasmaURLPattern {
                 return ((pp.equals("*")) || (path.matches(pp)));
             }
         }
-        
+
         // try to match without wildcard in domain
         return (((pp = (String) hostpaths.get(hostlow)) != null) &&
                 ((pp.equals("*")) || (path.matches(pp))));
     }
-    
+
 }
