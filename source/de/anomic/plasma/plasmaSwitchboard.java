@@ -113,13 +113,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.http.httpd;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroTables;
@@ -167,7 +165,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  boolean                     remoteProxyUse;
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
+    private static String               s_ProxyProfile  = "defaultProxyProfile";
     public  plasmaCrawlProfile.entry    defaultRemoteProfile;
+    private static String               s_RemoteProfile = "defaultRemoteProfile";
     public  plasmaWordIndexDistribution indexDistribution;
     public  HashMap                     outgoingCookies, incomingCookies;
     public  kelondroTables              facilityDB;
@@ -273,20 +273,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // start a cache manager
         log.logConfig("Starting HT Cache Manager");
 
-        // create the Cache directorie - Borg-0300
-        String cp = getConfig("proxyCache", "DATA/HTCACHE");
-        cp = cp.replace('\\', '/');
-        if (cp.endsWith("/")) cp = cp.substring(0,cp.length() - 1);                 
-        File htCachePath = new File(cp);
-        if (!(htCachePath.exists())) htCachePath.mkdirs();
-        if (!(htCachePath.isDirectory())) {
-            // if the cache does not exists or is a file and not a directory, panic
-            serverLog.logConfig("PLASMA", "the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");        		
-            System.exit(0);
-        } else {
-            serverLog.logInfo("PLASMA", "proxyCache=" + cp);
-        }
-
+        // create the cache directory
+        String cache = getConfig("proxyCache", "DATA/HTCACHE");
+        cache = cache.replace('\\', '/');
+        if (cache.endsWith("/")) { cache = cache.substring(0, cache.length() - 1); }                 
+        File htCachePath = new File(cache);
         long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig("proxyCacheSize", "2")); // this is megabyte
         this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP);
         
@@ -321,10 +312,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 this.cacheManager, 
                 this.log);
 
-	// init boards
+        // init boards
         log.logConfig("Starting Message Board");
-	messageDB = new messageBoard(new File(getRootPath(), "DATA/SETTINGS/message.db"), ramMessage);
-	log.logConfig("Starting Wiki Board");
+        messageDB = new messageBoard(new File(getRootPath(), "DATA/SETTINGS/message.db"), ramMessage);
+        log.logConfig("Starting Wiki Board");
         wikiDB = new wikiBoard(new File(getRootPath(), "DATA/SETTINGS/wiki.db"),
                  new File(getRootPath(), "DATA/SETTINGS/wiki-bkp.db"), ramWiki);
 
@@ -457,26 +448,26 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     private void initProfiles() throws IOException {
         if ((profiles.size() == 0) ||
-            (getConfig("defaultProxyProfile", "").length() == 0) ||
-            (profiles.getEntry(getConfig("defaultProxyProfile", "")) == null)) {
+            (getConfig(s_ProxyProfile, "").length() == 0) ||
+            (profiles.getEntry(getConfig(s_ProxyProfile, "")) == null)) {
             // generate new default entry for proxy crawling
             defaultProxyProfile = profiles.newEntry("proxy", "", ".*", ".*", Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), false, true, true, true, false, true, true, true);
-            setConfig("defaultProxyProfile", defaultProxyProfile.handle());
+            setConfig(s_ProxyProfile, defaultProxyProfile.handle());
         } else {
-            defaultProxyProfile = profiles.getEntry(getConfig("defaultProxyProfile", ""));
+            defaultProxyProfile = profiles.getEntry(getConfig(s_ProxyProfile, ""));
         }
         if ((profiles.size() == 1) ||
-            (getConfig("defaultRemoteProfile", "").length() == 0) ||
-            (profiles.getEntry(getConfig("defaultRemoteProfile", "")) == null)) {
+            (getConfig(s_RemoteProfile, "").length() == 0) ||
+            (profiles.getEntry(getConfig(s_RemoteProfile, "")) == null)) {
             // generate new default entry for remote crawling
             defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, false, true, true, false, true, true, false);
-            setConfig("defaultRemoteProfile", defaultRemoteProfile.handle());
+            setConfig(s_RemoteProfile, defaultRemoteProfile.handle());
         } else {
-            defaultRemoteProfile = profiles.getEntry(getConfig("defaultRemoteProfile", ""));
+            defaultRemoteProfile = profiles.getEntry(getConfig(s_RemoteProfile, ""));
         }
     }
     private void resetProfiles() {
-        File pdb = new File(plasmaPath, "crawlProfiles0.db");
+        final File pdb = new File(plasmaPath, "crawlProfiles0.db");
         if (pdb.exists()) pdb.delete();
         try {
             profiles = new plasmaCrawlProfile(pdb);
@@ -485,8 +476,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     public boolean cleanProfiles() {
         if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (urlPool.noticeURL.stackSize() > 0)) return false;
-	Iterator i = profiles.profiles(true);
-	plasmaCrawlProfile.entry entry;
+        final Iterator i = profiles.profiles(true);
+        plasmaCrawlProfile.entry entry;
         boolean hasDoneSomething = false;
         try {
             while (i.hasNext()) {
@@ -525,16 +516,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // work off unwritten files
-        if (entry.cacheArray != null)  {
+        if (entry.cacheArray == null)  {
+            log.logInfo("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
+        } else {
             String error = entry.shallStoreCacheForProxy();
             if (error == null) {
-            cacheManager.writeFile(entry.url, entry.cacheArray);
+                cacheManager.writeFile(entry.url, entry.cacheArray);
                 log.logInfo("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
             } else {
                 log.logInfo("WRITE OF FILE " + entry.cacheFile + " FORBIDDEN: " + error);
             }
-        } else {
-            log.logInfo("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
         }
 
         if (plasmaParser.supportedMimeTypesContains(entry.responseHeader.mime()) ||
@@ -610,7 +601,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public boolean deQueue() {
         // work off fresh entries from the proxy or from the crawler
         if (onlineCaution()) {
-            log.logFine("deQueue: online caution, omitting resource stack processing");
+            log.logFiner("deQueue: online caution, omitting resource stack processing");
             return false;
         }
         plasmaSwitchboardQueue.Entry nextentry;
@@ -1209,6 +1200,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     private boolean processRemoteCrawlTrigger(plasmaCrawlNURL.Entry urlEntry) {
+        final String remoteCrawlTrigger = "REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER ";
+        
         // return true iff another peer has/will index(ed) the url
         if (urlEntry == null) {
             log.logInfo("REMOTECRAWLTRIGGER[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]: urlEntry=null");
@@ -1269,7 +1262,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             yacyCore.dhtAgent.setCrawlDelay(remoteSeed.hash, newdelay);
             String response = (String) page.get("response");
             if (response.equals("stacked")) {
-                log.logInfo("REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " PLACED URL=" + urlEntry.url().toString() + "; NEW DELAY=" + newdelay);
+                log.logInfo(remoteCrawlTrigger + remoteSeed.getName() + " PLACED URL=" + urlEntry.url().toString() + "; NEW DELAY=" + newdelay);
                 return true;
             } else if (response.equals("double")) {
                 String lurl = (String) page.get("lurl");
@@ -1279,19 +1272,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         urlPool.loadedURL.newEntry(propStr, true),
                         yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1);
                         urlPool.noticeURL.remove(entry.hash());
-                    log.logInfo("REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
+                    log.logInfo(remoteCrawlTrigger + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
                     return true;
                 } else {
-                    log.logInfo("REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " REJECTED. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + ")");
+                    log.logInfo(remoteCrawlTrigger + remoteSeed.getName() + " REJECTED. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + ")");
                     return false;
                 }
             } else {
-                log.logInfo("REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " DENIED. RESPONSE=" + response + ", CAUSE=" + page.get("reason") + ", URL=" + urlEntry.url().toString());
+                log.logInfo(remoteCrawlTrigger + remoteSeed.getName() + " DENIED. RESPONSE=" + response + ", CAUSE=" + page.get("reason") + ", URL=" + urlEntry.url().toString());
                 return false;
             }
         } catch (Exception e) {
             // wrong values
-            log.logSevere("REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CLIENT RETURNED: " + page.toString(), e);
+            log.logSevere(remoteCrawlTrigger + remoteSeed.getName() + " FAILED. CLIENT RETURNED: " + page.toString(), e);
             return false;
         }
     }
@@ -1620,16 +1613,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return count;
     }
     
-    public int removeReferences(URL url, Set words) {
+    public int removeReferences(final URL url, final Set words) {
         return removeReferences(plasmaURL.urlHash(url), words);
     }
     
-    public int removeReferences(String urlhash, Set words) {
+    public int removeReferences(final String urlhash, final Set words) {
         // sequentially delete all word references
         // returns number of deletions
         Iterator it = words.iterator();
         String word;
-        String[] urlEntries = new String[] {urlhash};
+        final String[] urlEntries = new String[] {urlhash};
         int count = 0;
         while (it.hasNext()) {
             word = (String) it.next();

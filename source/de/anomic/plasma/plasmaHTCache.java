@@ -95,17 +95,15 @@ public final class plasmaHTCache {
         this.cachePath = htCachePath;
         this.maxCacheSize = maxCacheSize;
 
-        // we dont need check the path, because we have do that in plasmaSwitchboard.java - Borg-0300
-/*      // set cache path
+        // set/make cache path
         if (!(htCachePath.exists())) {
-            // make the cache path
-            htCachePath.mkdir();
+            htCachePath.mkdirs();
         }
         if (!(htCachePath.isDirectory())) {
             // if the cache does not exists or is a file and not a directory, panic
-            System.out.println("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
+            log.logSevere("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
             System.exit(0);
-        }*/
+        }
 
         // open the response header database
         File dbfile = new File(cachePath, "responseHeader.db");
@@ -115,7 +113,7 @@ public final class plasmaHTCache {
             else
                 responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, plasmaCrawlLURL.urlHashLength, 150));
         } catch (IOException e) {
-            System.out.println("the request header database could not be opened: " + e.getMessage());
+            log.logSevere("the request header database could not be opened: " + e.getMessage());
             System.exit(0);
         }
 
@@ -512,7 +510,7 @@ public final class plasmaHTCache {
                  String initiator,
                  plasmaCrawlProfile.entry profile) {
 
-        // normalize url - Borg-0300
+        // normalize url
         serverLog.logFine("PLASMA", "Entry: URL=" + url.toString());
         this.nomalizedURLString = htmlFilterContentScraper.urlNormalform(url);
         try {
@@ -521,9 +519,9 @@ public final class plasmaHTCache {
             System.out.println("internal error at httpdProxyCache.Entry: " + e);
             System.exit(-1);
         }
-        this.name           = name;
-        this.cacheFile      = getCachePath(this.url);
-        this.nomalizedURLHash        = plasmaCrawlLURL.urlHash(nomalizedURLString);
+        this.name             = name;
+        this.cacheFile        = getCachePath(this.url);
+        this.nomalizedURLHash = plasmaCrawlLURL.urlHash(nomalizedURLString);
 
        // assigned:
         this.initDate       = initDate;
