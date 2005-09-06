@@ -50,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroStack;
@@ -69,7 +68,7 @@ public class plasmaCrawlNURL extends plasmaURL {
     public static final int STACK_TYPE_IMAGE    = 11; // put on image stack
     public static final int STACK_TYPE_MOVIE    = 12; // put on movie stack
     public static final int STACK_TYPE_MUSIC    = 13; // put on music stack
-    
+
     private kelondroStack coreStack;      // links found by crawling to depth-1
     private kelondroStack limitStack;     // links found by crawling at target depth
     private kelondroStack overhangStack;  // links found by crawling at depth+1
@@ -77,9 +76,9 @@ public class plasmaCrawlNURL extends plasmaURL {
     private kelondroStack imageStack;     // links pointing to image resources
     private kelondroStack movieStack;     // links pointing to movie resources
     private kelondroStack musicStack;     // links pointing to music resources
-    
+
     private HashSet stackIndex;           // to find out if a specific link is already on any stack
-    
+
     public plasmaCrawlNURL(File cacheStacksPath, int bufferkb) throws IOException {
         super();
         int[] ce = {
@@ -96,20 +95,20 @@ public class plasmaCrawlNURL extends plasmaURL {
             urlFlagLength,               // extra space
             urlHandleLength              // extra handle
         };
-        
-	// create a stack for newly entered entries
+
+        // create a stack for newly entered entries
         if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path
-        
+
         File cacheFile = new File(cacheStacksPath, "urlNotice1.db");
         if (cacheFile.exists()) {
-	    // open existing cache
-	    urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400);
-	} else {
-	    // create new cache
-	    cacheFile.getParentFile().mkdirs();
-	    urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, ce);
-	}
-        
+            // open existing cache
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400);
+        } else {
+            // create new cache
+            cacheFile.getParentFile().mkdirs();
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, ce);
+        }
+
         File coreStackFile = new File(cacheStacksPath, "urlNoticeLocal0.stack");
         File limitStackFile = new File(cacheStacksPath, "urlNoticeLimit0.stack");
         File overhangStackFile = new File(cacheStacksPath, "urlNoticeOverhang0.stack");
@@ -152,25 +151,25 @@ public class plasmaCrawlNURL extends plasmaURL {
             } catch (IOException e) {}
         }
     }
-    
+
     private static String normalizeHost(String host) {
-	if (host.length() > urlHostLength) host = host.substring(0, urlHostLength);
-	host = host.toLowerCase();
-	while (host.length() < urlHostLength) host = host + " ";
-	return host;
+        if (host.length() > urlHostLength) host = host.substring(0, urlHostLength);
+        host = host.toLowerCase();
+        while (host.length() < urlHostLength) host = host + " ";
+        return host;
     }
 
     private static String normalizeHandle(int h) {
-	String d = Integer.toHexString(h);
-	while (d.length() < urlHandleLength) d = "0" + d;
-	return d;
+        String d = Integer.toHexString(h);
+        while (d.length() < urlHandleLength) d = "0" + d;
+        return d;
     }
-    
+
     public int stackSize() {
         // this does not count the overhang stack size
         return coreStack.size()  + limitStack.size() + remoteStack.size();
     }
-    
+
     public int stackSize(int stackType) {
         switch (stackType) {
             case STACK_TYPE_CORE:     return coreStack.size();
@@ -183,21 +182,22 @@ public class plasmaCrawlNURL extends plasmaURL {
             default: return -1;
         }
     }
-    
+
     public boolean existsInStack(String urlhash) {
         return stackIndex.contains(urlhash);
     }
-    
-    public synchronized Entry newEntry(String initiator, URL url, Date loaddate, String referrer, String name,
-                String profile, int depth, int anchors, int forkfactor, int stackMode) {
-	Entry e = new Entry(initiator, url, referrer, name, loaddate, profile,
-                     depth, anchors, forkfactor);
+
+    public synchronized Entry newEntry(String initiator, URL url, Date loaddate,
+                                       String referrer, String name, String profile,
+                                       int depth, int anchors, int forkfactor, int stackMode) {
+        Entry e = new Entry(initiator, url, referrer, name, loaddate,
+                            profile, depth, anchors, forkfactor);
         push(stackMode, e.hash);
         return e;
     }
 
     private void push(int stackType, String hash) {
-	try {
+        try {
             switch (stackType) {
                 case STACK_TYPE_CORE:     coreStack.push(new byte[][] {hash.getBytes()}); break;
                 case STACK_TYPE_LIMIT:    limitStack.push(new byte[][] {hash.getBytes()}); break;
@@ -224,7 +224,7 @@ public class plasmaCrawlNURL extends plasmaURL {
             default: return null;
         }
     }
-    
+
     public Entry pop(int stackType) {
         switch (stackType) {
             case STACK_TYPE_CORE:     return pop(coreStack);
@@ -237,7 +237,7 @@ public class plasmaCrawlNURL extends plasmaURL {
             default: return null;
         }
     }
-    
+
     public void shift(int fromStack, int toStack) throws IOException {
         switch (fromStack) {
             case STACK_TYPE_CORE:     push(toStack, new String(coreStack.pop()[0])); return;
@@ -250,7 +250,7 @@ public class plasmaCrawlNURL extends plasmaURL {
             default: return;
         }
     }
-    
+
     public void clear(int stackType) {
         try {
             switch (stackType) {
@@ -265,20 +265,20 @@ public class plasmaCrawlNURL extends plasmaURL {
             }
         } catch (IOException e) {}
     }
-    
+
     private Entry pop(kelondroStack stack) {
-	// this is a filo - pop
-	try {
-	    if (stack.size() > 0) {
+        // this is a filo - pop
+        try {
+            if (stack.size() > 0) {
                 Entry e = new Entry(new String(stack.pop()[0]));
                 stackIndex.remove(e.hash);
                 return e;
-	    } else {
-		return null;
-	    }
-	} catch (IOException e) {
-	    return null;
-	}
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     private Entry[] top(kelondroStack stack, int count) {
@@ -298,7 +298,7 @@ public class plasmaCrawlNURL extends plasmaURL {
     }
 
     public synchronized Entry getEntry(String hash) {
-	return new Entry(hash);
+        return new Entry(hash);
     }
 
     public synchronized void remove(String hash) {
@@ -308,21 +308,20 @@ public class plasmaCrawlNURL extends plasmaURL {
     }
 
     public class Entry {
-
         private String   initiator;     // the initiator hash, is NULL or "" if it is the own proxy;
                                         // if this is generated by a crawl, the own peer hash in entered
-	private String   hash;          // the url's hash
+        private String   hash;          // the url's hash
         private String   referrer;      // the url's referrer hash
         private URL      url;           // the url as string
         private String   name;          // the name of the url, from anchor tag <a>name</a>     
         private Date     loaddate;      // the time when the url was first time appeared
-	private String   profileHandle; // the name of the prefetch profile
+        private String   profileHandle; // the name of the prefetch profile
         private int      depth;         // the prefetch depth so far, starts at 0
         private int      anchors;       // number of anchors of the parent
         private int      forkfactor;    // sum of anchors of all ancestors
         private bitfield flags;
         private int      handle;
-        
+
         public Entry(String initiator, 
                      URL url, 
                      String referrer, 
@@ -347,11 +346,10 @@ public class plasmaCrawlNURL extends plasmaURL {
             this.flags         = new bitfield(urlFlagLength);
             this.handle        = 0;
             store();
-	}
-        
+        }
+
         public String toString() {
             StringBuffer str = new StringBuffer();
-            
             str.append("hash: ").append(hash==null ? "null" : hash).append(" | ")
                .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
                .append("url: ").append(url==null?"null":url.toString()).append(" | ")
@@ -362,9 +360,7 @@ public class plasmaCrawlNURL extends plasmaURL {
                .append("depth: ").append(Integer.toString(depth)).append(" | ")
                .append("forkfactor: ").append(Integer.toString(forkfactor)).append(" | ")
                .append("flags: ").append((flags==null) ? "null" : flags.toString());
-            
-            
-            return str.toString();
+               return str.toString();
         }
 
         public Entry(String hash) {
@@ -399,17 +395,16 @@ public class plasmaCrawlNURL extends plasmaURL {
             }
         }
 
-	private void store() {
-	    // stores the values from the object variables into the database
+        private void store() {
+            // stores the values from the object variables into the database
             String loaddatestr = serverCodings.enhancedCoder.encodeBase64Long(loaddate.getTime() / 86400000, urlDateLength);
-
-	    // store the hash in the hash cache
-	    try {
-		// even if the entry exists, we simply overwrite it
-		byte[][] entry = new byte[][] {
+            // store the hash in the hash cache
+            try {
+                // even if the entry exists, we simply overwrite it
+                byte[][] entry = new byte[][] { 
                     this.hash.getBytes(),
                     (initiator == null) ? "".getBytes() : this.initiator.getBytes(),
-		    this.url.toString().getBytes(),
+                    this.url.toString().getBytes(),
                     this.referrer.getBytes(),
                     this.name.getBytes(),
                     loaddatestr.getBytes(),
@@ -419,46 +414,56 @@ public class plasmaCrawlNURL extends plasmaURL {
                     serverCodings.enhancedCoder.encodeBase64Long(this.forkfactor, urlForkFactorLength).getBytes(),
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
-		};
-		urlHashCache.put(entry);
-	    } catch (IOException e) {
-		System.out.println("INTERNAL ERROR AT plasmaNURL:store:" + e.toString());
-	    } catch (kelondroException e) {
+                };
+                urlHashCache.put(entry);
+            } catch (IOException e) {
+                serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString());
+            } catch (kelondroException e) {
                 serverLog.logSevere("PLASMA", "plasmaCrawlNURL.store failed: " + e.getMessage());
             }
-	}
-        
-	public String hash() {
-	    // return a url-hash, based on the md5 algorithm
-	    // the result is a String of 12 bytes within a 72-bit space
-	    // (each byte has an 6-bit range)
-	    // that should be enough for all web pages on the world
-	    return this.hash;
-	}
+        }
+
+        /**
+         * return a url-hash, based on the md5 algorithm
+         * the result is a String of 12 bytes within a 72-bit space
+         * (each byte has an 6-bit range)
+         * that should be enough for all web pages on the world
+         */
+        public String hash() {
+            return this.hash;
+        }
+
         public String initiator() {
             if (initiator == null) return null;
             if (initiator.length() == 0) return null; 
             return initiator;
         }
+
         public boolean proxy() {
             return (initiator() == null);
         }
+
         public String referrerHash() {
-	    return this.referrer;
-	}
-	public URL url() {
-	    return url;
-	}
-	public Date loaddate() {
-	    return loaddate;
-	}
+            return this.referrer;
+        }
+
+        public URL url() {
+            return url;
+        }
+
+        public Date loaddate() {
+            return loaddate;
+        }
+
         public String name() {
-	    // return the creator's hash
-	    return name;
-	}
+            // return the creator's hash
+            return name;
+        }
+
         public int depth() {
             return depth;
         }
+
         public String profileHandle() {
             return profileHandle;
         }
@@ -466,22 +471,21 @@ public class plasmaCrawlNURL extends plasmaURL {
 
     /*
     public class kenum implements Enumeration {
-	// enumerates entry elements
-	kelondroTree.rowIterator i;
-	public kenum(boolean up, boolean rotating) throws IOException {
+    // enumerates entry elements
+    kelondroTree.rowIterator i;
+    public kenum(boolean up, boolean rotating) throws IOException {
             i = urlHashCache.rows(up, rotating);
         }
-	public boolean hasMoreElements() {
+    public boolean hasMoreElements() {
             return i.hasNext();
         }
-	public Object nextElement() {
+    public Object nextElement() {
             return new entry(new String(((byte[][]) i.next())[0]));
         }
     }
-    
     public Enumeration elements(boolean up, boolean rotating) throws IOException {
-	// enumerates entry elements
-	return new kenum(up, rotating);
+    // enumerates entry elements
+    return new kenum(up, rotating);
     }
     */
 }
