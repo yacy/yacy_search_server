@@ -84,7 +84,12 @@ public class IndexCreateIndexingQueue_p {
             if (post.containsKey("clearIndexingQueue")) {
                 try {
                     synchronized (switchboard.sbQueue) {
-                        switchboard.sbQueue.clear();
+                        plasmaSwitchboardQueue.Entry entry = null;
+                        while ((entry = switchboard.sbQueue.pop()) != null) {
+                            if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
+                                switchboard.cacheManager.deleteFile(entry.url());
+                            }                            
+                        }
                     } 
                 } catch (Exception e) {}
             } else if (post.containsKey("deleteEntry")) {
@@ -95,7 +100,10 @@ public class IndexCreateIndexingQueue_p {
                         for (int i=entries.size()-1; i >= 0; i--) {
                             plasmaSwitchboardQueue.Entry pcentry = (plasmaSwitchboardQueue.Entry) entries.get(i);
                             if (pcentry.urlHash().equals(urlHash)) {
-                                switchboard.sbQueue.remove(i);
+                                plasmaSwitchboardQueue.Entry entry = switchboard.sbQueue.remove(i);
+                                if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
+                                    switchboard.cacheManager.deleteFile(entry.url());
+                                }
                                 break;
                             }
                         }
@@ -117,6 +125,7 @@ public class IndexCreateIndexingQueue_p {
             dark = true;
             plasmaSwitchboardQueue.Entry pcentry;
             int inProcessCount = 0, entryCount = 0;
+            long totalSize = 0;
             try {
                 ArrayList entryList = new ArrayList();
                 
@@ -134,6 +143,8 @@ public class IndexCreateIndexingQueue_p {
                 for (int i = 0; i < entryList.size(); i++) {
                     boolean inProcess = i < inProcessCount;
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
+                    long entrySize = pcentry.size();
+                    totalSize += entrySize;
                     if ((pcentry != null)&&(pcentry.url() != null)) {
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                         prop.put("indexing-queue_list_"+entryCount+"_dark", (inProcess)? 2: ((dark) ? 1 : 0));
@@ -142,16 +153,17 @@ public class IndexCreateIndexingQueue_p {
                         prop.put("indexing-queue_list_"+entryCount+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
                         prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
                         prop.put("indexing-queue_list_"+entryCount+"_url", pcentry.normalizedURLString());
-                        prop.put("indexing-queue_list_"+entryCount+"_size", Status.bytesToString(pcentry.size()));
+                        prop.put("indexing-queue_list_"+entryCount+"_size", Status.bytesToString(entrySize));
                         prop.put("indexing-queue_list_"+entryCount+"_inProcess", (inProcess)?1:0);
-                        prop.put("indexing-queue_list_"+entryCount+"_0_hash", pcentry.urlHash());
+                        prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.urlHash());
                         dark = !dark;
                         entryCount++;
                     }
                 }
             } catch (IOException e) {}
 
-            prop.put("indexing-queue_num", entryCount);//num entries in queue            
+            prop.put("indexing-queue_num", entryCount);//num entries in queue
+            prop.put("indexing-queue_totalSize", Status.bytesToString(totalSize));//num entries in queue 
             prop.put("indexing-queue_list", entryCount);
         }
         
