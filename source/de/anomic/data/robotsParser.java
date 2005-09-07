@@ -47,6 +47,8 @@ package de.anomic.data;
 import java.lang.String;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -128,8 +130,11 @@ public final class robotsParser{
                     // getting the path
                     String path = line.substring(pos).trim();
                     
+                    // unencoding all special charsx
+                    path = URLDecoder.decode(path,"UTF-8");
+                    
                     // escaping all occurences of ; because this char is used as special char in the Robots DB
-                    path = path.replaceAll(";","%3B");
+                    path = path.replaceAll(";","%3B");                    
                     
                     // adding it to the pathlist
                     deny.add(path);
