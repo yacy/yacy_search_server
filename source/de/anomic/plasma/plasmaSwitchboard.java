@@ -165,9 +165,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  boolean                     remoteProxyUse;
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
-    private static String               s_ProxyProfile  = "defaultProxyProfile";
     public  plasmaCrawlProfile.entry    defaultRemoteProfile;
-    private static String               s_RemoteProfile = "defaultRemoteProfile";
     public  plasmaWordIndexDistribution indexDistribution;
     public  HashMap                     outgoingCookies, incomingCookies;
     public  kelondroTables              facilityDB;
@@ -176,7 +174,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  long                        proxyLastAccess;
     public  yacyCore                    yc;
     public  HashMap                     indexingTasksInProcess;
-    
+
+    private static final String STR_PROXYPROFILE       = "defaultProxyProfile";
+    private static final String STR_REMOTEPROFILE      = "defaultRemoteProfile";
+    private static final String STR_REMOTECRAWLTRIGGER = "REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER ";
+
     private serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
     
@@ -448,22 +450,22 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     private void initProfiles() throws IOException {
         if ((profiles.size() == 0) ||
-            (getConfig(s_ProxyProfile, "").length() == 0) ||
-            (profiles.getEntry(getConfig(s_ProxyProfile, "")) == null)) {
+            (getConfig(STR_PROXYPROFILE, "").length() == 0) ||
+            (profiles.getEntry(getConfig(STR_PROXYPROFILE, "")) == null)) {
             // generate new default entry for proxy crawling
             defaultProxyProfile = profiles.newEntry("proxy", "", ".*", ".*", Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), false, true, true, true, false, true, true, true);
-            setConfig(s_ProxyProfile, defaultProxyProfile.handle());
+            setConfig(STR_PROXYPROFILE, defaultProxyProfile.handle());
         } else {
-            defaultProxyProfile = profiles.getEntry(getConfig(s_ProxyProfile, ""));
+            defaultProxyProfile = profiles.getEntry(getConfig(STR_PROXYPROFILE, ""));
         }
         if ((profiles.size() == 1) ||
-            (getConfig(s_RemoteProfile, "").length() == 0) ||
-            (profiles.getEntry(getConfig(s_RemoteProfile, "")) == null)) {
+            (getConfig(STR_REMOTEPROFILE, "").length() == 0) ||
+            (profiles.getEntry(getConfig(STR_REMOTEPROFILE, "")) == null)) {
             // generate new default entry for remote crawling
             defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, false, true, true, false, true, true, false);
-            setConfig(s_RemoteProfile, defaultRemoteProfile.handle());
+            setConfig(STR_REMOTEPROFILE, defaultRemoteProfile.handle());
         } else {
-            defaultRemoteProfile = profiles.getEntry(getConfig(s_RemoteProfile, ""));
+            defaultRemoteProfile = profiles.getEntry(getConfig(STR_REMOTEPROFILE, ""));
         }
     }
     private void resetProfiles() {
@@ -476,14 +478,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     public boolean cleanProfiles() {
         if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (urlPool.noticeURL.stackSize() > 0)) return false;
-        final Iterator i = profiles.profiles(true);
+        final Iterator iter = profiles.profiles(true);
         plasmaCrawlProfile.entry entry;
         boolean hasDoneSomething = false;
         try {
-            while (i.hasNext()) {
-                entry = (plasmaCrawlProfile.entry) i.next();
+            while (iter.hasNext()) {
+                entry = (plasmaCrawlProfile.entry) iter.next();
                 if (!((entry.name().equals("proxy")) || (entry.name().equals("remote")))) {
-                    i.remove();
+                    iter.remove();
                     hasDoneSomething = true;
                 }
             }
@@ -1200,7 +1202,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     private boolean processRemoteCrawlTrigger(plasmaCrawlNURL.Entry urlEntry) {
-        final String remoteCrawlTrigger = "REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER ";
         
         // return true iff another peer has/will index(ed) the url
         if (urlEntry == null) {
@@ -1262,7 +1263,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             yacyCore.dhtAgent.setCrawlDelay(remoteSeed.hash, newdelay);
             String response = (String) page.get("response");
             if (response.equals("stacked")) {
-                log.logInfo(remoteCrawlTrigger + remoteSeed.getName() + " PLACED URL=" + urlEntry.url().toString() + "; NEW DELAY=" + newdelay);
+                log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " PLACED URL=" + urlEntry.url().toString() + "; NEW DELAY=" + newdelay);
                 return true;
             } else if (response.equals("double")) {
                 String lurl = (String) page.get("lurl");
@@ -1272,19 +1273,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         urlPool.loadedURL.newEntry(propStr, true),
                         yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1);
                         urlPool.noticeURL.remove(entry.hash());
-                    log.logInfo(remoteCrawlTrigger + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
+                    log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
                     return true;
                 } else {
-                    log.logInfo(remoteCrawlTrigger + remoteSeed.getName() + " REJECTED. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + ")");
+                    log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " REJECTED. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + ")");
                     return false;
                 }
             } else {
-                log.logInfo(remoteCrawlTrigger + remoteSeed.getName() + " DENIED. RESPONSE=" + response + ", CAUSE=" + page.get("reason") + ", URL=" + urlEntry.url().toString());
+                log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " DENIED. RESPONSE=" + response + ", CAUSE=" + page.get("reason") + ", URL=" + urlEntry.url().toString());
                 return false;
             }
         } catch (Exception e) {
             // wrong values
-            log.logSevere(remoteCrawlTrigger + remoteSeed.getName() + " FAILED. CLIENT RETURNED: " + page.toString(), e);
+            log.logSevere(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " FAILED. CLIENT RETURNED: " + page.toString(), e);
             return false;
         }
     }
@@ -1613,19 +1614,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return count;
     }
     
-    public int removeReferences(final URL url, final Set words) {
+    public int removeReferences(URL url, Set words) {
         return removeReferences(plasmaURL.urlHash(url), words);
     }
     
     public int removeReferences(final String urlhash, final Set words) {
         // sequentially delete all word references
         // returns number of deletions
-        Iterator it = words.iterator();
+        Iterator iter = words.iterator();
         String word;
         final String[] urlEntries = new String[] {urlhash};
         int count = 0;
-        while (it.hasNext()) {
-            word = (String) it.next();
+        while (iter.hasNext()) {
+            word = (String) iter.next();
             // delete the URL reference in this word index
             count += wordIndex.removeEntries(plasmaWordIndexEntry.word2hash(word), urlEntries, true);
         }
