@@ -105,8 +105,10 @@ package de.anomic.plasma;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -544,13 +546,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (plasmaParser.supportedMimeTypesContains(entry.responseHeader.mime()) ||
             plasmaParser.supportedFileExt(entry.url)) {
             
+            // registering the cachefile as in use
+            if (entry.cacheFile.exists()) {
+                cacheManager.filesInUse.add(entry.cacheFile);
+            }
+            
             // enqueue for further crawling
             enQueue(sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
                     entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
                     entry.initiator(), entry.depth, entry.profile.handle(),
                     entry.name()
             ));
-        }
+        } 
         
         return true;
     }
@@ -1092,7 +1099,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }            
             
             // explicit delete/free resources
-            if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) cacheManager.deleteFile(entry.url());
+            if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
+                cacheManager.filesInUse.remove(entry.cacheFile());
+                cacheManager.deleteFile(entry.url());
+            }
             entry = null;              
         }
     }
@@ -1127,10 +1137,29 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return reason;
         }
         
+        // check if ip is local ip address
+        try {
+            InetAddress hostAddress = InetAddress.getByName(nexturl.getHost());
+            if (hostAddress.isSiteLocalAddress()) {
+                reason = "denied_(private_ip_address)";
+                log.logFine("Host in URL '" + nexturlString + "' has private ip address.");
+                return reason;                
+            } else if (hostAddress.isLoopbackAddress()) {
+                reason = "denied_(loopback_ip_address)";
+                log.logFine("Host in URL '" + nexturlString + "' has loopback ip address.");
+                return reason;                  
+            }
+        } catch (UnknownHostException e) {
+            reason = "denied_(unknown_host)";
+            log.logFine("Unknown host in URL '" + nexturlString + "'.");
+            return reason;
+        }
+        
         // check blacklist
         String hostlow = nexturl.getHost().toLowerCase();
         if (urlBlacklist.isListed(hostlow, nexturl.getPath())) {
             reason = "denied_(url_in_blacklist)";
+            log.logFine("URL '" + nexturlString + "' is in blacklist.");
             return reason;
         }        
         
