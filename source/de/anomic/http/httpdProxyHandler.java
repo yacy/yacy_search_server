@@ -1019,6 +1019,19 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         String httpVersion = conProp.getProperty("HTTP");
         int timeout = Integer.parseInt(switchboard.getConfig("clientTimeout", "10000"));
         
+        
+        // check the blacklist
+        // blacklist idea inspired by [AS]:
+        // respond a 404 for all AGIS ("all you get is shit") servers
+        String hostlow = host.toLowerCase();
+        if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, "/")) {
+            httpd.sendRespondError(conProp,clientOut,4,403,null,
+                    "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
+            this.theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
+            forceConnectionClose();
+            return;
+        }
+        
         // possibly branch into PROXY-PROXY connection
         if (remoteProxyUse) {
             httpc remoteProxy = null;
@@ -1035,6 +1048,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     // pass error response back to client
                     httpd.sendRespondHeader(conProp,clientOut,httpVersion,response.statusCode,response.statusText,response.responseHeader);
                     //respondHeader(clientOut, response.status, response.responseHeader);
+                    forceConnectionClose();
                     return;
                 }
             } catch (Exception e) {

@@ -4,7 +4,9 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
-// last major change: 24.03.2005
+//
+// last major change: $LastChangedDate$ by $LastChangedBy$
+// Revision: $LastChangedRevision$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -106,6 +108,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -114,6 +117,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import de.anomic.data.messageBoard;
+import de.anomic.data.robotsParser;
 import de.anomic.data.wikiBoard;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
@@ -163,6 +167,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  String                      remoteProxyHost;
     public  int                         remoteProxyPort;
     public  boolean                     remoteProxyUse;
+    public static  plasmaCrawlRobotsTxt robots;
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
     public  plasmaCrawlProfile.entry    defaultRemoteProfile;
@@ -259,9 +264,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // make crawl profiles database and default profiles
         this.log.logConfig("Initializing Crawl Profiles");
         File profilesFile = new File(this.plasmaPath, "crawlProfiles0.db");
-        this.profiles = new plasmaCrawlProfile(new File(this.plasmaPath, "crawlProfiles0.db"));
+        this.profiles = new plasmaCrawlProfile(profilesFile);
         initProfiles();
         log.logConfig("Loaded profiles from file " + profilesFile + ", " + this.profiles.size() + " entries");
+        
+        // loading the robots.txt db
+        this.log.logConfig("Initializing robots.txt DB");
+        File robotsDBFile = new File(this.plasmaPath, "crawlRobotsTxt.db");
+        this.robots = new plasmaCrawlRobotsTxt(robotsDBFile);
+        this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile + ", " + this.robots.size() + " entries");        
         
         // start indexing management
         log.logConfig("Starting Indexing Management");
@@ -572,6 +583,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if (facilityDB != null) facilityDB.close();
             urlPool.close();
             profiles.close();
+            robots.close();
             parser.close();            
             cacheManager.close();
             sbQueue.close();
@@ -1148,6 +1160,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logFine("URL '" + nexturlString + "' is post URL.");
             return reason;
         }
+        
+        // checking robots.txt
+        if (robotsParser.isDisallowed(nexturl)) {
+            reason = "denied_(robots.txt)";
+            urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
+                                  name, reason, new bitfield(plasmaURL.urlFlagLength), false);
+            log.logFine("Crawling of URL '" + nexturlString + "' disallowed by robots.txt.");
+            return reason;            
+        }
+        
 
         String nexturlhash = plasmaURL.urlHash(nexturl);
         String dbocc = "";
