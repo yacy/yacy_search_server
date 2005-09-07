@@ -384,6 +384,11 @@ public final class httpc {
     */
     void init(String server, int port, int timeout, boolean ssl,
             String remoteProxyHost,  int remoteProxyPort) throws IOException {
+        
+        if (port == -1) {
+            port = (ssl)? 443 : 80;
+        }
+        
         this.init(remoteProxyHost, remoteProxyPort, timeout, ssl);
         this.remoteProxyUse = true;
         this.savedRemoteHost = server + ((port == 80) ? "" : (":" + port));
@@ -410,6 +415,10 @@ public final class httpc {
         this.savedRemoteHost = server;
 
         try {
+            if (port == -1) {
+                port = (ssl)? 443 : 80;
+            }
+            
             this.host = server + ((port == 80) ? "" : (":" + port));
             String hostip;
             if ((server.equals("localhost")) || (server.equals("127.0.0.1")) || (server.startsWith("192.168.")) || (server.startsWith("10."))) {
