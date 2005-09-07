@@ -196,8 +196,8 @@ public class plasmaCrawlRobotsTxt {
         }
         
         public boolean isDisallowed(String path) {
-            if ((path == null) || (path.length() == 0)) return false;
-            if ((this.mem == null) || (this.disallowPathList.size() == 0)) return false;
+            if ((this.mem == null) || (this.disallowPathList.size() == 0)) return false;            
+            if ((path == null) || (path.length() == 0)) path = "/";
             
             Iterator pathIter = this.disallowPathList.iterator();
             while (pathIter.hasNext()) {

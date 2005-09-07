@@ -4,7 +4,9 @@
 //(C) by Michael Peter Christen; mc@anomic.de
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
-//last major change: 21.04.2005 by Martin Thelian
+//
+//last major change: $LastChangedDate$ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
