@@ -155,7 +155,7 @@ public final class plasmaHTCache {
     }
 
     public long getFreeSize() {
-        return maxCacheSize - currCacheSize;
+        return (currCacheSize > maxCacheSize) ? 0 : maxCacheSize - currCacheSize;
     }  
 
     public boolean writeFile(URL url, byte[] array) {
