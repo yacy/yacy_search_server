@@ -362,7 +362,7 @@ public class cryptbig {
     private static void copy(OutputStream out, InputStream in, int bufferSize) throws IOException {
 	InputStream  bIn  = new BufferedInputStream(in, bufferSize);
 	OutputStream bOut = new BufferedOutputStream(out, bufferSize);
-	byte buf [] = new byte[bufferSize];
+	byte[] buf = new byte[bufferSize];
 	int n;
 	while ((n = bIn.read(buf)) > 0) bOut.write(buf, 0, n);
 	bIn.close();

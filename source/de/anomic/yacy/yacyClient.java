@@ -344,7 +344,7 @@ public class yacyClient {
             
             // create containers
             int words = wordhashes.length() / plasmaWordIndexEntry.wordHashLength;
-            plasmaWordIndexEntryContainer container[] = new plasmaWordIndexEntryContainer[words];
+            plasmaWordIndexEntryContainer[] container = new plasmaWordIndexEntryContainer[words];
             for (int i = 0; i < words; i++) {
                 container[i] = new plasmaWordIndexEntryContainer(wordhashes.substring(i * plasmaWordIndexEntry.wordHashLength, (i + 1) * plasmaWordIndexEntry.wordHashLength));
             }

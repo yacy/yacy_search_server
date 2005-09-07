@@ -260,7 +260,7 @@ public class ftpc {
   
   private static String[] shift(String args[]) {
     if ((args == null) || (args.length == 0)) return args; else {
-      String newArgs[] = new String[args.length-1];
+      String[] newArgs = new String[args.length-1];
       System.arraycopy(args, 1, newArgs, 0, args.length-1);
       return newArgs;
     }
@@ -301,13 +301,13 @@ public class ftpc {
   
   private void javaexec(String[] inArgs) {
     String obj = inArgs[0];
-    String args[] = new String[inArgs.length-1];
+    String[] args = new String[inArgs.length-1];
 
     // remove the object name from the array of arguments
     System.arraycopy(inArgs, 1, args, 0, inArgs.length-1);
 
     // Build the argument list for invoke() method.
-    Object argList[] = new Object[1];
+    Object[] argList = new Object[1];
     argList[0] = args;
 
     Properties pr = System.getProperties();
@@ -1557,7 +1557,7 @@ cd ..
     byte[] Bytes = serverCore.publicIP().getBytes();
 
     // bytes greater than 127 should not be printed as negative
-    short Shorts[] = new short[4];
+    short[] Shorts = new short[4];
     for (int i = 0; i < 4; i++) {
       Shorts[i] = Bytes[i];
       if (Shorts[i] < 0) Shorts[i] += 256;
@@ -1653,7 +1653,7 @@ cd ..
         outFile = new RandomAccessFile(fileDest, "rw"); 
    
       // write remote file to local file
-      byte block[] = new byte[blockSize];
+      byte[] block = new byte[blockSize];
       int numRead;
       long length = 0;
       
@@ -1718,7 +1718,7 @@ cd ..
       RandomAccessFile inFile = new RandomAccessFile(fileName, "r");
 
       // write remote file to local file
-      byte block[] = new byte[blockSize];
+      byte[] block = new byte[blockSize];
       int numRead;
 
       while ((numRead = inFile.read(block)) >= 0) {

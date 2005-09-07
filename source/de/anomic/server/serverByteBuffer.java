@@ -112,7 +112,7 @@ public final class serverByteBuffer extends OutputStream {
 
 	try {
 	    FileInputStream fis = new FileInputStream(f);
-//	    byte buf[] = new byte[512];
+//	    byte[] buf = new byte[512];
 //	    int p = 0;
 	    int l;
 //	    while ((l = fis.read(buf)) > 0) {
@@ -338,7 +338,7 @@ public final class serverByteBuffer extends OutputStream {
     }
     
     public byte toByteArray()[] {
-        byte newbuf[] = new byte[this.length];
+        byte[] newbuf = new byte[this.length];
         System.arraycopy(this.buffer, 0, newbuf, 0, this.length);
         return newbuf;
     }    

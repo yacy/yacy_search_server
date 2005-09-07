@@ -247,7 +247,7 @@ public final class serverCodings {
 	    MessageDigest digest = MessageDigest.getInstance("MD5");
 	    digest.reset();
 	    InputStream  in = new BufferedInputStream(new FileInputStream(file), 2048);
-	    byte buf [] = new byte[2048];
+	    byte[] buf = new byte[2048];
 	    int n;
 	    while ((n = in.read(buf)) > 0) digest.update(buf, 0, n);
 	    in.close();

@@ -150,7 +150,7 @@ public class GuiHandler extends Handler{
      */
     public synchronized LogRecord[] getLogArray() {
         
-        LogRecord tempBuffer[] = new LogRecord[this.count];
+        LogRecord[] tempBuffer = new LogRecord[this.count];
         
         for (int i = 0; i < this.count; i++) {
             int ix = (this.start+i)%this.buffer.length;

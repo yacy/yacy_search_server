@@ -73,7 +73,7 @@ public class listManager {
 
         //removes a List from a Lists-List
         public static void removeListFromListslist(String ListName, String BlackList){
-                String Lists[] = getListslistArray(ListName);
+                String[] Lists = getListslistArray(ListName);
                 String temp = "";
 
                 for(int i=0;i <= Lists.length -1;i++){
@@ -93,7 +93,7 @@ public class listManager {
 
         //add a new List to a List-List
         public static void addListToListslist(String ListName, String newList){
-                String Lists[] = getListslistArray(ListName);
+                String[] Lists = getListslistArray(ListName);
                 String temp = "";
 
                 for(int i = 0;i <= (Lists.length -1); i++){
@@ -105,7 +105,7 @@ public class listManager {
 
         //returns true, if the Lists-List contains the Listname
         public static boolean ListInListslist(String Listname, String BlackList){
-                String Lists[] =  getListslistArray(Listname);
+                String[] Lists =  getListslistArray(Listname);
 
                 for(int u=0;u <= Lists.length -1;u++){
                         if( BlackList.equals(Lists[u]) ){
