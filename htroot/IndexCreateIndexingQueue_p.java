@@ -43,6 +43,7 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -153,7 +154,7 @@ public class IndexCreateIndexingQueue_p {
                         prop.put("indexing-queue_list_"+entryCount+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
                         prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
                         prop.put("indexing-queue_list_"+entryCount+"_url", pcentry.normalizedURLString());
-                        prop.put("indexing-queue_list_"+entryCount+"_size", Status.bytesToString(entrySize));
+                        prop.put("indexing-queue_list_"+entryCount+"_size", bytesToString(entrySize));
                         prop.put("indexing-queue_list_"+entryCount+"_inProcess", (inProcess)?1:0);
                         prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.urlHash());
                         dark = !dark;
@@ -205,6 +206,32 @@ public class IndexCreateIndexingQueue_p {
         // return rewrite properties
         return prop;
     }
+    
+    public static String bytesToString(long byteCount) {  
+        try {
+            StringBuffer byteString = new StringBuffer();
+            
+            DecimalFormat df = new DecimalFormat( "0.00" );
+            if (byteCount > 1073741824) {                
+                byteString.append(df.format((double)byteCount / (double)1073741824 ))
+                          .append(" GB");
+            } else if (byteCount > 1048576) {
+                byteString.append(df.format((double)byteCount / (double)1048576))
+                          .append(" MB");              
+            } else if (byteCount > 1024) {
+                byteString.append(df.format((double)byteCount /(double)1024))
+                          .append(" KB");             
+            } else {
+                byteString.append(Long.toString(byteCount))
+                .append(" Bytes");                
+            }
+            
+            return byteString.toString();       
+        } catch (Exception e) {
+            return "unknown";
+        }        
+        
+    }    
     
 }
 
