@@ -300,7 +300,7 @@ public class IndexCreate_p {
             if (post.containsKey("continuecrawlqueue")) {
                 switchboard.continueCrawling();
                 prop.put("info", 5);//crawling continued
-            }                        
+            }                
         }
         
         // define visible variables
@@ -362,6 +362,7 @@ public class IndexCreate_p {
             prop.put("crawlProfiles_"+count+"_dark", ((dark) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_name", profile.name());
             prop.put("crawlProfiles_"+count+"_startURL", profile.startURL());
+            prop.put("crawlProfiles_"+count+"_handle", profile.handle());
             prop.put("crawlProfiles_"+count+"_depth", profile.generalDepth());
             prop.put("crawlProfiles_"+count+"_filter", profile.generalFilter());
             prop.put("crawlProfiles_"+count+"_withQuery", ((profile.crawlingQ()) ? 1 : 0));
