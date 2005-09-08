@@ -122,6 +122,7 @@ public class plasmaSwitchboardQueue {
     }
     
     public ArrayList list(int index) throws IOException {
+        if ((index==0) && (sbQueueStack.size()==0)) return new ArrayList(0);
         if ((index < 0) || (index >= sbQueueStack.size())) throw new ArrayIndexOutOfBoundsException();
         ArrayList list = sbQueueStack.botList(index);
         for (int i=0; i < list.size(); i++) {
