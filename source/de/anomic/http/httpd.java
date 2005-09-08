@@ -686,7 +686,7 @@ public final class httpd implements serverHandler {
     
     public Boolean CONNECT(String arg) throws IOException {
         // establish a ssh-tunneled http connection
-        // this is to support https
+        // this is to support https   
         
         // parse HTTP version
         int pos = arg.indexOf(" ");
@@ -695,25 +695,32 @@ public final class httpd implements serverHandler {
             httpVersion = arg.substring(pos + 1);
             arg = arg.substring(0, pos);
         }
+        prop.setProperty(httpd.CONNECTION_PROP_HTTP_VER, httpVersion);
         
-        if (!(allowProxy)) {
-            // not authorized through firewall blocking (ip does not match filter)
-            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
-            return serverCore.TERMINATE_CONNECTION;
-        }
-        
-        // parse port
+        // parse hostname and port
+        prop.setProperty(httpd.CONNECTION_PROP_HOST, arg);
         pos = arg.indexOf(":");
         int port = 443;
         if (pos >= 0) {
             port = Integer.parseInt(arg.substring(pos + 1));
             arg = arg.substring(0, pos);
-        }
+        }       
         
-        // arg is now the host string
+        // setting other connection properties
+        prop.setProperty(httpd.CONNECTION_PROP_CLIENTIP, this.clientIP);
+        prop.setProperty(httpd.CONNECTION_PROP_METHOD, httpHeader.METHOD_CONNECT);
+        prop.setProperty(httpd.CONNECTION_PROP_PATH, "/");
+        prop.setProperty(httpd.CONNECTION_PROP_EXT, "");
+        prop.setProperty(httpd.CONNECTION_PROP_URL, "");        
         
         // parse remaining lines
-        httpHeader header = readHeader();
+        httpHeader header = readHeader();                
+        
+        if (!(allowProxy)) {
+            // not authorized through firewall blocking (ip does not match filter)          
+            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
+            return serverCore.TERMINATE_CONNECTION;
+        }        
         
         if (port != 443) {
             // security: connection only to ssl port
@@ -722,12 +729,6 @@ public final class httpd implements serverHandler {
                     serverCore.crlfString + serverCore.crlfString).getBytes());
             return serverCore.TERMINATE_CONNECTION;
         }
-        
-        // prepare to pass values
-        Properties prop = new Properties();
-        prop.setProperty("HOST", arg);
-        prop.setProperty("PORT", Integer.toString(port));
-        prop.setProperty("HTTP", httpVersion);
         
         // pass to proxy
         if (allowProxy) {
@@ -1119,8 +1120,9 @@ public final class httpd implements serverHandler {
             
             // generating the desired request url
             String host = conProp.getProperty(httpd.CONNECTION_PROP_HOST);
-            String path = conProp.getProperty(httpd.CONNECTION_PROP_PATH);
+            String path = conProp.getProperty(httpd.CONNECTION_PROP_PATH,"/");
             String args = conProp.getProperty(httpd.CONNECTION_PROP_ARGS);
+            String method = conProp.getProperty(httpd.CONNECTION_PROP_METHOD);
             
             int port = 80, pos = host.indexOf(":");        
             if (pos != -1) {
@@ -1130,7 +1132,7 @@ public final class httpd implements serverHandler {
             
             String urlString;
             try {
-                urlString = (new URL("http", host, port, (args == null) ? path : path + "?" + args)).toString();
+                urlString = (new URL((method.equals(httpHeader.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
             } catch (MalformedURLException e) {
                 urlString = "invalid URL"; 
             }            

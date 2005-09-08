@@ -1014,11 +1014,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         this.connectionProperties = conProp;
         switchboard.proxyLastAccess = System.currentTimeMillis();
         
-        String host = conProp.getProperty("HOST");
-        int    port = Integer.parseInt(conProp.getProperty("PORT"));
-        String httpVersion = conProp.getProperty("HTTP");
+        String host = conProp.getProperty(httpd.CONNECTION_PROP_HOST);
+        String httpVersion = conProp.getProperty(httpd.CONNECTION_PROP_HTTP_VER);
         int timeout = Integer.parseInt(switchboard.getConfig("clientTimeout", "10000"));
         
+        int port, pos;
+        if ((pos = host.indexOf(":")) < 0) {
+            port = 80;
+        } else {
+            port = Integer.parseInt(host.substring(pos + 1));
+            host = host.substring(0, pos);
+        }                
         
         // check the blacklist
         // blacklist idea inspired by [AS]:
