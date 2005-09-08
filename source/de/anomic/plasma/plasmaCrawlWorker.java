@@ -311,6 +311,9 @@ public final class plasmaCrawlWorker extends Thread {
                     name, "denied_(url_in_blacklist)", new bitfield(plasmaURL.urlFlagLength), true);
         }            
         
+        // TODO: resolve yacy and yacyh domains
+        String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
+        
         // set referrer; in some case advertise a little bit:
         referer = (referer == null) ? "" : referer.trim();
         if (referer.length() == 0) referer = "http://www.yacy.net/yacy/";
@@ -480,7 +483,9 @@ public final class plasmaCrawlWorker extends Thread {
                 "Pausing crawlers. ");
                 plasmaCrawlLoader.switchboard.pauseCrawling();
             } else if ((errorMsg != null) && (errorMsg.indexOf("Network is unreachable") >=0)) {
-                log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + url.toString() + "'. ");                             
+                log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + url.toString() + "'. ");
+            } else if ((errorMsg != null) && (errorMsg.indexOf("No trusted certificate found")>= 0)) {
+                log.logSevere("CRAWLER No trusted certificate found for URL '" + url.toString() + "'. ");
             } else {
                 log.logSevere("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
             }
