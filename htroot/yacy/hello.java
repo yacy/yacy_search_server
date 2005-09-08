@@ -159,7 +159,7 @@ public class hello {
         seeds += "seed0=" + yacyCore.seedDB.mySeed.genSeedStr(key) + serverCore.crlfString;
         
         // attach some more seeds, as requested
-        if (yacyCore.seedDB != null) {
+        if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected()>0)) {
             if (count > yacyCore.seedDB.sizeConnected()) count = yacyCore.seedDB.sizeConnected();
             if (count > 100) count = 100;
             yacySeed[] ys = yacyCore.seedDB.seedsByAge(true, count); // latest seeds
