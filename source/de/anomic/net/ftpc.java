@@ -41,6 +41,7 @@
 
 package de.anomic.net;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -1188,7 +1189,7 @@ cd ..
     try {
       ControlSocket = new Socket(cmd[1], port);
       clientInput  = new BufferedReader(new InputStreamReader(ControlSocket.getInputStream()));
-      clientOutput = new DataOutputStream(ControlSocket.getOutputStream());
+      clientOutput = new DataOutputStream(new BufferedOutputStream(ControlSocket.getOutputStream()));
 
       // read greeting
       receive();    
