@@ -11,11 +11,13 @@
 # CONFIG  regular system status information (i.e. start-up messages)
 # FINE  in-function status debug output
 PARSER.level = INFO
+PROXY.level = INFO
 YACY.level = INFO
 HTCACHE.level = INFO
 PLASMA.level = INFO
 SERVER.level = INFO
 WORDMIGRATION.level = FINE
+FILEHANDLER.level = INFO
 
 # List of global handlers
 handlers = java.util.logging.FileHandler,\
