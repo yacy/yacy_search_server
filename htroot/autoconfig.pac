@@ -4,7 +4,11 @@ function FindProxyForURL(url,host) {
 	{
 		return "DIRECT";
 	    
-	} else  {
+	} 
+	else if (url.substring(0, 4) == "ftp:") {
+                return "DIRECT";
+            }
+	else  {
 		return "PROXY #[host]#:#[port]#, DIRECT";
 	}
 }
