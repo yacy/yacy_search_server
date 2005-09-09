@@ -50,7 +50,7 @@ public class enumerateFiles implements Enumeration {
     // implements iterative search through recursively defined subdirectories
     // and return all paths to the files
     
-    private ArrayList hierarchy; // contains TreeSet elements, earch TreeSet contains File Entries
+    private ArrayList hierarchy; // contains TreeSet elements, each TreeSet contains File Entries
     private boolean incOrder;    // if true, the smallest value is returned first
     private Object buffer;       // the prefetch-buffer
     private boolean return_files;

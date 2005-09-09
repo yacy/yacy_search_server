@@ -73,7 +73,7 @@ public class bbCode {
 	return output;
 	}
 	
-	/**Parses parts of bbCode (to-do: [Img],[URL],[List],[List=]).
+	/**Parses parts of bbCode (TODO: [Img],[URL],[List],[List=]).
 	*@author Alexander Schier
 	*@author Roland Ramthun
 	*@return String

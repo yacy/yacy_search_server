@@ -61,7 +61,7 @@ public class yacySeedUploadFtp implements yacySeedUploader {
     
     public String uploadSeedFile (serverSwitch sb, yacySeedDB seedDB, File seedFile) throws Exception {
         try {        
-            if (sb == null) throw new NullPointerException("Reference to serverSwitch nut not be null.");
+            if (sb == null) throw new NullPointerException("Reference to serverSwitch must not be null.");
             if (seedDB == null) throw new NullPointerException("Reference to seedDB must not be null.");
             if ((seedFile == null)||(!seedFile.exists())) throw new Exception("Seed file does not exist.");
             
