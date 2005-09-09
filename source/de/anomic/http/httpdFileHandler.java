@@ -74,6 +74,7 @@
 
 package de.anomic.http;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -81,6 +82,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.MessageDigest;
@@ -88,9 +90,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.zip.GZIPOutputStream;
 
 import de.anomic.server.serverClassLoader;
@@ -109,12 +113,18 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     private File htRootPath = null;
     private File htDocsPath = null;
     private File htTemplatePath = null;
-    private HashMap templates = null;
+    private static final HashMap templates = new HashMap();
     private String[] defaultFiles = null;
     private File htDefaultPath = null;
     private File htLocalePath = null;
     private serverSwitch switchboard;
     private MessageDigest md5Digest = null;
+    
+    /**
+     * Template Cache
+     * @param switchboard
+     */
+    private static final HashMap templateCache = new HashMap();
     
     public httpdFileHandler(serverSwitch switchboard) {
         this.switchboard = switchboard;
@@ -159,7 +169,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
             if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
         }
-        if (templates == null) templates = loadTemplates(htTemplatePath);
+        if (templates.size() == 0) templates.putAll(loadTemplates(htTemplatePath));
         
         // create htLocaleDefault, htLocalePath
         if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
@@ -235,7 +245,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         
         // check hack attacks in path
         if (path.indexOf("..") >= 0) {
-            httpd.sendRespondHeader(conProp,out,httpVersion,403,getDefaultHeaders());
+            httpd.sendRespondError(conProp,out,4,403,null,"Access not allowed",null);
             return;
         }
         
@@ -284,7 +294,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             (adminAccountBase64MD5.length() != 0) &&
             (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6))))) {
             // remove brute-force flag
-            serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+            serverCore.bfHost.remove(conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP));
         }
         
         // parse arguments
@@ -327,8 +337,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             argc = httpd.parseArgs(args, argsString);
         }
         
-        //if (args != null) System.out.println("***ARGS=" + args.toString()); // DEBUG
-        
         // check for cross site scripting - attacks in request arguments
         if (argc > 0) {
             // check all values for occurrences of script values
@@ -339,7 +347,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 if ((val != null) && (val instanceof String) && (((String) val).indexOf("<script") >= 0)) {
                     // deny request
                     httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null);
-                    //httpd.sendRespondHeader(conProp,out,httpVersion,403,"bad post values",0);
                     return;
                 }
             }
@@ -349,7 +356,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         // the result of value hand-over is in args and argc
         if (path.length() == 0) {
             httpd.sendRespondError(conProp,out,4,400,null,"Bad Request",null);
-            // textMessage(out, 400, "Bad Request\r\n");
             out.flush();
             return;
         }
@@ -460,14 +466,46 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     }
                     // read templates
                     tp.putAll(templates);
+                    
                     // rewrite the file
                     ByteArrayOutputStream o = null;
-                    FileInputStream fis = null;
+                    InputStream fis = null;
                     GZIPOutputStream zippedOut = null;
                     try {
+                        // do fileCaching here
+                        byte[] templateContent = null;
+                        long fileSize = localizedFile.length();
+                        if (fileSize <= 512*1024) {
+                            SoftReference ref = (SoftReference) templateCache.get(localizedFile);
+                            if (ref != null) {
+                                templateContent = (byte[]) ref.get();
+                                if (templateContent == null) 
+                                    templateCache.remove(localizedFile);                               
+                            }
+                            
+                            if (templateContent == null) {
+                                // loading the content of the template file into a byte array
+                                templateContent = serverFileUtils.read(localizedFile);
+                                
+                                // storing the content into the cache
+                                ref = new SoftReference(templateContent);
+                                templateCache.put(localizedFile,ref);
+                                if (this.theLogger.isLoggable(Level.FINEST))
+                                    this.theLogger.logFinest("Cache MISS for file " + localizedFile);
+                            } else {
+                                if (this.theLogger.isLoggable(Level.FINEST))
+                                    this.theLogger.logFinest("Cache HIT for file " + localizedFile);
+                            }
+                            
+                            // creating an inputstream needed by the template rewrite function
+                            fis = new ByteArrayInputStream(templateContent);                            
+                            templateContent = null;
+                        } else {
+                            fis = new FileInputStream(localizedFile);
+                        }
+
                         o = new ByteArrayOutputStream();
                         if (zipContent) zippedOut = new GZIPOutputStream(o);
-                        fis = new FileInputStream(localizedFile);
                         httpTemplate.writeTemplate(fis, (zipContent) ? (OutputStream)zippedOut: (OutputStream)o, tp, "-UNRESOLVED_PATTERN-".getBytes());
                         if (zipContent) {
                             zippedOut.finish();
@@ -490,7 +528,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     } finally {
                         if (zippedOut != null) try {zippedOut.close();} catch(Exception e) {}
                         if (o != null) try {o.close(); o = null;} catch(Exception e) {}
-                        if (fis != null) try {fis.close();} catch(Exception e) {}
+                        if (fis != null) try {fis.close(); fis=null;} catch(Exception e) {}
                     }
                     
                 } else { // no html                    
