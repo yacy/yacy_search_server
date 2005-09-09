@@ -103,6 +103,10 @@ public final class serverLog {
     public void logFinest(String message) {this.theLogger.finest(message);}
     public void logFinest(String message, Throwable thrown) {this.theLogger.log(Level.FINEST,message,thrown);}      
     
+    public boolean isLoggable(Level level) {
+        return this.theLogger.isLoggable(level);
+    }
+    
     // static log messages: log everything
     private static void log(String appName, int messageLevel, String message) {
         Logger.getLogger(appName).log(Level.parse(Integer.toString(messageLevel)),message);
