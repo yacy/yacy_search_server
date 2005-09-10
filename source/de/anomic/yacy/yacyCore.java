@@ -52,7 +52,6 @@
 // contributions:
 // principal peer status via file generation by Alexander Schier [AS]
 
-
 package de.anomic.yacy;
 
 import java.io.File;
@@ -111,19 +110,19 @@ public class yacyCore {
     public static SimpleDateFormat shortFormatter = new SimpleDateFormat(universalDateShortPattern);
     
     public static long universalTime() {
-	return universalDate().getTime();
+    return universalDate().getTime();
     }
 
     public static Date universalDate() {
-	return new GregorianCalendar(GMTTimeZone).getTime();
+    return new GregorianCalendar(GMTTimeZone).getTime();
     }
 
     public static String universalDateShortString() {
-	return universalDateShortString(universalDate());
+    return universalDateShortString(universalDate());
     }
 
     public static String universalDateShortString(Date date) {
-	return shortFormatter.format(date);
+    return shortFormatter.format(date);
     }
 
     public static Date parseUniversalDate(String remoteTimeString) {
@@ -131,6 +130,7 @@ public class yacyCore {
         try {
             return yacyCore.shortFormatter.parse(remoteTimeString);
         } catch (java.text.ParseException e) {
+            log.logFinest("parseUniversalDate remoteTimeString=[" + remoteTimeString + "]");
             return new Date();
         }
     }
@@ -207,12 +207,12 @@ public class yacyCore {
 
     
     synchronized static public void triggerOnlineAction() {
-	lastOnlineTime = universalTime();
+    lastOnlineTime = universalTime();
     }
 
     public boolean online() {
-	this.onlineMode = Integer.parseInt(switchboard.getConfig("onlineMode", "1"));
-	return ((onlineMode == 2) || ((universalTime() - lastOnlineTime) < 10000));
+    this.onlineMode = Integer.parseInt(switchboard.getConfig("onlineMode", "1"));
+    return ((onlineMode == 2) || ((universalTime() - lastOnlineTime) < 10000));
     }
 
     public void loadSeeds() {
