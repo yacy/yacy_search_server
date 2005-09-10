@@ -65,10 +65,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
-import java.util.StringTokenizer;
-
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
@@ -87,20 +86,25 @@ public class yacySeed {
     
     // class variables
     public String hash;
-    private Map dna;
+    private final Hashtable dna = new Hashtable(25);
     public int available;
     public int selectscore = -1; // only for debugging
 
     public yacySeed(String hash, Map dna) {
-	// create a seed with a pre-defined hash map
-	this.hash = hash;
-	this.dna = dna;
+        // create a seed with a pre-defined hash map
+        this.hash = hash;
+        this.dna.putAll(dna);
         this.available = 0;
     }
+    
+    public yacySeed(String hash, Hashtable dna) {
+        // create a seed with a pre-defined hash table
+        this.hash = hash;
+        this.dna.putAll(dna);
+        this.available = 0;
+    }    
 
     public yacySeed(String hash) {
-	dna = new HashMap();
-
 	// settings that can only be computed by originating peer:
 	// at first startup -
 	this.hash = hash;                // the hash key of the peer - very important. should be static somehow, even after restart
@@ -364,15 +368,16 @@ public class yacySeed {
 
     public String toString() {
         String s = null;
-        synchronized (dna) {
-            // set hash into seed code structure
-            dna.put("Hash", this.hash);
-            // generate string representation
-            s = dna.toString();
-            // reconstruct original: hash is stored external
-            dna.remove("Hash");
-            // return string
-        }
+        
+        Hashtable dnaClone = (Hashtable) dna.clone();
+        
+        // set hash into seed code structure
+        dnaClone.put("Hash", this.hash);
+        
+        // generate string representation
+        s = dnaClone.toString();
+        
+        // return string
         return s;
     }
 
@@ -413,7 +418,7 @@ public class yacySeed {
     }
 
     public Object clone() {
-	return new yacySeed(this.hash, (HashMap) (new HashMap(dna)).clone());
+	return new yacySeed(this.hash, (Hashtable)dna.clone());
     }
 
     /*
