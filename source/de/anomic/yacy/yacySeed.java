@@ -156,7 +156,7 @@ public class yacySeed {
     }
 
     public Map getMap() {
-	return dna;
+	return (Hashtable) dna.clone();
     }
     
     public String getName() {

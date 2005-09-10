@@ -64,7 +64,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.disorderHeap;
 
-public class yacySeedDB {
+public final class yacySeedDB {
     
     // global statics
     public static final int commonHashLength = 12;
@@ -84,10 +84,10 @@ public class yacySeedDB {
     private kelondroMap seedActiveDB, seedPassiveDB, seedPotentialDB;
     private int seedDBBufferKB;
     
-    public  plasmaSwitchboard sb;
+    public  final plasmaSwitchboard sb;
     public  yacySeed mySeed; // my own seed
-    public  File myOwnSeedFile;
-    private Hashtable nameLookupCache;
+    public  final File myOwnSeedFile;
+    private final Hashtable nameLookupCache;
     
     
     public yacySeedDB(plasmaSwitchboard sb,
@@ -341,23 +341,23 @@ public class yacySeedDB {
     public long countPotentialRWI() { return seedPotentialDB.getAcc("ICount"); }
 
     public synchronized void addConnected(yacySeed seed) {
-	if ((seed == null) || (seed.isProper() != null)) return;
+        if ((seed == null) || (seed.isProper() != null)) return;
         //seed.put("LastSeen", yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             nameLookupCache.put(seed.getName(), seed);
-	    seedActiveDB.set(seed.hash, seed.getMap());
+            seedActiveDB.set(seed.hash, seed.getMap());
             seedPassiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
-	} catch (IOException e){
+        } catch (IOException e){
             yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-	    seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);            
-	} catch (kelondroException e){
-	    yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-	    seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);            
+            seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);            
+        } catch (kelondroException e){
+            yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);            
         } catch (IllegalArgumentException e) {
-	    yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-	    seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
-	}
+            yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
+        }
     }
     
     public synchronized void addDisconnected(yacySeed seed) {

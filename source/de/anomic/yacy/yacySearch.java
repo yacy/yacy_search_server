@@ -140,7 +140,7 @@ public class yacySearch extends Thread {
             seed = (yacySeed) dhtEnum.nextElement();
             if (seed == null) continue;
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
-            serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.getMap().get("ICount") + ", score " + score);
+            serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.get("ICount","") + ", score " + score);
             ranking.addScore(seed.hash, score);
             seeds.put(seed.hash, seed);
             c--;
