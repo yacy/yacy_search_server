@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.NoRouteToHostException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -452,7 +453,9 @@ public final class plasmaCrawlWorker extends Thread {
             String errorMsg = e.getMessage();
             
             if (e instanceof MalformedURLException) {
-                log.logWarning("CRAWLER Malformed URL '" + url.toString() + "' detected. ");                    
+                log.logWarning("CRAWLER Malformed URL '" + url.toString() + "' detected. ");    
+            } else if (e instanceof NoRouteToHostException) {
+                log.logWarning("CRAWLER No route to host found while trying to crawl URL  '" + url.toString() + "'."); 
             } else if ((e instanceof UnknownHostException) || 
                        ((errorMsg != null) && (errorMsg.indexOf("unknown host") >= 0))) {                    
                 log.logWarning("CRAWLER Unknown host in URL '" + url.toString() + "'. " +
