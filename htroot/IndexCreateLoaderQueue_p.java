@@ -80,21 +80,22 @@ public class IndexCreateLoaderQueue_p {
             Thread[] threadList = new Thread[threadCount*2];
             threadCount = loaderThreads.enumerate(threadList);
             yacySeed initiator;
-            int i;
+            int i, count = 0;
             for (i = 0; i < threadCount; i++)  {
                 plasmaCrawlWorker theWorker = (plasmaCrawlWorker)threadList[i];
                 plasmaCrawlLoaderMessage theMsg = theWorker.theMsg;
                 if (theMsg == null) continue;
                 
                 initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
-                prop.put("loader-set_list_"+i+"_dark", ((dark) ? 1 : 0) );
-                prop.put("loader-set_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
-                prop.put("loader-set_list_"+i+"_depth", theMsg.depth );
-                prop.put("loader-set_list_"+i+"_url", theMsg.url ); // null pointer exception here !!! maybe url = null; check reason.
+                prop.put("loader-set_list_"+count+"_dark", ((dark) ? 1 : 0) );
+                prop.put("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
+                prop.put("loader-set_list_"+count+"_depth", theMsg.depth );
+                prop.put("loader-set_list_"+count+"_url", theMsg.url ); // null pointer exception here !!! maybe url = null; check reason.
                 dark = !dark;
+                count++;
             }
-            prop.put("loader-set_list", i );
-            prop.put("loader-set_num", i);
+            prop.put("loader-set_list", count );
+            prop.put("loader-set_num", count);
         }
                 
         // return rewrite properties
