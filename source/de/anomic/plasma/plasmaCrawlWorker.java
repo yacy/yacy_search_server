@@ -155,6 +155,7 @@ public final class plasmaCrawlWorker extends Thread {
     }
 
     public void reset() {
+        this.theMsg = null;
         this.url = null;
         this.referer = null;
         this.initiator = null;
