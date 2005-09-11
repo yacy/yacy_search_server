@@ -7,8 +7,9 @@
 //
 // This File is contributed by Alexander Schier
 //
-// last major change: $LastChangedDate$ by $LastChangedBy$
-// Revision: $LastChangedRevision$
+// $Date$
+// $Author$
+// $Revision$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -154,7 +155,7 @@ public class Blacklist_p {
 
         // Read the List
         final Vector list = listManager.getListArray(new File(listManager.listsPath, filename));
-        final StringBuffer out = new StringBuffer(list.size() * 128);
+        final StringBuffer out = new StringBuffer(list.size() * 64);
         final Iterator iter = list.iterator();
         while (iter.hasNext()){
             line = (String) iter.next();
