@@ -6,7 +6,9 @@
 // Frankfurt, Germany, 2004
 //
 // This File is contributed by Alexander Schier
-// last change: 02.08.2004
+//
+// last major change: $LastChangedDate$ by $LastChangedBy$
+// Revision: $LastChangedRevision$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,7 +44,7 @@
 // Contributions and changes to the program code must be marked as such.
 
 // You must compile this file with
-// javac -classpath .:../Classes Blacklist_p.java
+// javac -classpath .:../classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
 import java.io.File;
@@ -50,10 +52,8 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Vector;
-
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -62,205 +62,197 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class Blacklist_p {
+    private final static String BLACKLIST        = "blackLists_";
+    private final static String BLACKLIST_ALL    = "proxyBlackLists";
+    private final static String BLACKLIST_ACTIVE = "proxyBlackListsActive";
+    private final static String BLACKLIST_SHARED = "proxyBlackListsShared";
 
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
-	listManager.switchboard = (plasmaSwitchboard) env;
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        // return variable that accumulates replacements
+        listManager.switchboard = (plasmaSwitchboard) env;
+        listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        final serverObjects prop = new serverObjects();
+        String line;
+//      String HTMLout = "";
 
-	listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        String removeItem = "removeme";
+        int numItems = 0;
+        int i; // need below
 
-	serverObjects prop = new serverObjects();
-	String line;
-	String HTMLout = "";
-	String out = "";
-	String removeItem = "removeme";
-	int numItems=0;
-	int i=0;
-	
-	String filenames[] = listManager.getListslistArray("proxyBlackLists");
-	String filename = "";
-	
+        String[] filenames = listManager.getListslistArray(BLACKLIST_ALL);
+        String filename = "";
 
-	if(post != null && post.containsKey("blackLists")){ //Blacklist selected
-		filename = (String)post.get("blackLists");
-	}else if(post != null && post.containsKey("filename")){
-		filename = (String)post.get("filename");
-	}else if(filenames.length > 0){ //first BlackList
-		filename = filenames[0];
-	}else{ //No BlackList
-		//No file
-		filename = ""; //?
-		System.out.println("DEBUG: No Blacklist found");
-	}
-	prop.put("status", 0);//nothing
+        if (post != null) {
+            if (post.containsKey("blackLists")) { // Blacklist selected
+                filename = (String)post.get("blackLists");
+            } else if (post.containsKey("filename")) {
+                filename = (String)post.get("filename");
+            } else if (filenames.length > 0){ // first BlackList
+                filename = filenames[0];
+//          } else { //No BlackList
+//              System.out.println("DEBUG: No Blacklist found");
+            }
+            prop.put("status", 0); // nothing
 
+            // del list
+            if (post.containsKey("dellistbutton")) {
+                final File BlackListFile = new File(listManager.listsPath, filename);
+                BlackListFile.delete();
 
-	//List Management
+                // remove from all BlackLists Lists
+                listManager.removeListFromListslist(BLACKLIST_ALL, filename);
+                listManager.removeListFromListslist(BLACKLIST_ACTIVE, filename);
+                listManager.removeListFromListslist(BLACKLIST_SHARED, filename);
 
-	//Del list
-	if( post != null && post.containsKey("dellistbutton") ){
-
-		File BlackListFile = new File(listManager.listsPath, filename);
-		BlackListFile.delete();
-
-		//Remove from all BlackLists Lists
-		listManager.removeListFromListslist("proxyBlackLists", filename);
-		listManager.removeListFromListslist("proxyBlackListsActive", filename);
-		listManager.removeListFromListslist("proxyBlackListsShared", filename);
-		
-		//reload Blacklists
-		listManager.reloadBlacklists();
-
-		filenames = listManager.getListslistArray("proxyBlackLists");
-		if(filenames.length > 0){
-			filename = filenames[0];
-		}
-	}//del list
-
-	if( post != null && post.containsKey("newlistbutton") ){
-
-		String newList = (String)post.get("newlist");
-		if( !newList.endsWith(".black") ){
-			newList += ".black";
-		}
-
-		filename = newList; //to select it in the returnes Document
-		try{
-			File newFile = new File(listManager.listsPath, newList);
-			newFile.createNewFile();
-		
-			listManager.addListToListslist("proxyBlackLists", newList);
-			listManager.addListToListslist("proxyBlackListsActive", newList);
-			listManager.addListToListslist("proxyBlackListsShared", newList);
-
-		}catch(IOException e){}
-
-	}//newlist
-
-	if( post != null && post.containsKey("activatelistbutton") ){
-			
-		if( listManager.ListInListslist("proxyBlackListsActive", filename) ){ 
-			listManager.removeListFromListslist("proxyBlackListsActive", filename);
-		}else{ //inactive list -> enable
-			listManager.addListToListslist("proxyBlackListsActive", filename);
-		}
-
-		listManager.reloadBlacklists();
-	}
-	
-	if( post != null && post.containsKey("sharelistbutton") ){
-			
-		if( listManager.ListInListslist("proxyBlackListsShared", filename) ){ 
-			//Remove from shared BlackLists
-			listManager.removeListFromListslist("proxyBlackListsShared", filename);
-		}else{ //inactive list -> enable
-			listManager.addListToListslist("proxyBlackListsShared", filename);
-		}
-	}
-	//List Management End
-
-
-
-	Vector list = listManager.getListArray(new File(listManager.listsPath, filename));
-	//remove a Item?
-	if( post != null && post.containsKey("delbutton") && post.containsKey("Itemlist") && !((String)post.get("Itemlist")).equals("") ){
-		removeItem = (String)post.get("Itemlist");
-	}
-
-	//Read the List
-	Iterator it = list.iterator();
-	while(it.hasNext()){
-	    line = (String) it.next();
-
-		if(! (line.startsWith("#") || line.equals("") || line.equals(removeItem)) ){ //Not the item to remove
-			prop.put("Itemlist_"+numItems+"_item", line);
-			numItems++;
-		}
-
-		if(! line.equals(removeItem) ){
-			out += line + serverCore.crlfString; //full list
-		}else{
-			prop.put("status", 1);//removed
-			prop.put("status_item", line);
-			if (listManager.switchboard.urlBlacklist != null)
-			    listManager.switchboard.urlBlacklist.remove(line);
-		}
-	}
-	prop.put("Itemlist", numItems);
-
-	//Add a new Item
-	if( post != null && post.containsKey("addbutton") && !((String)post.get("newItem")).equals("") ){
-		String newItem = (String)post.get("newItem");
-		
-		//clean http://
-		if ( newItem.startsWith("http://") ){
-			newItem = newItem.substring(7);
-		}
-		
-		//append "/.*"
-		int pos = newItem.indexOf("/");
-		if (pos < 0) {
-		    // add default empty path pattern
-		    pos = newItem.length();
-		    newItem = newItem + "/.*";
-		}
-		
-		out += newItem+"\n";
-		
-		prop.put("Itemlist_"+numItems+"_item", newItem);
-		numItems++;
-		prop.put("Itemlist", numItems);
-		
-		prop.put("status", 2);//added
-		prop.put("status_item", newItem);//added
-
-		//add to blacklist
-		if (listManager.switchboard.urlBlacklist != null)
-                    listManager.switchboard.urlBlacklist.add(newItem.substring(0, pos), newItem.substring(pos + 1));
-	}
-	listManager.writeList(new File(listManager.listsPath, filename), out);
-
-	//List known hosts for BlackList retrieval
-	yacySeed seed;
-	if( yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0 ){ //no nullpointer error
-	    Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null);
-            i=0;
-	    while (e.hasMoreElements()) {
-		seed = (yacySeed) e.nextElement();
-                if (seed != null) {
-                    String Hash = seed.hash;
-                    String Name = seed.get("Name", "nameless");
-					prop.put("otherHosts_"+i+"_hash", Hash);
-					prop.put("otherHosts_"+i+"_name", Name);
-					i++;
+                // reload Blacklists
+                listManager.reloadBlacklists();
+                filenames = listManager.getListslistArray(BLACKLIST_ALL);
+                if (filenames.length > 0) {
+                    filename = filenames[0];
                 }
-	    }
-		prop.put("otherHosts", i);
-	}else{
-		//DEBUG: System.out.println("BlackList_p: yacy seed not loaded!");
-	}
-	String BlackLists[] = listManager.getListslistArray("proxyBlackLists");
-	
-	//List BlackLists
-	for(i=0; i <= BlackLists.length -1;i++){
-		prop.put("blackLists_"+i+"_name", BlackLists[i]);
-		prop.put("blackLists_"+i+"_active", 0);
-		prop.put("blackLists_"+i+"_shared", 0);
-		prop.put("blackLists_"+i+"_selected", 0);
-		if( BlackLists[i].equals(filename) ){ //current List
-			prop.put("blackLists_"+i+"_selected", 1);
-		}
-		if( listManager.ListInListslist("proxyBlackListsActive", BlackLists[i]) ){
-			prop.put("blackLists_"+i+"_active", 1);
-		}
-		if( listManager.ListInListslist("proxyBlackListsShared", BlackLists[i]) ){
-			prop.put("blackLists_"+i+"_shared", 1);
-		}
-	}
-	prop.put("blackLists", i);
 
-	prop.put("filename", filename);
-	return prop;
+            // new list
+            } else if (post.containsKey("newlistbutton")) {
+                String newList = (String)post.get("newlist");
+                if (!newList.endsWith(".black")) {
+                    newList += ".black";
+                }
+                filename = newList; //to select it in the returnes Document
+                try {
+                    final File newFile = new File(listManager.listsPath, newList);
+                    newFile.createNewFile();
+                    listManager.addListToListslist(BLACKLIST_ALL, newList);
+                    listManager.addListToListslist(BLACKLIST_ACTIVE, newList);
+                    listManager.addListToListslist(BLACKLIST_SHARED, newList);
+                } catch (IOException e) {}
+
+
+            } else if (post.containsKey("activatelistbutton")) {
+                if( listManager.ListInListslist(BLACKLIST_ACTIVE, filename) ){ 
+                    listManager.removeListFromListslist(BLACKLIST_ACTIVE, filename);
+                } else { // inactive list -> enable
+                    listManager.addListToListslist(BLACKLIST_ACTIVE, filename);
+                }
+                listManager.reloadBlacklists();
+
+            } else if (post.containsKey("sharelistbutton")) {
+                if (listManager.ListInListslist(BLACKLIST_SHARED, filename)) { 
+                    // Remove from shared BlackLists
+                    listManager.removeListFromListslist(BLACKLIST_SHARED, filename);
+                } else { // inactive list -> enable
+                    listManager.addListToListslist(BLACKLIST_SHARED, filename);
+                }
+            } // List Management End
+
+            // remove a Item?
+            if (post.containsKey("delbutton") &&
+                post.containsKey("Itemlist")  &&
+              !((String)post.get("Itemlist")).equals("") ) {
+                removeItem = (String)post.get("Itemlist");
+            }
+        } // post != null   
+
+        // Read the List
+        final Vector list = listManager.getListArray(new File(listManager.listsPath, filename));
+        final StringBuffer out = new StringBuffer(list.size() * 128);
+        final Iterator iter = list.iterator();
+        while (iter.hasNext()){
+            line = (String) iter.next();
+
+            if (!(line.length() == 0 || line.charAt(0) == '#' || line.equals(removeItem))) { //Not the item to remove
+                prop.put("Itemlist_" + numItems + "_item", line);
+                numItems++;
+            }
+
+            if (line.equals(removeItem)) {
+                prop.put("status", 1);//removed
+                prop.put("status_item", line);
+//              if (listManager.switchboard.urlBlacklist != null) {
+//                  listManager.switchboard.urlBlacklist.remove(line);
+                if (plasmaSwitchboard.urlBlacklist != null) {
+                    plasmaSwitchboard.urlBlacklist.remove(line);
+                }
+            } else {
+                out.append(line).append(serverCore.crlfString); //full list
+            }
+        }
+        prop.put("Itemlist", numItems);
+
+        // Add a new Item
+        if (post != null && post.containsKey("addbutton") && !((String)post.get("newItem")).equals("")) {
+            String newItem = (String)post.get("newItem");
+
+            //clean http://
+            if ( newItem.startsWith("http://") ){
+                newItem = newItem.substring(7);
+            }
+
+            //append "/.*"
+            int pos = newItem.indexOf("/");
+            if (pos < 0) {
+                // add default empty path pattern
+                pos = newItem.length();
+                newItem = newItem + "/.*";
+            }
+
+            out.append(newItem).append(serverCore.crlfString);
+
+            prop.put("Itemlist_"+numItems+"_item", newItem);
+            numItems++;
+            prop.put("Itemlist", numItems);
+
+            prop.put("status", 2);//added
+            prop.put("status_item", newItem);//added
+
+            // add to blacklist
+//          if (listManager.switchboard.urlBlacklist != null)
+//              listManager.switchboard.urlBlacklist.add(newItem.substring(0, pos), newItem.substring(pos + 1));
+            if (plasmaSwitchboard.urlBlacklist != null) { 
+                plasmaSwitchboard.urlBlacklist.add(newItem.substring(0, pos), newItem.substring(pos + 1));
+            }
+        }
+        listManager.writeList(new File(listManager.listsPath, filename), out.toString());
+
+        // List known hosts for BlackList retrieval
+        yacySeed seed;
+        if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) { // no nullpointer error
+            final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null);
+            i = 0;
+            while (e.hasMoreElements()) {
+                seed = (yacySeed) e.nextElement();
+                if (seed != null) {
+                    final String Hash = seed.hash;
+                    final String Name = seed.get("Name", "nameless");
+                    prop.put("otherHosts_" + i + "_hash", Hash);
+                    prop.put("otherHosts_" + i + "_name", Name);
+                    i++;
+                }
+            }
+            prop.put("otherHosts", i);
+//      } else {
+//          System.out.println("BlackList_p: yacy seed not loaded!"); // DEBUG: 
+        }
+
+        // List BlackLists
+        final String[] BlackLists = listManager.getListslistArray(BLACKLIST_ALL);
+        for (i = 0; i <= BlackLists.length - 1; i++) {
+            prop.put(BLACKLIST + i + "_name", BlackLists[i]);
+            prop.put(BLACKLIST + i + "_active", 0);
+            prop.put(BLACKLIST + i + "_shared", 0);
+            prop.put(BLACKLIST + i + "_selected", 0);
+            if (BlackLists[i].equals(filename)) { //current List
+                prop.put(BLACKLIST + i + "_selected", 1);
+            }
+            if (listManager.ListInListslist(BLACKLIST_ACTIVE, BlackLists[i])) {
+                prop.put(BLACKLIST + i + "_active", 1);
+            }
+            if (listManager.ListInListslist(BLACKLIST_SHARED, BlackLists[i])) {
+                prop.put(BLACKLIST + i + "_shared", 1);
+            }
+        }
+        prop.put("blackLists", i);
+        prop.put("filename", filename);
+        return prop;
     }
 
 }
