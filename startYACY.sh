@@ -7,6 +7,12 @@ then
 else
 	cd `dirname $0`
 	
+	#get javastart args
+	java_args=""
+	for i in $(grep javastart DATA/SETTINGS/httpProxy.conf);
+	do  i="${i#javastart_*=}";java_args=-$i" "$java_args;
+	done
+	
 	# generating the proper classpath
 	CLASSPATH=""
 	for N in `ls -1 lib/*.jar`; do CLASSPATH="$CLASSPATH$N:"; done	
@@ -14,13 +20,13 @@ else
 	
 	if [ x$1 == x-d ] #debug
 	then
-		java -classpath classes:$CLASSPATH yacy
+		java $java_args -classpath classes:$CLASSPATH yacy
 		exit 0
 	elif [ x$1 == x-l ] #logging
 	then
-		nohup java -classpath classes:htroot:$CLASSPATH yacy >> yacy.log &
+		nohup java $java_args -classpath classes:htroot:$CLASSPATH yacy >> yacy.log &
 	else
-		nohup java -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
+		nohup java $java_args -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
 #		nohup java -Xms160m -Xmx160m -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
 	fi
 	echo "YaCy started as daemon process. View it's activity in DATA/LOG/yacy00.log"
