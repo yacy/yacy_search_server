@@ -630,7 +630,7 @@ public class kelondroRecords {
 			    entryFile.seek(seek);
 			    values[i] = new byte[COLWIDTHS[i]];
 			    entryFile.read(values[i], 0, values[i].length);
-                            if (values[i][0] == 0) values[i] = null;
+                            if (allZero(values[i])) values[i] = null;
 			    seek += COLWIDTHS[i];
 			}
 		    }
@@ -644,7 +644,7 @@ public class kelondroRecords {
 			entryFile.seek(seek);
 			values[i] = new byte[COLWIDTHS[i]];
 			entryFile.read(values[i], 0, values[i].length);
-                        if (values[i][0] == 0) values[i] = null;
+                        if (allZero(values[i])) values[i] = null;
 			seek += COLWIDTHS[i];
 		    }
 		}
@@ -690,6 +690,10 @@ public class kelondroRecords {
 		seek = seek + COLWIDTHS[i];
 	    }
 	}
+        private boolean allZero(byte[] a) {
+            for (int i = 0; i < a.length; i++) if (a[i] != 0) return false;
+            return true;
+        }
 	public String toString() {
 	    if (this.handle.index == NUL) return "NULL";
 	    String s = Integer.toHexString(this.handle.index);
