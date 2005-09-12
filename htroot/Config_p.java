@@ -4,7 +4,7 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// This file created by Alexander Schier
+// This File is contributed by Alexander Schier
 //
 // $LastChangedDate$
 // $LastChangedRevision$
