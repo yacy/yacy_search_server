@@ -588,14 +588,16 @@ public class yacyClient {
         post.put("youare", targetSeed.hash);
         post.put("wordc", Integer.toString(indexes.length));
         int indexcount = 0;
-        String entrypost = "";
+        StringBuffer entrypost = new StringBuffer(indexes.length*73);
         Enumeration eenum;
         plasmaWordIndexEntry entry;
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].elements(true);
             while (eenum.hasMoreElements()) {
                 entry = (plasmaWordIndexEntry) eenum.nextElement();
-                entrypost += indexes[i].wordHash() + entry.toExternalForm() + serverCore.crlfString;
+                entrypost.append(indexes[i].wordHash()) 
+                         .append(entry.toExternalForm()) 
+                         .append(serverCore.crlfString);
                 indexcount++;
             }
         }
@@ -609,7 +611,7 @@ public class yacyClient {
         }
         
         post.put("entryc", Integer.toString(indexcount));
-        post.put("indexes", entrypost);
+        post.put("indexes", entrypost.toString());
         try {
             Vector v = httpc.wput(new URL("http://" + address + "/yacy/transferRWI.html"), 60000, null, null,
             yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort, post);

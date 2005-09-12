@@ -29,10 +29,13 @@ public class plasmaWordIndexDistribution {
     
     private plasmaURLPool urlPool;
     private plasmaWordIndex wordIndex;
-    private serverLog log;
+    serverLog log;
+    boolean paused = false;
     private boolean enabled;
     private boolean enabledWhileCrawling;
     private boolean closed;
+    
+    public transferIndexThread transferIdxThread = null;
     
     public plasmaWordIndexDistribution(plasmaURLPool urlPool, plasmaWordIndex wordIndex, serverLog log,
     boolean enable, boolean enabledWhileCrawling) {
@@ -63,6 +66,9 @@ public class plasmaWordIndexDistribution {
     
     public void close() {
         closed = true;
+        if (transferIdxThread != null) {
+            stopTransferWholeIndex();
+        }
     }
     
     public boolean job() {
@@ -86,6 +92,10 @@ public class plasmaWordIndexDistribution {
         if (!(enabled)) {
             log.logFine("no word distribution: not enabled");
             return false;
+        }
+        if (paused) {
+            log.logFine("no word distribution: paused");
+            return false;            
         }
         if (urlPool.loadedURL.size() < 10) {
             log.logFine("no word distribution: loadedURL.size() = " + urlPool.loadedURL.size());
@@ -227,7 +237,7 @@ public class plasmaWordIndexDistribution {
         return startPointHash;
     }
     
-    private Object[] /* of {plasmaWordIndexEntity[], HashMap(String, plasmaCrawlLURL.Entry)}*/
+    Object[] /* of {plasmaWordIndexEntity[], HashMap(String, plasmaCrawlLURL.Entry)}*/
             selectTransferIndexes(String hash, int count) {
         // the hash is a start hash from where the indexes are picked
         Vector tmpEntities = new Vector();
@@ -332,7 +342,7 @@ public class plasmaWordIndexDistribution {
         }
     }
     
-    private boolean deleteTransferIndexes(plasmaWordIndexEntity[] indexEntities) throws IOException {
+    boolean deleteTransferIndexes(plasmaWordIndexEntity[] indexEntities) throws IOException {
         String wordhash;
         Enumeration urlEnum;
         plasmaWordIndexEntry indexEntry;
@@ -380,5 +390,143 @@ public class plasmaWordIndexDistribution {
             indexEntities[i] = null;
         }
         return success;
+    }
+    
+
+    public void startTransferWholeIndex(yacySeed seed, boolean delete) {
+        if (transferIdxThread == null) {
+            this.transferIdxThread = new transferIndexThread(seed,delete);
+            this.transferIdxThread.start();
+        }
+    }    
+    
+    public void stopTransferWholeIndex() {
+        if ((transferIdxThread != null) && (!transferIdxThread.isFinished())) {
+            this.transferIdxThread.stopIt();
+        }
+    }    
+
+    public void abortTransferWholeIndex() {
+        if (transferIdxThread != null) {
+            if (!transferIdxThread.isFinished()) this.transferIdxThread.stopIt();
+            transferIdxThread = null;
+        }
+    } 
+    
+    
+    public class transferIndexThread extends Thread {
+
+        private yacySeed seed = null;
+        private boolean delete = false;
+        private boolean finished = false;
+        private int transferedIndexCount = 0;
+        private String status = "running";
+        private String startPointHash = "------------";
+        
+        public transferIndexThread(yacySeed seed, boolean delete) {
+            this.seed = seed;
+            this.delete = delete;
+        }
+        
+        public void run() {
+            performTransferWholeIndex();
+        }
+        
+        public void stopIt() {
+            this.finished = true;
+        }
+        
+        public boolean isFinished() {
+            return this.finished;
+        }
+        
+        public int getTransferedIndexCount() {
+            return this.transferedIndexCount;
+        }
+        
+        public yacySeed getSeed() {
+            return this.seed;
+        }
+        
+        public String getStatus() {
+            return this.status;
+        }
+        
+        public String getRange() {
+            return "[------------ .. " + startPointHash + "]";
+        }
+        
+        public void performTransferWholeIndex() {
+            try {
+                plasmaWordIndexDistribution.this.paused = true;
+                
+                // collect index                
+                plasmaWordIndexDistribution.this.log.logFine("Selected hash " + startPointHash + " as start point for index distribution of whole index");        
+                
+
+                while (!finished && !Thread.currentThread().isInterrupted()) {
+                    Object[] selectResult = selectTransferIndexes(startPointHash, 500);
+                    plasmaWordIndexEntity[] indexEntities = (plasmaWordIndexEntity[]) selectResult[0];
+                    if (finished || Thread.currentThread().isInterrupted()) {
+                        this.status = "aborted";
+                        return;
+                    }
+                    
+                    HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry 
+                    if ((indexEntities == null) || (indexEntities.length == 0)) {
+                        plasmaWordIndexDistribution.this.log.logFine("No index available for index transfer, hash start-point " + startPointHash);
+                        this.status = "finished.";
+                        return;
+                    }
+                    // count the indexes again, can be smaller as expected
+                    int idxCount = 0;
+                    for (int i = 0; i < indexEntities.length; i++) {
+                        idxCount += indexEntities[i].size();
+                    }
+                    
+                    // find start point for DHT-selection
+                    startPointHash = indexEntities[indexEntities.length - 1].wordHash(); // DHT targets must have greater hashes
+                    
+                    String error;
+                    long start;
+                    
+                    start = System.currentTimeMillis();
+                    error = yacyClient.transferIndex(seed, indexEntities, urlCache);
+                    if (error == null) {
+                        plasmaWordIndexDistribution.this.log.logInfo("Index transfer of " + idxCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "]" +
+                                " to peer " + seed.getName() + ":" + seed.hash + " in " +
+                                ((System.currentTimeMillis() - start) / 1000) + " seconds successfull (" +
+                                (1000 * idxCount / (System.currentTimeMillis() - start + 1)) + " words/s)");                
+                    } else {
+                        plasmaWordIndexDistribution.this.log.logWarning("Index transfer to peer " + seed.getName() + ":" + seed.hash + " failed:'" + error + "', disconnecting peer");
+                        yacyCore.peerActions.peerDeparture(seed);
+                        this.status = "Disconnected peer";
+                        return;
+                    }            
+                    
+                    if (delete) {
+                        try {
+                            if (deleteTransferIndexes(indexEntities)) {
+                                plasmaWordIndexDistribution.this.log.logFine("Deleted all " + indexEntities.length + " transferred whole-word indexes locally");
+                                transferedIndexCount += idxCount;
+                            } else {
+                                plasmaWordIndexDistribution.this.log.logSevere("Deleted not all transferred whole-word indexes");
+                            }
+                        } catch (IOException ee) {
+                            plasmaWordIndexDistribution.this.log.logSevere("Deletion of indexes not possible:" + ee.getMessage(), ee);
+                        }
+                    } else {
+                        // simply close the indexEntities
+                        for (int i = 0; i < indexEntities.length; i++) try {
+                            indexEntities[i].close();
+                        } catch (IOException ee) {}
+                        transferedIndexCount += idxCount;
+                    }
+                }
+                this.status = "aborted";
+            } finally {
+                plasmaWordIndexDistribution.this.paused = false;
+            }
+        }    
     }
 }

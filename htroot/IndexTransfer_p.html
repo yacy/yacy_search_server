@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy '#[clientname]#': Index Control</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Index Transfer</h2>
+
+<form action="IndexTransfer_p.html" method="post" enctype="multipart/form-data">
+<p>The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references</p>
+<p>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small" >Status</td>
+<td class="small" >Transfered Words</td>
+<td class="small" >Words Range</td>
+<td class="small" >Remote Peer</td>
+<td class="small" >Start/Stop Transfer</td>
+</tr>
+#(running)#
+<tr valign="top" class="TableCellLight">
+<td>Not running</td>
+<td align="center">-</td>
+<td align="center">-</td>
+<td>
+	<select name="hostHash">
+	#{hosts}#
+		<option value="#[hosthash]#">#[hostname]#</option>
+	#{/hosts}#
+	</select>
+</td>
+<td>
+	<input type="submit" name="startIndexTransfer" value="Start Index Transfer">
+</td>
+</tr>
+</table></p>
+::
+    <tr class="TableCellLight">
+      <td>#[status]#</td>
+      <td align="right">#[twcount]# (#[twpercent]#%) </td>
+      <td align="rigth"><tt>#[twrange]#</tt></td>
+      <td>#[peerName]#</td>
+      <td>#(stopped)#<input type="submit" name="stopIndexTransfer" value="Stop Index Transfer">::
+                     <input type="submit" name="newIndexTransfer" value="Start New Index Transfer">#(/stopped)#</td>
+    </tr>
+#(/running)#
+  </table> 
+</form>
+
+#[footer]#
+</body>
+</html>
