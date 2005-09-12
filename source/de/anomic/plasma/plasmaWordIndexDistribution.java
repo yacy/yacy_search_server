@@ -476,8 +476,9 @@ public class plasmaWordIndexDistribution {
                 // collect index                
                 plasmaWordIndexDistribution.this.log.logFine("Selected hash " + startPointHash + " as start point for index distribution of whole index");        
                 
-
+                long start;
                 while (!finished && !Thread.currentThread().isInterrupted()) {
+                    start = System.currentTimeMillis();
                     Object[] selectResult = selectTransferIndexes(startPointHash, 500);
                     plasmaWordIndexEntity[] indexEntities = (plasmaWordIndexEntity[]) selectResult[0];
                     if (finished || Thread.currentThread().isInterrupted()) {
@@ -501,11 +502,13 @@ public class plasmaWordIndexDistribution {
                     oldStartingPointHash = startPointHash;
                     startPointHash = indexEntities[indexEntities.length - 1].wordHash(); // DHT targets must have greater hashes
                     
-                    String error;
-                    long start;
+                    plasmaWordIndexDistribution.this.log.logInfo("Index selection of " + idxCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "]" +
+                            " in " +
+                            ((System.currentTimeMillis() - start) / 1000) + " seconds (" +
+                            (1000 * idxCount / (System.currentTimeMillis() - start + 1)) + " words/s)");                     
                     
                     start = System.currentTimeMillis();
-                    error = yacyClient.transferIndex(seed, indexEntities, urlCache);
+                    String error = yacyClient.transferIndex(seed, indexEntities, urlCache);
                     if (error == null) {
                         plasmaWordIndexDistribution.this.log.logInfo("Index transfer of " + idxCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "]" +
                                 " to peer " + seed.getName() + ":" + seed.hash + " in " +
