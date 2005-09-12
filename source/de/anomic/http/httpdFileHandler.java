@@ -454,7 +454,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 
                                 httpHeader headers = getDefaultHeaders();
                                 headers.put(httpHeader.LOCATION,location);
-                                httpd.sendRespondHeader(conProp,out,httpVersion,307,headers);
+                                httpd.sendRespondHeader(conProp,out,httpVersion,302,headers);
                                 return;
                             }
                             // add the application version, the uptime and the client name to every rewrite table
