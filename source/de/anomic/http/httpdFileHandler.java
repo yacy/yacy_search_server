@@ -74,6 +74,7 @@
 
 package de.anomic.http;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -97,6 +98,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.zip.GZIPOutputStream;
 
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -125,6 +127,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
      * @param switchboard
      */
     private static final HashMap templateCache = new HashMap();
+    
+    public static boolean useTemplateCache = false;
+    
+    static {
+        useTemplateCache = plasmaSwitchboard.getSwitchboard().getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
+    }
     
     public httpdFileHandler(serverSwitch switchboard) {
         this.switchboard = switchboard;
@@ -474,34 +482,38 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     try {
                         // do fileCaching here
                         byte[] templateContent = null;
-                        long fileSize = localizedFile.length();
-                        if (fileSize <= 512*1024) {
-                            SoftReference ref = (SoftReference) templateCache.get(localizedFile);
-                            if (ref != null) {
-                                templateContent = (byte[]) ref.get();
-                                if (templateContent == null) 
-                                    templateCache.remove(localizedFile);                               
-                            }
-                            
-                            if (templateContent == null) {
-                                // loading the content of the template file into a byte array
-                                templateContent = serverFileUtils.read(localizedFile);
+                        if (useTemplateCache) {
+                            long fileSize = localizedFile.length();
+                            if (fileSize <= 512*1024) {
+                                SoftReference ref = (SoftReference) templateCache.get(localizedFile);
+                                if (ref != null) {
+                                    templateContent = (byte[]) ref.get();
+                                    if (templateContent == null) 
+                                        templateCache.remove(localizedFile);                               
+                                }
                                 
-                                // storing the content into the cache
-                                ref = new SoftReference(templateContent);
-                                templateCache.put(localizedFile,ref);
-                                if (this.theLogger.isLoggable(Level.FINEST))
-                                    this.theLogger.logFinest("Cache MISS for file " + localizedFile);
+                                if (templateContent == null) {
+                                    // loading the content of the template file into a byte array
+                                    templateContent = serverFileUtils.read(localizedFile);
+                                    
+                                    // storing the content into the cache
+                                    ref = new SoftReference(templateContent);
+                                    templateCache.put(localizedFile,ref);
+                                    if (this.theLogger.isLoggable(Level.FINEST))
+                                        this.theLogger.logFinest("Cache MISS for file " + localizedFile);
+                                } else {
+                                    if (this.theLogger.isLoggable(Level.FINEST))
+                                        this.theLogger.logFinest("Cache HIT for file " + localizedFile);
+                                }
+                                
+                                // creating an inputstream needed by the template rewrite function
+                                fis = new ByteArrayInputStream(templateContent);                            
+                                templateContent = null;
                             } else {
-                                if (this.theLogger.isLoggable(Level.FINEST))
-                                    this.theLogger.logFinest("Cache HIT for file " + localizedFile);
+                                fis = new BufferedInputStream(new FileInputStream(localizedFile));
                             }
-                            
-                            // creating an inputstream needed by the template rewrite function
-                            fis = new ByteArrayInputStream(templateContent);                            
-                            templateContent = null;
                         } else {
-                            fis = new FileInputStream(localizedFile);
+                            fis = new BufferedInputStream(new FileInputStream(localizedFile));
                         }
 
                         o = new ByteArrayOutputStream();

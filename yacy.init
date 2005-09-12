@@ -518,3 +518,5 @@ crawler.MaxIdleThreads = 7
 crawler.MinIdleThreads = 5
 
 useYacyReferer = true
+
+enableTemplateCache = true
