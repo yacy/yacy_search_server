@@ -6,8 +6,9 @@
 // Frankfurt, Germany, 2005
 // This file created by Alexander Schier
 //
-// This File is contributed by Alexander Schier
-// last change: 02.08.2004
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,43 +44,50 @@
 // Contributions and changes to the program code must be marked as such.
 
 // You must compile this file with
-// javac -classpath .:../Classes Config_p.java
+// javac -classpath .:../classes Config_p.java
 // if the shell's current path is HTROOT
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-
+import java.util.List;
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class Config_p {
 
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
-	serverObjects prop = new serverObjects();
-	int count=0;
-	Iterator keys = env.configKeys();
-	String key="";
-	
-	//change a Key
-	if(post != null && post.containsKey("key") && post.containsKey("value")){
-		key=(String)post.get("key");
-		String value=(String)post.get("value");
-		if(!key.equals("")){
-			env.setConfig(key, value);
-		}
-	}
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        // return variable that accumulates replacements
+        final serverObjects prop = new serverObjects();
+        int count=0;
+        Iterator keys = env.configKeys();
+        String key="";
 
-	while(keys.hasNext()){
-		key=(String)keys.next();
-		prop.put("options_"+count+"_key", key);
-		prop.put("options_"+count+"_value", env.getConfig(key, "ERROR"));
-		count++;
-	}
-	prop.put("options", count);
+        //change a Key
+        if(post != null && post.containsKey("key") && post.containsKey("value")){
+            key=(String)post.get("key");
+            final String value=(String)post.get("value");
+            if(!key.equals("")){
+                env.setConfig(key, value);
+            }
+        }
 
-	
-	return prop;
+        final List list = new ArrayList(250);
+        while(keys.hasNext()){
+            list.add(keys.next());
+        }
+        Collections.sort(list);
+        keys = list.iterator();
+        while(keys.hasNext()){
+            key = (String) keys.next();
+            prop.put("options_"+count+"_key", key);
+            prop.put("options_"+count+"_value", env.getConfig(key, "ERROR"));
+            count++;        
+        }
+
+        prop.put("options", count);
+        return prop;
     }
 
 }
