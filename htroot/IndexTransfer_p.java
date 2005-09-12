@@ -69,10 +69,13 @@ public class IndexTransfer_p {
                 
                 switchboard.indexDistribution.startTransferWholeIndex(seed,true);                
             } else if (post.containsKey("stopIndexTransfer")) {
-                switchboard.indexDistribution.stopTransferWholeIndex();
+                switchboard.indexDistribution.stopTransferWholeIndex(true);
+                
             } else if (post.containsKey("newIndexTransfer")) {
-                switchboard.indexDistribution.abortTransferWholeIndex();
+                switchboard.indexDistribution.abortTransferWholeIndex(true);
             }
+            prop.put("LOCATION","");
+            return prop;
         }
         
         
@@ -86,7 +89,7 @@ public class IndexTransfer_p {
             int transferedIdxCount = transfThread.getTransferedIndexCount();
             prop.put("running_status",transfThread.getStatus());
             prop.put("running_twcount",transferedIdxCount);
-            prop.put("running_twpercent",Float.toString(transferedIdxCount*100/wcount));
+            prop.put("running_twpercent",Float.toString(transfThread.getTransferedIndexPercent()));
             prop.put("running_twrange", transfThread.getRange());
             prop.put("running_peerName",transfThread.getSeed().getName());
             prop.put("running_stopped",(transfThread.isFinished()) || (!transfThread.isAlive())?1:0);

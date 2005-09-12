@@ -67,7 +67,7 @@ public class plasmaWordIndexDistribution {
     public void close() {
         closed = true;
         if (transferIdxThread != null) {
-            stopTransferWholeIndex();
+            stopTransferWholeIndex(false);
         }
     }
     
@@ -400,15 +400,20 @@ public class plasmaWordIndexDistribution {
         }
     }    
     
-    public void stopTransferWholeIndex() {
-        if ((transferIdxThread != null) && (!transferIdxThread.isFinished())) {
-            this.transferIdxThread.stopIt();
+    public void stopTransferWholeIndex(boolean wait) {
+        if ((transferIdxThread != null) && (transferIdxThread.isAlive()) && (!transferIdxThread.isFinished())) {
+            try {
+                this.transferIdxThread.stopIt(wait);
+            } catch (InterruptedException e) { }
         }
     }    
 
-    public void abortTransferWholeIndex() {
+    public void abortTransferWholeIndex(boolean wait) {
         if (transferIdxThread != null) {
-            if (!transferIdxThread.isFinished()) this.transferIdxThread.stopIt();
+            if (!transferIdxThread.isFinished())
+                try {
+                    this.transferIdxThread.stopIt(wait);
+                } catch (InterruptedException e) { }
             transferIdxThread = null;
         }
     } 
@@ -421,19 +426,22 @@ public class plasmaWordIndexDistribution {
         private boolean finished = false;
         private int transferedIndexCount = 0;
         private String status = "running";
-        private String startPointHash = "------------";
+        private String oldStartingPointHash = "------------", startPointHash = "------------";
+        private int wordsDBSize = 0;
         
         public transferIndexThread(yacySeed seed, boolean delete) {
             this.seed = seed;
             this.delete = delete;
+            this.wordsDBSize = plasmaSwitchboard.getSwitchboard().wordIndex.size();
         }
         
         public void run() {
             performTransferWholeIndex();
         }
         
-        public void stopIt() {
+        public void stopIt(boolean wait) throws InterruptedException {
             this.finished = true;
+            this.join();
         }
         
         public boolean isFinished() {
@@ -442,6 +450,11 @@ public class plasmaWordIndexDistribution {
         
         public int getTransferedIndexCount() {
             return this.transferedIndexCount;
+        }
+        
+        public float getTransferedIndexPercent() {
+            if (wordsDBSize == 0) return 100;
+            else return (float)(this.transferedIndexCount*100/wordsDBSize);
         }
         
         public yacySeed getSeed() {
@@ -453,7 +466,7 @@ public class plasmaWordIndexDistribution {
         }
         
         public String getRange() {
-            return "[------------ .. " + startPointHash + "]";
+            return "[" + oldStartingPointHash + " .. " + startPointHash + "]";
         }
         
         public void performTransferWholeIndex() {
@@ -485,6 +498,7 @@ public class plasmaWordIndexDistribution {
                     }
                     
                     // find start point for DHT-selection
+                    oldStartingPointHash = startPointHash;
                     startPointHash = indexEntities[indexEntities.length - 1].wordHash(); // DHT targets must have greater hashes
                     
                     String error;
