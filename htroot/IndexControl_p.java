@@ -50,6 +50,9 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.TreeMap;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
@@ -309,20 +312,27 @@ public class IndexControl_p {
         //List known hosts
 	yacySeed seed;
         int hc = 0;
-	if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected() > 0)) {
-	    Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(keyhash);
-	    while (e.hasMoreElements()) {
-		seed = (yacySeed) e.nextElement();
-                if (seed != null) {
-                    prop.put("hosts_" + hc + "_hosthash", seed.hash);
-                    prop.put("hosts_" + hc + "_hostname", /*seed.hash + " " +*/ seed.get("Name", "nameless"));
-                    hc++;
+        if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected() > 0)) {
+            Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(keyhash);
+            TreeMap hostList = new TreeMap();
+            while (e.hasMoreElements()) {
+                seed = (yacySeed) e.nextElement();
+                if (seed != null) hostList.put(seed.get("Name", "nameless"),seed.hash);
+            }
+            
+            String hostName = null;
+            try {
+                while ((hostName = (String) hostList.firstKey()) != null) {
+                    prop.put("hosts_" + hc + "_hosthash", hostList.get(hostName));
+                    prop.put("hosts_" + hc + "_hostname", /*seed.hash + " " +*/ hostName);
+                    hc++;                
+                    hostList.remove(hostName);
                 }
-	    }
+            } catch (NoSuchElementException ex) {}
             prop.put("hosts", Integer.toString(hc));
-	} else {
+        } else {
             prop.put("hosts", "0");
-	}
+        }
         
         // insert constants
         prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
