@@ -94,6 +94,7 @@ public class IndexTransfer_p {
             prop.put("running_twcount",transferedIdxCount);
             prop.put("running_twpercent",Float.toString(transfThread.getTransferedIndexPercent()));
             prop.put("running_twrange", transfThread.getRange());
+            prop.put("running_twchunk", Integer.toString(transfThread.getChunkSize()));
             prop.put("running_peerName",transfThread.getSeed().getName());
             prop.put("running_stopped",(transfThread.isFinished()) || (!transfThread.isAlive())?1:0);
         }

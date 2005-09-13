@@ -460,7 +460,6 @@ public class plasmaWordIndexDistribution {
     
     
     public class transferIndexThread extends Thread {
-
         private yacySeed seed = null;
         private boolean delete = false;
         private boolean finished = false;
@@ -468,12 +467,13 @@ public class plasmaWordIndexDistribution {
         private String status = "running";
         private String oldStartingPointHash = "------------", startPointHash = "------------";
         private int wordsDBSize = 0;
+        private int chunkSize = 500;
         
         public transferIndexThread(yacySeed seed, boolean delete) {
+            super(new ThreadGroup("TransferIndexThreadGroup"),"TransferIndex_" + seed.getName());
             this.seed = seed;
             this.delete = delete;
-            this.wordsDBSize = plasmaSwitchboard.getSwitchboard().wordIndex.size();
-            this.setName("TransferIndex_" + seed.getName());           
+            this.wordsDBSize = plasmaSwitchboard.getSwitchboard().wordIndex.size();           
         }
         
         public void run() {
@@ -487,6 +487,10 @@ public class plasmaWordIndexDistribution {
         
         public boolean isFinished() {
             return this.finished;
+        }
+        
+        public int getChunkSize() {
+            return this.chunkSize;
         }
         
         public int getTransferedIndexCount() {
@@ -528,7 +532,7 @@ public class plasmaWordIndexDistribution {
                     start = System.currentTimeMillis();
                     
                     // selecting 500 words to transfer
-                    Object[] selectResult = selectTransferIndexes(startPointHash, 500);
+                    Object[] selectResult = selectTransferIndexes(startPointHash, chunkSize);
                     plasmaWordIndexEntity[] indexEntities = (plasmaWordIndexEntity[]) selectResult[0];                    
                     
                     HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry 
@@ -562,11 +566,18 @@ public class plasmaWordIndexDistribution {
                         String error = yacyClient.transferIndex(seed, indexEntities, urlCache);
                         if (error == null) {
                             // words successfully transfered
+                            long transferTime = System.currentTimeMillis() - start;
                             plasmaWordIndexDistribution.this.log.logInfo("Index transfer of " + idxCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "]" +
-                                    " to peer " + seed.getName() + ":" + seed.hash + " in " +
-                                    ((System.currentTimeMillis() - start) / 1000) + " seconds successfull (" +
-                                    (1000 * idxCount / (System.currentTimeMillis() - start + 1)) + " words/s)");
+                                    " to peer " + seed.getName() + ":" + seed.hash + " in " + (transferTime/1000) + " seconds successfull (" +
+                                    (1000 * idxCount / (transferTime + 1)) + " words/s)");
                             retryCount = 0;
+                            
+                            if (transferTime > 30000) {
+                                if (chunkSize>100) chunkSize-=50;
+                            } else {
+                                chunkSize+=50;
+                            }
+                            
                             break;
                         } else {
                             // worts transfer failed
@@ -604,7 +615,7 @@ public class plasmaWordIndexDistribution {
                                     Thread.sleep(retryCount*5000);
                                     continue;
                                 } else {
-                                    seed = yacyCore.seedDB.getConnected(seed.hash);
+                                    yacyCore.seedDB.getConnected(seed.hash);
                                     this.status = "running";
                                     break;
                                 }             

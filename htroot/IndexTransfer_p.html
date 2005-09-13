@@ -22,28 +22,28 @@
 </tr>
 #(running)#
 <tr valign="top" class="TableCellLight">
-<td>Not running</td>
-<td align="center">-</td>
-<td align="center">-</td>
-<td>
+<td class="small">Not running</td>
+<td class="small" align="center">-</td>
+<td class="small" align="center">-</td>
+<td class="small">
 	<select name="hostHash">
 	#{hosts}#
 		<option value="#[hosthash]#">#[hostname]#</option>
 	#{/hosts}#
 	</select>
 </td>
-<td>
+<td class="small">
 	<input type="submit" name="startIndexTransfer" value="Start Index Transfer">
 </td>
 </tr>
 </table></p>
 ::
     <tr class="TableCellLight">
-      <td><font color="#(stopped)#green::red#(/stopped)#">#[status]#</font></td>
-      <td align="right">#[twcount]# (#[twpercent]#%) </td>
-      <td align="rigth"><tt>#[twrange]#</tt></td>
-      <td>#[peerName]#</td>
-      <td>#(stopped)#<input type="submit" name="stopIndexTransfer" value="Stop Index Transfer">::
+      <td class="small"><font color="#(stopped)#green::red#(/stopped)#">#[status]#</font></td>
+      <td class="small" align="right">#[twcount]# (#[twpercent]#%) </td>
+      <td class="small" align="rigth">#[twchunk]# words: <tt>#[twrange]#</tt></td>
+      <td class="small">#[peerName]#</td>
+      <td class="small">#(stopped)#<input type="submit" name="stopIndexTransfer" value="Stop Index Transfer">::
                      <input type="submit" name="newIndexTransfer" value="Start New Index Transfer">#(/stopped)#</td>
     </tr>
 #(/running)#
