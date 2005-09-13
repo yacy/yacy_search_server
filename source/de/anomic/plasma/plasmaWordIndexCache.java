@@ -187,7 +187,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
         dumpArray.close();
         dumpArray = null;
-        log.logConfig("dumped " + urlcount + " word/url relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+        log.logConfig("dumped " + urlcount + " word/URL relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         } finally {
             if (dumpArray != null) try {dumpArray.close();}catch(Exception e){}
         }
@@ -197,7 +197,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (!(indexDumpFile.exists())) return 0;
         kelondroArray dumpArray = new kelondroArray(indexDumpFile);
-        log.logConfig("restore array dump of index cache, " + dumpArray.size() + " word/url relations");
+        log.logConfig("restore array dump of index cache, " + dumpArray.size() + " word/URL relations");
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;
         long urlCount = 0, urlsPerSecond = 0;

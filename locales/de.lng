@@ -333,32 +333,32 @@ Accept remote crawling requests and perform crawl at maximum load==Akzeptiere re
 Accept remote crawling requests and perform crawl at maximum of==Akzeptiere remote Crawling Anfragen und Crawle bis zu einem Maximum von
 Pages Per Minute \(minimum is 1, low system load at PPM <= 30\)==Seiten pro Minute (Minimum ist 1, langsame Systeme sollten unter 30 Seiten pro Minte laden)
 Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Akzeptiere keine remote Crawling Anfragen (bitte aktivieren Sie dies nur, wenn Sie nicht eine Seite pro Minute Crawlen k&ouml;nnen; siehe Option oben)
-"set"=="Speicher"
+"set"=="Speichern"
 Error:==Fehler:
 Error with profile management. Please stop yacy, delete the File DATA/PLASMADB/crawlProfiles0.db and restart.==Fehler im Profil Management. Bitte stoppen Sie YaCy, l&ouml;schen Sie die Datei DATA/PLASMADB/crawlProfiles0.db und starten Sie YaCy neu.
 Application not yet initialized. Sorry. Please wait some seconds and repeat the request.==Nicht richtig initialisiert. Sorry. Bitte warten Sie einige Sekunden und wiederholen Sie die Anfrage.
 <b>ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</b> Please try again with different filter==
-Crawling of "#[crawlingURL]#" failed. Reason:==
+Crawling of "\#\[crawlingURL\]\#" failed. Reason:==Crawling von "#[crawlingURL]#" fehlgeschlagen. Grund:
 Error with url input==Fehler mit der eigegebenen URL
 Error with file input==Fehler mit der eingebenen Datei
 Set new prefetch depth to==Neue Crawl Tiefe gesetzt auf
 Crawling of "\#\[crawlingURL\]\#" started.==Crawling von "#[crawlingURL]#" gestartet.
-You can monitor the crawling progress either by watching the URL queues==Sie k&ouml;nnen den Crawling Prozess auch sehen, indem Sie auf einer URLs nachsehen
-(<a href="/IndexCreateWWWLocalQueue_p.html">local queue</a>,
-<a href="/IndexCreateWWWGlobalQueue_p.html">global queue</a>,
-<a href="/IndexCreateLoaderQueue_p.html">loader queue</a>,
-<a href="/IndexCreateLoaderQueue_p.html">indexing queue</a>)
-or see the fill/process count of all queues on the
-<a href="/Performance_p.html">performance page</a>.
-<b>Please wait some seconds, because the request is enqueued and delayed until the http server is idle for a certain time.</b>==
-The indexing result is presented on the==
-<a href="IndexMonitor.html">Index Monitor</a>-page.==
-<b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>==
-If you crawl any un-wanted pages, you can delete them <a href="IndexControl_p.html">here</a>.==
-Removed #[numEntries]# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty==
+You can monitor the crawling progress either by watching the URL queues==Sie k&ouml;nnen den Crawling Prozess auch sehen, indem Sie auf einer der folgenden URLs nachsehen:
+\(<a href="/IndexCreateWWWLocalQueue_p.html">local queue</a>,==(<a href="/IndexCreateWWWLocalQueue_p.html">lokale Warteschlange</a>,
+<a href="/IndexCreateWWWGlobalQueue_p.html">global queue</a>,==<a href="/IndexCreateWWWGlobalQueue_p.html">globale Warteschlange</a>,
+<a href="/IndexCreateLoaderQueue_p.html">loader queue</a>,==<a href="/IndexCreateLoaderQueue_p.html">Lade Warteschlange</a>,
+<a href="/IndexCreateLoaderQueue_p.html">indexing queue</a>\)==<a href="/IndexCreateLoaderQueue_p.html">Indexier Warteschlange</a>)
+or see the fill/process count of all queues on the==Oder sehen sehen Sie sich den F&uuml;ll-Prozess von allen Warteschlangen auf der
+<a href="/Performance_p.html">performance page</a>.==<a href="/Performance_p.html">Performance Seite</a> an.
+<b>Please wait some seconds, because the request is enqueued and delayed until the http server is idle for a certain time.</b>==<b>Bitte warten Sie einige Sekunden, da Ihre Anfrage wartet und sich verz&ouml;gert bis der http Server einige Zeit nichts zu tun hat.</b>
+The indexing result is presented on the==Die Indexier Resulatet werden auf der
+<a href="IndexMonitor.html">Index Monitor</a>-page.==<a href="IndexMonitor.html">Index Monitor</a>-Seite angezeigt.
+<b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>==<b>Es dauert in der Regel mind. 30 Sekunden bis das Sie dort die ersten Ergebnisse sehen k&ouml;nnen. Bitte beachten Sie, dass das Crawling jedesmal, wenn Sie den Proxy oder den Web-Sever benutzen, pausiert wird, um maximale Verf&uuml;gbarkeit zu garantieren.</b>
+If you crawl any un-wanted pages, you can delete them <a href="IndexControl_p.html">here</a>.==Wenn Sie Seiten crawlen, die Sie nicht crawlen wollen, k&ouml;nnen Sie diese <a href="IndexControl_p.html">hier</a> l&ouml;schen.
+Removed \#\[numEntries\]\# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty==#[numEntries]# Eintr&auml;ge wurden aus der Crawl Warteschlange entfernt. Diese Warteschlange wird sich erneut f&uuml;llen, wenn noch Eintr&auml;ge in der Lade- und Indexier Warteschlange stehen.
 Crawling paused successfully.==Crawling wurde erfolgreich unterbrochen (Pause).
 Continue crawling.==Crawling wird fortgesetzt.
-"refresh"=="Aktualisiere"
+"refresh"=="Aktualisieren"
 "continue crawling"=="Crawling fortzsetzen"
 "pause crawling"=="Crawling pausieren"
 Crawl Profile List:==Crawl Profil Liste:
