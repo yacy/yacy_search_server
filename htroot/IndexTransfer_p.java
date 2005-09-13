@@ -1,10 +1,13 @@
-//IndexControl_p.java 
+//IndexTransfer_p.java 
 //-----------------------
 //part of the AnomicHTTPD caching proxy
 //(C) by Michael Peter Christen; mc@anomic.de
 //first published on http://www.anomic.de
-//Frankfurt, Germany, 2004
-//last change: 02.05.2004
+//Frankfurt, Germany, 2005
+//
+//This file is contributed by Martin Thelian
+//last major change: $LastChangedDate$ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
