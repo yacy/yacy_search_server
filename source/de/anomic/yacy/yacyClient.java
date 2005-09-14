@@ -644,7 +644,7 @@ public class yacyClient {
             if (urls[i] != null) {
                 resource = urls[i].toString();
                 if (resource != null) {
-                    post.put("url" + i, resource);
+                    post.put("url" + urlc, resource);
                     urlc++;
                 }
             }
