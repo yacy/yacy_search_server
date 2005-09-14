@@ -3,8 +3,8 @@
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
-// last major change: 06.10.2004
+// Frankfurt, Germany, 2005
+// last major change: 13.09.2005
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,124 +43,105 @@ package de.anomic.kelondro;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
 
 public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA {
 
+    private static final int bufferSizeExp = 10;
+    private static final int bufferSize = 1 << bufferSizeExp;
+    private static final int bufferOffsetFilter = bufferSize - 1;
+    
     protected kelondroRA ra; 
-    protected kelondroMScoreCluster bufferScore;
-    protected HashMap bufferMemory;
-    private int bufferMaxElements;
-    private int bufferElementSize;
+    protected byte[] buffer;
+    protected int bufferPage;
+    protected boolean bufferWritten;
     private long seekpos;
     
-    public kelondroBufferedRA(kelondroRA ra, int buffersize, int elementsize) throws FileNotFoundException {
+    public kelondroBufferedRA(kelondroRA ra) throws FileNotFoundException {
 	this.ra  = ra;
         this.name = ra.name();
-        this.bufferMemory = new HashMap();
-        this.bufferScore = new kelondroMScoreCluster();
-        this.bufferElementSize = elementsize;
-        this.bufferMaxElements = (int) (buffersize / bufferElementSize);
+        this.buffer = new byte[bufferSize];
         this.seekpos = 0;
+        this.bufferPage = -1;
+        this.bufferWritten = true;
     }
 
-    private int bufferElementNumber(long address) {
-        return (int) address / bufferElementSize;
+    private void readBuffer(int newPageNr) throws IOException {
+        if (newPageNr == bufferPage) return;
+        bufferPage = newPageNr;
+        ra.seek(bufferPage << bufferSizeExp);
+        ra.readFully(buffer, 0, bufferSize);
+        bufferWritten = true;
+    }
+
+    private void writeBuffer() throws IOException {
+        if ((bufferWritten) || (bufferPage < 0)) return;
+        ra.seek(bufferPage << bufferSizeExp);
+        ra.write(buffer, 0, bufferSize);
+        bufferWritten = true;
     }
     
-    private int bufferElementOffset(long address) {
-        return (int) address % bufferElementSize;
-    }
-    
-    private byte[] readBuffer(int bufferNr) throws IOException {
-        Integer bufferNrI = new Integer(bufferNr);
-        byte[] buffer = (byte[]) bufferMemory.get(bufferNrI);
-        if (buffer == null) {
-            if (bufferMemory.size() >= bufferMaxElements) {
-                // delete elements in buffer if buffer too big
-                Iterator it = bufferScore.scores(true);
-                Integer element = (Integer) it.next();
-                writeBuffer((byte[]) bufferMemory.get(element), element.intValue());
-                bufferMemory.remove(element);
-                int age = bufferScore.deleteScore(element);
-                de.anomic.server.logging.serverLog.logFine("CACHE: " + name, "GC; age=" + ((((int) (0xFFFFFFFFL & System.currentTimeMillis())) - age) / 1000));
-            }
-            // add new element
-            buffer = new byte[bufferElementSize];
-            //System.out.println("buffernr=" + bufferNr + ", elSize=" + bufferElementSize);
-            ra.seek(bufferNr * bufferElementSize);
-            ra.read(buffer, 0, bufferElementSize);
-            bufferMemory.put(bufferNrI, buffer);
+    private void updateToBuffer(int newPageNr) throws IOException {
+        if (newPageNr != bufferPage) {
+            writeBuffer();
+            readBuffer(newPageNr);
         }
-        bufferScore.setScore(bufferNrI, (int) (0xFFFFFFFFL & System.currentTimeMillis()));
-        return buffer;
-    }
-    
-    private void writeBuffer(byte[] buffer, int bufferNr) throws IOException {
-        if (buffer == null) return;
-        Integer bufferNrI = new Integer(bufferNr);
-        ra.seek(bufferNr * bufferElementSize);
-        ra.write(buffer, 0, bufferElementSize);
-        bufferScore.setScore(bufferNrI, (int) (0xFFFFFFFFL & System.currentTimeMillis()));
     }
     
     // pseudo-native method read
     public int read() throws IOException {
-        int bn = bufferElementNumber(seekpos);
-        int offset = bufferElementOffset(seekpos);
+        int bn = (int) seekpos >> bufferSizeExp; // buffer page number
+        int offset = (int) seekpos & bufferOffsetFilter; // buffer page offset
         seekpos++;
-        return 0xFF & readBuffer(bn)[offset];
+        updateToBuffer(bn);
+        return 0xFF & buffer[offset];
     }
 
     // pseudo-native method write
     public void write(int b) throws IOException {
-        int bn = bufferElementNumber(seekpos);
-        int offset = bufferElementOffset(seekpos);
-        byte[] buffer = readBuffer(bn);
+        int bn = (int) seekpos >> bufferSizeExp; // buffer page number
+        int offset = (int) seekpos & bufferOffsetFilter; // buffer page offset
         seekpos++;
+        updateToBuffer(bn);
         buffer[offset] = (byte) b;
-        //writeBuffer(buffer, bn);
+        bufferWritten = false;
     }
 
     public int read(byte[] b, int off, int len) throws IOException {
-        int bn1 = bufferElementNumber(seekpos);
-        int bn2 = bufferElementNumber(seekpos + len - 1);
-        int offset = bufferElementOffset(seekpos);
-        byte[] buffer = readBuffer(bn1);
+        int bn1 = (int) seekpos >> bufferSizeExp; // buffer page number, first position
+        int bn2 = (int) (seekpos + len - 1) >> bufferSizeExp; // buffer page number, last position
+        int offset = (int) seekpos & bufferOffsetFilter; // buffer page offset
+        updateToBuffer(bn1);
         if (bn1 == bn2) {
             // simple case
-            //System.out.println("C1: bn1=" + bn1 + ", offset=" + offset + ", off=" + off + ", len=" + len);
             System.arraycopy(buffer, offset, b, off, len);
             seekpos += len;
             return len;
         } else {
             // do recursively
-            int thislen = bufferElementSize - offset;
-            //System.out.println("C2: bn1=" + bn1 + ", bn2=" + bn2 +", offset=" + offset + ", off=" + off + ", len=" + len + ", thislen=" + thislen);
+            int thislen = bufferSize - offset;
             System.arraycopy(buffer, offset, b, off, thislen);
             seekpos += thislen;
-            return thislen + read(b, thislen, len - thislen);
+            return thislen + read(b, off + thislen, len - thislen);
         }
     }
 
     public void write(byte[] b, int off, int len) throws IOException {
-        int bn1 = bufferElementNumber(seekpos);
-        int bn2 = bufferElementNumber(seekpos + len - 1);
-        int offset = bufferElementOffset(seekpos);
-        byte[] buffer = readBuffer(bn1);
+        int bn1 = (int) seekpos >> bufferSizeExp; // buffer page number, first position
+        int bn2 = (int) (seekpos + len - 1) >> bufferSizeExp; // buffer page number, last position
+        int offset = (int) seekpos & bufferOffsetFilter; // buffer page offset
+        updateToBuffer(bn1);
         if (bn1 == bn2) {
             // simple case
             System.arraycopy(b, off, buffer, offset, len);
+            bufferWritten = false;
             seekpos += len;
-            //writeBuffer(buffer, bn1);
         } else {
             // do recursively
-            int thislen = bufferElementSize - offset;
+            int thislen = bufferSize - offset;
             System.arraycopy(b, off, buffer, offset, thislen);
+            bufferWritten = false;
             seekpos += thislen;
-            //writeBuffer(buffer, bn1);
-            write(b, thislen, len - thislen);
+            write(b, off + thislen, len - thislen);
         }
     }
 
@@ -169,16 +150,30 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
     }
 
     public void close() throws IOException {
-        // write all unwritten buffers
-        Iterator it = bufferScore.scores(true);
-        while (it.hasNext()) {
-            Integer element = (Integer) it.next();
-            writeBuffer((byte[]) bufferMemory.get(element), element.intValue());
-            bufferMemory.remove(element);
-        }
+        // write unwritten buffer
+        if (buffer == null) return;
+        writeBuffer();
         ra.close();
-        bufferScore = null;
-        bufferMemory = null;
+        buffer = null;
+    }
+    
+    public void finalize() {
+        try {
+            close();
+        } catch (IOException e) {}
     }
 
+    public static void main(String[] args) {
+        try {
+            kelondroRA file = new kelondroBufferedRA(new kelondroFileRA("testx"));
+            file.seek(bufferSize - 2);
+            byte[] b = new byte[]{65, 66, 77, 88};
+            file.write(b);
+            file.seek(bufferSize * 2 - 30);
+            for (int i = 65; i < 150; i++) file.write(i);
+            file.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

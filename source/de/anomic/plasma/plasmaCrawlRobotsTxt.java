@@ -56,6 +56,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
 
 public class plasmaCrawlRobotsTxt {
@@ -65,7 +66,13 @@ public class plasmaCrawlRobotsTxt {
     public plasmaCrawlRobotsTxt(File robotsTableFile) throws IOException {
         this.robotsTableFile = robotsTableFile;
         if (robotsTableFile.exists()) {
-            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, 32000));
+            try {
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, 32000));
+            } catch (kelondroException e) {
+                robotsTableFile.delete();
+                robotsTableFile.getParentFile().mkdirs();
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, 32000, 256, 512));
+            }
         } else {
             robotsTableFile.getParentFile().mkdirs();
             robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, 32000, 256, 512));

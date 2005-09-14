@@ -228,7 +228,13 @@ public class kelondroDyn extends kelondroTree {
 	} else {
 	    byte[] buf = getValueCached(dynKey(key, reccnt));
 	    if (buf == null) return null;
-	    //System.out.println("read: buf.length="+buf.length+",recpos="+recpos+",len="+len);
+            if (buf.length < reclen) {
+                byte[] buff = new byte[reclen];
+                System.arraycopy(buf, 0, buff, 0, buf.length);
+                buf = buff;
+                buff = null;
+            }
+            //System.out.println("read: buf.length="+buf.length+",recpos="+recpos+",len="+len);
 	    if (len < (reclen - recpos)) {
 		segment1 = new byte[len];
 		System.arraycopy(buf, recpos, segment1, 0, len);
@@ -269,7 +275,14 @@ public class kelondroDyn extends kelondroTree {
 	    }
 	} else {
 	    buf = getValueCached(dynKey(key, reccnt));
-	    if (buf == null) buf = new byte[reclen];
+            if (buf == null) {
+                buf = new byte[reclen];
+            } else if (buf.length < reclen) {
+                byte[] buff = new byte[reclen];
+                System.arraycopy(buf, 0, buff, 0, buf.length);
+                buf = buff;
+                buff = null;
+            }
 	    //System.out.println("write: b.length="+b.length+",off="+off+",len="+(reclen-recpos));
 	    if (len < (reclen - recpos))
 		System.arraycopy(b, off, buf, recpos, len);

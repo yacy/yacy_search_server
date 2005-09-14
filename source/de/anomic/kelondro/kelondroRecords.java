@@ -73,13 +73,21 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
+import java.util.Map;
+import java.util.Iterator;
 
 public class kelondroRecords {
 
     // constants
     private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
-    public  static final long memBlock =  5000000; // do not fill cache further if the amount of available memory is less that this
+    public  static final long memBlock =   500000; // do not fill cache further if the amount of available memory is less that this
     public  static final long memKcolb = 10000000; // if the amount of available memory is greater than this, do not use cache size to block, simply use memory
+    
+    // caching flags
+    protected static final int CP_NONE   = -1; // cache priority none; entry shall not be cached
+    protected static final int CP_LOW    =  0; // cache priority low; entry may be cached
+    protected static final int CP_MEDIUM =  1; // cache priority medium; entry shall be cached
+    protected static final int CP_HIGH   =  2; // cache priority high; entry must be cached
     
     // static seek pointers
     private static long POS_MAGIC      = 0;                     // 1 byte, byte: file type magic
@@ -108,6 +116,8 @@ public class kelondroRecords {
     protected String     filename;     // the database's file name
     protected kelondroRA entryFile;    // the database file
     private   int        overhead;     // OHBYTEC + 4 * OHHANDLEC = size of additional control bytes
+    private   int        headchunksize;// overheadsize + key element column size
+    private   int        tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
     private   int        recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record
 
     // dynamic run-time seek pointers
@@ -146,7 +156,7 @@ public class kelondroRecords {
 	if (file.exists()) throw new IOException("kelondroRecords: file " + file + " already exist");
 	this.filename   = file.getCanonicalPath();
         kelondroRA raf = new kelondroFileRA(this.filename);
-        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 5000000, 1000);
+        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename));
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
         init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
         this.XcacheSize = (int) (buffersize / ((long) (overhead + columns[0])));
@@ -186,6 +196,8 @@ public class kelondroRecords {
 	this.overhead   = ohbytec + 4 * ohhandlec;
 	this.recordsize = this.overhead;
 	for (int i = 0; i < columns.length; i++) this.recordsize += columns[i];
+        this.headchunksize = overhead + columns[0];
+        this.tailchunksize = this.recordsize - this.headchunksize;
 
 	// store dynamic run-time seek pointers 
 	POS_HANDLES     =  POS_COLWIDTHS + columns.length * 4;
@@ -256,7 +268,8 @@ public class kelondroRecords {
 
         this.filename = file.getCanonicalPath();
         kelondroRA raf = new kelondroFileRA(this.filename);
-        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 5000000, 1000);
+        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename));
+        //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
         init(raf);
         this.XcacheSize = (int) (buffersize / ((long) (overhead + COLWIDTHS[0])));
@@ -286,7 +299,8 @@ public class kelondroRecords {
         this.XcacheStartup = System.currentTimeMillis();
     }
 
-    private void init(kelondroRA ra) throws IOException{
+    private void init(kelondroRA ra) throws IOException {
+        
         // assign values that are only present at run-time
 	this.entryFile = ra;
 
@@ -303,6 +317,8 @@ public class kelondroRecords {
 	entryFile.seek(POS_TXTPROPC); this.TXTPROPS = new byte[entryFile.readInt()][];
 	entryFile.seek(POS_TXTPROPW); this.TXTPROPW = entryFile.readInt();
 
+        if (COLWIDTHS.length == 0) throw new kelondroException(filename, "init: zero columns; strong failure");
+        
 	// calculate dynamic run-time seek pointers
 	POS_HANDLES = POS_COLWIDTHS + COLWIDTHS.length * 4;
 	POS_TXTPROPS = POS_HANDLES  + HANDLES.length * 4;
@@ -325,38 +341,23 @@ public class kelondroRecords {
 
 	// assign remaining values that are only present at run-time
 	this.overhead = OHBYTEC + 4 * OHHANDLEC;
-	this.recordsize = this.overhead; for (int i = 0; i < COLWIDTHS.length; i++) this.recordsize += COLWIDTHS[i];
+	this.recordsize = this.overhead;
+        for (int i = 0; i < COLWIDTHS.length; i++) this.recordsize += COLWIDTHS[i];
+        this.headchunksize = this.overhead + COLWIDTHS[0];
+        this.tailchunksize = this.recordsize - this.headchunksize;
     }
     
     
-    protected int newNode() {
-        Node n = new Node();
-        return USEDC + FREEC;
+    protected Node newNode() throws IOException {
+        return new Node();
     }
     
-    protected Node newNode(byte[][] v) {
-        return new Node(v);
-    }
-    
-    protected Node getNode(Handle handle) {
+    protected Node getNode(Handle handle) throws IOException {
         return getNode(handle, null, 0);
     }
     
-    protected Node getNode(Handle handle, Node parentNode, int referenceInParent) {
-        if (XcacheSize == 0) return new Node(handle, parentNode, referenceInParent);
-        synchronized (XcacheHeaders) {
-            Node n = (Node) XcacheHeaders.get(handle);
-            if (n == null) {
-                n = new Node(handle, parentNode, referenceInParent);
-                checkCacheSpace();
-                n.updateNodeCache();
-                return n;
-            } else {
-                //System.out.println("read from cache " + n.toString());
-                XcacheScore.setScore(handle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
-                return n;
-            }
-        }
+    protected Node getNode(Handle handle, Node parentNode, int referenceInParent) throws IOException {
+        return new Node(handle, parentNode, referenceInParent);
     }
     
     protected void deleteNode(Handle handle) throws IOException {
@@ -397,6 +398,401 @@ public class kelondroRecords {
         }
     }
         
+    public class Node {
+	// an Node holds all information of one row of data. This includes the key to the entry
+	// which is stored as entry element at position 0
+	// an Node object can be created in two ways:
+	// 1. instantiation with an index number. After creation the Object does not hold any
+	//    value information until such is retrieved using the getValue() method
+	// 2. instantiation with a value array. the values are not directly written into the
+	//    file. Expanding the tree structure is then done using the save() method. at any
+	//    time it is possible to verify the save state using the saved() predicate.
+	// Therefore an entry object has three modes:
+	// a: holding an index information only (saved() = true)
+	// b: holding value information only (saved() = false)
+	// c: holding index and value information at the same time (saved() = true)
+	//    which can be the result of one of the two processes as follow:
+	//    (i)  created with index and after using the getValue() method, or
+	//    (ii) created with values and after calling the save() method
+	// the method will therefore throw an IllegalStateException when the following
+	// process step is performed:
+	//    - create the Node with index and call then the save() method
+	// this case can be decided with
+	//    ((index != NUL) && (values == null))
+	// The save() method represents the insert function for the tree. Balancing functions
+	// are applied automatically. While balancing, the Node does never change its index key,
+	// but its parent/child keys.
+	//private byte[]    ohBytes  = null;  // the overhead bytes, OHBYTEC values
+	//private Handle[]  ohHandle= null;  // the overhead handles, OHHANDLEC values
+	//private byte[][]  values  = null;  // an array of byte[] nodes is the value vector
+	private Handle handle    = null; // index of the entry, by default NUL means undefined
+        private byte[] headChunk = null; // contains ohBytes, ohHandles and the key value
+        private byte[] tailChunk = null; // contains all values except the key value
+        private boolean headChanged = false;
+        private boolean tailChanged = false;
+        
+	private Node() throws IOException {
+	    // create a new empty node and reserve empty space in file for it
+            // use this method only if you want to extend the file with new entries
+            // without the need to have content in it.
+            this.handle = new Handle();
+            
+            // create empty chunks
+            this.headChunk = new byte[headchunksize];
+            this.tailChunk = new byte[tailchunksize];
+            for (int i = 0; i < headchunksize; i++) this.headChunk[i] = 0;
+            for (int i = 0; i < tailchunksize; i++) this.tailChunk[i] = 0;
+            this.headChanged = true;
+            this.tailChanged = true;
+	}
+        
+	private Node(Handle handle) throws IOException {
+	    // this creates an entry with an pre-reserved entry position
+	    // values can be written using the setValues() method
+	    // but we expect that values are already there in the file ready to be read which we do not here
+	    if (handle == null) throw new IllegalArgumentException("INTERNAL ERROR: node handle is null.");
+            if (handle.index >=	USEDC + FREEC) throw new kelondroException(filename, "INTERNAL ERROR: node handle index exceeds size.");  
+
+            // use given handle
+	    this.handle = new Handle(handle.index);
+            
+            // init the content
+            initContent();
+	}
+
+        private Node(Handle handle, Node parentNode, int referenceInParent) throws IOException {
+	    // this creates an entry with an pre-reserved entry position
+	    // values can be written using the setValues() method
+	    // but we expect that values are already there in the file ready to be read which we do not here
+	    if (handle == null) throw new IllegalArgumentException("INTERNAL ERROR: node handle is null.");
+
+            // the parentNode can be given if an auto-fix in the following case is wanted
+            if (handle.index >= USEDC + FREEC) {
+                if (parentNode == null) {
+                    throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index exceeds size. No auto-fix node was submitted. This is a serious failure.");  
+                } else {
+                    try {
+                        Handle[] handles = parentNode.getOHHandles();
+                        handles[referenceInParent] = null;
+                        parentNode.setOHHandles(handles);
+                        parentNode.commit(CP_NONE);
+                        throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. The bad node has been auto-fixed");
+                    } catch (IOException ee) {
+                        throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. It was tried to fix the bad node, but failed with an IOException: " + ee.getMessage());
+                    }
+                }
+            }
+
+            // use given handle
+	    this.handle = new Handle(handle.index);
+            
+            // init the content
+            initContent();
+	}
+        
+        private void initContent() throws IOException {
+            // create chunks; read them from file or cache
+            this.tailChunk = null;
+            if (XcacheSize == 0) {
+                // read overhead and key
+                //System.out.println("**NO CACHE for " + this.handle.index + "**");
+                this.headChunk = new byte[headchunksize];
+                synchronized (entryFile) {
+                    entryFile.seek(seekpos(this.handle));
+                    entryFile.readFully(this.headChunk, 0, this.headChunk.length);
+                }
+                this.headChanged = false;
+            } else synchronized(XcacheHeaders) {
+                byte[] cacheEntry = (byte[]) XcacheHeaders.get(this.handle);
+                if (cacheEntry == null) {
+                    // read overhead and key
+                    //System.out.println("**CACHE miss for " + this.handle.index + "**");
+                    this.headChunk = new byte[headchunksize];
+                    //this.tailChunk = new byte[tailchunksize];
+                    synchronized (entryFile) {
+                        entryFile.seek(seekpos(this.handle));
+                        entryFile.readFully(this.headChunk, 0, this.headChunk.length);
+                        //entryFile.read(this.tailChunk, 0, this.tailChunk.length);
+                    }
+                    this.headChanged = true; // provoke a cache store
+                    checkCacheSpace();
+                    updateNodeCache();
+                } else {
+                    //System.out.println("**CACHE HIT for " + this.handle.index + "**");
+                    // copy cache entry
+                    this.headChunk = new byte[headchunksize];
+                    System.arraycopy(cacheEntry, 0, this.headChunk, 0, headchunksize);
+                    // update cache scores to announce this cache hit
+                    XcacheScore.setScore(this.handle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
+                    this.headChanged = false;
+                }
+            }
+        }
+        
+        private void setValue(byte[] value, int valuewidth, byte[] targetarray, int targetoffset) {
+            if (value == null) {
+                while (valuewidth-- > 0) targetarray[targetoffset + valuewidth] = 0;
+            } else {
+                System.arraycopy(value, 0, targetarray, targetoffset, Math.min(value.length, valuewidth)); // error?
+                if (value.length < valuewidth)
+                    while (valuewidth-- > value.length) targetarray[targetoffset + valuewidth] = 0;
+            }
+        }
+        
+        protected Handle handle() {
+	    // if this entry has an index, return it
+	    if (this.handle.index == NUL) throw new kelondroException(filename, "the entry has no index assigned");
+	    return new Handle(this.handle.index);
+	}
+        
+	protected void setOHBytes(byte[] b) throws IOException {
+	    if (b == null) throw new IllegalArgumentException("setOHByte: setting null value does not make any sense");
+	    if (b.length != OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong array size");
+	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
+            System.arraycopy(b, 0, this.headChunk, 0, b.length);
+            this.headChanged = true;
+	}
+        
+        protected void setOHHandles(Handle[] handles) throws IOException {
+            if (handles == null) throw new IllegalArgumentException("setOHint: setting null value does not make any sense");
+            if (handles.length != OHHANDLEC) throw new IllegalArgumentException("setOHHandle: wrong array size");
+            if (this.handle.index == NUL) throw new kelondroException(filename, "setOHHandle: no handle assigned");
+            int offset = OHBYTEC;
+            for (int i = 0; i < handles.length; i++) {
+                if (handles[i] == null) {
+                    NUL2bytes(this.headChunk, offset);
+                } else {
+                    if (handles[i].index > USEDC + FREEC) throw new kelondroException(filename, "INTERNAL ERROR, setOHHandles: handle " + i + " exceeds file size (" + handles[i].index + " > " + (USEDC + FREEC) + ")");
+                    int2bytes(handles[i].index, this.headChunk, offset);
+                }
+                offset += 4;
+            }
+            this.headChanged = true;
+        }
+        
+	protected byte[] getOHBytes() throws IOException {
+	    if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
+            byte[] b = new byte[OHBYTEC];
+            System.arraycopy(this.headChunk, 0, b, 0, OHBYTEC);
+	    return b;
+	}
+        
+        protected Handle[] getOHHandles() throws IOException {
+            if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
+            Handle[] handles = new Handle[OHHANDLEC];
+            int offset = OHBYTEC;
+            int i;
+            for (int j = 0; j < handles.length; j++) {
+                i = bytes2int(this.headChunk, offset);
+                handles[j] = (i == NUL) ? null : new Handle(i);
+                offset += 4;
+            }
+            return handles;
+        }
+        
+	public byte[][] setValues(byte[][] row) throws IOException {
+	    // if the index is defined, then write values directly to the file, else only to the object
+	    byte[][] result = getValues(); // previous value (this loads the values if not already happened)
+            
+            // set values
+            if (this.handle.index != NUL) {
+                setValue(row[0], COLWIDTHS[0], headChunk, overhead);
+                int offset = 0;
+                for (int i = 1; i < row.length; i++) {
+                    setValue(row[i], COLWIDTHS[i], tailChunk, offset);
+                    offset +=COLWIDTHS[i];
+                } 
+            }
+            this.headChanged = true;
+            this.tailChanged = true;
+	    return result; // return previous value
+	}
+        
+	public byte[] getKey() throws IOException {
+            // read key
+            return trimCopy(headChunk, overhead, COLWIDTHS[0]);
+	} 
+        
+	public byte[][] getValues() throws IOException {
+            if (this.tailChunk == null) {
+                // load all values from the database file
+                this.tailChunk = new byte[tailchunksize];
+                // read values
+                synchronized (entryFile) {
+                    entryFile.seek(seekpos(this.handle) + headchunksize);
+                    entryFile.read(this.tailChunk, 0, this.tailChunk.length);
+                }
+            }
+            
+            // create return value
+            byte[][] values = new byte[COLWIDTHS.length][];
+            
+            // read key
+            values[0] = trimCopy(headChunk, overhead, COLWIDTHS[0]);
+            
+            // read remaining values
+            int offset = 0;
+            for (int i = 1; i < COLWIDTHS.length; i++) {
+                values[i] = trimCopy(tailChunk, offset, COLWIDTHS[i]);
+                offset += COLWIDTHS[i];
+            }
+            
+            return values;
+        }
+
+        public synchronized void commit(int cachePriority) throws IOException {
+            // this must be called after all write operations to the node are finished
+            
+            // place the data to the file
+            
+	    if (this.headChunk == null) {
+		// there is nothing to save
+		throw new kelondroException(filename, "no values to save (header missing)");
+	    }
+            
+            /*
+	    if (this.tailChunk == null) {
+		// there is nothing to save
+		throw new kelondroException(filename, "no values to save (tail missing)");
+	    }
+            */
+            
+            // save head
+            if (this.headChanged) {
+                synchronized (entryFile) {
+                    entryFile.seek(seekpos(this.handle));
+                    //System.out.print("#write "); printChunk(this.handle, this.headChunk); System.out.println();
+                    entryFile.write(this.headChunk);
+                }
+                updateNodeCache();
+            }
+            
+            // save tail
+            if ((this.tailChunk != null) && (this.tailChanged)) synchronized (entryFile) {
+                entryFile.seek(seekpos(this.handle) + headchunksize);
+                entryFile.write(this.tailChunk);
+            }
+        }
+        
+        public synchronized void collapse() {
+            // this must be called after all write and read operations to the node are finished
+            this.headChunk = null;
+            this.tailChunk = null;
+            this.handle = null;
+        }
+        
+        /*
+        public void finalize() {
+            try {
+                commit(CP_NONE);
+                collapse();
+            } catch (IOException e) {}
+        }
+        */
+        
+        private byte[] trimCopy(byte[] a, int offset, int length) {
+            if (length > a.length - offset) length = a.length - offset;
+            while ((length > 0) && (a[offset + length - 1] == 0)) length--;
+            if (length == 0) return null;
+            byte[] b = new byte[length];
+            System.arraycopy(a, offset, b, 0, length);
+            return b;
+        }
+        
+	public String toString() {
+	    if (this.handle.index == NUL) return "NULL";
+	    String s = Integer.toHexString(this.handle.index);
+	    while (s.length() < 4) s = "0" + s;
+	    try {
+		byte[] b = getOHBytes();
+		for (int i = 0; i < b.length; i++) s = s + ":b" + b[i];
+		Handle[] h = getOHHandles();
+		for (int i = 0; i < h.length; i++) if (h[i] == null) s = s + ":hNULL"; else s = s + ":h" + h[i].toString();
+		byte[][] content = getValues();
+		for (int i = 0; i < content.length; i++) s = s + ":" + ((content[i] == null) ? "NULL" : (new String(content[i])).trim());
+	    } catch (IOException e) {
+		s = s + ":***LOAD ERROR***:" + e.getMessage();
+	    }
+	    return s;
+        }
+        
+        private void updateNodeCache() {
+            if (this.handle == null) return;
+            if (this.headChunk == null) return;
+            
+            if (XcacheSize != 0) {
+                synchronized (XcacheHeaders) {
+                    // remember size to evaluate a cache size check need
+                    int sizeBefore = XcacheHeaders.size();
+                    //long memBefore = Runtime.getRuntime().freeMemory();
+                    // generate cache entry
+                    byte[] cacheEntry = new byte[headchunksize];
+                    System.arraycopy(headChunk, 0, cacheEntry, 0, headchunksize);
+                    Handle cacheHandle = new Handle(this.handle.index);
+                    
+                    // store the cache entry
+                    //XcacheHeaders.remove(cacheHandle);
+                    XcacheHeaders.put(cacheHandle, cacheEntry);
+                    XcacheScore.setScore(cacheHandle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
+
+                    // delete the cache entry buffer
+                    cacheEntry = null;
+                    cacheHandle = null;
+                    //System.out.println("kelondroRecords cache4" + filename + ": cache record size = " + (memBefore - Runtime.getRuntime().freeMemory()) + " bytes" + ((newentry) ? " new" : ""));
+                    // check cache size
+                    if (XcacheHeaders.size() > sizeBefore) checkCacheSpace();
+                    //System.out.println("kelondroRecords cache4" + filename + ": " + XcacheHeaders.size() + " entries, " + XcacheSize + " allowed.");
+                    //printCache();
+                }
+            }
+        }
+    }
+    
+    protected void printCache() {
+        if (XcacheSize == 0) {
+            System.out.println("### file report: " + size() + " entries");
+            for (int i = 0; i < size() + 3; i++) {
+                // print from  file to compare
+                System.out.print("#F " + i + ": ");
+                try {synchronized (entryFile) {
+                    entryFile.seek(seekpos(new Handle(i)));
+                    for (int j = 0; j < headchunksize; j++) System.out.print(entryFile.readByte() + ",");
+                }} catch (IOException e) {}
+                
+                System.out.println();
+            }
+        } else {
+            System.out.println("### cache report: " + XcacheHeaders.size() + " entries");
+            Iterator i = XcacheHeaders.entrySet().iterator();
+            Map.Entry entry;
+            byte[] b;
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                
+                // print from cache
+                System.out.print("#C ");
+                printChunk((Handle) entry.getKey(), (byte[]) entry.getValue());
+                System.out.println();
+                
+                // print from  file to compare
+                System.out.print("#F " + ((Handle) entry.getKey()).index + ": ");
+                try {synchronized (entryFile) {
+                    entryFile.seek(seekpos((Handle) entry.getKey()));
+                    for (int j = 0; j < headchunksize; j++) System.out.print(entryFile.readByte() + ",");
+                }} catch (IOException e) {}
+                
+                System.out.println();
+            }
+        }
+        System.out.println("### end report");
+    }
+    
+    private void printChunk(Handle handle, byte[] chunk) {
+        System.out.print(handle.index + ": ");
+        for (int j = 0; j < chunk.length; j++) System.out.print(chunk[j] + ",");
+    }
+    
+    /*
     public class Node {
 	// an Node holds all information of one row of data. This includes the key to the entry
 	// which is stored as entry element at position 0
@@ -746,7 +1142,8 @@ public class kelondroRecords {
             }
         }
     }
-
+    */
+    
     public synchronized int columns() {
 	return this.COLWIDTHS.length;
     }
@@ -876,8 +1273,30 @@ public class kelondroRecords {
         for (int i = 0; i < b.length; i++) x = (x << 8) | (0xff & (int) b[i]);
         return x;
     }
+    
+    public static void NUL2bytes(byte[] b, int offset) {
+        b[offset    ] = (byte) (0XFF & (NUL >> 24));
+        b[offset + 1] = (byte) (0XFF & (NUL >> 16));
+        b[offset + 2] = (byte) (0XFF & (NUL >>  8));
+        b[offset + 3] = (byte) (0XFF & NUL);
+    }
+    
+    public static void int2bytes(long i, byte[] b, int offset) {
+        b[offset    ] = (byte) (0XFF & (i >> 24));
+        b[offset + 1] = (byte) (0XFF & (i >> 16));
+        b[offset + 2] = (byte) (0XFF & (i >>  8));
+        b[offset + 3] = (byte) (0XFF & i);
+    }
+    
+    public static int bytes2int(byte[] b, int offset) {
+        return (
+            ((b[offset    ] & 0xff) << 24) |
+            ((b[offset + 1] & 0xff) << 16) |
+            ((b[offset + 2] & 0xff) << 8) |
+             (b[offset + 3] & 0xff));  
+    }
 
-    public void print(boolean records) {
+    public void print(boolean records) throws IOException {
 	System.out.println("REPORT FOR FILE '" + this.filename + "':");
 	System.out.println("--");
 	System.out.println("CONTROL DATA");
@@ -905,7 +1324,9 @@ public class kelondroRecords {
 	System.out.println("  Overhead   : " + this.overhead + " bytes  ("+ OHBYTEC + " OH bytes, " + OHHANDLEC + " OH Handles)");
 	System.out.println("  Recordsize : " + this.recordsize + " bytes");
 	System.out.println("--");
-
+        printCache();
+        System.out.println("--");
+        
 	if (!(records)) return;
 	// print also all records
 	for (int i = 0; i < USEDC + FREEC; i++) System.out.println("NODE: " + new Node(new Handle(i), null, 0).toString());

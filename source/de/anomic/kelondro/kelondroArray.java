@@ -67,16 +67,22 @@ public class kelondroArray extends kelondroRecords {
     }
     
     public synchronized byte[][] set(int index, byte[][] row) throws IOException {
-	if (row.length != columns()) throw new IllegalArgumentException("set: wrong row length " + row.length + "; must be " + columns());
+	if (row.length != columns())
+            throw new IllegalArgumentException("set: wrong row length " + row.length + "; must be " + columns());
 
         // make room for element
-        if (size() <= index) while (newNode() <= index) {}
+        Node n;
+        while (size() <= index) {
+            n = newNode();
+            n.commit(CP_NONE);
+        }
         
         // get the node at position index
-        Node n = getNode(new Handle(index));
+        n = getNode(new Handle(index));
         
         // write the row
         byte[][] before = n.setValues(row);
+        n.commit(CP_NONE);
         
         return before;
     }
@@ -103,7 +109,7 @@ public class kelondroArray extends kelondroRecords {
         for (int i = 0; i < size(); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
-            for (int j = 0; j < columns(); j++) System.out.print(new String(row[j]) + ", ");
+            for (int j = 0; j < columns(); j++) System.out.print(((row[j] == null) ? "NULL" : new String(row[j])) + ", ");
             System.out.println();
         }
         System.out.println("EndOfTable");
@@ -123,9 +129,7 @@ public class kelondroArray extends kelondroRecords {
                 // create <filename> <valuelen> 
                 File f = new File(args[1]);
                 if (f.exists()) f.delete();
-                int[] lens = new int[1];
-                lens[0] = Integer.parseInt(args[2]);
-                kelondroArray fm = new kelondroArray(f, lens, 2);
+                kelondroArray fm = new kelondroArray(f, new int[]{Integer.parseInt(args[2])}, 2);
                 fm.close();
             } else
             if ((args.length == 2) && (args[0].equals("-v"))) {
@@ -149,7 +153,17 @@ public class kelondroArray extends kelondroRecords {
                 byte[][] row = new byte[][]{args[3].getBytes()};
                 fm.set(Integer.parseInt(args[2]), row);
                 fm.close();
-            } else {
+            } else
+            if ((args.length == 1) && (args[0].equals("-test"))) {
+                File testfile = new File("test.array");
+                if (testfile.exists()) testfile.delete();
+                kelondroArray fm = new kelondroArray(testfile, new int[]{30, 50}, 9);
+                for (int i = 0; i < 100; i++) {
+                    fm.set(i, new byte[][]{("name" + i).getBytes(), ("value" + i).getBytes()});
+                }
+                fm.close();
+            } else
+            {
                 System.err.println("usage: kelondroArray -c|-v|-s|-g [file]|[index [value]] <db-file>");
                 System.err.println("( create, view, set, get)");
                 System.exit(0);

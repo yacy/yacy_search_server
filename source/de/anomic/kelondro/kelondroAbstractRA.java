@@ -66,7 +66,12 @@ abstract class kelondroAbstractRA implements kelondroRA {
     abstract public void seek(long pos) throws IOException;
     abstract public void close() throws IOException;
 
-    // derivated methods:
+    // derived methods:
+    public void readFully(byte[] b, int off, int len) throws IOException {
+        int r = read(b, off, len);
+        if (r < len) readFully(b, off + r, len - r);
+    }
+    
     public byte readByte() throws IOException {
 	int ch = this.read();
 	if (ch < 0) throw new IOException();
@@ -112,7 +117,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
 	this.write((int) (v >>> 24) & 0xFF); this.write((int) (v >>> 16) & 0xFF);
 	this.write((int) (v >>>  8) & 0xFF); this.write((int) (v >>>  0) & 0xFF);
     }
-
+ 
     public void write(byte[] b) throws IOException {
 	this.write(b, 0, b.length);
     }

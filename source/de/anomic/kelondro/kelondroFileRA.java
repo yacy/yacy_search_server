@@ -45,38 +45,55 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.FileDescriptor;
+import java.io.SyncFailedException;
 import java.util.Map;
 import java.util.Properties;
 
 public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
 
     protected RandomAccessFile RAFile;
+    protected FileDescriptor   RADescriptor;
     
-    public kelondroFileRA(String file) throws FileNotFoundException {
+    public kelondroFileRA(String file) throws IOException, FileNotFoundException {
         this(new File(file));
     }
 
-    public kelondroFileRA(File file) throws FileNotFoundException {
+    public kelondroFileRA(File file) throws IOException, FileNotFoundException {
         this.name = file.getName();
 	RAFile  = new RandomAccessFile(file, "rw");
+        RADescriptor = RAFile.getFD();
     }
 
+    private void sync() throws IOException {
+        try {
+            RADescriptor.sync();
+            //try {Thread.currentThread().sleep(8);} catch (InterruptedException e) {return;}
+        } catch (SyncFailedException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+    
     // pseudo-native method read
     public int read() throws IOException {
+        sync();
 	return RAFile.read();
     }
 
     // pseudo-native method write
     public void write(int b) throws IOException {
-	RAFile.write(b);
+        RAFile.write(b);
     }
 
     public int read(byte[] b, int off, int len) throws IOException {
-	return RAFile.read(b, off, len);
+        sync();
+        RAFile.read(b, off, len);
+        return len;
     }
 
     public void write(byte[] b, int off, int len) throws IOException {
-	RAFile.write(b, off, len);
+        // write to file
+        RAFile.write(b, off, len);
     }
 
     public void seek(long pos) throws IOException {
@@ -84,8 +101,9 @@ public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
     }
 
     public void close() throws IOException {
-	RAFile.close();
-    RAFile = null;
+        sync();
+        RAFile.close();
+        RAFile = null;
     }
 
     protected void finalize() throws Throwable {

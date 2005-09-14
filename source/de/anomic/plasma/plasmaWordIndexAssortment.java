@@ -113,7 +113,9 @@ public final class plasmaWordIndexAssortment {
                 if (log != null) log.logConfig("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
                 return;
             } catch (IOException e){
-                serverLog.logSevere("PLASMA", "unable to open assortment database, creating new: " + e.getMessage(), e);
+                serverLog.logSevere("PLASMA", "unable to open assortment database " + assortmentLength + ", creating new: " + e.getMessage(), e);
+            } catch (kelondroException e) {
+                serverLog.logSevere("PLASMA", "assortment database " + assortmentLength + " corupted, creating new: " + e.getMessage(), e);
             }
             assortmentFile.delete(); // make space for new one
         }
