@@ -67,18 +67,25 @@ public class IndexTransfer_p {
         
         if (post != null) {            
             if (post.containsKey("startIndexTransfer")) {                
-                yacySeed seed = yacyCore.seedDB.getConnected(post.get("hostHash", ""));
-                if (seed == null) return prop;
-                
-                switchboard.indexDistribution.startTransferWholeIndex(seed,true);                
+                yacySeed seed = yacyCore.seedDB.getConnected(post.get("hostHash", ""));                
+                if (seed == null) {
+                    prop.put("running_status","Disconnected peer");
+                } else {                    
+                    boolean deleteIndex = ((String)post.get("deleteIndex", "0")).equals("1");                    
+                    switchboard.indexDistribution.startTransferWholeIndex(seed,deleteIndex);
+                    prop.put("LOCATION","");
+                    return prop;
+                }
             } else if (post.containsKey("stopIndexTransfer")) {
                 switchboard.indexDistribution.stopTransferWholeIndex(true);
+                prop.put("LOCATION","");
+                return prop;
                 
             } else if (post.containsKey("newIndexTransfer")) {
                 switchboard.indexDistribution.abortTransferWholeIndex(true);
+                prop.put("LOCATION","");
+                return prop;
             }
-            prop.put("LOCATION","");
-            return prop;
         }
         
         
@@ -95,8 +102,11 @@ public class IndexTransfer_p {
             prop.put("running_twpercent",Float.toString(transfThread.getTransferedIndexPercent()));
             prop.put("running_twrange", transfThread.getRange());
             prop.put("running_twchunk", Integer.toString(transfThread.getChunkSize()));
+            prop.put("running_deleteIndex", transfThread.deleteIndex()?1:0);
             prop.put("running_peerName",transfThread.getSeed().getName());
             prop.put("running_stopped",(transfThread.isFinished()) || (!transfThread.isAlive())?1:0);
+        } else {
+            if (!prop.containsKey("running_status")) prop.put("running_status","Not running");
         }
         
         

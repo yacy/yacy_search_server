@@ -464,7 +464,7 @@ public class plasmaWordIndexDistribution {
         private boolean delete = false;
         private boolean finished = false;
         private int transferedIndexCount = 0;
-        private String status = "running";
+        private String status = "Running";
         private String oldStartingPointHash = "------------", startPointHash = "------------";
         private int wordsDBSize = 0;
         private int chunkSize = 500;
@@ -484,9 +484,13 @@ public class plasmaWordIndexDistribution {
             this.finished = true;
             this.join();
         }
-        
+                
         public boolean isFinished() {
             return this.finished;
+        }
+        
+        public boolean deleteIndex() {
+            return this.delete;
         }
         
         public int getChunkSize() {
@@ -526,19 +530,21 @@ public class plasmaWordIndexDistribution {
                  * - detected a server shutdown or user interruption
                  * - detected a failure
                  */
-                long start, retryCount = 0;
+                long start, retryCount = 0, iteration = 0;
                 while (!finished && !Thread.currentThread().isInterrupted()) {
+                    iteration++;
                     int idxCount = 0;
                     start = System.currentTimeMillis();
                     
                     // selecting 500 words to transfer
+                    this.status = "Running: Selection of chunk " + iteration;
                     Object[] selectResult = selectTransferIndexes(startPointHash, chunkSize);
                     plasmaWordIndexEntity[] indexEntities = (plasmaWordIndexEntity[]) selectResult[0];                    
                     
                     HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry 
                     if ((indexEntities == null) || (indexEntities.length == 0)) {
                         plasmaWordIndexDistribution.this.log.logFine("No index available for index transfer, hash start-point " + startPointHash);
-                        this.status = "finished.";
+                        this.status = "Finished. " + iteration + " chunks transfered.";
                         return;
                     }
                     // count the indexes again, can be smaller as expected                    
@@ -563,6 +569,7 @@ public class plasmaWordIndexDistribution {
                         if (isAborted()) return;
                         
                         // transfering seleted words to remote peer
+                        this.status = "Running: Transfer of chunk " + iteration;
                         String error = yacyClient.transferIndex(seed, indexEntities, urlCache);
                         if (error == null) {
                             // words successfully transfered
@@ -625,6 +632,7 @@ public class plasmaWordIndexDistribution {
                     
                     // deleting transfered words from index
                     if (delete) {
+                        this.status = "Running: Deletion of chunk " + iteration;
                         try {
                             if (deleteTransferIndexes(indexEntities)) {
                                 plasmaWordIndexDistribution.this.log.logFine("Deleted all " + indexEntities.length + " transferred whole-word indexes locally");

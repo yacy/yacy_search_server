@@ -16,15 +16,22 @@
 <tr class="TableHeader" valign="bottom">
 <td class="small" >Status</td>
 <td class="small" >Transfered Words</td>
-<td class="small" >Words Range</td>
+<td class="small" >Chunk Size: Words Range</td>
+<td class="small" >Delete Index</td>
 <td class="small" >Remote Peer</td>
 <td class="small" >Start/Stop Transfer</td>
 </tr>
 #(running)#
 <tr valign="top" class="TableCellLight">
-<td class="small">Not running</td>
+<td class="small">#[status]#</td>
 <td class="small" align="center">-</td>
 <td class="small" align="center">-</td>
+<td class="small">
+	<select name="deleteIndex">
+		<option value="1">true</option>
+		<option value="0">false</option>
+	</select>
+</td>
 <td class="small">
 	<select name="hostHash">
 	#{hosts}#
@@ -42,6 +49,7 @@
       <td class="small"><font color="#(stopped)#green::red#(/stopped)#">#[status]#</font></td>
       <td class="small" align="right">#[twcount]# (#[twpercent]#%) </td>
       <td class="small" align="rigth">#[twchunk]# words: <tt>#[twrange]#</tt></td>
+      <td class="small">#(deleteIndex)#false::true#(/deleteIndex)#</td>
       <td class="small">#[peerName]#</td>
       <td class="small">#(stopped)#<input type="submit" name="stopIndexTransfer" value="Stop Index Transfer">::
                      <input type="submit" name="newIndexTransfer" value="Start New Index Transfer">#(/stopped)#</td>
