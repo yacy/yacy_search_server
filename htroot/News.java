@@ -95,9 +95,13 @@ public class News {
                 }
                 yacyNewsRecord record;
                 try {
-                    while (yacyCore.newsPool.size(tableID) > 0) {
-                        record = yacyCore.newsPool.get(tableID, 0);
-                        yacyCore.newsPool.moveOff(tableID, record.id());
+                    if ((tableID == 2) || (tableID == 4)) {
+                        yacyCore.newsPool.clear(tableID);
+                    } else {
+                        while (yacyCore.newsPool.size(tableID) > 0) {
+                            record = yacyCore.newsPool.get(tableID, 0);
+                            yacyCore.newsPool.moveOff(tableID, record.id());
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

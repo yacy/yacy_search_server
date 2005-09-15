@@ -88,6 +88,10 @@ public class yacyNewsQueue {
         queueStack = createStack(path);
     }
     
+    public void clear() throws IOException {
+        resetDB();
+    }
+    
     public void close() {
         if (queueStack != null) try {queueStack.close();} catch (IOException e) {}
         queueStack = null;

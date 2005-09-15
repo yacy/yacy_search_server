@@ -229,6 +229,17 @@ public class yacyNewsPool {
         return null;
     }
     
+    public void clear(int dbKey) throws IOException {
+        // this is called if a queue element shall be moved to another queue or off the queue
+        // it depends on the dbKey how the record is handled
+        switch (dbKey) {
+            case INCOMING_DB:	incomingNews.clear(); break;
+            case PROCESSED_DB:  processedNews.clear(); break;
+            case OUTGOING_DB:   outgoingNews.clear(); break;
+            case PUBLISHED_DB:  publishedNews.clear(); break;
+        }
+    }
+
     public void moveOff(int dbKey, String id) throws IOException {
         // this is called if a queue element shall be moved to another queue or off the queue
         // it depends on the dbKey how the record is handled
@@ -245,10 +256,10 @@ public class yacyNewsPool {
         // the news is also removed from the news database
         yacyNewsRecord record;
         synchronized (fromqueue) {
-            for (int i = fromqueue.size() - 1; i >= 0; i--) {
-                record = fromqueue.top(i);
+            while (fromqueue.size() > 0) {
+                record = fromqueue.top(0);
                 if ((record != null) && (record.id().equals(id))) {
-                    fromqueue.pop(i);
+                    fromqueue.pop(0);
                     if (toqueue != null) toqueue.push(record);
                     //newsDB.remove(id);
                     return true;
