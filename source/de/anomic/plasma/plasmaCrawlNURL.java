@@ -339,7 +339,7 @@ public class plasmaCrawlNURL extends plasmaURL {
             this.referrer      = (referrer == null) ? dummyHash : referrer;
             this.name          = (name == null) ? "" : name;
             this.loaddate      = (loaddate == null) ? new Date() : loaddate;
-            this.profileHandle = profileHandle;
+            this.profileHandle = profileHandle; // must not be null
             this.depth         = depth;
             this.anchors       = anchors;
             this.forkfactor    = forkfactor;
@@ -380,7 +380,7 @@ public class plasmaCrawlNURL extends plasmaURL {
                     this.referrer      = (entry[3]==null) ? dummyHash : new String(entry[3]);
                     this.name          = (entry[4] == null) ? "" : new String(entry[4]).trim();
                     this.loaddate      = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[5])));
-                    this.profileHandle = new String(entry[6]).trim();
+                    this.profileHandle = (entry[6] == null) ? null : new String(entry[6]).trim();
                     this.depth         = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[7]));
                     this.anchors       = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
                     this.forkfactor    = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[9]));
@@ -408,7 +408,7 @@ public class plasmaCrawlNURL extends plasmaURL {
                     this.referrer.getBytes(),
                     this.name.getBytes(),
                     loaddatestr.getBytes(),
-                    this.profileHandle.getBytes(),
+                    (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
                     serverCodings.enhancedCoder.encodeBase64Long(this.depth, urlCrawlDepthLength).getBytes(),
                     serverCodings.enhancedCoder.encodeBase64Long(this.anchors, urlParentBranchesLength).getBytes(),
                     serverCodings.enhancedCoder.encodeBase64Long(this.forkfactor, urlForkFactorLength).getBytes(),

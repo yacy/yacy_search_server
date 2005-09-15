@@ -49,6 +49,7 @@ import java.util.Locale;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlNURL;
+import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -96,13 +97,18 @@ public class IndexCreateWWWGlobalQueue_p {
             plasmaCrawlNURL.Entry urle;
             boolean dark = true;
             yacySeed initiator;
+            String profileHandle;
+            plasmaCrawlProfile.entry profileEntry;
             int i;
             for (i = 0; i < crawlerList.length; i++) {
                 urle = crawlerList[i];
                 if (urle != null) {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());
+                    profileHandle = urle.profileHandle();
+                    profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+i+"_dark", ((dark) ? 1 : 0) );
                     prop.put("crawler-queue_list_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
+                    prop.put("crawler-queue_list_"+i+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
                     prop.put("crawler-queue_list_"+i+"_depth", urle.depth());
                     prop.put("crawler-queue_list_"+i+"_modified", daydate(urle.loaddate()) );
                     prop.put("crawler-queue_list_"+i+"_anchor", urle.name());

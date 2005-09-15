@@ -1230,7 +1230,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                            loadDate, /* load date */
                            referrerHash, /* last url in crawling queue */
                            name, /* the anchor name */
-                           (profile == null) ? null : profile.handle(), 
+                           (profile == null) ? null : profile.handle(),  // profile must not be null!
                            currentdepth, /*depth so far*/
                            0, /*anchors, default value */
                            0, /*forkfactor, default value */

@@ -49,6 +49,7 @@ import java.util.Locale;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlNURL;
+import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -94,13 +95,18 @@ public class IndexCreateWWWLocalQueue_p {
             plasmaCrawlNURL.Entry urle;
             boolean dark = true;
             yacySeed initiator;
+            String profileHandle;
+            plasmaCrawlProfile.entry profileEntry;
             int i;
             for (i = 0; (i < crawlerList.length) && (showNum < 100); i++) {
                 urle = crawlerList[i];
                 if ((urle != null)&&(urle.url()!=null)) {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());
+                    profileHandle = urle.profileHandle();
+                    profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", ((dark) ? 1 : 0) );
                     prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
+                    prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
                     prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
                     prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
                     prop.put("crawler-queue_list_"+showNum+"_anchor", urle.name());
