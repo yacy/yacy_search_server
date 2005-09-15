@@ -93,17 +93,19 @@ public class CacheAdmin_p {
 
         // generate dir listing
         String[] list = dir.list();
-        File f; String tree  = "Directory of<br>" + ((pathString.length() == 0) ? "domain list" : linkPathString(pathString)) + "<br><br>";
+        File f;
+        StringBuffer tree = new StringBuffer(list.length * 200);
+        tree.append("Directory of<br>" + ((pathString.length() == 0) ? "domain list" : linkPathString(pathString)) + "<br><br>");
         if (list == null)
-            tree += "[empty]";
+            tree.append("[empty]");
         else {
             for (int i = 0; i < list.length; i++) {
                 f = new File(dir, list[i]);
                 if (!f.getName().equalsIgnoreCase("responseHeader.db"))
                     if (f.isDirectory())
-                        tree += "<img src=\"/env/grafics/folderIconSmall.gif\" align=\"top\" alt=\"Folder\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString;
+                        tree.append("<img src=\"/env/grafics/folderIconSmall.gif\" align=\"top\" alt=\"Folder\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString);
                     else
-                        tree += "<img src=\"/env/grafics/fileIconSmall.gif\" align=\"top\" alt=\"File\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString;
+                        tree.append("<img src=\"/env/grafics/fileIconSmall.gif\" align=\"top\" alt=\"File\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=" + pathString + "/" + list[i] + "\" class=\"tt\">" + list[i] + "</a><br>" + serverCore.crlfString);
             }
         }
 
@@ -146,7 +148,7 @@ public class CacheAdmin_p {
 
         prop.put("cachesize", Long.toString(switchboard.cacheManager.currCacheSize/1024));
         prop.put("cachemax", Long.toString(switchboard.cacheManager.maxCacheSize/1024));
-        prop.put("tree", tree);
+        prop.put("tree", tree.toString());
         prop.put("info", info);
         // return rewrite properties
         return prop;
