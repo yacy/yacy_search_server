@@ -23,7 +23,7 @@
 YaCy: Blacklist Manager==YaCy: Blacklist Manager
 Blacklist==Blacklist
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion  stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
-from being loaded. You can define several blacklists and activate them separately.==Sie kÃ¶nnen mehrere Blacklists anlegen und getrennt aktivieren.
+from being loaded. You can define several blacklists and activate them separately.==Sie k&ouml;nnen mehrere Blacklists anlegen und getrennt aktivieren.
 You may also provide your blacklist to other peers by sharing them; in return you may==Sie k&ouml;nnen ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
 collect blacklist entries from other peers.==Im Gegenzug k&ouml;nnen Sie sich selber von anderen Peers Blacklists runterladen.
 Edit list:==Liste bearbeiten:
@@ -99,9 +99,9 @@ Cookies==Cookies
 #-------------------------------------------------------
 #File: EditProfile_p.html
 
-Your Personal Profile==Dein pers&ouml;nliches Profil
+Your Personal Profile==Ihr pers&ouml;nliches Profil
 You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten. Andere YaCy-Benutzer k&ouml;nnen dieses Profil &uuml;ber einen Link auf ihrer Netzwerkseite ansehen.
-You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie m&uuml;ssen hier keine pers&ouml;nlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen m&ouml;chten, kann man das hier machen.
+You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie m&uuml;ssen hier keine pers&ouml;nlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen m&ouml;chten, k&ouml;nnen Sie das hier machen.
 #Name==Name
 #Nick Name==Nick Name
 #Homepage==Homepage
@@ -252,7 +252,7 @@ You can enrich the search results by using the 'global' option; you must also sw
 (by using the proxy) to contribute to the global index.==(in dem Sie den Proxy benutzen) um im globalen Index suchen zu k&ouml;nnen.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu erschaffen.
-Architecture and implementation==Architektur und Implementierung
+Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
 
 #-------------------------------------------------------
 #File: IndexControl_p.html
@@ -261,15 +261,15 @@ Index Control==Index Kontrolle
 Index Administration==Index Administration
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Der lokale Index besteht im Moment aus #[wcount]# W&ouml;rtern und #[ucount]# URL-Links.
 Word==Wort:
-value="Show URL Entries for Wort:">==value="Zeige URL Eintr&auml;ge f&uuml;r Wort:">
+value="Show URL Entries for Wort:">==value="URL Eintr&auml;ge f&uuml;r Wort zeigen">
 Word-Hash:==Wort-Hash:
-"Generate List"=="Erstelle Liste"
-value="Show URL Entries for Wort:-Hash">==value="Zeige Eintr&auml;ge f&uuml;r Wort-Hash">
-"Transfer to other peer"=="Sende an anderen Peer"
+"Generate List"=="Liste erstellen"
+value="Show URL Entries for Wort:-Hash">==value="Eintr&auml;ge f&uuml;r Wort-Hash zeigen">
+"Transfer to other peer"=="An anderen Peer senden"
 URL==URL
-"Show Details for URL"=="Zeige Details f&uuml;r URL"
+"Show Details for URL"=="Details f&uuml;r URL zeigen"
 URL-Hash:==URL-Hash
-"Show Details for URL-Hash"=="Zeige Details f&uuml;r URL-Hash"
+"Show Details for URL-Hash"=="Details f&uuml;r URL-Hash zeigen"
 DHT Transmission control:==DHT-Verteilungs Kontrolle:
 The transmission is necessary for the functionality of global search on other peers.==Die Verteilung ist notwendig, damit auf anderen Peers die globale Suche funktioniert.
 If you switch off distribution or receipt of RWIs you will be banned from global search.==Wenn Sie die Verteilung oder den Erhalt von RWIs nicht erlauben, werden Sie von der globalen Suche ausgeschlossen.
@@ -285,6 +285,7 @@ Changes will take effect immediately==&Auml;nderungen sind sofort aktiv
 
 #-------------------------------------------------------
 #File: IndexCreate_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Index Creation==Index Erzeugung
 Start Crawling Job:==Starte Crawling Aufgabe:
@@ -325,7 +326,7 @@ From&nbsp;URL:==Von URL:
 Existing start URL's are re-crawled.==Die existierende Start URL wird wieder gecrawlt.
 Other already visited URL's are sorted out as 'double'.==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert.
 A complete re-crawl will be available soon.==Ein kompletter Re-Crawl wird bald m&ouml;glich sein.
-"Start New Crawl"=="Starte neuen Crawl"
+"Start New Crawl"=="Neuen Crawl starten"
 <b>Distributed Indexing: </b>==<b>Verteiltes Indexieren: </b>
 Crawling and indexing can be done by remote peers.==Crawlen und Indexieren kann von anderen Peers durchgef&uuml;hrt werden.
 Your peer can search and index for other peers and they can search for you.==Ihr Peer kann suchen und indexieren f&uuml;r andere Peers und diese k&ouml;nnen f&uuml;r Sie suchen.
@@ -354,7 +355,7 @@ or see the fill/process count of all queues on the==Oder sehen sehen Sie sich de
 The indexing result is presented on the==Die Indexier Resulatet werden auf der
 <a href="IndexMonitor.html">Index Monitor</a>-page.==<a href="IndexMonitor.html">Index Monitor</a>-Seite angezeigt.
 <b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>==<b>Es dauert in der Regel mind. 30 Sekunden bis das Sie dort die ersten Ergebnisse sehen k&ouml;nnen. Bitte beachten Sie, dass das Crawling jedesmal, wenn Sie den Proxy oder den Web-Sever benutzen, pausiert wird, um maximale Verf&uuml;gbarkeit zu garantieren.</b>
-If you crawl any un-wanted pages, you can delete them <a href="IndexControl_p.html">here</a>.==Wenn Sie Seiten crawlen, die Sie nicht crawlen wollen, k&ouml;nnen Sie diese <a href="IndexControl_p.html">hier</a> l&ouml;schen.
+If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Sie Seiten crawlen, die Sie nicht crawlen wollen, k&ouml;nnen Sie diese <a href="IndexControl_p.html">hier</a> l&ouml;schen.
 Removed \#\[numEntries\]\# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty==#[numEntries]# Eintr&auml;ge wurden aus der Crawl Warteschlange entfernt. Diese Warteschlange wird sich erneut f&uuml;llen, wenn noch Eintr&auml;ge in der Lade- und Indexier Warteschlange stehen.
 Crawling paused successfully.==Crawling wurde erfolgreich unterbrochen (Pause).
 Continue crawling.==Crawling wird fortgesetzt.
@@ -381,9 +382,53 @@ No remote crawl peers availible.==Kein Peer zum remote Crawl erreichbar.
 peers available for remote crawling.==Peers erreichbar zum remote Crawling.==
 Idle Peers==unt&auml;tige Peers
 Busy Peers==Besch&auml;tigte Peers
+\#\(withQuery\)\#no::yes\#\(/withQuery\)\#==#(withQuery)#nein::ja#(/withQuery)#
+\#\(storeCache\)\#no::yes\#\(/storeCache\)\#==#(storeCache)#nein::ja#(/storeCache)#
+\#\(localIndexing\)\#no::yes\#\(/localIndexing\)\#==#(localIndexing)#nein::ja#(/localIndexing)#
+\#\(remoteIndexing\)\#no::yes\#\(/remoteIndexing\)\#==#(remoteIndexing)#nein::ja#(/remoteIndexing)#
+\#\(crawlingQ\)\#no::yes\#\(/crawlingQ\)\#==#(crawlingQ)#nein::ja#(/crawlingQ)#
+\#\{available\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)&nbsp;&nbsp; \#\{/available\}\#==#{available}##[name]# (#[due]# Sekunden lang)&nbsp;&nbsp; #{/available}#
+\#\{busy\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)&nbsp;&nbsp;\#\{/busy\}\#==#{busy}##[name]# (#[due]# Sekunden lang)&nbsp;&nbsp;#{/busy}#
+
+#-------------------------------------------------------
+#File: IndexCreateIndexingQueue_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy '\#\[clientname\]\# ': Index Creation/Indexing Queue==YaCy '#[clientname]#': Index Erzeugung/Indexier Warteschlange
+Index Creation: Indexing Queue==Index Erzeugung: Indexier Warteschlange
+The indexing queue is empty==Die Indexier Warteschlange ist leer.
+"clear indexing queue"=="Warteschlange l&ouml;schen"
+There are \#\[num\]\# entries with a total size of \#\[totalSize\]\# in the indexing queue:==Es befinden sich #[num]# Eintr&auml;ge mit einer Gr&ouml;sse von #[totalSize]# in der Indexier Warteschlange:
+Initiator==Initiator
+Depth==Tiefe
+Modified Date==&Auml;nderungsdatum
+Anchor Name==Anker Name
+URL==URL
+Size</th>==Gr&ouml;sse</th>
+Delete==L&ouml;schen
+Rejected URL List:</b>&nbsp;There are \#\[num\]\# entries in the rejected-urls list.==Ausschluss URL Liste:</b>&nbsp;Es befinden sich #[num]# Eintr&auml;ge in der ausgeschlossene-urls Liste.
+Showing latest \#\[num\]\# entries.==Es werden die letzten #[num]# Eintr&auml;ge gezeigt.
+"show more"=="Mehr zeigen"
+"clear list"=="Liste l&ouml;schen"
+There are \#\[num\]\# entries in the rejected-queue:==Es befinden sich #[num]# Eintr&auml;ge in der ausgeschlossenen Warteschlange:
+Executor==Ausf&uuml;hrender
+Fail-Reason==Fehler Grund
+
+#-------------------------------------------------------
+#File: IndexCreateLoaderQueue_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy '\#\[clientname\]\#': Index Creation / Loader Queue==YaCy '#[clientname]#': Index Erzeugung / Lade Warteschlange
+Index Creation: Loader Queue==Index Erzeugung: Lade Warteschlange
+The loader set is empty==Die Lade Warteschlange ist leer.
+There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Eintr&auml;ge in der Lade Warteschlange:
+Initiator==Initiator
+Depth==Tiefe
+URL==URL
 
 #-------------------------------------------------------
 #File: IndexMonitor.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 #YaCy '#[clientname]#': Index Monitor
 Index Monitor Menu==Index Monitor Men&uuml;
@@ -437,14 +482,14 @@ This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu
 The stack is empty.==Die Liste ist leer.
 Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Eintr&auml;ge in diesem Bereich.
 Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Eintr&auml;ge aus diesem Bereich von insgesamt #[all]# Eintr&auml;gen.
-"clear list"=="Leere Liste"
+"clear list"=="Liste leeren"
 #Initiator==Initiator
 Executor==Ausf&uuml;hrender
 Modified Date==&Auml;nderungsdatum Datum
 Words==W&ouml;rter
 Title==Titel
 #URL==URL
-"delete"=="L&ouml;sche"
+"delete"=="L&ouml;schen"
 
 #-------------------------------------------------------
 #File: Language_p.html
@@ -457,11 +502,10 @@ Current language:==Aktuelle Sprache
 default\(english\)==Deutsch
 Languagefile Author:==Autor der Sprachdatei:
 <!-- author -->==Roland Ramthun, Oliver Wunder
-Send additions to maintainer:==Schicken Sie Erg&auml;nzungen an:
+Send additions to maintainer:==Schicken Sie Erg&auml;nzungen bitte an:
 <!-- maintainer -->==admin@yacy-forum.de
 Languages:==Sprachen:
 Install new language from URL:==Neue Sprachdatei herunterladen:
-
 Use this language==Diese Sprachdatei sofort benutzen
 "Use"==Benutzen
 "Delete"==L&ouml;schen
@@ -508,7 +552,7 @@ Network Overview==Netzwerk &Uuml;berblick
 Active Peers==Aktive Peers
 Passive Peers==Passive Peers
 Potential Peers==Potenzielle Peers
-Manually contacting Peer==
+Manually contacting Peer==Kontaktiere Peer manuell
 no remote==Kein
 peer for this list known==Peer bekannt oder online.
 Showing==Gezeigt werden
@@ -607,8 +651,8 @@ Category==Kategorie
 Received==Erhalten
 Distributed==Verteilt
 Attributes==Attribute
-"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Gew&auml;hlte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::gew&auml;hlte&nbsp;News&nbsp;L&ouml;schen::Breche&nbsp;Verbreitung&nbsp;gew&auml;hlter&nbsp;News&nbsp;ab::gew&auml;hlte&nbsp;News&nbsp;L&ouml;schen#(/page)#
-"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Markiere&nbsp;alle&nbsp;News&nbsp;als&nbsp;gelesen::L&ouml;sche&nbsp;alle&nbsp;News::Breche&nbsp;Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;ab::L&ouml;sche&nbsp;alle&nbsp;News#(/page)#
+"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Gew&auml;hlte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Gew&auml;hlte&nbsp;News&nbsp;l&ouml;schen::Verbreitung&nbsp;gew&auml;hlter&nbsp;News&nbsp;abbrechen::Gew&auml;hlte&nbsp;News&nbsp;l&ouml;schen#(/page)#
+"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Alle&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Alle&nbsp;News&nbsp;l&ouml;schen::Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;abbrechen::Alle&nbsp;News&nbsp;l&ouml;schen#(/page)#
 
 #-------------------------------------------------------
 #File: ProxyIndexingMonitor_p.html
@@ -631,10 +675,10 @@ Store to Cache==Speicher im Cache
 It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Es wird empfohlen diese Option immer zu aktivieren. Einzige Ausnahme: Sie haben einen zweiten Proxy als Cache laufen und Yacy soll im "Proxy-zu-Proxy"-Modus laufen.
 Proxy generally==Proxy Allgemein
 Path==Verzeichnis
-The path where the pages are stored \(max. length 300\)==Verzeichnis in dem die Seiten gecachet werden (max. 300 Zeichen)
+The path where the pages are stored \(max. length 300\)==Verzeichnis in dem der Cache sein soll (max. 300 Zeichen)
 Size</td>==Gr&ouml;sse</td>
-The size in MB of the cache.==Die Gr&ouml;sse in MB vom Cache.
-"set proxy profile"=="Speicher Proxy Profil"
+The size in MB of the cache.==Die Gr&ouml;sse des Cache in MB.
+"Set proxy profile"=="Proxy Profil speichern"
 The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DATA/PLASMADB/crawlProfiles0.db fehlt entweder oder ist defekt.
 Please delete that file and restart.==Bitte l&ouml;schen Sie diese Datei und starten Sie YaCy neu.
 Proxy pre-fetch is now set to depth==Proxy Indizierung erfolgt nun bis zu einer Tiefe von
@@ -654,11 +698,11 @@ Skin selection==Skinauswahl
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie k&ouml;nnen hier das Aussehen von YaCy mit Skins &auml;ndern. W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
 Current skin:==Verwendeter Skin:
 Skins:==Skins:
-"Use"==Benutze
-"Delete"==L&ouml;sche
+"Use"=="Benutzen"
+"Delete"=="L&ouml;schen"
 Install new Skin from URL:==Installiere einen neuen Skin von folgender URL:
 Use this skin==Benutze diesen Skin
-"install"==installiere
+"install"=="Installieren"
 Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
 Error saving the skin.==Es trat ein Fehler beim Speichern des Skin auf.
 
@@ -753,13 +797,14 @@ You can now go back to the <a href="Settings_p.html">Settings</a> page if you wa
 
 #-------------------------------------------------------
 #File: ViewLog_p.html
+
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Log==YaCy: Log
+YaCy Log:==YaCy Log:
 Log==Log
 Lines==Zeilen
 reversed order==in umgekehrter Reihenfolge
-"refresh"==aktualisieren
+"refresh"==Aktualisieren
 
 #-------------------------------------------------------
 #File: ViewProfile.html
