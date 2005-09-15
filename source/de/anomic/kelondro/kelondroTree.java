@@ -123,6 +123,15 @@ public class kelondroTree extends kelondroRecords implements Comparator {
         super.clear();
         setHandle(root, null); // reset the root value
     }
+    
+    private void commitNode(Node n) throws IOException {
+        Handle left = n.getOHHandle(leftchild);
+        Handle right = n.getOHHandle(rightchild);
+        if ((left == null) && (right == null)) n.commit(CP_LOW);
+        else if (left == null) n.commit(CP_MEDIUM);
+        else if (right == null) n.commit(CP_MEDIUM);
+        else n.commit(CP_HIGH);
+    }
 
     // Returns the value to which this map maps the specified key.
     public synchronized byte[][] get(byte[] key) throws IOException {
@@ -212,15 +221,21 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 		    if (visitedNodeKeys.containsKey(otherkey)) {
                         // we have loops in the database.
                         // to fix this, all affected nodes must be patched
-                        thenode.setOHBytes(new byte[] {1, 0});
-                        thenode.setOHHandles(new Handle[] {null, null, null});
+                        thenode.setOHByte(magic,   (byte) 1);
+                        thenode.setOHByte(balance, (byte) 0);
+                        thenode.setOHHandle(parent, null);
+                        thenode.setOHHandle(leftchild, null);
+                        thenode.setOHHandle(rightchild, null);
                         Iterator fix = visitedNodeKeys.entrySet().iterator();
                         Map.Entry entry;
                         while (fix.hasNext()) {
                             entry = (Map.Entry) fix.next();
                             thenode = (Node) entry.getValue();
-                            thenode.setOHBytes(new byte[] {1, 0});
-                            thenode.setOHHandles(new Handle[] {null, null, null});
+                            thenode.setOHByte(magic,   (byte) 1);
+                            thenode.setOHByte(balance, (byte) 0);
+                            thenode.setOHHandle(parent, null);
+                            thenode.setOHHandle(leftchild, null);
+                            thenode.setOHHandle(rightchild, null);
                         }
                         thenode.commit(CP_NONE);
                         //printCache();
@@ -235,10 +250,10 @@ public class kelondroTree extends kelondroRecords implements Comparator {
                         return;
                     } else if (c < 0) {
                         child = -1;
-                        thisHandle = thenode.getOHHandles()[leftchild];
+                        thisHandle = thenode.getOHHandle(leftchild);
                     } else {
                         child = 1;
-                        thisHandle = thenode.getOHHandles()[rightchild];
+                        thisHandle = thenode.getOHHandle(rightchild);
                     }
 		    visitedNodeKeys.put(otherkey, thenode);
                 }
@@ -280,7 +295,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 
     public boolean isChild(Node childn, Node parentn, int child) throws IOException {
 	if (childn == null) throw new IllegalArgumentException("isLeftChild: Node parameter is NULL");
-	Handle lc = parentn.getOHHandles()[child];
+	Handle lc = parentn.getOHHandle(child);
 	if (lc == null) return false;
 	return (lc.equals(childn.handle()));
     }
@@ -314,7 +329,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	    // a node with this key exist. simply overwrite the content and return old content
 	    Node e = searchResult.getMatcher();
 	    byte[][] result = e.setValues(newrow);
-            e.commit(CP_MEDIUM);
+            commitNode(e);
             searchResult = null;
 	    return result;
 	} else if (searchResult.isRoot()) {
@@ -326,8 +341,11 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	    Node e = newNode();
             e.setValues(newrow);
 	    // write the propetries
-	    e.setOHBytes(new byte[] {1, 0}); // {magic, balance}
-	    e.setOHHandles(new Handle[] {null, null, null}); // {parent, leftchild, rightchild}
+	    e.setOHByte(magic,   (byte) 1);
+            e.setOHByte(balance, (byte) 0);
+            e.setOHHandle(parent, null);
+            e.setOHHandle(leftchild, null);
+            e.setOHHandle(rightchild, null);
 	    // do updates
 	    e.commit(CP_LOW);
             setHandle(root, e.handle());
@@ -345,24 +363,25 @@ public class kelondroTree extends kelondroRecords implements Comparator {
             Node parentNode = searchResult.getParent();
 	    Node theNode = newNode();
             theNode.setValues(newrow);
-            theNode.setOHBytes(new byte[] {1, 0}); // fresh {magic, balance}
-	    theNode.setOHHandles(new Handle[] {parentNode.handle(), null, null}); // {parent, leftchild, rightchild}
+            theNode.setOHByte(0, (byte) 1); // fresh magic
+            theNode.setOHByte(1, (byte) 0); // fresh balance
+            theNode.setOHHandle(parent, parentNode.handle());
+            theNode.setOHHandle(leftchild, null);
+            theNode.setOHHandle(rightchild, null);
             theNode.commit(CP_LOW);
             
 	    // check consistency and link new node to parent node
-	    byte[] parentOHByte;
-	    Handle[] parentOHHandle = parentNode.getOHHandles(); // {parent, leftchild, rightchild}
-	    if (searchResult.isLeft()) {
-		if (parentOHHandle[leftchild] != null) throw new kelondroException(filename, "tried to create leftchild node twice");
-		parentOHHandle[leftchild] = theNode.handle();
+	    byte parentBalance;
+            if (searchResult.isLeft()) {
+		if (parentNode.getOHHandle(leftchild) != null) throw new kelondroException(filename, "tried to create leftchild node twice");
+                parentNode.setOHHandle(leftchild, theNode.handle());
 	    } else if (searchResult.isRight()) {
-		if (parentOHHandle[rightchild] != null) throw new kelondroException(filename, "tried to create rightchild node twice");
-		parentOHHandle[rightchild] = theNode.handle();
+		if (parentNode.getOHHandle(rightchild) != null) throw new kelondroException(filename, "tried to create rightchild node twice");
+                parentNode.setOHHandle(rightchild, theNode.handle());
 	    } else {
                 throw new kelondroException(filename, "neither left nor right child");
             }
-	    parentNode.setOHHandles(parentOHHandle);
-            parentNode.commit(((parentOHHandle[leftchild] == null) || (parentOHHandle[rightchild] == null)) ? CP_MEDIUM : CP_HIGH);
+            commitNode(parentNode);
             
 	    // now update recursively the node balance of the parentNode
 	    // what do we have:
@@ -371,26 +390,29 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 
 	    // set balance factor in parent node(s)
 	    boolean increasedHight = true;
-	    byte prevHight;
 	    String path = "";
+            byte prevHight;
+            Handle parentSideHandle;
 	    while (increasedHight) {
 
 		// update balance
-		parentOHByte = parentNode.getOHBytes(); // {magic, balance}
-		parentOHHandle = parentNode.getOHHandles(); // {parent, leftchild, rightchild}
-		prevHight = parentOHByte[balance];
-		if ((parentOHHandle[leftchild] != null) && (parentOHHandle[leftchild].equals(theNode.handle()))) {
-		    //isLeftchild
-		    parentOHByte[balance]++; 
+		parentBalance = parentNode.getOHByte(balance); // {magic, balance}
+		prevHight = parentBalance;
+                parentSideHandle = parentNode.getOHHandle(leftchild);
+		if ((parentSideHandle != null) && (parentSideHandle.equals(theNode.handle()))) {
+		    // is left child
+		    parentBalance++; 
 		    path = "L" + path;
 		}
-		if ((parentOHHandle[rightchild] != null) && (parentOHHandle[rightchild].equals(theNode.handle()))) {
-		    parentOHByte[balance]--;
+                parentSideHandle =parentNode.getOHHandle(rightchild);
+		if ((parentSideHandle != null) && (parentSideHandle.equals(theNode.handle()))) {
+                    // is right child
+		    parentBalance--;
 		    path = "R" + path;
 		}
-		increasedHight = ((java.lang.Math.abs((int) parentOHByte[balance]) - java.lang.Math.abs((int) prevHight)) > 0);
-		parentNode.setOHBytes(parentOHByte);
-                parentNode.commit(((parentOHHandle[leftchild] == null) || (parentOHHandle[rightchild] == null)) ? CP_MEDIUM : CP_HIGH);
+		increasedHight = ((java.lang.Math.abs((int) parentBalance) - java.lang.Math.abs((int) prevHight)) > 0);
+		parentNode.setOHByte(balance, parentBalance);
+                commitNode(parentNode);
 
 		// here we either stop because we had no increased hight,
 		// or we have a balance greater then 1 or less than -1 and we do rotation
@@ -398,7 +420,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 		if (!(increasedHight)) break; // finished
 
 		// check rotation need
-		if (java.lang.Math.abs((int) parentOHByte[balance]) > 1) {
+		if (java.lang.Math.abs((int) parentBalance) > 1) {
 		    // rotate and stop then
 		    //System.out.println("* DB DEBUG: " + path.substring(0,2) + " ROTATION AT NODE " + parentNode.handle().toString() + ": BALANCE=" + parentOHByte[balance]);
 		    if (path.startsWith("LL")) {
@@ -411,27 +433,27 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 		    }
 		    if (path.startsWith("RL")) {
 			Handle parentHandle = parentNode.handle();
-			LL_RightRotation(theNode, getNode(theNode.getOHHandles()[leftchild], theNode, leftchild));
+			LL_RightRotation(theNode, getNode(theNode.getOHHandle(leftchild), theNode, leftchild));
 			parentNode = getNode(parentHandle, null, 0); // reload the parent node
-			RR_LeftRotation(parentNode, getNode(parentNode.getOHHandles()[rightchild], parentNode, rightchild));
+			RR_LeftRotation(parentNode, getNode(parentNode.getOHHandle(rightchild), parentNode, rightchild));
 			break;
 		    }
 		    if (path.startsWith("LR")) {
 			Handle parentHandle = parentNode.handle();
-			RR_LeftRotation(theNode, getNode(theNode.getOHHandles()[rightchild], theNode, rightchild));
+			RR_LeftRotation(theNode, getNode(theNode.getOHHandle(rightchild), theNode, rightchild));
 			parentNode = getNode(parentHandle, null, 0); // reload the parent node
-			LL_RightRotation(parentNode, getNode(parentNode.getOHHandles()[leftchild], parentNode, leftchild));
+			LL_RightRotation(parentNode, getNode(parentNode.getOHHandle(leftchild), parentNode, leftchild));
 			break;
 		    }
 		    break;
 		} else {
 		    // crawl up the tree
-		    if (parentOHHandle[parent] == null) {
+		    if (parentNode.getOHHandle(parent) == null) {
 			// root reached: stop
 			break;
 		    } else {
 			theNode = parentNode;
-			parentNode = getNode(parentOHHandle[parent], null, 0);
+			parentNode = getNode(parentNode.getOHHandle(parent), null, 0);
 		    }
 		}
 	    }
@@ -441,16 +463,10 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     }
 
     private void assignChild(Node parentNode, Node childNode, int childType) throws IOException {
-	Handle[] parentOHHandle = parentNode.getOHHandles();
-	Handle[] childOHHandle = childNode.getOHHandles();
-
-	parentOHHandle[childType] = childNode.handle();
-	childOHHandle[parent] = parentNode.handle();
-
-	parentNode.setOHHandles(parentOHHandle);
-        parentNode.commit(((parentOHHandle[leftchild] == null) || (parentOHHandle[rightchild] == null)) ? CP_MEDIUM : CP_HIGH);
-	childNode.setOHHandles(childOHHandle);
-        childNode.commit(((childOHHandle[leftchild] == null) || (childOHHandle[rightchild] == null)) ? CP_MEDIUM : CP_HIGH);
+	parentNode.setOHHandle(childType, childNode.handle());
+        childNode.setOHHandle(parent, parentNode.handle());
+        commitNode(parentNode);
+        commitNode(childNode);
     }
 
     private void replace(Node oldNode, Node oldNodeParent, Node newNode) throws IOException {
@@ -458,36 +474,31 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	// the anchor's link to the oldNode by the newNode-link
 	// the new link gets the anchor as parent link assigned
         // the oldNode will not be updated, so this must be done outside this routine
-	Handle[] oldHandle = oldNode.getOHHandles(); // {parent, leftchild, rightchild}
 	// distinguish case where the oldNode is the root node
 	if (oldNodeParent == null) {
 	    // this is the root, update root
 	    setHandle(root, newNode.handle());
 	    // update new Node
-	    Handle[] newHandle = newNode.getOHHandles();
-	    newHandle[parent] = null;
-	    newNode.setOHHandles(newHandle);
-            newNode.commit(CP_HIGH);
+	    newNode.setOHHandle(parent, null);
+            commitNode(newNode);
 	} else {
 	    // not the root, find parent
-	    Handle[] parentHandle = oldNodeParent.getOHHandles();
 	    // ok, we have the parent, but for updating the child link we must know
 	    // if the oldNode was left or right child
-	    if ((parentHandle[leftchild] != null) && (parentHandle[leftchild].equals(oldNode.handle()))) {
+            Handle parentSideHandle = oldNodeParent.getOHHandle(leftchild);
+            if ((parentSideHandle != null) && (parentSideHandle.equals(oldNode.handle()))) {
 		// update left node from parent
-		parentHandle[leftchild] = newNode.handle();
+                oldNodeParent.setOHHandle(leftchild, newNode.handle());
 	    }
-	    if ((parentHandle[rightchild] != null) && (parentHandle[rightchild].equals(oldNode.handle()))) {
+	    parentSideHandle = oldNodeParent.getOHHandle(rightchild);
+	    if ((parentSideHandle != null) && (parentSideHandle.equals(oldNode.handle()))) {
 		// update right node from parent
-		parentHandle[rightchild] = newNode.handle();
+                oldNodeParent.setOHHandle(rightchild, newNode.handle());
 	    }
-	    oldNodeParent.setOHHandles(parentHandle);
-            oldNodeParent.commit(((parentHandle[leftchild] == null) || (parentHandle[rightchild] == null)) ? CP_MEDIUM : CP_HIGH);
+	    commitNode(oldNodeParent);
 	    // update new Node
-	    Handle[] newHandle = newNode.getOHHandles();
-	    newHandle[parent] = oldNodeParent.handle();
-	    newNode.setOHHandles(newHandle);
-            newNode.commit(((newHandle[leftchild] == null) || (newHandle[rightchild] == null)) ? CP_MEDIUM : CP_HIGH);
+	    newNode.setOHHandle(parent, oldNodeParent.handle());
+            commitNode(newNode);
 	}
 	// finished. remember that we did not set the links to the oldNode
         // we have also not set the children of the newNode.
@@ -505,16 +516,14 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 
     private void LL_RightRotation(Node parentNode, Node childNode) throws IOException {
 	// replace the parent node; the parent is afterwards unlinked
-        Handle p2Handle = parentNode.getOHHandles()[parent];
+        Handle p2Handle = parentNode.getOHHandle(parent);
         Node p2Node = (p2Handle == null) ? null : getNode(p2Handle, null, 0);
         replace(parentNode, p2Node, childNode);
 
 	// set the left son of the parent to the right son of the childNode
-	Handle childOfChild = childNode.getOHHandles()[rightchild];
+	Handle childOfChild = childNode.getOHHandle(rightchild);
 	if (childOfChild == null) {
-	    Handle[] parentHandle = parentNode.getOHHandles();
-	    parentHandle[leftchild] = null;
-	    parentNode.setOHHandles(parentHandle);
+	    parentNode.setOHHandle(leftchild, null);
 	} else {
 	    assignChild(parentNode, getNode(childOfChild, childNode, rightchild), leftchild);
 	}
@@ -524,30 +533,28 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 
 	// - newBal(parent)  = oldBal(parent) - 1 - max(oldBal(leftChild), 0)
 	// - newBal(leftChild) = oldBal(leftChild) - 1 + min(newBal(parent), 0)
-	byte[] parentBytes = parentNode.getOHBytes();
-	byte[] childBytes = childNode.getOHBytes();
-	byte oldBalParent = parentBytes[balance];
-	byte oldBalChild = childBytes[balance];
-	parentBytes[balance] = (byte) (oldBalParent - 1 - max0(oldBalChild));
-	childBytes[balance] = (byte) (oldBalChild - 1 + min0(parentBytes[balance]));
-	parentNode.setOHBytes(parentBytes);
-        childNode.setOHBytes(childBytes);
-        parentNode.commit(CP_NONE);
-	childNode.commit(CP_NONE);
+	byte parentBalance = parentNode.getOHByte(balance);
+	byte childBalance = childNode.getOHByte(balance);
+	byte oldBalParent = parentBalance;
+	byte oldBalChild = childBalance;
+	parentBalance = (byte) (oldBalParent - 1 - max0(oldBalChild));
+	childBalance = (byte) (oldBalChild - 1 + min0(parentBalance));
+	parentNode.setOHByte(balance, parentBalance);
+        childNode.setOHByte(balance, childBalance);
+        commitNode(parentNode);
+        commitNode(childNode);
     }
 
     private void RR_LeftRotation(Node parentNode, Node childNode) throws IOException {
 	// replace the parent node; the parent is afterwards unlinked
-        Handle p2Handle = parentNode.getOHHandles()[parent];
+        Handle p2Handle = parentNode.getOHHandle(parent);
         Node p2Node = (p2Handle == null) ? null : getNode(p2Handle, null, 0);
 	replace(parentNode, p2Node, childNode);
 
 	// set the left son of the parent to the right son of the childNode
-	Handle childOfChild = childNode.getOHHandles()[leftchild];
+	Handle childOfChild = childNode.getOHHandle(leftchild);
 	if (childOfChild == null) {
-	    Handle[] parentHandle = parentNode.getOHHandles();
-	    parentHandle[rightchild] = null;
-	    parentNode.setOHHandles(parentHandle);
+	    parentNode.setOHHandle(rightchild, null);
 	} else {
 	    assignChild(parentNode, getNode(childOfChild, childNode, leftchild), rightchild);
 	}
@@ -557,16 +564,16 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 
 	// - newBal(parent)   = oldBal(parent) + 1 - min(oldBal(rightChild), 0)
 	// - newBal(rightChild) = oldBal(rightChild) + 1 + max(newBal(parent), 0)
-	byte[] parentBytes = parentNode.getOHBytes();
-	byte[] childBytes = childNode.getOHBytes();
-	byte oldBalParent = parentBytes[balance];
-	byte oldBalChild = childBytes[balance];
-	parentBytes[balance] = (byte) (oldBalParent + 1 - min0(oldBalChild));
-	childBytes[balance] = (byte) (oldBalChild + 1 + max0(parentBytes[balance]));
-	parentNode.setOHBytes(parentBytes);
-	childNode.setOHBytes(childBytes);
-        parentNode.commit(CP_NONE);
-	childNode.commit(CP_NONE);
+	byte parentBalance = parentNode.getOHByte(balance);
+	byte childBalance = childNode.getOHByte(balance);
+	byte oldBalParent = parentBalance;
+	byte oldBalChild = childBalance;
+	parentBalance = (byte) (oldBalParent + 1 - min0(oldBalChild));
+	childBalance = (byte) (oldBalChild + 1 + max0(parentBalance));
+	parentNode.setOHByte(balance, parentBalance);
+	childNode.setOHByte(balance, childBalance);
+        commitNode(parentNode);
+        commitNode(childNode);
     }
 
     // Associates the specified value with the specified key in this map
@@ -604,68 +611,66 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	//   by the greatest node of the left child or the smallest
 	//   node of the right child
 
-	Handle[] handles = node.getOHHandles();
-        Node childnode;
-	if ((handles[leftchild] == null) && (handles[rightchild] == null)) {
+	Node childnode;
+	if ((node.getOHHandle(leftchild) == null) && (node.getOHHandle(rightchild) == null)) {
 	    // easy case: the node is a leaf
 	    if (parentOfNode == null) {
 		// this is the root!
 		setHandle(root, null);
 	    } else {
-		Handle[] h = parentOfNode.getOHHandles();
-		if ((h[leftchild] != null) && (h[leftchild].equals(node.handle()))) h[leftchild] = null;
-		if ((h[rightchild] != null) && (h[rightchild].equals(node.handle()))) h[rightchild] = null;
-		parentOfNode.setOHHandles(h);
-                parentOfNode.commit(((h[leftchild] == null) && (h[rightchild] == null)) ? CP_LOW : CP_MEDIUM);
+                Handle h = parentOfNode.getOHHandle(leftchild);
+		if ((h != null) && (h.equals(node.handle()))) parentOfNode.setOHHandle(leftchild, null);
+                h = parentOfNode.getOHHandle(rightchild);
+		if ((h != null) && (h.equals(node.handle()))) parentOfNode.setOHHandle(rightchild, null);
+                commitNode(parentOfNode);
 	    }
-	} else if ((handles[leftchild] != null) && (handles[rightchild] == null)) {
-	    replace(node, parentOfNode, getNode(handles[leftchild], node, leftchild));
-	} else if ((handles[leftchild] == null) && (handles[rightchild] != null)) {
-	    replace(node, parentOfNode, getNode(handles[rightchild], node, rightchild));
+	} else if ((node.getOHHandle(leftchild) != null) && (node.getOHHandle(rightchild) == null)) {
+	    replace(node, parentOfNode, getNode(node.getOHHandle(leftchild), node, leftchild));
+	} else if ((node.getOHHandle(leftchild) == null) && (node.getOHHandle(rightchild) != null)) {
+	    replace(node, parentOfNode, getNode(node.getOHHandle(rightchild), node, rightchild));
 	} else {
 	    // difficult case: node has two children
-	    Node repl = lastNode(getNode(handles[leftchild], node, leftchild));
+	    Node repl = lastNode(getNode(node.getOHHandle(leftchild), node, leftchild));
 	    //System.out.println("last node is " + repl.toString());
 	    // we remove that replacement node and put it where the node was
 	    // this seems to be recursive, but is not since the replacement
 	    // node cannot have two children (it would not have been the smallest or greatest)
-	    Handle[] replha = repl.getOHHandles();
 	    Node n;
-	    Handle[] h;
+	    Handle h;
             // remove leaf
-	    if ((replha[leftchild] == null) && (replha[rightchild] == null)) {
+	    if ((repl.getOHHandle(leftchild) == null) && (repl.getOHHandle(rightchild) == null)) {
 		// the replacement cannot be the root, so simply remove from parent node
-		n = getNode(replha[parent], null, 0); // parent node of replacement node
-		h = n.getOHHandles();
-		if ((h[leftchild] != null) && (h[leftchild].equals(repl.handle()))) h[leftchild] = null;
-		if ((h[rightchild] != null) && (h[rightchild].equals(repl.handle()))) h[rightchild] = null;
-		n.setOHHandles(h);
-                n.commit(((h[leftchild] == null) && (h[rightchild] == null)) ? CP_LOW : CP_MEDIUM);
-	    } else if ((replha[leftchild] != null) && (replha[rightchild] == null)) {
+		n = getNode(repl.getOHHandle(parent), null, 0); // parent node of replacement node
+		h = n.getOHHandle(leftchild);
+		if ((h != null) && (h.equals(repl.handle()))) n.setOHHandle(leftchild, null);
+                h = n.getOHHandle(rightchild);
+		if ((h != null) && (h.equals(repl.handle()))) n.setOHHandle(rightchild, null);
+                commitNode(n);
+	    } else if ((repl.getOHHandle(leftchild) != null) && (repl.getOHHandle(rightchild) == null)) {
                 try {
-                    childnode = getNode(replha[leftchild], repl, leftchild);
-                    replace(repl, getNode(replha[parent], null, 0), childnode);
+                    childnode = getNode(repl.getOHHandle(leftchild), repl, leftchild);
+                    replace(repl, getNode(repl.getOHHandle(parent), null, 0), childnode);
                 } catch (IllegalArgumentException e) {
                     // now treat the situation as if that link had been null before
-                    n = getNode(replha[parent], null, 0); // parent node of replacement node
-                    h = n.getOHHandles();
-                    if ((h[leftchild] != null) && (h[leftchild].equals(repl.handle()))) h[leftchild] = null;
-                    if ((h[rightchild] != null) && (h[rightchild].equals(repl.handle()))) h[rightchild] = null;
-                    n.setOHHandles(h);
-                    n.commit(((h[leftchild] == null) && (h[rightchild] == null)) ? CP_LOW : CP_MEDIUM);
+                    n = getNode(repl.getOHHandle(parent), null, 0); // parent node of replacement node
+                    h = n.getOHHandle(leftchild);
+                    if ((h != null) && (h.equals(repl.handle()))) n.setOHHandle(leftchild, null);
+                    h = n.getOHHandle(rightchild);
+                    if ((h != null) && (h.equals(repl.handle()))) n.setOHHandle(rightchild, null);
+                    commitNode(n);
                 }
-	    } else if ((replha[leftchild] == null) && (replha[rightchild] != null)) {
+	    } else if ((repl.getOHHandle(leftchild) == null) && (repl.getOHHandle(rightchild) != null)) {
                 try {
-                    childnode = getNode(replha[rightchild], repl, rightchild);
-                    replace(repl, getNode(replha[parent], null, 0), childnode);
+                    childnode = getNode(repl.getOHHandle(rightchild), repl, rightchild);
+                    replace(repl, getNode(repl.getOHHandle(parent), null, 0), childnode);
                 } catch (IllegalArgumentException e) {
                     // now treat the situation as if that link had been null before
-                    n = getNode(replha[parent], null, 0); // parent node of replacement node
-                    h = n.getOHHandles();
-                    if ((h[leftchild] != null) && (h[leftchild].equals(repl.handle()))) h[leftchild] = null;
-                    if ((h[rightchild] != null) && (h[rightchild].equals(repl.handle()))) h[rightchild] = null;
-                    n.setOHHandles(h);
-                    n.commit(((h[leftchild] == null) && (h[rightchild] == null)) ? CP_LOW : CP_MEDIUM);
+                    n = getNode(repl.getOHHandle(parent), null, 0); // parent node of replacement node
+                    h = n.getOHHandle(leftchild);
+                    if ((h != null) && (h.equals(repl.handle()))) n.setOHHandle(leftchild, null);
+                    h = n.getOHHandle(rightchild);
+                    if ((h != null) && (h.equals(repl.handle()))) n.setOHHandle(rightchild, null);
+                    commitNode(n);
                 }
 	    }
 	    //System.out.println("node before reload is " + node.toString());
@@ -673,26 +678,26 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 	    //System.out.println("node after reload is " + node.toString());
             
             // now plant in the replha node
-	    byte[] b = node.getOHBytes(); // save bytes of disappearing node
-	    handles = node.getOHHandles(); // save handles of disappearing node
+	    byte b = node.getOHByte(balance); // save balance of disappearing node
+            Handle parentHandle = node.getOHHandle(parent);
+            Handle leftchildHandle = node.getOHHandle(leftchild);
+            Handle rightchildHandle = node.getOHHandle(rightchild);
 	    replace(node, parentOfNode, repl);
-	    repl.setOHBytes(b); // restore bytes
-	    repl.setOHHandles(handles); // restore handles
-            repl.commit(((handles[leftchild] == null) || (handles[rightchild] == null)) ? CP_MEDIUM : CP_HIGH);
+	    repl.setOHByte(balance, b); // restore balance
+	    repl.setOHHandle(parent, parentHandle); // restore handles
+            repl.setOHHandle(leftchild, leftchildHandle);
+            repl.setOHHandle(rightchild, rightchildHandle);
+            commitNode(repl);
 	    // last thing to do: change uplinks of children to this new node
-	    if (handles[leftchild] != null) {
-		n = getNode(handles[leftchild], node, leftchild);
-		h = n.getOHHandles();
-		h[parent] = repl.handle();
-		n.setOHHandles(h);
-                n.commit(((h[leftchild] == null) || (h[rightchild] == null)) ? CP_MEDIUM : CP_HIGH);
+	    if (leftchildHandle != null) {
+		n = getNode(leftchildHandle, node, leftchild);
+                n.setOHHandle(parent, repl.handle());
+                commitNode(n);
 	    }
-	    if (handles[rightchild] != null) {
-		n = getNode(handles[rightchild], node, rightchild);
-		h = n.getOHHandles();
-		h[parent] = repl.handle();
-		n.setOHHandles(h);
-                n.commit(((h[leftchild] == null) || (h[rightchild] == null)) ? CP_MEDIUM : CP_HIGH);
+	    if (rightchildHandle != null) {
+		n = getNode(rightchildHandle, node, rightchild);
+                n.setOHHandle(parent, repl.handle());
+                commitNode(n);
 	    }
  	}
         // move node to recycling queue
@@ -707,7 +712,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     
     private Node firstNode(Node node) throws IOException {
         if (node == null) throw new IllegalArgumentException("firstNode: node=null"); 
-	Handle h = node.getOHHandles()[leftchild];
+	Handle h = node.getOHHandle(leftchild);
 	while (h != null) {
             try {
                 node = getNode(h, node, leftchild);
@@ -715,7 +720,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
                 // return what we have
                 return node;
             }
-	    h = node.getOHHandles()[leftchild];
+	    h = node.getOHHandle(leftchild);
 	}
 	return node;
     }
@@ -728,7 +733,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 
     private Node lastNode(Node node) throws IOException {
 	if (node == null) throw new IllegalArgumentException("lastNode: node=null"); 
-        Handle h = node.getOHHandles()[rightchild];
+        Handle h = node.getOHHandle(rightchild);
 	while (h != null) {
 	    try {
                 node = getNode(h, node, rightchild);
@@ -736,7 +741,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
                 // return what we have
                 return node;
             }
-	    h = node.getOHHandles()[rightchild];
+	    h = node.getOHHandle(rightchild);
 	}
 	return node;
     }
@@ -849,7 +854,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
                 nodeStack.addLast(new Object[]{searchNode, new Integer(ct)});
                 
                 // go to next node
-                searchHandle = searchNode.getOHHandles()[ct];
+                searchHandle = searchNode.getOHHandle(ct);
                 if (searchHandle == null) throw new kelondroException(filename, "start node does not exist (handle null)");
                 searchNode = getNode(searchHandle, searchNode, ct);
                 if (searchNode == null) throw new kelondroException(filename, "start node does not exist (node null)");
@@ -876,14 +881,14 @@ public class kelondroTree extends kelondroRecords implements Comparator {
             
             try {
                 int childtype = (up) ? rightchild : leftchild;
-                Handle childHandle = nextNode.getOHHandles()[childtype];
+                Handle childHandle = nextNode.getOHHandle(childtype);
                 if (childHandle != null) {
                     //System.out.println("go to other leg, stack size=" + nodeStack.size());
                     // we have walked one leg of the tree; now go to the other one: step down to next child
                     nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
                     nextNode = getNode(childHandle, nextNode, childtype);
                     childtype = (up) ? leftchild : rightchild;
-                    while ((childHandle = nextNode.getOHHandles()[childtype]) != null) {
+                    while ((childHandle = nextNode.getOHHandle(childtype)) != null) {
                         try {
                             nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
                             nextNode = getNode(childHandle, nextNode, childtype);
@@ -1082,9 +1087,10 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     
     private int height(Node node) throws IOException {
         if (node == null) return 0;
-        Handle[] childs = node.getOHHandles();
-	int hl = (childs[leftchild] == null) ? 0 : height(getNode(childs[leftchild], node, leftchild));
-        int hr = (childs[rightchild] == null) ? 0 : height(getNode(childs[rightchild], node, rightchild));
+        Handle h = node.getOHHandle(leftchild);
+	int hl = (h == null) ? 0 : height(getNode(h, node, leftchild));
+        h = node.getOHHandle(rightchild);
+        int hr = (h == null) ? 0 : height(getNode(h, node, rightchild));
         if (hl > hr) return hl + 1; else return hr + 1;
     }
         
@@ -1124,9 +1130,8 @@ public class kelondroTree extends kelondroRecords implements Comparator {
                     nextline.add(null);
                     nextline.add(null);
                 } else {
-                    childs = node.getOHHandles();
-                    nextline.add(childs[leftchild]);
-                    nextline.add(childs[rightchild]);
+                    nextline.add(node.getOHHandle(leftchild));
+                    nextline.add(node.getOHHandle(rightchild));
                 }
             }
             System.out.println();
@@ -1158,34 +1163,6 @@ public class kelondroTree extends kelondroRecords implements Comparator {
         }
 	System.out.println();
     }
-    /*
-    public void print() {
-	super.print(false);
-	Handle h;
-	Node n;
-	Iterator it = iterator(true);
-	while (it.hasNext()) {
-	    n = (Node) it.next();
-	    System.out.println("> NODE " + np(n));
-	    try {
-	      System.out.println("       magic " + n.getOHByte()[magic] +
-	      ", balance " + n.getOHByte()[balance] +
-	      ", parent " + np(n.getOHHandle()[parent]) +
-	      ", left " + np(n.getOHHandle()[leftchild]) +
-	      ", right " + np(n.getOHHandle()[rightchild]));
-	      } catch (IOException e) {
-	      System.out.println("File error: " + e.getMessage());
-	      }
-	    
-	      System.out.print("  KEY:'" + (new String(n.getValue(0))).trim() + "'");
-	      for (int j = 1; j < columns(); j++)
-	      System.out.print(", V[" + j + "]:'" + (new String(n.getValue(j))).trim() + "'");
-	    
-	    //System.out.println();
-	}
-	System.out.println();
-    }
-    */
     
     private static void cmd(String[] args) {
 	System.out.print("kelondroTree ");

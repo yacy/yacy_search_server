@@ -101,7 +101,7 @@ public class kelondroStack extends kelondroRecords {
 	public Object next() {
 	    Handle ret = nextHandle;
 	    try {
-		nextHandle = getNode(nextHandle, null, 0).getOHHandles()[right];
+		nextHandle = getNode(nextHandle, null, 0).getOHHandle(right);
                 return getNode(ret, null, 0);
 	    } catch (IOException e) {
                 throw new kelondroException(filename, "IO error at Counter:next()");
@@ -112,7 +112,6 @@ public class kelondroStack extends kelondroRecords {
 	}
     }
 
-    
     public synchronized void push(byte[][] row) throws IOException {
 	if (row.length != columns()) throw new IllegalArgumentException("push: wrong row length " + row.length + "; must be " + columns());
 	// check if there is already a stack
@@ -121,7 +120,8 @@ public class kelondroStack extends kelondroRecords {
 	    // create node
 	    Node n = newNode();
             n.setValues(row);
-	    n.setOHHandles(new Handle[] {null, null});
+	    n.setOHHandle(left, null);
+            n.setOHHandle(right, null);
 	    n.commit(CP_NONE);
 	    // assign handles
 	    setHandle(root, n.handle());
@@ -131,11 +131,13 @@ public class kelondroStack extends kelondroRecords {
 	    // expand the list at the end
 	    Node n = newNode();
             n.setValues(row);
-	    n.setOHHandles(new Handle[] {getHandle(toor), null});
+	    n.setOHHandle(left, getHandle(toor));
+            n.setOHHandle(right, null);
 	    n.commit(CP_NONE);
 	    Node n1 = getNode(getHandle(toor), null, 0);
-	    n1.setOHHandles(new Handle[] {n1.getOHHandles()[left], n.handle()});
-            n1.commit(CP_NONE);
+	    n1.setOHHandle(left, n1.getOHHandle(left));
+            n1.setOHHandle(right, n.handle());
+	    n1.commit(CP_NONE);
 	    // assign handles
 	    setHandle(toor, n.handle());
 	    // thats it
@@ -214,8 +216,8 @@ public class kelondroStack extends kelondroRecords {
     
     private void unlinkNode(Node n) throws IOException {
         // join chaines over node
-	Handle l = n.getOHHandles()[left];
-        Handle r = n.getOHHandles()[right];
+	Handle l = n.getOHHandle(left);
+        Handle r = n.getOHHandle(right);
         // look left
 	if (l == null) {
 	    // reached the root on left side
@@ -223,7 +225,8 @@ public class kelondroStack extends kelondroRecords {
 	} else {
 	    // un-link the previous record
 	    Node k = getNode(l, null, 0);
-	    k.setOHHandles(new Handle[] {k.getOHHandles()[left], r});
+	    k.setOHHandle(left, k.getOHHandle(left));
+            k.setOHHandle(right, r);
             k.commit(CP_NONE);
 	}
         // look right
@@ -233,7 +236,8 @@ public class kelondroStack extends kelondroRecords {
 	} else {
 	    // un-link the following record
 	    Node k = getNode(r, null, 0);
-	    k.setOHHandles(new Handle[] {l, k.getOHHandles()[right]});
+	    k.setOHHandle(left, k.getOHHandle(right));
+            k.setOHHandle(right, null);
             k.commit(CP_NONE);
 	}
     }
@@ -253,11 +257,9 @@ public class kelondroStack extends kelondroRecords {
 	Handle h = getHandle(side);
 	if (h == null) return null;
 	if (dist >= size()) return null; // that would exceed the stack
-	while (dist-- > 0) h = getNode(h, null, 0).getOHHandles()[dir]; // track through elements
+	while (dist-- > 0) h = getNode(h, null, 0).getOHHandle(dir); // track through elements
 	return getNode(h, null, 0);
     }
-    
-    
     
 
     /*
@@ -326,7 +328,7 @@ public class kelondroStack extends kelondroRecords {
 		n = (Node) it.next();
 		//n = getNode(h, null, 0);
 		System.out.println("> NODE " + hp(n.handle()) +
-				   "; left " + hp(n.getOHHandles()[left]) + ", right " + hp(n.getOHHandles()[right]));
+				   "; left " + hp(n.getOHHandle(left)) + ", right " + hp(n.getOHHandle(right)));
 		System.out.print("  KEY:'" + (new String(n.getValues()[0])).trim() + "'");
 		for (int j = 1; j < columns(); j++)
 		    System.out.print(", V[" + j + "]:'" + (new String(n.getValues()[j])).trim() + "'");

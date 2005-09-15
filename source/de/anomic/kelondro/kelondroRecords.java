@@ -472,9 +472,7 @@ public class kelondroRecords {
                     throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index exceeds size. No auto-fix node was submitted. This is a serious failure.");  
                 } else {
                     try {
-                        Handle[] handles = parentNode.getOHHandles();
-                        handles[referenceInParent] = null;
-                        parentNode.setOHHandles(handles);
+                        parentNode.setOHHandle(referenceInParent, null);
                         parentNode.commit(CP_NONE);
                         throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. The bad node has been auto-fixed");
                     } catch (IOException ee) {
@@ -545,14 +543,33 @@ public class kelondroRecords {
 	    return new Handle(this.handle.index);
 	}
         
-	protected void setOHBytes(byte[] b) throws IOException {
+	protected void setOHByte(int i, byte b) throws IOException {
+	    if (i >= OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong index " + i);
+	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
+            this.headChunk[i] = b;
+            this.headChanged = true;
+	}
+        
+        protected void setOHHandle(int i, Handle handle) throws IOException {
+            if (i >= OHHANDLEC) throw new IllegalArgumentException("setOHHandle: wrong array size " + i);
+            if (this.handle.index == NUL) throw new kelondroException(filename, "setOHHandle: no handle assigned");
+            if (handle == null) {
+                NUL2bytes(this.headChunk, OHBYTEC + 4 * i);
+            } else {
+                if (handle.index > USEDC + FREEC) throw new kelondroException(filename, "INTERNAL ERROR, setOHHandles: handle " + i + " exceeds file size (" + handle.index + " > " + (USEDC + FREEC) + ")");
+                int2bytes(handle.index, this.headChunk, OHBYTEC + 4 * i);
+            }
+            this.headChanged = true;
+        }
+        
+	/*
+        protected void setOHBytes(byte[] b) throws IOException {
 	    if (b == null) throw new IllegalArgumentException("setOHByte: setting null value does not make any sense");
 	    if (b.length != OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong array size");
 	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
             System.arraycopy(b, 0, this.headChunk, 0, b.length);
             this.headChanged = true;
 	}
-        
         protected void setOHHandles(Handle[] handles) throws IOException {
             if (handles == null) throw new IllegalArgumentException("setOHint: setting null value does not make any sense");
             if (handles.length != OHHANDLEC) throw new IllegalArgumentException("setOHHandle: wrong array size");
@@ -569,14 +586,27 @@ public class kelondroRecords {
             }
             this.headChanged = true;
         }
+        */
+        protected byte getOHByte(int i) throws IOException {
+	    if (i >= OHBYTEC) throw new IllegalArgumentException("getOHByte: wrong index " + i);
+	    if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
+            return this.headChunk[i];
+	}
         
-	protected byte[] getOHBytes() throws IOException {
+        protected Handle getOHHandle(int i) throws IOException {
+            if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
+            if (i >= OHHANDLEC) throw new kelondroException(filename, "handle index out of bounds: " + i);
+            int h = bytes2int(this.headChunk, OHBYTEC + 4 * i);
+            return (h == NUL) ? null : new Handle(h);
+        }
+        
+	/*
+        protected byte[] getOHBytes() throws IOException {
 	    if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
             byte[] b = new byte[OHBYTEC];
             System.arraycopy(this.headChunk, 0, b, 0, OHBYTEC);
 	    return b;
 	}
-        
         protected Handle[] getOHHandles() throws IOException {
             if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
             Handle[] handles = new Handle[OHHANDLEC];
@@ -589,8 +619,9 @@ public class kelondroRecords {
             }
             return handles;
         }
+        */
         
-	public byte[][] setValues(byte[][] row) throws IOException {
+        public byte[][] setValues(byte[][] row) throws IOException {
 	    // if the index is defined, then write values directly to the file, else only to the object
 	    byte[][] result = getValues(); // previous value (this loads the values if not already happened)
             
@@ -650,13 +681,6 @@ public class kelondroRecords {
 		throw new kelondroException(filename, "no values to save (header missing)");
 	    }
             
-            /*
-	    if (this.tailChunk == null) {
-		// there is nothing to save
-		throw new kelondroException(filename, "no values to save (tail missing)");
-	    }
-            */
-            
             // save head
             if (this.headChanged) {
                 synchronized (entryFile) {
@@ -681,15 +705,6 @@ public class kelondroRecords {
             this.handle = null;
         }
         
-        /*
-        public void finalize() {
-            try {
-                commit(CP_NONE);
-                collapse();
-            } catch (IOException e) {}
-        }
-        */
-        
         private byte[] trimCopy(byte[] a, int offset, int length) {
             if (length > a.length - offset) length = a.length - offset;
             while ((length > 0) && (a[offset + length - 1] == 0)) length--;
@@ -702,12 +717,14 @@ public class kelondroRecords {
 	public String toString() {
 	    if (this.handle.index == NUL) return "NULL";
 	    String s = Integer.toHexString(this.handle.index);
+            Handle h;
 	    while (s.length() < 4) s = "0" + s;
 	    try {
-		byte[] b = getOHBytes();
-		for (int i = 0; i < b.length; i++) s = s + ":b" + b[i];
-		Handle[] h = getOHHandles();
-		for (int i = 0; i < h.length; i++) if (h[i] == null) s = s + ":hNULL"; else s = s + ":h" + h[i].toString();
+		for (int i = 0; i < OHBYTEC; i++) s = s + ":b" + getOHByte(i);
+		for (int i = 0; i < OHHANDLEC; i++) {
+                    h = getOHHandle(i);
+                    if (h == null) s = s + ":hNULL"; else s = s + ":h" + h.toString();
+                }
 		byte[][] content = getValues();
 		for (int i = 0; i < content.length; i++) s = s + ":" + ((content[i] == null) ? "NULL" : (new String(content[i])).trim());
 	    } catch (IOException e) {
