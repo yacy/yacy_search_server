@@ -85,7 +85,6 @@ public class CacheAdmin_p {
         String pathString = ((post == null) ? "" : post.get("path", "/"));
         final String fileString = pathString;
 
-        // we dont need check the path, because we have do that in plasmaSwitchboard.java - Borg-0300
         final File cache = new File(switchboard.getConfig("proxyCache", "DATA/HTCACHE"));    
 
         File       dir;
@@ -102,8 +101,8 @@ public class CacheAdmin_p {
         // generate sorted dir/file listing
         final StringBuffer tree  = new StringBuffer("Directory of<br>").append((pathString.length() == 0) ? "domain list" : linkPathString(pathString)).append("<br><br>");
         
-        final List dList = new ArrayList(50);
-        final List fList = new ArrayList(20);
+        final List dList = new ArrayList(500);
+        final List fList = new ArrayList(200);
         final String[] list = dir.list();
         File object;
         if (list == null) {
@@ -121,6 +120,7 @@ public class CacheAdmin_p {
             }
             Iterator iter = dList.iterator();
             String str;
+            tree.ensureCapacity((dList.size() + fList.size() + 2) * 255);
             if (dList.size() > 1) {
                 Collections.sort(dList);            
                 try {
@@ -142,7 +142,7 @@ public class CacheAdmin_p {
             }
         }
 
-        final StringBuffer info = new StringBuffer();
+        final StringBuffer info = new StringBuffer(8192);
 
         if ((action.equals("info")) && (!file.isDirectory())) {
             final String urls = htmlFilterContentScraper.urlNormalform(url);
