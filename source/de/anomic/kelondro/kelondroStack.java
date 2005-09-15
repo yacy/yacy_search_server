@@ -82,6 +82,7 @@ public class kelondroStack extends kelondroRecords {
     public kelondroStack(File file, long buffersize) throws IOException{
 	// this opens a file with an existing tree
 	super(file, buffersize);
+        if ((getHandle(root) == null) && (getHandle(toor) == null)) clear();
     }
 
     public void clear() throws IOException {
@@ -133,10 +134,9 @@ public class kelondroStack extends kelondroRecords {
             n.setValues(row);
 	    n.setOHHandle(left, getHandle(toor));
             n.setOHHandle(right, null);
-	    n.commit(CP_NONE);
 	    Node n1 = getNode(getHandle(toor), null, 0);
-	    n1.setOHHandle(left, n1.getOHHandle(left));
             n1.setOHHandle(right, n.handle());
+	    n.commit(CP_NONE);
 	    n1.commit(CP_NONE);
 	    // assign handles
 	    setHandle(toor, n.handle());
@@ -236,8 +236,8 @@ public class kelondroStack extends kelondroRecords {
 	} else {
 	    // un-link the following record
 	    Node k = getNode(r, null, 0);
-	    k.setOHHandle(left, k.getOHHandle(right));
-            k.setOHHandle(right, null);
+	    k.setOHHandle(left, l);
+            k.setOHHandle(right, k.getOHHandle(right));
             k.commit(CP_NONE);
 	}
     }
