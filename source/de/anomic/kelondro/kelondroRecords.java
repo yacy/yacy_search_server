@@ -160,13 +160,17 @@ public class kelondroRecords {
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
         init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
         this.XcacheSize = (int) (buffersize / ((long) (overhead + columns[0])));
+        if (this.XcacheSize > size()) this.XcacheSize = size() + 1; // do not waste too much memory
         if (XcacheSize <= 0) {
             XcacheSize = 0;
             this.XcacheHeaders = null;
             this.XcacheScore = null;
         } else {
+            // initialize cache
+            // in case that we have more cache space than elements
+            // we dont need cache control by the XcacheScore
             this.XcacheHeaders = new HashMap();
-            this.XcacheScore = new kelondroMScoreCluster();
+            this.XcacheScore = (this.XcacheSize > size()) ? null : new kelondroMScoreCluster();
         }
         this.XcacheStartup = System.currentTimeMillis();
     }
@@ -177,13 +181,14 @@ public class kelondroRecords {
         this.filename = null;
         init(ra, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
         this.XcacheSize = (int) (buffersize / ((long) (overhead + columns[0])));
+        if (this.XcacheSize > size()) this.XcacheSize = size() + 1; // do not waste too much memory
         if (XcacheSize <= 0) {
             XcacheSize = 0;
             this.XcacheHeaders = null;
             this.XcacheScore = null;
         } else {
             this.XcacheHeaders = new HashMap();
-            this.XcacheScore = new kelondroMScoreCluster();
+            this.XcacheScore = (this.XcacheSize > size()) ? null : new kelondroMScoreCluster();
         }
         this.XcacheStartup = System.currentTimeMillis();
     }
@@ -273,13 +278,14 @@ public class kelondroRecords {
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
         init(raf);
         this.XcacheSize = (int) (buffersize / ((long) (overhead + COLWIDTHS[0])));
+        if (this.XcacheSize > size()) this.XcacheSize = size() + 1; // do not waste too much memory
         if (XcacheSize <= 0) {
             XcacheSize = 0;
             this.XcacheHeaders = null;
             this.XcacheScore = null;
         } else {
             this.XcacheHeaders = new HashMap();
-            this.XcacheScore = new kelondroMScoreCluster();
+            this.XcacheScore = (this.XcacheSize > size()) ? null : new kelondroMScoreCluster();
         }
         this.XcacheStartup = System.currentTimeMillis();
     }
@@ -288,13 +294,14 @@ public class kelondroRecords {
         this.filename = null;
         init(ra);
         this.XcacheSize = (int) (buffersize / ((long) (overhead + COLWIDTHS[0])));
+        if (this.XcacheSize > size()) this.XcacheSize = size() + 1; // do not waste too much memory
         if (XcacheSize <= 0) {
             XcacheSize = 0;
             this.XcacheHeaders = null;
             this.XcacheScore = null;
         } else {
             this.XcacheHeaders = new HashMap();
-            this.XcacheScore = new kelondroMScoreCluster();
+            this.XcacheScore = (this.XcacheSize > size()) ? null : new kelondroMScoreCluster();
         }
         this.XcacheStartup = System.currentTimeMillis();
     }
@@ -363,7 +370,9 @@ public class kelondroRecords {
     protected void deleteNode(Handle handle) throws IOException {
         if (XcacheSize != 0) {
             synchronized (XcacheHeaders) {
-                if (XcacheHeaders.get(handle) != null) {
+                if (XcacheScore == null) {
+                    XcacheHeaders.remove(handle);
+                } else if (XcacheHeaders.get(handle) != null) {
                     XcacheScore.deleteScore(handle);
                     XcacheHeaders.remove(handle);
                 }
@@ -375,7 +384,8 @@ public class kelondroRecords {
     private void checkCacheSpace() {
         // check for space in cache
         // should be only called within a synchronized(XcacheHeaders) environment
-        if (XcacheSize == 0) return;
+        if (XcacheSize == 0) return; // no caching
+        if (XcacheScore == null) return; // no cache control
         Handle delkey;
         long free = Runtime.getRuntime().freeMemory();
         int count = 0;
@@ -521,7 +531,7 @@ public class kelondroRecords {
                     this.headChunk = new byte[headchunksize];
                     System.arraycopy(cacheEntry, 0, this.headChunk, 0, headchunksize);
                     // update cache scores to announce this cache hit
-                    XcacheScore.setScore(this.handle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
+                    if (XcacheScore != null) XcacheScore.setScore(this.handle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
                     this.headChanged = false;
                 }
             }
@@ -562,32 +572,7 @@ public class kelondroRecords {
             this.headChanged = true;
         }
         
-	/*
-        protected void setOHBytes(byte[] b) throws IOException {
-	    if (b == null) throw new IllegalArgumentException("setOHByte: setting null value does not make any sense");
-	    if (b.length != OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong array size");
-	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
-            System.arraycopy(b, 0, this.headChunk, 0, b.length);
-            this.headChanged = true;
-	}
-        protected void setOHHandles(Handle[] handles) throws IOException {
-            if (handles == null) throw new IllegalArgumentException("setOHint: setting null value does not make any sense");
-            if (handles.length != OHHANDLEC) throw new IllegalArgumentException("setOHHandle: wrong array size");
-            if (this.handle.index == NUL) throw new kelondroException(filename, "setOHHandle: no handle assigned");
-            int offset = OHBYTEC;
-            for (int i = 0; i < handles.length; i++) {
-                if (handles[i] == null) {
-                    NUL2bytes(this.headChunk, offset);
-                } else {
-                    if (handles[i].index > USEDC + FREEC) throw new kelondroException(filename, "INTERNAL ERROR, setOHHandles: handle " + i + " exceeds file size (" + handles[i].index + " > " + (USEDC + FREEC) + ")");
-                    int2bytes(handles[i].index, this.headChunk, offset);
-                }
-                offset += 4;
-            }
-            this.headChanged = true;
-        }
-        */
-        protected byte getOHByte(int i) throws IOException {
+	protected byte getOHByte(int i) throws IOException {
 	    if (i >= OHBYTEC) throw new IllegalArgumentException("getOHByte: wrong index " + i);
 	    if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
             return this.headChunk[i];
@@ -600,28 +585,7 @@ public class kelondroRecords {
             return (h == NUL) ? null : new Handle(h);
         }
         
-	/*
-        protected byte[] getOHBytes() throws IOException {
-	    if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
-            byte[] b = new byte[OHBYTEC];
-            System.arraycopy(this.headChunk, 0, b, 0, OHBYTEC);
-	    return b;
-	}
-        protected Handle[] getOHHandles() throws IOException {
-            if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
-            Handle[] handles = new Handle[OHHANDLEC];
-            int offset = OHBYTEC;
-            int i;
-            for (int j = 0; j < handles.length; j++) {
-                i = bytes2int(this.headChunk, offset);
-                handles[j] = (i == NUL) ? null : new Handle(i);
-                offset += 4;
-            }
-            return handles;
-        }
-        */
-        
-        public byte[][] setValues(byte[][] row) throws IOException {
+	public byte[][] setValues(byte[][] row) throws IOException {
 	    // if the index is defined, then write values directly to the file, else only to the object
 	    byte[][] result = getValues(); // previous value (this loads the values if not already happened)
             
@@ -734,33 +698,33 @@ public class kelondroRecords {
         }
         
         private void updateNodeCache() {
-            if (this.handle == null) return;
-            if (this.headChunk == null) return;
+            if (this.handle == null) return; // wrong access
+            if (this.headChunk == null) return; // nothing there to cache
+            if (XcacheSize == 0) return; // we do not use the cache
+            if ((XcacheScore == null) && (XcacheSize <= XcacheHeaders.size())) return; // no cache control and cache is full
             
-            if (XcacheSize != 0) {
-                synchronized (XcacheHeaders) {
-                    // remember size to evaluate a cache size check need
-                    int sizeBefore = XcacheHeaders.size();
-                    //long memBefore = Runtime.getRuntime().freeMemory();
-                    // generate cache entry
-                    byte[] cacheEntry = new byte[headchunksize];
-                    System.arraycopy(headChunk, 0, cacheEntry, 0, headchunksize);
-                    Handle cacheHandle = new Handle(this.handle.index);
-                    
-                    // store the cache entry
-                    //XcacheHeaders.remove(cacheHandle);
-                    XcacheHeaders.put(cacheHandle, cacheEntry);
-                    XcacheScore.setScore(cacheHandle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
-
-                    // delete the cache entry buffer
-                    cacheEntry = null;
-                    cacheHandle = null;
-                    //System.out.println("kelondroRecords cache4" + filename + ": cache record size = " + (memBefore - Runtime.getRuntime().freeMemory()) + " bytes" + ((newentry) ? " new" : ""));
-                    // check cache size
-                    if (XcacheHeaders.size() > sizeBefore) checkCacheSpace();
-                    //System.out.println("kelondroRecords cache4" + filename + ": " + XcacheHeaders.size() + " entries, " + XcacheSize + " allowed.");
-                    //printCache();
-                }
+            synchronized (XcacheHeaders) {
+                // remember size to evaluate a cache size check need
+                int sizeBefore = XcacheHeaders.size();
+                //long memBefore = Runtime.getRuntime().freeMemory();
+                // generate cache entry
+                byte[] cacheEntry = new byte[headchunksize];
+                System.arraycopy(headChunk, 0, cacheEntry, 0, headchunksize);
+                Handle cacheHandle = new Handle(this.handle.index);
+                
+                // store the cache entry
+                //XcacheHeaders.remove(cacheHandle);
+                XcacheHeaders.put(cacheHandle, cacheEntry);
+                if (XcacheScore != null) XcacheScore.setScore(cacheHandle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
+                
+                // delete the cache entry buffer
+                cacheEntry = null;
+                cacheHandle = null;
+                //System.out.println("kelondroRecords cache4" + filename + ": cache record size = " + (memBefore - Runtime.getRuntime().freeMemory()) + " bytes" + ((newentry) ? " new" : ""));
+                // check cache size
+                if (XcacheHeaders.size() > sizeBefore) checkCacheSpace();
+                //System.out.println("kelondroRecords cache4" + filename + ": " + XcacheHeaders.size() + " entries, " + XcacheSize + " allowed.");
+                //printCache();
             }
         }
     }
