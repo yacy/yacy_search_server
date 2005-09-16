@@ -1363,7 +1363,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
             int steps = 0;
             while (true) {
                 if (testFile.exists()) testFile.delete();
-                tt = new kelondroTree(testFile, 0, 4 ,4);
+                tt = new kelondroTree(testFile, 2000, 4 ,4);
                 steps = 10 + ((int) System.currentTimeMillis() % 7) * (((int) System.currentTimeMillis() + 17) % 11);
                 t = s;
                 d = "";
