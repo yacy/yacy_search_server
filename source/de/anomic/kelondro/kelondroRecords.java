@@ -80,7 +80,7 @@ public class kelondroRecords {
 
     // constants
     private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
-    public  static final long memBlock =   500000; // do not fill cache further if the amount of available memory is less that this
+    public  static final long memBlock =  5000000; // do not fill cache further if the amount of available memory is less that this
     public  static final long memKcolb = 10000000; // if the amount of available memory is greater than this, do not use cache size to block, simply use memory
     
     // caching flags
