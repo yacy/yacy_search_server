@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last change: 05.08.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,14 +41,13 @@
 // done inside the copyright notive above. A re-distribution must contain
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
-
+//
 // You must compile this file with
-// javac -classpath .:../Classes index.java
+// javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -55,36 +57,32 @@ import de.anomic.yacy.yacyCore;
 public class welcome {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
-	serverObjects prop = new serverObjects();
-
-	// set values
-	String s;
-	int pos;
+        // return variable that accumulates replacements
+        final serverObjects prop = new serverObjects();
 
         // update seed info
         yacyCore.peerActions.updateMySeed();
 
-	prop.put("peername", env.getConfig("peerName", "<nameless>"));
+        prop.put("peername", env.getConfig("peerName", "<nameless>"));
         prop.put("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
-	prop.put("peeraddress", yacyCore.seedDB.mySeed.getAddress());
+        prop.put("peeraddress", yacyCore.seedDB.mySeed.getAddress());
         prop.put("hostname", serverCore.publicIP());
-		try{
-	        prop.put("hostip", InetAddress.getByName(serverCore.publicIP()).getHostAddress());
-		}catch(UnknownHostException e){
-	        prop.put("hostip", "Unknown Host Exception");
-		}
-	prop.put("port", env.getConfig("port", "8080"));
+        try{
+            prop.put("hostip", InetAddress.getByName(serverCore.publicIP()).getHostAddress());
+        }catch(UnknownHostException e){
+            prop.put("hostip", "Unknown Host Exception");
+        }
+        prop.put("port", env.getConfig("port", "8080"));
         prop.put("clientip", header.get("CLIENTIP", ""));
-        
-        String peertype = (yacyCore.seedDB.mySeed == null) ? serverSwitch.PEERTYPE_JUNIOR : yacyCore.seedDB.mySeed.get(serverSwitch.PEERTYPE, serverSwitch.PEERTYPE_VIRGIN);
-	boolean senior = (peertype.equals(serverSwitch.PEERTYPE_SENIOR)) || (peertype.equals(serverSwitch.PEERTYPE_PRINCIPAL));
-	if (senior) prop.put("couldcan", "can"); else prop.put("couldcan", "could");
-	if (senior) prop.put("seniorinfo", "This peer runs in senior mode which means that your peer can be accessed using the addresses shown above."); else prop.put("seniorinfo", "<b>Nobody can access your peer from the outside of your intranet. You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below.</b>");
-	prop.put("wwwpath", "<application_root_path>/" + env.getConfig("htDocsPath", "DATA/HTDOCS"));
 
-	// return rewrite properties
-	return prop;
+        final String peertype = (yacyCore.seedDB.mySeed == null) ? serverSwitch.PEERTYPE_JUNIOR : yacyCore.seedDB.mySeed.get(serverSwitch.PEERTYPE, serverSwitch.PEERTYPE_VIRGIN);
+        final boolean senior = (peertype.equals(serverSwitch.PEERTYPE_SENIOR)) || (peertype.equals(serverSwitch.PEERTYPE_PRINCIPAL));
+        if (senior) { prop.put("couldcan", "can"); } else { prop.put("couldcan", "could"); }
+        if (senior) { prop.put("seniorinfo", "This peer runs in senior mode which means that your peer can be accessed using the addresses shown above."); } else { prop.put("seniorinfo", "<b>Nobody can access your peer from the outside of your intranet. You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below.</b>"); }
+        prop.put("wwwpath", "<application_root_path>/" + env.getConfig("htDocsPath", "DATA/HTDOCS"));
+
+        // return rewrite properties
+        return prop;
     }
 
 }
