@@ -108,8 +108,9 @@ public class dir {
         String adminAccountBase64MD5    = switchboard.getConfig("adminAccountBase64MD5", "");
         String uploadAccountBase64MD5   = switchboard.getConfig("uploadAccountBase64MD5", "");
         String downloadAccountBase64MD5 = switchboard.getConfig("downloadAccountBase64MD5", "");
-        String logoutAccountBase64MD5 = serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(":"));
-	String authorizationMD5 = serverCodings.standardCoder.encodeMD5Hex(((String) header.get("Authorization", "xxxxxx")).trim().substring(6));
+        
+    String logoutAccountBase64MD5 = de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(":"));
+    String authorizationMD5 = de.anomic.server.serverCodings.encodeMD5Hex(((String) header.get("Authorization", "xxxxxx")).trim().substring(6));
 	//if (logoutAccountBase64.equals(authorization))
 	boolean adminAuthorization =
             ((adminAccountBase64MD5.length() != 0) &&

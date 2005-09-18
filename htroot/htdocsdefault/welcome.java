@@ -77,8 +77,8 @@ public class welcome {
 	prop.put("port", env.getConfig("port", "8080"));
         prop.put("clientip", header.get("CLIENTIP", ""));
         
-        String peertype = (yacyCore.seedDB.mySeed == null) ? "virgin" : yacyCore.seedDB.mySeed.get("PeerType", "virgin");
-	boolean senior = (peertype.equals("senior")) || (peertype.equals("principal"));
+        String peertype = (yacyCore.seedDB.mySeed == null) ? serverSwitch.PEERTYPE_JUNIOR : yacyCore.seedDB.mySeed.get(serverSwitch.PEERTYPE, serverSwitch.PEERTYPE_VIRGIN);
+	boolean senior = (peertype.equals(serverSwitch.PEERTYPE_SENIOR)) || (peertype.equals(serverSwitch.PEERTYPE_PRINCIPAL));
 	if (senior) prop.put("couldcan", "can"); else prop.put("couldcan", "could");
 	if (senior) prop.put("seniorinfo", "This peer runs in senior mode which means that your peer can be accessed using the addresses shown above."); else prop.put("seniorinfo", "<b>Nobody can access your peer from the outside of your intranet. You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below.</b>");
 	prop.put("wwwpath", "<application_root_path>/" + env.getConfig("htDocsPath", "DATA/HTDOCS"));
