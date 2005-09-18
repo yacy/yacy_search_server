@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 04.02.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,10 +51,16 @@ package de.anomic.server;
 
 import java.net.InetAddress;
 import java.util.Iterator;
-
 import de.anomic.server.logging.serverLog;
 
 public interface serverSwitch {
+
+    public static final String PEERTYPE = "PeerType";
+    public static final String PEERTYPE_VIRGIN = "virgin";
+    public static final String PEERTYPE_JUNIOR = "junior";
+    public static final String PEERTYPE_SENIOR = "senior";
+    public static final String PEERTYPE_PRINCIPAL = "principal";
+
     // the root path for the application
     public String getRootPath();
 
@@ -62,15 +71,15 @@ public interface serverSwitch {
     // a switchboard can have action listener
     // these listeners are hooks for numerous methods below
     public void deployAction(String actionName,
-			     String actionShortDescription,
-			     String actionLongDescription,
+                             String actionShortDescription,
+                             String actionLongDescription,
                              serverSwitchAction action); 
     public void undeployAction(String actionName); 
 
     // the switchboard can manage worker threads
     public void deployThread(String threadName,
-			     String threadShortDescription,
-			     String threadLongDescription,
+                             String threadShortDescription,
+                             String threadLongDescription,
                              String threadMonitorURL,
                              serverThread newThread,
                              long startupDelay,
@@ -83,7 +92,7 @@ public interface serverSwitch {
     public void terminateAllThreads(boolean waitFor);
 
     public Iterator /*of serverThread-Names (String)*/ threadNames();
-    
+
     // the switchboard can be used to set and read properties
     public void setConfig(String key, String value);
     public String getConfig(String key, String dflt);
@@ -110,8 +119,9 @@ public interface serverSwitch {
     // The actionName selects an action
     // the actionInput is an input for the selected action
     public serverObjects action(String actionName, serverObjects actionInput);
-    
+
     // performance control: the server can announce busy and idle status to the switchboard
     // these announcements can be used to trigger events or interrupts
     public void handleBusyState(int jobs);
+
 }
