@@ -47,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
@@ -66,6 +67,7 @@ public class IndexCreateWWWLocalQueue_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        wikiCode wikiTransformer = new wikiCode(switchboard);
         serverObjects prop = new serverObjects();
  
         if (post != null) {
@@ -105,12 +107,12 @@ public class IndexCreateWWWLocalQueue_p {
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", ((dark) ? 1 : 0) );
-                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
+                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : wikiTransformer.replaceHTML(initiator.getName())) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
                     prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
                     prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
-                    prop.put("crawler-queue_list_"+showNum+"_anchor", urle.name());
-                    prop.put("crawler-queue_list_"+showNum+"_url", urle.url());
+                    prop.put("crawler-queue_list_"+showNum+"_anchor", wikiTransformer.replaceHTML(urle.name()));
+                    prop.put("crawler-queue_list_"+showNum+"_url", wikiTransformer.replaceHTML(urle.url().toString()));
                     prop.put("crawler-queue_list_"+showNum+"_hash", urle.hash());
                     dark = !dark;
                     showNum++;

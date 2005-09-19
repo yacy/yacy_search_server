@@ -51,6 +51,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.io.IOException;
 
+import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaHTCache;
@@ -71,6 +72,7 @@ public class IndexCreateIndexingQueue_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        wikiCode wikiTransformer = new wikiCode(switchboard);
         serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
         int showRejectedCount = 10;
@@ -149,11 +151,11 @@ public class IndexCreateIndexingQueue_p {
                     if ((pcentry != null)&&(pcentry.url() != null)) {
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                         prop.put("indexing-queue_list_"+entryCount+"_dark", (inProcess)? 2: ((dark) ? 1 : 0));
-                        prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
+                        prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : wikiTransformer.replaceHTML(initiator.getName())));
                         prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
                         prop.put("indexing-queue_list_"+entryCount+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
                         prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
-                        prop.put("indexing-queue_list_"+entryCount+"_url", pcentry.normalizedURLString());
+                        prop.put("indexing-queue_list_"+entryCount+"_url", wikiTransformer.replaceHTML(pcentry.normalizedURLString()));
                         prop.put("indexing-queue_list_"+entryCount+"_size", bytesToString(entrySize));
                         prop.put("indexing-queue_list_"+entryCount+"_inProcess", (inProcess)?1:0);
                         prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.urlHash());
@@ -192,9 +194,9 @@ public class IndexCreateIndexingQueue_p {
                 url = entry.url().toString();
                 initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                 executorSeed = yacyCore.seedDB.getConnected(executorHash);
-                prop.put("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
-                prop.put("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
-                prop.put("rejected_list_"+j+"_url", url);
+                prop.put("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : wikiTransformer.replaceHTML(initiatorSeed.getName())));
+                prop.put("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : wikiTransformer.replaceHTML(executorSeed.getName())));
+                prop.put("rejected_list_"+j+"_url", wikiTransformer.replaceHTML(url));
                 prop.put("rejected_list_"+j+"_failreason", entry.failreason());
                 prop.put("rejected_list_"+j+"_dark", ((dark) ? 1 : 0));
                 dark = !dark;
