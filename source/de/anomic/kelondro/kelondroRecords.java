@@ -80,7 +80,7 @@ public class kelondroRecords {
 
     // constants
     private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
-    public  static final long memBlock =  5000000; // do not fill cache further if the amount of available memory is less that this
+    public  static final long memBlock =   500000; // do not fill cache further if the amount of available memory is less that this
     public  static final long memKcolb = 10000000; // if the amount of available memory is greater than this, do not use cache size to block, simply use memory
     
     // caching flags
@@ -551,8 +551,15 @@ public class kelondroRecords {
                         //entryFile.read(this.tailChunk, 0, this.tailChunk.length);
                     }
                     this.headChanged = true; // provoke a cache store
-                    checkCacheSpace(CP_HIGH);
-                    updateNodeCache(CP_HIGH);
+                    int cp = CP_HIGH;
+                    if (OHHANDLEC == 3) {
+                        Handle l = getOHHandle(1);
+                        Handle r = getOHHandle(2);
+                        if ((l == null) && (r == null)) cp = CP_LOW;
+                        else if ((l == null) || (r == null)) cp = CP_MEDIUM;
+                    }
+                    checkCacheSpace(cp);
+                    updateNodeCache(cp);
                 } else {
                     //System.out.println("**CACHE HIT for " + this.handle.index + "**");
                     // copy cache entry

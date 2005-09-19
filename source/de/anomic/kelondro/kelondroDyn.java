@@ -192,6 +192,7 @@ public class kelondroDyn extends kelondroTree {
 
         if ((segmentCacheKey != null) && (serverByteBuffer.equals(key, segmentCacheKey))) {
             // use cache
+            //System.out.println("cache hit: " + super.filename + "/" + new String(key));
             return segmentCacheContent;
         } else {
             // read from db
@@ -217,6 +218,16 @@ public class kelondroDyn extends kelondroTree {
 	put(key, value);
     }
 
+    public synchronized int getDyn(String key, int pos) throws IOException {
+	int reccnt = pos / reclen;
+	// read within a single record
+        byte[] buf = getValueCached(dynKey(key, reccnt));
+        if (buf == null) return -1;
+        int recpos = pos % reclen;
+	if (buf.length <= recpos) return -1;
+        return buf[recpos] & 0xFF;
+    }
+    
     public synchronized byte[] getDyn(String key, int pos, int len) throws IOException {
 	int recpos = pos % reclen;
 	int reccnt = pos / reclen;
@@ -235,7 +246,7 @@ public class kelondroDyn extends kelondroTree {
                 buff = null;
             }
             //System.out.println("read: buf.length="+buf.length+",recpos="+recpos+",len="+len);
-	    if (len < (reclen - recpos)) {
+	    if (recpos + len <= reclen) {
 		segment1 = new byte[len];
 		System.arraycopy(buf, recpos, segment1, 0, len);
 	    } else {
@@ -316,7 +327,8 @@ public class kelondroDyn extends kelondroTree {
 
     public synchronized kelondroRA getRA(String filekey) throws IOException {
 	// this returns always a RARecord, even if no existed bevore
-	return new RARecord(filekey);
+	//return new kelondroBufferedRA(new RARecord(filekey), 512, 0);
+        return new RARecord(filekey);
     }
 
     public class RARecord extends kelondroAbstractRA implements kelondroRA {
@@ -329,8 +341,9 @@ public class kelondroDyn extends kelondroTree {
 	}
 
 	public int read() throws IOException {
-	    byte[] b = getDyn(filekey, seekpos++, 1);
-            return (b == null) ? -1 : b[0] & 0xFF;
+	    return getDyn(filekey, seekpos++);
+            //byte[] b = getDyn(filekey, seekpos++, 1);
+            //return (b == null) ? -1 : b[0] & 0xFF;
 	}
 
 	public void write(int i) throws IOException {

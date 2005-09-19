@@ -1321,8 +1321,8 @@ public class kelondroTree extends kelondroRecords implements Comparator {
 
     public static void main(String[] args) {
 	//cmd(args);
-        //bigtest(Integer.parseInt(args[0]));
-        randomtest(Integer.parseInt(args[0]));
+        bigtest(Integer.parseInt(args[0]));
+        //randomtest(Integer.parseInt(args[0]));
         //smalltest();
     }
  
@@ -1448,7 +1448,7 @@ public class kelondroTree extends kelondroRecords implements Comparator {
     
     public static kelondroTree testTree(File f, String testentities) throws IOException {
         if (f.exists()) f.delete();
-        kelondroTree tt = new kelondroTree(f, 200000, 4, 4);
+        kelondroTree tt = new kelondroTree(f, 0, 4, 4);
         byte[] b;
         for (int i = 0; i < testentities.length(); i++) {
             b = testWord(testentities.charAt(i));
