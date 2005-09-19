@@ -292,7 +292,7 @@ Start Crawling Job:==Starte Crawling Aufgabe:
 You can define URLs as start points for Web page crawling and start that crawling here.==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten.
 Crawling Depth:==Crawl-Tiefe:
 "\#\[crawlingDepth\]\#">=="#[crawlingDepth]#">
-A minimum of 1 is recommended.==Ein Minimum von 1 ist empohlen.
+A minimum of 1 is recommended.==Ein Minimum von 1 ist empfohlen.
 Be careful with the prefetch number. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durschnittlichen Verzweigungsfaktor von 20;
 A prefetch-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
 Crawling Filter:==Crawl-Maske:
@@ -300,14 +300,14 @@ Crawling Filter:==Crawl-Maske:
 This is an emacs-like regular expression that must match with the crawled URL.==Dies ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit der gecrawlten URL &uuml;bereinstimmen muss.
 Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase==Benutzen Sie dies z.B., um nur eine einzelne Domain zu crawlen. Wenn Sie diese Maske aktivieren, macht es Sinn
 the crawl depth.==die Crawl Tiefe zu erh&ouml;hen.
-Accept URLs with '\?' / dynamic URLs:==Akzeptiere URLs mit '?' / dynamischen URLs:
+Accept URLs with '\?' / dynamic URLs:==Akzeptiere URLs mit '?' / dynamische URLs:
 URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
 is accessed with URL's containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
-Store to Proxy Cache:==Speicher im Proxy Cache:
+Store to Proxy Cache:==Speichern im Proxy-Cache:
 This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardm&auml;ssig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
 We recommend to leave this switched off unless you want to control the crawl results with the==Wir raten Ihnen, sie nicht zu aktivieren, ausser Sie wollen die Crawl Resulate mit
 Cache Monitor==Cache Monitor kontrollieren.
-Do Local Indexing:==Lokales indexieren:
+Do Local Indexing:==Lokales Indexieren:
 This should be switched on by default, unless you want to crawl only to fill the==Dies sollte standardm&auml;ssig aktiviert sein, ausser Sie wollen den
 Proxy Cache</a> without indexing.==Proxy Cache</a> ohne Indexierung f&uuml;llen.
 Do Remote Indexing:==Indexieren auf anderen Peers:
@@ -330,10 +330,10 @@ A complete re-crawl will be available soon.==Ein kompletter Re-Crawl wird bald m
 <b>Distributed Indexing: </b>==<b>Verteiltes Indexieren: </b>
 Crawling and indexing can be done by remote peers.==Crawlen und Indexieren kann von anderen Peers durchgef&uuml;hrt werden.
 Your peer can search and index for other peers and they can search for you.==Ihr Peer kann suchen und indexieren f&uuml;r andere Peers und diese k&ouml;nnen f&uuml;r Sie suchen.
-Accept remote crawling requests and perform crawl at maximum load==Akzeptiere remote Crawling Anfragen und Crawle bis zum maximal geladenen.
-Accept remote crawling requests and perform crawl at maximum of==Akzeptiere remote Crawling Anfragen und Crawle bis zu einem Maximum von
-Pages Per Minute \(minimum is 1, low system load at PPM <= 30\)==Seiten pro Minute (Minimum ist 1, langsame Systeme sollten unter 30 Seiten pro Minte laden)
-Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Akzeptiere keine remote Crawling Anfragen (bitte aktivieren Sie dies nur, wenn Sie nicht eine Seite pro Minute Crawlen k&ouml;nnen; siehe Option oben)
+Accept remote crawling requests and perform crawl at maximum load==Akzeptiere Remote-Crawling Anfragen und crawle bis zur maximalen Auslastung.
+Accept remote crawling requests and perform crawl at maximum of==Akzeptiere Remote-Crawling Anfragen und crawle bis zu einem Maximum von
+Pages Per Minute \(minimum is 1, low system load at PPM <= 30\)==Seiten pro Minute (Minimum ist 1, langsame Systeme sollten unter 30 Seiten pro Minute laden)
+Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Akzeptiere keine Remote-Crawling Anfragen (bitte aktivieren Sie dies nur, wenn Sie nicht eine Seite pro Minute crawlen k&ouml;nnen; siehe Option oben)
 "set"=="Speichern"
 Error:==Fehler:
 Error with profile management. Please stop yacy, delete the File DATA/PLASMADB/crawlProfiles0.db and restart.==Fehler im Profil Management. Bitte stoppen Sie YaCy, l&ouml;schen Sie die Datei DATA/PLASMADB/crawlProfiles0.db und starten Sie YaCy neu.
@@ -376,10 +376,10 @@ Start Time==Startzeit
 Peer Name==Peer Name
 Start URL==Start URL
 Intention/Description==Absicht/Beschreibung
-Recently started remote crawls, finished:==Gerade gestartete Indexieren auf anderen Peers, beendet:
-Remote Crawling Peers:==Remote Crawl Peers:
-No remote crawl peers availible.==Kein Peer zum remote Crawl erreichbar.
-peers available for remote crawling.==Peers erreichbar zum remote Crawling.==
+Recently started remote crawls, finished:==Gerade gestartetes Indexieren auf anderen Peers, beendet:
+Remote Crawling Peers:==Remote-Crawl Peers:
+No remote crawl peers availible.==Kein Peer zum Remote-Crawl erreichbar.
+peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.==
 Idle Peers==unt&auml;tige Peers
 Busy Peers==Besch&auml;tigte Peers
 \#\(withQuery\)\#no::yes\#\(/withQuery\)\#==#(withQuery)#nein::ja#(/withQuery)#

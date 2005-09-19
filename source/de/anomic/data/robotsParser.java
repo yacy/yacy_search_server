@@ -241,7 +241,7 @@ public final class robotsParser{
                 con = null;            
                 
                 // following the redirection
-                serverLog.logFinest("ROBOTS","Redirection detected for Robots.txt with URL '" + robotsURL + "'." + 
+                serverLog.logFinest("ROBOTS","Redirection detected for robots.txt with URL '" + robotsURL + "'." + 
                                     "\nRedirecting request to: " + redirectionUrl);
                 return downloadRobotsTxt(redirectionUrl,redirectionCount);
                 
@@ -249,7 +249,7 @@ public final class robotsParser{
                 accessCompletelyRestricted = true;
                 serverLog.logFinest("ROBOTS","Access to Robots.txt not allowed on URL '" + robotsURL + "'.");
             } else {
-                serverLog.logFinest("ROBOTS","Robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + res.status + "].");
+                serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + res.status + "].");
                 robotsTxt = null;
             }        
         } catch (Exception e) {
