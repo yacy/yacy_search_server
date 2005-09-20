@@ -6,8 +6,27 @@
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #[header]#
-<br><br>
+#[submenuPerformance]#
+<br>
 <h2>Performance Settings for Memory</h2>
+
+
+<p>
+<div class=small><b>Available Memory:</b></div>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small">After Startup</td>
+<td class="small">After Initializations</td>
+<td class="small">Now</td>
+</tr>
+
+<tr class="TableCellDark">
+<td class="small" align="right">#[memoryFreeAfterStartup]# bytes</td>
+<td class="small" align="right">#[memoryFreeAfterInit]# bytes</td>
+<td class="small" align="right">#[memoryFreeNow]# bytes</td>
+</tr>
+</table>
+</p>
 
 <p>
 <div class=small><b>RAM Cache for Database Files:</b></div>
@@ -15,12 +34,12 @@
 <form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
 <tr class="TableHeader" valign="bottom">
 <td class="small">Database<br></td>
-<td class="small">Chunk&nbsp;Size<br>(bytes)</td>
-<td class="small">#Needed&nbsp;Slots<br>(=&nbsp;DB&nbsp;Size)</td>
-<td class="small">#Empty&nbsp;Slots<br>&nbsp;</td>
-<td class="small">#Used&nbsp;Slots<br>High&nbsp;Priority</td>
-<td class="small">#Used&nbsp;Slots<br>Medium&nbsp;Priority</td>
-<td class="small">#Used&nbsp;Slots<br>Low&nbsp;Priority</td>
+<td class="small">Chunk Size<br>(bytes)</td>
+<td class="small">#Needed Slots<br>(=&nbsp;DB&nbsp;Size)</td>
+<td class="small">#Empty Slots<br>&nbsp;</td>
+<td class="small">#Used Slots<br>High Priority</td>
+<td class="small">#Used Slots<br>Medium Priority</td>
+<td class="small">#Used Slots<br>Low Priority</td>
 <td class="small">Used<br>Size</td>
 <td class="small">Assigned<br>Max-Size</td>
 <td class="small">Recommended<br>Max-Size</td>

@@ -135,6 +135,10 @@ public final class plasmaHTCache {
         }        
     }
 
+    public int dbSize() {
+        return responseHeaderDB.size();      
+    }
+
     public int dbCacheChunkSize() {
         return responseHeaderDB.cacheChunkSize();
     }

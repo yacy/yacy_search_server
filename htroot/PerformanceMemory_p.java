@@ -81,13 +81,22 @@ public class PerformanceMemory_p {
             sb.setConfig("ramCacheNews", post.get("ramCacheNews", "0"));
         }
         
+        System.gc(); 
+        long memoryFreeNow = Runtime.getRuntime().freeMemory();
+        long memoryFreeAfterInit = Long.parseLong(sb.getConfig("memoryFreeAfterInit", "0"));
+        long memoryFreeAfterStartup = Long.parseLong(sb.getConfig("memoryFreeAfterStartup", "0"));
+        
+        prop.put("memoryFreeNow", memoryFreeNow);
+        prop.put("memoryFreeAfterInit", memoryFreeAfterInit);
+        prop.put("memoryFreeAfterStartup", memoryFreeAfterStartup);
+        
         req = switchboard.wordIndex.size();
         chk = switchboard.wordIndex.assortmentsCacheChunkSizeAvg();
         slt = switchboard.wordIndex.assortmentsCacheFillStatusCml();
         calc(); putprop(prop, "RWI");
         prop.put("ramCacheRWI", sb.getConfig("ramCacheRWI", "0"));
         
-        req = switchboard.cacheManager.size();
+        req = switchboard.cacheManager.dbSize();
         chk = switchboard.cacheManager.dbCacheChunkSize();
         slt = switchboard.cacheManager.dbCacheFillStatus();
         calc(); putprop(prop, "HTTP");
