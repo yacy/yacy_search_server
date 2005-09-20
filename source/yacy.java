@@ -1,43 +1,45 @@
-//yacy.java
-//-----------------------
-//(C) by Michael Peter Christen; mc@anomic.de
-//first published on http://www.yacy.net
-//Frankfurt, Germany, 2004, 2005
-//last major change: 24.03.2005
+// yacy.java
+// -----------------------
+// (C) by Michael Peter Christen; mc@anomic.de
+// first published on http://www.yacy.net
+// Frankfurt, Germany, 2004, 2005
 //
-//This program is free software; you can redistribute it and/or modify
-//it under the terms of the GNU General Public License as published by
-//the Free Software Foundation; either version 2 of the License, or
-//(at your option) any later version.
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
-//This program is distributed in the hope that it will be useful,
-//but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//GNU General Public License for more details.
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
 //
-//You should have received a copy of the GNU General Public License
-//along with this program; if not, write to the Free Software
-//Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//Using this software in any meaning (reading, learning, copying, compiling,
-//running) means that you agree that the Author(s) is (are) not responsible
-//for cost, loss of data or any harm that may be caused directly or indirectly
-//by usage of this softare or this documentation. The usage of this software
-//is on your own risk. The installation and usage (starting/running) of this
-//software may allow other people or application to access your computer and
-//any attached devices and is highly dependent on the configuration of the
-//software which must be done by the user of the software; the author(s) is
-//(are) also not responsible for proper configuration and usage of the
-//software, even if provoked by documentation provided together with
-//the software.
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-//Any changes to this file according to the GPL as documented in the file
-//gpl.txt aside this file in the shipment you received can be done to the
-//lines that follows this copyright notice here, but changes must not be
-//done inside the copyright notive above. A re-distribution must contain
-//the intact and unchanged copyright notice.
-//Contributions and changes to the program code must be marked as such.
-
+// Using this software in any meaning (reading, learning, copying, compiling,
+// running) means that you agree that the Author(s) is (are) not responsible
+// for cost, loss of data or any harm that may be caused directly or indirectly
+// by usage of this softare or this documentation. The usage of this software
+// is on your own risk. The installation and usage (starting/running) of this
+// software may allow other people or application to access your computer and
+// any attached devices and is highly dependent on the configuration of the
+// software which must be done by the user of the software; the author(s) is
+// (are) also not responsible for proper configuration and usage of the
+// software, even if provoked by documentation provided together with
+// the software.
+//
+// Any changes to this file according to the GPL as documented in the file
+// gpl.txt aside this file in the shipment you received can be done to the
+// lines that follows this copyright notice here, but changes must not be
+// done inside the copyright notive above. A re-distribution must contain
+// the intact and unchanged copyright notice.
+// Contributions and changes to the program code must be marked as such.
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -50,7 +52,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
-// import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,7 +59,6 @@ import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -66,13 +66,10 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.kelondro.kelondroMScoreCluster;
-// import de.anomic.kelondro.kelondroTree;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
-// import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
-// import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.plasma.plasmaWordIndexClassicDB;
 import de.anomic.plasma.plasmaWordIndexCache;
 import de.anomic.server.serverCodings;
@@ -118,8 +115,8 @@ import de.anomic.yacy.yacyCore;
 * <li>terminate.
 * </ul>
 */
-public final class yacy {
 
+public final class yacy {
     // static objects
     private static String vString = "@REPL_VERSION@";
     private static float version = (float) 0.1;
@@ -170,6 +167,7 @@ public final class yacy {
     */
     private static void startup(String homePath, long startupFree) {
         long startup = yacyCore.universalTime();
+
         try {
             // start up
             System.out.println(copyright);
@@ -197,65 +195,65 @@ public final class yacy {
             serverLog.logConfig("STARTUP", "Application Root Path: " + homePath);
 
             // create data folder
-            File dataFolder = new File(homePath, "DATA");
+            final File dataFolder = new File(homePath, "DATA");
             if (!(dataFolder.exists())) dataFolder.mkdir();
 
-            plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
+            final plasmaSwitchboard sboard = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
 
             // save information about available memory at startup time
-            sb.setConfig("memoryFreeAfterStartup", startupFree); // for statistics and memory configuration
+            sboard.setConfig("memoryFreeAfterStartup", startupFree); // for statistics and memory configuration
             
             // hardcoded, forced, temporary value-migration
-            sb.setConfig("htTemplatePath", "htroot/env/templates");
-            sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
+            sboard.setConfig("htTemplatePath", "htroot/env/templates");
+            sboard.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
 
             // if we are running an SVN version, we try to detect the used svn revision now ...
-            Properties buildProp = new Properties();
+            final Properties buildProp = new Properties();
             File buildPropFile = null;
             try {
                 buildPropFile = new File(homePath,"build.properties");
                 buildProp.load(new FileInputStream(buildPropFile));
             } catch (Exception e) {
-                System.err.println("ERROR: " + buildPropFile.toString() + " not found in settings path");
+                serverLog.logWarning("STARTUP", buildPropFile.toString() + " not found in settings path");
             }
 
             try {
                 if (buildProp.containsKey("releaseNr")) {
-                    // this normally looks like this: $Revision: 181 $
-                    String svnReleaseNrStr = buildProp.getProperty("releaseNr");
-                    Pattern pattern = Pattern.compile("\\$Revision:\\s(.*)\\s\\$",Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
-                    Matcher matcher = pattern.matcher(svnReleaseNrStr);
+                    // this normally looks like this: $Revision$
+                    final String svnReleaseNrStr = buildProp.getProperty("releaseNr");
+                    final Pattern pattern = Pattern.compile("\\$Revision:\\s(.*)\\s\\$",Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
+                    final Matcher matcher = pattern.matcher(svnReleaseNrStr);
                     if (matcher.find()) {
-                        String svrReleaseNr = matcher.group(1);
+                        final String svrReleaseNr = matcher.group(1);
                         try {
                             try {version = Float.parseFloat(vString);} catch (NumberFormatException e) {version = (float) 0.1;}
                             version = versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
                         } catch (NumberFormatException e) {}
-                        sb.setConfig("svnRevision", svrReleaseNr);
+                        sboard.setConfig("svnRevision", svrReleaseNr);
                     }
                 }
             } catch (Exception e) {
                 System.err.println("Unable to determine the currently used SVN revision number.");
             }
 
-            sb.setConfig("version", Float.toString(version));
-            sb.setConfig("vString", combinedVersionString2PrettyString(Float.toString(version)));
-            sb.setConfig("vdate", vDATE);
-            sb.setConfig("applicationRoot", homePath);
-            sb.setConfig("startupTime", Long.toString(startup));
+            sboard.setConfig("version", Float.toString(version));
+            sboard.setConfig("vString", combinedVersionString2PrettyString(Float.toString(version)));
+            sboard.setConfig("vdate", vDATE);
+            sboard.setConfig("applicationRoot", homePath);
+            sboard.setConfig("startupTime", Long.toString(startup));
             serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + vDATE);
             yacyCore.latestVersion = (float) version;
 
             // read environment
             //new
-            int port          = Integer.parseInt(sb.getConfig("port", "8080"));
-            int timeout       = Integer.parseInt(sb.getConfig("httpdTimeout", "60000"));
+            final int port    = Integer.parseInt(sboard.getConfig("port", "8080"));
+            int timeout       = Integer.parseInt(sboard.getConfig("httpdTimeout", "60000"));
             if (timeout < 60000) timeout = 60000;
 
             // create some directories
-            File htRootPath = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot"));
-            File htDocsPath = new File(sb.getRootPath(), sb.getConfig("htDocsPath", "DATA/HTDOCS"));
-            File htTemplatePath = new File(sb.getRootPath(), sb.getConfig("htTemplatePath","htdocs"));
+            final File htRootPath = new File(sboard.getRootPath(), sboard.getConfig("htRootPath", "htroot"));
+            final File htDocsPath = new File(sboard.getRootPath(), sboard.getConfig("htDocsPath", "DATA/HTDOCS"));
+            File htTemplatePath = new File(sboard.getRootPath(), sboard.getConfig("htTemplatePath","htdocs"));
 
             // create default notifier picture
             if (!((new File(htRootPath, "env/grafics/notifier.gif")).exists())) try {
@@ -264,7 +262,7 @@ public final class yacy {
             } catch (IOException e) {}
 
             if (!(htDocsPath.exists())) htDocsPath.mkdir();
-            File htdocsDefaultReadme = new File(htDocsPath, "readme.txt");
+            final File htdocsDefaultReadme = new File(htDocsPath, "readme.txt");
             if (!(htdocsDefaultReadme.exists())) try {serverFileUtils.write((
                     "This is your root directory for individual Web Content\r\n" +
                     "\r\n" +
@@ -281,10 +279,10 @@ public final class yacy {
                         System.out.println("Error creating htdocs readme: " + e.getMessage());
                     }
 
-            File wwwDefaultPath = new File(htDocsPath, "www");
+            final File wwwDefaultPath = new File(htDocsPath, "www");
             if (!(wwwDefaultPath.exists())) wwwDefaultPath.mkdir();
 
-            File wwwDefaultClass = new File(wwwDefaultPath, "welcome.class");
+            final File wwwDefaultClass = new File(wwwDefaultPath, "welcome.class");
             //if ((!(wwwDefaultClass.exists())) || (wwwDefaultClass.length() != (new File(htRootPath, "htdocsdefault/welcome.class")).length())) try {
             if((new File(htRootPath, "htdocsdefault/welcome.java")).exists())
                 serverFileUtils.copy(new File(htRootPath, "htdocsdefault/welcome.java"), new File(wwwDefaultPath, "welcome.java"));
@@ -292,10 +290,10 @@ public final class yacy {
             serverFileUtils.copy(new File(htRootPath, "htdocsdefault/welcome.html"), new File(wwwDefaultPath, "welcome.html"));
             //} catch (IOException e) {}
 
-            File shareDefaultPath = new File(htDocsPath, "share");
+            final File shareDefaultPath = new File(htDocsPath, "share");
             if (!(shareDefaultPath.exists())) shareDefaultPath.mkdir();
 
-            File shareDefaultClass = new File(shareDefaultPath, "dir.class");
+            final File shareDefaultClass = new File(shareDefaultPath, "dir.class");
             //if ((!(shareDefaultClass.exists())) || (shareDefaultClass.length() != (new File(htRootPath, "htdocsdefault/dir.class")).length())) try {
             if((new File(htRootPath, "htdocsdefault/dir.java")).exists())
                 serverFileUtils.copy(new File(htRootPath, "htdocsdefault/dir.java"), new File(shareDefaultPath, "dir.java"));
@@ -306,49 +304,57 @@ public final class yacy {
 
             // set preset accounts/passwords
             String acc;
-            if ((acc = sb.getConfig("proxyAccount", "")).length() > 0) {
-                sb.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
-                sb.setConfig("proxyAccount", "");
+            if ((acc = sboard.getConfig("proxyAccount", "")).length() > 0) {
+//              sboard.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sboard.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sboard.setConfig("proxyAccount", "");
             }
-            if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
-                sb.setConfig("serverAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
-                sb.setConfig("serverAccount", "");
+            if ((acc = sboard.getConfig("serverAccount", "")).length() > 0) {
+//              sboard.setConfig("serverAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sboard.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sboard.setConfig("serverAccount", "");
             }
-            if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
-                sb.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
-                sb.setConfig("adminAccount", "");
+            if ((acc = sboard.getConfig("adminAccount", "")).length() > 0) {
+//              sboard.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sboard.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sboard.setConfig("adminAccount", "");
             }
 
             // fix unsafe old passwords
-            if ((acc = sb.getConfig("proxyAccountBase64", "")).length() > 0) {
-                sb.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
-                sb.setConfig("proxyAccountBase64", "");
+            if ((acc = sboard.getConfig("proxyAccountBase64", "")).length() > 0) {
+//              sboard.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
+                sboard.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+                sboard.setConfig("proxyAccountBase64", "");
             }
-            if ((acc = sb.getConfig("serverAccountBase64", "")).length() > 0) {
-                sb.setConfig("serverAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
-                sb.setConfig("serverAccountBase64", "");
+            if ((acc = sboard.getConfig("serverAccountBase64", "")).length() > 0) {
+//              sboard.setConfig("serverAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
+                sboard.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+                sboard.setConfig("serverAccountBase64", "");
             }
-            if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
-                sb.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
-                sb.setConfig("adminAccountBase64", "");
+            if ((acc = sboard.getConfig("adminAccountBase64", "")).length() > 0) {
+//              sboard.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
+                sboard.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+                sboard.setConfig("adminAccountBase64", "");
             }
-            if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {
-                sb.setConfig("uploadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
-                sb.setConfig("uploadAccountBase64", "");
+            if ((acc = sboard.getConfig("uploadAccountBase64", "")).length() > 0) {
+//              sboard.setConfig("uploadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
+                sboard.setConfig("uploadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+                sboard.setConfig("uploadAccountBase64", "");
             }
-            if ((acc = sb.getConfig("downloadAccountBase64", "")).length() > 0) {
-                sb.setConfig("downloadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
-                sb.setConfig("downloadAccountBase64", "");
+            if ((acc = sboard.getConfig("downloadAccountBase64", "")).length() > 0) {
+//              sboard.setConfig("downloadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
+                sboard.setConfig("downloadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+                sboard.setConfig("downloadAccountBase64", "");
             }
 
             // start main threads
             try {
-                httpd protocolHandler = new httpd(sb, new httpdFileHandler(sb), new httpdProxyHandler(sb));
-                serverCore server = new serverCore(port,
+                final httpd protocolHandler = new httpd(sboard, new httpdFileHandler(sboard), new httpdProxyHandler(sboard));
+                final serverCore server = new serverCore(port,
                         timeout /*control socket timeout in milliseconds*/,
                         true /* block attacks (wrong protocol) */,
                         protocolHandler /*command class*/,
-                        sb,
+                        sboard,
                         30000 /*command max length incl. GET args*/);
                 server.setName("httpd:"+port);
                 server.setPriority(Thread.MAX_PRIORITY);
@@ -356,23 +362,23 @@ public final class yacy {
                     serverLog.logSevere("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
                 } else {
                     // first start the server
-                    sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
+                    sboard.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
                     //server.start();
 
                     // open the browser window
-                    boolean browserPopUpTrigger = sb.getConfig("browserPopUpTrigger", "true").equals("true");
+                    final boolean browserPopUpTrigger = sboard.getConfig("browserPopUpTrigger", "true").equals("true");
                     if (browserPopUpTrigger) {
-                        String  browserPopUpPage        = sb.getConfig("browserPopUpPage", "Status.html");
-                        String  browserPopUpApplication = sb.getConfig("browserPopUpApplication", "netscape");
+                        final String  browserPopUpPage        = sboard.getConfig("browserPopUpPage", "Status.html");
+                        final String  browserPopUpApplication = sboard.getConfig("browserPopUpApplication", "netscape");
                         serverSystem.openBrowser("http://localhost:" + port + "/" + browserPopUpPage, browserPopUpApplication);
                     }
 
                     //Copy the shipped locales into DATA
-                    File localesPath = new File(sb.getRootPath(), sb.getConfig("localesPath", "DATA/LOCALE"));
-                    File defaultLocalesPath = new File(sb.getRootPath(), "locales");
+                    final File localesPath = new File(sboard.getRootPath(), sboard.getConfig("localesPath", "DATA/LOCALE"));
+                    final File defaultLocalesPath = new File(sboard.getRootPath(), "locales");
 
                     try{
-                        File[] defaultLocales = defaultLocalesPath.listFiles();
+                        final File[] defaultLocales = defaultLocalesPath.listFiles();
                         localesPath.mkdirs();
                         for(int i=0;i < defaultLocales.length; i++){
                             if(defaultLocales[i].getName().endsWith(".lng"))
@@ -384,11 +390,11 @@ public final class yacy {
                     }
 
                     //regenerate Locales from Translationlist, if needed
-                    String lang = sb.getConfig("htLocaleSelection", "");
+                    final String lang = sboard.getConfig("htLocaleSelection", "");
                     if(! lang.equals("") && ! lang.equals("default") ){ //locale is used
                         String currentRev = "";
                         try{
-                            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File( sb.getConfig("htRootPath", "htroot"), "locale/"+lang+"/version" ))));
+                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File( sboard.getConfig("htRootPath", "htroot"), "locale/"+lang+"/version" ))));
                             currentRev = br.readLine();
                             br.close();
                         }catch(IOException e){
@@ -396,14 +402,14 @@ public final class yacy {
                         }
 
                         try{ //seperate try, because we want this, even when the File "version2 does not exist.
-                            if(! currentRev.equals(sb.getConfig("svnRevision", "")) ){ //is this another version?!
-                                File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
-                                File destDir = new File(sourceDir, "locale/"+lang);
+                            if(! currentRev.equals(sboard.getConfig("svnRevision", "")) ){ //is this another version?!
+                                final File sourceDir = new File(sboard.getConfig("htRootPath", "htroot"));
+                                final File destDir = new File(sourceDir, "locale/"+lang);
                                 if(translator.translateFiles(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
-                                //if(translator.translateFilesRecursive(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
+                              //if(translator.translateFilesRecursive(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
                                     //write the new Versionnumber
-                                    BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-                                    bw.write(sb.getConfig("svnRevision", "Error getting Version"));
+                                    final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+                                    bw.write(sboard.getConfig("svnRevision", "Error getting Version"));
                                     bw.close();
                                 }
                             }
@@ -414,15 +420,15 @@ public final class yacy {
 
                     // registering shutdown hook
                     serverLog.logConfig("STARTUP", "Registering Shutdown Hook");
-                    Runtime run = Runtime.getRuntime();
-                    run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
+                    final Runtime run = Runtime.getRuntime();
+                    run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sboard));
 
                     // save information about available memory after all initializations
-                    System.gc(); sb.setConfig("memoryFreeAfterInit", Runtime.getRuntime().freeMemory());
+                    System.gc(); sboard.setConfig("memoryFreeAfterInit", Runtime.getRuntime().freeMemory());
             
                     // wait for server shutdown
                     try {
-                        sb.waitForShutdown();
+                        sboard.waitForShutdown();
                     } catch (Exception e) {
                         serverLog.logSevere("MAIN CONTROL LOOP", "PANIK: " + e.getMessage(),e);
                     }
@@ -443,7 +449,7 @@ public final class yacy {
                         Thread.currentThread().sleep(2000); // wait a while
                     }
                     serverLog.logConfig("SHUTDOWN", "server has terminated");
-                    sb.close();
+                    sboard.close();
                 }
             } catch (Exception e) {
                 serverLog.logSevere("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
@@ -454,6 +460,7 @@ public final class yacy {
         }
         serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
         try {
+            // if (restart) startup(homePath);
             System.exit(0);
         } catch (Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
     }
@@ -818,22 +825,22 @@ public final class yacy {
 * machine shuts down. Signals the plasmaSwitchboard to shut down.
 */
 class shutdownHookThread extends Thread {
-    private plasmaSwitchboard sb = null;
+    private plasmaSwitchboard sboard = null;
     private Thread mainThread = null;
 
-    public shutdownHookThread(Thread mainThread, plasmaSwitchboard sb) {
-        this.sb = sb;
+    public shutdownHookThread(Thread mainThread, plasmaSwitchboard sboard) {
+        super();
+        this.sboard = sboard;
         this.mainThread = mainThread;
     }
 
     public void run() {
-
         try {
-            if (!this.sb.isTerminated()) {
+            if (!this.sboard.isTerminated()) {
                 serverLog.logConfig("SHUTDOWN","Shutdown via shutdown hook.");
 
                 // sending the yacy main thread a shutdown signal
-                this.sb.terminate();
+                this.sboard.terminate();
 
                 // waiting for the yacy thread to finish execution
                 this.mainThread.join();
