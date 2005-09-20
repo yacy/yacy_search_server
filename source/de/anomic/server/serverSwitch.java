@@ -55,12 +55,6 @@ import de.anomic.server.logging.serverLog;
 
 public interface serverSwitch {
 
-    public static final String PEERTYPE = "PeerType";
-    public static final String PEERTYPE_VIRGIN = "virgin";
-    public static final String PEERTYPE_JUNIOR = "junior";
-    public static final String PEERTYPE_SENIOR = "senior";
-    public static final String PEERTYPE_PRINCIPAL = "principal";
-
     // the root path for the application
     public String getRootPath();
 

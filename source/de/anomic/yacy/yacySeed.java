@@ -82,7 +82,6 @@ public class yacySeed {
     public static final String PEERTYPE_JUNIOR = "junior";
     public static final String PEERTYPE_SENIOR = "senior";
     public static final String PEERTYPE_PRINCIPAL = "principal";
-    
     public static final String PEERTYPE = "PeerType";
     
     // class variables

@@ -92,7 +92,7 @@ public class hello {
         // we easily know the caller's IP:
         final String clientip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum
         final String reportedip = remoteSeed.get(STR_IP, "");
-        final String reportedPeerType = remoteSeed.get(serverSwitch.PEERTYPE, serverSwitch.PEERTYPE_JUNIOR);
+        final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         final float clientversion = remoteSeed.getVersion();
 
         int urls = -1;
@@ -139,22 +139,22 @@ public class hello {
 
         // assign status
         if (urls >= 0) {
-            if (remoteSeed.get(serverSwitch.PEERTYPE, serverSwitch.PEERTYPE_SENIOR) == null) {
-                prop.put(STR_YOURTYPE, serverSwitch.PEERTYPE_SENIOR);
-                remoteSeed.put(serverSwitch.PEERTYPE, serverSwitch.PEERTYPE_SENIOR);
-            } else if (remoteSeed.get(serverSwitch.PEERTYPE, serverSwitch.PEERTYPE_PRINCIPAL).equals(serverSwitch.PEERTYPE_PRINCIPAL)) {
-                prop.put(STR_YOURTYPE, serverSwitch.PEERTYPE_PRINCIPAL);
+            if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) == null) {
+                prop.put(STR_YOURTYPE, yacySeed.PEERTYPE_SENIOR);
+                remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
+            } else if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL).equals(yacySeed.PEERTYPE_PRINCIPAL)) {
+                prop.put(STR_YOURTYPE, yacySeed.PEERTYPE_PRINCIPAL);
             } else {
-                prop.put(STR_YOURTYPE, serverSwitch.PEERTYPE_SENIOR);
-                remoteSeed.put(serverSwitch.PEERTYPE, serverSwitch.PEERTYPE_SENIOR);
+                prop.put(STR_YOURTYPE, yacySeed.PEERTYPE_SENIOR);
+                remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             }
             // connect the seed
             yacyCore.peerActions.peerArrival(remoteSeed, true);
         } else {
-            prop.put(STR_YOURTYPE, serverSwitch.PEERTYPE_JUNIOR);
+            prop.put(STR_YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
             remoteSeed.put(STR_LASTSEEN, yacyCore.universalDateShortString());
             yacyCore.peerActions.juniorConnects++; // update statistics
-            remoteSeed.put(serverSwitch.PEERTYPE, serverSwitch.PEERTYPE_JUNIOR);
+            remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
             yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper() == null)) {

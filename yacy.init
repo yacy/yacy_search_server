@@ -437,23 +437,23 @@ xpstopw=true
 
 # ram cache for database files
 
-# ram cache for assortment cache cluster (for all 50 files)
+# ram cache for assortment cache cluster (for all 64 files)
 ramCacheRWI     =  8388608
 
 # ram cache for responseHeader.db
-ramCacheHTTP    =  1048576
+ramCacheHTTP    =  4194304
 
 # ram cache for urlHash.db
 ramCacheLURL    =  4194304
 
 # ram cache for urlNotice.db
-ramCacheNURL    =   524288
+ramCacheNURL    =  4194304
 
 # ram cache for urlErr.db 
-ramCacheEURL    =   131072
+ramCacheEURL    =     8192
 
 # ram cache for seedDBs
-ramCacheDHT     =   131072
+ramCacheDHT     =     8192
 
 # ram cache for message.db
 ramCacheMessage =     8192
