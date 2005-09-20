@@ -68,13 +68,13 @@ public class yacyNewsDB {
         this.bufferkb = bufferkb;
         
         if (path.exists())
-            news = new kelondroTree(path, bufferkb);
+            news = new kelondroTree(path, bufferkb * 0x400);
         else
-            news = createDB(path,bufferkb);        
+            news = createDB(path, bufferkb);        
     }
     
     private static kelondroTree createDB(File path, int bufferkb) throws IOException {
-        return new kelondroTree(path, bufferkb, new int[] {
+        return new kelondroTree(path, bufferkb * 0x400, new int[] {
                 yacyNewsRecord.idLength(), // id = created + originator
                 yacyNewsRecord.categoryStringLength,    // category
                 yacyCore.universalDateShortPattern.length(), // received
