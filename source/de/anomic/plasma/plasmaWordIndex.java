@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// last major change: 02.02.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,7 +45,6 @@
 // compile with
 // javac -classpath classes -sourcepath source -d classes -g source/de/anomic/plasma/*.java
 
-
 package de.anomic.plasma;
 
 import java.io.File;
@@ -57,28 +59,28 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaWordIndex {
-    
+
     final File databaseRoot;
     final plasmaWordIndexCache ramCache;
-    
+
     public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) throws IOException {
         this.databaseRoot = databaseRoot;
         plasmaWordIndexClassicDB fileDB = new plasmaWordIndexClassicDB(databaseRoot, log);
         this.ramCache = new plasmaWordIndexCache(databaseRoot, fileDB, bufferkb, log);
     }
-    
+
     public File getRoot() {
         return databaseRoot;
     }
-    
+
     public int maxURLinWordCache() {
         return ramCache.maxURLinWordCache();
     }
-    
+
     public int wordCacheRAMSize() {
         return ramCache.wordCacheRAMSize();
     }
-    
+
     public int[] assortmentSizes() {
         return ramCache.assortmentsSizes();
     }
@@ -94,48 +96,47 @@ public final class plasmaWordIndex {
     public void setMaxWords(int maxWords) {
         ramCache.setMaxWords(maxWords);
     }
-    
+
     public int addEntries(plasmaWordIndexEntryContainer entries) {
         return ramCache.addEntries(entries, System.currentTimeMillis());
     }   
-    
+
     public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty) {
         return ramCache.getIndex(wordHash, deleteIfEmpty);
     }
-    
+
     public int size() {
         return ramCache.size();
     }
-    
+
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
         return ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
     }
-    
+
     public void intermission(long pause) {
-	this.ramCache.intermission(pause);
+        this.ramCache.intermission(pause);
     }
 
     public void close(int waitingBoundSeconds) {
         ramCache.close(waitingBoundSeconds);
     }
-    
+
     public void deleteIndex(String wordHash) {
         ramCache.deleteIndex(wordHash);
     }
-    
+
     public Iterator wordHashes(String startHash, boolean up, boolean rot) {
         //return ramCache.wordHashes(startHash, up);
         return new correctedWordIterator(up, rot, startHash); // use correction until bug is found
     }
 
-    private class correctedWordIterator implements Iterator {
-	
-        Iterator ii;
+    private class correctedWordIterator implements Iterator {    
+        Iterator iter;
         String nextWord;
-        
+
         public correctedWordIterator(boolean up, boolean rotating, String firstWord) {
-            ii = ramCache.wordHashes(firstWord, up);
-            nextWord = (ii.hasNext()) ? (String) ii.next() : null;
+            iter = ramCache.wordHashes(firstWord, up);
+            nextWord = (iter.hasNext()) ? (String) iter.next() : null;
             boolean corrected = true;
             int cc = 0; // to avoid rotation loops
             while ((nextWord != null) && (corrected) && (cc < 50)) {
@@ -144,60 +145,59 @@ public final class plasmaWordIndex {
                 if ((c > 0) && (up)) {
                     // firstKey > nextNode.getKey()
                     //System.out.println("CORRECTING WORD ITERATOR: firstWord=" + firstWord + ", nextWord=" + nextWord);
-                    nextWord = (ii.hasNext()) ? (String) ii.next() : null;
+                    nextWord = (iter.hasNext()) ? (String) iter.next() : null;
                     corrected = true;
                     cc++;
                 }
                 if ((c < 0) && (!(up))) {
-                    nextWord = (ii.hasNext()) ? (String) ii.next() : null;
+                    nextWord = (iter.hasNext()) ? (String) iter.next() : null;
                     corrected = true;
                     cc++;
                 }
             }
         }
-        
+
         public void finalize() {
-            ii = null;
+            iter = null;
             nextWord = null;
         }
-            
-	public boolean hasNext() {
+
+        public boolean hasNext() {
             return nextWord != null;
-	}
+        }
 
         public Object next() {
             String r = nextWord;
-            nextWord = (ii.hasNext()) ? (String) ii.next() : null;                        
+            nextWord = (iter.hasNext()) ? (String) iter.next() : null;                        
             return r;
         }
-        
+
         public void remove() {
             throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro Tables not yet supported");
-	}
-    }
-    
+        }
+    } // correctedWordIterator
+
     public Iterator fileIterator(String startHash, boolean up, boolean deleteEmpty) {
         return new iterateFiles(startHash, up, deleteEmpty);
     }
-    
+
     public class iterateFiles implements Iterator {
         // Iterator of hash-strings in WORDS path
-        
+
         private ArrayList hierarchy; // contains TreeSet elements, earch TreeSet contains File Entries
         private Comparator comp;     // for string-compare
         private String buffer;       // the prefetch-buffer
         private boolean delete;
-        
-        
+
         public iterateFiles(String startHash, boolean up, boolean deleteEmpty) {
             this.hierarchy = new ArrayList();
             this.comp = kelondroMSetTools.fastStringComparator(up);
             this.delete = deleteEmpty;
-            
+
             // the we initially fill the hierarchy with the content of the root folder
             String path = "WORDS";
             TreeSet list = list(new File(databaseRoot, path));
-            
+
             // if we have a start hash then we find the appropriate subdirectory to start
             if ((startHash != null) && (startHash.length() == yacySeedDB.commonHashLength)) {
                 delete(startHash.substring(0, 1), list);
@@ -221,22 +221,22 @@ public final class plasmaWordIndex {
                 buffer = next0();
             }
         }
-        
+
         private synchronized void delete(String pattern, TreeSet names) {
             String name;
             while ((names.size() > 0) && (comp.compare((new File(name = (String) names.first())).getName(), pattern) < 0)) names.remove(name);
         }
-        
+
         private TreeSet list(File path) {
-            //System.out.println("PATH: " + path);
+//          System.out.println("PATH: " + path);
             TreeSet t = new TreeSet(comp);
             String[] l = path.list();
             if (l != null) for (int i = 0; i < l.length; i++) t.add(path + "/" + l[i]);
-            //else System.out.println("DEBUG: wrong path " + path);
-            //System.out.println(t);
+//          else System.out.println("DEBUG: wrong path " + path);
+//          System.out.println(t);
             return t;
         }
-        
+
         private synchronized String next0() {
             // the object is a File pointing to the corresponding file
             File f;
@@ -267,36 +267,36 @@ public final class plasmaWordIndex {
                 }
             } while (f == null);
             // thats it
-	    if ((f == null) || ((n = f.getName()) == null) || (n.length() < yacySeedDB.commonHashLength)) {
-		return null;
-	    } else {
-		return n.substring(0, yacySeedDB.commonHashLength);
-	    }
+            if ((f == null) || ((n = f.getName()) == null) || (n.length() < yacySeedDB.commonHashLength)) {
+                return null;
+            } else {
+                return n.substring(0, yacySeedDB.commonHashLength);
+            }
         }
-        
+
         public boolean hasNext() {
             return buffer != null;
         }
-        
+
         public Object next() {
             String r = buffer;
             while (((buffer = next0()) != null) && (comp.compare(buffer, r) < 0)) {};
             return r;
         }
-        
+
         public void remove() {
-            
         }
     }
-    
+
     public static void main(String[] args) {
-        //System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
+//      System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
         try {
-        plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, new serverLog("TESTAPP"));
-        Iterator i = index.wordHashes("5A8yhZMh_Kmv", true, true);
-        while (i.hasNext()) {
-            System.out.println("File: " + (String) i.next());
-        }
+            plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, new serverLog("TESTAPP"));
+            Iterator iter = index.wordHashes("5A8yhZMh_Kmv", true, true);
+            while (iter.hasNext()) {
+                System.out.println("File: " + (String) iter.next());
+            }
         } catch (IOException e) {}
     }
+
 }

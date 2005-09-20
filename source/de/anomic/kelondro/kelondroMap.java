@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 26.10.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,7 +42,6 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-
 package de.anomic.kelondro;
 
 import java.io.IOException;
@@ -48,9 +50,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class kelondroMap {
-    
+
     private static final int cachesize = 500;
-    
+
     private kelondroDyn dyn;
     private kelondroMScoreCluster cacheScore;
     private HashMap cache;
@@ -59,7 +61,7 @@ public class kelondroMap {
     private HashMap sortClusterMap; // a String-kelondroMScoreCluster - relation
     private HashMap accMap; // to store accumulations of specific fields
     private int elementCount;
-    
+
     public kelondroMap(kelondroDyn dyn) {
         this(dyn, null, null);
     }
@@ -70,23 +72,27 @@ public class kelondroMap {
         this.cacheScore = new kelondroMScoreCluster();
         this.startup = System.currentTimeMillis();
         this.elementCount = 0;
-                
+
         // create fast ordering clusters and acc fields
         this.sortfields = sortfields;
         this.accfields = accfields;
-        
+
         kelondroMScoreCluster[] cluster = null;
         if (sortfields == null) sortClusterMap = null; else {
             sortClusterMap = new HashMap();
             cluster = new kelondroMScoreCluster[sortfields.length];
-            for (int i = 0; i < sortfields.length; i++) cluster[i] = new kelondroMScoreCluster();
+            for (int i = 0; i < sortfields.length; i++) {
+                cluster[i] = new kelondroMScoreCluster();   
+            }
         }
-        
+
         Long[] accumulator = null;
         if (accfields == null) accMap = null; else {
             accMap = new HashMap();
             accumulator = new Long[accfields.length];
-            for (int i = 0; i < accfields.length; i++) accumulator[i] = new Long(0);
+            for (int i = 0; i < accfields.length; i++) {
+                accumulator[i] = new Long(0);   
+            }
         }
 
         // fill cluster and accumulator with values
@@ -97,14 +103,14 @@ public class kelondroMap {
             Map map;
             while (it.hasNext()) {
                 key = (String) it.next();
-		//System.out.println("kelondroMap: enumerating key " + key);
+//              System.out.println("kelondroMap: enumerating key " + key);
                 map = get(key);
-                
+
                 if (sortfields != null) for (int i = 0; i < sortfields.length; i++) {
                     value = (String) map.get(sortfields[i]);
                     if (value != null) cluster[i].setScore(key, kelondroMScoreCluster.string2score(value));
                 }
-                
+
                 if (accfields != null) for (int i = 0; i < accfields.length; i++) {
                     value = (String) map.get(accfields[i]);
                     if (value != null) try {
@@ -115,7 +121,7 @@ public class kelondroMap {
                 elementCount++;
             }
         } catch (IOException e) {}
-        
+
         // fill cluster
         if (sortfields != null) for (int i = 0; i < sortfields.length; i++) sortClusterMap.put(sortfields[i], cluster[i]);
 
@@ -126,19 +132,19 @@ public class kelondroMap {
     public int keySize() {
         return dyn.columnSize(0);
     }
-    
+
     public int cacheChunkSize() {
         return dyn.cacheChunkSize();
     }
-    
+
     public int[] cacheFillStatus() {
         return dyn.cacheFillStatus();
     }
-    
+
     public synchronized void set(String key, Map newMap) throws IOException {
         // update elementCount
         if ((sortfields != null) || (accfields != null)) {
-            Map oldMap = get(key, false);
+            final Map oldMap = get(key, false);
             if (oldMap == null) {
                 // new element
                 elementCount++;
@@ -147,49 +153,51 @@ public class kelondroMap {
                 if (accfields != null) updateAcc(oldMap, false);
             }
         }
-        
         // write entry
         writeKra(key, newMap, "");
-        
+
         // check for space in cache
         checkCacheSpace();
-        
+
         // write map to cache
         cacheScore.setScore(key, (int) ((System.currentTimeMillis() - startup) / 1000));
         cache.put(key, newMap);
-        
+
         // update sortCluster
         if (sortClusterMap != null) updateSortCluster(key, newMap);
-        
+
         // update accumulators with new values (add)
         if (accfields != null) updateAcc(newMap, true);
     }
-    
-    private synchronized void writeKra(String key, Map newMap, String comment) throws IOException {
+
+    private synchronized void writeKra(final String key, final Map newMap, String comment) throws IOException {
         // write map to kra
-	kelondroRA kra = dyn.getRA(key);
-	kra.writeMap(newMap, comment);
-	kra.close();
+        final kelondroRA kra = dyn.getRA(key);
+        kra.writeMap(newMap, comment);
+        kra.close();
     }
-    
+
     private void updateAcc(Map map, boolean add) {
         String value;
         long valuel;
         Long accumulator;
         for (int i = 0; i < accfields.length; i++) {
             value = (String) map.get(accfields[i]);
-            if (value != null) try {
-                valuel = Long.parseLong(value);
-                accumulator = (Long) accMap.get(accfields[i]);
-                if (add)
-                    accMap.put(accfields[i], new Long(accumulator.longValue() + ((long) valuel)));
-                else
-                    accMap.put(accfields[i], new Long(accumulator.longValue() - ((long) valuel)));
-            } catch (NumberFormatException e) {}
+            if (value != null) {
+                try {
+                    valuel = Long.parseLong(value);
+                    accumulator = (Long) accMap.get(accfields[i]);
+                    if (add) {
+                        accMap.put(accfields[i], new Long(accumulator.longValue() + ((long) valuel)));
+                    } else {
+                        accMap.put(accfields[i], new Long(accumulator.longValue() - ((long) valuel)));
+                    }
+                } catch (NumberFormatException e) {}
+            }
         }
     }
 
-    private void updateSortCluster(String key, Map map) {
+    private void updateSortCluster(final String key, final Map map) {
         String value;
         kelondroMScoreCluster cluster;
         for (int i = 0; i < sortfields.length; i++) {
@@ -201,16 +209,16 @@ public class kelondroMap {
             }
         }
     }
-    
+
     public synchronized void remove(String key) throws IOException {
         // update elementCount
         if (key == null) return;
         if ((sortfields != null) || (accfields != null)) {
-            Map map = get(key);
+            final Map map = get(key);
             if (map != null) {
                 // update count
                 elementCount--;
-                
+
                 // update accumulators (subtract)
                 if (accfields != null) updateAcc(map, false);
 
@@ -218,16 +226,15 @@ public class kelondroMap {
                 if (sortfields != null) deleteSortCluster(key);
             }
         }
-        
         // remove from cache
         cacheScore.deleteScore(key);
         cache.remove(key);
-        
+
         // remove from file
         dyn.remove(key);
     }
-    
-    private void deleteSortCluster(String key) {
+
+    private void deleteSortCluster(final String key) {
         if (key == null) return;
         kelondroMScoreCluster cluster;
         for (int i = 0; i < sortfields.length; i++) {
@@ -236,23 +243,23 @@ public class kelondroMap {
             sortClusterMap.put(sortfields[i], cluster);
         }
     }
-        
-    public synchronized Map get(String key) throws IOException {
+
+    public synchronized Map get(final String key) throws IOException {
         if (key == null) return null;
         return get(key, true);
     }
-    
-    private synchronized Map get(String key, boolean storeCache) throws IOException {
-	// load map from cache
+
+    private synchronized Map get(final String key, final boolean storeCache) throws IOException {
+        // load map from cache
         Map map = (Map) cache.get(key);
         if (map != null) return map;
-        
-	// load map from kra
+
+        // load map from kra
         if (!(dyn.existsDyn(key))) return null;
-	kelondroRA kra = dyn.getRA(key);
-	map = kra.readMap();
-	kra.close();
-	
+        final kelondroRA kra = dyn.getRA(key);
+        map = kra.readMap();
+        kra.close();
+
         if (storeCache) {
             // cache it also
             checkCacheSpace();
@@ -260,66 +267,65 @@ public class kelondroMap {
             cacheScore.setScore(key, (int) ((System.currentTimeMillis() - startup) / 1000));
             cache.put(key, map);
         }
-        
+
         // return value
-	return map;
+        return map;
     }
-    
     
     private synchronized void checkCacheSpace() {
         // check for space in cache
         if (cache.size() >= cachesize) {
             // delete one entry
-            String delkey = (String) cacheScore.getMinObject();
+            final String delkey = (String) cacheScore.getMinObject();
             cacheScore.deleteScore(delkey);
             cache.remove(delkey);
         }
     }
 
-    public synchronized kelondroDyn.dynKeyIterator keys(boolean up, boolean rotating) throws IOException {
+    public synchronized kelondroDyn.dynKeyIterator keys(final boolean up, final boolean rotating) throws IOException {
         // simple enumeration of key names without special ordering
         return dyn.dynKeys(up, rotating);
     }
-    
-    public synchronized kelondroDyn.dynKeyIterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+
+    public synchronized kelondroDyn.dynKeyIterator keys(final boolean up, final boolean rotating, final byte[] firstKey) throws IOException {
         // simple enumeration of key names without special ordering
         return dyn.dynKeys(up, rotating, firstKey);
     }
-    
-    public synchronized Iterator keys(boolean up, /* sorted by */ String field) {
+
+    public synchronized Iterator keys(final boolean up, /* sorted by */ String field) {
         // sorted iteration using the sortClusters
         if (sortClusterMap == null) return null;
-        kelondroMScoreCluster cluster = (kelondroMScoreCluster) sortClusterMap.get(field);
+        final kelondroMScoreCluster cluster = (kelondroMScoreCluster) sortClusterMap.get(field);
         if (cluster == null) return null; // sort field does not exist
         //System.out.println("DEBUG: cluster for field " + field + ": " + cluster.toString());
         return cluster.scores(up);
     }
-    
-    public synchronized mapIterator maps(boolean up, boolean rotating) throws IOException {
+
+    public synchronized mapIterator maps(final boolean up, final boolean rotating) throws IOException {
         return new mapIterator(keys(up, rotating));
     }
-    
-    public synchronized mapIterator maps(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+
+    public synchronized mapIterator maps(final boolean up, final boolean rotating, final byte[] firstKey) throws IOException {
         return new mapIterator(keys(up, rotating, firstKey));
     }
-    
-    public synchronized mapIterator maps(boolean up, String field) {
+
+    public synchronized mapIterator maps(final boolean up, final String field) {
         return new mapIterator(keys(up, field));
     }
-    
-    public synchronized long getAcc(String field) {
-        Long accumulator = (Long) accMap.get(field);
+
+    public synchronized long getAcc(final String field) {
+        final Long accumulator = (Long) accMap.get(field);
         if (accumulator == null) return -1; else return accumulator.longValue();
     }
-    
+
     public synchronized int size() {
         if ((sortfields != null) || (accfields != null)) return elementCount; else return dyn.size();
     }
-    
+
     public void close() throws IOException {
         // finish queue
         //writeWorker.terminate(true);
-        
+
         // close cluster
         if (sortClusterMap != null) {
             for (int i = 0; i < sortfields.length; i++) sortClusterMap.remove(sortfields[i]);
@@ -331,32 +337,31 @@ public class kelondroMap {
         // close file
         dyn.close();
     }
-    
-    
+
     public class mapIterator implements Iterator {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
-        
+
         Iterator keyIterator;
         boolean finish;
-        
+
         public mapIterator(Iterator keyIterator) {
             this.keyIterator = keyIterator;
             this.finish = false;
         }
-        
+
         public boolean hasNext() {
             return (!(finish)) && (keyIterator.hasNext());
         }
-        
+
         public Object next() {
-            String nextKey = (String) keyIterator.next();
+            final String nextKey = (String) keyIterator.next();
             if (nextKey == null) {
                 finish = true;
                 return null;
             }
             try {
-                Map map = get(nextKey);
+                final Map map = get(nextKey);
                 if (map == null) throw new kelondroException(dyn.filename, "no more elements available");
                 map.put("key", nextKey);
                 return map;
@@ -365,10 +370,10 @@ public class kelondroMap {
                 return null;
             }
         }
-        
+
         public void remove() {
             throw new UnsupportedOperationException();
         }
-        
-    }
-}
+    } // class mapIterator
+
+} // class kelondroMap
