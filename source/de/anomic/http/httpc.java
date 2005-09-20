@@ -1257,36 +1257,23 @@ do upload
                 status = Integer.toString(statusCode) + " " + statusText;
                 return; // in bad mood
             }
-            String buffer = new String(b); // this is the status response line
-            //System.out.println("#S#" + buffer);
-            int p = buffer.indexOf(" ");
-            if (p < 0) {
-                statusCode = 500;
-                statusText = "status line parse error";
-                status = Integer.toString(statusCode) + " " + statusText;
+            
+            // parsing the response status line
+            String buffer = new String(b);        
+            Object[] responseInfo = httpHeader.parseResponseLine(buffer);
+            this.httpVer =    (String) responseInfo[0];
+            this.statusCode = ((Integer)responseInfo[1]).intValue();
+            this.statusText = (String) responseInfo[2];
+            this.status = this.statusCode + " " + this.statusText;
+            
+            if ((this.statusCode==500)&&(this.statusText.equals("status line parse error"))) {
                 // flush in anything that comes without parsing
                 while ((b != null) && (b.length != 0)) b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false);
-                return; // in bad mood
+                return; // in bad mood                
             }
-            
-            // the http version reported by the server
-            this.httpVer = buffer.substring(0,p);
-            
-            // Status of the request, e.g. "200 OK"
-            this.status = buffer.substring(p + 1).trim(); // the status code plus reason-phrase
-            
-            // splitting the status into statuscode and statustext
-            p = this.status.indexOf(" ");
-            try {
-                this.statusCode = Integer.parseInt((p < 0) ? this.status.trim() : this.status.substring(0,p).trim());
-                this.statusText = (p < 0) ? "" : this.status.substring(p+1).trim();
-            } catch (Exception e) {
-                this.statusCode = 500;
-                this.statusText = this.status;
-            }
-            
+                        
             // check validity
-            if (this.status.startsWith("400")) {
+            if (this.statusCode == 400) {
                 // bad request
                 // flush in anything that comes without parsing
                 while ((b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false)).length != 0) {}
@@ -1307,7 +1294,7 @@ do upload
                     responseHeader.put(key, (String) responseHeader.get(key) + " " + buffer.trim());
                 } else {
                     // create new entry
-                    p = buffer.indexOf(":");
+                    int p = buffer.indexOf(":");
                     if (p > 0) {
                         responseHeader.add(buffer.substring(0, p).trim(), buffer.substring(p + 1).trim());
                     } else {

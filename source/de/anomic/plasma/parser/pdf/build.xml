@@ -16,10 +16,7 @@
   	  	  <pathelement location="${build}" />	
   	  	
 		  <!-- main lib needed to parse pdf files -->  	  	
-  		  <pathelement location="${libx}/PDFBox-0.7.1.jar" />        	
-  		  	
-  		  <!-- libs needed by the main lib -->  	  	  		  	
-  		  <pathelement location="${libx}/log4j-1.2.9.jar" />    
+  		  <pathelement location="${libx}/PDFBox-0.7.2.jar" />        	
   	  	</classpath>
   	  </javac>    	
     </target>
@@ -28,7 +25,7 @@
     <target name="zip" depends="compile">
   	  <tar destfile="${parserArchive}" compression="gzip">
   	  	<tarfileset dir="${libx}" 
-  	  				includes="PDFBox-0.7.1.*,log4j-1.2.9.*" 
+  	  				includes="PDFBox-0.7.2.*" 
   	  				prefix="${releaseDir}/libx/"
 			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
@@ -42,7 +39,7 @@
 
     <target name="copy" depends="compile">
         <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="PDFBox-0.7.1.*,log4j-1.2.9.*"/> 
+             <fileset dir="${libx}" includes="PDFBox-0.7.2.*"/> 
         </copy>
         <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
              <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 

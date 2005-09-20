@@ -66,7 +66,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.kelondro.kelondroMSetTools;
 
-public class plasmaCondenser {
+public final class plasmaCondenser {
 
     private final static int numlength = 5;
 

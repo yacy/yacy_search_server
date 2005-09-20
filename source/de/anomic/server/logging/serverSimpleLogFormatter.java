@@ -5,7 +5,7 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
-//This file ist contributed by Martin Thelian
+//This file is contributed by Martin Thelian
 //last major change: $LastChangedDate$ by $LastChangedBy$
 //Revision: $LastChangedRevision$
 //

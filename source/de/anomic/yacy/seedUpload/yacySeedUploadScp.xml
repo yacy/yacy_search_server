@@ -17,7 +17,7 @@
   	  	  <pathelement location="${build}" />	
   	  	
 		  <!-- main lib needed to parse rss/atom feed files -->  	
-   		  <pathelement location="${libx}/jsch-0.1.19.jar" />  	  		    	
+   		  <pathelement location="${libx}/jsch-0.1.21.jar" />  	  		    	
   	  	</classpath>
   	  </javac>    	
     </target>
@@ -26,7 +26,7 @@
     <target name="zip" depends="compile">
   	  <tar destfile="${parserArchive}" compression="gzip">
   	  	<tarfileset dir="${libx}" 
-  	  				includes="jsch-0.1.19.*" 
+  	  				includes="jsch-0.1.21.*" 
   	  				prefix="${releaseDir}/libx/"
 			  		dirmode="755" mode="644"/>
   	  	<tarfileset dir="${src}/de/anomic/yacy/seedUpload/" 
@@ -47,7 +47,7 @@
 
     <target name="copy" depends="compile">
         <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="jsch-0.1.19.*"/> 
+             <fileset dir="${libx}" includes="jsch-0.1.21.*"/> 
         </copy>
         <copy todir="${release}/source/de/anomic/yacy/seedUpload/">
              <fileset dir="${src}/de/anomic/yacy/seedUpload/">

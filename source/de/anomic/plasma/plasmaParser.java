@@ -237,6 +237,12 @@ public final class plasmaParser {
         }
     }
     
+    public static String getMediaExtList() {
+        synchronized (mediaExtSet) {
+            return mediaExtSet.toString();
+        }        
+    }
+    
     public static void initSupportedRealtimeFileExt(List supportedRealtimeFileExtList) {
         synchronized (supportedRealtimeFileExt) {
             supportedRealtimeFileExt.clear();
@@ -446,12 +452,16 @@ public final class plasmaParser {
                         
                         // testing if all needed libx libraries are available
                         String[] neededLibx = ((Parser)theParser).getLibxDependences();
+                        StringBuffer neededLibxBuf = new StringBuffer();
                         if (neededLibx != null) {
                             for (int libxId=0; libxId < neededLibx.length; libxId++) {
                                 if (javaClassPath.indexOf(neededLibx[libxId]) == -1) {
                                     throw new ParserException("Missing dependency detected: '" + neededLibx[libxId] + "'.");
                                 }
+                                neededLibxBuf.append(neededLibx[libxId])
+                                             .append(",");
                             }
+                            if (neededLibxBuf.length()>0) neededLibxBuf.deleteCharAt(neededLibxBuf.length()-1);
                         }
                         
                         // loading the list of mime-types that are supported by this parser class
@@ -460,7 +470,8 @@ public final class plasmaParser {
                         while (mimeTypeIterator.hasNext()) {
                             String mimeType = (String) mimeTypeIterator.next();
                             availableParserList.put(mimeType,fullClassName);
-                            serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'.");
+                            serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'." +
+                                              ((neededLibxBuf.length()>0)?" Dependencies: " + neededLibxBuf.toString():""));
                         }
                         
                     } catch (Exception e) { /* we can ignore this for the moment */

@@ -245,10 +245,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         this.connectionProperties = conProp;
         
         // getting some connection properties
-        String method     = conProp.getProperty(httpd.CONNECTION_PROP_METHOD);
-        String path       = conProp.getProperty(httpd.CONNECTION_PROP_PATH);
-        String argsString = conProp.getProperty(httpd.CONNECTION_PROP_ARGS); // is null if no args were given
-        String httpVersion= conProp.getProperty(httpd.CONNECTION_PROP_HTTP_VER);
+        String method     = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
+        String path       = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
+        String argsString = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS); // is null if no args were given
+        String httpVersion= conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
         String url = "http://" + requestHeader.get(httpHeader.HOST,"localhost") + path;
         
         // check hack attacks in path
@@ -302,7 +302,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             (adminAccountBase64MD5.length() != 0) &&
             (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6))))) {
             // remove brute-force flag
-            serverCore.bfHost.remove(conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP));
+            serverCore.bfHost.remove(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
         }
         
         // parse arguments
@@ -597,10 +597,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 
                 errorMessage.append("\nSession: ").append(Thread.currentThread().getName())
                             .append("\nQuery:   ").append(path)
-                            .append("\nClient:  ").append(conProp.getProperty(httpd.CONNECTION_PROP_CLIENTIP,"unknown")) 
+                            .append("\nClient:  ").append(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP,"unknown")) 
                             .append("\nReason:  ").append(e.toString());    
                 
-                if (!conProp.containsKey(httpd.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+                if (!conProp.containsKey(httpHeader.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     // sending back an error message to the client 
                     // if we have not already send an http header
                     httpd.sendRespondError(conProp,out, 4, httpStatusCode, httpStatusText, errorMessage.toString(),errorExc);
@@ -629,7 +629,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     
     private void forceConnectionClose() {
         if (this.connectionProperties != null) {
-            this.connectionProperties.setProperty(httpd.CONNECTION_PROP_PERSISTENT,"close");            
+            this.connectionProperties.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");            
         }
     }
 

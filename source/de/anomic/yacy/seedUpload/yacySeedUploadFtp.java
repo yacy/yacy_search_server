@@ -64,6 +64,8 @@ public class yacySeedUploadFtp implements yacySeedUploader {
             if (sb == null) throw new NullPointerException("Reference to serverSwitch must not be null.");
             if (seedDB == null) throw new NullPointerException("Reference to seedDB must not be null.");
             if ((seedFile == null)||(!seedFile.exists())) throw new Exception("Seed file does not exist.");
+            if (!seedFile.isFile()) throw new Exception("Seed file is not a file.");
+            if (!seedFile.canRead()) throw new Exception("Seed file is not readable.");
             
             String  seedFTPServer   = sb.getConfig(CONFIG_FTP_SERVER,null);
             String  seedFTPAccount  = sb.getConfig(CONFIG_FTP_ACCOUNT,null);

@@ -78,6 +78,7 @@ import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
+import de.anomic.icap.icapd;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -748,6 +749,15 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	    return receive(in, this.readLineBuffer, commandMaxLength, false);
     	}
     
+        /**
+         * reads a line from the input socket
+         * this function is provided by the server through a passed method on initialization
+         * @return the next requestline as string
+         */
+        public String readLineAsString() {
+            byte[] l = readLine();
+            return (l == null) ? null: new String(l);
+        }
     
         /**
          * @return
@@ -821,11 +831,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
             }
         }  
         
-        private void execute() throws InterruptedException {
-                   
+        private void execute() throws InterruptedException {                   
             try {
-                 
-                
                 // settin the session identity
                 this.identity = "-";
                 
@@ -838,18 +845,11 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 // getting input and output stream for communication with client
                 this.in = new PushbackInputStream(this.controlSocket.getInputStream());
                 this.out = this.controlSocket.getOutputStream();
-                
-                
-                // initiate the command class
+
+                // reseting the command counter
                 this.commandCounter = 0;
-                if ((this.commandObj != null) && 
-                    (this.commandObj.getClass().getName().equals(serverCore.this.handlerPrototype.getClass().getName()))) {
-                    this.commandObj.reset();
-                } else {
-                    this.commandObj = (serverHandler) serverCore.this.handlerPrototype.clone();
-                }
-                this.commandObj.initSession(this);
-    
+                
+                // listen for commands
     		    listen();
             } catch (Exception e) {
                 if (e instanceof InterruptedException) throw (InterruptedException) e;
@@ -879,21 +879,20 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 Class[] stringType    = {"".getClass()};
                 Class[] exceptionType = {Class.forName("java.lang.Throwable")};
                 
-                // send greeting
-                Object result = commandObj.greeting();
-                if (result != null) {
-                    if ((result instanceof String) && (((String) result).length() > 0)) writeLine((String) result);
-                }
+                Object result;
+//                // send greeting
+//                Object result = commandObj.greeting();
+//                if (result != null) {
+//                    if ((result instanceof String) && (((String) result).length() > 0)) writeLine((String) result);
+//                }
                 
                 // start dialog
                 byte[] requestBytes = null;
                 boolean terminate = false;
-                int pos;
-                String cmd;
-                String tmp;
+                String reqCmd;
+                String reqProtocol = "HTTP";
                 Object[] stringParameter = new String[1];
-                while ((this.in != null) && ((requestBytes = readLine()) != null)) {
-                    this.commandCounter++;
+                while ((this.in != null) && ((requestBytes = readLine()) != null)) {                    
                     this.setName("Session_" + this.userAddress.getHostAddress() + ":" + this.controlSocket.getPort() + "#" + commandCounter);
                     
                     this.request = new String(requestBytes);
@@ -904,24 +903,50 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         // of the commandObject
                         if (this.request.trim().length() == 0) this.request = "EMPTY";
                         
-                        pos = this.request.indexOf(' ');
+                        // getting the rest of the request parameters
+                        int pos = this.request.indexOf(' ');
                         if (pos < 0) {
-                            cmd = this.request.trim().toUpperCase();
+                            reqCmd = this.request.trim().toUpperCase();
                             stringParameter[0] = "";
                         } else {
-                            cmd = this.request.substring(0, pos).trim().toUpperCase();
+                            reqCmd = this.request.substring(0, pos).trim().toUpperCase();
                             stringParameter[0] = this.request.substring(pos).trim();
                         }
+                        
+                        // now we need to initialize the session
+                        if (this.commandCounter == 0) {
+                            // first we need to determine the proper protocol handler
+                            if (this.request.indexOf("ICAP") >= 0) reqProtocol = "ICAP";
+                            else reqProtocol = "HTTP";                            
+                            
+                            // next we need to get the proper protocol handler
+                            if (reqProtocol.equals("ICAP")) {
+                                this.commandObj = new icapd();
+                            } else {
+//                                if ((this.commandObj != null) && 
+//                                        (this.commandObj.getClass().getName().equals(serverCore.this.handlerPrototype.getClass().getName()))) {
+//                                        this.commandObj.reset();
+//                                    } else {
+//                                        this.commandObj = (serverHandler) serverCore.this.handlerPrototype.clone();
+//                                    }
+                                
+                                this.commandObj = (serverHandler) serverCore.this.handlerPrototype.clone();
+                            }
+                            
+                            // initializing the session
+                            this.commandObj.initSession(this); 
+                        }
+                        this.commandCounter++;
                         
                         // setting the socket timeout for reading of the request content
                         this.controlSocket.setSoTimeout(this.socketTimeout);
                         
                         // exec command and return value
-                        Object commandMethod = this.commandObjMethodCache.get(cmd);
+                        Object commandMethod = this.commandObjMethodCache.get(reqProtocol + "_" + reqCmd);
                         if (commandMethod == null) {
                             try {
-                                commandMethod = this.commandObj.getClass().getMethod(cmd, stringType);
-                                this.commandObjMethodCache.put(cmd,commandMethod);
+                                commandMethod = this.commandObj.getClass().getMethod(reqCmd, stringType);
+                                this.commandObjMethodCache.put(reqProtocol + "_" + reqCmd,commandMethod);
                             } catch (NoSuchMethodException noMethod) {
                                 commandMethod = this.commandObj.getClass().getMethod("UNKNOWN", stringType);
                                 stringParameter[0] = this.request.trim();
@@ -947,7 +972,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                             }
                             writeLine((String) result);
                         } else if (result instanceof InputStream) {
-                            tmp = send(out, (InputStream) result);
+                            String tmp = send(out, (InputStream) result);
                             if ((tmp.length() > 4) && (tmp.toUpperCase().startsWith("PASS"))) {
                                 log(true, "PASS ********");
                             } else {
@@ -1014,6 +1039,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         		if ((b = pbis.read()) != lf) if (b >= 0) pbis.unread(b); // we push back the byte
     	    }
     	    
+            if ((readLineBuffer.length()==0)&&(b == -1)) return null;
             return readLineBuffer.toByteArray();
         } catch (ClosedByInterruptException e) {
             if (logerr) serverLog.logSevere("SERVER", "receive interrupted - timeout");

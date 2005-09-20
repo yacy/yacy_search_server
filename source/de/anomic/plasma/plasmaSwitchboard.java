@@ -304,6 +304,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         sbQueue = new plasmaSwitchboardQueue(this.cacheManager, urlPool.loadedURL, new File(plasmaPath, "switchboardQueue1.stack"), 10, profiles);
         indexingTasksInProcess = new HashMap();
         
+        // going through the sbQueue Entries and registering all content files as in use
+        int count = 0;
+        ArrayList sbQueueEntries = this.sbQueue.list();
+        for (int i=0; i<sbQueueEntries.size(); i++) {
+            plasmaSwitchboardQueue.Entry entry = (plasmaSwitchboardQueue.Entry) sbQueueEntries.get(i);
+            if ((entry != null)&&(entry.url() != null)&&(entry.cacheFile().exists())) {
+                plasmaHTCache.filesInUse.add(entry.cacheFile());
+                count++;
+            }
+        }
+        log.logConfig(count + " files in htcache reported to the cachemanager as in use.");
+        
         // define an extension-blacklist
         log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
         plasmaParser.initMediaExt(plasmaParser.extString2extList(getConfig("mediaExt","")));
@@ -327,9 +339,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 this.cacheManager, 
                 this.log);
 
-        // init boards
+        // starting message board
         log.logConfig("Starting Message Board");
         messageDB = new messageBoard(new File(getRootPath(), "DATA/SETTINGS/message.db"), ramMessage);
+        
+        // starting wiki
         log.logConfig("Starting Wiki Board");
         wikiDB = new wikiBoard(new File(getRootPath(), "DATA/SETTINGS/wiki.db"),
                  new File(getRootPath(), "DATA/SETTINGS/wiki-bkp.db"), ramWiki);
@@ -922,6 +936,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private void processResourceStack(plasmaSwitchboardQueue.Entry entry) {
         // work off one stack entry with a fresh resource
         try {    
+            long parsingStartTime = 0, parsingEndTime = 0, indexingStartTime = 0, indexingEndTime;
+            
             // we must distinguish the following cases: resource-load was initiated by
             // 1) global crawling: the index is extern, not here (not possible here)
             // 2) result of search queries, some indexes are here (not possible here)
@@ -953,6 +969,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     ", url=" + entry.url()); // DEBUG
             
             // parse content
+            parsingStartTime = System.currentTimeMillis();
             plasmaParserDocument document = null;
             if ((plasmaParser.supportedFileExt(entry.url())) ||
                 ((entry.responseHeader() != null) &&
@@ -972,6 +989,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logFine("(Parser) '" + entry.normalizedURLString() + "'. Unsupported mimeType '" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().mime()) + "'.");
                 return;                
             }
+            parsingEndTime = System.currentTimeMillis();
             
             Date loadDate = null;
             if (entry.responseHeader() != null) {
@@ -1019,6 +1037,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             if (noIndexReason == null) {
                 // strip out words
+                indexingStartTime = System.currentTimeMillis();
                 log.logFine("Condensing for '" + entry.normalizedURLString() + "'");
                 plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(document.getText()));
  
@@ -1061,7 +1080,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         // do indexing
                         //log.logDebug("Create Index for '" + entry.normalizedURLString() + "'");
                         int words = searchManager.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
-                        log.logInfo("*Indexed " + words + " words in URL " + entry.url() + " (" + descr + ")");
+                        indexingEndTime = System.currentTimeMillis();
+                        log.logInfo("*Indexed " + words + " words in URL " + entry.url() + 
+                                    "\n\tDescription:  " + descr + "\n\t" +
+                                    "MimeType: "  + document.getMimeType() + " | " + 
+                                    "Size: " + document.text.length + " bytes | " +
+                                    "ParsingTime:  " + (parsingEndTime-parsingStartTime) + " ms | " + 
+                                    "IndexingTime: " + (indexingEndTime-indexingStartTime) + " ms");
                         
                         // if this was performed for a remote crawl request, notify requester
                         if ((processCase == 6) && (initiator != null)) {

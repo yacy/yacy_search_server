@@ -258,11 +258,11 @@
           <pathelement location="${build}" />   
         
           <!-- main lib needed to parse rss/atom feed files -->     
-          <pathelement location="${libx}/jsch-0.1.19.jar" />                    
+          <pathelement location="${libx}/jsch-0.1.21.jar" />                    
         </classpath>
     </javac>      
     <copy todir="${release}/libx/">
-         <fileset dir="${libx}" includes="jsch-0.1.19.*"/> 
+         <fileset dir="${libx}" includes="jsch-0.1.21.*"/> 
     </copy>
     <copy todir="${release}/source/de/anomic/server/">
          <fileset dir="${src}/de/anomic/server/">

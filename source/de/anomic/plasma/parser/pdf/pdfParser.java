@@ -43,7 +43,6 @@
 
 package de.anomic.plasma.parser.pdf;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
@@ -74,8 +73,7 @@ public class pdfParser extends AbstractParser implements Parser {
      * @see Parser#getLibxDependences()
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "PDFBox-0.7.1.jar",
-        "log4j-1.2.9.jar"
+        "PDFBox-0.7.2.jar"
     };    
     
     public pdfParser() {        

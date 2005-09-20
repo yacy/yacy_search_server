@@ -3,7 +3,9 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 29.04.2004
+//
+// last major change: $LastChangedDate$ by $LastChangedBy$
+// Revision: $LastChangedRevision$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -57,6 +59,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -64,10 +69,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import de.anomic.server.serverCore;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyCore;
 
 public final class httpHeader extends TreeMap implements Map {
 
@@ -176,6 +184,31 @@ public final class httpHeader extends TreeMap implements Map {
         http1_1.put("504","Gateway Time-out");
         http1_1.put("505","HTTP Version not supported");        
     }
+    
+    /* PROPERTIES: General properties */    
+    public static final String CONNECTION_PROP_HTTP_VER = "HTTP";
+    public static final String CONNECTION_PROP_HOST = "HOST";
+    public static final String CONNECTION_PROP_METHOD = "METHOD";
+    public static final String CONNECTION_PROP_PATH = "PATH";
+    public static final String CONNECTION_PROP_EXT = "EXT";
+    public static final String CONNECTION_PROP_URL = "URL";
+    public static final String CONNECTION_PROP_ARGS = "ARGS";
+    public static final String CONNECTION_PROP_CLIENTIP = "CLIENTIP";
+    public static final String CONNECTION_PROP_PERSISTENT = "PERSISTENT";
+    public static final String CONNECTION_PROP_KEEP_ALIVE_COUNT = "KEEP-ALIVE_COUNT";
+    public static final String CONNECTION_PROP_REQUESTLINE = "REQUESTLINE";
+    public static final String CONNECTION_PROP_PREV_REQUESTLINE = "PREVREQUESTLINE";
+    public static final String CONNECTION_PROP_REQUEST_START = "REQUEST_START";
+    public static final String CONNECTION_PROP_REQUEST_END = "REQUEST_END";
+    
+    /* PROPERTIES: Client -> Proxy */
+    public static final String CONNECTION_PROP_CLIENT_REQUEST_HEADER = "CLIENT_REQUEST_HEADER";
+    
+    /* PROPERTIES: Proxy -> Client */
+    public static final String CONNECTION_PROP_PROXY_RESPOND_CODE = "PROXY_RESPOND_CODE";
+    public static final String CONNECTION_PROP_PROXY_RESPOND_STATUS = "PROXY_RESPOND_STATUS";
+    public static final String CONNECTION_PROP_PROXY_RESPOND_HEADER = "PROXY_RESPOND_HEADER";
+    public static final String CONNECTION_PROP_PROXY_RESPOND_SIZE = "PROXY_REQUEST_SIZE";    
 
     private final HashMap reverseMappingCache;
 
@@ -310,7 +343,6 @@ public final class httpHeader extends TreeMap implements Map {
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
     private static SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
     private static SimpleDateFormat EMLFormatter     = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US);
-
     
     public static Date parseHTTPDate(String s) {
 	if ((s == null) || (s.length() < 9)) return new Date();
@@ -386,17 +418,309 @@ public final class httpHeader extends TreeMap implements Map {
         return ((containsKey(httpHeader.CONTENT_ENCODING)) &&
 		(((String) get(httpHeader.CONTENT_ENCODING)).toUpperCase().startsWith("GZIP")));
     }
-    /*
-    public static void main(String[] args) {
-	Collator c;
-	c = Collator.getInstance(Locale.US); c.setStrength(Collator.PRIMARY);
-	System.out.println("PRIMARY:   compare(abc, ABC) = " + c.compare("abc", "ABC"));
-	c = Collator.getInstance(Locale.US); c.setStrength(Collator.SECONDARY);
-	System.out.println("SECONDARY: compare(abc, ABC) = " + c.compare("abc", "ABC"));
-	c = Collator.getInstance(Locale.US); c.setStrength(Collator.TERTIARY);
-	System.out.println("TERTIARY:  compare(abc, ABC) = " + c.compare("abc", "ABC"));
-	c = Collator.getInstance(Locale.US); c.setStrength(Collator.IDENTICAL);
-	System.out.println("IDENTICAL: compare(abc, ABC) = " + c.compare("abc", "ABC"));
+    
+    public static Object[] parseResponseLine(String respLine) {
+        
+        if ((respLine == null) || (respLine.length() == 0)) {
+            return new Object[]{"HTTP/1.0",new Integer(500),"status line parse error"};
+        }
+        
+        int p = respLine.indexOf(" ");
+        if (p < 0) {
+            return new Object[]{"HTTP/1.0",new Integer(500),"status line parse error"};
+        }
+        
+        String httpVer, status, statusText;
+        Integer statusCode;
+        
+        // the http version reported by the server
+        httpVer = respLine.substring(0,p);
+        
+        // Status of the request, e.g. "200 OK"
+        status = respLine.substring(p + 1).trim(); // the status code plus reason-phrase
+        
+        // splitting the status into statuscode and statustext
+        p = status.indexOf(" ");
+        try {
+            statusCode = Integer.valueOf((p < 0) ? status.trim() : status.substring(0,p).trim());
+            statusText = (p < 0) ? "" : status.substring(p+1).trim();
+        } catch (Exception e) {
+            statusCode = new Integer(500);
+            statusText = status;
+        }
+        
+        return new Object[]{httpVer,statusCode,statusText};
     }
-    */
+    
+    public static Properties parseRequestLine(String s, Properties prop, String virtualHost) {
+        int p = s.indexOf(" ");
+        if (p >= 0) {
+            String cmd = s.substring(0,p);
+            String args = s.substring(p+1);
+            return parseRequestLine(cmd,args, prop,virtualHost);
+        } else {
+            return prop;
+        }
+    }
+    
+    public static Properties parseRequestLine(String cmd, String args, Properties prop, String virtualHost) {
+        
+        // getting the last request line for debugging purposes
+        String prevRequestLine = prop.containsKey(httpHeader.CONNECTION_PROP_REQUESTLINE)?
+                prop.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE) : "";
+        
+        // reset property from previous run   
+        prop.clear();
+
+        // storing informations about the request
+        prop.setProperty(httpHeader.CONNECTION_PROP_METHOD, cmd);
+        prop.setProperty(httpHeader.CONNECTION_PROP_REQUESTLINE,cmd + " " + args);
+        prop.setProperty(httpHeader.CONNECTION_PROP_PREV_REQUESTLINE,prevRequestLine);
+        
+        // this parses a whole URL
+        if (args.length() == 0) {
+            prop.setProperty(httpHeader.CONNECTION_PROP_HOST, virtualHost);
+            prop.setProperty(httpHeader.CONNECTION_PROP_PATH, "/");
+            prop.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+            prop.setProperty(httpHeader.CONNECTION_PROP_EXT, "");
+            return prop;
+        }
+        
+        // store the version propery "HTTP" and cut the query at both ends
+        int sep = args.indexOf(" ");
+        if (sep >= 0) {
+            // HTTP version is given
+            prop.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, args.substring(sep + 1).trim());
+            args = args.substring(0, sep).trim(); // cut off HTTP version mark
+        } else {
+            // HTTP version is not given, it will be treated as ver 0.9
+            prop.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+        }
+        
+        // properties of the query are stored with the prefix "&"
+        // additionally, the values URL and ARGC are computed
+        
+        String argsString = "";
+        sep = args.indexOf("?");
+        if (sep >= 0) {
+            // there are values attached to the query string
+            argsString = args.substring(sep + 1); // cut haed from tail of query
+            args = args.substring(0, sep);
+        }
+        prop.setProperty(httpHeader.CONNECTION_PROP_URL, args); // store URL
+        //System.out.println("HTTPD: ARGS=" + argsString);
+        if (argsString.length() != 0) prop.setProperty(httpHeader.CONNECTION_PROP_ARGS, argsString); // store arguments in original form
+        
+        // find out file extension
+        sep = args.lastIndexOf(".");
+        if (sep >= 0) {
+            if (args.indexOf("?", sep + 1) >= sep)
+                prop.setProperty(httpHeader.CONNECTION_PROP_EXT, args.substring(sep + 1, args.indexOf("?", sep + 1)).toLowerCase());
+            else if (args.indexOf("#", sep + 1) >= sep)
+                prop.setProperty(httpHeader.CONNECTION_PROP_EXT, args.substring(sep + 1, args.indexOf("#", sep + 1)).toLowerCase());
+            else
+                prop.setProperty(httpHeader.CONNECTION_PROP_EXT, args.substring(sep + 1).toLowerCase());
+        } else {
+            prop.setProperty(httpHeader.CONNECTION_PROP_EXT, "");
+        }
+        
+        // finally find host string
+        if (args.toUpperCase().startsWith("HTTP://")) {
+            // a host was given. extract it and set path
+            args = args.substring(7);
+            sep = args.indexOf("/");
+            if (sep < 0) {
+                // this is a malformed url, something like
+                // http://index.html
+                // we are lazy and guess that it means
+                // /index.html
+                // which is a localhost access to the file servlet
+                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, virtualHost);
+                prop.setProperty(httpHeader.CONNECTION_PROP_PATH, "/" + args);
+            } else {
+                // THIS IS THE "GOOD" CASE
+                // a perfect formulated url
+                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, args.substring(0, sep));
+                prop.setProperty(httpHeader.CONNECTION_PROP_PATH, args.substring(sep)); // yes, including beginning "/"
+            }
+        } else {
+            // no host in url. set path
+            if (args.startsWith("/")) {
+                // thats also fine, its a perfect localhost access
+                // in this case, we simulate a
+                // http://localhost/s
+                // access by setting a virtual host
+                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, virtualHost);
+                prop.setProperty(httpHeader.CONNECTION_PROP_PATH, args);
+            } else {
+                // the client 'forgot' to set a leading '/'
+                // this is the same case as above, with some lazyness
+                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, virtualHost);
+                prop.setProperty(httpHeader.CONNECTION_PROP_PATH, "/" + args);
+            }
+        }
+        return prop;
+    }    
+    
+    /**
+     * Reading http headers from a reader class and building up a httpHeader object
+     * @param reader the {@link BufferedReader} that is used to read the http header lines
+     * @return a {@link httpHeader}-Object containing all parsed headers
+     * @throws IOException
+     */
+    public static httpHeader readHttpHeader(BufferedReader reader) throws IOException {
+        // reading all request headers
+        httpHeader httpHeader = new httpHeader(httpd.reverseMappingCache);
+        int p;
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.length() == 0) break; 
+            if ((p = line.indexOf(":")) >= 0) {
+                // store a property
+                httpHeader.add(line.substring(0, p).trim(), line.substring(p + 1).trim());
+            }
+        }   
+        return httpHeader;
+    }        
+    
+    public static httpHeader readHeader(Properties prop, serverCore.Session theSession) throws IOException {
+        
+        // reading all headers
+        httpHeader header = new httpHeader(httpd.reverseMappingCache);
+        int p;
+        String line;
+        while ((line = theSession.readLineAsString()) != null) {
+            if (line.length() == 0) break; // this seperates the header of the HTTP request from the body
+            // parse the header line: a property seperated with the ':' sign
+            if ((p = line.indexOf(":")) >= 0) {
+                // store a property
+                header.add(line.substring(0, p).trim(), line.substring(p + 1).trim());
+            }
+        }
+        
+        /* 
+         * doing some header validation here ...
+         */
+        String httpVersion = prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+        if (httpVersion.equals("HTTP/1.1") && !header.containsKey(httpHeader.HOST)) {
+            // the HTTP/1.1 specification requires that an HTTP/1.1 server must reject any  
+            // HTTP/1.1 message that does not contain a Host header.            
+            httpd.sendRespondError(prop,theSession.out,0,400,null,null,null);
+            throw new IOException("400 Bad request");
+        }     
+        
+        return header;
+    }
+ 
+    
+    public StringBuffer toHeaderString(
+            String httpVersion, 
+            int httpStatusCode, 
+            String httpStatusText) {
+        // creating a new buffer to store the header as string
+        StringBuffer theHeader = new StringBuffer();
+        
+        // generating the header string
+        this.toHeaderString(httpVersion,httpStatusCode,httpStatusText,theHeader);
+        
+        // returning the result
+        return theHeader;
+    }
+    
+    
+    public void toHeaderString(
+            String httpVersion, 
+            int httpStatusCode, 
+            String httpStatusText, 
+            StringBuffer theHeader) {        
+        
+        if (theHeader == null) throw new IllegalArgumentException();
+        
+        // setting the http version if it was not already set
+        if (httpVersion == null) httpVersion = "HTTP/1.0";
+        
+        // setting the status text if it was not already set
+        if ((httpStatusText == null)||(httpStatusText.length()==0)) {
+            if (httpVersion.equals("HTTP/1.0") && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
+                httpStatusText = (String) httpHeader.http1_0.get(Integer.toString(httpStatusCode));
+            else if (httpVersion.equals("HTTP/1.1") && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
+                httpStatusText = (String) httpHeader.http1_1.get(Integer.toString(httpStatusCode));
+            else httpStatusText = "Unknown";
+        }
+        
+        
+        // write status line
+        theHeader.append(httpVersion).append(" ")
+                 .append(Integer.toString(httpStatusCode)).append(" ")
+                 .append(httpStatusText).append("\r\n");
+        
+        // write header
+        Iterator i = keySet().iterator();
+        String key, value;
+        char tag;
+        int count;
+        while (i.hasNext()) {
+            key = (String) i.next();
+            tag = key.charAt(0);
+            if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
+                count = keyCount(key);
+                for (int j = 0; j < count; j++) {
+                    theHeader.append(key).append(": ").append((String) getSingle(key, j)).append("\r\n");  
+                }
+            }            
+        }
+        // end header
+        theHeader.append("\r\n");                
+    }    
+    
+    public static URL getRequestURL(Properties conProp) throws MalformedURLException {
+        String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
+        String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
+        String args =    conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
+        String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
+        
+        int port, pos;        
+        if ((pos = host.indexOf(":")) < 0) {
+            port = 80;
+        } else {
+            port = Integer.parseInt(host.substring(pos + 1));
+            host = host.substring(0, pos);
+        }
+        
+        URL url = new URL("http", host, port, (args == null) ? path : path + "?" + args);
+        return url;
+    }
+
+    public static void handleTransparentProxySupport(httpHeader header, Properties prop, String virtualHost, boolean isTransparentProxy) {   
+        // transparent proxy support is only available for http 1.0 and above connections
+        if (prop.getProperty(CONNECTION_PROP_HTTP_VER, "HTTP/0.9").equals("HTTP/0.9")) return;
+        
+        // if the transparent proxy support was disabled, we have nothing todo here ...
+        if (!(isTransparentProxy && header.containsKey(HOST))) return;
+        
+        try {                
+            String dstHost, dstHostSocket = (String) header.get(HOST);
+            
+            int idx = dstHostSocket.indexOf(":");
+            dstHost = (idx != -1) ? dstHostSocket.substring(0,idx).trim() : dstHostSocket.trim();     
+            Integer dstPort = (idx != -1) ? Integer.valueOf(dstHostSocket.substring(idx+1)) : new Integer(80);
+            
+            if (dstPort.intValue() == 80) {
+                if (dstHost.endsWith(".yacy")) {
+                    // if this peer is accessed via its yacy domain name we need to set the
+                    // host property to virtualHost to redirect the request to the yacy server
+                    if (dstHost.endsWith(yacyCore.seedDB.mySeed.getName()+".yacy")) {
+                        prop.setProperty(CONNECTION_PROP_HOST,virtualHost);
+                    } else {
+                        prop.setProperty(CONNECTION_PROP_HOST,dstHostSocket);
+                    }
+                } else {
+                    InetAddress dstHostAddress = InetAddress.getByName(dstHost);
+                    if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
+                        prop.setProperty(CONNECTION_PROP_HOST,dstHostSocket);
+                    }
+                }
+            }
+        } catch (Exception e) {}
+    }
 }
