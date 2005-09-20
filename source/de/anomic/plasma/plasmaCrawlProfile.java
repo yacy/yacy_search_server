@@ -111,14 +111,28 @@ public class plasmaCrawlProfile {
             next = null;
         }
         public boolean hasNext() {
-            return handleIterator.hasNext();
+            try {
+                return handleIterator.hasNext();
+            } catch (kelondroException e) {
+                resetDatabase();
+                return false;
+            }
         }
         public Object next() {
-            next = getEntry((String) handleIterator.next());
-            return next;
+            try {
+                return getEntry((String) handleIterator.next());
+            } catch (kelondroException e) {
+                resetDatabase();
+                return null;
+            }
         }
         public void remove() {
-            removeEntry(next.handle());
+            if (next != null) try {
+                Object handle = next.handle();
+                if (handle != null) removeEntry((String) handle);
+            } catch (kelondroException e) {
+                resetDatabase();
+            }
         }
     }
    
