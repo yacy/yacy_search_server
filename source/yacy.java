@@ -166,8 +166,9 @@ public final class yacy {
     * the main threads.
     *
     * @param homePath Root-path where all information is to be found.
+    * @param startupFree free memory at startup time, to be used later for statistics
     */
-    private static void startup(String homePath) {
+    private static void startup(String homePath, long startupFree) {
         long startup = yacyCore.universalTime();
         try {
             // start up
@@ -201,6 +202,9 @@ public final class yacy {
 
             plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
 
+            // save information about available memory at startup time
+            sb.setConfig("memoryFreeAfterStartup", startupFree); // for statistics and memory configuration
+            
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
             sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
@@ -413,6 +417,9 @@ public final class yacy {
                     Runtime run = Runtime.getRuntime();
                     run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
 
+                    // save information about available memory after all initializations
+                    System.gc(); sb.setConfig("memoryFreeAfterInit", Runtime.getRuntime().freeMemory());
+            
                     // wait for server shutdown
                     try {
                         sb.waitForShutdown();
@@ -766,13 +773,14 @@ public final class yacy {
     * @param args Given arguments from the command line.
     */
     public static void main(String args[]) {
+        System.gc(); long startupFree = Runtime.getRuntime().freeMemory();
         String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
         //System.out.println("args.length=" + args.length);
         //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
         if ((args.length >= 1) && ((args[0].equals("-startup")) || (args[0].equals("-start")))) {
             // normal start-up of yacy
             if (args.length == 2) applicationRoot= args[1];
-            startup(applicationRoot);
+            startup(applicationRoot, startupFree);
         } else if ((args.length >= 1) && ((args[0].equals("-shutdown")) || (args[0].equals("-stop")))) {
             // normal shutdown of yacy
             if (args.length == 2) applicationRoot= args[1];
@@ -800,7 +808,7 @@ public final class yacy {
             cleanwordlist(args[1], minlength, maxlength);
         } else {
             if (args.length == 1) applicationRoot= args[0];
-            startup(applicationRoot);
+            startup(applicationRoot, startupFree);
         }
     }
 }

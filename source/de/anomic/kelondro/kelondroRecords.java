@@ -159,19 +159,7 @@ public class kelondroRecords {
         //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename));
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
         init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
-        this.XcacheSize = (int) (buffersize / ((long) (overhead + columns[0])));
-        if (XcacheSize <= 0) {
-            XcacheSize = 0;
-            this.XcacheHeaders = null;
-            this.XcacheScore = null;
-        } else {
-            // initialize cache
-            // in case that we have more cache space than elements
-            // we dont need cache control by the XcacheScore
-            this.XcacheHeaders = new HashMap[]{new HashMap(), new HashMap(), new HashMap()};
-            this.XcacheScore = (this.XcacheSize > size()) ? null : new kelondroMScoreCluster();
-        }
-        this.XcacheStartup = System.currentTimeMillis();
+        initCache(buffersize);
     }
     
     public kelondroRecords(kelondroRA ra, long buffersize /* bytes */,
@@ -179,16 +167,7 @@ public class kelondroRecords {
 			   int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
         this.filename = null;
         init(ra, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
-        this.XcacheSize = (int) (buffersize / ((long) (overhead + columns[0])));
-        if (XcacheSize <= 0) {
-            XcacheSize = 0;
-            this.XcacheHeaders = null;
-            this.XcacheScore = null;
-        } else {
-            this.XcacheHeaders = new HashMap[]{new HashMap(), new HashMap(), new HashMap()};
-            this.XcacheScore = (this.XcacheSize > size()) ? null : new kelondroMScoreCluster();
-        }
-        this.XcacheStartup = System.currentTimeMillis();
+        initCache(buffersize);
     }
    
     private void init(kelondroRA ra, short ohbytec, short ohhandlec,
@@ -275,31 +254,13 @@ public class kelondroRecords {
         //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
         init(raf);
-        this.XcacheSize = (int) (buffersize / ((long) (overhead + COLWIDTHS[0])));
-        if (XcacheSize <= 0) {
-            XcacheSize = 0;
-            this.XcacheHeaders = null;
-            this.XcacheScore = null;
-        } else {
-            this.XcacheHeaders = new HashMap[]{new HashMap(), new HashMap(), new HashMap()};
-            this.XcacheScore = (this.XcacheSize > size()) ? null : new kelondroMScoreCluster();
-        }
-        this.XcacheStartup = System.currentTimeMillis();
+        initCache(buffersize);
     }
     
     public kelondroRecords(kelondroRA ra, long buffersize) throws IOException{
         this.filename = null;
         init(ra);
-        this.XcacheSize = (int) (buffersize / ((long) (overhead + COLWIDTHS[0])));
-        if (XcacheSize <= 0) {
-            XcacheSize = 0;
-            this.XcacheHeaders = null;
-            this.XcacheScore = null;
-        } else {
-            this.XcacheHeaders = new HashMap[]{new HashMap(), new HashMap(), new HashMap()};
-            this.XcacheScore = (this.XcacheSize > size()) ? null : new kelondroMScoreCluster();
-        }
-        this.XcacheStartup = System.currentTimeMillis();
+        initCache(buffersize);
     }
 
     private void init(kelondroRA ra) throws IOException {
@@ -350,7 +311,38 @@ public class kelondroRecords {
         this.tailchunksize = this.recordsize - this.headchunksize;
     }
     
+    private void initCache(long buffersize) {
+        if (buffersize <= 0) {
+            this.XcacheSize = 0;
+            this.XcacheHeaders = null;
+            this.XcacheScore = null;
+        } else {
+            if ((buffersize / cacheChunkSize(false)) > size()) {
+                this.XcacheSize = (int) (buffersize / cacheChunkSize(false));
+                this.XcacheScore = null;
+            } else {
+                this.XcacheSize = (int) (buffersize / cacheChunkSize(true));
+                this.XcacheScore = new kelondroMScoreCluster();
+            }
+            this.XcacheHeaders = new HashMap[]{new HashMap(), new HashMap(), new HashMap()};
+        }
+        this.XcacheStartup = System.currentTimeMillis();
+    }
     
+    private int cacheChunkSize(boolean cacheControl) {
+        return this.headchunksize + 14 + ((cacheControl) ? 16 : 0);
+    }
+    
+    public int cacheChunkSize() {
+        return cacheChunkSize(this.XcacheScore != null);
+    }
+    
+    public int[] cacheFillStatus() {
+        if (XcacheHeaders == null) return new int[]{0,0,0,0};
+        return new int[]{XcacheSize - (XcacheHeaders[CP_HIGH].size() + XcacheHeaders[CP_MEDIUM].size() + XcacheHeaders[CP_LOW].size()), XcacheHeaders[CP_HIGH].size(), XcacheHeaders[CP_MEDIUM].size(), XcacheHeaders[CP_LOW].size()};
+    }
+    
+   
     protected Node newNode() throws IOException {
         return new Node();
     }

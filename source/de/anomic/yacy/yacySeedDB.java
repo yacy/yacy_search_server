@@ -147,10 +147,21 @@ public final class yacySeedDB {
         } catch (IOException e) {}
     }
     
+    public int dbCacheChunkSize() {
+        return (seedActiveDB.cacheChunkSize() + seedPassiveDB.cacheChunkSize() + seedPotentialDB.cacheChunkSize()) / 3;
+    }
+    
+    public int[] dbCacheFillStatus() {
+        int[] ac = seedActiveDB.cacheFillStatus();
+        int[] pa = seedPassiveDB.cacheFillStatus();
+        int[] po = seedPotentialDB.cacheFillStatus();
+        return new int[]{ac[0] + pa[0] + po[0], ac[1] + pa[1] + po[1], ac[2] + pa[2] + po[2], ac[3] + pa[3] + po[3]};
+    }
+    
     private synchronized kelondroMap openSeedTable(File seedDBFile) throws IOException {
         if (seedDBFile.exists()) try {
             // open existing seed database
-            return new kelondroMap(new kelondroDyn(seedDBFile, seedDBBufferKB * 0x400), sortFields, accFields);
+            return new kelondroMap(new kelondroDyn(seedDBFile, seedDBBufferKB/3 * 0x400), sortFields, accFields);
         } catch (kelondroException e) {
             // if we have an error, we start with a fresh database
             if (seedDBFile.exists()) seedDBFile.delete();
@@ -160,7 +171,7 @@ public final class yacySeedDB {
         }
         // create new seed database
         new File(seedDBFile.getParent()).mkdir();
-        return new kelondroMap(new kelondroDyn(seedDBFile, seedDBBufferKB * 0x400, commonHashLength, 480), sortFields, accFields);
+        return new kelondroMap(new kelondroDyn(seedDBFile, seedDBBufferKB/3 * 0x400, commonHashLength, 480), sortFields, accFields);
     }
     
     private synchronized kelondroMap resetSeedTable(kelondroMap seedDB, File seedDBFile) {

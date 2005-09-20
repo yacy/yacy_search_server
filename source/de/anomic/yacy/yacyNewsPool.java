@@ -99,6 +99,18 @@ public class yacyNewsPool {
         maxDistribution = 30;
     }
     
+    public int dbSize() {
+        return newsDB.size();
+    }
+    
+    public int dbCacheChunkSize() {
+        return newsDB.dbCacheChunkSize();
+    }
+    
+    public int[] dbCacheFillStatus() {
+        return newsDB.dbCacheFillStatus();
+    }
+    
     public void publishMyNews(yacyNewsRecord record) throws IOException {
         // this shall be called if our peer generated a new news record and wants to publish it
         if (newsDB.get(record.id()) == null) {

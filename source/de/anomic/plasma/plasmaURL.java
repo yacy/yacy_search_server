@@ -93,7 +93,7 @@ public class plasmaURL {
     }
     
     // the class object
-    protected kelondroTree urlHashCache;
+    public kelondroTree urlHashCache;
     private HashSet existsIndex;
 
     public plasmaURL() throws IOException {

@@ -78,6 +78,18 @@ public class messageBoard {
 	sn = 0;
     }
 
+    public int size() {
+        return database.size();
+    }
+    
+    public int dbCacheChunkSize() {
+        return database.cacheChunkSize();
+    }
+    
+    public int[] dbCacheFillStatus() {
+        return database.cacheFillStatus();
+    }
+    
     public void close() throws IOException {
         database.close();
     }

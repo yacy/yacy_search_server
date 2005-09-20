@@ -154,7 +154,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static plasmaURLPattern urlBlacklist;
     
     // storage management    
-    private File                        cachePath; // do we need that ?
+    private File                        cachePath;
     private File                        plasmaPath;
     public  File                        listsPath;
     public  plasmaURLPool               urlPool;

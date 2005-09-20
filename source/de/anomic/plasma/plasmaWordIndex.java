@@ -82,7 +82,15 @@ public final class plasmaWordIndex {
     public int[] assortmentSizes() {
         return ramCache.assortmentsSizes();
     }
-        
+    
+    public int assortmentsCacheChunkSizeAvg() {
+        return ramCache.assortmentsCacheChunkSizeAvg();
+    }
+    
+    public int[] assortmentsCacheFillStatusCml() {
+        return ramCache.assortmentsCacheFillStatusCml();
+    }
+    
     public void setMaxWords(int maxWords) {
         ramCache.setMaxWords(maxWords);
     }

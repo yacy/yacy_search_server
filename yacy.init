@@ -461,6 +461,9 @@ ramCacheMessage =     8192
 # ram cache for wiki.db
 ramCacheWiki    =     8192
 
+# ram cache for news1.db
+ramCacheNews    =     8192
+
 # performance properties for the word index cache
 # wordCacheMax is the number of word indexes that shall be held in the
 # ram cache during indexing. When YaCy is shut down, this cache must be

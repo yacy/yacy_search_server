@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy '#[clientname]#': Performance Settings for Memory</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Performance Settings for Memory</h2>
+
+<p>
+<div class=small><b>RAM Cache for Database Files:</b></div>
+<table border="0" cellpadding="2" cellspacing="1">
+<form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
+<tr class="TableHeader" valign="bottom">
+<td class="small">Database<br></td>
+<td class="small">Chunk&nbsp;Size<br>(bytes)</td>
+<td class="small">#Needed&nbsp;Slots<br>(=&nbsp;DB&nbsp;Size)</td>
+<td class="small">#Empty&nbsp;Slots<br>&nbsp;</td>
+<td class="small">#Used&nbsp;Slots<br>High&nbsp;Priority</td>
+<td class="small">#Used&nbsp;Slots<br>Medium&nbsp;Priority</td>
+<td class="small">#Used&nbsp;Slots<br>Low&nbsp;Priority</td>
+<td class="small">Used<br>Size</td>
+<td class="small">Assigned<br>Max-Size</td>
+<td class="small">Recommended<br>Max-Size</td>
+<td class="small">Optimum<br>Max-Size</td>
+<td class="small">Description<br>&nbsp;</td>
+</tr>
+
+<tr class="TableCellDark">
+<td class="small" align="left">RWI Assortment Cluster</td>
+<td class="small" align="right">#[chunkRWI]#</td>
+<td class="small" align="right">#[slreqRWI]#</td>
+<td class="small" align="right">#[slempRWI]#</td>
+<td class="small" align="right">#[slhigRWI]#</td>
+<td class="small" align="right">#[slmedRWI]#</td>
+<td class="small" align="right">#[sllowRWI]#</td>
+<td class="small" align="right">#[usedRWI]#</td>
+<td class="small" align="right"><input name="ramCacheRWI" type="text" align="right" size="8" maxlength="9" value="#[ramCacheRWI]#"> bytes</td>
+<td class="small" align="right">#[goodRWI]#</td>
+<td class="small" align="right">#[bestRWI]#</td>
+<td class="small" align="left">The Assortment Cluster stores most of the page indexes.
+Flushing speed of the temporary RWI cache depends on the size of this file cache. Increasing the space of this
+cache will speed up crawls with a depth > 3.</td>
+</tr>
+
+<tr class="TableCellDark">
+<td class="small" align="left">HTTP Response Header</td>
+<td class="small" align="right">#[chunkHTTP]#</td>
+<td class="small" align="right">#[slreqHTTP]#</td>
+<td class="small" align="right">#[slempHTTP]#</td>
+<td class="small" align="right">#[slhigHTTP]#</td>
+<td class="small" align="right">#[slmedHTTP]#</td>
+<td class="small" align="right">#[sllowHTTP]#</td>
+<td class="small" align="right">#[usedHTTP]#</td>
+<td class="small" align="right"><input name="ramCacheHTTP" type="text" align="right" size="8" maxlength="9" value="#[ramCacheHTTP]#"> bytes</td>
+<td class="small" align="right">#[goodHTTP]#</td>
+<td class="small" align="right">#[bestHTTP]#</td>
+<td class="small" align="left">The Response Header database stores the HTTP heades that other servers send when YaCy retrieves web pages
+during proxy mode, when performing crawls or if it fetches pages for snippet generation.
+Increasing this cache will be most important for a fast proxy mode.</td>
+</tr>
+
+<tr class="TableCellDark">
+<td class="small" align="left">'loaded' URLs</td>
+<td class="small" align="right">#[chunkLURL]#</td>
+<td class="small" align="right">#[slreqLURL]#</td>
+<td class="small" align="right">#[slempLURL]#</td>
+<td class="small" align="right">#[slhigLURL]#</td>
+<td class="small" align="right">#[slmedLURL]#</td>
+<td class="small" align="right">#[sllowLURL]#</td>
+<td class="small" align="right">#[usedLURL]#</td>
+<td class="small" align="right"><input name="ramCacheLURL" type="text" align="right" size="8" maxlength="9" value="#[ramCacheLURL]#"> bytes</td>
+<td class="small" align="right">#[goodLURL]#</td>
+<td class="small" align="right">#[bestLURL]#</td>
+<td class="small" align="left">This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.
+This cache is very important for a fast search process. Increasing the cache size will result in more search results and less IO during DHT transfer.</td>
+</tr>
+
+<tr class="TableCellDark">
+<td class="small" align="left">'noticed' URLs</td>
+<td class="small" align="right">#[chunkNURL]#</td>
+<td class="small" align="right">#[slreqNURL]#</td>
+<td class="small" align="right">#[slempNURL]#</td>
+<td class="small" align="right">#[slhigNURL]#</td>
+<td class="small" align="right">#[slmedNURL]#</td>
+<td class="small" align="right">#[sllowNURL]#</td>
+<td class="small" align="right">#[usedNURL]#</td>
+<td class="small" align="right"><input name="ramCacheNURL" type="text" align="right" size="8" maxlength="9" value="#[ramCacheNURL]#"> bytes</td>
+<td class="small" align="right">#[goodNURL]#</td>
+<td class="small" align="right">#[bestNURL]#</td>
+<td class="small" align="left">A noticed URL is one that was discovered during crawling but was not loaded yet.
+Increasing the cache size will result in faster double-check during URL recognition when doing crawls.</td>
+</tr>
+
+<tr class="TableCellDark">
+<td class="small" align="left">'error' URLs</td>
+<td class="small" align="right">#[chunkEURL]#</td>
+<td class="small" align="right">#[slreqEURL]#</td>
+<td class="small" align="right">#[slempEURL]#</td>
+<td class="small" align="right">#[slhigEURL]#</td>
+<td class="small" align="right">#[slmedEURL]#</td>
+<td class="small" align="right">#[sllowEURL]#</td>
+<td class="small" align="right">#[usedEURL]#</td>
+<td class="small" align="right"><input name="ramCacheEURL" type="text" align="right" size="8" maxlength="9" value="#[ramCacheEURL]#"> bytes</td>
+<td class="small" align="right">#[goodEURL]#</td>
+<td class="small" align="right">#[bestEURL]#</td>
+<td class="small" align="left">URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.
+Increasing the cache size will most probably speed up crawling slightly, but not significantly.</td>
+</tr>
+
+<tr class="TableCellDark">
+<td class="small" align="left">DHT Control</td>
+<td class="small" align="right">#[chunkDHT]#</td>
+<td class="small" align="right">#[slreqDHT]#</td>
+<td class="small" align="right">#[slempDHT]#</td>
+<td class="small" align="right">#[slhigDHT]#</td>
+<td class="small" align="right">#[slmedDHT]#</td>
+<td class="small" align="right">#[sllowDHT]#</td>
+<td class="small" align="right">#[usedDHT]#</td>
+<td class="small" align="right"><input name="ramCacheDHT" type="text" align="right" size="8" maxlength="9" value="#[ramCacheDHT]#"> bytes</td>
+<td class="small" align="right">#[goodDHT]#</td>
+<td class="small" align="right">#[bestDHT]#</td>
+<td class="small" align="left">This is simply the cache for the seed-dbs (active, passive, potential).
+This cache is divided into three equal parts.
+Increasing this cache may speed up many functions, but we need to test this to see the effects.</td>
+</tr>
+
+<tr class="TableCellDark">
+<td class="small" align="left">Messages</td>
+<td class="small" align="right">#[chunkMessage]#</td>
+<td class="small" align="right">#[slreqMessage]#</td>
+<td class="small" align="right">#[slempMessage]#</td>
+<td class="small" align="right">#[slhigMessage]#</td>
+<td class="small" align="right">#[slmedMessage]#</td>
+<td class="small" align="right">#[sllowMessage]#</td>
+<td class="small" align="right">#[usedMessage]#</td>
+<td class="small" align="right"><input name="ramCacheMessage" type="text" align="right" size="8" maxlength="9" value="#[ramCacheMessage]#"> bytes</td>
+<td class="small" align="right">#[goodMessage]#</td>
+<td class="small" align="right">#[bestMessage]#</td>
+<td class="small" align="left">The Message cache for peer-to-peer messages. Less important.</td>
+</tr>
+
+<tr class="TableCellDark">
+<td class="small" align="left">Wiki</td>
+<td class="small" align="right">#[chunkWiki]#</td>
+<td class="small" align="right">#[slreqWiki]#</td>
+<td class="small" align="right">#[slempWiki]#</td>
+<td class="small" align="right">#[slhigWiki]#</td>
+<td class="small" align="right">#[slmedWiki]#</td>
+<td class="small" align="right">#[sllowWiki]#</td>
+<td class="small" align="right">#[usedWiki]#</td>
+<td class="small" align="right"><input name="ramCacheWiki" type="text" align="right" size="8" maxlength="9" value="#[ramCacheWiki]#"> bytes</td>
+<td class="small" align="right">#[goodWiki]#</td>
+<td class="small" align="right">#[bestWiki]#</td>
+<td class="small" align="left">The YaCy-Wiki uses a database to store its pages.
+This cache is divided in two parts, one for the wiki database and one for its backup.
+Increasing this cache may speed up access to the wiki pages.</td>
+</tr>
+
+<tr class="TableCellDark">
+<td class="small" align="left">News</td>
+<td class="small" align="right">#[chunkNews]#</td>
+<td class="small" align="right">#[slreqNews]#</td>
+<td class="small" align="right">#[slempNews]#</td>
+<td class="small" align="right">#[slhigNews]#</td>
+<td class="small" align="right">#[slmedNews]#</td>
+<td class="small" align="right">#[sllowNews]#</td>
+<td class="small" align="right">#[usedNews]#</td>
+<td class="small" align="right"><input name="ramCacheNews" type="text" align="right" size="8" maxlength="9" value="#[ramCacheNews]#"> bytes</td>
+<td class="small" align="right">#[goodNews]#</td>
+<td class="small" align="right">#[bestNews]#</td>
+<td class="small" align="left">The News-DB stores property-lists for news that are included in seeds.
+Increasing this cache may speed up the peer-ping.</td>
+</tr>
+
+<tr class="TableCellLight">
+<td class="small" align="left" colspan="18">
+<input type="submit" name="submitcache" value="Submit New Cache Values">&nbsp;&nbsp;&nbsp;
+Changes take effect after re-start of YaCy</td>
+</tr>
+</form>
+</table>
+</p>
+
+#[footer]#
+</body>
+</html>

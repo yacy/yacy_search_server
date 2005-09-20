@@ -74,20 +74,34 @@ public class wikiBoard {
 	new File(actpath.getParent()).mkdir();
         if (datbase == null) {
 	    if (actpath.exists())
-		datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb * 0x40));
+		datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb/2 * 0x40));
 	    else
-		datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb * 0x400, keyLength, recordSize));
+		datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb/2 * 0x400, keyLength, recordSize));
 	}
 	new File(bkppath.getParent()).mkdir();
 	if (bkpbase == null) {
 	    if (bkppath.exists())
-		bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb * 0x400));
+		bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb/2 * 0x400));
 	    else
-		bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb * 0x400, keyLength + dateFormat.length(), recordSize));
+		bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb/2 * 0x400, keyLength + dateFormat.length(), recordSize));
 	}
 	sn = 0;
     }
 
+    public int sizeOfTwo() {
+        return datbase.size() + bkpbase.size();
+    }
+    
+    public int dbCacheChunkSize() {
+        return (datbase.cacheChunkSize() + bkpbase.cacheChunkSize()) / 2;
+    }
+    
+    public int[] dbCacheFillStatus() {
+        int[] a = datbase.cacheFillStatus();
+        int[] b = bkpbase.cacheFillStatus();
+        return new int[]{a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]};
+    }
+    
     public void close() throws IOException {
         datbase.close();
         bkpbase.close();

@@ -153,20 +153,20 @@ public class yacyCore {
         yacyDBPath = new File(sb.getRootPath(), sb.getConfig("yacyDB", "DATA/YACYDB"));
         if (!(yacyDBPath.exists())) yacyDBPath.mkdir();
         
-        // read memory amount
-        int mem = Integer.parseInt(switchboard.getConfig("ramCacheDHT", "1024")) / 1024;
-        log.logConfig("DHT Cache memory = " + mem + " KB");
-        
         // create or init seed cache
+        int memDHT = Integer.parseInt(switchboard.getConfig("ramCacheDHT", "1024")) / 1024;
+        log.logConfig("DHT Cache memory = " + memDHT + " KB");
         seedDB = new yacySeedDB(
                 sb, 
                 new File(yacyDBPath, "seed.new.db"),
                 new File(yacyDBPath, "seed.old.db"),
                 new File(yacyDBPath, "seed.pot.db"),
-                mem);
+                memDHT);
         
         // create or init news database
-        newsPool = new yacyNewsPool(yacyDBPath, 1024);
+        int memNews = Integer.parseInt(switchboard.getConfig("ramCacheNews", "1024")) / 1024;
+        log.logConfig("News Cache memory = " + memNews + " KB");
+        newsPool = new yacyNewsPool(yacyDBPath, memNews);
         
         loadSeedUploadMethods();
         

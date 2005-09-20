@@ -190,7 +190,22 @@ public final class plasmaWordIndexAssortmentCluster {
         for (int i = 0; i < clusterCount; i++) sizes[i] = assortments[i].size();
         return sizes;
     }
-        
+    
+    public int cacheChunkSizeAvg() {
+        int total = 0;
+        for (int i = 0; i < clusterCount; i++) total += assortments[i].cacheChunkSize();
+        return total / clusterCount;
+    }
+    
+    public int[] cacheFillStatusCml() {
+        int[] a, cml = new int[]{0, 0, 0, 0};
+        for (int i = 0; i < clusterCount; i++) {
+            a = assortments[i].cacheFillStatus();
+            for (int j = 0; j < 4; j++) cml[j] += a[j];
+        }
+        return cml;
+    }
+    
     public void close() {
         for (int i = 0; i < clusterCount; i++) assortments[i].close();
     }

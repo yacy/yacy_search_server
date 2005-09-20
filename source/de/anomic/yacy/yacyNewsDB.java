@@ -89,6 +89,14 @@ public class yacyNewsDB {
         news = createDB(path, bufferkb);
     }
     
+    public int dbCacheChunkSize() {
+        return news.cacheChunkSize();
+    }
+    
+    public int[] dbCacheFillStatus() {
+        return news.cacheFillStatus();
+    }
+    
     public void close() {
         if (news != null) try {news.close();} catch (IOException e) {}
         news = null;

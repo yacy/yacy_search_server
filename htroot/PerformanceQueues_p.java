@@ -1,4 +1,4 @@
-//Performace_p.java
+//PerformaceQueues_p.java
 //-----------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@anomic.de
@@ -57,7 +57,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.server.serverFileUtils;
 
-public class Performance_p {
+public class PerformanceQueues_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         // return variable that accumulates replacements

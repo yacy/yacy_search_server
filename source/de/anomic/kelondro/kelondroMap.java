@@ -127,6 +127,14 @@ public class kelondroMap {
         return dyn.columnSize(0);
     }
     
+    public int cacheChunkSize() {
+        return dyn.cacheChunkSize();
+    }
+    
+    public int[] cacheFillStatus() {
+        return dyn.cacheFillStatus();
+    }
+    
     public synchronized void set(String key, Map newMap) throws IOException {
         // update elementCount
         if ((sortfields != null) || (accfields != null)) {
