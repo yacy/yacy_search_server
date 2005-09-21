@@ -165,7 +165,7 @@ public final class yacy {
     * @param homePath Root-path where all information is to be found.
     * @param startupFree free memory at startup time, to be used later for statistics
     */
-    private static void startup(String homePath, long startupFree) {
+    private static void startup(String homePath, long startupMemFree, long startupMemTotal, long startupMemMax) {
         long startup = yacyCore.universalTime();
 
         try {
@@ -198,14 +198,16 @@ public final class yacy {
             final File dataFolder = new File(homePath, "DATA");
             if (!(dataFolder.exists())) dataFolder.mkdir();
 
-            final plasmaSwitchboard sboard = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
+            final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
 
             // save information about available memory at startup time
-            sboard.setConfig("memoryFreeAfterStartup", startupFree); // for statistics and memory configuration
+            sb.setConfig("memoryFreeAfterStartup", startupMemFree);
+            sb.setConfig("memoryTotalAfterStartup", startupMemTotal);
+            sb.setConfig("memoryMaxAfterStartup", startupMemMax);
             
             // hardcoded, forced, temporary value-migration
-            sboard.setConfig("htTemplatePath", "htroot/env/templates");
-            sboard.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
+            sb.setConfig("htTemplatePath", "htroot/env/templates");
+            sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
 
             // if we are running an SVN version, we try to detect the used svn revision now ...
             final Properties buildProp = new Properties();
@@ -229,31 +231,31 @@ public final class yacy {
                             try {version = Float.parseFloat(vString);} catch (NumberFormatException e) {version = (float) 0.1;}
                             version = versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
                         } catch (NumberFormatException e) {}
-                        sboard.setConfig("svnRevision", svrReleaseNr);
+                        sb.setConfig("svnRevision", svrReleaseNr);
                     }
                 }
             } catch (Exception e) {
                 System.err.println("Unable to determine the currently used SVN revision number.");
             }
 
-            sboard.setConfig("version", Float.toString(version));
-            sboard.setConfig("vString", combinedVersionString2PrettyString(Float.toString(version)));
-            sboard.setConfig("vdate", vDATE);
-            sboard.setConfig("applicationRoot", homePath);
-            sboard.setConfig("startupTime", Long.toString(startup));
+            sb.setConfig("version", Float.toString(version));
+            sb.setConfig("vString", combinedVersionString2PrettyString(Float.toString(version)));
+            sb.setConfig("vdate", vDATE);
+            sb.setConfig("applicationRoot", homePath);
+            sb.setConfig("startupTime", Long.toString(startup));
             serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + vDATE);
             yacyCore.latestVersion = (float) version;
 
             // read environment
             //new
-            final int port    = Integer.parseInt(sboard.getConfig("port", "8080"));
-            int timeout       = Integer.parseInt(sboard.getConfig("httpdTimeout", "60000"));
+            final int port    = Integer.parseInt(sb.getConfig("port", "8080"));
+            int timeout       = Integer.parseInt(sb.getConfig("httpdTimeout", "60000"));
             if (timeout < 60000) timeout = 60000;
 
             // create some directories
-            final File htRootPath = new File(sboard.getRootPath(), sboard.getConfig("htRootPath", "htroot"));
-            final File htDocsPath = new File(sboard.getRootPath(), sboard.getConfig("htDocsPath", "DATA/HTDOCS"));
-            File htTemplatePath = new File(sboard.getRootPath(), sboard.getConfig("htTemplatePath","htdocs"));
+            final File htRootPath = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot"));
+            final File htDocsPath = new File(sb.getRootPath(), sb.getConfig("htDocsPath", "DATA/HTDOCS"));
+            File htTemplatePath = new File(sb.getRootPath(), sb.getConfig("htTemplatePath","htdocs"));
 
             // create default notifier picture
             if (!((new File(htRootPath, "env/grafics/notifier.gif")).exists())) try {
@@ -304,57 +306,57 @@ public final class yacy {
 
             // set preset accounts/passwords
             String acc;
-            if ((acc = sboard.getConfig("proxyAccount", "")).length() > 0) {
-//              sboard.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
-                sboard.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
-                sboard.setConfig("proxyAccount", "");
+            if ((acc = sb.getConfig("proxyAccount", "")).length() > 0) {
+//              sb.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sb.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sb.setConfig("proxyAccount", "");
             }
-            if ((acc = sboard.getConfig("serverAccount", "")).length() > 0) {
-//              sboard.setConfig("serverAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
-                sboard.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
-                sboard.setConfig("serverAccount", "");
+            if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
+//              sb.setConfig("serverAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sb.setConfig("serverAccount", "");
             }
-            if ((acc = sboard.getConfig("adminAccount", "")).length() > 0) {
-//              sboard.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
-                sboard.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
-                sboard.setConfig("adminAccount", "");
+            if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
+//              sb.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+                sb.setConfig("adminAccount", "");
             }
 
             // fix unsafe old passwords
-            if ((acc = sboard.getConfig("proxyAccountBase64", "")).length() > 0) {
-//              sboard.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
-                sboard.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
-                sboard.setConfig("proxyAccountBase64", "");
+            if ((acc = sb.getConfig("proxyAccountBase64", "")).length() > 0) {
+//              sb.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
+                sb.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+                sb.setConfig("proxyAccountBase64", "");
             }
-            if ((acc = sboard.getConfig("serverAccountBase64", "")).length() > 0) {
-//              sboard.setConfig("serverAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
-                sboard.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
-                sboard.setConfig("serverAccountBase64", "");
+            if ((acc = sb.getConfig("serverAccountBase64", "")).length() > 0) {
+//              sb.setConfig("serverAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
+                sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+                sb.setConfig("serverAccountBase64", "");
             }
-            if ((acc = sboard.getConfig("adminAccountBase64", "")).length() > 0) {
-//              sboard.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
-                sboard.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
-                sboard.setConfig("adminAccountBase64", "");
+            if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
+//              sb.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
+                sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+                sb.setConfig("adminAccountBase64", "");
             }
-            if ((acc = sboard.getConfig("uploadAccountBase64", "")).length() > 0) {
-//              sboard.setConfig("uploadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
-                sboard.setConfig("uploadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
-                sboard.setConfig("uploadAccountBase64", "");
+            if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {
+//              sb.setConfig("uploadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
+                sb.setConfig("uploadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+                sb.setConfig("uploadAccountBase64", "");
             }
-            if ((acc = sboard.getConfig("downloadAccountBase64", "")).length() > 0) {
-//              sboard.setConfig("downloadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
-                sboard.setConfig("downloadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
-                sboard.setConfig("downloadAccountBase64", "");
+            if ((acc = sb.getConfig("downloadAccountBase64", "")).length() > 0) {
+//              sb.setConfig("downloadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
+                sb.setConfig("downloadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+                sb.setConfig("downloadAccountBase64", "");
             }
 
             // start main threads
             try {
-                final httpd protocolHandler = new httpd(sboard, new httpdFileHandler(sboard), new httpdProxyHandler(sboard));
+                final httpd protocolHandler = new httpd(sb, new httpdFileHandler(sb), new httpdProxyHandler(sb));
                 final serverCore server = new serverCore(port,
                         timeout /*control socket timeout in milliseconds*/,
                         true /* block attacks (wrong protocol) */,
                         protocolHandler /*command class*/,
-                        sboard,
+                        sb,
                         30000 /*command max length incl. GET args*/);
                 server.setName("httpd:"+port);
                 server.setPriority(Thread.MAX_PRIORITY);
@@ -362,20 +364,20 @@ public final class yacy {
                     serverLog.logSevere("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
                 } else {
                     // first start the server
-                    sboard.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
+                    sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
                     //server.start();
 
                     // open the browser window
-                    final boolean browserPopUpTrigger = sboard.getConfig("browserPopUpTrigger", "true").equals("true");
+                    final boolean browserPopUpTrigger = sb.getConfig("browserPopUpTrigger", "true").equals("true");
                     if (browserPopUpTrigger) {
-                        final String  browserPopUpPage        = sboard.getConfig("browserPopUpPage", "Status.html");
-                        final String  browserPopUpApplication = sboard.getConfig("browserPopUpApplication", "netscape");
+                        final String  browserPopUpPage        = sb.getConfig("browserPopUpPage", "Status.html");
+                        final String  browserPopUpApplication = sb.getConfig("browserPopUpApplication", "netscape");
                         serverSystem.openBrowser("http://localhost:" + port + "/" + browserPopUpPage, browserPopUpApplication);
                     }
 
                     //Copy the shipped locales into DATA
-                    final File localesPath = new File(sboard.getRootPath(), sboard.getConfig("localesPath", "DATA/LOCALE"));
-                    final File defaultLocalesPath = new File(sboard.getRootPath(), "locales");
+                    final File localesPath = new File(sb.getRootPath(), sb.getConfig("localesPath", "DATA/LOCALE"));
+                    final File defaultLocalesPath = new File(sb.getRootPath(), "locales");
 
                     try{
                         final File[] defaultLocales = defaultLocalesPath.listFiles();
@@ -390,11 +392,11 @@ public final class yacy {
                     }
 
                     //regenerate Locales from Translationlist, if needed
-                    final String lang = sboard.getConfig("htLocaleSelection", "");
+                    final String lang = sb.getConfig("htLocaleSelection", "");
                     if(! lang.equals("") && ! lang.equals("default") ){ //locale is used
                         String currentRev = "";
                         try{
-                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File( sboard.getConfig("htRootPath", "htroot"), "locale/"+lang+"/version" ))));
+                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File( sb.getConfig("htRootPath", "htroot"), "locale/"+lang+"/version" ))));
                             currentRev = br.readLine();
                             br.close();
                         }catch(IOException e){
@@ -402,14 +404,14 @@ public final class yacy {
                         }
 
                         try{ //seperate try, because we want this, even when the File "version2 does not exist.
-                            if(! currentRev.equals(sboard.getConfig("svnRevision", "")) ){ //is this another version?!
-                                final File sourceDir = new File(sboard.getConfig("htRootPath", "htroot"));
+                            if(! currentRev.equals(sb.getConfig("svnRevision", "")) ){ //is this another version?!
+                                final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
                                 final File destDir = new File(sourceDir, "locale/"+lang);
                                 if(translator.translateFiles(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
                               //if(translator.translateFilesRecursive(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html")){ //translate it
                                     //write the new Versionnumber
                                     final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-                                    bw.write(sboard.getConfig("svnRevision", "Error getting Version"));
+                                    bw.write(sb.getConfig("svnRevision", "Error getting Version"));
                                     bw.close();
                                 }
                             }
@@ -421,14 +423,17 @@ public final class yacy {
                     // registering shutdown hook
                     serverLog.logConfig("STARTUP", "Registering Shutdown Hook");
                     final Runtime run = Runtime.getRuntime();
-                    run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sboard));
+                    run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
 
                     // save information about available memory after all initializations
-                    System.gc(); sboard.setConfig("memoryFreeAfterInit", Runtime.getRuntime().freeMemory());
+                    System.gc();
+                    sb.setConfig("memoryFreeAfterInit", Runtime.getRuntime().freeMemory());
+                    sb.setConfig("memoryTotalAfterInit", Runtime.getRuntime().totalMemory());
+                    sb.setConfig("memoryMaxAfterInit", Runtime.getRuntime().maxMemory());
             
                     // wait for server shutdown
                     try {
-                        sboard.waitForShutdown();
+                        sb.waitForShutdown();
                     } catch (Exception e) {
                         serverLog.logSevere("MAIN CONTROL LOOP", "PANIK: " + e.getMessage(),e);
                     }
@@ -449,7 +454,7 @@ public final class yacy {
                         Thread.currentThread().sleep(2000); // wait a while
                     }
                     serverLog.logConfig("SHUTDOWN", "server has terminated");
-                    sboard.close();
+                    sb.close();
                 }
             } catch (Exception e) {
                 serverLog.logSevere("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
@@ -780,14 +785,18 @@ public final class yacy {
     * @param args Given arguments from the command line.
     */
     public static void main(String args[]) {
-        System.gc(); long startupFree = Runtime.getRuntime().freeMemory();
+        System.gc();
+        long startupMemFree  = Runtime.getRuntime().freeMemory(); // the amount of free memory in the Java Virtual Machine
+        long startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
+        long startupMemMax   = Runtime.getRuntime().maxMemory(); // the maximum amount of memory that the Java virtual machine will attempt to use
+
         String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
         //System.out.println("args.length=" + args.length);
         //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
         if ((args.length >= 1) && ((args[0].equals("-startup")) || (args[0].equals("-start")))) {
             // normal start-up of yacy
             if (args.length == 2) applicationRoot= args[1];
-            startup(applicationRoot, startupFree);
+            startup(applicationRoot, startupMemFree, startupMemTotal, startupMemMax);
         } else if ((args.length >= 1) && ((args[0].equals("-shutdown")) || (args[0].equals("-stop")))) {
             // normal shutdown of yacy
             if (args.length == 2) applicationRoot= args[1];
@@ -815,7 +824,7 @@ public final class yacy {
             cleanwordlist(args[1], minlength, maxlength);
         } else {
             if (args.length == 1) applicationRoot= args[0];
-            startup(applicationRoot, startupFree);
+            startup(applicationRoot, startupMemFree, startupMemTotal, startupMemMax);
         }
     }
 }
@@ -825,22 +834,22 @@ public final class yacy {
 * machine shuts down. Signals the plasmaSwitchboard to shut down.
 */
 class shutdownHookThread extends Thread {
-    private plasmaSwitchboard sboard = null;
+    private plasmaSwitchboard sb = null;
     private Thread mainThread = null;
 
-    public shutdownHookThread(Thread mainThread, plasmaSwitchboard sboard) {
+    public shutdownHookThread(Thread mainThread, plasmaSwitchboard sb) {
         super();
-        this.sboard = sboard;
+        this.sb = sb;
         this.mainThread = mainThread;
     }
 
     public void run() {
         try {
-            if (!this.sboard.isTerminated()) {
+            if (!this.sb.isTerminated()) {
                 serverLog.logConfig("SHUTDOWN","Shutdown via shutdown hook.");
 
                 // sending the yacy main thread a shutdown signal
-                this.sboard.terminate();
+                this.sb.terminate();
 
                 // waiting for the yacy thread to finish execution
                 this.mainThread.join();

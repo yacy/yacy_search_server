@@ -85,10 +85,22 @@ public class PerformanceMemory_p {
         long memoryFreeNow = Runtime.getRuntime().freeMemory();
         long memoryFreeAfterInit = Long.parseLong(sb.getConfig("memoryFreeAfterInit", "0"));
         long memoryFreeAfterStartup = Long.parseLong(sb.getConfig("memoryFreeAfterStartup", "0"));
+        long memoryTotalNow = Runtime.getRuntime().totalMemory();
+        long memoryTotalAfterInit = Long.parseLong(sb.getConfig("memoryTotalAfterInit", "0"));
+        long memoryTotalAfterStartup = Long.parseLong(sb.getConfig("memoryTotalAfterStartup", "0"));
+        long memoryMaxNow = Runtime.getRuntime().maxMemory();
+        long memoryMaxAfterInit = Long.parseLong(sb.getConfig("memoryMaxAfterInit", "0"));
+        long memoryMaxAfterStartup = Long.parseLong(sb.getConfig("memoryMaxAfterStartup", "0"));
         
         prop.put("memoryFreeNow", memoryFreeNow);
         prop.put("memoryFreeAfterInit", memoryFreeAfterInit);
         prop.put("memoryFreeAfterStartup", memoryFreeAfterStartup);
+        prop.put("memoryTotalNow", memoryTotalNow);
+        prop.put("memoryTotalAfterInit", memoryTotalAfterInit);
+        prop.put("memoryTotalAfterStartup", memoryTotalAfterStartup);
+        prop.put("memoryMaxNow", memoryMaxNow);
+        prop.put("memoryMaxAfterInit", memoryMaxAfterInit);
+        prop.put("memoryMaxAfterStartup", memoryMaxAfterStartup);
         
         req = switchboard.wordIndex.size();
         chk = switchboard.wordIndex.assortmentsCacheChunkSizeAvg();
