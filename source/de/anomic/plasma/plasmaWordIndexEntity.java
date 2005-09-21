@@ -49,6 +49,7 @@ import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.kelondro.kelondroException;
 
 public class plasmaWordIndexEntity {
 
@@ -237,18 +238,29 @@ public class plasmaWordIndexEntity {
     public class dbenum implements Enumeration {
 	Iterator i;
 	public dbenum(boolean up) {
-	    i = theIndex.nodeIterator(up, false);
+            try {
+                i = theIndex.nodeIterator(up, false);
+            } catch (kelondroException e) {
+                e.printStackTrace();
+                theIndex.file().delete();
+                i = null;
+            }
 	}
 	public boolean hasMoreElements() {
-	    return i.hasNext();
+	    return (i != null) && (i.hasNext());
 	}
 	public Object nextElement() {
+            if (i == null) return null;
 	    try {
 		byte[][] n = ((kelondroRecords.Node) i.next()).getValues();
 		return new plasmaWordIndexEntry(new String(n[0]), new String(n[1]));
 	    } catch (IOException e) {
+                i = null;
 		throw new RuntimeException("dbenum: " + e.getMessage());
-	    }
+	    } catch (kelondroException e) {
+                i = null;
+                throw new RuntimeException("dbenum: " + e.getMessage());
+            }
 	}
     }
     public class tmpenum implements Enumeration {

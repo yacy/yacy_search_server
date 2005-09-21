@@ -333,6 +333,11 @@ public class kelondroRecords {
         this.XcacheStartup = System.currentTimeMillis();
     }
     
+    public File file() {
+        if (filename == null) return null;
+        return new File(filename);
+    }
+    
     private int cacheChunkSize(boolean cacheControl) {
         return this.headchunksize + element_in_cache + ((cacheControl) ? cache_control_entry : 0);
     }
