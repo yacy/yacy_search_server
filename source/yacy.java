@@ -165,7 +165,7 @@ public final class yacy {
     * @param homePath Root-path where all information is to be found.
     * @param startupFree free memory at startup time, to be used later for statistics
     */
-    private static void startup(String homePath, long startupMemFree, long startupMemTotal, long startupMemMax) {
+    private static void startup(String homePath, long startupMemFree, long startupMemTotal) {
         long startup = yacyCore.universalTime();
 
         try {
@@ -203,7 +203,6 @@ public final class yacy {
             // save information about available memory at startup time
             sb.setConfig("memoryFreeAfterStartup", startupMemFree);
             sb.setConfig("memoryTotalAfterStartup", startupMemTotal);
-            sb.setConfig("memoryMaxAfterStartup", startupMemMax);
             
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
@@ -426,11 +425,12 @@ public final class yacy {
                     run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
 
                     // save information about available memory after all initializations
+                    sb.setConfig("memoryFreeAfterInitBGC", Runtime.getRuntime().freeMemory());
+                    sb.setConfig("memoryTotalAfterInitBGC", Runtime.getRuntime().totalMemory());
                     System.gc();
-                    sb.setConfig("memoryFreeAfterInit", Runtime.getRuntime().freeMemory());
-                    sb.setConfig("memoryTotalAfterInit", Runtime.getRuntime().totalMemory());
-                    sb.setConfig("memoryMaxAfterInit", Runtime.getRuntime().maxMemory());
-            
+                    sb.setConfig("memoryFreeAfterInitAGC", Runtime.getRuntime().freeMemory());
+                    sb.setConfig("memoryTotalAfterInitAGC", Runtime.getRuntime().totalMemory());
+                    
                     // wait for server shutdown
                     try {
                         sb.waitForShutdown();
@@ -788,15 +788,14 @@ public final class yacy {
         System.gc();
         long startupMemFree  = Runtime.getRuntime().freeMemory(); // the amount of free memory in the Java Virtual Machine
         long startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
-        long startupMemMax   = Runtime.getRuntime().maxMemory(); // the maximum amount of memory that the Java virtual machine will attempt to use
-
+        
         String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
         //System.out.println("args.length=" + args.length);
         //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
         if ((args.length >= 1) && ((args[0].equals("-startup")) || (args[0].equals("-start")))) {
             // normal start-up of yacy
             if (args.length == 2) applicationRoot= args[1];
-            startup(applicationRoot, startupMemFree, startupMemTotal, startupMemMax);
+            startup(applicationRoot, startupMemFree, startupMemTotal);
         } else if ((args.length >= 1) && ((args[0].equals("-shutdown")) || (args[0].equals("-stop")))) {
             // normal shutdown of yacy
             if (args.length == 2) applicationRoot= args[1];
@@ -824,7 +823,7 @@ public final class yacy {
             cleanwordlist(args[1], minlength, maxlength);
         } else {
             if (args.length == 1) applicationRoot= args[0];
-            startup(applicationRoot, startupMemFree, startupMemTotal, startupMemMax);
+            startup(applicationRoot, startupMemFree, startupMemTotal);
         }
     }
 }

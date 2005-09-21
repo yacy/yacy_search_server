@@ -12,32 +12,44 @@
 
 
 <p>
-<div class=small><b>Available Memory:</b></div>
+<div class=small><b>Memory Usage:</b></div>
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader" valign="bottom">
-<td class="small">Type</td>
-<td class="small">After Startup</td>
-<td class="small">After Initializations</td>
-<td class="small">Now</td>
-</tr>
-
-<tr class="TableCellDark">
-<td class="TableHeader" align="left">Free</td>
-<td class="small" align="right">#[memoryFreeAfterStartup]# bytes</td>
-<td class="small" align="right">#[memoryFreeAfterInit]# bytes</td>
-<td class="small" align="right">#[memoryFreeNow]# bytes</td>
-</tr>
-<tr class="TableCellDark">
-<td class="TableHeader" align="left">Total</td>
-<td class="small" align="right">#[memoryTotalAfterStartup]# bytes</td>
-<td class="small" align="right">#[memoryTotalAfterInit]# bytes</td>
-<td class="small" align="right">#[memoryTotalNow]# bytes</td>
+<td class="small">&nbsp;<br>Type</td>
+<td class="small">After Startup<br>&nbsp;</td>
+<td class="small">After Initializations<br>before GC</td>
+<td class="small">After Initializations<br>after GC</td>
+<td class="small">Now<br>&nbsp;</td>
+<td class="small">Description<br>&nbsp;</td>
 </tr>
 <tr class="TableCellDark">
 <td class="TableHeader" align="left">Max</td>
-<td class="small" align="right">#[memoryMaxAfterStartup]# bytes</td>
-<td class="small" align="right">#[memoryMaxAfterInit]# bytes</td>
-<td class="small" align="right">#[memoryMaxNow]# bytes</td>
+<td class="small" align="center" colspan="4">#[memoryMax]# MByte</td>
+<td class="small" align="left">maximum memory that the JVM will attempt to use</td>
+</tr>
+<tr class="TableCellDark">
+<td class="TableHeader" align="left">Total</td>
+<td class="small" align="right">#[memoryTotalAfterStartup]# KByte</td>
+<td class="small" align="right">#[memoryTotalAfterInitBGC]# KByte</td>
+<td class="small" align="right">#[memoryTotalAfterInitAGC]# KByte</td>
+<td class="small" align="right">#[memoryTotalNow]# MByte</td>
+<td class="small" align="left">total memory taken from the OS</td>
+</tr>
+<tr class="TableCellDark">
+<td class="TableHeader" align="left">Free</td>
+<td class="small" align="right">#[memoryFreeAfterStartup]# KByte</td>
+<td class="small" align="right">#[memoryFreeAfterInitBGC]# KByte</td>
+<td class="small" align="right">#[memoryFreeAfterInitAGC]# KByte</td>
+<td class="small" align="right">#[memoryFreeNow]# MByte</td>
+<td class="small" align="left">free memory in the JVM within total amount</td>
+</tr>
+<tr class="TableCellDark">
+<td class="TableHeader" align="left">Used</td>
+<td class="small" align="right">#[memoryUsedAfterStartup]# KByte</td>
+<td class="small" align="right">#[memoryUsedAfterInitBGC]# KByte</td>
+<td class="small" align="right">#[memoryUsedAfterInitAGC]# KByte</td>
+<td class="small" align="right">#[memoryUsedNow]# MByte</td>
+<td class="small" align="left">used memory in the JVM within total amount</td>
 </tr>
 </table>
 </p>
@@ -47,18 +59,23 @@
 <table border="0" cellpadding="2" cellspacing="1">
 <form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
 <tr class="TableHeader" valign="bottom">
-<td class="small">Database<br></td>
-<td class="small">Chunk Size<br>(bytes)</td>
-<td class="small">#Needed Slots<br>(=&nbsp;DB&nbsp;Size)</td>
-<td class="small">#Empty Slots<br>&nbsp;</td>
-<td class="small">#Used Slots<br>High Priority</td>
-<td class="small">#Used Slots<br>Medium Priority</td>
-<td class="small">#Used Slots<br>Low Priority</td>
-<td class="small">Used<br>Size</td>
-<td class="small">Assigned<br>Max-Size</td>
-<td class="small">Recommended<br>Max-Size</td>
-<td class="small">Optimum<br>Max-Size</td>
-<td class="small">Description<br>&nbsp;</td>
+<td class="small" rowspan="2">Database<br>&nbsp;</td>
+<td class="small" rowspan="2">Chunk Size<br>(bytes)</td>
+<td class="small" colspan="5">#Slots</td>
+<td class="small" colspan="4">Memory Occupation (KBytes)</td>
+<td class="small" rowspan="2">Description<br>&nbsp;</td>
+</tr>
+
+<tr class="TableHeader" valign="bottom">
+<td class="small">Needed<br>(=&nbsp;DB&nbsp;Size)</td>
+<td class="small">Empty<br>&nbsp;</td>
+<td class="small">Used<br>High Prio</td>
+<td class="small">Used<br>Medium Prio</td>
+<td class="small">Used<br>Low Prio</td>
+<td class="small">Used Now</td>
+<td class="small">Assigned Max</td>
+<td class="small">Good Max</td>
+<td class="small">Best Max</td>
 </tr>
 
 <tr class="TableCellDark">
@@ -70,7 +87,7 @@
 <td class="small" align="right">#[slmedRWI]#</td>
 <td class="small" align="right">#[sllowRWI]#</td>
 <td class="small" align="right">#[usedRWI]#</td>
-<td class="small" align="right"><input name="ramCacheRWI" type="text" align="right" size="8" maxlength="9" value="#[ramCacheRWI]#"> bytes</td>
+<td class="small" align="right"><input name="ramCacheRWI" type="text" align="right" size="5" maxlength="6" value="#[ramCacheRWI]#"></td>
 <td class="small" align="right">#[goodRWI]#</td>
 <td class="small" align="right">#[bestRWI]#</td>
 <td class="small" align="left">The Assortment Cluster stores most of the page indexes.
@@ -87,7 +104,7 @@ cache will speed up crawls with a depth > 3.</td>
 <td class="small" align="right">#[slmedHTTP]#</td>
 <td class="small" align="right">#[sllowHTTP]#</td>
 <td class="small" align="right">#[usedHTTP]#</td>
-<td class="small" align="right"><input name="ramCacheHTTP" type="text" align="right" size="8" maxlength="9" value="#[ramCacheHTTP]#"> bytes</td>
+<td class="small" align="right"><input name="ramCacheHTTP" type="text" align="right" size="5" maxlength="6" value="#[ramCacheHTTP]#"></td>
 <td class="small" align="right">#[goodHTTP]#</td>
 <td class="small" align="right">#[bestHTTP]#</td>
 <td class="small" align="left">The Response Header database stores the HTTP heades that other servers send when YaCy retrieves web pages
@@ -104,7 +121,7 @@ Increasing this cache will be most important for a fast proxy mode.</td>
 <td class="small" align="right">#[slmedLURL]#</td>
 <td class="small" align="right">#[sllowLURL]#</td>
 <td class="small" align="right">#[usedLURL]#</td>
-<td class="small" align="right"><input name="ramCacheLURL" type="text" align="right" size="8" maxlength="9" value="#[ramCacheLURL]#"> bytes</td>
+<td class="small" align="right"><input name="ramCacheLURL" type="text" align="right" size="5" maxlength="6" value="#[ramCacheLURL]#"></td>
 <td class="small" align="right">#[goodLURL]#</td>
 <td class="small" align="right">#[bestLURL]#</td>
 <td class="small" align="left">This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.
@@ -120,7 +137,7 @@ This cache is very important for a fast search process. Increasing the cache siz
 <td class="small" align="right">#[slmedNURL]#</td>
 <td class="small" align="right">#[sllowNURL]#</td>
 <td class="small" align="right">#[usedNURL]#</td>
-<td class="small" align="right"><input name="ramCacheNURL" type="text" align="right" size="8" maxlength="9" value="#[ramCacheNURL]#"> bytes</td>
+<td class="small" align="right"><input name="ramCacheNURL" type="text" align="right" size="5" maxlength="6" value="#[ramCacheNURL]#"></td>
 <td class="small" align="right">#[goodNURL]#</td>
 <td class="small" align="right">#[bestNURL]#</td>
 <td class="small" align="left">A noticed URL is one that was discovered during crawling but was not loaded yet.
@@ -136,7 +153,7 @@ Increasing the cache size will result in faster double-check during URL recognit
 <td class="small" align="right">#[slmedEURL]#</td>
 <td class="small" align="right">#[sllowEURL]#</td>
 <td class="small" align="right">#[usedEURL]#</td>
-<td class="small" align="right"><input name="ramCacheEURL" type="text" align="right" size="8" maxlength="9" value="#[ramCacheEURL]#"> bytes</td>
+<td class="small" align="right"><input name="ramCacheEURL" type="text" align="right" size="5" maxlength="6" value="#[ramCacheEURL]#"></td>
 <td class="small" align="right">#[goodEURL]#</td>
 <td class="small" align="right">#[bestEURL]#</td>
 <td class="small" align="left">URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.
@@ -152,7 +169,7 @@ Increasing the cache size will most probably speed up crawling slightly, but not
 <td class="small" align="right">#[slmedDHT]#</td>
 <td class="small" align="right">#[sllowDHT]#</td>
 <td class="small" align="right">#[usedDHT]#</td>
-<td class="small" align="right"><input name="ramCacheDHT" type="text" align="right" size="8" maxlength="9" value="#[ramCacheDHT]#"> bytes</td>
+<td class="small" align="right"><input name="ramCacheDHT" type="text" align="right" size="5" maxlength="6" value="#[ramCacheDHT]#"></td>
 <td class="small" align="right">#[goodDHT]#</td>
 <td class="small" align="right">#[bestDHT]#</td>
 <td class="small" align="left">This is simply the cache for the seed-dbs (active, passive, potential).
@@ -169,7 +186,7 @@ Increasing this cache may speed up many functions, but we need to test this to s
 <td class="small" align="right">#[slmedMessage]#</td>
 <td class="small" align="right">#[sllowMessage]#</td>
 <td class="small" align="right">#[usedMessage]#</td>
-<td class="small" align="right"><input name="ramCacheMessage" type="text" align="right" size="8" maxlength="9" value="#[ramCacheMessage]#"> bytes</td>
+<td class="small" align="right"><input name="ramCacheMessage" type="text" align="right" size="5" maxlength="6" value="#[ramCacheMessage]#"></td>
 <td class="small" align="right">#[goodMessage]#</td>
 <td class="small" align="right">#[bestMessage]#</td>
 <td class="small" align="left">The Message cache for peer-to-peer messages. Less important.</td>
@@ -184,7 +201,7 @@ Increasing this cache may speed up many functions, but we need to test this to s
 <td class="small" align="right">#[slmedWiki]#</td>
 <td class="small" align="right">#[sllowWiki]#</td>
 <td class="small" align="right">#[usedWiki]#</td>
-<td class="small" align="right"><input name="ramCacheWiki" type="text" align="right" size="8" maxlength="9" value="#[ramCacheWiki]#"> bytes</td>
+<td class="small" align="right"><input name="ramCacheWiki" type="text" align="right" size="5" maxlength="6" value="#[ramCacheWiki]#"></td>
 <td class="small" align="right">#[goodWiki]#</td>
 <td class="small" align="right">#[bestWiki]#</td>
 <td class="small" align="left">The YaCy-Wiki uses a database to store its pages.
@@ -201,7 +218,7 @@ Increasing this cache may speed up access to the wiki pages.</td>
 <td class="small" align="right">#[slmedNews]#</td>
 <td class="small" align="right">#[sllowNews]#</td>
 <td class="small" align="right">#[usedNews]#</td>
-<td class="small" align="right"><input name="ramCacheNews" type="text" align="right" size="8" maxlength="9" value="#[ramCacheNews]#"> bytes</td>
+<td class="small" align="right"><input name="ramCacheNews" type="text" align="right" size="5" maxlength="6" value="#[ramCacheNews]#"></td>
 <td class="small" align="right">#[goodNews]#</td>
 <td class="small" align="right">#[bestNews]#</td>
 <td class="small" align="left">The News-DB stores property-lists for news that are included in seeds.

@@ -88,6 +88,7 @@ public interface serverSwitch {
     public Iterator /*of serverThread-Names (String)*/ threadNames();
 
     // the switchboard can be used to set and read properties
+    public void setConfig(String key, long value);
     public void setConfig(String key, String value);
     public String getConfig(String key, String dflt);
     public Iterator configKeys();
