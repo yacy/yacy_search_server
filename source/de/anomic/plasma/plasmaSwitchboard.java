@@ -248,13 +248,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
 
         // read memory amount
-        int ramLURL    = Integer.parseInt(getConfig("ramCacheLURL", "1024")) / 1024;
-        int ramNURL    = Integer.parseInt(getConfig("ramCacheNURL", "1024")) / 1024;
-        int ramEURL    = Integer.parseInt(getConfig("ramCacheEURL", "1024")) / 1024;
-        int ramRWI     = Integer.parseInt(getConfig("ramCacheRWI",  "1024")) / 1024;
-        int ramHTTP    = Integer.parseInt(getConfig("ramCacheHTTP", "1024")) / 1024;
-        int ramMessage = Integer.parseInt(getConfig("ramCacheMessage", "1024")) / 1024;
-        int ramWiki    = Integer.parseInt(getConfig("ramCacheWiki", "1024")) / 1024;
+        int ramLURL    = (int) getConfigLong("ramCacheLURL", 1024) / 1024;
+        int ramNURL    = (int) getConfigLong("ramCacheNURL", 1024) / 1024;
+        int ramEURL    = (int) getConfigLong("ramCacheEURL", 1024) / 1024;
+        int ramRWI     = (int) getConfigLong("ramCacheRWI",  1024) / 1024;
+        int ramHTTP    = (int) getConfigLong("ramCacheHTTP", 1024) / 1024;
+        int ramMessage = (int) getConfigLong("ramCacheMessage", 1024) / 1024;
+        int ramWiki    = (int) getConfigLong("ramCacheWiki", 1024) / 1024;
         this.log.logConfig("LURL    Cache memory = " + ppRamString(ramLURL));
         this.log.logConfig("NURL    Cache memory = " + ppRamString(ramNURL));
         this.log.logConfig("EURL    Cache memory = " + ppRamString(ramEURL));

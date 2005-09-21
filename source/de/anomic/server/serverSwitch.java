@@ -91,6 +91,7 @@ public interface serverSwitch {
     public void setConfig(String key, long value);
     public void setConfig(String key, String value);
     public String getConfig(String key, String dflt);
+    public long getConfigLong(String key, long dflt);
     public Iterator configKeys();
 
     // the switchboard also shall maintain a job list

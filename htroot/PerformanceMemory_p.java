@@ -61,118 +61,147 @@ public class PerformanceMemory_p {
     
     private static final int KB = 1024;
     private static final int MB = 1024 * KB;
-    
+    private static Map defaultSettings = null;
+        
     private static int[] slt;
     private static int   req,chk,usd,bst,god;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
-        // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
-        serverObjects prop = new serverObjects();
-        File defaultSettingsFile = new File(switchboard.getRootPath(), "yacy.init");
-        Map defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
+    private static long usedTotal, currTotal, dfltTotal, goodTotal, bestTotal;
         
-        if ((post != null) && (post.containsKey("submitcache"))) {
-            sb.setConfig("ramCacheRWI", Long.parseLong(post.get("ramCacheRWI", "0")) * KB);
-            sb.setConfig("ramCacheHTTP", Long.parseLong(post.get("ramCacheHTTP", "0")) * KB);
-            sb.setConfig("ramCacheLURL", Long.parseLong(post.get("ramCacheLURL", "0")) * KB);
-            sb.setConfig("ramCacheNURL", Long.parseLong(post.get("ramCacheNURL", "0")) * KB);
-            sb.setConfig("ramCacheEURL", Long.parseLong(post.get("ramCacheEURL", "0")) * KB);
-            sb.setConfig("ramCacheDHT", Long.parseLong(post.get("ramCacheDHT", "0")) * KB);
-            sb.setConfig("ramCacheMessage", Long.parseLong(post.get("ramCacheMessage", "0")) * KB);
-            sb.setConfig("ramCacheWiki", Long.parseLong(post.get("ramCacheWiki", "0")) * KB);
-            sb.setConfig("ramCacheNews", Long.parseLong(post.get("ramCacheNews", "0")) * KB);
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        // return variable that accumulates replacements
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        serverObjects prop = new serverObjects();
+        if (defaultSettings == null) {
+            defaultSettings = serverFileUtils.loadHashMap(new File(env.getRootPath(), "yacy.init"));
+        }
+        prop.put("gc", 0);
+        String set = "";
+        if (post != null) {
+            if (post.containsKey("setCustom")) {
+                env.setConfig("ramCacheRWI", Long.parseLong(post.get("ramCacheRWI", "0")) * KB);
+                env.setConfig("ramCacheHTTP", Long.parseLong(post.get("ramCacheHTTP", "0")) * KB);
+                env.setConfig("ramCacheLURL", Long.parseLong(post.get("ramCacheLURL", "0")) * KB);
+                env.setConfig("ramCacheNURL", Long.parseLong(post.get("ramCacheNURL", "0")) * KB);
+                env.setConfig("ramCacheEURL", Long.parseLong(post.get("ramCacheEURL", "0")) * KB);
+                env.setConfig("ramCacheDHT", Long.parseLong(post.get("ramCacheDHT", "0")) * KB);
+                env.setConfig("ramCacheMessage", Long.parseLong(post.get("ramCacheMessage", "0")) * KB);
+                env.setConfig("ramCacheWiki", Long.parseLong(post.get("ramCacheWiki", "0")) * KB);
+                env.setConfig("ramCacheNews", Long.parseLong(post.get("ramCacheNews", "0")) * KB);
+            }
+            if (post.containsKey("setDefault")) {
+                env.setConfig("ramCacheRWI", Long.parseLong((String) defaultSettings.get("ramCacheRWI")));
+                env.setConfig("ramCacheHTTP", Long.parseLong((String) defaultSettings.get("ramCacheHTTP")));
+                env.setConfig("ramCacheLURL", Long.parseLong((String) defaultSettings.get("ramCacheLURL")));
+                env.setConfig("ramCacheNURL", Long.parseLong((String) defaultSettings.get("ramCacheNURL")));
+                env.setConfig("ramCacheEURL", Long.parseLong((String) defaultSettings.get("ramCacheEURL")));
+                env.setConfig("ramCacheDHT", Long.parseLong((String) defaultSettings.get("ramCacheDHT")));
+                env.setConfig("ramCacheMessage", Long.parseLong((String) defaultSettings.get("ramCacheMessage")));
+                env.setConfig("ramCacheWiki", Long.parseLong((String) defaultSettings.get("ramCacheWiki")));
+                env.setConfig("ramCacheNews", Long.parseLong((String) defaultSettings.get("ramCacheNews")));
+            }
+            if (post.containsKey("setGood")) set = "setGood";
+            if (post.containsKey("setBest")) set = "setBest";
+            if (post.containsKey("gc")) {
+                Runtime.getRuntime().gc();
+                prop.put("gc", 1);
+            }
         }
         
         long memoryFreeNow = Runtime.getRuntime().freeMemory();
-        long memoryFreeAfterInitBGC = Long.parseLong(sb.getConfig("memoryFreeAfterInitBGC", "0"));
-        long memoryFreeAfterInitAGC = Long.parseLong(sb.getConfig("memoryFreeAfterInitAGC", "0"));
-        long memoryFreeAfterStartup = Long.parseLong(sb.getConfig("memoryFreeAfterStartup", "0"));
+        long memoryFreeAfterInitBGC = Long.parseLong(env.getConfig("memoryFreeAfterInitBGC", "0"));
+        long memoryFreeAfterInitAGC = Long.parseLong(env.getConfig("memoryFreeAfterInitAGC", "0"));
+        long memoryFreeAfterStartup = Long.parseLong(env.getConfig("memoryFreeAfterStartup", "0"));
         long memoryTotalNow = Runtime.getRuntime().totalMemory();
-        long memoryTotalAfterInitBGC = Long.parseLong(sb.getConfig("memoryTotalAfterInitBGC", "0"));
-        long memoryTotalAfterInitAGC = Long.parseLong(sb.getConfig("memoryTotalAfterInitAGC", "0"));
-        long memoryTotalAfterStartup = Long.parseLong(sb.getConfig("memoryTotalAfterStartup", "0"));
+        long memoryTotalAfterInitBGC = Long.parseLong(env.getConfig("memoryTotalAfterInitBGC", "0"));
+        long memoryTotalAfterInitAGC = Long.parseLong(env.getConfig("memoryTotalAfterInitAGC", "0"));
+        long memoryTotalAfterStartup = Long.parseLong(env.getConfig("memoryTotalAfterStartup", "0"));
         long memoryMax = Runtime.getRuntime().maxMemory();
         
-        prop.put("memoryUsedAfterStartup", (memoryTotalAfterStartup - memoryFreeAfterStartup) / KB);
-        prop.put("memoryUsedAfterInitBGC", (memoryTotalAfterInitBGC - memoryFreeAfterInitBGC) / KB);
-        prop.put("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / KB);
-        prop.put("memoryUsedNow", (memoryTotalNow - memoryFreeNow) / MB);
-        prop.put("memoryFreeAfterStartup", memoryFreeAfterStartup / KB);
-        prop.put("memoryFreeAfterInitBGC", memoryFreeAfterInitBGC / KB);
-        prop.put("memoryFreeAfterInitAGC", memoryFreeAfterInitAGC / KB);
-        prop.put("memoryFreeNow", memoryFreeNow / MB);
+        prop.put("memoryMax", memoryMax / MB);
+        prop.put("memoryAvailAfterStartup", (memoryMax - memoryTotalAfterStartup + memoryFreeAfterStartup) / KB);
+        prop.put("memoryAvailAfterInitBGC", (memoryMax - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / KB);
+        prop.put("memoryAvailAfterInitAGC", (memoryMax - memoryTotalAfterInitAGC + memoryFreeAfterInitAGC) / KB);
+        prop.put("memoryAvailNow", (memoryMax - memoryTotalNow + memoryFreeNow) / MB);
         prop.put("memoryTotalAfterStartup", memoryTotalAfterStartup / KB);
         prop.put("memoryTotalAfterInitBGC", memoryTotalAfterInitBGC / KB);
         prop.put("memoryTotalAfterInitAGC", memoryTotalAfterInitAGC / KB);
         prop.put("memoryTotalNow", memoryTotalNow / MB);
-        prop.put("memoryMax", memoryMax / MB);
+        prop.put("memoryFreeAfterStartup", memoryFreeAfterStartup / KB);
+        prop.put("memoryFreeAfterInitBGC", memoryFreeAfterInitBGC / KB);
+        prop.put("memoryFreeAfterInitAGC", memoryFreeAfterInitAGC / KB);
+        prop.put("memoryFreeNow", memoryFreeNow / MB);
+        prop.put("memoryUsedAfterStartup", (memoryTotalAfterStartup - memoryFreeAfterStartup) / KB);
+        prop.put("memoryUsedAfterInitBGC", (memoryTotalAfterInitBGC - memoryFreeAfterInitBGC) / KB);
+        prop.put("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / KB);
+        prop.put("memoryUsedNow", (memoryTotalNow - memoryFreeNow) / MB);
         
-        req = switchboard.wordIndex.size();
-        chk = switchboard.wordIndex.assortmentsCacheChunkSizeAvg();
-        slt = switchboard.wordIndex.assortmentsCacheFillStatusCml();
-        calc(); putprop(prop, "RWI");
-        prop.put("ramCacheRWI", Long.parseLong(sb.getConfig("ramCacheRWI", "0")) / KB);
+        usedTotal = 0;
+        currTotal = 0;
+        dfltTotal = 0;
+        goodTotal = 0;
+        bestTotal = 0;
+    
+        req = sb.wordIndex.size();
+        chk = sb.wordIndex.assortmentsCacheChunkSizeAvg();
+        slt = sb.wordIndex.assortmentsCacheFillStatusCml();
+        putprop(prop, env, "RWI", set);
         
-        req = switchboard.cacheManager.dbSize();
-        chk = switchboard.cacheManager.dbCacheChunkSize();
-        slt = switchboard.cacheManager.dbCacheFillStatus();
-        calc(); putprop(prop, "HTTP");
-        prop.put("ramCacheHTTP", Long.parseLong(sb.getConfig("ramCacheHTTP", "0")) / KB);
+        req = sb.cacheManager.dbSize();
+        chk = sb.cacheManager.dbCacheChunkSize();
+        slt = sb.cacheManager.dbCacheFillStatus();
+        putprop(prop, env, "HTTP", set);
         
-        req = switchboard.urlPool.loadedURL.urlHashCache.size();
-        chk = switchboard.urlPool.loadedURL.urlHashCache.cacheChunkSize();
-        slt = switchboard.urlPool.loadedURL.urlHashCache.cacheFillStatus();
-        calc(); putprop(prop, "LURL");
-        prop.put("ramCacheLURL", Long.parseLong(sb.getConfig("ramCacheLURL", "0")) / KB);
+        req = sb.urlPool.loadedURL.urlHashCache.size();
+        chk = sb.urlPool.loadedURL.urlHashCache.cacheChunkSize();
+        slt = sb.urlPool.loadedURL.urlHashCache.cacheFillStatus();
+        putprop(prop, env, "LURL", set);
         
-        req = switchboard.urlPool.noticeURL.urlHashCache.size();
-        chk = switchboard.urlPool.noticeURL.urlHashCache.cacheChunkSize();
-        slt = switchboard.urlPool.noticeURL.urlHashCache.cacheFillStatus();
-        calc(); putprop(prop, "NURL");
-        prop.put("ramCacheNURL", Long.parseLong(sb.getConfig("ramCacheNURL", "0")) / KB);
+        req = sb.urlPool.noticeURL.urlHashCache.size();
+        chk = sb.urlPool.noticeURL.urlHashCache.cacheChunkSize();
+        slt = sb.urlPool.noticeURL.urlHashCache.cacheFillStatus();
+        putprop(prop, env, "NURL", set);
         
-        req = switchboard.urlPool.errorURL.urlHashCache.size();
-        chk = switchboard.urlPool.errorURL.urlHashCache.cacheChunkSize();
-        slt = switchboard.urlPool.errorURL.urlHashCache.cacheFillStatus();
-        calc(); putprop(prop, "EURL");
-        prop.put("ramCacheEURL", Long.parseLong(sb.getConfig("ramCacheEURL", "0")) / KB);
+        req = sb.urlPool.errorURL.urlHashCache.size();
+        chk = sb.urlPool.errorURL.urlHashCache.cacheChunkSize();
+        slt = sb.urlPool.errorURL.urlHashCache.cacheFillStatus();
+        putprop(prop, env, "EURL", set);
         
         req = yacyCore.seedDB.sizeConnected() + yacyCore.seedDB.sizeDisconnected() + yacyCore.seedDB.sizePotential();
         chk = yacyCore.seedDB.dbCacheChunkSize();
         slt = yacyCore.seedDB.dbCacheFillStatus();
-        calc(); putprop(prop, "DHT");
-        prop.put("ramCacheDHT", Long.parseLong(sb.getConfig("ramCacheDHT", "0")) / KB);
+        putprop(prop, env, "DHT", set);
         
-        req = switchboard.messageDB.size();
-        chk = switchboard.messageDB.dbCacheChunkSize();
-        slt = switchboard.messageDB.dbCacheFillStatus();
-        calc(); putprop(prop, "Message");
-        prop.put("ramCacheMessage", Long.parseLong(sb.getConfig("ramCacheMessage", "0")) / KB);
+        req = sb.messageDB.size();
+        chk = sb.messageDB.dbCacheChunkSize();
+        slt = sb.messageDB.dbCacheFillStatus();
+        putprop(prop, env, "Message", set);
         
-        req = switchboard.wikiDB.sizeOfTwo();
-        chk = switchboard.wikiDB.dbCacheChunkSize();
-        slt = switchboard.wikiDB.dbCacheFillStatus();
-        calc(); putprop(prop, "Wiki");
-        prop.put("ramCacheWiki", Long.parseLong(sb.getConfig("ramCacheWiki", "0")) / KB);
-
+        req = sb.wikiDB.sizeOfTwo();
+        chk = sb.wikiDB.dbCacheChunkSize();
+        slt = sb.wikiDB.dbCacheFillStatus();
+        putprop(prop, env, "Wiki", set);
+        
         req = yacyCore.newsPool.dbSize();
         chk = yacyCore.newsPool.dbCacheChunkSize();
         slt = yacyCore.newsPool.dbCacheFillStatus();
-        calc(); putprop(prop, "News");
-        prop.put("ramCacheNews", Long.parseLong(sb.getConfig("ramCacheNews", "0")) / KB);
-
+        putprop(prop, env, "News", set);
+        
+        prop.put("usedTotal", usedTotal / MB);
+        prop.put("currTotal", currTotal / MB);
+        prop.put("dfltTotal", dfltTotal / MB);
+        prop.put("goodTotal", goodTotal / MB);
+        prop.put("bestTotal", bestTotal / MB);
         // return rewrite values for templates
         return prop;
     }
     
-    private static void calc() {
+    private static void putprop(serverObjects prop, serverSwitch env, String db, String set) {
         usd = chk * (slt[1]+slt[2]+slt[3]);
         bst = (((chk * req) >> 10) + 1) << 10;
         god = (((bst / (1+slt[1]+slt[2]+slt[3]) * slt[1]) >> 10) + 1) << 10;
-    }
-    
-    private static void putprop(serverObjects prop, String db) {
+        if (set.equals("setGood")) env.setConfig("ramCache" + db, god);
+        if (set.equals("setBest")) env.setConfig("ramCache" + db, bst);
         prop.put("chunk" + db, chk);
         prop.put("slreq" + db, req);
         prop.put("slemp" + db, slt[0]);
@@ -182,5 +211,12 @@ public class PerformanceMemory_p {
         prop.put("used" + db, usd / KB);
         prop.put("good" + db, god / KB);
         prop.put("best" + db, bst / KB);
+        prop.put("dflt" + db, Long.parseLong((String) defaultSettings.get("ramCache" + db)) / KB);
+        prop.put("ramCache" + db, Long.parseLong(env.getConfig("ramCache" + db, "0")) / KB);
+        usedTotal += usd;
+        currTotal += Long.parseLong(env.getConfig("ramCache" + db, "0"));
+        dfltTotal += Long.parseLong((String) defaultSettings.get("ramCache" + db));
+        goodTotal += god;
+        bestTotal += bst;
     }
 }

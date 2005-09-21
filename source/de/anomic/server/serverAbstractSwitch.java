@@ -188,6 +188,14 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	// return value
 	if (s == null) return dflt; else return (String)s;
     }
+    
+    public long getConfigLong(String key, long dflt) {
+        try {
+            return Long.parseLong(getConfig(key, Long.toString(dflt)));
+        } catch (NumberFormatException e) {
+            return dflt;
+        }
+    }
 
     public Iterator configKeys() {
 	return configProps.keySet().iterator();
