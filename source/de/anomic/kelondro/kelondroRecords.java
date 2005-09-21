@@ -83,6 +83,10 @@ public class kelondroRecords {
     public  static final long memBlock =   500000; // do not fill cache further if the amount of available memory is less that this
     public  static final long memKcolb = 10000000; // if the amount of available memory is greater than this, do not use cache size to block, simply use memory
     
+    // memory calculation
+    private static final int element_in_cache = 52;
+    private static final int cache_control_entry = 96;
+    
     // caching flags
     protected static final int CP_NONE   = -1; // cache priority none; entry shall not be cached
     protected static final int CP_LOW    =  0; // cache priority low; entry may be cached
@@ -330,7 +334,7 @@ public class kelondroRecords {
     }
     
     private int cacheChunkSize(boolean cacheControl) {
-        return this.headchunksize + 14 + ((cacheControl) ? 16 : 0);
+        return this.headchunksize + element_in_cache + ((cacheControl) ? cache_control_entry : 0);
     }
     
     public int cacheChunkSize() {
