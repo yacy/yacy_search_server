@@ -74,7 +74,7 @@ public class Status {
         // update seed info
         yacyCore.peerActions.updateMySeed();
         
-        if (header.get("IS_ADMIN","false").equals("true")) {
+        if (((plasmaSwitchboard) env).adminAuthenticated(header) >= 2) {
             prop.put("privateStatusTable","Status_p.inc");
         } else {
             prop.put("privateStatusTable","");

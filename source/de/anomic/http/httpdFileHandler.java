@@ -260,16 +260,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         // check permission/granted access
         String authorization = (String) requestHeader.get(httpHeader.AUTHORIZATION);
         String adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "");
-		if( authorization != null && adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6))) ){
-            requestHeader.put("IS_ADMIN", "true");
-		}else{
-			//WARNING: This line ist very important, do not remove!
-			//It resets the virtual header to false, so nobody can provide
-			//a real header IS_ADMIN: true to gain adminrights
-            requestHeader.put("IS_ADMIN", "false");
-        }
-
-        if ((path.endsWith("_p.html")) && (adminAccountBase64MD5.length() != 0)) {
+	if ((path.endsWith("_p.html")) && (adminAccountBase64MD5.length() != 0)) {
             // authentication required
             if (authorization == null) {
                 // no authorization given in response. Ask for that
@@ -277,8 +268,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                 return;
-            } else if (requestHeader.get("IS_ADMIN", "false") == "true") {
-                // remove brute-force flag
+            } else if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6)))) {
+                // Authentication successfull. remove brute-force flag
                 serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
             } else {
                 // a wrong authentication was given. Ask again
