@@ -217,7 +217,14 @@ public class kelondroTree extends kelondroRecords implements Comparator {
                         found = false;
                         return;
                     }
-		    otherkey = new String(thenode.getKey());
+                    if (thenode == null) {
+                        throw new kelondroException(filename, "kelondroTree.searchproc: thenode==null");
+                    }
+                    try {
+                        otherkey = new String(thenode.getKey());
+                    } catch (NullPointerException e) {
+                        throw new kelondroException(filename, "kelondroTree.searchproc: nullpointer" + e.getMessage());
+                    }
 		    if (visitedNodeKeys.containsKey(otherkey)) {
                         // we have loops in the database.
                         // to fix this, all affected nodes must be patched
