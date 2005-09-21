@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 13.06.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -54,19 +57,19 @@ import de.anomic.server.logging.serverLog;
 
 public class yacySearch extends Thread {
 
-    private Set wordhashes;
-    private int count;
-    private boolean global;
-    private plasmaCrawlLURL urlManager;
-    private plasmaSearch searchManager;
-    private plasmaURLPattern blacklist;
-    private plasmaSnippetCache snippetCache;
-    private yacySeed targetPeer;
+    final private Set wordhashes;
+    final private int count;
+    final private boolean global;
+    final private plasmaCrawlLURL urlManager;
+    final private plasmaSearch searchManager;
+    final private plasmaURLPattern blacklist;
+    final private plasmaSnippetCache snippetCache;
+    final private yacySeed targetPeer;
     private int links;
-    private long duetime;
+    final private long duetime;
 
     public yacySearch(Set wordhashes, int count, boolean global, yacySeed targetPeer,
-		      plasmaCrawlLURL urlManager, plasmaSearch searchManager, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, long duetime) {
+                      plasmaCrawlLURL urlManager, plasmaSearch searchManager, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, long duetime) {
         super("yacySearch_" + targetPeer.getName());
         this.wordhashes = wordhashes;
         this.count = count;
@@ -88,100 +91,100 @@ public class yacySearch extends Thread {
             yacyCore.seedDB.mySeed.incRU(links);
         }
     }
-    
+
     public static String set2string(Set hashes) {
         String wh = "";
-        Iterator i = hashes.iterator();
-        while (i.hasNext()) wh = wh + (String) i.next();
+        final Iterator iter = hashes.iterator();
+        while (iter.hasNext()) { wh = wh + (String) iter.next(); }
         return wh;
     }
-    
+
     public int links() {
         return this.links;
     }
 
     private static yacySeed[] selectPeers(Set wordhashes, int seedcount) {
-	// find out a specific number of seeds, that would be relevant for the given word hash(es)
-	// the result is ordered by relevance: [0] is most relevant
-	// the seedcount is the maximum number of wanted results
-	if (yacyCore.seedDB == null) return null;
-	if (seedcount > yacyCore.seedDB.sizeConnected()) seedcount = yacyCore.seedDB.sizeConnected();
+        // find out a specific number of seeds, that would be relevant for the given word hash(es)
+        // the result is ordered by relevance: [0] is most relevant
+        // the seedcount is the maximum number of wanted results
+        if (yacyCore.seedDB == null) { return null; }
+        if (seedcount > yacyCore.seedDB.sizeConnected()) { seedcount = yacyCore.seedDB.sizeConnected(); }
 
         // put in seeds according to dht
-        kelondroMScoreCluster ranking = new kelondroMScoreCluster();
-        HashMap seeds = new HashMap();
+        final kelondroMScoreCluster ranking = new kelondroMScoreCluster();
+        final HashMap seeds = new HashMap();
         yacySeed seed;
-        Enumeration dhtEnum; 
-        Iterator i = wordhashes.iterator();
+        Enumeration dhtEnum;         
         int c;
         String wordhash;
         double distance;
-        while (i.hasNext()) {
-            wordhash = (String) i.next();
+        Iterator iter = wordhashes.iterator();
+        while (iter.hasNext()) {
+            wordhash = (String) iter.next();
             dhtEnum = yacyCore.dhtAgent.getDHTSeeds(true, wordhash);
             c = seedcount;
-            while ((dhtEnum.hasMoreElements()) && (c > 0)) {
+            while (dhtEnum.hasMoreElements() && c > 0) {
                 seed = (yacySeed) dhtEnum.nextElement();
-                if (seed == null) continue;
+                if (seed == null) { continue; }
                 distance = yacyDHTAction.dhtDistance(seed.hash, wordhash);
-                if (distance > 0.9) continue; // catch bug in peer selection
+                if (distance > 0.9) { continue; } // catch bug in peer selection
                 serverLog.logFine("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/" + distance + " for wordhash " + wordhash + ", score " + c);
                 ranking.addScore(seed.hash, c--);
                 seeds.put(seed.hash, seed);
             }
         }
-        
+
         // put in seeds according to size of peer
         dhtEnum = yacyCore.seedDB.seedsSortedConnected(false, "ICount");
         c = seedcount;
         int score;
-        if (c > yacyCore.seedDB.sizeConnected()) c = yacyCore.seedDB.sizeConnected();
-        while ((dhtEnum.hasMoreElements()) && (c > 0)) {
+        if (c > yacyCore.seedDB.sizeConnected()) { c = yacyCore.seedDB.sizeConnected(); }
+        while (dhtEnum.hasMoreElements() && c > 0) {
             seed = (yacySeed) dhtEnum.nextElement();
-            if (seed == null) continue;
+            if (seed == null) { continue; }
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
             serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.get("ICount","") + ", score " + score);
             ranking.addScore(seed.hash, score);
             seeds.put(seed.hash, seed);
             c--;
         }
-        
+
         // evaluate the ranking score and select seeds
-        if (ranking.size() < seedcount) seedcount = ranking.size();
+        if (ranking.size() < seedcount) { seedcount = ranking.size(); }
         yacySeed[] result = new yacySeed[seedcount];
-        Iterator e = ranking.scores(false); // higher are better
         c = 0;
-        while ((e.hasNext()) && (c < result.length)) {
-            seed = (yacySeed) seeds.get((String) e.next());
+        iter = ranking.scores(false); // higher are better
+        while (iter.hasNext() && c < result.length) {
+            seed = (yacySeed) seeds.get((String) iter.next());
             seed.selectscore = c;
             serverLog.logFine("PLASMA", "selectPeers/_lineup_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
             result[c++] = seed;
         }
-            
-	//System.out.println("DEBUG yacySearch.selectPeers = " + seedcount + " seeds:"); for (int i = 0; i < seedcount; i++) System.out.println(" #" + i + ":" + result[i]); // debug
-	return result;
+
+//      System.out.println("DEBUG yacySearch.selectPeers = " + seedcount + " seeds:"); for (int i = 0; i < seedcount; i++) System.out.println(" #" + i + ":" + result[i]); // debug
+        return result;
     }
-    
+
     public static int searchHashes(Set wordhashes, plasmaCrawlLURL urlManager, plasmaSearch searchManager,
-			     int count, int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, long waitingtime) {
+                           int count, int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, long waitingtime) {
         // check own peer status
-        if ((yacyCore.seedDB.mySeed == null) || (yacyCore.seedDB.mySeed.getAddress() == null)) return 0;
-        
+        if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return 0; }
+
         // start delay control
-        long start = System.currentTimeMillis();
-        
+        final long start = System.currentTimeMillis();
+
         // set a duetime for clients
         long duetime = waitingtime - 4000; // subtract network traffic overhead, guessed 4 seconds
-        if (duetime < 1000) duetime = 1000;
-        
+        if (duetime < 1000) { duetime = 1000; }
+
         // prepare seed targets and threads
         //Set wordhashes = plasmaSearch.words2hashes(querywords);
-        yacySeed[] targetPeers = selectPeers(wordhashes, targets);
-        if (targetPeers == null) return 0;
+        final yacySeed[] targetPeers = selectPeers(wordhashes, targets);
+        if (targetPeers == null) { return 0; }
         targets = targetPeers.length;
-        if (targets == 0) return 0;
+        if (targets == 0) { return 0; }
         yacySearch[] searchThreads = new yacySearch[targets];
-        for (int i = 0; i < targets; i++) {
+        for (int i = 0; i < targets; i++) {           
             searchThreads[i]= new yacySearch(wordhashes, count, true, targetPeers[i],
                     urlManager, searchManager, blacklist, snippetCache, duetime);
             searchThreads[i].start();
@@ -200,20 +203,26 @@ public class yacySearch extends Thread {
             c = 0;
             anyIdle = false;
             for (int i = 0; i < targets; i++) {
-                if (searchThreads[i].links() < 0) anyIdle = true; else c = c + searchThreads[i].links();
+                if (searchThreads[i].links() < 0) {
+                    anyIdle = true;
+                } else { 
+                    c = c + searchThreads[i].links();
+                }
             }
             if ((c >= count * 3) && ((System.currentTimeMillis() - start) > (waitingtime * 2 / 3))) {
                 yacyCore.log.logFine("DEBUG yacySearch: c=" + c + ", count=" + count + ", waitingtime=" + waitingtime);
                 break; // we have enough
             }
-            if (c >= count * 5) break;
+            if (c >= count * 5) { break; }
             // wait a little time ..
             try {Thread.currentThread().sleep(100);} catch (InterruptedException e) {}
         }
 
         // collect results
         c = 0;
-        for (int i = 0; i < targets; i++) c = c + ((searchThreads[i].links() > 0) ? searchThreads[i].links() : 0);
+        for (int i = 0; i < targets; i++) {
+            c = c + ((searchThreads[i].links() > 0) ? searchThreads[i].links() : 0);
+        }
         return c;
     }
 
