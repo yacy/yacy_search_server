@@ -50,6 +50,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.server.logging.serverLog;
 
@@ -191,10 +192,19 @@ public final class plasmaWordIndexAssortmentCluster {
         return sizes;
     }
     
-    public int cacheChunkSizeAvg() {
-        int total = 0;
-        for (int i = 0; i < clusterCount; i++) total += assortments[i].cacheChunkSize();
-        return total / clusterCount;
+    public int[] cacheChunkSizeAvg() {
+        int[] i = new int[]{0, 0, 0};
+        int[] a = new int[3];
+        for (int j = 0; j < clusterCount; j++) {
+            a = assortments[j].cacheChunkSize();
+            i[kelondroRecords.CP_LOW]    += a[kelondroRecords.CP_LOW];
+            i[kelondroRecords.CP_MEDIUM] += a[kelondroRecords.CP_MEDIUM];
+            i[kelondroRecords.CP_HIGH]   += a[kelondroRecords.CP_HIGH];
+        }
+        a[kelondroRecords.CP_LOW]    = i[kelondroRecords.CP_LOW] / clusterCount;
+        a[kelondroRecords.CP_MEDIUM] = i[kelondroRecords.CP_MEDIUM] / clusterCount;
+        a[kelondroRecords.CP_HIGH]   = i[kelondroRecords.CP_HIGH] / clusterCount;
+        return a;
     }
     
     public int[] cacheFillStatusCml() {

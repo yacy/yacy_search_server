@@ -257,8 +257,8 @@ public class kelondroStack extends kelondroRecords {
 	Handle h = getHandle(side);
 	if (h == null) return null;
 	if (dist >= size()) return null; // that would exceed the stack
-	while (dist-- > 0) h = getNode(h, null, 0).getOHHandle(dir); // track through elements
-	return getNode(h, null, 0);
+	while (dist-- > 0) h = getNode(h).getOHHandle(dir); // track through elements
+	return getNode(h);
     }
     
 

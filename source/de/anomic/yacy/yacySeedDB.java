@@ -58,6 +58,7 @@ import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroRecords;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSwitch;
@@ -148,8 +149,15 @@ public final class yacySeedDB {
         } catch (IOException e) {}
     }
     
-    public int dbCacheChunkSize() {
-        return (seedActiveDB.cacheChunkSize() + seedPassiveDB.cacheChunkSize() + seedPotentialDB.cacheChunkSize()) / 3;
+    public int[] dbCacheChunkSize() {
+        int[] ac = seedActiveDB.cacheChunkSize();
+        int[] pa = seedPassiveDB.cacheChunkSize();
+        int[] po = seedPotentialDB.cacheChunkSize();
+        int[] i = new int[3];
+        i[kelondroRecords.CP_LOW] = (ac[kelondroRecords.CP_LOW] + pa[kelondroRecords.CP_LOW] + po[kelondroRecords.CP_LOW]) / 3;
+        i[kelondroRecords.CP_MEDIUM] = (ac[kelondroRecords.CP_MEDIUM] + pa[kelondroRecords.CP_MEDIUM] + po[kelondroRecords.CP_MEDIUM]) / 3;
+        i[kelondroRecords.CP_HIGH] = (ac[kelondroRecords.CP_HIGH] + pa[kelondroRecords.CP_HIGH] + po[kelondroRecords.CP_HIGH]) / 3;
+        return i;
     }
     
     public int[] dbCacheFillStatus() {

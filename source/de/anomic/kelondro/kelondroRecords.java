@@ -80,18 +80,17 @@ public class kelondroRecords {
 
     // constants
     private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
-    public  static final long memBlock =   500000; // do not fill cache further if the amount of available memory is less that this
-    public  static final long memKcolb = 10000000; // if the amount of available memory is greater than this, do not use cache size to block, simply use memory
+    private static final long memBlock = 500000; // do not fill cache further if the amount of available memory is less that this
     
     // memory calculation
     private static final int element_in_cache = 52;
     private static final int cache_control_entry = 96;
     
     // caching flags
-    protected static final int CP_NONE   = -1; // cache priority none; entry shall not be cached
-    protected static final int CP_LOW    =  0; // cache priority low; entry may be cached
-    protected static final int CP_MEDIUM =  1; // cache priority medium; entry shall be cached
-    protected static final int CP_HIGH   =  2; // cache priority high; entry must be cached
+    public static final int CP_NONE   = -1; // cache priority none; entry shall not be cached
+    public static final int CP_LOW    =  0; // cache priority low; entry may be cached
+    public static final int CP_MEDIUM =  1; // cache priority medium; entry shall be cached
+    public static final int CP_HIGH   =  2; // cache priority high; entry must be cached
     
     // static seek pointers
     private static long POS_MAGIC      = 0;                     // 1 byte, byte: file type magic
@@ -144,7 +143,7 @@ public class kelondroRecords {
     private HashMap[]             XcacheHeaders; // the cache; holds overhead values and key element
     private int                   XcacheSize;    // number of cache records
     private long                  XcacheStartup; // startup time; for cache aging
-    private kelondroMScoreCluster XcacheScore;   // controls cache aging
+    private kelondroMScoreCluster cacheScore;   // controls cache aging
 
 
     public kelondroRecords(File file, long buffersize /* bytes */,
@@ -319,18 +318,26 @@ public class kelondroRecords {
         if (buffersize <= 0) {
             this.XcacheSize = 0;
             this.XcacheHeaders = null;
-            this.XcacheScore = null;
+            this.cacheScore = null;
         } else {
             if ((buffersize / cacheChunkSize(false)) > size()) {
                 this.XcacheSize = (int) (buffersize / cacheChunkSize(false));
-                this.XcacheScore = null;
+                this.cacheScore = null; // no cache control because we have more cache slots than database entries
             } else {
                 this.XcacheSize = (int) (buffersize / cacheChunkSize(true));
-                this.XcacheScore = new kelondroMScoreCluster();
+                this.cacheScore = new kelondroMScoreCluster(); // cache control of CP_HIGH caches
             }
             this.XcacheHeaders = new HashMap[]{new HashMap(), new HashMap(), new HashMap()};
         }
         this.XcacheStartup = System.currentTimeMillis();
+    }
+    
+    private static final long max = Runtime.getRuntime().maxMemory();
+    private static final Runtime runtime = Runtime.getRuntime();
+    
+    private static long availableMemory() {
+        // memory that is available including increasing total memory up to maximum
+        return max - runtime.totalMemory() + runtime.freeMemory();
     }
     
     public File file() {
@@ -342,8 +349,16 @@ public class kelondroRecords {
         return this.headchunksize + element_in_cache + ((cacheControl) ? cache_control_entry : 0);
     }
     
-    public int cacheChunkSize() {
-        return cacheChunkSize(this.XcacheScore != null);
+    public int[] cacheChunkSize() {
+        // returns three integers:
+        // #0: chunk size of CP_LOW - priority entries
+        // #1: chunk size of CP_MEDIUM - priority entries
+        // #2: chunk size of CP_HIGH - priority entries
+        int[] i = new int[3];
+        i[CP_LOW]    = cacheChunkSize(false);
+        i[CP_MEDIUM] = cacheChunkSize(false);
+        i[CP_HIGH]   = cacheChunkSize(this.cacheScore != null);
+        return i;
     }
     
     public int[] cacheFillStatus() {
@@ -367,65 +382,100 @@ public class kelondroRecords {
     protected void deleteNode(Handle handle) throws IOException {
         if (XcacheSize != 0) {
             synchronized (XcacheHeaders) {
-                if (XcacheScore == null) {
-                    XcacheHeaders[0].remove(handle);
-                    XcacheHeaders[1].remove(handle);
-                    XcacheHeaders[2].remove(handle);
-                } else if (XcacheHeaders[0].get(handle) != null) {
-                    XcacheScore.deleteScore(handle);
-                    XcacheHeaders[0].remove(handle);
-                } else if (XcacheHeaders[1].get(handle) != null) {
-                    XcacheScore.deleteScore(handle);
-                    XcacheHeaders[1].remove(handle);
-                } else if (XcacheHeaders[2].get(handle) != null) {
-                    XcacheScore.deleteScore(handle);
-                    XcacheHeaders[2].remove(handle);
+                if (cacheScore == null) {
+                    XcacheHeaders[CP_LOW].remove(handle);
+                    XcacheHeaders[CP_MEDIUM].remove(handle);
+                    XcacheHeaders[CP_HIGH].remove(handle);
+                } else if (XcacheHeaders[CP_HIGH].get(handle) != null) {
+                    // remove handle from cache-control
+                    cacheScore.deleteScore(handle);
+                    XcacheHeaders[CP_HIGH].remove(handle);
+                } else if (XcacheHeaders[CP_MEDIUM].get(handle) != null) {
+                    // no cache control for medium-priority entries
+                    XcacheHeaders[CP_MEDIUM].remove(handle);
+                } else if (XcacheHeaders[CP_LOW].get(handle) != null) {
+                    // no cache control for low-priority entries
+                    XcacheHeaders[CP_LOW].remove(handle);
                 }
             }
         }
         dispose(handle);
     }
     
-    private void checkCacheSpace(int forPriority) {
+    private boolean cacheSpace(int forPriority) {
         // check for space in cache
         // should be only called within a synchronized(XcacheHeaders) environment
-        if (XcacheSize == 0) return; // no caching
-        if (XcacheScore == null) return; // no cache control (== no deletion)
-        long free = Runtime.getRuntime().freeMemory();
-        long cs = XcacheHeaders[0].size() + XcacheHeaders[1].size() + XcacheHeaders[2].size();
-        if (cs == 0) return;
-        if ((cs < XcacheSize) && (free >= memBlock)) return; // no need to flush cache space
+        // returns true if it is allowed to add another entry to the cache
+        // returns false if the cache is considered to be full
+        if (forPriority == CP_NONE) return false;
+        if (XcacheSize == 0) return false; // no caching
+        long cs = XcacheHeaders[CP_LOW].size() + XcacheHeaders[CP_MEDIUM].size() + XcacheHeaders[CP_HIGH].size();
+        if (cs == 0) return true; // nothing there to flush
+        if ((cs < XcacheSize) && (availableMemory() >= memBlock)) return true; // no need to flush cache space
         Handle delkey;
-        // (free < memKcolb)) ??
         
-        // delete one entry
-        try {
-            delkey = (Handle) XcacheScore.getMinObject(); // error (see below) here
-            int cp = priorityOfCache(delkey);
-            if (cp <= forPriority) {
-                // deletion is ok, it affects an entry that has less priority
-                XcacheScore.deleteScore(delkey);
-                XcacheHeaders[cp].remove(delkey);
+        // delete one entry. distinguish between different priority cases:
+        if (forPriority == CP_LOW) {
+            // remove only from low-priority cache
+            if (this.XcacheHeaders[CP_LOW].size() != 0) {
+                // just delete any of the low-priority entries
+                delkey = (Handle) this.XcacheHeaders[CP_LOW].keySet().iterator().next();
+                XcacheHeaders[CP_LOW].remove(delkey);
+                return true;
             } else {
-                for (int i = 0; i < 3; i++) {
-                    if (XcacheHeaders[i].size() > 0) {
-                        delkey = (Handle) XcacheHeaders[i].keySet().iterator().next();
-                        XcacheScore.deleteScore(delkey);
-                        XcacheHeaders[i].remove(delkey);
-                        break;
-                    }
-                }
+                // we cannot delete any entry, therefore there is no space for another entry
+                return false;
             }
-        } catch (NoSuchElementException e) {
-            System.out.println("strange kelondroRecords error: " + e.getMessage() + "; cachesize=" + XcacheSize + ", cache.size()=[" + XcacheHeaders[0].size() + "," + XcacheHeaders[1].size() + "," + XcacheHeaders[2].size() + "], cacheScore.size()=" + XcacheScore.size());
-            // this is a strange error and could be caused by internal java problems
-            // we simply clear the cache
-            this.XcacheScore = new kelondroMScoreCluster();
-            this.XcacheHeaders[0] = new HashMap();
-            this.XcacheHeaders[1] = new HashMap();
-            this.XcacheHeaders[2] = new HashMap();
+        } else if (forPriority == CP_MEDIUM) {
+            if (this.XcacheHeaders[CP_LOW].size() != 0) {
+                // just delete any of the low-priority entries
+                delkey = (Handle) this.XcacheHeaders[CP_LOW].keySet().iterator().next();
+                XcacheHeaders[CP_LOW].remove(delkey);
+                return true;
+            } else if (this.XcacheHeaders[CP_MEDIUM].size() != 0) {
+                // just delete any of the medium-priority entries
+                delkey = (Handle) this.XcacheHeaders[CP_MEDIUM].keySet().iterator().next();
+                XcacheHeaders[CP_MEDIUM].remove(delkey);
+                return true;
+            } else {
+                // we cannot delete any entry, therefore there is no space for another entry
+                return false;
+            }
+        } else {
+            // request for a high-priority entry
+            if (this.XcacheHeaders[CP_LOW].size() != 0) {
+                // just delete any of the low-priority entries
+                delkey = (Handle) this.XcacheHeaders[CP_LOW].keySet().iterator().next();
+                XcacheHeaders[CP_LOW].remove(delkey);
+                return true;
+            } else if (this.XcacheHeaders[CP_MEDIUM].size() != 0) {
+                // just delete any of the medium-priority entries
+                delkey = (Handle) this.XcacheHeaders[CP_MEDIUM].keySet().iterator().next();
+                XcacheHeaders[CP_MEDIUM].remove(delkey);
+                return true;
+            } else if (cacheScore == null) {
+                // no cache-control of high-priority cache
+                // the cache is considered as full
+                return false;
+            } else try {
+                // delete one from the high-priority entries
+                // use the cache-control to find the right object
+                delkey = (Handle) cacheScore.getMinObject();
+                cacheScore.deleteScore(delkey);
+                XcacheHeaders[CP_HIGH].remove(delkey);
+                return true;
+            } catch (NoSuchElementException e) {
+                // this is a strange error and could be caused by internal java problems
+                // we simply clear the cache
+                String error = "cachScore error: " + e.getMessage() + "; cachesize=" + XcacheSize + ", cache.size()=[" + XcacheHeaders[0].size() + "," + XcacheHeaders[1].size() + "," + XcacheHeaders[2].size() + "], cacheScore.size()=" + cacheScore.size();
+                this.cacheScore = new kelondroMScoreCluster();
+                this.XcacheHeaders[0] = new HashMap();
+                this.XcacheHeaders[1] = new HashMap();
+                this.XcacheHeaders[2] = new HashMap();
+                throw new kelondroException(filename, error);
+                
+            }
         }
-        delkey = null;
     }
     
     private int priorityOfCache(Handle handle) {
@@ -538,11 +588,19 @@ public class kelondroRecords {
                 }
                 this.headChanged = false;
             } else synchronized(XcacheHeaders) {
-                byte[] cacheEntry = (byte[]) XcacheHeaders[CP_HIGH].get(this.handle); // first try
-                if (cacheEntry == null) cacheEntry = (byte[]) XcacheHeaders[CP_MEDIUM].get(this.handle); // second try
-                if (cacheEntry == null) cacheEntry = (byte[]) XcacheHeaders[CP_LOW].get(this.handle); // third try
+                byte[] cacheEntry = null;
+                int cp = CP_HIGH;
+                cacheEntry = (byte[]) XcacheHeaders[CP_HIGH].get(this.handle); // first try
                 if (cacheEntry == null) {
-                    // read overhead and key
+                    cacheEntry = (byte[]) XcacheHeaders[CP_MEDIUM].get(this.handle); // second try
+                    cp = CP_MEDIUM;
+                }
+                if (cacheEntry == null) {
+                    cacheEntry = (byte[]) XcacheHeaders[CP_LOW].get(this.handle); // third try
+                    cp = CP_LOW;
+                }
+                if (cacheEntry == null) {
+                    // cache miss, we read overhead and key from file
                     //System.out.println("**CACHE miss for " + this.handle.index + "**");
                     this.headChunk = new byte[headchunksize];
                     //this.tailChunk = new byte[tailchunksize];
@@ -552,22 +610,28 @@ public class kelondroRecords {
                         //entryFile.read(this.tailChunk, 0, this.tailChunk.length);
                     }
                     this.headChanged = true; // provoke a cache store
-                    int cp = CP_HIGH;
+                    cp = CP_HIGH;
                     if (OHHANDLEC == 3) {
                         Handle l = getOHHandle(1);
                         Handle r = getOHHandle(2);
                         if ((l == null) && (r == null)) cp = CP_LOW;
                         else if ((l == null) || (r == null)) cp = CP_MEDIUM;
                     }
-                    checkCacheSpace(cp);
-                    updateNodeCache(cp);
+                    // if space left in cache, copy these value to the cache
+                    if (XcacheSize > 0) {
+                        XcacheHeaders[CP_LOW].remove(this.handle);
+                        XcacheHeaders[CP_MEDIUM].remove(this.handle);
+                        XcacheHeaders[CP_HIGH].remove(this.handle);
+                }   if (cacheSpace(cp)) updateNodeCache(cp);
                 } else {
+                    // cache hit, copy overhead and key from cache
                     //System.out.println("**CACHE HIT for " + this.handle.index + "**");
-                    // copy cache entry
                     this.headChunk = new byte[headchunksize];
                     System.arraycopy(cacheEntry, 0, this.headChunk, 0, headchunksize);
                     // update cache scores to announce this cache hit
-                    if (XcacheScore != null) XcacheScore.setScore(this.handle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
+                    if ((cacheScore != null) && (cp == CP_HIGH)) {
+                        cacheScore.setScore(this.handle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
+                    }
                     this.headChanged = false;
                 }
             }
@@ -688,7 +752,12 @@ public class kelondroRecords {
                     //System.out.print("#write "); printChunk(this.handle, this.headChunk); System.out.println();
                     entryFile.write(this.headChunk);
                 }
-                updateNodeCache(cachePriority);
+                if (XcacheSize > 0) {
+                    XcacheHeaders[CP_LOW].remove(this.handle);
+                    XcacheHeaders[CP_MEDIUM].remove(this.handle);
+                    XcacheHeaders[CP_HIGH].remove(this.handle);
+                }
+                if (cacheSpace(cachePriority)) updateNodeCache(cachePriority);
             }
             
             // save tail
@@ -739,13 +808,9 @@ public class kelondroRecords {
             if (priority == CP_NONE) return; // it is not wanted that this shall be cached
             if (XcacheSize == 0) return; // we do not use the cache
             int cs = XcacheHeaders[CP_LOW].size() + XcacheHeaders[CP_MEDIUM].size() + XcacheHeaders[CP_HIGH].size();
-            if ((cs >= XcacheSize) && (XcacheScore == null)) return; // no cache update if cache is full and not controlled
-            if ((cs >= XcacheSize) && (priority == CP_LOW)) return; // no cache update if cache is full and new entry has low priority
+            if (cs >= XcacheSize) return; // no cache update if cache is full
             
             synchronized (XcacheHeaders) {
-                // remember size to evaluate a cache size check need
-                int sizeBefore = cs;
-                //long memBefore = Runtime.getRuntime().freeMemory();
                 // generate cache entry
                 byte[] cacheEntry = new byte[headchunksize];
                 System.arraycopy(headChunk, 0, cacheEntry, 0, headchunksize);
@@ -757,16 +822,14 @@ public class kelondroRecords {
                 if (priority != CP_MEDIUM) XcacheHeaders[CP_MEDIUM].remove(cacheHandle);
                 if (priority != CP_HIGH) XcacheHeaders[CP_HIGH].remove(cacheHandle);
                 XcacheHeaders[priority].put(cacheHandle, cacheEntry);
-                if (XcacheScore != null) XcacheScore.setScore(cacheHandle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
+                if ((cacheScore != null) && (priority == CP_HIGH)) {
+                    cacheScore.setScore(cacheHandle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
+                }
                 
                 // delete the cache entry buffer
                 cacheEntry = null;
                 cacheHandle = null;
                 //System.out.println("kelondroRecords cache4" + filename + ": cache record size = " + (memBefore - Runtime.getRuntime().freeMemory()) + " bytes" + ((newentry) ? " new" : ""));
-                // check cache size
-                cs = XcacheHeaders[CP_LOW].size() + XcacheHeaders[CP_MEDIUM].size() + XcacheHeaders[CP_HIGH].size();
-                if (cs > sizeBefore) checkCacheSpace(priority);
-                //System.out.println("kelondroRecords cache4" + filename + ": " + XcacheHeaders.size() + " entries, " + XcacheSize + " allowed.");
                 //printCache();
             }
         }

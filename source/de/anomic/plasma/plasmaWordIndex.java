@@ -85,7 +85,7 @@ public final class plasmaWordIndex {
         return ramCache.assortmentsSizes();
     }
     
-    public int assortmentsCacheChunkSizeAvg() {
+    public int[] assortmentsCacheChunkSizeAvg() {
         return ramCache.assortmentsCacheChunkSizeAvg();
     }
     

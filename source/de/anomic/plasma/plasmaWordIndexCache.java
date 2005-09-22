@@ -265,7 +265,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return assortmentCluster.sizes();
     }
     
-    public int assortmentsCacheChunkSizeAvg() {
+    public int[] assortmentsCacheChunkSizeAvg() {
         return assortmentCluster.cacheChunkSizeAvg();
     }
     

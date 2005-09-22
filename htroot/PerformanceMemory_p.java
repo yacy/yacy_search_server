@@ -63,8 +63,8 @@ public class PerformanceMemory_p {
     private static final int MB = 1024 * KB;
     private static Map defaultSettings = null;
         
-    private static int[] slt;
-    private static int   req,chk,usd,bst,god;
+    private static int[] slt,chk;
+    private static int   req,usd,bst,god;
     
     private static long usedTotal, currTotal, dfltTotal, goodTotal, bestTotal;
         
@@ -210,12 +210,12 @@ public class PerformanceMemory_p {
     }
     
     private static void putprop(serverObjects prop, serverSwitch env, String db, String set) {
-        usd = chk * (slt[1]+slt[2]+slt[3]);
-        bst = (((chk * req) >> 10) + 1) << 10;
+        usd = chk[0]*slt[3] + chk[1]*slt[2] + chk[2]*slt[1];
+        bst = (((chk[2] * req) >> 10) + 1) << 10;
         god = (((bst / (1+slt[1]+slt[2]+slt[3]) * slt[1]) >> 10) + 1) << 10;
         if (set.equals("setGood")) env.setConfig("ramCache" + db, god);
         if (set.equals("setBest")) env.setConfig("ramCache" + db, bst);
-        prop.put("chunk" + db, chk);
+        prop.put("chunk" + db, chk[2] + "/" + chk[1] + "/" + chk[0]);
         prop.put("slreq" + db, req);
         prop.put("slemp" + db, slt[0]);
         prop.put("slhig" + db, slt[1]);

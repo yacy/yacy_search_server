@@ -82,7 +82,7 @@ public class messageBoard {
         return database.size();
     }
     
-    public int dbCacheChunkSize() {
+    public int[] dbCacheChunkSize() {
         return database.cacheChunkSize();
     }
     

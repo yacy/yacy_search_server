@@ -54,6 +54,7 @@ import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.serverCodings;
 
 public class wikiBoard {
@@ -92,8 +93,14 @@ public class wikiBoard {
         return datbase.size() + bkpbase.size();
     }
     
-    public int dbCacheChunkSize() {
-        return (datbase.cacheChunkSize() + bkpbase.cacheChunkSize()) / 2;
+    public int[] dbCacheChunkSize() {
+        int[] db = datbase.cacheChunkSize();
+        int[] bk = bkpbase.cacheChunkSize();
+        int[] i = new int[3];
+        i[kelondroRecords.CP_LOW] = (db[kelondroRecords.CP_LOW] + bk[kelondroRecords.CP_LOW]) / 2;
+        i[kelondroRecords.CP_MEDIUM] = (db[kelondroRecords.CP_MEDIUM] + bk[kelondroRecords.CP_MEDIUM]) / 2;
+        i[kelondroRecords.CP_HIGH] = (db[kelondroRecords.CP_HIGH] + bk[kelondroRecords.CP_HIGH]) / 2;
+        return i;
     }
     
     public int[] dbCacheFillStatus() {

@@ -80,7 +80,7 @@
 <form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
 <tr class="TableHeader" valign="bottom">
 <td class="small" rowspan="2">Database<br>&nbsp;</td>
-<td class="small" rowspan="2">Chunk Size<br>(bytes)</td>
+<td class="small" rowspan="2">Chunk Size<br>high/med/low<br>(bytes)</td>
 <td class="small" colspan="5">#Slots</td>
 <td class="small" colspan="5">Memory Occupation (KBytes)</td>
 <td class="small" rowspan="2">Description<br>&nbsp;</td>
@@ -101,7 +101,7 @@
 
 <tr class="TableCellDark">
 <td class="small" align="left">RWI Assortment Cluster</td>
-<td class="small" align="right">#[chunkRWI]#</td>
+<td class="small" align="center">#[chunkRWI]#</td>
 <td class="small" align="right">#[slreqRWI]#</td>
 <td class="small" align="right">#[slempRWI]#</td>
 <td class="small" align="right">#[slhigRWI]#</td>
@@ -119,7 +119,7 @@ cache will speed up crawls with a depth > 3.</td>
 
 <tr class="TableCellDark">
 <td class="small" align="left">HTTP Response Header</td>
-<td class="small" align="right">#[chunkHTTP]#</td>
+<td class="small" align="center">#[chunkHTTP]#</td>
 <td class="small" align="right">#[slreqHTTP]#</td>
 <td class="small" align="right">#[slempHTTP]#</td>
 <td class="small" align="right">#[slhigHTTP]#</td>
@@ -137,7 +137,7 @@ Increasing this cache will be most important for a fast proxy mode.</td>
 
 <tr class="TableCellDark">
 <td class="small" align="left">'loaded' URLs</td>
-<td class="small" align="right">#[chunkLURL]#</td>
+<td class="small" align="center">#[chunkLURL]#</td>
 <td class="small" align="right">#[slreqLURL]#</td>
 <td class="small" align="right">#[slempLURL]#</td>
 <td class="small" align="right">#[slhigLURL]#</td>
@@ -154,7 +154,7 @@ This cache is very important for a fast search process. Increasing the cache siz
 
 <tr class="TableCellDark">
 <td class="small" align="left">'noticed' URLs</td>
-<td class="small" align="right">#[chunkNURL]#</td>
+<td class="small" align="center">#[chunkNURL]#</td>
 <td class="small" align="right">#[slreqNURL]#</td>
 <td class="small" align="right">#[slempNURL]#</td>
 <td class="small" align="right">#[slhigNURL]#</td>
@@ -171,7 +171,7 @@ Increasing the cache size will result in faster double-check during URL recognit
 
 <tr class="TableCellDark">
 <td class="small" align="left">'error' URLs</td>
-<td class="small" align="right">#[chunkEURL]#</td>
+<td class="small" align="center">#[chunkEURL]#</td>
 <td class="small" align="right">#[slreqEURL]#</td>
 <td class="small" align="right">#[slempEURL]#</td>
 <td class="small" align="right">#[slhigEURL]#</td>
@@ -188,7 +188,7 @@ Increasing the cache size will most probably speed up crawling slightly, but not
 
 <tr class="TableCellDark">
 <td class="small" align="left">DHT Control</td>
-<td class="small" align="right">#[chunkDHT]#</td>
+<td class="small" align="center">#[chunkDHT]#</td>
 <td class="small" align="right">#[slreqDHT]#</td>
 <td class="small" align="right">#[slempDHT]#</td>
 <td class="small" align="right">#[slhigDHT]#</td>
@@ -206,7 +206,7 @@ Increasing this cache may speed up many functions, but we need to test this to s
 
 <tr class="TableCellDark">
 <td class="small" align="left">Messages</td>
-<td class="small" align="right">#[chunkMessage]#</td>
+<td class="small" align="center">#[chunkMessage]#</td>
 <td class="small" align="right">#[slreqMessage]#</td>
 <td class="small" align="right">#[slempMessage]#</td>
 <td class="small" align="right">#[slhigMessage]#</td>
@@ -222,7 +222,7 @@ Increasing this cache may speed up many functions, but we need to test this to s
 
 <tr class="TableCellDark">
 <td class="small" align="left">Wiki</td>
-<td class="small" align="right">#[chunkWiki]#</td>
+<td class="small" align="center">#[chunkWiki]#</td>
 <td class="small" align="right">#[slreqWiki]#</td>
 <td class="small" align="right">#[slempWiki]#</td>
 <td class="small" align="right">#[slhigWiki]#</td>
@@ -240,7 +240,7 @@ Increasing this cache may speed up access to the wiki pages.</td>
 
 <tr class="TableCellDark">
 <td class="small" align="left">News</td>
-<td class="small" align="right">#[chunkNews]#</td>
+<td class="small" align="center">#[chunkNews]#</td>
 <td class="small" align="right">#[slreqNews]#</td>
 <td class="small" align="right">#[slempNews]#</td>
 <td class="small" align="right">#[slhigNews]#</td>
