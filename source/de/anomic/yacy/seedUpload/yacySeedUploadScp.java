@@ -97,7 +97,7 @@ public class yacySeedUploadScp implements yacySeedUploader {
     }
     
     public String[] getLibxDependences() {
-        return new String[]{"jsch-0.1.19.jar"};
+        return new String[]{"jsch-0.1.21.jar"};
     }
     
 }
