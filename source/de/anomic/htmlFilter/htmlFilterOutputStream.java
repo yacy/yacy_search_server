@@ -417,7 +417,7 @@ public final class htmlFilterOutputStream extends OutputStream {
             out.write(b);
         }
     }
-
+    
     public void write(byte b[]) throws IOException {
 	this.write(b, 0, b.length);
     }

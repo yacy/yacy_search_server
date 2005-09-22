@@ -109,18 +109,6 @@ public class kelondroMScoreCluster {
         addScore(objs, 1);
     }
     
-    public synchronized void addScore(Object[] objs, int count) {
-        if (objs != null)
-            for (int i = 0; i < objs.length; i++)
-                addScore(objs[i], count);
-    }
-    
-    public synchronized void setScore(Object[] objs, int count) {
-        if (objs != null)
-            for (int i = 0; i < objs.length; i++)
-                setScore(objs[i], count);
-    }
-     
     public synchronized void incScore(Object obj) {
         addScore(obj, 1);
     }
