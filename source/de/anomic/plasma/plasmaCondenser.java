@@ -138,7 +138,7 @@ public final class plasmaCondenser {
 	words = new TreeMap(kelondroMSetTools.fastStringComparator);
 	sentences = new HashMap();
 	HashSet currsentwords = new HashSet();
-	String sentence = "";
+	StringBuffer sentence = new StringBuffer(100);
 	String word = "";
 	String k;
 	int wordlen;
@@ -163,7 +163,7 @@ public final class plasmaCondenser {
 		if (sentence.length() > 0) {
 		    // we store the punctuation symbol as first element of the sentence vector
 		    allsentencecounter++;
-		    sentence = word + sentence;
+		    sentence.insert(0, word); // append at beginning
 		    if (sentences.containsKey(sentence)) {
 			// sentence already exists
 			sp = (statProp) sentences.get(sentence);
@@ -184,7 +184,7 @@ public final class plasmaCondenser {
 			words.put(k,sp);
 		    }
 		}
-		sentence = "";
+		sentence = new StringBuffer(100);
 		currsentwords.clear();
 	    } else {
 		// store word
@@ -202,13 +202,13 @@ public final class plasmaCondenser {
 		}
 		words.put(word, sp);
 		// we now have the unique handle of the word, put it into the sentence:
-		sentence = sentence + intString(wordHandle, numlength); // thread hang error here
+		sentence.append(intString(wordHandle, numlength));
 	    }
 	}
 	// finnish last sentence
 	if (sentence.length() > 0) {
 	    allsentencecounter++;
-	    sentence = "." + sentence;
+	    sentence.insert(0, "."); // append at beginning
 	    if (sentences.containsKey(sentence)) {
 		sp = (statProp) sentences.get(sentence);
 		sp.inc();
@@ -226,20 +226,24 @@ public final class plasmaCondenser {
 	Object[] orderedSentences = new Object[sentenceHandleCount];
 	String[] s;
 	int wc;
+        Object o;
 	it = sentences.keySet().iterator();
-	while (it.hasNext()) {
-	    sentence = (String) it.next();
-	    wc = (sentence.length() - 1) / numlength;
-	    s = new String[wc + 2];
-	    sp = (statProp) sentences.get(sentence);
-	    s[0] = intString(sp.count, numlength); // number of occurrences of this sentence
-	    s[1] = sentence.substring(0,1); // the termination symbol of this sentence
-	    for (int i = 0; i < wc; i++) {
-		k = sentence.substring(i * numlength + 1, (i + 1) * numlength + 1);
-		s[i + 2] = k;
-	    }
-	    orderedSentences[sp.handle] = s;
-	}
+        while (it.hasNext()) {
+            o = it.next();
+            if (o != null) {
+                sentence = (StringBuffer) o;
+                wc = (sentence.length() - 1) / numlength;
+                s = new String[wc + 2];
+                sp = (statProp) sentences.get(sentence);
+                s[0] = intString(sp.count, numlength); // number of occurrences of this sentence
+                s[1] = sentence.substring(0,1); // the termination symbol of this sentence
+                for (int i = 0; i < wc; i++) {
+                    k = sentence.substring(i * numlength + 1, (i + 1) * numlength + 1);
+                    s[i + 2] = k;
+                }
+                orderedSentences[sp.handle] = s;
+            }
+        }
 
 	Map.Entry entry;
 	// we search for similar words and reorganize the corresponding sentences
@@ -280,10 +284,12 @@ public final class plasmaCondenser {
 	// depending on the orderedSentences structure, we rebuild the sentence HashMap to
 	// eliminate double occuring sentences
 	sentences = new HashMap();
+        int le;
 	for (int i = 0; i < orderedSentences.length; i++) {
-	    sentence = "";
-	    for (int j = 1; j < ((String[]) orderedSentences[i]).length; j++) sentence = sentence + ((String[]) orderedSentences[i])[j];
-	    if (sentences.containsKey(sentence)) {
+            le = ((String[]) orderedSentences[i]).length; 
+	    sentence = new StringBuffer(le * 10);
+	    for (int j = 1; j < le; j++) sentence.append(((String[]) orderedSentences[i])[j]);
+            if (sentences.containsKey(sentence)) {
 		// add sentence counter to counter of found sentence
 		sp = (statProp) sentences.get(sentence);
 		sp.count = sp.count + Integer.parseInt(((String[]) orderedSentences[i])[0]);
@@ -374,12 +380,12 @@ public final class plasmaCondenser {
 	Iterator it;
 	statProp sp;
 	String[] s;
-	String sentence;
+	StringBuffer sentence;
 	Object[] orderedSentences = new Object[sentences.size()];
 	for (int i = 0; i < sentences.size(); i++) orderedSentences[i] = null; // this array must be initialized
 	it = sentences.keySet().iterator();
 	while (it.hasNext()) {
-	    sentence = (String) it.next();
+	    sentence = (StringBuffer) it.next();
 	    wc = (sentence.length() - 1) / numlength;
 	    s = new String[wc + 2];
 	    sp = (statProp) sentences.get(sentence);

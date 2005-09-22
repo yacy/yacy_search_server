@@ -292,7 +292,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String cache = getConfig("proxyCache", "DATA/HTCACHE");
         cache = cache.replace('\\', '/');
         if (cache.endsWith("/")) { cache = cache.substring(0, cache.length() - 1); }                 
-        File htCachePath = new File(cache);
+        File htCachePath = new File(rootPath, cache);
         long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig("proxyCacheSize", "2")); // this is megabyte
         this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP);
         
@@ -936,7 +936,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private void processResourceStack(plasmaSwitchboardQueue.Entry entry) {
         // work off one stack entry with a fresh resource
         try {    
-            long parsingStartTime = 0, parsingEndTime = 0, indexingStartTime = 0, indexingEndTime;
+            long stackStartTime = 0, stackEndTime = 0, parsingStartTime = 0, parsingEndTime = 0, indexingStartTime = 0, indexingEndTime;
             
             // we must distinguish the following cases: resource-load was initiated by
             // 1) global crawling: the index is extern, not here (not possible here)
@@ -999,6 +999,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if (loadDate == null) loadDate = new Date();
             
             // put anchors on crawl stack
+            stackStartTime = System.currentTimeMillis();
             if (((processCase == 4) || (processCase == 5)) &&
                 ((entry.profile() == null) || (entry.depth() < entry.profile().generalDepth()))) {
                 Map hl = document.getHyperlinks();
@@ -1020,8 +1021,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     }
                 }
                 log.logInfo("CRAWL: ADDED " + c + " LINKS FROM " + entry.normalizedURLString() +
+                            ", " + (hl.size() - c) + " LINKS DOUBLE" +
                             ", NEW CRAWL STACK SIZE IS " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
             }
+            stackEndTime = System.currentTimeMillis();
             
             // create index
             String descr = document.getMainLongTitle();
@@ -1085,6 +1088,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                     "\n\tDescription:  " + descr + "\n\t" +
                                     "MimeType: "  + document.getMimeType() + " | " + 
                                     "Size: " + document.text.length + " bytes | " +
+                                    "StackingTime:  " + (stackEndTime-stackStartTime) + " ms | " + 
                                     "ParsingTime:  " + (parsingEndTime-parsingStartTime) + " ms | " + 
                                     "IndexingTime: " + (indexingEndTime-indexingStartTime) + " ms");
                         

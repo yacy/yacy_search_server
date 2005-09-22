@@ -165,7 +165,7 @@ public class CacheAdmin_p {
             } catch (Exception e) {
                 info.append("- This file is not cached -");
                 info.append(e.toString());
-                // e.printStackTrace();
+                e.printStackTrace();
             }           
         }
 
