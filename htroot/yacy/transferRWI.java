@@ -80,6 +80,9 @@ public class transferRWI {
         String result = "";
         String unknownURLs = "";
         
+        yacySeed otherPeer = yacyCore.seedDB.get(iam);
+        String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
+        
         if (granted) {
             // decode request
             Vector v = new Vector();
@@ -124,8 +127,6 @@ public class transferRWI {
             Iterator it = unknownURL.iterator();
             while (it.hasNext()) unknownURLs += "," + (String) it.next();
             if (unknownURLs.length() > 0) unknownURLs = unknownURLs.substring(1);
-            yacySeed otherPeer = yacyCore.seedDB.get(iam);
-            String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
             if (wordhashes.length == 0)
                 switchboard.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", requested " + unknownURL.size() + " URLs");
             else {
@@ -134,6 +135,7 @@ public class transferRWI {
             }
             result = "ok";
         } else {
+            switchboard.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "error_not_granted";
         }
         

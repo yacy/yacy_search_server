@@ -53,6 +53,7 @@ import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class transferURL {
 
@@ -75,6 +76,9 @@ public class transferURL {
         String result = "";
         String doublevalues = "0";
         
+        yacySeed otherPeer = yacyCore.seedDB.get(iam);
+        String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
+        
         if (granted) {
             int received = 0;
             int sizeBefore = switchboard.urlPool.loadedURL.size();
@@ -84,18 +88,18 @@ public class transferURL {
             for (int i = 0; i < urlc; i++) {
                 urls = (String) post.get("url" + i);
                 if (urls == null) {
-                    yacyCore.log.logFine("transferURL: got null URL-string from peer " + iam);
+                    yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
                 } else {
                     lEntry = switchboard.urlPool.loadedURL.newEntry(urls, true);
                     if ((lEntry != null) && (blockBlacklist)) {
                         if (switchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) {
-                            yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + iam);
+                            yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName);
                             lEntry = null;
                         }
                     }
                     if (lEntry != null) {
                         switchboard.urlPool.loadedURL.addEntry(lEntry, iam, iam, 3);
-                        yacyCore.log.logFine("transferURL: received URL '" + lEntry.url() + "' from peer " + iam);
+                        yacyCore.log.logFine("transferURL: received URL '" + lEntry.url() + "' from peer " + otherPeerName);
                         received++;
                     }
                 }
@@ -106,10 +110,11 @@ public class transferURL {
             // return rewrite properties
             int more = switchboard.urlPool.loadedURL.size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
-            switchboard.getLog().logInfo("Received " + received + " URLs from peer " + iam);
-            if ((received - more) > 0) switchboard.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + iam);
+            switchboard.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName);
+            if ((received - more) > 0) switchboard.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
             result = "ok";
         } else {
+            switchboard.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
             result = "error_not_granted";
         }
         
