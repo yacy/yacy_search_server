@@ -253,10 +253,9 @@ public final class yacy {
             if (timeout < 60000) timeout = 60000;
 
             // create some directories
-            final File RootPath = new File(sb.getRootPath());
-            final File htRootPath = new File(RootPath, sb.getConfig("htRootPath", "htroot"));
-            final File htDocsPath = new File(RootPath, sb.getConfig("htDocsPath", "DATA/HTDOCS"));
-            File htTemplatePath = new File(RootPath, sb.getConfig("htTemplatePath","htdocs"));
+            final File htRootPath = new File(homePath, sb.getConfig("htRootPath", "htroot"));
+            final File htDocsPath = new File(homePath, sb.getConfig("htDocsPath", "DATA/HTDOCS"));
+            File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
             // create default notifier picture
             if (!((new File(htRootPath, "env/grafics/notifier.gif")).exists())) try {
@@ -377,8 +376,8 @@ public final class yacy {
                     }
 
                     //Copy the shipped locales into DATA
-                    final File localesPath = new File(RootPath, sb.getConfig("localesPath", "DATA/LOCALE"));
-                    final File defaultLocalesPath = new File(RootPath, "locales");
+                    final File localesPath = new File(homePath, sb.getConfig("localesPath", "DATA/LOCALE"));
+                    final File defaultLocalesPath = new File(homePath, "locales");
 
                     try{
                         final File[] defaultLocales = defaultLocalesPath.listFiles();
