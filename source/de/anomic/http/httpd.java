@@ -46,6 +46,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PushbackInputStream;
@@ -666,11 +667,23 @@ public final class httpd implements serverHandler {
     // but this belongs to the protocol handler, this class.
     
     
-    public static int parseArgs(serverObjects args, PushbackInputStream in, int length) throws IOException {
+    public static int parseArgs(serverObjects args, InputStream in, int length) throws IOException {
         // this is a quick hack using a previously coded parseMultipart based on a buffer
         // should be replaced sometime by a 'right' implementation
-        byte[] buffer = new byte[length];
-        in.read(buffer);
+        byte[] buffer = null;
+        
+        // parsing post request bodies with a given length
+        if (length != -1) {
+            buffer = new byte[length];
+            in.read(buffer);
+        // parsing post request bodies which are gzip content-encoded
+        } else {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            serverFileUtils.copy(in,bout);
+            buffer = bout.toByteArray();
+            bout.close(); bout = null;
+        }
+        
         int argc = parseArgs(args, new String(buffer));
         buffer = null;
         return argc;
@@ -722,16 +735,29 @@ public final class httpd implements serverHandler {
     }
     
     
-    public static HashMap parseMultipart(httpHeader header, serverObjects args, PushbackInputStream in, int length) throws IOException {
+    public static HashMap parseMultipart(httpHeader header, serverObjects args, InputStream in, int length) throws IOException {
         // this is a quick hack using a previously coded parseMultipart based on a buffer
         // should be replaced sometime by a 'right' implementation
-        byte[] buffer = new byte[length];
-        int c, a = 0;
-        while (a < length) {
-            c = in.read(buffer, a, length - a);
-            if (c <= 0) break;
-            a += c;
+
+        byte[] buffer = null;
+        
+        // parsing post request bodies with a given length
+        if (length != -1) { 
+            buffer = new byte[length];
+            int c, a = 0;
+            while (a < length) {
+                c = in.read(buffer, a, length - a);
+                if (c <= 0) break;
+                a += c;
+            }
+        // parsing post request bodies which are gzip content-encoded
+        } else {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            serverFileUtils.copy(in,bout);
+            buffer = bout.toByteArray();
+            bout.close(); bout = null;
         }
+        
         //System.out.println("MULTIPART-BUFFER=" + new String(buffer));
         HashMap files = parseMultipart(header, args, buffer);
         buffer = null;

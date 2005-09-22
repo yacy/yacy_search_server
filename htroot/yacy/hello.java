@@ -55,6 +55,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyVersion;
 
 public class hello {
 
@@ -99,7 +100,7 @@ public class hello {
         // if the remote client has reported its own IP address and the client supports
         // the port forwarding feature (if client version >= 0.383) then we try to 
         // connect to the reported IP address first
-        if (reportedip.length() > 0 && !clientip.equals(reportedip) && clientversion >= (float)0.383) {
+        if (reportedip.length() > 0 && !clientip.equals(reportedip) && clientversion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING) {
             // try first the reportedip, since this may be a connect from a port-forwarding host
             prop.put(STR_YOURIP, reportedip);
             remoteSeed.put(STR_IP, reportedip);

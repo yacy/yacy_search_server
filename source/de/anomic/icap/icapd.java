@@ -286,7 +286,7 @@ public class icapd implements serverHandler {
                     httpChunkedInputStream chunkedIn = new httpChunkedInputStream(in);
                     ByteArrayOutputStream bout = new ByteArrayOutputStream();
                     int l = 0,len = 0;
-                    byte[] buffer = new byte[256];
+                    byte[] buffer = new byte[2048];
                     while ((l = chunkedIn.read(buffer)) >= 0) {
                         len += l;
                         bout.write(buffer,0,l);

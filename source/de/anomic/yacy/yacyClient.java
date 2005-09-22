@@ -63,6 +63,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyVersion;
 
 public class yacyClient {
 
@@ -156,7 +157,7 @@ public class yacyClient {
          * 
          * @see serverCore#portForwardingEnabled 
          */
-        if (!serverCore.portForwardingEnabled || otherPeerVersion >= (float)0.383) {
+        if (!serverCore.portForwardingEnabled || otherPeerVersion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING) {
             String mytype = (String) result.get("yourtype");
             if (mytype == null) { mytype = yacySeed.PEERTYPE_JUNIOR; }        
             if (
@@ -583,6 +584,11 @@ public class yacyClient {
         // prepare post values
         final serverObjects post = new serverObjects();
         final String key = crypt.randomSalt();
+        
+        // enabling gzip compression for post request body
+        if (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS) {
+            post.put(httpc.GZIP_POST_BODY,"true");
+        }
         post.put("key", key);
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);
@@ -635,6 +641,12 @@ public class yacyClient {
         // prepare post values
         final serverObjects post = new serverObjects();
         final String key = crypt.randomSalt();
+        
+        // enabling gzip compression for post request body
+        if (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS) {
+            post.put(httpc.GZIP_POST_BODY,"true");
+        }        
+        
         post.put("key", key);
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);

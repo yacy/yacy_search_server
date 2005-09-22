@@ -54,7 +54,7 @@ import java.io.InputStreamReader;
  * Some parts of this class code was copied from <a href="http://www.devdaily.com/java/jwarehouse/commons-httpclient-2.0/src/java/org/apache/commons/httpclient/ChunkedInputStream.shtml">Apache httpclient Project.</a>
  * @author theli
  */
-public class httpChunkedInputStream extends InputStream {
+public final class httpChunkedInputStream extends InputStream {
     
     private static final int READ_CHUNK_STATE_NORMAL = 0;
     private static final int READ_CHUNK_STATE_CR_READ = 1;
@@ -64,7 +64,7 @@ public class httpChunkedInputStream extends InputStream {
     private static final char CR = '\r';
     private static final char LF = '\n';
     
-    private InputStream inputStream;
+    private final InputStream inputStream;
     private int currPos;
     private int currChunkSize;
     private httpHeader httpTrailer;
@@ -97,9 +97,6 @@ public class httpChunkedInputStream extends InputStream {
     
     
     public int read (byte[] b, int off, int len) throws IOException {
-        
-        if (b == null) throw new IllegalArgumentException("bytearry parameter must not be null");
-        
         if (this.isClosed) throw new IOException("Inputstream already closed.");
         if (this.isEOF) return -1;
         
@@ -114,7 +111,6 @@ public class httpChunkedInputStream extends InputStream {
     }
     
     public int read (byte[] b) throws IOException {
-        if (b == null) throw new IllegalArgumentException("bytearry parameter must not be null");
         return read(b, 0, b.length);
     }
     

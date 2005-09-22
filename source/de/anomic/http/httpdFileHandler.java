@@ -96,6 +96,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import de.anomic.plasma.plasmaSwitchboard;
@@ -240,7 +241,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         doResponse(conProp, requestHeader, response, body);
     }
     
-    public void doResponse(Properties conProp, httpHeader requestHeader, OutputStream out, PushbackInputStream body) throws IOException {
+    public void doResponse(Properties conProp, httpHeader requestHeader, OutputStream out, InputStream body) throws IOException {
         
         this.connectionProperties = conProp;
         
@@ -303,10 +304,19 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             // no args here, maybe a POST with multipart extension
             int length;
             //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
-            if ((method.equals(httpHeader.METHOD_POST)) &&
-                    (requestHeader.containsKey(httpHeader.CONTENT_LENGTH))) {
+            if (method.equals(httpHeader.METHOD_POST)) {
+
+                if (requestHeader.containsKey(httpHeader.CONTENT_LENGTH)) {
+                    length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
+                } else if (requestHeader.gzip()) {
+                    length = -1;
+                    body = new GZIPInputStream(body);
+                } else {
+                    httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null); 
+                    return;
+                }
+                
                 // if its a POST, it can be either multipart or as args in the body
-                length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
                 if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
                         (((String) requestHeader.get(httpHeader.CONTENT_TYPE)).toLowerCase().startsWith("multipart"))) {
                     // parse multipart

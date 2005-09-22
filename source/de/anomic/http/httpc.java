@@ -66,6 +66,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.SSLSocketFactory;
 
@@ -87,6 +88,14 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 */
 public final class httpc {
 
+    // some constants
+    /** 
+     * Specifies that the httpc is allowed to use gzip content encoding for
+     * http post requests 
+     * @see #POST(String, httpHeader, serverObjects, Hashtable)
+     */
+    public static final String GZIP_POST_BODY = "GZIP_POST_BODY";
+    
     // statics
     private static final String vDATE = "20040602";
     private static String userAgent;
@@ -757,7 +766,18 @@ public final class httpc {
         }
         boundary = "--" + boundary.substring(pos + "boundary=".length());
 
+        boolean zipContent = args.containsKey(GZIP_POST_BODY);
+        
+        OutputStream out;
+        GZIPOutputStream zippedOut;
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        if (zipContent) {
+            zippedOut = new GZIPOutputStream(buf);
+            out = zippedOut;
+        } else {
+            out = buf;
+        }
+        
         // in contrast to GET and HEAD, this method also transports a message body
         // the body consists of repeated boundaries and values in between
         if (args.size() != 0) {
@@ -766,38 +786,42 @@ public final class httpc {
             Enumeration e = args.keys();
             while (e.hasMoreElements()) {
                 // start with a boundary
-                buf.write(boundary.getBytes());
-                buf.write(serverCore.crlf);
+                out.write(boundary.getBytes());
+                out.write(serverCore.crlf);
                 // write value
                 key = (String) e.nextElement();
                 value = (String) args.get(key, "");
                 if ((files != null) && (files.containsKey(key))) {
                     // we are about to write a file
-                    buf.write(("Content-Disposition: form-data; name=" + '"' + key + '"' + "; filename=" + '"' + value + '"').getBytes());
-                    buf.write(serverCore.crlf);
-                    buf.write(serverCore.crlf);
-                    buf.write((byte[]) files.get(key));
-                    buf.write(serverCore.crlf);
+                    out.write(("Content-Disposition: form-data; name=" + '"' + key + '"' + "; filename=" + '"' + value + '"').getBytes());
+                    out.write(serverCore.crlf);
+                    out.write(serverCore.crlf);
+                    out.write((byte[]) files.get(key));
+                    out.write(serverCore.crlf);
                 } else {
                     // write a single value
-                    buf.write(("Content-Disposition: form-data; name=" + '"' + key + '"').getBytes());
-                    buf.write(serverCore.crlf);
-                    buf.write(serverCore.crlf);
-                    buf.write(value.getBytes());
-                    buf.write(serverCore.crlf);
+                    out.write(("Content-Disposition: form-data; name=" + '"' + key + '"').getBytes());
+                    out.write(serverCore.crlf);
+                    out.write(serverCore.crlf);
+                    out.write(value.getBytes());
+                    out.write(serverCore.crlf);
                 }
             }
             // finish with a boundary
-            buf.write(boundary.getBytes());
-            buf.write(serverCore.crlf);
+            out.write(boundary.getBytes());
+            out.write(serverCore.crlf);
             //buf.write("" + serverCore.crlfString);
         }
         // create body array
-        buf.close();
+        out.close();
         byte[] body = buf.toByteArray();
         //System.out.println("DEBUG: PUT BODY=" + new String(body));
-        // size of that body
-        requestHeader.put(httpHeader.CONTENT_LENGTH, Integer.toString(body.length));
+        if (zipContent) {
+            requestHeader.put(httpHeader.CONTENT_ENCODING, "gzip");
+        } else {
+            // size of that body            
+            requestHeader.put(httpHeader.CONTENT_LENGTH, Integer.toString(body.length));
+        }
         // send the header
         //System.out.println("header=" + requestHeader);
         send(httpHeader.METHOD_POST, path, requestHeader, false);
