@@ -183,8 +183,9 @@ public final class yacy {
             }
 
             // setting up logging
-            try {
-                serverLog.configureLogging(new File(homePath, "yacy.logging"));
+			if (!((new File(homePath, "DATA/LOG/yacy.logging")).exists())) try {
+				serverFileUtils.copy(new File(homePath, "yacy.logging"), new File(homePath, "DATA/LOG/yacy.logging"));
+                serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));
             } catch (IOException e) {
                 System.out.println("could not find logging properties in homePath=" + homePath);
                 e.printStackTrace();
@@ -252,9 +253,10 @@ public final class yacy {
             if (timeout < 60000) timeout = 60000;
 
             // create some directories
-            final File htRootPath = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot"));
-            final File htDocsPath = new File(sb.getRootPath(), sb.getConfig("htDocsPath", "DATA/HTDOCS"));
-            File htTemplatePath = new File(sb.getRootPath(), sb.getConfig("htTemplatePath","htdocs"));
+            final File RootPath = new File(sb.getRootPath());
+            final File htRootPath = new File(RootPath, sb.getConfig("htRootPath", "htroot"));
+            final File htDocsPath = new File(RootPath, sb.getConfig("htDocsPath", "DATA/HTDOCS"));
+            File htTemplatePath = new File(RootPath, sb.getConfig("htTemplatePath","htdocs"));
 
             // create default notifier picture
             if (!((new File(htRootPath, "env/grafics/notifier.gif")).exists())) try {
@@ -375,8 +377,8 @@ public final class yacy {
                     }
 
                     //Copy the shipped locales into DATA
-                    final File localesPath = new File(sb.getRootPath(), sb.getConfig("localesPath", "DATA/LOCALE"));
-                    final File defaultLocalesPath = new File(sb.getRootPath(), "locales");
+                    final File localesPath = new File(RootPath, sb.getConfig("localesPath", "DATA/LOCALE"));
+                    final File defaultLocalesPath = new File(RootPath, "locales");
 
                     try{
                         final File[] defaultLocales = defaultLocalesPath.listFiles();
