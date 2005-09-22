@@ -65,6 +65,7 @@ public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
         RADescriptor = RAFile.getFD();
     }
 
+    /*
     private void sync() throws IOException {
         try {
             RADescriptor.sync();
@@ -73,6 +74,7 @@ public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
             throw new IOException(e.getMessage());
         }
     }
+    */
     
     // pseudo-native method read
     public int read() throws IOException {
@@ -101,7 +103,7 @@ public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
     }
 
     public void close() throws IOException {
-        sync();
+        //sync();
         RAFile.close();
         RAFile = null;
     }
