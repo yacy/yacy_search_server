@@ -106,6 +106,12 @@ public class PerformanceMemory_p {
                 Runtime.getRuntime().gc();
                 prop.put("gc", 1);
             }
+            if (post.containsKey("Xmx")) {
+                env.setConfig("javastart_Xmx", "Xmx" + post.get("Xmx", "64") + "m");
+            }
+            if (post.containsKey("Xms")) {
+                env.setConfig("javastart_Xms", "Xms" + post.get("Xms", "10") + "m");
+            }
         }
         
         long memoryFreeNow = Runtime.getRuntime().freeMemory();
@@ -119,9 +125,9 @@ public class PerformanceMemory_p {
         long memoryMax = Runtime.getRuntime().maxMemory();
         
         prop.put("memoryMax", memoryMax / MB);
-        prop.put("memoryAvailAfterStartup", (memoryMax - memoryTotalAfterStartup + memoryFreeAfterStartup) / KB);
-        prop.put("memoryAvailAfterInitBGC", (memoryMax - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / KB);
-        prop.put("memoryAvailAfterInitAGC", (memoryMax - memoryTotalAfterInitAGC + memoryFreeAfterInitAGC) / KB);
+        prop.put("memoryAvailAfterStartup", (memoryMax - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
+        prop.put("memoryAvailAfterInitBGC", (memoryMax - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / MB);
+        prop.put("memoryAvailAfterInitAGC", (memoryMax - memoryTotalAfterInitAGC + memoryFreeAfterInitAGC) / MB);
         prop.put("memoryAvailNow", (memoryMax - memoryTotalNow + memoryFreeNow) / MB);
         prop.put("memoryTotalAfterStartup", memoryTotalAfterStartup / KB);
         prop.put("memoryTotalAfterInitBGC", memoryTotalAfterInitBGC / KB);
@@ -192,6 +198,13 @@ public class PerformanceMemory_p {
         prop.put("dfltTotal", dfltTotal / MB);
         prop.put("goodTotal", goodTotal / MB);
         prop.put("bestTotal", bestTotal / MB);
+        
+        // parse initialization memory settings
+        String Xmx = (String) env.getConfig("javastart_Xmx", "Xmx64m").substring(3);
+        prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
+        String Xms = (String) env.getConfig("javastart_Xms", "Xms10m").substring(3);
+        prop.put("Xms", Xms.substring(0, Xms.length() - 1));
+        
         // return rewrite values for templates
         return prop;
     }

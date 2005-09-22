@@ -10,29 +10,32 @@
 <br>
 <h2>Performance Settings for Memory</h2>
 
-
 <p>
 <div class=small><b>Memory Usage:</b></div>
 <table border="0" cellpadding="2" cellspacing="1">
+<form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
 <tr class="TableHeader" valign="bottom">
 <td class="small">&nbsp;<br>Type</td>
 <td class="small">After Startup<br>&nbsp;</td>
 <td class="small">After Initializations<br>before GC</td>
 <td class="small">After Initializations<br>after GC</td>
 <td class="small">Now<br>#(gc)#before <a href="PerformanceMemory_p.html?gc=">GC</a>::after GC#(/gc)#</td>
+<td class="small">Next<br>Startup</td>
 <td class="small">Description<br>&nbsp;</td>
 </tr>
 <tr class="TableCellDark">
 <td class="TableHeader" align="left">Max</td>
 <td class="small" align="center" colspan="4">#[memoryMax]# MByte</td>
+<td class="small" align="right"><input name="Xmx" type="text" align="right" size="3" maxlength="3" value="#[Xmx]#"><br>MByte</td>
 <td class="small" align="left">maximum memory that the JVM will attempt to use</td>
 </tr>
 <tr class="TableCellDark">
 <td class="TableHeader" align="left">Available</td>
-<td class="small" align="right">#[memoryAvailAfterStartup]# KByte</td>
-<td class="small" align="right">#[memoryAvailAfterInitBGC]# KByte</td>
-<td class="small" align="right">#[memoryAvailAfterInitAGC]# KByte</td>
+<td class="small" align="right">#[memoryAvailAfterStartup]# MByte</td>
+<td class="small" align="right">#[memoryAvailAfterInitBGC]# MByte</td>
+<td class="small" align="right">#[memoryAvailAfterInitAGC]# MByte</td>
 <td class="small" align="right">#[memoryAvailNow]# MByte</td>
+<td class="small" align="right">&nbsp;<br>&nbsp;</td>
 <td class="small" align="left">total available memory including free for the JVM within maximum</td>
 </tr>
 <tr class="TableCellDark">
@@ -41,6 +44,7 @@
 <td class="small" align="right">#[memoryTotalAfterInitBGC]# KByte</td>
 <td class="small" align="right">#[memoryTotalAfterInitAGC]# KByte</td>
 <td class="small" align="right">#[memoryTotalNow]# MByte</td>
+<td class="small" align="right"><input name="Xms" type="text" align="right" size="3" maxlength="3" value="#[Xms]#"><br>MByte</td>
 <td class="small" align="left">total memory taken from the OS</td>
 </tr>
 <tr class="TableCellDark">
@@ -49,6 +53,7 @@
 <td class="small" align="right">#[memoryFreeAfterInitBGC]# KByte</td>
 <td class="small" align="right">#[memoryFreeAfterInitAGC]# KByte</td>
 <td class="small" align="right">#[memoryFreeNow]# MByte</td>
+<td class="small" align="right">&nbsp;<br>&nbsp;</td>
 <td class="small" align="left">free memory in the JVM within total amount</td>
 </tr>
 <tr class="TableCellDark">
@@ -57,8 +62,15 @@
 <td class="small" align="right">#[memoryUsedAfterInitBGC]# KByte</td>
 <td class="small" align="right">#[memoryUsedAfterInitAGC]# KByte</td>
 <td class="small" align="right">#[memoryUsedNow]# MByte</td>
+<td class="small" align="right">&nbsp;<br>&nbsp;</td>
 <td class="small" align="left">used memory in the JVM within total amount</td>
 </tr>
+<tr class="TableCellLight">
+<td class="small" align="right" colspan="5">Re-Configuration of Startup Paramenters: </td>
+<td class="small" align="right"><input type="submit" name="setStartup" value="Set"></td>
+<td class="small" align="left">Changes take effect after <b>re-start</b> of YaCy<br>this works only on linux/unix systems</td>
+</tr>
+</form>
 </table>
 </p>
     
@@ -254,12 +266,12 @@ Increasing this cache may speed up the peer-ping.</td>
 </tr>
 
 <tr class="TableCellLight">
-<td class="small" align="left" colspan="8">Re-Configuration:</td>
+<td class="small" align="right" colspan="8">Re-Configuration:</td>
 <td class="small" align="center"><input type="submit" name="setCustom" value="Set"><br>these<br>custom<br>values<br>&nbsp;</td>
 <td class="small" align="center"><input type="submit" name="setDefault" value="Set"><br>all<br>default<br>values<br>&nbsp;</td>
 <td class="small" align="center"><input type="submit" name="setGood" value="Set"><br>all<br>recom-<br>mended values</td>
 <td class="small" align="center"><input type="submit" name="setBest" value="Set"><br>all<br>optimum<br>values<br>&nbsp;</td>
-<td class="small" align="center">Changes take effect after <b>re-start</b> of YaCy</td>
+<td class="small" align="left">Changes take effect after <b>re-start</b> of YaCy</td>
 </tr>
 
 </form>

@@ -464,6 +464,17 @@ ramCacheWiki    =     8192
 # ram cache for news1.db
 ramCacheNews    =     8192
 
+# default memory settings for startup of yacy
+# is only valid in unix/shell environments and
+# not for first startup of YaCy
+
+# -Xms<size> set initial Java heap size
+javastart_Xmx=Xmx64m
+
+# -Xmx<size> set maximum Java heap size
+javastart_Xms=Xms10m
+
+
 # performance properties for the word index cache
 # wordCacheMax is the number of word indexes that shall be held in the
 # ram cache during indexing. When YaCy is shut down, this cache must be
