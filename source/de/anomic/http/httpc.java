@@ -767,6 +767,7 @@ public final class httpc {
         boundary = "--" + boundary.substring(pos + "boundary=".length());
 
         boolean zipContent = args.containsKey(GZIP_POST_BODY);
+        args.remove(GZIP_POST_BODY);
         
         OutputStream out;
         GZIPOutputStream zippedOut;
