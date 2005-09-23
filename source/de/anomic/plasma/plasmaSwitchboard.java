@@ -1195,8 +1195,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // filter deny
         if ((currentdepth > 0) && (profile != null) && (!(nexturlString.matches(profile.generalFilter())))) {
             reason = "denied_(does_not_match_filter)";
+            /*
             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-                    name, reason, new bitfield(plasmaURL.urlFlagLength), false);
+                    name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
             log.logFine("URL '" + nexturlString + "' does not match crawling filter '" + profile.generalFilter() + "'.");
             return reason;
         }
@@ -1204,8 +1205,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // deny cgi
         if (plasmaHTCache.isCGI(nexturlString))  {
             reason = "denied_(cgi_url)";
+            /*
             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-                                  name, reason, new bitfield(plasmaURL.urlFlagLength), false);
+                                  name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
             log.logFine("URL '" + nexturlString + "' is cgi URL.");
             return reason;
         }
@@ -1213,31 +1215,33 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // deny post properties
         if ((plasmaHTCache.isPOST(nexturlString)) && (profile != null) && (!(profile.crawlingQ())))  {
             reason = "denied_(post_url)";
+            /*
             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-                                  name, reason, new bitfield(plasmaURL.urlFlagLength), false);
+                                  name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
             log.logFine("URL '" + nexturlString + "' is post URL.");
+            return reason;
+        }
+        
+        String nexturlhash = plasmaURL.urlHash(nexturl);
+        String dbocc = "";
+        if ((dbocc = urlPool.exists(nexturlhash)) != null) {
+            // DISTIGUISH OLD/RE-SEARCH CASES HERE!
+            reason = "double_(registered_in_" + dbocc + ")";
+            /*
+            urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
+                                  name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
+            log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'.");
             return reason;
         }
         
         // checking robots.txt
         if (robotsParser.isDisallowed(nexturl)) {
             reason = "denied_(robots.txt)";
+            /*
             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-                                  name, reason, new bitfield(plasmaURL.urlFlagLength), false);
+                                  name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
             log.logFine("Crawling of URL '" + nexturlString + "' disallowed by robots.txt.");
             return reason;            
-        }
-        
-
-        String nexturlhash = plasmaURL.urlHash(nexturl);
-        String dbocc = "";
-        if ((dbocc = urlPool.exists(nexturlhash)) != null) {
-            // DISTIGUISH OLD/RE-SEARCH CASES HERE!
-            reason = "double_(registered_in_" + dbocc + ")";
-            urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-                                  name, reason, new bitfield(plasmaURL.urlFlagLength), false);
-            log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'.");
-            return reason;
         }
         
         // store information
