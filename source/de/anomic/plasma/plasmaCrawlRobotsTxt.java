@@ -57,27 +57,36 @@ import java.util.Map;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.logging.serverLog;
 
 public class plasmaCrawlRobotsTxt {
     private kelondroMap robotsTable;
     private File robotsTableFile;
     
-    public plasmaCrawlRobotsTxt(File robotsTableFile) throws IOException {
+    public plasmaCrawlRobotsTxt(File robotsTableFile, int bufferkb) throws IOException {
         this.robotsTableFile = robotsTableFile;
         if (robotsTableFile.exists()) {
             try {
-                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, 1000000));
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024));
             } catch (kelondroException e) {
                 robotsTableFile.delete();
                 robotsTableFile.getParentFile().mkdirs();
-                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, 1000000, 256, 512));
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512));
             }
         } else {
             robotsTableFile.getParentFile().mkdirs();
-            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, 1000000, 256, 512));
+            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512));
         }
     }
+    
+    public int[] dbCacheChunkSize() {
+        return robotsTable.cacheChunkSize();
+    }    
+    
+    public int[] dbCacheFillStatus() {
+        return robotsTable.cacheFillStatus();
+    }    
     
     private void resetDatabase() {
         // deletes the robots.txt database and creates a new one

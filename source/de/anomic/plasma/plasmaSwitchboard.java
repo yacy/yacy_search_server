@@ -255,6 +255,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int ramHTTP    = (int) getConfigLong("ramCacheHTTP", 1024) / 1024;
         int ramMessage = (int) getConfigLong("ramCacheMessage", 1024) / 1024;
         int ramWiki    = (int) getConfigLong("ramCacheWiki", 1024) / 1024;
+        int ramRobots  = (int) getConfigLong("ramCacheRobots",1024) / 1024;
         this.log.logConfig("LURL    Cache memory = " + ppRamString(ramLURL));
         this.log.logConfig("NURL    Cache memory = " + ppRamString(ramNURL));
         this.log.logConfig("EURL    Cache memory = " + ppRamString(ramEURL));
@@ -262,6 +263,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("HTTP    Cache memory = " + ppRamString(ramHTTP));
         this.log.logConfig("Message Cache memory = " + ppRamString(ramMessage));
         this.log.logConfig("Wiki    Cache memory = " + ppRamString(ramWiki));
+        this.log.logConfig("Robots  Cache memory = " + ppRamString(ramRobots));
         
         // make crawl profiles database and default profiles
         this.log.logConfig("Initializing Crawl Profiles");
@@ -273,7 +275,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // loading the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
         File robotsDBFile = new File(this.plasmaPath, "crawlRobotsTxt.db");
-        this.robots = new plasmaCrawlRobotsTxt(robotsDBFile);
+        this.robots = new plasmaCrawlRobotsTxt(robotsDBFile, ramRobots);
         this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile + ", " + this.robots.size() + " entries");        
         
         // start indexing management

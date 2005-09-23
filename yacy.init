@@ -464,6 +464,9 @@ ramCacheWiki    =     8192
 # ram cache for news1.db
 ramCacheNews    =     8192
 
+# ram cache for robotsTxt.db
+ramCacheRobots  =  1048576
+
 # default memory settings for startup of yacy
 # is only valid in unix/shell environments and
 # not for first startup of YaCy

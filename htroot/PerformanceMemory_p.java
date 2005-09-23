@@ -43,19 +43,15 @@
 //javac -classpath .:../classes PerformanceMemory_p.java
 //if the shell's current path is HTROOT
 
-import java.util.Iterator;
 import java.util.Map;
 import java.io.File;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverThread;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeedDB;
 
 public class PerformanceMemory_p {
     
@@ -88,6 +84,7 @@ public class PerformanceMemory_p {
                 env.setConfig("ramCacheMessage", Long.parseLong(post.get("ramCacheMessage", "0")) * KB);
                 env.setConfig("ramCacheWiki", Long.parseLong(post.get("ramCacheWiki", "0")) * KB);
                 env.setConfig("ramCacheNews", Long.parseLong(post.get("ramCacheNews", "0")) * KB);
+                env.setConfig("ramCacheRobots", Long.parseLong(post.get("ramCacheRobots", "0")) * KB);
             }
             if (post.containsKey("setDefault")) {
                 env.setConfig("ramCacheRWI", Long.parseLong((String) defaultSettings.get("ramCacheRWI")));
@@ -99,6 +96,7 @@ public class PerformanceMemory_p {
                 env.setConfig("ramCacheMessage", Long.parseLong((String) defaultSettings.get("ramCacheMessage")));
                 env.setConfig("ramCacheWiki", Long.parseLong((String) defaultSettings.get("ramCacheWiki")));
                 env.setConfig("ramCacheNews", Long.parseLong((String) defaultSettings.get("ramCacheNews")));
+                env.setConfig("ramCacheRobots", Long.parseLong((String) defaultSettings.get("ramCacheRobots")));
             }
             if (post.containsKey("setGood")) set = "setGood";
             if (post.containsKey("setBest")) set = "setBest";
@@ -192,6 +190,11 @@ public class PerformanceMemory_p {
         chk = yacyCore.newsPool.dbCacheChunkSize();
         slt = yacyCore.newsPool.dbCacheFillStatus();
         putprop(prop, env, "News", set);
+        
+        req = sb.robots.size();
+        chk = sb.robots.dbCacheChunkSize();
+        slt = sb.robots.dbCacheFillStatus();
+        putprop(prop, env, "Robots", set);        
         
         prop.put("usedTotal", usedTotal / MB);
         prop.put("currTotal", currTotal / MB);
