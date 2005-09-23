@@ -1,8 +1,7 @@
 #!/bin/sh
 cd `dirname $0`
 
-which wget >/dev/null
-if [ 0 == $? ];
+if [ -x `which wget` ];
 then
 port=`cat DATA/SETTINGS/httpProxy.conf |grep "^port="|sed "s/.*=//"`
 pw=`cat DATA/SETTINGS/httpProxy.conf |grep "^adminAccountBase64MD5="|sed "s/.*=//"`
