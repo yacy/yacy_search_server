@@ -6,7 +6,10 @@
 // Frankfurt, Germany, 2004
 //
 // This File is contributed by Alexander Schier
-// last change: 18.06.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,11 +45,10 @@
 // Contributions and changes to the program code must be marked as such.
 
 // You must compile this file with
-// javac -classpath .:../../Classes list.java
+// javac -classpath .:../../classes list.java
 // if the shell's current path is HTROOT
 
 import java.io.File;
-
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverCore;
@@ -56,33 +58,32 @@ import de.anomic.server.serverSwitch;
 public class list {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
-	serverObjects prop = new serverObjects();
-	String col = (String) post.get("col", "");
+        // return variable that accumulates replacements
+        final serverObjects prop = new serverObjects();
+        final String col = (String) post.get("col", "");
 
-	File listsPath = new File(env.getRootPath(),env.getConfig("listsPath", "DATA/LISTS"));
+        final File listsPath = new File(env.getRootPath(),env.getConfig("listsPath", "DATA/LISTS"));
 
-	if (col.equals("black")) {
-	    String filename = "";
-	    String line;
-	    String out = "";
-	    
-		String filenames=env.getConfig("proxyBlackListsShared", "");
-		String filenamesarray[] = filenames.split(",");
+        if (col.equals("black")) {
+            String filename = "";
+            final StringBuffer out = new StringBuffer();
 
-		if(filenamesarray.length >0){
-			for(int i = 0;i <= filenamesarray.length -1; i++){
-				filename = filenamesarray[i];
-				out += listManager.getListString(new File(listsPath,filename).toString(), false) + serverCore.crlfString;
-			}
-		}//if filenamesarray.length >0
-	    
-	    prop.put("list",out);
-	} else {
-	    prop.put("list","");
-	}
+            final String filenames=env.getConfig("proxyBlackListsShared", "");
+            final String[] filenamesarray = filenames.split(",");
 
-	return prop;
+            if(filenamesarray.length >0){
+                for(int i = 0;i <= filenamesarray.length -1; i++){
+                    filename = filenamesarray[i];
+                    out.append(listManager.getListString(new File(listsPath,filename).toString(), false)).append(serverCore.crlfString);
+                }
+            } // if filenamesarray.length >0
+
+            prop.put("list",out);
+        } else {
+            prop.put("list","");
+        }
+
+        return prop;
     }
 
 }
