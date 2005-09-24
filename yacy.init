@@ -465,7 +465,10 @@ ramCacheWiki    =     8192
 ramCacheNews    =     8192
 
 # ram cache for robotsTxt.db
-ramCacheRobots  =  1048576
+ramCacheRobots  =  2097152
+
+# ram cache for crawlProfile.db
+ramCacheProfiles  =   8192
 
 # default memory settings for startup of yacy
 # is only valid in unix/shell environments and

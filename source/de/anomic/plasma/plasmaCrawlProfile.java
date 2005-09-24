@@ -58,16 +58,25 @@ public class plasmaCrawlProfile {
     
     private kelondroMap profileTable;
     private File profileTableFile;
+    private int bufferkb;
     
-    public plasmaCrawlProfile(File profileTableFile) throws IOException {
+    public plasmaCrawlProfile(File profileTableFile, int bufferkb) throws IOException {
         this.profileTableFile = profileTableFile;
         if (profileTableFile.exists()) {
-            profileTable = new kelondroMap(new kelondroDyn(profileTableFile, 32000));
+            profileTable = new kelondroMap(new kelondroDyn(profileTableFile, bufferkb * 1024));
         } else {
             profileTableFile.getParentFile().mkdirs();
-            profileTable = new kelondroMap(new kelondroDyn(profileTableFile, 32000, plasmaURL.urlCrawlProfileHandleLength, 2000));
+            profileTable = new kelondroMap(new kelondroDyn(profileTableFile, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000));
         }
     }
+    
+    public int[] dbCacheChunkSize() {
+        return profileTable.cacheChunkSize();
+    }    
+    
+    public int[] dbCacheFillStatus() {
+        return profileTable.cacheFillStatus();
+    }    
     
     private void resetDatabase() {
         // deletes the profile database and creates a new one
@@ -77,7 +86,7 @@ public class plasmaCrawlProfile {
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         try {
             profileTableFile.getParentFile().mkdirs();
-            profileTable = new kelondroMap(new kelondroDyn(profileTableFile, 32000, plasmaURL.urlCrawlProfileHandleLength, 2000));
+            profileTable = new kelondroMap(new kelondroDyn(profileTableFile, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000));
         } catch (IOException e){
             serverLog.logSevere("PLASMA", "plasmaCrawlProfile.resetDatabase", e);
         }

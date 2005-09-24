@@ -256,19 +256,21 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int ramMessage = (int) getConfigLong("ramCacheMessage", 1024) / 1024;
         int ramWiki    = (int) getConfigLong("ramCacheWiki", 1024) / 1024;
         int ramRobots  = (int) getConfigLong("ramCacheRobots",1024) / 1024;
-        this.log.logConfig("LURL    Cache memory = " + ppRamString(ramLURL));
-        this.log.logConfig("NURL    Cache memory = " + ppRamString(ramNURL));
-        this.log.logConfig("EURL    Cache memory = " + ppRamString(ramEURL));
-        this.log.logConfig("RWI     Cache memory = " + ppRamString(ramRWI));
-        this.log.logConfig("HTTP    Cache memory = " + ppRamString(ramHTTP));
-        this.log.logConfig("Message Cache memory = " + ppRamString(ramMessage));
-        this.log.logConfig("Wiki    Cache memory = " + ppRamString(ramWiki));
-        this.log.logConfig("Robots  Cache memory = " + ppRamString(ramRobots));
+        int ramProfiles= (int) getConfigLong("ramCacheProfiles",1024) / 1024;
+        this.log.logConfig("LURL     Cache memory = " + ppRamString(ramLURL));
+        this.log.logConfig("NURL     Cache memory = " + ppRamString(ramNURL));
+        this.log.logConfig("EURL     Cache memory = " + ppRamString(ramEURL));
+        this.log.logConfig("RWI      Cache memory = " + ppRamString(ramRWI));
+        this.log.logConfig("HTTP     Cache memory = " + ppRamString(ramHTTP));
+        this.log.logConfig("Message  Cache memory = " + ppRamString(ramMessage));
+        this.log.logConfig("Wiki     Cache memory = " + ppRamString(ramWiki));
+        this.log.logConfig("Robots   Cache memory = " + ppRamString(ramRobots));
+        this.log.logConfig("Profiles Cache memory = " + ppRamString(ramProfiles));
         
         // make crawl profiles database and default profiles
         this.log.logConfig("Initializing Crawl Profiles");
         File profilesFile = new File(this.plasmaPath, "crawlProfiles0.db");
-        this.profiles = new plasmaCrawlProfile(profilesFile);
+        this.profiles = new plasmaCrawlProfile(profilesFile, ramProfiles);
         initProfiles();
         log.logConfig("Loaded profiles from file " + profilesFile + ", " + this.profiles.size() + " entries");
         
@@ -501,7 +503,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         final File pdb = new File(plasmaPath, "crawlProfiles0.db");
         if (pdb.exists()) pdb.delete();
         try {
-            profiles = new plasmaCrawlProfile(pdb);
+            int ramProfiles = (int) getConfigLong("ramCacheProfiles",1024) / 1024;
+            profiles = new plasmaCrawlProfile(pdb, ramProfiles);
             initProfiles();
         } catch (IOException e) {}
     }

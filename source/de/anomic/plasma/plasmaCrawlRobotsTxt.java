@@ -63,9 +63,11 @@ import de.anomic.server.logging.serverLog;
 public class plasmaCrawlRobotsTxt {
     private kelondroMap robotsTable;
     private File robotsTableFile;
+    private int bufferkb;
     
     public plasmaCrawlRobotsTxt(File robotsTableFile, int bufferkb) throws IOException {
         this.robotsTableFile = robotsTableFile;
+        this.bufferkb = bufferkb;
         if (robotsTableFile.exists()) {
             try {
                 robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024));
@@ -96,7 +98,7 @@ public class plasmaCrawlRobotsTxt {
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         try {
             robotsTableFile.getParentFile().mkdirs();
-            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, 1000000, 256, 512));
+            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, this.bufferkb, 256, 512));
         } catch (IOException e){
             serverLog.logSevere("PLASMA", "robotsTxt.resetDatabase", e);
         }

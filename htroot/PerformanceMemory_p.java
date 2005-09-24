@@ -85,6 +85,7 @@ public class PerformanceMemory_p {
                 env.setConfig("ramCacheWiki", Long.parseLong(post.get("ramCacheWiki", "0")) * KB);
                 env.setConfig("ramCacheNews", Long.parseLong(post.get("ramCacheNews", "0")) * KB);
                 env.setConfig("ramCacheRobots", Long.parseLong(post.get("ramCacheRobots", "0")) * KB);
+                env.setConfig("ramCacheProfiles", Long.parseLong(post.get("ramCacheProfiles", "0")) * KB);
             }
             if (post.containsKey("setDefault")) {
                 env.setConfig("ramCacheRWI", Long.parseLong((String) defaultSettings.get("ramCacheRWI")));
@@ -97,6 +98,7 @@ public class PerformanceMemory_p {
                 env.setConfig("ramCacheWiki", Long.parseLong((String) defaultSettings.get("ramCacheWiki")));
                 env.setConfig("ramCacheNews", Long.parseLong((String) defaultSettings.get("ramCacheNews")));
                 env.setConfig("ramCacheRobots", Long.parseLong((String) defaultSettings.get("ramCacheRobots")));
+                env.setConfig("ramCacheProfiles", Long.parseLong((String) defaultSettings.get("ramCacheProfiles")));
             }
             if (post.containsKey("setGood")) set = "setGood";
             if (post.containsKey("setBest")) set = "setBest";
@@ -195,6 +197,11 @@ public class PerformanceMemory_p {
         chk = sb.robots.dbCacheChunkSize();
         slt = sb.robots.dbCacheFillStatus();
         putprop(prop, env, "Robots", set);        
+        
+        req = sb.profiles.size();
+        chk = sb.profiles.dbCacheChunkSize();
+        slt = sb.profiles.dbCacheFillStatus();
+        putprop(prop, env, "Profiles", set);        
         
         prop.put("usedTotal", usedTotal / MB);
         prop.put("currTotal", currTotal / MB);
