@@ -69,10 +69,10 @@ public class plasmaCrawlNURL extends plasmaURL {
     public static final int STACK_TYPE_MOVIE    = 12; // put on movie stack
     public static final int STACK_TYPE_MUSIC    = 13; // put on music stack
 
-    private kelondroStack coreStack;      // links found by crawling to depth-1
-    private kelondroStack limitStack;     // links found by crawling at target depth
-    private kelondroStack overhangStack;  // links found by crawling at depth+1
-    private kelondroStack remoteStack;    // links from remote crawl orders
+    private plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
+    private plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
+    private plasmaCrawlBalancer overhangStack;  // links found by crawling at depth+1
+    private plasmaCrawlBalancer remoteStack;    // links from remote crawl orders
     private kelondroStack imageStack;     // links pointing to image resources
     private kelondroStack movieStack;     // links pointing to movie resources
     private kelondroStack musicStack;     // links pointing to music resources
@@ -116,10 +116,10 @@ public class plasmaCrawlNURL extends plasmaURL {
         File imageStackFile = new File(cacheStacksPath, "urlNoticeImage0.stack");
         File movieStackFile = new File(cacheStacksPath, "urlNoticeMovie0.stack");
         File musicStackFile = new File(cacheStacksPath, "urlNoticeMusic0.stack");
-        if (coreStackFile.exists()) coreStack = new kelondroStack(coreStackFile, 0); else coreStack = new kelondroStack(coreStackFile, 0, new int[] {plasmaURL.urlHashLength});
-        if (limitStackFile.exists()) limitStack = new kelondroStack(limitStackFile, 0); else limitStack = new kelondroStack(limitStackFile, 0, new int[] {plasmaURL.urlHashLength});
-        if (overhangStackFile.exists()) overhangStack = new kelondroStack(overhangStackFile, 0); else overhangStack = new kelondroStack(overhangStackFile, 0, new int[] {plasmaURL.urlHashLength});
-        if (remoteStackFile.exists()) remoteStack = new kelondroStack(remoteStackFile, 0); else remoteStack = new kelondroStack(remoteStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        coreStack = new plasmaCrawlBalancer(coreStackFile, 0);
+        limitStack = new plasmaCrawlBalancer(limitStackFile, 0);
+        overhangStack = new plasmaCrawlBalancer(overhangStackFile, 0);
+        remoteStack = new plasmaCrawlBalancer(remoteStackFile, 0);
         if (imageStackFile.exists()) imageStack = new kelondroStack(imageStackFile, 0); else imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength});
         if (movieStackFile.exists()) movieStack = new kelondroStack(movieStackFile, 0); else movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength});
         if (musicStackFile.exists()) musicStack = new kelondroStack(musicStackFile, 0); else musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength});
@@ -128,13 +128,26 @@ public class plasmaCrawlNURL extends plasmaURL {
         stackIndex = new HashSet();
         new initStackIndex().start();
     }
+    
+    public void close() {
+        coreStack.close();
+        try {
+            limitStack.close();
+            overhangStack.close();
+            remoteStack.close();
+            imageStack.close();
+            movieStack.close();
+            musicStack.close();
+        } catch (IOException e) {}
+        try { super.close(); } catch (IOException e) {}
+    }
 
     public class initStackIndex extends Thread {
         public void run() {
             Iterator i;
             try {
                 //System.out.println("init     coreStack index");
-                i =     coreStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+                i =     coreStack.iterator(); while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));
                 //System.out.println("init    limitStack index");
                 i =    limitStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
                 //System.out.println("init overhangStack index");
@@ -192,17 +205,17 @@ public class plasmaCrawlNURL extends plasmaURL {
                                        int depth, int anchors, int forkfactor, int stackMode) {
         Entry e = new Entry(initiator, url, referrer, name, loaddate,
                             profile, depth, anchors, forkfactor);
-        push(stackMode, e.hash);
+        push(stackMode, url.getHost(), e.hash);
         return e;
     }
 
-    private void push(int stackType, String hash) {
+    private void push(int stackType, String domain, String hash) {
         try {
             switch (stackType) {
-                case STACK_TYPE_CORE:     coreStack.push(new byte[][] {hash.getBytes()}); break;
-                case STACK_TYPE_LIMIT:    limitStack.push(new byte[][] {hash.getBytes()}); break;
-                case STACK_TYPE_OVERHANG: overhangStack.push(new byte[][] {hash.getBytes()}); break;
-                case STACK_TYPE_REMOTE:   remoteStack.push(new byte[][] {hash.getBytes()}); break;
+                case STACK_TYPE_CORE:     coreStack.add(domain, hash.getBytes()); break;
+                case STACK_TYPE_LIMIT:    limitStack.add(domain, hash.getBytes()); break;
+                case STACK_TYPE_OVERHANG: overhangStack.add(domain, hash.getBytes()); break;
+                case STACK_TYPE_REMOTE:   remoteStack.add(domain, hash.getBytes()); break;
                 case STACK_TYPE_IMAGE:    imageStack.push(new byte[][] {hash.getBytes()}); break;
                 case STACK_TYPE_MOVIE:    movieStack.push(new byte[][] {hash.getBytes()}); break;
                 case STACK_TYPE_MUSIC:    musicStack.push(new byte[][] {hash.getBytes()}); break;
@@ -239,16 +252,9 @@ public class plasmaCrawlNURL extends plasmaURL {
     }
 
     public void shift(int fromStack, int toStack) throws IOException {
-        switch (fromStack) {
-            case STACK_TYPE_CORE:     push(toStack, new String(coreStack.pop()[0])); return;
-            case STACK_TYPE_LIMIT:    push(toStack, new String(limitStack.pop()[0])); return;
-            case STACK_TYPE_OVERHANG: push(toStack, new String(overhangStack.pop()[0])); return;
-            case STACK_TYPE_REMOTE:   push(toStack, new String(remoteStack.pop()[0])); return;
-            case STACK_TYPE_IMAGE:    push(toStack, new String(imageStack.pop()[0])); return;
-            case STACK_TYPE_MOVIE:    push(toStack, new String(movieStack.pop()[0])); return;
-            case STACK_TYPE_MUSIC:    push(toStack, new String(musicStack.pop()[0])); return;
-            default: return;
-        }
+        Entry entry = pop(fromStack);
+        if (entry.url() == null) return;
+        push(toStack, entry.url.getHost(), entry.hash());
     }
 
     public void clear(int stackType) {
@@ -281,6 +287,21 @@ public class plasmaCrawlNURL extends plasmaURL {
         }
     }
 
+    private Entry pop(plasmaCrawlBalancer balancer) {
+        // this is a filo - pop
+        try {
+            if (balancer.size() > 0) {
+                Entry e = new Entry(new String((byte[]) balancer.get()[1]));
+                stackIndex.remove(e.hash);
+                return e;
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     private Entry[] top(kelondroStack stack, int count) {
         // this is a filo - top
         if (count > stack.size()) count = stack.size();
@@ -288,6 +309,22 @@ public class plasmaCrawlNURL extends plasmaURL {
         try {
             for (int i = 0; i < count; i++) {
                 byte[] hash = stack.top(i)[0];
+                if (hash == null) continue;
+                list.add(new Entry(new String(hash)));
+            }
+            return (Entry[])list.toArray(new Entry[list.size()]);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private Entry[] top(plasmaCrawlBalancer balancer, int count) {
+        // this is a filo - top
+        if (count > balancer.size()) count = balancer.size();
+        ArrayList list = new ArrayList(count);
+        try {
+            for (int i = 0; i < count; i++) {
+                byte[] hash = balancer.top(i);
                 if (hash == null) continue;
                 list.add(new Entry(new String(hash)));
             }

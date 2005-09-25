@@ -814,11 +814,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
         
-        if ((coreCrawlJobSize() == 0) && (limitCrawlTriggerJobSize() > 100)) {
+        if ((coreCrawlJobSize() <= 20) && (limitCrawlTriggerJobSize() > 100)) {
             // it is not efficient if the core crawl job is empty and we have too much to do
             // move some tasks to the core crawl job
-            int toshift = limitCrawlTriggerJobSize() / 10;
+            int toshift = limitCrawlTriggerJobSize() / 5;
             if (toshift > 1000) toshift = 1000;
+            if (toshift > limitCrawlTriggerJobSize()) toshift = limitCrawlTriggerJobSize();
             try {
                 for (int i = 0; i < toshift; i++) {
                     urlPool.noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);

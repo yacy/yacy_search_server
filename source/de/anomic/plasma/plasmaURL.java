@@ -106,7 +106,7 @@ public class plasmaURL {
     }
 
     public void close() throws IOException {
-	urlHashCache.close();
+	if (urlHashCache != null) urlHashCache.close();
     }
 
     public boolean exists(String urlHash) {
