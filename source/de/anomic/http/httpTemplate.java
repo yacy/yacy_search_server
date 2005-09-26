@@ -364,7 +364,7 @@ public final class httpTemplate {
 	    }else if( (bb & 0xFF) == ps){ //include
 			String include = "";
 			String line = "";
-		    keyStream = new ByteArrayOutputStream(); //reset stream
+                        keyStream = new ByteArrayOutputStream(); //reset stream
 			if(transferUntil(pis, keyStream, iClose)){
 			String filename = keyStream.toString();
 			if(filename.startsWith( Character.toString((char)lbr) ) && filename.endsWith( Character.toString((char)rbr) )){ //simple pattern for filename
@@ -373,7 +373,7 @@ public final class httpTemplate {
             if ((!filename.equals("")) && (!filename.equals(dflt))) {
                 BufferedReader br = null;
 				try{
-					br = new BufferedReader(new InputStreamReader(new FileInputStream( new File("htroot", filename) )));
+					br = new BufferedReader(new InputStreamReader(new FileInputStream( filename )));
 					//Read the Include
 					while( (line = br.readLine()) != null ){
 						include+=line+de.anomic.server.serverCore.crlfString;

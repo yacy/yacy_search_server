@@ -534,7 +534,7 @@ public class ftpc {
       err.println(logPrefix + "---- Syntax: GET <remote-file> [<local-file>]");
       return true;
     }
-    String remote = (new File(cmd[1])).getName();
+    String remote = cmd[1]; //(new File(cmd[1])).getName();
     File local;
     File l;
     if (cmd.length == 2) {
@@ -1664,15 +1664,15 @@ cd ..
       }
       
       // after stream is empty we should get control completion echo
-      reply = receive();
-      boolean success = (Integer.parseInt(reply.substring(0, 1)) == 2);
+      //reply = receive();
+      //boolean success = (Integer.parseInt(reply.substring(0, 1)) == 2);
    
       // shutdown connection
       outFile.close();
       ClientStream.close();
       data.close();
 
-      if (!success) throw new IOException(reply);
+      //if (!success) throw new IOException(reply);
 
       // write statistics
       long stop = GregorianCalendar.getInstance(GMTTimeZone).getTime().getTime();
@@ -1910,11 +1910,12 @@ cd ..
 			   String account, String password) {
 	try {
 	    ftpc c = new ftpc();
+            if (remoteFile.length() == 0) remoteFile = "/";
 	    c.exec("open " + host, false);
 	    c.exec("user " + account + " " + password, false);
-	    c.exec("lcd " + localPath.toString(), false);
+	    c.exec("lcd " + localPath.getAbsolutePath().toString(), false);
 	    c.exec("binary", false);
-	    c.exec("get " + remoteFile, false);
+	    c.exec("get " + remoteFile + " " + localPath.getAbsoluteFile().toString(), false);
 	    c.exec("close", false);
 	    c.exec("exit", false);
 	} catch (java.security.AccessControlException e) {

@@ -155,7 +155,7 @@ public final class robotsParser{
         plasmaCrawlRobotsTxt.Entry robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
         
         // if we have not found any data or the data is older than 7 days, we need to load it from the remote server
-        if ((robotsTxt4Host == null) || 
+        if ((robotsTxt4Host == null) || (robotsTxt4Host.getLoadedDate() == null) ||
             (System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000)) {
             URL robotsURL = null;
             // generating the proper url to download the robots txt

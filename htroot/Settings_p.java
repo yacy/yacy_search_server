@@ -49,6 +49,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.io.File;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -177,7 +178,7 @@ public final class Settings_p {
             String uploaderName = (String) uploaderKeys.nextElement();
             prop.put("seedUploadMethods_" +count+ "_name", uploaderName);
             prop.put("seedUploadMethods_" +count+ "_selected", uploaderName.equals(enabledUploader)?1:0);            
-            prop.put("seedUploadMethods_" +count+ "_file", "yacy/seedUpload/yacySeedUpload" + uploaderName + ".html");
+            prop.put("seedUploadMethods_" +count+ "_file", new File(env.getRootPath(), "htroot/yacy/seedUpload/yacySeedUpload" + uploaderName + ".html").toString());
             
             yacySeedUploader theUploader = yacyCore.getSeedUploader(uploaderName);
             String[] configOptions = theUploader.getConfigurationOptions();

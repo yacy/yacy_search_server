@@ -48,6 +48,8 @@
 
 import java.lang.Math;
 import java.text.DecimalFormat;
+import java.io.File;
+
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
@@ -76,7 +78,7 @@ public class Status {
         yacyCore.peerActions.updateMySeed();
 
         if (((plasmaSwitchboard) env).adminAuthenticated(header) >= 2) {
-            prop.put("privateStatusTable","Status_p.inc");
+            prop.put("privateStatusTable", new File(env.getRootPath(), "htroot/Status_p.inc").toString());
         } else {
             prop.put("privateStatusTable", "");
         }
