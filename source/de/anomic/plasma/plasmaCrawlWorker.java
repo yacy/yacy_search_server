@@ -311,6 +311,7 @@ public final class plasmaCrawlWorker extends Thread {
             log.logInfo("CRAWLER Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
             sb.urlPool.errorURL.newEntry(url, referer,initiator, yacyCore.seedDB.mySeed.hash,
                     name, "denied_(url_in_blacklist)", new bitfield(plasmaURL.urlFlagLength), true);
+            return;
         }            
         
         // TODO: resolve yacy and yacyh domains
