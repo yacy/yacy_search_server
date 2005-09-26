@@ -1044,15 +1044,15 @@ cd ..
         if (!line.startsWith("total ")) files.addElement(line);
 
       // after stream is empty we should get control completion echo
-      reply = receive();
+      //reply = receive();
 
-      boolean success = (Integer.parseInt(reply.substring(0, 1)) == 2);
+      //boolean success = (Integer.parseInt(reply.substring(0, 1)) == 2);
 
       // shutdown connection
       ClientStream.close();
       data.close();
 
-      if (!success) throw new IOException(reply);
+      //if (!success) throw new IOException(reply);
 
       files.trimToSize();
       return files;
@@ -1843,6 +1843,26 @@ cd ..
     public void checkSecurityAccess(String provider) { }
  }
 
+    
+    public static Vector dir(String host,
+			   String remotePath,
+			   String account, String password,
+                           boolean extended) {
+	try {
+	    ftpc c = new ftpc();
+            c.cmd = new String[]{"open", host}; c.OPEN();
+            c.cmd = new String[]{"user", account, password}; c.USER();
+            c.cmd = new String[]{"ls"}; Vector v = c.list(remotePath, extended);
+            c.cmd = new String[]{"close"}; c.CLOSE();
+            c.cmd = new String[]{"exit"}; c.EXIT();
+            return v;
+	} catch (java.security.AccessControlException e) {
+            return null;
+	} catch (IOException e) {
+            return null;
+	}
+    }
+ 
     public static void dir(String host,
 			   String remotePath,
 			   String account, String password) {

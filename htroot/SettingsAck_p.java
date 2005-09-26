@@ -386,7 +386,7 @@ public class SettingsAck_p {
                 } else {
                     prop.put("info",14);
                     prop.put("info_errormsg",error.replaceAll("\n","<br>"));                
-                    //env.setConfig("seedUploadMethod","none");
+                    env.setConfig("seedUploadMethod","none");
                 }
                 return prop;
             }
