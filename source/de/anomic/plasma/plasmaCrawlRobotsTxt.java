@@ -156,7 +156,7 @@ public class plasmaCrawlRobotsTxt {
         private String hostName;
         
         public Entry(String hostName, Map mem) {
-            this.hostName = hostName;
+            this.hostName = hostName.toLowerCase();
             this.mem = mem; 
             
             if (this.mem.containsKey(DISALLOW_PATH_LIST)) {

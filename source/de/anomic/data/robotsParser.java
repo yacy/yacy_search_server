@@ -44,32 +44,24 @@
 
 package de.anomic.data;
 
-import java.lang.String;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Date;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaCrawlRobotsTxt;
-import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
-import de.anomic.yacy.yacyCore;
 
 /*
  * A class for Parsing robots.txt files.
@@ -145,11 +137,32 @@ public final class robotsParser{
         return deny;
 	}
 	
+    public static boolean containsRobotsData(URL nexturl) {
+        // generating the hostname:poart string needed to do a DB lookup
+        String urlHostPort = nexturl.getHost() + ":" + ((nexturl.getPort()==-1)?80:nexturl.getPort());
+        urlHostPort = urlHostPort.toLowerCase();
+        
+        // doing a DB lookup to determine if the robots data is already available
+        plasmaCrawlRobotsTxt.Entry robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
+        
+        // if we have not found any data or the data is older than 7 days, we need to load it from the remote server
+        if ((robotsTxt4Host == null) || (robotsTxt4Host.getLoadedDate() == null) ||
+            (System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000)) {
+            return false;
+        }
+        return true;
+    }
+    
+//    public static boolean enqueueRobotsCheck(String nexturlString, String referrerString, String initiatorHash, String name, Date loadDate, int currentdepth, plasmaCrawlProfile.entry profile) {
+//        
+//    }
+    
     public static boolean isDisallowed(URL nexturl) {
         if (nexturl == null) throw new IllegalArgumentException();               
         
         // generating the hostname:poart string needed to do a DB lookup
         String urlHostPort = nexturl.getHost() + ":" + ((nexturl.getPort()==-1)?80:nexturl.getPort());
+        urlHostPort = urlHostPort.toLowerCase();
         
         // doing a DB lookup to determine if the robots data is already available
         plasmaCrawlRobotsTxt.Entry robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
@@ -259,18 +272,4 @@ public final class robotsParser{
         }            
         return new Object[]{new Boolean(accessCompletelyRestricted),robotsTxt};
     }
-
-//	/*
-//	 * Test the class with a file robots.txt in the workdir and a testpath as argument.
-//	 */
-//	public static void main(String[] args){
-//		robotsParser rp=new robotsParser(new File("robots.txt"));
-//		for(int i=0;i<args.length;i++){
-//			if(rp.isAllowedRobots(args[i])){
-//				System.out.println(args[i]+" is allowed.");
-//			}else{
-//				System.out.println(args[i]+" is NOT allowed.");
-//			}
-//		}
-//	}
 }
