@@ -44,19 +44,16 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Enumeration;
 
+import de.anomic.kelondro.kelondroArray;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroRecords;
-import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.kelondroArray;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -72,17 +69,17 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     
     
     // class variables
-    private File databaseRoot;
-    private plasmaWordIndexInterface backend;
-    private TreeMap cache;
-    private kelondroMScoreCluster hashScore;
-    private kelondroMScoreCluster hashDate;
+    private final File databaseRoot;
+    private final plasmaWordIndexInterface backend;
+    private final TreeMap cache;
+    private final kelondroMScoreCluster hashScore;
+    private final kelondroMScoreCluster hashDate;
     private long startTime;
     private int maxWords;
-    private serverLog log;
-    private plasmaWordIndexAssortmentCluster assortmentCluster;
+    private final serverLog log;
+    private final plasmaWordIndexAssortmentCluster assortmentCluster;
     private int assortmentBufferSize; //kb
-    private flush flushThread;
+    private final flush flushThread;
 
     // calculated constants
     private static String minKey, maxKey;
@@ -292,7 +289,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                         true);
     }
     
-    private class flush extends Thread {
+    private final class flush extends Thread {
         boolean terminate, pause;
 	long intermission;
         
