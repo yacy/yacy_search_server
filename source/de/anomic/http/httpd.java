@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PushbackInputStream;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -980,11 +979,8 @@ public final class httpd implements serverHandler {
 //            tp.put("host", serverCore.publicIP().getHostAddress());
 //            tp.put("port", switchboard.getConfig("port", "8080"));        
             tp.put("peerName", yacyCore.seedDB.mySeed.getName());
-            tp.put("host", serverCore.publicIP());
-            tp.put("port", (serverCore.portForwardingEnabled && (serverCore.portForwarding != null)) 
-                           ? Integer.toString(serverCore.portForwarding.getPort()) 
-                           : switchboard.getConfig("port", "8080"));
-            
+            tp.put("host", host);
+            tp.put("port", Integer.toString(port));
             tp.put("errorMessageType", errorcase);            
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
             tp.put("requestMethod",    conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD));
