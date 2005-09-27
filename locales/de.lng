@@ -60,14 +60,14 @@ was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
 
 YaCy: Local Cache Management==YaCy: Lokale Cache Verwaltung
 Local Cache==Lokaler Cache
-The current cache size is==Die aktuelle Gr&ouml;&szlig;e des Cache betr&auml;gt
+The current cache size is==Die aktuelle Gr&ouml;&szlig;e des Caches betr&auml;gt
 The maximum cache size is==Die maximale Gr&ouml;&szlig;e betr&auml;gt
 
 #-----------------------------------------------------------
 #File: Config_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy advanced Config==YaCy: erweiterte Einstellungen
+YaCy advanced Config==YaCy: Erweiterte Einstellungen
 Advanced Config==Erweiterte Einstellungen
 Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie k&ouml;nnen alles &auml;ndern, bedenken Sie aber, dass einige &Auml;nderungen einen Neustart von YaCy erfordern und andere &Auml;nderungen YaCy ganz zum Absturz bringen k&ouml;nnen.
@@ -79,7 +79,7 @@ For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in de
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy: Incoming Cookies Monitor==YaCy: &Uuml;berwachung eingehender Cookies
-Cookie Monitor: Incoming Cookies==Cookie &Uuml;berwachung: eingehende Cookies
+Cookie Monitor: Incoming Cookies==Cookie &Uuml;berwachung: Eingehende Cookies
 This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Auflistung aller Cookies, die ein Web Server an diesen YaCy Proxy geschickt hat:
 Showing==Angezeigt werden
 entries from a total of==Eintr&auml;ge von insgesamt
@@ -90,8 +90,8 @@ Cookies==Cookies
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy: Outgoing Cookies Monitor==YaCy: &Uuml;berwachung ausgehender Cookies
-Cookie Monitor: Outgoing Cookies==Cookie &Uuml;berwachung: ausgehende Cookies
-This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Dies ist eine Auflistung aller Cookies, die Ihr Browser an einen Web Server geschickt hat:
+Cookie Monitor: Outgoing Cookies==Cookie &Uuml;berwachung: Ausgehende Cookies
+This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Dies ist eine Auflistung aller Cookies, die Ihr Browser an einen Webserver geschickt hat:
 Showing==Angezeigt werden
 entries from a total of==Eintr&auml;ge von insgesamt
 Cookies==Cookies
@@ -341,7 +341,7 @@ Application not yet initialized. Sorry. Please wait some seconds and repeat the 
 <b>ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</b> Please try again with different filter==
 Crawling of "\#\[crawlingURL\]\#" failed. Reason:==Crawling von "#[crawlingURL]#" fehlgeschlagen. Grund:
 Error with url input==Fehler mit der eigegebenen URL
-Error with file input==Fehler mit der eingebenen Datei
+Error with file input==Fehler mit der eingegebenen Datei
 Set new prefetch depth to==Neue Crawl Tiefe gesetzt auf
 Crawling of "\#\[crawlingURL\]\#" started.==Crawling von "#[crawlingURL]#" gestartet.
 You can monitor the crawling progress either by watching the URL queues==Sie k&ouml;nnen den Crawling Prozess auch sehen, indem Sie auf einer der folgenden URLs nachsehen:
@@ -566,6 +566,7 @@ Type==Typ
 Release/<br>SVN==YaCy Version/<br>SVN
 Contact==Kontakt
 Last<br>Seen==Zuletzt<br>online
+Offset==Versatz
 Uptime==Uptime
 Links==Links
 RWIs==RWIs
