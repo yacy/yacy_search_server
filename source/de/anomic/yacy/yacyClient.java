@@ -105,7 +105,7 @@ public class yacyClient {
             obj.put("pattern", "");
             obj.put("count", "20");
             obj.put("key", key);
-            obj.put("mytime", yacyCore.universalDateShortString());
+            obj.put("mytime", yacyCore.universalDateShortString(new Date()));
             obj.put("seed", yacyCore.seedDB.mySeed.genSeedStr(key));
             result = nxTools.table(httpc.wput(url,
             105000, null, null,
@@ -126,13 +126,11 @@ public class yacyClient {
             return -1;
         }
 
-        final Date remoteTime = yacyCore.parseUniversalDate((String) result.get("mytime")); // read remote time
-        
         // check consistency with expectation
         yacySeed otherPeer = null;
         float otherPeerVersion = 0;
         if (otherHash != null && otherHash.length() > 0) {
-            otherPeer = yacySeed.genRemoteSeed((String) result.get("seed0"), key, remoteTime);
+            otherPeer = yacySeed.genRemoteSeed((String) result.get("seed0"), key);
             if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
                 yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
                 return -1; // no success
@@ -199,6 +197,8 @@ public class yacyClient {
             return -1;
         }
 
+        //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get("mytime")); // read remote time
+        
         // read the seeds that the peer returned and integrate them into own database
         int i = 0;
         int count = 0;
@@ -206,7 +206,7 @@ public class yacyClient {
         while ((seedStr = (String) result.get("seed" + i++)) != null) {
             // integrate new seed into own database
             // the first seed, "seed0" is the seed of the responding peer
-            if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, key, remoteTime), (i == 1))) count++;
+            if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, key), (i == 1))) count++;
         }
         return count;
     }
@@ -221,8 +221,8 @@ public class yacyClient {
             "&object=seed&env=" + seedHash),
             10000, null, null, yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort));
             if (result == null || result.size() == 0) { return null; }
-            final Date remoteTime = yacyCore.parseUniversalDate((String) result.get("mytime")); // read remote time
-            return yacySeed.genRemoteSeed((String) result.get("response"), key, remoteTime);
+            //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get("mytime")); // read remote time
+            return yacySeed.genRemoteSeed((String) result.get("response"), key);
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.querySeed error:" + e.getMessage());
             return null;
@@ -310,7 +310,7 @@ public class yacyClient {
             obj.put("query", wordhashes);
             obj.put("ttl", "0");
             obj.put("duetime", Long.toString(duetime));
-            obj.put("mytime", yacyCore.universalDateShortString());
+            obj.put("mytime", yacyCore.universalDateShortString(new Date()));
             //yacyCore.log.logDebug("yacyClient.search url=" + url);
             final long timestamp = System.currentTimeMillis();
             final HashMap result = nxTools.table(httpc.wput(new URL(url),
@@ -401,7 +401,7 @@ public class yacyClient {
         post.put("process", "permission");
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetHash);
-        post.put("mytime", yacyCore.universalDateShortString());
+        post.put("mytime", yacyCore.universalDateShortString(new Date()));
         String address;
         if (targetHash.equals(yacyCore.seedDB.mySeed.hash)) {
             address = yacyCore.seedDB.mySeed.getAddress();
@@ -433,7 +433,7 @@ public class yacyClient {
         post.put("myseed", yacyCore.seedDB.mySeed.genSeedStr(key));
         post.put("youare", targetHash);
         post.put("subject", subject);
-        post.put("mytime", yacyCore.universalDateShortString());
+        post.put("mytime", yacyCore.universalDateShortString(new Date()));
         post.put("message", new String(message));
         String address;
         if (targetHash.equals(yacyCore.seedDB.mySeed.hash)) {
@@ -467,7 +467,7 @@ public class yacyClient {
         post.put("process", "crawl");
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);
-        post.put("mytime", yacyCore.universalDateShortString());
+        post.put("mytime", yacyCore.universalDateShortString(new Date()));
         post.put("url", crypt.simpleEncode(url.toString()));
         post.put("referrer", crypt.simpleEncode((referrer == null) ? "" : referrer.toString()));
         post.put("depth", "0");

@@ -74,6 +74,7 @@ import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
 
 public class yacyCore {
@@ -109,6 +110,7 @@ public class yacyCore {
     public static String universalDateShortPattern = "yyyyMMddHHmmss";
     public static SimpleDateFormat shortFormatter = new SimpleDateFormat(universalDateShortPattern);
     
+    /*
     public static long universalTime() {
     return universalDate().getTime();
     }
@@ -120,17 +122,21 @@ public class yacyCore {
     public static String universalDateShortString() {
     return universalDateShortString(universalDate());
     }
-
+    */
     public static String universalDateShortString(Date date) {
     return shortFormatter.format(date);
     }
 
-    public static Date parseUniversalDate(String remoteTimeString) {
+    public static Date parseUniversalDate(String remoteTimeString, String remoteUTCOffset) {
         if ((remoteTimeString == null) || (remoteTimeString.length() == 0)) return new Date();
+        if ((remoteUTCOffset == null) || (remoteUTCOffset.length() == 0)) return new Date();
         try {
-            return yacyCore.shortFormatter.parse(remoteTimeString);
+            return new Date(yacyCore.shortFormatter.parse(remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
         } catch (java.text.ParseException e) {
-            log.logFinest("parseUniversalDate remoteTimeString=[" + remoteTimeString + "]");
+            log.logFinest("parseUniversalDate " + e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
+            return new Date();
+        } catch (java.lang.NumberFormatException e) {
+            log.logFinest("parseUniversalDate " + e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
             return new Date();
         }
     }
@@ -207,12 +213,12 @@ public class yacyCore {
 
     
     synchronized static public void triggerOnlineAction() {
-    lastOnlineTime = universalTime();
+        lastOnlineTime = System.currentTimeMillis();
     }
 
     public boolean online() {
     this.onlineMode = Integer.parseInt(switchboard.getConfig("onlineMode", "1"));
-    return ((onlineMode == 2) || ((universalTime() - lastOnlineTime) < 10000));
+    return ((onlineMode == 2) || ((System.currentTimeMillis() - lastOnlineTime) < 10000));
     }
 
     public void loadSeeds() {
@@ -294,7 +300,7 @@ public class yacyCore {
         // if we cannot reach ourself, we call a forced publishMySeed and return false
         int urlc = yacyClient.queryUrlCount(seedDB.mySeed);
         if (urlc >= 0) {
-            seedDB.mySeed.put("LastSeen", universalDateShortString());
+            seedDB.mySeed.put("LastSeen", universalDateShortString(new Date()));
             return true;
         }
         log.logInfo("re-connect own seed");

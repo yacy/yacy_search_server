@@ -70,9 +70,9 @@ public final class serverDate {
 
     // find out time zone and DST offset
     private static Calendar thisCalendar = GregorianCalendar.getInstance();
-    private static long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
-    private static long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
-    private static long offsetHours = zoneOffsetHours + DSTOffsetHours; // this must be subtracted from current Date().getTime() to produce a GMT Time
+    //private static long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
+    //private static long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
+    //private static long offsetHours = zoneOffsetHours + DSTOffsetHours; // this must be subtracted from current Date().getTime() to produce a GMT Time
 
     // pre-calculation of time tables
     private final static long[] dimnormalacc, dimleapacc;
@@ -103,8 +103,54 @@ public final class serverDate {
     private int dow; // day-of-week
     private long utime;
 
-    public static Date correctedGMTDate() {
-        return new Date(System.currentTimeMillis() - offsetHours);
+    public static String UTCDiffString() {
+        // we express the UTC Difference in 5 digits:
+        // SHHMM
+        // S  ::= '+'|'-'
+        // HH ::= '00'|'01'|'02'|'03'|'04'|'05'|'06'|'07'|'08'|'09'|'10'|'11'|'12'
+        // MM ::= '00'|'15'|'30'|'45'
+        // since there are some places on earth where there is a time shift of half an hour
+        // we need too show also the minutes of the time shift
+        // Examples: http://www.timeanddate.com/library/abbreviations/timezones/
+        long offsetHours = UTCDiff();
+        int om = Math.abs((int) (offsetHours / minuteMillis)) % 60;
+        int oh = Math.abs((int) (offsetHours / hourMillis));
+        String diff = Integer.toString(om);
+        if (diff.length() < 2) diff = "0" + diff;
+        diff = Integer.toString(oh) + diff;
+        if (diff.length() < 4) diff = "0" + diff;
+        if (offsetHours >= 0) {
+            return "+" + diff;
+        } else {
+            return "-" + diff;
+        }
+    }
+
+    public static long UTCDiff() {
+        long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
+        long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
+        return zoneOffsetHours + DSTOffsetHours;
+    }
+    
+    public static long UTCDiff(String diffString) {
+        if (diffString.length() != 5) throw new RuntimeException("UTC String malformed (wrong size):" + diffString);
+        boolean ahead = true;
+        if (diffString.charAt(0) == '+') ahead = true;
+        else if (diffString.charAt(0) == '-') ahead = false;
+        else throw new RuntimeException("UTC String malformed (wrong sign):" + diffString);
+        long oh = Long.parseLong(diffString.substring(1, 3));
+        long om = Long.parseLong(diffString.substring(3));
+        return ((ahead) ? (long) 1 : (long) -1) * (oh * hourMillis + om * minuteMillis);
+    }
+    
+    /*
+    public static Date UTC0Date() {
+        return new Date(UTC0Time());
+    }
+    */
+
+    public static long correctedUTCTime() {
+        return System.currentTimeMillis() - UTCDiff();
     }
     
     public serverDate() {
@@ -255,7 +301,7 @@ public final class serverDate {
         
     public static void main(String[] args) {
         //System.out.println("kelondroDate is (" + new kelondroDate().toString() + ")");
-        System.out.println("offset is " + (offsetHours/1000/60/60/24) + " hours, javaDate is " + new Date() + ", correctedDate is " + correctedGMTDate());
+        System.out.println("offset is " + (UTCDiff()/1000/60/60) + " hours, javaDate is " + new Date() + ", correctedDate is " + new Date(correctedUTCTime()));
         System.out.println("serverDate : " + new serverDate().toShortString(false));
         System.out.println("  javaDate : " + testSDateShortString());
         System.out.println("serverDate : " + new serverDate().toString());

@@ -115,8 +115,8 @@ public class message {
                 prop.put("response", "-1"); // request rejected
                 return prop;
             }
-            Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime")); // read remote time
-            yacySeed otherSeed = yacySeed.genRemoteSeed(otherSeedString, key, remoteTime);
+            //Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime")); // read remote time
+            yacySeed otherSeed = yacySeed.genRemoteSeed(otherSeedString, key);
             
             String subject = crypt.simpleDecode((String) post.get("subject", ""), key); // message's subject
             String message = crypt.simpleDecode((String) post.get("message", ""), key); // message body

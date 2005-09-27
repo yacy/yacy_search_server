@@ -44,6 +44,7 @@
 // if the shell's current path is HTROOT
 
 import java.util.Hashtable;
+import java.util.Date;
 import java.io.IOException;
 
 import de.anomic.http.httpHeader;
@@ -69,7 +70,7 @@ public class query {
 	String obj    = (String) post.get("object", ""); // keyword for query subject
 	String env    = (String) post.get("env", "");    // argument to query
     
-    prop.put("mytime", yacyCore.universalDateShortString());
+        prop.put("mytime", yacyCore.universalDateShortString(new Date()));
     
 	// check if we are the right target and requester has correct information about this peer
 	if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {

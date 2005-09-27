@@ -69,9 +69,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverCore;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
@@ -89,6 +91,16 @@ public class yacySeed {
     public static final String PEERTYPE_PRINCIPAL = "principal";
     public static final String PEERTYPE = "PeerType";
 
+    public static final String STR_YOURTYPE  = "yourtype";
+    public static final String STR_LASTSEEN  = "LastSeen";
+
+    public static final String STR_IP        = "IP";
+    public static final String STR_YOURIP    = "yourip";
+    public static final String STR_MYTIME    = "mytime";
+    public static final String STR_SEED      = "seed";
+    public static final String STR_EQUAL     = "=";
+
+    
     // class variables
     public String hash;
     private Map dna;
@@ -110,6 +122,7 @@ public class yacySeed {
         this.hash = hash;                // the hash key of the peer - very important. should be static somehow, even after restart
         dna.put("Name", "&empty;");     // the name that the peer has given itself
         dna.put("BDate", "&empty;");    // birthdate - first startup
+        dna.put("UTC", "+0000");
         // later during operation -
         dna.put("ISpeed", "0");   // the speed of indexing (pages/minute) of the peer
         dna.put("Uptime", "0");   // the number of minutes that the peer is up in minutes/day (moving average MA30)
@@ -127,7 +140,7 @@ public class yacySeed {
         dna.put("IPType", "&empty;");   // static/dynamic (if the ip changes often for any reason)
 
         // settings that can only be computed by visiting peer
-        dna.put("LastSeen", yacyCore.universalDateShortString());  // for last-seen date
+        dna.put("LastSeen", yacyCore.universalDateShortString(new Date()));  // for last-seen date
         dna.put("USpeed", "0");   // the computated uplink speed of the peer
 
         // settings that are needed to organize the seed round-trip
@@ -209,7 +222,34 @@ public class yacySeed {
         String port = (String) dna.get("Port");
         if (ip != null && ip.length() >= 8 && port != null && port.length() >= 2) return ip + ":" + port; else return null;
     }
+    
+    public long getUTCDiff() {
+        String utc = (String) dna.get("UTC");
+        if (utc == null) utc = "+0200";
+        return serverDate.UTCDiff(utc);        
+    }
 
+    public long getLastSeenTime() {
+        try {
+            long t = yacyCore.shortFormatter.parse(get("LastSeen", "20040101000000")).getTime();
+            // the problem here is: getTime applies a time shift according to local time zone:
+            // it substracts the local UTF offset, but it should substract the remote UTC offset
+            // so we correct it by first adding the local UTF offset and then subtractibg the remote
+            // but the time zone was originally the seeds time zone
+            // we correct this here
+            return t - getUTCDiff() + serverDate.UTCDiff();
+        } catch (java.text.ParseException e) {
+            return System.currentTimeMillis();
+        } catch (java.lang.NumberFormatException e) {
+            return System.currentTimeMillis();
+        }
+    }
+    
+    public void setLastSeenTime() {
+        // if we set a last seen time, then we need to respect the seeds UTC offset
+        put("LastSeen", yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() - serverDate.UTCDiff() + getUTCDiff())));
+    }
+    
     public int getPPM() {
         try {
             return Integer.parseInt(get("ISpeed", "0"));
@@ -352,21 +392,22 @@ public class yacySeed {
     } else {
         newSeed.dna.put("Port", sb.getConfig("port", "8080"));
     }
-    newSeed.dna.put("BDate", yacyCore.universalDateShortString());
+    newSeed.dna.put("BDate", yacyCore.universalDateShortString(new Date()));
     newSeed.dna.put("LastSeen", newSeed.dna.get("BDate")); // just as initial setting
+    newSeed.dna.put("UTC", serverDate.UTCDiffString());
     newSeed.dna.put(PEERTYPE, PEERTYPE_VIRGIN);
 
     return newSeed;
     }
 
-    public static yacySeed genRemoteSeed(String seedStr, String key, Date remoteTime) {
-    // this method is used to convert the external representation of a seed into a seed object
-    if (seedStr == null) return null;
-    String seed = crypt.simpleDecode(seedStr, key);
-    if (seed == null) return null;
-    HashMap dna = serverCodings.string2map(seed);
-    String hash = (String) dna.remove("Hash");
-    return new yacySeed(hash, dna);
+    public static yacySeed genRemoteSeed(String seedStr, String key) {
+        // this method is used to convert the external representation of a seed into a seed object
+        if (seedStr == null) return null;
+        String seed = crypt.simpleDecode(seedStr, key);
+        if (seed == null) return null;
+        HashMap dna = serverCodings.string2map(seed);
+        String hash = (String) dna.remove("Hash");
+        return new yacySeed(hash, dna);
     }
 
     public String toString() {
@@ -416,7 +457,7 @@ public class yacySeed {
     char[] b = new char[(int) f.length()];
     fr.read(b, 0, b.length);
     fr.close();
-    return genRemoteSeed(new String(b), null, new Date());
+    return genRemoteSeed(new String(b), null);
     }
 
     public Object clone() {

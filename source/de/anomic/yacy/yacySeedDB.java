@@ -298,7 +298,6 @@ public final class yacySeedDB {
         // fill a score object
         kelondroMScoreCluster seedScore = new kelondroMScoreCluster();
         yacySeed ys;
-        String t;
         long absage;
         Enumeration s = seedsConnected(true, false, null);
         int searchcount = 1000;
@@ -306,8 +305,8 @@ public final class yacySeedDB {
         try {
             while ((s.hasMoreElements()) && (searchcount-- > 0)) {
                 ys = (yacySeed) s.nextElement();
-                if ((ys != null) && ((t = ys.get("LastSeen", "")).length() > 10)) try {
-                    absage = Math.abs(yacyCore.universalTime() -  yacyCore.shortFormatter.parse(t).getTime());
+                if ((ys != null) && (ys.get("LastSeen", "").length() > 10)) try {
+                    absage = Math.abs(System.currentTimeMillis() - ys.getLastSeenTime());
                     seedScore.addScore(ys.hash, (int) absage);
                 } catch (Exception e) {}
             }

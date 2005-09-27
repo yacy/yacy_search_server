@@ -75,11 +75,11 @@ public class search {
         long    duetime= Long.parseLong((String) post.get("duetime", "3000"));
 	int     count  = Integer.parseInt((String) post.get("count", "10"));     // maximum number of wanted results
 	boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
-        Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime")); // read remote time
+        //Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime")); // read remote time
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
-            yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(oseed, key, remoteTime), true);
+            yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(oseed, key), true);
         }
 
         HashSet keyhashes = new HashSet();

@@ -562,10 +562,10 @@ public final class plasmaHTCache {
                System.exit(0);
            }
 
-           lastModified = serverDate.correctedGMTDate();
+            lastModified = new Date(serverDate.correctedUTCTime());
         } else {
             lastModified = responseHeader.lastModified();
-            if (lastModified == null) lastModified = serverDate.correctedGMTDate(); // does not exist in header
+            if (lastModified == null) lastModified = new Date(serverDate.correctedUTCTime()); // does not exist in header
         }
         this.doctype = plasmaWordIndexEntry.docType(responseHeader.mime());
         if (this.doctype == plasmaWordIndexEntry.DT_UNKNOWN) this.doctype = plasmaWordIndexEntry.docType(url);
@@ -675,7 +675,7 @@ public final class plasmaHTCache {
                     if (date == null) return "stale_no_date_given_in_response";
                     try {
                         long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                        if (serverDate.correctedGMTDate().getTime() - date.getTime() > ttl) {
+                        if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
                             //System.out.println("***not indexed because cache-control");
                             return "stale_expired";
                         }
@@ -717,8 +717,8 @@ public final class plasmaHTCache {
 		if (!(responseHeader.containsKey(httpHeader.LAST_MODIFIED))) return false;
 		// parse date
                 Date d1, d2;
-		d2 = responseHeader.lastModified(); if (d2 == null) d2 = serverDate.correctedGMTDate();
-		d1 = requestHeader.ifModifiedSince(); if (d1 == null) d1 = serverDate.correctedGMTDate();
+		d2 = responseHeader.lastModified(); if (d2 == null) d2 = new Date(serverDate.correctedUTCTime());
+		d1 = requestHeader.ifModifiedSince(); if (d1 == null) d1 = new Date(serverDate.correctedUTCTime());
 		// finally, we shall treat the cache as stale if the modification time is after the if-.. time
 		if (d2.after(d1)) return false;
 	    }
@@ -762,7 +762,7 @@ public final class plasmaHTCache {
 	    // the expires value gives us a very easy hint when the cache is stale
 	    if (expires != null) {
 		//System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
-		if (expires.before(serverDate.correctedGMTDate())) return false;
+		if (expires.before(new Date(serverDate.correctedUTCTime()))) return false;
 	    }
 	    
 	    // -lastModified in cached response
@@ -772,13 +772,13 @@ public final class plasmaHTCache {
 	    // This would be a TTL factor of 100% we want no more than 10% TTL, so that a 10 month old cache
 	    // file may only be treated as fresh for one more month, not more.
 	    if (lastModified != null) {
-		if (date == null) date = serverDate.correctedGMTDate();
+		if (date == null) date = new Date(serverDate.correctedUTCTime());
 		long age = date.getTime() - lastModified.getTime();
 		if (age < 0) return false;
 		// TTL (Time-To-Live) is age/10 = (d2.getTime() - d1.getTime()) / 10
 		// the actual living-time is serverDate.correctedGMTDate().getTime() - d2.getTime()
 		// therefore the cache is stale, if serverDate.correctedGMTDate().getTime() - d2.getTime() > age/10
-		if (serverDate.correctedGMTDate().getTime() - date.getTime() > age / 10) return false;
+		if (serverDate.correctedUTCTime() - date.getTime() > age / 10) return false;
 	    }
 	    
  	    // -cache-control in cached response
@@ -797,7 +797,7 @@ public final class plasmaHTCache {
                     if (date == null) return false;
                     try {
                         long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                        if (serverDate.correctedGMTDate().getTime() - date.getTime() > ttl) {
+                        if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
                             return false;
                         }
                     } catch (Exception e) {

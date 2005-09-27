@@ -50,6 +50,7 @@ import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverDate;
 
 public class yacyNewsDB {
     
@@ -167,7 +168,7 @@ public class yacyNewsDB {
         return new yacyNewsRecord(
             new String(b[0]),
             new String(b[1]),
-            (b[2] == null) ? null : yacyCore.parseUniversalDate(new String(b[2])),
+            (b[2] == null) ? null : yacyCore.parseUniversalDate(new String(b[2]), serverDate.UTCDiffString()),
             (int) serverCodings.enhancedCoder.decodeBase64Long(new String(b[3])),
             serverCodings.string2map(new String(b[4]))
         );

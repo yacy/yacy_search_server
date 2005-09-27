@@ -59,6 +59,7 @@ import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -72,8 +73,9 @@ import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexClassicDB;
 import de.anomic.plasma.plasmaWordIndexCache;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
@@ -166,7 +168,7 @@ public final class yacy {
     * @param startupFree free memory at startup time, to be used later for statistics
     */
     private static void startup(String homePath, long startupMemFree, long startupMemTotal) {
-        long startup = yacyCore.universalTime();
+        long startup = System.currentTimeMillis();
 
         try {
             // start up
@@ -181,14 +183,19 @@ public final class yacy {
                 Thread.currentThread().sleep(3000);
                 System.exit(-1);
             }
-
+            
+            // ensure that there is a DATA directory
+            File f = new File(homePath); if (!(f.exists())) f.mkdirs();
+            f = new File(homePath, "DATA/"); if (!(f.exists())) f.mkdirs();
+            
             // setting up logging
-			if (!((new File(homePath, "DATA/LOG/yacy.logging")).exists())) try {
-				serverFileUtils.copy(new File(homePath, "yacy.logging"), new File(homePath, "DATA/LOG/yacy.logging"));
-			}catch (IOException e){
-				System.out.println("could not copy yacy.logging");
-			}
-			try{
+            f = new File(homePath, "DATA/LOG/"); if (!(f.exists())) f.mkdirs();
+            if (!((new File(homePath, "DATA/LOG/yacy.logging")).exists())) try {
+                serverFileUtils.copy(new File(homePath, "yacy.logging"), new File(homePath, "DATA/LOG/yacy.logging"));
+            }catch (IOException e){
+                System.out.println("could not copy yacy.logging");
+            }
+            try{
                 serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));
             } catch (IOException e) {
                 System.out.println("could not find logging properties in homePath=" + homePath);
@@ -198,6 +205,7 @@ public final class yacy {
             serverLog.logConfig("STARTUP", hline);
             serverLog.logConfig("STARTUP", "java version " + System.getProperty("java.version", "no-java-version"));
             serverLog.logConfig("STARTUP", "Application Root Path: " + homePath);
+            serverLog.logConfig("STARTUP", "Time Zone: UTC" + serverDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
 
             // create data folder
             final File dataFolder = new File(homePath, "DATA");

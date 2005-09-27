@@ -314,7 +314,7 @@ public class plasmaSwitchboardQueue {
                 if ((ifModifiedSince != null) && (responseHeader().containsKey(httpHeader.LAST_MODIFIED))) {
                     // parse date
                     Date d = responseHeader().lastModified();
-                    if (d == null) d = serverDate.correctedGMTDate();
+                    if (d == null) d = new Date(serverDate.correctedUTCTime());
                     // finally, we shall treat the cache as stale if the modification time is after the if-.. time
                     if (d.after(ifModifiedSince)) {
                         //System.out.println("***not indexed because if-modified-since");
@@ -343,7 +343,7 @@ public class plasmaSwitchboardQueue {
                 // sometimes, the expires date is set to the past to prevent that a page is cached
                 // we use that information to see if we should index it
                 if (expires != null) {
-                    if (expires.before(serverDate.correctedGMTDate())) return "Stale_(Expired)";
+                    if (expires.before(new Date(serverDate.correctedUTCTime()))) return "Stale_(Expired)";
                 }
                 
                 // -lastModified in cached response
@@ -371,7 +371,7 @@ public class plasmaSwitchboardQueue {
                         if (date == null) return "Stale_(no_date_given_in_response)";
                         try {
                             long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                            if (serverDate.correctedGMTDate().getTime() - date.getTime() > ttl) {
+                            if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
                                 //System.out.println("***not indexed because cache-control");
                                 return "Stale_(expired_by_cache-control)";
                             }

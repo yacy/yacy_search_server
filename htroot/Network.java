@@ -117,6 +117,7 @@ public class Network {
                 }
                 myppm = seed.getPPM();
                 prop.put("table_my-version", seed.get("Version", "-"));
+                prop.put("table_my-utc", seed.get("UTC", "-"));
                 prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", ""))));
                 prop.put("table_my-links", groupDigits(links));
                 prop.put("table_my-words", groupDigits(words));
@@ -317,8 +318,9 @@ public class Network {
                                 prop.put(STR_TABLE_LIST+conCount+"_type_url", seed.get("seedURL", "http://nowhere/") );
                             }
                             prop.put(STR_TABLE_LIST+conCount+"_version", yacy.combinedVersionString2PrettyString(seed.get("Version", "0.1")));
-                            prop.put(STR_TABLE_LIST+conCount+"_contact", (seed.getFlagDirectConnect() ? 1 : 0) );
-                            prop.put(STR_TABLE_LIST+conCount+"_lastSeen", lastSeen(seed.get("LastSeen", "-")) );
+                            prop.put(STR_TABLE_LIST+conCount+"_contact", (seed.getFlagDirectConnect() ? 1 : 0));
+                            prop.put(STR_TABLE_LIST+conCount+"_lastSeen", (System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
+                            prop.put(STR_TABLE_LIST+conCount+"_utc", seed.get("UTC", "-"));
                             prop.put(STR_TABLE_LIST+conCount+"_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", "0"))));
                             prop.put(STR_TABLE_LIST+conCount+"_links", groupDigits(links));
                             prop.put(STR_TABLE_LIST+conCount+"_words", groupDigits(words));
@@ -354,20 +356,7 @@ public class Network {
         // return rewrite properties
         return prop;
     }
-    
-    private static String lastSeen(String date) {
-        long l = 0;
-        if (date.length() == 0) {
-            l = 999;
-        } else {
-            try {
-                l = (yacyCore.universalTime() - yacyCore.shortFormatter.parse(date).getTime()) / 1000 / 60;
-            } catch (java.text.ParseException e) {
-                l = 999;
-            }
-        }
-        if (l == 999) return "-"; else return Long.toString(l);
-    }
+
     
     private static String groupDigits(long Number) {
         final String s = Long.toString(Number);

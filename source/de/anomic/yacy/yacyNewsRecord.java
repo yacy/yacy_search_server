@@ -61,8 +61,8 @@ public class yacyNewsRecord {
     
     public yacyNewsRecord(String newsString) {
         this.attributes = serverCodings.string2map(newsString);
-        this.received = (attributes.containsKey("rec")) ? yacyCore.parseUniversalDate((String) attributes.get("rec")) : new Date();
-        this.created = (attributes.containsKey("cre")) ? yacyCore.parseUniversalDate((String) attributes.get("cre")) : new Date();
+        this.received = (attributes.containsKey("rec")) ? yacyCore.parseUniversalDate((String) attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
+        this.created = (attributes.containsKey("cre")) ? yacyCore.parseUniversalDate((String) attributes.get("cre"), serverDate.UTCDiffString()) : new Date();
         this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : null;
         this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt((String) attributes.get("dis")) : 0;
         this.originator = (attributes.containsKey("ori")) ? (String) attributes.get("ori") : null;
@@ -83,7 +83,7 @@ public class yacyNewsRecord {
     protected yacyNewsRecord(String id, String category, Date received, int distributed, Map attributes) {
         this.attributes = attributes;
         this.received = received;
-        this.created = yacyCore.parseUniversalDate(id.substring(0, yacyCore.universalDateShortPattern.length()));
+        this.created = yacyCore.parseUniversalDate(id.substring(0, yacyCore.universalDateShortPattern.length()), serverDate.UTCDiffString());
         this.category = category;
         this.distributed = distributed;
         this.originator = id.substring(yacyCore.universalDateShortPattern.length());

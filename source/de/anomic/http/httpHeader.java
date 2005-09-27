@@ -340,7 +340,6 @@ public final class httpHeader extends TreeMap implements Map {
 	  Server=Apache/1.3.26
 	*/
     
-    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
     private static SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
     private static SimpleDateFormat EMLFormatter     = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US);
     

@@ -171,16 +171,16 @@ public class yacyNewsPool {
     private boolean automaticProcessP(yacyNewsRecord record) {
         if (record == null) return false;
         if (record.category() == null) return true;
-        if ((yacyCore.universalTime() - record.created().getTime()) > (1000 * 60 * 60 * 24 * 7) /* 1 Week */) {
+        if ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24 * 7) /* 1 Week */) {
 	    // remove everything after 1 week
             return true;
         }
         if ((record.category().equals("wiki_upd")) &&
-            ((yacyCore.universalTime() - record.created().getTime()) > (1000 * 60 * 60 * 24) /* 1 Day */)) {
+            ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24) /* 1 Day */)) {
             return true;
         }
         if ((record.category().equals("crwlstrt")) &&
-            ((yacyCore.universalTime() - record.created().getTime()) > (1000 * 60 * 60 * 24) /* 1 Day */)) {
+            ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24) /* 1 Day */)) {
             yacySeed seed = yacyCore.seedDB.get(record.originator());
             if (seed == null) return false;
             try {
