@@ -1,0 +1,176 @@
+body {
+  background-color:#F8F8FF;
+}
+h1 {
+font-family:Helvetica, sans-serif;
+font-size:16pt;
+font-style:normal;
+line-height:14pt;
+margin-top:0pt;
+    margin-bottom:0pt;
+}
+h2 {
+font-family:Helvetica, sans-serif;
+font-size:14pt;
+font-style:normal;
+line-height:14pt;
+margin-top:0pt;
+    margin-bottom:0pt;
+}
+h3 {
+font-family:Helvetica, sans-serif;
+font-size:12pt;
+font-style:normal;
+line-height:14pt;
+margin-top:0pt;
+    margin-bottom:0pt;
+}
+h4 {
+font-family:Helvetica, sans-serif;
+font-size:10pt;
+font-style:normal;
+line-height:14pt;
+margin-top:0pt;
+    margin-bottom:0pt;
+}
+a, body, div, li, ol, span, table, td, tr, ul {
+color:#000000;
+font-family:Helvetica, sans-serif;
+font-size:10pt;
+font-style:normal;
+line-height:14px;
+margin-top:0px;
+margin-bottom:0px;
+}
+*.small {
+font-family:Helvetica, sans-serif;
+font-size:8pt;
+font-style:normal;
+line-height:9px;
+margin-top:0px;
+margin-bottom:0px;
+}
+body, div, li, ol, span, table, td, tr, ul {
+      
+text-decoration:none;
+}
+a:hover {
+color:#0000FF;
+}
+a.unknown {
+color:#990000;
+}
+a.known {
+color:#009900;
+}
+a.extern {
+color:#000099;
+}
+*.xxxyellow {
+color:#0000FF;
+font-weight:bold;
+text-decoration:none;
+font-size:11px;
+}
+*.xxxblue {
+color:#556699;
+font-weight:bold;
+text-decoration:none;
+font-size:11px;
+}
+*.tt {
+font-family:Courier,Terminal,sans-serif;
+font-size:8pt;
+line-height:9px;
+}
+.Menu {
+width: 140;
+}
+.SubMenu {
+
+}
+.MenuHeader {
+background-color: #4070a0;
+color:white;
+font-size: 9px;
+font-weight:bold;
+}
+.MenuItem {
+background-color: #bdcdd4;
+font-weight:bold;
+text-decoration:none;
+font-size:11px;
+padding-top: 2;
+padding-bottom: 2;
+}
+.MenuTopItem {
+background-color: #bdcdd4;
+font-weight:bold;
+text-decoration:none;
+font-size:11px;
+padding-top: 3;
+padding-bottom: 3;
+}
+.MenuSubItem {
+background-color: #bdcdd4;
+font-weight:bold;
+text-decoration:none;
+font-size:11px;
+padding-top: 3;
+padding-bottom: 3;
+}
+.MenuItemLink {
+color: black;
+font-weight:bold;
+text-decoration:none;
+font-size:11px;
+}
+a.MenuItemLink:hover {
+color:#0088BB;
+font-weight:bold;
+text-decoration:none;
+}
+.MenuSpacer {
+height: 4;
+background-color: #ffffff;
+}
+.MenuSubSpacer {
+padding-left: 2;
+padding-right: 2;
+background-color: #ffffff;
+}
+.Headline {
+color: white;
+font-weight: bold;
+font-size: 160%;
+font-family: Helvetica, Arial;
+text-align: center;
+}
+.Heading {
+background-color: #4070a0;
+height: 36px;
+}
+.TableHeader {
+background-color: #88aaaa;
+}
+.TableCellDark {
+background-color: #bbcccc;
+}
+.TableCellLight {
+background-color: #ddeeee;
+}
+.TableCellSummary {
+background-color: #ffbbaa;
+}
+.WikiBackground {
+background-color: #eeeeee;
+}
+.MessageBackground {
+background-color: #eeeeee;
+}
+.menu {
+	float: left;
+}
+.content {
+	margin-left: 11em;
+}

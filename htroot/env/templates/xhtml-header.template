@@ -1,0 +1,61 @@
+<div class="head">
+<img src="/env/grafics/yacy.gif" class="head" />
+<h1 class="head">YaCy - Distributed Web Indexing - Administration</h1>
+</div>
+<div class="menu">
+
+<table width="100%" border="0" cellspacing="2" cellpadding="0" class="menu">
+  <tr><td class="MenuHeader">&nbsp;Global&nbsp;Index</td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/index.html" accesskey="s" class="MenuItemLink">Search Page</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/Help.html" class="MenuItemLink">Help</a></td></tr>
+<!--<tr><td class="MenuItem">&nbsp;<a href="/Statistics.html" class="MenuItemLink">Statistics</a></td></tr>-->
+  <tr><td class="MenuSpacer"></td></tr>
+  
+  <tr><td class="MenuHeader">&nbsp;Distributed Crawler</td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/IndexCreate_p.html" class="MenuItemLink">Index Create</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/IndexControl_p.html" class="MenuItemLink">Index Control</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/IndexMonitor.html" class="MenuItemLink">Index Monitor</a></td></tr>
+  <tr><td class="MenuSpacer"></td></tr>
+  
+  <tr><td class="MenuHeader">&nbsp;Local Proxy</td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Blacklist_p.html" class="MenuItemLink">Blacklist</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink">Proxy Indexing</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/CacheAdmin_p.html" class="MenuItemLink">Cache Monitor</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/CookieMonitorIncoming_p.html" class="MenuItemLink">Cookie Monitor</a></td></tr>
+  <tr><td class="MenuSpacer"></td></tr>
+
+  <tr><td class="MenuHeader">&nbsp;Communication / Publication</td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/www/" class="MenuItemLink">Home&nbsp;Page</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/share/" class="MenuItemLink">File&nbsp;Share</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/Wiki.html" class="MenuItemLink">Wiki</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Messages_p.html" class="MenuItemLink">Messages</a>&nbsp;<img border="0" src="/env/grafics/notifier.gif" align="center"></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/EditProfile_p.html" class="MenuItemLink">Personal Profile</a></td></tr>
+  <tr><td class="MenuSpacer"></td></tr>
+  
+  <tr><td class="MenuHeader">&nbsp;Peer&nbsp;Control</td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/Status.html" accesskey="t" class="MenuItemLink">Status</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/Network.html" accesskey="w" class="MenuItemLink">Network</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/News.html" accesskey="n" class="MenuItemLink">News</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/ViewLog_p.html" class="MenuItemLink">Log</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Settings_p.html" class="MenuItemLink">Settings</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/PerformanceQueues_p.html" class="MenuItemLink">Performance</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Language_p.html" class="MenuItemLink">Language</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Skins_p.html" class="MenuItemLink">Skins</a></td></tr>
+  <tr><td class="MenuSpacer"></td></tr>
+  
+  <tr><td class="MenuHeader">&nbsp;The Project</td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy.net/yacy/" class="MenuItemLink">Project Home</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy.net/yacy/News.html" class="MenuItemLink">Project News</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="http://sourceforge.net/forum/?group_id=116142" class="MenuItemLink">English Forum</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy-forum.de" class="MenuItemLink">Deutsches Forum</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy.net/yacy/Download.html" class="MenuItemLink">Download YaCy</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy.net/yacy/Contact.html" class="MenuItemLink">Contact</a></td></tr>
+  <tr><td class="MenuSpacer"></td></tr>
+
+  <!--
+  <tr><td class="MenuHeader">&nbsp;Experimental</b></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/Lab.html" class="MenuItemLink">The Lab</a></td></tr>
+  -->
+</table>
+</div>
+<div class="content">
