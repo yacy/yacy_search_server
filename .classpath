@@ -17,9 +17,9 @@
 <classpathentry kind="lib" path="libx/jaxrpc.jar"/>
 <classpathentry kind="lib" path="libx/jdom.jar"/>
 <classpathentry kind="lib" path="libx/jmimemagic-0.0.4a.jar"/>
-<classpathentry kind="lib" path="libx/jsch-0.1.19.jar"/>
+<classpathentry kind="lib" path="libx/jsch-0.1.21.jar"/>
 <classpathentry kind="lib" path="libx/log4j-1.2.9.jar"/>
-<classpathentry kind="lib" path="libx/PDFBox-0.7.1.jar"/>
+<classpathentry kind="lib" path="libx/PDFBox-0.7.2.jar"/>
 <classpathentry kind="lib" path="libx/saaj.jar"/>
 <classpathentry kind="lib" path="libx/tar.jar"/>
 <classpathentry kind="lib" path="libx/tm-extractors-0.4.jar"/>
