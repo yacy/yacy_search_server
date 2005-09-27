@@ -118,6 +118,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+
 import de.anomic.data.messageBoard;
 import de.anomic.data.robotsParser;
 import de.anomic.data.wikiBoard;
@@ -470,7 +472,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
     }
     
-    private static String ppRamString(int bytes) {
+    private static String ppRamString(long bytes) {
         if (bytes < 1024) return bytes + " KByte";
         bytes = bytes / 1024;
         if (bytes < 1024) return bytes + " MByte";
@@ -942,7 +944,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private void processResourceStack(plasmaSwitchboardQueue.Entry entry) {
         // work off one stack entry with a fresh resource
         try {    
-            long stackStartTime = 0, stackEndTime = 0, parsingStartTime = 0, parsingEndTime = 0, indexingStartTime = 0, indexingEndTime;
+            long stackStartTime = 0, stackEndTime = 0, 
+                 parsingStartTime = 0, parsingEndTime = 0, 
+                 indexingStartTime = 0, indexingEndTime = 0,
+                 storageStartTime = 0, storageEndTime = 0;
             
             // we must distinguish the following cases: resource-load was initiated by
             // 1) global crawling: the index is extern, not here (not possible here)
@@ -1085,18 +1090,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 			(entry.profile().localIndexing())) {
                         // remove stopwords
                         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + entry.url());
+                        indexingEndTime = System.currentTimeMillis();
                         
                         // do indexing
                         //log.logDebug("Create Index for '" + entry.normalizedURLString() + "'");
+                        storageStartTime = System.currentTimeMillis();
                         int words = searchManager.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
-                        indexingEndTime = System.currentTimeMillis();
-                        log.logInfo("*Indexed " + words + " words in URL " + entry.url() + 
-                                    "\n\tDescription:  " + descr + "\n\t" +
-                                    "MimeType: "  + document.getMimeType() + " | " + 
-                                    "Size: " + document.text.length + " bytes | " +
-                                    "StackingTime:  " + (stackEndTime-stackStartTime) + " ms | " + 
-                                    "ParsingTime:  " + (parsingEndTime-parsingStartTime) + " ms | " + 
-                                    "IndexingTime: " + (indexingEndTime-indexingStartTime) + " ms");
+                        storageEndTime = System.currentTimeMillis();
+                        
+                        if (log.isLoggable(Level.INFO)) {
+                            log.logInfo("*Indexed " + words + " words in URL " + entry.url() + 
+                                        "\n\tDescription:  " + descr + 
+                                        "\n\tMimeType: "  + document.getMimeType() + " | " + 
+                                        "Size: " + document.text.length + " bytes | " +
+                                        "Anchors: " + ((document.anchors==null)?0:document.anchors.size()) +
+                                        "\n\tStackingTime:  " + (stackEndTime-stackStartTime) + " ms | " + 
+                                        "ParsingTime:  " + (parsingEndTime-parsingStartTime) + " ms | " + 
+                                        "IndexingTime: " + (indexingEndTime-indexingStartTime) + " ms | " +
+                                        "StorageTime: " + (storageEndTime-storageStartTime) + " ms");
+                        }
                         
                         // if this was performed for a remote crawl request, notify requester
                         if ((processCase == 6) && (initiator != null)) {

@@ -81,8 +81,8 @@ public class plasmaParserDocument {
         this.sections = (sections==null)?new String[0]:sections;
         this.abstrct = (abstrct==null)?"":abstrct;
         this.text = (text==null)?new byte[0]:text;
-        this.anchors = (anchors==null)?new HashMap():anchors;
-        this.images = (images==null)?new HashMap():images;
+        this.anchors = (anchors==null)?new HashMap(0):anchors;
+        this.images = (images==null)?new HashMap(0):images;
         this.hyperlinks = null;
         this.medialinks = null;
         this.emaillinks = null;

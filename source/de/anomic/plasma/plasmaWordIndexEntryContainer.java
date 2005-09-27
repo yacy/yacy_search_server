@@ -57,16 +57,20 @@ import java.util.Iterator;
 
 import de.anomic.server.serverCodings;
 
-public class plasmaWordIndexEntryContainer implements Comparable {
+public final class plasmaWordIndexEntryContainer implements Comparable {
 
-    private String wordHash;
-    private HashMap container; // urlHash/plasmaWordIndexEntry - Mapping
+    private final String wordHash;
+    private final HashMap container; // urlHash/plasmaWordIndexEntry - Mapping
     private long updateTime;
     
     public plasmaWordIndexEntryContainer(String wordHash) {
+        this(wordHash,16);
+    }
+    
+    public plasmaWordIndexEntryContainer(String wordHash, int initContainerSize) {
         this.wordHash = wordHash;
         this.updateTime = 0;
-        container = new HashMap(); // a urlhash/plasmaWordIndexEntry - relation
+        container = new HashMap(initContainerSize); // a urlhash/plasmaWordIndexEntry - relation
     }
     
     public int size() {
@@ -123,7 +127,7 @@ public class plasmaWordIndexEntryContainer implements Comparable {
     }
 
     public static plasmaWordIndexEntryContainer instantContainer(String wordHash, long creationTime, plasmaWordIndexEntry entry) {
-        plasmaWordIndexEntryContainer c = new plasmaWordIndexEntryContainer(wordHash);
+        plasmaWordIndexEntryContainer c = new plasmaWordIndexEntryContainer(wordHash,1);
         c.add(entry);
         c.updateTime = creationTime;
         return c;
