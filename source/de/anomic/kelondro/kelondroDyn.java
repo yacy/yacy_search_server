@@ -126,7 +126,7 @@ public class kelondroDyn extends kelondroTree {
     }
 
     private byte[] dynKey(String key, int record) {
-	if (key.length() > keylen) throw new RuntimeException("key len out of limit:" + key.length());
+	if (key.length() > keylen) throw new RuntimeException("key len (" + key.length() + ") out of limit (" + keylen + "): '" + key + "'");
 	while (key.length() < keylen) key = key + "_";
 	key = key + counter(record);
 	return key.getBytes();

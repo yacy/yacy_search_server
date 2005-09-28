@@ -293,6 +293,7 @@ public class Network {
                                 links = Long.parseLong(seed.get("LCount", "0"));
                                 words = Long.parseLong(seed.get("ICount", "0"));
                             } catch (Exception exc) {links = 0; words = 0;}
+                            prop.put(STR_TABLE_LIST+conCount+"_hash", seed.hash);
                             String shortname = seed.get("Name", "deadlink");
                             if (shortname.length() > 20) {
                                 shortname = shortname.substring(0, 20) + "..."; 
