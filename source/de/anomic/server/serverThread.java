@@ -96,6 +96,9 @@ public interface serverThread {
     public long getExecTime();
     // returns the total time that this thread has worked so far
     
+    public long getMemoryUse();
+    // returns the sum of all memory usage differences before and after one busy job
+    
     public void setLog(serverLog log);
     // defines a log where process states can be written to
 

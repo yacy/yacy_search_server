@@ -57,7 +57,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     private long startup = 0, intermission = 0, idlePause = 0, busyPause = 0, blockPause = 0;
     private boolean running = true;
     private serverLog log = null;
-    private long idletime = 0, busytime = 0, memprereq = 0;
+    private long idletime = 0, busytime = 0, memprereq = 0, memuse = 0;
     private String shortDescr = "", longDescr = "";
     private String monitorURL = null;
     private long threadBlockTimestamp = System.currentTimeMillis();
@@ -158,6 +158,11 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         return this.busytime;
     }
     
+    public long getMemoryUse() {
+        // returns the sum of all memory usage differences before and after one busy job
+        return memuse;
+    }
+
     public final void setLog(serverLog log) {
         // defines a log where process states can be written to
         this.log = log;
@@ -227,6 +232,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         int outerloop;
         long innerpause;
         long timestamp;
+        long memstamp0, memstamp1;
         boolean isBusy;
         Runtime rt = Runtime.getRuntime();
                 
@@ -240,16 +246,30 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
             if (rt.freeMemory() > memprereq) try {
                 // do job
                 timestamp = System.currentTimeMillis();
+                memstamp0 = serverMemory.used();
                 isBusy = this.job();
+                // do memory and busy/idle-count/time monitoring
+                if (isBusy) {
+                    memstamp1 = serverMemory.used();
+                    if (memstamp1 >= memstamp0) {
+                        // no GC in between. this is not shure but most probable
+                        memuse += memstamp1 - memstamp0;
+                    } else {
+                        // GC was obviously in between. Add an average as simple heuristic
+                        memuse += memuse / busyCycles;
+                    }
+                    busytime += System.currentTimeMillis() - timestamp;
+                    busyCycles++;
+                } else {
+                    idleCycles++;
+                }
+                // interrupt loop if this is interrupted or supposed to be a one-time job
                 if ((!running) || (this.isInterrupted())) break;
-                busytime += (isBusy) ? System.currentTimeMillis() - timestamp : 0;
-                // interrupt loop if this is supposed to be a one-time job
                 if ((this.idlePause < 0) || (this.busyPause < 0)) break; // for one-time jobs
                 // process scheduled pause
                 timestamp = System.currentTimeMillis();
                 ratz((isBusy) ? this.busyPause : this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
-                if (isBusy) busyCycles++; else idleCycles++;
             } catch (Exception e) {
                 // handle exceptions: thread must not die on any unexpected exceptions
                 // if the exception is too bad it should call terminate()

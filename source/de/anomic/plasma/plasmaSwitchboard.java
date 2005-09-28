@@ -436,7 +436,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                                             getConfig("allowDistributeIndexWhileCrawling","false").equals("true"));
         indexDistribution.setCounts(150, 1, 3, 10000);
         deployThread("20_dhtdistribution", "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-                     new serverInstantThread(indexDistribution, "job", null), 12000);
+                     new serverInstantThread(indexDistribution, "job", null), 600000);
             
         // init migratiion from 0.37 -> 0.38
         classicCache = new plasmaWordIndexClassicCacheMigration(plasmaPath, wordIndex);

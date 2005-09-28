@@ -85,7 +85,7 @@ public class PerformanceQueues_p {
         
         // set templates for latest news from the threads
         long blocktime, sleeptime, exectime;
-        long idlesleep, busysleep, memprereq;
+        long idlesleep, busysleep, memuse, memprereq;
         int queuesize;
         threads = switchboard.threadNames();
         int c = 0;
@@ -104,6 +104,7 @@ public class PerformanceQueues_p {
             blocktime = thread.getBlockTime();
             sleeptime = thread.getSleepTime();
             exectime = thread.getExecTime();
+            memuse = thread.getMemoryUse();
             idleCycles = thread.getIdleCycles();
             busyCycles = thread.getBusyCycles();
             memshortageCycles = thread.getOutOfMemoryCycles();
@@ -119,6 +120,7 @@ public class PerformanceQueues_p {
             prop.put("table_" + c + "_memscycles", Long.toString(memshortageCycles));
             prop.put("table_" + c + "_sleeppercycle", ((idleCycles + busyCycles) == 0) ? "-" : Long.toString(sleeptime / (idleCycles + busyCycles)));
             prop.put("table_" + c + "_execpercycle", (busyCycles == 0) ? "-" : Long.toString(exectime / busyCycles));
+            prop.put("table_" + c + "_memusepercycle", (busyCycles == 0) ? "-" : Long.toString(memuse / busyCycles / 1024));
             
             if ((post != null) && (post.containsKey("submitdelay"))) {
                 // load with new values
