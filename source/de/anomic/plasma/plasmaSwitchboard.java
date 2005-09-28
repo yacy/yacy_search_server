@@ -5,8 +5,9 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
 //
-// last major change: $LastChangedDate: 2005-09-07 23:38:03 +0200 (Mi, 07 Sep 2005) $ by $LastChangedBy: theli $
-// Revision: $LastChangedRevision: 682 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -393,7 +394,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
         this.yc = new yacyCore(this);
         //log.logSystem("Started YaCy Protocol Core");
-        //System.gc(); try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
+        System.gc(); try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
         serverInstantThread.oneTimeJob(yc, "loadSeeds", yc.log, 3000);
         
         // deploy threads
