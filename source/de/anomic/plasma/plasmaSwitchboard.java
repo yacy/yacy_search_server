@@ -298,8 +298,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // create the cache directory
         String cache = getConfig("proxyCache", "DATA/HTCACHE");
         cache = cache.replace('\\', '/');
-        if (cache.endsWith("/")) { cache = cache.substring(0, cache.length() - 1); }                 
-        File htCachePath = new File(cache); // don't use rootPath
+        if (cache.endsWith("/")) { cache = cache.substring(0, cache.length() - 1); }
+        File htCachePath;
+        if (new File(cache).isAbsolute()) {
+            htCachePath = new File(cache); // don't use rootPath
+        } else {
+            htCachePath = new File(rootPath, cache);
+        }
+        this.log.logInfo("HTCACHE Path = " + htCachePath.getAbsolutePath());
         long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig("proxyCacheSize", "2")); // this is megabyte
         this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP);
         
