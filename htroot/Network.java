@@ -293,8 +293,6 @@ public class Network {
                                 links = Long.parseLong(seed.get("LCount", "0"));
                                 words = Long.parseLong(seed.get("ICount", "0"));
                             } catch (Exception exc) {links = 0; words = 0;}
-                            prop.put(STR_TABLE_LIST+conCount+"_complete", ((complete)? 1 : 0) );
-                            prop.put(STR_TABLE_LIST+conCount+"_hash", seed.hash);
                             String shortname = seed.get("Name", "deadlink");
                             if (shortname.length() > 20) {
                                 shortname = shortname.substring(0, 20) + "..."; 
@@ -306,6 +304,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST+conCount+"_complete_ip", seed.get("IP", "-") );
                                 prop.put(STR_TABLE_LIST+conCount+"_complete_port", seed.get("Port", "-") );
                                 prop.put(STR_TABLE_LIST+conCount+"_complete_hash", seed.hash);
+                                prop.put(STR_TABLE_LIST+conCount+"_complete_age", seed.getAge());
                             }else{
                                 prop.put(STR_TABLE_LIST+conCount+"_complete", 0);
                             }

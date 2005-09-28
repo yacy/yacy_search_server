@@ -245,6 +245,18 @@ public class yacySeed {
         }
     }
     
+    public int getAge() {
+        // returns the age as number of days
+        try {
+            long t = yacyCore.shortFormatter.parse(get("BDate", "20040101000000")).getTime();
+            return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + serverDate.UTCDiff())) / 1000 / 60 / 60 / 24);
+        } catch (java.text.ParseException e) {
+            return -1;
+        } catch (java.lang.NumberFormatException e) {
+            return -1;
+        }
+    }
+    
     public void setLastSeenTime() {
         // if we set a last seen time, then we need to respect the seeds UTC offset
         put("LastSeen", yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() - serverDate.UTCDiff() + getUTCDiff())));
