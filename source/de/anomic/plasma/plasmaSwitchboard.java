@@ -5,8 +5,8 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
 //
-// last major change: $LastChangedDate$ by $LastChangedBy$
-// Revision: $LastChangedRevision$
+// last major change: $LastChangedDate: 2005-09-07 23:38:03 +0200 (Mi, 07 Sep 2005) $ by $LastChangedBy: theli $
+// Revision: $LastChangedRevision: 682 $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -145,7 +145,7 @@ import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
 
 public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
-
+    
     // load slots
     public static int crawlSlots = 10;
     public static int indexingSlots = 100;
@@ -298,7 +298,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String cache = getConfig("proxyCache", "DATA/HTCACHE");
         cache = cache.replace('\\', '/');
         if (cache.endsWith("/")) { cache = cache.substring(0, cache.length() - 1); }                 
-        File htCachePath = new File(rootPath, cache);
+        File htCachePath = new File(cache); // don't use rootPath
         long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig("proxyCacheSize", "2")); // this is megabyte
         this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP);
         
@@ -398,7 +398,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // deploy threads
         log.logConfig("Starting Threads");
-        System.gc(); // help for profiler
+        // System.gc(); // help for profiler
         int indexing_cluster = Integer.parseInt(getConfig("80_indexing_cluster", "1"));
         if (indexing_cluster < 1) indexing_cluster = 1;
         deployThread("90_cleanup", "Cleanup", "simple cleaning process for monitoring information", null,
