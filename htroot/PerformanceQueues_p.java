@@ -126,7 +126,7 @@ public class PerformanceQueues_p {
                 // load with new values
                 idlesleep = Long.parseLong((String) post.get(threadName + "_idlesleep", "1000"));
                 busysleep = Long.parseLong((String) post.get(threadName + "_busysleep",  "100"));
-                memprereq = Long.parseLong((String) post.get(threadName + "_memprereq",    "0"));
+                memprereq = Long.parseLong((String) post.get(threadName + "_memprereq",    "0")) * 1024;
                 
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
@@ -164,7 +164,7 @@ public class PerformanceQueues_p {
             }
             prop.put("table_" + c + "_idlesleep", idlesleep);
             prop.put("table_" + c + "_busysleep", busysleep);
-            prop.put("table_" + c + "_memprereq", memprereq);
+            prop.put("table_" + c + "_memprereq", memprereq / 1024);
             
             c++;
         }

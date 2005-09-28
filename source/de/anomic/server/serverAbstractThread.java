@@ -256,7 +256,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                         memuse += memstamp1 - memstamp0;
                     } else {
                         // GC was obviously in between. Add an average as simple heuristic
-                        memuse += memuse / busyCycles;
+                        if (busyCycles > 0) memuse += memuse / busyCycles;
                     }
                     busytime += System.currentTimeMillis() - timestamp;
                     busyCycles++;
