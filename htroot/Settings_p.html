@@ -50,7 +50,6 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 <p><table border="0" cellspacing="5">
   <tr valign="top">
     <td>Account Name:</td><td><input name="adminuser" type="text" size="16" maxlength="16" value="#[adminuser]#"></td>
-    <td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="adminaccount" value="submit"></td>
   </tr>
   <tr valign="top">
     <td>Password:</td>
@@ -58,6 +57,9 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
   <tr valign="top">
     <td>Password (repeat same as above):</td>
     <td><input name="adminpw2" type="password" size="16" maxlength="16" value=""></td>
+  </tr>
+  <tr valign="top">
+    <td colspan="2"><input type="submit" name="adminaccount" value="submit"></td>
   </tr>
 </table>
 </fieldset>
@@ -85,7 +87,7 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
            If the address of outgoing connections is equal to the address of incoming connections,
            you don't need to set anything here, please leave it blank.<br>
   </tr>
-  <tr>
+  <tr valign="top">
     <td colspan="3"><input type="submit" name="generalsettings" value="submit"></td>
   </tr>
 </table>
@@ -112,12 +114,27 @@ All traffic is routed throug one single port, for both proxy and server.<br>
 </ul><br>
 
 <p>This is the account that restricts access to the proxy function. You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet. The default setting should be right in most cases. If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.</p>
-<p><table border="0" cellspacing="5">
-<tr valign="top"><td>IP-Number filter:</td><td colspan ="2"><input name="proxyfilter" type="text" size="50" maxlength="1000" value="#[proxyfilter]#"></td></tr>
-<tr valign="top"><td>Account Name:</td><td><input name="proxyuser" type="text" size="16" maxlength="16" value="#[proxyuser]#"></td>
-<td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="proxyaccount" value="Submit"></td></tr>
-<tr valign="top"><td>Password:</td><td><input name="proxypw1" type="password" size="16" maxlength="16" value=""></td></tr>
-<tr valign="top"><td>Password (repeat same as above):</td><td><input name="proxypw2" type="password" size="16" maxlength="16" value=""></td></tr>
+<p>
+<table border="0" cellspacing="5">
+  <tr valign="top">
+    <td>IP-Number filter:</td>
+    <td colspan ="2"><input name="proxyfilter" type="text" size="50" maxlength="1000" value="#[proxyfilter]#"></td>
+  </tr>
+  <tr valign="top">
+    <td>Account Name:</td>
+    <td><input name="proxyuser" type="text" size="16" maxlength="16" value="#[proxyuser]#"></td>
+  </tr>
+  <tr valign="top">
+    <td>Password:</td>
+    <td><input name="proxypw1" type="password" size="16" maxlength="16" value=""></td>
+  </tr>
+  <tr valign="top">
+    <td>Password (repeat same as above):</td>
+    <td><input name="proxypw2" type="password" size="16" maxlength="16" value=""></td>
+  </tr>
+  <tr valign="top">
+    <td colspan="2"><input type="submit" name="proxyaccount" value="Submit"></td>
+  </tr>
 </table>
 </fieldset>
 </form><br>
@@ -139,8 +156,7 @@ All traffic is routed throug one single port, for both proxy and server.<br>
     <td>With this you can specify if YaCy should support the HTTP connection keep-alive feature.</td>
   </tr>  
   <tr valign="top">
-    <td></td>
-    <td colspan="2"><input type="submit" name="httpNetworking" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
+    <td colspan="3"><input type="submit" name="httpNetworking" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
   </tr>  
 </table>
 </fieldset>
@@ -167,8 +183,7 @@ All traffic is routed throug one single port, for both proxy and server.<br>
     <td><input type="checkbox" name="remoteProxyUse" align="top" #(remoteProxyUseChecked)#::checked#(/remoteProxyUseChecked)#></td>
   </tr>
   <tr valign="top">
-    <td></td>
-    <td><input type="submit" name="proxysettings" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
+    <td colspan="2"><input type="submit" name="proxysettings" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
   </tr>
 </table>
 </fieldset>
@@ -217,8 +232,7 @@ Alternatively, you can simply set a virtual server port on your NAT/Server to en
     <td>&nbsp;</td>
   </tr> 
   <tr valign="top"> 
-    <td>&nbsp;</td>
-	<td colspan="2"><input type="submit" name="portForwarding" value="Submit">&nbsp;<i>Changes will take effect immediately.</i></td>
+    <td colspan="3"><input type="submit" name="portForwarding" value="Submit">&nbsp;<i>Changes will take effect immediately.</i></td>
   </tr>  
 </table>
 </fieldset>
@@ -229,10 +243,20 @@ Alternatively, you can simply set a virtual server port on your NAT/Server to en
 <fieldset><legend id="ServerAccess">Server Access Settings</legend>
 <p>Here you can restrict access to the server. By default, the access is not limited, because this function is needed to spawn the p2p index-sharing function. If you block access to your server (setting anything else than '*'), then you will also be blocked from using other peers' indexes for search service. However, blocking access may be correct in enterprise environments where you only want to index your company's own web pages.</p>
 <p>ATTENTION: Your current IP is recognized as "#[clientIP]#". If the value you enter here does not match with this IP, you will not be able to access the server pages anymore</p>
-<p><table border="0" cellspacing="5">
-<tr valign="top"><td>IP-Number filter:</td><td colspan ="2"><input name="serverfilter" type="text" size="50" maxlength="1000" value="#[serverfilter]#"></td></tr>
-<tr valign="top"><td><!--Account Name:</td><td><input name="serveruser" type="text" size="16" maxlength="16" value="#[serveruser]#">--></td>
-<td valign="bottom" align="right" rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="serveraccount" value="Submit"></td></tr>
+<p>
+<table border="0" cellspacing="5">
+<tr valign="top">
+  <td>IP-Number filter:</td>
+    <td colspan ="2"><input name="serverfilter" type="text" size="50" maxlength="1000" value="#[serverfilter]#"></td>
+  </tr>
+  <!--
+  <tr valign="top">
+    <td>Account Name:</td><td><input name="serveruser" type="text" size="16" maxlength="16" value="#[serveruser]#"></td>
+  </tr>
+  -->
+  <tr valign="top">
+    <td valign="bottom" rowspan="3"><input type="submit" name="serveraccount" value="Submit"></td>
+  </tr>
 <!--
 <tr valign="top"><td>Password:</td><td><input name="serverpw1" type="password" size="16" maxlength="16" value=""></td></tr>
 <tr valign="top"><td>Password (repeat same as above):</td><td><input name="serverpw2" type="password" size="16" maxlength="16" value=""></td></tr>
@@ -311,8 +335,7 @@ but only if there had been changes to the seed-list.
     <td><i>The recipient email-address.<br> e.g.:</i>&nbsp;<code>root@localhost</code></td>
   </tr>
   <tr valign="top">
-    <td></td>
-    <td colspan="2"><input type="submit" name="msgForwarding" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
+    <td colspan="3"><input type="submit" name="msgForwarding" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
   </tr>    
   
 </table>
