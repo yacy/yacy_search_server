@@ -50,7 +50,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.io.IOException;
-
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -70,8 +69,8 @@ public class Network {
         final serverObjects prop = new serverObjects();
         final boolean overview = (post == null) || (((String) post.get("page", "0")).equals("0"));
 
-        final String mySeedType = yacyCore.seedDB.mySeed.get("PeerType", "virgin");
-        final boolean iAmActive = (mySeedType.equals("senior")) || (mySeedType.equals("principal"));
+        final String mySeedType = yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
+        final boolean iAmActive = (mySeedType.equals(yacySeed.PEERTYPE_SENIOR) || mySeedType.equals(yacySeed.PEERTYPE_PRINCIPAL));
 
         if (overview) {
             long accActLinks = yacyCore.seedDB.countActiveURL();
@@ -119,17 +118,17 @@ public class Network {
                 prop.put("table_my-version", seed.get("Version", "-"));
                 prop.put("table_my-utc", seed.get("UTC", "-"));
                 prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", ""))));
-                prop.put("table_my-links", groupDigits(links));
-                prop.put("table_my-words", groupDigits(words));
+                prop.put("table_my-links", groupDigits(Long.toString(links)));
+                prop.put("table_my-words", groupDigits(Long.toString(words)));
                 prop.put("table_my-acceptcrawl", Integer.toString(seed.getFlagAcceptRemoteCrawl() ? 1 : 0) );
                 prop.put("table_my-acceptindex", Integer.toString(seed.getFlagAcceptRemoteIndex() ? 1 : 0) );
-                prop.put("table_my-sI", seed.get("sI", "-"));
-                prop.put("table_my-sU", seed.get("sU", "-"));
-                prop.put("table_my-rI", seed.get("rI", "-"));
-                prop.put("table_my-rU", seed.get("rU", "-"));
+                prop.put("table_my-sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
+                prop.put("table_my-sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
+                prop.put("table_my-rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
+                prop.put("table_my-rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                 prop.put("table_my-ppm", myppm);
                 prop.put("table_my-seeds", seed.get("SCount", "-"));
-                prop.put("table_my-connects", seed.get("CCount", "-"));
+                prop.put("table_my-connects", groupDigits(seed.get("CCount", "0")));
             }
 
             // overall results: Network statistics
@@ -185,7 +184,7 @@ public class Network {
                 } else {
                     peer = yacyCore.seedDB.getConnected(peer.hash);
                     prop.put("table_comment",2);
-                    prop.put("table_comment_status","publish: handshaked " + peer.get("PeerType", "senior") + " peer '" + peer.getName() + "' at " + peer.getAddress());
+                    prop.put("table_comment_status","publish: handshaked " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getAddress());
                     prop.put("table_comment_details",peer.toString());
                 }
 
@@ -251,8 +250,8 @@ public class Network {
                     Enumeration e = null;
                     switch (page) {
                         case 1 : e = yacyCore.seedDB.seedsSortedConnected(post.get("order", "down").equals("up"), post.get("sort", "LCount")); break;
-                        case 2 : e = yacyCore.seedDB.seedsSortedDisconnected(post.get("order", "up").equals("up"), post.get("sort", "LastSeen")); break;
-                        case 3 : e = yacyCore.seedDB.seedsSortedPotential(post.get("order", "up").equals("up"), post.get("sort", "LastSeen")); break;
+                        case 2 : e = yacyCore.seedDB.seedsSortedDisconnected(post.get("order", "up").equals("up"), post.get("sort", yacySeed.STR_LASTSEEN)); break;
+                        case 3 : e = yacyCore.seedDB.seedsSortedPotential(post.get("order", "up").equals("up"), post.get("sort", yacySeed.STR_LASTSEEN)); break;
                         default: break;
                     }
                     String startURL;
@@ -322,17 +321,17 @@ public class Network {
                             prop.put(STR_TABLE_LIST+conCount+"_lastSeen", (System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                             prop.put(STR_TABLE_LIST+conCount+"_utc", seed.get("UTC", "-"));
                             prop.put(STR_TABLE_LIST+conCount+"_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", "0"))));
-                            prop.put(STR_TABLE_LIST+conCount+"_links", groupDigits(links));
-                            prop.put(STR_TABLE_LIST+conCount+"_words", groupDigits(words));
+                            prop.put(STR_TABLE_LIST+conCount+"_links", groupDigits(Long.toString(links)));
+                            prop.put(STR_TABLE_LIST+conCount+"_words", groupDigits(Long.toString(words)));
                             prop.put(STR_TABLE_LIST+conCount+"_acceptcrawl", (seed.getFlagAcceptRemoteCrawl() ? 1 : 0) );
                             prop.put(STR_TABLE_LIST+conCount+"_acceptindex", (seed.getFlagAcceptRemoteIndex() ? 1 : 0) );
-                            prop.put(STR_TABLE_LIST+conCount+"_sI", seed.get("sI", "-"));
-                            prop.put(STR_TABLE_LIST+conCount+"_sU", seed.get("sU", "-"));
-                            prop.put(STR_TABLE_LIST+conCount+"_rI", seed.get("rI", "-"));
-                            prop.put(STR_TABLE_LIST+conCount+"_rU", seed.get("rU", "-"));
+                            prop.put(STR_TABLE_LIST+conCount+"_sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
+                            prop.put(STR_TABLE_LIST+conCount+"_sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
+                            prop.put(STR_TABLE_LIST+conCount+"_rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
+                            prop.put(STR_TABLE_LIST+conCount+"_rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                             prop.put(STR_TABLE_LIST+conCount+"_ppm", PPM);
                             prop.put(STR_TABLE_LIST+conCount+"_seeds", seed.get("SCount", "-"));
-                            prop.put(STR_TABLE_LIST+conCount+"_connects", seed.get("CCount", "-"));
+                            prop.put(STR_TABLE_LIST+conCount+"_connects", groupDigits(seed.get("CCount", "0")));
                             conCount++;
                         }//seed != null
                     }//while
@@ -349,7 +348,7 @@ public class Network {
             switch (page) {
                 case 1 : prop.put("table_peertype", "senior/principal"); break;
                 case 2 : prop.put("table_peertype", "senior/principal"); break;
-                case 3 : prop.put("table_peertype", "junior"); break;
+                case 3 : prop.put("table_peertype", yacySeed.PEERTYPE_JUNIOR); break;
                 default: break;
             }
         }
@@ -357,11 +356,23 @@ public class Network {
         return prop;
     }
 
-    
+    private static String groupDigits(String Number) {
+        long n;
+        try {
+            if (Number.endsWith(".0")) { Number = Number.substring(0, Number.length() - 2); } // for Connects per hour, why float ?
+            n = Long.parseLong(Number);
+        } catch (Exception e) {n = 0;}
+        if (n == 0) { return "-"; }
+        final String s = Long.toString(n);
+        String t = "";
+        for (int i = 0; i < s.length(); i++) { t = s.charAt(s.length() - i - 1) + (((i % 3) == 0) ? "." : "") + t; }
+        return t.substring(0, t.length() - 1);
+    }
+
     private static String groupDigits(long Number) {
         final String s = Long.toString(Number);
         String t = "";
-        for (int i = 0; i < s.length(); i++)  t = s.charAt(s.length() - i - 1) + (((i % 3) == 0) ? "," : "") + t;
+        for (int i = 0; i < s.length(); i++) t = s.charAt(s.length() - i - 1) + (((i % 3) == 0) ? "." : "") + t;
         return t.substring(0, t.length() - 1);
     }
 
