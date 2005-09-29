@@ -119,6 +119,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     private File   htRootPath = null;
 
     private static boolean doAccessLogging = false; 
+	private static HashSet users = null;
     
     /**
      * Do logging configuration for special proxy access log file
@@ -168,6 +169,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         } catch (Exception e) { 
             serverLog.logSevere("PROXY","Unable to configure proxy access logging.",e);        
         }
+		users = new HashSet();
     }
     
     /**
