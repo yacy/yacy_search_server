@@ -84,11 +84,9 @@ public class CacheAdmin_p {
         }
         final String fileString = pathString;
 
-        final File cache = new File(switchboard.getConfig("proxyCache", "DATA/HTCACHE"));    
-
         File       dir;
-        final File file = new File(cache, pathString);
-        final URL  url  = plasmaHTCache.getURL(cache, file);
+        final File file = new File(switchboard.htCachePath, pathString);
+        final URL  url  = plasmaHTCache.getURL(switchboard.htCachePath, file);
 
         if (file.isDirectory()) {
             dir = file;

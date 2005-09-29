@@ -157,7 +157,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static plasmaURLPattern urlBlacklist;
     
     // storage management    
-    private File                        cachePath;
+    public  File                        htCachePath;
     private File                        plasmaPath;
     public  File                        listsPath;
     public  plasmaURLPool               urlPool;
@@ -299,7 +299,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String cache = getConfig("proxyCache", "DATA/HTCACHE");
         cache = cache.replace('\\', '/');
         if (cache.endsWith("/")) { cache = cache.substring(0, cache.length() - 1); }
-        File htCachePath;
         if (new File(cache).isAbsolute()) {
             htCachePath = new File(cache); // don't use rootPath
         } else {
