@@ -154,6 +154,8 @@ public class userDB {
         public static final String LAST_ACCESS = "lastAccess";
         public static final String TIME_USED = "timeUsed";
         public static final String TIME_LIMIT = "timeLimit";
+        public static final String TRAFFIC_SIZE = "trafficSize";
+        public static final String TRAFFIC_LIMIT = "trafficLimit";
         
         // this is a simple record structure that hold all properties of a user
         private Map mem;
@@ -164,7 +166,7 @@ public class userDB {
                 throw new IllegalArgumentException();
             
             this.userName = userName.trim(); 
-            if (userName.length() < USERNAME_MIN_LENGTH) 
+            if (this.userName.length() < USERNAME_MIN_LENGTH) 
                 throw new IllegalArgumentException("Username to short. Length should be >= " + USERNAME_MIN_LENGTH);
             
             if (mem == null) this.mem = new HashMap();
@@ -189,10 +191,6 @@ public class userDB {
             return (this.mem.containsKey(USER_ADDRESS)?(String)this.mem.get(USER_ADDRESS):null);
         } 
         
-        public Long getLastAccess() {
-            return (this.mem.containsKey(LAST_ACCESS)?Long.valueOf((String)this.mem.get(LAST_ACCESS)):null);
-        }
-        
         public long getTimeUsed() {
             if (this.mem.containsKey(TIME_USED)) {
                 return Long.valueOf((String)this.mem.get(TIME_USED)).longValue();
@@ -209,6 +207,38 @@ public class userDB {
             return (this.mem.containsKey(TIME_LIMIT)?Long.valueOf((String)this.mem.get(TIME_LIMIT)):null);
         }
         
+        public long getTrafficSize() {
+            if (this.mem.containsKey(TRAFFIC_SIZE)) {
+                return Long.valueOf((String)this.mem.get(TRAFFIC_SIZE)).longValue();
+            }
+            try {
+                this.setProperty(TRAFFIC_SIZE,"0");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return 0;
+        }
+        
+        public Long getTrafficLimit() {
+            return (this.mem.containsKey(TRAFFIC_LIMIT)?Long.valueOf((String)this.mem.get(TRAFFIC_LIMIT)):null);
+        }
+        
+        public long updateTrafficSize(long responseSize) {
+            if (responseSize < 0) throw new IllegalArgumentException("responseSize must be greater or equal zero.");
+            
+            long currentTrafficSize = getTrafficSize();
+            long newTrafficSize = currentTrafficSize + responseSize;
+            try {
+                this.setProperty(TRAFFIC_SIZE,Long.toString(newTrafficSize));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return newTrafficSize;
+        }
+        
+        public Long getLastAccess() {
+            return (this.mem.containsKey(LAST_ACCESS)?Long.valueOf((String)this.mem.get(LAST_ACCESS)):null);
+        }        
         
         public long updateLastAccess(long timeStamp, boolean decrementTimeUsed) {
             if (timeStamp < 0) throw new IllegalArgumentException();
