@@ -44,29 +44,39 @@
 //if the shell's current path is HTROOT
 
 import de.anomic.http.httpHeader;
-import de.anomic.server.serverCore;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class autoconfig {
-
- /**
-  * Generates a proxy-autoconfig-file (application/x-ns-proxy-autoconfig) 
-  * See: <a href="http://wp.netscape.com/eng/mozilla/2.0/relnotes/demo/proxy-live.html">Proxy Auto-Config File Format</a> 
-  * @param header
-  * @param post
-  * @param env
-  * @return
-  */
- public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-     
-    serverObjects prop = new serverObjects();
-
-    prop.put("host", serverCore.publicLocalIP().getHostAddress());
-    prop.put("port", env.getConfig("port", "8080"));
-
- // return rewrite properties
-    return prop;
- }
-
+    
+    /**
+     * Generates a proxy-autoconfig-file (application/x-ns-proxy-autoconfig) 
+     * See: <a href="http://wp.netscape.com/eng/mozilla/2.0/relnotes/demo/proxy-live.html">Proxy Auto-Config File Format</a> 
+     * @param header
+     * @param post
+     * @param env
+     * @return
+     */
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        
+        serverObjects prop = new serverObjects();
+        plasmaSwitchboard sb = (plasmaSwitchboard)env;
+        
+        // getting the http host header
+        String hostSocket = (String) header.get(httpHeader.CONNECTION_PROP_HOST);
+        
+        String host = hostSocket;
+        int port = 80, pos = hostSocket.indexOf(":");        
+        if (pos != -1) {
+            port = Integer.parseInt(hostSocket.substring(pos + 1));
+            host = hostSocket.substring(0, pos);
+        }    
+        
+        prop.put("host", host);
+        prop.put("port", Integer.toString(port));
+        
+        return prop;
+    }
+    
 }
