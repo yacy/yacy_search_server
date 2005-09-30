@@ -114,6 +114,7 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String CACHE_CONTROL = "Cache-Control";
     public static final String TRANSFER_ENCODING = "Transfer-Encoding";
     public static final String LOCATION = "Location";
+    public static final String ETAG = "ETag";
     
     public static final String X_CACHE = "X-Cache";
     public static final String X_CACHE_LOOKUP = "X-Cache-Lookup";
@@ -188,6 +189,7 @@ public final class httpHeader extends TreeMap implements Map {
     /* PROPERTIES: General properties */    
     public static final String CONNECTION_PROP_HTTP_VER = "HTTP";
     public static final String CONNECTION_PROP_HOST = "HOST";
+    public static final String CONNECTION_PROP_USER = "USER";
     public static final String CONNECTION_PROP_METHOD = "METHOD";
     public static final String CONNECTION_PROP_PATH = "PATH";
     public static final String CONNECTION_PROP_EXT = "EXT";

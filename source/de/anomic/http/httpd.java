@@ -428,6 +428,8 @@ public final class httpd implements serverHandler {
         } catch (Exception e) {
             logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
+        } finally {
+            this.doUserAccounting(this.prop);
         }
     }
     
@@ -499,7 +501,9 @@ public final class httpd implements serverHandler {
         } catch (Exception e) {
             logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
-        }        
+        } finally {
+            this.doUserAccounting(this.prop);
+        }
     }
     
     public Boolean POST(String arg) throws IOException {
@@ -581,7 +585,9 @@ public final class httpd implements serverHandler {
         } catch (Exception e) {
             logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
-        }        
+        } finally {
+            this.doUserAccounting(this.prop);
+        }
     }
     
     
@@ -1207,6 +1213,13 @@ public final class httpd implements serverHandler {
         return true;
     }    
     
+    public void doUserAccounting(Properties conProps) {
+        // TODO: validation of conprop fields
+        // httpHeader.CONNECTION_PROP_USER
+        // httpHeader.CONNECTION_PROP_CLIENTIP
+        // httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE
+        // httpHeader.CONNECTION_PROP_PROXY_RESPOND_STATUS
+    }
     
     
 //  public static boolean isTextMime(String mime, Set whitelist) {
