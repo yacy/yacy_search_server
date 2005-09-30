@@ -14,7 +14,7 @@
 #(page)#
 <td valign="top">
 <form action="User_p.html">
-<select name="users">
+<select name="user">
 <option value="newuser">new User</option>
 #{users}#
 <option>#[user]#</option>
@@ -61,10 +61,6 @@ Current User: #[username]#
  <tr>
   <td>Time used: </td>
   <td><input type="text" name="timeused" value="#[timeused]#"></td>
- </tr>
- <tr>
-  <td>Time range: </td>
-  <td><input type="text" name="timerange" value="#[timerange]#"></td>
  </tr>
 </table>
 <input type="submit" name="change" value="Save User">

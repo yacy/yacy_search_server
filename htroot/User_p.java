@@ -56,6 +56,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.data.userDB;
+import de.anomic.server.serverCodings;
 
 public class User_p {
     
@@ -65,7 +66,7 @@ public class User_p {
 		plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
 		userDB.Entry entry=null;
 
-		if(post == null){
+		if( (post == null) || (!post.containsKey("change")) ){
 			prop.put("page", 0);
 			//default values
 			prop.put("page_current_user", "newuser");
@@ -89,8 +90,20 @@ public class User_p {
 				numUsers++;
 			}
 			prop.put("page_users", numUsers);
+			
+			if(post != null && post.containsKey("user") && !((String)post.get("user")).equals("newuser")){
+				entry=sb.userDB.getEntry((String)post.get("user"));
+				//TODO: set username read-only in html
+				prop.put("page_username", post.get("user"));
+				prop.put("page_firstname", entry.getFirstName());
+				prop.put("page_lastname", entry.getLastName());
+				prop.put("page_address", entry.getAddress());
+				prop.put("page_timelimit", entry.getTimeLimit());
+				prop.put("page_timeused", entry.getTimeUsed());
+			}
+
 				
-	    } else { //post == null
+	    } else { //Data submitted
 			prop.put("page", 1); //results
 			prop.put("page_text", 0);
 			prop.put("page_error", 0);
@@ -105,7 +118,7 @@ public class User_p {
 			String timeLimit="0";
 			String timeUsed="0";
 			HashMap mem=new HashMap();
-			if(post.containsKey("current_user") && post.get("current_user").equals("newuser")){
+			if( post != null && post.containsKey("current_user") && post.get("current_user").equals("newuser")){
 				username=(String)post.get("username");
 				pw=(String)post.get("password");
 				pw2=(String)post.get("password2");
@@ -119,12 +132,12 @@ public class User_p {
 				timeLimit=(String)post.get("timelimit");
 				timeUsed=(String)post.get("timelimit");
 				
-				mem.put("password", pw);
-				mem.put("firstname", firstName);
-				mem.put("lastname", lastName);
-				mem.put("address", address);
-				mem.put("timelimit", timeLimit);
-				mem.put("timeused", timeUsed);
+				mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
+				mem.put(userDB.Entry.USER_FIRSTNAME, firstName);
+				mem.put(userDB.Entry.USER_LASTNAME, lastName);
+				mem.put(userDB.Entry.USER_ADDRESS, address);
+				mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
+				mem.put(userDB.Entry.TIME_USED, timeUsed);
 
 				entry=sb.userDB.createEntry(username, mem);
 				sb.userDB.addEntry(entry);
