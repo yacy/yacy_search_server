@@ -48,6 +48,8 @@ package de.anomic.data;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.kelondro.kelondroDyn;
@@ -56,11 +58,11 @@ import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.logging.serverLog;
 
 public class userDB {
-
+    
     public static final int USERNAME_MAX_LENGTH = 128;
     public static final int USERNAME_MIN_LENGTH = 4;
     
-    private kelondroMap userTable;
+    kelondroMap userTable;
     private File userTableFile;
     private int bufferkb;
     
@@ -89,7 +91,7 @@ public class userDB {
         return userTable.cacheFillStatus();
     }    
     
-    private void resetDatabase() {
+    void resetDatabase() {
         // deletes the database and creates a new one
         if (userTable != null) try {
             userTable.close();
@@ -119,11 +121,11 @@ public class userDB {
         } catch (IOException e) {}
     }        
     
-    public Entry getEntry(String hostName) {
+    public Entry getEntry(String userName) {
         try {
-            Map record = userTable.get(hostName);
+            Map record = userTable.get(userName);
             if (record == null) return null;
-            return new Entry(hostName, record);
+            return new Entry(userName, record);
         } catch (IOException e) {
             return null;
         }
@@ -162,7 +164,7 @@ public class userDB {
             this.userName = userName.trim(); 
             if (userName.length() < USERNAME_MIN_LENGTH) 
                 throw new IllegalArgumentException("Username to short. Length should be >= " + USERNAME_MIN_LENGTH);
-
+            
             if (mem == null) this.mem = new HashMap();
             else this.mem = mem;            
             
@@ -196,7 +198,7 @@ public class userDB {
         public String toString() {
             StringBuffer str = new StringBuffer();
             str.append((this.userName==null)?"null":this.userName)
-               .append(": ");
+            .append(": ");
             
             if (this.mem != null) {     
                 str.append(this.mem.toString());
@@ -204,8 +206,53 @@ public class userDB {
             
             return str.toString();
         }    
-    
+        
     }
     
+    public Iterator iterator(boolean up) {
+        // enumerates users
+        try {
+            return new userIterator(up);
+        } catch (IOException e) {
+            return new HashSet().iterator();
+        }
+    }
+    
+    public class userIterator implements Iterator {
+        // the iterator iterates all userNames
+        kelondroDyn.dynKeyIterator userIter;
+        userDB.Entry nextEntry;
+        
+        public userIterator(boolean up) throws IOException {
+            this.userIter = userDB.this.userTable.keys(up, false);
+            this.nextEntry = null;
+        }
+        public boolean hasNext() {
+            try {
+                return this.userIter.hasNext();
+            } catch (kelondroException e) {
+                resetDatabase();
+                return false;
+            }
+        }
+        public Object next() {
+            try {
+                return getEntry((String) this.userIter.next());
+            } catch (kelondroException e) {
+                resetDatabase();
+                return null;
+            }
+        }
+        public void remove() {
+            if (this.nextEntry != null) {
+                try {
+                    Object userName = this.nextEntry.getUserName();
+                    if (userName != null) removeEntry((String) userName);
+                } catch (kelondroException e) {
+                    resetDatabase();
+                }
+            }
+        }
+    }    
     
 }
