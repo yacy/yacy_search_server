@@ -1,0 +1,211 @@
+//userDB.java 
+//-------------------------------------
+//part of YACY
+//(C) by Michael Peter Christen; mc@anomic.de
+//first published on http://www.anomic.de
+//Frankfurt, Germany, 2004
+//
+//This file ist contributed by Martin Thelian
+//last major change: $LastChangedDate$ by $LastChangedBy$
+//Revision: $LastChangedRevision$
+//
+//This program is free software; you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation; either version 2 of the License, or
+//(at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//Using this software in any meaning (reading, learning, copying, compiling,
+//running) means that you agree that the Author(s) is (are) not responsible
+//for cost, loss of data or any harm that may be caused directly or indirectly
+//by usage of this softare or this documentation. The usage of this software
+//is on your own risk. The installation and usage (starting/running) of this
+//software may allow other people or application to access your computer and
+//any attached devices and is highly dependent on the configuration of the
+//software which must be done by the user of the software; the author(s) is
+//(are) also not responsible for proper configuration and usage of the
+//software, even if provoked by documentation provided together with
+//the software.
+//
+//Any changes to this file according to the GPL as documented in the file
+//gpl.txt aside this file in the shipment you received can be done to the
+//lines that follows this copyright notice here, but changes must not be
+//done inside the copyright notive above. A re-distribution must contain
+//the intact and unchanged copyright notice.
+//Contributions and changes to the program code must be marked as such.
+
+
+package de.anomic.data;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroMap;
+import de.anomic.server.logging.serverLog;
+
+public class userDB {
+
+    public static final int USERNAME_MAX_LENGTH = 128;
+    public static final int USERNAME_MIN_LENGTH = 4;
+    
+    private kelondroMap userTable;
+    private File userTableFile;
+    private int bufferkb;
+    
+    public userDB(File robotsTableFile, int bufferkb) throws IOException {
+        this.userTableFile = robotsTableFile;
+        this.bufferkb = bufferkb;
+        if (robotsTableFile.exists()) {
+            try {
+                this.userTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024));
+            } catch (kelondroException e) {
+                robotsTableFile.delete();
+                robotsTableFile.getParentFile().mkdirs();
+                this.userTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 128, 256));
+            }
+        } else {
+            robotsTableFile.getParentFile().mkdirs();
+            this.userTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 128, 256));
+        }
+    }
+    
+    public int[] dbCacheChunkSize() {
+        return userTable.cacheChunkSize();
+    }    
+    
+    public int[] dbCacheFillStatus() {
+        return userTable.cacheFillStatus();
+    }    
+    
+    private void resetDatabase() {
+        // deletes the database and creates a new one
+        if (userTable != null) try {
+            userTable.close();
+        } catch (IOException e) {}
+        if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
+        try {
+            userTableFile.getParentFile().mkdirs();
+            userTable = new kelondroMap(new kelondroDyn(userTableFile, this.bufferkb, 256, 512));
+        } catch (IOException e){
+            serverLog.logSevere("PLASMA", "user.resetDatabase", e);
+        }
+    }
+    
+    public void close() {
+        try {
+            userTable.close();
+        } catch (IOException e) {}
+    }
+    
+    public int size() {
+        return userTable.size();
+    }    
+    
+    public void removeEntry(String hostName) {
+        try {
+            userTable.remove(hostName.toLowerCase());
+        } catch (IOException e) {}
+    }        
+    
+    public Entry getEntry(String hostName) {
+        try {
+            Map record = userTable.get(hostName);
+            if (record == null) return null;
+            return new Entry(hostName, record);
+        } catch (IOException e) {
+            return null;
+        }
+    }    
+    
+    public Entry addEntry(String userName, HashMap userProps) {
+        Entry entry = new Entry(userName,userProps);
+        addEntry(entry);
+        return entry;
+    }
+    
+    public String addEntry(Entry entry) {
+        try {
+            userTable.set(entry.userName,entry.mem);
+            return entry.userName;
+        } catch (IOException e) {
+            return null;
+        }
+    }    
+    
+    public class Entry {
+        public static final String MD5ENCODED_USERPWD_STRING = "MD5_user:pwd";
+        public static final String AUTHENTICATION_METHOD = "auth_method";
+        public static final String USER_FIRSTNAME = "firstName";
+        public static final String USER_LASTNAME = "lastName";
+        public static final String USER_ADDRESS = "address";
+        
+        // this is a simple record structure that hold all properties of a user
+        private Map mem;
+        private String userName;
+        
+        public Entry(String userName, Map mem) {
+            if ((userName == null) || (userName.length() == 0)) 
+                throw new IllegalArgumentException();
+            
+            this.userName = userName.trim(); 
+            if (userName.length() < USERNAME_MIN_LENGTH) 
+                throw new IllegalArgumentException("Username to short. Length should be >= " + USERNAME_MIN_LENGTH);
+
+            if (mem == null) this.mem = new HashMap();
+            else this.mem = mem;            
+            
+            if (!mem.containsKey(AUTHENTICATION_METHOD))this.mem.put(AUTHENTICATION_METHOD,"yacy");
+        }
+        
+        public String getUserName() {
+            return this.userName;
+        }
+        
+        public String getFirstName() {
+            return (this.mem.containsKey(USER_FIRSTNAME)?(String)this.mem.get(USER_FIRSTNAME):null);
+        } 
+        
+        public String getLastName() {
+            return (this.mem.containsKey(USER_LASTNAME)?(String)this.mem.get(USER_LASTNAME):null);
+        }     
+        
+        public String getAddress() {
+            return (this.mem.containsKey(USER_ADDRESS)?(String)this.mem.get(USER_ADDRESS):null);
+        } 
+        
+        public String getMD5EncodedUserPwd() {
+            return (this.mem.containsKey(MD5ENCODED_USERPWD_STRING)?(String)this.mem.get(MD5ENCODED_USERPWD_STRING):null);
+        }
+        
+        public Map getProperties() {
+            return this.mem;
+        }
+        
+        public String toString() {
+            StringBuffer str = new StringBuffer();
+            str.append((this.userName==null)?"null":this.userName)
+               .append(": ");
+            
+            if (this.mem != null) {     
+                str.append(this.mem.toString());
+            } 
+            
+            return str.toString();
+        }    
+    
+    }
+    
+    
+}
