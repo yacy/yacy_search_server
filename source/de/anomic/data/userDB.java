@@ -66,20 +66,20 @@ public class userDB {
     private File userTableFile;
     private int bufferkb;
     
-    public userDB(File robotsTableFile, int bufferkb) throws IOException {
-        this.userTableFile = robotsTableFile;
+    public userDB(File userTableFile, int bufferkb) throws IOException {
+        this.userTableFile = userTableFile;
         this.bufferkb = bufferkb;
-        if (robotsTableFile.exists()) {
+        if (userTableFile.exists()) {
             try {
-                this.userTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024));
+                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024));
             } catch (kelondroException e) {
-                robotsTableFile.delete();
-                robotsTableFile.getParentFile().mkdirs();
-                this.userTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 128, 256));
+                userTableFile.delete();
+                userTableFile.getParentFile().mkdirs();
+                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256));
             }
         } else {
-            robotsTableFile.getParentFile().mkdirs();
-            this.userTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 128, 256));
+            userTableFile.getParentFile().mkdirs();
+            this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256));
         }
     }
     
@@ -131,9 +131,8 @@ public class userDB {
         }
     }    
     
-    public Entry addEntry(String userName, HashMap userProps) {
+    public Entry createEntry(String userName, HashMap userProps) {
         Entry entry = new Entry(userName,userProps);
-        addEntry(entry);
         return entry;
     }
     
@@ -152,6 +151,9 @@ public class userDB {
         public static final String USER_FIRSTNAME = "firstName";
         public static final String USER_LASTNAME = "lastName";
         public static final String USER_ADDRESS = "address";
+        public static final String LAST_ACCESS = "lastAccess";
+        public static final String TIME_USED = "timeUsed";
+        public static final String TIME_LIMIT = "timeLimit";
         
         // this is a simple record structure that hold all properties of a user
         private Map mem;
@@ -187,12 +189,60 @@ public class userDB {
             return (this.mem.containsKey(USER_ADDRESS)?(String)this.mem.get(USER_ADDRESS):null);
         } 
         
+        public Long getLastAccess() {
+            return (this.mem.containsKey(LAST_ACCESS)?Long.valueOf((String)this.mem.get(LAST_ACCESS)):null);
+        }
+        
+        public long getTimeUsed() {
+            if (this.mem.containsKey(TIME_USED)) {
+                return Long.valueOf((String)this.mem.get(TIME_USED)).longValue();
+            }
+            try {
+                this.setProperty(TIME_USED,"0");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return 0;
+        }
+        
+        
+        public long updateLastAccess(long timeStamp, boolean decrementTimeUsed) {
+            if (timeStamp < 0) throw new IllegalArgumentException();
+            
+            Long lastAccess = this.getLastAccess();                                            
+            long oldTimeUsed = getTimeUsed();
+            long newTimeUsed = oldTimeUsed;            
+            
+            if (decrementTimeUsed) {
+                if ((lastAccess == null)||((lastAccess != null)||(lastAccess.longValue()-timeStamp>1000))) {
+                    this.mem.put(TIME_USED,new Long(newTimeUsed = ++oldTimeUsed));  
+                }
+            }            
+            this.mem.put(LAST_ACCESS,Long.toString(timeStamp));
+            
+            try {
+                userDB.this.userTable.set(getUserName(), this.mem); 
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+            return newTimeUsed;
+        }
+        
         public String getMD5EncodedUserPwd() {
             return (this.mem.containsKey(MD5ENCODED_USERPWD_STRING)?(String)this.mem.get(MD5ENCODED_USERPWD_STRING):null);
         }
         
         public Map getProperties() {
             return this.mem;
+        }
+        
+        public void setProperty(String propName, String newValue) throws IOException {
+            this.mem.put(propName,  newValue);
+            userDB.this.userTable.set(getUserName(), this.mem);
+        }
+        
+        public String getProperty(String propName, String defaultValue) {
+            return (this.mem.containsKey(propName)?(String)this.mem.get(propName):defaultValue);
         }
         
         public String toString() {
