@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy '#[clientname]#': User Administration</title>
+#[metas]#
+</head>
+<body>
+#[header]#
+<br><br>
+<h2>User Administration</h2><br>
+<table>
+<tr>
+
+<td valign="top">
+<form action="User_p.html">
+<select name="users">
+<option value="newuser">new User</option>
+#{users}#
+<option>#[user]#</option>
+#{/users}#
+</select><br />
+<input type="submit" value="Edit User">
+</form>
+</td>
+
+<td width="100%">
+<form action="User_p.html">
+Current User: <input type="text" name="current_user" value="#[current_user]#" readonly>
+<p />
+<table border="1">
+ <tr>
+  <td>Username: </td>
+  <td><input type="text" value="#[username]#"></td>
+ </tr>
+ <tr>
+  <td>Password: </td>
+  <td><input type="password" name="password"></td>
+ </tr>
+ <tr>
+  <td>Password(repeat): </td>
+  <td><input type="password" name="password2"></td>
+ </tr>
+ <tr>
+  <td>First Name: </td>
+  <td><input type="text" name="firstname" value="#[firstname]#"></td>
+ </tr>
+ <tr>
+  <td>Last Name: </td>
+  <td><input type="text" name="lastname" value="#[lastname]#"></td>
+ </tr>
+ <tr>
+  <td>Address: </td>
+  <td><input type="text" name="address" value="#[address]#"></td>
+ </tr>
+ <tr>
+  <td>Timelimit: </td>
+  <td><input type="text" name="timelimit" value="#[timelimit]#"></td>
+ </tr>
+ <tr>
+  <td>Time used: </td>
+  <td><input type="text" name="timeused" value="#[timeused]#"></td>
+ </tr>
+ <tr>
+  <td>Time range: </td>
+  <td><input type="text" name="timerange" value="#[timerange]#"></td>
+ </tr>
+</table>
+<input type="submit" name="change" value="Save User">
+
+</form>
+</td>
+
+
+</tr>
+</table>
+
+#[footer]#
+</body>
+</html>

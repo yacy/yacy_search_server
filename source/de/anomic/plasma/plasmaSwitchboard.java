@@ -124,6 +124,7 @@ import java.util.logging.Level;
 import de.anomic.data.messageBoard;
 import de.anomic.data.robotsParser;
 import de.anomic.data.wikiBoard;
+import de.anomic.data.userDB;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -184,6 +185,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  long                        proxyLastAccess;
     public  yacyCore                    yc;
     public  HashMap                     indexingTasksInProcess;
+	public  userDB						userDB;
 
     private static final String STR_PROXYPROFILE       = "defaultProxyProfile";
     private static final String STR_REMOTEPROFILE      = "defaultRemoteProfile";
@@ -359,6 +361,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logConfig("Starting Wiki Board");
         wikiDB = new wikiBoard(new File(getRootPath(), "DATA/SETTINGS/wiki.db"),
                  new File(getRootPath(), "DATA/SETTINGS/wiki-bkp.db"), ramWiki);
+		userDB = new userDB(new File(getRootPath(), "DATA/SETTINGS/user.db"), 512);
 
         // init cookie-Monitor
         log.logConfig("Starting Cookie Monitor");
