@@ -11,6 +11,7 @@
 <table>
 <tr>
 
+#(page)#
 <td valign="top">
 <form action="User_p.html">
 <select name="users">
@@ -25,12 +26,13 @@
 
 <td width="100%">
 <form action="User_p.html">
-Current User: <input type="text" name="current_user" value="#[current_user]#" readonly>
+Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly>
+Current User: #[username]#
 <p />
 <table border="1">
  <tr>
   <td>Username: </td>
-  <td><input type="text" value="#[username]#"></td>
+  <td><input type="text" name="username" value="#[username]#"></td>
  </tr>
  <tr>
   <td>Password: </td>
@@ -73,6 +75,21 @@ Current User: <input type="text" name="current_user" value="#[current_user]#" re
 
 </tr>
 </table>
+::
+Result:
+#(text)#
+leer
+::
+User created: #[username]#
+#(/text)#
+<p />
+#(error)#
+no error
+::
+Passwords do not match.
+#(/error)#
+
+#(/page)#
 
 #[footer]#
 </body>

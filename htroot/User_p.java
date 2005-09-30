@@ -48,6 +48,8 @@
 
 import java.util.logging.Handler;
 import java.util.logging.Logger;
+import java.util.Iterator;
+import java.util.HashMap;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.http.httpHeader;
@@ -61,22 +63,75 @@ public class User_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
 		plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+		userDB.Entry entry=null;
 
-		//default values
-		prop.put("current_user", "nouser");
-		prop.put("username", "");
-		prop.put("firstname", "");
-		prop.put("lastname", "");
-		prop.put("address", "");
-		prop.put("timelimit", "");
-		prop.put("timeused", "");
-		prop.put("timerange", "");
-
-		if(sb.userDB == null)
-			return prop;
+		if(post == null){
+			prop.put("page", 0);
+			//default values
+			prop.put("page_current_user", "newuser");
+			prop.put("page_username", "");
+			prop.put("page_firstname", "");
+			prop.put("page_lastname", "");
+			prop.put("page_address", "");
+			prop.put("page_timelimit", "");
+			prop.put("page_timeused", "");
+			prop.put("page_timerange", "");
+			prop.put("page_users", 0);
+	
+			if(sb.userDB == null)
+				return prop;
 			
-        // return rewrite properties
-        return prop;
-    }
-    
+			Iterator it = sb.userDB.iterator(true);
+			int numUsers=0;
+			while(it.hasNext()){
+				entry = (userDB.Entry)it.next();
+				prop.put("page_users_"+numUsers+"_user", entry.getUserName());
+				numUsers++;
+			}
+			prop.put("page_users", numUsers);
+				
+	    } else { //post == null
+			prop.put("page", 1); //results
+			prop.put("page_text", 0);
+			prop.put("page_error", 0);
+
+			
+			String username="";
+			String pw="";
+			String pw2="";
+			String firstName="";
+			String lastName="";
+			String address="";
+			String timeLimit="0";
+			String timeUsed="0";
+			HashMap mem=new HashMap();
+			if(post.containsKey("current_user") && post.get("current_user").equals("newuser")){
+				username=(String)post.get("username");
+				pw=(String)post.get("password");
+				pw2=(String)post.get("password2");
+				if(! pw.equals(pw2)){
+					prop.put("page_error", 1); //PW does not match
+					return prop;
+				}
+				firstName=(String)post.get("firstname");
+				lastName=(String)post.get("lastname");
+				address=(String)post.get("address");
+				timeLimit=(String)post.get("timelimit");
+				timeUsed=(String)post.get("timelimit");
+				
+				mem.put("password", pw);
+				mem.put("firstname", firstName);
+				mem.put("lastname", lastName);
+				mem.put("address", address);
+				mem.put("timelimit", timeLimit);
+				mem.put("timeused", timeUsed);
+
+				entry=sb.userDB.createEntry(username, mem);
+				sb.userDB.addEntry(entry);
+				
+			}
+		}
+	    // return rewrite properties
+	    return prop;
+	}
 }
