@@ -205,6 +205,10 @@ public class userDB {
             return 0;
         }
         
+        public Long getTimeLimit() {
+            return (this.mem.containsKey(TIME_LIMIT)?Long.valueOf((String)this.mem.get(TIME_LIMIT)):null);
+        }
+        
         
         public long updateLastAccess(long timeStamp, boolean decrementTimeUsed) {
             if (timeStamp < 0) throw new IllegalArgumentException();
@@ -215,7 +219,7 @@ public class userDB {
             
             if (decrementTimeUsed) {
                 if ((lastAccess == null)||((lastAccess != null)||(lastAccess.longValue()-timeStamp>1000))) {
-                    this.mem.put(TIME_USED,new Long(newTimeUsed = ++oldTimeUsed));  
+                    this.mem.put(TIME_USED,Long.toString(newTimeUsed = ++oldTimeUsed));  
                 }
             }            
             this.mem.put(LAST_ACCESS,Long.toString(timeStamp));
