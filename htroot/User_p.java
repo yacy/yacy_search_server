@@ -50,6 +50,7 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.io.IOException;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.http.httpHeader;
@@ -94,6 +95,7 @@ public class User_p {
 			if(post != null && post.containsKey("user") && !((String)post.get("user")).equals("newuser")){
 				entry=sb.userDB.getEntry((String)post.get("user"));
 				//TODO: set username read-only in html
+				prop.put("page_current_user", post.get("user"));
 				prop.put("page_username", post.get("user"));
 				prop.put("page_firstname", entry.getFirstName());
 				prop.put("page_lastname", entry.getLastName());
@@ -142,6 +144,33 @@ public class User_p {
 				entry=sb.userDB.createEntry(username, mem);
 				sb.userDB.addEntry(entry);
 				
+			}else if(post != null && post.containsKey("currentuser")){
+				username=(String)post.get("username");
+				pw=(String)post.get("password");
+				pw2=(String)post.get("password2");
+				if(! pw.equals(pw2)){
+					prop.put("page_error", 1); //PW does not match
+					return prop;
+				}
+				firstName=(String)post.get("firstname");
+				lastName=(String)post.get("lastname");
+				address=(String)post.get("address");
+				timeLimit=(String)post.get("timelimit");
+				timeUsed=(String)post.get("timelimit");
+
+				entry = sb.userDB.getEntry("username");
+				try{
+					entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
+					entry.setProperty(userDB.Entry.USER_FIRSTNAME, firstName);
+					entry.setProperty(userDB.Entry.USER_LASTNAME, lastName);
+					entry.setProperty(userDB.Entry.USER_ADDRESS, address);
+					entry.setProperty(userDB.Entry.TIME_LIMIT, timeLimit);
+					entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
+				}catch (IOException e){
+				}
+				
+				sb.userDB.addEntry(entry);
+
 			}
 		}
 	    // return rewrite properties
