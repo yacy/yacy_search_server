@@ -72,8 +72,6 @@ public class Network {
         final String mySeedType = yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
         final boolean iAmActive = (mySeedType.equals(yacySeed.PEERTYPE_SENIOR) || mySeedType.equals(yacySeed.PEERTYPE_PRINCIPAL));
 
-        final StringBuffer info = new StringBuffer(512);
-
         if (overview) {
             long accActLinks = yacyCore.seedDB.countActiveURL();
             long accActWords = yacyCore.seedDB.countActiveRWI();
@@ -103,31 +101,22 @@ public class Network {
                 // my-info
                 prop.put("table_my-name", seed.get("Name", "-") );
                 if (yacyCore.seedDB.mySeed.isVirgin()) {
-                    info.append("<img border=\"0\" src=\"/env/grafics/Virgin.gif\" title=\"Type: Virgin\"></img>");
+                    prop.put("table_my-info", 0);
                 } else if(yacyCore.seedDB.mySeed.isJunior()) {
-                    info.append("<img border=\"0\" src=\"/env/grafics/JuniorDirect.gif\" title=\"Type: Junior\"></img>");
+                    prop.put("table_my-info", 1);
                     accPotLinks += links;
                     accPotWords += words;
                 } else if(yacyCore.seedDB.mySeed.isSenior()) {
-                    info.append("<img border=\"0\" src=\"/env/grafics/SeniorDirect.gif\" title=\"Type: Senior\"></img>");
+                    prop.put("table_my-info", 2);
                     accActLinks += links;
                     accActWords += words;
                 } else if(yacyCore.seedDB.mySeed.isPrincipal()) {
-                    info.append("<img border=\"0\" src=\"/env/grafics/PrincipalDirect.gif\" title=\"Type: Principal\"></img>");
+                    prop.put("table_my-info", 3);
                     accActLinks += links;
                     accActWords += words;
                 }
-                if (seed.getFlagAcceptRemoteCrawl()) {
-                    info.append("<img border=\"0\" src=\"/env/grafics/CrawlYes.gif\" title=\"Accept Crawl: yes\"></img>");
-                } else {
-                    info.append("<img border=\"0\" src=\"/env/grafics/CrawlNo.gif\" title=\"Accept Crawl: no\"></img>");
-                }
-                if (seed.getFlagAcceptRemoteIndex()) {
-                    info.append("<img border=\"0\" src=\"/env/grafics/DHTReceiveYes.gif\" title=\"DHT Receive: yes\"></img>");
-                } else {
-                    info.append("<img border=\"0\" src=\"/env/grafics/DHTReceiveNo.gif\" title=\"DHT Receive: no\"></img>");
-                }
-                prop.put("table_my-info", info.toString());
+                prop.put("table_my-acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0);
+                prop.put("table_my-dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
 
 
                 myppm = seed.getPPM();
@@ -270,25 +259,26 @@ public class Network {
                     }
                     String startURL;
                     String wikiPage;
+                    final StringBuffer alert = new StringBuffer();
                     int PPM;
                     while (e.hasMoreElements() && conCount < maxCount) {
                         seed = (yacySeed) e.nextElement();
                         if (seed != null) {
                             if (conCount >= maxCount) { break; }
                             if (seed.hash.equals(yacyCore.seedDB.mySeed.hash)) {
-                                prop.put(STR_TABLE_LIST+conCount+"_dark", 2);
+                                prop.put(STR_TABLE_LIST + conCount + "_dark", 2);
                             } else {
-                                prop.put(STR_TABLE_LIST+conCount+"_dark", ((dark) ? 1 : 0) ); dark=!dark;
+                                prop.put(STR_TABLE_LIST + conCount + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
                             }
-                            info.setLength(0);
+                            alert.setLength(0);
                             if (updatedProfile.contains(seed.hash)) {
-                                info.append("<a href=\"ViewProfile.html?hash=").append(seed.hash).append("\"><img border=\"0\" src=\"/env/grafics/profile.gif\" align=\"bottom\"></a>");
+                                alert.append("<a href=\"ViewProfile.html?hash=").append(seed.hash).append("\"><img border=\"0\" src=\"/env/grafics/profile.gif\" align=\"bottom\"></a>");
                             }
                             if ((wikiPage = (String) updatedWiki.get(seed.hash)) == null) {
-                                prop.put(STR_TABLE_LIST+conCount+"_updatedWikiPage", "");
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", "");
                             } else {
-                                prop.put(STR_TABLE_LIST+conCount+"_updatedWikiPage", "?page=" + wikiPage);
-                                info.append("<a href=\"http://").append(seed.get("Name", "deadlink")).append(".yacy/Wiki.html?page=").append(wikiPage).append("\"><img border=\"0\" src=\"/env/grafics/wiki.gif\" align=\"bottom\"></a>");
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", "?page=" + wikiPage);
+                                alert.append("<a href=\"http://").append(seed.get("Name", "deadlink")).append(".yacy/Wiki.html?page=").append(wikiPage).append("\"><img border=\"0\" src=\"/env/grafics/wiki.gif\" align=\"bottom\"></a>");
                             }
                             try {
                                 PPM = Integer.parseInt(seed.get("ISpeed", "-"));
@@ -296,78 +286,56 @@ public class Network {
                                 PPM = 0;
                             }
                             if (((startURL = (String) isCrawling.get(seed.hash)) != null) && (PPM >= 10)) {
-                                info.append("<a href=\"").append(startURL).append("\"><img border=\"0\" src=\"/env/grafics/crawl.gif\" align=\"bottom\"></a>");
+                                alert.append("<a href=\"").append(startURL).append("\"><img border=\"0\" src=\"/env/grafics/crawl.gif\" align=\"bottom\"></a>");
                             }
-                            prop.put(STR_TABLE_LIST+conCount+"_alert", info.toString());
-                            prop.put(STR_TABLE_LIST+conCount+"_hash", seed.hash);
+                            prop.put(STR_TABLE_LIST + conCount + "_alert", alert.toString());
+                            prop.put(STR_TABLE_LIST + conCount + "_hash", seed.hash);
                             String shortname = seed.get("Name", "deadlink");
                             if (shortname.length() > 20) {
                                 shortname = shortname.substring(0, 20) + "..."; 
                             }
-                            prop.put(STR_TABLE_LIST+conCount+"_shortname", shortname);
-                            prop.put(STR_TABLE_LIST+conCount+"_fullname", seed.get("Name", "deadlink"));
+                            prop.put(STR_TABLE_LIST + conCount + "_shortname", shortname);
+                            prop.put(STR_TABLE_LIST + conCount + "_fullname", seed.get("Name", "deadlink"));
                             if (complete) {
-                                prop.put(STR_TABLE_LIST+conCount+"_complete", 1);
-                                prop.put(STR_TABLE_LIST+conCount+"_complete_ip", seed.get("IP", "-") );
-                                prop.put(STR_TABLE_LIST+conCount+"_complete_port", seed.get("Port", "-") );
-                                prop.put(STR_TABLE_LIST+conCount+"_complete_hash", seed.hash);
-                                prop.put(STR_TABLE_LIST+conCount+"_complete_age", seed.getAge());
+                                prop.put(STR_TABLE_LIST + conCount + "_complete", 1);
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_ip", seed.get("IP", "-") );
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_port", seed.get("Port", "-") );
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_hash", seed.hash);
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_age", seed.getAge());
                             } else {
-                                prop.put(STR_TABLE_LIST+conCount+"_complete", 0);
+                                prop.put(STR_TABLE_LIST + conCount + "_complete", 0);
                             }
 
 
-                            info.setLength(0);
                             if (seed.isJunior()) {
-                                if (seed.getFlagDirectConnect()) {
-                                    info.append("<img border=\"0\" src=\"/env/grafics/JuniorDirect.gif\" title=\"Type: Junior | Contact: direct\"></img>");
-                                } else {
-                                    info.append("<img border=\"0\" src=\"/env/grafics/JuniorPassive.gif\" title=\"Type: Junior | Contact: passive\"></img>");
-                                }
+                                prop.put(STR_TABLE_LIST + conCount + "_info", 0);
                             } else if(seed.isSenior()){
-                                if (seed.getFlagDirectConnect()) {
-                                    info.append("<img border=\"0\" src=\"/env/grafics/SeniorDirect.gif\" title=\"Type: Senior | Contact: direct\"></img>");
-                                } else {
-                                    info.append("<img border=\"0\" src=\"/env/grafics/SeniorPassive.gif\" title=\"Type: Senior | Contact: passive\"></img>");
-                                }
+                                prop.put(STR_TABLE_LIST + conCount + "_info", 1);
                             } else if(seed.isPrincipal()) {
-                                info.append("<a href=\"").append(seed.get("seedURL", "http://nowhere/")).append("\">");
-                                if (seed.getFlagDirectConnect()) {
-                                    info.append("<img border=\"0\" src=\"/env/grafics/PrincipalDirect.gif\" title=\"Type: Principal | Contact: direct | Seed download: possible\"></img>");
-                                } else {
-                                    info.append("<img border=\"0\" src=\"/env/grafics/PrincipalPassive.gif\" title=\"Type: Principal | Contact: passive\"></img>");
-                                }
-                                info.append("</a>");
+                                prop.put(STR_TABLE_LIST + conCount + "_info", 2);
                             }
-                            if (seed.getFlagAcceptRemoteCrawl()) {
-                                info.append("<img border=\"0\" src=\"/env/grafics/CrawlYes.gif\" title=\"Accept Crawl: yes\"></img>");
-                            } else {
-                                info.append("<img border=\"0\" src=\"/env/grafics/CrawlNo.gif\" title=\"Accept Crawl: no\"></img>");
-                            }
-                            if (seed.getFlagAcceptRemoteIndex()) {
-                                info.append("<img border=\"0\" src=\"/env/grafics/DHTReceiveYes.gif\" title=\"DHT Receive: yes\"></img>");
-                            } else {
-                                info.append("<img border=\"0\" src=\"/env/grafics/DHTReceiveNo.gif\" title=\"DHT Receive: no\"></img>");
-                            }
-                            prop.put(STR_TABLE_LIST+conCount+"_info", info.toString());
+                            prop.put(STR_TABLE_LIST + conCount + "_info_url", seed.get("seedURL", "http://nowhere/"));
+                            prop.put(STR_TABLE_LIST + conCount + "_info_direct", seed.getFlagDirectConnect() ? 1 : 0);
+                            prop.put(STR_TABLE_LIST + conCount + "_acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0);
+                            prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
 
 
-                            prop.put(STR_TABLE_LIST+conCount+"_version", yacy.combinedVersionString2PrettyString(seed.get("Version", "0.1")));
-                            prop.put(STR_TABLE_LIST+conCount+"_lastSeen", (System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
-                            prop.put(STR_TABLE_LIST+conCount+"_utc", seed.get("UTC", "-"));
-                            prop.put(STR_TABLE_LIST+conCount+"_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", "0"))));
-                            prop.put(STR_TABLE_LIST+conCount+"_links", groupDigits(seed.get("LCount", "0")));
-                            prop.put(STR_TABLE_LIST+conCount+"_words", groupDigits(seed.get("ICount", "0")));
-                            prop.put(STR_TABLE_LIST+conCount+"_sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
-                            prop.put(STR_TABLE_LIST+conCount+"_sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
-                            prop.put(STR_TABLE_LIST+conCount+"_rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
-                            prop.put(STR_TABLE_LIST+conCount+"_rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
-                            prop.put(STR_TABLE_LIST+conCount+"_ppm", PPM);
-                            prop.put(STR_TABLE_LIST+conCount+"_seeds", seed.get("SCount", "-"));
-                            prop.put(STR_TABLE_LIST+conCount+"_connects", groupDigits(seed.get("CCount", "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_version", yacy.combinedVersionString2PrettyString(seed.get("Version", "0.1")));
+                            prop.put(STR_TABLE_LIST + conCount + "_lastSeen", (System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
+                            prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get("UTC", "-"));
+                            prop.put(STR_TABLE_LIST + conCount + "_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", "0"))));
+                            prop.put(STR_TABLE_LIST + conCount + "_links", groupDigits(seed.get("LCount", "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_words", groupDigits(seed.get("ICount", "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_ppm", PPM);
+                            prop.put(STR_TABLE_LIST + conCount + "_seeds", seed.get("SCount", "-"));
+                            prop.put(STR_TABLE_LIST + conCount + "_connects", groupDigits(seed.get("CCount", "0")));
                             conCount++;
-                        }//seed != null
-                    }//while
+                        } // seed != null
+                    } // while
                     if (iAmActive) { yacyCore.seedDB.removeMySeed(); }
                     prop.put("table_list", conCount);
                     prop.put("table", 1);
