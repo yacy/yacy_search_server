@@ -271,7 +271,12 @@ public final class plasmaParser {
     
     public static boolean supportedFileExt(URL url) {
         String name = url.getFile();
-        int p = name.lastIndexOf('.');
+        int p = name.lastIndexOf('?');
+        if (p != -1) {
+            name = name.substring(0,p);
+        }
+            
+        p = name.lastIndexOf('.');
         if (p < 0) return true; // seams to be strange, but this is a directory entry or default file (html)
         return supportedFileExtContains(name.substring(p + 1));
     }
