@@ -315,13 +315,19 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_info", 2);
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_info_url", seed.get("seedURL", "http://nowhere/"));
-                            prop.put(STR_TABLE_LIST + conCount + "_info_direct", seed.getFlagDirectConnect() ? 1 : 0);
+
+                            long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
+//                          if (lastseen < 0) lastseen = 0;
+                            if (page == 2 || lastseen > 1440) { // Passive Peers should be passive, also Peers without contact greater than an day 
+                                prop.put(STR_TABLE_LIST + conCount + "_info_direct", 0);
+                            } else { 
+                                prop.put(STR_TABLE_LIST + conCount + "_info_direct", seed.getFlagDirectConnect() ? 1 : 0);
+                            }
                             prop.put(STR_TABLE_LIST + conCount + "_acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0);
                             prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
 
-
                             prop.put(STR_TABLE_LIST + conCount + "_version", yacy.combinedVersionString2PrettyString(seed.get("Version", "0.1")));
-                            prop.put(STR_TABLE_LIST + conCount + "_lastSeen", (System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
+                            prop.put(STR_TABLE_LIST + conCount + "_lastSeen", lastseen);
                             prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get("UTC", "-"));
                             prop.put(STR_TABLE_LIST + conCount + "_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get("Uptime", "0"))));
                             prop.put(STR_TABLE_LIST + conCount + "_links", groupDigits(seed.get("LCount", "0")));
