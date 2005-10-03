@@ -257,6 +257,14 @@ public final class plasmaParser {
         }
     }
     
+    public static boolean supportedContent(URL url, String mimeType) {
+        return supportedMimeTypesContains(mimeType) && supportedFileExt(url);
+    }
+    
+    public static boolean supportedRealTimeContent(URL url, String mimeType) {
+        return realtimeParsableMimeTypesContains(mimeType) && supportedFileExt(url);
+    }    
+    
     public static boolean supportedMimeTypesContains(String mimeType) {
         mimeType = getRealMimeType(mimeType);
         
@@ -270,13 +278,23 @@ public final class plasmaParser {
     }
     
     public static boolean supportedFileExt(URL url) {
+        // getting the file path
         String name = url.getFile();
+        
+        // chopping http parameters from the url
         int p = name.lastIndexOf('?');
         if (p != -1) {
             name = name.substring(0,p);
         }
+        
+        // tetermining last position of / in the file path
+        p = name.lastIndexOf('/');
+        if (p != -1) {
+            name = name.substring(p);
+        }
             
-        p = name.lastIndexOf('.');
+        // termining last position of . in file path
+        p = (p != -1) ? name.lastIndexOf('.',p) : name.lastIndexOf('.');
         if (p < 0) return true; // seams to be strange, but this is a directory entry or default file (html)
         return supportedFileExtContains(name.substring(p + 1));
     }
