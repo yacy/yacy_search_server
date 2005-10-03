@@ -301,6 +301,8 @@ public final class plasmaParser {
     
     public static boolean supportedFileExtContains(String fileExt) {
         if (supportedFileExt == null) return false;
+        if (fileExt == null) return false;        
+        fileExt = fileExt.trim().toLowerCase();
         
         synchronized(supportedFileExt) {
             if (supportedFileExt.contains(fileExt)) return true;
@@ -313,6 +315,7 @@ public final class plasmaParser {
     
     public static boolean mediaExtContains(String mediaExt) {
         if (mediaExt == null) return false;
+        mediaExt = mediaExt.trim().toLowerCase();
         
         synchronized (supportedFileExt) {
 			if (supportedFileExt.contains(mediaExt)) return false;
@@ -330,9 +333,10 @@ public final class plasmaParser {
     public static String getRealMimeType(String mimeType) {
         //if (mimeType == null) doMimeTypeAnalysis
         if (mimeType == null) mimeType = "application/octet-stream";
+        mimeType = mimeType.trim().toLowerCase();
         
         int pos = mimeType.indexOf(';');
-        return ((pos < 0) ? mimeType : mimeType.substring(0, pos)).toLowerCase();              
+        return ((pos < 0) ? mimeType : mimeType.substring(0, pos));              
     }
     
     public static String getMimeTypeByFileExt(String fileExt) {
