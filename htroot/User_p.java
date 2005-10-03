@@ -64,116 +64,121 @@ public class User_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
-		plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-		userDB.Entry entry=null;
+        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        userDB.Entry entry=null;
 
-		if( (post == null) || (!post.containsKey("change")) ){
-			prop.put("page", 0);
-			//default values
-			prop.put("page_current_user", "newuser");
-			prop.put("page_username", "");
-			prop.put("page_firstname", "");
-			prop.put("page_lastname", "");
-			prop.put("page_address", "");
-			prop.put("page_timelimit", "");
-			prop.put("page_timeused", "");
-			prop.put("page_timerange", "");
-			prop.put("page_users", 0);
-	
-			if(sb.userDB == null)
-				return prop;
-			
-			Iterator it = sb.userDB.iterator(true);
-			int numUsers=0;
-			while(it.hasNext()){
-				entry = (userDB.Entry)it.next();
-				prop.put("page_users_"+numUsers+"_user", entry.getUserName());
-				numUsers++;
-			}
-			prop.put("page_users", numUsers);
-			
-			if(post != null && post.containsKey("user") && !((String)post.get("user")).equals("newuser")){
-				entry=sb.userDB.getEntry((String)post.get("user"));
-				//TODO: set username read-only in html
-				prop.put("page_current_user", post.get("user"));
-				prop.put("page_username", post.get("user"));
-				prop.put("page_firstname", entry.getFirstName());
-				prop.put("page_lastname", entry.getLastName());
-				prop.put("page_address", entry.getAddress());
-				prop.put("page_timelimit", entry.getTimeLimit());
-				prop.put("page_timeused", entry.getTimeUsed());
-			}
+        //default values
+        prop.put("page", 0);
+        prop.put("page_current_user", "newuser");
+        prop.put("page_username", "");
+        prop.put("page_firstname", "");
+        prop.put("page_lastname", "");
+        prop.put("page_address", "");
+        prop.put("page_timelimit", "");
+        prop.put("page_timeused", "");
+        prop.put("page_timerange", "");
+        prop.put("page_users", 0);
 
-				
-	    } else { //Data submitted
-			prop.put("page", 1); //results
-			prop.put("page_text", 0);
-			prop.put("page_error", 0);
+        if(sb.userDB == null)
+            return prop;
+        
+        Iterator it = sb.userDB.iterator(true);
+        int numUsers=0;
+        while(it.hasNext()){
+            entry = (userDB.Entry)it.next();
+            prop.put("page_users_"+numUsers+"_user", entry.getUserName());
+            numUsers++;
+        }
+        prop.put("page_users", numUsers);
 
-			
-			String username="";
-			String pw="";
-			String pw2="";
-			String firstName="";
-			String lastName="";
-			String address="";
-			String timeLimit="0";
-			String timeUsed="0";
-			HashMap mem=new HashMap();
-			if( post != null && post.containsKey("current_user") && post.get("current_user").equals("newuser")){
-				username=(String)post.get("username");
-				pw=(String)post.get("password");
-				pw2=(String)post.get("password2");
-				if(! pw.equals(pw2)){
-					prop.put("page_error", 1); //PW does not match
-					return prop;
-				}
-				firstName=(String)post.get("firstname");
-				lastName=(String)post.get("lastname");
-				address=(String)post.get("address");
-				timeLimit=(String)post.get("timelimit");
-				timeUsed=(String)post.get("timelimit");
-				
-				mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
-				mem.put(userDB.Entry.USER_FIRSTNAME, firstName);
-				mem.put(userDB.Entry.USER_LASTNAME, lastName);
-				mem.put(userDB.Entry.USER_ADDRESS, address);
-				mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
-				mem.put(userDB.Entry.TIME_USED, timeUsed);
+        if(post == null){
+            return prop;
+        }
+            
+        //user != current_user
+        //user=from userlist
+        //current_user = edited user
+        if(post.containsKey("user") && !((String)post.get("user")).equals("newuser")){
+            //defaults for newuser are set above
+            entry=sb.userDB.getEntry((String)post.get("user"));
+            //TODO: set username read-only in html
+            prop.put("page_current_user", post.get("user"));
+            prop.put("page_username", post.get("user"));
+            prop.put("page_firstname", entry.getFirstName());
+            prop.put("page_lastname", entry.getLastName());
+            prop.put("page_address", entry.getAddress());
+            prop.put("page_timelimit", entry.getTimeLimit());
+            prop.put("page_timeused", entry.getTimeUsed());
+        } else if(post.containsKey("change")) { //Data submitted
+            prop.put("page", 1); //results
+            prop.put("page_text", 0);
+            prop.put("page_error", 0);
 
-				entry=sb.userDB.createEntry(username, mem);
-				sb.userDB.addEntry(entry);
-				
-			}else if(post != null && post.containsKey("currentuser")){
-				username=(String)post.get("username");
-				pw=(String)post.get("password");
-				pw2=(String)post.get("password2");
-				if(! pw.equals(pw2)){
-					prop.put("page_error", 1); //PW does not match
-					return prop;
-				}
-				firstName=(String)post.get("firstname");
-				lastName=(String)post.get("lastname");
-				address=(String)post.get("address");
-				timeLimit=(String)post.get("timelimit");
-				timeUsed=(String)post.get("timelimit");
+            
+            String username="";
+            String pw="";
+            String pw2="";
+            String firstName="";
+            String lastName="";
+            String address="";
+            String timeLimit="0";
+            String timeUsed="0";
+            HashMap mem=new HashMap();
+            if( post.get("current_user").equals("newuser")){ //new user
+                username=(String)post.get("username");
+                pw=(String)post.get("password");
+                pw2=(String)post.get("password2");
+                if(! pw.equals(pw2)){
+                    prop.put("page_error", 1); //PW does not match
+                    return prop;
+                }
+                firstName=(String)post.get("firstname");
+                lastName=(String)post.get("lastname");
+                address=(String)post.get("address");
+                timeLimit=(String)post.get("timelimit");
+                timeUsed=(String)post.get("timelimit");
+                
+                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
+                mem.put(userDB.Entry.USER_FIRSTNAME, firstName);
+                mem.put(userDB.Entry.USER_LASTNAME, lastName);
+                mem.put(userDB.Entry.USER_ADDRESS, address);
+                mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
+                mem.put(userDB.Entry.TIME_USED, timeUsed);
 
-				entry = sb.userDB.getEntry("username");
-				try{
-					entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
-					entry.setProperty(userDB.Entry.USER_FIRSTNAME, firstName);
-					entry.setProperty(userDB.Entry.USER_LASTNAME, lastName);
-					entry.setProperty(userDB.Entry.USER_ADDRESS, address);
-					entry.setProperty(userDB.Entry.TIME_LIMIT, timeLimit);
-					entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
-				}catch (IOException e){
-				}
-				
-				sb.userDB.addEntry(entry);
+                entry=sb.userDB.createEntry(username, mem);
+                sb.userDB.addEntry(entry);
+                
+            } else { //edit user
+                username=(String)post.get("username");
+                pw=(String)post.get("password");
+                pw2=(String)post.get("password2");
+                if(! pw.equals(pw2)){
+                    prop.put("page_error", 1); //PW does not match
+                    return prop;
+                }
+                firstName=(String)post.get("firstname");
+                lastName=(String)post.get("lastname");
+                address=(String)post.get("address");
+                timeLimit=(String)post.get("timelimit");
+                timeUsed=(String)post.get("timelimit");
 
-			}
-		}
-	    // return rewrite properties
-	    return prop;
-	}
+                entry = sb.userDB.getEntry(username);
+				if(entry != null){
+	                try{
+		                entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
+			            entry.setProperty(userDB.Entry.USER_FIRSTNAME, firstName);
+				        entry.setProperty(userDB.Entry.USER_LASTNAME, lastName);
+					    entry.setProperty(userDB.Entry.USER_ADDRESS, address);
+						entry.setProperty(userDB.Entry.TIME_LIMIT, timeLimit);
+	                    entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
+		            }catch (IOException e){
+					}
+                }//TODO? else error
+                
+
+            }
+        }
+        // return rewrite properties
+        return prop;
+    }
 }
