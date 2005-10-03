@@ -265,20 +265,10 @@ public class yacyNewsPool {
 
     private boolean moveOff(yacyNewsQueue fromqueue, yacyNewsQueue toqueue, String id) throws IOException {
         // called if a published news shall be removed
-        // the news is also removed from the news database
-        yacyNewsRecord record;
-        synchronized (fromqueue) {
-            while (fromqueue.size() > 0) {
-                record = fromqueue.top(0);
-                if ((record != null) && (record.id().equals(id))) {
-                    fromqueue.pop(0);
-                    if (toqueue != null) toqueue.push(record);
-                    //newsDB.remove(id);
-                    return true;
-                }
-            }
-        }
-        return false;
+        yacyNewsRecord record = fromqueue.remove(id);
+        if (record == null) return false;
+        toqueue.push(record);
+        return true;
     }
     
     

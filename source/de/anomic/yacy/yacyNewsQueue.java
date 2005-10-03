@@ -129,6 +129,19 @@ public class yacyNewsQueue {
         return entry;
     }
     
+    public synchronized yacyNewsRecord remove(String id) throws IOException {
+        yacyNewsRecord record;
+        for (int i = 0; i < size(); i++) {
+            record = top(i);
+            if ((record != null) && (record.id().equals(id))) {
+                pop(i);
+                return record;
+            }
+        }
+        return null;
+    }
+    
+    
     /*
     public synchronized void incDistributedCounter(yacyNewsRecord entry) throws IOException {
         // this works only if the entry element lies ontop of the stack
