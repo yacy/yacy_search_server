@@ -82,33 +82,27 @@ public class User_p {
         if(sb.userDB == null)
             return prop;
         
-        Iterator it = sb.userDB.iterator(true);
-        int numUsers=0;
-        while(it.hasNext()){
-            entry = (userDB.Entry)it.next();
-            prop.put("page_users_"+numUsers+"_user", entry.getUserName());
-            numUsers++;
-        }
-        prop.put("page_users", numUsers);
-
         if(post == null){
-            return prop;
-        }
+			//do nothing
             
         //user != current_user
         //user=from userlist
         //current_user = edited user
-        if(post.containsKey("user") && !((String)post.get("user")).equals("newuser")){
-            //defaults for newuser are set above
-            entry=sb.userDB.getEntry((String)post.get("user"));
-            //TODO: set username read-only in html
-            prop.put("page_current_user", post.get("user"));
-            prop.put("page_username", post.get("user"));
-            prop.put("page_firstname", entry.getFirstName());
-            prop.put("page_lastname", entry.getLastName());
-            prop.put("page_address", entry.getAddress());
-            prop.put("page_timelimit", entry.getTimeLimit());
-            prop.put("page_timeused", entry.getTimeUsed());
+		} else if(post.containsKey("user") && !((String)post.get("user")).equals("newuser")){
+			if(post.containsKey("change_user")){
+	            //defaults for newuser are set above
+		        entry=sb.userDB.getEntry((String)post.get("user"));
+			    //TODO: set username read-only in html
+				prop.put("page_current_user", post.get("user"));
+	            prop.put("page_username", post.get("user"));
+		        prop.put("page_firstname", entry.getFirstName());
+			    prop.put("page_lastname", entry.getLastName());
+	            prop.put("page_address", entry.getAddress());
+		        prop.put("page_timelimit", entry.getTimeLimit());
+			    prop.put("page_timeused", entry.getTimeUsed());
+			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
+				sb.userDB.removeEntry((String)post.get("user"));
+			}
         } else if(post.containsKey("change")) { //Data submitted
             prop.put("page", 1); //results
             prop.put("page_text", 0);
@@ -138,12 +132,14 @@ public class User_p {
                 timeLimit=(String)post.get("timelimit");
                 timeUsed=(String)post.get("timelimit");
                 
-                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
-                mem.put(userDB.Entry.USER_FIRSTNAME, firstName);
-                mem.put(userDB.Entry.USER_LASTNAME, lastName);
-                mem.put(userDB.Entry.USER_ADDRESS, address);
-                mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
-                mem.put(userDB.Entry.TIME_USED, timeUsed);
+				if(!pw.equals("")){ //change only if set
+	                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
+				}
+		        mem.put(userDB.Entry.USER_FIRSTNAME, firstName);
+			    mem.put(userDB.Entry.USER_LASTNAME, lastName);
+				mem.put(userDB.Entry.USER_ADDRESS, address);
+				mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
+	            mem.put(userDB.Entry.TIME_USED, timeUsed);
 
                 entry=sb.userDB.createEntry(username, mem);
                 sb.userDB.addEntry(entry);
@@ -178,6 +174,17 @@ public class User_p {
 
             }
         }
+		
+		//Generate Userlist
+        Iterator it = sb.userDB.iterator(true);
+        int numUsers=0;
+        while(it.hasNext()){
+            entry = (userDB.Entry)it.next();
+            prop.put("page_users_"+numUsers+"_user", entry.getUserName());
+            numUsers++;
+        }
+        prop.put("page_users", numUsers);
+
         // return rewrite properties
         return prop;
     }
