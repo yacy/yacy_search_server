@@ -106,6 +106,7 @@ public class yacyClient {
             obj.put("count", "20");
             obj.put("key", key);
             obj.put("mytime", yacyCore.universalDateShortString(new Date()));
+            obj.put("myUTC", System.currentTimeMillis());
             obj.put("seed", yacyCore.seedDB.mySeed.genSeedStr(key));
             result = nxTools.table(httpc.wput(url,
             105000, null, null,

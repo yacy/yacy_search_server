@@ -50,7 +50,7 @@ globalheader();
 
 <h2>News</h2>
 
-<p>This is essentially the release change-log. We have a <a href="roadmap.txt">release roadmap</a> and releases published here will (hopefully) match the milestones from the roadmap's vision.
+<p>This is essentially the release change-log. We have a <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:Roadmap">release roadmap</a> and releases published here will (hopefully) match the milestones from the roadmap's vision.
 
 <p>Release list in reverse order:
 
@@ -72,6 +72,55 @@ globalheader();
 <li></li>
 </ul>
 -->
+
+<br><p>v0.41_20051004_843
+<ul>
+<li>Prevention of unwanted DDoS effects caused by YaCy crawls by doing a target-server load balancing; further prevention is done by robots.txt</li>
+<li>New setting of proxy cache size and storage path in submenu 'Proxy Indexing'</li>
+<li>Modified cleanup of HTCache</li>
+<li>Sorted config list in Config_p.html and sorted file list in Cache Admin menu</li>
+<li>Code clean-up: added finals and constants</li>
+<li>New Network menu design; showing peer status, Index Receive and Crawl Receive properties as images</li>
+<li>Added ICAP support; now an experimental ICAP Server is embedded and Yacy allows other proxies to use the indexing service via icap response modification requests</li>
+<li>Single-Peer permanent index transfer (full flush to other peer)</li>
+<li>Added a templateCache to httpFileHandler</li>
+<li>Added blacklist support for https requests and crawler</li>
+<li>Adding functionality to delete entries from Indexing and Crawler Queue</li>
+<li>Adding functionality to clear the whole indexing queue</li>
+<li>Proxy now supports the X-Forwarded-For Header</li>
+<li>Indexing queue now displays total size of enqueued content in kb</li>
+<li>Remembering Crawler-isPaused setting by storing status into config file</li>
+<li>Splitting of status page into a private and a public accessible part</li>
+<li>Adding Queue overview to status page</li>
+<li>New symbols for Peer Status, connection status, Index-Receive-Granted and Crawl-Receive-Granted in Network menu, replacing old separate columns</li>
+<li>Support for robots.txt</li>
+  <ul>
+  <li>Implementation of a robots.txt parser</li>
+  <li>Control of remote crawls with robots.txt</li>
+  </ul>
+<li>Performance enhancements</li>
+  <ul>
+  <li>Better Database Caching</li>
+    <ul>
+    <li>Better usage of memory in kelondro Record-Nodes and less IO access</li>
+    <li>New cache-control menu within the performance menu</li>
+    <li>Better cache-size default values</li>
+    </ul>
+  <li>Accelerated Blacklists import; makes big lists possible</li>
+  <li>Content-Encoding GZIP support for http post requests on index transfer/distribution</li>
+  </ul>
+<li>Bugfixes</li>
+  <ul>
+  <li>Normalization problems: prevent URLs with ':80'</li>
+  <li>Many bug fixes for NULL pointer occurrences</li>
+  <li>Display of an proxy error page instead of a white page if the server has closed the connection before yacy was able to receive the http response line</li>
+  <li>Crawler Redirection bug fixed</li>
+  <li>Indexer now gets the mimeType now from the parsed document instead of the responseHeader (this is especially necessary if mimeType has to be detected by the MimeType parser)</li>
+  <li>URLs pointing to a server having a private ip addess will not be indexed anymore</li>
+  <li>Unsupported MimeTypes and fileExtensions will not be queued by the cachemanager in the indexer queue anymore (to reduce unneccesary IO)</li>
+  </ul>
+<li>.. many more small changes and bugfixes. for details please see the <a href="http://svn.berlios.de/wsvn/yacy/?op=log&rev=0&sc=0&isdir=1">SVN history</a></li>
+</ul>
 
 <br><p>v0.40_20050816_548
 <ul>
