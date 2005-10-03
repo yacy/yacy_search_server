@@ -355,12 +355,10 @@ public final class plasmaCrawlWorker extends Thread {
                 File cacheFile = cacheManager.getCachePath(url);
                 try {
                     String error = null;
-                    if ((!(plasmaParser.supportedMimeTypesContains(res.responseHeader.mime()))) &&
-                        (!(plasmaParser.supportedFileExt(url)))) {
-                        // if the response has not the right file type then reject file
-                        remote.close();
-                        log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + url.toString());
-                    } else {
+                    if (
+                            (plasmaParser.supportedMimeTypesContains(res.responseHeader.mime())) &&
+                            (plasmaParser.supportedFileExt(url))
+                       ) {
                         if (cacheFile.isFile()) {
                             cacheManager.deleteFile(url);
                         }                        
@@ -376,6 +374,10 @@ public final class plasmaCrawlWorker extends Thread {
                         } finally {
                             if (fos!=null)try{fos.close();}catch(Exception e){}
                         }
+                    } else {
+                        // if the response has not the right file type then reject file
+                        remote.close();
+                        log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + url.toString());                        
                     }
                     // enQueue new entry with response header
                     if (profile != null) {

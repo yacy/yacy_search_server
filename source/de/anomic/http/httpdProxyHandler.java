@@ -541,9 +541,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             );
 
             // handle file types and make (possibly transforming) output stream
-            if ((!(transformer.isIdentityTransformer())) &&
-                ((ext == null) || (!(plasmaParser.mediaExtContains(ext)))) &&
-                (plasmaParser.realtimeParsableMimeTypesContains(res.responseHeader.mime()))) {
+            if (
+                    (!transformer.isIdentityTransformer()) &&
+                    (plasmaParser.supportedFileExt(url)) &&
+                    (plasmaParser.realtimeParsableMimeTypesContains(res.responseHeader.mime()))
+                ) {
                 // make a transformer
                 this.theLogger.logFine("create transformer for URL " + url);
                 hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
