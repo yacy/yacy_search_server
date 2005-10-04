@@ -145,6 +145,7 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyNewsPool;
 
 public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
     
@@ -173,7 +174,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  String                      remoteProxyHost;
     public  int                         remoteProxyPort;
     public  boolean                     remoteProxyUse;
-    public static  plasmaCrawlRobotsTxt robots;
+    public  static plasmaCrawlRobotsTxt robots;
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
     public  plasmaCrawlProfile.entry    defaultRemoteProfile;
@@ -185,7 +186,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  long                        proxyLastAccess;
     public  yacyCore                    yc;
     public  HashMap                     indexingTasksInProcess;
-	public  userDB						userDB;
+    public  userDB                      userDB;
 
     private static final String STR_PROXYPROFILE       = "defaultProxyProfile";
     private static final String STR_REMOTEPROFILE      = "defaultRemoteProfile";
@@ -700,13 +701,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // clean up error stack
 	if ((urlPool.errorURL.stackSize() > 1000)) {
+            log.logFine("Cleaning Error-URLs report stack, " + urlPool.errorURL.stackSize() + " entries on stack");
 	    urlPool.errorURL.clearStack();
             hasDoneSomething = true;
 	}
 	// clean up loadedURL stack
 	for (int i = 1; i <= 6; i++) {
 	    if (urlPool.loadedURL.getStackSize(i) > 1000) {
-		urlPool.loadedURL.clearStack(i);
+		log.logFine("Cleaning Loaded-URLs report stack, " + urlPool.loadedURL.getStackSize(i) + " entries on stack " + i);
+                urlPool.loadedURL.clearStack(i);
                 hasDoneSomething = true;
 	    }
 	}
@@ -715,6 +718,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // clean up news
         try {
+            log.logFine("Cleaning Incoming News, " + yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
             if (yacyCore.newsPool.automaticProcess() > 0) hasDoneSomething = true;
         } catch (IOException e) {}
         

@@ -84,6 +84,10 @@ public class transferRWI {
         String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
         
         if (granted) {
+            // log value status (currently added to find outOfMemory error
+            switchboard.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
+            long startProcess = System.currentTimeMillis();
+            
             // decode request
             Vector v = new Vector();
             int s = 0;
@@ -94,7 +98,7 @@ public class transferRWI {
                 s = e; while (s < indexes.length) if (indexes[s++] >= 32) {s--; break;}
             }
             // the value-vector should now have the same length as entryc
-            if (v.size() != entryc) System.out.println("ERROR WITH ENTRY COUNTER: v=" + v.size() + ", entryc=" + entryc);
+            if (v.size() != entryc) switchboard.getLog().logSevere("ERROR WITH ENTRY COUNTER: v=" + v.size() + ", entryc=" + entryc);
             
             // now parse the Strings in the value-vector and write index entries
             String estring;
@@ -128,10 +132,10 @@ public class transferRWI {
             while (it.hasNext()) unknownURLs += "," + (String) it.next();
             if (unknownURLs.length() > 0) unknownURLs = unknownURLs.substring(1);
             if (wordhashes.length == 0)
-                switchboard.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", requested " + unknownURL.size() + " URLs");
+                switchboard.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
             else {
                 double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[wordhashes.length - 1])) / 2.0;
-                switchboard.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[wordhashes.length - 1] + "]/" + avdist + " from " + otherPeerName + ", requested " + unknownURL.size() + " URLs");
+                switchboard.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[wordhashes.length - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
             }
             result = "ok";
         } else {

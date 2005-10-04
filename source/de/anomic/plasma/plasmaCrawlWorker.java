@@ -410,8 +410,8 @@ public final class plasmaCrawlWorker extends Thread {
                         remote = null;
                         
                         // restart crawling with new url
-                        log.logInfo("CRAWLER Redirection detected ('" + res.status + "') for URL " + url.toString() + 
-                                    "\nRedirecting request to: " + redirectionUrl);
+                        log.logInfo("CRAWLER Redirection detected ('" + res.status + "') for URL " + url.toString());
+                        log.logInfo("CRAWLER ..Redirecting request to: " + redirectionUrl);
                         
                         // if we are already doing a shutdown we don't need to retry crawling
                         if (Thread.currentThread().isInterrupted()) {

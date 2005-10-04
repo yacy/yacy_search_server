@@ -302,6 +302,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_port", seed.get("Port", "-") );
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_hash", seed.hash);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_age", seed.getAge());
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_connects", groupDigits(seed.get("CCount", "0")));
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 0);
                             }
@@ -338,7 +339,6 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_ppm", PPM);
                             prop.put(STR_TABLE_LIST + conCount + "_seeds", seed.get("SCount", "-"));
-                            prop.put(STR_TABLE_LIST + conCount + "_connects", groupDigits(seed.get("CCount", "0")));
                             conCount++;
                         } // seed != null
                     } // while
