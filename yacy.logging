@@ -12,9 +12,9 @@
 # FINE  in-function status debug output
 PARSER.level = INFO
 PROXY.level = INFO
-YACY.level = FINE
+YACY.level = INFO
 HTCACHE.level = INFO
-PLASMA.level = FINE
+PLASMA.level = INFO
 SERVER.level = INFO
 WORDMIGRATION.level = FINE
 FILEHANDLER.level = INFO
