@@ -78,8 +78,7 @@ public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
     
     // pseudo-native method read
     public int read() throws IOException {
-        //sync();
-	return RAFile.read();
+        return RAFile.read();
     }
 
     // pseudo-native method write
@@ -88,9 +87,7 @@ public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
     }
 
     public int read(byte[] b, int off, int len) throws IOException {
-        //sync();
-        RAFile.read(b, off, len);
-        return len;
+        return RAFile.read(b, off, len);
     }
 
     public void write(byte[] b, int off, int len) throws IOException {
@@ -103,7 +100,6 @@ public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
     }
 
     public void close() throws IOException {
-        //sync();
         RAFile.close();
         RAFile = null;
     }

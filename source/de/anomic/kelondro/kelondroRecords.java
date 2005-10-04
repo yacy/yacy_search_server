@@ -303,7 +303,7 @@ public class kelondroRecords {
 	for (int i = 0; i < TXTPROPS.length; i++) {
 	    entryFile.seek(POS_TXTPROPS + TXTPROPW * i);
 	    TXTPROPS[i] = new byte[TXTPROPW];
-	    entryFile.read(TXTPROPS[i], 0, TXTPROPS[i].length);
+	    entryFile.readFully(TXTPROPS[i], 0, TXTPROPS[i].length);
 	}
 
 	// assign remaining values that are only present at run-time
@@ -526,7 +526,7 @@ public class kelondroRecords {
                     synchronized (entryFile) {
                         entryFile.seek(seekpos(this.handle));
                         entryFile.readFully(this.headChunk, 0, this.headChunk.length);
-                        //entryFile.read(this.tailChunk, 0, this.tailChunk.length);
+                        //entryFile.readFully(this.tailChunk, 0, this.tailChunk.length);
                     }
                     this.headChanged = true; // provoke a cache store
                     cp = CP_HIGH;
@@ -630,7 +630,7 @@ public class kelondroRecords {
                 // read values
                 synchronized (entryFile) {
                     entryFile.seek(seekpos(this.handle) + headchunksize);
-                    entryFile.read(this.tailChunk, 0, this.tailChunk.length);
+                    entryFile.readFully(this.tailChunk, 0, this.tailChunk.length);
                 }
             }
             
