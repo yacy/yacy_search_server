@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
-// last change: 24.01.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,12 +45,9 @@
 // You must compile this file with
 // javac -classpath .:../classes transferRWI.java
 
-
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
-
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
@@ -60,36 +60,37 @@ import de.anomic.yacy.yacyDHTAction;
 
 public class transferRWI {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
-        
-	if ((post == null) || (env == null)) return prop;
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+        if (post == null || ss == null) { return new serverObjects(); }
 
-	// request values
-	String iam      = (String) post.get("iam", "");      // seed hash of requester
-        String youare   = (String) post.get("youare", "");   // seed hash of the target peer, needed for network stability
-	String key      = (String) post.get("key", "");      // transmission key
-	int wordc       = Integer.parseInt((String) post.get("wordc", ""));    // number of different words
-        int entryc      = Integer.parseInt((String) post.get("entryc", ""));   // number of entries in indexes
-        byte[] indexes  = ((String) post.get("indexes", "")).getBytes();  // the indexes, as list of word entries
-        boolean granted = switchboard.getConfig("allowReceiveIndex", "false").equals("true");
-	
+        // return variable that accumulates replacements
+        final serverObjects prop = new serverObjects();
+        final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        if (prop == null || sb == null) { return new serverObjects(); }
+        
+        // request values
+        final String iam      = (String) post.get("iam", "");    // seed hash of requester
+//      final String youare   = (String) post.get("youare", ""); // seed hash of the target peer, needed for network stability
+//      final String key      = (String) post.get("key", "");    // transmission key
+        final int wordc       = Integer.parseInt((String) post.get("wordc", ""));  // number of different words
+        final int entryc      = Integer.parseInt((String) post.get("entryc", "")); // number of entries in indexes
+        final byte[] indexes  = ((String) post.get("indexes", "")).getBytes();     // the indexes, as list of word entries
+        final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
+
         // response values
         String result = "";
-        String unknownURLs = "";
-        
-        yacySeed otherPeer = yacyCore.seedDB.get(iam);
-        String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
-        
+        StringBuffer unknownURLs = new StringBuffer();
+
+        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
+        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
+
         if (granted) {
             // log value status (currently added to find outOfMemory error
-            switchboard.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
-            long startProcess = System.currentTimeMillis();
-            
+            sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
+            final long startProcess = System.currentTimeMillis();
+
             // decode request
-            Vector v = new Vector();
+            final Vector v = new Vector();
             int s = 0;
             int e;
             while (s < indexes.length) {
@@ -98,15 +99,15 @@ public class transferRWI {
                 s = e; while (s < indexes.length) if (indexes[s++] >= 32) {s--; break;}
             }
             // the value-vector should now have the same length as entryc
-            if (v.size() != entryc) switchboard.getLog().logSevere("ERROR WITH ENTRY COUNTER: v=" + v.size() + ", entryc=" + entryc);
-            
+            if (v.size() != entryc) sb.getLog().logSevere("ERROR WITH ENTRY COUNTER: v=" + v.size() + ", entryc=" + entryc);
+
             // now parse the Strings in the value-vector and write index entries
             String estring;
             int p;
             String wordHash;
             String urlHash;
             plasmaWordIndexEntry entry;
-            HashSet unknownURL = new HashSet();
+            final HashSet unknownURL = new HashSet();
             String[] wordhashes = new String[v.size()];
             int received = 0;
             for (int i = 0; i < v.size(); i++) {
@@ -116,38 +117,40 @@ public class transferRWI {
                     wordHash = estring.substring(0, p);
                     wordhashes[i] = wordHash;
                     entry = new plasmaWordIndexEntry(estring.substring(p));
-                    switchboard.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry));
+                    sb.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry));
                     urlHash = entry.getUrlHash();
                     if ((!(unknownURL.contains(urlHash))) &&
-                    (!(switchboard.urlPool.loadedURL.exists(urlHash)))) {
+                    (!(sb.urlPool.loadedURL.exists(urlHash)))) {
                         unknownURL.add(urlHash);
                     }
                     received++;
                 }
             }
             yacyCore.seedDB.mySeed.incRI(received);
-            
+
             // finally compose the unknownURL hash list
-            Iterator it = unknownURL.iterator();
-            while (it.hasNext()) unknownURLs += "," + (String) it.next();
-            if (unknownURLs.length() > 0) unknownURLs = unknownURLs.substring(1);
-            if (wordhashes.length == 0)
-                switchboard.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
-            else {
-                double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[wordhashes.length - 1])) / 2.0;
-                switchboard.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[wordhashes.length - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
+            final Iterator it = unknownURL.iterator();            
+            while (it.hasNext()) {
+                unknownURLs.append(",").append((String) it.next());
+            }
+            if (unknownURLs.length() > 0) { unknownURLs.delete(0, 1); }
+            if (wordhashes.length == 0) {
+                sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
+            } else {
+                final double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[wordhashes.length - 1])) / 2.0;
+                sb.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[wordhashes.length - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
             }
             result = "ok";
         } else {
-            switchboard.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "error_not_granted";
         }
-        
-        prop.put("unknownURL", unknownURLs);
+
+        prop.put("unknownURL", unknownURLs.toString());
         prop.put("result", result);
-        
-	// return rewrite properties
-	return prop;
+
+        // return rewrite properties
+        return prop;
     }
 
 }
