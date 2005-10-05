@@ -325,44 +325,36 @@ public final class yacy {
             // set preset accounts/passwords
             String acc;
             if ((acc = sb.getConfig("proxyAccount", "")).length() > 0) {
-//              sb.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
                 sb.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
                 sb.setConfig("proxyAccount", "");
             }
             if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
-//              sb.setConfig("serverAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
                 sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
                 sb.setConfig("serverAccount", "");
             }
             if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
-//              sb.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
                 sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
                 sb.setConfig("adminAccount", "");
             }
 
             // fix unsafe old passwords
             if ((acc = sb.getConfig("proxyAccountBase64", "")).length() > 0) {
-//              sb.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
                 sb.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
                 sb.setConfig("proxyAccountBase64", "");
             }
             if ((acc = sb.getConfig("serverAccountBase64", "")).length() > 0) {
-//              sb.setConfig("serverAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
                 sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
                 sb.setConfig("serverAccountBase64", "");
             }
             if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
-//              sb.setConfig("adminAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
                 sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
                 sb.setConfig("adminAccountBase64", "");
             }
             if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {
-//              sb.setConfig("uploadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
                 sb.setConfig("uploadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
                 sb.setConfig("uploadAccountBase64", "");
             }
             if ((acc = sb.getConfig("downloadAccountBase64", "")).length() > 0) {
-//              sb.setConfig("downloadAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(acc));
                 sb.setConfig("downloadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
                 sb.setConfig("downloadAccountBase64", "");
             }
@@ -488,7 +480,7 @@ public final class yacy {
         if (restart.equals("true")) {
             serverLog.logConfig("SHUTDOWN", "RESTART...");
             long count = 0;
-            while (Thread.activeCount() > 1 && count <= 60) { // waiting 5 minutes               
+            while (Thread.activeCount() > 1 && count <= 60) { // wait 5 minutes               
                 serverLog.logConfig("SHUTDOWN", "Waiting 5 seconds for " + (Thread.activeCount() - 1) + "running threads to restart YaCy");
                 try { Thread.currentThread().sleep(5000); } catch (InterruptedException e) {}
                 count++;
