@@ -146,21 +146,13 @@ public class plasmaCrawlNURL extends plasmaURL {
         public void run() {
             Iterator i;
             try {
-                //System.out.println("init     coreStack index");
-                i =     coreStack.iterator(); while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));
-                //System.out.println("init    limitStack index");
-                i =    limitStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
-                //System.out.println("init overhangStack index");
-                i = overhangStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
-                //System.out.println("init   remoteStack index");
-                i =   remoteStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
-                //System.out.println("init    imageStack index");
-                i =    imageStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
-                //System.out.println("init    movieStack index");
-                i =    movieStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
-                //System.out.println("init    musicStack index");
-                i =    musicStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
-                //System.out.println("finished           index init");
+                try { i =     coreStack.iterator(); while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));} catch (Exception e) {coreStack.reset();}
+                try { i =    limitStack.iterator(); while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));} catch (Exception e) {limitStack.reset();}
+                try { i = overhangStack.iterator(); while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));} catch (Exception e) {overhangStack.reset();}
+                try { i =   remoteStack.iterator(); while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));} catch (Exception e) {remoteStack.reset();}
+                try { i =    imageStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));} catch (Exception e) {imageStack = kelondroStack.reset(imageStack);}
+                try { i =    movieStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));} catch (Exception e) {movieStack = kelondroStack.reset(movieStack);}
+                try { i =    musicStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));} catch (Exception e) {musicStack = kelondroStack.reset(musicStack);}
             } catch (IOException e) {}
         }
     }

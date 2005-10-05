@@ -70,6 +70,11 @@ public class plasmaCrawlBalancer {
         stack = null;
     }
     
+    public void reset() throws IOException {
+        stack = kelondroStack.reset(stack);
+        domainStacks = new HashMap();
+    }
+    
     public Iterator iterator() {
         // iterates byte[] - objects
         return new KeyIterator(stack.iterator());

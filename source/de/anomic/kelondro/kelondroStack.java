@@ -91,6 +91,20 @@ public class kelondroStack extends kelondroRecords {
 	setHandle(toor, null); // reset the toor value
     }
 
+    public static kelondroStack reset(kelondroStack stack) throws IOException {
+        // memorize settings to this file
+        File f = new File(stack.filename);
+        long bz = stack.XcacheSize * stack.cacheChunkSize(true);
+        int[] cols = stack.COLWIDTHS;
+        
+        // close and delete the file
+        try {stack.close();} catch (Exception e) {};
+        if (f.exists()) f.delete();
+
+        // re-open a database with same settings as before
+        return new kelondroStack(f, bz, cols);
+    }
+    
     public class Counter implements Iterator {
 	Handle nextHandle = null;
 	public Counter() throws IOException {

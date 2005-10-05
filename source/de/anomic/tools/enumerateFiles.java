@@ -96,17 +96,22 @@ public class enumerateFiles implements Enumeration {
             if (f.isDirectory()) {
                 t = new TreeSet();
                 String[] l = f.list();
-                if (l.length == 0) {
-                    if (delete_emptyFolders) {
-                        f.delete();
-                        f = null;
+                if (l == null) {
+                    // f has disappeared
+                    f = null;
+                } else {
+                    if (l.length == 0) {
+                        if (delete_emptyFolders) {
+                            f.delete();
+                            f = null;
+                        } else {
+                            if (!(return_folders)) f = null;
+                        }
                     } else {
+                        for (int i = 0; i < l.length; i++) t.add(new File(f, l[i]));
+                        hierarchy.add(t);
                         if (!(return_folders)) f = null;
                     }
-                } else {
-                    for (int i = 0; i < l.length; i++) t.add(new File(f, l[i]));
-                    hierarchy.add(t);
-                    if (!(return_folders)) f = null;
                 }
             } else {
                 if (!(return_files)) f = null;

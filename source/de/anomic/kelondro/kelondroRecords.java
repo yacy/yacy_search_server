@@ -134,16 +134,16 @@ public class kelondroRecords {
     private   Handle            FREEH;       // pointer to first element in list of free Nodes, empty = NUL
     private   short             OHBYTEC;     // number of extra bytes in each node
     private   short             OHHANDLEC;   // number of handles in each node
-    private   int               COLWIDTHS[]; // array with widths of columns
+    protected int               COLWIDTHS[]; // array with widths of columns
     private   Handle            HANDLES[];   // array with handles
     private   byte[]            TXTPROPS[];  // array with text properties
     private   int               TXTPROPW;    // size of a single TXTPROPS element
 
     // caching buffer
-    private HashMap[]             XcacheHeaders; // the cache; holds overhead values and key element
-    private int                   XcacheSize;    // number of cache records
-    private long                  XcacheStartup; // startup time; for cache aging
-    private kelondroMScoreCluster cacheScore;   // controls cache aging
+    protected HashMap[]             XcacheHeaders; // the cache; holds overhead values and key element
+    protected int                   XcacheSize;    // number of cache records
+    protected long                  XcacheStartup; // startup time; for cache aging
+    protected kelondroMScoreCluster cacheScore;   // controls cache aging
 
 
     public kelondroRecords(File file, long buffersize /* bytes */,
@@ -345,7 +345,7 @@ public class kelondroRecords {
         return new File(filename);
     }
     
-    private int cacheChunkSize(boolean cacheControl) {
+    protected int cacheChunkSize(boolean cacheControl) {
         return this.headchunksize + element_in_cache + ((cacheControl) ? cache_control_entry : 0);
     }
     
