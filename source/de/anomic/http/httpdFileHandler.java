@@ -2,8 +2,8 @@
 // -----------------------
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
-// last change: 22.06.2004
+// Frankfurt, Germany, 2004, 2005
+// last major change: 05.10.2005
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -98,6 +98,8 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.awt.image.BufferedImage; 
+import javax.imageio.ImageIO; 
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverClassLoader;
@@ -369,8 +371,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             return;
         }
         
-        Date filedate;
-        File rc = null;
         try {
             // locate the file
             if (!(path.startsWith("/"))) {
@@ -391,29 +391,45 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
             }
             
-            // find locales or alternatives in htDocsPath
-            File defaultFile = new File(htDefaultPath, path);
-            File localizedFile = defaultFile;
-            if (defaultFile.exists()) {
-                // look if we have a localization of that file
-                String htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
-                if (!(htLocaleSelection.equals("default"))) {
-                    File localePath = new File(htLocalePath, htLocaleSelection + "/" + path);
-                    if (localePath.exists()) localizedFile = localePath;
+            File   targetFile  = new File(htDefaultPath, path);
+            File   targetClass = rewriteClassFile(targetFile);
+            String targetExt   = conProp.getProperty("EXT","");
+            Date targetDate;
+            
+            if ((targetClass != null) && ((path.endsWith("png") || (path.endsWith("gif"))))) {
+                // call an image-servlet to produce an on-the-fly - generated image
+                BufferedImage bi = null;
+                try {
+                    requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
+                    requestHeader.put("PATH", path);
+                    // in case that there are no args given, args = null or empty hashmap
+                    bi = (BufferedImage) rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
+                } catch (InvocationTargetException e) {
+                    this.theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
+                    e.getMessage() +
+                    " target exception at " + targetClass + ": " +
+                    e.getTargetException().toString() + ":" +
+                    e.getTargetException().getMessage(),e);
+                    targetClass = null;
                 }
-            } else {
-                // try to find that file in the htDocsPath
-                defaultFile = new File(htDocsPath, path);
-                localizedFile = defaultFile;
-            }
-                       
-            if ((localizedFile.exists()) && (localizedFile.canRead())) {
+                targetDate = new Date(System.currentTimeMillis());
+                String mimeType = mimeTable.getProperty(targetExt,"text/html");
+                
+                // generate an byte array from the generated image
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(bi, targetExt, baos);
+                byte[] result = baos.toByteArray();
+        
+                // write the array to the client
+                httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, targetDate, null, null, null, null);
+                Thread.currentThread().sleep(200); // see below
+                serverFileUtils.write(result, out);
+                
+            } else if ((targetFile.exists()) && (targetFile.canRead())) {
                 // we have found a file that can be written to the client
                 // if this file uses templates, then we use the template
                 // re-write - method to create an result
-                serverObjects tp = new serverObjects();
-                filedate = new Date(localizedFile.lastModified());
-                String mimeType = mimeTable.getProperty(conProp.getProperty("EXT",""),"text/html");
+                String mimeType = mimeTable.getProperty(targetExt,"text/html");
                 byte[] result;
                 boolean zipContent = requestHeader.acceptGzip() && httpd.shallTransportZipped("." + conProp.getProperty("EXT",""));
                 String md5String = null;
@@ -422,14 +438,26 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         path.endsWith("rss") || 
                         path.endsWith("csv") ||
                         path.endsWith("pac")) {
-                    rc = rewriteClassFile(defaultFile);
-                    if (rc != null) {
+                            
+                    // find locales or alternatives in htDocsPath
+                    String htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
+                    // look if we have a localization of that file
+                    if (!(htLocaleSelection.equals("default"))) {
+                        File localePath = new File(htLocalePath, htLocaleSelection + "/" + path);
+                        if (localePath.exists()) targetFile = localePath;
+                    }
+                    
+                    // call rewrite-class
+                    serverObjects tp = new serverObjects();
+                    if (targetClass == null) {
+                        targetDate = new Date(targetFile.lastModified());
+                    } else {
                         // CGI-class: call the class to create a property for rewriting
                         try {
                             requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
                             requestHeader.put("PATH", path);
                             // in case that there are no args given, args = null or empty hashmap
-                            tp = (serverObjects) rewriteMethod(rc).invoke(null, new Object[] {requestHeader, args, switchboard});
+                            tp = (serverObjects) rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
                             // if no args given , then tp will be an empty Hashtable object (not null)
                             if (tp == null) tp = new serverObjects();
                             // check if the servlets requests authentification
@@ -466,12 +494,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         } catch (InvocationTargetException e) {
                             this.theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                                     e.getMessage() +
-                                    " target exception at " + rc + ": " +
+                                    " target exception at " + targetClass + ": " +
                                     e.getTargetException().toString() + ":" +
                                     e.getTargetException().getMessage(),e);
-                            rc = null;
+                            targetClass = null;
                         }
-                        filedate = new Date(System.currentTimeMillis());
+                        targetDate = new Date(System.currentTimeMillis());
                     }
                     // read templates
                     tp.putAll(templates);
@@ -484,37 +512,37 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         // do fileCaching here
                         byte[] templateContent = null;
                         if (useTemplateCache) {
-                            long fileSize = localizedFile.length();
+                            long fileSize = targetFile.length();
                             if (fileSize <= 512*1024) {
-                                SoftReference ref = (SoftReference) templateCache.get(localizedFile);
+                                SoftReference ref = (SoftReference) templateCache.get(targetFile);
                                 if (ref != null) {
                                     templateContent = (byte[]) ref.get();
                                     if (templateContent == null) 
-                                        templateCache.remove(localizedFile);                               
+                                        templateCache.remove(targetFile);                               
                                 }
                                 
                                 if (templateContent == null) {
                                     // loading the content of the template file into a byte array
-                                    templateContent = serverFileUtils.read(localizedFile);
+                                    templateContent = serverFileUtils.read(targetFile);
                                     
                                     // storing the content into the cache
                                     ref = new SoftReference(templateContent);
-                                    templateCache.put(localizedFile,ref);
+                                    templateCache.put(targetFile,ref);
                                     if (this.theLogger.isLoggable(Level.FINEST))
-                                        this.theLogger.logFinest("Cache MISS for file " + localizedFile);
+                                        this.theLogger.logFinest("Cache MISS for file " + targetFile);
                                 } else {
                                     if (this.theLogger.isLoggable(Level.FINEST))
-                                        this.theLogger.logFinest("Cache HIT for file " + localizedFile);
+                                        this.theLogger.logFinest("Cache HIT for file " + targetFile);
                                 }
                                 
                                 // creating an inputstream needed by the template rewrite function
                                 fis = new ByteArrayInputStream(templateContent);                            
                                 templateContent = null;
                             } else {
-                                fis = new BufferedInputStream(new FileInputStream(localizedFile));
+                                fis = new BufferedInputStream(new FileInputStream(targetFile));
                             }
                         } else {
-                            fis = new BufferedInputStream(new FileInputStream(localizedFile));
+                            fis = new BufferedInputStream(new FileInputStream(targetFile));
                         }
 
                         o = new ByteArrayOutputStream();
@@ -546,7 +574,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     
                 } else { // no html                    
                     // write the file to the client
-                    result = (zipContent)? serverFileUtils.readAndZip(localizedFile) : serverFileUtils.read(localizedFile);
+                    targetDate = new Date(targetFile.lastModified());
+                    result = (zipContent) ? serverFileUtils.readAndZip(targetFile) : serverFileUtils.read(targetFile);
                     
                     // check mime type again using the result array: these are 'magics'
 //                    if (serverByteBuffer.equals(result, 1, "PNG".getBytes())) mimeType = mimeTable.getProperty("png","text/html");
@@ -556,7 +585,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
                 
                 // write the array to the client
-                httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, filedate, null, null, (zipContent)?"gzip":null, null);
+                httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, targetDate, null, null, (zipContent)?"gzip":null, null);
                 Thread.currentThread().sleep(200); // this solved the message problem (!!)
                 serverFileUtils.write(result, out);
             } else {
