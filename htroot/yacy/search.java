@@ -1,10 +1,13 @@
-// search.java 
+// search.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 02.06.2003
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -44,9 +47,7 @@
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
-import java.util.Date;
 import java.util.HashSet;
-
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
@@ -57,43 +58,44 @@ import de.anomic.yacy.yacySeed;
 
 public final class search {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+        if (post == null || ss == null) { return new serverObjects(); }
 
-	// be save
-	if ((post == null) || (env == null)) return prop;
+        // return variable that accumulates replacements
+        final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        serverObjects prop = new serverObjects();
+        if (prop == null || sb == null) { return new serverObjects(); }
 
-	//System.out.println("yacy: search received request = " + post.toString());
+        //System.out.println("yacy: search received request = " + post.toString());
 
-	String  oseed  = (String) post.get("myseed", ""); // complete seed of the requesting peer
-	String  youare = (String) post.get("youare", ""); // seed hash of the target peer, used for testing network stability
-	String  key    = (String) post.get("key", "");    // transmission key for response
-	String  query  = (String) post.get("query", "");  // a string of word hashes
-	String  fwdep  = (String) post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
-	String  fwden  = (String) post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
-        long    duetime= Long.parseLong((String) post.get("duetime", "3000"));
-	int     count  = Integer.parseInt((String) post.get("count", "10"));     // maximum number of wanted results
-	boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
-        //Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime")); // read remote time
+        final String  oseed  = (String) post.get("myseed", ""); // complete seed of the requesting peer
+//      final String  youare = (String) post.get("youare", ""); // seed hash of the target peer, used for testing network stability
+        final String  key    = (String) post.get("key", "");    // transmission key for response
+        final String  query  = (String) post.get("query", "");  // a string of word hashes
+//      final String  fwdep  = (String) post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
+//      final String  fwden  = (String) post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
+        final long    duetime= Long.parseLong((String) post.get("duetime", "3000"));
+        final int     count  = Integer.parseInt((String) post.get("count", "10"));     // maximum number of wanted results
+        final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
+//      Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime")); // read remote time
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
             yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(oseed, key), true);
         }
 
-        HashSet keyhashes = new HashSet(query.length() / plasmaWordIndexEntry.wordHashLength);
+        final HashSet keyhashes = new HashSet(query.length() / plasmaWordIndexEntry.wordHashLength);
         for (int i = 0; i < (query.length() / plasmaWordIndexEntry.wordHashLength); i++) {
             keyhashes.add(query.substring(i * plasmaWordIndexEntry.wordHashLength, (i + 1) * plasmaWordIndexEntry.wordHashLength));
         }
-        long timestamp = System.currentTimeMillis();
-	prop = switchboard.searchFromRemote(keyhashes, count, global, duetime);
+        final long timestamp = System.currentTimeMillis();
+        prop = sb.searchFromRemote(keyhashes, count, global, duetime);
         prop.put("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
-        
-        int links = Integer.parseInt(prop.get("linkcount","0"));
+
+        final int links = Integer.parseInt(prop.get("linkcount","0"));
         yacyCore.seedDB.mySeed.incSI(links);
         yacyCore.seedDB.mySeed.incSU(links);
-	return prop;
+       return prop;
     }
 
 }
