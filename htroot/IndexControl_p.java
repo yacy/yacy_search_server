@@ -446,7 +446,7 @@ public class IndexControl_p {
                 result.append("No URL entries related to this word hash <span class=\"tt\">").append(keyhash).append("</span>.");
             } else {
                 final Enumeration en = index.elements(true);
-                result.append("URL entries related to this word hash <span class=\"tt\">").append(keyhash).append("</span><br>");
+                result.append("URL entries related to this word hash <span class=\"tt\">").append(keyhash).append("</span><br><br>");
                 result.append("<form action=\"IndexControl_p.html\" method=\"post\" enctype=\"multipart/form-data\">");
                 String us, uh;
                 int i = 0;
