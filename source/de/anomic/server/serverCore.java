@@ -57,15 +57,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.nio.channels.ClosedByInterruptException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.security.KeyStore;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 
 import javax.net.ServerSocketFactory;
@@ -77,7 +70,6 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
 import de.anomic.http.httpc;
-import de.anomic.http.httpd;
 import de.anomic.icap.icapd;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
@@ -106,15 +98,12 @@ public final class serverCore extends serverAbstractThread implements serverThre
     serverLog log;                         // log object
     private int timeout;                   // connection time-out of the socket
     
-    private int thresholdActive = 5000;    // after that time a thread should have got a command line
     private int thresholdSleep = 30000;    // after that time a thread is considered as beeing sleeping (30 seconds)
-    private int thresholdDead = 3600000;   // after that time a thread is considered as beeing dead-locked (1 hour)
     serverHandler handlerPrototype;        // the command class (a serverHandler) 
-    private Class[] initHandlerClasses;    // the init's methods arguments
-    private Class[] initSessionClasses;    // the init's methods arguments
+
     private serverSwitch switchboard;      // the command class switchboard
-    private Hashtable denyHost;
-    private int commandMaxLength;
+    Hashtable denyHost;
+    int commandMaxLength;
     
     /**
      * The session-object pool
@@ -122,7 +111,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
     final SessionPool theSessionPool;
     final ThreadGroup theSessionThreadGroup = new ThreadGroup("sessionThreadGroup");
     private Config cralwerPoolConfig = null;
-    private Selector channelSel;
 
     private static ServerSocketFactory getServerSocketFactory(boolean dflt, File keyfile, String passphrase) {
         // see doc's at
@@ -181,9 +169,13 @@ public final class serverCore extends serverAbstractThread implements serverThre
             int commandMaxLength
     ) throws IOException {
         this.port = port;
+        this.timeout = timeout;
+        
         this.commandMaxLength = commandMaxLength;
         this.denyHost = (blockAttack) ? new Hashtable() : null;
-
+        this.handlerPrototype = handlerPrototype;
+        this.switchboard = switchboard;
+        
         // initialize logger
         this.log = new serverLog("SERVER");
         
@@ -208,15 +200,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             System.out.println("FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number"); System.exit(0);
         }
 
-        try {
-            this.handlerPrototype = handlerPrototype;
-            this.switchboard = switchboard;
-            this.initHandlerClasses = new Class[] {Class.forName("de.anomic.server.serverSwitch")};
-            this.initSessionClasses = new Class[] {Class.forName("de.anomic.server.serverCore$Session")};
-            this.timeout = timeout;
-        } catch (java.lang.ClassNotFoundException e) {
-            System.out.println("FATAL ERROR: " + e.getMessage() + " - Class Not Found"); System.exit(0);
-        }
+
 
         // init port forwarding            
         try {
@@ -303,7 +287,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         return isNotLocal(url.getHost());
     }
     
-    private static boolean isNotLocal(String ip) {
+    static boolean isNotLocal(String ip) {
 	if ((ip.equals("localhost")) ||
 	    (ip.startsWith("127")) ||
 	    (ip.startsWith("192.168")) ||
@@ -315,7 +299,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static String publicIP() {
         try {
             
-            // If port forwarding was enabled we need to return the remote IP Address           
+            // if a static IP was configured, we have to return it here ...
 			plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
 			if(sb != null){
 			String staticIP=sb.getConfig("staticIP", "");
@@ -323,12 +307,16 @@ public final class serverCore extends serverAbstractThread implements serverThre
 					return staticIP;
 				}
 			}
+            
+            // If port forwarding was enabled we need to return the remote IP Address  
             if ((serverCore.portForwardingEnabled)&&(serverCore.portForwarding != null)) {
 				//does not return serverCore.portForwarding.getHost(), because hostnames are not valid, except in DebugMode
                 return InetAddress.getByName(serverCore.portForwarding.getHost()).getHostAddress();
-            } else {
-                return publicLocalIP().getHostAddress();
             }
+            
+            // otherwise we return the real IP address of this host
+            return publicLocalIP().getHostAddress();
+            
         } catch (java.net.UnknownHostException e) {
             System.err.println("ERROR: (internal) " + e.getMessage());
             return null;
@@ -395,7 +383,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         // idleThreadCheck();
         this.switchboard.handleBusyState(this.theSessionPool.getNumActive() /*activeThreads.size() */);
 
-        log.logFine(
+        this.log.logFinest(
         "* waiting for connections, " + this.theSessionPool.getNumActive() + " sessions running, " +
         this.theSessionPool.getNumIdle() + " sleeping");
         
@@ -410,21 +398,25 @@ public final class serverCore extends serverAbstractThread implements serverThre
             Integer attempts = (Integer) bfHost.get(cIP);
             if (attempts == null) attempts = new Integer(1); else attempts = new Integer(attempts.intValue() + 1);
             bfHost.put(cIP, attempts);
-            this.log.logInfo("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP + ", ATTEMPT " + attempts.intValue());
+            this.log.logWarning("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP + ", ATTEMPT " + attempts.intValue());
             // add a delay to make brute-force harder
             announceThreadBlockApply();
             try {Thread.sleep(attempts.intValue() * 2000);} catch (InterruptedException e) {}
             announceThreadBlockRelease();
-            if ((attempts.intValue() >= 10) && (denyHost != null)) {
-                denyHost.put(cIP, "deny");
+            if ((attempts.intValue() >= 10) && (this.denyHost != null)) {
+                this.denyHost.put(cIP, "deny");
             }
         }
         
         if ((this.denyHost == null) || (this.denyHost.get(cIP) == null)) {
+            // setting the timeout properly
             controlSocket.setSoTimeout(this.timeout);
+            
+            // getting a free session thread from the pool
             Session connection = (Session) this.theSessionPool.borrowObject();
+            
+            // processing the new request
             connection.execute(controlSocket,this.timeout);
-            //log.logDebug("* NEW SESSION: " + connection.request + " from " + clientIP);
         } else {
             this.log.logWarning("ACCESS FROM " + cIP + " DENIED");
         }
@@ -477,8 +469,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         return (this.theSessionPool.getNumActive() == 0);
     }
     
-    public final class SessionPool extends GenericObjectPool 
-    {
+    public final class SessionPool extends GenericObjectPool {
         public boolean isClosed = false;
         
         /**
@@ -630,12 +621,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
          */
         public void passivateObject(Object obj) { 
             //log.debug(" passivateObject..." + obj);
-            if (obj instanceof Session)  {
-                Session theSession = (Session) obj;
-                
-                // Clean up the result of the execution
-                theSession.setResult(null);                 
-            }
+//            if (obj instanceof Session)  {
+//                Session theSession = (Session) obj;              
+//            }
         }        
     }
     
@@ -646,8 +634,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         // synchronization object needed for the threadpool implementation
         private Object syncObject;        
-        
-        private Object processingResult = null;
         
         private boolean running = false;
         private boolean stopped = false;
@@ -720,7 +706,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         }
         
         public long getTime() {
-            return System.currentTimeMillis() - start;
+            return System.currentTimeMillis() - this.start;
         }
             
     	public void setIdentity(String id) {
@@ -734,7 +720,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	*/
     
     	public void log(boolean outgoing, String request) {
-    	    serverCore.this.log.logFine(userAddress.getHostAddress() + "/" + this.identity + " " +
+    	    serverCore.this.log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
     		     "[" + ((serverCore.this.theSessionPool.isClosed)? -1 : serverCore.this.theSessionPool.getNumActive()) + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
@@ -746,7 +732,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	}
     
     	public byte[] readLine() {
-    	    return receive(in, this.readLineBuffer, commandMaxLength, false);
+    	    return receive(this.in, this.readLineBuffer, serverCore.this.commandMaxLength, false);
     	}
     
         /**
@@ -767,19 +753,13 @@ public final class serverCore extends serverAbstractThread implements serverThre
         }
     
         /**
-         * @param object
-         */
-        public void setResult(Object object) {
-            this.processingResult  = object;
-        }    
-        
-        /**
          * 
          */
         public void reset()  {
             this.done = true;
             this.syncObject = null;
             this.readLineBuffer.reset();
+            this.commandObj.reset();
         }    
         
         /**
@@ -893,7 +873,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 String reqProtocol = "HTTP";
                 Object[] stringParameter = new String[1];
                 while ((this.in != null) && ((requestBytes = readLine()) != null)) {                    
-                    this.setName("Session_" + this.userAddress.getHostAddress() + ":" + this.controlSocket.getPort() + "#" + commandCounter);
+                    this.setName("Session_" + this.userAddress.getHostAddress() + 
+                                 ":" + this.controlSocket.getPort() + 
+                                 "#" + this.commandCounter);
                     
                     this.request = new String(requestBytes);
                     //log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
@@ -936,6 +918,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
                             // initializing the session
                             this.commandObj.initSession(this); 
                         }
+                        
+                        // count the amount of requests that were processed by this session until yet
                         this.commandCounter++;
                         
                         // setting the socket timeout for reading of the request content
@@ -972,7 +956,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                             }
                             writeLine((String) result);
                         } else if (result instanceof InputStream) {
-                            String tmp = send(out, (InputStream) result);
+                            String tmp = send(this.out, (InputStream) result);
                             if ((tmp.length() > 4) && (tmp.toUpperCase().startsWith("PASS"))) {
                                 log(true, "PASS ********");
                             } else {
@@ -982,32 +966,33 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         }
                         if (terminate) break;
                         
-                    } catch (InvocationTargetException ite) {
-                        System.out.println("ERROR A " + userAddress.getHostAddress());
+                    } catch (InvocationTargetException ite) {                        
+                        System.out.println("ERROR A " + this.userAddress.getHostAddress());
                         // we extract a target exception and let the thread survive
-                        writeLine((String) commandObj.error(ite.getTargetException()));
+                        writeLine(this.commandObj.error(ite.getTargetException()));
                     } catch (NoSuchMethodException nsme) {
-                        System.out.println("ERROR B " + userAddress.getHostAddress());
-                        if (isNotLocal(userAddress.getHostAddress().toString())) {
-                            if (denyHost != null)
-                                denyHost.put((""+userAddress.getHostAddress()), "deny"); // block client: hacker attempt
+                        System.out.println("ERROR B " + this.userAddress.getHostAddress());
+                        if (isNotLocal(this.userAddress.getHostAddress().toString())) {
+                            if (serverCore.this.denyHost != null) {
+                                serverCore.this.denyHost.put((""+this.userAddress.getHostAddress()), "deny"); // block client: hacker attempt
+                            }
                         }
                         break;
                         // the client requested a command that does not exist
                         //Object[] errorParameter = { nsme };
                         //writeLine((String) error.invoke(this.cmdObject, errorParameter));
                     } catch (IllegalAccessException iae) {
-                        System.out.println("ERROR C " + userAddress.getHostAddress());
+                        System.out.println("ERROR C " + this.userAddress.getHostAddress());
                         // wrong parameters: this an only be an internal problem
-                        writeLine((String) commandObj.error(iae));
+                        writeLine(this.commandObj.error(iae));
                     } catch (java.lang.ClassCastException e) {
-                        System.out.println("ERROR D " + userAddress.getHostAddress());
+                        System.out.println("ERROR D " + this.userAddress.getHostAddress());
                         // ??
-                        writeLine((String) commandObj.error(e));
+                        writeLine(this.commandObj.error(e));
                     } catch (Exception e) {
-                        System.out.println("ERROR E " + userAddress.getHostAddress());
+                        System.out.println("ERROR E " + this.userAddress.getHostAddress());
                         // whatever happens: the thread has to survive!
-                        writeLine("UNKNOWN REASON:" + (String) commandObj.error(e));
+                        writeLine("UNKNOWN REASON:" + this.commandObj.error(e));
                     }
                 } // end of while
             } catch (java.lang.ClassNotFoundException e) {

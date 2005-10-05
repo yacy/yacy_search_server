@@ -54,13 +54,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Vector;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -79,7 +78,7 @@ public class sharedBlacklist_p {
  	String line = "";
 	String out = "";
 	HashSet Blacklist = new HashSet();
-	Vector otherBlacklist = new Vector();
+	ArrayList otherBlacklist = new ArrayList();
 	int num = 0;
 	int i = 0; //loop-var
 	int count = 0;

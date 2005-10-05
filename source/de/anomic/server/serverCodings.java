@@ -79,18 +79,18 @@ public final class serverCodings {
     }
 
     public String encodeBase64Long(long c, int length) {
-	if (length < 0) length = 0;
-	String s = "";
-	if (c == 0) s = alpha[0] + s;
+	if (length < 0) length = 0;	
+    StringBuffer s = new StringBuffer(length); //String s = "";
+	if (c == 0) s.insert(0,alpha[0]); //s = alpha[0] + s;
 	else while (c > 0) {
-	    s = alpha[(byte) (c & 0x3F)] + s;
+	    s.insert(0,alpha[(byte) (c & 0x3F)]); //s = alpha[(byte) (c & 0x3F)] + s;
 	    c >>= 6;
 	}
 	if ((length != 0) && (s.length() > length))
 	    throw new RuntimeException("encodeBase64 result '" + s + "' exceeds demanded length of " + length + " digits");
 	if (length == 0) length = 1; // rare exception for the case that c == 0
-	while (s.length() < length) s = alpha[0] + s;
-	return s;
+	while (s.length() < length) s.insert(0,alpha[0]); //s = alpha[0] + s;
+	return s.toString();
     }
 
     public long decodeBase64Long(String s) {

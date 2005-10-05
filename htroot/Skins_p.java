@@ -51,8 +51,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
@@ -122,7 +122,7 @@ public class Skins_p {
 		//load Skin from URL
 		} else if (post.containsKey("url")){
 			String url = (String)post.get("url");
-			Vector skinVector;
+			ArrayList skinVector;
 			try{
 				skinVector = httpc.wget(new URL(url), 6000, null, null, switchboard.remoteProxyHost, switchboard.remoteProxyPort);
 			}catch(IOException e){

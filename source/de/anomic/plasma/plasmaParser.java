@@ -498,7 +498,7 @@ public final class plasmaParser {
                             String mimeType = (String) mimeTypeIterator.next();
                             availableParserList.put(mimeType,fullClassName);
                             serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'." +
-                                              ((neededLibxBuf.length()>0)?" Dependencies: " + neededLibxBuf.toString():""));
+                                              ((neededLibxBuf.length()>0)?"\nDependencies: " + neededLibxBuf.toString():""));
                         }
                         
                     } catch (Exception e) { /* we can ignore this for the moment */

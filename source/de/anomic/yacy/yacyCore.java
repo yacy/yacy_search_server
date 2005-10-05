@@ -63,8 +63,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -84,7 +83,7 @@ public class yacyCore {
     public static long startupTime = System.currentTimeMillis();
     public static yacySeedDB seedDB = null;
     public static yacyNewsPool newsPool = null;
-    public static final Hashtable seedUploadMethods = new Hashtable();
+    public static final HashMap seedUploadMethods = new HashMap();
     public static yacyPeerActions peerActions = null;
     public static yacyDHTAction dhtAgent = null;
     public static serverLog log;
@@ -538,9 +537,9 @@ public class yacyCore {
         }
     }
     
-    public static Hashtable getSeedUploadMethods() {
+    public static HashMap getSeedUploadMethods() {
         synchronized (yacyCore.seedUploadMethods) {
-            return (Hashtable) yacyCore.seedUploadMethods.clone();
+            return (HashMap) yacyCore.seedUploadMethods.clone();
         }        
     }
     
@@ -563,7 +562,7 @@ public class yacyCore {
     }
     
     public static void loadSeedUploadMethods() {
-        Hashtable availableUploaders = new Hashtable();
+        HashMap availableUploaders = new HashMap();
         
         try {
             String uploadersPkgName = yacyCore.class.getPackage().getName() + ".seedUpload";

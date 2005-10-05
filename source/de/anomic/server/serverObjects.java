@@ -61,10 +61,10 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Vector;
 
 public final class serverObjects extends Hashtable implements Cloneable {
 
@@ -137,7 +137,7 @@ public final class serverObjects extends Hashtable implements Cloneable {
     public String[] getAll(String keyMapper) {
         // the keyMapper may contain regular expressions as defined in String.matches
         // this method is particulary useful when parsing the result of checkbox forms
-        Vector v = new Vector();
+        ArrayList v = new ArrayList();
 	Enumeration e = keys();
 	String key;
 	while (e.hasMoreElements()) {
@@ -146,7 +146,7 @@ public final class serverObjects extends Hashtable implements Cloneable {
 	}
         // make a String[]
         String[] result = new String[v.size()];
-        for (int i = 0; i < v.size(); i++) result[i] = (String) v.elementAt(i);
+        for (int i = 0; i < v.size(); i++) result[i] = (String) v.get(i);
         return result;
     }
 

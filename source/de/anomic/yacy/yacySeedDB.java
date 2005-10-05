@@ -46,12 +46,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Vector;
 
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroDyn;
@@ -508,13 +508,13 @@ public final class yacySeedDB {
         return null;
     }
     
-    public Vector storeCache(File seedFile) throws IOException {
+    public ArrayList storeCache(File seedFile) throws IOException {
 	return storeCache(seedFile, false);
     }
 
-    private Vector storeCache(File seedFile, boolean addMySeed) throws IOException {
+    private ArrayList storeCache(File seedFile, boolean addMySeed) throws IOException {
         PrintWriter pw = null;
-        Vector v = new Vector(seedActiveDB.size()+1);
+        ArrayList v = new ArrayList(seedActiveDB.size()+1);
         try {
             
             pw = new PrintWriter(new BufferedWriter(new FileWriter(seedFile)));
@@ -562,10 +562,10 @@ public final class yacySeedDB {
             // create a seed file which for uploading ...            
             seedFile = new File("seedFile.txt");
             serverLog.logFine("YACY","SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
-            Vector uv = storeCache(seedFile, true);            
+            ArrayList uv = storeCache(seedFile, true);            
             
             // uploading the seed file
-            serverLog.logFine("YACY","SaveSeedList: Trying to upload seed-file ...");
+            serverLog.logFine("YACY","SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
             log = uploader.uploadSeedFile(sb,seedDB,seedFile);
             
             // check also if the result can be retrieved again
@@ -584,7 +584,7 @@ public final class yacySeedDB {
         
     public String copyCache(File seedFile, URL seedURL) throws IOException {
         if (seedURL == null) return "COPY - Error: URL not given";
-        Vector uv = storeCache(seedFile, true);
+        ArrayList uv = storeCache(seedFile, true);
         try {
             // check also if the result can be retrieved again
             if (checkCache(uv, seedURL))
@@ -596,9 +596,9 @@ public final class yacySeedDB {
         }
     }
 
-    private boolean checkCache(Vector uv, URL seedURL) throws IOException {        
+    private boolean checkCache(ArrayList uv, URL seedURL) throws IOException {        
         // check if the result can be retrieved again
-        Vector check  = httpc.wget(seedURL, 10000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
+        ArrayList check  = httpc.wget(seedURL, 10000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
         
         if (check == null) {
             serverLog.logFine("YACY","SaveSeedList: Testing download failed ...");
@@ -614,7 +614,7 @@ public final class yacySeedDB {
             serverLog.logFine("YACY","SaveSeedList: Comparing local and uploades seed-list entries ...");
             int i;
             for (i = 0; i < uv.size(); i++) {
-                if (!(((String) uv.elementAt(i)).equals((String) check.elementAt(i)))) return false;
+                if (!(((String) uv.get(i)).equals((String) check.get(i)))) return false;
             }
             if (i == uv.size()) return true;
         }

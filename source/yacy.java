@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,8 +68,10 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexClassicDB;
@@ -655,6 +658,91 @@ public final class yacy {
             e.printStackTrace();
         }
     }
+    
+    public static void minimizeUrlDB(String homePath) {
+        // run with "java -classpath classes yacy -migratewords"
+        try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
+        File dbroot = new File(new File(homePath), "DATA/PLASMADB");
+        try {
+            serverLog log = new serverLog("URL-CLEANUP");
+            log.logInfo("STARTING URL CLEANUP");
+            
+            // db containing all currently loades urls
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304);
+            
+            // db used to hold all neede urls
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.temp.db"), 4194304);
+            
+            Runtime rt = Runtime.getRuntime();
+            int cacheMem = (int)(rt.maxMemory()-rt.totalMemory())-5*1024*1024;
+            plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, cacheMem, log);
+            Iterator wordHashIterator = wordIndex.wordHashes("------------", true, true);
+            
+            String wordhash;
+            long urlCounter = 0, wordCounter = 0;
+            long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
+            String wordChunkStartHash = "------------", wordChunkEndHash;
+            
+            while (wordHashIterator.hasNext()) {
+                plasmaWordIndexEntity wordIdxEntity = null;
+                try {
+                    wordCounter++;
+                    wordhash = (String) wordHashIterator.next();
+                    wordIdxEntity = wordIndex.getEntity(wordhash, true);
+                    
+                    // the combined container will fit, read the container
+                    Enumeration wordIdxEntries = wordIdxEntity.elements(true);
+                    plasmaWordIndexEntry wordIdxEntry;
+                    while (wordIdxEntries.hasMoreElements()) {
+                        wordIdxEntry = (plasmaWordIndexEntry) wordIdxEntries.nextElement();
+                        String urlHash = wordIdxEntry.getUrlHash();                    
+                        if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) {
+                            urlCounter++;
+                            plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash);                       
+                            minimizedUrlDB.newEntry(urlEntry);
+                            if (urlCounter % 500 == 0) {
+                                log.logInfo(urlCounter + " URLs found so far.");
+                            }
+                        }
+                    }
+                    // we have read all elements, now delete the entity
+                    wordIdxEntity.close(); wordIdxEntity = null;
+                    
+                    if (wordCounter%500 == 0) {
+                        wordChunkEndHash = wordhash;
+                        wordChunkEnd = System.currentTimeMillis();
+                        long duration = wordChunkEnd - wordChunkStart;
+                        log.logInfo(wordCounter + " words scanned " +
+                                "[" + wordChunkStartHash + " .. " + wordChunkEndHash + "]\n" + 
+                                "Duration: "+ 500*1000/duration + " words/s" +
+                                " | Free memory: " + rt.freeMemory() + 
+                                " | Total memory: " + rt.totalMemory());
+                        wordChunkStart = wordChunkEnd;
+                        wordChunkStartHash = wordChunkEndHash;
+                    }
+                    
+                    
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (wordIdxEntity != null) try { wordIdxEntity.close(); } catch (Exception e) {}
+                }
+            }
+            currentUrlDB.close();
+            minimizedUrlDB.close();
+            wordIndex.close(600);
+            
+            log.logInfo("current LURL DB contains " + currentUrlDB.size() + " entries.");
+            log.logInfo("mimimized LURL DB contains " + minimizedUrlDB.size() + " entries.");
+            
+            // TODO: rename the mimimized UrlDB to the name of the previous UrlDB
+            
+            log.logInfo("FINISHED URL CLEANUP, WAIT FOR DUMP");
+            log.logInfo("TERMINATED URL CLEANUP");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
     * Reads all words from the given file and creates a hashmap, where key is
@@ -818,6 +906,11 @@ public final class yacy {
             // attention: this may run long and should not be interrupted!
             if (args.length == 2) applicationRoot= args[1];
             migrateWords(applicationRoot);
+        } else if ((args.length >= 1) && (args[0].equals("-minimizeUrlDB"))) {
+            // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
+            // attention: this may run long and should not be interrupted!
+            if (args.length == 2) applicationRoot= args[1];
+            minimizeUrlDB(applicationRoot);
         } else if ((args.length >= 1) && (args[0].equals("-deletestopwords"))) {
             // delete those words in the index that are listed in the stopwords file
             if (args.length == 2) applicationRoot= args[1];

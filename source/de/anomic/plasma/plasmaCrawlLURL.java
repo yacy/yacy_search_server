@@ -69,17 +69,17 @@ import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public class plasmaCrawlLURL extends plasmaURL {
+public final class plasmaCrawlLURL extends plasmaURL {
 
     // result stacks;
     // these have all entries of form
     // strings: urlHash + initiatorHash + ExecutorHash
-    private LinkedList externResultStack; // 1 - remote index: retrieved by other peer
-    private LinkedList searchResultStack; // 2 - partly remote/local index: result of search queries
-    private LinkedList transfResultStack; // 3 - partly remote/local index: result of index transfer
-    private LinkedList proxyResultStack;  // 4 - local index: result of proxy fetch/prefetch
-    private LinkedList lcrawlResultStack; // 5 - local index: result of local crawling
-    private LinkedList gcrawlResultStack; // 6 - local index: triggered external
+    private final LinkedList externResultStack; // 1 - remote index: retrieved by other peer
+    private final LinkedList searchResultStack; // 2 - partly remote/local index: result of search queries
+    private final LinkedList transfResultStack; // 3 - partly remote/local index: result of index transfer
+    private final LinkedList proxyResultStack;  // 4 - local index: result of proxy fetch/prefetch
+    private final LinkedList lcrawlResultStack; // 5 - local index: result of local crawling
+    private final LinkedList gcrawlResultStack; // 6 - local index: triggered external
     
     public plasmaCrawlLURL(File cachePath, int bufferkb) throws IOException {
         super();
@@ -170,6 +170,35 @@ public class plasmaCrawlLURL extends plasmaURL {
 	return new Entry(hash);
     }
 
+    public synchronized Entry newEntry(Entry oldEntry) {
+        if (oldEntry == null) return null;
+        /*
+         * de.anomic.plasma.plasmaCrawlLURL.Entry.Entry(URL url, String descr, 
+         * Date moddate, Date loaddate, 
+         * String referrerHash, 
+         * int copyCount, 
+         * boolean localNeed, 
+         * int quality, 
+         * String language, 
+         * char doctype, 
+         * long size, 
+         * int wordCount)
+         */
+        return new Entry(
+                oldEntry.url(),
+                oldEntry.descr(),
+                oldEntry.moddate(),
+                oldEntry.loaddate(),
+                oldEntry.referrerHash(),
+                oldEntry.copyCount(),
+                oldEntry.local(),
+                oldEntry.quality(),
+                oldEntry.language(),
+                oldEntry.doctype(),
+                oldEntry.size(),
+                oldEntry.wordCount());
+    }    
+    
     public synchronized Entry newEntry(String propStr, boolean setGlobal) {
         if ((propStr.startsWith("{")) && (propStr.endsWith("}"))) {
             return new Entry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)), setGlobal);    
@@ -516,56 +545,98 @@ public class plasmaCrawlLURL extends plasmaURL {
             return snippet;
         }
         
-        private String corePropList() {
+        private StringBuffer corePropList() {
             // generate a parseable string; this is a simple property-list
+            StringBuffer corePropStr = new StringBuffer(300);
             try {
-		return
-		    "hash=" + urlHash +
-		    ",referrer=" + referrerHash +
-		    ",mod=" + shortDayFormatter.format(moddate) +
-		    ",load=" + shortDayFormatter.format(loaddate) +
-		    ",size=" + size +
-		    ",wc=" + wordCount +
-		    ",cc=" + copyCount +
-		    ",local=" + ((local()) ? "true" : "false") +
-		    ",q=" + serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength) +
-		    ",dt=" + doctype +
-		    ",lang=" + language +
-		    ",url=" + crypt.simpleEncode(url.toString()) +
-		    ",descr=" + crypt.simpleEncode(descr);
-	    } catch (Exception e) {
-		//serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
+                corePropStr
+                .append("hash=")     .append(urlHash)
+                .append(",referrer=").append(referrerHash)
+                .append(",mod=")     .append(shortDayFormatter.format(moddate))
+                .append(",load=")    .append(shortDayFormatter.format(loaddate))
+                .append(",size=")    .append(size)
+                .append(",wc=")      .append(wordCount)
+                .append(",cc=")      .append(copyCount)
+                .append(",local=")   .append(((local()) ? "true" : "false"))
+                .append(",q=")       .append(serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength))
+                .append(",dt=")      .append(doctype)
+                .append(",lang=")    .append(language)
+                .append(",url=")     .append(crypt.simpleEncode(url.toString()))
+                .append(",descr=")   .append(crypt.simpleEncode(descr));                
+                return corePropStr;
+                
+//                return
+//                "hash=" + urlHash +
+//                ",referrer=" + referrerHash +
+//                ",mod=" + shortDayFormatter.format(moddate) +
+//                ",load=" + shortDayFormatter.format(loaddate) +
+//                ",size=" + size +
+//                ",wc=" + wordCount +
+//                ",cc=" + copyCount +
+//                ",local=" + ((local()) ? "true" : "false") +
+//                ",q=" + serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength) +
+//                ",dt=" + doctype +
+//                ",lang=" + language +
+//                ",url=" + crypt.simpleEncode(url.toString()) +
+//                ",descr=" + crypt.simpleEncode(descr);
+            } catch (Exception e) {
+                //serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
                 //if (moddate == null) serverLog.logFailure("plasmaLURL.corePropList", "moddate=null");
                 //if (loaddate == null) serverLog.logFailure("plasmaLURL.corePropList", "loaddate=null");
                 //e.printStackTrace();
-		return null;
-	    }
+                return null;
+            }
         }
         
-	public String toString(int posintext, int posinphrase, int posofphrase) {
+        public String toString(int posintext, int posinphrase, int posofphrase) {
             // add information needed for remote transport
-	    String core = corePropList();
+            StringBuffer core = corePropList();
             if (core == null) return null;
-	    return
-		    "{" + core +
-                    ",posintext=" + posintext +
-                    ",posinphrase=" + posinphrase +
-                    ",posofphraseint=" + posofphrase +
-		    "}";
-	}
+                        
+            core.ensureCapacity(core.length() + 200);
+            core.insert(0,"{")
+                .append(",posintext=").append(posintext)
+                .append(",posinphrase=").append(posinphrase)
+                .append(",posofphraseint=").append(posofphrase)
+                .append("}");
+            return core.toString();
+            
+//            return
+//            "{" + core +
+//            ",posintext=" + posintext +
+//            ",posinphrase=" + posinphrase +
+//            ",posofphraseint=" + posofphrase +
+//            "}";
+        }
 
-	public String toString(String snippet) {
-            // add information needed for remote transport
-	    String core = corePropList();
-            if (core == null) return null;
-	    return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
-	}
+    public String toString(String snippet) {
+        // add information needed for remote transport
+        StringBuffer core = corePropList();
+        if (core == null) return null;
         
-        public String toString() {
-	    String core = corePropList();
-            if (core == null) return null;
-	    return "{" + core + "}";
-	}
+        core.ensureCapacity(core.length() + snippet.length()*2);
+        core.insert(0,"{");
+        core.append(",snippet=").append(crypt.simpleEncode(snippet)).append("}");
+        
+        return core.toString();        
+        //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
+    }
+        
+    /**
+     * Returns this object as String.<br> 
+     * This e.g. looks like this:
+     * <pre>{hash=jmqfMk7Y3NKw,referrer=------------,mod=20050610,load=20051003,size=51666,wc=1392,cc=0,local=true,q=AEn,dt=h,lang=uk,url=b|aHR0cDovL3d3dy50cmFuc3BhcmVuY3kub3JnL3N1cnZleXMv,descr=b|S25vd2xlZGdlIENlbnRyZTogQ29ycnVwdGlvbiBTdXJ2ZXlzIGFuZCBJbmRpY2Vz}</pre>
+     */
+    public String toString() {
+        StringBuffer core = corePropList();
+        if (core == null) return null;
+        
+        core.insert(0,"{");
+        core.append("}");
+        
+        return core.toString();
+        //return "{" + core + "}";
+    }
 
 	public void print() {
 	    System.out.println("URL           : " + url);

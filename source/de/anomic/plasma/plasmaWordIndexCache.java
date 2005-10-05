@@ -296,6 +296,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         public flush() {
             terminate = false;
             intermission = 0;
+            this.setName(this.getClass().getName());
         }
 
 	public void intermission(long pause) {
@@ -534,36 +535,41 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         // can be negative if some assortments have been moved to the backend
         File db = plasmaWordIndexEntity.wordHash2path(databaseRoot, wordhash);
         if (!(db.exists())) return 0;
-        plasmaWordIndexEntity entity = new plasmaWordIndexEntity(databaseRoot, wordhash, true);
-        int size = entity.size();
-        if (size > assortmentCluster.clusterCapacity) {
-            // this will be too big to integrate it
-            entity.close();
-            return 0;
-        } else {
-            // take out all words from the assortment to see if it fits
-            // together with the extracted assortment
-            plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordhash);
-            if (size + container.size() > assortmentCluster.clusterCapacity) {
-                // this will also be too big to integrate, add to entity
-                entity.addEntries(container);
-                entity.close();
-                return -container.size();
+        plasmaWordIndexEntity entity = null;
+        try {
+            entity =  new plasmaWordIndexEntity(databaseRoot, wordhash, true);
+            int size = entity.size();
+            if (size > assortmentCluster.clusterCapacity) {
+                // this will be too big to integrate it
+                entity.close(); entity = null;
+                return 0;
             } else {
-                // the combined container will fit, read the container
-                Enumeration entries = entity.elements(true);
-                plasmaWordIndexEntry entry;
-                while (entries.hasMoreElements()) {
-                    entry = (plasmaWordIndexEntry) entries.nextElement();
-                    container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
+                // take out all words from the assortment to see if it fits
+                // together with the extracted assortment
+                plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordhash);
+                if (size + container.size() > assortmentCluster.clusterCapacity) {
+                    // this will also be too big to integrate, add to entity
+                    entity.addEntries(container);
+                    entity.close(); entity = null;
+                    return -container.size();
+                } else {
+                    // the combined container will fit, read the container
+                    Enumeration entries = entity.elements(true);
+                    plasmaWordIndexEntry entry;
+                    while (entries.hasMoreElements()) {
+                        entry = (plasmaWordIndexEntry) entries.nextElement();
+                        container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
+                    }
+                    // we have read all elements, now delete the entity
+                    entity.deleteComplete();
+                    entity.close(); entity = null;
+                    // integrate the container into the assortments; this will work
+                    assortmentCluster.storeTry(wordhash, container);
+                    return size;
                 }
-                // we have read all elements, now delete the entity
-                entity.deleteComplete();
-                entity.close();
-                // integrate the container into the assortments; this will work
-                assortmentCluster.storeTry(wordhash, container);
-                return size;
             }
+        } finally {
+            if (entity != null) try {entity.close();}catch(Exception e){}
         }
     }
 

@@ -55,7 +55,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public class search {
+public final class search {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
@@ -82,7 +82,7 @@ public class search {
             yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(oseed, key), true);
         }
 
-        HashSet keyhashes = new HashSet();
+        HashSet keyhashes = new HashSet(query.length() / plasmaWordIndexEntry.wordHashLength);
         for (int i = 0; i < (query.length() / plasmaWordIndexEntry.wordHashLength); i++) {
             keyhashes.add(query.substring(i * plasmaWordIndexEntry.wordHashLength, (i + 1) * plasmaWordIndexEntry.wordHashLength));
         }

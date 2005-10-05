@@ -47,15 +47,13 @@ package de.anomic.plasma;
 import java.net.URL;
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
-import java.util.Iterator;
 
 public class plasmaURLPool {
     
     
-    public  plasmaCrawlLURL        loadedURL;
-    public  plasmaCrawlNURL        noticeURL;
-    public  plasmaCrawlEURL        errorURL;
+    public  final plasmaCrawlLURL        loadedURL;
+    public  final plasmaCrawlNURL        noticeURL;
+    public  final plasmaCrawlEURL        errorURL;
     
     public plasmaURLPool(File plasmaPath, int ramLURL, int ramNURL, int ramEURL) throws IOException {
         loadedURL = new plasmaCrawlLURL(new File(plasmaPath, "urlHash.db"), ramLURL);

@@ -127,17 +127,20 @@ public class IndexControl_p {
         if (post.containsKey("keyhashdeleteall")) {
             if ((delurl) || (delurlref)) {
                 // generate an urlx array
+                plasmaWordIndexEntity index = null;
                 try {
                     HashSet keyhashes = new HashSet();
                     keyhashes.add(keyhash);
-                    plasmaWordIndexEntity index = switchboard.searchManager.searchHashes(keyhashes, 10000);
+                    index = switchboard.searchManager.searchHashes(keyhashes, 10000);
                     Enumeration en = index.elements(true);
                     int i = 0;
                     urlx = new String[index.size()];
                     while (en.hasMoreElements()) urlx[i++] = ((plasmaWordIndexEntry) en.nextElement()).getUrlHash();
-		    index.close();
+                    index.close(); index = null;
                 } catch (IOException e) {
                     urlx = new String[0];
+                } finally {
+                    if (index != null) try { index.close(); } catch (Exception e) {}
                 }
             }
             if (delurlref) for (int i = 0; i < urlx.length; i++) switchboard.removeAllUrlReferences(urlx[i], true);
@@ -233,7 +236,14 @@ public class IndexControl_p {
                 indexes[0].removeEntry((String) hashIter.next(), false);
             } catch (IOException e) {}
             // use whats remaining
-            result = yacyClient.transferIndex(yacyCore.seedDB.getConnected(post.get("hostHash", "")), indexes, knownURLs);
+            String gzipBody = switchboard.getConfig("indexControl.gzipBody","false");
+            int timeout = (int) switchboard.getConfigLong("indexControl.timeout",60000);
+            result = yacyClient.transferIndex(
+                    yacyCore.seedDB.getConnected(post.get("hostHash", "")), 
+                    indexes, 
+                    knownURLs, 
+                    "true".equalsIgnoreCase(gzipBody), 
+                    timeout);
             prop.put("result", (result == null) ? ("Successfully transferred " + indexes[0].size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds") : result);
 	    try {indexes[0].close();} catch (IOException e) {}
         }
@@ -370,10 +380,11 @@ public class IndexControl_p {
     
     public static String genUrlList(plasmaSwitchboard switchboard, String keyhash, String keystring) {
         // search for a word hash and generate a list of url links
+        plasmaWordIndexEntity index = null;
         try {
             HashSet keyhashes = new HashSet();
             keyhashes.add(keyhash);
-            plasmaWordIndexEntity index = switchboard.searchManager.searchHashes(keyhashes, 10000);
+            index = switchboard.searchManager.searchHashes(keyhashes, 10000);
             String result = "";
             if (index.size() == 0) {
                 result = "No URL entries related to this word hash <span class=\"tt\">" + keyhash + "</span>.";
@@ -416,10 +427,12 @@ public class IndexControl_p {
                 "<span class=\"small\">for every resolveable and deleted URL reference, delete the same reference at every other word where the reference exists (very extensive, but prevents further unresolved references)</span>" +
                 "</td></tr></table></fieldset></form>";
             }
-	    index.close();
+            index.close(); index = null;
             return result;
         }  catch (IOException e) {
             return "";
+        } finally {
+            if (index != null) try { index.close(); } catch (Exception e) {};
         }
     }
     

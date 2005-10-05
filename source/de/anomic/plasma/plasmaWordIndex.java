@@ -130,7 +130,7 @@ public final class plasmaWordIndex {
         return new correctedWordIterator(up, rot, startHash); // use correction until bug is found
     }
 
-    private class correctedWordIterator implements Iterator {    
+    private final class correctedWordIterator implements Iterator {    
         Iterator iter;
         String nextWord;
 
@@ -181,13 +181,13 @@ public final class plasmaWordIndex {
         return new iterateFiles(startHash, up, deleteEmpty);
     }
 
-    public class iterateFiles implements Iterator {
+    public final class iterateFiles implements Iterator {
         // Iterator of hash-strings in WORDS path
 
-        private ArrayList hierarchy; // contains TreeSet elements, earch TreeSet contains File Entries
-        private Comparator comp;     // for string-compare
+        private final ArrayList hierarchy; // contains TreeSet elements, earch TreeSet contains File Entries
+        private final Comparator comp;     // for string-compare
         private String buffer;       // the prefetch-buffer
-        private boolean delete;
+        private final boolean delete;
 
         public iterateFiles(String startHash, boolean up, boolean deleteEmpty) {
             this.hierarchy = new ArrayList();

@@ -69,19 +69,10 @@ public class plasmaCrawlNURL extends plasmaURL {
     public static final int STACK_TYPE_MOVIE    = 12; // put on movie stack
     public static final int STACK_TYPE_MUSIC    = 13; // put on music stack
 
-    private plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
-    private plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
-    private plasmaCrawlBalancer overhangStack;  // links found by crawling at depth+1
-    private plasmaCrawlBalancer remoteStack;    // links from remote crawl orders
-    private kelondroStack imageStack;     // links pointing to image resources
-    private kelondroStack movieStack;     // links pointing to movie resources
-    private kelondroStack musicStack;     // links pointing to music resources
-
-    private HashSet stackIndex;           // to find out if a specific link is already on any stack
-
-    public plasmaCrawlNURL(File cacheStacksPath, int bufferkb) throws IOException {
-        super();
-        int[] ce = {
+    /**
+     * column length definition for the {@link plasmaURL#urlHashCache} DB
+     */
+    public static final int[] ce = {
             urlHashLength,               // the url hash
             urlHashLength,               // initiator
             urlStringLength,             // the url as string
@@ -94,7 +85,21 @@ public class plasmaCrawlNURL extends plasmaURL {
             urlForkFactorLength,         // sum of anchors of all ancestors
             urlFlagLength,               // extra space
             urlHandleLength              // extra handle
-        };
+        };    
+        
+    private final plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
+    private final plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
+    private final plasmaCrawlBalancer overhangStack;  // links found by crawling at depth+1
+    private final plasmaCrawlBalancer remoteStack;    // links from remote crawl orders
+    private kelondroStack imageStack;     // links pointing to image resources
+    private kelondroStack movieStack;     // links pointing to movie resources
+    private kelondroStack musicStack;     // links pointing to music resources
+
+    private final HashSet stackIndex;           // to find out if a specific link is already on any stack
+
+    public plasmaCrawlNURL(File cacheStacksPath, int bufferkb) throws IOException {
+        super();
+
 
         // create a stack for newly entered entries
         if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path

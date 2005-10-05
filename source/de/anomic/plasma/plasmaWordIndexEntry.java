@@ -53,7 +53,7 @@ import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 // import de.anomic.server.logging.serverLog;
 
-public class plasmaWordIndexEntry {
+public final class plasmaWordIndexEntry {
 	
     // an wordEntry can be filled in either of two ways:
     // by the discrete values of the entry
@@ -68,7 +68,7 @@ public class plasmaWordIndexEntry {
     public static final int attrSpaceLong    = 18;
 
     // the associated hash
-    private String urlHash;
+    private final String urlHash;
     
     // discrete values
     private int    count;       // words in file
@@ -245,37 +245,57 @@ public class plasmaWordIndexEntry {
    public String toEncodedForm(boolean longAttr) {
        // attention: this integrates NOT the URL into the encoding
        // if you need a complete dump, use toExternalForm()
-       String shortAttr =
-               b64save(quality, plasmaCrawlLURL.urlQualityLength) +
-               b64save(age, 3) +
-               b64save(count, 2) +
-               new String(language) +
-               doctype +
-               localflag; // 3 + 3 + 2 + 2 + 1 + 1 = 12 bytes
+       StringBuffer buf = new StringBuffer(longAttr?18:12);
+       
+       buf.append(b64save(this.quality, plasmaURL.urlQualityLength))
+          .append(b64save(this.age, 3))
+          .append(b64save(this.count, 2))
+          .append(new String(this.language))
+          .append(this.doctype)
+          .append(this.localflag); // 3 + 3 + 2 + 2 + 1 + 1 = 12 bytes
+           
        if (longAttr)
-           return
-               shortAttr +
-                   b64save(posintext, 2) +
-                   b64save(posinphrase, 2) +
-                   b64save(posofphrase, 2);
-       // 12 + 3 + 2 + 2 + 1 + 1 = 12 bytes
-       else
-           return shortAttr;
+           buf.append(b64save(this.posintext, 2))
+              .append(b64save(this.posinphrase, 2))
+              .append(b64save(this.posofphrase, 2));
+       
+       return buf.toString();
+       
+//       String shortAttr =
+//               b64save(quality, plasmaCrawlLURL.urlQualityLength) +
+//               b64save(age, 3) +
+//               b64save(count, 2) +
+//               new String(language) +
+//               doctype +
+//               localflag; // 3 + 3 + 2 + 2 + 1 + 1 = 12 bytes
+//       if (longAttr) 
+//           return
+//               shortAttr +
+//                   b64save(posintext, 2) +
+//                   b64save(posinphrase, 2) +
+//                   b64save(posofphrase, 2);
+//       // 12 + 3 + 2 + 2 + 1 + 1 = 12 bytes
+//       else
+//           return shortAttr;
    }
     
    public String toExternalForm() {
-       return "{" +
-               "h=" + urlHash +
-               ",q=" + b64save(quality, plasmaCrawlLURL.urlQualityLength) +
-               ",a=" + b64save(age, 3) +
-               ",c=" + b64save(count, 2) +
-               ",l=" + new String(language) +
-               ",d=" + doctype +
-               ",f=" + localflag +
-               ",t=" + b64save(posintext, 2) +
-               ",r=" + b64save(posinphrase, 2) +
-               ",o=" + b64save(posofphrase, 2) +
-               "}";
+       StringBuffer str = new StringBuffer(61);
+       
+       str.append("{")
+           .append("h=").append(this.urlHash)
+           .append(",q=").append(b64save(this.quality, plasmaURL.urlQualityLength))
+           .append(",a=").append(b64save(this.age, 3))
+           .append(",c=").append(b64save(this.count, 2))
+           .append(",l=").append(new String(this.language))
+           .append(",d=").append(this.doctype)
+           .append(",f=").append(this.localflag)
+           .append(",t=").append(b64save(this.posintext, 2))
+           .append(",r=").append(b64save(this.posinphrase, 2))
+           .append(",o=").append(b64save(this.posofphrase, 2))
+       .append("}");
+       
+       return str.toString();
    }
         
     public String getUrlHash() {

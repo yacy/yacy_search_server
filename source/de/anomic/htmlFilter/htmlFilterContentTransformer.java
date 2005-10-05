@@ -44,10 +44,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.TreeSet;
-import java.util.Vector;
 
 import de.anomic.server.serverByteBuffer;
 
@@ -70,7 +70,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
 	linkTags1.add("a");
     }
 
-    private static Vector bluelist = null;
+    private static ArrayList bluelist = null;
 
     public htmlFilterContentTransformer() {
 	super(linkTags0, linkTags1);
@@ -80,7 +80,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         //System.out.println("Transformer init: " + initarg);
 	if (bluelist == null) {
 	    // here, the initarg is used to load a list of bluelisted words
-	    bluelist = new Vector();
+	    bluelist = new ArrayList();
 	    File f = new File(initarg);
 	    if ((f.exists()) && (f.canRead())) try {
 		BufferedReader r = new BufferedReader(new FileReader(f));
@@ -111,7 +111,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     private boolean hit(byte[] text) {
 	if ((text == null) || (bluelist == null)) return false;
 	String lc = new String(text).toLowerCase();
-	for (int i = 0; i < bluelist.size(); i++) if (lc.indexOf((String) bluelist.elementAt(i)) >= 0) return true;
+	for (int i = 0; i < bluelist.size(); i++) if (lc.indexOf((String) bluelist.get(i)) >= 0) return true;
 	return false;
     }
 

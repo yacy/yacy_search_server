@@ -57,8 +57,8 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
     
 
     // class variables
-    private File      databaseRoot;
-    private serverLog log;
+    private final File      databaseRoot;
+    private final serverLog log;
     private int       size;
 
     public plasmaWordIndexClassicDB(File databaseRoot, serverLog log) throws IOException {
@@ -77,8 +77,8 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
     
     public class iterateFiles implements Iterator {
         
-        private ArrayList hierarchy; // contains TreeSet elements, earch TreeSet contains File Entries
-        private Comparator comp;     // for string-compare
+        private final ArrayList hierarchy; // contains TreeSet elements, earch TreeSet contains File Entries
+        private final Comparator comp;     // for string-compare
         private String buffer;       // the prefetch-buffer
         
         public iterateFiles(String startHash, boolean up) {
@@ -207,9 +207,10 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
 
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
         // removes all given url hashes from a single word index. Returns number of deletions.
-        plasmaWordIndexEntity pi = getIndex(wordHash, true);
+        plasmaWordIndexEntity pi = null;
         int count = 0;
         try {
+            pi =  getIndex(wordHash, true);
             for (int i = 0; i < urlHashes.length; i++)
                 if (pi.removeEntry(urlHashes[i], deleteComplete)) count++;
             int size = pi.size();
@@ -220,6 +221,8 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         } catch (IOException e) {
             log.logSevere("plasmaWordIndexClassic.removeEntries: " + e.getMessage());
             return count;
+        } finally {
+            if (pi != null) try{pi.close();}catch(Exception e){}
         }
     }
     
@@ -229,17 +232,19 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         if ((container == null) || (container.size() == 0)) return 0;
         
         // open file
+        plasmaWordIndexEntity pi = null;
         try {
-            plasmaWordIndexEntity pi = new plasmaWordIndexEntity(databaseRoot, container.wordHash(), false);
+            pi = new plasmaWordIndexEntity(databaseRoot, container.wordHash(), false);
             int count = pi.addEntries(container);
             
             // close and return
-            pi.close();
-            pi = null;
+            pi.close(); pi = null;
             return count;
         } catch (IOException e) {
             log.logSevere("plasmaWordIndexClassic.addEntries: " + e.getMessage());
             return 0;
+        } finally {
+            if (pi != null) try{pi.close();}catch (Exception e){}
         }
     }
 

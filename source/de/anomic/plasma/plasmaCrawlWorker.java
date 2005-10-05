@@ -355,10 +355,7 @@ public final class plasmaCrawlWorker extends Thread {
                 File cacheFile = cacheManager.getCachePath(url);
                 try {
                     String error = null;
-                    if (
-                            (plasmaParser.supportedMimeTypesContains(res.responseHeader.mime())) &&
-                            (plasmaParser.supportedFileExt(url))
-                       ) {
+                    if (plasmaParser.supportedContent(url,res.responseHeader.mime())) {
                         if (cacheFile.isFile()) {
                             cacheManager.deleteFile(url);
                         }                        

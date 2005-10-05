@@ -59,7 +59,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
-public class hello {
+public final class hello {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final serverObjects prop = new serverObjects(); // return variable that accumulates replacements

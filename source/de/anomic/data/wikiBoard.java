@@ -47,7 +47,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
@@ -68,7 +67,7 @@ public class wikiBoard {
 
     private kelondroMap datbase = null;
     private kelondroMap bkpbase = null;
-    private Hashtable authors = new Hashtable();
+    private HashMap authors = new HashMap();
     private int sn = 0;
 
     public wikiBoard(File actpath, File bkppath, int bufferkb) throws IOException {

@@ -45,10 +45,10 @@ package de.anomic.yacy;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Vector;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearch;
@@ -65,7 +65,7 @@ import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
-public class yacyClient {
+public final class yacyClient {
 
     public static int publishMySeed(String address, String otherHash) {
         // this is called to enrich the seed information by
@@ -100,7 +100,7 @@ public class yacyClient {
              */
 
             final URL url = new URL("http://" + address + "/yacy/hello.html");
-            final serverObjects obj = new serverObjects();
+            final serverObjects obj = new serverObjects(6);
             obj.put("iam", yacyCore.seedDB.mySeed.hash);
             obj.put("pattern", "");
             obj.put("count", "20");
@@ -302,7 +302,7 @@ public class yacyClient {
                 "&count=" + count + "&resource=" + ((global) ? "global" : "local") +
                 "&query=" + wordhashes;
              */
-            final serverObjects obj = new serverObjects();
+            final serverObjects obj = new serverObjects(9);
             obj.put("myseed", yacyCore.seedDB.mySeed.genSeedStr(key));
             obj.put("youare", targetPeer.hash);
             obj.put("key", key);
@@ -396,7 +396,7 @@ public class yacyClient {
         // ask for allowed message size and attachement size
         // if this replies null, the peer does not answer
         if (yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return null; }
-        final serverObjects post = new serverObjects();
+        final serverObjects post = new serverObjects(5);
         final String key = crypt.randomSalt();
         post.put("key", key);
         post.put("process", "permission");
@@ -427,7 +427,7 @@ public class yacyClient {
 
     public static HashMap postMessage(String targetHash, String subject, byte[] message) {
         // this post a message to the remote message board
-        final serverObjects post = new serverObjects();
+        final serverObjects post = new serverObjects(7);
         final String key = crypt.randomSalt();
         post.put("key", key);
         post.put("process", "post");
@@ -445,7 +445,7 @@ public class yacyClient {
         if (address == null) { address = "localhost:8080"; }
         //System.out.println("DEBUG POST "  + address + "/yacy/message.html" + post.toString());
         try {
-            final Vector v = httpc.wput(new URL("http://" + address + "/yacy/message.html"), 20000, null, null,
+            final ArrayList v = httpc.wput(new URL("http://" + address + "/yacy/message.html"), 20000, null, null,
             yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort, post);
             //System.out.println("V=" + v.toString());
             return nxTools.table(v);
@@ -462,7 +462,7 @@ public class yacyClient {
         if (yacyCore.seedDB.mySeed == targetSeed) { return null; }
 
         // construct request
-        final serverObjects post = new serverObjects();
+        final serverObjects post = new serverObjects(9);
         final String key = crypt.randomSalt();
         post.put("key", key);
         post.put("process", "crawl");
@@ -550,8 +550,8 @@ public class yacyClient {
                                    httpHeader requestHeader) throws IOException {
      */
 
-    public static String transferIndex(yacySeed targetSeed, plasmaWordIndexEntity[] indexes, HashMap urlCache) {
-        HashMap in = transferRWI(targetSeed, indexes);
+    public static String transferIndex(yacySeed targetSeed, plasmaWordIndexEntity[] indexes, HashMap urlCache, boolean gzipBody, int timeout) {
+        HashMap in = transferRWI(targetSeed, indexes, gzipBody, timeout);
         if (in == null) { return "no_connection_1"; }
         String result = (String) in.get("result");
         if (result == null) { return "no_result_1"; }
@@ -569,7 +569,7 @@ public class yacyClient {
             urls[i] = (plasmaCrawlLURL.Entry) urlCache.get(uhs[i]);
             if (urls[i] == null) System.out.println("DEBUG transferIndex: error with requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
         }
-        in = transferURL(targetSeed, urls);
+        in = transferURL(targetSeed, urls, gzipBody, timeout);
         if (in == null) { return "no_connection_2"; }
         result = (String) in.get("result");
         if (result == null) { return "no_result_2"; }
@@ -579,15 +579,15 @@ public class yacyClient {
         return null;
     }
 
-    private static HashMap transferRWI(yacySeed targetSeed, plasmaWordIndexEntity[] indexes) {
+    private static HashMap transferRWI(yacySeed targetSeed, plasmaWordIndexEntity[] indexes, boolean gzipBody, int timeout) {
         final String address = targetSeed.getAddress();
         if (address == null) { return null; }
         // prepare post values
-        final serverObjects post = new serverObjects();
+        final serverObjects post = new serverObjects(7);
         final String key = crypt.randomSalt();
         
         // enabling gzip compression for post request body
-        if (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS) {
+        if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
             post.put(httpc.GZIP_POST_BODY,"true");
         }
         post.put("key", key);
@@ -611,7 +611,7 @@ public class yacyClient {
 
         if (indexcount == 0) {
             // nothing to do but everything ok
-            final HashMap result = new HashMap();
+            final HashMap result = new HashMap(2);
             result.put("result", "ok");
             result.put("unknownURL", "");
             return result;
@@ -620,7 +620,7 @@ public class yacyClient {
         post.put("entryc", Integer.toString(indexcount));
         post.put("indexes", entrypost.toString());
         try {
-            final Vector v = httpc.wput(new URL("http://" + address + "/yacy/transferRWI.html"), 60000, null, null,
+            final ArrayList v = httpc.wput(new URL("http://" + address + "/yacy/transferRWI.html"), timeout, null, null,
             yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort, post);
             // this should return a list of urlhashes that are unknwon
             if (v != null) {
@@ -635,16 +635,16 @@ public class yacyClient {
         }
     }
 
-    private static HashMap transferURL(yacySeed targetSeed, plasmaCrawlLURL.Entry[] urls) {
+    private static HashMap transferURL(yacySeed targetSeed, plasmaCrawlLURL.Entry[] urls, boolean gzipBody, int timeout) {
         // this post a message to the remote message board
         final String address = targetSeed.getAddress();
         if (address == null) { return null; }
         // prepare post values
-        final serverObjects post = new serverObjects();
+        final serverObjects post = new serverObjects(5+urls.length);
         final String key = crypt.randomSalt();
         
         // enabling gzip compression for post request body
-        if (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS) {
+        if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
             post.put(httpc.GZIP_POST_BODY,"true");
         }        
         
@@ -664,7 +664,7 @@ public class yacyClient {
         }
         post.put("urlc", Integer.toString(urlc));
         try {
-            final Vector v = httpc.wput(new URL("http://" + address + "/yacy/transferURL.html"), 60000, null, null,
+            final ArrayList v = httpc.wput(new URL("http://" + address + "/yacy/transferURL.html"), timeout, null, null,
             yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort, post);
             if (v != null) {
                 yacyCore.seedDB.mySeed.incSU(urlc);
@@ -678,13 +678,13 @@ public class yacyClient {
 
     public static HashMap getProfile(yacySeed targetSeed) {
         // this post a message to the remote message board
-        final serverObjects post = new serverObjects();
+        final serverObjects post = new serverObjects(2);
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);
         String address = targetSeed.getAddress();
         if (address == null) { address = "localhost:8080"; }
         try {
-            final Vector v = httpc.wput(new URL("http://" + address + "/yacy/profile.html"), 20000, null, null,
+            final ArrayList v = httpc.wput(new URL("http://" + address + "/yacy/profile.html"), 20000, null, null,
             yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort, post);
             return nxTools.table(v);
         } catch (Exception e) {

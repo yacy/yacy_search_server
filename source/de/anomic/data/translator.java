@@ -51,6 +51,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -82,7 +83,7 @@ public class translator {
 		Hashtable translationList = new Hashtable(); //current Translation Table
         FileInputStream fileIn = null;
 
-		Vector list = listManager.getListArray(translationFile);
+		ArrayList list = listManager.getListArray(translationFile);
 		Iterator it = list.iterator();
 		String line = "";
 		String value = "";
@@ -182,7 +183,7 @@ public class translator {
 	}
 
     public static boolean translateFilesRecursive(File sourceDir, File destDir, File translationFile, String extension){
-        Vector dirList=listManager.getDirsRecursive(sourceDir);
+        ArrayList dirList=listManager.getDirsRecursive(sourceDir);
         Iterator it=dirList.iterator();
         String sourceName=sourceDir.getPath();
         String destName=destDir.getPath();

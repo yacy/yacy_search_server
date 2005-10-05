@@ -1,8 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-<title>YaCy '#[clientname]#': Index Control</title>
+<title>YaCy '#[clientname]#': Index Transfer</title>
 #[metas]#
+<meta http-equiv="REFRESH" content="30">
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #[header]#
@@ -14,16 +15,20 @@
 <p>
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader" valign="bottom">
+<td>&nbsp;</td>
 <td class="small" >Status</td>
+<td class="small" >Chunk Size</td>
+<td class="small" >Words Range</td>
 <td class="small" >Transfered Words</td>
-<td class="small" >Chunk Size: Words Range</td>
-<td class="small" >Delete Index</td>
-<td class="small" >Remote Peer</td>
+<td class="small" >Delete<br>Index</td>
+<td class="small" >Remote<br>Peer</td>
 <td class="small" >Start/Stop Transfer</td>
 </tr>
 #(running)#
 <tr valign="top" class="TableCellLight">
+<td class="TableHeader">-</td>
 <td class="small">#[status]#</td>
+<td class="small" align="center">-</td>
 <td class="small" align="center">-</td>
 <td class="small" align="center">-</td>
 <td class="small">
@@ -46,17 +51,26 @@
 </table></p>
 ::
     <tr class="TableCellLight">
-      <td class="small"><font color="#(stopped)#green::red#(/stopped)#">#[status]#</font></td>
-      <td class="small" align="right">#[twcount]# (#[twpercent]#%) </td>
-      <td class="small" align="rigth">#[twchunk]# words: <tt>#[twrange]#</tt></td>
-      <td class="small">#(deleteIndex)#false::true#(/deleteIndex)#</td>
-      <td class="small">#[peerName]#</td>
-      <td class="small">#(stopped)#<input type="submit" name="stopIndexTransfer" value="Stop Index Transfer">::
+      <td class="TableCellDark">Selection</td>
+      <td class="small" ><font color="#(stopped)#green::red#(/stopped)#">#[selection.status]#</font></td>
+      <td class="small" align="rigth">#[selection.twchunk]# words</td>
+      <td class="small" align="right"><tt>#[selection.twrange]#</tt></td>
+      <td class="small" rowspan="2" align="right">#[twcount]# (#[twpercent]#%)<br>#[twspeed]# words/s</td>
+      <td class="small" rowspan="2">#(deleteIndex)#false::true#(/deleteIndex)#</td>
+      <td class="small" rowspan="2">#[peerName]#</td>
+      <td class="small" rowspan="2">#(stopped)#<input type="submit" name="stopIndexTransfer" value="Stop Index Transfer">::
                      <input type="submit" name="newIndexTransfer" value="Start New Index Transfer">#(/stopped)#</td>
     </tr>
+    <tr class="TableCellLight">
+      <td class="TableCellDark">Transfer</td>
+      <td class="small" ><font color="#(stopped)#green::red#(/stopped)#">#[transfer.status]#</font></td>
+      <td class="small" align="rigth">#[transfer.twchunk]# words</td>
+      <td class="small" align="right"><tt>#[transfer.twrange]#</tt></td>
+    </tr>    
 #(/running)#
   </table> 
 </form>
+<p><font size="-3"><i>Last Refresh:</i> #[date]#</font></p>
 
 #[footer]#
 </body>

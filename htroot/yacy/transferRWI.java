@@ -45,9 +45,10 @@
 // You must compile this file with
 // javac -classpath .:../classes transferRWI.java
 
+
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Vector;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
@@ -58,17 +59,19 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyDHTAction;
 
-public class transferRWI {
+public final class transferRWI {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
         if (post == null || ss == null) { return new serverObjects(); }
 
-        // return variable that accumulates replacements
+        long start = System.currentTimeMillis();
+        
+	// return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         if (prop == null || sb == null) { return new serverObjects(); }
         
-        // request values
+	// request values
         final String iam      = (String) post.get("iam", "");    // seed hash of requester
 //      final String youare   = (String) post.get("youare", ""); // seed hash of the target peer, needed for network stability
 //      final String key      = (String) post.get("key", "");    // transmission key
@@ -76,21 +79,21 @@ public class transferRWI {
         final int entryc      = Integer.parseInt((String) post.get("entryc", "")); // number of entries in indexes
         final byte[] indexes  = ((String) post.get("indexes", "")).getBytes();     // the indexes, as list of word entries
         final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
-
+	
         // response values
         String result = "";
         StringBuffer unknownURLs = new StringBuffer();
-
+        
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
-
+        
         if (granted) {
             // log value status (currently added to find outOfMemory error
             sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
             final long startProcess = System.currentTimeMillis();
-
+            
             // decode request
-            final Vector v = new Vector();
+            ArrayList v = new ArrayList();
             int s = 0;
             int e;
             while (s < indexes.length) {
@@ -100,7 +103,7 @@ public class transferRWI {
             }
             // the value-vector should now have the same length as entryc
             if (v.size() != entryc) sb.getLog().logSevere("ERROR WITH ENTRY COUNTER: v=" + v.size() + ", entryc=" + entryc);
-
+            
             // now parse the Strings in the value-vector and write index entries
             String estring;
             int p;
@@ -111,7 +114,7 @@ public class transferRWI {
             String[] wordhashes = new String[v.size()];
             int received = 0;
             for (int i = 0; i < v.size(); i++) {
-                estring = (String) v.elementAt(i);
+                estring = (String) v.get(i);
                 p = estring.indexOf("{");
                 if (p > 0) {
                     wordHash = estring.substring(0, p);
@@ -127,7 +130,7 @@ public class transferRWI {
                 }
             }
             yacyCore.seedDB.mySeed.incRI(received);
-
+            
             // finally compose the unknownURL hash list
             final Iterator it = unknownURL.iterator();            
             while (it.hasNext()) {
@@ -145,12 +148,12 @@ public class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "error_not_granted";
         }
-
+        
         prop.put("unknownURL", unknownURLs.toString());
         prop.put("result", result);
-
-        // return rewrite properties
-        return prop;
+        
+	// return rewrite properties
+	return prop;
     }
 
 }

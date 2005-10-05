@@ -54,7 +54,7 @@ import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 
-public class crawlReceipt {
+public final class crawlReceipt {
 
     
     /*

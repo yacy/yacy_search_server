@@ -160,7 +160,7 @@ public class IndexCreate_p {
                             
                             // stack url
                             plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
-                            String reasonString = switchboard.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0, pe);
+                            String reasonString = switchboard.sbStackCrawlThread.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
                                 // liftoff!
@@ -247,7 +247,7 @@ public class IndexCreate_p {
                                     }                                    
                                     
                                     // enqueuing the url for crawling
-                                    String rejectReason = switchboard.stackCrawl(nexturlstring, null, yacyCore.seedDB.mySeed.hash, (String)e.getValue(), new Date(), 1, profile);                                    
+                                    String rejectReason = switchboard.sbStackCrawlThread.stackCrawl(nexturlstring, null, yacyCore.seedDB.mySeed.hash, (String)e.getValue(), new Date(), 1, profile);                                    
                                     
                                     // if something failed add the url into the errorURL list
                                     if (rejectReason == null) {

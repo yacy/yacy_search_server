@@ -102,7 +102,7 @@ parseableMimeTypes=
 # this is important to recognize <a href> - tags as not-html reference
 # These files will be excluded from indexing _(Please keep extensions in alphabetical order)_
 mediaExt=ace,arj,asf,avi,bin,bz2,css,deb,doc,dll,dmg,gif,gz,hqx,ico,img,iso,jar,jpe,jpg,jpeg,mpeg,mov,mp3,mpg,ogg,png,pdf,ppt,ps,ram,rar,rm,rpm,sit,so,swf,sxc,sxd,sxi,sxw,tar,tgz,torrent,wmv,xcf,xls,zip
-parseableExt=html,htm,txt,php,shtml,asp
+parseableExt=html,htm,txt,php,shtml,asp,aspx,jsp
 
 # Promotion Strings
 # These strings appear in the Web Mask of the YACY search client
@@ -470,6 +470,9 @@ ramCacheRobots  =  2097152
 # ram cache for crawlProfile.db
 ramCacheProfiles  =   8192
 
+# ram cache for stack crawl thread db
+ramCachePreNURL = 8192
+
 # default memory settings for startup of yacy
 # is only valid in unix/shell environments and
 # not for first startup of YaCy
@@ -539,4 +542,26 @@ crawler.MinIdleThreads = 5
 
 useYacyReferer = true
 
+# specifies if the httpdFileHandler should cache 
+# the template-files from the htroot directory
 enableTemplateCache = true
+
+# specifies if the http post body should be transfered
+# using content-encoding gzip during index transfer
+# a) indexDistribution: which is done periodically if you have enabled 
+#    Index Distribution via IndexControl_p.html
+# b) indexTransfer: which can be used to transfer the whole index of a peer
+#    this can be started via IndexTransfer_p.html
+# c) indexControl: which can be triggered manually via IndexControl_p.html to
+#    transfer a chosen subset of the peer index     
+indexDistribution.gzipBody = true
+indexTransfer.gzipBody = true
+indexControl.gzipBody = true
+
+# defining timeouts for index- transfer/distribution/control
+indexControl.timeout = 60000
+indexDistribution.timeout = 60000
+indexTransfer.timeout = 120000
+
+# 
+storagePeerHash =

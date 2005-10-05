@@ -91,7 +91,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -114,15 +113,17 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     
     // class variables   
     private static final Properties mimeTable = new Properties();
-    private serverClassLoader provider = null;
-    private File htRootPath = null;
-    private File htDocsPath = null;
-    private File htTemplatePath = null;
+    private static final serverClassLoader provider;
     private static final HashMap templates = new HashMap();
-    private String[] defaultFiles = null;
-    private File htDefaultPath = null;
-    private File htLocalePath = null;
-    private serverSwitch switchboard;
+    private static serverSwitch switchboard;
+    
+    private static File htRootPath = null;
+    private static File htDocsPath = null;
+    private static File htTemplatePath = null;
+    private static String[] defaultFiles = null;
+    private static File htDefaultPath = null;
+    private static File htLocalePath = null;
+    
     private MessageDigest md5Digest = null;
     
     /**
@@ -135,68 +136,71 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     
     static {
         useTemplateCache = plasmaSwitchboard.getSwitchboard().getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
+        
+        // create a class loader
+        provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
     }
     
     public httpdFileHandler(serverSwitch switchboard) {
-        this.switchboard = switchboard;
         
         // creating a logger
         this.theLogger = new serverLog("FILEHANDLER");
         
-        if (mimeTable.size() == 0) {
-            // load the mime table
-            String mimeTablePath = switchboard.getConfig("mimeConfig","");
-            FileInputStream mimeTableInputStream = null;
-            try {
-                serverLog.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
-                mimeTableInputStream = new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath));
-                mimeTable.load(mimeTableInputStream);
-            } catch (Exception e) {                
-                serverLog.logSevere("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
-                System.exit(1);
-            } finally {
-                if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}                
+        if (httpdFileHandler.switchboard == null) {
+            httpdFileHandler.switchboard = switchboard;
+            
+            if (mimeTable.size() == 0) {
+                // load the mime table
+                String mimeTablePath = switchboard.getConfig("mimeConfig","");
+                BufferedInputStream mimeTableInputStream = null;
+                try {
+                    serverLog.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
+                    mimeTableInputStream = new BufferedInputStream(new FileInputStream(new File(switchboard.getRootPath(), mimeTablePath)));
+                    mimeTable.load(mimeTableInputStream);
+                } catch (Exception e) {                
+                    serverLog.logSevere("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
+                    System.exit(1);
+                } finally {
+                    if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (Exception e1) {}                
+                }
             }
+            
+            // create default files array
+            defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
+            if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
+            
+            // create a htRootPath: system pages
+            if (htRootPath == null) {
+                htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
+                if (!(htRootPath.exists())) htRootPath.mkdir();
+            }
+            
+            // create a htDocsPath: user defined pages
+            if (htDocsPath == null) {
+                htDocsPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "htdocs"));
+                if (!(htDocsPath.exists())) htDocsPath.mkdir();
+            }
+            
+            // create a htTemplatePath
+            if (htTemplatePath == null) {
+                htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
+                if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
+            }
+            if (templates.size() == 0) templates.putAll(loadTemplates(htTemplatePath));
+            
+            // create htLocaleDefault, htLocalePath
+            if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
+            if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("htLocalePath","htroot/locale"));
+            //htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
         }
         
-        // create default files array
-        defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
-        if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
+
         
-        // create a htRootPath: system pages
-        if (htRootPath == null) {
-            htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
-            if (!(htRootPath.exists())) htRootPath.mkdir();
-        }
+
         
-        // create a htDocsPath: user defined pages
-        if (htDocsPath == null) {
-            htDocsPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "htdocs"));
-            if (!(htDocsPath.exists())) htDocsPath.mkdir();
-        }
+
         
-        // create a htTemplatePath
-        if (htTemplatePath == null) {
-            htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
-            if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
-        }
-        if (templates.size() == 0) templates.putAll(loadTemplates(htTemplatePath));
-        
-        // create htLocaleDefault, htLocalePath
-        if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
-        if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("htLocalePath","htroot/locale"));
-        //htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
-        
-        // create a class loader
-        if (provider == null) {
-            provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
-            // debug
-            /*
-             Package[] ps = ((cachedClassLoader) provider).packages();
-             for (int i = 0; i < ps.length; i++) System.out.println("PACKAGE IN PROVIDER: " + ps[i].toString());
-             */
-        }
-        
+
         // initialise an message digest for Content-MD5 support ...
         try {
             this.md5Digest = MessageDigest.getInstance("MD5");
@@ -308,11 +312,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
             if (method.equals(httpHeader.METHOD_POST)) {
 
+                GZIPInputStream gzipBody = null;
                 if (requestHeader.containsKey(httpHeader.CONTENT_LENGTH)) {
                     length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
                 } else if (requestHeader.gzip()) {
                     length = -1;
-                    body = new GZIPInputStream(body);
+                    gzipBody = new GZIPInputStream(body);
                 } else {
                     httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null); 
                     return;
@@ -322,7 +327,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
                         (((String) requestHeader.get(httpHeader.CONTENT_TYPE)).toLowerCase().startsWith("multipart"))) {
                     // parse multipart
-                    HashMap files = httpd.parseMultipart(requestHeader, args, body, length);
+                    HashMap files = httpd.parseMultipart(requestHeader, args, (gzipBody!=null)?gzipBody:body, length);
                     // integrate these files into the args
                     if (files != null) {
                         Iterator fit = files.entrySet().iterator();
@@ -335,7 +340,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     argc = Integer.parseInt((String) requestHeader.get("ARGC"));
                 } else {
                     // parse args in body
-                    argc = httpd.parseArgs(args, body, length);
+                    argc = httpd.parseArgs(args, (gzipBody!=null)?gzipBody:body, length);
                 }
             } else {
                 // no args

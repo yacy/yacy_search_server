@@ -46,6 +46,7 @@
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -165,17 +166,17 @@ public final class Settings_p {
             env.setConfig("seedUploadMethod",enabledUploader);
         }                  
         
-        Hashtable uploaders = yacyCore.getSeedUploadMethods();
+        HashMap uploaders = yacyCore.getSeedUploadMethods();
         prop.put("seedUploadMethods", uploaders.size() + 1);
         prop.put("seedUploadMethods_0_name", "none");
         prop.put("seedUploadMethods_0_selected", enabledUploader.equals("none")?1:0);
         prop.put("seedUploadMethods_0_file", "");
         
         int count = 0;
-        Enumeration uploaderKeys = uploaders.keys();
-        while (uploaderKeys.hasMoreElements()) {
+        Iterator uploaderKeys = uploaders.keySet().iterator();
+        while (uploaderKeys.hasNext()) {
             count++;
-            String uploaderName = (String) uploaderKeys.nextElement();
+            String uploaderName = (String) uploaderKeys.next();
             prop.put("seedUploadMethods_" +count+ "_name", uploaderName);
             prop.put("seedUploadMethods_" +count+ "_selected", uploaderName.equals(enabledUploader)?1:0);            
             prop.put("seedUploadMethods_" +count+ "_file", new File(env.getRootPath(), "htroot/yacy/seedUpload/yacySeedUpload" + uploaderName + ".html").toString());

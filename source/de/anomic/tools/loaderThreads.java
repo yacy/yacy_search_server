@@ -42,8 +42,8 @@ package de.anomic.tools;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Vector;
 
 import de.anomic.http.httpc;
 
@@ -131,7 +131,7 @@ public class loaderThreads {
         private Exception error;
         private long starttime;
         private loaderProcess process;
-        private Vector page;
+        private ArrayList page;
         private boolean loaded;
         
         public loaderThread(URL url, loaderProcess process) {
@@ -192,7 +192,7 @@ public class loaderThreads {
             this.status = STATUS_READY;
         }
         
-        public synchronized void feed(Vector v) {
+        public synchronized void feed(ArrayList v) {
             this.status = STATUS_RUNNING;
             this.completion = 1;
             int line = 0;
@@ -201,7 +201,7 @@ public class loaderThreads {
             try {
                 while ((this.run) && (line < v.size())) {
                     // parse line and construct a property
-                    s = (String) v.elementAt(line);
+                    s = (String) v.get(line);
                     if ((s != null) && ((p = s.indexOf('=')) > 0)) {
                         key = s.substring(0, p).trim();
                         value = s.substring(p + 1).trim();

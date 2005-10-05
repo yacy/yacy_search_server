@@ -51,15 +51,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
 import java.util.HashMap;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.data.translator;
@@ -132,7 +131,7 @@ public class Language_p {
 		//load language file from URL
 		} else if (post.containsKey("url")){
 			String url = (String)post.get("url");
-			Vector langVector;
+			ArrayList langVector;
 			try{
 				langVector = httpc.wget(new URL(url), 6000, null, null, switchboard.remoteProxyHost, switchboard.remoteProxyPort);
 			}catch(IOException e){

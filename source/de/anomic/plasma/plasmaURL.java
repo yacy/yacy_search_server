@@ -46,8 +46,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Properties;
-import java.util.StringTokenizer;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.kelondroTree;
@@ -57,7 +55,7 @@ import de.anomic.yacy.yacySeedDB;
 public class plasmaURL {
 
     // day formatter for entry export
-    protected static SimpleDateFormat shortDayFormatter = new SimpleDateFormat("yyyyMMdd");
+    protected static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat("yyyyMMdd");
     
     // statics for value lengths
     public static final int urlHashLength               = yacySeedDB.commonHashLength; // 12
@@ -130,13 +128,13 @@ public class plasmaURL {
 	} catch (IOException e) {}
     }
 
-    public static String urlHash(URL url) {
+    public static final String urlHash(URL url) {
 	if (url == null) return null;
         String hash = serverCodings.encodeMD5B64(htmlFilterContentScraper.urlNormalform(url), true).substring(0, urlHashLength);
         return hash;
     }
         
-    public static String urlHash(String url) {
+    public static final String urlHash(String url) {
 	if ((url == null) || (url.length() < 10)) return null;
         String hash = serverCodings.encodeMD5B64(htmlFilterContentScraper.urlNormalform(url), true).substring(0, urlHashLength);
         return hash;

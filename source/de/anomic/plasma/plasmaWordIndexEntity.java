@@ -51,9 +51,9 @@ import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
 
-public class plasmaWordIndexEntity {
+public final class plasmaWordIndexEntity {
 
-    private String       theWordHash;
+    private final String       theWordHash;
     private kelondroTree theIndex;
     private TreeMap      theTmpMap;
     private File         theLocation;
@@ -235,7 +235,7 @@ public class plasmaWordIndexEntity {
 	if (theTmpMap == null) return new dbenum(up); else return new tmpenum(up);
     }
 
-    public class dbenum implements Enumeration {
+    public final class dbenum implements Enumeration {
 	Iterator i;
 	public dbenum(boolean up) {
             try {
@@ -263,8 +263,8 @@ public class plasmaWordIndexEntity {
             }
 	}
     }
-    public class tmpenum implements Enumeration {
-	TreeMap searchTree;
+    public final class tmpenum implements Enumeration {
+	final TreeMap searchTree;
         boolean up;
 	public tmpenum(boolean up) {
             this.up = up;

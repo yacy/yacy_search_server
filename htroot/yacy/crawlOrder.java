@@ -43,21 +43,19 @@
 // javac -classpath .:../classes crawlOrder.java
 
 
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Vector;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public class crawlOrder {
+public final class crawlOrder {
 
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -140,8 +138,8 @@ public class crawlOrder {
                 delay = "9999";
             } else {
                 // read the urls/referrer-vector
-                Vector urlv = new Vector();
-                Vector refv = new Vector();
+                ArrayList urlv = new ArrayList();
+                ArrayList refv = new ArrayList();
                 String refencoded = (String) post.get("referrer", null);
                 String urlencoded = (String) post.get("url", null);
                 if (urlencoded != null) {
@@ -168,7 +166,7 @@ public class crawlOrder {
                 int count = Math.min(urlv.size(), refv.size());
                 if (count == 1) {
                     // old method: only one url
-                    stackresult = stack(switchboard, (String) urlv.elementAt(0), (String) refv.elementAt(0), iam, youare);
+                    stackresult = stack(switchboard, (String) urlv.get(0), (String) refv.get(0), iam, youare);
                     response = (String) stackresult[0];
                     reason = (String) stackresult[1];
                     lurl = (String) stackresult[2];
@@ -179,7 +177,7 @@ public class crawlOrder {
                     int doubleCount = 0;
                     int rejectedCount = 0;
                     for (int i = 0; i < count; i++) {
-                        stackresult = stack(switchboard, (String) urlv.elementAt(i), (String) refv.elementAt(i), iam, youare);
+                        stackresult = stack(switchboard, (String) urlv.get(i), (String) refv.get(i), iam, youare);
                         response = (String) stackresult[0];
                         prop.put("list_" + i + "_job", (String) stackresult[0] + "," + (String) stackresult[1]);
                         prop.put("list_" + i + "_lurl", (String) stackresult[2]);
@@ -215,7 +213,7 @@ public class crawlOrder {
     private static Object[] stack(plasmaSwitchboard switchboard, String url, String referrer, String iam, String youare) {
         String response, reason, lurl;
         // stack url
-        String reasonString = switchboard.stackCrawl(url, referrer, iam, "REMOTE-CRAWLING", new Date(), 0, switchboard.defaultRemoteProfile);
+        String reasonString = switchboard.sbStackCrawlThread.stackCrawl(url, referrer, iam, "REMOTE-CRAWLING", new Date(), 0, switchboard.defaultRemoteProfile);
         if (reasonString == null) {
             // liftoff!
             response = "stacked";

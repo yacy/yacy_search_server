@@ -46,6 +46,7 @@
 //javac -classpath .:../Classes IndexControl_p.java
 //if the shell's current path is HTROOT
 
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
@@ -58,7 +59,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public class IndexTransfer_p {
+public final class IndexTransfer_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
@@ -97,11 +98,23 @@ public class IndexTransfer_p {
         prop.put("running",(transfThread==null)?0:1);
         if (transfThread != null) {
             int transferedIdxCount = transfThread.getTransferedIndexCount();
-            prop.put("running_status",transfThread.getStatus());
+            String[] status = transfThread.getStatus();
+            String[] range  = transfThread.getRange();
+            int[] chunk     = transfThread.getChunkSize();
+            
+            prop.put("running_selection.status",status[0]);
+            prop.put("running_selection.twrange", range[0]);
+            prop.put("running_selection.twchunk", Integer.toString(chunk[0]));
+            
+            prop.put("running_transfer.status",status[1]);
+            prop.put("running_transfer.twrange", range[1]);
+            prop.put("running_transfer.twchunk", Integer.toString(chunk[1]));
+
+            
             prop.put("running_twcount",transferedIdxCount);
             prop.put("running_twpercent",Float.toString(transfThread.getTransferedIndexPercent()));
-            prop.put("running_twrange", transfThread.getRange());
-            prop.put("running_twchunk", Integer.toString(transfThread.getChunkSize()));
+            prop.put("running_twspeed",Integer.toString(transfThread.getTransferedIndexSpeed()));
+            
             prop.put("running_deleteIndex", transfThread.deleteIndex()?1:0);
             prop.put("running_peerName",transfThread.getSeed().getName());
             prop.put("running_stopped",(transfThread.isFinished()) || (!transfThread.isAlive())?1:0);
@@ -136,6 +149,7 @@ public class IndexTransfer_p {
             prop.put("running_hosts", "0");
         }
 
+        prop.put("date",(new Date()).toString());
         return prop;
     }
     

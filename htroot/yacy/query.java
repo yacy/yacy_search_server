@@ -43,7 +43,6 @@
 // javac -classpath .:../../Classes query.java
 // if the shell's current path is HTROOT
 
-import java.util.Hashtable;
 import java.util.Date;
 import java.io.IOException;
 
@@ -53,7 +52,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 
-public class query {
+public final class query {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
 	// return variable that accumulates replacements
@@ -84,12 +83,15 @@ public class query {
 	if (obj.equals("rwiurlcount")) {
 	    // the total number of different urls in the rwi is returned
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
+            de.anomic.plasma.plasmaWordIndexEntity entity = null;
             try {
-                de.anomic.plasma.plasmaWordIndexEntity entity = switchboard.wordIndex.getEntity(env, true);
+                entity = switchboard.wordIndex.getEntity(env, true);
                 prop.put("response", entity.size());
                 entity.close();
             } catch (IOException e) {
                 prop.put("response", -1);
+            } finally {
+                if (entity != null) try { entity.close(); } catch (Exception e) {}
             }
             return prop;
 	}

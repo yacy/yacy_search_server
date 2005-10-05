@@ -40,8 +40,10 @@
 
 package de.anomic.tools;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 public class nxTools {
@@ -51,7 +53,7 @@ public class nxTools {
 	Enumeration i = list.elements();
 	int pos;
 	String line;
-	HashMap props = new HashMap();
+	HashMap props = new HashMap(list.size());
 	while (i.hasMoreElements()) {
 	    line = ((String) i.nextElement()).trim();
 	    //System.out.println("NXTOOLS_PROPS - LINE:" + line);
@@ -60,6 +62,20 @@ public class nxTools {
 	}
 	return props;
     }
+    
+    public static HashMap table(ArrayList list) {
+        Iterator i = list.iterator();
+        int pos;
+        String line;
+        HashMap props = new HashMap(list.size());
+        while (i.hasNext()) {
+            line = ((String) i.next()).trim();
+            //System.out.println("NXTOOLS_PROPS - LINE:" + line);
+            pos = line.indexOf("=");
+            if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
+        }
+        return props;
+        }
 
     public static Vector grep(Vector list, int afterContext, String pattern) {
 	Enumeration i = list.elements();
@@ -78,11 +94,34 @@ public class nxTools {
 	}
 	return result;
     }
+    
+    public static ArrayList grep(ArrayList list, int afterContext, String pattern) {
+        Iterator i = list.iterator();
+        int ac = 0;
+        String line;
+        ArrayList result = new ArrayList();
+        while (i.hasNext()) {
+            line = (String) i.next();
+            if (line.indexOf(pattern) >= 0) {
+            result.add(line);
+            ac = afterContext + 1;
+            } else if (ac > 0) {
+            result.add(line);
+            }
+            ac--;
+        }
+        return result;
+        }    
 
     public static String tail1(Vector list) {
 	if ((list == null) || (list.size() == 0)) return "";
 	return (String) list.lastElement();
     }
+    
+    public static String tail1(ArrayList list) {
+        if ((list == null) || (list.size() == 0)) return "";
+        return (String) list.get(list.size()-1);
+        }
 
     public static String awk(String sentence, String separator, int count) {
 	// returns the nth word of sentence, where count is the counter and the first word has the number 1

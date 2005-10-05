@@ -46,10 +46,10 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Vector;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -94,7 +94,7 @@ public class ViewProfile {
                 Iterator i = profile.entrySet().iterator();
                 Map.Entry entry;
 		//all known keys which should be set as they are
-		Vector knownKeys = new Vector();
+		ArrayList knownKeys = new ArrayList();
 		knownKeys.add("name");
 		knownKeys.add("nickname");
 		//knownKeys.add("homepage");//+http

@@ -396,11 +396,11 @@ public class SettingsAck_p {
          * Loop through the available seed uploaders to see if the 
          * configuration of one of them has changed 
          */
-        Hashtable uploaders = yacyCore.getSeedUploadMethods();
-        Enumeration uploaderKeys = uploaders.keys();
-        while (uploaderKeys.hasMoreElements()) {
+        HashMap uploaders = yacyCore.getSeedUploadMethods();
+        Iterator uploaderKeys = uploaders.keySet().iterator();
+        while (uploaderKeys.hasNext()) {
             // getting the uploader module name
-            String uploaderName = (String) uploaderKeys.nextElement();
+            String uploaderName = (String) uploaderKeys.next();
             
             
             // determining if the user has reconfigured the settings of this uploader

@@ -56,9 +56,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
-import java.util.Vector;
 
 import de.anomic.server.serverByteBuffer;
 
@@ -484,7 +484,7 @@ public final class htmlFilterOutputStream extends OutputStream {
 	byte[] buffer = new byte[512];
 	try {
 	    htmlFilterContentScraper lc = new htmlFilterContentScraper(new URL("http://www.anomic.de/"));
-	    Vector v = new Vector();
+	    ArrayList v = new ArrayList();
 	    v.add("proxy");
 	    htmlFilterTransformer lt = new htmlFilterContentTransformer();
 	    InputStream is = new FileInputStream(args[0]);

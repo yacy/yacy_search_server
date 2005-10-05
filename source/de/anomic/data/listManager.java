@@ -51,11 +51,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.TreeMap;
-import java.util.Vector;
 
-import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 
@@ -118,9 +116,9 @@ public class listManager {
 //================generel Lists==================
 
 	//Gets a Array of all lines(Items) of a (list)file
-	public static Vector getListArray(File listFile){
+	public static ArrayList getListArray(File listFile){
 		String line;
-		Vector list = new Vector();
+        ArrayList list = new ArrayList();
 		int count = 0;
         BufferedReader br = null;
 		try{
@@ -204,7 +202,7 @@ public class listManager {
 		return null;
 	}
 
-	public static Vector getDirsRecursive(File dir){
+	public static ArrayList getDirsRecursive(File dir){
         return getDirsRecursive(dir, true);  
     }
 	/**
@@ -212,10 +210,10 @@ public class listManager {
 	 *
 	 * Warning: untested
 	 */
-	public static Vector getDirsRecursive(File dir, boolean excludeDotfiles){
+	public static ArrayList getDirsRecursive(File dir, boolean excludeDotfiles){
 		File[] dirList = dir.listFiles();
-		Vector resultList = new Vector();
-		Vector recursive;
+        ArrayList resultList = new ArrayList();
+        ArrayList recursive;
 		Iterator it;
 		for(int i=0;i<dirList.length;i++){
 			if(dirList[i].isDirectory() && (!excludeDotfiles || !dirList[i].getName().startsWith(".")) ){

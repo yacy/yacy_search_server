@@ -31,7 +31,7 @@ Processors: #[processors]#
 </td></tr>
 <tr class="TableCellDark"><td>Indexing Queue</td><td>#[indexingQueueSize]# | #[indexingQueueMax]#</td></tr>
 <tr class="TableCellLight"><td>Loader Queue</td><td>#[loaderQueueSize]# | #[loaderQueueMax]# #(loaderPaused)#::(paused)#(/loaderPaused)#</td></tr>
-<tr class="TableCellDark"><td>Local Crawler Queue</td><td>#[localCrawlQueueSize]#</td></tr>
+<tr class="TableCellDark"><td>Local Crawler Queue</td><td>Enqueued: #[localCrawlQueueSize]# | Pending: #[stackCrawlQueueSize]#</td></tr>
 <tr class="TableCellLight"><td>Remote Crawler Queue</td><td>#[remoteCrawlQueueSize]#</td></tr>
 
 

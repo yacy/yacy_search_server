@@ -46,11 +46,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Vector;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -139,8 +138,8 @@ public class yacyPeerActions {
 	yacySeed     ys;
 	String       seedListFileURL;
         URL          url;
-	Vector       seedList;
-	Enumeration  enu;
+	ArrayList       seedList;
+	Iterator  enu;
         int          lc;
         int          sc = seedDB.sizeConnected();
         httpHeader   header;
@@ -167,10 +166,10 @@ public class yacyPeerActions {
                     } else {
                         ssc++;
                         seedList = httpc.wget(url, 5000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
-                        enu = seedList.elements();
+                        enu = seedList.iterator();
                         lc = 0;
-                        while (enu.hasMoreElements()) {
-                            ys = yacySeed.genRemoteSeed((String) enu.nextElement(), null);
+                        while (enu.hasNext()) {
+                            ys = yacySeed.genRemoteSeed((String) enu.next(), null);
                             if ((ys != null) && (ys.isProper() == null) &&
                             ((seedDB.mySeed == null) || (seedDB.mySeed.hash != ys.hash))) {
                                 if (connectPeer(ys, false)) lc++;
@@ -219,11 +218,11 @@ public class yacyPeerActions {
         
         // read in remote file from url
         try {
-            Vector remote = httpc.wget(new URL(url), 5000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
+            ArrayList remote = httpc.wget(new URL(url), 5000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
             if ((remote != null) && (remote.size() > 0)) {
-                Enumeration e = remote.elements();
-                while (e.hasMoreElements()) {
-                    line = (String) e.nextElement();
+                Iterator e = remote.iterator();
+                while (e.hasNext()) {
+                    line = (String) e.next();
                     if (line != null) {
                         line = line.trim();
                         supsee.add(line);

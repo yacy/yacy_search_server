@@ -331,7 +331,7 @@ public final class plasmaHTCache {
         while ((doms.size() > 0) && (c < 50) && ((System.currentTimeMillis() - start) < 60000)) {
             dom = (String) doms.getMaxObject();
             ip = httpc.dnsResolve(dom);
-            if (ip == null) break;
+            if (ip == null) continue;
             result += ", " + dom + "=" + ip;
             log.logConfig("PRE-FILLED " + dom + "=" + ip);
             c++;

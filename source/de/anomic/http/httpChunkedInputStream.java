@@ -45,10 +45,11 @@ package de.anomic.http;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import de.anomic.server.serverByteBuffer;
 
 /**
  * Some parts of this class code was copied from <a href="http://www.devdaily.com/java/jwarehouse/commons-httpclient-2.0/src/java/org/apache/commons/httpclient/ChunkedInputStream.shtml">Apache httpclient Project.</a>
@@ -142,9 +143,9 @@ public final class httpChunkedInputStream extends InputStream {
     
     private void readTrailer() throws IOException {
         BufferedReader reader = null;
-        ByteArrayOutputStream bout = null;
+        serverByteBuffer bout = null;
         try {
-            bout = new ByteArrayOutputStream();
+            bout = new serverByteBuffer();
             do {
                 int ch;
                 while ((ch = this.inputStream.read()) >= 0) {
@@ -153,7 +154,7 @@ public final class httpChunkedInputStream extends InputStream {
                         break;
                     }
                 }            
-                if (bout.size() <= 2) break;
+                if (bout.length() <= 2) break;
             } while(true);
             
             ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
@@ -172,7 +173,7 @@ public final class httpChunkedInputStream extends InputStream {
     private static int readChunkFromStream(final InputStream in) 
     throws IOException {           
         
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serverByteBuffer baos = new serverByteBuffer();
         int state = 0; 
         while (state != READ_CHUNK_STATE_FINISHED) {
             int b = in.read();

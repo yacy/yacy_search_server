@@ -130,8 +130,8 @@ public class plasmaCrawlRobotsTxt {
         }
     }    
     
-    public Entry addEntry(String hostName, ArrayList disallowPathList, Date loadedDate) {
-        Entry entry = new Entry(hostName,disallowPathList,loadedDate);
+    public Entry addEntry(String hostName, ArrayList disallowPathList, Date loadedDate, Date modDate, String eTag) {
+        Entry entry = new Entry(hostName,disallowPathList,loadedDate,modDate,eTag);
         addEntry(entry);
         return entry;
     }
@@ -149,6 +149,8 @@ public class plasmaCrawlRobotsTxt {
     public class Entry {
         public static final String DISALLOW_PATH_LIST = "disallow";
         public static final String LOADED_DATE = "date";
+        public static final String MOD_DATE = "modDate";
+        public static final String ETAG = "etag";
         
         // this is a simple record structure that hold all properties of a single crawl start
         private Map mem;
@@ -173,7 +175,12 @@ public class plasmaCrawlRobotsTxt {
             }
         }  
         
-        public Entry(String hostName, ArrayList disallowPathList, Date loadedDate) {
+        public Entry(
+                String hostName, 
+                ArrayList disallowPathList, 
+                Date loadedDate,
+                Date modDate,
+                String eTag) {
             if ((hostName == null) || (hostName.length() == 0)) throw new IllegalArgumentException();
             
             this.hostName = hostName.trim().toLowerCase();
@@ -181,6 +188,8 @@ public class plasmaCrawlRobotsTxt {
             
             this.mem = new HashMap();
             if (loadedDate != null) this.mem.put(LOADED_DATE,Long.toString(loadedDate.getTime()));
+            if (modDate != null) this.mem.put(MOD_DATE,Long.toString(modDate.getTime()));
+            if (eTag != null) this.mem.put(ETAG,eTag);
             
             if ((disallowPathList != null)&&(disallowPathList.size()>0)) {
                 this.disallowPathList.addAll(disallowPathList);
@@ -212,6 +221,20 @@ public class plasmaCrawlRobotsTxt {
             }
             return null;
         }
+        
+        public Date getModDate() {
+            if (this.mem.containsKey(MOD_DATE)) {
+                return new Date(Long.valueOf((String) this.mem.get(MOD_DATE)).longValue());
+            }
+            return null;
+        }        
+        
+        public String getETag() {
+            if (this.mem.containsKey(ETAG)) {
+                return (String) this.mem.get(ETAG);
+            }
+            return null;
+        }          
         
         public boolean isDisallowed(String path) {
             if ((this.mem == null) || (this.disallowPathList.size() == 0)) return false;            

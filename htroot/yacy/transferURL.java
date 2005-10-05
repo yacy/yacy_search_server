@@ -43,11 +43,7 @@
 // javac -classpath .:../classes transferRWI.java
 
 
-import java.net.URL;
-import java.net.MalformedURLException;
-
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.server.serverObjects;
@@ -55,9 +51,11 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public class transferURL {
+public final class transferURL {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        long start = System.currentTimeMillis(); 
+        
 	// return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
 	serverObjects prop = new serverObjects();
@@ -92,7 +90,7 @@ public class transferURL {
                 } else {
                     lEntry = switchboard.urlPool.loadedURL.newEntry(urls, true);
                     if ((lEntry != null) && (blockBlacklist)) {
-                        if (switchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) {
+                        if (plasmaSwitchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) {
                             yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName);
                             lEntry = null;
                         }
@@ -110,7 +108,8 @@ public class transferURL {
             // return rewrite properties
             int more = switchboard.urlPool.loadedURL.size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
-            switchboard.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName);
+            switchboard.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + 
+                                         " in " + (System.currentTimeMillis() - start) + " ms.");
             if ((received - more) > 0) switchboard.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
             result = "ok";
         } else {

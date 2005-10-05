@@ -40,7 +40,6 @@
 
 package de.anomic.http;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -60,11 +59,9 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -92,7 +89,7 @@ public final class httpc {
     /** 
      * Specifies that the httpc is allowed to use gzip content encoding for
      * http post requests 
-     * @see #POST(String, httpHeader, serverObjects, Hashtable)
+     * @see #POST(String, httpHeader, serverObjects, HashMap)
      */
     public static final String GZIP_POST_BODY = "GZIP_POST_BODY";
     
@@ -180,7 +177,7 @@ public final class httpc {
      */
     final serverByteBuffer readLineBuffer = new serverByteBuffer(100);
 
-    private static final Hashtable openSocketLookupTable = new Hashtable();
+    private static final HashMap openSocketLookupTable = new HashMap();
 
     /**
     * Convert the status of this class into an String object to output it.
@@ -741,12 +738,12 @@ public final class httpc {
     * @param path The path to the page which the post is sent to.
     * @param requestHeader Prefilled httpHeader.
     * @param args serverObjects with the names of the files to send.
-    * @param files Hashtable with the names of the files as key and the content
+    * @param files HashMap with the names of the files as key and the content
     * of the files as value.
     * @return Instance of response with the content.
     * @throws IOException
     */
-    public response POST(String path, httpHeader requestHeader, serverObjects args, Hashtable files) throws IOException {
+    public response POST(String path, httpHeader requestHeader, serverObjects args, HashMap files) throws IOException {
         // make shure, the header has a boundary information like
         // CONTENT-TYPE=multipart/form-data; boundary=----------0xKhTmLbOuNdArY
         if (requestHeader == null) requestHeader = new httpHeader();
@@ -771,7 +768,7 @@ public final class httpc {
         
         OutputStream out;
         GZIPOutputStream zippedOut;
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        serverByteBuffer buf = new serverByteBuffer();
         if (zipContent) {
             zippedOut = new GZIPOutputStream(buf);
             out = zippedOut;
@@ -791,7 +788,7 @@ public final class httpc {
                 out.write(serverCore.crlf);
                 // write value
                 key = (String) e.nextElement();
-                value = (String) args.get(key, "");
+                value = args.get(key, "");
                 if ((files != null) && (files.containsKey(key))) {
                     // we are about to write a file
                     out.write(("Content-Disposition: form-data; name=" + '"' + key + '"' + "; filename=" + '"' + value + '"').getBytes());
@@ -816,6 +813,8 @@ public final class httpc {
         // create body array
         out.close();
         byte[] body = buf.toByteArray();
+        buf = null; out = null;
+        
         //System.out.println("DEBUG: PUT BODY=" + new String(body));
         if (zipContent) {
             requestHeader.put(httpHeader.CONTENT_ENCODING, "gzip");
@@ -907,10 +906,7 @@ do upload
 
             httpc.response res = con.GET(path, null);
             if (res.status.startsWith("2")) {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                res.writeContent(bos, null);
-                con.close();
-                return bos.toByteArray();
+                return res.writeContent();
             } else {
                 return res.status.getBytes();
             }
@@ -964,10 +960,7 @@ do upload
 
             //System.out.println("response=" + res.toString());
             if (res.status.startsWith("2")) {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                res.writeContent(bos, null);
-                con.close();
-                return bos.toByteArray();
+                return res.writeContent();
             } else {
                 return res.status.getBytes();
             }
@@ -1000,13 +993,13 @@ do upload
         }
     }
 
-    public static Vector wget(URL url, int timeout, String user, String password, String proxyHost, int proxyPort) throws IOException {
+    public static ArrayList wget(URL url, int timeout, String user, String password, String proxyHost, int proxyPort) throws IOException {
         // splitting of the byte array into lines
         byte[] a = singleGET(url, timeout, user, password, proxyHost, proxyPort);
         if (a == null) return null;
         int s = 0;
         int e;
-        Vector v = new Vector();
+        ArrayList v = new ArrayList();
         while (s < a.length) {
             e = s; while (e < a.length) if (a[e++] < 32) {e--; break;}
             v.add(new String(a, s, e - s));
@@ -1065,13 +1058,13 @@ do upload
     }
      */
 
-    public static Vector wput(URL url, int timeout, String user, String password, String proxyHost, int proxyPort, serverObjects props) throws IOException {
+    public static ArrayList wput(URL url, int timeout, String user, String password, String proxyHost, int proxyPort, serverObjects props) throws IOException {
         // splitting of the byte array into lines
         byte[] a = singlePOST(url, timeout, user, password, proxyHost, proxyPort, props);
         //System.out.println("wput-out=" + new String(a));
         int s = 0;
         int e;
-        Vector v = new Vector();
+        ArrayList v = new ArrayList();
         while (s < a.length) {
             e = s; while (e < a.length) if (a[e++] < 32) {e--; break;}
             v.add(new String(a, s, e - s));
@@ -1097,7 +1090,7 @@ do upload
         System.out.println("ANOMIC.DE HTTP CLIENT v" + vDATE);
         String url = args[0];
         if (!(url.toUpperCase().startsWith("HTTP://"))) url = "http://" + url;
-        Vector text = new Vector();
+        ArrayList text = new ArrayList();
         if (args.length == 4) {
             int timeout = Integer.parseInt(args[1]);
             String proxyHost = args[2];
@@ -1118,8 +1111,8 @@ do upload
             }
             text = wput(url, post);
         }*/
-        Enumeration i = text.elements();
-        while (i.hasMoreElements()) System.out.println((String) i.nextElement());
+        Iterator i = text.listIterator();
+        while (i.hasNext()) System.out.println((String) i.next());
     }
 
     /**

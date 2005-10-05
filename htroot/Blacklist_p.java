@@ -50,9 +50,9 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.Vector;
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -154,7 +154,7 @@ public class Blacklist_p {
         } // post != null   
 
         // Read the List
-        final Vector list = listManager.getListArray(new File(listManager.listsPath, filename));
+        final ArrayList list = listManager.getListArray(new File(listManager.listsPath, filename));
         final StringBuffer out = new StringBuffer(list.size() * 64);
         final Iterator iter = list.iterator();
         while (iter.hasNext()){

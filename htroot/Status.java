@@ -236,8 +236,10 @@ public class Status {
         prop.put("loaderQueueMax", Integer.toString(plasmaSwitchboard.crawlSlots));
         prop.put("loaderPaused",sb.crawlingIsPaused()?1:0);
 
-        prop.put("localCrawlQueueSize", Integer.toString(sb.getThread("50_localcrawl").getJobCount()));        
+        prop.put("localCrawlQueueSize", Integer.toString(sb.getThread("50_localcrawl").getJobCount()));
+        prop.put("stackCrawlQueueSize", Integer.toString(sb.sbStackCrawlThread.getQueueSize()));       
         prop.put("remoteCrawlQueueSize", Integer.toString(sb.getThread("61_globalcrawltrigger").getJobCount()));
+        
 
         // return rewrite properties
         return prop;

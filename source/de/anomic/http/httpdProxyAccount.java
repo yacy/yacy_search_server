@@ -1,3 +1,5 @@
+package de.anomic.http;
+
 import java.net.InetAddress;
 
 public final class httpdProxyAccount {

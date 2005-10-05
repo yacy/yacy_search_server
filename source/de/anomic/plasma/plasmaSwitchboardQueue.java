@@ -205,6 +205,19 @@ public class plasmaSwitchboardQueue {
             this.referrerURL = null;
         }
         
+        public String toString() {
+            StringBuffer str = new StringBuffer();
+            str.append("url: ")            .append(this.url==null ? "null" : this.url.toString()).append(" | ")
+               .append("referrer: ")       .append(this.referrerHash==null?"null":this.referrerHash).append(" | ")
+               .append("ifModifiedSince: ").append(this.ifModifiedSince==null?"null":this.ifModifiedSince.toString()).append(" | ")
+               .append("flags: ")          .append(Byte.toString(this.flags)).append(" | ")
+               .append("initiator: ")      .append(this.initiator==null ? "null" : this.initiator).append(" | ")
+               .append("depth: ")          .append(Integer.toString(this.depth)).append(" | ")
+               .append("profile: ")        .append(this.profileHandle==null?"null":this.profileHandle).append(" | ")
+               .append("anchorName: ")     .append(this.anchorName==null?"null":this.anchorName);
+               return str.toString();
+        }         
+        
         public URL url() {
             return url;
         }

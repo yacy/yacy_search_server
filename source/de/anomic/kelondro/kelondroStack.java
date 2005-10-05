@@ -52,10 +52,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.StringTokenizer;
 
-public class kelondroStack extends kelondroRecords {
+public final class kelondroStack extends kelondroRecords {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
