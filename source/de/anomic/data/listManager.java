@@ -1,9 +1,12 @@
-// listManager.java 
+// listManager.java
 // -------------------------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This file ist contributed by Alexander Schier
 // last major change: 09.08.2004
@@ -53,190 +56,191 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 
-//The Naming of the functions is a bit strange...
+// The Naming of the functions is a bit strange...
 
 public class listManager {
-	public static plasmaSwitchboard switchboard;
-	public static File listsPath;
+    public static plasmaSwitchboard switchboard;
+    public static File listsPath;
 
 //===============Listslists=====================
-        //get an array of all Lists from a Config Property
-        public static String[] getListslistArray(String Listname){
-                return switchboard.getConfig(Listname, "").split(",");
+        // get an array of all Lists from a Config Property
+        public static String[] getListslistArray(String Listname) {
+            return switchboard.getConfig(Listname, "").split(",");
         }
 
-        //removes a List from a Lists-List
-        public static void removeListFromListslist(String ListName, String BlackList){
-                String[] Lists = getListslistArray(ListName);
-                String temp = "";
+        // removes a List from a Lists-List
+        public static void removeListFromListslist(String ListName, String BlackList) {
+            String[] Lists = getListslistArray(ListName);
+            String temp = "";
 
-                for(int i=0;i <= Lists.length -1;i++){
-                        if( !Lists[i].equals(BlackList) && !Lists[i].equals("") ){
-                                temp += Lists[i] + ",";
-                        }
+            for (int i=0; i <= Lists.length -1; i++) {
+                if (!Lists[i].equals(BlackList) && !Lists[i].equals("")) {
+                    temp += Lists[i] + ",";
                 }
-                if( temp.endsWith(",") ){ //remove "," at end...
-                        temp = temp.substring(0, temp.length() -1);
-                }
-                if( temp.startsWith(",") ){ //remove "," at end...
-                        temp = temp.substring(1, temp.length() );
-                }
+            }
+            if (temp.endsWith(",")) { //remove "," at end...
+                temp = temp.substring(0, temp.length() -1);
+            }
+            if (temp.startsWith(",") ) { //remove "," at end...
+                temp = temp.substring(1, temp.length());
+            }
 
-                switchboard.setConfig(ListName, temp);
+            switchboard.setConfig(ListName, temp);
         }
 
-        //add a new List to a List-List
-        public static void addListToListslist(String ListName, String newList){
-                String[] Lists = getListslistArray(ListName);
-                String temp = "";
+        // add a new List to a List-List
+        public static void addListToListslist(String ListName, String newList) {
+            String[] Lists = getListslistArray(ListName);
+            String temp = "";
 
-                for(int i = 0;i <= (Lists.length -1); i++){
-                        temp += Lists[i] + ",";
-                }
-                temp += newList;
-                switchboard.setConfig(ListName, temp);
+            for (int i = 0; i <= (Lists.length -1); i++) {
+                temp += Lists[i] + ",";
+            }
+            temp += newList;
+            switchboard.setConfig(ListName, temp);
         }
 
-        //returns true, if the Lists-List contains the Listname
-        public static boolean ListInListslist(String Listname, String BlackList){
-                String[] Lists =  getListslistArray(Listname);
+        // returns true, if the Lists-List contains the Listname
+        public static boolean ListInListslist(String Listname, String BlackList) {
+            String[] Lists =  getListslistArray(Listname);
 
-                for(int u=0;u <= Lists.length -1;u++){
-                        if( BlackList.equals(Lists[u]) ){
-                                return true;
-                        }
+            for (int u=0; u <= Lists.length -1; u++) {
+                if (BlackList.equals(Lists[u])) {
+                    return true;
                 }
-                return false;
+            }
+            return false;
         }
 
 //================generel Lists==================
 
-	//Gets a Array of all lines(Items) of a (list)file
-	public static ArrayList getListArray(File listFile){
-		String line;
+    // Gets a Array of all lines(Items) of a (list)file
+    public static ArrayList getListArray(File listFile){
+        String line;
         ArrayList list = new ArrayList();
-		int count = 0;
+        int count = 0;
         BufferedReader br = null;
-		try{
-			br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile)));
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile)));
 
-			while( (line = br.readLine()) != null){
-				list.add(line);
-				count++;
-			}
-			br.close();
-		}catch(IOException e){
-			//list is empty
-		} finally {
-            if (br!=null)try{br.close();}catch(Exception e) {}
-        }
-		return list; 
-	}
-
-	//Writes the Liststring to a file
-	public static boolean writeList(File listFile, String out){
-        BufferedWriter bw = null;
-		try{
-		    bw = new BufferedWriter(new PrintWriter(new FileWriter(listFile)));
-			bw.write(out);
-			bw.close();
-			return true;
-		}catch(IOException e){
-			return false;
-		} finally {
-            if (bw!=null)try{bw.close();}catch(Exception e){}
-        }
-	}
-
-	//overloaded function to write an array
-	public static boolean writeList(File listFile, String[] list){
-		String out = "";
-		for(int i=0;i <= list.length; i++){
-			out += list[i] + serverCore.crlfString;
-		}
-		return writeList(listFile, out); //(File, String)
-	}
-
-	public static String getListString(String filename, boolean withcomments){
-		String temp = "";
-		String line = "";
-        BufferedReader br = null;
-		try{
-			br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(listsPath ,filename))));
-			//Read the List
-			while((line = br.readLine()) != null){
-				if( (!line.startsWith("#") || withcomments) || (!line.equals("")) ){
-					temp += line + serverCore.crlfString;
-				}
-			}
-			br.close();
-		} catch(IOException e){            
+            while((line = br.readLine()) != null){
+                list.add(line);
+                count++;
+            }
+            br.close();
+        } catch(IOException e) {
+            // list is empty
         } finally {
-            if (br!=null)try{br.close();}catch(Exception e){}
+            if (br!=null) try { br.close(); } catch (Exception e) {}
         }
-        
-		return temp;
-	}
-
-	//get a Directory Listing as a String Array
-	public static String[] getDirListing(String dirname){
-		String[] fileListString;
-		File[] fileList;
-		File dir = new File(dirname);
-
-		if(dir != null){
-			if(!dir.exists()){
-				dir.mkdir();
-			}
-			fileList = dir.listFiles();
-			fileListString = new String[fileList.length];
-			for(int i=0;i<= fileList.length-1;i++){
-				fileListString[i]=fileList[i].getName();
-			}
-			return fileListString;
-		}
-		return null;
-	}
-
-	public static ArrayList getDirsRecursive(File dir){
-        return getDirsRecursive(dir, true);  
+        return list;
     }
-	/**
-	 * Returns a List of all dirs and subdirs as File Objects
-	 *
-	 * Warning: untested
-	 */
-	public static ArrayList getDirsRecursive(File dir, boolean excludeDotfiles){
-		File[] dirList = dir.listFiles();
-        ArrayList resultList = new ArrayList();
-        ArrayList recursive;
-		Iterator it;
-		for(int i=0;i<dirList.length;i++){
-			if(dirList[i].isDirectory() && (!excludeDotfiles || !dirList[i].getName().startsWith(".")) ){
-				resultList.add(dirList[i]);
-				recursive = getDirsRecursive(dirList[i]);
-				it=recursive.iterator();
-				while(it.hasNext()){
-					resultList.add(it.next());
-				}
-			}
-		}
-		return resultList;
-	}
 
+    // Writes the Liststring to a file
+    public static boolean writeList(File listFile, String out) {
+        BufferedWriter bw = null;
+        try {
+            bw = new BufferedWriter(new PrintWriter(new FileWriter(listFile)));
+            bw.write(out);
+            bw.close();
+            return true;
+        } catch(IOException e) {
+            return false;
+        } finally {
+            if (bw!=null) try { bw.close(); } catch (Exception e) {}
+        }
+    }
+
+    // overloaded function to write an array
+    public static boolean writeList(File listFile, String[] list){
+        String out = "";
+        for(int i=0;i <= list.length; i++){
+            out += list[i] + serverCore.crlfString;
+        }
+        return writeList(listFile, out); //(File, String)
+    }
+
+    public static String getListString(String filename, boolean withcomments){
+        String temp = "";
+        String line = "";
+        BufferedReader br = null;
+        try{
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(listsPath ,filename))));
+            // Read the List
+            while ((line = br.readLine()) != null) {
+                if ((!line.startsWith("#") || withcomments) || !line.equals("")) {
+                    temp += line + serverCore.crlfString;
+                }
+            }
+            br.close();
+        } catch (IOException e) {
+        } finally {
+            if (br!=null) try { br.close(); } catch (Exception e) {}
+        }
+
+        return temp;
+    }
+
+    // get a Directory Listing as a String Array
+    public static String[] getDirListing(String dirname){
+        String[] fileListString;
+        File[] fileList;
+        final File dir = new File(dirname);
+
+        if (dir != null ) {
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+            fileList = dir.listFiles();
+            fileListString = new String[fileList.length];
+            for (int i=0; i<= fileList.length-1; i++) {
+                fileListString[i]=fileList[i].getName();
+            }
+            return fileListString;
+        }
+        return null;
+    }
+
+    public static ArrayList getDirsRecursive(File dir){
+        return getDirsRecursive(dir, true);
+    }
+    /**
+     * Returns a List of all dirs and subdirs as File Objects
+     *
+     * Warning: untested
+     */
+    public static ArrayList getDirsRecursive(File dir, boolean excludeDotfiles){
+        final File[] dirList = dir.listFiles();
+        final ArrayList resultList = new ArrayList();
+        ArrayList recursive;
+        Iterator iter;
+        for (int i=0;i<dirList.length;i++) {
+            if (dirList[i].isDirectory() && (!excludeDotfiles || !dirList[i].getName().startsWith("."))) {
+                resultList.add(dirList[i]);
+                recursive = getDirsRecursive(dirList[i]);
+                iter=recursive.iterator();
+                while (iter.hasNext()) {
+                    resultList.add(iter.next());
+                }
+            }
+        }
+        return resultList;
+    }
 
 //=============Blacklist specific================
-	
-	//load all active Blacklists in the Proxy
-	public static void reloadBlacklists(){
-                String f = switchboard.getConfig("proxyBlackListsActive", "");
-                switchboard.urlBlacklist.clear();
-                if (f != "") switchboard.urlBlacklist.loadLists("black", f, "/");
-        }
 
+    // load all active Blacklists in the Proxy
+    public static void reloadBlacklists(){
+         final String f = switchboard.getConfig("proxyBlackListsActive", "");
+         de.anomic.plasma.plasmaSwitchboard.urlBlacklist.clear();
+         if (f != "") {
+             de.anomic.plasma.plasmaSwitchboard.urlBlacklist.loadLists("black", f, "/");
+         }
+//       switchboard.urlBlacklist.clear();
+//       if (f != "") switchboard.urlBlacklist.loadLists("black", f, "/");
+    }
 
 }
