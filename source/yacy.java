@@ -40,7 +40,6 @@
 // done inside the copyright notive above. A re-distribution must contain
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -129,7 +128,7 @@ public final class yacy {
     private static final String vDATE   = "@REPL_DATE@";
     private static final String copyright = "[ YACY Proxy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
-
+   
     /**
     * Convert the combined versionstring into a pretty string.
     * FIXME: Why is this so complicated?
@@ -172,7 +171,8 @@ public final class yacy {
     */
     private static void startup(String homePath, long startupMemFree, long startupMemTotal) {
         long startup = System.currentTimeMillis();
-
+        String restart = "false";
+        
         try {
             // start up
             System.out.println(copyright);
@@ -216,6 +216,9 @@ public final class yacy {
 
             final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
 
+            // set default = no restart
+            sb.setConfig("restart", "false");
+            
             // save information about available memory at startup time
             sb.setConfig("memoryFreeAfterStartup", startupMemFree);
             sb.setConfig("memoryTotalAfterStartup", startupMemTotal);
@@ -453,7 +456,8 @@ public final class yacy {
                     } catch (Exception e) {
                         serverLog.logSevere("MAIN CONTROL LOOP", "PANIK: " + e.getMessage(),e);
                     }
-
+                    restart = sb.getConfig("restart", "false");
+                    
                     // shut down
                     serverLog.logConfig("SHUTDOWN", "caught termination signal");
                     server.terminate(false);
@@ -479,9 +483,27 @@ public final class yacy {
         } catch (Exception ee) {
             serverLog.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         }
-        serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
+
+        // restart YaCy
+        if (restart.equals("true")) {
+            serverLog.logConfig("SHUTDOWN", "RESTART...");
+            long count = 0;
+            while (Thread.activeCount() > 1 && count <= 60) { // waiting 5 minutes               
+                serverLog.logConfig("SHUTDOWN", "Waiting 5 seconds for " + (Thread.activeCount() - 1) + "running threads to restart YaCy");
+                try { Thread.currentThread().sleep(5000); } catch (InterruptedException e) {}
+                count++;
+            }
+            if (count < 60) { 
+                startupMemFree  = Runtime.getRuntime().freeMemory();  // the amount of free memory in the Java Virtual Machine
+                startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
+                startup(homePath, startupMemFree, startupMemTotal);
+            } else {
+                serverLog.logConfig("SHUTDOWN", "RESTART BREAK, more than 5 minutes waited to try a restart, goodbye. (this is the last line)");
+            }
+        } else {
+            serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
+        }
         try {
-            // if (restart) startup(homePath);
             System.exit(0);
         } catch (Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
     }

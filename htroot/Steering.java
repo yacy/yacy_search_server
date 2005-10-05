@@ -1,10 +1,13 @@
-// Steering.java 
+// Steering.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
-// last major change: 18.02.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,14 +53,16 @@ import de.anomic.server.serverSwitch;
 
 public class Steering {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+        if (post == null || ss == null) { return new serverObjects(); }
+        
+        plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        serverObjects prop = new serverObjects();
         prop.put("info", 0);//no information submitted
-	if (post == null) return prop;
+        if (prop == null) { return prop; }
 
         // handle access rights
-        switch (switchboard.adminAuthenticated(header)) {
+        switch (sb.adminAuthenticated(header)) {
             case 0: // wrong password given
                 try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {} // prevent brute-force
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
@@ -71,14 +76,22 @@ public class Steering {
             case 3: // soft-authenticated for localhost only
             case 4: // hard-authenticated, all ok
         }
-        
-	if (post.containsKey("shutdown")) {
-            switchboard.terminate();
-            prop.put("info", 3);//shutting down
+
+        if (post.containsKey("shutdown")) {
+            ss.setConfig("restart", "false");
+            sb.terminate();
+            prop.put("info", 3);
             return prop;
         }
 
-	return prop;
+        if (post.containsKey("restart")) {
+            ss.setConfig("restart", "true");
+            sb.terminate();
+            prop.put("info", 4);
+            return prop;
+        }
+
+        return prop;
     }
 
 }

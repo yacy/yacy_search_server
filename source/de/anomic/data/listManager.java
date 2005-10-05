@@ -3,13 +3,12 @@
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
+// 
+// This file ist contributed by Alexander Schier
 //
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
-//
-// This file ist contributed by Alexander Schier
-// last major change: 09.08.2004
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
