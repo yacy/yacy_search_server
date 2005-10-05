@@ -61,26 +61,26 @@ import de.anomic.yacy.yacyVersion;
 
 public final class hello {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        final serverObjects prop = new serverObjects(); // return variable that accumulates replacements
-        if ((post == null) ||
-            (env == null) ||
-            (yacyCore.seedDB == null) ||
-            (yacyCore.seedDB.mySeed == null)) { return new serverObjects(); }
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+        if (post == null || ss == null || yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return new serverObjects(); }
 
-        // final String iam      = (String) post.get("iam", "");      // complete seed of the requesting peer
-        // final String pattern  = (String) post.get("pattern", "");  //        
-        // final String mytime   = (String) post.get(STR_MYTIME, ""); // 
+        // return variable that accumulates replacements
+        final serverObjects prop = new serverObjects();
+        if (prop == null) { return new serverObjects(); }
+        
+//      final String iam      = (String) post.get("iam", "");      // complete seed of the requesting peer
+//      final String pattern  = (String) post.get("pattern", "");  //        
+//      final String mytime   = (String) post.get(STR_MYTIME, ""); // 
         final String key      = (String) post.get("key", "");    // transmission key for response
         final String seed     = (String) post.get(yacySeed.STR_SEED, ""); // 
         final String countStr = (String) post.get("count", "0"); //
         int  i;
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (NumberFormatException e) {count = 0;}
-        //final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(STR_MYTIME)); // read remote time
+//      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(STR_MYTIME)); // read remote time
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key);
 
-        //System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
+//      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
         if (remoteSeed == null) { return new serverObjects(); }
 
         // we easily know the caller's IP:
@@ -190,4 +190,3 @@ public final class hello {
     }
 
 }
-

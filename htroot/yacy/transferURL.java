@@ -1,10 +1,13 @@
-// transferURL.java 
+// transferURL.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
-// last change: 24.01.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,7 +45,6 @@
 // You must compile this file with
 // javac -classpath .:../classes transferRWI.java
 
-
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -53,33 +55,33 @@ import de.anomic.yacy.yacySeed;
 
 public final class transferURL {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        long start = System.currentTimeMillis(); 
-        
-	// return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
-        
-	if ((post == null) || (env == null)) return prop;
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+        if (post == null || ss == null) { return new serverObjects(); }
+        long start = System.currentTimeMillis();
 
-	// request values
-	String iam      = (String) post.get("iam", "");      // seed hash of requester
-        String youare   = (String) post.get("youare", "");   // seed hash of the target peer, needed for network stability
-	String key      = (String) post.get("key", "");      // transmission key
-	int urlc        = Integer.parseInt((String) post.get("urlc", ""));    // number of transported urls 
-        boolean granted = switchboard.getConfig("allowReceiveIndex", "false").equals("true");
-	boolean blockBlacklist = switchboard.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
+        // return variable that accumulates replacements
+        final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        final serverObjects prop = new serverObjects();
+        if (prop == null || sb == null) { return new serverObjects(); }
+
+        // request values
+        final String iam      = (String) post.get("iam", "");      // seed hash of requester
+//      final String youare   = (String) post.get("youare", "");   // seed hash of the target peer, needed for network stability
+//      final String key      = (String) post.get("key", "");      // transmission key
+        final int urlc        = Integer.parseInt((String) post.get("urlc", ""));    // number of transported urls
+        final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
+        final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
 
         // response values
         String result = "";
         String doublevalues = "0";
-        
-        yacySeed otherPeer = yacyCore.seedDB.get(iam);
-        String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
-        
+
+        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
+        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
+
         if (granted) {
             int received = 0;
-            int sizeBefore = switchboard.urlPool.loadedURL.size();
+            final int sizeBefore = sb.urlPool.loadedURL.size();
             // read the urls from the other properties and store
             String urls;
             plasmaCrawlLURL.Entry lEntry;
@@ -88,38 +90,36 @@ public final class transferURL {
                 if (urls == null) {
                     yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
                 } else {
-                    lEntry = switchboard.urlPool.loadedURL.newEntry(urls, true);
-                    if ((lEntry != null) && (blockBlacklist)) {
-                        if (plasmaSwitchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) {
-                            yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName);
-                            lEntry = null;
-                        }
+                    lEntry = sb.urlPool.loadedURL.newEntry(urls, true);
+                    if (lEntry != null && blockBlacklist &&
+                        sb.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) {
+                        yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName);
+                        lEntry = null;
                     }
                     if (lEntry != null) {
-                        switchboard.urlPool.loadedURL.addEntry(lEntry, iam, iam, 3);
+                        sb.urlPool.loadedURL.addEntry(lEntry, iam, iam, 3);
                         yacyCore.log.logFine("transferURL: received URL '" + lEntry.url() + "' from peer " + otherPeerName);
                         received++;
                     }
                 }
             }
-            
+
             yacyCore.seedDB.mySeed.incRU(received);
-            
+
             // return rewrite properties
-            int more = switchboard.urlPool.loadedURL.size() - sizeBefore;
+            final int more = sb.urlPool.loadedURL.size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
-            switchboard.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + 
-                                         " in " + (System.currentTimeMillis() - start) + " ms.");
-            if ((received - more) > 0) switchboard.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
+            sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms.");
+            if ((received - more) > 0) sb.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
             result = "ok";
         } else {
-            switchboard.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
+            sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
             result = "error_not_granted";
         }
-        
+
         prop.put("double", doublevalues);
         prop.put("result", result);
-	return prop;
+        return prop;
     }
 
 }

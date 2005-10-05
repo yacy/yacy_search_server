@@ -6,7 +6,10 @@
 // Frankfurt, Germany, 2004, 2005
 //
 // This file ist contributed by Alexander Schier
-// last major change: 27.02.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -58,37 +61,39 @@ import de.anomic.server.serverSwitch;
 
 public final class profile {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	serverObjects prop = new serverObjects(); // return variable that accumulates replacements
-	Properties profile = new Properties();
-	int count=0;
-	String key="";
-	String value="";
-    
-    FileInputStream fileIn = null;
-	try{
-        fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
-		profile.load(fileIn);		
-	}catch(IOException e){}
-    finally {
-        if (fileIn!=null) try{fileIn.close(); fileIn=null;}catch(Exception e) {}
-    }
-	
-	Iterator it = ((Map)profile).keySet().iterator();
-	while(it.hasNext()){
-		key=(String)it.next();
-		value=profile.getProperty(key, "").replaceAll("\r","").replaceAll("\n","\\\\n");
-		if( !(key.equals("")) && !(value.equals("")) ){
-			prop.put("list_"+count+"_key", key);
-			prop.put("list_"+count+"_value", value);
-			count++;
-		}
-	}
-	prop.put("list", count);
-	
-	
-	// return rewrite properties
-	return prop;
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+        // return variable that accumulates replacements
+        serverObjects prop = new serverObjects();
+        if (prop == null) { return new serverObjects(); }
+
+        Properties profile = new Properties();
+        int count=0;
+        String key="";
+        String value="";
+
+        FileInputStream fileIn = null;
+        try {
+            fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
+            profile.load(fileIn);        
+        } catch(IOException e) {
+        } finally {
+            if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (Exception e) {}
+        }
+
+        Iterator it = ((Map)profile).keySet().iterator();
+        while (it.hasNext()) {
+            key=(String)it.next();
+            value=profile.getProperty(key, "").replaceAll("\r","").replaceAll("\n","\\\\n");
+            if( !(key.equals("")) && !(value.equals("")) ){
+                prop.put("list_"+count+"_key", key);
+                prop.put("list_"+count+"_value", value);
+                count++;
+            }
+        }
+        prop.put("list", count);
+
+        // return rewrite properties
+        return prop;
     }
 
 }
