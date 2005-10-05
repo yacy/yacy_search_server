@@ -507,7 +507,7 @@ public final class plasmaStackCrawlThread extends Thread {
             byte[][] entryBytes = null;
             stackCrawlMessage newMessage = null;
             synchronized(this.urlEntryHashCache) {               
-                 urlHash = (String) this.urlEntryHashCache.remove();
+                 urlHash = (String) this.urlEntryHashCache.removeLast();
                  entryBytes = this.urlEntryCache.remove(urlHash.getBytes());                 
             }
             

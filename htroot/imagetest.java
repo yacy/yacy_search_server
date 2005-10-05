@@ -46,6 +46,7 @@
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.ImagePainter;
 
 import java.awt.Graphics2D; 
 import java.awt.Color; 
@@ -58,6 +59,7 @@ import java.io.FileOutputStream;
 import java.io.ByteArrayOutputStream; 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 
 public class imagetest {
     
@@ -93,6 +95,10 @@ public class imagetest {
         for (int i = 20; i < 100; i++) r.setPixel(i, 32, new int[]{0, 255, 0});
         for (int i = 20; i < 100; i++) r.setPixel(i, 34, new int[]{0, 0, 255});
         
+        ImagePainter img = new ImagePainter(300, 200);
+        img.draw(3, 5, 277, 170, "AA1122");
+        
+        g.drawImage(img, BufferedImageOp
         return bi;
     }
     
