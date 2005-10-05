@@ -69,6 +69,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
     // derived methods:
     public void readFully(byte[] b, int off, int len) throws IOException {
         int r = read(b, off, len);
+        if (r < 0) return; // read exceeded EOF
         if (r < len) readFully(b, off + r, len - r);
     }
     
