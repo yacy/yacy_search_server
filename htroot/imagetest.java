@@ -65,7 +65,7 @@ public class imagetest {
     
 
     public static BufferedImage respond(httpHeader header, serverObjects post, serverSwitch env) {
-        
+        /*
         BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB); 
         Graphics2D g = bi.createGraphics();
         g.setBackground(Color.white);
@@ -94,12 +94,13 @@ public class imagetest {
         for (int i = 20; i < 100; i++) r.setPixel(i, 30, new int[]{255, 0, 0});
         for (int i = 20; i < 100; i++) r.setPixel(i, 32, new int[]{0, 255, 0});
         for (int i = 20; i < 100; i++) r.setPixel(i, 34, new int[]{0, 0, 255});
-        
-        ImagePainter img = new ImagePainter(300, 200);
-        img.draw(3, 5, 277, 170, "AA1122");
-        
-        //g.drawImage(img, BufferedImageOp
         return bi;
+        */
+        ImagePainter img = new ImagePainter(300, 200, ImagePainter.TRANSPARENT);
+        img.dot(150, 100, 50, true, ImagePainter.BLUE, ImagePainter.MODE_REPLACE);
+        img.dot(170, 130, 40, true, ImagePainter.GREEN, ImagePainter.MODE_REPLACE);
+        return img.toImage();
+        
     }
     
 }
