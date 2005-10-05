@@ -98,7 +98,7 @@ public class imagetest {
         ImagePainter img = new ImagePainter(300, 200);
         img.draw(3, 5, 277, 170, "AA1122");
         
-        g.drawImage(img, BufferedImageOp
+        //g.drawImage(img, BufferedImageOp
         return bi;
     }
     
