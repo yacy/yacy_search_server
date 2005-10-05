@@ -154,15 +154,11 @@ public class ImagePainter {
     }
     
     private void circle(int xc, int yc, int radius) {
-        int xp = xc + radius;
-        int yp = yc;
         int xn, yn;
         for (int i = 359; i >= 0; i--) {
             xn = xc + (int) (radius * Math.cos(Math.PI * 2 * i / 360));
             yn = yc + (int) (radius * Math.sin(Math.PI * 2 * i / 360));
-            line(xp, yp, xn, yn);
-            xp = xn;
-            yp = yn;
+            plot(xn, yn);
         }
     }
     
@@ -194,124 +190,5 @@ public class ImagePainter {
         
         return bi;
     }
-    
-    /*
-    public String toHTML() {
-        String s = "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"" + width +"\">\n\r";
-        long c;
-        int x, i, l;
-        for (int y = height - 1; y >= 0; y--) {
-            s += "<tr height=\"1\">";
-            x = 0;
-            while (x < width) {
-                i = x + 1;
-                c = grid[x + y * width];
-                while ((i < width) && (grid[i * width + y] == c)) i++;
-                l = i - x;
-                x = i;
-                if (l == 1)
-                    s += "<td width=\"1\" bgcolor=\"#" + colStr(c) + "\"></td>";
-                else
-                    s += "<td width=\"1\" bgcolor=\"#" + colStr(c) + "\" rowspan=\"" + l + "\"></td>";
-            }
-            s += "</tr>\n\r";
-        }
-        s += "</table>\n\r";
-        return s;
-    }
-    */
+
 }
-
-/*
-/============================================================================
-// b r e s l i n e . c    
-//
-// VERSION 1: draws only from one end and calculates both x and y.
-//
-// Programmer:  Kenny Hoff
-// Date:        10/25/95
-// Purpose:     To implement the Bresenham's line drawing algorithm for all
-//              slopes and line directions (using minimal routines). 
-//============================================================================
-
-#include <stdlib.h>
-
-// EXTERNALLY DEFINED FRAMEBUFFER AND FRAMEBUFFER DIMENSIONS (WIDTH))
-extern unsigned char far* FrameBuffer;
-extern int WIDTH; 
-#define SetPixel(x,y,c) FrameBuffer[y*WIDTH+x]=c;
-
-//============================================================================
-// Fills the intermediate points along a line between the two given endpoints
-// using Bresenham's line drawing algorithm. NOTE: this routine does no clipping
-// so the coordinate values must be within the FrameBuffer bounds.
-// NOTE: USE (Ax,Ay) as the starting point (values that are incremented)
-//============================================================================
-void BresLine(int Ax, int Ay, int Bx, int By, unsigned char Color)
-{
-	//------------------------------------------------------------------------
-	// INITIALIZE THE COMPONENTS OF THE ALGORITHM THAT ARE NOT AFFECTED BY THE
-	// SLOPE OR DIRECTION OF THE LINE
-	//------------------------------------------------------------------------
-	int dX = abs(Bx-Ax);	// store the change in X and Y of the line endpoints
-	int dY = abs(By-Ay);
-	
-	//------------------------------------------------------------------------
-	// DETERMINE "DIRECTIONS" TO INCREMENT X AND Y (REGARDLESS OF DECISION)
-	//------------------------------------------------------------------------
-	int Xincr, Yincr;
-	if (Ax > Bx) { Xincr=-1; } else { Xincr=1; }	// which direction in X?
-	if (Ay > By) { Yincr=-1; } else { Yincr=1; }	// which direction in Y?
-	
-	//------------------------------------------------------------------------
-	// DETERMINE INDEPENDENT VARIABLE (ONE THAT ALWAYS INCREMENTS BY 1 (OR -1) )
-	// AND INITIATE APPROPRIATE LINE DRAWING ROUTINE (BASED ON FIRST OCTANT
-	// ALWAYS). THE X AND Y'S MAY BE FLIPPED IF Y IS THE INDEPENDENT VARIABLE.
-	//------------------------------------------------------------------------
-	if (dX >= dY)	// if X is the independent variable
-	{           
-		int dPr 	= dY<<1;           // amount to increment decision if right is chosen (always)
-		int dPru 	= dPr - (d><<1);   // amount to increment decision if up is chosen
-		int P 		= dPr - dX;  // decision variable start value
-
-		for (; dX>=0; dX--)            // process each point in the line one at a time (just use dX)
-		{
-			SetPixel(Ax, Ay, Color); // plot the pixel
-			if (P > 0)               // is the pixel going right AND up?
-			{ 
-				Ax+=Xincr;	       // increment independent variable
-				Ay+=Yincr;         // increment dependent variable
-				P+=dPru;           // increment decision (for up)
-			}
-			else                     // is the pixel just going right?
-			{
-				Ax+=Xincr;         // increment independent variable
-				P+=dPr;            // increment decision (for right)
-			}
-		}		
-	}
-	else              // if Y is the independent variable
-	{
-		int dPr 	= dX<<1;           // amount to increment decision if right is chosen (always)
-		int dPru 	= dPr - (d><<1);   // amount to increment decision if up is chosen
-		int P 		= dPr - dY;  // decision variable start value
-
-		for (; dY>=0; dY--)            // process each point in the line one at a time (just use dY)
-		{
-			SetPixel(Ax, Ay, Color); // plot the pixel
-			if (P > 0)               // is the pixel going up AND right?
-			{ 
-				Ax+=Xincr;         // increment dependent variable
-				Ay+=Yincr;         // increment independent variable
-				P+=dPru;           // increment decision (for up)
-			}
-			else                     // is the pixel just going up?
-			{
-				Ay+=Yincr;         // increment independent variable
-				P+=dPr;            // increment decision (for right)
-			}
-		}		
-	}		
-}
-
-*/
