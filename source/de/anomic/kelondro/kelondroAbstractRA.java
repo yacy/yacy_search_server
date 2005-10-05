@@ -1,10 +1,13 @@
-// kelondroAbstractRA.java 
+// kelondroAbstractRA.java
 // -----------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 09.02.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,7 +58,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
     public String name() {
         return name;
     }
-    
+
     // pseudo-native methods:
     abstract public int read() throws IOException;
     abstract public void write(int b) throws IOException;
@@ -68,67 +71,67 @@ abstract class kelondroAbstractRA implements kelondroRA {
 
     // derived methods:
     public void readFully(byte[] b, int off, int len) throws IOException {
-        int r = read(b, off, len);
+        final int r = read(b, off, len);
         if (r < 0) return; // read exceeded EOF
-        if (r < len) readFully(b, off + r, len - r);
-    }
-    
-    public byte readByte() throws IOException {
-	int ch = this.read();
-	if (ch < 0) throw new IOException();
-	return (byte)(ch);
+        if (r < len) { readFully(b, off + r, len - r); }
     }
 
-    public void writeByte(int v) throws IOException {
-	this.write(v);
+    public byte readByte() throws IOException {
+        final int ch = this.read();
+        if (ch < 0) throw new IOException();
+        return (byte)(ch);
+    }
+
+    public void writeByte(final int v) throws IOException {
+        this.write(v);
     }
 
     public short readShort() throws IOException {
-	int ch1 = this.read();
-	int ch2 = this.read();
-	if ((ch1 | ch2) < 0) throw new IOException();
-	return (short) ((ch1 << 8) + (ch2 << 0));
+        final int ch1 = this.read();
+        final int ch2 = this.read();
+        if ((ch1 | ch2) < 0) throw new IOException();
+        return (short) ((ch1 << 8) + (ch2 << 0));
     }
 
-    public void writeShort(int v) throws IOException {
-	this.write((v >>> 8) & 0xFF); this.write((v >>> 0) & 0xFF);
+    public void writeShort(final int v) throws IOException {
+        this.write((v >>> 8) & 0xFF); this.write((v >>> 0) & 0xFF);
     }
 
     public int readInt() throws IOException {
-	int ch1 = this.read();
-	int ch2 = this.read();
-	int ch3 = this.read();
-	int ch4 = this.read();
-	if ((ch1 | ch2 | ch3 | ch4) < 0) throw new IOException("kelondroAbstractRA.readInt: wrong values; ch1=" + ch1 + ", ch2=" + ch2 + ", ch3=" + ch3 + ", ch4=" + ch4);
-	return ((ch1 << 24) | (ch2 << 16) | (ch3 << 8) | ch4);
+        final int ch1 = this.read();
+        final int ch2 = this.read();
+        final int ch3 = this.read();
+        final int ch4 = this.read();
+        if ((ch1 | ch2 | ch3 | ch4) < 0) throw new IOException("kelondroAbstractRA.readInt: wrong values; ch1=" + ch1 + ", ch2=" + ch2 + ", ch3=" + ch3 + ", ch4=" + ch4);
+        return ((ch1 << 24) | (ch2 << 16) | (ch3 << 8) | ch4);
     }
 
-    public void writeInt(int v) throws IOException {
-	this.write((v >>> 24) & 0xFF); this.write((v >>> 16) & 0xFF);
-	this.write((v >>>  8) & 0xFF); this.write((v >>>  0) & 0xFF);
+    public void writeInt(final int v) throws IOException {
+        this.write((v >>> 24) & 0xFF); this.write((v >>> 16) & 0xFF);
+        this.write((v >>>  8) & 0xFF); this.write((v >>>  0) & 0xFF);
     }
 
     public long readLong() throws IOException {
-	return ((long) (readInt()) << 32) + (readInt() & 0xFFFFFFFFL);
+        return ((long) (readInt()) << 32) + (readInt() & 0xFFFFFFFFL);
     }
 
-    public void writeLong(long v) throws IOException {
-	this.write((int) (v >>> 56) & 0xFF); this.write((int) (v >>> 48) & 0xFF);
-	this.write((int) (v >>> 40) & 0xFF); this.write((int) (v >>> 32) & 0xFF);
-	this.write((int) (v >>> 24) & 0xFF); this.write((int) (v >>> 16) & 0xFF);
-	this.write((int) (v >>>  8) & 0xFF); this.write((int) (v >>>  0) & 0xFF);
+    public void writeLong(final long v) throws IOException {
+        this.write((int) (v >>> 56) & 0xFF); this.write((int) (v >>> 48) & 0xFF);
+        this.write((int) (v >>> 40) & 0xFF); this.write((int) (v >>> 32) & 0xFF);
+        this.write((int) (v >>> 24) & 0xFF); this.write((int) (v >>> 16) & 0xFF);
+        this.write((int) (v >>>  8) & 0xFF); this.write((int) (v >>>  0) & 0xFF);
     }
- 
-    public void write(byte[] b) throws IOException {
-	this.write(b, 0, b.length);
+
+    public void write(final byte[] b) throws IOException {
+        this.write(b, 0, b.length);
     }
 
     private static final byte cr = 13;
     private static final byte lf = 10;
     private static final String crlf = new String(new byte[] {cr, lf});
 
-    public void writeLine(String line) throws IOException {
-	this.write(line.getBytes());
+    public void writeLine(final String line) throws IOException {
+        this.write(line.getBytes());
         this.write(cr);
         this.write(lf);
     }
@@ -158,82 +161,84 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
     }
 
-    public void writeProperties(Properties props, String comment) throws IOException {
-	this.seek(0);
-	writeLine("# " + comment);
-	Enumeration e = props.propertyNames();
-	String key, value;
-	while (e.hasMoreElements()) {
-	    key = (String) e.nextElement();
-	    value = props.getProperty(key, "");
+    public void writeProperties(final Properties props, final String comment) throws IOException {
+        this.seek(0);
+        writeLine("# " + comment);
+        final Enumeration e = props.propertyNames();
+        String key, value;
+        while (e.hasMoreElements()) {
+            key = (String) e.nextElement();
+            value = props.getProperty(key, "");
             write(key.getBytes());
             write((byte) '=');
             writeLine(value);
-	}
-	writeLine("# EOF");
+        }
+        writeLine("# EOF");
     }
 
     public Properties readProperties() throws IOException {
-	this.seek(0);
-	Properties props = new Properties();
-	String line;
-	int pos;
-	while ((line = readLine()) != null) {
-	    line = line.trim();
-	    if (line.equals("# EOF")) return props;
-	    if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
-	    pos = line.indexOf("=");
-	    if (pos < 0) continue;
-	    props.setProperty(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
-	}
-	return props;
+        this.seek(0);
+        final Properties props = new Properties();
+        String line;
+        int pos;
+        while ((line = readLine()) != null) {
+            line = line.trim();
+            if (line.equals("# EOF")) return props;
+            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
+            pos = line.indexOf("=");
+            if (pos < 0) continue;
+            props.setProperty(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
+        }
+        return props;
     }
 
-    public void writeMap(Map map, String comment) throws IOException {
-	this.seek(0);
-	writeLine("# " + comment);
-	Iterator i = map.entrySet().iterator();
-	Map.Entry entry;
-	while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
+    public void writeMap(final Map map, final String comment) throws IOException {
+        this.seek(0);
+        writeLine("# " + comment);
+        final Iterator iter = map.entrySet().iterator();
+        Map.Entry entry;
+        while (iter.hasNext()) {
+            entry = (Map.Entry) iter.next();
             write(((String) entry.getKey()).getBytes());
             write((byte) '=');
-	    writeLine((String) entry.getValue());
-	}
-	writeLine("# EOF");
+           writeLine((String) entry.getValue());
+        }
+        writeLine("# EOF");
     }
 
     public Map readMap() throws IOException {
-	this.seek(0);
-	TreeMap map = new TreeMap();
-	String line;
-	int pos;
-	while ((line = readLine()) != null) { // very slow readLine????
-	    line = line.trim();
-	    if (line.equals("# EOF")) return map;
-	    if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
-	    pos = line.indexOf("=");
-	    if (pos < 0) continue;
-	    map.put(line.substring(0, pos), line.substring(pos + 1));
-	}
-	return map;
+        this.seek(0);
+        final TreeMap map = new TreeMap();
+        String line;
+        int pos;
+        while ((line = readLine()) != null) { // very slow readLine????
+            line = line.trim();
+            if (line.equals("# EOF")) return map;
+            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
+            pos = line.indexOf("=");
+            if (pos < 0) continue;
+            map.put(line.substring(0, pos), line.substring(pos + 1));
+        }
+        return map;
     }
 
-    public void writeArray(byte[] b) throws IOException {
-	// this does not write the content to the see position
-	// but to the very beginning of the record
-	// some additional bytes will ensure that we know the correct content size later on
-	seek(0);
-	writeInt(b.length);
-	write(b);
+    /**
+     * this does not write the content to the see position
+     * but to the very beginning of the record
+     * some additional bytes will ensure that we know the correct content size later on
+     */
+    public void writeArray(final byte[] b) throws IOException {
+        seek(0);
+        writeInt(b.length);
+        write(b);
     }
 
     public byte[] readArray() throws IOException {
-	seek(0);
-	int l = readInt();
-	byte[] b = new byte[l];
-	read(b, 0, l);
-	return b;
+        seek(0);
+        final int l = readInt();
+        final byte[] b = new byte[l];
+        read(b, 0, l);
+        return b;
     }
 
 }
