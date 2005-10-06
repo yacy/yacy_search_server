@@ -67,7 +67,8 @@
                   <a href="http://#[fullname]#.yacy/Wiki.html#[updatedWikiPage]#" class="small" title="Read and edit wiki on peer #[fullname]#">w</a>&nbsp;&nbsp;#[alert]#
 </td>
 <td class="small"><a href="http://www.#[fullname]#.yacy" class="small">#[shortname]#</a></td>
-<td class="small">#(info)##(direct)#<img border="0" src="/env/grafics/JuniorPassive.gif" title="Type: Junior | Contact: passive"></img>::<img border="0" src="/env/grafics/JuniorDirect.gif" title="Type: Junior | Contact: direct"></img>#(/direct)#::#(direct)#<img border="0" src="/env/grafics/SeniorPassive.gif" title="Type: Senior | Contact: passive"></img>::<img border="0" src="/env/grafics/SeniorDirect.gif" title="Type: Senior | Contact: direct"></img>#(/direct)#::<a href="#[url]#">#(direct)#<img border="0" src="/env/grafics/PrincipalPassive.gif" title="Type: Principal | Contact: passive | Seed download: possible"></img>::<img border="0" src="/env/grafics/PrincipalDirect.gif"  title="Type: Principal | Contact: direct | Seed download: possible"></img>#(/direct)#</a>#(/info)##(acceptcrawl)#<img border="0" src="/env/grafics/CrawlNo.gif" title="Accept Crawl: no"></img>::<img border="0" src="/env/grafics/CrawlYes.gif" title="Accept Crawl: yes"></img>#(/acceptcrawl)##(dhtreceive)#<img border="0" src="/env/grafics/DHTReceiveNo.gif" title="DHT Receive: no"></img>::<img border="0" src="/env/grafics/DHTReceiveYes.gif" title="DHT Receive: yes"></img>#(/dhtreceive)#</td>
+<td class="small">
+#(type)##(direct)#<img border="0" src="/env/grafics/JuniorPassive.gif" title="Type: Junior | Contact: passive"></img>::<img border="0" src="/env/grafics/JuniorDirect.gif" title="Type: Junior | Contact: direct"></img>::<img border="0" src="/env/grafics/JuniorOffline.gif" title="Type: Junior | Contact: offline"></img>#(/direct)#::#(direct)#<img border="0" src="/env/grafics/SeniorPassive.gif" title="Type: Senior | Contact: passive"></img>::<img border="0" src="/env/grafics/SeniorDirect.gif" title="Type: Senior | Contact: direct"></img>::<img border="0" src="/env/grafics/SeniorOffline.gif" title="Type: Senior | Contact: offline"></img>#(/direct)#::<a href="#[url]#">#(direct)#<img border="0" src="/env/grafics/PrincipalPassive.gif" title="Type: Principal | Contact: passive | Seed download: possible"></img>::<img border="0" src="/env/grafics/PrincipalDirect.gif"  title="Type: Principal | Contact: direct | Seed download: possible"></img>::<img border="0" src="/env/grafics/PrincipalOffline.gif"  title="Type: Principal | Contact: offline | Seed download: ?"></img>#(/direct)#</a>#(/type)##(acceptcrawl)#<img border="0" src="/env/grafics/CrawlNo.gif" title="Accept Crawl: no"></img>::<img border="0" src="/env/grafics/CrawlYes.gif" title="Accept Crawl: yes"></img>::<img border="0" src="/env/grafics/CrawlYesOffline.gif" title="Accept Crawl: yes"></img>#(/acceptcrawl)##(dhtreceive)#<img border="0" src="/env/grafics/DHTReceiveNo.gif" title="DHT Receive: no"></img>::<img border="0" src="/env/grafics/DHTReceiveYes.gif" title="DHT Receive: yes"></img>::<img border="0" src="/env/grafics/DHTReceiveYesOffline.gif" title="DHT Receive: yes"></img>#(/dhtreceive)#</td>
 <td class="small" align="right">#[version]#</td>
 <td class="small" align="right">#[lastSeen]#</td>
 <td class="small" align="right">#[utc]#</td>
@@ -89,6 +90,7 @@
 #(/complete)#
 </tr>
 #{/list}#
+<tr><td colspan="15" align="right"><p><font size="-3"><i>runtime: #[rt]# ms</i></font></p></td></tr>
 </table>
 </p>
 ::
@@ -204,5 +206,6 @@ To do this, press this button:
 </form>
 #(/table)#
 #[footer]#
+
 </body>
 </html>

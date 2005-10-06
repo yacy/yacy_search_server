@@ -65,6 +65,8 @@ public class Network {
     private static final String STR_TABLE_LIST = "table_list_";
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
+        long start = System.currentTimeMillis();
+        
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final boolean overview = (post == null) || (((String) post.get("page", "0")).equals("0"));
@@ -309,24 +311,39 @@ public class Network {
 
 
                             if (seed.isJunior()) {
-                                prop.put(STR_TABLE_LIST + conCount + "_info", 0);
+                                prop.put(STR_TABLE_LIST + conCount + "_type", 0);
                             } else if(seed.isSenior()){
-                                prop.put(STR_TABLE_LIST + conCount + "_info", 1);
+                                prop.put(STR_TABLE_LIST + conCount + "_type", 1);
                             } else if(seed.isPrincipal()) {
-                                prop.put(STR_TABLE_LIST + conCount + "_info", 2);
+                                prop.put(STR_TABLE_LIST + conCount + "_type", 2);
                             }
-                            prop.put(STR_TABLE_LIST + conCount + "_info_url", seed.get("seedURL", "http://nowhere/"));
+                            prop.put(STR_TABLE_LIST + conCount + "_type_url", seed.get("seedURL", "http://nowhere/"));
 
                             long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
-//                          if (lastseen < 0) lastseen = 0;
-                            if (page == 2 || lastseen > 1440) { // Passive Peers should be passive, also Peers without contact greater than an day 
-                                prop.put(STR_TABLE_LIST + conCount + "_info_direct", 0);
-                            } else { 
-                                prop.put(STR_TABLE_LIST + conCount + "_info_direct", seed.getFlagDirectConnect() ? 1 : 0);
+                            if (page == 2 || lastseen > 1440) { // Passive Peers should be passive, also Peers without contact greater than an day
+                                // principal/senior/junior: red/red=offline
+                                prop.put(STR_TABLE_LIST + conCount + "_type_direct", 2);
+                            } else {
+                                // principal/senior: green/green=direct or yellow/yellow=passive
+                                // junior: red/green=direct or red/yellow=passive
+                                prop.put(STR_TABLE_LIST + conCount + "_type_direct", seed.getFlagDirectConnect() ? 1 : 0);
                             }
-                            prop.put(STR_TABLE_LIST + conCount + "_acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0);
-                            prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
-
+                            
+                            if (page == 1) {
+                                prop.put(STR_TABLE_LIST + conCount + "_acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0); // green=on or red=off 
+                                prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);  // green=on or red=off
+                            } else { // Passive, Potential Peers
+                                if (seed.getFlagAcceptRemoteCrawl()) {
+                                    prop.put(STR_TABLE_LIST + conCount + "_acceptcrawl", 2); // red/green: offline, was on
+                                } else {
+                                    prop.put(STR_TABLE_LIST + conCount + "_acceptcrawl", 0); // red/red; offline was off
+                                }
+                                if (seed.getFlagAcceptRemoteIndex()) {
+                                    prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", 2);  // red/green: offline, was on
+                                } else {
+                                    prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", 0);  // red/red; offline was off
+                                }
+                            }
                             prop.put(STR_TABLE_LIST + conCount + "_version", yacy.combinedVersionString2PrettyString(seed.get("Version", "0.1")));
                             prop.put(STR_TABLE_LIST + conCount + "_lastSeen", lastseen);
                             prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get("UTC", "-"));
@@ -359,6 +376,7 @@ public class Network {
                 default: break;
             }
         }
+        prop.put("table_rt", System.currentTimeMillis() - start);
         // return rewrite properties
         return prop;
     }
