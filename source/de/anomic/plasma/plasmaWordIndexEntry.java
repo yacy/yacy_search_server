@@ -181,7 +181,7 @@ public final class plasmaWordIndexEntry {
 
     // the class instantiation can only be done by a plasmaStore method
     // therefore they are all public
-    public plasmaWordIndexEntry(String urlHash, int count, int posintext, int posinphrase, int posofphraseint, int virtualage, int quality, String language, char doctype, boolean local) {
+    public plasmaWordIndexEntry(String urlHash, int count, int posintext, int posinphrase, int posofphrase, int virtualage, int quality, String language, char doctype, boolean local) {
 
 	// ** hier fehlt noch als Attribut: <Wortposition im Text>, damit 'nearby' getrackt werden kann **
 

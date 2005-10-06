@@ -97,9 +97,13 @@ public class imagetest {
         return bi;
         */
         ImagePainter img = new ImagePainter(300, 200, ImagePainter.TRANSPARENT);
-        img.dot(150, 100, 50, true, ImagePainter.BLUE, ImagePainter.MODE_REPLACE);
-        img.dot(170, 130, 40, true, ImagePainter.GREEN, ImagePainter.MODE_REPLACE);
-        return img.toImage();
+        img.dot(150, 100, 90, true, ImagePainter.BLUE, ImagePainter.MODE_MIX);
+        img.dot(190, 130, 60, true, ImagePainter.GREEN, ImagePainter.MODE_MIX);
+        img.arc(220, 90, 50, 90, 30, 110, ImagePainter.RED / 2, ImagePainter.MODE_MIX);
+        img.arc(210, 77, 50, 90, 30, 110, ImagePainter.RED / 2, ImagePainter.MODE_MIX);
+        img.print(50, 100, "BROADCAST MESSAGE #772: NODE %882 BLACK", ImagePainter.WHITE, ImagePainter.MODE_MIX);
+        img.print(50, 120, "BROADCAST MESSAGE #772: NODE %882 GREEN", ImagePainter.GREEN, ImagePainter.MODE_REPLACE);
+        return img.toImage(true);
         
     }
     
