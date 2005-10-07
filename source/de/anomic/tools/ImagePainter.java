@@ -57,15 +57,22 @@ import java.util.ArrayList;
 public class ImagePainter {
     
     public static final long TRANSPARENT = -1;
-    public static final long WHITE = 0xFFFFFF;
-    public static final long RED   = 0xFF0000;
-    public static final long GREEN = 0x00FF00;
-    public static final long BLUE  = 0x0000FF;
-    public static final long BLACK = 0;
+    
+    // colors regarding RGB Color Model
+    public static final long ADDITIVE_RED   = 0xFF0000;
+    public static final long ADDITIVE_GREEN = 0x00FF00;
+    public static final long ADDITIVE_BLUE  = 0x0000FF;
+    public static final long ADDITIVE_BLACK = 0xFFFFFF;
+    
+    // colors regarding CMY Color Model
+    public static final long SUBTRACTIVE_CYAN    = 0xFF0000;
+    public static final long SUBTRACTIVE_MAGENTA = 0x00FF00;
+    public static final long SUBTRACTIVE_YELLOW  = 0x0000FF;
+    public static final long SUBTRACTIVE_WHITE   = 0xFFFFFF;
     
     public static final byte MODE_REPLACE = 0;
-    public static final byte MODE_REVERSE = 1;
-    public static final byte MODE_MIX = 2;
+    public static final byte MODE_ADD = 1;
+    public static final byte MODE_SUB = 2;
 
     private static long[] font = new long[]{
         0x0000000,0x0421004,0x0A50000,0x0AFABEA,0x0FA38BE,0x09B39B2,0x0E82A8A,0x0420000,
@@ -130,7 +137,7 @@ public class ImagePainter {
     public ImagePainter(int width, int height, long backgroundColor) {
         this.width = width;
         this.height = height;
-        this.defaultCol = BLACK;
+        this.defaultCol = ADDITIVE_BLACK;
         this.defaultMode = MODE_REPLACE;
         grid = new long[width*height];
         for (int n= width * height - 1; n >= 0; n--) grid[n] = backgroundColor;
@@ -159,48 +166,30 @@ public class ImagePainter {
         defaultMode = m;
     }
     
-    /*
     private void plot(int x, int y) {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
         if (defaultMode == MODE_REPLACE) {
             grid[x + y * width] = defaultCol;
-        } else if (defaultMode == MODE_MIX) {
-            int n = x + y * width;
-            long c = grid[n];
-            if (c < 0) {
-                //grid[n] = defaultCol;
-                int r = (int) (0xFF - (defaultCol >> 16));
-                int g = (int) (0xFF - ((defaultCol >> 8) & 0xff));
-                int b = (int) (0xFF - (defaultCol & 0xff));
-                grid[n] = r << 16 | g << 8 | b;
-            } else {
-                int r = (int) ((c >> 16) - (defaultCol >> 16));
-                int g = (int) (((c >> 8) & 0xff) - ((defaultCol >> 8) & 0xff));
-                int b = (int) ((c & 0xff) - (defaultCol & 0xff));
-                grid[n] = ((r < 0) ? 0 : r << 16) | ((g < 0) ? 0 : g << 8) | ((b < 0) ? 0 : b);
-            }
-        }
-    }
-    */
-    
-    
-    private void plot(int x, int y) {
-        if ((x < 0) || (x >= width)) return;
-        if ((y < 0) || (y >= height)) return;
-        if (defaultMode == MODE_REPLACE) {
-            grid[x + y * width] = defaultCol;
-        } else if (defaultMode == MODE_MIX) {
+        } else if (defaultMode == MODE_ADD) {
             int n = x + y * width;
             long c = grid[n];
             if (c < 0) {
                 grid[n] = defaultCol;
             } else {
-                int r = ((int) ((c >> 16) + (defaultCol >> 16))) & 0xff;
-                int g = ((int) (((c >> 8) & 0xff) + ((defaultCol >> 8) & 0xff))) & 0xff;
-                int b = ((int) ((c & 0xff) + (defaultCol & 0xff))) & 0xff;
+                int r = ((int) ((c >> 16) + (defaultCol >> 16))); if (r > 0xff) r = 0xff;
+                int g = ((int) (((c >> 8) & 0xff) + ((defaultCol >> 8) & 0xff))); if (g > 0xff) g = 0xff;
+                int b = ((int) ((c & 0xff) + (defaultCol & 0xff))); if (b > 0xff) b = 0xff;
                 grid[n] = r << 16 | g << 8 | b;
             }
+        } else if (defaultMode == MODE_SUB) {
+            int n = x + y * width;
+            long c = grid[n];
+            if (c < 0) c = 0xffffff;
+            int r = ((int) ((c >> 16) - (defaultCol >> 16))); if (r < 0) r = 0;
+            int g = ((int) (((c >> 8) & 0xff) - ((defaultCol >> 8) & 0xff))); if (g < 0) g = 0;
+            int b = ((int) ((c & 0xff) - (defaultCol & 0xff))); if (g < 0) g = 0;
+            grid[n] = r << 16 | g << 8 | b;
         }
     }
     
@@ -321,34 +310,61 @@ public class ImagePainter {
         }
     }
     
+    private static final int arcDist = 8;
+    public void arcPrint(int cx, int cy, int radius, int angle, String message) {
+        int x = cx + (int) ((radius + 1) * Math.cos(Math.PI * angle / 180));
+        int y = cy - (int) ((radius + 1) * Math.sin(Math.PI * angle / 180));
+        int yp = y + 3;
+        if ((angle > arcDist) && (angle < 180 - arcDist)) yp = y;
+        if ((angle > 180 + arcDist) && (angle < 360 - arcDist)) yp = y + 6;
+        if ((angle > ( 90 - arcDist)) && (angle < ( 90 + arcDist))) yp -= 6;
+        if ((angle > (270 - arcDist)) && (angle < (270 + arcDist))) yp += 6;
+        int xp = x - 3 * message.length();
+        if ((angle > (90 + arcDist)) && (angle < (270 - arcDist))) xp = x - 6 * message.length();
+        if ((angle < (90 - arcDist)) || (angle > (270 + arcDist))) xp = x;
+        print(xp, yp, message);
+    }
+    
+    public void arcLine(int cx, int cy, int innerRadius, int outerRadius, int angle) {
+        int xi = cx + (int) ((innerRadius + 1) * Math.cos(Math.PI * angle / 180));
+        int yi = cy - (int) ((innerRadius + 1) * Math.sin(Math.PI * angle / 180));
+        int xo = cx + (int) ((outerRadius + 1) * Math.cos(Math.PI * angle / 180));
+        int yo = cy - (int) ((outerRadius + 1) * Math.sin(Math.PI * angle / 180));
+        line(xi, yi, xo, yo);
+    }
+    
     public BufferedImage toImage(boolean complementary) {
         BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB); 
         Graphics2D gr = bi.createGraphics();
         gr.setBackground(Color.white);
         gr.clearRect(0, 0, width, height);
-
+        
         WritableRaster wr = bi.getRaster();
         long c;
-        int r, g, b, m, n, d;
-        for (int i = width - 1; i >= 0; i--) {
-            for (int j = height - 1; j >= 0; j--) {
-                c = grid[i + j * width];
-                if (c >= 0) {
-                    r = (int) (c >> 16);
-                    g = (int) ((c >> 8) & 0xff);
-                    b = (int) (c & 0xff);
-                    m = Math.max(g + b, Math.max(r + b, r + g)); // max of m = 0x1fe
-                    n = Math.max(r, Math.max(g, b));
-                    d = 1 + ((m + n) / 0x1ff);
-                    if (complementary) {
-                        wr.setPixel(i, j, new int[]{(m + 2 * r - g - b) / d, (m + 2 * g - r - b) / d , (m + 2 * b - r - g) / d});
-                    } else {
-                        wr.setPixel(i, j, new int[]{r, g, b});
+        if (complementary) {
+            int r, g, b;
+            // then set pixels
+            for (int i = width - 1; i >= 0; i--) {
+                for (int j = height - 1; j >= 0; j--) {
+                    c = grid[i + j * width];
+                    if (c >= 0) {
+                        r = (int) (c >> 16);
+                        g = (int) ((c >> 8) & 0xff);
+                        b = (int) (c & 0xff);
+                        wr.setPixel(i, j, new int[]{(0x1fe - g - b) / 2, (0x1fe - r - b) / 2, (0x1fe - r - g) / 2});
+                    }
+                }
+            }
+        } else {
+            for (int i = width - 1; i >= 0; i--) {
+                for (int j = height - 1; j >= 0; j--) {
+                    c = grid[i + j * width];
+                    if (c >= 0) {
+                        wr.setPixel(i, j, new int[]{(int) (c >> 16), (int) ((c >> 8) & 0xff), (int) (c & 0xff)});
                     }
                 }
             }
         }
-        
         return bi;
     }
 

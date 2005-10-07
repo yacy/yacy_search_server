@@ -98,24 +98,24 @@ public class imagetest {
         */
         ImagePainter img = new ImagePainter(800, 600, ImagePainter.TRANSPARENT);
         
-        img.setMode(ImagePainter.MODE_MIX);
-        img.setColor(ImagePainter.BLACK);
-        for (int y = 0; y < 600; y = y + 50) img.print(0, y, "" + y);
-        for (int x = 0; x < 800; x = x + 50) img.print(x, 10, "" + x);
-        img.setColor(ImagePainter.BLUE);
-        img.dot(150, 100, 90, true);
-        img.setColor(ImagePainter.GREEN);
-        img.dot(190, 130, 60, true);
-        img.setColor(ImagePainter.RED);
+        img.setMode(ImagePainter.MODE_ADD);
+        img.setColor(ImagePainter.ADDITIVE_BLACK);
+        for (int y = 0; y < 600; y = y + 50) img.print(0, 6 + y, "" + y);
+        for (int x = 0; x < 800; x = x + 50) img.print(x, 6    , "" + x);
+        img.setColor(ImagePainter.ADDITIVE_RED);
+        img.dot(550, 110, 90, true);
+        img.setColor(ImagePainter.ADDITIVE_GREEN);
+        img.dot(480, 200, 90, true);
+        img.setColor(ImagePainter.ADDITIVE_BLUE);
+        img.dot(620, 200, 90, true);
+        img.setColor(ImagePainter.ADDITIVE_RED);
         img.arc(300, 270, 30, 70, 0, 360);
-        img.setColor("AA0000");
-        img.arc(220, 90, 50, 90, 30, 110);
-        img.arc(210, 77, 50, 90, 30, 110);
-        img.setColor(ImagePainter.WHITE);
-        img.print(50, 100, "BROADCAST MESSAGE #772: NODE %882 WHITE abcefghijklmnopqrstuvwxyz");
-        img.setColor(ImagePainter.BLACK);
+        img.setColor("330000");
+        img.arc(220, 110, 50, 90, 30, 110);
+        img.arc(210, 120, 50, 90, 30, 110);
+        img.setColor(ImagePainter.ADDITIVE_BLACK);
         img.print(50, 110, "BROADCAST MESSAGE #772: NODE %882 BLACK abcefghijklmnopqrstuvwxyz");
-        img.setColor(ImagePainter.GREEN);
+        img.setColor(ImagePainter.ADDITIVE_GREEN);
         img.print(50, 120, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz");
         for (long i = 0; i < 256; i++) {
             img.setColor(i);
@@ -123,7 +123,28 @@ public class imagetest {
         }
         img.setColor("008000");
         img.dot(10 + 14 * 8, 200 + 14 * 8, 90, true);
-        
+        /*
+        for (long r = 0; r < 256; r = r + 16) {
+            for (long g = 0; g < 256; g = g + 16) {
+                for (long b = 0; b < 256; b = b + 16) {
+                    img.setColor(r << 16 + g << 8 + b);
+                    img.dot((int) (10 + 48 * g + 12 * ((r / 16) / 12)), (int) (420 + 48 * b + 12 * ((r / 16) % 12)), 4, true);
+                }
+            }
+        }*/
+        img.setColor("0000A0");
+        img.arc(550, 400, 40, 81, 0, 360);
+        img.setColor("010100");
+        for (int i = 0; i <= 360; i++) {
+            img.arc(550, 400, 40, 41 + i/9, 0, i);
+        }
+        img.setColor(ImagePainter.ADDITIVE_BLACK);
+        int angle;
+        for (byte c = (byte) 'A'; c <= 'Z'; c++) {
+            angle = ((byte) c - (byte) 'A') * 360 / ((byte) 'Z' - (byte) 'A');
+            img.arcLine(550, 400, 81, 100, angle);
+            img.arcPrint(550, 400, 100, angle, "ANGLE" + angle + ":" + (char) c);
+        }
         return img.toImage(true);
         
     }
