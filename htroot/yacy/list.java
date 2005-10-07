@@ -57,18 +57,21 @@ import de.anomic.server.serverSwitch;
 
 public final class list {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+        if (post == null || ss == null ) { return null; }
+
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
+        if (prop == null) { return null; }
+        
         final String col = (String) post.get("col", "");
-
-        final File listsPath = new File(env.getRootPath(),env.getConfig("listsPath", "DATA/LISTS"));
+        final File listsPath = new File(ss.getRootPath(),ss.getConfig("listsPath", "DATA/LISTS"));
 
         if (col.equals("black")) {
             String filename = "";
             final StringBuffer out = new StringBuffer();
 
-            final String filenames=env.getConfig("proxyBlackListsShared", "");
+            final String filenames=ss.getConfig("proxyBlackListsShared", "");
             final String[] filenamesarray = filenames.split(",");
 
             if(filenamesarray.length >0){
@@ -76,7 +79,7 @@ public final class list {
                     filename = filenamesarray[i];
                     out.append(listManager.getListString(new File(listsPath,filename).toString(), false)).append(serverCore.crlfString);
                 }
-            } // if filenamesarray.length >0
+            } // if filenamesarray.length > 0
 
             prop.put("list",out);
         } else {

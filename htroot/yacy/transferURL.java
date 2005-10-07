@@ -56,13 +56,14 @@ import de.anomic.yacy.yacySeed;
 public final class transferURL {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null) { return new serverObjects(); }
+        if (post == null || ss == null) { return null; }
+
         long start = System.currentTimeMillis();
 
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         final serverObjects prop = new serverObjects();
-        if (prop == null || sb == null) { return new serverObjects(); }
+        if (prop == null || sb == null) { return null; }
 
         // request values
         final String iam      = (String) post.get("iam", "");      // seed hash of requester

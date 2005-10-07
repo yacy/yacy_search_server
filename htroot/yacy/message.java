@@ -69,12 +69,12 @@ public final class message {
     }
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null) { return new serverObjects(); }
+        if (post == null || ss == null) { return null; }
 
         // return variable that accumulates replacements
         plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         serverObjects prop = new serverObjects();
-        if (prop == null || sb == null) { return new serverObjects(); }
+        if (prop == null || sb == null) { return null; }
 
 //      System.out.println("yacy/message:post=" + post.toString());
 

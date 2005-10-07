@@ -59,12 +59,12 @@ import de.anomic.yacy.yacySeed;
 public final class search {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null) { return new serverObjects(); }
+        if (post == null || ss == null) { return null; }
 
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         serverObjects prop = new serverObjects();
-        if (prop == null || sb == null) { return new serverObjects(); }
+        if (prop == null || sb == null) { return null; }
 
         //System.out.println("yacy: search received request = " + post.toString());
 
@@ -75,9 +75,9 @@ public final class search {
 //      final String  fwdep  = (String) post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
 //      final String  fwden  = (String) post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
         final long    duetime= Long.parseLong((String) post.get("duetime", "3000"));
-        final int     count  = Integer.parseInt((String) post.get("count", "10"));     // maximum number of wanted results
+        final int     count  = Integer.parseInt((String) post.get("count", "10"));         // maximum number of wanted results
         final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
-//      Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime")); // read remote time
+//      Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime"));        // read remote time
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
@@ -95,7 +95,7 @@ public final class search {
         final int links = Integer.parseInt(prop.get("linkcount","0"));
         yacyCore.seedDB.mySeed.incSI(links);
         yacyCore.seedDB.mySeed.incSU(links);
-       return prop;
+        return prop;
     }
 
 }

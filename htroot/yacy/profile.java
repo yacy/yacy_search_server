@@ -64,7 +64,7 @@ public final class profile {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
-        if (prop == null) { return new serverObjects(); }
+        if (prop == null) { return null; }
 
         Properties profile = new Properties();
         int count=0;

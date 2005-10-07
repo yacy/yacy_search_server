@@ -62,18 +62,18 @@ import de.anomic.yacy.yacyVersion;
 public final class hello {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null || yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return new serverObjects(); }
+        if (post == null || ss == null || yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return null; }
 
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        if (prop == null) { return new serverObjects(); }
+        if (prop == null) { return null; }
         
 //      final String iam      = (String) post.get("iam", "");      // complete seed of the requesting peer
 //      final String pattern  = (String) post.get("pattern", "");  //        
-//      final String mytime   = (String) post.get(STR_MYTIME, ""); // 
-        final String key      = (String) post.get("key", "");    // transmission key for response
-        final String seed     = (String) post.get(yacySeed.STR_SEED, ""); // 
-        final String countStr = (String) post.get("count", "0"); //
+//      final String mytime   = (String) post.get(STR_MYTIME, ""); //
+        final String key      = (String) post.get("key", "");      // transmission key for response
+        final String seed     = (String) post.get(yacySeed.STR_SEED, "");
+        final String countStr = (String) post.get("count", "0");
         int  i;
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (NumberFormatException e) {count = 0;}
@@ -81,7 +81,7 @@ public final class hello {
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key);
 
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
-        if (remoteSeed == null) { return new serverObjects(); }
+        if (remoteSeed == null) { return null; }
 
         // we easily know the caller's IP:
         final String clientip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum

@@ -62,16 +62,16 @@ import de.anomic.yacy.yacyDHTAction;
 public final class transferRWI {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null) { return new serverObjects(); }
+        if (post == null || ss == null) { return null; }
 
         long start = System.currentTimeMillis();
-        
-	// return variable that accumulates replacements
-        final serverObjects prop = new serverObjects();
+
+        // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
-        if (prop == null || sb == null) { return new serverObjects(); }
-        
-	// request values
+        final serverObjects prop = new serverObjects();
+        if (prop == null || sb == null) { return null; }
+
+        // request values
         final String iam      = (String) post.get("iam", "");    // seed hash of requester
 //      final String youare   = (String) post.get("youare", ""); // seed hash of the target peer, needed for network stability
 //      final String key      = (String) post.get("key", "");    // transmission key
@@ -79,11 +79,11 @@ public final class transferRWI {
         final int entryc      = Integer.parseInt((String) post.get("entryc", "")); // number of entries in indexes
         final byte[] indexes  = ((String) post.get("indexes", "")).getBytes();     // the indexes, as list of word entries
         final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
-	
+
         // response values
         String result = "";
         StringBuffer unknownURLs = new StringBuffer();
-        
+
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
         
@@ -91,7 +91,7 @@ public final class transferRWI {
             // log value status (currently added to find outOfMemory error
             sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
             final long startProcess = System.currentTimeMillis();
-            
+
             // decode request
             ArrayList v = new ArrayList();
             int s = 0;
@@ -103,7 +103,7 @@ public final class transferRWI {
             }
             // the value-vector should now have the same length as entryc
             if (v.size() != entryc) sb.getLog().logSevere("ERROR WITH ENTRY COUNTER: v=" + v.size() + ", entryc=" + entryc);
-            
+
             // now parse the Strings in the value-vector and write index entries
             String estring;
             int p;
@@ -130,7 +130,7 @@ public final class transferRWI {
                 }
             }
             yacyCore.seedDB.mySeed.incRI(received);
-            
+
             // finally compose the unknownURL hash list
             final Iterator it = unknownURL.iterator();            
             while (it.hasNext()) {
@@ -148,12 +148,12 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "error_not_granted";
         }
-        
+
         prop.put("unknownURL", unknownURLs.toString());
         prop.put("result", result);
-        
-	// return rewrite properties
-	return prop;
+
+        // return rewrite properties
+        return prop;
     }
 
 }

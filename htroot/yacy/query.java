@@ -57,12 +57,12 @@ import de.anomic.yacy.yacyCore;
 public final class query {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null) { return new serverObjects(); }
+        if (post == null || ss == null) { return null; }
 
         // return variable that accumulates replacements
-        final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
-        if (prop == null || sb == null) { return new serverObjects(); }
+        final serverObjects prop = new serverObjects();
+        if (prop == null || sb == null) { return null; }
 
 //      System.out.println("YACYQUERY: RECEIVED POST = " + ((post == null) ? "NULL" : post.toString()));
 
