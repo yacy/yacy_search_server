@@ -6,7 +6,7 @@
 ;last major change: 22.07.2005
 Name "YaCy"
 
-OutFile "yacy_v0.40_20050816_547.exe"
+OutFile "yacy_v0.41_20051004_848.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -19,7 +19,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.40(Build 20050816) on your computer. Select which optional things you want to be installed."
+ComponentText "This will install YaCy v0.41(Build 20051004) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old Version was installed into another locAtion(eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install in to:"
@@ -66,6 +66,7 @@ Section "Binaries (required)"
 	#htroot non devel
 	SetOutPath "$INSTDIR\htroot"
 	File "htroot\*.html"
+	File "htroot\*.inc"
 	File "htroot\*.soap"
 	File "htroot\*.xml"
 	File "htroot\*.xsl"
