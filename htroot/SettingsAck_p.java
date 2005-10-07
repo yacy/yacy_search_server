@@ -137,26 +137,30 @@ public class SettingsAck_p {
             
             // read and process data
             String filter = (String) post.get("proxyfilter");
-            String user   = (String) post.get("proxyuser");
-            String pw1    = (String) post.get("proxypw1");
-            String pw2    = (String) post.get("proxypw2");
+			String use_proxyAccounts="";
+			if(post.containsKey("use_proxyaccounts")){
+				//needed? or set to true by default?
+	            use_proxyAccounts = (((String) post.get("use_proxyaccounts")).equals("on") ? "true" : "false" );
+			}else{
+				use_proxyAccounts = "false";
+			}
             // do checks
-            if ((filter == null) || (user == null) || (pw1 == null) || (pw2 == null)) {
+            if ((filter == null) || (use_proxyAccounts == null)) {
                 prop.put("info", 1);//error with submitted information
                 return prop;
             }
-            if (user.length() == 0) {
+            /*if (user.length() == 0) {
                 prop.put("info", 2);//username must be given
                 return prop;
-            }
-            if (!(pw1.equals(pw2))) {
+            }*/
+            /*if (!(pw1.equals(pw2))) {
                 prop.put("info", 3);//pw check failed
                 return prop;
-            }
+            }*/
             if (filter.length() == 0) filter = "*";
             // check passed. set account:
             env.setConfig("proxyClient", filter);
-            if (pw1.length() == 0) {
+            /*if (pw1.length() == 0) {
                 // only ip filter setting without account
                 env.setConfig("proxyAccountBase64MD5", "");
                 env.setConfig("proxyAccount", "");
@@ -169,7 +173,16 @@ public class SettingsAck_p {
                 prop.put("info", 7);//proxy account has changed
                 prop.put("info_user", user);
                 prop.put("info_filter", filter);
-            }
+            }*/
+            env.setConfig("use_proxyAccounts", use_proxyAccounts);//"true" or "false"
+			if (use_proxyAccounts.equals("false")){
+                prop.put("info", 6);//proxy account has changed(no pw)
+                prop.put("info_filter", filter);
+			} else {
+                prop.put("info", 7);//proxy account has changed
+                //prop.put("info_user", user);
+                prop.put("info_filter", filter);
+			}
             return prop;
         }
         

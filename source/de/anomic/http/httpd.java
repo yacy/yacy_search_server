@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.lang.StringIndexOutOfBoundsException;
 
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
@@ -71,6 +72,8 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.data.userDB;
 
 
 /**
@@ -100,7 +103,7 @@ public final class httpd implements serverHandler {
     private httpdHandler proxyHandler = null;   // a servlet that holds the proxy functions
     private httpdHandler fileHandler = null;    // a servlet that holds the file serving functions
     private httpdHandler soapHandler = null;
-    private static serverSwitch switchboard = null;
+    private static plasmaSwitchboard switchboard = null;
     private static String virtualHost = null;
     
     public static boolean keepAliveSupport = false;
@@ -112,7 +115,8 @@ public final class httpd implements serverHandler {
     private boolean allowServer;
     
     // for authentication
-    private String proxyAccountBase64MD5;
+    private boolean use_proxyAccounts = false;
+	private boolean proxyAccounts_init = false; // is use_proxyAccounts set?
     private String serverAccountBase64MD5;
     private String clientIP;
     
@@ -124,17 +128,19 @@ public final class httpd implements serverHandler {
     
     // needed for logging
     private final serverLog log = new serverLog("HTTPD");
+
+    private final serverCodings codings = new serverCodings(true);
     
     // class methods
     public httpd(serverSwitch s, httpdHandler fileHandler, httpdHandler proxyHandler) {
         // handler info
-        httpd.switchboard = s;
+        httpd.switchboard = (plasmaSwitchboard)s;
         this.fileHandler = fileHandler;
         this.proxyHandler = proxyHandler;
         httpd.virtualHost = switchboard.getConfig("fileHost","localhost");
         
         // authentication: by default none
-        this.proxyAccountBase64MD5 = null;
+        this.proxyAccounts_init = false;
         this.serverAccountBase64MD5 = null;
         this.clientIP = null;
         
@@ -152,7 +158,7 @@ public final class httpd implements serverHandler {
         this.userAddress = null;
         this.allowProxy = false;
         this.allowServer = false;
-        this.proxyAccountBase64MD5 = null;
+        this.proxyAccounts_init = false;
         this.serverAccountBase64MD5 = null;
         this.clientIP = null;
         this.prop.clear();
@@ -186,7 +192,7 @@ public final class httpd implements serverHandler {
             throw new IOException(errorMsg);
         }
         
-        this.proxyAccountBase64MD5 = null;
+        this.proxyAccounts_init = false;
         this.serverAccountBase64MD5 = null;
     }
     
@@ -301,21 +307,43 @@ public final class httpd implements serverHandler {
         String httpVersion = this.prop.getProperty("HTTP", "HTTP/0.9");            
         
         // reading the authentication settings from switchboard
-        if (this.proxyAccountBase64MD5 == null) 
-            this.proxyAccountBase64MD5 = switchboard.getConfig("proxyAccountBase64MD5", "");
+        if (this.proxyAccounts_init == false) {
+            this.use_proxyAccounts = (switchboard.getConfig("use_proxyAccounts", "false").equals("true") ? true : false);
+			this.proxyAccounts_init = true; // is initialised
+		}
         
-        if (this.proxyAccountBase64MD5.length() > 0) {
+        if (this.use_proxyAccounts) {
             String auth = (String) header.get(httpHeader.PROXY_AUTHORIZATION,"xxxxxx");    
-            if (!this.proxyAccountBase64MD5.equals(serverCodings.encodeMD5Hex(auth.trim().substring(6)))) {
-                // ask for authenticate
-                this.session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-                        httpHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString).getBytes());
-                this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
-                this.session.out.write("\r\n".getBytes());                   
-                return false;
-            }
-        }
-        return true;
+			auth=auth.trim().substring(6);
+            try{
+                auth=codings.decodeBase64String(auth);
+            }catch(StringIndexOutOfBoundsException e){} //no valid Base64
+            String[] tmp=auth.split(":");
+            if(tmp.length == 2){
+                userDB.Entry entry=switchboard.userDB.getEntry(tmp[0]);
+                if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(auth)) ){
+					//TODO: Check Timelimits
+                    return true;
+                }
+			}
+            // ask for authenticate
+            this.session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
+				httpHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString).getBytes());
+            this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
+            this.session.out.write("\r\n".getBytes());                   
+            return false;
+//            if (!this.proxyAccountBase64MD5.equals(serverCodings.encodeMD5Hex(auth.trim().substring(6)))) {
+//                // ask for authenticate
+//                this.session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
+//                        httpHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString).getBytes());
+//                this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
+//                this.session.out.write("\r\n".getBytes());                   
+//                return false;
+//            }
+        }else{
+			return true;
+		}
+        //return false; //UNREACHABLE
     }
     
     public Boolean UNKNOWN(String requestLine) throws IOException {

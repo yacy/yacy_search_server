@@ -26,7 +26,7 @@
 </td>
 
 <td width="100%">
-<form action="User_p.html">
+<form action="User_p.html" method="POST">
 Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly>
 Current User: #[username]#
 <p />
@@ -73,18 +73,22 @@ Current User: #[username]#
 </tr>
 </table>
 ::
-Result:
+<!-- Page 1: Results -->
 #(text)#
-leer
 ::
 User created: #[username]#
+::
+User changed: #[username]#
 #(/text)#
 <p />
 #(error)#
-no error
+::
+generic error.
 ::
 Passwords do not match.
 #(/error)#
+<p />
+If you want to manage more Users, return to the <a href="User_p.html?change_user=true&user=#[username]#">user</a> page.
 
 #(/page)#
 

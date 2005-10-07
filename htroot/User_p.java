@@ -103,7 +103,7 @@ public class User_p {
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
 			}
-        } else if(post.containsKey("change")) { //Data submitted
+        } else if(post.containsKey("change")) { //New User
             prop.put("page", 1); //results
             prop.put("page_text", 0);
             prop.put("page_error", 0);
@@ -123,14 +123,14 @@ public class User_p {
                 pw=(String)post.get("password");
                 pw2=(String)post.get("password2");
                 if(! pw.equals(pw2)){
-                    prop.put("page_error", 1); //PW does not match
+                    prop.put("page_error", 2); //PW does not match
                     return prop;
                 }
                 firstName=(String)post.get("firstname");
                 lastName=(String)post.get("lastname");
                 address=(String)post.get("address");
                 timeLimit=(String)post.get("timelimit");
-                timeUsed=(String)post.get("timelimit");
+                timeUsed=(String)post.get("timeused");
                 
 				if(!pw.equals("")){ //change only if set
 	                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
@@ -143,6 +143,8 @@ public class User_p {
 
                 entry=sb.userDB.createEntry(username, mem);
                 sb.userDB.addEntry(entry);
+				prop.put("page_text_username", username);
+				prop.put("page_text", 1);
                 
             } else { //edit user
                 username=(String)post.get("username");
@@ -156,7 +158,7 @@ public class User_p {
                 lastName=(String)post.get("lastname");
                 address=(String)post.get("address");
                 timeLimit=(String)post.get("timelimit");
-                timeUsed=(String)post.get("timelimit");
+                timeUsed=(String)post.get("timeused");
 
                 entry = sb.userDB.getEntry(username);
 				if(entry != null){
@@ -169,10 +171,13 @@ public class User_p {
 	                    entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
 		            }catch (IOException e){
 					}
-                }//TODO? else error
-                
-
-            }
+                }else{
+					prop.put("page_error", 1);
+				}
+				prop.put("page_text_username", username);
+				prop.put("page_text", 2);
+            }//edit user
+			prop.put("page_username", username);
         }
 		
 		//Generate Userlist

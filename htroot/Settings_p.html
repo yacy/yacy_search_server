@@ -121,16 +121,8 @@ All traffic is routed throug one single port, for both proxy and server.<br>
     <td colspan ="2"><input name="proxyfilter" type="text" size="50" maxlength="1000" value="#[proxyfilter]#"></td>
   </tr>
   <tr valign="top">
-    <td>Account Name:</td>
-    <td><input name="proxyuser" type="text" size="16" maxlength="16" value="#[proxyuser]#"></td>
-  </tr>
-  <tr valign="top">
-    <td>Password:</td>
-    <td><input name="proxypw1" type="password" size="16" maxlength="16" value=""></td>
-  </tr>
-  <tr valign="top">
-    <td>Password (repeat same as above):</td>
-    <td><input name="proxypw2" type="password" size="16" maxlength="16" value=""></td>
+    <td>Accounts:</td>
+    <td><input name="use_proxyaccounts" type="checkbox" size="16" maxlength="16" value="on" #(use_proxyAccounts)#::checked#(/use_proxyAccounts)#> Use <a href="User_p.html">Proxy Accounts</a></td>
   </tr>
   <tr valign="top">
     <td colspan="2"><input type="submit" name="proxyaccount" value="Submit"></td>

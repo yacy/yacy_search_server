@@ -627,6 +627,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             indexDistribution.close();
             cacheLoader.close();
             wikiDB.close();
+			userDB.close();
             messageDB.close();
             if (facilityDB != null) facilityDB.close();
             urlPool.close();

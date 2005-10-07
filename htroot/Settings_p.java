@@ -118,17 +118,18 @@ public final class Settings_p {
         prop.put("proxyfilter", env.getConfig("proxyClient", "*"));
         
         // proxy password
-        if (env.getConfig("proxyAccountBase64", "").length() == 0) {
+        if ( env.getConfig("use_proxyAccounts", "false").equals("false") ) {
             // no password has been specified
-            prop.put("proxyuser","proxy");
+            prop.put("use_proxyAccounts", 0); //unchecked
         } else {
-            s = env.getConfig("proxyAccount", "proxy:void");
+            prop.put("use_proxyAccounts", 1); //checked
+            /*s = env.getConfig("proxyAccount", "proxy:void");
             pos = s.indexOf(":");
             if (pos < 0) {
                 prop.put("proxyuser","proxy");
             } else {
                 prop.put("proxyuser",s.substring(0, pos));
-            }
+            }*/
         }
         
         // server access filter

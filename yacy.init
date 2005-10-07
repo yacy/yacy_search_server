@@ -174,12 +174,16 @@ proxyClient=localhost,127.0.0.1,192.168.*,10.*
 # search services.
 serverClient=*
 
-# proxyAccount: a user:password - pair for proxy authentification
-# leave empty for no authenication
-# example:
-#proxyAccount=jim:knopf
-proxyAccount=
-proxyAccountBase64MD5=
+### proxyAccount: a user:password - pair for proxy authentification
+### leave empty for no authenication
+### example:
+##proxyAccount=jim:knopf
+##proxyAccount=
+##proxyAccountBase64MD5=
+
+# use_proxyAccounts: set to true to restrict proxy-access to some identified users.
+#use User_p.html to create some Users.
+use_proxyAccounts=false
 
 # serverAccount: a user:password - pair for web server access
 # this is the access to the 'public' pages on the server
