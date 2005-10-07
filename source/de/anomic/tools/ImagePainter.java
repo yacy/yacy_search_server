@@ -68,10 +68,18 @@ public class ImagePainter {
     public static final byte MODE_MIX = 2;
 
     private static long[] font = new long[]{
-        0x0,0x421004,0xa50000,0xafabea,0xfa38be,0x9b39b2,0xe82a8a,0x420000,0x221082,0x821080,0x51040,0x23880,0x1088,0x3800,0x4,0x111110,
-        0xe9d72e,0x46108e,0xe8991f,0xe88a2e,0x657c42,0x1f8783e,0xe87a2e,0x1f11084,0xe8ba2e,0xe8bc2e,0x20080,0x20088,0x222082,0xf83e0,0x820888,0xe11004,
-        0xeefa0e,0x4547f1,0x1c97a3e,0xe8420e,0x1e8c63e,0x1f8721f,0x1f87210,0xe85e2e,0x118fe31,0x1f2109f,0x1f0862e,0x1197251,0x108421f,0x11dd631,0x11cd671,0xe8c62e,
-        0x1e8fa10,0xe8d64d,0x1e8fa51,0xe8382e,0x1f21084,0x118c62e,0x118c544,0x118c6aa,0x1151151,0x1151084,0x1f1111f,0xe4210e,0x1041041,0xe1084e,0x454400,0x1f
+        0x0000000,0x0421004,0x0A50000,0x0AFABEA,0x0FA38BE,0x09B39B2,0x0E82A8A,0x0420000,
+        0x0221082,0x0821080,0x0051040,0x0023880,0x0001088,0x0003800,0x0000004,0x0111110,
+        0x0E9D72E,0x046108E,0x0E8991F,0x0E88A2E,0x0657C42,0x1F8783E,0x0E87A2E,0x1F11084,
+        0x0E8BA2E,0x0E8BC2E,0x0020080,0x0020088,0x0222082,0x00F83E0,0x0820888,0x0E11004,
+        0x0EEFA0E,0x04547F1,0x1C97A3E,0x0E8420E,0x1E8C63E,0x1F8721F,0x1F87210,0x0E85E2E,
+        0x118FE31,0x1F2109F,0x1F0862E,0x1197251,0x108421F,0x11DD631,0x11CD671,0x0E8C62E,
+        0x1E8FA10,0x0E8D64D,0x1E8FA51,0x0E8382E,0x1F21084,0x118C62E,0x118C544,0x118C6AA,
+        0x1151151,0x1151084,0x1F1111F,0x0E4210E,0x1041041,0x0E1084E,0x0454400,0x000001F,
+        0x0820000,0x0003E2F,0x1087A3E,0x0003E0F,0x010BE2F,0x0064A8F,0x0623884,0x00324BE,
+        0x1085B31,0x0401084,0x0401088,0x1084F93,0x0421084,0x0002AB5,0x0003A31,0x0003A2E,
+        0x00F47D0,0x007C5E1,0x0011084,0x0001932,0x0471084,0x000462E,0x0004544,0x00056AA,
+        0x000288A,0x0002884,0x0003C9E,0x0622086,0x0421084,0x0C2088C,0x0045440,0x1F8C63F
     };
     
     private static final int radiusPrecalc = 120;
@@ -139,11 +147,15 @@ public class ImagePainter {
         return s;
     }
     
-    private void setColor(long c) {
+    public void setColor(long c) {
         defaultCol = c;
     }
     
-    private void setMode(byte m) {
+    public void setColor(String s) {
+        defaultCol = colNum(s);
+    }
+    
+    public void setMode(byte m) {
         defaultMode = m;
     }
     
@@ -244,10 +256,10 @@ public class ImagePainter {
             for (int i = c.length - 1; i >= 0; i--) {
                 x = c[i][0];
                 y = c[i][1];
-                plot(xc + x, yc + y);
-                plot(xc - x + 1, yc + y);
-                plot(xc + x, yc - y + 1);
-                plot(xc - x + 1, yc - y + 1);
+                plot(xc + x    , yc - y - 1); // quadrant 1
+                plot(xc - x + 1, yc - y - 1); // quadrant 2
+                plot(xc + x    , yc + y    ); // quadrant 4
+                plot(xc - x + 1, yc + y    ); // quadrant 3
             }
         }
     }
@@ -262,12 +274,12 @@ public class ImagePainter {
             int q = c.length;
             int[][] c4 = new int[q * 4][];
             for (int i = 0; i < q; i++) {
-                c4[i        ] = new int[]{  c[i        ][0],1-c[i        ][1]};
-                c4[i +     q] = new int[]{1-c[q - 1 - i][0],1-c[q - 1 - i][1]};
-                c4[i + 2 * q] = new int[]{1-c[i        ][0],  c[i        ][1]};
-                c4[i + 3 * q] = new int[]{  c[q - 1 - i][0],  c[q - 1 - i][1]};
+                c4[i        ] = new int[]{    c[i        ][0], -c[i        ][1] - 1}; // quadrant 1
+                c4[i +     q] = new int[]{1 - c[q - 1 - i][0], -c[q - 1 - i][1] - 1}; // quadrant 2
+                c4[i + 2 * q] = new int[]{1 - c[i        ][0],  c[i        ][1]    }; // quadrant 3
+                c4[i + 3 * q] = new int[]{    c[q - 1 - i][0],  c[q - 1 - i][1]    }; // quadrant 4
             }
-            for (int i = q * 4 * fromArc / 360; i <= q * 4 * toArc / 360; i++) {
+            for (int i = q * 4 * fromArc / 360; i < q * 4 * toArc / 360; i++) {
                 plot(xc + c4[i][0], yc + c4[i][1]);
             }
         }
@@ -289,9 +301,7 @@ public class ImagePainter {
         }
     }
     
-    public void dot(int x, int y, int radius, boolean filled, long color, byte mode) {
-        setColor(color);
-        setMode(mode);
+    public void dot(int x, int y, int radius, boolean filled) {
         if (filled) {
             for (int r = radius; r >= 0; r--) circle(x, y, r);
         } else {
@@ -299,16 +309,12 @@ public class ImagePainter {
         }
     }
     
-    public void arc(int x, int y, int innerRadius, int outerRadius, int fromArc, int toArc, long color, byte mode) {
-        setColor(color);
-        setMode(mode);
+    public void arc(int x, int y, int innerRadius, int outerRadius, int fromArc, int toArc) {
         for (int r = innerRadius; r <= outerRadius; r++) circle(x, y, r, fromArc, toArc);
         
     }
     
-    public void print(int x, int y, String message, long color, byte mode) {
-        setColor(color);
-        setMode(mode);
+    public void print(int x, int y, String message) {
         for (int i = 0; i < message.length(); i++) {
             print(x, y, message.charAt(i));
             x += 6;
@@ -317,20 +323,27 @@ public class ImagePainter {
     
     public BufferedImage toImage(boolean complementary) {
         BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB); 
-        Graphics2D g = bi.createGraphics();
-        g.setBackground(Color.white);
-        g.clearRect(0, 0, width, height);
+        Graphics2D gr = bi.createGraphics();
+        gr.setBackground(Color.white);
+        gr.clearRect(0, 0, width, height);
 
-        WritableRaster r = bi.getRaster();
+        WritableRaster wr = bi.getRaster();
         long c;
+        int r, g, b, m, n, d;
         for (int i = width - 1; i >= 0; i--) {
             for (int j = height - 1; j >= 0; j--) {
                 c = grid[i + j * width];
                 if (c >= 0) {
+                    r = (int) (c >> 16);
+                    g = (int) ((c >> 8) & 0xff);
+                    b = (int) (c & 0xff);
+                    m = Math.max(g + b, Math.max(r + b, r + g)); // max of m = 0x1fe
+                    n = Math.max(r, Math.max(g, b));
+                    d = 1 + ((m + n) / 0x1ff);
                     if (complementary) {
-                        r.setPixel(i, j, new int[]{0xff - (int) ((((c >> 8) & 0xff) + (c & 0xff)) / 2), 0xff - (int) (((c >> 16) + (c & 0xff)) / 2) , 0xff - (int) ((((c >> 8) & 0xff) + (c >> 16)) / 2)});
+                        wr.setPixel(i, j, new int[]{(m + 2 * r - g - b) / d, (m + 2 * g - r - b) / d , (m + 2 * b - r - g) / d});
                     } else {
-                        r.setPixel(i, j, new int[]{(int) (c >> 16), (int) ((c >> 8) & 0xff), (int) (c & 0xff)});
+                        wr.setPixel(i, j, new int[]{r, g, b});
                     }
                 }
             }

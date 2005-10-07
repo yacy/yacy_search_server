@@ -379,7 +379,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         try {
             // locate the file
             if (!(path.startsWith("/"))) path = "/" + path; // attach leading slash
-            File targetFile  = new File(htDefaultPath, path);
+            File   targetFile  = new File(htDefaultPath, path);
+            String targetExt   = conProp.getProperty("EXT","");
             if (path.endsWith("/")) {
                 String testpath;
                 // attach default file name
@@ -393,11 +394,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
             if (!(targetFile.exists())) {
                 // try to find that file in the htDocsPath
-                targetFile = new File(htDocsPath, path);
+                File trialFile = new File(htDocsPath, path);
+                if (trialFile.exists()) targetFile = trialFile;
             }
             
-            File   targetClass = rewriteClassFile(targetFile);
-            String targetExt   = conProp.getProperty("EXT","");
+            File targetClass = rewriteClassFile(targetFile);
             Date targetDate;
             
             if ((targetClass != null) && ((path.endsWith("png") || (path.endsWith("gif"))))) {

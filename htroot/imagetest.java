@@ -96,13 +96,34 @@ public class imagetest {
         for (int i = 20; i < 100; i++) r.setPixel(i, 34, new int[]{0, 0, 255});
         return bi;
         */
-        ImagePainter img = new ImagePainter(300, 200, ImagePainter.TRANSPARENT);
-        img.dot(150, 100, 90, true, ImagePainter.BLUE, ImagePainter.MODE_MIX);
-        img.dot(190, 130, 60, true, ImagePainter.GREEN, ImagePainter.MODE_MIX);
-        img.arc(220, 90, 50, 90, 30, 110, ImagePainter.RED / 2, ImagePainter.MODE_MIX);
-        img.arc(210, 77, 50, 90, 30, 110, ImagePainter.RED / 2, ImagePainter.MODE_MIX);
-        img.print(50, 100, "BROADCAST MESSAGE #772: NODE %882 BLACK", ImagePainter.WHITE, ImagePainter.MODE_MIX);
-        img.print(50, 120, "BROADCAST MESSAGE #772: NODE %882 GREEN", ImagePainter.GREEN, ImagePainter.MODE_REPLACE);
+        ImagePainter img = new ImagePainter(800, 600, ImagePainter.TRANSPARENT);
+        
+        img.setMode(ImagePainter.MODE_MIX);
+        img.setColor(ImagePainter.BLACK);
+        for (int y = 0; y < 600; y = y + 50) img.print(0, y, "" + y);
+        for (int x = 0; x < 800; x = x + 50) img.print(x, 10, "" + x);
+        img.setColor(ImagePainter.BLUE);
+        img.dot(150, 100, 90, true);
+        img.setColor(ImagePainter.GREEN);
+        img.dot(190, 130, 60, true);
+        img.setColor(ImagePainter.RED);
+        img.arc(300, 270, 30, 70, 0, 360);
+        img.setColor("AA0000");
+        img.arc(220, 90, 50, 90, 30, 110);
+        img.arc(210, 77, 50, 90, 30, 110);
+        img.setColor(ImagePainter.WHITE);
+        img.print(50, 100, "BROADCAST MESSAGE #772: NODE %882 WHITE abcefghijklmnopqrstuvwxyz");
+        img.setColor(ImagePainter.BLACK);
+        img.print(50, 110, "BROADCAST MESSAGE #772: NODE %882 BLACK abcefghijklmnopqrstuvwxyz");
+        img.setColor(ImagePainter.GREEN);
+        img.print(50, 120, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz");
+        for (long i = 0; i < 256; i++) {
+            img.setColor(i);
+            img.dot(10 + 14 * (int) (i / 16), 200 + 14 * (int) (i % 16), 6, true);
+        }
+        img.setColor("008000");
+        img.dot(10 + 14 * 8, 200 + 14 * 8, 90, true);
+        
         return img.toImage(true);
         
     }
