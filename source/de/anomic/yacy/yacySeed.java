@@ -270,6 +270,14 @@ public class yacySeed {
         }
     }
 
+    public long getLinkCount() {
+        try {
+            return Long.parseLong(get("LCount", "0"));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+    
     private boolean getFlag(int flag) {
         String flags = get("Flags", "0000");
         return (new bitfield(flags.getBytes())).get(flag);
@@ -321,26 +329,34 @@ public class yacySeed {
             c = c / 96;
         }
         if (length != 0 && s.length() > length)
-        throw new RuntimeException("encodeLex result '" + s + "' exceeds demanded length of " + length + " digits");
+            throw new RuntimeException("encodeLex result '" + s + "' exceeds demanded length of " + length + " digits");
         if (length == 0) length = 1; // rare exception for the case that c == 0
         while (s.length() < length) s = '-' + s;
         return s;
     }
 
     public long decodeLex(String s) {
-    long c = 0;
-    for (int i = 0; i < s.length(); i++) c = c * 96 + (byte) s.charAt(i) - 32;
-    return c;
+        long c = 0;
+        for (int i = 0; i < s.length(); i++) c = c * 96 + (byte) s.charAt(i) - 32;
+        return c;
     }
 
     private static long maxLex(int len) {
         // computes the maximum number that can be coded with a lex-encoded String of length len
         long c = 0;
-    for (int i = 0; i < len; i++) c = c * 96 + 95;
-    return c;
+        for (int i = 0; i < len; i++) c = c * 96 + 90;
+        return c;
     }
     
-    public static final long maxDHTDistance = maxLex(9);
+    private static long minLex(int len) {
+        // computes the minimum number that can be coded with a lex-encoded String of length len
+        long c = 0;
+        for (int i = 0; i < len; i++) c = c * 96 + 13;
+        return c;
+    }
+    
+    public static final long minDHTNumber   = minLex(9);
+    public static final long maxDHTDistance = maxLex(9) - minDHTNumber;
     
     public long dhtDistance(String wordhash) {
         // computes a virtual distance, the result must be set in relation to maxDHTDistace
@@ -349,6 +365,11 @@ public class yacySeed {
         long myPos = decodeLex(hash.substring(0,9));
         long wordPos = decodeLex(wordhash.substring(0,9));
         return (myPos > wordPos) ? (myPos - wordPos) : (myPos + maxDHTDistance - wordPos);
+    }
+    
+    public long dhtDistance() {
+        // returns an absolute value
+        return decodeLex(hash.substring(0,9)) - minDHTNumber;
     }
     
     public static yacySeed genLocalSeed(plasmaSwitchboard sb) {

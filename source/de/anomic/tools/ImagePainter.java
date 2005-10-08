@@ -48,6 +48,10 @@
 package de.anomic.tools;
 
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsConfiguration;
+import java.awt.Transparency;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
@@ -326,14 +330,26 @@ public class ImagePainter {
     }
     
     public void arcLine(int cx, int cy, int innerRadius, int outerRadius, int angle) {
-        int xi = cx + (int) ((innerRadius + 1) * Math.cos(Math.PI * angle / 180));
-        int yi = cy - (int) ((innerRadius + 1) * Math.sin(Math.PI * angle / 180));
-        int xo = cx + (int) ((outerRadius + 1) * Math.cos(Math.PI * angle / 180));
-        int yo = cy - (int) ((outerRadius + 1) * Math.sin(Math.PI * angle / 180));
+        int xi = cx + (int) (innerRadius * Math.cos(Math.PI * angle / 180));
+        int yi = cy - (int) (innerRadius * Math.sin(Math.PI * angle / 180));
+        int xo = cx + (int) (outerRadius * Math.cos(Math.PI * angle / 180));
+        int yo = cy - (int) (outerRadius * Math.sin(Math.PI * angle / 180));
         line(xi, yi, xo, yo);
     }
     
+    public void arcDot(int cx, int cy, int arcRadius, int dotRadius, int angle) {
+        int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
+        int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
+        dot(x, y, dotRadius, true);
+    }
+    
     public BufferedImage toImage(boolean complementary) {
+        /*
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gs = ge.getDefaultScreenDevice();
+        GraphicsConfiguration gc = gs.getDefaultConfiguration();
+        BufferedImage bi = gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
+        */
         BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB); 
         Graphics2D gr = bi.createGraphics();
         gr.setBackground(Color.white);
