@@ -641,7 +641,7 @@ public final class plasmaCrawlStacker {
             //this.setMaxWait(1000); // Wait 1 second till a thread is available
         }
         
-        public WorkerPool(plasmaStackCrawlThread.WorkterFactory objFactory,
+        public WorkerPool(plasmaCrawlStacker.WorkterFactory objFactory,
                            GenericObjectPool.Config config) {
             super(objFactory, config);
         }
