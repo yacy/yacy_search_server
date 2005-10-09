@@ -166,7 +166,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaSnippetCache          snippetCache;
     public  plasmaCrawlLoader           cacheLoader;
     public  plasmaSwitchboardQueue      sbQueue;
-    public  plasmaStackCrawlThread      sbStackCrawlThread;
+    //public  plasmaStackCrawlThread      sbStackCrawlThread;
+    public  plasmaCrawlStacker          sbStackCrawlThread;
     public  messageBoard                messageDB;
     public  wikiBoard                   wikiDB;
     public  String                      remoteProxyHost;
@@ -411,8 +412,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         serverInstantThread.oneTimeJob(yc, "loadSeeds", yc.log, 3000);
         
         // initializing the stackCrawlThread
-        this.sbStackCrawlThread = new plasmaStackCrawlThread(this,this.plasmaPath,ramPreNURL);
-        this.sbStackCrawlThread.start();        
+        this.sbStackCrawlThread = new plasmaCrawlStacker(this,this.plasmaPath,ramPreNURL);
+        //this.sbStackCrawlThread = new plasmaStackCrawlThread(this,this.plasmaPath,ramPreNURL);
+        //this.sbStackCrawlThread.start();        
         
         // deploy threads
         log.logConfig("Starting Threads");
@@ -421,10 +423,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (indexing_cluster < 1) indexing_cluster = 1;
         deployThread("90_cleanup", "Cleanup", "simple cleaning process for monitoring information", null,
                      new serverInstantThread(this, "cleanupJob", "cleanupJobSize"), 10000); // all 5 Minutes
+        deployThread("82_crawlstack", "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
+                     new serverInstantThread(sbStackCrawlThread, "job", "size"), 8000);
         serverInstantThread indexingThread = null;
         deployThread("80_indexing", "Parsing/Indexing", "thread that performes document parsing and indexing", "/IndexCreateIndexingQueue_p.html",
                     indexingThread = new serverInstantThread(this, "deQueue", "queueSize"), 10000);
-        
         for (int i = 1; i < indexing_cluster; i++) {
             setConfig((i + 80) + "_indexing_idlesleep", getConfig("80_indexing_idlesleep", ""));
             setConfig((i + 80) + "_indexing_busysleep", getConfig("80_indexing_busysleep", ""));
@@ -623,7 +626,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         wordIndex.close(waitingBoundSeconds);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
         try {
-            sbStackCrawlThread.stopIt();
+            //sbStackCrawlThread.stopIt();
             indexDistribution.close();
             cacheLoader.close();
             wikiDB.close();
@@ -669,7 +672,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         int stackCrawlQueueSize;
-        if ((stackCrawlQueueSize = sbStackCrawlThread.getQueueSize()) >= stackCrawlSlots) {
+        if ((stackCrawlQueueSize = sbStackCrawlThread.size()) >= stackCrawlSlots) {
             log.logFine("deQueue: too many processes in stack crawl thread queue, dismissed to protect emergency case (" +
                     "stackCrawlQueue=" + stackCrawlQueueSize + ")");
             return false;
@@ -1055,7 +1058,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     e = (Map.Entry) i.next();
                     nexturlstring = (String) e.getKey();
   
-                    sbStackCrawlThread.stackCrawlEnqueue(nexturlstring, entry.normalizedURLString(), initiatorHash, (String) e.getValue(), loadDate, entry.depth() + 1, entry.profile());
+                    sbStackCrawlThread.enqueue(nexturlstring, entry.normalizedURLString(), initiatorHash, (String) e.getValue(), loadDate, entry.depth() + 1, entry.profile());
 
 //                    rejectReason = stackCrawl(nexturlstring, entry.normalizedURLString(), initiatorHash, (String) e.getValue(), loadDate, entry.depth() + 1, entry.profile());
 //                    if (rejectReason == null) {
