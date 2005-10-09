@@ -229,7 +229,7 @@ public class Status {
 
         // Queue information
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
-        prop.put("indexingQueueSize", Integer.toString(sb.getThread("80_indexing").getJobCount()));
+        prop.put("indexingQueueSize", Integer.toString(sb.getThread("80_indexing").getJobCount()+sb.indexingTasksInProcess.size()));
         prop.put("indexingQueueMax", Integer.toString(plasmaSwitchboard.indexingSlots));
 
         prop.put("loaderQueueSize", Integer.toString(sb.cacheLoader.size()));        
