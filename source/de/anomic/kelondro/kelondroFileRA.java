@@ -46,11 +46,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.FileDescriptor;
-import java.io.SyncFailedException;
 import java.util.Map;
 import java.util.Properties;
 
-public class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
+public final class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
 
     protected RandomAccessFile RAFile;
     protected FileDescriptor   RADescriptor;

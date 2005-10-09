@@ -57,12 +57,11 @@ import java.util.Map;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.logging.serverLog;
 
 public class plasmaCrawlRobotsTxt {
     private kelondroMap robotsTable;
-    private File robotsTableFile;
+    private final File robotsTableFile;
     private int bufferkb;
     
     public plasmaCrawlRobotsTxt(File robotsTableFile, int bufferkb) throws IOException {

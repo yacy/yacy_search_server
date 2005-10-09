@@ -60,8 +60,8 @@ import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaWordIndex {
 
-    final File databaseRoot;
-    final plasmaWordIndexCache ramCache;
+    private final File databaseRoot;
+    private final plasmaWordIndexCache ramCache;
 
     public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) throws IOException {
         this.databaseRoot = databaseRoot;

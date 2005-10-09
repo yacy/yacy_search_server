@@ -466,7 +466,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     
     public synchronized int addEntries(plasmaWordIndexEntryContainer container, long updateTime) {
         // this puts the entries into the cache, not into the assortment directly
-
+        
         // check cache space
         if (cache.size() > 0) try {
             // pause to get space in the cache (while it is flushed)
@@ -480,14 +480,14 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         
         // stop flushing now for one moment
         flushThread.pause();
-	//serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
-        
-	// put new words into cache
+        //serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
+
+        // put new words into cache
         int added = 0;
-	synchronized (cache) {
-            String wordHash = container.wordHash();
-	    plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
-	    if (entries == null) entries = new plasmaWordIndexEntryContainer(wordHash);
+        String wordHash = container.wordHash();
+        synchronized (cache) {            
+            plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+            if (entries == null) entries = new plasmaWordIndexEntryContainer(wordHash);
             added = entries.add(container);
             if (added > 0) {
                 cache.put(wordHash, entries);
@@ -495,7 +495,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 hashDate.setScore(wordHash, intTime(updateTime));
             }
             entries = null;
-	}
+        }
         //System.out.println("DEBUG: cache = " + cache.toString());
         flushThread.proceed();
         return added;

@@ -792,7 +792,7 @@ public final class plasmaWordIndexDistribution {
                             } else if (selectionTime < transferTime){
                                 this.chunkSize +=100;
                                 //chunkSize+=50;
-                            } else if (transferTime >= selectionTime){
+                            } else if (selectionTime >= selectionTime){
                                 if (chunkSize>200) chunkSize-=100;
                             }
                             

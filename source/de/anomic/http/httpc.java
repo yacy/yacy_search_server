@@ -109,7 +109,7 @@ public final class httpc {
     private static final SimpleDateFormat EMLFormatter     = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US);
     private static final SimpleDateFormat ShortFormatter   = new SimpleDateFormat("yyyyMMddHHmmss");
     //Mo 06 Sep 2004 23:32
-    private static final HashMap reverseMappingCache = new HashMap();
+    static final HashMap reverseMappingCache = new HashMap();
 
     // the dns cache
     private static final HashMap nameCacheHit = new HashMap();
@@ -124,7 +124,7 @@ public final class httpc {
     // class variables
     private Socket socket = null; // client socket for commands
     private Thread socketOwner = null;
-    private String host = null;
+    String host = null;
     private long timeout;
     private long handle;
 
@@ -134,7 +134,7 @@ public final class httpc {
 
     private boolean remoteProxyUse = false;
     private String  savedRemoteHost = null;
-    private String  requestPath = null;
+    String  requestPath = null;
     private boolean allowContentEncoding = true;
 	static boolean useYacyReferer = true;
 	public static boolean yacyDebugMode = false;
@@ -294,7 +294,7 @@ public final class httpc {
     */
     public boolean isClosed() {
         if (this.socket == null) return true;
-        else return (!this.socket.isConnected()) || (this.socket.isClosed());
+        return (!this.socket.isConnected()) || (this.socket.isClosed());
     }
 
     /**
@@ -312,9 +312,8 @@ public final class httpc {
             if ((ip != null) && (!(ip.equals("127.0.0.1"))) && (!(ip.equals("localhost")))) {
                 nameCacheHit.put(host, ip);
                 return ip;
-            } else {
-                return null;
             }
+            return null;
         } catch (UnknownHostException e) {
             //nameCacheMiss.add(host);
         }
@@ -335,9 +334,8 @@ public final class httpc {
             if ((ip != null) && (!(ip.equals("127.0.0.1"))) && (!(ip.equals("localhost")))) {
                 nameCacheHit.put(host, ip);
                 return true;
-            } else {
-                return false;
             }
+            return false;
         } catch (UnknownHostException e) {
             //nameCacheMiss.add(host);
             return false;
@@ -411,7 +409,7 @@ public final class httpc {
     * @throws IOException
     */
     void init(String server, int port, int timeout, boolean ssl) throws IOException {
-        handle = System.currentTimeMillis();
+        this.handle = System.currentTimeMillis();
         //serverLog.logDebug("HTTPC", handle + " initialized");
         this.remoteProxyUse = false;
         this.timeout = timeout;
@@ -483,7 +481,7 @@ public final class httpc {
         }
         if (this.socket != null) {
             try {this.socket.close();} catch (Exception e) {}
-            this.unregisterOpenSocket(this.socket,this.socketOwner);
+            httpc.unregisterOpenSocket(this.socket,this.socketOwner);
             this.socket = null;
             this.socketOwner = null;
         }
@@ -540,7 +538,7 @@ public final class httpc {
         if ((path == null) || (path.length() == 0)) path = "/";
 
         // for debuggug:
-        requestPath = path;
+        this.requestPath = path;
 
         // prepare header
         if (header == null) header = new httpHeader();
@@ -564,7 +562,7 @@ public final class httpc {
         // the host is mandatory, if we use HTTP/1.1
         if (!(header.containsKey(httpHeader.HOST))) {
             if (this.remoteProxyUse)
-                header.put(httpHeader.HOST, savedRemoteHost);
+                header.put(httpHeader.HOST, this.savedRemoteHost);
             else
                 header.put(httpHeader.HOST, this.host);
         }
@@ -608,7 +606,7 @@ public final class httpc {
         // send request
         if ((this.remoteProxyUse) && (!(method.equals(httpHeader.METHOD_CONNECT))))
             path = "http://" + this.savedRemoteHost + path;
-        serverCore.send(clientOutput, method + " " + path + " HTTP/1.0"); // if set to HTTP/1.1, servers give time-outs?
+        serverCore.send(this.clientOutput, method + " " + path + " HTTP/1.0"); // if set to HTTP/1.1, servers give time-outs?
 
         // send header
         //System.out.println("***HEADER for path " + path + ": PROXY TO SERVER = " + header.toString()); // DEBUG
@@ -695,18 +693,18 @@ public final class httpc {
                 len = Integer.parseInt(cl);
                 // transfer len bytes from ins to the server
                 while ((len > 0) && ((c = ins.read(buffer)) >= 0)) {
-                    clientOutput.write(buffer, 0, c);
+                    this.clientOutput.write(buffer, 0, c);
                     len -= c;
                 }
             } else {
                 len = 0;
                 while ((c = ins.read(buffer)) >= 0) {
-                    clientOutput.write(buffer, 0, c);
+                    this.clientOutput.write(buffer, 0, c);
                     len += c;
                 }
                 requestHeader.put(httpHeader.CONTENT_LENGTH, Integer.toString(len));
             }
-            clientOutput.flush();
+            this.clientOutput.flush();
             return new response(false);
         } catch (SocketException e) {
             throw new IOException(e.getMessage());
@@ -827,7 +825,7 @@ public final class httpc {
         send(httpHeader.METHOD_POST, path, requestHeader, false);
         // send the body
         //System.out.println("body=" + buf.toString());
-        serverCore.send(clientOutput, body);
+        serverCore.send(this.clientOutput, body);
 
         return new response(false);
     }
@@ -907,9 +905,8 @@ do upload
             httpc.response res = con.GET(path, null);
             if (res.status.startsWith("2")) {
                 return res.writeContent();
-            } else {
-                return res.status.getBytes();
             }
+            return res.status.getBytes();
         } catch (Exception e) {
             throw new IOException(e.getMessage());
         } finally {
@@ -961,9 +958,8 @@ do upload
             //System.out.println("response=" + res.toString());
             if (res.status.startsWith("2")) {
                 return res.writeContent();
-            } else {
-                return res.status.getBytes();
             }
+            return res.status.getBytes();
         } catch (Exception e) {
             throw new IOException(e.getMessage());
         } finally {
@@ -1035,10 +1031,9 @@ do upload
             if (res.status.startsWith("2")) {
                 // success
                 return res.responseHeader;
-            } else {
-                // fail
-                return res.responseHeader;
             }
+            // fail
+            return res.responseHeader;
         } catch (Exception e) {
             throw new IOException(e.getMessage());
         } finally {
@@ -1251,28 +1246,28 @@ do upload
         public response(boolean zipped) throws IOException {
 
             // lets start with worst-case attributes as set-up
-            responseHeader = new httpHeader(reverseMappingCache);
-            statusCode = 503;
-            statusText = "internal httpc error";
-            status = Integer.toString(statusCode) + " " + statusText;
-            gzip   = false;
+            this.responseHeader = new httpHeader(reverseMappingCache);
+            this.statusCode = 503;
+            this.statusText = "internal httpc error";
+            this.status = Integer.toString(this.statusCode) + " " + this.statusText;
+            this.gzip   = false;
 
             // check connection status
-            if (clientInput == null) {
+            if (httpc.this.clientInput == null) {
                 // the server has meanwhile disconnected
-                statusCode = 503;
-                statusText = "lost connection to server";
-                status = Integer.toString(statusCode) + " " + statusText;                
+                this.statusCode = 503;
+                this.statusText = "lost connection to server";
+                this.status = Integer.toString(this.statusCode) + " " + this.statusText;                
                 return; // in bad mood
             }
 
             // reads in the http header, right now, right here
-            byte[] b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false);
+            byte[] b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false);
             if (b == null) {
                 // the server has meanwhile disconnected
-                statusCode = 503;
-                statusText = "server has closed connection";
-                status = Integer.toString(statusCode) + " " + statusText;
+                this.statusCode = 503;
+                this.statusText = "server has closed connection";
+                this.status = Integer.toString(this.statusCode) + " " + this.statusText;
                 return; // in bad mood
             }
             
@@ -1286,7 +1281,7 @@ do upload
             
             if ((this.statusCode==500)&&(this.statusText.equals("status line parse error"))) {
                 // flush in anything that comes without parsing
-                while ((b != null) && (b.length != 0)) b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false);
+                while ((b != null) && (b.length != 0)) b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false);
                 return; // in bad mood                
             }
                         
@@ -1294,13 +1289,13 @@ do upload
             if (this.statusCode == 400) {
                 // bad request
                 // flush in anything that comes without parsing
-                while ((b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false)).length != 0) {}
+                while ((b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false)).length != 0) {}
                 return; // in bad mood
             }
 
             // at this point we should have a valid response. read in the header properties
             String key = "";
-            while ((b = serverCore.receive(clientInput, readLineBuffer, terminalMaxLength, false)) != null) {
+            while ((b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false)) != null) {
                 if (b.length == 0) break;
                 buffer = new String(b);
                 //System.out.println("#H#" + buffer); // debug
@@ -1308,15 +1303,15 @@ do upload
                     // use old entry
                     if (key.length() == 0) throw new IOException("header corrupted - input error");
                     // attach new line
-                    if (!(responseHeader.containsKey(key))) throw new IOException("header corrupted - internal error");
-                    responseHeader.put(key, (String) responseHeader.get(key) + " " + buffer.trim());
+                    if (!(this.responseHeader.containsKey(key))) throw new IOException("header corrupted - internal error");
+                    this.responseHeader.put(key, (String) this.responseHeader.get(key) + " " + buffer.trim());
                 } else {
                     // create new entry
                     int p = buffer.indexOf(":");
                     if (p > 0) {
-                        responseHeader.add(buffer.substring(0, p).trim(), buffer.substring(p + 1).trim());
+                        this.responseHeader.add(buffer.substring(0, p).trim(), buffer.substring(p + 1).trim());
                     } else {
-                        serverLog.logSevere("HTTPC", "RESPONSE PARSE ERROR: HOST='" + host + "', PATH='" + requestPath + "', STATUS='" + status + "'");
+                        serverLog.logSevere("HTTPC", "RESPONSE PARSE ERROR: HOST='" + httpc.this.host + "', PATH='" + httpc.this.requestPath + "', STATUS='" + this.status + "'");
                         serverLog.logSevere("HTTPC", "..............BUFFER: " + buffer);
                     }
                 }
@@ -1325,11 +1320,11 @@ do upload
 
             // we will now manipulate the header if the content is gzip encoded, because
             // reading the content with "writeContent" will gunzip on-the-fly
-            gzip = ((zipped) && (responseHeader.gzip()));
+            this.gzip = ((zipped) && (this.responseHeader.gzip()));
 
-            if (gzip) {
-                responseHeader.remove("CONTENT-ENCODING"); // we fake that we don't have encoding, since what comes out does not have gzip and we also don't know what was encoded
-                responseHeader.remove("CONTENT-LENGTH"); // we cannot use the length during gunzippig yet; still we can hope that it works
+            if (this.gzip) {
+                this.responseHeader.remove(httpHeader.CONTENT_ENCODING); // we fake that we don't have encoding, since what comes out does not have gzip and we also don't know what was encoded
+                this.responseHeader.remove(httpHeader.CONTENT_LENGTH); // we cannot use the length during gunzippig yet; still we can hope that it works
             }
         }
 
@@ -1353,7 +1348,7 @@ do upload
         * @return True, if the request was successfull.
         */
         public boolean success() {
-            return ((status.charAt(0) == '2') || (status.charAt(0) == '3'));
+            return ((this.status.charAt(0) == '2') || (this.status.charAt(0) == '3'));
         }
 
         /**
@@ -1366,7 +1361,7 @@ do upload
         public byte[] writeContent() throws IOException {
             int contentLength = (int) this.responseHeader.contentLength();
             serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-            writeContentX(null, sbb, clientInput);
+            writeContentX(null, sbb, httpc.this.clientInput);
             return sbb.getBytes();
         }
 
@@ -1381,7 +1376,7 @@ do upload
         public byte[] writeContent(OutputStream procOS) throws IOException {
             int contentLength = (int) this.responseHeader.contentLength();
             serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-            writeContentX(procOS, sbb, clientInput);
+            writeContentX(procOS, sbb, httpc.this.clientInput);
             return sbb.getBytes();
         }
 
@@ -1399,7 +1394,7 @@ do upload
             FileOutputStream bufferOS = null;
             try {
                 if (file != null) bufferOS = new FileOutputStream(file);
-                writeContentX(procOS, bufferOS, clientInput);
+                writeContentX(procOS, bufferOS, httpc.this.clientInput);
             } finally {
                 if (bufferOS != null) {
                     bufferOS.close();
@@ -1476,7 +1471,7 @@ do upload
         * status of this instance.
         */
         public void print() {
-            serverLog.logInfo("HTTPC", "RESPONSE: status=" + status + ", header=" + responseHeader.toString());
+            serverLog.logInfo("HTTPC", "RESPONSE: status=" + this.status + ", header=" + this.responseHeader.toString());
         }
 
     }

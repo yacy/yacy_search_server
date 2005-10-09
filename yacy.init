@@ -475,7 +475,7 @@ ramCacheRobots  =  2097152
 ramCacheProfiles  =   8192
 
 # ram cache for stack crawl thread db
-ramCachePreNURL = 8192
+ramCachePreNURL = 4194304
 
 # default memory settings for startup of yacy
 # is only valid in unix/shell environments and

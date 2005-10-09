@@ -65,15 +65,8 @@ import de.anomic.server.logging.serverLog;
 /*
  * A class for Parsing robots.txt files.
  * It only parses the Deny Part, yet.
- * TODO: Allow, Do not deny if User-Agent: != yacy
- *
+ *  *
  * http://www.robotstxt.org/wc/norobots-rfc.html
- *
- * Use:
- * robotsParser rp=new Robotsparser(robotsfile);
- * if(rp.isAllowedRobots("/test")){
- *   System.out.println("/test is allowed");
- * }
  */
 public final class robotsParser{
     
@@ -115,6 +108,13 @@ public final class robotsParser{
             } else if (line.startsWith("#")) {
                 // we can ignore this. Just a comment line
             } else if ((!rule4Yacy) && (line.startsWith("User-agent:"))) {
+                // cutting off comments at the line end
+                pos = line.indexOf("#");
+                if (pos != -1) {
+                    line = line.substring(0,pos);
+                }
+                
+                // getting out the robots name
                 pos = line.indexOf(" ");
                 if (pos != -1) {
                     String userAgent = line.substring(pos).trim();
