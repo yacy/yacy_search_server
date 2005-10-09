@@ -100,8 +100,8 @@ public class imagetest {
         
         img.setMode(ImagePainter.MODE_ADD);
         img.setColor(ImagePainter.ADDITIVE_BLACK);
-        for (int y = 0; y < 600; y = y + 50) img.print(0, 6 + y, "" + y);
-        for (int x = 0; x < 800; x = x + 50) img.print(x, 6    , "" + x);
+        for (int y = 0; y < 600; y = y + 50) img.print(0, 6 + y, "" + y, true);
+        for (int x = 0; x < 800; x = x + 50) img.print(x, 6    , "" + x, true);
         img.setColor(ImagePainter.ADDITIVE_RED);
         img.dot(550, 110, 90, true);
         img.setColor(ImagePainter.ADDITIVE_GREEN);
@@ -114,9 +114,9 @@ public class imagetest {
         img.arc(220, 110, 50, 90, 30, 110);
         img.arc(210, 120, 50, 90, 30, 110);
         img.setColor(ImagePainter.ADDITIVE_BLACK);
-        img.print(50, 110, "BROADCAST MESSAGE #772: NODE %882 BLACK abcefghijklmnopqrstuvwxyz");
+        img.print(50, 110, "BROADCAST MESSAGE #772: NODE %882 BLACK abcefghijklmnopqrstuvwxyz", true);
         img.setColor(ImagePainter.ADDITIVE_GREEN);
-        img.print(50, 120, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz");
+        img.print(50, 120, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz", true);
         for (long i = 0; i < 256; i++) {
             img.setColor(i);
             img.dot(10 + 14 * (int) (i / 16), 200 + 14 * (int) (i % 16), 6, true);

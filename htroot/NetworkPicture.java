@@ -88,6 +88,7 @@ public class NetworkPicture {
         
         // draw connected senior and principals
         int count = 0;
+        int totalCount = 0;
         Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null);
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
@@ -96,6 +97,7 @@ public class NetworkPicture {
                 count++;
             }
         }
+        totalCount += count;
         
         // draw disconnected senior and principals that have been seen lately
         count = 0;
@@ -109,6 +111,7 @@ public class NetworkPicture {
                 count++;
             }
         }
+        totalCount += count;
         
         // draw juniors that have been seen lately
         count = 0;
@@ -122,13 +125,16 @@ public class NetworkPicture {
                 count++;
             }
         }
+        totalCount += count;
         
         // draw my own peer
         drawPeer(img, width / 2, height / 2, radius, yacyCore.seedDB.mySeed, "800000", "FFFFFF");
         
         // draw description
         img.setColor("FFFFFF");
-        img.print(2, 8, "YACY NETWORK PICTURE / SNAPSHOT FROM " + new Date().toString().toUpperCase());
+        img.print(2, 8, "YACY NETWORK PICTURE", true);
+        img.print(2, 16, "DRAWING OF " + totalCount + " SELECTED PEERS", true);
+        img.print(width - 2, 8, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), false);
         
         return img.toImage(true);
     }

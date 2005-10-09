@@ -307,10 +307,11 @@ public class ImagePainter {
         
     }
     
-    public void print(int x, int y, String message) {
+    public void print(int x, int y, String message, boolean alignRight) {
+        int xx = (alignRight) ? x : x - 6 * message.length();
         for (int i = 0; i < message.length(); i++) {
-            print(x, y, message.charAt(i));
-            x += 6;
+            print(xx, y, message.charAt(i));
+            xx += 6;
         }
     }
     
@@ -326,7 +327,7 @@ public class ImagePainter {
         int xp = x - 3 * message.length();
         if ((angle > (90 + arcDist)) && (angle < (270 - arcDist))) xp = x - 6 * message.length();
         if ((angle < (90 - arcDist)) || (angle > (270 + arcDist))) xp = x;
-        print(xp, yp, message);
+        print(xp, yp, message, true);
     }
     
     public void arcLine(int cx, int cy, int innerRadius, int outerRadius, int angle) {

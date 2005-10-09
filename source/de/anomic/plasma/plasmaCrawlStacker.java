@@ -1,4 +1,4 @@
-// plasmaSwitchboard.java
+// plasmaCrawlStacker.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@anomic.de
