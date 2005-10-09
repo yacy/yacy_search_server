@@ -267,7 +267,7 @@ public class yacyNewsPool {
         // called if a published news shall be removed
         yacyNewsRecord record = fromqueue.remove(id);
         if (record == null) return false;
-        toqueue.push(record);
+        if (toqueue != null) toqueue.push(record);
         return true;
     }
     

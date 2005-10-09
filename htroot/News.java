@@ -56,6 +56,7 @@ import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacyNewsPool;
 
 public class News {
     
@@ -95,7 +96,7 @@ public class News {
                 }
                 yacyNewsRecord record;
                 try {
-                    if ((tableID == 2) || (tableID == 4)) {
+                    if ((tableID == yacyNewsPool.PROCESSED_DB) || (tableID == yacyNewsPool.PUBLISHED_DB)) {
                         yacyCore.newsPool.clear(tableID);
                     } else {
                         while (yacyCore.newsPool.size(tableID) > 0) {
