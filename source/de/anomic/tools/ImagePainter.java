@@ -349,39 +349,59 @@ public class ImagePainter {
         GraphicsDevice gs = ge.getDefaultScreenDevice();
         GraphicsConfiguration gc = gs.getDefaultConfiguration();
         BufferedImage bi = gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
-        */
-        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB); 
-        Graphics2D gr = bi.createGraphics();
-        gr.setBackground(Color.white);
-        gr.clearRect(0, 0, width, height);
-        
-        WritableRaster wr = bi.getRaster();
-        long c;
-        if (complementary) {
-            int r, g, b;
-            // then set pixels
-            for (int i = width - 1; i >= 0; i--) {
-                for (int j = height - 1; j >= 0; j--) {
-                    c = grid[i + j * width];
-                    if (c >= 0) {
-                        r = (int) (c >> 16);
-                        g = (int) ((c >> 8) & 0xff);
-                        b = (int) (c & 0xff);
-                        wr.setPixel(i, j, new int[]{(0x1fe - g - b) / 2, (0x1fe - r - b) / 2, (0x1fe - r - g) / 2});
+         */
+        try {
+            BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D gr = bi.createGraphics();
+            gr.setBackground(Color.white);
+            gr.clearRect(0, 0, width, height);
+            
+            WritableRaster wr = bi.getRaster();
+            long c;
+            if (complementary) {
+                int r, g, b;
+                // then set pixels
+                for (int i = width - 1; i >= 0; i--) {
+                    for (int j = height - 1; j >= 0; j--) {
+                        c = grid[i + j * width];
+                        if (c >= 0) {
+                            r = (int) (c >> 16);
+                            g = (int) ((c >> 8) & 0xff);
+                            b = (int) (c & 0xff);
+                            wr.setPixel(i, j, new int[]{(0x1fe - g - b) / 2, (0x1fe - r - b) / 2, (0x1fe - r - g) / 2});
+                        }
+                    }
+                }
+            } else {
+                for (int i = width - 1; i >= 0; i--) {
+                    for (int j = height - 1; j >= 0; j--) {
+                        c = grid[i + j * width];
+                        if (c >= 0) {
+                            wr.setPixel(i, j, new int[]{(int) (c >> 16), (int) ((c >> 8) & 0xff), (int) (c & 0xff)});
+                        }
                     }
                 }
             }
-        } else {
-            for (int i = width - 1; i >= 0; i--) {
-                for (int j = height - 1; j >= 0; j--) {
-                    c = grid[i + j * width];
-                    if (c >= 0) {
-                        wr.setPixel(i, j, new int[]{(int) (c >> 16), (int) ((c >> 8) & 0xff), (int) (c & 0xff)});
-                    }
-                }
-            }
+            return bi;
+        } catch (Exception e) {
+            // strange case where environment disallowes generation of graphics
+            /*
+             java.lang.InternalError: Can't connect to X11 window server using ':0.0' as the value of the DISPLAY variable.
+             at sun.awt.X11GraphicsEnvironment.initDisplay(Native Method)
+             at sun.awt.X11GraphicsEnvironment.access$000(X11GraphicsEnvironment.java:53)
+             at sun.awt.X11GraphicsEnvironment$1.run(X11GraphicsEnvironment.java:142)
+             at java.security.AccessController.doPrivileged(Native Method)
+             at sun.awt.X11GraphicsEnvironment.<clinit>(X11GraphicsEnvironment.java:131)
+             at java.lang.Class.forName0(Native Method)
+             at java.lang.Class.forName(Class.java:164)
+             at java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(GraphicsEnvironment.java:68)
+             at java.awt.image.BufferedImage.createGraphics(BufferedImage.java:1141)
+             at de.anomic.tools.ImagePainter.toImage(ImagePainter.java:354)
+             */
+            System.out.println("Error with Graphics environment:");
+            e.printStackTrace();
+            return new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB);
         }
-        return bi;
     }
 
 }

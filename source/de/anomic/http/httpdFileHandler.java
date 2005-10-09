@@ -417,19 +417,24 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     e.getTargetException().getMessage(),e);
                     targetClass = null;
                 }
-                targetDate = new Date(System.currentTimeMillis());
-                String mimeType = mimeTable.getProperty(targetExt,"text/html");
-                
-                // generate an byte array from the generated image
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write(bi, targetExt, baos);
-                byte[] result = baos.toByteArray();
-        
-                // write the array to the client
-                httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, targetDate, null, null, null, null);
-                Thread.currentThread().sleep(200); // see below
-                serverFileUtils.write(result, out);
-                
+                if (bi == null) {
+                    // error with image generation; send file-not-found
+                    httpd.sendRespondError(this.connectionProperties,out,3,404,"File not Found",null,null);
+                } else {
+                    // send an image to client
+                    targetDate = new Date(System.currentTimeMillis());
+                    String mimeType = mimeTable.getProperty(targetExt,"text/html");
+                    
+                    // generate an byte array from the generated image
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ImageIO.write(bi, targetExt, baos);
+                    byte[] result = baos.toByteArray();
+                    
+                    // write the array to the client
+                    httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, targetDate, null, null, null, null);
+                    Thread.currentThread().sleep(200); // see below
+                    serverFileUtils.write(result, out);
+                }
             } else if ((targetFile.exists()) && (targetFile.canRead())) {
                 // we have found a file that can be written to the client
                 // if this file uses templates, then we use the template
