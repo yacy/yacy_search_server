@@ -46,6 +46,7 @@
 
 import java.awt.image.BufferedImage; 
 import java.util.Enumeration;
+import java.util.Date;
 
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
@@ -77,35 +78,59 @@ public class NetworkPicture {
         img.arc(width / 2, height / 2, radius - 20, radius + 20, 0, 360);
         
         
-        final int maxCount = 300;
-        yacySeed seed;
-        int count = 0;
-        int angle;
-        img.setColor(ImagePainter.ADDITIVE_BLACK);
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
         //System.out.println("Seed Minimum distance is       " + yacySeed.minDHTNumber);
+        
+        final int maxCount = 300;
+        yacySeed seed;
+        int angle;
+        long lastseen;
+        
+        // draw connected senior and principals
+        int count = 0;
         Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null);
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
-                drawPeer(img, width / 2, height / 2, radius, seed, "000040", "A0A0A0");
+                drawPeer(img, width / 2, height / 2, radius, seed, "000040", "B0FFB0");
                 count++;
             }
         }
+        
+        // draw disconnected senior and principals that have been seen lately
         count = 0;
-        e = yacyCore.seedDB.seedsPotential(true, false, null);
-        long lastseen;
+        e = yacyCore.seedDB.seedsSortedDisconnected(true, yacySeed.STR_LASTSEEN);
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
-                if (lastseen < 60) drawPeer(img, width / 2, height / 2, radius, seed, "100010", "606060");
+                if (lastseen > 120) break; // we have enough, this list is sorted so we don't miss anything
+                drawPeer(img, width / 2, height / 2, radius, seed, "101010", "802000");
                 count++;
             }
         }
-        drawPeer(img, width / 2, height / 2, radius, yacyCore.seedDB.mySeed, "800000", "D0D0D0");
-        return img.toImage(true);
         
+        // draw juniors that have been seen lately
+        count = 0;
+        e = yacyCore.seedDB.seedsSortedPotential(true, yacySeed.STR_LASTSEEN);
+        while (e.hasMoreElements() && count < maxCount) {
+            seed = (yacySeed) e.nextElement();
+            if (seed != null) {
+                lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
+                if (lastseen > 120) break; // we have enough, this list is sorted so we don't miss anything
+                drawPeer(img, width / 2, height / 2, radius, seed, "202000", "A0A000");
+                count++;
+            }
+        }
+        
+        // draw my own peer
+        drawPeer(img, width / 2, height / 2, radius, yacyCore.seedDB.mySeed, "800000", "FFFFFF");
+        
+        // draw description
+        img.setColor("FFFFFF");
+        img.print(2, 8, "YACY NETWORK PICTURE / SNAPSHOT FROM " + new Date().toString().toUpperCase());
+        
+        return img.toImage(true);
     }
     
     private static void drawPeer(ImagePainter img, int x, int y, int radius, yacySeed seed, String colorDot, String colorText) {
