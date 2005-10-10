@@ -51,6 +51,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Date;
+import java.util.Calendar;
 
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
@@ -160,6 +162,7 @@ public final class userDB {
         // this is a simple record structure that hold all properties of a user
         private Map mem;
         private String userName;
+		private Calendar oldDate, newDate;
         
         public Entry(String userName, Map mem) {
             if ((userName == null) || (userName.length() == 0)) 
@@ -173,6 +176,8 @@ public final class userDB {
             else this.mem = mem;            
             
             if (!mem.containsKey(AUTHENTICATION_METHOD))this.mem.put(AUTHENTICATION_METHOD,"yacy");
+			this.oldDate=Calendar.getInstance();
+			this.newDate=Calendar.getInstance();
         }
         
         public String getUserName() {
@@ -259,6 +264,24 @@ public final class userDB {
             if (incrementTimeUsed) {
                 if ((lastAccess == null)||((lastAccess != null)&&(timeStamp-lastAccess.longValue()>=1000*60))) {
                     this.mem.put(TIME_USED,Long.toString(newTimeUsed = ++oldTimeUsed));  
+					if(lastAccess != null){
+    					this.oldDate.setTime(new Date(lastAccess.longValue()));
+	    				this.newDate.setTime(new Date(System.currentTimeMillis()));
+		    			if(
+			    			this.oldDate.get(Calendar.DAY_OF_MONTH) != this.newDate.get(Calendar.DAY_OF_MONTH) ||
+				    		this.oldDate.get(Calendar.MONTH) != this.newDate.get(Calendar.MONTH) ||
+					    	this.oldDate.get(Calendar.YEAR) != this.newDate.get(Calendar.YEAR)
+    					){ //new Day, reset time
+	    					newTimeUsed=0;
+							System.out.println("foo");
+			    		}else{
+							System.out.println("baz");
+						}
+                    }else{ //no access so far
+						newTimeUsed=0;
+						System.out.println("bar");
+					}
+		    		this.mem.put(TIME_USED,Long.toString(newTimeUsed));  
 					this.mem.put(LAST_ACCESS,Long.toString(timeStamp)); //update Timestamp
                 }
             }else{ 

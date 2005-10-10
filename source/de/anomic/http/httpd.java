@@ -322,7 +322,6 @@ public final class httpd implements serverHandler {
             if(tmp.length == 2){
                 userDB.Entry entry=switchboard.userDB.getEntry(tmp[0]);
                 if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(auth)) ){
-					//TODO: Check Timelimits
 					if(entry.canSurf()){
 						return true;
 					} else {
