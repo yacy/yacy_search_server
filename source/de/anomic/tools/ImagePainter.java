@@ -93,7 +93,7 @@ public class ImagePainter {
         0x000288A,0x0002884,0x0003C9E,0x0622086,0x0421084,0x0C2088C,0x0045440,0x1F8C63F
     };
     
-    private static final int radiusPrecalc = 120;
+    private static final int radiusPrecalc = 180;
     private static HashSet crds = new HashSet();
     private static ArrayList crc;
     private static int[][][] circles = new int[radiusPrecalc][][];

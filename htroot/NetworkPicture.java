@@ -60,12 +60,19 @@ import de.anomic.yacy.yacySeed;
 
 public class NetworkPicture {
     
-    private static final int width = 640;
-    private static final int height = 420;
-    private static final int radius = Math.min(width, height) / 5;
     
     public static BufferedImage respond(httpHeader header, serverObjects post, serverSwitch env) {
+
+        int width = 640;
+        int height = 420;
         
+        if (post != null) {
+            width = post.getInt("width", 640);
+            height = post.getInt("height", 420);
+        }
+        
+        int radius = Math.min(width, height) / 5;
+    
         ImagePainter img = new ImagePainter(width, height, ImagePainter.TRANSPARENT);
         img.setMode(ImagePainter.MODE_ADD);
 
@@ -132,7 +139,7 @@ public class NetworkPicture {
         
         // draw description
         img.setColor("FFFFFF");
-        img.print(2, 8, "YACY NETWORK PICTURE", true);
+        img.print(2, 8, "THE YACY NETWORK", true);
         img.print(2, 16, "DRAWING OF " + totalCount + " SELECTED PEERS", true);
         img.print(width - 2, 8, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), false);
         
@@ -142,7 +149,7 @@ public class NetworkPicture {
     private static void drawPeer(ImagePainter img, int x, int y, int radius, yacySeed seed, String colorDot, String colorText) {
         int angle = (int) ((long) 360 * (seed.dhtDistance() / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
-        int linelength = radius + 60 + (seed.hash.hashCode() % (radius / 2));
+        int linelength = radius + 60 + (Math.abs(seed.hash.hashCode()) % (radius / 2));
         int dotsize = 6 + 2 * (int) (seed.getLinkCount() / 500000L);
         if (dotsize > 18) dotsize = 18;
         img.setColor(colorDot);

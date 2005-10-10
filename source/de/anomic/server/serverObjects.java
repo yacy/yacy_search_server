@@ -133,6 +133,26 @@ public final class serverObjects extends Hashtable implements Cloneable {
 	return (String) this.get((Object) key, (Object) dflt);
     }
 
+    public int getInt(String key, int dflt) {
+	String s = (String) super.get(key);
+        if (s == null) return dflt;
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return dflt;
+        }
+    }
+    
+    public long getLong(String key, long dflt) {
+	String s = (String) super.get(key);
+        if (s == null) return dflt;
+        try {
+            return Long.parseLong(s);
+        } catch (NumberFormatException e) {
+            return dflt;
+        }
+    }
+    
     // returns a set of all values where their key mappes the keyMapper
     public String[] getAll(String keyMapper) {
         // the keyMapper may contain regular expressions as defined in String.matches
