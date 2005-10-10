@@ -273,13 +273,9 @@ public final class userDB {
 					    	this.oldDate.get(Calendar.YEAR) != this.newDate.get(Calendar.YEAR)
     					){ //new Day, reset time
 	    					newTimeUsed=0;
-							System.out.println("foo");
-			    		}else{
-							System.out.println("baz");
-						}
+			    		}
                     }else{ //no access so far
 						newTimeUsed=0;
-						System.out.println("bar");
 					}
 		    		this.mem.put(TIME_USED,Long.toString(newTimeUsed));  
 					this.mem.put(LAST_ACCESS,Long.toString(timeStamp)); //update Timestamp
