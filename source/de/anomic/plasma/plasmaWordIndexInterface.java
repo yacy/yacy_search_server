@@ -55,7 +55,7 @@ public interface plasmaWordIndexInterface {
     public void deleteIndex(String wordHash);
 
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete);
-    public int addEntries(plasmaWordIndexEntryContainer newEntries, long creationTime);
+    public int addEntries(plasmaWordIndexEntryContainer newEntries, long creationTime, boolean highPriority);
 
     public void close(int waitingSeconds);
 

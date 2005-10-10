@@ -74,8 +74,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private final TreeMap cache;
     private final kelondroMScoreCluster hashScore;
     private final kelondroMScoreCluster hashDate;
-    private long startTime;
-    private int maxWords;
+    private long  startTime;
+    private int   maxWordsLow, maxWordsHigh; // we have 2 cache limits for different priorities
     private final serverLog log;
     private final plasmaWordIndexAssortmentCluster assortmentCluster;
     private int assortmentBufferSize; //kb
@@ -115,7 +115,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	this.hashScore = new kelondroMScoreCluster();
         this.hashDate  = new kelondroMScoreCluster();
         this.startTime = System.currentTimeMillis();
-	this.maxWords = 10000;
+	this.maxWordsLow  =  8000;
+        this.maxWordsHigh = 10000;
         this.backend = backend;
         this.log = log;
 	this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, log);
@@ -254,8 +255,9 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return cache.size();
     }
     
-    public void setMaxWords(int maxWords) {
-        this.maxWords = maxWords;
+    public void setMaxWords(int maxWordsLow, int maxWordsHigh) {
+        this.maxWordsLow = maxWordsLow;
+        this.maxWordsHigh = maxWordsHigh;
     }
     
     public int[] assortmentsSizes() {
@@ -319,7 +321,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 } else {
                     flushFromMem();
                     try {
-                        pausetime = 1 + java.lang.Math.min(1000, 5 * maxWords/(cache.size() + 1));
+                        pausetime = 1 + java.lang.Math.min(1000, 5 * maxWordsHigh/(cache.size() + 1));
                         if (cache.size() == 0) pausetime = 2000;
                         this.sleep(pausetime);
                     } catch (InterruptedException e) {}
@@ -395,11 +397,11 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 return container.size();
             } else {
                 // *** should care about another option here ***
-                return backend.addEntries(feedback, time);
+                return backend.addEntries(feedback, time, true);
             }
         } else {
             // store to back-end; this should be a rare case
-            return backend.addEntries(container, time);
+            return backend.addEntries(container, time, true);
         }
 
     }
@@ -420,7 +422,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         } else {
             // we have a non-empty entry-container
             // integrate it to the backend
-            return backend.addEntries(container, container.updated()) > 0;
+            return backend.addEntries(container, container.updated(), true) > 0;
         }
     }
 
@@ -464,17 +466,22 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return removed;
     }
     
-    public synchronized int addEntries(plasmaWordIndexEntryContainer container, long updateTime) {
+    public synchronized int addEntries(plasmaWordIndexEntryContainer container, long updateTime, boolean highPriority) {
         // this puts the entries into the cache, not into the assortment directly
         
         // check cache space
         if (cache.size() > 0) try {
             // pause to get space in the cache (while it is flushed)
-            if (cache.size() + 1000 >= this.maxWords) Thread.sleep(java.lang.Math.min(1000, cache.size() - this.maxWords + 1000));
+            long pausetime;
+            if (highPriority) {
+                if (cache.size() + 1000 >= this.maxWordsHigh) Thread.sleep(java.lang.Math.min(1000, cache.size() - this.maxWordsHigh + 1000));
+                pausetime = java.lang.Math.min(10, 2 * cache.size() / (maxWordsHigh + 1));
+            } else {
+                if (cache.size() + 1000 >= this.maxWordsLow) Thread.sleep(java.lang.Math.min(1000, cache.size() - this.maxWordsLow + 1000));
+                pausetime = java.lang.Math.min(10, 2 * cache.size() / (maxWordsLow + 1));
+            }
             
             // slow down if we reach cache limit
-            long pausetime = java.lang.Math.min(10, 2 * cache.size() / (maxWords + 1));
-            //System.out.println("Pausetime=" + pausetime);
             Thread.sleep(pausetime);
         } catch (InterruptedException e) {}
         

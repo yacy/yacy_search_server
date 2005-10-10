@@ -87,13 +87,18 @@ Changes take effect immediately</td>
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
-    <td class=small>Maximum number of Word Caches:</td>
-    <td class=small><input name="wordCacheMax" type="text" size="20" maxlength="100" value="#[wordCacheMax]#"></td>
-    <td class=small>
+    <td class=small>Maximum number of Word Caches, low limit:</td>
+    <td class=small><input name="wordCacheMaxLow" type="text" size="20" maxlength="100" value="#[wordCacheMaxLow]#"></td>
+    <td class=small rowspan="2">
     This is is the number of word indexes that shall be held in the
     ram cache during indexing. When YaCy is shut down, this cache must be
-    flushed to disc; this may last some minutes.
+    flushed to disc; this may last some minutes. The low limit is valid for crawling tasks, the high limit is valid
+    for search and DHT transmission tasks.
     </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Maximum number of Word Caches, high limit:</td>
+    <td class=small><input name="wordCacheMaxHigh" type="text" size="20" maxlength="100" value="#[wordCacheMaxHigh]#"></td>
   </tr>
   <tr valign="top" class="TableCellLight">
     <td class=small colspan="3">

@@ -79,7 +79,7 @@ public final class plasmaSearch {
     }
     
     public void addWords(plasmaWordIndexEntryContainer container) {
-        wordIndex.addEntries(container);
+        wordIndex.addEntries(container, true);
     }
         
     public int addPageIndex(URL url, String urlHash, Date urlModified, plasmaCondenser condenser,
@@ -108,7 +108,7 @@ public final class plasmaSearch {
 	    wordHash = plasmaWordIndexEntry.word2hash(word);
 	    entry = new plasmaWordIndexEntry(urlHash, count, p++, 0, 0,
                                          age, quality, language, doctype, true);
-	    this.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry));
+	    this.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), false);
 	}
 	//System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
         return condenser.getWords().size();

@@ -93,12 +93,12 @@ public final class plasmaWordIndex {
         return ramCache.assortmentsCacheFillStatusCml();
     }
     
-    public void setMaxWords(int maxWords) {
-        ramCache.setMaxWords(maxWords);
+    public void setMaxWords(int maxWordsLow, int maxWordsHigh) {
+        ramCache.setMaxWords(maxWordsLow, maxWordsHigh);
     }
 
-    public int addEntries(plasmaWordIndexEntryContainer entries) {
-        return ramCache.addEntries(entries, System.currentTimeMillis());
+    public int addEntries(plasmaWordIndexEntryContainer entries, boolean highPriority) {
+        return ramCache.addEntries(entries, System.currentTimeMillis(), highPriority);
     }   
 
     public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty) {

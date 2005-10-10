@@ -171,9 +171,11 @@ public class PerformanceQueues_p {
         prop.put("table", c);
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
-            int wordCacheMax = Integer.parseInt((String) post.get("wordCacheMax", "10000"));
-            switchboard.setConfig("wordCacheMax", Integer.toString(wordCacheMax));
-            switchboard.wordIndex.setMaxWords(wordCacheMax);
+            int wordCacheMaxLow = Integer.parseInt((String) post.get("wordCacheMaxLow", "8000"));
+            int wordCacheMaxHigh = Integer.parseInt((String) post.get("wordCacheMaxHigh", "10000"));
+            switchboard.setConfig("wordCacheMaxLow", Integer.toString(wordCacheMaxLow));
+            switchboard.setConfig("wordCacheMaxHigh", Integer.toString(wordCacheMaxHigh));
+            switchboard.wordIndex.setMaxWords(wordCacheMaxLow, wordCacheMaxHigh);
             int maxWaitingWordFlush = Integer.parseInt((String) post.get("maxWaitingWordFlush", "180"));
             switchboard.setConfig("maxWaitingWordFlush", Integer.toString(maxWaitingWordFlush));
         }
@@ -232,7 +234,8 @@ public class PerformanceQueues_p {
         prop.put("wordCacheRAMSize", switchboard.wordIndex.wordCacheRAMSize());
         prop.put("maxURLinWordCache", "" + switchboard.wordIndex.maxURLinWordCache());
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
-        prop.put("wordCacheMax", switchboard.getConfig("wordCacheMax", "10000"));
+        prop.put("wordCacheMaxLow", switchboard.getConfig("wordCacheMaxLow", "10000"));
+        prop.put("wordCacheMaxHigh", switchboard.getConfig("wordCacheMaxHigh", "10000"));
         prop.put("onlineCautionDelay", switchboard.getConfig("onlineCautionDelay", "30000"));
         prop.put("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
         

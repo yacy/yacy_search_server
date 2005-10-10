@@ -226,7 +226,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         }
     }
     
-    public int addEntries(plasmaWordIndexEntryContainer container, long creationTime) {
+    public int addEntries(plasmaWordIndexEntryContainer container, long creationTime, boolean highPriority) {
 	//System.out.println("* adding " + newEntries.size() + " cached word index entries for word " + wordHash); // debug
 	// fetch the index cache
         if ((container == null) || (container.size() == 0)) return 0;

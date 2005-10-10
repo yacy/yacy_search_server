@@ -166,7 +166,7 @@ public class plasmaWordIndexClassicCacheMigration {
                                   new String(row[j + 2], plasmaCrawlLURL.urlHashLength, plasmaWordIndexEntry.attrSpaceShort));
             }
             container.add(entries, System.currentTimeMillis());
-            fresh.addEntries(container);
+            fresh.addEntries(container, false);
             i = null;
             remove(hash);
             return true;
