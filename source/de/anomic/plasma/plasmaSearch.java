@@ -154,7 +154,7 @@ public final class plasmaSearch {
             time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
 	    searchA = searchResult;
 	    searchB = (plasmaWordIndexEntity) map.remove(k);
-            searchResult = joinConstructive(searchA, searchB, 2 * time / (map.size() + 1));
+            searchResult = plasmaWordIndexEntity.joinConstructive(searchA, searchB, 2 * time / (map.size() + 1));
 	    // close the input files/structures
 	    if (searchA != searchResult) searchA.close();
 	    if (searchB != searchResult) searchB.close();
@@ -167,117 +167,6 @@ public final class plasmaSearch {
         return searchResult;
     }
 
-    private static int log2(int x) {
-        int l = 0;
-        while (x > 0) {x = x >> 1; l++;}
-        return l;
-    }
-        
-    private plasmaWordIndexEntity joinConstructive(plasmaWordIndexEntity i1, plasmaWordIndexEntity i2, long time) throws IOException {
-        if ((i1 == null) || (i2 == null)) return null;
-	if ((i1.size() == 0) || (i2.size() == 0)) return new plasmaWordIndexEntity(null);
-
-	// decide which method to use
-	int high = ((i1.size() > i2.size()) ? i1.size() : i2.size());
-	int low  = ((i1.size() > i2.size()) ? i2.size() : i1.size());
-	int stepsEnum = 10 * (high + low - 1);
-	int stepsTest = 12 * log2(high) * low;
-
-	// start most efficient method
-	if (stepsEnum > stepsTest) {
-	    if (i1.size() < i2.size())
-                return joinConstructiveByTest(i1, i2, time);
-            else
-                return joinConstructiveByTest(i2, i1, time);
-	} else {
-	    return joinConstructiveByEnumeration(i1, i2, time);
-        }
-    }
-    
-    private plasmaWordIndexEntity joinConstructiveByTest(plasmaWordIndexEntity small, plasmaWordIndexEntity large, long time) throws IOException {
-        System.out.println("DEBUG: JOIN METHOD BY TEST");
-        plasmaWordIndexEntity conj = new plasmaWordIndexEntity(null); // start with empty search result
-        Enumeration se = small.elements(true);
-        plasmaWordIndexEntry ie;
-        long stamp = System.currentTimeMillis();
-        try {
-            while ((se.hasMoreElements()) && ((System.currentTimeMillis() - stamp) < time)) {
-                ie = (plasmaWordIndexEntry) se.nextElement();
-                if (large.contains(ie)) conj.addEntry(ie);
-            }
-        }  catch (kelondroException e) {
-            serverLog.logSevere("PLASMA", "joinConstructiveByTest: Database corrupt (" + e.getMessage() + "), deleting index");
-            small.deleteComplete();
-            return conj;
-        }
-        return conj;
-    }
-    
-    private plasmaWordIndexEntity joinConstructiveByEnumeration(plasmaWordIndexEntity i1, plasmaWordIndexEntity i2, long time) throws IOException {
-        System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
-        plasmaWordIndexEntity conj = new plasmaWordIndexEntity(null); // start with empty search result
-        Enumeration e1 = i1.elements(true);
-        Enumeration e2 = i2.elements(true);
-        int c;
-        if ((e1.hasMoreElements()) && (e2.hasMoreElements())) {
-            plasmaWordIndexEntry ie1;
-            plasmaWordIndexEntry ie2;
-            try {
-                ie1 = (plasmaWordIndexEntry) e1.nextElement();
-            }  catch (kelondroException e) {
-                serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database corrupt 1 (" + e.getMessage() + "), deleting index");
-                i1.deleteComplete();
-                return conj;
-            }
-            try {
-                ie2 = (plasmaWordIndexEntry) e2.nextElement();
-            }  catch (kelondroException e) {
-                serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database corrupt 2 (" + e.getMessage() + "), deleting index");
-                i2.deleteComplete();
-                return conj;
-            }
-            long stamp = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - stamp) < time) {
-                c = ie1.getUrlHash().compareTo(ie2.getUrlHash());
-                if (c < 0) {
-                    try {
-                        if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
-                    } catch (kelondroException e) {
-                        serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
-                        i1.deleteComplete();
-                        break;
-                    }
-                } else if (c > 0) {
-                    try {
-                        if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
-                    } catch (kelondroException e) {
-                        serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
-                        i2.deleteComplete();
-                        break;
-                    }
-                } else {
-                    // we have found the same urls in different searches!
-                    conj.addEntry(ie1);
-                    try {
-                        if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
-                    } catch (kelondroException e) {
-                        serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
-                        i1.deleteComplete();
-                        break;
-                    }
-                    try {
-                        if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
-                    }  catch (kelondroException e) {
-                        serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
-                        i2.deleteComplete();
-                        break;
-                    }
-                }
-            }
-        }
-        return conj;
-    }
-    
     public plasmaSearchResult order(plasmaWordIndexEntity searchResult, Set searchhashes, Set stopwords, char[] priority, long maxTime, int minEntries) throws IOException {
 	// we collect the urlhashes from it and construct a List with urlEntry objects
 	// attention: if minEntries is too high, this method will not terminate within the maxTime
