@@ -76,7 +76,6 @@ package de.anomic.http;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -101,6 +100,7 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO; 
 
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -426,9 +426,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     String mimeType = mimeTable.getProperty(targetExt,"text/html");
                     
                     // generate an byte array from the generated image
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    serverByteBuffer baos = new serverByteBuffer();
                     ImageIO.write(bi, targetExt, baos);
                     byte[] result = baos.toByteArray();
+                    baos.close(); baos = null;
                     
                     // write the array to the client
                     httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, targetDate, null, null, null, null);
@@ -515,7 +516,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     tp.putAll(templates);
                     
                     // rewrite the file
-                    ByteArrayOutputStream o = null;
+                    serverByteBuffer o = null;
                     InputStream fis = null;
                     GZIPOutputStream zippedOut = null;
                     try {
@@ -555,7 +556,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             fis = new BufferedInputStream(new FileInputStream(targetFile));
                         }
 
-                        o = new ByteArrayOutputStream();
+                        o = new serverByteBuffer();
                         if (zipContent) zippedOut = new GZIPOutputStream(o);
                         httpTemplate.writeTemplate(fis, (zipContent) ? (OutputStream)zippedOut: (OutputStream)o, tp, "-UNRESOLVED_PATTERN-".getBytes());
                         if (zipContent) {
