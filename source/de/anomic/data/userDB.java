@@ -57,14 +57,14 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.logging.serverLog;
 
-public class userDB {
+public final class userDB {
     
     public static final int USERNAME_MAX_LENGTH = 128;
     public static final int USERNAME_MIN_LENGTH = 4;
     
     kelondroMap userTable;
-    private File userTableFile;
-    private int bufferkb;
+    private final File userTableFile;
+    private final int bufferkb;
     
     public userDB(File userTableFile, int bufferkb) throws IOException {
         this.userTableFile = userTableFile;
@@ -248,7 +248,7 @@ public class userDB {
             long newTimeUsed = oldTimeUsed;            
             
             if (decrementTimeUsed) {
-                if ((lastAccess == null)||((lastAccess != null)||(lastAccess.longValue()-timeStamp>1000))) {
+                if ((lastAccess == null)||((lastAccess != null)&&(timeStamp-lastAccess.longValue()>=1000*60))) {
                     this.mem.put(TIME_USED,Long.toString(newTimeUsed = ++oldTimeUsed));  
                 }
             }            
