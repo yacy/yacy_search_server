@@ -205,8 +205,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         setLog(new serverLog("PLASMA"));
 
         // load values from configs
-        plasmaPath   = new File(rootPath, getConfig("dbPath", "PLASMADB"));
-        listsPath      = new File(rootPath, getConfig("listsPath", "LISTS"));        
+        this.plasmaPath   = new File(rootPath, getConfig("dbPath", "PLASMADB"));
+        this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
+        this.listsPath      = new File(rootPath, getConfig("listsPath", "LISTS"));
+        this.log.logConfig("Lists Path: " + this.listsPath.toString());
         
         // remote proxy configuration
         remoteProxyHost = getConfig("remoteProxyHost", "");
@@ -233,23 +235,31 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (blueList == null) {
             // read only once upon first instantiation of this class
             String f = getConfig("plasmaBlueList", null);
-            if (f != null) blueList = kelondroMSetTools.loadList(new File(f)); else blueList= new TreeSet();
-            this.log.logConfig("loaded blue-list from file " + f + ", " + blueList.size() + " entries");
+            File plasmaBlueListFile = new File(f);
+            if (f != null) blueList = kelondroMSetTools.loadList(plasmaBlueListFile); else blueList= new TreeSet();
+            this.log.logConfig("loaded blue-list from file " + plasmaBlueListFile.getName() + ", " + 
+                               blueList.size() + " entries, " +
+                               ppRamString(plasmaBlueListFile.length()/1024));
         }
 
         // load the black-list / inspired by [AS]
-        urlBlacklist = new plasmaURLPattern(new File(getRootPath(), getConfig("listsPath", "DATA/LISTS")));
+        File ulrBlackListFile = new File(getRootPath(), getConfig("listsPath", "DATA/LISTS"));
+        urlBlacklist = new plasmaURLPattern(ulrBlackListFile);
         String f = getConfig("proxyBlackListsActive", null);
         if (f != null) {
             urlBlacklist.loadLists("black", f, "/");
-            this.log.logConfig("loaded black-list from file " + f + ", " + urlBlacklist.size() + " entries");
+            this.log.logConfig("loaded black-list from file " + ulrBlackListFile.getName() + ", " + 
+                               urlBlacklist.size() + " entries, " +
+                               ppRamString(ulrBlackListFile.length()/1024));
         }
             
         // load stopwords
         if (stopwords == null) {
             File stopwordsFile = new File(rootPath, "yacy.stopwords");
             stopwords = kelondroMSetTools.loadList(stopwordsFile);
-            this.log.logConfig("loaded stopwords from file " + stopwordsFile + ", " + stopwords.size() + " entries");
+            this.log.logConfig("loaded stopwords from file " + stopwordsFile.getName() + ", " + 
+                               stopwords.size() + " entries, " +
+                               ppRamString(stopwordsFile.length()/1024));
         }
 
         // read memory amount
@@ -279,7 +289,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         File profilesFile = new File(this.plasmaPath, "crawlProfiles0.db");
         this.profiles = new plasmaCrawlProfile(profilesFile, ramProfiles);
         initProfiles();
-        log.logConfig("Loaded profiles from file " + profilesFile + 
+        log.logConfig("Loaded profiles from file " + profilesFile.getName() + 
                       ", " + this.profiles.size() + " entries" + 
                       ", " + ppRamString(profilesFile.length()/1024));
         
@@ -287,7 +297,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("Initializing robots.txt DB");
         File robotsDBFile = new File(this.plasmaPath, "crawlRobotsTxt.db");
         this.robots = new plasmaCrawlRobotsTxt(robotsDBFile, ramRobots);
-        this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile + 
+        this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() + 
                            ", " + this.robots.size() + " entries" + 
                            ", " + ppRamString(robotsDBFile.length()/1024));        
         
@@ -360,22 +370,37 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 this.log);
 
         // starting message board
-        log.logConfig("Starting Message Board");
-        messageDB = new messageBoard(new File(getRootPath(), "DATA/SETTINGS/message.db"), ramMessage);
+        this.log.logConfig("Starting Message Board");
+        File messageDbFile = new File(getRootPath(), "DATA/SETTINGS/message.db");
+        this.messageDB = new messageBoard(messageDbFile, ramMessage);
+        this.log.logConfig("Loaded Message Board DB from file " + messageDbFile.getName() + 
+                ", " + this.messageDB.size() + " entries" + 
+                ", " + ppRamString(messageDbFile.length()/1024));            
         
         // starting wiki
-        log.logConfig("Starting Wiki Board");
-        wikiDB = new wikiBoard(new File(getRootPath(), "DATA/SETTINGS/wiki.db"),
-                 new File(getRootPath(), "DATA/SETTINGS/wiki-bkp.db"), ramWiki);
-		userDB = new userDB(new File(getRootPath(), "DATA/SETTINGS/user.db"), 512);
+        this.log.logConfig("Starting Wiki Board");
+        File wikiDbFile = new File(getRootPath(), "DATA/SETTINGS/wiki.db");
+        this.wikiDB = new wikiBoard(wikiDbFile,
+                                    new File(getRootPath(), "DATA/SETTINGS/wiki-bkp.db"), ramWiki);
+        this.log.logConfig("Loaded Wiki Board DB from file " + wikiDbFile.getName() + 
+                ", " + this.wikiDB.size() + " entries" + 
+                ", " + ppRamString(wikiDbFile.length()/1024));          
+        
+        // Init User DB
+        this.log.logConfig("Loading User DB");
+        File userDbFile = new File(getRootPath(), "DATA/SETTINGS/user.db");
+		this.userDB = new userDB(userDbFile, 512);
+        this.log.logConfig("Loaded User DB from file " + userDbFile.getName() + 
+                ", " + this.userDB.size() + " entries" + 
+                ", " + ppRamString(userDbFile.length()/1024));            
 
         // init cookie-Monitor
-        log.logConfig("Starting Cookie Monitor");
-        outgoingCookies = new HashMap();
-        incomingCookies = new HashMap();
+        this.log.logConfig("Starting Cookie Monitor");
+        this.outgoingCookies = new HashMap();
+        this.incomingCookies = new HashMap();
             
         // clean up profiles
-        log.logConfig("Cleaning Profiles");
+        this.log.logConfig("Cleaning Profiles");
         cleanProfiles();
 
         // init facility DB

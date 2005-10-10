@@ -130,12 +130,16 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
      * Template Cache
      * @param switchboard
      */
-    private static final HashMap templateCache = new HashMap();
+    private static final HashMap templateCache;
+    
+    private static final HashMap templateMethodCache;
     
     public static boolean useTemplateCache = false;
     
     static {
         useTemplateCache = plasmaSwitchboard.getSwitchboard().getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
+        templateCache = (useTemplateCache)? new HashMap() : new HashMap(0);
+        templateMethodCache = (useTemplateCache) ? new HashMap() : new HashMap(0);
         
         // create a class loader
         provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
@@ -709,10 +713,26 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         }
     }
     
-    private Method rewriteMethod(File classFile) {
+    private final Method rewriteMethod(File classFile) {                
         Method m = null;
+        long start = System.currentTimeMillis();
         // now make a class out of the stream
         try {
+            if (useTemplateCache) {
+                
+                SoftReference ref = (SoftReference) templateMethodCache.get(classFile);
+                if (ref != null) {
+                    m = (Method) ref.get();
+                    if (m == null) {
+                        templateMethodCache.remove(classFile);
+                    } else {
+                        this.theLogger.logFine("Cache HIT for file " + classFile);
+                        return m;
+                    }
+                    
+                }          
+            } 
+            
             //System.out.println("**DEBUG** loading class file " + classFile);
             Class c = provider.loadClass(classFile);
             Class[] params = new Class[] {
@@ -720,6 +740,14 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     Class.forName("de.anomic.server.serverObjects"),
                     Class.forName("de.anomic.server.serverSwitch")};
             m = c.getMethod("respond", params);
+            
+            if (useTemplateCache) {
+                // storing the method into the cache
+                SoftReference ref = new SoftReference(m);
+                templateMethodCache.put(classFile,ref);
+                this.theLogger.logFine("Cache MISS for file " + classFile);
+            }
+            
         } catch (ClassNotFoundException e) {
             System.out.println("INTERNAL ERROR: class " + classFile + " is missing:" + e.getMessage()); 
         } catch (NoSuchMethodException e) {

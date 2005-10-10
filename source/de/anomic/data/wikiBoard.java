@@ -92,6 +92,10 @@ public class wikiBoard {
         return datbase.size() + bkpbase.size();
     }
     
+    public int size() {
+        return datbase.size();
+    }
+    
     public int[] dbCacheChunkSize() {
         int[] db = datbase.cacheChunkSize();
         int[] bk = bkpbase.cacheChunkSize();
