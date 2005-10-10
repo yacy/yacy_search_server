@@ -60,8 +60,6 @@ import java.util.ArrayList;
 
 public class ImagePainter {
     
-    public static final long TRANSPARENT = -1;
-    
     // colors regarding RGB Color Model
     public static final long ADDITIVE_RED   = 0xFF0000;
     public static final long ADDITIVE_GREEN = 0x00FF00;
@@ -93,61 +91,31 @@ public class ImagePainter {
         0x000288A,0x0002884,0x0003C9E,0x0622086,0x0421084,0x0C2088C,0x0045440,0x1F8C63F
     };
     
-    //private static final int radiusPrecalc = 180;
-    //private static HashSet crds = new HashSet();
-    //private static ArrayList crc;
-    //private static int[][][] circles = new int[radiusPrecalc][][];
-    private static int[][][] circles = new int[0][][];
-    /*
-    static {
-        // calculate coordinates
-        int x, y;
-        String co;
-        crds.add("0|0");
-        for (int r = 0; r < radiusPrecalc; r++) {
-            crc = new ArrayList();
-            for (int a = 0; a <= 2 * (r + 1); a++) {
-                x = (int) ((r + 1) * Math.cos(Math.PI * a / (4 * (r + 1))));
-                y = (int) ((r + 1) * Math.sin(Math.PI * a / (4 * (r + 1))));
-                co = x + "|" + y;
-                if (!(crds.contains(co))) {
-                    crc.add(new int[]{x, y});
-                    crds.add(co);
-                }
-                x = (int) ((r + 0.5) * Math.cos(Math.PI * a / (4 * (r + 1))));
-                y = (int) ((r + 0.5) * Math.sin(Math.PI * a / (4 * (r + 1))));
-                co = x + "|" + y;
-                if (!(crds.contains(co))) {
-                    crc.add(new int[]{x, y});
-                    crds.add(co);
-                }
-            }
-            // put coordinates into array
-            //System.out.print("Radius " + r + " => " + crc.size() + " points: ");
-            circles[r] = new int[crc.size() - 1][];
-            for (int i = 0; i < crc.size() - 1; i++) {
-                circles[r][i] = (int[]) crc.get(i);
-                //System.out.print(circles[r][i][0] + "," +circles[r][i][1] + "; "); 
-            }
-            //System.out.println();
-        }
-        crc = null;
-        crds = null;
-    }
-    */
+    private static int[][] circles = new int[0][];
     
-    private long[] grid; // one-dimensional arrays are much faster than two-dimensional
-    private int width, height;
-    private long defaultCol;
+    private byte[] grid; // one-dimensional arrays are much faster than two-dimensional
+    private int  width, height;
+    private int  defaultColR, defaultColG, defaultColB;
     private byte defaultMode;
     
     public ImagePainter(int width, int height, long backgroundColor) {
         this.width = width;
         this.height = height;
-        this.defaultCol = ADDITIVE_BLACK;
+        this.defaultColR = 0xFF;
+        this.defaultColG = 0xFF;
+        this.defaultColB = 0xFF;
         this.defaultMode = MODE_REPLACE;
-        grid = new long[width*height];
-        for (int n= width * height - 1; n >= 0; n--) grid[n] = backgroundColor;
+        grid = new byte[3*width*height];
+        
+        // fill grid with background color
+        byte bgR = (byte) (backgroundColor >> 16);
+        byte bgG = (byte) ((backgroundColor >> 8) & 0xff);
+        byte bgB = (byte) (backgroundColor & 0xff);
+        for (int n = 3 * width * height - 3; n >= 0; n = n - 3) {
+            grid[n    ] = bgR;
+            grid[n + 1] = bgG;
+            grid[n + 2] = bgB;
+        }
     }
     
     private long colNum(String col) {
@@ -162,11 +130,13 @@ public class ImagePainter {
     }
     
     public void setColor(long c) {
-        defaultCol = c;
+        defaultColR = (byte) (c >> 16);
+        defaultColG = (byte) ((c >> 8) & 0xff);
+        defaultColB = (byte) (c & 0xff);
     }
     
     public void setColor(String s) {
-        defaultCol = colNum(s);
+        setColor(colNum(s));
     }
     
     public void setMode(byte m) {
@@ -176,27 +146,25 @@ public class ImagePainter {
     private void plot(int x, int y) {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
+        int n = 3 * (x + y * width);
         if (defaultMode == MODE_REPLACE) {
-            grid[x + y * width] = defaultCol;
+            grid[n    ] = (byte) defaultColR;
+            grid[n + 1] = (byte) defaultColG;
+            grid[n + 2] = (byte) defaultColB;
         } else if (defaultMode == MODE_ADD) {
-            int n = x + y * width;
-            long c = grid[n];
-            if (c < 0) {
-                grid[n] = defaultCol;
-            } else {
-                int r = ((int) ((c >> 16) + (defaultCol >> 16))); if (r > 0xff) r = 0xff;
-                int g = ((int) (((c >> 8) & 0xff) + ((defaultCol >> 8) & 0xff))); if (g > 0xff) g = 0xff;
-                int b = ((int) ((c & 0xff) + (defaultCol & 0xff))); if (b > 0xff) b = 0xff;
-                grid[n] = r << 16 | g << 8 | b;
-            }
+            int r = ((int) (0xff & grid[n    ])) + defaultColR; if (r > 0xff) r = 0xff;
+            int g = ((int) (0xff & grid[n + 1])) + defaultColG; if (g > 0xff) g = 0xff;
+            int b = ((int) (0xff & grid[n + 2])) + defaultColB; if (b > 0xff) b = 0xff;
+            grid[n    ] = (byte) r;
+            grid[n + 1] = (byte) g;
+            grid[n + 2] = (byte) b;
         } else if (defaultMode == MODE_SUB) {
-            int n = x + y * width;
-            long c = grid[n];
-            if (c < 0) c = 0xffffff;
-            int r = ((int) ((c >> 16) - (defaultCol >> 16))); if (r < 0) r = 0;
-            int g = ((int) (((c >> 8) & 0xff) - ((defaultCol >> 8) & 0xff))); if (g < 0) g = 0;
-            int b = ((int) ((c & 0xff) - (defaultCol & 0xff))); if (g < 0) g = 0;
-            grid[n] = r << 16 | g << 8 | b;
+            int r = ((int) (0xff & grid[n    ])) - defaultColR; if (r < 0) r = 0;
+            int g = ((int) (0xff & grid[n + 1])) - defaultColG; if (g < 0) g = 0;
+            int b = ((int) (0xff & grid[n + 2])) - defaultColB; if (b < 0) b = 0;
+            grid[n    ] = (byte) r;
+            grid[n + 1] = (byte) g;
+            grid[n + 2] = (byte) b;
         }
     }
     
@@ -241,7 +209,7 @@ public class ImagePainter {
         }
     }
     
-    private static int[][] getCircleCoords(int radius) {
+    private static int[] getCircleCoords(int radius) {
         if ((radius - 1) < circles.length) return circles[radius - 1];
         
         // read some lines from known circles
@@ -249,14 +217,14 @@ public class ImagePainter {
         crds.add("0|0");
         String co;
         for (int i = Math.max(0, circles.length - 5); i < circles.length; i++) {
-            for (int j = 0; j < circles[i].length; j++) {
-                co = circles[i][j][0] + "|" + circles[i][j][1];
+            for (int j = 0; j < circles[i].length; j = j + 2) {
+                co = circles[i][j] + "|" + circles[i][j + 1];
                 if (!(crds.contains(co))) crds.add(co);
             }
         }
         
         // copy old circles into new array
-        int[][][] newCircles = new int[radius + 30][][];
+        int[][] newCircles = new int[radius + 30][];
         System.arraycopy(circles, 0, newCircles, 0, circles.length);
         
         // compute more lines in new circles
@@ -282,9 +250,12 @@ public class ImagePainter {
             }
             // put coordinates into array
             //System.out.print("Radius " + r + " => " + crc.size() + " points: ");
-            newCircles[r] = new int[crc.size() - 1][];
+            newCircles[r] = new int[2 * (crc.size() - 1)];
+            int[] coords;
             for (int i = 0; i < crc.size() - 1; i++) {
-                newCircles[r][i] = (int[]) crc.get(i);
+                coords = (int[]) crc.get(i);
+                newCircles[r][2 * i    ] = coords[0];
+                newCircles[r][2 * i + 1] = coords[1];
                 //System.out.print(circles[r][i][0] + "," +circles[r][i][1] + "; "); 
             }
             //System.out.println();
@@ -304,11 +275,11 @@ public class ImagePainter {
         if (radius == 0) {
             plot(xc, yc);
         } else {
-            int[][] c = getCircleCoords(radius);
+            int[] c = getCircleCoords(radius);
             int x, y;
-            for (int i = c.length - 1; i >= 0; i--) {
-                x = c[i][0];
-                y = c[i][1];
+            for (int i = (c.length / 2) - 1; i >= 0; i--) {
+                x = c[2 * i    ];
+                y = c[2 * i + 1];
                 plot(xc + x    , yc - y - 1); // quadrant 1
                 plot(xc - x + 1, yc - y - 1); // quadrant 2
                 plot(xc + x    , yc + y    ); // quadrant 4
@@ -323,14 +294,14 @@ public class ImagePainter {
         if (radius == 0) {
             plot(xc, yc);
         } else {
-            int[][] c = getCircleCoords(radius);
-            int q = c.length;
+            int[] c = getCircleCoords(radius);
+            int q = c.length / 2;
             int[][] c4 = new int[q * 4][];
             for (int i = 0; i < q; i++) {
-                c4[i        ] = new int[]{    c[i        ][0], -c[i        ][1] - 1}; // quadrant 1
-                c4[i +     q] = new int[]{1 - c[q - 1 - i][0], -c[q - 1 - i][1] - 1}; // quadrant 2
-                c4[i + 2 * q] = new int[]{1 - c[i        ][0],  c[i        ][1]    }; // quadrant 3
-                c4[i + 3 * q] = new int[]{    c[q - 1 - i][0],  c[q - 1 - i][1]    }; // quadrant 4
+                c4[i        ] = new int[]{    c[2 * (i        )], -c[2 * (i        ) + 1] - 1}; // quadrant 1
+                c4[i +     q] = new int[]{1 - c[2 * (q - 1 - i)], -c[2 * (q - 1 - i) + 1] - 1}; // quadrant 2
+                c4[i + 2 * q] = new int[]{1 - c[2 * (i        )],  c[2 * (i        ) + 1]    }; // quadrant 3
+                c4[i + 3 * q] = new int[]{    c[2 * (q - 1 - i)],  c[2 * (q - 1 - i) + 1]    }; // quadrant 4
             }
             for (int i = q * 4 * fromArc / 360; i < q * 4 * toArc / 360; i++) {
                 plot(xc + c4[i][0], yc + c4[i][1]);
@@ -418,28 +389,27 @@ public class ImagePainter {
             gr.clearRect(0, 0, width, height);
             
             WritableRaster wr = bi.getRaster();
-            long c;
+            int n;
+            int r, g, b;
             if (complementary) {
-                int r, g, b;
                 // then set pixels
                 for (int i = width - 1; i >= 0; i--) {
                     for (int j = height - 1; j >= 0; j--) {
-                        c = grid[i + j * width];
-                        if (c >= 0) {
-                            r = (int) (c >> 16);
-                            g = (int) ((c >> 8) & 0xff);
-                            b = (int) (c & 0xff);
-                            wr.setPixel(i, j, new int[]{(0x1fe - g - b) / 2, (0x1fe - r - b) / 2, (0x1fe - r - g) / 2});
-                        }
+                        n = 3 * (i + j * width);
+                        r = 0xff & grid[n    ];
+                        g = 0xff & grid[n + 1];
+                        b = 0xff & grid[n + 2];
+                        wr.setPixel(i, j, new int[]{(0x1fe - g - b) / 2, (0x1fe - r - b) / 2, (0x1fe - r - g) / 2});
                     }
                 }
             } else {
                 for (int i = width - 1; i >= 0; i--) {
                     for (int j = height - 1; j >= 0; j--) {
-                        c = grid[i + j * width];
-                        if (c >= 0) {
-                            wr.setPixel(i, j, new int[]{(int) (c >> 16), (int) ((c >> 8) & 0xff), (int) (c & 0xff)});
-                        }
+                        n = 3 * (i + j * width);
+                        r = 0xff & grid[n    ];
+                        g = 0xff & grid[n + 1];
+                        b = 0xff & grid[n + 2];
+                        wr.setPixel(i, j, new int[]{r, g, b});
                     }
                 }
             }

@@ -80,7 +80,7 @@ public class NetworkPicture {
         shortestName = 10;
         longestName = 12;
     
-        ImagePainter img = new ImagePainter(width, height, ImagePainter.TRANSPARENT);
+        ImagePainter img = new ImagePainter(width, height, 0);
         img.setMode(ImagePainter.MODE_ADD);
 
         if (yacyCore.seedDB == null) return img.toImage(true); // no other peers known

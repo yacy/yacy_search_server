@@ -96,7 +96,7 @@ public class imagetest {
         for (int i = 20; i < 100; i++) r.setPixel(i, 34, new int[]{0, 0, 255});
         return bi;
         */
-        ImagePainter img = new ImagePainter(800, 600, ImagePainter.TRANSPARENT);
+        ImagePainter img = new ImagePainter(800, 600, 0);
         
         img.setMode(ImagePainter.MODE_ADD);
         img.setColor(ImagePainter.ADDITIVE_BLACK);
