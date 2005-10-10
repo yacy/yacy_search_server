@@ -240,19 +240,30 @@ public final class userDB {
             return (this.mem.containsKey(LAST_ACCESS)?Long.valueOf((String)this.mem.get(LAST_ACCESS)):null);
         }        
         
-        public long updateLastAccess(long timeStamp, boolean decrementTimeUsed) {
+		public boolean canSurf(){
+			if(this.updateLastAccess(true) < this.getTimeLimit().longValue() )
+				return true;
+			else
+				return false;
+		}
+        public long updateLastAccess(boolean incrementTimeUsed) {
+			return updateLastAccess(System.currentTimeMillis(), incrementTimeUsed);
+		}
+        public long updateLastAccess(long timeStamp, boolean incrementTimeUsed) {
             if (timeStamp < 0) throw new IllegalArgumentException();
             
             Long lastAccess = this.getLastAccess();                                            
             long oldTimeUsed = getTimeUsed();
             long newTimeUsed = oldTimeUsed;            
             
-            if (decrementTimeUsed) {
+            if (incrementTimeUsed) {
                 if ((lastAccess == null)||((lastAccess != null)&&(timeStamp-lastAccess.longValue()>=1000*60))) {
                     this.mem.put(TIME_USED,Long.toString(newTimeUsed = ++oldTimeUsed));  
+					this.mem.put(LAST_ACCESS,Long.toString(timeStamp)); //update Timestamp
                 }
-            }            
-            this.mem.put(LAST_ACCESS,Long.toString(timeStamp));
+            }else{ 
+	            this.mem.put(LAST_ACCESS,Long.toString(timeStamp)); //update Timestamp
+			}
             
             try {
                 userDB.this.userTable.set(getUserName(), this.mem); 

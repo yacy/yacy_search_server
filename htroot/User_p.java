@@ -163,7 +163,9 @@ public class User_p {
                 entry = sb.userDB.getEntry(username);
 				if(entry != null){
 	                try{
-		                entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
+						if(! pw.equals("")){
+			                entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
+						}
 			            entry.setProperty(userDB.Entry.USER_FIRSTNAME, firstName);
 				        entry.setProperty(userDB.Entry.USER_LASTNAME, lastName);
 					    entry.setProperty(userDB.Entry.USER_ADDRESS, address);

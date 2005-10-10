@@ -323,7 +323,12 @@ public final class httpd implements serverHandler {
                 userDB.Entry entry=switchboard.userDB.getEntry(tmp[0]);
                 if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(auth)) ){
 					//TODO: Check Timelimits
-                    return true;
+					if(entry.canSurf()){
+						return true;
+					} else {
+						sendRespondError(this.prop,this.session.out,5,403,null, "Internet-Timelimit reached", null);
+		                return false;
+					}
                 }
 			}
             // ask for authenticate
@@ -332,14 +337,6 @@ public final class httpd implements serverHandler {
             this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
             this.session.out.write("\r\n".getBytes());                   
             return false;
-//            if (!this.proxyAccountBase64MD5.equals(serverCodings.encodeMD5Hex(auth.trim().substring(6)))) {
-//                // ask for authenticate
-//                this.session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-//                        httpHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString).getBytes());
-//                this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
-//                this.session.out.write("\r\n".getBytes());                   
-//                return false;
-//            }
         }else{
 			return true;
 		}

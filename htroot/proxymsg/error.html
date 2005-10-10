@@ -9,7 +9,7 @@
 <meta name="copyright" content="Michael Christen">
 
 <base href="http://#[host]#:#[port]#/">
-<link rel="stylesheet" media="all" href="/env/style.css">
+<link rel="stylesheet" media="all" href="http://#[host]#:#[port]#/env/style.css">
 
 <!-- (C), Architecture and Realisation: Michael Peter Christen; Contact: mc <at> anomic.de -->
 
@@ -21,7 +21,7 @@
   <tr height="36">
     <td width="240">
 	<a href="http://www.yacy.net">
-	<img width="52" height="33" border="0" src="/env/grafics/yacy.gif" align="top">
+	<img width="52" height="33" border="0" src="http://#[host]#:#[port]#//env/grafics/yacy.gif" align="top">
 	</a>
     </td>
     <td width="50%" align="center">
@@ -55,6 +55,8 @@
 						Could not load resource. The file is not available.
 						::<!-- 4 -->
 						#[detailedErrorMsg]#
+						::<!-- 5 -->
+						Your Internet-Timelimit is reached.
 					#(/errorMessageType)#
 				</b>
 			</p>
