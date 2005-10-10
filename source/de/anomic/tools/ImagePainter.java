@@ -93,10 +93,12 @@ public class ImagePainter {
         0x000288A,0x0002884,0x0003C9E,0x0622086,0x0421084,0x0C2088C,0x0045440,0x1F8C63F
     };
     
-    private static final int radiusPrecalc = 180;
-    private static HashSet crds = new HashSet();
-    private static ArrayList crc;
-    private static int[][][] circles = new int[radiusPrecalc][][];
+    //private static final int radiusPrecalc = 180;
+    //private static HashSet crds = new HashSet();
+    //private static ArrayList crc;
+    //private static int[][][] circles = new int[radiusPrecalc][][];
+    private static int[][][] circles = new int[0][][];
+    /*
     static {
         // calculate coordinates
         int x, y;
@@ -132,6 +134,7 @@ public class ImagePainter {
         crc = null;
         crds = null;
     }
+    */
     
     private long[] grid; // one-dimensional arrays are much faster than two-dimensional
     private int width, height;
@@ -238,13 +241,70 @@ public class ImagePainter {
         }
     }
     
-    
+    private static int[][] getCircleCoords(int radius) {
+        if ((radius - 1) < circles.length) return circles[radius - 1];
+        
+        // read some lines from known circles
+        HashSet crds = new HashSet();
+        crds.add("0|0");
+        String co;
+        for (int i = Math.max(0, circles.length - 5); i < circles.length; i++) {
+            for (int j = 0; j < circles[i].length; j++) {
+                co = circles[i][j][0] + "|" + circles[i][j][1];
+                if (!(crds.contains(co))) crds.add(co);
+            }
+        }
+        
+        // copy old circles into new array
+        int[][][] newCircles = new int[radius + 30][][];
+        System.arraycopy(circles, 0, newCircles, 0, circles.length);
+        
+        // compute more lines in new circles
+        int x, y;
+        ArrayList crc;
+        for (int r = circles.length; r < newCircles.length; r++) {
+            crc = new ArrayList();
+            for (int a = 0; a <= 2 * (r + 1); a++) {
+                x = (int) ((r + 1) * Math.cos(Math.PI * a / (4 * (r + 1))));
+                y = (int) ((r + 1) * Math.sin(Math.PI * a / (4 * (r + 1))));
+                co = x + "|" + y;
+                if (!(crds.contains(co))) {
+                    crc.add(new int[]{x, y});
+                    crds.add(co);
+                }
+                x = (int) ((r + 0.5) * Math.cos(Math.PI * a / (4 * (r + 1))));
+                y = (int) ((r + 0.5) * Math.sin(Math.PI * a / (4 * (r + 1))));
+                co = x + "|" + y;
+                if (!(crds.contains(co))) {
+                    crc.add(new int[]{x, y});
+                    crds.add(co);
+                }
+            }
+            // put coordinates into array
+            //System.out.print("Radius " + r + " => " + crc.size() + " points: ");
+            newCircles[r] = new int[crc.size() - 1][];
+            for (int i = 0; i < crc.size() - 1; i++) {
+                newCircles[r][i] = (int[]) crc.get(i);
+                //System.out.print(circles[r][i][0] + "," +circles[r][i][1] + "; "); 
+            }
+            //System.out.println();
+        }
+        crc = null;
+        crds = null;
+        
+        // move newCircles to circles array
+        circles = newCircles;
+        newCircles = null;
+        
+        // finally return wanted slice
+        return circles[radius - 1];
+    }
     
     private void circle(int xc, int yc, int radius) {
         if (radius == 0) {
             plot(xc, yc);
         } else {
-            int[][] c = circles[radius - 1];
+            int[][] c = getCircleCoords(radius);
             int x, y;
             for (int i = c.length - 1; i >= 0; i--) {
                 x = c[i][0];
@@ -263,7 +323,7 @@ public class ImagePainter {
         if (radius == 0) {
             plot(xc, yc);
         } else {
-            int[][] c = circles[radius - 1];
+            int[][] c = getCircleCoords(radius);
             int q = c.length;
             int[][] c4 = new int[q * 4][];
             for (int i = 0; i < q; i++) {

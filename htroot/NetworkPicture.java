@@ -60,6 +60,8 @@ import de.anomic.yacy.yacySeed;
 
 public class NetworkPicture {
     
+    private static int shortestName = 10;
+    private static int longestName = 12;
     
     public static BufferedImage respond(httpHeader header, serverObjects post, serverSwitch env) {
 
@@ -71,7 +73,12 @@ public class NetworkPicture {
             height = post.getInt("height", 420);
         }
         
-        int radius = Math.min(width, height) / 5;
+        int innerradius = Math.min(width, height) / 5;
+        int outerradius = innerradius + innerradius * yacyCore.seedDB.sizeConnected() / 100;
+        if (outerradius > innerradius * 2) outerradius = innerradius * 2;
+        
+        shortestName = 10;
+        longestName = 12;
     
         ImagePainter img = new ImagePainter(width, height, ImagePainter.TRANSPARENT);
         img.setMode(ImagePainter.MODE_ADD);
@@ -82,8 +89,7 @@ public class NetworkPicture {
         
         // draw network circle
         img.setColor("004020");
-        img.arc(width / 2, height / 2, radius - 20, radius + 20, 0, 360);
-        
+        img.arc(width / 2, height / 2, innerradius - 20, innerradius + 20, 0, 360);
         
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
         //System.out.println("Seed Minimum distance is       " + yacySeed.minDHTNumber);
@@ -100,7 +106,7 @@ public class NetworkPicture {
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
-                drawPeer(img, width / 2, height / 2, radius, seed, "000040", "B0FFB0");
+                drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "000040", "B0FFB0");
                 count++;
             }
         }
@@ -114,7 +120,7 @@ public class NetworkPicture {
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                 if (lastseen > 120) break; // we have enough, this list is sorted so we don't miss anything
-                drawPeer(img, width / 2, height / 2, radius, seed, "101010", "802000");
+                drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "101010", "802000");
                 count++;
             }
         }
@@ -128,14 +134,14 @@ public class NetworkPicture {
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                 if (lastseen > 120) break; // we have enough, this list is sorted so we don't miss anything
-                drawPeer(img, width / 2, height / 2, radius, seed, "202000", "A0A000");
+                drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "202000", "A0A000");
                 count++;
             }
         }
         totalCount += count;
         
         // draw my own peer
-        drawPeer(img, width / 2, height / 2, radius, yacyCore.seedDB.mySeed, "800000", "FFFFFF");
+        drawPeer(img, width / 2, height / 2, innerradius, outerradius, yacyCore.seedDB.mySeed, "800000", "FFFFFF");
         
         // draw description
         img.setColor("FFFFFF");
@@ -146,17 +152,21 @@ public class NetworkPicture {
         return img.toImage(true);
     }
     
-    private static void drawPeer(ImagePainter img, int x, int y, int radius, yacySeed seed, String colorDot, String colorText) {
+    private static void drawPeer(ImagePainter img, int x, int y, int innerradius, int outerradius, yacySeed seed, String colorDot, String colorText) {
+        String name = seed.getName().toUpperCase();
+        if (name.length() < shortestName) shortestName = name.length();
+        if (name.length() > longestName) longestName = name.length();
         int angle = (int) ((long) 360 * (seed.dhtDistance() / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
-        int linelength = radius + 60 + (Math.abs(seed.hash.hashCode()) % (radius / 2));
+        int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + (Math.abs(seed.hash.hashCode()) % 20)) / 60;
+        if (linelength > outerradius) linelength = outerradius;
         int dotsize = 6 + 2 * (int) (seed.getLinkCount() / 500000L);
         if (dotsize > 18) dotsize = 18;
         img.setColor(colorDot);
-        img.arcDot(x, y, radius, dotsize, angle);
+        img.arcDot(x, y, innerradius, dotsize, angle);
         img.setColor(colorText);
-        img.arcLine(x, y, radius + 18, linelength, angle);
-        img.arcPrint(x, y, linelength, angle, seed.getName().toUpperCase());
+        img.arcLine(x, y, innerradius + 18, innerradius + linelength, angle);
+        img.arcPrint(x, y, innerradius + linelength, angle, name);
     }
     
 }
