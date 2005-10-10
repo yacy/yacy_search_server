@@ -1243,7 +1243,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                   (
                      (exceptionMsg.indexOf("unknown host")>=0) ||
                      (exceptionMsg.indexOf("socket write error")>=0) ||
-                     (exceptionMsg.indexOf("Read timed out") >= 0)
+                     (exceptionMsg.indexOf("Read timed out") >= 0) || 
+                     (exceptionMsg.indexOf("Broken pipe") >= 0)
                   )) {
                     errorMessage = exceptionMsg;
                 } else if ((remote != null)&&(remote.isClosed())) { 
