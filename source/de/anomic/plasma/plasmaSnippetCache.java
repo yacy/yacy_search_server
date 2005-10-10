@@ -374,7 +374,7 @@ public class plasmaSnippetCache {
             log);
     }
     
-    public void fetch(plasmaSearch.result acc, Set queryhashes, String urlmask, int fetchcount) {
+    public void fetch(plasmaSearchResult acc, Set queryhashes, String urlmask, int fetchcount) {
         // fetch snippets
         int i = 0;
         plasmaCrawlLURL.Entry urlentry;

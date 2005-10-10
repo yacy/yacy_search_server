@@ -51,10 +51,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.TreeSet;
+
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -73,11 +75,11 @@ public class index {
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
 
         // case if no values are requested
+        final String referer = (String) header.get("Referer");
         if (post == null || env == null) {
 
             // save referrer
             // System.out.println("HEADER=" + header.toString());
-            final String referer = (String) header.get("Referer");
             if (referer != null) {
                 URL url;
                 try { url = new URL(referer); } catch (MalformedURLException e) { url = null; }
@@ -122,7 +124,7 @@ public class index {
         // process search words
         final String querystring = (String) post.get("search", "");
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
-        final TreeSet query = cleanQuery(querystring);
+        final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
         // filter out stopwords
         final TreeSet filtered = kelondroMSetTools.joinConstructive(query, plasmaSwitchboard.stopwords);
         if (filtered.size() > 0) {
@@ -147,10 +149,15 @@ public class index {
         }
 
         // do the search
-        final serverObjects prop = ((plasmaSwitchboard) env).searchFromLocal(query, order1, order2, count,
+        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, referer, new String[]{order1, order2}, count, searchtime, urlmask,
+                                                             ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
+                                                             "", 20);
+        final serverObjects prop = sb.searchFromLocal(thisSearch);
+        /*
+        final serverObjects prop = sb.searchFromLocal(query, order1, order2, count,
                                    ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))),
                                      searchtime, urlmask);
-
+                                     */
         // remember the last search expression
         env.setConfig("last-search", querystring);
         // process result of search
@@ -264,23 +271,6 @@ public class index {
         return prop;
     }
 
-    public static TreeSet cleanQuery(String words) {
-        // convert Umlaute
-        words = htmlFilterContentScraper.convertUmlaute(new serverByteBuffer(words.getBytes())).toString();
 
-        // remove funny symbols
-        final String seps = "' .,:/-&";
-        words = words.toLowerCase().trim();
-        int c;
-        for (int i = 0; i < seps.length(); i++) {
-            if ((c = words.indexOf(seps.charAt(i))) >= 0) { words = words.substring(0, c) + (((c + 1) < words.length()) ? (" " + words.substring(c + 1)) : ""); }
-        }
-
-        // the string is clean now, but we must generate a set out of it
-        final String[] a = words.split(" ");
-        final TreeSet query = new TreeSet(kelondroMSetTools.fastStringComparator);
-        for (int i = 0; i < a.length; i++) { query.add(a[i]); }
-        return query;
-    }
 
 }

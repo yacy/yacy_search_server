@@ -1372,7 +1372,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logFine("presearch: started job");
                 idx = searchManager.searchHashes(queryhashes, time);
                 log.logFine("presearch: found " + idx.size() + " results");
-                plasmaSearch.result acc = searchManager.order(idx, queryhashes, stopwords, order, time, searchcount);
+                plasmaSearchResult acc = searchManager.order(idx, queryhashes, stopwords, order, time, searchcount);
                 if (acc == null) return;
                 log.logFine("presearch: ordered results, now " + acc.sizeOrdered() + " URLs ready for fetch");
                 
@@ -1387,63 +1387,64 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
     }
     
-    public serverObjects searchFromLocal(Set querywords, String order1, String order2, int count, boolean global, long time /*milliseconds*/, String urlmask) {
+    //public serverObjects searchFromLocal(Set querywords, String order1, String order2, int count, boolean global, long time /*milliseconds*/, String urlmask) {
+    public serverObjects searchFromLocal(plasmaSearchQuery query) {
         
 	// tell all threads to do nothing for a specific time
-	wordIndex.intermission(time);
-	intermissionAllThreads(time);
+	wordIndex.intermission(query.maximumTime);
+	intermissionAllThreads(query.maximumTime);
 
         serverObjects prop = new serverObjects();
         try {
             char[] order = new char[2];
-            if (order1.equals("quality")) order[0] = plasmaSearch.O_QUALITY; else order[0] = plasmaSearch.O_AGE;
-            if (order2.equals("quality")) order[1] = plasmaSearch.O_QUALITY; else order[1] = plasmaSearch.O_AGE;
+            if (query.order[0].equals("quality")) order[0] = plasmaSearchResult.O_QUALITY; else order[0] = plasmaSearchResult.O_AGE;
+            if (query.order[1].equals("quality")) order[1] = plasmaSearchResult.O_QUALITY; else order[1] = plasmaSearchResult.O_AGE;
             
             // filter out words that appear in bluelist
-            Iterator it = querywords.iterator();
+            Iterator it = query.queryWords.iterator();
             String word, gs = "";
             while (it.hasNext()) {
                 word = (String) it.next();
                 if (blueList.contains(word)) it.remove(); else gs += "+" + word;
             }
             if (gs.length() > 0) gs = gs.substring(1);
-            Set queryhashes = plasmaSearch.words2hashes(querywords);
             
             // log
-            log.logInfo("INIT WORD SEARCH: " + gs + ":" + queryhashes + " - " + count + " links, " + (time / 1000) + " seconds");
+            log.logInfo("INIT WORD SEARCH: " + gs + ":" + query.queryHashes + " - " + query.wantedResults + " links, " + (query.maximumTime / 1000) + " seconds");
             long timestamp = System.currentTimeMillis();
             
             // start a presearch, which makes only sense if we idle afterwards.
             // this is especially the case if we start a global search and idle until search
-            if (global) {
-                Thread preselect = new presearch(queryhashes, order, time / 10, urlmask, 10, 3);
+            if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
+                Thread preselect = new presearch(query.queryHashes, order, query.maximumTime / 10, query.urlMask, 10, 3);
                 preselect.start();
             }
             
             // do global fetching
             int globalresults = 0;
-            if (global) {
-                int fetchcount = ((int) time / 1000) * 5; // number of wanted results until break in search
-                int fetchpeers = ((int) time / 1000) * 2; // number of target peers; means 30 peers in 10 seconds
-                long fetchtime = time * 6 / 10;           // time to waste
+            if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
+                int fetchcount = ((int) (query.maximumTime / 1000L)) * 5; // number of wanted results until break in search
+                int fetchpeers = ((int) (query.maximumTime / 1000L)) * 2; // number of target peers; means 30 peers in 10 seconds
+                long fetchtime = query.maximumTime * 6 / 10;           // time to waste
                 if (fetchpeers < 10) fetchpeers = 10;
-                if (fetchcount > count * 10) fetchcount = count * 10;
-                globalresults = yacySearch.searchHashes(queryhashes, urlPool.loadedURL, searchManager, fetchcount, fetchpeers, urlBlacklist, snippetCache, fetchtime);
+                if (fetchcount > query.wantedResults * 10) fetchcount = query.wantedResults * 10;
+                globalresults = yacySearch.searchHashes(query.queryHashes, urlPool.loadedURL, searchManager, fetchcount, fetchpeers, urlBlacklist, snippetCache, fetchtime);
                 log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             }
             prop.put("globalresults", globalresults); // the result are written to the local DB
             
             
             // now search locally (the global results should be now in the local db)
-            long remainingTime = time - (System.currentTimeMillis() - timestamp);
-            plasmaWordIndexEntity idx = searchManager.searchHashes(queryhashes, remainingTime * 8 / 10); // the search
+            long remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
+            plasmaWordIndexEntity idx = searchManager.searchHashes(query.queryHashes, remainingTime * 8 / 10); // the search
             log.logFine("SEARCH TIME AFTER FINDING " + idx.size() + " ELEMENTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
-            remainingTime = time - (System.currentTimeMillis() - timestamp);
+            remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
             if (remainingTime < 500) remainingTime = 500;
             if (remainingTime > 3000) remainingTime = 3000;
-            plasmaSearch.result acc = searchManager.order(idx, queryhashes, stopwords, order, remainingTime, 10);
-            if (!(global)) snippetCache.fetch(acc.cloneSmart(), queryhashes, urlmask, 10);
+            plasmaSearchResult acc = searchManager.order(idx, query.queryHashes, stopwords, order, remainingTime, 10);
+            if (query.domType != plasmaSearchQuery.SEARCHDOM_GLOBALDHT)
+                snippetCache.fetch(acc.cloneSmart(), query.queryHashes, query.urlMask, 10);
             log.logFine("SEARCH TIME AFTER ORDERING OF SEARCH RESULT: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
             // result is a List of urlEntry elements: prepare answer
@@ -1463,7 +1464,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 yacySeed seed;
                 plasmaSnippetCache.result snippet;
                 //kelondroMScoreCluster ref = new kelondroMScoreCluster();
-                while ((acc.hasMoreElements()) && (i < count)) {
+                while ((acc.hasMoreElements()) && (i < query.wantedResults)) {
                     urlentry = acc.nextElement();
                     url = urlentry.url();
                     host = url.getHost();
@@ -1500,8 +1501,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                          */
                     //addScoreForked(ref, gs, descr.split(" "));
                     //addScoreForked(ref, gs, urlstring.split("/"));
-                    if (urlstring.matches(urlmask)) { //.* is default
-                        snippet = snippetCache.retrieve(url, queryhashes, false, 260);
+                    if (urlstring.matches(query.urlMask)) { //.* is default
+                        snippet = snippetCache.retrieve(url, query.queryHashes, false, 260);
                         if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
                             // suppress line: there is no match in that resource
                         } else {
@@ -1524,7 +1525,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logFine("SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
                 // calc some more cross-reference
-                remainingTime = time - (System.currentTimeMillis() - timestamp);
+                remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
                 if (remainingTime < 0) remainingTime = 1000;
                 /*
                 while ((acc.hasMoreElements()) && (((time + timestamp) < System.currentTimeMillis()))) {
@@ -1577,7 +1578,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             plasmaWordIndexEntity idx = searchManager.searchHashes(hashes, duetime * 8 / 10); // a nameless temporary index, not sorted by special order but by hash
             long remainingTime = duetime - (System.currentTimeMillis() - timestamp);
             if (remainingTime < 500) remainingTime = 500;
-            plasmaSearch.result acc = searchManager.order(idx, hashes, stopwords, new char[]{plasmaSearch.O_QUALITY, plasmaSearch.O_AGE}, remainingTime, 10);
+            plasmaSearchResult acc = searchManager.order(idx, hashes, stopwords, new char[]{plasmaSearchResult.O_QUALITY, plasmaSearchResult.O_AGE}, remainingTime, 10);
             
             // result is a List of urlEntry elements
             if (acc == null) {
