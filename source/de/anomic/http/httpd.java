@@ -963,6 +963,7 @@ public final class httpd implements serverHandler {
         respond.flush();        
     }
     
+    
     public static final void sendRespondError(
             Properties conProp,
             OutputStream respond,
@@ -970,6 +971,50 @@ public final class httpd implements serverHandler {
             int httpStatusCode,            
             String httpStatusText,
             String detailedErrorMsg,
+            Exception stackTrace
+    ) throws IOException {
+        sendRespondError(
+                conProp,
+                respond,
+                errorcase,
+                httpStatusCode,
+                httpStatusText,
+                detailedErrorMsg,
+                null,
+                stackTrace
+        );
+    }
+    
+    public static final void sendRespondError(
+            Properties conProp,
+            OutputStream respond,
+            int errorcase,
+            int httpStatusCode,            
+            String httpStatusText,
+            File detailedErrorMsgFile,
+            HashMap detailedErrorMsgValues,
+            Exception stackTrace
+    ) throws IOException {
+        sendRespondError(
+                conProp,
+                respond,
+                errorcase,
+                httpStatusCode,
+                httpStatusText,
+                detailedErrorMsgFile,
+                detailedErrorMsgValues,
+                stackTrace
+        );        
+    }
+    
+    private static final void sendRespondError(
+            Properties conProp,
+            OutputStream respond,
+            int errorcase,
+            int httpStatusCode,            
+            String httpStatusText,
+            Object detailedErrorMsg,
+            HashMap detailedErrorMsgValues,
             Exception stackTrace
     ) throws IOException {
         
@@ -1036,7 +1081,28 @@ public final class httpd implements serverHandler {
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
             tp.put("requestMethod",    conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD));
             tp.put("requestURL",       urlString);
-            tp.put("errorMessageType_detailedErrorMsg",(detailedErrorMsg != null) ? detailedErrorMsg : "");
+            
+            if (detailedErrorMsg == null ) {
+                if (errorcase == 4) 
+                    tp.put("errorMessageType_detailedErrorMsg","");
+                else if (errorcase == 5) 
+                    tp.put("errorMessageType_file","");
+            } else {
+                if (detailedErrorMsg instanceof String ) {
+                    tp.put("errorMessageType_detailedErrorMsg",detailedErrorMsg);
+                } else if (detailedErrorMsg instanceof File) {
+                    tp.put("errorMessageType_file",detailedErrorMsg);
+                    
+                    if ((detailedErrorMsgValues != null)&&(detailedErrorMsgValues.size()>0)) {
+                        // rewriting the value-names and add the proper name prefix:
+                        Iterator nameIter = detailedErrorMsgValues.keySet().iterator();
+                        while (nameIter.hasNext()) {
+                            String name = (String) nameIter.next();
+                            tp.put("errorMessageType_" + name,detailedErrorMsgValues.get(name));
+                        }                        
+                    }
+                }
+            }
             
             // building the stacktrace            
             if (stackTrace != null) {  
