@@ -106,7 +106,7 @@ public class NetworkPicture {
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
-                drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "000040", "B0FFB0");
+                drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "000040", "608860", "B0FFB0");
                 count++;
             }
         }
@@ -120,7 +120,7 @@ public class NetworkPicture {
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                 if (lastseen > 120) break; // we have enough, this list is sorted so we don't miss anything
-                drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "101010", "802000");
+                drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "101010", "401000", "802000");
                 count++;
             }
         }
@@ -134,17 +134,18 @@ public class NetworkPicture {
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                 if (lastseen > 120) break; // we have enough, this list is sorted so we don't miss anything
-                drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "202000", "A0A000");
+                drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "202000", "505000", "A0A000");
                 count++;
             }
         }
         totalCount += count;
         
         // draw my own peer
-        drawPeer(img, width / 2, height / 2, innerradius, outerradius, yacyCore.seedDB.mySeed, "800000", "FFFFFF");
+        drawPeer(img, width / 2, height / 2, innerradius, outerradius, yacyCore.seedDB.mySeed, "800000", "AAAAAA", "FFFFFF");
         
         // draw description
         img.setColor("FFFFFF");
+        img.setMode(ImagePainter.MODE_ADD);
         img.print(2, 8, "THE YACY NETWORK", true);
         img.print(2, 16, "DRAWING OF " + totalCount + " SELECTED PEERS", true);
         img.print(width - 2, 8, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), false);
@@ -152,7 +153,7 @@ public class NetworkPicture {
         return img.toImage(true);
     }
     
-    private static void drawPeer(ImagePainter img, int x, int y, int innerradius, int outerradius, yacySeed seed, String colorDot, String colorText) {
+    private static void drawPeer(ImagePainter img, int x, int y, int innerradius, int outerradius, yacySeed seed, String colorDot, String colorLine, String colorText) {
         String name = seed.getName().toUpperCase();
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
@@ -162,11 +163,29 @@ public class NetworkPicture {
         if (linelength > outerradius) linelength = outerradius;
         int dotsize = 6 + 2 * (int) (seed.getLinkCount() / 500000L);
         if (dotsize > 18) dotsize = 18;
+        img.setMode(ImagePainter.MODE_ADD);
+        // draw dot
         img.setColor(colorDot);
-        img.arcDot(x, y, innerradius, dotsize, angle);
-        img.setColor(colorText);
+        img.arcDot(x, y, innerradius, angle, dotsize);
+        // draw line to text
+        img.setColor(colorLine);
         img.arcLine(x, y, innerradius + 18, innerradius + linelength, angle);
+        // draw text
+        img.setColor(colorText);
         img.arcPrint(x, y, innerradius + linelength, angle, name);
+        // draw corona around dot for crawling activity
+        int ppm10 = seed.getPPM() / 10;
+        if (ppm10 > 0) {
+            if (ppm10 > 3) ppm10 = 3;
+            img.setMode(ImagePainter.MODE_SUB);
+            img.setColor("303030");
+            img.arcArc(x, y, innerradius, angle, dotsize + 1, dotsize + ppm10 + 1, 0, 360);
+            img.setMode(ImagePainter.MODE_ADD);
+            img.setColor("200000");
+            img.arcArc(x, y, innerradius, angle, dotsize + ppm10    , dotsize + ppm10    , 0, 360);
+            img.setColor("500000");
+            img.arcArc(x, y, innerradius, angle, dotsize + ppm10 + 1, dotsize + ppm10 + 1, 0, 360);
+        }
     }
     
 }

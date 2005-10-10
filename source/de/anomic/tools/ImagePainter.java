@@ -130,9 +130,9 @@ public class ImagePainter {
     }
     
     public void setColor(long c) {
-        defaultColR = (byte) (c >> 16);
-        defaultColG = (byte) ((c >> 8) & 0xff);
-        defaultColB = (byte) (c & 0xff);
+        defaultColR = (int) (c >> 16);
+        defaultColG = (int) ((c >> 8) & 0xff);
+        defaultColB = (int) (c & 0xff);
     }
     
     public void setColor(String s) {
@@ -140,25 +140,25 @@ public class ImagePainter {
     }
     
     public void setMode(byte m) {
-        defaultMode = m;
+        this.defaultMode = m;
     }
     
     private void plot(int x, int y) {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
         int n = 3 * (x + y * width);
-        if (defaultMode == MODE_REPLACE) {
+        if (this.defaultMode == MODE_REPLACE) {
             grid[n    ] = (byte) defaultColR;
             grid[n + 1] = (byte) defaultColG;
             grid[n + 2] = (byte) defaultColB;
-        } else if (defaultMode == MODE_ADD) {
+        } else if (this.defaultMode == MODE_ADD) {
             int r = ((int) (0xff & grid[n    ])) + defaultColR; if (r > 0xff) r = 0xff;
             int g = ((int) (0xff & grid[n + 1])) + defaultColG; if (g > 0xff) g = 0xff;
             int b = ((int) (0xff & grid[n + 2])) + defaultColB; if (b > 0xff) b = 0xff;
             grid[n    ] = (byte) r;
             grid[n + 1] = (byte) g;
             grid[n + 2] = (byte) b;
-        } else if (defaultMode == MODE_SUB) {
+        } else if (this.defaultMode == MODE_SUB) {
             int r = ((int) (0xff & grid[n    ])) - defaultColR; if (r < 0) r = 0;
             int g = ((int) (0xff & grid[n + 1])) - defaultColG; if (g < 0) g = 0;
             int b = ((int) (0xff & grid[n + 2])) - defaultColB; if (b < 0) b = 0;
@@ -369,10 +369,16 @@ public class ImagePainter {
         line(xi, yi, xo, yo);
     }
     
-    public void arcDot(int cx, int cy, int arcRadius, int dotRadius, int angle) {
+    public void arcDot(int cx, int cy, int arcRadius, int angle, int dotRadius) {
         int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
         int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
         dot(x, y, dotRadius, true);
+    }
+    
+    public void arcArc(int cx, int cy, int arcRadius, int angle, int innerRadius, int outerRadius, int fromArc, int toArc) {
+        int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
+        int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
+        arc(x, y, innerRadius, outerRadius, fromArc, toArc);
     }
     
     public BufferedImage toImage(boolean complementary) {
