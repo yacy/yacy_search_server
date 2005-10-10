@@ -263,7 +263,8 @@ public final class userDB {
             
             if (incrementTimeUsed) {
                 if ((lastAccess == null)||((lastAccess != null)&&(timeStamp-lastAccess.longValue()>=1000*60))) {
-                    this.mem.put(TIME_USED,Long.toString(newTimeUsed = ++oldTimeUsed));  
+                    //this.mem.put(TIME_USED,Long.toString(newTimeUsed = ++oldTimeUsed));  
+                    newTimeUsed = ++oldTimeUsed;  
 					if(lastAccess != null){
     					this.oldDate.setTime(new Date(lastAccess.longValue()));
 	    				this.newDate.setTime(new Date(System.currentTimeMillis()));
