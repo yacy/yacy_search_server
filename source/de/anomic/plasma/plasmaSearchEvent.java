@@ -42,11 +42,14 @@
 
 package de.anomic.plasma;
 
+import java.util.Iterator;
 
 public final class plasmaSearchEvent {
     
+    private plasmaSearchQuery query;
 
-    public plasmaSearchEvent() {
+    public plasmaSearchEvent(plasmaSearchQuery query) {
+        this.query = query;
     }
     
 }

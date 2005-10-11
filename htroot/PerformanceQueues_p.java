@@ -173,6 +173,7 @@ public class PerformanceQueues_p {
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             int wordCacheMaxLow = Integer.parseInt((String) post.get("wordCacheMaxLow", "8000"));
             int wordCacheMaxHigh = Integer.parseInt((String) post.get("wordCacheMaxHigh", "10000"));
+            if (wordCacheMaxLow > wordCacheMaxHigh) wordCacheMaxLow = wordCacheMaxHigh;
             switchboard.setConfig("wordCacheMaxLow", Integer.toString(wordCacheMaxLow));
             switchboard.setConfig("wordCacheMaxHigh", Integer.toString(wordCacheMaxHigh));
             switchboard.wordIndex.setMaxWords(wordCacheMaxLow, wordCacheMaxHigh);

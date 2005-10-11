@@ -306,8 +306,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         urlPool = new plasmaURLPool(plasmaPath, ramLURL, ramNURL, ramEURL);
 
         wordIndex = new plasmaWordIndex(plasmaPath, ramRWI, log);
-        int wordCacheMaxLow = Integer.parseInt((String) getConfig("wordCacheMaxLow", "8000"));
-        int wordCacheMaxHigh = Integer.parseInt((String) getConfig("wordCacheMaxHigh", "10000"));
+        int wordCacheMaxLow = (int) getConfigLong("wordCacheMaxLow", 8000);
+        int wordCacheMaxHigh = (int) getConfigLong("wordCacheMaxHigh", 10000);
         wordIndex.setMaxWords(wordCacheMaxLow, wordCacheMaxHigh);
         searchManager = new plasmaSearch(urlPool.loadedURL, wordIndex);
         
@@ -695,6 +695,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // work off fresh entries from the proxy or from the crawler
         if (onlineCaution()) {
             log.logFiner("deQueue: online caution, omitting resource stack processing");
+            return false;
+        }
+        
+        if (wordIndex.wordCacheRAMSize() + 1000 > (int) getConfigLong("wordCacheMaxLow", 8000)) {
+            log.logFine("deQueue: word index ram cache too full (" + ((int) getConfigLong("wordCacheMaxLow", 8000) - wordIndex.wordCacheRAMSize()) +
+                        " slots left); dismissed to omit ram flush lock");
             return false;
         }
         

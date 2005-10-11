@@ -390,7 +390,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 	}
         
         // now decide where to flush that container
-        if (container.size() <= assortmentCluster.clusterCapacity) {
+        //if (container.size() <= assortmentCluster.clusterCapacity) {
             // this fits into the assortments
             plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(key, container);
             if (feedback == null) {
@@ -399,10 +399,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 // *** should care about another option here ***
                 return backend.addEntries(feedback, time, true);
             }
+            /*
         } else {
             // store to back-end; this should be a rare case
             return backend.addEntries(container, time, true);
         }
+             **/
 
     }
     
@@ -466,9 +468,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return removed;
     }
     
-    public synchronized int addEntries(plasmaWordIndexEntryContainer container, long updateTime, boolean highPriority) {
+    public int addEntries(plasmaWordIndexEntryContainer container, long updateTime, boolean highPriority) {
         // this puts the entries into the cache, not into the assortment directly
         
+        int added = 0;
         // check cache space
         if (cache.size() > 0) try {
             // pause to get space in the cache (while it is flushed)
@@ -485,14 +488,17 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             Thread.sleep(pausetime);
         } catch (InterruptedException e) {}
         
-        // stop flushing now for one moment
-        flushThread.pause();
         //serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
-
+        
         // put new words into cache
-        int added = 0;
         String wordHash = container.wordHash();
-        synchronized (cache) {            
+        
+        synchronized (cache) {
+            
+            // stop flushing now for one moment
+            flushThread.pause();
+            
+            // put container into cache
             plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
             if (entries == null) entries = new plasmaWordIndexEntryContainer(wordHash);
             added = entries.add(container);
@@ -502,9 +508,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 hashDate.setScore(wordHash, intTime(updateTime));
             }
             entries = null;
+            
+            // resume flushing
+            flushThread.proceed();
         }
         //System.out.println("DEBUG: cache = " + cache.toString());
-        flushThread.proceed();
+        
         return added;
     }
 

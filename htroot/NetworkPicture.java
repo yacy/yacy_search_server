@@ -66,7 +66,7 @@ public class NetworkPicture {
     public static BufferedImage respond(httpHeader header, serverObjects post, serverSwitch env) {
 
         int width = 640;
-        int height = 420;
+        int height = 480;
         
         if (post != null) {
             width = post.getInt("width", 640);
