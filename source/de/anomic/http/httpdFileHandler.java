@@ -418,7 +418,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     e.getMessage() +
                     " target exception at " + targetClass + ": " +
                     e.getTargetException().toString() + ":" +
-                    e.getTargetException().getMessage(),e);
+                    e.getTargetException().getMessage() +
+                    "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'",e);
                     targetClass = null;
                 }
                 if (bi == null) {
