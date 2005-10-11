@@ -215,9 +215,6 @@ public final class yacy {
             if (!(dataFolder.exists())) dataFolder.mkdir();
 
             final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
-
-            // set default = no restart
-            sb.setConfig("restart", "false");
             
             // save information about available memory at startup time
             sb.setConfig("memoryFreeAfterStartup", startupMemFree);
@@ -226,6 +223,9 @@ public final class yacy {
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
             sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
+
+            // set default = no restart
+            sb.setConfig("restart", "false");
 
             // if we are running an SVN version, we try to detect the used svn revision now ...
             final Properties buildProp = new Properties();
@@ -480,17 +480,22 @@ public final class yacy {
         if (restart.equals("true")) {
             serverLog.logConfig("SHUTDOWN", "RESTART...");
             long count = 0;
-            while (Thread.activeCount() > 1 && count <= 60) { // wait 5 minutes               
-                serverLog.logConfig("SHUTDOWN", "Waiting 5 seconds for " + (Thread.activeCount() - 1) + "running threads to restart YaCy");
-                try { Thread.currentThread().sleep(5000); } catch (InterruptedException e) {}
-                count++;
+            if (Thread.activeCount() > 1) {
+                serverLog.logConfig("SHUTDOWN", "Wait maximally 5 minutes for " + (Thread.activeCount() - 1) + " running threads to restart YaCy");
+                while (Thread.activeCount() > 1 && count <= 60) { // wait 5 minutes                 
+                    count++;
+                    try { Thread.currentThread().sleep(5000); } catch (InterruptedException e) {}
+                }
             }
-            if (count < 60) { 
+            if (count < 60) {
+                System.gc();
+                try { Thread.currentThread().sleep(5000); } catch (InterruptedException e) {}
                 startupMemFree  = Runtime.getRuntime().freeMemory();  // the amount of free memory in the Java Virtual Machine
                 startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
                 startup(homePath, startupMemFree, startupMemTotal);
             } else {
                 serverLog.logConfig("SHUTDOWN", "RESTART BREAK, more than 5 minutes waited to try a restart, goodbye. (this is the last line)");
+                serverLog.logConfig("SHUTDOWN", "RESTART BREAK, getAllStackTraces()\n" + Thread.getAllStackTraces());
             }
         } else {
             serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
