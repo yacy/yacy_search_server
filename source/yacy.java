@@ -495,7 +495,7 @@ public final class yacy {
                 startup(homePath, startupMemFree, startupMemTotal);
             } else {
                 serverLog.logConfig("SHUTDOWN", "RESTART BREAK, more than 5 minutes waited to try a restart, goodbye. (this is the last line)");
-                serverLog.logConfig("SHUTDOWN", "RESTART BREAK, getAllStackTraces()\n" + Thread.getAllStackTraces());
+//              serverLog.logConfig("SHUTDOWN", "RESTART BREAK, getAllStackTraces()\n" + Thread.getAllStackTraces()); // needs java 1.5
             }
         } else {
             serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
