@@ -80,7 +80,7 @@ public class NetworkPicture {
         shortestName = 10;
         longestName = 12;
     
-        ImagePainter img = new ImagePainter(width, height, 0);
+        ImagePainter img = new ImagePainter(width, height, "000010");
         img.setMode(ImagePainter.MODE_ADD);
 
         if (yacyCore.seedDB == null) return img.toImage(true); // no other peers known
@@ -88,7 +88,7 @@ public class NetworkPicture {
         if (size == 0) return img.toImage(true); // no other peers known
         
         // draw network circle
-        img.setColor("004020");
+        img.setColor("008020");
         img.arc(width / 2, height / 2, innerradius - 20, innerradius + 20, 0, 360);
         
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
@@ -177,6 +177,20 @@ public class NetworkPicture {
         int ppm10 = seed.getPPM() / 10;
         if (ppm10 > 0) {
             if (ppm10 > 3) ppm10 = 3;
+            // draw a wave around crawling peers
+            long strength;
+            img.setMode(ImagePainter.MODE_SUB);
+            img.setColor("303030");
+            img.arcArc(x, y, innerradius, angle, dotsize + 1, dotsize + 1, 0, 360);
+            int waveradius = innerradius / 2;
+            for (int r = 0; r < waveradius; r++) {
+                strength = (waveradius - r) * (long) (0x08 * ppm10 * (1.0 + Math.sin(Math.PI * 16 * r / waveradius))) / waveradius;
+                //System.out.println("r = " + r + ", Strength = " + strength);
+                img.setColor((strength << 16) | (strength << 8) | strength);
+                img.arcArc(x, y, innerradius, angle, dotsize + r, dotsize + r, 0, 360);
+            }
+            /*
+            // draw corona
             img.setMode(ImagePainter.MODE_SUB);
             img.setColor("303030");
             img.arcArc(x, y, innerradius, angle, dotsize + 1, dotsize + ppm10 + 1, 0, 360);
@@ -185,6 +199,7 @@ public class NetworkPicture {
             img.arcArc(x, y, innerradius, angle, dotsize + ppm10    , dotsize + ppm10    , 0, 360);
             img.setColor("500000");
             img.arcArc(x, y, innerradius, angle, dotsize + ppm10 + 1, dotsize + ppm10 + 1, 0, 360);
+             */
         }
     }
     

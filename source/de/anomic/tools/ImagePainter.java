@@ -98,6 +98,10 @@ public class ImagePainter {
     private int  defaultColR, defaultColG, defaultColB;
     private byte defaultMode;
     
+    public ImagePainter(int width, int height, String backgroundColor) {
+        this(width, height, colNum(backgroundColor));
+    }
+    
     public ImagePainter(int width, int height, long backgroundColor) {
         this.width = width;
         this.height = height;
@@ -118,12 +122,12 @@ public class ImagePainter {
         }
     }
     
-    private long colNum(String col) {
+    private static long colNum(String col) {
         return Long.parseLong(col, 16);
         //return Integer.parseInt(col.substring(0,2), 16) << 16 | Integer.parseInt(col.substring(2,4), 16) << 8 | Integer.parseInt(col.substring(4,6), 16);
     }
     
-    private String colStr(long c) {
+    private static String colStr(long c) {
         String s = Long.toHexString(c);
         while (s.length() < 6) s = "0" + s;
         return s;

@@ -264,7 +264,7 @@ public final class plasmaWordIndexDistribution {
             }
             return indexCount;
         } else {
-            log.logSevere("Index distribution failed. Too less peers (" + hc + ") received the index, not deleted locally.");
+            log.logSevere("Index distribution failed. Too few peers (" + hc + ") received the index, not deleted locally.");
             return -1;
         }
     }
