@@ -573,5 +573,9 @@ indexControl.timeout = 60000
 indexDistribution.timeout = 60000
 indexTransfer.timeout = 120000
 
+# defining max. allowed amount of open files during index- transfer/distribution
+indexDistribution.maxOpenFiles = 800
+indexTransfer.maxOpenFiles = 800
+
 # 
 storagePeerHash =

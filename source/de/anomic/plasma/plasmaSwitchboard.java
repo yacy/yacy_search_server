@@ -478,11 +478,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                      peerPing = new serverInstantThread(yc, "peerPing", null), 2000);
         peerPing.setSyncObject(new Object());
         
-        indexDistribution = new plasmaWordIndexDistribution(urlPool, wordIndex, log,
-                                                            getConfig("allowDistributeIndex", "false").equalsIgnoreCase("true"),
-                                                            getConfig("allowDistributeIndexWhileCrawling","false").equalsIgnoreCase("true"),
-                                                            getConfig("indexDistribution.gzipBody","false").equalsIgnoreCase("true"),
-                                                            (int)getConfigLong("indexDistribution.timeout",60000));
+        this.indexDistribution = new plasmaWordIndexDistribution(
+                this.urlPool, 
+                this.wordIndex, 
+                this.log,
+                getConfig("allowDistributeIndex", "false").equalsIgnoreCase("true"),
+                getConfig("allowDistributeIndexWhileCrawling","false").equalsIgnoreCase("true"),
+                getConfig("indexDistribution.gzipBody","false").equalsIgnoreCase("true"),
+                (int)getConfigLong("indexDistribution.timeout",60000),
+                (int)getConfigLong("indexDistribution.maxOpenFiles",800)
+        );
         indexDistribution.setCounts(150, 1, 3, 10000);
         deployThread("20_dhtdistribution", "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
                      new serverInstantThread(indexDistribution, "job", null), 600000);
