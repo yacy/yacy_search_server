@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy '#[clientname]#': Connection Tracking</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<p><h2>Connection Tracking</h2></p>
+<p><h3>Incoming Connections</h3></p>
+<p>Showing #[numActiveRunning]# active connections, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.<br>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+	<td class="small">Protocol</td>
+	<td class="small">Duration</td>
+	<td class="small">Source IP[:Port]</td>
+	<td class="small">Dest. IP[:Port]</td>
+	<td class="small">Command</td>
+	<td class="small">Used</td>
+</tr>
+#{list}#
+<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" title="#[sessionName]#">
+	<td class="small">#[proto]#</td>
+	<td class="small">#(ms)##[duration]#::#[duration]# ms#(/ms)#</td>
+	<td class="small">#[source]#</td>
+	<td class="small">#[dest]#</td>
+	<td class="small">#(running)#Waiting for new request nr. # #[reqNr]#::#[command]##(/running)#</td>
+	<td class="small">#[used]#</td>
+</tr>
+#{/list}#
+</table>
+</p>
+
+#[footer]#
+
+</body>
+</html>

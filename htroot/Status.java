@@ -58,6 +58,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
@@ -227,6 +228,15 @@ public class Status {
         prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
         prop.put("trafficOut",bytesToString(httpdByteCountOutputStream.getGlobalCount()));
 
+        // connection information
+        serverCore httpd = (serverCore) env.getThread("10_httpd");
+        int activeSessionCount = httpd.getActiveSessionCount();
+        int idleSessionCount = httpd.getIdleSessionCount();
+        int maxSessionCount = httpd.getMaxSessionCount();
+        prop.put("connectionsActive",Integer.toString(activeSessionCount));
+        prop.put("connectionsMax",Integer.toString(maxSessionCount));
+        prop.put("connectionsIdle",Integer.toString(idleSessionCount));
+        
         // Queue information
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
         prop.put("indexingQueueSize", Integer.toString(sb.getThread("80_indexing").getJobCount()+sb.indexingTasksInProcess.size()));

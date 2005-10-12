@@ -784,10 +784,10 @@ public final class plasmaCrawlStacker {
                         } finally  {
                             reset();
                             
-                            if (!this.stopped && !this.isInterrupted() && !theWorkerPool.isClosed) {
+                            if (!this.stopped && !this.isInterrupted() && !plasmaCrawlStacker.this.theWorkerPool.isClosed) {
                                 try {
                                     this.setName("stackCrawlThread_inPool");
-                                    theWorkerPool.returnObject(this);
+                                    plasmaCrawlStacker.this.theWorkerPool.returnObject(this);
                                 } catch (Exception e1) {
                                     // e1.printStackTrace();
                                     this.stopped = true;
@@ -798,12 +798,12 @@ public final class plasmaCrawlStacker {
                 }
             }
                 
-            private void execute() throws InterruptedException {                   
+            private void execute() {                   
                 try {
                     String rejectReason = dequeue(this.theMsg);                    
                     
                     if (rejectReason != null) {
-                        sb.urlPool.errorURL.newEntry(
+                        plasmaCrawlStacker.this.sb.urlPool.errorURL.newEntry(
                                 new URL(this.theMsg.url()), 
                                 this.theMsg.referrerHash(), 
                                 this.theMsg.initiatorHash(), 

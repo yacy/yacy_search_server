@@ -45,7 +45,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.ref.SoftReference;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -54,6 +57,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpc;
+import de.anomic.http.httpd;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -89,6 +93,7 @@ public final class yacySeedDB {
     public  yacySeed mySeed; // my own seed
     public  final File myOwnSeedFile;
     private final Hashtable nameLookupCache;
+    private final Hashtable ipLookupCache;
     
     
     public yacySeedDB(plasmaSwitchboard sb,
@@ -133,6 +138,9 @@ public final class yacySeedDB {
         
         // start our virtual DNS service for yacy peers with empty cache
         nameLookupCache = new Hashtable();
+        
+        // cache for reverse name lookup
+        ipLookupCache = new Hashtable();
         
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();
@@ -506,6 +514,105 @@ public final class yacySeedDB {
         if (name.equals(peerName)) return mySeed;
         // nothing found
         return null;
+    }
+    
+    public yacySeed lookupByIP(
+            InetAddress peerIP, 
+            boolean lookupConnected, 
+            boolean lookupDisconnected,
+            boolean lookupPotential
+    ) {
+        
+        yacySeed seed = null;        
+        
+        // local peer?
+        if (httpd.isThisHostIP(peerIP)) return mySeed;
+        
+        // then try to use the cache
+        SoftReference ref = (SoftReference) ipLookupCache.get(peerIP);
+        if (ref != null) {        
+            seed = (yacySeed) ref.get();
+            if (seed != null) return seed;
+        }
+
+        int pos = -1;
+        String addressStr = null;
+        InetAddress seedIPAddress = null;        
+        
+        if (lookupConnected) {
+            // enumerate the cache and simultanous insert values
+            Enumeration e = seedsConnected(true, false, null);
+
+            while (e.hasMoreElements()) {
+                try {
+                    seed = (yacySeed) e.nextElement();
+                    if (seed != null) {
+                        addressStr = seed.getAddress();
+                        if ((pos = addressStr.indexOf(":"))!= -1) {
+                            addressStr = addressStr.substring(0,pos);
+                        }
+                        seedIPAddress = InetAddress.getByName(addressStr);
+                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference(seed));
+                        if (seedIPAddress.equals(peerIP)) return seed;
+                    }
+                } catch (UnknownHostException ex) {}
+            }
+        }
+        
+        if (lookupDisconnected) {
+            // enumerate the cache and simultanous insert values
+            Enumeration e = seedsDisconnected(true, false, null);
+
+            while (e.hasMoreElements()) {
+                try {
+                    seed = (yacySeed) e.nextElement();
+                    if (seed != null) {
+                        addressStr = seed.getAddress();
+                        if ((pos = addressStr.indexOf(":"))!= -1) {
+                            addressStr = addressStr.substring(0,pos);
+                        }
+                        seedIPAddress = InetAddress.getByName(addressStr);
+                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference(seed));
+                        if (seedIPAddress.equals(peerIP)) return seed;
+                    }
+                } catch (UnknownHostException ex) {}
+            }
+        }
+        
+        if (lookupPotential) {
+            // enumerate the cache and simultanous insert values
+            Enumeration e = seedsPotential(true, false, null);
+
+            while (e.hasMoreElements()) {
+                try {
+                    seed = (yacySeed) e.nextElement();
+                    if (seed != null) {
+                        addressStr = seed.getAddress();
+                        if ((pos = addressStr.indexOf(":"))!= -1) {
+                            addressStr = addressStr.substring(0,pos);
+                        }
+                        seedIPAddress = InetAddress.getByName(addressStr);
+                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference(seed));
+                        if (seedIPAddress.equals(peerIP)) return seed;
+                    }
+                } catch (UnknownHostException ex) {}
+            }
+        }
+        
+        try {
+            // check local seed
+            addressStr = mySeed.getAddress();
+            if ((pos = addressStr.indexOf(":"))!= -1) {
+                addressStr = addressStr.substring(0,pos);
+            }
+            seedIPAddress = InetAddress.getByName(addressStr);
+            if (mySeed.isProper() == null) ipLookupCache.put(seedIPAddress,  new SoftReference(mySeed));
+            if (seedIPAddress.equals(peerIP)) return mySeed;
+            // nothing found
+            return null;
+        } catch (UnknownHostException e2) {
+            return null;
+        }
     }
     
     public ArrayList storeCache(File seedFile) throws IOException {

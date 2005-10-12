@@ -112,6 +112,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
     final ThreadGroup theSessionThreadGroup = new ThreadGroup("sessionThreadGroup");
     private Config cralwerPoolConfig = null;
 
+    public ThreadGroup getSessionThreadGroup() {
+        return this.theSessionThreadGroup;
+    }
+    
     private static ServerSocketFactory getServerSocketFactory(boolean dflt, File keyfile, String passphrase) {
         // see doc's at
         // http://java.sun.com/developer/technicalArticles/Security/secureinternet/
@@ -463,6 +467,18 @@ public final class serverCore extends serverAbstractThread implements serverThre
         return this.theSessionPool.getNumActive();
     }
     
+    public int getActiveSessionCount() {
+        return this.theSessionPool.getNumActive();
+    }    
+    
+    public int getIdleSessionCount() {
+        return this.theSessionPool.getNumIdle();
+    }
+    
+    public int getMaxSessionCount() {
+        return this.theSessionPool.getMaxActive();
+    }
+    
     // idle sensor: the thread is idle if there are no sessions running
     public boolean idle() {
         // idleThreadCheck();
@@ -651,6 +667,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
     	public  Socket controlSocket;      // dialog socket
     	public  InetAddress userAddress;   // the address of the client
+        public  int userPort;              // the ip port used by the client 
     	public  PushbackInputStream in;    // on control input stream
     	public  OutputStream out;          // on control output stream, autoflush
         private int socketTimeout;
@@ -660,10 +677,27 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	
     	public Session(ThreadGroup theThreadGroup) {
             super(theThreadGroup,"Session");
-            
-            // setting the session startup time
-            this.start = System.currentTimeMillis(); 
     	}
+        
+        public int getCommandCount() {
+            return this.commandCounter;
+        }
+        
+        public String getCommandLine() {
+            return this.request;
+        }
+        
+        public serverHandler getCommandObj() {
+            return this.commandObj;
+        }
+        
+        public InetAddress getUserAddress() {
+            return this.userAddress;
+        }
+        
+        public int getUserPort() {
+            return this.userPort;
+        }
         
         public void setStopped(boolean stopped) {
             this.stopped = stopped;            
@@ -759,8 +793,16 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.done = true;
             this.syncObject = null;
             this.readLineBuffer.reset();
-            this.commandObj.reset();
+            if (this.commandObj !=null) this.commandObj.reset();
+            this.userAddress = null;
+            this.userPort = 0;
+            this.controlSocket = null;
+            this.request = null;
         }    
+        
+        private void shortReset() {
+            this.request = null;
+        }
         
         /**
          * 
@@ -813,11 +855,15 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         private void execute() throws InterruptedException {                   
             try {
+                // setting the session startup time
+                this.start = System.currentTimeMillis();                 
+                
                 // settin the session identity
                 this.identity = "-";
                 
                 // getting some client information
                 this.userAddress = this.controlSocket.getInetAddress();
+                this.userPort = this.controlSocket.getPort();
                 this.setName("Session_" + this.userAddress.getHostAddress() + ":" + this.controlSocket.getPort());
                 
                 // TODO: check if we want to allow this socket to connect us
@@ -993,7 +1039,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         System.out.println("ERROR E " + this.userAddress.getHostAddress());
                         // whatever happens: the thread has to survive!
                         writeLine("UNKNOWN REASON:" + this.commandObj.error(e));
-                    }
+                    }      
+                    
+                    shortReset();
+                    
                 } // end of while
             } catch (java.lang.ClassNotFoundException e) {
                 System.out.println("Internal error: Wrapper class not found: " + e.getMessage());

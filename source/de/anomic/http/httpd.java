@@ -148,6 +148,10 @@ public final class httpd implements serverHandler {
         keepAliveSupport = Boolean.valueOf(switchboard.getConfig("connectionKeepAliveSupport","false")).booleanValue();
     }
     
+    public Properties getConProp() {
+        return this.prop;
+    }
+    
     /**
      * Can be used to reset this {@link serverHandler} oject so that
      * it can be reused for further connections
@@ -782,7 +786,7 @@ public final class httpd implements serverHandler {
             }
         // parsing post request bodies which are gzip content-encoded
         } else {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            serverByteBuffer bout = new serverByteBuffer();
             serverFileUtils.copy(in,bout);
             buffer = bout.toByteArray();
             bout.close(); bout = null;
@@ -1309,6 +1313,85 @@ public final class httpd implements serverHandler {
         // httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE
         // httpHeader.CONNECTION_PROP_PROXY_RESPOND_STATUS
     }
+    
+    public static boolean isThisHostPortForwardingIP(String hostName) {
+        if ((hostName == null) || (hostName.length() == 0)) return false;
+        if ((!serverCore.portForwardingEnabled) || (serverCore.portForwarding == null)) return false;
+        
+        boolean isThisHostIP = false;
+        try {
+            InetAddress hostAddress = InetAddress.getByName(hostName);
+            InetAddress forwardingAddress = InetAddress.getByName(serverCore.portForwarding.getHost());
+            
+            if (hostAddress.equals(forwardingAddress)) return true;              
+        } catch (Exception e) {}   
+        return isThisHostIP;        
+    }    
+    
+    public static boolean isThisHostIP(String hostName) {
+        if ((hostName == null) || (hostName.length() == 0)) return false;
+        
+        boolean isThisHostIP = false;
+        try {
+            final InetAddress clientAddress = InetAddress.getByName(hostName);
+            if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
+            
+            final InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
+            for (int i=0; i<localAddress.length; i++) {
+                if (localAddress[i].equals(clientAddress)) {
+                    isThisHostIP = true;
+                    break;
+                }
+            }  
+        } catch (Exception e) {}   
+        return isThisHostIP;
+    }    
+    
+    public static boolean isThisHostIP(InetAddress clientAddress) {
+        if (clientAddress == null) return false;
+        
+        boolean isThisHostIP = false;
+        try {
+            if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
+            
+            final InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
+            for (int i=0; i<localAddress.length; i++) {
+                if (localAddress[i].equals(clientAddress)) {
+                    isThisHostIP = true;
+                    break;
+                }
+            }  
+        } catch (Exception e) {}   
+        return isThisHostIP;
+    }  
+    
+    public static boolean isThisHostName(String hostName) {
+        if ((hostName == null) || (hostName.length() == 0)) return false;
+        
+        try {                            
+            final int idx = hostName.indexOf(":");
+            final String dstHost = (idx != -1) ? hostName.substring(0,idx).trim() : hostName.trim();     
+            final Integer dstPort = (idx != -1) ? Integer.valueOf(hostName.substring(idx+1).trim()) : new Integer(80);
+            
+            // if the hostname endswith thisPeerName.yacy ...
+            if (dstHost.endsWith(yacyCore.seedDB.mySeed.getName() + ".yacy")) {
+                return true;
+            /* 
+             * If the port number is equal to the yacy port and the IP address is an address of this host ...
+             * Please note that yacy is listening to all interfaces of this host
+             */
+            } else if (dstPort.equals(Integer.valueOf(switchboard.getConfig("port", "8080"))) &&
+                        isThisHostIP(dstHost)) {
+                 return true;                
+            } else if ((serverCore.portForwardingEnabled) && 
+                       (serverCore.portForwarding != null) && 
+                       (dstPort.intValue() == serverCore.portForwarding.getPort()) &&
+                       isThisHostPortForwardingIP(dstHost)) {
+                return true;  
+            }
+        } catch (Exception e) {}    
+        return false;
+    }    
     
     
 //  public static boolean isTextMime(String mime, Set whitelist) {

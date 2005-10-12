@@ -336,6 +336,11 @@ public class yacyPeerActions {
                             yacyCore.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
                             return false;
                         }
+                        
+                        if (connectedSeed.getName() != seed.getName()) {
+                            // TODO: update seed name lookup cache
+                        }
+                        
                     } catch (java.text.ParseException e) {}
                     yacyCore.log.logFine("connect: updated KNOWN " + ((direct) ? "direct " : "") +  peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
 		    seedDB.addConnected(seed);

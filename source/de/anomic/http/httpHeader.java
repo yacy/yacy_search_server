@@ -541,7 +541,8 @@ public final class httpHeader extends TreeMap implements Map {
             } else {
                 // THIS IS THE "GOOD" CASE
                 // a perfect formulated url
-                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, args.substring(0, sep));
+                String dstHostSocket = args.substring(0, sep);
+                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, (httpd.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
                 prop.setProperty(httpHeader.CONNECTION_PROP_PATH, args.substring(sep)); // yes, including beginning "/"
             }
         } else {
@@ -699,29 +700,11 @@ public final class httpHeader extends TreeMap implements Map {
         // if the transparent proxy support was disabled, we have nothing todo here ...
         if (!(isTransparentProxy && header.containsKey(HOST))) return;
         
-        try {                
-            String dstHost, dstHostSocket = (String) header.get(HOST);
-            
-            int idx = dstHostSocket.indexOf(":");
-            dstHost = (idx != -1) ? dstHostSocket.substring(0,idx).trim() : dstHostSocket.trim();     
-            Integer dstPort = (idx != -1) ? Integer.valueOf(dstHostSocket.substring(idx+1)) : new Integer(80);
-            
-            if (dstPort.intValue() == 80) {
-                if (dstHost.endsWith(".yacy")) {
-                    // if this peer is accessed via its yacy domain name we need to set the
-                    // host property to virtualHost to redirect the request to the yacy server
-                    if (dstHost.endsWith(yacyCore.seedDB.mySeed.getName()+".yacy")) {
-                        prop.setProperty(CONNECTION_PROP_HOST,virtualHost);
-                    } else {
-                        prop.setProperty(CONNECTION_PROP_HOST,dstHostSocket);
-                    }
-                } else {
-                    InetAddress dstHostAddress = InetAddress.getByName(dstHost);
-                    if (!(dstHostAddress.isAnyLocalAddress() || dstHostAddress.isLoopbackAddress())) {
-                        prop.setProperty(CONNECTION_PROP_HOST,dstHostSocket);
-                    }
-                }
-            }
-        } catch (Exception e) {}
+        // we only need to do the transparent proxy support if the request URL didn't contain the hostname
+        // and therefor was set to virtualHost by function parseQuery()
+        if (!prop.getProperty(CONNECTION_PROP_HOST).equals(virtualHost)) return;
+        
+        String dstHostSocket = (String) header.get(httpHeader.HOST);
+        prop.setProperty(CONNECTION_PROP_HOST,(httpd.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
     }
 }

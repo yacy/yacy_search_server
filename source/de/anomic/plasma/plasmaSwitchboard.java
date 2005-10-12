@@ -1091,7 +1091,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     e = (Map.Entry) i.next();
                     nexturlstring = (String) e.getKey();
   
-                    sbStackCrawlThread.enqueue(nexturlstring, entry.normalizedURLString(), initiatorHash, (String) e.getValue(), loadDate, entry.depth() + 1, entry.profile());
+                    sbStackCrawlThread.enqueue(nexturlstring, entry.url().toString(), initiatorHash, (String) e.getValue(), loadDate, entry.depth() + 1, entry.profile());
 
 //                    rejectReason = stackCrawl(nexturlstring, entry.normalizedURLString(), initiatorHash, (String) e.getValue(), loadDate, entry.depth() + 1, entry.profile());
 //                    if (rejectReason == null) {
@@ -1284,7 +1284,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logInfo(stats + ": urlEntry=null");
             return;
         }
-        cacheLoader.loadParallel(urlEntry.url(), urlEntry.name(), urlEntry.referrerHash(), urlEntry.initiator(), urlEntry.depth(), profile);
+        
+        URL refererURL = null;
+        String refererHash = urlEntry.referrerHash();
+        if ((refererHash != null) && (!refererHash.equals(plasmaURL.dummyHash))) {
+            refererURL = this.urlPool.getURL(refererHash);
+        }
+        cacheLoader.loadParallel(urlEntry.url(), urlEntry.name(), (refererURL!=null)?refererURL.toString():null, urlEntry.initiator(), urlEntry.depth(), profile);
         log.logInfo(stats + ": enqueued for load " + urlEntry.url() + " [" + urlEntry.hash() + "]");
         return;
     }
