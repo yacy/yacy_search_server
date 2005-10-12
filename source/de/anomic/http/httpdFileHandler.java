@@ -100,6 +100,7 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO; 
 
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaParser;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCodings;
@@ -253,11 +254,20 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 //        out.flush();
 //    }
     
-    private httpHeader getDefaultHeaders() {
+    private httpHeader getDefaultHeaders(String path) {
         httpHeader headers = new httpHeader();
+		String ext;
+		int pos;
+    	if ((pos = path.lastIndexOf('.')) < 0) {
+            ext = "";
+        } else {
+            ext = path.substring(pos + 1).toLowerCase();
+        }
         headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
-        headers.put(httpHeader.PRAGMA, "no-cache");         
+        if(!(plasmaParser.mediaExtContains(ext))){
+            headers.put(httpHeader.PRAGMA, "no-cache");         
+        }
         return headers;
     }
     
@@ -297,7 +307,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             // authentication required
             if (authorization == null) {
                 // no authorization given in response. Ask for that
-                httpHeader headers = getDefaultHeaders();
+                httpHeader headers = getDefaultHeaders(path);
                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                 return;
@@ -314,7 +324,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 else
                     serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
 
-                httpHeader headers = getDefaultHeaders();
+                httpHeader headers = getDefaultHeaders(path);
                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                 return;
@@ -505,7 +515,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                         serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
                                 }
                                 // send authentication request to browser
-                                httpHeader headers = getDefaultHeaders();
+                                httpHeader headers = getDefaultHeaders(path);
                                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"" + tp.get("AUTHENTICATE", "") + "\"");
                                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                                 return;
@@ -513,7 +523,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 String location = tp.get("LOCATION","");
                                 if (location.length() == 0) location = path;
                                 
-                                httpHeader headers = getDefaultHeaders();
+                                httpHeader headers = getDefaultHeaders(path);
                                 headers.put(httpHeader.LOCATION,location);
                                 httpd.sendRespondHeader(conProp,out,httpVersion,302,headers);
                                 return;
