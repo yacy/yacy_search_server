@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
+
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -150,9 +151,7 @@ public class IndexControl_p {
                 // generate an urlx array
                 plasmaWordIndexEntity index = null;
                 try {
-                    HashSet keyhashes = new HashSet();
-                    keyhashes.add(keyhash);
-                    index = switchboard.searchManager.searchHashes(keyhashes, 10000);
+                    index = switchboard.wordIndex.getEntity(keyhash, true);
                     Enumeration en = index.elements(true);
                     int i = 0;
                     urlx = new String[index.size()];
@@ -437,9 +436,7 @@ public class IndexControl_p {
         // search for a word hash and generate a list of url links
         plasmaWordIndexEntity index = null;
         try {
-            final HashSet keyhashes = new HashSet();
-            keyhashes.add(keyhash);
-            index = switchboard.searchManager.searchHashes(keyhashes, 10000);
+            index = switchboard.wordIndex.getEntity(keyhash, true);
 
             final StringBuffer result = new StringBuffer(1024);
             if (index.size() == 0) {

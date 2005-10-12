@@ -54,29 +54,23 @@ import de.anomic.server.serverCodings;
 
 public final class plasmaSearchResult {
     
-    public static final char O_QUALITY = 'q';
-    public static final char O_AGE     = 'a';
     public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
     
     private TreeMap pageAcc;            // key = order hash; value = plasmaLURL.entry
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
-    private Set searchhashes;           // hashes that are searched here
-    private Set stopwords;              // words that are excluded from the commonSense heuristic
-    private char[] order;               // order of heuristics
     private ArrayList results;          // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
+    private plasmaSearchQuery query;
     
-    public plasmaSearchResult(Set searchhashes, Set stopwords, char[] order) {
+    public plasmaSearchResult(plasmaSearchQuery query) {
         this.pageAcc = new TreeMap();
-        ref = new kelondroMScoreCluster();
-        this.searchhashes = searchhashes;
-        this.stopwords = stopwords;
-        this.order = order;
+        this.ref = new kelondroMScoreCluster();
         this.results = new ArrayList();
+        this.query = query;
     }
     
     public plasmaSearchResult cloneSmart() {
         // clones only the top structure
-        plasmaSearchResult theClone = new plasmaSearchResult(this.searchhashes, this.stopwords, this.order);
+        plasmaSearchResult theClone = new plasmaSearchResult(query);
         theClone.pageAcc = (TreeMap) this.pageAcc.clone();
         theClone.ref = this.ref;
         theClone.results = this.results;
@@ -149,10 +143,10 @@ public final class plasmaSearchResult {
             
             // apply pre-calculated order attributes
             ranking = 0;
-            if (order[0] == O_QUALITY)  ranking  = 4096 * indexEntry.getQuality();
-            else if (order[0] == O_AGE) ranking  = 4096 * indexEntry.getVirtualAge();
-            if (order[1] == O_QUALITY)  ranking += indexEntry.getQuality();
-            else if (order[1] == O_AGE) ranking += indexEntry.getVirtualAge();
+            if (query.order[0].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking  = 4096 * indexEntry.getQuality();
+            else if (query.order[0].equals(plasmaSearchQuery.ORDER_DATE)) ranking  = 4096 * indexEntry.getVirtualAge();
+            if (query.order[1].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking += indexEntry.getQuality();
+            else if (query.order[1].equals(plasmaSearchQuery.ORDER_DATE)) ranking += indexEntry.getVirtualAge();
             
             // apply 'common-sense' heuristic using references
             for (int j = 0; j < urlcomps.length; j++) if (commonSense.contains(urlcomps[j])) ranking += inc;
@@ -161,7 +155,7 @@ public final class plasmaSearchResult {
             // apply query-in-result matching
             Set urlcomph = plasmaSearchQuery.words2hashes(urlcomps);
             Set descrcomph = plasmaSearchQuery.words2hashes(descrcomps);
-            Iterator shi = searchhashes.iterator();
+            Iterator shi = query.queryHashes.iterator();
             while (shi.hasNext()) {
                 queryhash = (String) shi.next();
                 if (urlcomph.contains(queryhash)) ranking += 10 * inc;
@@ -187,9 +181,8 @@ public final class plasmaSearchResult {
         for (int i = 0; i < words.length; i++) {
             word = words[i].toLowerCase();
             if ((word.length() > 2) &&
-            (!(stopwords.contains(word))) &&
-            ("http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0) &&
-            (!(searchhashes.contains(plasmaWordIndexEntry.word2hash(word)))))
+                ("http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0) &&
+                (!(query.queryHashes.contains(plasmaWordIndexEntry.word2hash(word)))))
                 ref.incScore(word);
         }
     }

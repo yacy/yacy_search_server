@@ -52,6 +52,9 @@ import de.anomic.server.serverByteBuffer;
 
 public final class plasmaSearchQuery {
     
+    public static final String ORDER_QUALITY = "quality";
+    public static final String ORDER_DATE    = "date";
+    
     public static final int SEARCHDOM_LOCAL = 0;
     public static final int SEARCHDOM_GROUPDHT = 1;
     public static final int SEARCHDOM_GROUPALL = 2;
@@ -69,21 +72,35 @@ public final class plasmaSearchQuery {
     public String domGroupName;
     public int domMaxTargets;
 
-    public plasmaSearchQuery(Set queryWords, String referrer,
+    public plasmaSearchQuery(Set queryWords,
                              String[] order, int wantedResults, long maximumTime, String urlMask,
+                             String referrer,
                              int domType, String domGroupName, int domMaxTargets) {
         this.queryWords = queryWords;
         this.queryHashes = words2hashes(queryWords);
-        this.referrer = referrer;
         this.order = order;
         this.wantedResults = wantedResults;
         this.maximumTime = maximumTime;
         this.urlMask = urlMask;
+        this.referrer = referrer;
         this.domType = domType;
         this.domGroupName = domGroupName;
         this.domMaxTargets = domMaxTargets;
     }
     
+    public plasmaSearchQuery(Set queryHashes,
+                             String[] order, int wantedResults, long maximumTime, String urlMask) {
+        this.queryWords = null;
+        this.queryHashes = queryHashes;
+        this.order = order;
+        this.wantedResults = wantedResults;
+        this.maximumTime = maximumTime;
+        this.urlMask = urlMask;
+        this.referrer = referrer;
+        this.domType = -1;
+        this.domGroupName = null;
+        this.domMaxTargets = -1;
+    }
 
     public static Set words2hashes(String[] words) {
 	TreeSet hashes = new TreeSet();
@@ -117,4 +134,13 @@ public final class plasmaSearchQuery {
         return query;
     }
     
+    public void filterOut(Set blueList) {
+        // filter out words that appear in this set
+        Iterator it = queryWords.iterator();
+        String word;
+        while (it.hasNext()) {
+            word = (String) it.next();
+            if (blueList.contains(word)) it.remove();
+        }
+    }
 }

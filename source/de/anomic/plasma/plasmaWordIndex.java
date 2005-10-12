@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
+import java.util.HashSet;
+import java.util.Set;
 
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.logging.serverLog;
@@ -103,6 +105,28 @@ public final class plasmaWordIndex {
 
     public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty) {
         return ramCache.getIndex(wordHash, deleteIfEmpty);
+    }
+
+    public Set getEntities(Set wordHashes, boolean deleteIfEmpty, boolean interruptIfEmpty) {
+        
+        // retrieve entities that belong to the hashes
+        HashSet entities = new HashSet();
+        String singleHash;
+        plasmaWordIndexEntity singleEntity;
+        Iterator i = wordHashes.iterator();
+        while (i.hasNext()) {
+            // get next hash:
+            singleHash = (String) i.next();
+            
+            // retrieve index
+            singleEntity = getEntity(singleHash, true);
+            
+            // check result
+            if (((singleEntity == null) || (singleEntity.size() == 0)) && (interruptIfEmpty)) return null;
+            
+            entities.add(singleEntity);
+        }
+        return entities;
     }
 
     public int size() {

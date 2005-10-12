@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.TreeMap;
+import java.util.Set;
 
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroTree;
@@ -292,6 +293,54 @@ public final class plasmaWordIndexEntity {
         while (x > 0) {x = x >> 1; l++;}
         return l;
     }
+    
+    public static plasmaWordIndexEntity joinEntities(Set entities, long time) throws IOException {
+        
+        long stamp = System.currentTimeMillis();
+        
+        // order entities by their size
+        TreeMap map = new TreeMap();
+        plasmaWordIndexEntity singleEntity;
+        Iterator i = entities.iterator();
+        int count = 0;
+        while (i.hasNext()) {
+            // get next entity:
+            singleEntity = (plasmaWordIndexEntity) i.next();
+            
+            // check result
+            if ((singleEntity == null) || (singleEntity.size() == 0)) return new plasmaWordIndexEntity(null); // as this is a cunjunction of searches, we have no result if any word is not known
+            
+            // store result in order of result size
+            map.put(new Long(singleEntity.size() * 1000 + count), singleEntity);
+            count++;
+        }
+        
+        // check if there is any result
+        if (map.size() == 0) return new plasmaWordIndexEntity(null); // no result, nothing found
+        
+        // the map now holds the search results in order of number of hits per word
+        // we now must pairwise build up a conjunction of these sets
+        Long k = (Long) map.firstKey(); // the smallest, which means, the one with the least entries
+        plasmaWordIndexEntity searchA, searchB, searchResult = (plasmaWordIndexEntity) map.remove(k);
+        while ((map.size() > 0) && (searchResult.size() > 0) && (time > 0)) {
+            // take the first element of map which is a result and combine it with result
+            k = (Long) map.firstKey(); // the next smallest...
+            time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
+	    searchA = searchResult;
+	    searchB = (plasmaWordIndexEntity) map.remove(k);
+            searchResult = plasmaWordIndexEntity.joinConstructive(searchA, searchB, 2 * time / (map.size() + 1));
+	    // close the input files/structures
+	    if (searchA != searchResult) searchA.close();
+	    if (searchB != searchResult) searchB.close();
+        }
+        searchA = null; // free resources
+	searchB = null; // free resources
+
+        // in 'searchResult' is now the combined search result
+        if (searchResult.size() == 0) return new plasmaWordIndexEntity(null);
+        return searchResult;
+    }
+    
     
     public static plasmaWordIndexEntity joinConstructive(plasmaWordIndexEntity i1, plasmaWordIndexEntity i2, long time) throws IOException {
         if ((i1 == null) || (i2 == null)) return null;

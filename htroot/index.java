@@ -139,8 +139,8 @@ public class index {
                                     (yacyCore.seedDB.mySeed != null) &&
                                     (yacyCore.seedDB.mySeed.getAddress() != null));
 
-        final String order1 = (order.equals("Quality-Date")) ? "quality" : "date";
-        final String order2 = (order.equals("Quality-Date")) ? "date" : "quality";
+        final String order1 = (order.equals("Quality-Date")) ? plasmaSearchQuery.ORDER_QUALITY : plasmaSearchQuery.ORDER_DATE;
+        final String order2 = (order.equals("Quality-Date")) ? plasmaSearchQuery.ORDER_DATE : plasmaSearchQuery.ORDER_QUALITY;
         String urlmask = "";
         if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
             urlmask = ".*";
@@ -149,7 +149,7 @@ public class index {
         }
 
         // do the search
-        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, referer, new String[]{order1, order2}, count, searchtime, urlmask,
+        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, new String[]{order1, order2}, count, searchtime, urlmask, referer,
                                                              ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
                                                              "", 20);
         final serverObjects prop = sb.searchFromLocal(thisSearch);

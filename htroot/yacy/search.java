@@ -51,6 +51,7 @@ import java.util.HashSet;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -89,7 +90,11 @@ public final class search {
             keyhashes.add(query.substring(i * plasmaWordIndexEntry.wordHashLength, (i + 1) * plasmaWordIndexEntry.wordHashLength));
         }
         final long timestamp = System.currentTimeMillis();
-        prop = sb.searchFromRemote(keyhashes, count, global, duetime);
+        
+        plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, new String[]{plasmaSearchQuery.ORDER_QUALITY, plasmaSearchQuery.ORDER_DATE},
+                                                        count, duetime, ".*");
+        
+        prop = sb.searchFromRemote(squery);
         prop.put("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
 
         final int links = Integer.parseInt(prop.get("linkcount","0"));

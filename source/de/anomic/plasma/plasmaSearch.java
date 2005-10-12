@@ -113,89 +113,19 @@ public final class plasmaSearch {
 	//System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
         return condenser.getWords().size();
     }
-    
+    /*
     public plasmaWordIndexEntity searchWords(Set words, long time) throws IOException {
-	// search for the set of words and return an array of urlEntry elements
-        return searchHashes(plasmaSearchQuery.words2hashes(words), time);
-    }
 
+    }
+    */
+    /*
     public plasmaWordIndexEntity searchHashes(Set hashes, long time) throws IOException {
-        // search for the set of hashes and return an array of urlEntry elements
-        
-        long stamp = System.currentTimeMillis();
-        TreeMap map = new TreeMap();
-        String singleHash;
-        plasmaWordIndexEntity singleResult;
-        Iterator i = hashes.iterator();
-        while (i.hasNext()) {
-            // get next hash:
-            singleHash = (String) i.next();
-            
-            // retrieve index
-            singleResult = wordIndex.getEntity(singleHash, true);
-            
-            // check result
-            if ((singleResult == null) || (singleResult.size() == 0)) return new plasmaWordIndexEntity(null); // as this is a cunjunction of searches, we have no result if any word is not known
-            
-            // store result in order of result size
-            map.put(serverCodings.enhancedCoder.encodeHex(singleResult.size(), 8) + singleHash, singleResult);
-        }
-        
-        // check if there is any result
-        if (map.size() == 0) return new plasmaWordIndexEntity(null); // no result, nothing found
-        
-        // the map now holds the search results in order of number of hits per word
-        // we now must pairwise build up a conjunction of these sets
-        String k = (String) map.firstKey(); // the smallest, which means, the one with the least entries
-        plasmaWordIndexEntity searchA, searchB, searchResult = (plasmaWordIndexEntity) map.remove(k);
-        while ((map.size() > 0) && (searchResult.size() > 0) && (time > 0)) {
-            // take the first element of map which is a result and combine it with result
-            k = (String) map.firstKey(); // the next smallest...
-            time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
-	    searchA = searchResult;
-	    searchB = (plasmaWordIndexEntity) map.remove(k);
-            searchResult = plasmaWordIndexEntity.joinConstructive(searchA, searchB, 2 * time / (map.size() + 1));
-	    // close the input files/structures
-	    if (searchA != searchResult) searchA.close();
-	    if (searchB != searchResult) searchB.close();
-        }
-        searchA = null; // free resources
-	searchB = null; // free resources
 
-        // in 'searchResult' is now the combined search result
-        if (searchResult.size() == 0) return new plasmaWordIndexEntity(null);
-        return searchResult;
     }
-
+    */
+    /*
     public plasmaSearchResult order(plasmaWordIndexEntity searchResult, Set searchhashes, Set stopwords, char[] priority, long maxTime, int minEntries) throws IOException {
-	// we collect the urlhashes from it and construct a List with urlEntry objects
-	// attention: if minEntries is too high, this method will not terminate within the maxTime
 
-	plasmaSearchResult acc = new plasmaSearchResult(searchhashes, stopwords, priority);
-	if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
-        if (searchResult.size() == 0) return acc; // case that we have nothing to do
-        
-	Enumeration e = searchResult.elements(true);
-	plasmaWordIndexEntry entry;
-        long startCreateTime = System.currentTimeMillis();
-        plasmaCrawlLURL.Entry page;
-	try {
-	    while (e.hasMoreElements()) {
-                if ((acc.sizeFetched() >= minEntries) &&
-                    (System.currentTimeMillis() - startCreateTime >= maxTime)) break;
-                entry = (plasmaWordIndexEntry) e.nextElement();
-                // find the url entry
-                page = urlStore.getEntry(entry.getUrlHash());
-                // add a result
-		acc.addResult(entry, page);
-	    }
-	} catch (kelondroException ee) {
-	    serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
-	}
-        long startSortTime = System.currentTimeMillis();
-        acc.sortResults();
-        serverLog.logFine("PLASMA", "plasmaSearch.order: minEntries = " + minEntries + ", effectiveEntries = " + acc.sizeOrdered() + ", demanded Time = " + maxTime + ", effectiveTime = " + (System.currentTimeMillis() - startCreateTime) + ", createTime = " + (startSortTime - startCreateTime) + ", sortTime = " + (System.currentTimeMillis() - startSortTime));
-	return acc;
     }
-    
+    */
 }

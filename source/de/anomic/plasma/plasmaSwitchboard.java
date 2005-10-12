@@ -1394,13 +1394,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	if (date == null) return ""; else return DateFormatter.format(date);
     }
     
+    /*
     public class presearch extends Thread {
         Set queryhashes;
         char[] order;
         String urlmask;
         long time;
         int searchcount, fetchcount;
-        public presearch(Set queryhashes, char[] order, long time /*milliseconds*/, String urlmask, int searchcount, int fetchcount) {
+        public presearch(Set queryhashes, char[] order, long time, String urlmask, int searchcount, int fetchcount) {
             this.queryhashes = queryhashes;
             this.order = order;
             this.urlmask = urlmask;
@@ -1430,38 +1431,34 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
     }
     
+    */
+    
     //public serverObjects searchFromLocal(Set querywords, String order1, String order2, int count, boolean global, long time /*milliseconds*/, String urlmask) {
     public serverObjects searchFromLocal(plasmaSearchQuery query) {
         
 	// tell all threads to do nothing for a specific time
-	wordIndex.intermission(query.maximumTime);
-	intermissionAllThreads(query.maximumTime);
+	wordIndex.intermission(2 * query.maximumTime);
+	intermissionAllThreads(2 * query.maximumTime);
 
         serverObjects prop = new serverObjects();
         try {
-            char[] order = new char[2];
-            if (query.order[0].equals("quality")) order[0] = plasmaSearchResult.O_QUALITY; else order[0] = plasmaSearchResult.O_AGE;
-            if (query.order[1].equals("quality")) order[1] = plasmaSearchResult.O_QUALITY; else order[1] = plasmaSearchResult.O_AGE;
+            //char[] order = new char[2];
+            //if (query.order[0].equals("quality")) order[0] = plasmaSearchResult.O_QUALITY; else order[0] = plasmaSearchResult.O_AGE;
+            //if (query.order[1].equals("quality")) order[1] = plasmaSearchResult.O_QUALITY; else order[1] = plasmaSearchResult.O_AGE;
             
             // filter out words that appear in bluelist
-            Iterator it = query.queryWords.iterator();
-            String word, gs = "";
-            while (it.hasNext()) {
-                word = (String) it.next();
-                if (blueList.contains(word)) it.remove(); else gs += "+" + word;
-            }
-            if (gs.length() > 0) gs = gs.substring(1);
+            query.filterOut(blueList);
             
             // log
-            log.logInfo("INIT WORD SEARCH: " + gs + ":" + query.queryHashes + " - " + query.wantedResults + " links, " + (query.maximumTime / 1000) + " seconds");
+            log.logInfo("INIT WORD SEARCH: " + query.queryWords + ":" + query.queryHashes + " - " + query.wantedResults + " links, " + (query.maximumTime / 1000) + " seconds");
             long timestamp = System.currentTimeMillis();
             
             // start a presearch, which makes only sense if we idle afterwards.
             // this is especially the case if we start a global search and idle until search
-            if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
-                Thread preselect = new presearch(query.queryHashes, order, query.maximumTime / 10, query.urlMask, 10, 3);
-                preselect.start();
-            }
+            //if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
+            //    Thread preselect = new presearch(query.queryHashes, order, query.maximumTime / 10, query.urlMask, 10, 3);
+            //    preselect.start();
+            //}
             
             // do global fetching
             int globalresults = 0;
@@ -1479,13 +1476,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // now search locally (the global results should be now in the local db)
             long remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
-            plasmaWordIndexEntity idx = searchManager.searchHashes(query.queryHashes, remainingTime * 8 / 10); // the search
+            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, log, wordIndex, urlPool.loadedURL, snippetCache);
+            plasmaWordIndexEntity idx = theSearch.search(remainingTime * 8 / 10);
             log.logFine("SEARCH TIME AFTER FINDING " + idx.size() + " ELEMENTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
             remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
             if (remainingTime < 500) remainingTime = 500;
             if (remainingTime > 3000) remainingTime = 3000;
-            plasmaSearchResult acc = searchManager.order(idx, query.queryHashes, stopwords, order, remainingTime, 10);
+            plasmaSearchResult acc = theSearch.order(idx, remainingTime, 10);
             if (query.domType != plasmaSearchQuery.SEARCHDOM_GLOBALDHT)
                 snippetCache.fetch(acc.cloneSmart(), query.queryHashes, query.urlMask, 10);
             log.logFine("SEARCH TIME AFTER ORDERING OF SEARCH RESULT: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
@@ -1595,7 +1593,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             
             // log
-            log.logInfo("EXIT WORD SEARCH: " + gs + " - " +
+            log.logInfo("EXIT WORD SEARCH: " + query.queryWords + " - " +
             prop.get("totalcount", "0") + " links found, " +
             prop.get("orderedcount", "0") + " links ordered, " +
 	    prop.get("linkcount", "?") + " links selected, " +
@@ -1607,21 +1605,21 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
     }
     
-    public serverObjects searchFromRemote(Set hashes, int count, boolean global, long duetime) {
+    public serverObjects searchFromRemote(plasmaSearchQuery query) {
 
 	// tell all threads to do nothing for a specific time
-	wordIndex.intermission(duetime);
-	intermissionAllThreads(duetime);
+	wordIndex.intermission(2 * query.maximumTime);
+	intermissionAllThreads(2 * query.maximumTime);
 
-        if (hashes == null) hashes = new HashSet();
         serverObjects prop = new serverObjects();
         try {
-            log.logInfo("INIT HASH SEARCH: " + hashes + " - " + count + " links");
+            log.logInfo("INIT HASH SEARCH: " + query.queryHashes + " - " + query.wantedResults + " links");
             long timestamp = System.currentTimeMillis();
-            plasmaWordIndexEntity idx = searchManager.searchHashes(hashes, duetime * 8 / 10); // a nameless temporary index, not sorted by special order but by hash
-            long remainingTime = duetime - (System.currentTimeMillis() - timestamp);
+            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, log, wordIndex, urlPool.loadedURL, snippetCache);
+            plasmaWordIndexEntity idx = theSearch.search(query.maximumTime * 8 / 10);
+            long remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
             if (remainingTime < 500) remainingTime = 500;
-            plasmaSearchResult acc = searchManager.order(idx, hashes, stopwords, new char[]{plasmaSearchResult.O_QUALITY, plasmaSearchResult.O_AGE}, remainingTime, 10);
+            plasmaSearchResult acc = theSearch.order(idx, remainingTime, 10);
             
             // result is a List of urlEntry elements
             if (acc == null) {
@@ -1636,9 +1634,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 //plasmaIndexEntry pie;
                 plasmaCrawlLURL.Entry urlentry;
                 plasmaSnippetCache.result snippet;
-                while ((acc.hasMoreElements()) && (i < count)) {
+                while ((acc.hasMoreElements()) && (i < query.wantedResults)) {
                     urlentry = acc.nextElement();
-                    snippet = snippetCache.retrieve(urlentry.url(), hashes, false, 260);
+                    snippet = snippetCache.retrieve(urlentry.url(), query.queryHashes, false, 260);
                     if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
                         // suppress line: there is no match in that resource
                     } else {
@@ -1669,7 +1667,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
             
             // log
-            log.logInfo("EXIT HASH SEARCH: " + hashes + " - " +
+            log.logInfo("EXIT HASH SEARCH: " + query.queryHashes + " - " +
             ((idx == null) ? "0" : (""+idx.size())) + " links found, " +
 	    prop.get("linkcount", "?") + " links selected, " +
             ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
