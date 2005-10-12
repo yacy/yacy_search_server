@@ -373,7 +373,8 @@ public final class httpTemplate {
             if ((!filename.equals("")) && (!filename.equals(dflt))) {
                 BufferedReader br = null;
 				try{
-					br = new BufferedReader(new InputStreamReader(new FileInputStream( filename )));
+					//br = new BufferedReader(new InputStreamReader(new FileInputStream( filename ))); //Simple Include
+					br = new BufferedReader( new InputStreamReader(new FileInputStream( httpdFileHandler.getLocalizedFile(filename) )) ); //YaCy (with Locales)
 					//Read the Include
 					while( (line = br.readLine()) != null ){
 						include+=line+de.anomic.server.serverCore.crlfString;

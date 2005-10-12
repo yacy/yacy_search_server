@@ -212,6 +212,28 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             serverLog.logWarning("HTTPDFileHandler", "Content-MD5 support not availabel ...");
         }
     }
+    /*
+     * Returns the path of a (existing) localized File, or the english one, if not availible.
+     * @param path is relative from htroot
+     * @return the function returns a Filehandle to the translated file, or if not availitble to the english one.
+     */
+	public static File getLocalizedFile(String path){
+        plasmaSwitchboard switchboard=plasmaSwitchboard.getSwitchboard();
+        // create htLocaleDefault, htLocalePath
+        if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
+        if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("htLocalePath","htroot/locale"));
+        //htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
+
+        // find locales or alternatives in htDocsPath
+        String htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
+        // look if we have a localization of that file
+        if (!(htLocaleSelection.equals("default"))) {
+            File localePath = new File(htLocalePath, htLocaleSelection + "/" + path);
+            if (localePath.exists())
+                return localePath;
+        }
+        return new File(htDefaultPath, path);
+	}
     
 //    private void textMessage(OutputStream out, int retcode, String body) throws IOException {
 //        httpd.sendRespondHeader(
@@ -455,13 +477,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         path.endsWith("csv") ||
                         path.endsWith("pac")) {
                             
-                    // find locales or alternatives in htDocsPath
-                    String htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
-                    // look if we have a localization of that file
-                    if (!(htLocaleSelection.equals("default"))) {
-                        File localePath = new File(htLocalePath, htLocaleSelection + "/" + path);
-                        if (localePath.exists()) targetFile = localePath;
-                    }
+                    targetFile = getLocalizedFile(path);
                     
                     // call rewrite-class
                     serverObjects tp = new serverObjects();

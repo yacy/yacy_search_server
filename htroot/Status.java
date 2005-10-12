@@ -79,7 +79,7 @@ public class Status {
         yacyCore.peerActions.updateMySeed();
 
         if (((plasmaSwitchboard) env).adminAuthenticated(header) >= 2) {
-            prop.put("privateStatusTable", new File(env.getRootPath(), "htroot/Status_p.inc").toString());
+            prop.put("privateStatusTable", "Status_p.inc");
         } else {
             prop.put("privateStatusTable", "");
         }
