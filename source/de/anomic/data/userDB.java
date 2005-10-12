@@ -246,7 +246,7 @@ public final class userDB {
         }        
         
 		public boolean canSurf(){
-			if( this.getTimeLimit().longValue() <= 0 || (this.updateLastAccess(true) < this.getTimeLimit().longValue()) )//no timelimit or timelimit not reached
+			if( this.getTimeLimit() == null || this.getTimeLimit().longValue() <= 0 || (this.updateLastAccess(true) < this.getTimeLimit().longValue()) )//no timelimit or timelimit not reached
 				return true;
 			else
 				return false;
