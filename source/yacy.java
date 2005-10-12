@@ -905,9 +905,14 @@ public final class yacy {
     * @param args Given arguments from the command line.
     */
     public static void main(String args[]) {
+
+        // check memory amount
         System.gc();
         long startupMemFree  = Runtime.getRuntime().freeMemory(); // the amount of free memory in the Java Virtual Machine
         long startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
+
+        // go into headless awt mode
+        System.setProperty("java.awt.headless", "true");
         
         String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
         //System.out.println("args.length=" + args.length);
