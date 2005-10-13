@@ -1,10 +1,13 @@
-// plasmaCrawlLURL.java 
+// plasmaCrawlLURL.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 09.08.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -59,7 +62,6 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Properties;
-
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
@@ -80,7 +82,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
     private final LinkedList proxyResultStack;  // 4 - local index: result of proxy fetch/prefetch
     private final LinkedList lcrawlResultStack; // 5 - local index: result of local crawling
     private final LinkedList gcrawlResultStack; // 6 - local index: triggered external
-    
+
     public plasmaCrawlLURL(File cachePath, int bufferkb) throws IOException {
         super();
         int[] ce = {
@@ -99,36 +101,33 @@ public final class plasmaCrawlLURL extends plasmaURL {
             urlWordCountLength
         };
         int segmentsize = 0;
-        for (int i = 0; i < ce.length; i++) segmentsize += ce[i];
+        for (int i = 0; i < ce.length; i++) { segmentsize += ce[i]; }
         if (cachePath.exists()) {
-	    // open existing cache
-	    urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400);
-	} else {
-	    // create new cache
-	    cachePath.getParentFile().mkdirs();
-	    
-	    urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce);
-	}
-        
+            // open existing cache
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400);
+        } else {
+            // create new cache
+            cachePath.getParentFile().mkdirs();
+           urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce);
+        }
+
         // init result stacks
         externResultStack = new LinkedList();
         searchResultStack = new LinkedList();
         transfResultStack = new LinkedList();
-        proxyResultStack = new LinkedList();
+        proxyResultStack  = new LinkedList();
         lcrawlResultStack = new LinkedList();
         gcrawlResultStack = new LinkedList();
-        
     }
 
     public synchronized Entry addEntry(URL url, String descr, Date moddate, Date loaddate,
                                        String initiatorHash, String executorHash,
-				       String referrerHash, int copyCount, boolean localNeed,
-				       int quality, String language, char doctype,
-				       long size, int wordCount,
-                                       int stackType) {
-	Entry e = new Entry(url, descr, moddate, loaddate, referrerHash, copyCount, localNeed, quality, language, doctype, size, wordCount);
-        if (initiatorHash == null) initiatorHash = dummyHash;
-        if (executorHash == null) executorHash = dummyHash;
+                                       String referrerHash, int copyCount, boolean localNeed,
+                                       int quality, String language, char doctype,
+                                       long size, int wordCount, int stackType) {
+        Entry e = new Entry(url, descr, moddate, loaddate, referrerHash, copyCount, localNeed, quality, language, doctype, size, wordCount);
+        if (initiatorHash == null) { initiatorHash = dummyHash; }
+        if (executorHash == null) { executorHash = dummyHash; }
         switch (stackType) {
             case 0: break;
             case 1: externResultStack.add(e.urlHash + initiatorHash + executorHash); break;
@@ -142,10 +141,10 @@ public final class plasmaCrawlLURL extends plasmaURL {
     }
 
     public synchronized Entry addEntry(Entry e, String initiatorHash, String executorHash, int stackType) {
-        if (e == null) return null;
+        if (e == null) { return null; }
         try {
-            if (initiatorHash == null) initiatorHash = dummyHash;
-            if (executorHash == null) executorHash = dummyHash;
+            if (initiatorHash == null) { initiatorHash = dummyHash; }
+            if (executorHash == null) { executorHash = dummyHash; }
             switch (stackType) {
                 case 0: break;
                 case 1: externResultStack.add(e.urlHash + initiatorHash + executorHash); break;
@@ -161,27 +160,27 @@ public final class plasmaCrawlLURL extends plasmaURL {
             return null;
         }
     }
-    
+
     public void notifyGCrawl(String urlHash, String initiatorHash, String executorHash) {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
-    
+
     public synchronized Entry getEntry(String hash) {
-	return new Entry(hash);
+        return new Entry(hash);
     }
 
     public synchronized Entry newEntry(Entry oldEntry) {
         if (oldEntry == null) return null;
         /*
-         * de.anomic.plasma.plasmaCrawlLURL.Entry.Entry(URL url, String descr, 
-         * Date moddate, Date loaddate, 
-         * String referrerHash, 
-         * int copyCount, 
-         * boolean localNeed, 
-         * int quality, 
-         * String language, 
-         * char doctype, 
-         * long size, 
+         * de.anomic.plasma.plasmaCrawlLURL.Entry.Entry(URL url, String descr,
+         * Date moddate, Date loaddate,
+         * String referrerHash,
+         * int copyCount,
+         * boolean localNeed,
+         * int quality,
+         * String language,
+         * char doctype,
+         * long size,
          * int wordCount)
          */
         return new Entry(
@@ -197,16 +196,16 @@ public final class plasmaCrawlLURL extends plasmaURL {
                 oldEntry.doctype(),
                 oldEntry.size(),
                 oldEntry.wordCount());
-    }    
-    
+    }
+
     public synchronized Entry newEntry(String propStr, boolean setGlobal) {
-        if ((propStr.startsWith("{")) && (propStr.endsWith("}"))) {
-            return new Entry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)), setGlobal);    
+        if (propStr.startsWith("{") && propStr.endsWith("}")) {
+            return new Entry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)), setGlobal);
         } else {
             return null;
         }
     }
-    
+
     public int getStackSize(int stack) {
         switch (stack) {
             case 1: return externResultStack.size();
@@ -218,7 +217,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         }
         return -1;
     }
-    
+
     public String getUrlHash(int stack, int pos) {
         switch (stack) {
             case 1: return ((String) externResultStack.get(pos)).substring(0, urlHashLength);
@@ -230,7 +229,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         }
         return null;
     }
-    
+
     public String getInitiatorHash(int stack, int pos) {
         switch (stack) {
             case 1: return ((String) externResultStack.get(pos)).substring(urlHashLength, urlHashLength * 2);
@@ -242,7 +241,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         }
         return null;
     }
-    
+
     public String getExecutorHash(int stack, int pos) {
         switch (stack) {
             case 1: return ((String) externResultStack.get(pos)).substring(urlHashLength * 2, urlHashLength * 3);
@@ -254,7 +253,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         }
         return null;
     }
-    
+
     public void removeStack(int stack, int pos) {
         switch (stack) {
             case 1: externResultStack.remove(pos); break;
@@ -265,7 +264,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             case 6: gcrawlResultStack.remove(pos); break;
         }
     }
-    
+
     public void clearStack(int stack) {
         switch (stack) {
             case 1: externResultStack.clear(); break;
@@ -276,22 +275,67 @@ public final class plasmaCrawlLURL extends plasmaURL {
             case 6: gcrawlResultStack.clear(); break;
         }
     }
-        
+
     public void remove(String urlHash) {
         super.remove(urlHash);
-        for (int stack = 1; stack <= 6; stack++)
-            for (int i = getStackSize(stack) - 1; i >= 0; i--)
-                if (getUrlHash(stack,i).equals(urlHash)) { removeStack(stack,i); return; }
-        
+        for (int stack = 1; stack <= 6; stack++) {
+            for (int i = getStackSize(stack) - 1; i >= 0; i--) {
+                if (getUrlHash(stack,i).equals(urlHash)) {
+                    removeStack(stack,i);
+                    return;
+                }
+            }
+        }
     }
-     
+
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(Date date) {
-	if (date == null) return ""; else return dayFormatter.format(date);
+        if (date == null) {
+            return "";
+        } else {
+            return dayFormatter.format(date);
+        }
     }
-    
+
+    /**
+     * This function shortens the String url<br>
+     *
+     * Example returns:<br>
+     * <dl><dt>normal domain:</dt><dd>http://domain.net/leftpath..rightpath</dd>
+     * <dt>long domain:</dt><dd>http://very_very_long_domain.net/le..</dd></dl>
+     * @param String like a URL
+     * @return the shorten or the old String
+     */
+    public static String cutUrlText(String url, int len) {
+        // This is contributed by Thomas Quella (borg-0300)
+        int la = url.length();
+        if (la > len) {
+            int cpos;
+            cpos = url.indexOf("://");
+            if (cpos >= 0) {
+                cpos = url.indexOf("/", cpos + 3);
+                if (cpos >= 0) {
+                    if (cpos < len-(len / 3)) { // at least 1/3 characters for the path
+                        final int lb = ((len - cpos) / 2) - 1;
+                        if (lb * 2 + 2 + cpos < len) { la--; } // if smaller(odd), half right path + 1
+                        url = url.substring(0, cpos + lb).concat("..").concat(url.substring(la - lb));
+                    } else {
+                        url = url.substring(0, len - 2).concat("..");
+                    }
+                } else { // very crazy domain or very short len
+                    url = url.substring(0, len - 2).concat("..");
+                } // no slash at end
+            } // NO URL !?
+        } // URL < len
+        return url;
+    }
+
     public serverObjects genTableProps(int tabletype, int lines, boolean showInit, boolean showExec, String dfltInit, String dfltExec, String feedbackpage, boolean makeLink) {
-        serverObjects prop = new serverObjects();
+        serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps tabletype=" + tabletype    +    " lines=" + lines    +
+                                                                    " showInit=" + showInit     + " showExec=" + showExec +
+                                                                    " dfltInit=" + dfltInit     + " dfltExec=" + dfltExec +
+                                                                " feedbackpage=" + feedbackpage + " makeLink=" + makeLink);
+        final serverObjects prop = new serverObjects();
         if (getStackSize(tabletype) == 0) {
             prop.put("table", 0);
             return prop;
@@ -309,23 +353,41 @@ public final class plasmaCrawlLURL extends plasmaURL {
         prop.put("table_tabletype", tabletype);
         prop.put("table_showInit", (showInit) ? 1 : 0);
         prop.put("table_showExec", (showExec) ? 1 : 0);
-        
+
         boolean dark = true;
         String urlHash, initiatorHash, executorHash;
         plasmaCrawlLURL.Entry urle;
         yacySeed initiatorSeed, executorSeed;
-        String cachepath;
-        int c = 0;
+        String cachepath,url,txt;
+        int p, c = 0;
+
         for (int i = getStackSize(tabletype) - 1; i >= (getStackSize(tabletype) - lines); i--) {
             initiatorHash = getInitiatorHash(tabletype, i);
             executorHash = getExecutorHash(tabletype, i);
+//          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps initiatorHash=" + initiatorHash + " executorHash=" + executorHash);
             urlHash = getUrlHash(tabletype, i);
+//          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
             urle = getEntry(urlHash);
+//          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
             if (urle != null) try {
                 initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                 executorSeed = yacyCore.seedDB.getConnected(executorHash);
-                cachepath = (urle.url() == null) ? "-not-cached-" : urle.url().toString().substring(7);
+
+                url = urle.url().toString();
+                txt = urle.url().toString();
+
+                // Kosmetik, die wirklich benutzte URL behält die ':80'
+                if (txt.endsWith(":80")) txt = txt.substring(0, txt.length() - 3);
+                if ((p = txt.indexOf(":80/")) != -1) {
+                    txt = txt.substring(0, p).concat(txt.substring(p + 3)); // den '/' erstmal nicht abschneiden
+                    serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps Remove ':80' URL=" + txt);
+                }
+
+                txt = cutUrlText(txt, 72); // shorten the string text like a URL
+
+                cachepath = (urle.url() == null) ? "-not-cached-" : url.substring(url.indexOf("://") + 3);
                 if (cachepath.endsWith("/")) cachepath = cachepath + "ndx";
+
                 prop.put("table_indexed_" + c + "_dark", (dark) ? 1 : 0);
                 prop.put("table_indexed_" + c + "_feedbackpage", feedbackpage);
                 prop.put("table_indexed_" + c + "_tabletype", tabletype);
@@ -337,7 +399,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                 prop.put("table_indexed_" + c + "_moddate", daydate(urle.moddate()));
                 prop.put("table_indexed_" + c + "_wordcount", urle.wordCount());
                 prop.put("table_indexed_" + c + "_urldescr", urle.descr());
-                prop.put("table_indexed_" + c + "_url", (urle.url() == null) ? "-not-cached-" : ((makeLink) ? ("<a href=\"CacheAdmin_p.html?action=info&path=" + cachepath + "\" class=\"small\">" + urle.url().toString() + "</a>") : urle.url().toString()));
+                prop.put("table_indexed_" + c + "_url", (urle.url() == null) ? "-not-cached-" : ((makeLink) ? ("<a href=\"CacheAdmin_p.html?action=info&path=" + cachepath + "\" class=\"small\" title=\"" + url + "\">" + txt + "</a>") : url));
                 dark = !dark;
                 c++;
             } catch (Exception e) {
@@ -347,349 +409,350 @@ public final class plasmaCrawlLURL extends plasmaURL {
         prop.put("table_indexed", c);
         return prop;
     }
-    
+
     public class Entry {
 
-	private URL    url;
-	private String descr;
-	private Date   moddate;
-	private Date   loaddate;
-	private String urlHash;
-	private String referrerHash;
-	private int    copyCount;
-	private String flags;
-	private int    quality;
-	private String language;
-	private char   doctype;
-	private long   size;
-	private int    wordCount;
+    private URL    url;
+    private String descr;
+    private Date   moddate;
+    private Date   loaddate;
+    private String urlHash;
+    private String referrerHash;
+    private int    copyCount;
+    private String flags;
+    private int    quality;
+    private String language;
+    private char   doctype;
+    private long   size;
+    private int    wordCount;
         private String snippet;
 
-	public Entry(URL url, String descr, Date moddate, Date loaddate,
-		     String referrerHash, int copyCount, boolean localNeed,
-		     int quality, String language, char doctype, long size, int wordCount) {
-	    // create new entry and store it into database
-	    this.urlHash = urlHash(url);
-	    this.url = url;
-	    this.descr = (descr==null)?this.url.toString():descr;
-	    this.moddate = moddate;
-	    this.loaddate = loaddate;
-	    this.referrerHash = (referrerHash == null) ? dummyHash : referrerHash;
-	    this.copyCount = copyCount; // the number of remote (global) copies of this object without this one
-	    this.flags = (localNeed) ? "L " : "  ";
-	    this.quality = quality;
-	    this.language = (language==null)?"uk":language;
-	    this.doctype = doctype;
-	    this.size = size;
-	    this.wordCount = wordCount;
+    public Entry(URL url, String descr, Date moddate, Date loaddate,
+             String referrerHash, int copyCount, boolean localNeed,
+             int quality, String language, char doctype, long size, int wordCount) {
+        // create new entry and store it into database
+        this.urlHash = urlHash(url);
+        this.url = url;
+        this.descr = (descr==null)?this.url.toString():descr;
+        this.moddate = moddate;
+        this.loaddate = loaddate;
+        this.referrerHash = (referrerHash == null) ? dummyHash : referrerHash;
+        this.copyCount = copyCount; // the number of remote (global) copies of this object without this one
+        this.flags = (localNeed) ? "L " : "  ";
+        this.quality = quality;
+        this.language = (language==null)?"uk":language;
+        this.doctype = doctype;
+        this.size = size;
+        this.wordCount = wordCount;
+        this.snippet = null;
+        store();
+    }
+
+    public Entry(String urlHash) {
+        // generates an plasmaLURLEntry using the url hash
+        // to speed up the access, the url-hashes are buffered
+        // in the hash cache.
+        // we have two options to find the url:
+        // - look into the hash cache
+        // - look into the filed properties
+        // if the url cannot be found, this returns null
+        this.urlHash = urlHash;
+        try {
+        byte[][] entry = urlHashCache.get(urlHash.getBytes());
+        if (entry != null) {
+            this.url = new URL(new String(entry[1]).trim());
+            this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2]).trim();
+            this.moddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[3])));
+            this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[4])));
+            this.referrerHash = (entry[5]==null)?dummyHash:new String(entry[5]);
+            this.copyCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6]));
+            this.flags = new String(entry[7]);
+            this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
+            this.language = new String(entry[9]);
+            this.doctype = (char) entry[10][0];
+            this.size = (long) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[11]));
+            this.wordCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[12]));
             this.snippet = null;
-	    store();
-	}
-
-	public Entry(String urlHash) {
-	    // generates an plasmaLURLEntry using the url hash
-	    // to speed up the access, the url-hashes are buffered
-	    // in the hash cache.
-	    // we have two options to find the url:
-	    // - look into the hash cache
-	    // - look into the filed properties
-	    // if the url cannot be found, this returns null
-	    this.urlHash = urlHash;
-	    try {
-		byte[][] entry = urlHashCache.get(urlHash.getBytes());
-		if (entry != null) {
-		    this.url = new URL(new String(entry[1]).trim());
-		    this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2]).trim();
-		    this.moddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[3])));
-		    this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[4])));
-		    this.referrerHash = (entry[5]==null)?dummyHash:new String(entry[5]);
-		    this.copyCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6]));
-		    this.flags = new String(entry[7]);
-		    this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
-		    this.language = new String(entry[9]);
-		    this.doctype = (char) entry[10][0];
-		    this.size = (long) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[11]));
-		    this.wordCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[12]));
-                    this.snippet = null;
-		    return;
-		}
-	    } catch (Exception e) {
+            return;
+        }
+        } catch (Exception e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString(), e);
-	    }
-	}
+        }
+    }
 
-	public Entry(Properties prop, boolean setGlobal) {
-	    // generates an plasmaLURLEntry using the properties from the argument
-	    // the property names must correspond to the one from toString
-	    //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
-	    this.urlHash = prop.getProperty("hash", dummyHash);
-	    try {
-		byte[][] entry = urlHashCache.get(urlHash.getBytes());
-		//if (entry == null) {
-		    this.referrerHash = prop.getProperty("referrer", dummyHash);
-		    this.moddate = shortDayFormatter.parse(prop.getProperty("mod", "20000101"));
-		    //System.out.println("DEBUG: moddate = " + moddate + ", prop=" + prop.getProperty("mod"));
-		    this.loaddate = shortDayFormatter.parse(prop.getProperty("load", "20000101"));
-		    this.copyCount = Integer.parseInt(prop.getProperty("cc", "0"));
-		    this.flags = ((prop.getProperty("local", "true").equals("true")) ? "L " : "  ");
-		    if (setGlobal) this.flags = "G ";
-		    this.url = new URL(crypt.simpleDecode(prop.getProperty("url", ""), null));
-		    this.descr = crypt.simpleDecode(prop.getProperty("descr", ""), null);
+    public Entry(Properties prop, boolean setGlobal) {
+        // generates an plasmaLURLEntry using the properties from the argument
+        // the property names must correspond to the one from toString
+        //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
+        this.urlHash = prop.getProperty("hash", dummyHash);
+        try {
+        byte[][] entry = urlHashCache.get(urlHash.getBytes());
+        //if (entry == null) {
+            this.referrerHash = prop.getProperty("referrer", dummyHash);
+            this.moddate = shortDayFormatter.parse(prop.getProperty("mod", "20000101"));
+            //System.out.println("DEBUG: moddate = " + moddate + ", prop=" + prop.getProperty("mod"));
+            this.loaddate = shortDayFormatter.parse(prop.getProperty("load", "20000101"));
+            this.copyCount = Integer.parseInt(prop.getProperty("cc", "0"));
+            this.flags = ((prop.getProperty("local", "true").equals("true")) ? "L " : "  ");
+            if (setGlobal) this.flags = "G ";
+            this.url = new URL(crypt.simpleDecode(prop.getProperty("url", ""), null));
+            this.descr = crypt.simpleDecode(prop.getProperty("descr", ""), null);
                     if (this.descr == null) this.descr = this.url.toString();
-		    this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(prop.getProperty("q", ""));
-		    this.language = prop.getProperty("lang", "uk");
-		    this.doctype = prop.getProperty("dt", "t").charAt(0);
-		    this.size = Long.parseLong(prop.getProperty("size", "0"));
-		    this.wordCount = Integer.parseInt(prop.getProperty("wc", "0"));
+            this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(prop.getProperty("q", ""));
+            this.language = prop.getProperty("lang", "uk");
+            this.doctype = prop.getProperty("dt", "t").charAt(0);
+            this.size = Long.parseLong(prop.getProperty("size", "0"));
+            this.wordCount = Integer.parseInt(prop.getProperty("wc", "0"));
                     this.snippet = prop.getProperty("snippet", "");
                     if (snippet.length() == 0) snippet = null; else snippet = crypt.simpleDecode(snippet, null);
-		    store();
-		    //}
-	    } catch (Exception e) {
-		serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/2: " + e.toString(), e);
-	    }
-	}
+            store();
+            //}
+        } catch (Exception e) {
+        serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/2: " + e.toString(), e);
+        }
+    }
 
-	private void store() {
-	    // stores the values from the object variables into the database
-	    String moddatestr = serverCodings.enhancedCoder.encodeBase64Long(moddate.getTime() / 86400000, urlDateLength);
-	    String loaddatestr = serverCodings.enhancedCoder.encodeBase64Long(loaddate.getTime() / 86400000, urlDateLength);
+    private void store() {
+        // stores the values from the object variables into the database
+        final String moddatestr = serverCodings.enhancedCoder.encodeBase64Long(moddate.getTime() / 86400000, urlDateLength);
+        final String loaddatestr = serverCodings.enhancedCoder.encodeBase64Long(loaddate.getTime() / 86400000, urlDateLength);
 
-	    // store the hash in the hash cache
-	    try {
-		// even if the entry exists, we simply overwrite it
-		byte[][] entry = new byte[][] {
-		    urlHash.getBytes(),
-		    url.toString().getBytes(),
-		    descr.getBytes(), // null?
-		    moddatestr.getBytes(),
-		    loaddatestr.getBytes(),
-		    referrerHash.getBytes(),
-		    serverCodings.enhancedCoder.encodeBase64Long(copyCount, urlCopyCountLength).getBytes(),
-		    flags.getBytes(),
-		    serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength).getBytes(),
-		    language.getBytes(),
-		    new byte[] {(byte) doctype},
-		    serverCodings.enhancedCoder.encodeBase64Long(size, urlSizeLength).getBytes(),
-		    serverCodings.enhancedCoder.encodeBase64Long(wordCount, urlWordCountLength).getBytes(),
-		};
-		urlHashCache.put(entry);
-	    } catch (Exception e) {
-		serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString(), e);
-	    }
-	}
+        // store the hash in the hash cache
+        try {
+            // even if the entry exists, we simply overwrite it
+            final byte[][] entry = new byte[][] {
+            urlHash.getBytes(),
+            url.toString().getBytes(),
+            descr.getBytes(), // null?
+            moddatestr.getBytes(),
+            loaddatestr.getBytes(),
+            referrerHash.getBytes(),
+            serverCodings.enhancedCoder.encodeBase64Long(copyCount, urlCopyCountLength).getBytes(),
+            flags.getBytes(),
+            serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength).getBytes(),
+            language.getBytes(),
+            new byte[] {(byte) doctype},
+            serverCodings.enhancedCoder.encodeBase64Long(size, urlSizeLength).getBytes(),
+            serverCodings.enhancedCoder.encodeBase64Long(wordCount, urlWordCountLength).getBytes(),
+        };
+        urlHashCache.put(entry);
+        } catch (Exception e) {
+        serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString(), e);
+        }
+    }
 
-	public String hash() {
-	    // return a url-hash, based on the md5 algorithm
-	    // the result is a String of 12 bytes within a 72-bit space
-	    // (each byte has an 6-bit range)
-	    // that should be enough for all web pages on the world
-	    return this.urlHash;
-	}
+    public String hash() {
+        // return a url-hash, based on the md5 algorithm
+        // the result is a String of 12 bytes within a 72-bit space
+        // (each byte has an 6-bit range)
+        // that should be enough for all web pages on the world
+        return this.urlHash;
+    }
 
-	public URL url() {
-	    return url;
-	}
+    public URL url() {
+        return url;
+    }
 
-	public String descr() {
-	    return descr;
-	}
+    public String descr() {
+        return descr;
+    }
 
-	public Date moddate() {
-	    return moddate;
-	}
+    public Date moddate() {
+        return moddate;
+    }
 
-	public Date loaddate() {
-	    return loaddate;
-	}
+    public Date loaddate() {
+        return loaddate;
+    }
 
-	public String referrerHash() {
-	    // return the creator's hash
-	    return referrerHash;
-	}
+    public String referrerHash() {
+        // return the creator's hash
+        return referrerHash;
+    }
 
-	public char doctype() {
-	    return doctype;
-	}
+    public char doctype() {
+        return doctype;
+    }
 
-	public int copyCount() {
-	    // return number of copies of this object in the global index
-	    return copyCount;
-	}
+    public int copyCount() {
+        // return number of copies of this object in the global index
+        return copyCount;
+    }
 
-	public boolean local() {
-	    // returns true if the url was created locally and is needed for own word index
+    public boolean local() {
+        // returns true if the url was created locally and is needed for own word index
             if (flags == null) return false;
             return flags.charAt(0) == 'L';
-	}
+    }
 
-	public int quality() {
-	    return quality;
-	}
+    public int quality() {
+        return quality;
+    }
 
-	public String language() {
-	    return language;
-	}
+    public String language() {
+        return language;
+    }
 
-	public long size() {
-	    return size;
-	}
+    public long size() {
+        return size;
+    }
 
-	public int wordCount() {
-	    return wordCount;
-	}
+    public int wordCount() {
+        return wordCount;
+    }
 
-        public String snippet() {
-            // the snippet may appear here if the url was transported in a remote search
-            // it will not be saved anywhere, but can only be requested here
-            return snippet;
+    public String snippet() {
+        // the snippet may appear here if the url was transported in a remote search
+        // it will not be saved anywhere, but can only be requested here
+        return snippet;
+    }
+
+    private StringBuffer corePropList() {
+        // generate a parseable string; this is a simple property-list
+        final StringBuffer corePropStr = new StringBuffer(300);
+        try {
+            corePropStr
+            .append("hash=")     .append(urlHash)
+            .append(",referrer=").append(referrerHash)
+            .append(",mod=")     .append(shortDayFormatter.format(moddate))
+            .append(",load=")    .append(shortDayFormatter.format(loaddate))
+            .append(",size=")    .append(size)
+            .append(",wc=")      .append(wordCount)
+            .append(",cc=")      .append(copyCount)
+            .append(",local=")   .append(((local()) ? "true" : "false"))
+            .append(",q=")       .append(serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength))
+            .append(",dt=")      .append(doctype)
+            .append(",lang=")    .append(language)
+            .append(",url=")     .append(crypt.simpleEncode(url.toString()))
+            .append(",descr=")   .append(crypt.simpleEncode(descr));                
+            return corePropStr;
+
+//          return
+//          "hash=" + urlHash +
+//          ",referrer=" + referrerHash +
+//          ",mod=" + shortDayFormatter.format(moddate) +
+//          ",load=" + shortDayFormatter.format(loaddate) +
+//          ",size=" + size +
+//          ",wc=" + wordCount +
+//          ",cc=" + copyCount +
+//          ",local=" + ((local()) ? "true" : "false") +
+//          ",q=" + serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength) +
+//          ",dt=" + doctype +
+//          ",lang=" + language +
+//          ",url=" + crypt.simpleEncode(url.toString()) +
+//          ",descr=" + crypt.simpleEncode(descr);
+        } catch (Exception e) {
+//          serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
+//          if (moddate == null) serverLog.logFailure("plasmaLURL.corePropList", "moddate=null");
+//          if (loaddate == null) serverLog.logFailure("plasmaLURL.corePropList", "loaddate=null");
+//          e.printStackTrace();
+            return null;
         }
-        
-        private StringBuffer corePropList() {
-            // generate a parseable string; this is a simple property-list
-            StringBuffer corePropStr = new StringBuffer(300);
-            try {
-                corePropStr
-                .append("hash=")     .append(urlHash)
-                .append(",referrer=").append(referrerHash)
-                .append(",mod=")     .append(shortDayFormatter.format(moddate))
-                .append(",load=")    .append(shortDayFormatter.format(loaddate))
-                .append(",size=")    .append(size)
-                .append(",wc=")      .append(wordCount)
-                .append(",cc=")      .append(copyCount)
-                .append(",local=")   .append(((local()) ? "true" : "false"))
-                .append(",q=")       .append(serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength))
-                .append(",dt=")      .append(doctype)
-                .append(",lang=")    .append(language)
-                .append(",url=")     .append(crypt.simpleEncode(url.toString()))
-                .append(",descr=")   .append(crypt.simpleEncode(descr));                
-                return corePropStr;
-                
-//                return
-//                "hash=" + urlHash +
-//                ",referrer=" + referrerHash +
-//                ",mod=" + shortDayFormatter.format(moddate) +
-//                ",load=" + shortDayFormatter.format(loaddate) +
-//                ",size=" + size +
-//                ",wc=" + wordCount +
-//                ",cc=" + copyCount +
-//                ",local=" + ((local()) ? "true" : "false") +
-//                ",q=" + serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength) +
-//                ",dt=" + doctype +
-//                ",lang=" + language +
-//                ",url=" + crypt.simpleEncode(url.toString()) +
-//                ",descr=" + crypt.simpleEncode(descr);
-            } catch (Exception e) {
-                //serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
-                //if (moddate == null) serverLog.logFailure("plasmaLURL.corePropList", "moddate=null");
-                //if (loaddate == null) serverLog.logFailure("plasmaLURL.corePropList", "loaddate=null");
-                //e.printStackTrace();
-                return null;
-            }
-        }
-        
-        public String toString(int posintext, int posinphrase, int posofphrase) {
-            // add information needed for remote transport
-            StringBuffer core = corePropList();
-            if (core == null) return null;
-                        
-            core.ensureCapacity(core.length() + 200);
-            core.insert(0,"{")
-                .append(",posintext=").append(posintext)
-                .append(",posinphrase=").append(posinphrase)
-                .append(",posofphraseint=").append(posofphrase)
-                .append("}");
-            return core.toString();
-            
-//            return
-//            "{" + core +
-//            ",posintext=" + posintext +
-//            ",posinphrase=" + posinphrase +
-//            ",posofphraseint=" + posofphrase +
-//            "}";
-        }
+    }
+
+    public String toString(int posintext, int posinphrase, int posofphrase) {
+        // add information needed for remote transport
+        final StringBuffer core = corePropList();
+        if (core == null) return null;
+
+        core.ensureCapacity(core.length() + 200);
+        core.insert(0,"{")
+            .append(",posintext=").append(posintext)
+            .append(",posinphrase=").append(posinphrase)
+            .append(",posofphraseint=").append(posofphrase)
+            .append("}");
+        return core.toString();
+
+//      return
+//      "{" + core +
+//      ",posintext=" + posintext +
+//      ",posinphrase=" + posinphrase +
+//      ",posofphraseint=" + posofphrase +
+//      "}";
+    }        
 
     public String toString(String snippet) {
         // add information needed for remote transport
-        StringBuffer core = corePropList();
+        final StringBuffer core = corePropList();
         if (core == null) return null;
-        
+
         core.ensureCapacity(core.length() + snippet.length()*2);
         core.insert(0,"{");
         core.append(",snippet=").append(crypt.simpleEncode(snippet)).append("}");
-        
+
         return core.toString();        
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
     }
-        
+
     /**
      * Returns this object as String.<br> 
      * This e.g. looks like this:
      * <pre>{hash=jmqfMk7Y3NKw,referrer=------------,mod=20050610,load=20051003,size=51666,wc=1392,cc=0,local=true,q=AEn,dt=h,lang=uk,url=b|aHR0cDovL3d3dy50cmFuc3BhcmVuY3kub3JnL3N1cnZleXMv,descr=b|S25vd2xlZGdlIENlbnRyZTogQ29ycnVwdGlvbiBTdXJ2ZXlzIGFuZCBJbmRpY2Vz}</pre>
      */
     public String toString() {
-        StringBuffer core = corePropList();
+        final StringBuffer core = corePropList();
         if (core == null) return null;
-        
+
         core.insert(0,"{");
         core.append("}");
-        
+
         return core.toString();
         //return "{" + core + "}";
     }
 
-	public void print() {
-	    System.out.println("URL           : " + url);
-	    System.out.println("Description   : " + descr);
-	    System.out.println("Modified      : " + httpc.dateString(moddate));
-	    System.out.println("Loaded        : " + httpc.dateString(loaddate));
-	    System.out.println("Size          : " + size + " bytes, " + wordCount + " words");
-	    System.out.println("Referrer Hash : " + referrerHash);
-	    System.out.println("Quality       : " + quality);
-	    System.out.println("Language      : " + language);
-	    System.out.println("DocType       : " + doctype);
-	    System.out.println();
-	}
+    public void print() {
+        System.out.println("URL           : " + url);
+        System.out.println("Description   : " + descr);
+        System.out.println("Modified      : " + httpc.dateString(moddate));
+        System.out.println("Loaded        : " + httpc.dateString(loaddate));
+        System.out.println("Size          : " + size + " bytes, " + wordCount + " words");
+        System.out.println("Referrer Hash : " + referrerHash);
+        System.out.println("Quality       : " + quality);
+        System.out.println("Language      : " + language);
+        System.out.println("DocType       : " + doctype);
+        System.out.println();
     }
+    } // class Entry
 
     public class kenum implements Enumeration {
-	// enumerates entry elements
-	kelondroTree.rowIterator i;
-	public kenum(boolean up, boolean rotating) throws IOException {
+        // enumerates entry elements
+        kelondroTree.rowIterator i;
+        public kenum(boolean up, boolean rotating) throws IOException {
             i = urlHashCache.rows(up, rotating);
         }
-	public boolean hasMoreElements() {
+
+        public boolean hasMoreElements() {
             return i.hasNext();
         }
-	public Object nextElement() {
+
+        public Object nextElement() {
             return new Entry(new String((byte[]) i.next()));
         }
     }
-    
-    public Enumeration elements(boolean up, boolean rotating) throws IOException {
-	// enumerates entry elements
-	return new kenum(up, rotating);
-    }
-    
-    public static void main(String[] args) {
-	// test-generation of url hashes for debugging
-	// one argument requires, will be treated as url
-	// returns url-hash
-	if (args[0].equals("-h")) try {
-	    // arg 1 is url
-	    System.out.println("HASH: " + urlHash(new URL(args[1])));
-	} catch (MalformedURLException e) {}
-	if (args[0].equals("-l")) try {
-	    // arg 1 is path to URLCache
-	    plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), 1);
-	    Enumeration enu = urls.elements(true, false);
-	    while (enu.hasMoreElements()) {
-		((Entry) enu.nextElement()).print();
-	    }
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
 
+    public Enumeration elements(boolean up, boolean rotating) throws IOException {
+        // enumerates entry elements
+        return new kenum(up, rotating);
+    }
+
+    public static void main(String[] args) {
+        // test-generation of url hashes for debugging
+        // one argument requires, will be treated as url
+        // returns url-hash
+        if (args[0].equals("-h")) try {
+            // arg 1 is url
+            System.out.println("HASH: " + urlHash(new URL(args[1])));
+        } catch (MalformedURLException e) {}
+        if (args[0].equals("-l")) try {
+            // arg 1 is path to URLCache
+            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), 1);
+            final Enumeration enu = urls.elements(true, false);
+            while (enu.hasMoreElements()) {
+                ((Entry) enu.nextElement()).print();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
