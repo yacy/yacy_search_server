@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
+
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -270,11 +272,9 @@ public final class yacyClient {
         }
     }
 
-    public static int search(String wordhashes, int count, boolean global,
-                             yacySeed targetPeer, plasmaCrawlLURL urlManager,
-                             plasmaWordIndex wordIndex, plasmaURLPattern blacklist,
-                             plasmaSnippetCache snippets,
-                             long duetime) {
+    public static int search(String wordhashes, int count, boolean global, yacySeed targetPeer,
+                             plasmaCrawlLURL urlManager, plasmaWordIndexEntity entityCache,
+                             plasmaURLPattern blacklist, plasmaSnippetCache snippets, long duetime) {
         // send a search request to peer with remote Hash
         // this mainly converts the words into word hashes
 
@@ -374,7 +374,7 @@ public final class yacyClient {
             }
 
             // finally insert the containers to the index
-            for (int m = 0; m < words; m++) { wordIndex.addEntries(container[m], true); }
+            for (int m = 0; m < words; m++) { entityCache.addEntries(container[m]); }
 
             // generate statistics
             long searchtime;
@@ -383,7 +383,7 @@ public final class yacyClient {
             } catch (NumberFormatException e) {
                 searchtime = totalrequesttime;
             }
-            yacyCore.log.logFine("yacyClient.search: processed " + results + " links from peer " + targetPeer.hash + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes) + ", duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
+            yacyCore.log.logFine("yacyClient.search: processed " + results + " links from peer " + targetPeer.hash + ":" + targetPeer.getName() + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes) + ", duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
             return results;
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.search error: '" + targetPeer.get("Name", "anonymous") + "' failed - " + e);
@@ -596,12 +596,12 @@ public final class yacyClient {
         post.put("wordc", Integer.toString(indexes.length));
         int indexcount = 0;
         final StringBuffer entrypost = new StringBuffer(indexes.length*73);
-        Enumeration eenum;
+        Iterator eenum;
         plasmaWordIndexEntry entry;
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].elements(true);
-            while (eenum.hasMoreElements()) {
-                entry = (plasmaWordIndexEntry) eenum.nextElement();
+            while (eenum.hasNext()) {
+                entry = (plasmaWordIndexEntry) eenum.next();
                 entrypost.append(indexes[i].wordHash()) 
                          .append(entry.toExternalForm()) 
                          .append(serverCore.crlfString);

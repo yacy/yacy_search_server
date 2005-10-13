@@ -51,8 +51,8 @@ import java.util.HashMap;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaURLPattern;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaSnippetCache;
+import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.server.logging.serverLog;
 
 public class yacySearch extends Thread {
@@ -61,7 +61,7 @@ public class yacySearch extends Thread {
     final private int count;
     final private boolean global;
     final private plasmaCrawlLURL urlManager;
-    final private plasmaWordIndex wordIndex;
+    final private plasmaWordIndexEntity entityCache;
     final private plasmaURLPattern blacklist;
     final private plasmaSnippetCache snippetCache;
     final private yacySeed targetPeer;
@@ -69,13 +69,13 @@ public class yacySearch extends Thread {
     final private long duetime;
 
     public yacySearch(Set wordhashes, int count, boolean global, yacySeed targetPeer,
-                      plasmaCrawlLURL urlManager, plasmaWordIndex wordIndex, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, long duetime) {
+                      plasmaCrawlLURL urlManager, plasmaWordIndexEntity entityCache, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, long duetime) {
         super("yacySearch_" + targetPeer.getName());
         this.wordhashes = wordhashes;
         this.count = count;
         this.global = global;
         this.urlManager = urlManager;
-        this.wordIndex = wordIndex;
+        this.entityCache = entityCache;
         this.blacklist = blacklist;
         this.snippetCache = snippetCache;
         this.targetPeer = targetPeer;
@@ -84,7 +84,7 @@ public class yacySearch extends Thread {
     }
 
     public void run() {
-        this.links = yacyClient.search(set2string(wordhashes), count, global, targetPeer, urlManager, wordIndex, blacklist, snippetCache, duetime);
+        this.links = yacyClient.search(set2string(wordhashes), count, global, targetPeer, urlManager, entityCache, blacklist, snippetCache, duetime);
         if (links != 0) {
             //yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + links + " links for word hash " + wordhashes);
             yacyCore.seedDB.mySeed.incRI(links);
@@ -165,65 +165,49 @@ public class yacySearch extends Thread {
         return result;
     }
 
-    public static int searchHashes(Set wordhashes, plasmaCrawlLURL urlManager, plasmaWordIndex wordIndex,
-                           int count, int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, long waitingtime) {
+    public static yacySearch[] searchHashes(Set wordhashes, plasmaCrawlLURL urlManager, plasmaWordIndexEntity entityCache,
+                           int count, int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, long duetime) {
         // check own peer status
-        if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return 0; }
-
-        // start delay control
-        final long start = System.currentTimeMillis();
-
-        // set a duetime for clients
-        long duetime = waitingtime - 4000; // subtract network traffic overhead, guessed 4 seconds
-        if (duetime < 1000) { duetime = 1000; }
+        if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
 
         // prepare seed targets and threads
         //Set wordhashes = plasmaSearch.words2hashes(querywords);
         final yacySeed[] targetPeers = selectPeers(wordhashes, targets);
-        if (targetPeers == null) { return 0; }
+        if (targetPeers == null) return null;
         targets = targetPeers.length;
-        if (targets == 0) { return 0; }
+        if (targets == 0) return null;
         yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {           
             searchThreads[i]= new yacySearch(wordhashes, count, true, targetPeers[i],
-                    urlManager, wordIndex, blacklist, snippetCache, duetime);
+                    urlManager, entityCache, blacklist, snippetCache, duetime);
             searchThreads[i].start();
             try {Thread.currentThread().sleep(20);} catch (InterruptedException e) {}
-            if ((System.currentTimeMillis() - start) > waitingtime) {
-                targets = i + 1;
-                break;
-            }
-        }
 
-        int c;
-        // wait until wanted delay passed or wanted result appeared
-        boolean anyIdle = true;
-        while ((anyIdle) && ((System.currentTimeMillis() - start) < waitingtime)) {
-            // check if all threads have been finished or results so far are enough
-            c = 0;
-            anyIdle = false;
-            for (int i = 0; i < targets; i++) {
-                if (searchThreads[i].links() < 0) {
-                    anyIdle = true;
-                } else { 
-                    c = c + searchThreads[i].links();
-                }
-            }
-            if ((c >= count * 3) && ((System.currentTimeMillis() - start) > (waitingtime * 2 / 3))) {
-                yacyCore.log.logFine("DEBUG yacySearch: c=" + c + ", count=" + count + ", waitingtime=" + waitingtime);
-                break; // we have enough
-            }
-            if (c >= count * 5) { break; }
-            // wait a little time ..
-            try {Thread.currentThread().sleep(100);} catch (InterruptedException e) {}
         }
-
-        // collect results
-        c = 0;
-        for (int i = 0; i < targets; i++) {
-            c = c + ((searchThreads[i].links() > 0) ? searchThreads[i].links() : 0);
-        }
-        return c;
+        return searchThreads;
     }
-
+    
+    public static int remainingWaiting(yacySearch[] searchThreads) {
+        int alive = 0;
+        for (int i = 0; i < searchThreads.length; i++) {
+            if (searchThreads[i].isAlive()) alive++;
+        }
+        return alive;
+    }
+    
+    public static int collectedLinks(yacySearch[] searchThreads) {
+        int links = 0;
+        for (int i = 0; i < searchThreads.length; i++) {
+            if (!(searchThreads[i].isAlive())) links += searchThreads[i].links;
+        }
+        return links;
+    }
+    
+    public static void interruptAlive(yacySearch[] searchThreads) {
+        for (int i = 0; i < searchThreads.length; i++) {
+            if (searchThreads[i].isAlive()) searchThreads[i].interrupt();
+        }
+    }
+    
+    
 }

@@ -60,12 +60,16 @@ public final class plasmaSearchResult {
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
     private ArrayList results;          // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
     private plasmaSearchQuery query;
+    public  int globalContributions;
+    public  int localContributions;
     
     public plasmaSearchResult(plasmaSearchQuery query) {
         this.pageAcc = new TreeMap();
         this.ref = new kelondroMScoreCluster();
         this.results = new ArrayList();
         this.query = query;
+        this.globalContributions = 0;
+        this.localContributions = 0;
     }
     
     public plasmaSearchResult cloneSmart() {

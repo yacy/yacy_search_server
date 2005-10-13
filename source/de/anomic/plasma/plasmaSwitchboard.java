@@ -1440,10 +1440,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         serverObjects prop = new serverObjects();
         try {
-            //char[] order = new char[2];
-            //if (query.order[0].equals("quality")) order[0] = plasmaSearchResult.O_QUALITY; else order[0] = plasmaSearchResult.O_AGE;
-            //if (query.order[1].equals("quality")) order[1] = plasmaSearchResult.O_QUALITY; else order[1] = plasmaSearchResult.O_AGE;
-            
             // filter out words that appear in bluelist
             query.filterOut(blueList);
             
@@ -1458,30 +1454,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //    preselect.start();
             //}
             
-            // do global fetching
-            int globalresults = 0;
-            if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
-                int fetchcount = ((int) (query.maximumTime / 1000L)) * 5; // number of wanted results until break in search
-                int fetchpeers = ((int) (query.maximumTime / 1000L)) * 2; // number of target peers; means 30 peers in 10 seconds
-                long fetchtime = query.maximumTime * 6 / 10;           // time to waste
-                if (fetchpeers < 10) fetchpeers = 10;
-                if (fetchcount > query.wantedResults * 10) fetchcount = query.wantedResults * 10;
-                globalresults = yacySearch.searchHashes(query.queryHashes, urlPool.loadedURL, wordIndex, fetchcount, fetchpeers, urlBlacklist, snippetCache, fetchtime);
-                log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-            }
-            prop.put("globalresults", globalresults); // the result are written to the local DB
-            
-            
-            // now search locally (the global results should be now in the local db)
-            long remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
+            // create a new search event
             plasmaSearchEvent theSearch = new plasmaSearchEvent(query, log, wordIndex, urlPool.loadedURL, snippetCache);
-            plasmaWordIndexEntity idx = theSearch.search(remainingTime * 8 / 10);
-            log.logFine("SEARCH TIME AFTER FINDING " + idx.size() + " ELEMENTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+            plasmaSearchResult acc = theSearch.search();
             
-            remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
-            if (remainingTime < 500) remainingTime = 500;
-            if (remainingTime > 3000) remainingTime = 3000;
-            plasmaSearchResult acc = theSearch.order(idx, remainingTime, 10);
+            // fetch snippets
             if (query.domType != plasmaSearchQuery.SEARCHDOM_GLOBALDHT)
                 snippetCache.fetch(acc.cloneSmart(), query.queryHashes, query.urlMask, 10);
             log.logFine("SEARCH TIME AFTER ORDERING OF SEARCH RESULT: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
@@ -1492,7 +1469,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 prop.put("orderedcount", "0");
                 prop.put("linkcount", "0");
             } else {
-                prop.put("totalcount", Integer.toString(idx.size()));
+                prop.put("globalresults", acc.globalContributions);
+                prop.put("totalcount", acc.globalContributions + acc.localContributions);
                 prop.put("orderedcount", Integer.toString(acc.sizeOrdered()));
                 int i = 0;
                 int p;
@@ -1564,7 +1542,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logFine("SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
                 // calc some more cross-reference
-                remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
+                long remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
                 if (remainingTime < 0) remainingTime = 1000;
                 /*
                 while ((acc.hasMoreElements()) && (((time + timestamp) < System.currentTimeMillis()))) {
@@ -1596,7 +1574,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             prop.get("orderedcount", "0") + " links ordered, " +
 	    prop.get("linkcount", "?") + " links selected, " +
             ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-            if (idx != null) idx.close();
             return prop;
         } catch (IOException e) {
             return null;
@@ -1614,10 +1591,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logInfo("INIT HASH SEARCH: " + query.queryHashes + " - " + query.wantedResults + " links");
             long timestamp = System.currentTimeMillis();
             plasmaSearchEvent theSearch = new plasmaSearchEvent(query, log, wordIndex, urlPool.loadedURL, snippetCache);
-            plasmaWordIndexEntity idx = theSearch.search(query.maximumTime * 8 / 10);
+            int idxc = theSearch.localSearch(query.maximumTime * 8 / 10);
             long remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
             if (remainingTime < 500) remainingTime = 500;
-            plasmaSearchResult acc = theSearch.order(idx, remainingTime, 10);
+            plasmaSearchResult acc = theSearch.order(remainingTime, 10);
             
             // result is a List of urlEntry elements
             if (acc == null) {
@@ -1665,11 +1642,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
             
             // log
-            log.logInfo("EXIT HASH SEARCH: " + query.queryHashes + " - " +
-            ((idx == null) ? "0" : (""+idx.size())) + " links found, " +
+            log.logInfo("EXIT HASH SEARCH: " + query.queryHashes + " - " + idxc + " links found, " +
 	    prop.get("linkcount", "?") + " links selected, " +
             ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-            if (idx != null) idx.close();
             return prop;
         } catch (IOException e) {
             return null;

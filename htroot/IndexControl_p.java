@@ -152,11 +152,11 @@ public class IndexControl_p {
                 plasmaWordIndexEntity index = null;
                 try {
                     index = switchboard.wordIndex.getEntity(keyhash, true);
-                    Enumeration en = index.elements(true);
+                    Iterator en = index.elements(true);
                     int i = 0;
                     urlx = new String[index.size()];
-                    while (en.hasMoreElements()) {
-                        urlx[i++] = ((plasmaWordIndexEntry) en.nextElement()).getUrlHash();
+                    while (en.hasNext()) {
+                        urlx[i++] = ((plasmaWordIndexEntry) en.next()).getUrlHash();
                     }
                     index.close();
                     index = null;
@@ -260,13 +260,13 @@ public class IndexControl_p {
             long starttime = System.currentTimeMillis();
             indexes[0] = switchboard.wordIndex.getEntity(keyhash, true);
             // built urlCache
-            Enumeration urlEnum = indexes[0].elements(true);
+            Iterator urlIter = indexes[0].elements(true);
             HashMap knownURLs = new HashMap();
             HashSet unknownURLEntries = new HashSet();
             plasmaWordIndexEntry indexEntry;
             plasmaCrawlLURL.Entry lurl;
-            while (urlEnum.hasMoreElements()) {
-                indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();
+            while (urlIter.hasNext()) {
+                indexEntry = (plasmaWordIndexEntry) urlIter.next();
                 lurl = switchboard.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
                 if (lurl == null) {
                     unknownURLEntries.add(indexEntry.getUrlHash());
@@ -442,15 +442,15 @@ public class IndexControl_p {
             if (index.size() == 0) {
                 result.append("No URL entries related to this word hash <span class=\"tt\">").append(keyhash).append("</span>.");
             } else {
-                final Enumeration en = index.elements(true);
+                final Iterator en = index.elements(true);
                 result.append("URL entries related to this word hash <span class=\"tt\">").append(keyhash).append("</span><br><br>");
                 result.append("<form action=\"IndexControl_p.html\" method=\"post\" enctype=\"multipart/form-data\">");
                 String us, uh;
                 int i = 0;
 
                 final TreeMap tm = new TreeMap();
-                while (en.hasMoreElements()) {
-                    uh = ((plasmaWordIndexEntry)en.nextElement()).getUrlHash();
+                while (en.hasNext()) {
+                    uh = ((plasmaWordIndexEntry)en.next()).getUrlHash();
                     if (switchboard.urlPool.loadedURL.exists(uh)) {
                         us = switchboard.urlPool.loadedURL.getEntry(uh).url().toString();
                         tm.put(us, uh);

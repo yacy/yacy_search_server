@@ -750,16 +750,16 @@ public final class yacy {
                     plasmaWordIndexEntryContainer newContainer = new plasmaWordIndexEntryContainer(wordHash,importWordIdxEntity.size());
                     
                     // the combined container will fit, read the container
-                    Enumeration importWordIdxEntries = importWordIdxEntity.elements(true);
+                    Iterator importWordIdxEntries = importWordIdxEntity.elements(true);
                     plasmaWordIndexEntry importWordIdxEntry;
-                    while (importWordIdxEntries.hasMoreElements()) {
+                    while (importWordIdxEntries.hasNext()) {
                         
                         // testing if import process was aborted
                         if (Thread.interrupted()) break;
 
                         // getting next word index entry
                         entryCounter++;
-                        importWordIdxEntry = (plasmaWordIndexEntry) importWordIdxEntries.nextElement();
+                        importWordIdxEntry = (plasmaWordIndexEntry) importWordIdxEntries.next();
                         String urlHash = importWordIdxEntry.getUrlHash();                    
                         if ((importUrlDB.exists(urlHash)) && (!homeUrlDB.exists(urlHash))) {
                             urlCounter++;
@@ -866,10 +866,10 @@ public final class yacy {
                     wordIdxEntity = wordIndex.getEntity(wordhash, true);
                     
                     // the combined container will fit, read the container
-                    Enumeration wordIdxEntries = wordIdxEntity.elements(true);
+                    Iterator wordIdxEntries = wordIdxEntity.elements(true);
                     plasmaWordIndexEntry wordIdxEntry;
-                    while (wordIdxEntries.hasMoreElements()) {
-                        wordIdxEntry = (plasmaWordIndexEntry) wordIdxEntries.nextElement();
+                    while (wordIdxEntries.hasNext()) {
+                        wordIdxEntry = (plasmaWordIndexEntry) wordIdxEntries.next();
                         String urlHash = wordIdxEntry.getUrlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) {
                             urlCounter++;

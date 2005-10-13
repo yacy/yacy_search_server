@@ -301,7 +301,7 @@ public final class plasmaWordIndexDistribution {
             int currOpenFiles = 0;
             Iterator wordHashIterator = this.wordIndex.wordHashes(hash, true, true);
             plasmaWordIndexEntity indexEntity, tmpEntity;
-            Enumeration urlEnum;
+            Iterator urlIter;
             Iterator hashIter;
             plasmaWordIndexEntry indexEntry;
             plasmaCrawlLURL.Entry lurl;
@@ -322,10 +322,10 @@ public final class plasmaWordIndexDistribution {
                     // take the whole entity
                     try {
                         // fist check if we know all urls
-                        urlEnum = indexEntity.elements(true);
+                        urlIter = indexEntity.elements(true);
                         unknownURLEntries.clear();
-                        while (urlEnum.hasMoreElements()) {
-                            indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();                            
+                        while (urlIter.hasNext()) {
+                            indexEntry = (plasmaWordIndexEntry) urlIter.next();                            
                             lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
                             if ((lurl == null) || (lurl.toString() == null)) {
                                 unknownURLEntries.add(indexEntry.getUrlHash());
@@ -361,10 +361,10 @@ public final class plasmaWordIndexDistribution {
                     // make an on-the-fly entity and insert values
                     tmpEntity = new plasmaWordIndexEntity(indexEntity.wordHash());
                     try {
-                        urlEnum = indexEntity.elements(true);
+                        urlIter = indexEntity.elements(true);
                         unknownURLEntries.clear();
-                        while ((urlEnum.hasMoreElements()) && (count > 0)) {
-                            indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();
+                        while ((urlIter.hasNext()) && (count > 0)) {
+                            indexEntry = (plasmaWordIndexEntry) urlIter.next();
                             lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
                             if (lurl == null) {
                                 unknownURLEntries.add(indexEntry.getUrlHash());
@@ -410,7 +410,7 @@ public final class plasmaWordIndexDistribution {
     
     boolean deleteTransferIndexes(plasmaWordIndexEntity[] indexEntities) throws IOException {
         String wordhash;
-        Enumeration urlEnum;
+        Iterator urlIter;
         plasmaWordIndexEntry indexEntry;
         plasmaWordIndexEntity indexEntity;
         String[] urlHashes;
@@ -421,9 +421,9 @@ public final class plasmaWordIndexDistribution {
                 // delete entries separately
                 int c = 0;
                 urlHashes = new String[indexEntities[i].size()];
-                urlEnum = indexEntities[i].elements(true);
-                while (urlEnum.hasMoreElements()) {
-                    indexEntry = (plasmaWordIndexEntry) urlEnum.nextElement();
+                urlIter = indexEntities[i].elements(true);
+                while (urlIter.hasNext()) {
+                    indexEntry = (plasmaWordIndexEntry) urlIter.next();
                     urlHashes[c++] = indexEntry.getUrlHash();
                 }
                 wordIndex.removeEntries(indexEntities[i].wordHash(), urlHashes, true);

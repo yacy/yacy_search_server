@@ -43,7 +43,6 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.Set;
@@ -231,12 +230,12 @@ public final class plasmaWordIndexEntity {
 	}
     }
     
-    public Enumeration elements(boolean up) {
+    public Iterator elements(boolean up) {
 	// returns an enumeration of plasmaWordIndexEntry objects
 	if (theTmpMap == null) return new dbenum(up); else return new tmpenum(up);
     }
 
-    public final class dbenum implements Enumeration {
+    public final class dbenum implements Iterator {
 	Iterator i;
 	public dbenum(boolean up) {
             try {
@@ -247,10 +246,10 @@ public final class plasmaWordIndexEntity {
                 i = null;
             }
 	}
-	public boolean hasMoreElements() {
+	public boolean hasNext() {
 	    return (i != null) && (i.hasNext());
 	}
-	public Object nextElement() {
+	public Object next() {
             if (i == null) return null;
 	    try {
 		byte[][] n = ((kelondroRecords.Node) i.next()).getValues();
@@ -263,22 +262,28 @@ public final class plasmaWordIndexEntity {
                 throw new RuntimeException("dbenum: " + e.getMessage());
             }
 	}
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
-    public final class tmpenum implements Enumeration {
+    public final class tmpenum implements Iterator {
 	final TreeMap searchTree;
         boolean up;
 	public tmpenum(boolean up) {
             this.up = up;
             searchTree = (TreeMap) theTmpMap.clone(); // a shallow clone that is destroyed during search
 	}
-	public boolean hasMoreElements() {
+	public boolean hasNext() {
 	    return searchTree.size() > 0;
 	}
-	public Object nextElement() {
+	public Object next() {
 	    Object urlHash = (up) ? searchTree.firstKey() : searchTree.lastKey();
 	    plasmaWordIndexEntry entry = (plasmaWordIndexEntry) searchTree.remove(urlHash);
 	    return entry;
 	}
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     public String toString() {
@@ -292,6 +297,17 @@ public final class plasmaWordIndexEntity {
         int l = 0;
         while (x > 0) {x = x >> 1; l++;}
         return l;
+    }
+    
+    public void merge(plasmaWordIndexEntity otherEntity, long time) throws IOException {
+        // this is a merge of another entity to this entity
+        // the merge is interrupted when the given time is over
+        // a time=-1 means: no timeout
+        Iterator i = otherEntity.elements(true);
+        long timeout = (time == -1) ? Long.MAX_VALUE : System.currentTimeMillis() + time;
+        while ((i.hasNext()) && (System.currentTimeMillis() < timeout)) {
+            addEntry((plasmaWordIndexEntry) i.next());            
+        }
     }
     
     public static plasmaWordIndexEntity joinEntities(Set entities, long time) throws IOException {
@@ -366,12 +382,12 @@ public final class plasmaWordIndexEntity {
     private static plasmaWordIndexEntity joinConstructiveByTest(plasmaWordIndexEntity small, plasmaWordIndexEntity large, long time) throws IOException {
         System.out.println("DEBUG: JOIN METHOD BY TEST");
         plasmaWordIndexEntity conj = new plasmaWordIndexEntity(null); // start with empty search result
-        Enumeration se = small.elements(true);
+        Iterator se = small.elements(true);
         plasmaWordIndexEntry ie;
         long stamp = System.currentTimeMillis();
         try {
-            while ((se.hasMoreElements()) && ((System.currentTimeMillis() - stamp) < time)) {
-                ie = (plasmaWordIndexEntry) se.nextElement();
+            while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
+                ie = (plasmaWordIndexEntry) se.next();
                 if (large.contains(ie)) conj.addEntry(ie);
             }
         }  catch (kelondroException e) {
@@ -385,21 +401,21 @@ public final class plasmaWordIndexEntity {
     private static plasmaWordIndexEntity joinConstructiveByEnumeration(plasmaWordIndexEntity i1, plasmaWordIndexEntity i2, long time) throws IOException {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
         plasmaWordIndexEntity conj = new plasmaWordIndexEntity(null); // start with empty search result
-        Enumeration e1 = i1.elements(true);
-        Enumeration e2 = i2.elements(true);
+        Iterator e1 = i1.elements(true);
+        Iterator e2 = i2.elements(true);
         int c;
-        if ((e1.hasMoreElements()) && (e2.hasMoreElements())) {
+        if ((e1.hasNext()) && (e2.hasNext())) {
             plasmaWordIndexEntry ie1;
             plasmaWordIndexEntry ie2;
             try {
-                ie1 = (plasmaWordIndexEntry) e1.nextElement();
+                ie1 = (plasmaWordIndexEntry) e1.next();
             }  catch (kelondroException e) {
                 //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database corrupt 1 (" + e.getMessage() + "), deleting index");
                 i1.deleteComplete();
                 return conj;
             }
             try {
-                ie2 = (plasmaWordIndexEntry) e2.nextElement();
+                ie2 = (plasmaWordIndexEntry) e2.next();
             }  catch (kelondroException e) {
                 //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database corrupt 2 (" + e.getMessage() + "), deleting index");
                 i2.deleteComplete();
@@ -410,7 +426,7 @@ public final class plasmaWordIndexEntity {
                 c = ie1.getUrlHash().compareTo(ie2.getUrlHash());
                 if (c < 0) {
                     try {
-                        if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
+                        if (e1.hasNext()) ie1 = (plasmaWordIndexEntry) e1.next(); else break;
                     } catch (kelondroException e) {
                         //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
                         i1.deleteComplete();
@@ -418,7 +434,7 @@ public final class plasmaWordIndexEntity {
                     }
                 } else if (c > 0) {
                     try {
-                        if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
+                        if (e2.hasNext()) ie2 = (plasmaWordIndexEntry) e2.next(); else break;
                     } catch (kelondroException e) {
                         //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
                         i2.deleteComplete();
@@ -428,14 +444,14 @@ public final class plasmaWordIndexEntity {
                     // we have found the same urls in different searches!
                     conj.addEntry(ie1);
                     try {
-                        if (e1.hasMoreElements()) ie1 = (plasmaWordIndexEntry) e1.nextElement(); else break;
+                        if (e1.hasNext()) ie1 = (plasmaWordIndexEntry) e1.next(); else break;
                     } catch (kelondroException e) {
                         //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
                         i1.deleteComplete();
                         break;
                     }
                     try {
-                        if (e2.hasMoreElements()) ie2 = (plasmaWordIndexEntry) e2.nextElement(); else break;
+                        if (e2.hasNext()) ie2 = (plasmaWordIndexEntry) e2.next(); else break;
                     }  catch (kelondroException e) {
                         //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
                         i2.deleteComplete();

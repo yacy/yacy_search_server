@@ -570,10 +570,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     return -container.size();
                 } else {
                     // the combined container will fit, read the container
-                    Enumeration entries = entity.elements(true);
+                    Iterator entries = entity.elements(true);
                     plasmaWordIndexEntry entry;
-                    while (entries.hasMoreElements()) {
-                        entry = (plasmaWordIndexEntry) entries.nextElement();
+                    while (entries.hasNext()) {
+                        entry = (plasmaWordIndexEntry) entries.next();
                         container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
                     }
                     // we have read all elements, now delete the entity
