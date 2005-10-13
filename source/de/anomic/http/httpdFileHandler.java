@@ -627,7 +627,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
                 
                 // write the array to the client
-                httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, targetDate, null, null, (zipContent)?"gzip":null, null);
+                httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, (zipContent)?"gzip":null, null);
                 Thread.currentThread().sleep(200); // this solved the message problem (!!)
                 serverFileUtils.write(result, out);
             } else {
