@@ -329,7 +329,10 @@ public final class httpd implements serverHandler {
 					if(entry.canSurf()){
 						return true;
 					} else {
-						sendRespondError(this.prop,this.session.out,5,403,null, "Internet-Timelimit reached", null);
+						HashMap tp=new HashMap();
+						tp.put("limit", "0");//time per day
+						tp.put("limit_timelimit", entry.getTimeLimit());
+						sendRespondError(this.prop, this.session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
 		                return false;
 					}
                 }
