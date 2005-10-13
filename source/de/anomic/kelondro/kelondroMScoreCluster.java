@@ -46,10 +46,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class kelondroMScoreCluster {
+public final class kelondroMScoreCluster {
     
-    private TreeMap refkeyDB; // a mapping from a reference to the cluster key
-    private TreeMap keyrefDB; // a mapping from the cluster key to the reference
+    private final TreeMap refkeyDB; // a mapping from a reference to the cluster key
+    private final TreeMap keyrefDB; // a mapping from the cluster key to the reference
     private long gcount;
     private int encnt;
     
