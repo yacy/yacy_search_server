@@ -981,8 +981,9 @@ public final class httpd implements serverHandler {
                 respond,
                 errorcase,
                 httpStatusCode,
-                httpStatusText,
+                httpStatusText,                
                 detailedErrorMsg,
+                null,
                 null,
                 stackTrace
         );
@@ -991,7 +992,6 @@ public final class httpd implements serverHandler {
     public static final void sendRespondError(
             Properties conProp,
             OutputStream respond,
-            int errorcase,
             int httpStatusCode,            
             String httpStatusText,
             File detailedErrorMsgFile,
@@ -1001,9 +1001,10 @@ public final class httpd implements serverHandler {
         sendRespondError(
                 conProp,
                 respond,
-                errorcase,
+                5,
                 httpStatusCode,
                 httpStatusText,
+                null,
                 detailedErrorMsgFile,
                 detailedErrorMsgValues,
                 stackTrace
@@ -1016,7 +1017,8 @@ public final class httpd implements serverHandler {
             int errorcase,
             int httpStatusCode,            
             String httpStatusText,
-            Object detailedErrorMsg,
+            String detailedErrorMsgText,
+            Object detailedErrorMsgFile,
             HashMap detailedErrorMsgValues,
             Exception stackTrace
     ) throws IOException {
@@ -1085,17 +1087,12 @@ public final class httpd implements serverHandler {
             tp.put("requestMethod",    conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD));
             tp.put("requestURL",       urlString);
             
-            if (detailedErrorMsg == null ) {
-                if (errorcase == 4) 
-                    tp.put("errorMessageType_detailedErrorMsg","");
-                else if (errorcase == 5) 
-                    tp.put("errorMessageType_file","");
-            } else {
-                if (detailedErrorMsg instanceof String ) {
-                    tp.put("errorMessageType_detailedErrorMsg",detailedErrorMsg);
-                } else if (detailedErrorMsg instanceof File) {
-                    tp.put("errorMessageType_file",detailedErrorMsg);
-                    
+            switch (errorcase) {
+                case 4:
+                    tp.put("errorMessageType_detailedErrorMsg",(detailedErrorMsgText==null)?"":detailedErrorMsgText);
+                    break;
+                case 5:
+                    tp.put("errorMessageType_file",(detailedErrorMsgFile==null)?"":detailedErrorMsgFile);
                     if ((detailedErrorMsgValues != null)&&(detailedErrorMsgValues.size()>0)) {
                         // rewriting the value-names and add the proper name prefix:
                         Iterator nameIter = detailedErrorMsgValues.keySet().iterator();
@@ -1103,8 +1100,10 @@ public final class httpd implements serverHandler {
                             String name = (String) nameIter.next();
                             tp.put("errorMessageType_" + name,detailedErrorMsgValues.get(name));
                         }                        
-                    }
-                }
+                    }                    
+                    break;
+                default:
+                    break;
             }
             
             // building the stacktrace            
