@@ -63,7 +63,6 @@ import de.anomic.server.serverThread;
 import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacySeedDB;
 
 public class Connections_p {
     
@@ -123,7 +122,7 @@ public class Connections_p {
 
                     
                     // determining if the source is a yacy host
-                    yacySeed seed = yacyCore.seedDB.lookupByIP(userAddress,true,true,true);
+                    yacySeed seed = yacyCore.seedDB.lookupByIP(userAddress,true,false,false);
                     if (seed != null) {
                         if ((seed.hash == yacyCore.seedDB.mySeed.hash) && 
                             (!seed.get("Port","").equals(Integer.toString(userPort)))) {
