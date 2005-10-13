@@ -51,13 +51,13 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaCrawlLURL;
-import de.anomic.plasma.plasmaSearch;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.plasma.plasmaURLPattern;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.tools.crypt;
@@ -272,7 +272,7 @@ public final class yacyClient {
 
     public static int search(String wordhashes, int count, boolean global,
                              yacySeed targetPeer, plasmaCrawlLURL urlManager,
-                             plasmaSearch searchManager, plasmaURLPattern blacklist,
+                             plasmaWordIndex wordIndex, plasmaURLPattern blacklist,
                              plasmaSnippetCache snippets,
                              long duetime) {
         // send a search request to peer with remote Hash
@@ -359,7 +359,7 @@ public final class yacyClient {
                 link = urlManager.addEntry(lEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
                 // save the url entry
                 final plasmaWordIndexEntry entry = new plasmaWordIndexEntry(link.hash(), link.wordCount(), 0, 0, 0,
-                                                                      plasmaSearch.calcVirtualAge(link.moddate()), link.quality(),
+                                                                      plasmaWordIndex.calcVirtualAge(link.moddate()), link.quality(),
                                                                       link.language(), link.doctype(), false);
                 if (link.snippet() != null) {
                     // we don't store the snippets along the url entry, because they are search-specific.
@@ -374,7 +374,7 @@ public final class yacyClient {
             }
 
             // finally insert the containers to the index
-            for (int m = 0; m < words; m++) { searchManager.addWords(container[m]); }
+            for (int m = 0; m < words; m++) { wordIndex.addEntries(container[m], true); }
 
             // generate statistics
             long searchtime;

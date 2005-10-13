@@ -161,7 +161,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  File                        listsPath;
     public  plasmaURLPool               urlPool;
     public  plasmaWordIndex             wordIndex;
-    public  plasmaSearch                searchManager;
     public  plasmaHTCache               cacheManager;
     public  plasmaSnippetCache          snippetCache;
     public  plasmaCrawlLoader           cacheLoader;
@@ -309,7 +308,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int wordCacheMaxLow = (int) getConfigLong("wordCacheMaxLow", 8000);
         int wordCacheMaxHigh = (int) getConfigLong("wordCacheMaxHigh", 10000);
         wordIndex.setMaxWords(wordCacheMaxLow, wordCacheMaxHigh);
-        searchManager = new plasmaSearch(urlPool.loadedURL, wordIndex);
         
         // start a cache manager
         log.logConfig("Starting HT Cache Manager");
@@ -1175,14 +1173,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if (((storagePeerHash = getConfig("storagePeerHash",null))== null) || 
                             (storagePeerHash.trim().length() == 0) ||
                             ((seed = yacyCore.seedDB.getConnected(storagePeerHash))==null)){                           
-                            words = searchManager.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
+                            words = wordIndex.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
                         } else {
                             HashMap urlCache = new HashMap(1);
                             urlCache.put(newEntry.hash(),newEntry);
                             
                             ArrayList tmpEntities = new ArrayList(condenser.getWords().size());
                             
-                            int age = plasmaSearch.calcVirtualAge(lastModified);
+                            int age = plasmaWordIndex.calcVirtualAge(lastModified);
                             int quality = 0;
                             try {
                                 quality = Integer.parseInt(condenser.getAnalysis().getProperty("INFORMATION_VALUE","0"), 16);
@@ -1214,7 +1212,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             String error = yacyClient.transferIndex(seed,(plasmaWordIndexEntity[])tmpEntities.toArray(new plasmaWordIndexEntity[tmpEntities.size()]),urlCache,true,120000);
                             
                             if (error != null) {
-                                words = searchManager.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
+                                words = wordIndex.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
                             }
                             
                             // cleanup
@@ -1468,7 +1466,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 long fetchtime = query.maximumTime * 6 / 10;           // time to waste
                 if (fetchpeers < 10) fetchpeers = 10;
                 if (fetchcount > query.wantedResults * 10) fetchcount = query.wantedResults * 10;
-                globalresults = yacySearch.searchHashes(query.queryHashes, urlPool.loadedURL, searchManager, fetchcount, fetchpeers, urlBlacklist, snippetCache, fetchtime);
+                globalresults = yacySearch.searchHashes(query.queryHashes, urlPool.loadedURL, wordIndex, fetchcount, fetchpeers, urlBlacklist, snippetCache, fetchtime);
                 log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             }
             prop.put("globalresults", globalresults); // the result are written to the local DB

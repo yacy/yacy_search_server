@@ -55,6 +55,8 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Date;
+import java.net.URL;
 
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.logging.serverLog;
@@ -103,6 +105,49 @@ public final class plasmaWordIndex {
         return ramCache.addEntries(entries, System.currentTimeMillis(), highPriority);
     }   
 
+    public static int calcVirtualAge(Date modified) {
+	// this calculates a virtual age from a given date
+	// the purpose is to have an age in days of a given modified date
+	// from a fixed standpoint in the past
+	//if (modified == null) return 0;
+	// this is milliseconds. we need days
+	// one day has 60*60*24 seconds = 86400 seconds
+	// we take mod 64**3 = 262144, this is the mask of the storage
+	return (int) ((modified.getTime() / 86400000) % 262144);
+    }
+    
+    public int addPageIndex(URL url, String urlHash, Date urlModified, plasmaCondenser condenser,
+                                   String language, char doctype) {
+        // this is called by the switchboard to put in a new page into the index
+	// use all the words in one condenser object to simultanous create index entries
+	int age = calcVirtualAge(urlModified);
+	int quality = 0;
+	try {
+	    quality = Integer.parseInt(condenser.getAnalysis().getProperty("INFORMATION_VALUE","0"), 16);
+	} catch (NumberFormatException e) {
+	    System.out.println("INTERNAL ERROR WITH CONDENSER.INFORMATION_VALUE: " + e.toString() + ": in URL " + url.toString());
+	}
+
+        // iterate over all words
+	Iterator i = condenser.getWords().iterator();
+	String word;
+	int count;
+	plasmaWordIndexEntry entry;
+	String wordHash;
+	int p = 0;
+	while (i.hasNext()) {
+	    word = (String) i.next();
+	    count = condenser.wordCount(word);
+	    //if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ": " + c);
+	    wordHash = plasmaWordIndexEntry.word2hash(word);
+	    entry = new plasmaWordIndexEntry(urlHash, count, p++, 0, 0,
+                                         age, quality, language, doctype, true);
+	    addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), false);
+	}
+	//System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
+        return condenser.getWords().size();
+    }
+    
     public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty) {
         return ramCache.getIndex(wordHash, deleteIfEmpty);
     }
