@@ -695,9 +695,19 @@ public final class yacy {
         try {                                        
             //
             Runtime rt = Runtime.getRuntime();
+            String errorMsg = null;
             
             // configure destination DB
             File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
+            if (!homeDBroot.exists()) errorMsg = "Home DB directory does not exist.";
+            if (!homeDBroot.canRead()) errorMsg = "Home DB directory is not readable.";
+            if (!homeDBroot.canWrite()) errorMsg = "Home DB directory is not writeable";
+            if (!homeDBroot.isDirectory()) errorMsg = "Home DB Directory is not a directory.";
+            if (errorMsg != null) {
+                log.logSevere(errorMsg + "\nName: " + homeDBroot.getAbsolutePath());
+                return;
+            }              
+            
             if ((!homeDBroot.exists())&&(!homeDBroot.canRead())&&(!homeDBroot.isDirectory())) {
                 log.logSevere("DB home directory can not be opened.");
                 return;
@@ -708,11 +718,17 @@ public final class yacy {
             homeUrlDB = new plasmaCrawlLURL(new File(homeDBroot, "urlHash.db"), 4*1024*1024);            
             
             // configure import DB
+            errorMsg = null;
             File importDBroot = new File(importPath);
-            if ((!importDBroot.exists())&&(!importDBroot.canRead())&&(!importDBroot.isDirectory())) {
-                log.logSevere("DB import directory can not be opened.");
+            if (!importDBroot.exists()) errorMsg = "Import directory does not exist.";
+            if (!importDBroot.canRead()) errorMsg = "Import directory is not readable.";
+            if (!importDBroot.canWrite()) errorMsg = "Import directory is not writeable";
+            if (!importDBroot.isDirectory()) errorMsg = "ImportDirectory is not a directory.";
+            if (errorMsg != null) {
+                log.logSevere(errorMsg + "\nName: " + homeDBroot.getAbsolutePath());
                 return;
-            }     
+            }    
+            
             log.logFine("Initializing source word index db.");
             importWordIndex = new plasmaWordIndex(importDBroot, 8*1024*1024, log);
             log.logFine("Initializing source URL db.");
@@ -774,8 +790,7 @@ public final class yacy {
                         }
                         
                         // adding word index entity to container
-                        plasmaWordIndexEntry newEntry = new plasmaWordIndexEntry(importWordIdxEntry.toExternalForm());
-                        newContainer.add(newEntry,System.currentTimeMillis());
+                        newContainer.add(importWordIdxEntry,System.currentTimeMillis());
                         
                         if (entryCounter % 500 == 0) {
                             log.logFine(entryCounter + " word entries and " + wordCounter + " word entries processed so far.");
