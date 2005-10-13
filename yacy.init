@@ -533,7 +533,7 @@ portForwardingHostPwd=
 # msgForwarding: Specifies if yacy should forward received messages via
 # email to the configured email address
 msgForwardingEnabled=false
-msgForwardingCmd=/usr/sbin/sendmail -t
+msgForwardingCmd=/usr/sbin/sendmail
 msgForwardingTo=root@localhost
 
 #onlineCautionDelay: delay time after proxy usage before crawling is resumed
