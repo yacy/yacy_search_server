@@ -160,12 +160,12 @@ public final class message {
         try {
             if (!Boolean.valueOf(env.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 
-            // getting the sendmail configuration
-            String sendMailStr = env.getConfig("msgForwardingCmd","/usr/bin/sendmail -t");
-            String[] sendMail = sendMailStr.trim().split(" ");
-
             // getting the recipient address
             String sendMailTo = env.getConfig("msgForwardingTo","root@localhost").trim();
+			
+            // getting the sendmail configuration
+            String sendMailStr = env.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
+            String[] sendMail = sendMailStr.trim().split(" ");
 
             // building the message text
             StringBuffer emailTxt = new StringBuffer();
