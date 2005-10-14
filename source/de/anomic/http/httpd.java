@@ -318,24 +318,20 @@ public final class httpd implements serverHandler {
         
         if (this.use_proxyAccounts) {
             String auth = (String) header.get(httpHeader.PROXY_AUTHORIZATION,"xxxxxx");    
-			auth=auth.trim().substring(6);
-            try{
-                auth=codings.decodeBase64String(auth);
-            }catch(StringIndexOutOfBoundsException e){} //no valid Base64
-            String[] tmp=auth.split(":");
-            if(tmp.length == 2){
-                userDB.Entry entry=switchboard.userDB.getEntry(tmp[0]);
-                if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(auth)) ){
-					if(entry.canSurf()){
-						return true;
-					} else {
-						HashMap tp=new HashMap();
-						tp.put("limit", "0");//time per day
-						tp.put("limit_timelimit", entry.getTimeLimit());
-						sendRespondError(this.prop, this.session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
-		                return false;
-					}
-                }
+            userDB.Entry entry=switchboard.userDB.ipAuth(this.clientIP);
+			if(entry == null){
+				entry=switchboard.userDB.proxyAuth(auth, this.clientIP);
+			}
+            if(entry != null){
+			    if(entry.canSurf()){
+				    return true;
+				} else {
+					HashMap tp=new HashMap();
+					tp.put("limit", "0");//time per day
+					tp.put("limit_timelimit", entry.getTimeLimit());
+					sendRespondError(this.prop, this.session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
+		            return false;
+				}
 			}
             // ask for authenticate
             this.session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +

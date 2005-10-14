@@ -58,6 +58,8 @@ import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverCodings;
+import de.anomic.plasma.plasmaSwitchboard;
 
 public final class userDB {
     
@@ -67,6 +69,8 @@ public final class userDB {
     kelondroMap userTable;
     private final File userTableFile;
     private final int bufferkb;
+	private final serverCodings codings = new serverCodings(true);
+	private HashMap ipUsers = new HashMap();
     
     public userDB(File userTableFile, int bufferkb) throws IOException {
         this.userTableFile = userTableFile;
@@ -146,6 +150,61 @@ public final class userDB {
             return null;
         }
     }    
+	/*
+	 * use a ProxyAuth String to authenticate a user
+	 * @param auth a base64 Encoded String, which contains "username:pw".
+	 */
+	public Entry proxyAuth(String auth) {
+		Entry entry=null;
+		auth=auth.trim().substring(6);
+        try{
+            auth=codings.decodeBase64String(auth);
+        }catch(StringIndexOutOfBoundsException e){} //no valid Base64
+        String[] tmp=auth.split(":");
+        if(tmp.length == 2){
+            entry=this.getEntry(tmp[0]);
+            if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(auth)) ){
+				return entry;
+			}
+		}
+		return null;
+	}
+	/*
+	 * use a ProxyAuth String to authenticate a user and save the ip/username for ipAuth
+	 * @param auth a base64 Encoded String, which contains "username:pw".
+	 * @param ip an ip.
+	 */
+	public Entry proxyAuth(String auth, String ip){
+		Entry entry=proxyAuth(auth);
+		if(entry == null){
+			return null;
+		}else{
+			this.ipUsers.put(ip, entry.getUserName());
+			System.out.println(ip+", "+entry.getUserName());
+			return entry;
+		}
+	}
+	/*
+	 * authenticate a user by ip, if he had used proxyAuth in the last 10 Minutes
+	 * @param ip the IP of the User
+	 */
+	public Entry ipAuth(String ip) {
+		System.out.println(ip);
+        if(this.ipUsers.containsKey(ip)){
+            String user=(String)this.ipUsers.get(ip);
+			System.out.println(user);
+            Entry entry=this.getEntry(user);
+            Long entryTimestamp=entry.getLastAccess();
+            if(entryTimestamp == null || (System.currentTimeMillis()-entryTimestamp.longValue()) > (1000*60*10) ){ //no timestamp or older than 10 Minutes
+				System.out.println("too old");
+				System.out.println(System.currentTimeMillis()-entryTimestamp.longValue());
+                return null;
+            }
+            return entry; //All OK
+        }else{ //not known 
+            return null;
+        }
+	}
     
     public class Entry {
         public static final String MD5ENCODED_USERPWD_STRING = "MD5_user:pwd";
@@ -262,7 +321,7 @@ public final class userDB {
             long newTimeUsed = oldTimeUsed;            
             
             if (incrementTimeUsed) {
-                if ((lastAccess == null)||((lastAccess != null)&&(timeStamp-lastAccess.longValue()>=1000*60))) {
+                if ((lastAccess == null)||((lastAccess != null)&&(timeStamp-lastAccess.longValue()>=1000*60))) { //1 minute
                     //this.mem.put(TIME_USED,Long.toString(newTimeUsed = ++oldTimeUsed));  
                     newTimeUsed = ++oldTimeUsed;  
 					if(lastAccess != null){
