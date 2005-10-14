@@ -118,8 +118,8 @@ Comment==Kommentar
 
 YaCy: Help==YaCy: Hilfeseiten
 Help==Hilfe
-This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==YaCy ist eine Suchmaschine,  die &auml;hnlich dem Prinzip des verteilten Rechnen (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und indizieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <i>online-Interface</i> von YaCy. Sie k&ouml;nnen dieses Interface auch zum konfigurieren Ihrer pers&ouml;nlichen Einstellungen, Proxy Einstellungen, der Zugriffs Kontrolle und den crawl Einstellungen benutzen. Sie k&ouml;nnen das Interface auch zum Starten von crawls, Nachrichtenversand an andere YaCy-Nutzer und zur &Uuml;berwachung Ihres Index, Cache Status und des crawl Prozesses benutzen. Besonders interssant ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <i>globalen</i> Index zu durchsuchen.
-For more detailed information, visit the <a href="http://www.yacy.net/yacy">YaCy homepage</a>==F&uuml;r mehr Informationen besuchen Sie bitte die <a href="http://www.yacy.net/yacy">YaCy Homepage</a>
+This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==YaCy ist eine Suchmaschine,  die &auml;hnlich dem Prinzip des verteilten Rechnens (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und Indexieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <i>online-Interface</i> von YaCy. Sie k&ouml;nnen dieses Interface auch zum Konfigurieren Ihrer pers&ouml;nlichen Einstellungen, Proxy-Einstellungen, der Zugriffs-Kontrolle und den Crawl-Einstellungen benutzen. Sie k&ouml;nnen das Interface auch zum Starten von Crawls, Nachrichtenversand an andere YaCy-Nutzer und zur &Uuml;berwachung Ihres Index, Cache-Status und des Crawl-Prozesses benutzen. Besonders wichtig ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <i>globalen</i> Index zu durchsuchen.
+For more detailed information, visit the <a href="http://www.yacy.net/yacy">YaCy homepage</a>==F&uuml;r weitergehende Informationen besuchen Sie bitte die <a href="http://www.yacy.net/yacy">YaCy Homepage</a>
 Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
 The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Weseiten zusammensetzt, die Sie mit dem Proxy besuchen.
 The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie k&ouml;nnen aber auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
@@ -226,7 +226,7 @@ Please repeat your search to see if there are late-responses from remote peers==
 If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
 then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen crawl nach der gesuchten Information, um sie
 available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um crawls von anderen Peers zu erlauben. Danke!
-results from a total number of==Resulate aus
+results from a total number of==Resultate aus
 known links.==bekannten Links.
 You can try to==Sie k&ouml;nnen versuchen
 catch up more links==mehr Links zu sammeln
@@ -249,7 +249,7 @@ To do this, press this button:==Um dies zu tun, klicken Sie bitte folgenden Butt
 "go online"==gehe online
 The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers==Die globale Suche hat #[globalresults]# Resulate, bereitgestellt von anderen YaCy Peers, gefunden.
 You can enrich the search results by using the 'global' option; you must also switch to online mode==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn sie die 'global' Option benutzen. Sie m&uuml;ssen aber erst in den online Modus wechseln,
-(by using the proxy) to contribute to the global index.==(in dem Sie den Proxy benutzen) um im globalen Index suchen zu k&ouml;nnen.
+(by using the proxy) to contribute to the global index.==(indem Sie den Proxy benutzen) um im globalen Index suchen zu k&ouml;nnen.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu erschaffen.
 Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
@@ -282,6 +282,7 @@ The DHT-rules do not work without this function.==Die DHT-Regeln funktionieren n
 If checked, your peer silently ignores transmitted URLs that match your blacklist==Wenn aktiviert, ignoriert Ihr Peer stillschweigend eingehende URLs, die auf Ihrer Blacklist stehen.
 "set"=="Speichern"
 Changes will take effect immediately==&Auml;nderungen sind sofort aktiv
+To transfer the whole index to an other peer, click <a href="IndexTransfer_p.html">here</a>.==Um Ihren gesamten Index an einen anderen Peer zu übermitteln, klicken Sie <a href="IndexTransfer_p.html">hier</a>.
 
 #-------------------------------------------------------
 #File: IndexCreate_p.html
@@ -394,7 +395,7 @@ Busy Peers==Besch&auml;tigte Peers
 #File: IndexCreateIndexingQueue_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy '\#\[clientname\]\# ': Index Creation/Indexing Queue==YaCy '#[clientname]#': Index Erzeugung/Indexier Warteschlange
+YaCy '\#\[clientname\]\# ': Index Creation/Indexing Queue==YaCy '#[clientname]#': Index Erzeugung/Indexier-Warteschlange
 Index Creation: Indexing Queue==Index Erzeugung: Indexier Warteschlange
 The indexing queue is empty==Die Indexier Warteschlange ist leer.
 "clear indexing queue"=="Warteschlange l&ouml;schen"
@@ -872,3 +873,22 @@ English Forum==Englisches Forum
 #Deutsches Forum==Deutsches Forum
 Download YaCy==YaCy herunterladen
 Contact==Kontakt
+
+#--------------------------------------------------------
+#File: IndexTransfer_p.html
+
+The local index currently consists of \(at least\)==Der lokale Index besteht zur Zeit aus (ungefähr)
+reverse word indexes and==Worten und
+URL references==URLs
+Chunk Size==Chunk-Größe
+Words Range==Worte-Bereich
+Transfered Words==Übermittelte Worte
+Delete<br>Index==Index<br>löschen
+true==ja
+false==nein
+Selection==Auswahl
+words==Worte
+words/s==Worte/s
+Stop Index Transfer==Stoppe Index-Transfer
+Last Refresh:==Letzte Aktualisierung:
+Start New Index Transfer==Starte neuen Index-Transfer

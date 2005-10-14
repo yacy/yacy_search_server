@@ -135,7 +135,7 @@ public final class yacy {
     * FIXME: Why is this so complicated?
     *
     * @param s Combined version string
-    * @return Pretty string where version and svn-Version are separated by an
+    * @return Pretty string where version and svn-Version are separated by a
     * slash
     */
     public static String combinedVersionString2PrettyString(String s) {
@@ -152,8 +152,8 @@ public final class yacy {
     }
 
     /**
-    * Combines the version of the proxy with the versionnumber from svn to a
-    * combined Version
+    * Combines the version of the proxy with the versionnumber from SVN to a
+    * combined version
     *
     * @param version Current given version for this proxy.
     * @param svn Current version given from svn.

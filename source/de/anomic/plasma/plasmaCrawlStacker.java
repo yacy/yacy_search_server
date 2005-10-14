@@ -262,7 +262,7 @@ public final class plasmaCrawlStacker {
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
-            this.log.logFine("URL '" + nexturlString + "' is post URL." + 
+            this.log.logFine("URL '" + nexturlString + "' is post URL. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;
         }
