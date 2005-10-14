@@ -180,7 +180,6 @@ public final class userDB {
 			return null;
 		}else{
 			this.ipUsers.put(ip, entry.getUserName());
-			System.out.println(ip+", "+entry.getUserName());
 			return entry;
 		}
 	}
@@ -189,15 +188,11 @@ public final class userDB {
 	 * @param ip the IP of the User
 	 */
 	public Entry ipAuth(String ip) {
-		System.out.println(ip);
         if(this.ipUsers.containsKey(ip)){
             String user=(String)this.ipUsers.get(ip);
-			System.out.println(user);
             Entry entry=this.getEntry(user);
             Long entryTimestamp=entry.getLastAccess();
             if(entryTimestamp == null || (System.currentTimeMillis()-entryTimestamp.longValue()) > (1000*60*10) ){ //no timestamp or older than 10 Minutes
-				System.out.println("too old");
-				System.out.println(System.currentTimeMillis()-entryTimestamp.longValue());
                 return null;
             }
             return entry; //All OK
@@ -305,7 +300,8 @@ public final class userDB {
         }        
         
 		public boolean canSurf(){
-			if( this.getTimeLimit() == null || this.getTimeLimit().longValue() <= 0 || (this.updateLastAccess(true) < this.getTimeLimit().longValue()) )//no timelimit or timelimit not reached
+			long timeUsed=this.updateLastAccess(true);
+			if( this.getTimeLimit() == null || this.getTimeLimit().longValue() <= 0 || ( timeUsed < this.getTimeLimit().longValue()) )//no timelimit or timelimit not reached
 				return true;
 			else
 				return false;
