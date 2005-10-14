@@ -726,7 +726,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         }
 
         public Object nextElement() {
-            return new Entry(new String((byte[]) i.next()));
+            return new Entry(new String(((byte[][])i.next())[0]));
         }
     }
 
