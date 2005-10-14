@@ -551,6 +551,9 @@ crawler.MaxIdleThreads = 7
 crawler.MinIdleThreads = 5
 
 useYacyReferer = true
+#allow only 443(https-port) for https-proxy?
+#if you want to tunnel other protokols, set to false
+secureHttps = true
 
 # specifies if the httpdFileHandler should cache 
 # the template-files from the htroot directory

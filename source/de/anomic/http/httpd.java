@@ -655,7 +655,7 @@ public final class httpd implements serverHandler {
             return serverCore.TERMINATE_CONNECTION;
         }        
         
-        if (port != 443) {
+        if (port != 443 && switchboard.getConfig("secureHttps", "true").equals("true")) {
             // security: connection only to ssl port
             // we send a 403 (forbidden) error back
             session.out.write((httpVersion + " 403 Connection to non-443 forbidden" +
