@@ -428,12 +428,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
             }
             
-            if (!(targetFile.exists())) {
-                // try to find that file in the htDocsPath
-                File trialFile = new File(htDocsPath, path);
-                if (trialFile.exists()) targetFile = trialFile;
-            }
-            
             File targetClass = rewriteClassFile(targetFile);
             Date targetDate;
             
@@ -488,6 +482,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         path.endsWith("pac")) {
                             
                     targetFile = getLocalizedFile(path);
+					if (!(targetFile.exists())) {
+		                // try to find that file in the htDocsPath
+				        File trialFile = new File(htDocsPath, path);
+						if (trialFile.exists()) targetFile = trialFile;
+		            }
+            
                     
                     // call rewrite-class
                     serverObjects tp = new serverObjects();
