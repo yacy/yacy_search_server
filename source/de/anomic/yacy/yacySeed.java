@@ -69,7 +69,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
@@ -100,7 +99,6 @@ public class yacySeed {
     public static final String STR_SEED      = "seed";
     public static final String STR_EQUAL     = "=";
 
-    
     // class variables
     public String hash;
     private Map dna;
@@ -140,7 +138,7 @@ public class yacySeed {
         dna.put("IPType", "&empty;");   // static/dynamic (if the ip changes often for any reason)
 
         // settings that can only be computed by visiting peer
-        dna.put("LastSeen", yacyCore.universalDateShortString(new Date()));  // for last-seen date
+        dna.put(STR_LASTSEEN, yacyCore.universalDateShortString(new Date()));  // for last-seen date
         dna.put("USpeed", "0");   // the computated uplink speed of the peer
 
         // settings that are needed to organize the seed round-trip
@@ -159,8 +157,8 @@ public class yacySeed {
     }
 
     public String get(String key, String dflt) {
-        Object o = dna.get(key);
-        if (o == null) return dflt; else return (String) o;
+        final Object o = dna.get(key);
+        if (o == null) { return dflt; } else { return (String) o; }
     }
 
     public void put(String key, String value) {
@@ -180,22 +178,26 @@ public class yacySeed {
     }
 
     public void incSI(int count) {
-        String v = (String) dna.get(INDEX_OUT); if (v == null) v = "0";
+        String v = (String) dna.get(INDEX_OUT);
+        if (v == null) { v = "0"; }
         dna.put(INDEX_OUT, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public void incRI(int count) {
-        String v = (String) dna.get(INDEX_IN); if (v == null) v = "0";
+        String v = (String) dna.get(INDEX_IN);
+        if (v == null) { v = "0"; }
         dna.put(INDEX_IN, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public void incSU(int count) {
-        String v = (String) dna.get(URL_OUT); if (v == null) v = "0";
+        String v = (String) dna.get(URL_OUT);
+        if (v == null) { v = "0"; }
         dna.put(URL_OUT, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public void incRU(int count) {
-        String v = (String) dna.get(URL_IN); if (v == null) v = "0";
+        String v = (String) dna.get(URL_IN);
+        if (v == null) { v = "0"; }
         dna.put(URL_IN, Integer.toString(Integer.parseInt(v) + count));
     }
 
@@ -218,20 +220,24 @@ public class yacySeed {
     }
 
     public String getAddress() {
-        String ip   = (String) dna.get("IP");
-        String port = (String) dna.get("Port");
-        if (ip != null && ip.length() >= 8 && port != null && port.length() >= 2) return ip + ":" + port; else return null;
+        final String ip   = (String) dna.get("IP");
+        final String port = (String) dna.get("Port");
+        if (ip != null && ip.length() >= 8 && port != null && port.length() >= 2) {
+            return ip + ":" + port;
+        } else {
+            return null;
+        }
     }
-    
+
     public long getUTCDiff() {
         String utc = (String) dna.get("UTC");
-        if (utc == null) utc = "+0200";
+        if (utc == null) { utc = "+0200"; }
         return serverDate.UTCDiff(utc);        
     }
 
     public long getLastSeenTime() {
         try {
-            long t = yacyCore.shortFormatter.parse(get("LastSeen", "20040101000000")).getTime();
+            final long t = yacyCore.shortFormatter.parse(get(STR_LASTSEEN, "20040101000000")).getTime();
             // the problem here is: getTime applies a time shift according to local time zone:
             // it substracts the local UTF offset, but it should substract the remote UTC offset
             // so we correct it by first adding the local UTF offset and then subtractibg the remote
@@ -244,11 +250,11 @@ public class yacySeed {
             return System.currentTimeMillis();
         }
     }
-    
+
     public int getAge() {
         // returns the age as number of days
         try {
-            long t = yacyCore.shortFormatter.parse(get("BDate", "20040101000000")).getTime();
+            final long t = yacyCore.shortFormatter.parse(get("BDate", "20040101000000")).getTime();
             return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + serverDate.UTCDiff())) / 1000 / 60 / 60 / 24);
         } catch (java.text.ParseException e) {
             return -1;
@@ -256,12 +262,12 @@ public class yacySeed {
             return -1;
         }
     }
-    
+
     public void setLastSeenTime() {
         // if we set a last seen time, then we need to respect the seeds UTC offset
-        put("LastSeen", yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() - serverDate.UTCDiff() + getUTCDiff())));
+        put(STR_LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() - serverDate.UTCDiff() + getUTCDiff())));
     }
-    
+
     public int getPPM() {
         try {
             return Integer.parseInt(get("ISpeed", "0"));
@@ -277,15 +283,15 @@ public class yacySeed {
             return 0;
         }
     }
-    
+
     private boolean getFlag(int flag) {
-        String flags = get("Flags", "0000");
+        final String flags = get("Flags", "0000");
         return (new bitfield(flags.getBytes())).get(flag);
     }
 
     private void setFlag(int flag, boolean value) {
-        String flags = get("Flags", "0000");
-        bitfield f = new bitfield(flags.getBytes());
+        final String flags = get("Flags", "0000");
+        final bitfield f = new bitfield(flags.getBytes());
         f.set(flag, value);
         put("Flags", f.toString());
     }
@@ -303,7 +309,6 @@ public class yacySeed {
         //if (getVersion() < 0.335) return false;
         return getFlag(2);
     }
-
     public boolean isVirgin() {
         return get(PEERTYPE, "").equals(PEERTYPE_VIRGIN);
     }
@@ -321,57 +326,67 @@ public class yacySeed {
     }
 
     public String encodeLex(long c, int length) {
-        if (length < 0) length = 0;
+        if (length < 0) { length = 0; }
         String s = "";
-        if (c == 0) s = '-' + s;
-        else while (c > 0) {
-            s = ((char) (32 + (c % 96))) + s;
-            c = c / 96;
+        if (c == 0) {
+            s = '-' + s;
+        } else {
+            while (c > 0) {
+                s = ((char) (32 + (c % 96))) + s;
+                c = c / 96;
+            }
         }
-        if (length != 0 && s.length() > length)
+        if (length != 0 && s.length() > length) {
             throw new RuntimeException("encodeLex result '" + s + "' exceeds demanded length of " + length + " digits");
-        if (length == 0) length = 1; // rare exception for the case that c == 0
-        while (s.length() < length) s = '-' + s;
+        }
+        if (length == 0) { length = 1; } // rare exception for the case that c == 0
+        while (s.length() < length) { s = '-' + s; }
         return s;
     }
 
     public long decodeLex(String s) {
         long c = 0;
-        for (int i = 0; i < s.length(); i++) c = c * 96 + (byte) s.charAt(i) - 32;
+        for (int i = 0; i < s.length(); i++) {
+            c = c * 96 + (byte) s.charAt(i) - 32;
+        }
         return c;
     }
 
     private static long maxLex(int len) {
         // computes the maximum number that can be coded with a lex-encoded String of length len
         long c = 0;
-        for (int i = 0; i < len; i++) c = c * 96 + 90;
+        for (int i = 0; i < len; i++) {
+            c = c * 96 + 90;
+        }
         return c;
     }
-    
+
     private static long minLex(int len) {
         // computes the minimum number that can be coded with a lex-encoded String of length len
         long c = 0;
-        for (int i = 0; i < len; i++) c = c * 96 + 13;
+        for (int i = 0; i < len; i++) {
+            c = c * 96 + 13;
+        }
         return c;
     }
-    
+
     public static final long minDHTNumber   = minLex(9);
     public static final long maxDHTDistance = maxLex(9) - minDHTNumber;
-    
+
     public long dhtDistance(String wordhash) {
         // computes a virtual distance, the result must be set in relation to maxDHTDistace
         // if the distance is small, this peer is more responsible for that word hash
         // if the distance is big, this peer is less responsible for that word hash
-        long myPos = decodeLex(hash.substring(0,9));
-        long wordPos = decodeLex(wordhash.substring(0,9));
+        final long myPos = decodeLex(hash.substring(0,9));
+        final long wordPos = decodeLex(wordhash.substring(0,9));
         return (myPos > wordPos) ? (myPos - wordPos) : (myPos + maxDHTDistance - wordPos);
     }
-    
+
     public long dhtDistance() {
         // returns an absolute value
         return decodeLex(hash.substring(0,9)) - minDHTNumber;
     }
-    
+
     public static yacySeed genLocalSeed(plasmaSwitchboard sb) {
     // genera a seed for the local peer
     // this is the birthplace of a seed, that then will start to travel to other peers
@@ -379,8 +394,8 @@ public class yacySeed {
     // at first we need a good peer hash
     // that hash should be as static as possible, so that it depends mainly on system
     // variables and can even then be reconstructed if the local seed has disappeared
-    Properties sp = System.getProperties();
-    String slow = 
+    final Properties sp = System.getProperties();
+    final String slow = 
         sp.getProperty("file.encoding", "") + 
         sp.getProperty("file.separator", "") + 
         sp.getProperty("java.class.path", "") + 
@@ -393,12 +408,12 @@ public class yacySeed {
         sp.getProperty("user.language", "") +
         sp.getProperty("user.name", "") +
         sp.getProperty("user.timezone", "");
-    String medium =
+    final String medium =
         sp.getProperty("java.class.version", "") +
         sp.getProperty("java.version", "") +
         sp.getProperty("os.version", "") +
         sb.getConfig("peerName", "noname");
-    String fast = Long.toString(System.currentTimeMillis());
+    final String fast = Long.toString(System.currentTimeMillis());
     // the resultinh hash does not have any information than can be used to reconstruct the
     // original system information that has been collected here to create the hash
     // We simply distinuguish three parts of the hash: slow, medium and fast changing character of system idenfification
@@ -416,7 +431,7 @@ public class yacySeed {
         System.exit(-1);
     }
 
-    yacySeed newSeed = new yacySeed(hash);
+    final yacySeed newSeed = new yacySeed(hash);
 
     // now calculate other information about the host
     newSeed.dna.put("Name", sb.getConfig("peerName", "unnamed"));
@@ -426,7 +441,7 @@ public class yacySeed {
         newSeed.dna.put("Port", sb.getConfig("port", "8080"));
     }
     newSeed.dna.put("BDate", yacyCore.universalDateShortString(new Date()));
-    newSeed.dna.put("LastSeen", newSeed.dna.get("BDate")); // just as initial setting
+    newSeed.dna.put(STR_LASTSEEN, newSeed.dna.get("BDate")); // just as initial setting
     newSeed.dna.put("UTC", serverDate.UTCDiffString());
     newSeed.dna.put(PEERTYPE, PEERTYPE_VIRGIN);
 
@@ -435,66 +450,60 @@ public class yacySeed {
 
     public static yacySeed genRemoteSeed(String seedStr, String key) {
         // this method is used to convert the external representation of a seed into a seed object
-        if (seedStr == null) return null;
-        String seed = crypt.simpleDecode(seedStr, key);
-        if (seed == null) return null;
-        HashMap dna = serverCodings.string2map(seed);
-        String hash = (String) dna.remove("Hash");
+        if (seedStr == null || seedStr.length() < yacySeedDB.commonHashLength) { return null; }
+        final String seed = crypt.simpleDecode(seedStr, key);
+        if (seed == null) { return null; }
+        final HashMap dna = serverCodings.string2map(seed);
+        final String hash = (String) dna.remove("Hash");
         return new yacySeed(hash, dna);
     }
 
-    public String toString() {
-        String s = null;        
+    public String toString() {       
         synchronized (dna) {
-            // set hash into seed code structure
-            dna.put("Hash", this.hash);
-            // generate string representation
-            s = dna.toString();
-            // reconstruct original: hash is stored external
-            dna.remove("Hash");
-            // return string
+            dna.put("Hash", this.hash);      // set hash into seed code structure
+            final String s = dna.toString(); // generate string representation
+            dna.remove("Hash");              // reconstruct original: hash is stored external
+            return s;
         }
-        return s;
     }
 
     public String genSeedStr(String key) {
-    // use a default encoding
-    return genSeedStr('b', key);
+        // use a default encoding
+        return genSeedStr('b', key);
     }
 
     public String genSeedStr(char method, String key) {
-    return crypt.simpleEncode(toString(), key, method);
+        return crypt.simpleEncode(toString(), key, method);
     }
 
     public String isProper() {
         // checks if everything is ok with that seed
-        if (this.hash == null) return "hash is null";
-        if (this.hash.length() != yacySeedDB.commonHashLength) return "wrong hash length (" + this.hash.length() + ")";
-        String ip = (String) dna.get("IP");
-        if (ip == null) return "IP is null";
-        if (ip.length() < 8) return "IP is too short: " + ip;
-        if (!(natLib.isProper(ip))) return "IP is not proper: " + ip;
+        if (this.hash == null) { return "hash is null"; }
+        if (this.hash.length() != yacySeedDB.commonHashLength) { return "wrong hash length (" + this.hash.length() + ")"; }
+        final String ip = (String) dna.get("IP");
+        if (ip == null) { return "IP is null"; }
+        if (ip.length() < 8) { return "IP is too short: " + ip; }
+        if (!natLib.isProper(ip)) { return "IP is not proper: " + ip; }
         return null;
     }
 
     public void save(File f) throws IOException {
-    String out = genSeedStr('p', null);
-    FileWriter fw = new FileWriter(f);
-    fw.write(out, 0, out.length());
-    fw.close();
+        final String out = genSeedStr('p', null);
+        final FileWriter fw = new FileWriter(f);
+        fw.write(out, 0, out.length());
+        fw.close();
     }
 
-    
     public static yacySeed load(File f) throws IOException {
-    FileReader fr = new FileReader(f);
-    char[] b = new char[(int) f.length()];
-    fr.read(b, 0, b.length);
-    fr.close();
-    return genRemoteSeed(new String(b), null);
+        final FileReader fr = new FileReader(f);
+        final char[] b = new char[(int) f.length()];
+        fr.read(b, 0, b.length);
+        fr.close();
+        return genRemoteSeed(new String(b), null);
     }
 
     public Object clone() {
-    return new yacySeed(this.hash, (HashMap) (new HashMap(dna)).clone());
+        return new yacySeed(this.hash, (HashMap) (new HashMap(dna)).clone());
     }
 
     /*
