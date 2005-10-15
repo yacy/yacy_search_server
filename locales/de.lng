@@ -247,7 +247,7 @@ installation guide==f&uuml;r eine Anleitung
 Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativ k&ouml;nnen Sie auch den Proxy im permanent online Modus laufen lassen. Dies garantiert eine globale Suche.
 To do this, press this button:==Um dies zu tun, klicken Sie bitte folgenden Button:
 "go online"==gehe online
-The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers==Die globale Suche hat #[globalresults]# Resulate, bereitgestellt von anderen YaCy Peers, gefunden.
+The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers==Die globale Suche hat #[globalresults]# Ergebnisse, die von anderen Peers bereitgestellt wurden, gefunden.
 You can enrich the search results by using the 'global' option; you must also switch to online mode==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn sie die 'global' Option benutzen. Sie m&uuml;ssen aber erst in den online Modus wechseln,
 (by using the proxy) to contribute to the global index.==(indem Sie den Proxy benutzen) um im globalen Index suchen zu k&ouml;nnen.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
@@ -282,7 +282,6 @@ The DHT-rules do not work without this function.==Die DHT-Regeln funktionieren n
 If checked, your peer silently ignores transmitted URLs that match your blacklist==Wenn aktiviert, ignoriert Ihr Peer stillschweigend eingehende URLs, die auf Ihrer Blacklist stehen.
 "set"=="Speichern"
 Changes will take effect immediately==&Auml;nderungen sind sofort aktiv
-To transfer the whole index to an other peer, click <a href="IndexTransfer_p.html">here</a>.==Um Ihren gesamten Index an einen anderen Peer zu übermitteln, klicken Sie <a href="IndexTransfer_p.html">hier</a>.
 
 #-------------------------------------------------------
 #File: IndexCreate_p.html
@@ -395,7 +394,7 @@ Busy Peers==Besch&auml;tigte Peers
 #File: IndexCreateIndexingQueue_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy '\#\[clientname\]\# ': Index Creation/Indexing Queue==YaCy '#[clientname]#': Index Erzeugung/Indexier-Warteschlange
+YaCy '\#\[clientname\]\# ': Index Creation/Indexing Queue==YaCy '#[clientname]#': Index Erzeugung/Indexier Warteschlange
 Index Creation: Indexing Queue==Index Erzeugung: Indexier Warteschlange
 The indexing queue is empty==Die Indexier Warteschlange ist leer.
 "clear indexing queue"=="Warteschlange l&ouml;schen"
@@ -426,6 +425,43 @@ There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Eintr
 Initiator==Initiator
 Depth==Tiefe
 URL==URL
+
+#-------------------------------------------------------
+#File: IndexCreateWWWGlobalQueue_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy '\#\[clientname\]\#': Index Creation / Global Crawl Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Globale WWW Warteschlange
+Index Creation: WWW Global Crawl Queue==Index Erzeugung: Globale WWW Warteschlange
+This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Diese Warteschlange enth&auml;t URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuf&uuml;hren.
+If there is no peer for remote crawling available, the links are crawled locally.==Wenn kein Peer zum Remote Crawl vorhanden ist, werden die Links lokal gecrawlt.
+The global crawler queue is empty==Die globale Crawler Warteschlange ist leer.
+"clear global crawl queue"=="L&ouml;sche globale Crawler Warteschlange"
+There are \#\[num\]\# entries in the global crawler queue. Showing \#\[show-num\]\# most recent entries:==Es befinden sich #[num]# Eintr&auml;ge in der globalen Crawler Warteschlange. Gezeigt werden die #[show-num]# neusten Eintr&auml;ge:
+Initiator==Initiator
+Profile==Profil
+Depth==Tiefe
+Modified Date==&Auml;nderungsdatum
+Anchor Name==Anker Name
+URL==URL
+
+#-------------------------------------------------------
+#File: IndexCreateWWWLocalQueue_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy '\#\[clientname\]\#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Lokale WWW Warteschlange
+Index Creation: WWW Local Crawl Queue==Index Erzeugung: Lokale WWW Warteschlange
+This queue stores the urls that shall be crawled localy by this peer.==Diese Warteschlange enth&auml;t URLs, die von diesem Peer lokal gecrawlt werden sollen.
+It may also contain urls that are computed by the proxy-prefetch.==Sie enth&auml;t auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
+The local crawler queue is empty==Die lokale Crawler Warteschlange ist leer.
+"clear local crawl queue"=="L&ouml;sche lokale Crawler Warteschlange"
+There are \#\[num\]\# entries in the local crawler queue. Showing \#\[show-num\]\# most recent entries:==Es befinden sich #[num]# Eintr&auml;ge in der lokalen Crawler Warteschlange. Gezeigt werden die #[show-num]# neusten Eintr&auml;ge:
+Initiator==Initiator
+Profile==Profil
+Depth==Tiefe
+Modified Date==&Auml;nderungsdatum
+Anchor Name==Anker Name
+URL==URL
+Delete==L&ouml;schen
 
 #-------------------------------------------------------
 #File: IndexMonitor.html
@@ -475,7 +511,7 @@ Set the proxy settings of your browser to the same port as given==Setzen Sie daz
 on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
 \(5\) Index Monitor for Local Crawling.==(5) Index Monitor f&uuml;r das lokale Crawlen
 These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen lokalen Crawl auf der 'Index erzeugen' Seite gestartet haben.
-<i>Use Case:</i> start a crawl by setting a crawl start point on the 'Index Create' page.==<i>Anwendung:</i> Starten Sie einen Crawl, in dem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
+<i>Use Case:</i> start a crawl by setting a crawl start point on the 'Index Create' page.==<i>Anwendung:</i> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
 \(6\) Index Monitor for Global Crawling==(6) Index Monitor f&uuml;r das globale Crawlen
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen remote Peer initiiert.
 This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
@@ -491,6 +527,28 @@ Words==W&ouml;rter
 Title==Titel
 #URL==URL
 "delete"=="L&ouml;schen"
+
+#-------------------------------------------------------
+#File: IndexTransfer_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+The local index currently consists of \(at least\)==Der lokale Index besteht zur Zeit aus (ungefähr)
+reverse word indexes and==Worten und
+URL references==URLs
+Chunk Size==Chunk-Größe
+Words Range==Worte-Bereich
+Transfered Words==Übertragene Worte
+Delete<br>Index==Index<br>löschen
+"true"==ja
+"false"==nein
+Selection==Auswahl
+words==Worte
+words/s==Worte/s
+Last Refresh:==Letzte Aktualisierung:
+Start/Stop Transfer==Starte/Stoppe Transfer
+"Start Index Transfer"=="Starte Index-Transfer"
+"Stop Index Transfer"=="Stoppe Index-Transfer"
+"Start New Index Transfer"=="Starte neuen Index-Transfer"
 
 #-------------------------------------------------------
 #File: Language_p.html
@@ -613,9 +671,9 @@ no==nein
 yes==ja
 You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
 You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online Modus oder Sie benutzen nicht die Proxy Option.
-To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy Netzwerk zu verbinden, m&uuml;ssen Sie den Proxy benutzen, in dem Sie die Browser Einstellungen auf
+To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy Netzwerk zu verbinden, m&uuml;ssen Sie den Proxy benutzen, indem Sie die Browser Einstellungen auf
 \('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>==('on-demand - Modus', siehe <a href="http://www.yacy.net/yacy/Installation.html#wininst">hier</a>
-for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, in dem Sie den Permanent Online Modus aktivieren.
+for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den Permanent Online Modus aktivieren.
 To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Knopf:
 "go online"==Geh online
 
@@ -715,7 +773,8 @@ Error saving the skin.==Es trat ein Fehler beim Speichern des Skin auf.
 YaCy: Status==YaCy: Status
 System-, Index- and Peer-Status==System-, Index- und Peer-Status
 Welcome to YaCy!==Willkommen bei YaCy!
-Shutdown YaCy==YaCy herunterfahren
+"Restart"=="Neustarten"
+"Shutdown"=="Herunterfahren"
 Public System Properties==Allgemeine Systemangaben
 Protection==Sicherheit
 <b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html#admin">settings</a> page <b>immediately</b> and set an administration password.==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der <a href="Settings_p.html#admin">Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
@@ -795,6 +854,7 @@ You don't have the correct access right to perform this task.==Sie haben nicht d
 Please log in.==Bitte melden Sie sich an.
 Shutting down.==Runterfahren
 Application will terminate after working off all scheduled tasks.==Der YaCy Proxy f&auml;hrt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
+Then YaCy will restart.==Dann wird YaCy neu gestartet.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie k&ouml;nnen nun zur&uuml;ck auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie &Auml;nderungen vornehmen wollen.
 
 #-------------------------------------------------------
@@ -806,7 +866,7 @@ YaCy Log:==YaCy Log:
 Log==Log
 Lines==Zeilen
 reversed order==in umgekehrter Reihenfolge
-"refresh"==Aktualisieren
+"refresh"=="Aktualisieren"
 
 #-------------------------------------------------------
 #File: ViewProfile.html
@@ -873,22 +933,3 @@ English Forum==Englisches Forum
 #Deutsches Forum==Deutsches Forum
 Download YaCy==YaCy herunterladen
 Contact==Kontakt
-
-#--------------------------------------------------------
-#File: IndexTransfer_p.html
-
-The local index currently consists of \(at least\)==Der lokale Index besteht zur Zeit aus (ungefähr)
-reverse word indexes and==Worten und
-URL references==URLs
-Chunk Size==Chunk-Größe
-Words Range==Worte-Bereich
-Transfered Words==Übermittelte Worte
-Delete<br>Index==Index<br>löschen
-true==ja
-false==nein
-Selection==Auswahl
-words==Worte
-words/s==Worte/s
-Stop Index Transfer==Stoppe Index-Transfer
-Last Refresh:==Letzte Aktualisierung:
-Start New Index Transfer==Starte neuen Index-Transfer
