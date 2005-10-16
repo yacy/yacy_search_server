@@ -450,7 +450,7 @@ public class yacySeed {
 
     public static yacySeed genRemoteSeed(String seedStr, String key) {
         // this method is used to convert the external representation of a seed into a seed object
-        if (seedStr == null || seedStr.length() < yacySeedDB.commonHashLength) { return null; }
+        if (seedStr == null) { return null; }
         final String seed = crypt.simpleDecode(seedStr, key);
         if (seed == null) { return null; }
         final HashMap dna = serverCodings.string2map(seed);
