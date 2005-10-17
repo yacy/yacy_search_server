@@ -130,7 +130,7 @@ public class yacySeed {
         this.available = 0;
     }
 
-    public yacySeed(String hash) {
+    public yacySeed(String hash) {      
         dna = new HashMap();
 
         // settings that can only be computed by originating peer:
@@ -174,10 +174,21 @@ public class yacySeed {
         available = 0;
     }
 
+    public String getIP()        { return get(IP, "");                       }
+    public String getJunior()    { return get(PEERTYPE, PEERTYPE_JUNIOR);    }
+    public String getSenior()    { return get(PEERTYPE, PEERTYPE_SENIOR);    }
+    public String getPrincipal() { return get(PEERTYPE, PEERTYPE_PRINCIPAL); }
+
     public String get(String key, String dflt) {
         final Object o = dna.get(key);
         if (o == null) { return dflt; } else { return (String) o; }
     }
+
+    public void setIP(String ip)     { put(IP, ip);                       }
+    public void setJunior()          { put(PEERTYPE, PEERTYPE_JUNIOR);    }
+    public void setSenior()          { put(PEERTYPE, PEERTYPE_SENIOR);    }
+    public void setPrincipal()       { put(PEERTYPE, PEERTYPE_PRINCIPAL); }
+    public void setLastSeen(long rd) { put(LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - rd))); }
 
     public void put(String key, String value) {
         dna.put(key, value);
@@ -342,6 +353,9 @@ public class yacySeed {
     public boolean isOnline() {
         return (isSenior() || isPrincipal());
     }
+    public boolean isOnline(String type) {
+        return (type.equals(PEERTYPE_SENIOR) || type.equals(PEERTYPE_PRINCIPAL));
+    }
 
     public String encodeLex(long c, int length) {
         if (length < 0) { length = 0; }
@@ -491,8 +505,12 @@ public class yacySeed {
         return genSeedStr('b', key);
     }
 
-    public String genSeedStr(char method, String key) {
+    synchronized public String genSeedStr(char method, String key) {
         return crypt.simpleEncode(toString(), key, method);
+    }
+
+    public boolean isPeerOK() {
+        return (this.hash != null && isProper() == null);
     }
 
     public String isProper() {
