@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2002-2004
-// last major change: 09.03.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // ThreadPool
 //
@@ -73,10 +76,11 @@ import de.anomic.http.httpc;
 import de.anomic.icap.icapd;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 import de.anomic.plasma.plasmaSwitchboard;
 
 public final class serverCore extends serverAbstractThread implements serverThread {
-    
+
     // generic input/output static methods
     public static final byte cr = 13;
     public static final byte lf = 10;
@@ -265,8 +269,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 serverCore.portForwarding.connect();
                 
                 serverCore.portForwardingEnabled = true;
-                yacyCore.seedDB.mySeed.put("IP",publicIP());
-                yacyCore.seedDB.mySeed.put("Port",Integer.toString(serverCore.portForwarding.getPort()));                               
+                yacyCore.seedDB.mySeed.put(yacySeed.IP,publicIP());
+                yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(serverCore.portForwarding.getPort()));                               
             } catch (Exception e) {
                 serverCore.portForwardingEnabled = false;
                 this.switchboard.setConfig("portForwardingEnabled", "false");

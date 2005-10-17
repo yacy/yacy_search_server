@@ -6,7 +6,10 @@
 // Frankfurt, Germany, 2004
 //
 // This File is contributed by Alexander Schier
-// last change: 04.07.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -122,9 +125,9 @@ public class sharedBlacklist_p {
 		    while (e.hasMoreElements()) {
 			seed = (yacySeed) e.nextElement();
 			if (seed != null && seed.hash.equals(Hash) ) {
-			    IP = seed.get("IP", "127.0.0.1"); 
-			    Port = seed.get("Port", "8080");
-			    Name = (String) seed.get("Name", "<" + IP + ":" + Port + ">");
+			    IP = seed.get(yacySeed.IP, "127.0.0.1"); 
+			    Port = seed.get(yacySeed.PORT, "8080");
+			    Name = (String) seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
 				prop.put("status", 0);//nothing
 			}else{
 			    //status = "No Seed found"; //wrong? The Name not known?

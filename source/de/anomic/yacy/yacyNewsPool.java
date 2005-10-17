@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// last major change: 13.07.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -184,7 +187,7 @@ public class yacyNewsPool {
             yacySeed seed = yacyCore.seedDB.get(record.originator());
             if (seed == null) return false;
             try {
-                return (Integer.parseInt(seed.get("ISpeed", "-")) < 10);
+                return (Integer.parseInt(seed.get(yacySeed.ISPEED, "-")) < 10);
             } catch (NumberFormatException ee) {
                 return true;
             }

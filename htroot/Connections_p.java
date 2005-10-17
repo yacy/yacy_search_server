@@ -125,7 +125,7 @@ public class Connections_p {
                     yacySeed seed = yacyCore.seedDB.lookupByIP(userAddress,true,false,false);
                     if (seed != null) {
                         if ((seed.hash == yacyCore.seedDB.mySeed.hash) && 
-                            (!seed.get("Port","").equals(Integer.toString(userPort)))) {
+                            (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
                             seed = null;
                         }
                     }

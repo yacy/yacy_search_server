@@ -86,13 +86,13 @@ public class MessageSend_p {
 	    String peerName;
             yacySeed targetPeer = null;
 	    if (hash.equals(yacyCore.seedDB.mySeed.hash)) {
-		peerName = yacyCore.seedDB.mySeed.get("Name","nameless");
+		peerName = yacyCore.seedDB.mySeed.get(yacySeed.NAME,"nameless");
             } else {
                 targetPeer = yacyCore.seedDB.getConnected(hash);
                 if (targetPeer == null)
                     peerName = "nameless";
                 else
-                    peerName = targetPeer.get("Name","nameless");
+                    peerName = targetPeer.get(yacySeed.NAME,"nameless");
             }
             String response = (result == null) ? "-1" : (String) result.get("response");
 	    if ((response == null) || (response.equals("-1"))) {

@@ -70,14 +70,14 @@ public final class hello {
         
 //      final String iam      = (String) post.get("iam", "");      // complete seed of the requesting peer
 //      final String pattern  = (String) post.get("pattern", "");  //        
-//      final String mytime   = (String) post.get(STR_MYTIME, ""); //
+//      final String mytime   = (String) post.get(MYTIME, ""); //
         final String key      = (String) post.get("key", "");      // transmission key for response
-        final String seed     = (String) post.get(yacySeed.STR_SEED, "");
+        final String seed     = (String) post.get(yacySeed.SEED, "");
         final String countStr = (String) post.get("count", "0");
         int  i;
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (NumberFormatException e) {count = 0;}
-//      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(STR_MYTIME)); // read remote time
+//      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(MYTIME)); // read remote time
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key);
 
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
@@ -85,7 +85,7 @@ public final class hello {
 
         // we easily know the caller's IP:
         final String clientip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum
-        final String reportedip = remoteSeed.get(yacySeed.STR_IP, "");
+        final String reportedip = remoteSeed.get(yacySeed.IP, "");
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         final float clientversion = remoteSeed.getVersion();
 
@@ -95,8 +95,8 @@ public final class hello {
         // connect to the reported IP address first
         if (reportedip.length() > 0 && !clientip.equals(reportedip) && clientversion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING) {
             // try first the reportedip, since this may be a connect from a port-forwarding host
-            prop.put(yacySeed.STR_YOURIP, reportedip);
-            remoteSeed.put(yacySeed.STR_IP, reportedip);
+            prop.put(yacySeed.YOURIP, reportedip);
+            remoteSeed.put(yacySeed.IP, reportedip);
             urls = yacyClient.queryUrlCount(remoteSeed);
         }
 
@@ -123,8 +123,8 @@ public final class hello {
 
             // we are only allowed to connect to the client IP address if it's not our own address
             if (!isLocalIP) {
-                prop.put(yacySeed.STR_YOURIP, clientip);
-                remoteSeed.put(yacySeed.STR_IP, clientip);
+                prop.put(yacySeed.YOURIP, clientip);
+                remoteSeed.put(yacySeed.IP, clientip);
                 urls = yacyClient.queryUrlCount(remoteSeed);
             }
         }
@@ -134,19 +134,19 @@ public final class hello {
         // assign status
         if (urls >= 0) {
             if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) == null) {
-                prop.put(yacySeed.STR_YOURTYPE, yacySeed.PEERTYPE_SENIOR);
+                prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             } else if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL).equals(yacySeed.PEERTYPE_PRINCIPAL)) {
-                prop.put(yacySeed.STR_YOURTYPE, yacySeed.PEERTYPE_PRINCIPAL);
+                prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_PRINCIPAL);
             } else {
-                prop.put(yacySeed.STR_YOURTYPE, yacySeed.PEERTYPE_SENIOR);
+                prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             }
             // connect the seed
             yacyCore.peerActions.peerArrival(remoteSeed, true);
         } else {
-            prop.put(yacySeed.STR_YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
-            remoteSeed.put(yacySeed.STR_LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - remoteSeed.getUTCDiff())) );
+            prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
+            remoteSeed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - remoteSeed.getUTCDiff())) );
             yacyCore.peerActions.juniorConnects++; // update statistics
             remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
             yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);
@@ -155,11 +155,11 @@ public final class hello {
                 yacyCore.peerActions.peerPing(remoteSeed);
             }
         }
-        if (!((String)prop.get(yacySeed.STR_YOURTYPE)).equals(reportedPeerType)) {
+        if (!((String)prop.get(yacySeed.YOURTYPE)).equals(reportedPeerType)) {
             yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() +
                                                            "' [" + reportedip +
                                              "] peerType from '" + reportedPeerType +
-                                                        "' to '" + prop.get(yacySeed.STR_YOURTYPE) + "'.");
+                                                        "' to '" + prop.get(yacySeed.YOURTYPE) + "'.");
         }
 
         final StringBuffer seeds = new StringBuffer(768);
@@ -174,7 +174,7 @@ public final class hello {
             count = 1;
             for (i = 1; i < ySeeds.length; i++) {
                 if ((ySeeds[i] != null) && (ySeeds[i].isProper() == null)) {
-                    seeds.append(yacySeed.STR_SEED).append(count).append(yacySeed.STR_EQUAL).append(ySeeds[i].genSeedStr(key)).append(serverCore.crlfString);
+                    seeds.append(yacySeed.SEED).append(count).append(yacySeed.EQUAL).append(ySeeds[i].genSeedStr(key)).append(serverCore.crlfString);
                     count++;
                 }
             }
@@ -183,7 +183,7 @@ public final class hello {
             seeds.append("seed0=").append(yacyCore.seedDB.mySeed.genSeedStr(key)).append(serverCore.crlfString);
         }
 
-        prop.put(yacySeed.STR_MYTIME, yacyCore.universalDateShortString(new Date()));
+        prop.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
         prop.put("seedlist", seeds.toString());
         // return rewrite properties
         return prop;

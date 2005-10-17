@@ -6,8 +6,10 @@
 //Frankfurt, Germany, 2005
 //
 //This file is contributed by Martin Thelian
-//last major change: $LastChangedDate$ by $LastChangedBy$
-//Revision: $LastChangedRevision$
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -132,7 +134,7 @@ public final class IndexTransfer_p {
             TreeMap hostList = new TreeMap();
             while (e.hasMoreElements()) {
                 seed = (yacySeed) e.nextElement();
-                if (seed != null) hostList.put(seed.get("Name", "nameless"),seed.hash);
+                if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
             }
             
             String hostName = null;

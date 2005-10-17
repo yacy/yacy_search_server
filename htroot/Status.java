@@ -133,17 +133,17 @@ public class Status {
             prop.put("peerAddress", 0);    // not assigned
             prop.put("peerStatistics", 0); // unknown
         } else {
-            final long uptime = 60000 * Long.parseLong(yacyCore.seedDB.mySeed.get("Uptime", "0"));
+            final long uptime = 60000 * Long.parseLong(yacyCore.seedDB.mySeed.get(yacySeed.UPTIME, "0"));
             prop.put("peerStatistics", 1);
             prop.put("peerStatistics_uptime", serverDate.intervalToString(uptime));
-            prop.put("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed.get("ISpeed", "unknown"));
-            prop.put("peerStatistics_links", yacyCore.seedDB.mySeed.get("LCount", "unknown"));
-            prop.put("peerStatistics_words", yacyCore.seedDB.mySeed.get("ICount", "unknown"));
+            prop.put("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed.get(yacySeed.ISPEED, "unknown"));
+            prop.put("peerStatistics_links", yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "unknown"));
+            prop.put("peerStatistics_words", yacyCore.seedDB.mySeed.get(yacySeed.ICOUNT, "unknown"));
             prop.put("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);
             prop.put("peerStatistics_seniorConnects", yacyCore.peerActions.seniorConnects);
             prop.put("peerStatistics_principalConnects", yacyCore.peerActions.principalConnects);
             prop.put("peerStatistics_disconnects", yacyCore.peerActions.disconnects);
-            prop.put("peerStatistics_connects", yacyCore.seedDB.mySeed.get("CCount", "0"));
+            prop.put("peerStatistics_connects", yacyCore.seedDB.mySeed.get(yacySeed.CCOUNT, "0"));
             if (yacyCore.seedDB.mySeed.getAddress() == null) {
                 thisHash = yacyCore.seedDB.mySeed.hash;
                 prop.put("peerAddress", 1); // not assigned + instructions

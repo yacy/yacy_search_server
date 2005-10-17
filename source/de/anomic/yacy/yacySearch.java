@@ -135,7 +135,7 @@ public class yacySearch extends Thread {
         }
 
         // put in seeds according to size of peer
-        dhtEnum = yacyCore.seedDB.seedsSortedConnected(false, "ICount");
+        dhtEnum = yacyCore.seedDB.seedsSortedConnected(false, yacySeed.ICOUNT);
         c = seedcount;
         int score;
         if (c > yacyCore.seedDB.sizeConnected()) { c = yacyCore.seedDB.sizeConnected(); }
@@ -143,7 +143,7 @@ public class yacySearch extends Thread {
             seed = (yacySeed) dhtEnum.nextElement();
             if (seed == null) { continue; }
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
-            serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.get("ICount","") + ", score " + score);
+            serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.get(yacySeed.ICOUNT,"") + ", score " + score);
             ranking.addScore(seed.hash, score);
             seeds.put(seed.hash, seed);
             c--;

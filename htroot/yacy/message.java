@@ -115,7 +115,7 @@ public final class message {
                 prop.put("response", "-1"); // request rejected
                 return prop;
             }
-            //Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime")); // read remote time
+            //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
             yacySeed otherSeed = yacySeed.genRemoteSeed(otherSeedString, key);
 
             String subject = crypt.simpleDecode((String) post.get("subject", ""), key); // message's subject
@@ -127,7 +127,7 @@ public final class message {
             messageBoard.entry msgEntry = null;
             sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                     "remote",
-                    otherSeed.get("Name", "anonymous"), otherSeed.hash,
+                    otherSeed.get(yacySeed.NAME, "anonymous"), otherSeed.hash,
                     yacyCore.seedDB.mySeed.getName(), yacyCore.seedDB.mySeed.hash,
                     subject, message.getBytes()));
 

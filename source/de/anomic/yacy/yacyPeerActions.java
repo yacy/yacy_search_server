@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// last major change: 22.02.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -58,6 +60,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverSystem;
 import de.anomic.tools.disorderSet;
+import de.anomic.yacy.yacySeed;
 
 public class yacyPeerActions {
    
@@ -98,29 +101,29 @@ public class yacyPeerActions {
             newPeerName = newPeerName.replace('_', '-');
             sb.setConfig("peerName", newPeerName);
         }
-        seedDB.mySeed.put("Name", sb.getConfig("peerName", "nameless"));
+        seedDB.mySeed.put(yacySeed.NAME, sb.getConfig("peerName", "nameless"));
         if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-            seedDB.mySeed.put("Port", Integer.toString(serverCore.portForwarding.getPort()));
+            seedDB.mySeed.put(yacySeed.PORT, Integer.toString(serverCore.portForwarding.getPort()));
         } else {
-            seedDB.mySeed.put("Port", sb.getConfig("port", "8080"));
+            seedDB.mySeed.put(yacySeed.PORT, sb.getConfig("port", "8080"));
         }
         long uptime = ((System.currentTimeMillis() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000) / 60;
         long indexedc = sb.getThread("80_indexing").getBusyCycles();
-        seedDB.mySeed.put("ISpeed", ((indexedc == 0) || (uptime == 0)) ? "unknown" : Long.toString(indexedc / uptime)); // the speed of indexing (pages/minute) of the peer
-        seedDB.mySeed.put("Uptime", Long.toString(uptime)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        seedDB.mySeed.put("LCount", Integer.toString(sb.urlPool.loadedURL.size())); // the number of links that the peer has stored (LURL's)
-        seedDB.mySeed.put("NCount", Integer.toString(sb.urlPool.noticeURL.stackSize())); // the number of links that the peer has noticed, but not loaded (NURL's)
-        seedDB.mySeed.put("ICount", Integer.toString(sb.cacheSizeMin())); // the minimum number of words that the peer has indexed (as it says)
-        seedDB.mySeed.put("SCount", Integer.toString(seedDB.sizeConnected())); // the number of seeds that the peer has stored
-        seedDB.mySeed.put("CCount", Double.toString(((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
-        seedDB.mySeed.put("Version", sb.getConfig("version", ""));
-        if (seedDB.mySeed.get("PeerType","").equals("principal")) {
+        seedDB.mySeed.put(yacySeed.ISPEED, ((indexedc == 0) || (uptime == 0)) ? "unknown" : Long.toString(indexedc / uptime)); // the speed of indexing (pages/minute) of the peer
+        seedDB.mySeed.put(yacySeed.UPTIME, Long.toString(uptime)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        seedDB.mySeed.put(yacySeed.LCOUNT, Integer.toString(sb.urlPool.loadedURL.size())); // the number of links that the peer has stored (LURL's)
+        seedDB.mySeed.put(yacySeed.NCOUNT, Integer.toString(sb.urlPool.noticeURL.stackSize())); // the number of links that the peer has noticed, but not loaded (NURL's)
+        seedDB.mySeed.put(yacySeed.ICOUNT, Integer.toString(sb.cacheSizeMin())); // the minimum number of words that the peer has indexed (as it says)
+        seedDB.mySeed.put(yacySeed.SCOUNT, Integer.toString(seedDB.sizeConnected())); // the number of seeds that the peer has stored
+        seedDB.mySeed.put(yacySeed.CCOUNT, Double.toString(((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
+        seedDB.mySeed.put(yacySeed.VERSION, sb.getConfig("version", ""));
+        if (seedDB.mySeed.get(yacySeed.PEERTYPE,"").equals(yacySeed.PEERTYPE_PRINCIPAL)) {
             // attach information about seed location
             seedDB.mySeed.put("seedURL", sb.getConfig("seedURL", ""));
         }
         seedDB.mySeed.setFlagDirectConnect(true);
-        seedDB.mySeed.put("LastSeen", yacyCore.universalDateShortString(new Date()));
-        seedDB.mySeed.put("UTC", serverDate.UTCDiffString());
+        seedDB.mySeed.put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date()));
+        seedDB.mySeed.put(yacySeed.UTC, serverDate.UTCDiffString());
         seedDB.mySeed.setFlagAcceptRemoteCrawl(sb.getConfig("crawlResponse", "").equals("true"));
         seedDB.mySeed.setFlagAcceptRemoteIndex(sb.getConfig("allowReceiveIndex", "").equals("true"));
         //mySeed.setFlagAcceptRemoteIndex(true);
@@ -174,7 +177,7 @@ public class yacyPeerActions {
                             ((seedDB.mySeed == null) || (seedDB.mySeed.hash != ys.hash))) {
                                 if (connectPeer(ys, false)) lc++;
                                 //seedDB.writeMap(ys.hash, ys.getMap(), "init");
-                                //System.out.println("BOOTSTRAP: received peer " + ys.get("Name", "anonymous") + "/" + ys.getAddress());
+                                //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());
                                 //lc++;
                             }
                         }
@@ -251,17 +254,17 @@ public class yacyPeerActions {
 	    yacyCore.log.logInfo("connect: SELF reference " + seed.getAddress());
 	    return false;
 	} else {
-            String peerType = seed.get("PeerType", "virgin");
+            String peerType = seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
             // reject unqualified seeds
-            if ((peerType.equals("virgin")) || (peerType.equals("junior"))) {
+            if ((peerType.equals(yacySeed.PEERTYPE_VIRGIN)) || (peerType.equals(yacySeed.PEERTYPE_JUNIOR))) {
                 yacyCore.log.logFine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
                 return false;
             }
             
 	    // we may store that seed, but still have different cases
-	    if (seed.get("LastSeen", "").length() < 14) {
+	    if (seed.get(yacySeed.LASTSEEN, "").length() < 14) {
 		// hack for peers that do not have a LastSeen date
-		seed.put("LastSeen", "20040101000000");
+		seed.put(yacySeed.LASTSEEN, "20040101000000");
 	    }
             
             // connection time
@@ -272,7 +275,7 @@ public class yacyPeerActions {
                 /*
                 if (ctime > yacyCore.universalTime()) {
                     ctime = ((2 * ctime) + yacyCore.universalTime()) / 3;
-                    seed.put("LastSeen", yacyCore.shortFormatter.format(new Date(ctime)));
+                    seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(ctime)));
                 }
                  */
 
@@ -332,7 +335,7 @@ public class yacyPeerActions {
                     // the seed is known: this is an update
                     try {
                         // if the old LastSeen date is later then the other info, then we reject the info
-                        if ((ctimeUTC0 < (yacyCore.shortFormatter.parse(connectedSeed.get("LastSeen", "20040101000000")).getTime() - connectedSeed.getUTCDiff() + serverDate.UTCDiff())) && (!(direct))) {
+                        if ((ctimeUTC0 < (yacyCore.shortFormatter.parse(connectedSeed.get(yacySeed.LASTSEEN, "20040101000000")).getTime() - connectedSeed.getUTCDiff() + serverDate.UTCDiff())) && (!(direct))) {
                             yacyCore.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
                             return false;
                         }
@@ -347,15 +350,15 @@ public class yacyPeerActions {
                     return true;
                 } else {
                     // the seed is new
-                    if (((String) seed.get("IP", "127.0.0.1")).equals((String) seedDB.mySeed.get("IP", "127.0.0.1"))) {
+                    if (((String) seed.get(yacySeed.IP, "127.0.0.1")).equals((String) seedDB.mySeed.get(yacySeed.IP, "127.0.0.1"))) {
                         // seed from the same IP as the calling client: can be the case if there runs another one over a NAT
                         yacyCore.log.logFine("connect: saved NEW seed (myself IP) " + seed.getAddress());
                     } else {
                         // completely new seed
                         yacyCore.log.logFine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
                     }
-                    if (peerType.equals("senior")) seniorConnects++; // update statistics
-                    if (peerType.equals("principal")) principalConnects++; // update statistics
+                    if (peerType.equals(yacySeed.PEERTYPE_SENIOR)) seniorConnects++; // update statistics
+                    if (peerType.equals(yacySeed.PEERTYPE_PRINCIPAL)) principalConnects++; // update statistics
 		    seedDB.addConnected(seed);
                     return true;
                 }
@@ -364,14 +367,16 @@ public class yacyPeerActions {
 	}
     }
 
-    synchronized public void disconnectPeer(yacySeed seed) {
-	// we do this if we did not get contact with the other peer
-	yacyCore.log.logFine("connect: no contact to a " + seed.get("PeerType", "virgin") + " peer '" + seed.getName() + "' at " + seed.getAddress());
-	if (!(seedDB.hasDisconnected(seed.hash))) disconnects++;
-        seed.put("disconnected", yacyCore.universalDateShortString(new Date()));
-	seedDB.addDisconnected(seed); // update info
+    public void disconnectPeer(yacySeed seed) {
+        // we do this if we did not get contact with the other peer
+	    yacyCore.log.logFine("connect: no contact to a " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + seed.getName() + "' at " + seed.getAddress());
+        synchronized (seedDB) {
+	        if (!seedDB.hasDisconnected(seed.hash)) { disconnects++; }
+            seed.put("disconnected", yacyCore.universalDateShortString(new Date()));
+	        seedDB.addDisconnected(seed); // update info
+        }
     }
-    
+
     public boolean peerArrival(yacySeed peer, boolean direct) {
         boolean res = connectPeer(peer, direct);
         // perform all actions if peer is effective new

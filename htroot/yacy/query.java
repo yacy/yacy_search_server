@@ -53,6 +53,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public final class query {
 
@@ -72,7 +73,7 @@ public final class query {
         final String obj    = (String) post.get("object", ""); // keyword for query subject
         final String env    = (String) post.get("env", "");    // argument to query
 
-        prop.put("mytime", yacyCore.universalDateShortString(new Date()));
+        prop.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
 
         // check if we are the right target and requester has correct information about this peer
         if (yacyCore.seedDB.mySeed == null || !yacyCore.seedDB.mySeed.hash.equals(youare)) {

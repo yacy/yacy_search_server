@@ -231,7 +231,7 @@ public class yacyCore {
         log.logFine("yacyCore.publishSeedList: Triggered Seed Publish");
 
         /*
-        if (oldIPStamp.equals((String) seedDB.mySeed.get("IP", "127.0.0.1")))
+        if (oldIPStamp.equals((String) seedDB.mySeed.get(yacySeed.IP, "127.0.0.1")))
             yacyCore.log.logDebug("***DEBUG publishSeedList: oldIP is equal");
         if (seedCacheSizeStamp == seedDB.sizeConnected())
             yacyCore.log.logDebug("***DEBUG publishSeedList: sizeConnected is equal");
@@ -240,7 +240,7 @@ public class yacyCore {
         */
 
         if (
-                (this.lastSeedUpload_myIP.equals(seedDB.mySeed.get("IP", "127.0.0.1"))) &&
+                (this.lastSeedUpload_myIP.equals(seedDB.mySeed.get(yacySeed.IP, "127.0.0.1"))) &&
                 (this.lastSeedUpload_seedDBSize == seedDB.sizeConnected()) &&
                 (canReachMyself()) &&
                 (System.currentTimeMillis() - this.lastSeedUpload_timeStamp < 1000*60*60*24) &&
@@ -296,7 +296,7 @@ public class yacyCore {
         // if we cannot reach ourself, we call a forced publishMySeed and return false
         final int urlc = yacyClient.queryUrlCount(seedDB.mySeed);
         if (urlc >= 0) {
-            seedDB.mySeed.put("LastSeen", universalDateShortString(new Date()));
+            seedDB.mySeed.put(yacySeed.LASTSEEN, universalDateShortString(new Date()));
             return true;
         }
         log.logInfo("re-connect own seed");
@@ -400,7 +400,7 @@ public class yacyCore {
                 if (seeds[i] == null) continue;
 
                 final String address = seeds[i].getAddress();
-                log.logFine("HELLO #" + i + " to peer '" + seeds[i].get("Name", "") + "' at " + address); // debug
+                log.logFine("HELLO #" + i + " to peer '" + seeds[i].get(yacySeed.NAME, "") + "' at " + address); // debug
                 if ((address == null) || (seeds[i].isProper() != null)) {
                     // we don't like that address, delete it
                     peerActions.peerDeparture(seeds[i]);
@@ -454,7 +454,7 @@ public class yacyCore {
 //                t = (publishThread) v.elementAt(j);
 //                added = t.added;
 //                if (!(t.isAlive())) {
-//                    //log.logDebug("PEER " + seeds[j].get("Name", "") + " request terminated"); // debug
+//                    //log.logDebug("PEER " + seeds[j].get(yacySeed.NAME, "") + " request terminated"); // debug
 //                    if (added >= 0) {
 //                        // success! we have published our peer to a senior peer
 //                        // update latest news from the other peer
@@ -476,7 +476,7 @@ public class yacyCore {
                 ip = natLib.retrieveIP(DI604use, DI604pw);
             }
 //          yacyCore.log.logDebug("DEBUG: new IP=" + ip);
-            seedDB.mySeed.put("IP", ip);
+            seedDB.mySeed.put(yacySeed.IP, ip);
             if (seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR).equals(yacySeed.PEERTYPE_JUNIOR)) // ???????????????
                 seedDB.mySeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); // to start bootstraping, we need to be recognised as PEERTYPE_SENIOR peer
             log.logInfo("publish: no recipient found, asked NAT or responder; our address is " +
@@ -711,7 +711,7 @@ public class yacyCore {
             this.lastSeedUpload_seedDBSize = seedDB.sizeConnected();
             this.lastSeedUpload_timeStamp = System.currentTimeMillis();
 
-            this.lastSeedUpload_myIP = seedDB.mySeed.get("IP", "127.0.0.1");
+            this.lastSeedUpload_myIP = seedDB.mySeed.get(yacySeed.IP, "127.0.0.1");
             this.lastSeedUpload_myPeerType = seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         }
     }

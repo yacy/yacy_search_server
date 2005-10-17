@@ -78,7 +78,7 @@ public final class search {
         final long    duetime= Long.parseLong((String) post.get("duetime", "3000"));
         final int     count  = Integer.parseInt((String) post.get("count", "10"));         // maximum number of wanted results
         final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
-//      Date remoteTime = yacyCore.parseUniversalDate((String) post.get("mytime"));        // read remote time
+//      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {

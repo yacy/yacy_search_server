@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
-// last major change: 16.02.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -312,7 +315,7 @@ public class SettingsAck_p {
             String peerName = (String) post.get("peername");
             String staticIP =  (String)post.get("staticIP");
             env.setConfig("staticIP", staticIP);
-            if (staticIP.length() > 0) yacyCore.seedDB.mySeed.put("IP", staticIP);
+            if (staticIP.length() > 0) yacyCore.seedDB.mySeed.put(yacySeed.IP, staticIP);
             yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
             
             if ((oldSeed == null) || (env.getConfig("peerName","").equals(peerName))) {

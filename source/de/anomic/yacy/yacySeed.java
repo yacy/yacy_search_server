@@ -89,15 +89,33 @@ public class yacySeed {
     public static final String PEERTYPE_SENIOR = "senior";
     public static final String PEERTYPE_PRINCIPAL = "principal";
     public static final String PEERTYPE = "PeerType";
+   
+    public static final String IPTYPE    = "IPType";
+    public static final String FLAGS     = "Flags";
+    public static final String VERSION   = "Version";
+    
+    public static final String YOURTYPE  = "yourtype";
+    public static final String LASTSEEN  = "LastSeen";
+    public static final String USPEED    = "USpeed";
 
-    public static final String STR_YOURTYPE  = "yourtype";
-    public static final String STR_LASTSEEN  = "LastSeen";
+    public static final String NAME      = "Name";
+    public static final String BDATE     = "BDate";
+    public static final String UTC       = "UTC";
 
-    public static final String STR_IP        = "IP";
-    public static final String STR_YOURIP    = "yourip";
-    public static final String STR_MYTIME    = "mytime";
-    public static final String STR_SEED      = "seed";
-    public static final String STR_EQUAL     = "=";
+    public static final String ISPEED    = "ISpeed";
+    public static final String UPTIME    = "Uptime";
+    public static final String LCOUNT    = "LCount";
+    public static final String NCOUNT    = "NCount";
+    public static final String ICOUNT    = "ICount";
+    public static final String SCOUNT    = "SCount";
+    public static final String CCOUNT    = "CCount";
+
+    public static final String IP        = "IP";
+    public static final String PORT      = "Port";
+    public static final String YOURIP    = "yourip";
+    public static final String MYTIME    = "mytime";
+    public static final String SEED      = "seed";
+    public static final String EQUAL     = "=";
 
     // class variables
     public String hash;
@@ -117,32 +135,32 @@ public class yacySeed {
 
         // settings that can only be computed by originating peer:
         // at first startup -
-        this.hash = hash;                // the hash key of the peer - very important. should be static somehow, even after restart
-        dna.put("Name", "&empty;");     // the name that the peer has given itself
-        dna.put("BDate", "&empty;");    // birthdate - first startup
-        dna.put("UTC", "+0000");
+        this.hash = hash;          // the hash key of the peer - very important. should be static somehow, even after restart
+        dna.put(NAME, "&empty;");  // the name that the peer has given itself
+        dna.put(BDATE, "&empty;"); // birthdate - first startup
+        dna.put(UTC, "+0000");
         // later during operation -
-        dna.put("ISpeed", "0");   // the speed of indexing (pages/minute) of the peer
-        dna.put("Uptime", "0");   // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        dna.put("LCount", "0");   // the number of links that the peer has stored (LURL's)
-        dna.put("NCount", "0");   // the number of links that the peer has noticed, but not loaded (NURL's)
-        dna.put("ICount", "0");   // the number of words that the peer has indexed (as it says)
-        dna.put("SCount", "0");   // the number of seeds that the peer has stored
-        dna.put("CCount", "0");   // the number of clients that the peer connects (as connects/hour)
-        dna.put("Version", "0");  // the applications version
+        dna.put(ISPEED, "0");  // the speed of indexing (pages/minute) of the peer
+        dna.put(UPTIME, "0");  // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        dna.put(LCOUNT, "0");  // the number of links that the peer has stored (LURL's)
+        dna.put(NCOUNT, "0");  // the number of links that the peer has noticed, but not loaded (NURL's)
+        dna.put(ICOUNT, "0");  // the number of words that the peer has indexed (as it says)
+        dna.put(SCOUNT, "0");  // the number of seeds that the peer has stored
+        dna.put(CCOUNT, "0");  // the number of clients that the peer connects (as connects/hour)
+        dna.put(VERSION, "0"); // the applications version
 
         // settings that is created during the 'hello' phase - in first contact
-        dna.put("IP", "");       // 123.234.345.456
-        dna.put("Port", "&empty;"); // 
+        dna.put(IP, "");                    // 123.234.345.456
+        dna.put(PORT, "&empty;");
         dna.put(PEERTYPE, PEERTYPE_VIRGIN); // virgin/junior/senior/principal
-        dna.put("IPType", "&empty;");   // static/dynamic (if the ip changes often for any reason)
+        dna.put(IPTYPE, "&empty;");         // static/dynamic (if the ip changes often for any reason)
 
         // settings that can only be computed by visiting peer
-        dna.put(STR_LASTSEEN, yacyCore.universalDateShortString(new Date()));  // for last-seen date
-        dna.put("USpeed", "0");   // the computated uplink speed of the peer
+        dna.put(LASTSEEN, yacyCore.universalDateShortString(new Date())); // for last-seen date
+        dna.put(USPEED, "0");               // the computated uplink speed of the peer
 
         // settings that are needed to organize the seed round-trip
-        dna.put("Flags", "0000");
+        dna.put(FLAGS, "0000");
         setFlagDirectConnect(false);
         setFlagAcceptRemoteCrawl(true);
         setFlagAcceptRemoteIndex(true);
@@ -170,7 +188,7 @@ public class yacySeed {
     }
 
     public String getName() {
-        return get("Name", "&empty;");
+        return get(NAME, "&empty;");
     }
 
     public String getHexHash() {
@@ -213,15 +231,15 @@ public class yacySeed {
 
     public float getVersion() {
         try {
-            return Float.parseFloat(get("Version", "0"));
+            return Float.parseFloat(get(VERSION, "0"));
         } catch (NumberFormatException e) {
             return 0;
         }
     }
 
     public String getAddress() {
-        final String ip   = (String) dna.get("IP");
-        final String port = (String) dna.get("Port");
+        final String ip   = (String) dna.get(IP);
+        final String port = (String) dna.get(PORT);
         if (ip != null && ip.length() >= 8 && port != null && port.length() >= 2) {
             return ip + ":" + port;
         } else {
@@ -230,14 +248,14 @@ public class yacySeed {
     }
 
     public long getUTCDiff() {
-        String utc = (String) dna.get("UTC");
+        String utc = (String) dna.get(UTC);
         if (utc == null) { utc = "+0200"; }
         return serverDate.UTCDiff(utc);        
     }
 
     public long getLastSeenTime() {
         try {
-            final long t = yacyCore.shortFormatter.parse(get(STR_LASTSEEN, "20040101000000")).getTime();
+            final long t = yacyCore.shortFormatter.parse(get(LASTSEEN, "20040101000000")).getTime();
             // the problem here is: getTime applies a time shift according to local time zone:
             // it substracts the local UTF offset, but it should substract the remote UTC offset
             // so we correct it by first adding the local UTF offset and then subtractibg the remote
@@ -254,7 +272,7 @@ public class yacySeed {
     public int getAge() {
         // returns the age as number of days
         try {
-            final long t = yacyCore.shortFormatter.parse(get("BDate", "20040101000000")).getTime();
+            final long t = yacyCore.shortFormatter.parse(get(BDATE, "20040101000000")).getTime();
             return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + serverDate.UTCDiff())) / 1000 / 60 / 60 / 24);
         } catch (java.text.ParseException e) {
             return -1;
@@ -265,12 +283,12 @@ public class yacySeed {
 
     public void setLastSeenTime() {
         // if we set a last seen time, then we need to respect the seeds UTC offset
-        put(STR_LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() - serverDate.UTCDiff() + getUTCDiff())));
+        put(LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() - serverDate.UTCDiff() + getUTCDiff())));
     }
 
     public int getPPM() {
         try {
-            return Integer.parseInt(get("ISpeed", "0"));
+            return Integer.parseInt(get(ISPEED, "0"));
         } catch (NumberFormatException e) {
             return 0;
         }
@@ -278,22 +296,22 @@ public class yacySeed {
 
     public long getLinkCount() {
         try {
-            return Long.parseLong(get("LCount", "0"));
+            return Long.parseLong(get(LCOUNT, "0"));
         } catch (NumberFormatException e) {
             return 0;
         }
     }
 
     private boolean getFlag(int flag) {
-        final String flags = get("Flags", "0000");
+        final String flags = get(FLAGS, "0000");
         return (new bitfield(flags.getBytes())).get(flag);
     }
 
     private void setFlag(int flag, boolean value) {
-        final String flags = get("Flags", "0000");
+        final String flags = get(FLAGS, "0000");
         final bitfield f = new bitfield(flags.getBytes());
         f.set(flag, value);
-        put("Flags", f.toString());
+        put(FLAGS, f.toString());
     }
 
     public void setFlagDirectConnect(boolean value) {setFlag(0, value);}
@@ -434,15 +452,15 @@ public class yacySeed {
     final yacySeed newSeed = new yacySeed(hash);
 
     // now calculate other information about the host
-    newSeed.dna.put("Name", sb.getConfig("peerName", "unnamed"));
+    newSeed.dna.put(NAME, sb.getConfig("peerName", "unnamed"));
     if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-        newSeed.dna.put("Port",Integer.toString(serverCore.portForwarding.getPort()));
+        newSeed.dna.put(PORT,Integer.toString(serverCore.portForwarding.getPort()));
     } else {
-        newSeed.dna.put("Port", sb.getConfig("port", "8080"));
+        newSeed.dna.put(PORT, sb.getConfig("port", "8080"));
     }
-    newSeed.dna.put("BDate", yacyCore.universalDateShortString(new Date()));
-    newSeed.dna.put(STR_LASTSEEN, newSeed.dna.get("BDate")); // just as initial setting
-    newSeed.dna.put("UTC", serverDate.UTCDiffString());
+    newSeed.dna.put(BDATE, yacyCore.universalDateShortString(new Date()));
+    newSeed.dna.put(LASTSEEN, newSeed.dna.get(BDATE)); // just as initial setting
+    newSeed.dna.put(UTC, serverDate.UTCDiffString());
     newSeed.dna.put(PEERTYPE, PEERTYPE_VIRGIN);
 
     return newSeed;
@@ -450,6 +468,7 @@ public class yacySeed {
 
     public static yacySeed genRemoteSeed(String seedStr, String key) {
         // this method is used to convert the external representation of a seed into a seed object
+//      yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);
         if (seedStr == null) { return null; }
         final String seed = crypt.simpleDecode(seedStr, key);
         if (seed == null) { return null; }
@@ -480,7 +499,7 @@ public class yacySeed {
         // checks if everything is ok with that seed
         if (this.hash == null) { return "hash is null"; }
         if (this.hash.length() != yacySeedDB.commonHashLength) { return "wrong hash length (" + this.hash.length() + ")"; }
-        final String ip = (String) dna.get("IP");
+        final String ip = (String) dna.get(IP);
         if (ip == null) { return "IP is null"; }
         if (ip.length() < 8) { return "IP is too short: " + ip; }
         if (!natLib.isProper(ip)) { return "IP is not proper: " + ip; }

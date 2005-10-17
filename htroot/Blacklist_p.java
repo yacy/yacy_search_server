@@ -223,7 +223,7 @@ public class Blacklist_p {
                 seed = (yacySeed) e.nextElement();
                 if (seed != null) {
                     final String Hash = seed.hash;
-                    final String Name = seed.get("Name", "nameless");
+                    final String Name = seed.get(yacySeed.NAME, "nameless");
                     prop.put("otherHosts_" + i + "_hash", Hash);
                     prop.put("otherHosts_" + i + "_name", Name);
                     i++;
