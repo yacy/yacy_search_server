@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 13.05.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,7 +46,6 @@ package de.anomic.tools;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Random;
-
 import de.anomic.server.serverCodings;
 
 public class crypt {
@@ -56,14 +58,14 @@ public class crypt {
     private static Random saltrandom = new Random(System.currentTimeMillis());
 
     public static String randomSalt() {
-	// generate robust 48-bit random number
-	long salt =
-	    (saltrandom.nextLong() & 0XffffffffffffL) + 
-	    (System.currentTimeMillis() & 0XffffffffffffL) +
-	    ((1001 * saltcounter) & 0XffffffffffffL);
-	saltcounter++;
-	// we generate 48-bit salt values, that are represented as 8-character b64-encoded strings
-	return serverCodings.standardCoder.encodeBase64Long(salt & 0XffffffffffffL, 8);
+    // generate robust 48-bit random number
+    final long salt =
+        (saltrandom.nextLong() & 0XffffffffffffL) + 
+        (System.currentTimeMillis() & 0XffffffffffffL) +
+        ((1001 * saltcounter) & 0XffffffffffffL);
+    saltcounter++;
+    // we generate 48-bit salt values, that are represented as 8-character b64-encoded strings
+    return serverCodings.standardCoder.encodeBase64Long(salt & 0XffffffffffffL, 8);
     }
 
     // --------------------------------------------------------
@@ -77,22 +79,22 @@ public class crypt {
 
     String cryptMethod; // one of ["TripleDES", "Blowfish", "DESede", "DES"]
     private static final String defaultMethod = "PBEWithMD5AndDES"; //"DES";
-    
+
     public crypt(String pbe) {
-	// this is possible, but not recommended
-	this(pbe, (pbe + "XXXXXXXX").substring(0, 8));
+    // this is possible, but not recommended
+    this(pbe, (pbe + "XXXXXXXX").substring(0, 8));
     }
 
     public crypt(String pbe, String salt) {
-	this(pbe, salt, defaultMethod);
+    this(pbe, salt, defaultMethod);
     }
     private crypt(String pbe, String salt, String method) {
-	// a Password-Based Encryption. The SecretKey is created on the fly
-	    if (salt.length() > 8) salt = salt.substring(0,8);
-	    if (salt.length() < 8) salt = (salt + "XXXXXXXX").substring(0,8);
-	            
-	    // Create a cipher and initialize it for encrypting end decrypting
-	    cryptMethod = method;
+    // a Password-Based Encryption. The SecretKey is created on the fly
+        if (salt.length() > 8) salt = salt.substring(0,8);
+        if (salt.length() < 8) salt = (salt + "XXXXXXXX").substring(0,8);
+
+        // Create a cipher and initialize it for encrypting end decrypting
+        cryptMethod = method;
     }
 
     // --------------------------------------------------------
@@ -100,30 +102,32 @@ public class crypt {
     // --------------------------------------------------------
 
     public static String simpleEncode(String content) {
-	return simpleEncode(content, null, 'b');
+    return simpleEncode(content, null, 'b');
     }
 
     public static String simpleEncode(String content, String key) {
-	return simpleEncode(content, key, 'b');
+    return simpleEncode(content, key, 'b');
     }
 
     public static String simpleEncode(String content, String key, char method) {
-	if (key == null) key = "NULL";
-	if (method == 'p') return "p|" + content;
-	if (method == 'b') return "b|" + serverCodings.enhancedCoder.encodeBase64String(content);
-	if (method == 'z') return "z|" + serverCodings.enhancedCoder.encodeBase64(gzip.gzipString(content));
-	return null;
+    if (key == null) { key = "NULL"; }
+    switch (method) {
+    case 'p' : return "p|" + content;
+    case 'b' : return "b|" + serverCodings.enhancedCoder.encodeBase64String(content);
+    case 'z' : return "z|" + serverCodings.enhancedCoder.encodeBase64(gzip.gzipString(content));
+    default  : return null;
+    }
     }
 
     public static String simpleDecode(String encoded, String key) {
-	if ((encoded == null) || (encoded.length() < 3)) return null;
-	if (encoded.charAt(1) != '|') return encoded; // not encoded
-	char method = encoded.charAt(0);
-	encoded = encoded.substring(2);
-	if (method == 'p') return encoded;
-	if (method == 'b') return serverCodings.enhancedCoder.decodeBase64String(encoded);
-	if (method == 'z') return gzip.gunzipString(serverCodings.enhancedCoder.decodeBase64(encoded));
-	return null;
+    if (encoded == null || encoded.length() < 3) { return null; }
+    if (encoded.charAt(1) != '|') { return encoded; } // not encoded
+    switch (encoded.charAt(0)) {
+    case 'b' : return serverCodings.enhancedCoder.decodeBase64String(encoded.substring(2));
+    case 'z' : return gzip.gunzipString(serverCodings.enhancedCoder.decodeBase64(encoded.substring(2)));
+    case 'p' : return encoded.substring(2);
+    default  : return null;
+    }
     }
 
 }
