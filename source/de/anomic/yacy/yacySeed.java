@@ -184,11 +184,11 @@ public class yacySeed {
         if (o == null) { return dflt; } else { return (String) o; }
     }
 
-    public void setIP(String ip)     { put(IP, ip);                       }
-    public void setJunior()          { put(PEERTYPE, PEERTYPE_JUNIOR);    }
-    public void setSenior()          { put(PEERTYPE, PEERTYPE_SENIOR);    }
-    public void setPrincipal()       { put(PEERTYPE, PEERTYPE_PRINCIPAL); }
-    public void setLastSeen(long rd) { put(LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - rd))); }
+    public void setIP(String ip) { put(IP, ip);                       }
+    public void setJunior()      { put(PEERTYPE, PEERTYPE_JUNIOR);    }
+    public void setSenior()      { put(PEERTYPE, PEERTYPE_SENIOR);    }
+    public void setPrincipal()   { put(PEERTYPE, PEERTYPE_PRINCIPAL); }
+    public void setLastSeen()    { put(LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - getUTCDiff()))); }
 
     public void put(String key, String value) {
         dna.put(key, value);
