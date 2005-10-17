@@ -112,9 +112,9 @@ public class crypt {
     public static String simpleEncode(String content, String key, char method) {
     if (key == null) { key = "NULL"; }
     switch (method) {
-    case 'p' : return "p|" + content;
     case 'b' : return "b|" + serverCodings.enhancedCoder.encodeBase64String(content);
     case 'z' : return "z|" + serverCodings.enhancedCoder.encodeBase64(gzip.gzipString(content));
+    case 'p' : return "p|" + content;
     default  : return null;
     }
     }
