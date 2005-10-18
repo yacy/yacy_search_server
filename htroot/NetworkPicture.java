@@ -67,10 +67,14 @@ public class NetworkPicture {
 
         int width = 640;
         int height = 480;
+        int passiveLimit = 300;
+        int potentialLimit = 300;
         
         if (post != null) {
             width = post.getInt("width", 640);
             height = post.getInt("height", 420);
+            passiveLimit = post.getInt("pal", 300);
+            potentialLimit = post.getInt("pol", 300);
         }
         
         int innerradius = Math.min(width, height) / 5;
@@ -119,7 +123,7 @@ public class NetworkPicture {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
-                if (lastseen > 120) break; // we have enough, this list is sorted so we don't miss anything
+                if (lastseen > passiveLimit) break; // we have enough, this list is sorted so we don't miss anything
                 drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "101010", "401000", "802000");
                 count++;
             }
@@ -133,7 +137,7 @@ public class NetworkPicture {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
-                if (lastseen > 120) break; // we have enough, this list is sorted so we don't miss anything
+                if (lastseen > potentialLimit) break; // we have enough, this list is sorted so we don't miss anything
                 drawPeer(img, width / 2, height / 2, innerradius, outerradius, seed, "202000", "505000", "A0A000");
                 count++;
             }
