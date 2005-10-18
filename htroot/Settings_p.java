@@ -180,7 +180,7 @@ public final class Settings_p {
             String uploaderName = (String) uploaderKeys.next();
             prop.put("seedUploadMethods_" +count+ "_name", uploaderName);
             prop.put("seedUploadMethods_" +count+ "_selected", uploaderName.equals(enabledUploader)?1:0);            
-            prop.put("seedUploadMethods_" +count+ "_file", new File(env.getRootPath(), "htroot/yacy/seedUpload/yacySeedUpload" + uploaderName + ".html").toString());
+            prop.put("seedUploadMethods_" +count+ "_file", "yacy/seedUpload/yacySeedUpload" + uploaderName + ".html");
             
             yacySeedUploader theUploader = yacyCore.getSeedUploader(uploaderName);
             String[] configOptions = theUploader.getConfigurationOptions();
