@@ -84,7 +84,7 @@ public final class plasmaHTCache {
     public  long currCacheSize;
     public  long maxCacheSize;
     public  final File cachePath;
-    public  static serverLog log;
+    public  final serverLog log;
     public  static final HashSet filesInUse = new HashSet(); // can we delete this file
 
     public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb) {
@@ -100,33 +100,33 @@ public final class plasmaHTCache {
         }
         if (!(htCachePath.isDirectory())) {
             // if the cache does not exists or is a file and not a directory, panic
-            log.logSevere("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
+            this.log.logSevere("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
             System.exit(0);
         }
 
         // open the response header database
-        File dbfile = new File(cachePath, "responseHeader.db");
+        File dbfile = new File(this.cachePath, "responseHeader.db");
         try {
             if (dbfile.exists())
-                responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400));
+                this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400));
             else
-                responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, plasmaCrawlLURL.urlHashLength, 150));
+                this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, plasmaURL.urlHashLength, 150));
         } catch (IOException e) {
-            log.logSevere("the request header database could not be opened: " + e.getMessage());
+            this.log.logSevere("the request header database could not be opened: " + e.getMessage());
             System.exit(0);
         }
 
         // init stack
-        cacheStack = new LinkedList();
+        this.cacheStack = new LinkedList();
 
         // init cache age and size management
-        cacheAge = new TreeMap();
-        currCacheSize = 0;
+        this.cacheAge = new TreeMap();
+        this.currCacheSize = 0;
         this.maxCacheSize = maxCacheSize;
 
         // start the cache startup thread
         // this will collect information about the current cache size and elements
-        serverInstantThread.oneTimeJob(this, "cacheScan", log, 5000);
+        serverInstantThread.oneTimeJob(this, "cacheScan", this.log, 5000);
     }
 
     public int size() {
@@ -136,15 +136,15 @@ public final class plasmaHTCache {
     }
 
     public int dbSize() {
-        return responseHeaderDB.size();      
+        return this.responseHeaderDB.size();      
     }
 
     public int[] dbCacheChunkSize() {
-        return responseHeaderDB.cacheChunkSize();
+        return this.responseHeaderDB.cacheChunkSize();
     }
     
     public int[] dbCacheFillStatus() {
-        return responseHeaderDB.cacheFillStatus();
+        return this.responseHeaderDB.cacheFillStatus();
     }
     
     public void push(Entry entry) {
@@ -157,17 +157,16 @@ public final class plasmaHTCache {
         synchronized (this.cacheStack) {
         if (this.cacheStack.size() > 0)
             return (Entry) this.cacheStack.removeFirst();
-        else
-            return null;
+        return null;
         }
     }
 
     public void storeHeader(String urlHash, httpHeader responseHeader) throws IOException {
-        responseHeaderDB.set(urlHash, responseHeader);
+        this.responseHeaderDB.set(urlHash, responseHeader);
     }
 
     public long getFreeSize() {
-        return (currCacheSize > maxCacheSize) ? 0 : maxCacheSize - currCacheSize;
+        return (this.currCacheSize > this.maxCacheSize) ? 0 : this.maxCacheSize - this.currCacheSize;
     }  
 
     public boolean writeFile(URL url, byte[] array) {
@@ -181,10 +180,10 @@ public final class plasmaHTCache {
             // this is the case of a "(Not a directory)" error, which should be prohibited
             // by the shallStoreCache() property. However, sometimes the error still occurs
             // In this case do nothing.
-            log.logSevere("File storage failed (not a directory): " + e.getMessage());
+            this.log.logSevere("File storage failed (not a directory): " + e.getMessage());
             return false;
         } catch (IOException e) {
-            log.logSevere("File storage failed (IO error): " + e.getMessage());
+            this.log.logSevere("File storage failed (IO error): " + e.getMessage());
             return false;
         }
         writeFileAnnouncement(file);
@@ -192,10 +191,10 @@ public final class plasmaHTCache {
     }
 
     public void writeFileAnnouncement(File file) {
-        synchronized (cacheAge) {
+        synchronized (this.cacheAge) {
             if (file.exists()) {
-                currCacheSize += file.length();
-                cacheAge.put(ageString(file.lastModified(), file), file);
+                this.currCacheSize += file.length();
+                this.cacheAge.put(ageString(file.lastModified(), file), file);
                 cleanup();
             }
         }
@@ -209,22 +208,21 @@ public final class plasmaHTCache {
         if (deleteFileandDirs(getCachePath(url), msg)) {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
-                log.logFinest("Trying to remove responseHeader from URL: " + url.toString());
-                responseHeaderDB.remove(plasmaURL.urlHash(url));
+                this.log.logFinest("Trying to remove responseHeader from URL: " + url.toString());
+                this.responseHeaderDB.remove(plasmaURL.urlHash(url));
             } catch (IOException e) {
-                log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
+                this.log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
             }
            return true;
-       } else {
-           return false;
        }
+        return false;
     }    
     
     private boolean deleteFile(File obj) {
         if (obj.exists() && !filesInUse.contains(obj)) {
             long size = obj.length();
             if (obj.delete()) {
-                currCacheSize -= size;
+                this.currCacheSize -= size;
                 return true;
             }
         }
@@ -233,39 +231,38 @@ public final class plasmaHTCache {
 
     private boolean deleteFileandDirs (File obj, String msg) {
         if (deleteFile(obj)) {
-            log.logInfo("DELETED " + msg + " CACHE : " + obj.toString());
+            this.log.logInfo("DELETED " + msg + " CACHE : " + obj.toString());
             obj = obj.getParentFile();
             // If the has been emptied, remove it
             // Loop as long as we produce empty driectoriers, but stop at HTCACHE
-            while ((!(obj.equals(cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
-                if (obj.delete()) log.logInfo("DELETED EMPTY DIRECTORY : " + obj.toString());
+            while ((!(obj.equals(this.cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
+                if (obj.delete()) this.log.logInfo("DELETED EMPTY DIRECTORY : " + obj.toString());
                 obj = obj.getParentFile();
             }
             return true;
-         } else {
-             return false;
          }
+        return false;
     }
 
     private void cleanupDoIt(long newCacheSize) {
-        if (cacheAge.size() == 0) return;
+        if (this.cacheAge.size() == 0) return;
 
         File obj;
-        Iterator iter = cacheAge.keySet().iterator();
-        while (iter.hasNext() && (currCacheSize >= newCacheSize)) {
+        Iterator iter = this.cacheAge.keySet().iterator();
+        while (iter.hasNext() && (this.currCacheSize >= newCacheSize)) {
             Object key = iter.next();
-            obj = (File) cacheAge.get(key);
+            obj = (File) this.cacheAge.get(key);
             if (obj != null) {
                 if (filesInUse.contains(obj)) continue;
-                log.logFinest("Trying to delete old file: " + obj.toString());
+                this.log.logFinest("Trying to delete old file: " + obj.toString());
                 if (deleteFileandDirs (obj, "OLD")) {
                     try {
                         // As the file is gone, the entry in responseHeader.db is not needed anymore
-                        log.logFinest("Trying to remove responseHeader for URL: " +
-                            getURL(cachePath ,obj).toString());
-                        responseHeaderDB.remove(plasmaURL.urlHash(getURL(cachePath ,obj)));
+                        this.log.logFinest("Trying to remove responseHeader for URL: " +
+                            getURL(this.cachePath ,obj).toString());
+                        this.responseHeaderDB.remove(plasmaURL.urlHash(getURL(this.cachePath ,obj)));
                     } catch (IOException e) {
-                        log.logInfo("IOExeption removing response header from DB: " +
+                        this.log.logInfo("IOExeption removing response header from DB: " +
                             e.getMessage(), e);
                     }
                 }
@@ -275,13 +272,13 @@ public final class plasmaHTCache {
 
     private void cleanup() {
         // clean up cache to have 4% (enough) space for next entries
-        if ((currCacheSize >= maxCacheSize) && (cacheAge.size() > 0)) {
-            if (maxCacheSize > 0) cleanupDoIt(maxCacheSize - ((maxCacheSize / 100) * 4));
+        if ((this.currCacheSize >= this.maxCacheSize) && (this.cacheAge.size() > 0)) {
+            if (this.maxCacheSize > 0) cleanupDoIt(this.maxCacheSize - ((this.maxCacheSize / 100) * 4));
         }
     }
 
     public void close() throws IOException {
-        responseHeaderDB.close();
+        this.responseHeaderDB.close();
     }
 
     private String ageString(long date, File f) {
@@ -299,7 +296,7 @@ public final class plasmaHTCache {
         //log.logSystem("STARTING CACHE SCANNING");
         kelondroMScoreCluster doms = new kelondroMScoreCluster();
         int c = 0;
-        enumerateFiles ef = new enumerateFiles(cachePath, true, false, true, true);
+        enumerateFiles ef = new enumerateFiles(this.cachePath, true, false, true, true);
         File f;
         while (ef.hasMoreElements()) {
             c++;
@@ -307,19 +304,19 @@ public final class plasmaHTCache {
             long d = f.lastModified();
             //System.out.println("Cache: " + dom(f));
             doms.incScore(dom(f));
-            currCacheSize += f.length();
-            cacheAge.put(ageString(d, f), f);
+            this.currCacheSize += f.length();
+            this.cacheAge.put(ageString(d, f), f);
         }
         //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
         long ageHours = 0;
         try {
             ageHours = (System.currentTimeMillis() -
-                            Long.parseLong(((String) cacheAge.firstKey()).substring(0, 16), 16)) / 3600000;
+                            Long.parseLong(((String) this.cacheAge.firstKey()).substring(0, 16), 16)) / 3600000;
         } catch (NumberFormatException e) {
             //e.printStackTrace();
         }
-        log.logConfig("CACHE SCANNED, CONTAINS " + c +
-                      " FILES = " + currCacheSize/1048576 + "MB, OLDEST IS " + 
+        this.log.logConfig("CACHE SCANNED, CONTAINS " + c +
+                      " FILES = " + this.currCacheSize/1048576 + "MB, OLDEST IS " + 
             ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) + " OLD");
         cleanup();
 
@@ -333,18 +330,18 @@ public final class plasmaHTCache {
             ip = httpc.dnsResolve(dom);
             if (ip == null) continue;
             result += ", " + dom + "=" + ip;
-            log.logConfig("PRE-FILLED " + dom + "=" + ip);
+            this.log.logConfig("PRE-FILLED " + dom + "=" + ip);
             c++;
             doms.deleteScore(dom);
             // wait a short while to prevent that this looks like a DoS
-            try {Thread.currentThread().sleep(100);} catch (InterruptedException e) {}
+            try {Thread.sleep(100);} catch (InterruptedException e) {}
         }
-        if (result.length() > 2) log.logConfig("PRE-FILLED DNS CACHE, FETCHED " + c +
+        if (result.length() > 2) this.log.logConfig("PRE-FILLED DNS CACHE, FETCHED " + c +
                                                " ADDRESSES: " + result.substring(2));
     }
 
     private String dom(File f) {
-        String s = f.toString().substring(cachePath.toString().length() + 1);
+        String s = f.toString().substring(this.cachePath.toString().length() + 1);
         int p = s.indexOf("/");
         if (p < 0) p = s.indexOf("\\");
         if (p < 0) return null;
@@ -352,17 +349,17 @@ public final class plasmaHTCache {
     }
 
     public httpHeader getCachedResponse(String urlHash) throws IOException {
-        Map hdb = responseHeaderDB.get(urlHash);
+        Map hdb = this.responseHeaderDB.get(urlHash);
         if (hdb == null) return null;
         return new httpHeader(null, hdb);
     }
 
     public boolean full() {
-        return (cacheStack.size() > stackLimit);
+        return (this.cacheStack.size() > stackLimit);
     }
 
     public boolean empty() {
-        return (cacheStack.size() == 0);
+        return (this.cacheStack.size() == 0);
     }
 
     public static boolean isPicture(httpHeader response) {
@@ -476,9 +473,8 @@ public final class plasmaHTCache {
             return serverFileUtils.read(f);
         } catch (IOException e) {
             return null;
-        } else {
-            return null;
         }
+        return null;
     }
 
     public static boolean isPOST(String urlString) {
@@ -534,14 +530,14 @@ public final class plasmaHTCache {
         serverLog.logFine("PLASMA", "Entry: URL=" + url.toString());
         this.nomalizedURLString = htmlFilterContentScraper.urlNormalform(url);
         try {
-            this.url            = new URL(nomalizedURLString);
+            this.url            = new URL(this.nomalizedURLString);
         } catch (MalformedURLException e) {
             System.out.println("internal error at httpdProxyCache.Entry: " + e);
             System.exit(-1);
         }
         this.name             = name;
         this.cacheFile        = getCachePath(this.url);
-        this.nomalizedURLHash = plasmaCrawlLURL.urlHash(nomalizedURLString);
+        this.nomalizedURLHash = plasmaURL.urlHash(this.nomalizedURLString);
 
        // assigned:
         this.initDate       = initDate;
@@ -562,10 +558,10 @@ public final class plasmaHTCache {
                System.exit(0);
            }
 
-            lastModified = new Date(serverDate.correctedUTCTime());
+            this.lastModified = new Date(serverDate.correctedUTCTime());
         } else {
-            lastModified = responseHeader.lastModified();
-            if (lastModified == null) lastModified = new Date(serverDate.correctedUTCTime()); // does not exist in header
+            this.lastModified = responseHeader.lastModified();
+            if (this.lastModified == null) this.lastModified = new Date(serverDate.correctedUTCTime()); // does not exist in header
         }
         this.doctype = plasmaWordIndexEntry.docType(responseHeader.mime());
         if (this.doctype == plasmaWordIndexEntry.DT_UNKNOWN) this.doctype = plasmaWordIndexEntry.docType(url);
@@ -576,22 +572,23 @@ public final class plasmaHTCache {
     }
 	
     public String name() {
-        return name;
+        return this.name;
     }        
     public String initiator() {
-        return initiator;
+        return this.initiator;
     }
     public boolean proxy() {
         return initiator() == null;
     }
     public long size() {
-       if (cacheArray == null) return 0; else return cacheArray.length;
+        if (this.cacheArray == null) return 0;
+        return this.cacheArray.length;
     }
 
     public URL referrerURL() {
-        if (requestHeader == null) return null;
+        if (this.requestHeader == null) return null;
         try {
-            return new URL((String) requestHeader.get(httpHeader.REFERER, ""));
+            return new URL((String) this.requestHeader.get(httpHeader.REFERER, ""));
         } catch (Exception e) {
             return null;
         }
@@ -611,35 +608,35 @@ public final class plasmaHTCache {
             // in case of FALSE, the reason as String is returned
 	    
             // check profile
-            if (!(profile.storeHTCache())) return "storage_not_wanted";
+            if (!(this.profile.storeHTCache())) return "storage_not_wanted";
             
 	    // decide upon header information if a specific file should be stored to the cache or not
 	    // if the storage was requested by prefetching, the request map is null
 	    
 	    // check status code
-	    if (!((responseStatus.startsWith("200")) || (responseStatus.startsWith("203")))) return "bad_status_" + responseStatus.substring(0,3);
+	    if (!((this.responseStatus.startsWith("200")) || (this.responseStatus.startsWith("203")))) return "bad_status_" + this.responseStatus.substring(0,3);
 	    
 	    // check storage location
 	    // sometimes a file name is equal to a path name in the same directory;
 	    // or sometimes a file name is equal a directory name created earlier;
 	    // we cannot match that here in the cache file path and therefore omit writing into the cache
-	    if ((cacheFile.getParentFile().isFile()) || (cacheFile.isDirectory())) return "path_ambiguous";
-	    if (cacheFile.toString().indexOf("..") >= 0) return "path_dangerous";
+	    if ((this.cacheFile.getParentFile().isFile()) || (this.cacheFile.isDirectory())) return "path_ambiguous";
+	    if (this.cacheFile.toString().indexOf("..") >= 0) return "path_dangerous";
             
 	    // -CGI access in request
 	    // CGI access makes the page very individual, and therefore not usable in caches
-        if ((isPOST(nomalizedURLString)) && (!(profile.crawlingQ()))) return "dynamic_post";
-        if (isCGI(nomalizedURLString)) return "dynamic_cgi";
+        if ((isPOST(this.nomalizedURLString)) && (!(this.profile.crawlingQ()))) return "dynamic_post";
+        if (isCGI(this.nomalizedURLString)) return "dynamic_cgi";
 	    
 	    // -authorization cases in request
 	    // authorization makes pages very individual, and therefore we cannot use the
 	    // content in the cache
-	    if ((requestHeader != null) && (requestHeader.containsKey(httpHeader.AUTHORIZATION))) return "personalized";
+	    if ((this.requestHeader != null) && (this.requestHeader.containsKey(httpHeader.AUTHORIZATION))) return "personalized";
 	    
 	    // -ranges in request and response
 	    // we do not cache partial content
-	    if ((requestHeader != null) && (requestHeader.containsKey(httpHeader.RANGE))) return "partial";
-	    if ((responseHeader != null) && (responseHeader.containsKey(httpHeader.CONTENT_RANGE))) return "partial";
+	    if ((this.requestHeader != null) && (this.requestHeader.containsKey(httpHeader.RANGE))) return "partial";
+	    if ((this.responseHeader != null) && (this.responseHeader.containsKey(httpHeader.CONTENT_RANGE))) return "partial";
 	    
 	    // -if-modified-since in request
 	    // we do not care about if-modified-since, because this case only occurres if the
@@ -657,8 +654,8 @@ public final class plasmaHTCache {
 	    // -pragma in response
 	    // if we have a pragma non-cache, we don't cache. usually if this is wanted from
 	    // the server, it makes sense
-	    if ((responseHeader.containsKey(httpHeader.PRAGMA)) &&
-		(((String) responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return "controlled_no_cache";
+	    if ((this.responseHeader.containsKey(httpHeader.PRAGMA)) &&
+		(((String) this.responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return "controlled_no_cache";
 	    
 	    // -expires in response
 	    // we do not care about expires, because at the time this is called the data is
@@ -666,12 +663,12 @@ public final class plasmaHTCache {
 	    
 	    // -cache-control in response
 	    // the cache-control has many value options.
-	    String cacheControl = (String) responseHeader.get(httpHeader.CACHE_CONTROL);
+	    String cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
 	    if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("MAX-AGE=")) {
                     // we need also the load date
-                    Date date = responseHeader.date();
+                    Date date = this.responseHeader.date();
                     if (date == null) return "stale_no_date_given_in_response";
                     try {
                         long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
@@ -696,57 +693,57 @@ public final class plasmaHTCache {
 	    
 	    // -CGI access in request
 	    // CGI access makes the page very individual, and therefore not usable in caches
-	    if (isPOST(nomalizedURLString)) return false;
-	    if (isCGI(nomalizedURLString)) return false;
+	    if (isPOST(this.nomalizedURLString)) return false;
+	    if (isCGI(this.nomalizedURLString)) return false;
 	    
 	    // -authorization cases in request
-	    if (requestHeader.containsKey(httpHeader.AUTHORIZATION)) return false;
+	    if (this.requestHeader.containsKey(httpHeader.AUTHORIZATION)) return false;
 	    
 	    // -ranges in request
 	    // we do not cache partial content
-	    if ((requestHeader != null) && (requestHeader.containsKey(httpHeader.RANGE))) return false;
+	    if ((this.requestHeader != null) && (this.requestHeader.containsKey(httpHeader.RANGE))) return false;
 	    
 	    //Date d1, d2;
 
 	    // -if-modified-since in request
 	    // The entity has to be transferred only if it has
 	    // been modified since the date given by the If-Modified-Since header.
-	    if (requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) {
+	    if (this.requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) {
 		// checking this makes only sense if the cached response contains
 		// a Last-Modified field. If the field does not exist, we go the safe way
-		if (!(responseHeader.containsKey(httpHeader.LAST_MODIFIED))) return false;
+		if (!(this.responseHeader.containsKey(httpHeader.LAST_MODIFIED))) return false;
 		// parse date
                 Date d1, d2;
-		d2 = responseHeader.lastModified(); if (d2 == null) d2 = new Date(serverDate.correctedUTCTime());
-		d1 = requestHeader.ifModifiedSince(); if (d1 == null) d1 = new Date(serverDate.correctedUTCTime());
+		d2 = this.responseHeader.lastModified(); if (d2 == null) d2 = new Date(serverDate.correctedUTCTime());
+		d1 = this.requestHeader.ifModifiedSince(); if (d1 == null) d1 = new Date(serverDate.correctedUTCTime());
 		// finally, we shall treat the cache as stale if the modification time is after the if-.. time
 		if (d2.after(d1)) return false;
 	    }
 	    
-	    boolean isNotPicture = !isPicture(responseHeader);
+	    boolean isNotPicture = !isPicture(this.responseHeader);
 
 	    // -cookies in request
 	    // unfortunately, we should reload in case of a cookie
 	    // but we think that pictures can still be considered as fresh
-	    if ((requestHeader.containsKey(httpHeader.COOKIE)) && (isNotPicture)) return false;
+	    if ((this.requestHeader.containsKey(httpHeader.COOKIE)) && (isNotPicture)) return false;
 	    
 	    // -set-cookie in cached response
 	    // this is a similar case as for COOKIE.
-	    if ((responseHeader.containsKey(httpHeader.SET_COOKIE)) && (isNotPicture)) return false; // too strong
-	    if ((responseHeader.containsKey(httpHeader.SET_COOKIE2)) && (isNotPicture)) return false; // too strong
+	    if ((this.responseHeader.containsKey(httpHeader.SET_COOKIE)) && (isNotPicture)) return false; // too strong
+	    if ((this.responseHeader.containsKey(httpHeader.SET_COOKIE2)) && (isNotPicture)) return false; // too strong
 	    
 	    // -pragma in cached response
 	    // logically, we would not need to care about no-cache pragmas in cached response headers,
 	    // because they cannot exist since they are not written to the cache.
 	    // So this IF should always fail..
-	    if ((responseHeader.containsKey(httpHeader.PRAGMA)) &&
-		(((String) responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return false;
+	    if ((this.responseHeader.containsKey(httpHeader.PRAGMA)) &&
+		(((String) this.responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return false;
 	    
 	    // calculate often needed values for freshness attributes
-	    Date date           = responseHeader.date();
-	    Date expires        = responseHeader.expires();
-	    Date lastModified   = responseHeader.lastModified();
-	    String cacheControl = (String) responseHeader.get(httpHeader.CACHE_CONTROL);
+	    Date date           = this.responseHeader.date();
+	    Date expires        = this.responseHeader.expires();
+	    Date lastModified   = this.responseHeader.lastModified();
+	    String cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
 	    
 	    
 	    // see for documentation also:

@@ -48,6 +48,7 @@
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -55,7 +56,7 @@ import de.anomic.yacy.yacySeed;
 
 public final class transferURL {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) throws InterruptedException {
         if (post == null || ss == null) { return null; }
 
         long start = System.currentTimeMillis();
@@ -69,7 +70,7 @@ public final class transferURL {
         final String iam      = (String) post.get("iam", "");      // seed hash of requester
 //      final String youare   = (String) post.get("youare", "");   // seed hash of the target peer, needed for network stability
 //      final String key      = (String) post.get("key", "");      // transmission key
-        final int urlc        = Integer.parseInt((String) post.get("urlc", ""));    // number of transported urls
+        final int urlc        = Integer.parseInt(post.get("urlc", ""));    // number of transported urls
         final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
         final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
 
@@ -87,13 +88,14 @@ public final class transferURL {
             String urls;
             plasmaCrawlLURL.Entry lEntry;
             for (int i = 0; i < urlc; i++) {
+                serverCore.checkInterruption();
                 urls = (String) post.get("url" + i);
                 if (urls == null) {
                     yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
                 } else {
                     lEntry = sb.urlPool.loadedURL.newEntry(urls, true);
                     if (lEntry != null && blockBlacklist &&
-                        sb.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) {
+                        plasmaSwitchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) {
                         yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName);
                         lEntry = null;
                     }
@@ -122,5 +124,4 @@ public final class transferURL {
         prop.put("result", result);
         return prop;
     }
-
 }

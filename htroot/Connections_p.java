@@ -64,18 +64,29 @@ import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public class Connections_p {
+public final class Connections_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         serverObjects prop = new serverObjects();
                  
+        // determines if name lookup should be done or not
+        boolean doNameLookup = true;
+        if (post.containsKey("nameLookup") && post.get("nameLookup","true").equals("false")) {
+            doNameLookup = false;
+        }
+        
+        // getting the virtualHost string
         String virtualHost = switchboard.getConfig("fileHost","localhost");
         
+        // getting the serverCore thread
         serverThread httpd = switchboard.getThread("10_httpd");
+        
+        // getting the session threadgroup
         ThreadGroup httpSessions = ((serverCore)httpd).getSessionThreadGroup();        
         
+        // getting the server core pool configuration
         GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();  
         
         /* waiting for all threads to finish */
@@ -122,11 +133,14 @@ public class Connections_p {
 
                     
                     // determining if the source is a yacy host
-                    yacySeed seed = yacyCore.seedDB.lookupByIP(userAddress,true,false,false);
-                    if (seed != null) {
-                        if ((seed.hash == yacyCore.seedDB.mySeed.hash) && 
-                            (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
-                            seed = null;
+                    yacySeed seed = null;
+                    if (doNameLookup) {
+                        seed = yacyCore.seedDB.lookupByIP(userAddress,true,false,false);
+                        if (seed != null) {
+                            if ((seed.hash.equals(yacyCore.seedDB.mySeed.hash)) && 
+                                    (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
+                                seed = null;
+                            }
                         }
                     }
                     

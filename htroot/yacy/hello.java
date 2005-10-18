@@ -61,7 +61,7 @@ import de.anomic.yacy.yacyVersion;
 
 public final class hello {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) throws InterruptedException {
         if (post == null || ss == null || yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return null; }
 
         // return variable that accumulates replacements
@@ -71,9 +71,9 @@ public final class hello {
 //      final String iam      = (String) post.get("iam", "");      // complete seed of the requesting peer
 //      final String pattern  = (String) post.get("pattern", "");  //        
 //      final String mytime   = (String) post.get(MYTIME, ""); //
-        final String key      = (String) post.get("key", "");      // transmission key for response
-        final String seed     = (String) post.get(yacySeed.SEED, "");
-        final String countStr = (String) post.get("count", "0");
+        final String key      = post.get("key", "");      // transmission key for response
+        final String seed     = post.get(yacySeed.SEED, "");
+        final String countStr = post.get("count", "0");
         int  i;
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (NumberFormatException e) {count = 0;}
@@ -93,7 +93,9 @@ public final class hello {
         // if the remote client has reported its own IP address and the client supports
         // the port forwarding feature (if client version >= 0.383) then we try to 
         // connect to the reported IP address first
-        if (reportedip.length() > 0 && !clientip.equals(reportedip) && clientversion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING) {
+        if (reportedip.length() > 0 && !clientip.equals(reportedip) && clientversion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING) {            
+            serverCore.checkInterruption();
+            
             // try first the reportedip, since this may be a connect from a port-forwarding host
             prop.put(yacySeed.YOURIP, reportedip);
             remoteSeed.put(yacySeed.IP, reportedip);
@@ -123,6 +125,8 @@ public final class hello {
 
             // we are only allowed to connect to the client IP address if it's not our own address
             if (!isLocalIP) {
+                serverCore.checkInterruption();
+                
                 prop.put(yacySeed.YOURIP, clientip);
                 remoteSeed.put(yacySeed.IP, clientip);
                 urls = yacyClient.queryUrlCount(remoteSeed);
@@ -162,6 +166,7 @@ public final class hello {
                                                         "' to '" + prop.get(yacySeed.YOURTYPE) + "'.");
         }
 
+        serverCore.checkInterruption();
         final StringBuffer seeds = new StringBuffer(768);
         // attach some more seeds, as requested
         if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected() > 0)) {

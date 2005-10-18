@@ -100,7 +100,7 @@ public class wikiCode {
         }
     }
     
-    public String replaceHTML(String result) {
+    public static String replaceHTML(String result) {
         int p0;
 	
 	// avoide html inside

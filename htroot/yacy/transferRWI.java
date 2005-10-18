@@ -46,13 +46,15 @@
 // javac -classpath .:../classes transferRWI.java
 
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -61,7 +63,7 @@ import de.anomic.yacy.yacyDHTAction;
 
 public final class transferRWI {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) throws InterruptedException {
         if (post == null || ss == null) { return null; }
 
         long start = System.currentTimeMillis();
@@ -77,7 +79,7 @@ public final class transferRWI {
 //      final String key      = (String) post.get("key", "");    // transmission key
         final int wordc       = Integer.parseInt((String) post.get("wordc", ""));  // number of different words
         final int entryc      = Integer.parseInt((String) post.get("entryc", "")); // number of entries in indexes
-        final byte[] indexes  = ((String) post.get("indexes", "")).getBytes();     // the indexes, as list of word entries
+        byte[] indexes  = ((String) post.get("indexes", "")).getBytes();     // the indexes, as list of word entries
         final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
 
         // response values
@@ -93,7 +95,7 @@ public final class transferRWI {
             final long startProcess = System.currentTimeMillis();
 
             // decode request
-            ArrayList v = new ArrayList();
+            final LinkedList v = new LinkedList();
             int s = 0;
             int e;
             while (s < indexes.length) {
@@ -101,6 +103,9 @@ public final class transferRWI {
                 if ((e - s) > 0) v.add(new String(indexes, s, e - s));
                 s = e; while (s < indexes.length) if (indexes[s++] >= 32) {s--; break;}
             }
+            // free memory
+            indexes = null;
+            
             // the value-vector should now have the same length as entryc
             if (v.size() != entryc) sb.getLog().logSevere("ERROR WITH ENTRY COUNTER: v=" + v.size() + ", entryc=" + entryc);
 
@@ -114,13 +119,17 @@ public final class transferRWI {
             String[] wordhashes = new String[v.size()];
             int received = 0;
             for (int i = 0; i < v.size(); i++) {
-                estring = (String) v.get(i);
+                serverCore.checkInterruption();
+                
+                estring = (String) v.removeFirst();
                 p = estring.indexOf("{");
                 if (p > 0) {
                     wordHash = estring.substring(0, p);
                     wordhashes[i] = wordHash;
                     entry = new plasmaWordIndexEntry(estring.substring(p));
                     sb.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), true);
+                    serverCore.checkInterruption();
+                    
                     urlHash = entry.getUrlHash();
                     if ((!(unknownURL.contains(urlHash))) &&
                     (!(sb.urlPool.loadedURL.exists(urlHash)))) {
@@ -155,5 +164,4 @@ public final class transferRWI {
         // return rewrite properties
         return prop;
     }
-
 }

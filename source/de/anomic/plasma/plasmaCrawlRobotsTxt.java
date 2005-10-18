@@ -60,7 +60,7 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
 
 public class plasmaCrawlRobotsTxt {
-    private kelondroMap robotsTable;
+    kelondroMap robotsTable;
     private final File robotsTableFile;
     private int bufferkb;
     
@@ -219,6 +219,12 @@ public class plasmaCrawlRobotsTxt {
                 return new Date(Long.valueOf((String) this.mem.get(LOADED_DATE)).longValue());
             }
             return null;
+        }
+        
+        public void setLoadedDate(Date newLoadedDate) {
+            if (newLoadedDate != null) {
+                this.mem.put(LOADED_DATE,Long.toString(newLoadedDate.getTime()));
+            }
         }
         
         public Date getModDate() {

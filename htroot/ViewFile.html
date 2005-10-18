@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy '#[clientname]#': View URL Content</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>View URL Content</h2>
+
+<p><font color="red">
+#(error)#
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader">
+	<td>URL</td>
+	<td><a href="#[url]#">#[url]#</a></td>
+</tr>
+<tr class="TableCellDark">
+	<td>Hash</td>
+	<td><tt>#[hash]#</tt></td>
+</tr>
+<tr class="TableCellLight">
+	<td>Word Count</td>
+	<td><tt>#[wordCount]#</tt></td>
+</tr>
+<tr class="TableCellDark">
+	<td>Description</td>
+	<td><tt>#[desc]#</tt></td>
+</tr>
+<tr class="TableCellLight">
+	<td>Size</td>
+	<td><tt>#[size]#</tt></td>
+</tr>
+<tr class="TableCellDark">
+	<td>View as:</td>
+	<td>
+		<a href="?urlHash=#[hash]#&viewMode=iframe">Original</a> |   
+		<a href="?urlHash=#[hash]#&viewMode=plain">Plain Text</a> |
+		<a href="?urlHash=#[hash]#&viewMode=parsed">Parsed Text</a> |
+		<a href="?urlHash=#[hash]#&viewMode=sentences">Parsed Sentences</a>		
+	</td>
+</tr>
+</table>
+:: <!-- 1 -->
+No URL hash submitted.
+:: <!-- 2 -->
+Unable to find URL Entry in DB
+:: <!-- 3 -->
+Invalid URL
+:: <!-- 4 -->
+Unable to download resource content.
+:: <!-- 5 -->
+Unable to parse resource content.
+#(/error)#
+</font>
+</p>
+<p>
+#(viewMode)#
+:: <!-- 1 -->
+	<h3>Plain Resource Content</h3><br>
+	<tt>#[plainText]#</tt>
+:: <!-- 2 -->
+	<h3>Parsed Resource Content</h3><br>
+	<tt>#[parsedText]#</tt>
+:: <!-- 3 -->
+	<h3>Parsed Resource Sentences</h3><br>
+	<table border="0" cellpadding="2" cellspacing="1">
+		#{sentences}#
+			<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" title="#[sessionName]#">
+				<td>#[nr]#</td>
+				<td><tt>#[text]#</tt></td>
+			</tr>
+		#{/sentences}#
+	</table>	
+:: <!-- 4 -->
+	<h3>Original Resource Content</h3><br>
+	<iframe src="#[url]#" width="800" height="400">
+	</iframe>
+#(/viewMode)#
+</p>
+
+#[footer]#
+</body>
+</html>

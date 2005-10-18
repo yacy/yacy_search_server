@@ -1222,12 +1222,13 @@ public final class httpd implements serverHandler {
         if (respond == null) throw new NullPointerException("The outputstream must not be null.");
         if (conProp == null) throw new NullPointerException("The connection property structure must not be null.");
         if (httpVersion == null) httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER,"HTTP/1.1");
+        if (header == null) header = new httpHeader();
         
         try {                        
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
-                if (httpVersion.equals("HTTP/1.0") && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
+                if (httpVersion.equals(httpHeader.HTTP_VERSION_1_0) && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
                     httpStatusText = (String) httpHeader.http1_0.get(Integer.toString(httpStatusCode));
-                else if (httpVersion.equals("HTTP/1.1") && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
+                else if (httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
                     httpStatusText = (String) httpHeader.http1_1.get(Integer.toString(httpStatusCode));
                 else httpStatusText = "Unknown";
             }
@@ -1389,45 +1390,5 @@ public final class httpd implements serverHandler {
             }
         } catch (Exception e) {}    
         return false;
-    }    
-    
-    
-//  public static boolean isTextMime(String mime, Set whitelist) {
-//  if (whitelist.contains(mime)) return true;
-//  // some mime-types are given as "text/html; charset=...", so look for ";"
-//  if (mime.length() == 0) return false;
-//  int pos = mime.indexOf(';');
-//  if (pos < 0) return false;
-//  return whitelist.contains(mime.substring(0, pos));
-//  }
+    }       
 }
-
-/*
- ###
- ### Messages of the Server
- ###
- 
- # success Messages
- HTTPStatus200 = OK; The URL was found. It contents follows.
- HTTPStatus201 = Created; A URL was created in response to a POST.
- HTTPStatus202 = Accepted; The request was accepted for processing later.
- HTTPStatus203 = Non-Authoritative; The information here is unofficial.
- HTTPStatus204 = No Response; The request is successful, but there is no data to send.
- 
- # redirection
- HTTPStatus300 = Moved; The URL has permanently moved to a new location.
- HTTPStatus301 = Found; The URL can be temporarily found at a new location.
- 
- # client errors
- HTTPStatus400 = Bad Request; Syntax error in the request.
- HTTPStatus401 = Unauthorized; The client is not authorized to access this web page.
- HTTPStatus402 = Payment Required; A payment is required to access this web page.
- HTTPStatus403 = Forbidden; This URL is forbidden. No authorization is required, it won't help.
- HTTPStatus404 = Not Found; This page is not on the server.
- 
- # server errors
- HTTPStatus500 = Internal Error; The server encountered an unexpected error.
- HTTPStatus501 = Not Implemented; The client requested an unimplemented feature.
- HTTPStatus502 = Service Overloaded; The server reached the maximum number of connections.
- HTTPStatus503 = Gateway timeout; Fetching data from remote service failed.
- */

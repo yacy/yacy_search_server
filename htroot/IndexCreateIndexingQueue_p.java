@@ -166,7 +166,7 @@ public class IndexCreateIndexingQueue_p {
             } catch (IOException e) {}
 
             prop.put("indexing-queue_num", entryCount);//num entries in queue
-            prop.put("indexing-queue_totalSize", Status.bytesToString(totalSize));//num entries in queue 
+            prop.put("indexing-queue_totalSize", bytesToString(totalSize));//num entries in queue 
             prop.put("indexing-queue_list", entryCount);
         }
         

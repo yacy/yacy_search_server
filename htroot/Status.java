@@ -48,6 +48,7 @@
 
 import java.lang.Math;
 import java.text.DecimalFormat;
+import java.util.Date;
 import java.io.File;
 
 import de.anomic.http.httpHeader;
@@ -71,6 +72,16 @@ public class Status {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
 
+        if (post != null) {
+            if (post.containsKey("pausecrawlqueue")) {
+                ((plasmaSwitchboard)env).pauseCrawling();
+            } else if (post.containsKey("continuecrawlqueue")) {
+                ((plasmaSwitchboard)env).continueCrawling();
+            }   
+            prop.put("LOCATION","");
+            return prop;
+        }
+        
         /*
           versionProbe=http://www.anomic.de/AnomicHTTPProxy/release.txt
           superseedFile=superseed.txt
@@ -252,6 +263,7 @@ public class Status {
         
 
         // return rewrite properties
+        prop.put("date",(new Date()).toString());
         return prop;
     }
 

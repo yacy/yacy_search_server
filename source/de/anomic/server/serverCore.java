@@ -578,8 +578,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             }
             
             super.close();  
-        }
-        
+        }        
     }
     
     public final class SessionFactory implements org.apache.commons.pool.PoolableObjectFactory {
@@ -707,6 +706,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.stopped = stopped;            
         }
         
+        public boolean isStopped() {
+            return this.stopped;
+        }
+        
         public void close() {
             if (this.isAlive()) {
                 try {
@@ -817,7 +820,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.running = true;
             
             // The thread keeps running.
-            while (!this.stopped && !Thread.interrupted()) {
+            while (!this.stopped && !this.isInterrupted()) {
                 if (this.done)  {
                     // We are waiting for a task now.
                     synchronized (this)  {
@@ -1113,6 +1116,12 @@ public final class serverCore extends serverAbstractThread implements serverThre
     protected void finalize() throws Throwable {
         if (!this.theSessionPool.isClosed) this.theSessionPool.close();
         super.finalize();
+    }
+    
+    public static final void checkInterruption() throws InterruptedException {
+        Thread currentThread = Thread.currentThread();
+        if (currentThread.isInterrupted()) throw new InterruptedException();  
+        if ((currentThread instanceof serverCore.Session) && ((serverCore.Session)currentThread).isStopped()) throw new InterruptedException();
     }
 
 }

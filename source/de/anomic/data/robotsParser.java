@@ -197,7 +197,10 @@ public final class robotsParser{
                     robotsTxt = (byte[])result[1];
                     eTag = (String) result[2];
                     modDate = (Date) result[3];
-                }                
+                } else if (robotsTxt4Host != null) {
+                    robotsTxt4Host.setLoadedDate(new Date());
+                    plasmaSwitchboard.robots.addEntry(robotsTxt4Host);
+                }
             } catch (Exception e) {
                 serverLog.logSevere("ROBOTS","Unable to download the robots.txt file from URL '" + robotsURL + "'. " + e.getMessage());
             }
@@ -218,7 +221,7 @@ public final class robotsParser{
                 
                 // storing the data into the robots DB
                 robotsTxt4Host = plasmaSwitchboard.robots.addEntry(urlHostPort,denyPath,new Date(),modDate,eTag);
-            }
+            } 
         }        
         
         if (robotsTxt4Host.isDisallowed(nexturl.getPath())) {
@@ -229,7 +232,7 @@ public final class robotsParser{
     
     private static Object[] downloadRobotsTxt(URL robotsURL, int redirectionCount, plasmaCrawlRobotsTxt.Entry entry) throws Exception {
         
-        if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null};
+        if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
         redirectionCount--;
         
         boolean accessCompletelyRestricted = false;
@@ -253,7 +256,7 @@ public final class robotsParser{
                 oldEtag = entry.getETag();
                 reqHeaders = new httpHeader();
                 Date modDate = entry.getModDate();
-                if (modDate != null) reqHeaders.put(httpHeader.IF_MODIFIED_SINCE,entry.getModDate());
+                if (modDate != null) reqHeaders.put(httpHeader.IF_MODIFIED_SINCE,httpc.dateString(entry.getModDate()));
             }
             
             httpc.response res = con.GET(robotsURL.getPath(), reqHeaders);

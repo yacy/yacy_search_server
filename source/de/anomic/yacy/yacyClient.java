@@ -696,19 +696,19 @@ public final class yacyClient {
         try {
             final plasmaSwitchboard sb = new plasmaSwitchboard(args[0], "httpProxy.init", "DATA/SETTINGS/httpProxy.conf");
             final yacyCore core = new yacyCore(sb);
-            core.peerActions.loadSeedLists();
-            final yacySeed target = core.seedDB.getConnected(args[1]);
+            yacyCore.peerActions.loadSeedLists();
+            final yacySeed target = yacyCore.seedDB.getConnected(args[1]);
             final String wordhashe = plasmaWordIndexEntry.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             final HashMap result = nxTools.table(httpc.wget(
             new URL("http://" + target.getAddress() +
-            "/yacy/search.html?myseed=" + core.seedDB.mySeed.genSeedStr(null) +
+            "/yacy/search.html?myseed=" + yacyCore.seedDB.mySeed.genSeedStr(null) +
             "&youare=" + target.hash + "&key=" +
-            "&myseed=" + core.seedDB.mySeed.genSeedStr(null) +
+            "&myseed=" + yacyCore.seedDB.mySeed.genSeedStr(null) +
             "&count=10&resource=global" +
             "&query=" + wordhashe),
-            5000, null, null, core.seedDB.sb.remoteProxyHost, core.seedDB.sb.remoteProxyPort));
+            5000, null, null, yacyCore.seedDB.sb.remoteProxyHost, yacyCore.seedDB.sb.remoteProxyPort));
             System.out.println("Result=" + result.toString());
         } catch (Exception e) {
             e.printStackTrace();

@@ -70,7 +70,7 @@
 </tr>
 <tr class="TableCellLight">
 	<td>Loader Queue</td>
-	<td>#[loaderQueueSize]# | #[loaderQueueMax]# #(loaderPaused)#::(paused)#(/loaderPaused)#</td>
+	<td>#[loaderQueueSize]# | #[loaderQueueMax]# #(loaderPaused)#::(paused)#(/loaderPaused)#&nbsp;<a href="Status.html?#(loaderPaused)#pausecrawlqueue::continuecrawlqueue#(/loaderPaused)#=" title="#(loaderPaused)#pause crawling::continue crawling#(/loaderPaused)#"><img src="env/grafics/#(loaderPaused)#stop.gif::start.gif#(/loaderPaused)#" border="0"></a></td>
 	<td>[<a href="IndexCreateLoaderQueue_p.html">Details</a>]</td>
 </tr>
 <tr class="TableCellDark">

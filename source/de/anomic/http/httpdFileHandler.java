@@ -534,6 +534,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             tp.put("clientname", switchboard.getConfig("peerName", "anomic"));
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (InvocationTargetException e) {
+                            if (e.getCause() instanceof InterruptedException) {
+                                throw new InterruptedException(e.getCause().getMessage());
+                            }                            
+                            
                             this.theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                                     e.getMessage() +
                                     " target exception at " + targetClass + ": " +

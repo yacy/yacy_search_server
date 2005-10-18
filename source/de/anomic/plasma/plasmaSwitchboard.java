@@ -1476,7 +1476,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 int p;
                 URL url;
                 plasmaCrawlLURL.Entry urlentry;
-                String urlstring, urlname, filename;
+                String urlstring, urlname, filename, urlhash;
                 String host, hash, address, descr = "";
                 yacySeed seed;
                 plasmaSnippetCache.result snippet;
@@ -1484,6 +1484,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 while ((acc.hasMoreElements()) && (i < query.wantedResults)) {
                     urlentry = acc.nextElement();
                     url = urlentry.url();
+                    urlhash = urlentry.hash();
                     host = url.getHost();
                     if (host.endsWith(".yacyh")) {
                         // translate host into current IP
@@ -1525,6 +1526,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         } else {
                             prop.put("results_" + i + "_description", descr);
                             prop.put("results_" + i + "_url", urlstring);
+                            prop.put("results_" + i + "_urlhash", urlhash);
                             prop.put("results_" + i + "_urlname", urlname);
                             prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
                             prop.put("results_" + i + "_size", Long.toString(urlentry.size()));

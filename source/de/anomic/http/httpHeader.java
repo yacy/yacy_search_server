@@ -81,6 +81,13 @@ public final class httpHeader extends TreeMap implements Map {
 
     
     /* =============================================================
+     * Constants defining http versions
+     * ============================================================= */
+    public static final String HTTP_VERSION_0_9 = "HTTP/0.9";
+    public static final String HTTP_VERSION_1_0 = "HTTP/1.0";
+    public static final String HTTP_VERSION_1_1 = "HTTP/1.1";
+    
+    /* =============================================================
      * Constants defining http header names
      * ============================================================= */    
     public static final String ACCEPT = "Accept";
