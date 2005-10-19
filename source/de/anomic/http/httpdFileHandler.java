@@ -426,7 +426,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     targetClass = rewriteClassFile(new File(htDefaultPath, testpath));
                     if (!(targetFile.exists())){
                         targetFile = new File(htDocsPath, testpath);
-                        targetClass = rewriteClassFile(new File(htDocsPath, path));
+                        targetClass = rewriteClassFile(targetFile);
                     }
                     if (targetFile.exists()) {
                         path = testpath;
