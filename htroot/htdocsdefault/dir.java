@@ -70,6 +70,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.data.userDB;
 
 public class dir {
 
@@ -112,15 +113,20 @@ public class dir {
         final String downloadAccountBase64MD5 = switchboard.getConfig("downloadAccountBase64MD5", "");
 
         final String logoutAccountBase64MD5 = de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(":"));
-        final String authorizationMD5 = de.anomic.server.serverCodings.encodeMD5Hex(((String) header.get("Authorization", "xxxxxx")).trim().substring(6));
-//      if (logoutAccountBase64.equals(authorization))
-        final boolean adminAuthorization = (adminAccountBase64MD5.length() != 0 &&
-                                            adminAccountBase64MD5.equals(authorizationMD5));
-        final boolean uploadAuthorization = (adminAuthorization ||(uploadAccountBase64MD5.length() != 0 &&
-                                                                   uploadAccountBase64MD5.equals(authorizationMD5)));
-        final boolean downloadAuthorization = (adminAuthorization || uploadAuthorization ||
-                                               downloadAccountBase64MD5.length() == 0 ||
-                                               downloadAccountBase64MD5.equals(authorizationMD5));
+
+        userDB.Entry entry = switchboard.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
+        boolean adminAuthorization, downloadAuthorization, uploadAuthorization;
+        if(entry == null){
+            final String authorizationMD5 = de.anomic.server.serverCodings.encodeMD5Hex(((String) header.get("Authorization", "xxxxxx")).trim().substring(6));
+//          if (logoutAccountBase64.equals(authorization))
+            adminAuthorization = (adminAccountBase64MD5.length() != 0 && adminAccountBase64MD5.equals(authorizationMD5));
+            uploadAuthorization = (adminAuthorization ||(uploadAccountBase64MD5.length() != 0 && uploadAccountBase64MD5.equals(authorizationMD5)));
+            downloadAuthorization = (adminAuthorization || uploadAuthorization || downloadAccountBase64MD5.length() == 0 || downloadAccountBase64MD5.equals(authorizationMD5));
+        }else{ //userDB
+            adminAuthorization=entry.hasAdminRight();
+            uploadAuthorization=entry.hasUploadRight();
+            downloadAuthorization=entry.hasDownloadRight();
+        }
 
         // do authentitcate processes by triggering the http authenticate method
         if (action.equals("authenticateAdmin") && !adminAuthorization) {
