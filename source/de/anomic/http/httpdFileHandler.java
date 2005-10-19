@@ -415,17 +415,20 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         try {
             // locate the file
             if (!(path.startsWith("/"))) path = "/" + path; // attach leading slash
-            File   targetFile  = new File(htDefaultPath, path);
+            File   targetFile  = getLocalizedFile(path);
             String targetExt   = conProp.getProperty("EXT","");
             if (path.endsWith("/")) {
                 String testpath;
                 // attach default file name
                 for (int i = 0; i < defaultFiles.length; i++) {
                     testpath = path + defaultFiles[i];
-                    targetFile = new File(htDefaultPath, testpath);
+                    targetFile = getLocalizedFile(testpath);
                     if (!(targetFile.exists())) targetFile = new File(htDocsPath, testpath);
                     if (targetFile.exists()) {path = testpath; break;}
                 }
+            }else{
+                    if (!(targetFile.exists())) targetFile = new File(htDocsPath, path);
+                
             }
             
             File targetClass = rewriteClassFile(targetFile);
