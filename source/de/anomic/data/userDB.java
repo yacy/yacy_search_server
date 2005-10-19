@@ -304,7 +304,12 @@ public final class userDB {
         }        
         
 		public boolean canSurf(){
+            //TODO: more returnvalues.
+            //Exception if false, or CONSTANTS
 			long timeUsed=this.updateLastAccess(true);
+            if(this.hasProxyRight() == false)
+                return false;
+
 			if( this.getTimeLimit() == null || this.getTimeLimit().longValue() <= 0 || ( timeUsed < this.getTimeLimit().longValue()) )//no timelimit or timelimit not reached
 				return true;
 			else

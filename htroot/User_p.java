@@ -77,8 +77,10 @@ public class User_p {
         prop.put("page_timelimit", "");
         prop.put("page_timeused", "");
         prop.put("page_timerange", "");
+        prop.put("page_proxyRight", 1);
         prop.put("page_downloadRight", 0);
         prop.put("page_uploadRight", 0);
+        prop.put("page_adminRight", 0);
         
         prop.put("page_users", 0);
 
@@ -103,8 +105,10 @@ public class User_p {
 	            prop.put("page_address", entry.getAddress());
 		        prop.put("page_timelimit", entry.getTimeLimit());
 			    prop.put("page_timeused", entry.getTimeUsed());
+                prop.put("page_proxyRight", (entry.hasProxyRight()?1:0));
                 prop.put("page_uploadRight", (entry.hasUploadRight()?1:0));
                 prop.put("page_downloadRight", (entry.hasDownloadRight()?1:0));
+                prop.put("page_adminRight", (entry.hasAdminRight()?1:0));
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
 			}
@@ -126,8 +130,10 @@ public class User_p {
             String address=(String)post.get("address");
             String timeLimit=(String)post.get("timelimit");
             String timeUsed=(String)post.get("timeused");
+            String proxyRight=( post.containsKey("proxyRight")&&((String)post.get("proxyRight")).equals("on") ? "true" : "false");
             String uploadRight=( post.containsKey("uploadRight")&&((String)post.get("uploadRight")).equals("on") ? "true" : "false");
             String downloadRight=( post.containsKey("downloadRight")&&((String)post.get("downloadRight")).equals("on") ? "true" : "false");
+            String adminRight=( post.containsKey("adminRight")&&((String)post.get("adminRight")).equals("on") ? "true" : "false");
             HashMap mem=new HashMap();
             if( post.get("current_user").equals("newuser")){ //new user
                 
@@ -139,8 +145,10 @@ public class User_p {
 				mem.put(userDB.Entry.USER_ADDRESS, address);
 				mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
 	            mem.put(userDB.Entry.TIME_USED, timeUsed);
+                mem.put(userDB.Entry.PROXY_RIGHT, proxyRight);
                 mem.put(userDB.Entry.UPLOAD_RIGHT, uploadRight);
                 mem.put(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
+                mem.put(userDB.Entry.ADMIN_RIGHT, adminRight);
 
                 entry=sb.userDB.createEntry(username, mem);
                 sb.userDB.addEntry(entry);
@@ -160,8 +168,10 @@ public class User_p {
 					    entry.setProperty(userDB.Entry.USER_ADDRESS, address);
 						entry.setProperty(userDB.Entry.TIME_LIMIT, timeLimit);
 	                    entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
+                        entry.setProperty(userDB.Entry.PROXY_RIGHT, proxyRight);
                         entry.setProperty(userDB.Entry.UPLOAD_RIGHT, uploadRight);
                         entry.setProperty(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
+                        entry.setProperty(userDB.Entry.ADMIN_RIGHT, adminRight);
 		            }catch (IOException e){
 					}
                 }else{

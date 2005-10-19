@@ -109,6 +109,8 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.data.userDB;
+
 
 public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
     
@@ -117,6 +119,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     private static final serverClassLoader provider;
     private static final HashMap templates = new HashMap();
     private static serverSwitch switchboard;
+    private static plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
     
     private static File htRootPath = null;
     private static File htDocsPath = null;
@@ -311,23 +314,28 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                 return;
-            } else if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6)))) {
-                // Authentication successfull. remove brute-force flag
-                serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
             } else {
-                // a wrong authentication was given. Ask again
-                String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
-                serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
-                if (attempts == null)
-                    serverCore.bfHost.put(clientIP, new Integer(1));
-                else
-                    serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
+                userDB.Entry entry = sb.userDB.proxyAuth(authorization);
+                if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6)))) {
+                    // Authentication successfull. remove brute-force flag
+                    serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+                }else if(entry != null && entry.hasAdminRight()){
+                    serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+                } else {
+                    // a wrong authentication was given. Ask again
+                    String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
+                    serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
+                    Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
+                    if (attempts == null)
+                        serverCore.bfHost.put(clientIP, new Integer(1));
+                    else
+                        serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
 
-                httpHeader headers = getDefaultHeaders(path);
-                headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
-                httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
+                    httpHeader headers = getDefaultHeaders(path);
+                    headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
+                    httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                 return;
+                }
             }
         }
         

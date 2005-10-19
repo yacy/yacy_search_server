@@ -58,8 +58,8 @@ Current User: #[username]#
  <tr>
  <td>Rights</td>
  <td>
-  <input type="checkbox" name="proxyRight" checked disabled>Proxy<br />
-  <input type="checkbox" name="adminRight" disabled>Admin<br />
+  <input type="checkbox" name="proxyRight" #(proxyRight)#::checked#(/proxyRight)#>Proxy<br />
+  <input type="checkbox" name="adminRight" #(adminRight)#::checked#(/adminRight)#>Admin<br />
   <input type="checkbox" name="uploadRight" #(uploadRight)#::checked#(/uploadRight)#>Fileshare-Upload<br />
   <input type="checkbox" name="downloadRight" #(downloadRight)#::checked#(/downloadRight)#>Fileshare-Download<br />
  </td>
