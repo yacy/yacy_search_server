@@ -212,6 +212,10 @@ public final class userDB {
         public static final String TIME_LIMIT = "timeLimit";
         public static final String TRAFFIC_SIZE = "trafficSize";
         public static final String TRAFFIC_LIMIT = "trafficLimit";
+        public static final String UPLOAD_RIGHT = "uploadRight";
+        public static final String DOWNLOAD_RIGHT = "downloadRight";
+        public static final String ADMIN_RIGHT = "adminRight";
+        public static final String PROXY_RIGHT = "proxyRight";
         
         // this is a simple record structure that hold all properties of a user
         private Map mem;
@@ -363,6 +367,18 @@ public final class userDB {
         
         public String getProperty(String propName, String defaultValue) {
             return (this.mem.containsKey(propName)?(String)this.mem.get(propName):defaultValue);
+        }
+        public boolean hasUploadRight() {
+            return (this.mem.containsKey(UPLOAD_RIGHT)?((String)this.mem.get(UPLOAD_RIGHT)).equals("true"):false);
+        }
+        public boolean hasDownloadRight() {
+            return (this.mem.containsKey(DOWNLOAD_RIGHT)?((String)this.mem.get(DOWNLOAD_RIGHT)).equals("true"):false);
+        }
+        public boolean hasProxyRight() {
+            return (this.mem.containsKey(PROXY_RIGHT)?((String)this.mem.get(PROXY_RIGHT)).equals("true"):false);
+        }
+        public boolean hasAdminRight() {
+            return (this.mem.containsKey(ADMIN_RIGHT)?((String)this.mem.get(ADMIN_RIGHT)).equals("true"):false);
         }
         
         public String toString() {

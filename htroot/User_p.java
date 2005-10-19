@@ -77,6 +77,9 @@ public class User_p {
         prop.put("page_timelimit", "");
         prop.put("page_timeused", "");
         prop.put("page_timerange", "");
+        prop.put("page_downloadRight", 0);
+        prop.put("page_uploadRight", 0);
+        
         prop.put("page_users", 0);
 
         if(sb.userDB == null)
@@ -100,37 +103,33 @@ public class User_p {
 	            prop.put("page_address", entry.getAddress());
 		        prop.put("page_timelimit", entry.getTimeLimit());
 			    prop.put("page_timeused", entry.getTimeUsed());
+                prop.put("page_uploadRight", (entry.hasUploadRight()?1:0));
+                prop.put("page_downloadRight", (entry.hasDownloadRight()?1:0));
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
 			}
-        } else if(post.containsKey("change")) { //New User
+        } else if(post.containsKey("change")) { //New User / edit User
             prop.put("page", 1); //results
             prop.put("page_text", 0);
             prop.put("page_error", 0);
 
             
-            String username="";
-            String pw="";
-            String pw2="";
-            String firstName="";
-            String lastName="";
-            String address="";
-            String timeLimit="0";
-            String timeUsed="0";
+            String username=(String)post.get("username");
+            String pw=(String)post.get("password");
+            String pw2=(String)post.get("password2");
+            if(! pw.equals(pw2)){
+                prop.put("page_error", 2); //PW does not match
+                return prop;
+            }
+            String firstName=(String)post.get("firstname");
+            String lastName=(String)post.get("lastname");
+            String address=(String)post.get("address");
+            String timeLimit=(String)post.get("timelimit");
+            String timeUsed=(String)post.get("timeused");
+            String uploadRight=( post.containsKey("uploadRight")&&((String)post.get("uploadRight")).equals("on") ? "true" : "false");
+            String downloadRight=( post.containsKey("downloadRight")&&((String)post.get("downloadRight")).equals("on") ? "true" : "false");
             HashMap mem=new HashMap();
             if( post.get("current_user").equals("newuser")){ //new user
-                username=(String)post.get("username");
-                pw=(String)post.get("password");
-                pw2=(String)post.get("password2");
-                if(! pw.equals(pw2)){
-                    prop.put("page_error", 2); //PW does not match
-                    return prop;
-                }
-                firstName=(String)post.get("firstname");
-                lastName=(String)post.get("lastname");
-                address=(String)post.get("address");
-                timeLimit=(String)post.get("timelimit");
-                timeUsed=(String)post.get("timeused");
                 
 				if(!pw.equals("")){ //change only if set
 	                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
@@ -140,6 +139,8 @@ public class User_p {
 				mem.put(userDB.Entry.USER_ADDRESS, address);
 				mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
 	            mem.put(userDB.Entry.TIME_USED, timeUsed);
+                mem.put(userDB.Entry.UPLOAD_RIGHT, uploadRight);
+                mem.put(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
 
                 entry=sb.userDB.createEntry(username, mem);
                 sb.userDB.addEntry(entry);
@@ -147,18 +148,6 @@ public class User_p {
 				prop.put("page_text", 1);
                 
             } else { //edit user
-                username=(String)post.get("username");
-                pw=(String)post.get("password");
-                pw2=(String)post.get("password2");
-                if(! pw.equals(pw2)){
-                    prop.put("page_error", 1); //PW does not match
-                    return prop;
-                }
-                firstName=(String)post.get("firstname");
-                lastName=(String)post.get("lastname");
-                address=(String)post.get("address");
-                timeLimit=(String)post.get("timelimit");
-                timeUsed=(String)post.get("timeused");
 
                 entry = sb.userDB.getEntry(username);
 				if(entry != null){
@@ -171,6 +160,8 @@ public class User_p {
 					    entry.setProperty(userDB.Entry.USER_ADDRESS, address);
 						entry.setProperty(userDB.Entry.TIME_LIMIT, timeLimit);
 	                    entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
+                        entry.setProperty(userDB.Entry.UPLOAD_RIGHT, uploadRight);
+                        entry.setProperty(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
 		            }catch (IOException e){
 					}
                 }else{
