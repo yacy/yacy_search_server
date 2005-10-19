@@ -434,7 +434,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     }
                 }
             }else{
-                    if (!(targetFile.exists())){
+                    if (!(targetFile.exists()) && (!(path.endsWith("png")||path.endsWith("gif")))){
                         targetFile = new File(htDocsPath, path);
                         targetClass = rewriteClassFile(new File(htDocsPath, path));
                     }else{
