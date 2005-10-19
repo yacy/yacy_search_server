@@ -66,20 +66,18 @@ public final class transferRWI {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) throws InterruptedException {
         if (post == null || ss == null) { return null; }
 
-        long start = System.currentTimeMillis();
-
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         final serverObjects prop = new serverObjects();
         if (prop == null || sb == null) { return null; }
 
         // request values
-        final String iam      = (String) post.get("iam", "");    // seed hash of requester
-//      final String youare   = (String) post.get("youare", ""); // seed hash of the target peer, needed for network stability
-//      final String key      = (String) post.get("key", "");    // transmission key
-        final int wordc       = Integer.parseInt((String) post.get("wordc", ""));  // number of different words
-        final int entryc      = Integer.parseInt((String) post.get("entryc", "")); // number of entries in indexes
-        byte[] indexes  = ((String) post.get("indexes", "")).getBytes();     // the indexes, as list of word entries
+        final String iam      = post.get("iam", "");                      // seed hash of requester
+//      final String youare   = (String) post.get("youare", "");          // seed hash of the target peer, needed for network stability
+//      final String key      = (String) post.get("key", "");             // transmission key
+        final int wordc       = Integer.parseInt(post.get("wordc", ""));  // number of different words
+        final int entryc      = Integer.parseInt(post.get("entryc", "")); // number of entries in indexes
+        byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
         final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
 
         // response values
@@ -115,17 +113,18 @@ public final class transferRWI {
             String wordHash;
             String urlHash;
             plasmaWordIndexEntry entry;
+            int wordhashesSize = v.size();
             final HashSet unknownURL = new HashSet();
             String[] wordhashes = new String[v.size()];
             int received = 0;
-            for (int i = 0; i < v.size(); i++) {
+            for (int i = 0; i < wordhashesSize; i++) {
                 serverCore.checkInterruption();
                 
                 estring = (String) v.removeFirst();
                 p = estring.indexOf("{");
                 if (p > 0) {
                     wordHash = estring.substring(0, p);
-                    wordhashes[i] = wordHash;
+                    wordhashes[received] = wordHash;
                     entry = new plasmaWordIndexEntry(estring.substring(p));
                     sb.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), true);
                     serverCore.checkInterruption();
@@ -141,7 +140,8 @@ public final class transferRWI {
             yacyCore.seedDB.mySeed.incRI(received);
 
             // finally compose the unknownURL hash list
-            final Iterator it = unknownURL.iterator();            
+            final Iterator it = unknownURL.iterator();  
+            unknownURLs.ensureCapacity(unknownURL.size()*13);
             while (it.hasNext()) {
                 unknownURLs.append(",").append((String) it.next());
             }
@@ -149,8 +149,8 @@ public final class transferRWI {
             if (wordhashes.length == 0) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
             } else {
-                final double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[wordhashes.length - 1])) / 2.0;
-                sb.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[wordhashes.length - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
+                final double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[received - 1])) / 2.0;
+                sb.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
             }
             result = "ok";
         } else {

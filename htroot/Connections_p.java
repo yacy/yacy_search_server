@@ -73,7 +73,7 @@ public final class Connections_p {
                  
         // determines if name lookup should be done or not
         boolean doNameLookup = true;
-        if (post.containsKey("nameLookup") && post.get("nameLookup","true").equals("false")) {
+        if ((post != null) && post.containsKey("nameLookup") && post.get("nameLookup","true").equals("false")) {
             doNameLookup = false;
         }
         
