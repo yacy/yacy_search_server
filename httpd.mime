@@ -37,6 +37,7 @@ mov     = video/quicktime
 mpe     = video/mpeg
 mpeg    = video/mpeg
 mpg     = video/mpeg
+ogg     = audio/ogg-vorbis
 pac     = application/x-ns-proxy-autoconfig
 pdf     = application/pdf
 php     = application/x-httpd-php
