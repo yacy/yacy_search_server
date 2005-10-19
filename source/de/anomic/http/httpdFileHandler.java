@@ -411,7 +411,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             out.flush();
             return;
         }
-        
+        File targetClass=null;
         try {
             // locate the file
             if (!(path.startsWith("/"))) path = "/" + path; // attach leading slash
@@ -423,15 +423,27 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 for (int i = 0; i < defaultFiles.length; i++) {
                     testpath = path + defaultFiles[i];
                     targetFile = getLocalizedFile(testpath);
-                    if (!(targetFile.exists())) targetFile = new File(htDocsPath, testpath);
-                    if (targetFile.exists()) {path = testpath; break;}
+                    targetClass = rewriteClassFile(new File(htDefaultPath, testpath));
+                    if (!(targetFile.exists())){
+                        targetFile = new File(htDocsPath, testpath);
+                        targetClass = rewriteClassFile(new File(htDocsPath, path));
+                    }
+                    if (targetFile.exists()) {
+                        path = testpath;
+                        break;
+                    }
                 }
             }else{
-                    if (!(targetFile.exists())) targetFile = new File(htDocsPath, path);
+                    if (!(targetFile.exists())){
+                        targetFile = new File(htDocsPath, path);
+                        targetClass = rewriteClassFile(new File(htDocsPath, path));
+                    }else{
+                        targetClass = rewriteClassFile(new File(htDefaultPath, path));
+                    }
                 
             }
             
-            File targetClass = rewriteClassFile(targetFile);
+            //File targetClass = rewriteClassFile(targetFile);
             Date targetDate;
             
             if ((targetClass != null) && ((path.endsWith("png") || (path.endsWith("gif"))))) {
