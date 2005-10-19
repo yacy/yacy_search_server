@@ -111,13 +111,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
-
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
 import de.anomic.data.userDB;
@@ -139,7 +137,6 @@ import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyNewsPool;
 
@@ -515,7 +512,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	public static plasmaSwitchboard getSwitchboard(){
 		return sb;
 	}
-    
+
+    /**
+     * This method changes the HTCache size.<br>
+     * @param new cache size in mb
+     */
+    public final void setCacheSize(long newCacheSize) {
+        this.cacheManager.setCacheSize(1048576 * newCacheSize);
+    }
+
     public boolean onlineCaution() {
         try {
             return System.currentTimeMillis() - proxyLastAccess < Integer.parseInt(getConfig("onlineCautionDelay", "30000"));
@@ -782,7 +787,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         return hasDoneSomething;
     }
-    
+
     /**
      * With this function the crawling process can be paused 
      */

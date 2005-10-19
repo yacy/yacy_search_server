@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 12.02.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -165,8 +168,20 @@ public final class plasmaHTCache {
         this.responseHeaderDB.set(urlHash, responseHeader);
     }
 
+    /**
+     * This method changes the HTCache size.<br>
+     * @param new cache size in bytes
+     */
+    public final void setCacheSize(long newCacheSize) {
+        this.maxCacheSize = newCacheSize;
+    }
+
+    /**
+     * This method returns the free HTCache size.<br>
+     * @return the cache size in bytes
+     */
     public long getFreeSize() {
-        return (this.currCacheSize > this.maxCacheSize) ? 0 : this.maxCacheSize - this.currCacheSize;
+        return (this.currCacheSize >= this.maxCacheSize) ? 0 : this.maxCacheSize - this.currCacheSize;
     }  
 
     public boolean writeFile(URL url, byte[] array) {
@@ -414,7 +429,7 @@ public final class plasmaHTCache {
      * @return URL
      */
     public File getCachePath(URL url) {
-        // System.out.println("DEBUG: getCachePath:  IN=" + url.toString());
+//      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
         String remotePath = url.getPath();
         if (!(remotePath.startsWith("/"))) remotePath = "/" + remotePath;
         if (remotePath.endsWith("/")) remotePath = remotePath + "ndx";
@@ -424,7 +439,7 @@ public final class plasmaHTCache {
         remotePath = remotePath.replace(':', '_'); // yes this is not reversible, but that is not needed
         int port = url.getPort();
         if (port < 0) port = 80;
-        // System.out.println("DEBUG: getCachePath: OUT=" + url.getHost() + ((port == 80) ? "" : ("+" + port)) + remotePath);
+//      this.log.logFinest("plasmaHTCache: getCachePath: OUT=" + url.getHost() + ((port == 80) ? "" : ("+" + port)) + remotePath);
         return new File(this.cachePath, url.getHost() + ((port == 80) ? "" : ("+" + port)) + remotePath);
     }
 
@@ -433,8 +448,8 @@ public final class plasmaHTCache {
      * from a given storage path
      */
     public static URL getURL(File cachePath, File f) {
-        // System.out.println("DEBUG: getURL:  IN: Path=[" + cachePath + "]");
-        // System.out.println("DEBUG: getURL:  IN: File=[" + f + "]");
+//      this.log.logFinest("plasmaHTCache: getURL:  IN: Path=[" + cachePath + "]");
+//      this.log.logFinest("plasmaHTCache: getURL:  IN: File=[" + f + "]");
         String s = f.toString().replace('\\', '/');
         String c = cachePath.toString().replace('\\', '/');
         int p = s.lastIndexOf(c);
@@ -450,20 +465,20 @@ public final class plasmaHTCache {
                 else
                     s = s.substring(0, p) + ":80" + s.substring(p);*/
             }
-            if (s.endsWith("ndx")) s = s.substring(0, s.length() - 3);
-            // System.out.println("DEBUG: getURL: OUT=" + s);
-	
+            if (s.endsWith("ndx")) { s = s.substring(0, s.length() - 3); }
+//          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);
+    
             try {
 /*              URL url = null;
                 url = new URL("http://" + s);
-                System.out.println("DEBUG: getURL: URL=" + url.toString());
+                this.log.logFinest("plasmaHTCache: getURL: URL=" + url.toString());
                 return url;//new URL("http://" + s); */
                 return new URL("http://" + s);
             } catch (Exception e) {
                 return null;
             }
         }
-	    return null;
+        return null;
     }
 
     public byte[] loadResource(URL url) {
@@ -570,7 +585,7 @@ public final class plasmaHTCache {
         // to be defined later:
         this.cacheArray     = null;
     }
-	
+    
     public String name() {
         return this.name;
     }        
@@ -595,76 +610,76 @@ public final class plasmaHTCache {
     }
 
     /*
-	public boolean update() {
-	    return ((status == CACHE_FILL) || (status == CACHE_STALE_RELOAD_GOOD));
-	}
-	*/
+    public boolean update() {
+        return ((status == CACHE_FILL) || (status == CACHE_STALE_RELOAD_GOOD));
+    }
+    */
 
     // the following three methods for cache read/write granting shall be as loose as possible
     // but also as strict as necessary to enable caching of most items
-	
+    
     public String shallStoreCacheForProxy() {
             // returns NULL if the answer is TRUE
             // in case of FALSE, the reason as String is returned
-	    
+        
             // check profile
             if (!(this.profile.storeHTCache())) return "storage_not_wanted";
             
-	    // decide upon header information if a specific file should be stored to the cache or not
-	    // if the storage was requested by prefetching, the request map is null
-	    
-	    // check status code
-	    if (!((this.responseStatus.startsWith("200")) || (this.responseStatus.startsWith("203")))) return "bad_status_" + this.responseStatus.substring(0,3);
-	    
-	    // check storage location
-	    // sometimes a file name is equal to a path name in the same directory;
-	    // or sometimes a file name is equal a directory name created earlier;
-	    // we cannot match that here in the cache file path and therefore omit writing into the cache
-	    if ((this.cacheFile.getParentFile().isFile()) || (this.cacheFile.isDirectory())) return "path_ambiguous";
-	    if (this.cacheFile.toString().indexOf("..") >= 0) return "path_dangerous";
+        // decide upon header information if a specific file should be stored to the cache or not
+        // if the storage was requested by prefetching, the request map is null
+        
+        // check status code
+        if (!((this.responseStatus.startsWith("200")) || (this.responseStatus.startsWith("203")))) return "bad_status_" + this.responseStatus.substring(0,3);
+        
+        // check storage location
+        // sometimes a file name is equal to a path name in the same directory;
+        // or sometimes a file name is equal a directory name created earlier;
+        // we cannot match that here in the cache file path and therefore omit writing into the cache
+        if ((this.cacheFile.getParentFile().isFile()) || (this.cacheFile.isDirectory())) return "path_ambiguous";
+        if (this.cacheFile.toString().indexOf("..") >= 0) return "path_dangerous";
             
-	    // -CGI access in request
-	    // CGI access makes the page very individual, and therefore not usable in caches
+        // -CGI access in request
+        // CGI access makes the page very individual, and therefore not usable in caches
         if ((isPOST(this.nomalizedURLString)) && (!(this.profile.crawlingQ()))) return "dynamic_post";
         if (isCGI(this.nomalizedURLString)) return "dynamic_cgi";
-	    
-	    // -authorization cases in request
-	    // authorization makes pages very individual, and therefore we cannot use the
-	    // content in the cache
-	    if ((this.requestHeader != null) && (this.requestHeader.containsKey(httpHeader.AUTHORIZATION))) return "personalized";
-	    
-	    // -ranges in request and response
-	    // we do not cache partial content
-	    if ((this.requestHeader != null) && (this.requestHeader.containsKey(httpHeader.RANGE))) return "partial";
-	    if ((this.responseHeader != null) && (this.responseHeader.containsKey(httpHeader.CONTENT_RANGE))) return "partial";
-	    
-	    // -if-modified-since in request
-	    // we do not care about if-modified-since, because this case only occurres if the
-	    // cache file does not exist, and we need as much info as possible for the indexing
-	    
-	    // -cookies in request
-	    // we do not care about cookies, because that would prevent loading more pages
-	    // from one domain once a request resulted in a client-side stored cookie
-	    
-	    // -set-cookie in response
-	    // we do not care about cookies in responses, because that info comes along
-	    // any/many pages from a server and does not express the validity of the page
-	    // in modes of life-time/expiration or individuality
-	    
-	    // -pragma in response
-	    // if we have a pragma non-cache, we don't cache. usually if this is wanted from
-	    // the server, it makes sense
-	    if ((this.responseHeader.containsKey(httpHeader.PRAGMA)) &&
-		(((String) this.responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return "controlled_no_cache";
-	    
-	    // -expires in response
-	    // we do not care about expires, because at the time this is called the data is
-	    // obvious valid and that header info is used in the indexing later on
-	    
-	    // -cache-control in response
-	    // the cache-control has many value options.
-	    String cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
-	    if (cacheControl != null) {
+        
+        // -authorization cases in request
+        // authorization makes pages very individual, and therefore we cannot use the
+        // content in the cache
+        if ((this.requestHeader != null) && (this.requestHeader.containsKey(httpHeader.AUTHORIZATION))) return "personalized";
+        
+        // -ranges in request and response
+        // we do not cache partial content
+        if ((this.requestHeader != null) && (this.requestHeader.containsKey(httpHeader.RANGE))) return "partial";
+        if ((this.responseHeader != null) && (this.responseHeader.containsKey(httpHeader.CONTENT_RANGE))) return "partial";
+        
+        // -if-modified-since in request
+        // we do not care about if-modified-since, because this case only occurres if the
+        // cache file does not exist, and we need as much info as possible for the indexing
+        
+        // -cookies in request
+        // we do not care about cookies, because that would prevent loading more pages
+        // from one domain once a request resulted in a client-side stored cookie
+        
+        // -set-cookie in response
+        // we do not care about cookies in responses, because that info comes along
+        // any/many pages from a server and does not express the validity of the page
+        // in modes of life-time/expiration or individuality
+        
+        // -pragma in response
+        // if we have a pragma non-cache, we don't cache. usually if this is wanted from
+        // the server, it makes sense
+        if ((this.responseHeader.containsKey(httpHeader.PRAGMA)) &&
+        (((String) this.responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return "controlled_no_cache";
+        
+        // -expires in response
+        // we do not care about expires, because at the time this is called the data is
+        // obvious valid and that header info is used in the indexing later on
+        
+        // -cache-control in response
+        // the cache-control has many value options.
+        String cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
+        if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("MAX-AGE=")) {
                     // we need also the load date
@@ -680,107 +695,105 @@ public final class plasmaHTCache {
                         return "stale_error_" + e.getMessage() + ")";
                     }
                 }
-	    }
-
-	    
-	    return null;
-	}
+        }
+        return null;
+    }
 
         public boolean shallUseCacheForProxy() {
-	    // decide upon header information if a specific file should be taken from the cache or not
-	    
-	    //System.out.println("SHALL READ CACHE: requestHeader = " + requestHeader.toString() + ", responseHeader = " + responseHeader.toString());
-	    
-	    // -CGI access in request
-	    // CGI access makes the page very individual, and therefore not usable in caches
-	    if (isPOST(this.nomalizedURLString)) return false;
-	    if (isCGI(this.nomalizedURLString)) return false;
-	    
-	    // -authorization cases in request
-	    if (this.requestHeader.containsKey(httpHeader.AUTHORIZATION)) return false;
-	    
-	    // -ranges in request
-	    // we do not cache partial content
-	    if ((this.requestHeader != null) && (this.requestHeader.containsKey(httpHeader.RANGE))) return false;
-	    
-	    //Date d1, d2;
+        // decide upon header information if a specific file should be taken from the cache or not
+        
+        //System.out.println("SHALL READ CACHE: requestHeader = " + requestHeader.toString() + ", responseHeader = " + responseHeader.toString());
+        
+        // -CGI access in request
+        // CGI access makes the page very individual, and therefore not usable in caches
+        if (isPOST(this.nomalizedURLString)) return false;
+        if (isCGI(this.nomalizedURLString)) return false;
+        
+        // -authorization cases in request
+        if (this.requestHeader.containsKey(httpHeader.AUTHORIZATION)) return false;
+        
+        // -ranges in request
+        // we do not cache partial content
+        if ((this.requestHeader != null) && (this.requestHeader.containsKey(httpHeader.RANGE))) return false;
+        
+        //Date d1, d2;
 
-	    // -if-modified-since in request
-	    // The entity has to be transferred only if it has
-	    // been modified since the date given by the If-Modified-Since header.
-	    if (this.requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) {
-		// checking this makes only sense if the cached response contains
-		// a Last-Modified field. If the field does not exist, we go the safe way
-		if (!(this.responseHeader.containsKey(httpHeader.LAST_MODIFIED))) return false;
-		// parse date
+        // -if-modified-since in request
+        // The entity has to be transferred only if it has
+        // been modified since the date given by the If-Modified-Since header.
+        if (this.requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) {
+        // checking this makes only sense if the cached response contains
+        // a Last-Modified field. If the field does not exist, we go the safe way
+        if (!(this.responseHeader.containsKey(httpHeader.LAST_MODIFIED))) return false;
+        // parse date
                 Date d1, d2;
-		d2 = this.responseHeader.lastModified(); if (d2 == null) d2 = new Date(serverDate.correctedUTCTime());
-		d1 = this.requestHeader.ifModifiedSince(); if (d1 == null) d1 = new Date(serverDate.correctedUTCTime());
-		// finally, we shall treat the cache as stale if the modification time is after the if-.. time
-		if (d2.after(d1)) return false;
-	    }
-	    
-	    boolean isNotPicture = !isPicture(this.responseHeader);
+        d2 = this.responseHeader.lastModified(); if (d2 == null) d2 = new Date(serverDate.correctedUTCTime());
+        d1 = this.requestHeader.ifModifiedSince(); if (d1 == null) d1 = new Date(serverDate.correctedUTCTime());
+        // finally, we shall treat the cache as stale if the modification time is after the if-.. time
+        if (d2.after(d1)) return false;
+        }
+        
+        boolean isNotPicture = !isPicture(this.responseHeader);
 
-	    // -cookies in request
-	    // unfortunately, we should reload in case of a cookie
-	    // but we think that pictures can still be considered as fresh
-	    if ((this.requestHeader.containsKey(httpHeader.COOKIE)) && (isNotPicture)) return false;
-	    
-	    // -set-cookie in cached response
-	    // this is a similar case as for COOKIE.
-	    if ((this.responseHeader.containsKey(httpHeader.SET_COOKIE)) && (isNotPicture)) return false; // too strong
-	    if ((this.responseHeader.containsKey(httpHeader.SET_COOKIE2)) && (isNotPicture)) return false; // too strong
-	    
-	    // -pragma in cached response
-	    // logically, we would not need to care about no-cache pragmas in cached response headers,
-	    // because they cannot exist since they are not written to the cache.
-	    // So this IF should always fail..
-	    if ((this.responseHeader.containsKey(httpHeader.PRAGMA)) &&
-		(((String) this.responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return false;
-	    
-	    // calculate often needed values for freshness attributes
-	    Date date           = this.responseHeader.date();
-	    Date expires        = this.responseHeader.expires();
-	    Date lastModified   = this.responseHeader.lastModified();
-	    String cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
-	    
-	    
-	    // see for documentation also:
-	    // http://www.web-caching.com/cacheability.html
-	    // http://vancouver-webpages.com/CacheNow/
+        // -cookies in request
+        // unfortunately, we should reload in case of a cookie
+        // but we think that pictures can still be considered as fresh
+        if ((this.requestHeader.containsKey(httpHeader.COOKIE)) && (isNotPicture)) return false;
+        
+        // -set-cookie in cached response
+        // this is a similar case as for COOKIE.
+        if ((this.responseHeader.containsKey(httpHeader.SET_COOKIE)) && (isNotPicture)) return false; // too strong
+        if ((this.responseHeader.containsKey(httpHeader.SET_COOKIE2)) && (isNotPicture)) return false; // too strong
+        
+        // -pragma in cached response
+        // logically, we would not need to care about no-cache pragmas in cached response headers,
+        // because they cannot exist since they are not written to the cache.
+        // So this IF should always fail..
+        if ((this.responseHeader.containsKey(httpHeader.PRAGMA)) &&
+        (((String) this.responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))) return false;
+        
+        // calculate often needed values for freshness attributes
+        Date date           = this.responseHeader.date();
+        Date expires        = this.responseHeader.expires();
+        Date lastModified   = this.responseHeader.lastModified();
+        String cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
+        
+        
+        // see for documentation also:
+        // http://www.web-caching.com/cacheability.html
+        // http://vancouver-webpages.com/CacheNow/
 
-	    // look for freshnes information
-	    // if we don't have any freshnes indication, we treat the file as stale.
-	    // no handle for freshness control:
-	    if ((expires == null) && (cacheControl == null) && (lastModified == null)) return false;
-	    
-	    // -expires in cached response
-	    // the expires value gives us a very easy hint when the cache is stale
-	    if (expires != null) {
-		//System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
-		if (expires.before(new Date(serverDate.correctedUTCTime()))) return false;
-	    }
-	    
-	    // -lastModified in cached response
-	    // we can apply a TTL (Time To Live)  heuristic here. We call the time delta between the last read
-	    // of the file and the last modified date as the age of the file. If we consider the file as
-	    // middel-aged then, the maximum TTL would be cache-creation plus age.
-	    // This would be a TTL factor of 100% we want no more than 10% TTL, so that a 10 month old cache
-	    // file may only be treated as fresh for one more month, not more.
-	    if (lastModified != null) {
-		if (date == null) date = new Date(serverDate.correctedUTCTime());
-		long age = date.getTime() - lastModified.getTime();
-		if (age < 0) return false;
-		// TTL (Time-To-Live) is age/10 = (d2.getTime() - d1.getTime()) / 10
-		// the actual living-time is serverDate.correctedGMTDate().getTime() - d2.getTime()
-		// therefore the cache is stale, if serverDate.correctedGMTDate().getTime() - d2.getTime() > age/10
-		if (serverDate.correctedUTCTime() - date.getTime() > age / 10) return false;
-	    }
-	    
- 	    // -cache-control in cached response
-	    // the cache-control has many value options.
-	    if (cacheControl != null) {
+        // look for freshnes information
+        // if we don't have any freshnes indication, we treat the file as stale.
+        // no handle for freshness control:
+        if ((expires == null) && (cacheControl == null) && (lastModified == null)) return false;
+        
+        // -expires in cached response
+        // the expires value gives us a very easy hint when the cache is stale
+        if (expires != null) {
+        //System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
+        if (expires.before(new Date(serverDate.correctedUTCTime()))) return false;
+        }
+        
+        // -lastModified in cached response
+        // we can apply a TTL (Time To Live)  heuristic here. We call the time delta between the last read
+        // of the file and the last modified date as the age of the file. If we consider the file as
+        // middel-aged then, the maximum TTL would be cache-creation plus age.
+        // This would be a TTL factor of 100% we want no more than 10% TTL, so that a 10 month old cache
+        // file may only be treated as fresh for one more month, not more.
+        if (lastModified != null) {
+        if (date == null) date = new Date(serverDate.correctedUTCTime());
+        long age = date.getTime() - lastModified.getTime();
+        if (age < 0) return false;
+        // TTL (Time-To-Live) is age/10 = (d2.getTime() - d1.getTime()) / 10
+        // the actual living-time is serverDate.correctedGMTDate().getTime() - d2.getTime()
+        // therefore the cache is stale, if serverDate.correctedGMTDate().getTime() - d2.getTime() > age/10
+        if (serverDate.correctedUTCTime() - date.getTime() > age / 10) return false;
+        }
+        
+         // -cache-control in cached response
+        // the cache-control has many value options.
+        if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("PUBLIC")) {
                     // ok, do nothing
@@ -801,10 +814,10 @@ public final class plasmaHTCache {
                         return false;
                     }
                 }
-	    }
-	    
-	    return true;
-	}
+        }
+        
+        return true;
+    }
         
         
     }

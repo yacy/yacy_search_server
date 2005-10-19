@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last change: 02.05.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -65,13 +68,13 @@ public class ProxyIndexingMonitor_p {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
 
 //      int showIndexedCount = 20;
 //      boolean se = false;
 
-        String oldProxyCache, newProxyCache;
+        String oldProxyCachePath, newProxyCachePath;
         String oldProxyCacheSize, newProxyCacheSize;
 
         prop.put("info", 0);
@@ -90,23 +93,25 @@ public class ProxyIndexingMonitor_p {
 
                 // added proxyCache, proxyCacheSize - Borg-0300
                 // proxyCache - check and create the directory
-                oldProxyCache = env.getConfig("proxyCache", "DATA/HTCACHE");
-                newProxyCache = ((String) post.get("proxyCache", "DATA/HTCACHE"));
-                newProxyCache = newProxyCache.replace('\\', '/');
-                if (newProxyCache.endsWith("/")) {
-                    newProxyCache.substring(0, newProxyCache.length() - 1);
+                oldProxyCachePath = env.getConfig("proxyCache", "DATA/HTCACHE");
+                newProxyCachePath = post.get("proxyCache", "DATA/HTCACHE");
+                newProxyCachePath = newProxyCachePath.replace('\\', '/');
+                if (newProxyCachePath.endsWith("/")) {
+                    newProxyCachePath.substring(0, newProxyCachePath.length() - 1);
                 }
-                final File cache = new File(newProxyCache);
-                if ((!cache.isDirectory()) && (!cache.isFile())) cache.mkdirs();                
-                env.setConfig("proxyCache", newProxyCache);
+                final File cache = new File(newProxyCachePath);
+                if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
+                env.setConfig("proxyCache", newProxyCachePath);
 
                 // proxyCacheSize 
-                oldProxyCacheSize = Integer.toString(Integer.parseInt(env.getConfig("proxyCacheSize", "64")));
-                newProxyCacheSize = Integer.toString(Integer.parseInt((String) post.get("proxyCacheSize", "64")));
+                oldProxyCacheSize = getStringLong(env.getConfig("proxyCacheSize", "64"));
+                newProxyCacheSize = getStringLong(post.get("proxyCacheSize", "64"));
+                if (getLong(newProxyCacheSize) < 4) { newProxyCacheSize = "4"; }
                 env.setConfig("proxyCacheSize", newProxyCacheSize);
+                sb.setCacheSize(Long.parseLong(newProxyCacheSize));                
 
                 // implant these settings also into the crawling profile for the proxy
-                plasmaCrawlProfile.entry profile = switchboard.profiles.getEntry(switchboard.getConfig("defaultProxyProfile", ""));
+                plasmaCrawlProfile.entry profile = sb.profiles.getEntry(sb.getConfig("defaultProxyProfile", ""));
                 if (profile == null) {
                     prop.put("info", 1); //delete DATA/PLASMADB/crawlProfiles0.db
                 } else {
@@ -118,12 +123,12 @@ public class ProxyIndexingMonitor_p {
                         prop.put("info_caching", (proxyStoreHTCache) ? 1 : 0);
 
                         // proxyCache - only display on change
-                        if (oldProxyCache.equals(newProxyCache)) {
+                        if (oldProxyCachePath.equals(newProxyCachePath)) {
                             prop.put("info_path", 0);
-                            prop.put("info_path_return", oldProxyCache);
+                            prop.put("info_path_return", oldProxyCachePath);
                         } else {
                             prop.put("info_path", 1);
-                            prop.put("info_path_return", newProxyCache);
+                            prop.put("info_path_return", newProxyCachePath);
                         }
                         // proxyCacheSize - only display on change
                         if (oldProxyCacheSize.equals(newProxyCacheSize)) {
@@ -133,11 +138,11 @@ public class ProxyIndexingMonitor_p {
                             prop.put("info_size", 1);
                             prop.put("info_size_return", newProxyCacheSize);
                         }
-                        // proxyCache, proxyCacheSize we need a restart 
+                        // proxyCache, proxyCacheSize we need a restart
                         prop.put("info_restart", 0);
                         prop.put("info_restart_return", 0);
-                        if (!oldProxyCache.equals(newProxyCache)) prop.put("info_restart", 1); 
-                        if (!oldProxyCacheSize.equals(newProxyCacheSize)) prop.put("info_restart", 1);
+                        if (!oldProxyCachePath.equals(newProxyCachePath)) prop.put("info_restart", 1);
+//                      if (!oldProxyCacheSize.equals(newProxyCacheSize)) prop.put("info_restart", 1);
 
                     } catch (IOException e) {
                         prop.put("info", 3); //Error: errmsg
@@ -159,4 +164,21 @@ public class ProxyIndexingMonitor_p {
         // return rewrite properties
         return prop;
     }
+
+    public static long getLong(String value) {
+        try {
+            return Long.parseLong(value);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public static String getStringLong(String value) {
+        try {
+            return Long.toString(Long.parseLong(value));
+        } catch (Exception e) {
+            return "0";
+        }
+    }
+
 }
