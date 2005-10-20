@@ -425,6 +425,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             if (!(path.startsWith("/"))) path = "/" + path; // attach leading slash
             File   targetFile  = getLocalizedFile(path);
             String targetExt   = conProp.getProperty("EXT","");
+            targetClass = rewriteClassFile(new File(htDefaultPath, path));
             if (path.endsWith("/")) {
                 String testpath;
                 // attach default file name
@@ -442,11 +443,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     }
                 }
             }else{
-                    if (!(targetFile.exists()) && (!(path.endsWith("png")||path.endsWith("gif")))){
+                    //you cannot share a .png/.gif file with a name like a class in htroot.
+                    if ( !(targetFile.exists()) && !((path.endsWith("png")||path.endsWith("gif"))&&targetClass!=null ) ){
                         targetFile = new File(htDocsPath, path);
                         targetClass = rewriteClassFile(new File(htDocsPath, path));
-                    }else{
-                        targetClass = rewriteClassFile(new File(htDefaultPath, path));
                     }
                 
             }
