@@ -567,6 +567,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                     e.getTargetException().toString() + ":" +
                                     e.getTargetException().getMessage(),e);
                             targetClass = null;
+                            throw e;
                         }
                         targetDate = new Date(System.currentTimeMillis());
                     }

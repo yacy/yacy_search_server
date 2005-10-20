@@ -183,7 +183,7 @@ public class Network {
 
                 final int added = yacyClient.publishMySeed(peer.getAddress(), peer.hash);
 
-                if (added < 0) {
+                if (added <= 0) {
                     prop.put("table_comment",1);
                     prop.put("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getAddress());
                 } else {

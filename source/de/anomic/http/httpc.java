@@ -953,7 +953,7 @@ do upload
                 con = httpc.getInstance(host, port, timeout, ssl);
             else
                 con = httpc.getInstance(host, port, timeout, ssl, proxyHost, proxyPort);
-            httpc.response res = con.POST(path, null, props, null);
+            httpc.response res = con.POST(path, requestHeader, props, null);
 
             //System.out.println("response=" + res.toString());
             if (res.status.startsWith("2")) {
