@@ -189,9 +189,14 @@ public class Network {
                     prop.put("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getAddress());
                 } else {
                     peer = yacyCore.seedDB.getConnected(peer.hash);
-                    prop.put("table_comment",2);
-                    prop.put("table_comment_status","publish: handshaked " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getAddress());
-                    prop.put("table_comment_details",peer.toString());
+                    if (peer == null) {
+                        prop.put("table_comment",1);
+                        prop.put("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getAddress());                     
+                    } else {
+                        prop.put("table_comment",2);
+                        prop.put("table_comment_status","publish: handshaked " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getAddress());
+                        prop.put("table_comment_details",peer.toString());
+                    }
                 }
 
                 prop.put("table_peerHash",(String) post.get("peerHash"));
