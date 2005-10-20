@@ -181,6 +181,7 @@ public class Network {
                 map.put(yacySeed.PORT,(String) post.get("peerPort"));
                 yacySeed peer = new yacySeed((String) post.get("peerHash"),map);
 
+                yacyCore.peerActions.updateMySeed();
                 final int added = yacyClient.publishMySeed(peer.getAddress(), peer.hash);
 
                 if (added <= 0) {
