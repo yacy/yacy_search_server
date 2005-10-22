@@ -72,8 +72,11 @@ public class wikiCode {
     private String defListLevel="";
     private plasmaSwitchboard sb;
     private boolean escape = false;     //needed for escape
+    private boolean escaped = false;     //yat another varaible needed for <pre> not getting in the way
     private boolean escapeSpan = false; //needed for escape symbols [= and =] spanning over several lines    
-    
+    private boolean preformatted = false;     //needed for preformatted test
+    private boolean preformattedSpan = false; //needed for <pre> and </pre> spanning over several lines
+        
     public wikiCode(plasmaSwitchboard switchboard){
         sb=switchboard;
     }
@@ -119,11 +122,14 @@ public class wikiCode {
 	int p0, p1;
 	boolean defList = false;    //needed for definition lists
         
-	result = replaceHTML(result);	
+	result = replaceHTML(result);
 	
-	//check if line contains any escape symbol of if we are in an esacpe sequence already
-	//if that's the case the program will continue further below [MN]
-	if((result.indexOf("[=")<0)&&(result.indexOf("=]")<0)&&(!escapeSpan)){
+	//check if line contains any escape symbol or tag for preformatted text 
+	//or if we are in an esacpe sequence already or if we are in a preforamtted text
+	//if that's the case the program will continue further below 
+	//(see code for [= and =] and <pre> and </pre>) [MN]
+	if((result.indexOf("[=")<0)&&(result.indexOf("=]")<0)&&(!escapeSpan)&&
+	   (result.indexOf("&lt;pre&gt;")<0)&&(result.indexOf("&lt;/pre&gt;")<0)&&(!preformattedSpan)){
         
             // format lines
             if (result.startsWith(" ")) result = "<tt>" + result + "</tt>";
@@ -392,15 +398,16 @@ public class wikiCode {
 	
 	//escape code contributed by [MN]
 	//both [= and =] in the same line
-	else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>=0)){
+	else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>=0)&&(!(preformatted))){
 	    String escapeText = result.substring(p0+2,p1);
 	    result = transformLine(result.substring(0,p0)+"!escape!!Text!"+result.substring(p1+2), switchboard);
 	    result = result.replaceAll("!escape!!Text!", escapeText);
 	}
 	
 	//start [=
-	else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)){
+	else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)&&(!(preformatted))){
 	    escape = true;    //prevent surplus line breaks
+	    escaped = true;   //prevents <pre> being parsed
 	    String escapeText = result.substring(p0+2);
 	    result = transformLine(result.substring(0,p0)+"!escape!!Text!", switchboard);
 	    result = result.replaceAll("!escape!!Text!", escapeText);
@@ -409,18 +416,48 @@ public class wikiCode {
 	}
 	
 	//end =]
-	else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)){
+	else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)&&(!(preformatted))){
 	    escapeSpan = false;
 	    String escapeText = result.substring(0,p0);
 	    result = transformLine("!escape!!Text!"+result.substring(p0+2), switchboard);
 	    result = result.replaceAll("!escape!!Text!", escapeText);
+	    escaped = false;
 	}
 	//end contrib [MN]
+
+	//preformatted code contributed by [MN]
+	//implementation very similar to escape code (see above)
+	//both <pre> and </pre> in the same line
+	else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&((p1 = result.indexOf("&lt;/pre&gt;"))>=0)&&(!(escaped))){
+	    String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11,p1)+"</pre>";
+	    result = transformLine(result.substring(0,p0)+"!preformatted!!Text!"+result.substring(p1+12), switchboard);
+	    result = result.replaceAll("!preformatted!!Text!", preformattedText);
+	}
 	
-	if ((result.endsWith("</li>"))||(defList)||(escape)) return result; else return result + "<br>";
+	//start <pre>
+	else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&(!preformattedSpan)&&(!(escaped))){
+	    preformatted = true;    //prevent surplus line breaks
+	    String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11);
+	    result = transformLine(result.substring(0,p0)+"!preformatted!!Text!", switchboard);
+	    result = result.replaceAll("!preformatted!!Text!", preformattedText);
+	    preformattedSpan = true;
+	}
+	
+	//end </pre>
+	else if(((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(preformattedSpan)&&(!(escaped))){
+	    preformattedSpan = false;
+	    String preformattedText = result.substring(0,p0)+"</pre>";
+	    result = transformLine("!preformatted!!Text!"+result.substring(p0+12), switchboard);
+	    result = result.replaceAll("!preformatted!!Text!", preformattedText);
+	    preformatted = false;
+	}
+	//end contrib [MN]	
+		
+	if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)) return result; 
+	else return result + "<br>";
     }
     /*
-      what we need:
+      what we need (have):
 
       == New section ==
       === Subsection ===
@@ -450,6 +487,7 @@ public class wikiCode {
       what we got in addition to that:
       
       [= escape characters =]
+      <pre> preformatted text </pre>
 
     */
 
