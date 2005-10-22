@@ -45,6 +45,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 
 public class loaderThreads {
@@ -53,28 +54,30 @@ public class loaderThreads {
     private int timeout;
     private String user;
     private String password;
-    private String remoteProxyHost;
-    private int remoteProxyPort;
+    private httpRemoteProxyConfig remoteProxyConfig;
 
     // management objects for collection of threads
     Hashtable threads;
     int completed, failed;
     
     public loaderThreads() {
-        this(null, 0);
+        this(null);
     }
     
-    public loaderThreads(String remoteProxyHost, int remoteProxyPort) {
-       this(10000, null, null, remoteProxyHost, remoteProxyPort);
+    public loaderThreads(httpRemoteProxyConfig theremoteProxyConfig) {
+       this(10000, null, null, theremoteProxyConfig);
     }
     
-    public loaderThreads(int timeout, String user, String password,
-                         String remoteProxyHost, int remoteProxyPort) {
+    public loaderThreads(
+            int timeout, 
+            String user, 
+            String password,
+            httpRemoteProxyConfig theremoteProxyConfig
+    ) {
         this.timeout = timeout;
         this.user = user;
         this.password = password;
-        this.remoteProxyHost = remoteProxyHost;
-        this.remoteProxyPort = remoteProxyPort;
+        this.remoteProxyConfig = theremoteProxyConfig;
         this.threads = new Hashtable();
         this.completed = 0;
         this.failed = 0;
@@ -145,7 +148,7 @@ public class loaderThreads {
 
         public void run() {
             try {
-                page = httpc.wget(url, timeout, user, password, remoteProxyHost, remoteProxyPort);
+                page = httpc.wget(url, timeout, user, password, remoteProxyConfig);
                 loaded = true;
                 process.feed(page);
                 if (process.status() == loaderCore.STATUS_FAILED) {
@@ -227,7 +230,8 @@ public class loaderThreads {
     }
     
     public static void main(String[] args) {
-        loaderThreads loader = new loaderThreads("192.168.1.122", 3128);
+        httpRemoteProxyConfig proxyConfig = httpRemoteProxyConfig.init("192.168.1.122", 3128);
+        loaderThreads loader = new loaderThreads(proxyConfig);
         try {
             loader.newPropLoaderThread("load1", new URL("http://www.anomic.de/superseed.txt"));
         } catch (MalformedURLException e) {

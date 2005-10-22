@@ -132,6 +132,7 @@ public class Status {
             prop.put("remoteProxy", 1);
             prop.put("remoteProxy_host", env.getConfig("remoteProxyHost", "<unknown>"));
             prop.put("remoteProxy_port", env.getConfig("remoteProxyPort", "<unknown>"));
+            prop.put("remoteProxy_4Yacy", env.getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true")?0:1);
         } else {
             prop.put("remoteProxy", 0); // not used
         }

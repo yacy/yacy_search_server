@@ -134,6 +134,8 @@ public final class httpc {
 
     private boolean remoteProxyUse = false;
     private String  savedRemoteHost = null;
+    private httpRemoteProxyConfig remoteProxyConfig = null;
+    
     String  requestPath = null;
     private boolean allowContentEncoding = true;
 	static boolean useYacyReferer = true;
@@ -206,8 +208,7 @@ public final class httpc {
             int port,
             int timeout,
             boolean ssl,
-            String remoteProxyHost,
-            int remoteProxyPort
+            httpRemoteProxyConfig remoteProxyConfig
             ) throws IOException {
 
         httpc newHttpc;
@@ -220,7 +221,13 @@ public final class httpc {
 
         // initialize it
         try {
-            newHttpc.init(server,port,timeout,ssl,remoteProxyHost, remoteProxyPort);
+            newHttpc.init(
+                    server,
+                    port,
+                    timeout,
+                    ssl,
+                    remoteProxyConfig
+            );
         } catch (IOException e) {
             try{ httpc.theHttpcPool.returnObject(newHttpc); } catch (Exception e1) {}
             throw e;
@@ -386,16 +393,25 @@ public final class httpc {
     * @param remoteProxyPort
     * @throws IOException
     */
-    void init(String server, int port, int timeout, boolean ssl,
-            String remoteProxyHost,  int remoteProxyPort) throws IOException {
+    void init(
+            String server, 
+            int port, 
+            int timeout, 
+            boolean ssl,
+            httpRemoteProxyConfig theRemoteProxyConfig) throws IOException {
         
         if (port == -1) {
             port = (ssl)? 443 : 80;
         }
         
+        String remoteProxyHost = theRemoteProxyConfig.getProxyHost();
+        int    remoteProxyPort = theRemoteProxyConfig.getProxyPort();
+        
         this.init(remoteProxyHost, remoteProxyPort, timeout, ssl);
+        
         this.remoteProxyUse = true;
         this.savedRemoteHost = server + ((port == 80) ? "" : (":" + port));
+        this.remoteProxyConfig = theRemoteProxyConfig;
     }
 
     /**
@@ -491,6 +507,7 @@ public final class httpc {
         this.handle = 0;
 
         this.remoteProxyUse = false;
+        this.remoteProxyConfig = null;
         this.savedRemoteHost = null;
         this.requestPath = null;
 
@@ -565,6 +582,14 @@ public final class httpc {
                 header.put(httpHeader.HOST, this.savedRemoteHost);
             else
                 header.put(httpHeader.HOST, this.host);
+        }
+        
+        if (this.remoteProxyUse) {
+            String remoteProxyUser = this.remoteProxyConfig.getProxyUser();
+            String remoteProxyPwd  = this.remoteProxyConfig.getProxyPwd();
+            if ((remoteProxyUser!=null)&&(remoteProxyUser.length()>0)) {
+                header.put(httpHeader.PROXY_AUTHORIZATION,serverCodings.standardCoder.encodeBase64String(remoteProxyUser + ":" + remoteProxyPwd));
+            }
         }
 
         if (!(header.containsKey(httpHeader.CONNECTION))) {
@@ -702,6 +727,8 @@ public final class httpc {
                     this.clientOutput.write(buffer, 0, c);
                     len += c;
                 }
+                
+                // TODO: we can not set the header here. This ist too late
                 requestHeader.put(httpHeader.CONTENT_LENGTH, Integer.toString(len));
             }
             this.clientOutput.flush();
@@ -806,7 +833,6 @@ public final class httpc {
             // finish with a boundary
             out.write(boundary.getBytes());
             out.write(serverCore.crlf);
-            //buf.write("" + serverCore.crlfString);
         }
         // create body array
         out.close();
@@ -816,15 +842,17 @@ public final class httpc {
         //System.out.println("DEBUG: PUT BODY=" + new String(body));
         if (zipContent) {
             requestHeader.put(httpHeader.CONTENT_ENCODING, "gzip");
+            
+            //TODO: should we also set the content length here?
         } else {
             // size of that body            
             requestHeader.put(httpHeader.CONTENT_LENGTH, Integer.toString(body.length));
         }
+        
         // send the header
-        //System.out.println("header=" + requestHeader);
         send(httpHeader.METHOD_POST, path, requestHeader, false);
+        
         // send the body
-        //System.out.println("body=" + buf.toString());
         serverCore.send(this.clientOutput, body);
 
         return new response(false);
@@ -884,11 +912,20 @@ do upload
 ###### End OfList ######
      */
 
-    public static byte[] singleGET(String host, int port, String path, int timeout,
-            String user, String password, boolean ssl,
-            String proxyHost,  int proxyPort,
-            httpHeader requestHeader) throws IOException {
+    public static byte[] singleGET(
+            String host, 
+            int port, 
+            String path, 
+            int timeout,
+            String user, 
+            String password, 
+            boolean ssl,
+            httpRemoteProxyConfig theRemoteProxyConfig,
+            httpHeader requestHeader
+    ) throws IOException {
         if (requestHeader == null) requestHeader = new httpHeader();
+        
+        // setting host authorization header
         if ((user != null) && (password != null) && (user.length() != 0)) {
             requestHeader.put(httpHeader.AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
         }
@@ -896,10 +933,10 @@ do upload
         httpc con = null;
         try {
 
-            if ((proxyHost == null) || (proxyPort == 0)) {
+            if ((theRemoteProxyConfig == null)||(!theRemoteProxyConfig.useProxy())) {
                 con = httpc.getInstance(host, port, timeout, ssl);
             } else {
-                con = httpc.getInstance(host, port, timeout, ssl, proxyHost, proxyPort);
+                con = httpc.getInstance(host, port, timeout, ssl, theRemoteProxyConfig);
             }
 
             httpc.response res = con.GET(path, null);
@@ -915,16 +952,20 @@ do upload
 
     }
 
-    public static byte[] singleGET(URL u, int timeout,
-            String user, String password,
-            String proxyHost, int proxyPort) throws IOException {
+    public static byte[] singleGET(
+            URL u, 
+            int timeout,
+            String user, 
+            String password,
+            httpRemoteProxyConfig theRemoteProxyConfig
+    ) throws IOException {
         int port = u.getPort();
         boolean ssl = u.getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443: 80;
         String path = u.getPath();
         String query = u.getQuery();
         if ((query != null) && (query.length() > 0)) path = path + "?" + query;
-        return singleGET(u.getHost(), port, path, timeout, user, password, ssl, proxyHost, proxyPort, null);
+        return singleGET(u.getHost(), port, path, timeout, user, password, ssl, theRemoteProxyConfig, null);
     }
 
     /*
@@ -937,10 +978,18 @@ do upload
     }
      */
 
-    public static byte[] singlePOST(String host, int port, String path, int timeout,
-            String user, String password, boolean ssl,
-            String proxyHost, int proxyPort,
-            httpHeader requestHeader, serverObjects props) throws IOException {
+    public static byte[] singlePOST(
+            String host, 
+            int port, 
+            String path, 
+            int timeout,
+            String user, 
+            String password, 
+            boolean ssl,
+            httpRemoteProxyConfig theRemoteProxyConfig,
+            httpHeader requestHeader, 
+            serverObjects props
+    ) throws IOException {
 
         if (requestHeader == null) requestHeader = new httpHeader();
         if ((user != null) && (password != null) && (user.length() != 0)) {
@@ -949,10 +998,11 @@ do upload
 
         httpc con = null;
         try {
-            if ((proxyHost == null) || (proxyPort == 0))
+            if ((theRemoteProxyConfig == null)||(!theRemoteProxyConfig.useProxy())) {
                 con = httpc.getInstance(host, port, timeout, ssl);
-            else
-                con = httpc.getInstance(host, port, timeout, ssl, proxyHost, proxyPort);
+            } else {
+                con = httpc.getInstance(host, port, timeout, ssl, theRemoteProxyConfig);
+            }
             httpc.response res = con.POST(path, requestHeader, props, null);
 
             //System.out.println("response=" + res.toString());
@@ -968,30 +1018,69 @@ do upload
 
     }
 
-    public static byte[] singlePOST(URL u, int timeout,
-            String user, String password,
-            String proxyHost, int proxyPort,
-            serverObjects props) throws IOException {
+    public static byte[] singlePOST(
+            URL u, 
+            int timeout,
+            String user, 
+            String password,
+            httpRemoteProxyConfig theRemoteProxyConfig,
+            serverObjects props
+    ) throws IOException {
         int port = u.getPort();
         boolean ssl = u.getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443 : 80;
         String path = u.getPath();
         String query = u.getQuery();
         if ((query != null) && (query.length() > 0)) path = path + "?" + query;
-        return singlePOST(u.getHost(), port, path, timeout, user, password, ssl, proxyHost, proxyPort, null, props);
+        return singlePOST(
+                u.getHost(), 
+                port, 
+                path, 
+                timeout, 
+                user, 
+                password, 
+                ssl, 
+                theRemoteProxyConfig, 
+                null, 
+                props
+        );
     }
 
-    public static byte[] singlePOST(String url, int timeout, serverObjects props) throws IOException {
+    public static byte[] singlePOST(
+            String url, 
+            int timeout, 
+            serverObjects props
+    ) throws IOException {
         try {
-            return singlePOST(new URL(url), timeout, null, null, null, 0, props);
+            return singlePOST(
+                    new URL(url), 
+                    timeout, 
+                    null, 
+                    null, 
+                    null, 
+                    props
+            );
         } catch (MalformedURLException e) {
             throw new IOException("Malformed URL: " + e.getMessage());
         }
     }
 
-    public static ArrayList wget(URL url, int timeout, String user, String password, String proxyHost, int proxyPort) throws IOException {
+    public static ArrayList wget(
+            URL url, 
+            int timeout, 
+            String user, 
+            String password, 
+            httpRemoteProxyConfig theRemoteProxyConfig
+    ) throws IOException {
         // splitting of the byte array into lines
-        byte[] a = singleGET(url, timeout, user, password, proxyHost, proxyPort);
+        byte[] a = singleGET(
+                url, 
+                timeout, 
+                user, 
+                password, 
+                theRemoteProxyConfig
+        );
+        
         if (a == null) return null;
         int s = 0;
         int e;
@@ -1004,7 +1093,13 @@ do upload
         return v;
     }
 
-    public static httpHeader whead(URL url, int timeout, String user, String password, String proxyHost, int proxyPort) throws IOException {
+    public static httpHeader whead(
+            URL url, 
+            int timeout, 
+            String user, 
+            String password, 
+            httpRemoteProxyConfig theRemoteProxyConfig
+    ) throws IOException {
         // generate request header
         httpHeader requestHeader = new httpHeader();
         if ((user != null) && (password != null) && (user.length() != 0)) {
@@ -1023,9 +1118,9 @@ do upload
         // start connection
         httpc con = null;
         try {
-            if ((proxyHost == null) || (proxyPort == 0))
+            if ((theRemoteProxyConfig == null)||(!theRemoteProxyConfig.useProxy()))
                 con = httpc.getInstance(host, port, timeout, ssl);
-            else con = httpc.getInstance(host, port, timeout, ssl, proxyHost, proxyPort);
+            else con = httpc.getInstance(host, port, timeout, ssl, theRemoteProxyConfig);
 
             httpc.response res = con.HEAD(path, requestHeader);
             if (res.status.startsWith("2")) {
@@ -1053,9 +1148,24 @@ do upload
     }
      */
 
-    public static ArrayList wput(URL url, int timeout, String user, String password, String proxyHost, int proxyPort, serverObjects props) throws IOException {
+    public static ArrayList wput(
+            URL url, 
+            int timeout, 
+            String user, 
+            String password, 
+            httpRemoteProxyConfig theRemoteProxyConfig, 
+            serverObjects props
+    ) throws IOException {
         // splitting of the byte array into lines
-        byte[] a = singlePOST(url, timeout, user, password, proxyHost, proxyPort, props);
+        byte[] a = singlePOST(
+                url, 
+                timeout, 
+                user, 
+                password, 
+                theRemoteProxyConfig, 
+                props
+        );
+        
         //System.out.println("wput-out=" + new String(a));
         int s = 0;
         int e;
@@ -1090,8 +1200,10 @@ do upload
             int timeout = Integer.parseInt(args[1]);
             String proxyHost = args[2];
             int proxyPort = Integer.parseInt(args[3]);
+            
+            httpRemoteProxyConfig theRemoteProxyConfig = httpRemoteProxyConfig.init(proxyHost,proxyPort);
             try {
-                text = wget(new URL(url), timeout, null, null, proxyHost, proxyPort);
+                text = wget(new URL(url), timeout, null, null, theRemoteProxyConfig);
             } catch (MalformedURLException e) {
                 System.out.println("The url '" + url + "' is wrong.");
             } catch (IOException e) {

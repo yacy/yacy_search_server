@@ -142,7 +142,7 @@ public class sharedBlacklist_p {
 		//Make Adresse
 		address = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
                 try {
-                    otherBlacklist = httpc.wget(new URL(address), 6000, null, null, switchboard.remoteProxyHost, switchboard.remoteProxyPort); //get List
+                    otherBlacklist = httpc.wget(new URL(address), 6000, null, null, switchboard.remoteProxyConfig); //get List
                 } catch (Exception e) {}
                 
 		//Make HTML-Optionlist with retrieved items
@@ -173,7 +173,7 @@ public class sharedBlacklist_p {
 		Name = address;
                 
                 try {
-                    otherBlacklist = httpc.wget(new URL(address), 6000, null, null, switchboard.remoteProxyHost, switchboard.remoteProxyPort); //get List
+                    otherBlacklist = httpc.wget(new URL(address), 6000, null, null, switchboard.remoteProxyConfig); //get List
                 } catch (Exception e) {}
 		prop.put("status", 0); //TODO: check if the wget failed...
 

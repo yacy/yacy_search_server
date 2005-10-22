@@ -109,10 +109,17 @@ public final class Settings_p {
         }
         
         // remote proxy
+        prop.put("remoteProxyUseChecked", env.getConfig("remoteProxyUse", "false").equals("true") ? 1 : 0);
+        prop.put("remoteProxyUse4Yacy", env.getConfig("remoteProxyUse4Yacy", "true").equals("true") ? 1 : 0);
+        prop.put("remoteProxyUse4SSL", env.getConfig("remoteProxyUse4SSL", "true").equals("true") ? 1 : 0);
+        
         prop.put("remoteProxyHost", env.getConfig("remoteProxyHost", ""));
         prop.put("remoteProxyPort", env.getConfig("remoteProxyPort", ""));
+        
+        prop.put("remoteProxyUser", env.getConfig("remoteProxyUser", ""));
+        prop.put("remoteProxyPwd", env.getConfig("remoteProxyPwd", ""));
+        
         prop.put("remoteProxyNoProxy", env.getConfig("remoteProxyNoProxy", ""));
-        prop.put("remoteProxyUseChecked", ((String) env.getConfig("remoteProxyUse", "false")).equals("true") ? 1 : 0);
         
         // proxy access filter
         prop.put("proxyfilter", env.getConfig("proxyClient", "*"));

@@ -56,7 +56,6 @@ public final class plasmaCrawlLoader extends Thread {
     static plasmaSwitchboard switchboard;
     
     private final plasmaHTCache   cacheManager;
-    private final int             socketTimeout;
     private final serverLog       log;   
     
     private final CrawlerMessageQueue theQueue;
@@ -66,15 +65,13 @@ public final class plasmaCrawlLoader extends Thread {
     private boolean stopped = false;
     
     public plasmaCrawlLoader(
-            plasmaHTCache cacheManager, 
-            serverLog log) {
+            plasmaHTCache theCacheManager, 
+            serverLog theLog) {
         
         this.setName("plasmaCrawlLoader");
         
-    	this.cacheManager    = cacheManager;
-    	this.log             = log;
-        
-    	this.socketTimeout   = Integer.parseInt(switchboard.getConfig("crawler.clientTimeout", "10000"));
+    	this.cacheManager    = theCacheManager;
+    	this.log             = theLog;
         
         // configuring the crawler messagequeue
         this.theQueue = new CrawlerMessageQueue();
@@ -103,11 +100,8 @@ public final class plasmaCrawlLoader extends Thread {
         
         CrawlerFactory theFactory = new CrawlerFactory(
                 this.theThreadGroup,
+                switchboard,
                 cacheManager,
-                socketTimeout,
-                switchboard.getConfig("remoteProxyUse","false").equals("true"),
-                switchboard.getConfig("remoteProxyHost",""),
-                Integer.parseInt(switchboard.getConfig("remoteProxyPort","3128")),
                 log);
         
         this.crawlwerPool = new CrawlerPool(theFactory,this.cralwerPoolConfig,this.theThreadGroup);        
@@ -363,37 +357,28 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
     private CrawlerPool thePool;
     private final ThreadGroup theThreadGroup;
     private final plasmaHTCache   cacheManager;
-    private final int             socketTimeout;
-    private final boolean         remoteProxyUse;
-    private final String          remoteProxyHost;
-    private final int             remoteProxyPort;   
     private final serverLog       theLog;
+    private final plasmaSwitchboard sb;
     
     public CrawlerFactory(           
-            ThreadGroup theThreadGroup,
-            plasmaHTCache cacheManager,
-            int socketTimeout,
-            boolean remoteProxyUse,
-            String  remoteProxyHost,
-            int remoteProxyPort,
-            serverLog theLog) {
+            ThreadGroup threadGroup,
+            plasmaSwitchboard theSb,
+            plasmaHTCache theCacheManager,
+            serverLog log) {
         
         super();  
         
-        if (theThreadGroup == null)
+        if (threadGroup == null)
             throw new IllegalArgumentException("The threadgroup object must not be null.");
         
-        this.theThreadGroup = theThreadGroup;
-        this.cacheManager = cacheManager;
-        this.socketTimeout = socketTimeout;
-        this.remoteProxyUse = remoteProxyUse;
-        this.remoteProxyHost = remoteProxyHost;
-        this.remoteProxyPort = remoteProxyPort;  
-        this.theLog = theLog;
+        this.theThreadGroup = threadGroup;
+        this.cacheManager = theCacheManager;
+        this.sb = theSb;  
+        this.theLog = log;
     }
     
-    public void setPool(CrawlerPool thePool) {
-        this.thePool = thePool;    
+    public void setPool(CrawlerPool pool) {
+        this.thePool = pool;    
     }
     
     /**
@@ -403,11 +388,8 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
         return new plasmaCrawlWorker(
                 this.theThreadGroup,
                 this.thePool,
+                this.sb,
                 this.cacheManager,
-                this.socketTimeout,
-                this.remoteProxyUse,
-                this.remoteProxyHost,
-                this.remoteProxyPort,
                 this.theLog);
     }
     

@@ -161,14 +161,14 @@ public class yacyPeerActions {
 		// load the seed list
 		try {
                     url = new URL(seedListFileURL);
-                    header = httpc.whead(url, 5000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
+                    header = httpc.whead(url, 5000, null, null, this.sb.remoteProxyConfig);
                     if ((header == null) || (header.lastModified() == null)) {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available");
                     } else if ((header.age() > 86400000) && (ssc > 0)) {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        seedList = httpc.wget(url, 5000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
+                        seedList = httpc.wget(url, 5000, null, null, this.sb.remoteProxyConfig);
                         enu = seedList.iterator();
                         lc = 0;
                         while (enu.hasNext()) {
@@ -221,7 +221,7 @@ public class yacyPeerActions {
         
         // read in remote file from url
         try {
-            ArrayList remote = httpc.wget(new URL(url), 5000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
+            ArrayList remote = httpc.wget(new URL(url), 5000, null, null, this.sb.remoteProxyConfig);
             if ((remote != null) && (remote.size() > 0)) {
                 Iterator e = remote.iterator();
                 while (e.hasNext()) {

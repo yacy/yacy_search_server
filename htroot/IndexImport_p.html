@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy '#[clientname]#': Index Import</title>
+#[metas]#
+<meta http-equiv="REFRESH" content="30">
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+<br><br>
+<h2>Index DB Import</h2>
+
+<p>The local index currenly consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references</p>
+<hr>
+#(error)#<!-- 0 -->
+	::<!-- 1 -->
+		<p><font color="red"><b>#[error_msg]#</b></font></p>
+	::<!-- 2 -->
+		<p><font color="red"><b>Import Job with the same path already started</b></font></p>
+#(/error)#
+<h3>Starting new Job</h3>
+<form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
+<table border="0" cellpadding="2" cellspacing="1">
+<tr>
+	<td title="Path to the PLASMADB directory of the foreign peer">Import Path:</td>
+	<td><input name="importPath" type="text" size="50" value=""></td>
+	<td><input type="submit" name="startIndexDbImport" value="Start New Import"></td>
+</tr>
+</table>
+</form>
+
+<hr>
+<form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
+<h3>Currently running jobs</h3>
+<p>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small" width="150">Path</td>
+<td class="small" >Status</td>
+<td class="small" >%</td>
+<td class="small" >Elapsed<br>Time</td>
+<td class="small" >Estimated<br>Time</td>
+<td class="small" >Word Hash</td>
+<td class="small" ># URLs</td>
+<td class="small" ># Word<br>Entities</td>
+<td class="small" ># Word<br>Entries</td>
+<td class="small" >Stop Import</td>
+</tr>
+#{running.jobs}#
+    <tr class="TableCellLight">
+      <td class="small">#[path]#</td>
+      <td class="small"><font color="#(stopped)#red::green#(/stopped)#">#(stopped)#Finished::Running#(/stopped)#</font></td>
+      <td class="small" align="right">#[percent]#</td>
+      <td class="small" align="right">#[elapsed]#</td>
+      <td class="small" align="right">#[estimated]#</td>
+      <td class="small" align="right"><tt>#[wordHash]#</tt></td>
+      <td class="small" align="rigth">#[url_num]#</td>
+      <td class="small" align="rigth">#[word_entity_num]#</td>
+      <td class="small" align="rigth">#[word_entry_num]#</td>
+      <td class="small">
+      	#(stopped)#::
+      		<input type="submit" name="stopIndexDbImport" value="Stop Index Transfer">
+      		<input type="hidden" name="jobNr" value="#[job_nr]#">
+      	#(/stopped)#
+	  </td>
+    </tr>  
+#{/running.jobs}#
+  </table> 
+</form>
+
+<hr>
+<form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
+<h3>Finished jobs</h3>
+<p>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small" width="150">Path</td>
+<td class="small" >Status</td>
+<td class="small" >%</td>
+<td class="small" >Elapsed<br>Time</td>
+<td class="small" >Word Hash</td>
+<td class="small" ># URLs</td>
+<td class="small" ># Word<br>Entities</td>
+<td class="small" ># Word<br>Entries</td>
+</tr>
+#{finished.jobs}#
+    <tr class="TableCellLight">
+      <td class="small">#[path]#</td>
+      <td class="small"><font color="#(stopped)#red::green::red#(/stopped)#">#(stopped)#Finished::<b>Error:</b> #[errorMsg]##(/stopped)#</font></td>
+	  <td class="small" align="right">#[percent]#</td>     
+      <td class="small" align="right">#[elapsed]#</td>	   
+      <td class="small" align="right"><tt>#[wordHash]#</tt></td>
+      <td class="small" align="rigth">#[url_num]#</td>
+      <td class="small" align="rigth">#[word_entity_num]#</td>
+      <td class="small" align="rigth">#[word_entry_num]#</td>
+    </tr>  
+#{/finished.jobs}#
+  </table> 
+  <input type="submit" name="clearFinishedJobList" value="Clear List">
+</form>
+<p><font size="-3"><i>Last Refresh:</i> #[date]#</font></p>
+
+#[footer]#
+</body>
+</html>

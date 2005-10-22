@@ -708,7 +708,14 @@ public final class yacySeedDB {
 
     private boolean checkCache(ArrayList uv, URL seedURL) throws IOException {        
         // check if the result can be retrieved again
-        ArrayList check  = httpc.wget(seedURL, 10000, null, null, sb.remoteProxyHost, sb.remoteProxyPort);
+        // TODO: should we check the useProxy4Yacy option here???
+        ArrayList check  = httpc.wget(
+                seedURL, 
+                10000, 
+                null, 
+                null, 
+                sb.remoteProxyConfig
+        );
         
         if (check == null) {
             serverLog.logFine("YACY","SaveSeedList: Testing download failed ...");

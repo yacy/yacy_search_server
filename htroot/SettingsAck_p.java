@@ -59,6 +59,7 @@ import java.util.List;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -343,19 +344,62 @@ public class SettingsAck_p {
         }
         
         if (post.containsKey("proxysettings")) {
-            httpdProxyHandler.remoteProxyUse = ((String) post.get("remoteProxyUse", "")).equals("on");
-            httpdProxyHandler.remoteProxyHost = (String) post.get("remoteProxyHost", "");
+            
+            /* ====================================================================
+             * Reading out the remote proxy settings 
+             * ==================================================================== */
+            boolean useRemoteProxy = post.containsKey("remoteProxyUse");
+            boolean useRemoteProxy4Yacy = post.containsKey("remoteProxyUse4Yacy");
+            boolean useRemoteProxy4SSL = post.containsKey("remoteProxyUse4SSL");
+            
+            String remoteProxyHost = post.get("remoteProxyHost", "");
+            String remoteProxyPortStr = post.get("remoteProxyPort", "");
+            int remoteProxyPort = 0;
             try {
-                httpdProxyHandler.remoteProxyPort = Integer.parseInt((String) post.get("remoteProxyPort", ""));
+                remoteProxyPort = Integer.parseInt(remoteProxyPortStr);
             } catch (NumberFormatException e) {
-                httpdProxyHandler.remoteProxyPort = 3128;
+                remoteProxyPort = 3128;
             }
-            httpdProxyHandler.remoteProxyNoProxy = (String) post.get("remoteProxyNoProxy", "");
-            httpdProxyHandler.remoteProxyNoProxyPatterns = httpdProxyHandler.remoteProxyNoProxy.split(",");
-            env.setConfig("remoteProxyHost", httpdProxyHandler.remoteProxyHost);
-            env.setConfig("remoteProxyPort", Integer.toString(httpdProxyHandler.remoteProxyPort));
-            env.setConfig("remoteProxyNoProxy", httpdProxyHandler.remoteProxyNoProxy);
-            env.setConfig("remoteProxyUse", (httpdProxyHandler.remoteProxyUse) ? "true" : "false");
+            
+            String remoteProxyUser = post.get("remoteProxyUser", "");
+            String remoteProxyPwd = post.get("remoteProxyPwd", "");
+            
+            String remoteProxyNoProxyStr = post.get("remoteProxyNoProxy", "");
+            String[] remoteProxyNoProxyPatterns = remoteProxyNoProxyStr.split(",");
+            
+            /* ====================================================================
+             * Storing settings into config file
+             * ==================================================================== */
+            env.setConfig("remoteProxyHost", remoteProxyHost);
+            env.setConfig("remoteProxyPort", Integer.toString(remoteProxyPort));
+            env.getConfig("remoteProxyUser", remoteProxyUser);
+            env.getConfig("remoteProxyPwd", remoteProxyPwd);
+            env.setConfig("remoteProxyNoProxy", remoteProxyNoProxyStr);
+            env.setConfig("remoteProxyUse", (useRemoteProxy) ? "true" : "false");
+            env.setConfig("remoteProxyUse4Yacy", (useRemoteProxy4Yacy) ? "true" : "false");
+            env.setConfig("remoteProxyUse4SSL", (useRemoteProxy4SSL) ? "true" : "false");
+            
+            /* ====================================================================
+             * Enabling settings
+             * ==================================================================== */
+            plasmaSwitchboard sb = (plasmaSwitchboard)env;
+            sb.remoteProxyConfig = httpRemoteProxyConfig.init(sb);            
+            
+//            httpdProxyHandler.remoteProxyUse = post.get("remoteProxyUse", "").equals("on");
+//            httpdProxyHandler.remoteProxyHost = post.get("remoteProxyHost", "");
+//            try {
+//                httpdProxyHandler.remoteProxyPort = Integer.parseInt((String) post.get("remoteProxyPort", ""));
+//            } catch (NumberFormatException e) {
+//                httpdProxyHandler.remoteProxyPort = 3128;
+//            }
+//            httpdProxyHandler.remoteProxyNoProxy = (String) post.get("remoteProxyNoProxy", "");
+//            httpdProxyHandler.remoteProxyNoProxyPatterns = httpdProxyHandler.remoteProxyNoProxy.split(",");
+//            env.setConfig("remoteProxyHost", httpdProxyHandler.remoteProxyHost);
+//            env.setConfig("remoteProxyPort", Integer.toString(httpdProxyHandler.remoteProxyPort));
+//            env.setConfig("remoteProxyNoProxy", httpdProxyHandler.remoteProxyNoProxy);
+//            env.setConfig("remoteProxyUse", (httpdProxyHandler.remoteProxyUse) ? "true" : "false");
+            
+            
             prop.put("info", 15); // The remote-proxy setting has been changed
             return prop;
         }

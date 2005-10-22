@@ -77,19 +77,18 @@ public class plasmaSnippetCache {
     private plasmaHTCache         cacheManager;
     private plasmaParser          parser;
     private serverLog             log;
-    private String                remoteProxyHost;
-    private int                   remoteProxyPort;
-    private boolean               remoteProxyUse;
+    private plasmaSwitchboard     sb;
     
-    public plasmaSnippetCache(plasmaHTCache cacheManager, plasmaParser parser,
-                              String remoteProxyHost, int remoteProxyPort, boolean remoteProxyUse,
-                              serverLog log) {
+    public plasmaSnippetCache(
+            plasmaSwitchboard theSb,
+            plasmaHTCache cacheManager, 
+            plasmaParser parser,
+            serverLog log
+    ) {
         this.cacheManager = cacheManager;
         this.parser = parser;
         this.log = log;
-        this.remoteProxyHost = remoteProxyHost;
-        this.remoteProxyPort = remoteProxyPort;
-        this.remoteProxyUse = remoteProxyUse;
+        this.sb = theSb;
         this.snippetsScoreCounter = 0;
         this.snippetsScore = new kelondroMScoreCluster();
         this.snippetsCache = new HashMap();        
@@ -367,11 +366,9 @@ public class plasmaSnippetCache {
             0, 
             null,
             socketTimeout,
-            remoteProxyHost,
-            remoteProxyPort,
-            remoteProxyUse,
-            cacheManager,
-            log);
+            this.sb.remoteProxyConfig,
+            this.cacheManager,
+            this.log);
     }
     
     public void fetch(plasmaSearchResult acc, Set queryhashes, String urlmask, int fetchcount) {

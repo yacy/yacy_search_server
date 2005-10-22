@@ -19,7 +19,7 @@
 	<td>&nbsp;</td>
 </tr>
 <tr class="TableCellLight">
-	<td>Proxy host</td>
+	<td>Peer host</td>
 	<td>#[host]#:#[port]#</td>
 	<td>&nbsp;</td>
 </tr>
@@ -30,7 +30,7 @@
 </tr>
 <tr class="TableCellLight">
 	<td>Remote proxy</td>
-	<td>#(remoteProxy)#not used::#[host]#:#[port]##(/remoteProxy)#</td>
+	<td>#(remoteProxy)#not used::#[host]#:#[port]# | Used for YaCy -> YaCy communication: #(4Yacy)#Yes::No #(/4Yacy)# #(/remoteProxy)#</td>
 	<td>&nbsp;</td>
 </tr>
 <tr class="TableCellDark">

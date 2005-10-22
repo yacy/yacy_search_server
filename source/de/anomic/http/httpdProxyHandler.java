@@ -105,14 +105,14 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     private static int timeout = 30000;
     private static boolean yacyTrigger = true;
     public static boolean isTransparentProxy = false;
-    public static boolean remoteProxyUse = false;
-    public static String remoteProxyHost = "";
-    public static int remoteProxyPort = -1;
-    public static String remoteProxyNoProxy = "";
-    public static String[] remoteProxyNoProxyPatterns = null;
+//    public static boolean remoteProxyUse = false;
+//    public static String remoteProxyHost = "";
+//    public static int remoteProxyPort = -1;
+//    public static String remoteProxyNoProxy = "";
+//    public static String[] remoteProxyNoProxyPatterns = null;
 
-    private static final HashSet remoteProxyAllowProxySet = new HashSet();
-    private static final HashSet remoteProxyDisallowProxySet = new HashSet();    
+//    private static final HashSet remoteProxyAllowProxySet = new HashSet();
+//    private static final HashSet remoteProxyDisallowProxySet = new HashSet();    
 
     private static htmlFilterTransformer transformer = null;
     public static final String userAgent = "yacy (" + httpc.systemOST +") yacy.net";
@@ -203,16 +203,16 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // doing httpc init
             httpc.useYacyReferer = sb.getConfig("useYacyReferer", "true").equals("true");
             
-            // load remote proxy data
-            remoteProxyHost    = switchboard.getConfig("remoteProxyHost","");
-            try {
-                remoteProxyPort    = Integer.parseInt(switchboard.getConfig("remoteProxyPort","3128"));
-            } catch (NumberFormatException e) {
-                remoteProxyPort = 3128;
-            }
-            remoteProxyUse     = switchboard.getConfig("remoteProxyUse","false").equals("true");
-            remoteProxyNoProxy = switchboard.getConfig("remoteProxyNoProxy","");
-            remoteProxyNoProxyPatterns = remoteProxyNoProxy.split(",");
+//            // load remote proxy data
+//            remoteProxyHost    = switchboard.getConfig("remoteProxyHost","");
+//            try {
+//                remoteProxyPort    = Integer.parseInt(switchboard.getConfig("remoteProxyPort","3128"));
+//            } catch (NumberFormatException e) {
+//                remoteProxyPort = 3128;
+//            }
+//            remoteProxyUse     = switchboard.getConfig("remoteProxyUse","false").equals("true");
+//            remoteProxyNoProxy = switchboard.getConfig("remoteProxyNoProxy","");
+//            remoteProxyNoProxyPatterns = remoteProxyNoProxy.split(",");
             
             // set timeout
             timeout = Integer.parseInt(switchboard.getConfig("clientTimeout", "10000"));
@@ -1020,7 +1020,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         
         String host = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
         String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
-        int timeout = Integer.parseInt(switchboard.getConfig("clientTimeout", "10000"));
         
         int port, pos;
         if ((pos = host.indexOf(":")) < 0) {
@@ -1043,16 +1042,23 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         }
         
         // possibly branch into PROXY-PROXY connection
-        if (remoteProxyUse) {
+        if ((switchboard.remoteProxyConfig != null) && (switchboard.remoteProxyConfig.useProxy4SSL())) {
             httpc remoteProxy = null;
             try {
-                remoteProxy = httpc.getInstance(host, port, timeout, false, remoteProxyHost, remoteProxyPort);
+                remoteProxy = httpc.getInstance(
+                        host, 
+                        port, 
+                        timeout, 
+                        false, 
+                        switchboard.remoteProxyConfig
+                );
+                
                 httpc.response response = remoteProxy.CONNECT(host, port, requestHeader);
                 response.print();
                 if (response.success()) {
                     // replace connection details
-                    host = remoteProxyHost;
-                    port = remoteProxyPort;
+                    host = switchboard.remoteProxyConfig.getProxyHost();
+                    port = switchboard.remoteProxyConfig.getProxyPort();
                     // go on (see below)
                 } else {
                     // pass error response back to client
@@ -1147,37 +1153,56 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     }
     
     private httpc newhttpc(String server, int port, int timeout) throws IOException {
+        
+        // getting the remote proxy configuration
+        httpRemoteProxyConfig remProxyConfig = switchboard.remoteProxyConfig;
+        
         // a new httpc connection, combined with possible remote proxy
-        boolean useProxy = remoteProxyUse;
+        boolean useProxy = (remProxyConfig!=null)&&(remProxyConfig.useProxy());
+        
         // check no-proxy rule
-        if ((useProxy) && (!(remoteProxyAllowProxySet.contains(server)))) {
-            if (remoteProxyDisallowProxySet.contains(server)) {
+        if (
+                (switchboard.remoteProxyConfig != null) &&
+                (switchboard.remoteProxyConfig.useProxy()) && 
+                (!(switchboard.remoteProxyConfig.remoteProxyAllowProxySet.contains(server)))) {
+            if (switchboard.remoteProxyConfig.remoteProxyDisallowProxySet.contains(server)) {
                 useProxy = false;
             } else {
                 // analyse remoteProxyNoProxy;
                 // set either remoteProxyAllowProxySet or remoteProxyDisallowProxySet accordingly
                 int i = 0;
-                while (i < remoteProxyNoProxyPatterns.length) {
-                    if (server.matches(remoteProxyNoProxyPatterns[i])) {
+                while (i < remProxyConfig.getProxyNoProxyPatterns().length) {
+                    if (server.matches(remProxyConfig.getProxyNoProxyPatterns()[i])) {
                         // disallow proxy for this server
-                        remoteProxyDisallowProxySet.add(server);
+                        switchboard.remoteProxyConfig.remoteProxyDisallowProxySet.add(server);
                         useProxy = false;
                         break;
                     }
                     i++;
                 }
-                if (i == remoteProxyNoProxyPatterns.length) {
+                if (i == remProxyConfig.getProxyNoProxyPatterns().length) {
                     // no pattern matches: allow server
-                    remoteProxyAllowProxySet.add(server);
+                    switchboard.remoteProxyConfig.remoteProxyAllowProxySet.add(server);
                 }
             }
         }
+        
         // branch to server/proxy
         if (useProxy) {
-            return httpc.getInstance(server, port, timeout, false, remoteProxyHost, remoteProxyPort);
-        } else {
-            return httpc.getInstance(server, port, timeout, false);
+            return httpc.getInstance(
+                    server, 
+                    port, 
+                    timeout, 
+                    false, 
+                    remProxyConfig
+            );
         }
+        return httpc.getInstance(
+                server, 
+                port, 
+                timeout, 
+                false
+        );
     }
     
     private httpc newhttpc(String address, int timeout) throws IOException {

@@ -244,10 +244,10 @@ public final class robotsParser{
         try {
             downloadStart = System.currentTimeMillis();
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-            if (!sb.remoteProxyUse) {
+            if ((sb.remoteProxyConfig == null) || (!sb.remoteProxyConfig.useProxy())) {
                 con = httpc.getInstance(robotsURL.getHost(), robotsURL.getPort(), 10000, false);
             } else {
-                con = httpc.getInstance(robotsURL.getHost(), robotsURL.getPort(), 10000, false, sb.remoteProxyHost, sb.remoteProxyPort);
+                con = httpc.getInstance(robotsURL.getHost(), robotsURL.getPort(), 10000, false, sb.remoteProxyConfig);
             }
             
             // if we previously have downloaded this robots.txt then we can set the if-modified-since header

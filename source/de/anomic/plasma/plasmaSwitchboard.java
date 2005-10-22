@@ -121,6 +121,7 @@ import de.anomic.data.wikiBoard;
 import de.anomic.data.userDB;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -166,9 +167,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaCrawlStacker          sbStackCrawlThread;
     public  messageBoard                messageDB;
     public  wikiBoard                   wikiDB;
-    public  String                      remoteProxyHost;
-    public  int                         remoteProxyPort;
-    public  boolean                     remoteProxyUse;
     public  static plasmaCrawlRobotsTxt robots;
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
@@ -182,7 +180,22 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  yacyCore                    yc;
     public  HashMap                     indexingTasksInProcess;
     public  userDB                      userDB;
+    
+    /*
+     * Remote Proxy configuration
+     */
+//    public boolean  remoteProxyUse;
+//    public boolean  remoteProxyUse4Yacy;
+//    public String   remoteProxyHost;
+//    public int      remoteProxyPort;
+//    public String   remoteProxyNoProxy = "";
+//    public String[] remoteProxyNoProxyPatterns = null;
+    public httpRemoteProxyConfig remoteProxyConfig = null;
 
+
+    /*
+     * Some constants
+     */
     private static final String STR_PROXYPROFILE       = "defaultProxyProfile";
     private static final String STR_REMOTEPROFILE      = "defaultRemoteProfile";
     private static final String STR_REMOTECRAWLTRIGGER = "REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER ";
@@ -206,25 +219,45 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.listsPath      = new File(rootPath, getConfig("listsPath", "LISTS"));
         this.log.logConfig("Lists Path: " + this.listsPath.toString());
         
-        // remote proxy configuration
-        remoteProxyHost = getConfig("remoteProxyHost", "");
-        try {
-            remoteProxyPort = Integer.parseInt(getConfig("remoteProxyPort", "3128"));
-        } catch (NumberFormatException e) {
-            remoteProxyPort = 3128;
-        }
-        if (getConfig("remoteProxyUse", "false").equals("true")) {
-            remoteProxyUse = true;            
-            log.logConfig("Using remote proxy:" + 
-                          "\n\tHost: " + remoteProxyHost + 
-                          "\n\tPort: " + remoteProxyPort);
-        } else {
-            remoteProxyUse = false;
-            remoteProxyHost = null;
-            remoteProxyPort = 0;
-        }
-        proxyLastAccess = System.currentTimeMillis() - 60000;        
+        /* ============================================================================
+         * Remote Proxy configuration
+         * ============================================================================ */
+        this.remoteProxyConfig = httpRemoteProxyConfig.init(this);
+        this.log.logConfig("Remote proxy configuration:\n" + this.remoteProxyConfig.toString());
         
+//        // reading the proxy host name
+//        this.remoteProxyHost = getConfig("remoteProxyHost", "");
+//        
+//        // reading the proxy host port
+//        try {
+//            this.remoteProxyPort = Integer.parseInt(getConfig("remoteProxyPort", "3128"));
+//        } catch (NumberFormatException e) {
+//            this.remoteProxyPort = 3128;
+//        }
+//        
+//        // determining if remote proxy should be used for yacy -> yacy communication
+//        this.remoteProxyUse4Yacy = getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true");
+//        
+//        // determining addresses for which the remote proxy should not be used
+//        this.remoteProxyNoProxy = getConfig("remoteProxyNoProxy","");
+//        this.remoteProxyNoProxyPatterns = this.remoteProxyNoProxy.split(",");
+//        
+//        // determining if remote Proxy should be used
+//        if (getConfig("remoteProxyUse", "false").equalsIgnoreCase("true")) {
+//            this.remoteProxyUse = true;            
+//            this.log.logConfig("Using remote proxy:" + 
+//                          "\n\tHost: " + this.remoteProxyHost + 
+//                          "\n\tPort: " + this.remoteProxyPort +
+//                          "\n\tUseProxy4Yacy: " + Boolean.toString(this.remoteProxyUse4Yacy)
+//            );
+//        } else {
+//            this.remoteProxyUse = false;
+//            this.remoteProxyHost = null;
+//            this.remoteProxyPort = 0;
+//        }
+        this.proxyLastAccess = System.currentTimeMillis() - 60000;        
+        
+        // configuring list path
         if (!(listsPath.exists())) listsPath.mkdirs();
 
         // load coloured lists
@@ -420,9 +453,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
-        snippetCache = new plasmaSnippetCache(cacheManager, parser,
-                                              remoteProxyHost, remoteProxyPort, remoteProxyUse,
-                                              log);
+        snippetCache = new plasmaSnippetCache(this,cacheManager, parser,log);
         
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");

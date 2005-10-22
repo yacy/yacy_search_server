@@ -142,11 +142,16 @@ plasmaBlueList=yacy.blue
 # if you wish to do that, specify it here
 # if you want to switch on the proxy use, set remoteProxyUse=true
 # remoteProxyNoProxy is a no-proxy pattern list for the remote proxy
+remoteProxyUse=false
+remoteProxyUse4Yacy=true
+remoteProxyUse4SSL=true
+
 remoteProxyHost=192.168.2.2
 remoteProxyPort=4239
+remoteProxyUser=
+remoteProxyPwd=
+
 remoteProxyNoProxy=192.*,10.*,127.*,localhost
-remoteProxyUse=false
-#remoteProxyUse=true
 
 # the proxy may filter the content of transferred web pages
 # the bluelist removes specific keywords from web pages

@@ -124,7 +124,7 @@ public class Skins_p {
 			String url = (String)post.get("url");
 			ArrayList skinVector;
 			try{
-				skinVector = httpc.wget(new URL(url), 6000, null, null, switchboard.remoteProxyHost, switchboard.remoteProxyPort);
+				skinVector = httpc.wget(new URL(url), 6000, null, null, switchboard.remoteProxyConfig);
 			}catch(IOException e){
 				prop.put("status", 1);//unable to get url
 				prop.put("status_url", url);

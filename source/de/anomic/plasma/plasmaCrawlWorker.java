@@ -57,6 +57,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.server.serverCore;
@@ -72,12 +73,10 @@ public final class plasmaCrawlWorker extends Thread {
     private static final String threadBaseName = "CrawlerWorker";
     
     private final CrawlerPool     myPool;
+    private final plasmaSwitchboard sb;
     private final plasmaHTCache   cacheManager;
-    private final int             socketTimeout;
-    private final boolean         remoteProxyUse;
-    private final String          remoteProxyHost;
-    private final int             remoteProxyPort;
     private final serverLog       log;
+    private int socketTimeout;
     
     public plasmaCrawlLoaderMessage theMsg;
     private URL url;
@@ -114,33 +113,35 @@ public final class plasmaCrawlWorker extends Thread {
         
     public plasmaCrawlWorker(
             ThreadGroup theTG, 
-            CrawlerPool thePool, 
-            plasmaHTCache cacheManager,
-            int socketTimeout,
-            boolean remoteProxyUse,
-            String remoteProxyHost,
-            int remoteProxyPort,
-            serverLog log) {
+            CrawlerPool thePool,
+            plasmaSwitchboard theSb,
+            plasmaHTCache theCacheManager,
+            serverLog theLog) {
         super(theTG,threadBaseName + "_inPool");
                 
         this.myPool = thePool;
-        this.cacheManager = cacheManager;
-        this.socketTimeout = socketTimeout;
-        this.remoteProxyUse = remoteProxyUse;
-        this.remoteProxyHost = remoteProxyHost;
-        this.remoteProxyPort = remoteProxyPort;
-        this.log = log;
+        this.sb = theSb;
+        this.cacheManager = theCacheManager;
+        this.log = theLog;
+        
+        // setting the crawler timeout properly
+        this.socketTimeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
+    }
+    
+    public long getDuration() {
+        long startDate = this.startdate;
+        return (startDate != 0) ? System.currentTimeMillis() - startDate : 0;
     }
 
-    public synchronized void execute(plasmaCrawlLoaderMessage theMsg) {
-        this.theMsg = theMsg;
+    public synchronized void execute(plasmaCrawlLoaderMessage theNewMsg) {
+        this.theMsg = theNewMsg;
         
-        this.url = theMsg.url;
-        this.name = theMsg.name;
-        this.referer = theMsg.referer;
-        this.initiator = theMsg.initiator;
-        this.depth = theMsg.depth;
-        this.profile = theMsg.profile;
+        this.url = theNewMsg.url;
+        this.name = theNewMsg.name;
+        this.referer = theNewMsg.referer;
+        this.initiator = theNewMsg.initiator;
+        this.depth = theNewMsg.depth;
+        this.profile = theNewMsg.profile;
         
         this.startdate = System.currentTimeMillis();        
         //this.error = null;        
@@ -197,7 +198,7 @@ public final class plasmaCrawlWorker extends Thread {
                     if (!this.stopped && !this.isInterrupted()) {
                         try {
                             this.myPool.returnObject(this);
-                            this.setName(this.threadBaseName + "_inPool");
+                            this.setName(plasmaCrawlWorker.threadBaseName + "_inPool");
                         }
                         catch (Exception e1) {
                             log.logSevere("pool error", e1);
@@ -210,10 +211,25 @@ public final class plasmaCrawlWorker extends Thread {
     
     public void execute() throws IOException {
         try {
-            this.setName(this.threadBaseName + "_" + this.url);
-            load(this.url, this.name, this.referer, this.initiator, this.depth, this.profile,
-                 this.socketTimeout, this.remoteProxyHost, this.remoteProxyPort, this.remoteProxyUse,
-                 this.cacheManager, this.log);
+            // setting threadname
+            this.setName(plasmaCrawlWorker.threadBaseName + "_" + this.url);
+            
+            // refreshing timeout value
+            this.socketTimeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
+            
+            // loading resource
+            load(
+                    this.url, 
+                    this.name, 
+                    this.referer, 
+                    this.initiator, 
+                    this.depth, 
+                    this.profile,
+                    this.socketTimeout, 
+                    this.sb.remoteProxyConfig,
+                    this.cacheManager, 
+                    this.log
+            );
             
         } catch (IOException e) {
             //throw e;
@@ -223,8 +239,8 @@ public final class plasmaCrawlWorker extends Thread {
         }
     }
     
-    public void setStopped(boolean stopped) {
-        this.stopped = stopped;           
+    public void setStopped(boolean isStopped) {
+        this.stopped = isStopped;           
     }
 
     public boolean isRunning() {
@@ -251,9 +267,7 @@ public final class plasmaCrawlWorker extends Thread {
             int depth, 
             plasmaCrawlProfile.entry profile,
             int socketTimeout,
-            String remoteProxyHost,
-            int remoteProxyPort,
-            boolean remoteProxyUse,
+            httpRemoteProxyConfig theRemoteProxyConfig,
             plasmaHTCache cacheManager,
             serverLog log
         ) throws IOException {
@@ -264,9 +278,7 @@ public final class plasmaCrawlWorker extends Thread {
              depth, 
              profile,
              socketTimeout, 
-             remoteProxyHost, 
-             remoteProxyPort, 
-             remoteProxyUse, 
+             theRemoteProxyConfig,
              cacheManager, 
              log, 
              DEFAULT_CRAWLING_RETRY_COUNT,
@@ -282,9 +294,7 @@ public final class plasmaCrawlWorker extends Thread {
             int depth, 
             plasmaCrawlProfile.entry profile,
             int socketTimeout,
-            String remoteProxyHost,
-            int remoteProxyPort,
-            boolean remoteProxyUse,
+            httpRemoteProxyConfig theRemoteProxyConfig,
             plasmaHTCache cacheManager,
             serverLog log,
             int crawlingRetryCount,
@@ -309,8 +319,16 @@ public final class plasmaCrawlWorker extends Thread {
         String hostlow = host.toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
             log.logInfo("CRAWLER Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
-            sb.urlPool.errorURL.newEntry(url, referer,initiator, yacyCore.seedDB.mySeed.hash,
-                    name, "denied_(url_in_blacklist)", new bitfield(plasmaURL.urlFlagLength), true);
+            sb.urlPool.errorURL.newEntry(
+                    url, 
+                    referer,
+                    initiator, 
+                    yacyCore.seedDB.mySeed.hash,
+                    name, 
+                    "denied_(url_in_blacklist)", 
+                    new bitfield(plasmaURL.urlFlagLength), 
+                    true
+            );
             return;
         }            
         
@@ -335,8 +353,9 @@ public final class plasmaCrawlWorker extends Thread {
             //System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
                     
             // open the connection
-            remote = (remoteProxyUse) ? httpc.getInstance(host, port, socketTimeout, ssl, remoteProxyHost, remoteProxyPort)
-                                      : httpc.getInstance(host, port, socketTimeout, ssl);
+            remote = ((theRemoteProxyConfig != null) && (theRemoteProxyConfig.useProxy())) 
+                   ? httpc.getInstance(host, port, socketTimeout, ssl, theRemoteProxyConfig)
+                   : httpc.getInstance(host, port, socketTimeout, ssl);
             
             // specifying if content encoding is allowed
             remote.setAllowContentEncoding(useContentEncodingGzip);
@@ -346,6 +365,8 @@ public final class plasmaCrawlWorker extends Thread {
                 
             if (res.status.startsWith("200") || res.status.startsWith("203")) {
                 // the transfer is ok
+                
+                // TODO: aborting download if content is to long ...
                 long contentLength = res.responseHeader.contentLength();
                 
                 // reserve cache entry
@@ -354,7 +375,6 @@ public final class plasmaCrawlWorker extends Thread {
                 // request has been placed and result has been returned. work off response
                 File cacheFile = cacheManager.getCachePath(url);
                 try {
-                    String error = null;
                     if (plasmaParser.supportedContent(url,res.responseHeader.mime())) {
                         if (cacheFile.isFile()) {
                             cacheManager.deleteFile(url);
@@ -430,9 +450,7 @@ public final class plasmaCrawlWorker extends Thread {
                              depth, 
                              profile,
                              socketTimeout, 
-                             remoteProxyHost, 
-                             remoteProxyPort, 
-                             remoteProxyUse, 
+                             theRemoteProxyConfig,
                              cacheManager, 
                              log, 
                              --crawlingRetryCount,
@@ -517,9 +535,7 @@ public final class plasmaCrawlWorker extends Thread {
                         depth,
                         profile,
                         socketTimeout,
-                        remoteProxyHost,
-                        remoteProxyPort,
-                        remoteProxyUse,
+                        theRemoteProxyConfig,
                         cacheManager,
                         log,
                         --crawlingRetryCount,

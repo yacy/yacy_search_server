@@ -177,8 +177,8 @@ public class Network {
                 }
 
                 final HashMap map = new HashMap();
-                map.put(yacySeed.IP,(String) post.get("peerIP"));
-                map.put(yacySeed.PORT,(String) post.get("peerPort"));
+                map.put(yacySeed.IP,post.get("peerIP"));
+                map.put(yacySeed.PORT,post.get("peerPort"));
                 yacySeed peer = new yacySeed((String) post.get("peerHash"),map);
 
                 yacyCore.peerActions.updateMySeed();
