@@ -42,6 +42,8 @@ package de.anomic.http;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -131,6 +133,9 @@ public final class httpc {
     // output and input streams for client control connection
     PushbackInputStream clientInput = null;
     private OutputStream clientOutput = null;
+    
+    private httpdByteCountInputStream clientInputByteCount = null;
+    private httpdByteCountOutputStream clientOutputByteCount = null;
 
     private boolean remoteProxyUse = false;
     private String  savedRemoteHost = null;
@@ -208,7 +213,9 @@ public final class httpc {
             int port,
             int timeout,
             boolean ssl,
-            httpRemoteProxyConfig remoteProxyConfig
+            httpRemoteProxyConfig remoteProxyConfig,
+            String incomingByteCountAccounting,
+            String outgoingByteCountAccounting
             ) throws IOException {
 
         httpc newHttpc;
@@ -226,7 +233,9 @@ public final class httpc {
                     port,
                     timeout,
                     ssl,
-                    remoteProxyConfig
+                    remoteProxyConfig,
+                    incomingByteCountAccounting,
+                    outgoingByteCountAccounting
             );
         } catch (IOException e) {
             try{ httpc.theHttpcPool.returnObject(newHttpc); } catch (Exception e1) {}
@@ -234,7 +243,27 @@ public final class httpc {
         }
         return newHttpc;
     }
+    
+    public static httpc getInstance(
+            String server,
+            int port,
+            int timeout,
+            boolean ssl,
+            httpRemoteProxyConfig remoteProxyConfig
+            ) throws IOException {
+        return getInstance(server,port,timeout,ssl,remoteProxyConfig,null,null);
+    }
 
+    public static httpc getInstance(
+            String server, 
+            int port, 
+            int timeout, 
+            boolean ssl
+    ) throws IOException {
+        return getInstance(server,port,timeout,ssl,null,null);
+    }
+
+    
     /**
     * This method gets a new httpc instance from the object pool and
     * initializes it with the given parameters.
@@ -246,7 +275,14 @@ public final class httpc {
     * @throws IOException
     * @see httpc#init
     */
-    public static httpc getInstance(String server, int port, int timeout, boolean ssl) throws IOException {
+    public static httpc getInstance(
+            String server, 
+            int port, 
+            int timeout, 
+            boolean ssl,
+            String incomingByteCountAccounting,
+            String outgoingByteCountAccounting
+    ) throws IOException {
 
         httpc newHttpc = null;
         // fetching a new httpc from the object pool
@@ -259,7 +295,7 @@ public final class httpc {
 
         // initialize it
         try {
-            newHttpc.init(server,port,timeout,ssl);
+            newHttpc.init(server,port,timeout,ssl,incomingByteCountAccounting,outgoingByteCountAccounting);
         } catch (IOException e) {
             try{ httpc.theHttpcPool.returnObject(newHttpc); } catch (Exception e1) {}
             throw e;
@@ -398,7 +434,10 @@ public final class httpc {
             int port, 
             int timeout, 
             boolean ssl,
-            httpRemoteProxyConfig theRemoteProxyConfig) throws IOException {
+            httpRemoteProxyConfig theRemoteProxyConfig,
+            String incomingByteCountAccounting,
+            String outgoingByteCountAccounting            
+    ) throws IOException {
         
         if (port == -1) {
             port = (ssl)? 443 : 80;
@@ -407,7 +446,7 @@ public final class httpc {
         String remoteProxyHost = theRemoteProxyConfig.getProxyHost();
         int    remoteProxyPort = theRemoteProxyConfig.getProxyPort();
         
-        this.init(remoteProxyHost, remoteProxyPort, timeout, ssl);
+        this.init(remoteProxyHost, remoteProxyPort, timeout, ssl,incomingByteCountAccounting,outgoingByteCountAccounting);
         
         this.remoteProxyUse = true;
         this.savedRemoteHost = server + ((port == 80) ? "" : (":" + port));
@@ -424,7 +463,14 @@ public final class httpc {
     * @param ssl Wether we should use SSL.
     * @throws IOException
     */
-    void init(String server, int port, int timeout, boolean ssl) throws IOException {
+    void init(
+            String server, 
+            int port, 
+            int timeout, 
+            boolean ssl,
+            String incomingByteCountAccounting,
+            String outgoingByteCountAccounting
+    ) throws IOException {
         this.handle = System.currentTimeMillis();
         //serverLog.logDebug("HTTPC", handle + " initialized");
         this.remoteProxyUse = false;
@@ -466,10 +512,19 @@ public final class httpc {
             //socket.setSoLinger(true, timeout);
             this.socket.setKeepAlive(true); //
 
+            if (incomingByteCountAccounting != null) {
+                this.clientInputByteCount = new httpdByteCountInputStream(this.socket.getInputStream(),incomingByteCountAccounting);
+            }
+            
             // getting input and output streams
-            this.clientInput  = new PushbackInputStream(this.socket.getInputStream());
+            this.clientInput  = new PushbackInputStream((this.clientInputByteCount!=null)?
+                                this.clientInputByteCount:
+                                this.socket.getInputStream()); 
             this.clientOutput = this.socket.getOutputStream();
             
+
+                                  
+
             // if we reached this point, we should have a connection
         } catch (UnknownHostException e) {
             if (this.socket != null) {
@@ -479,6 +534,14 @@ public final class httpc {
             this.socketOwner = null;
             throw new IOException("unknown host: " + server);
         }
+    }    
+    
+    public long getInputStreamByteCount() {
+        return (this.clientInputByteCount == null)?0:this.clientInputByteCount.getCount();
+    }
+    
+    public long getOutputStreamByteCount() {
+        return (this.clientOutputByteCount == null)?0:this.clientOutputByteCount.getCount();
     }
 
     /**
@@ -500,6 +563,15 @@ public final class httpc {
             httpc.unregisterOpenSocket(this.socket,this.socketOwner);
             this.socket = null;
             this.socketOwner = null;
+        }
+        
+        if (this.clientInputByteCount != null) {
+            try { this.clientInputByteCount.finish();} catch (IOException e) {}
+            this.clientInputByteCount = null;
+        }
+        if (this.clientOutputByteCount != null) {
+            try { this.clientOutputByteCount.finish();} catch (IOException e) {}
+            this.clientOutputByteCount = null;
         }
 
         this.host = null;

@@ -62,7 +62,15 @@ public final class httpdByteCountOutputStream extends BufferedOutputStream {
         }
     }
     
+    public static void resetCount() {
+        synchronized (syncObject) {
+            globalByteCount = 0;
+        }
+    }    
+    
     public void finish() throws IOException {
+        if (this.finished) return;
+        
         this.finished = true;
         synchronized (syncObject) {
             globalByteCount += this.byteCount;

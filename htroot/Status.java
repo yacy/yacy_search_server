@@ -77,7 +77,10 @@ public class Status {
                 ((plasmaSwitchboard)env).pauseCrawling();
             } else if (post.containsKey("continuecrawlqueue")) {
                 ((plasmaSwitchboard)env).continueCrawling();
-            }   
+            } else if (post.containsKey("ResetTraffic")) {
+                httpdByteCountInputStream.resetCount();
+                httpdByteCountOutputStream.resetCount();               
+            }
             prop.put("LOCATION","");
             return prop;
         }
@@ -239,6 +242,7 @@ public class Status {
         // proxy traffic
         prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
         prop.put("trafficOut",bytesToString(httpdByteCountOutputStream.getGlobalCount()));
+        prop.put("trafficCrawler",bytesToString(httpdByteCountInputStream.getAccountCount("CRAWLER")));
 
         // connection information
         serverCore httpd = (serverCore) env.getThread("10_httpd");
