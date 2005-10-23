@@ -1042,7 +1042,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         }
         
         // possibly branch into PROXY-PROXY connection
-        if ((switchboard.remoteProxyConfig != null) && (switchboard.remoteProxyConfig.useProxy4SSL())) {
+        if (
+                (switchboard.remoteProxyConfig != null) && 
+                (switchboard.remoteProxyConfig.useProxy()) &&
+                (switchboard.remoteProxyConfig.useProxy4SSL())
+        ) {
             httpc remoteProxy = null;
             try {
                 remoteProxy = httpc.getInstance(

@@ -103,7 +103,9 @@ public final class yacyClient {
             final URL url = new URL("http://" + address + "/yacy/hello.html");
             
             // should we use the proxy?
-            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) &&  
+                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
             
             // adding all needed parameters
             final serverObjects obj = new serverObjects(6);
@@ -228,7 +230,9 @@ public final class yacyClient {
         final String key = crypt.randomSalt();
         try {
             // should we use the proxy?
-            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) &&  
+                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
             
             // sending request
             final HashMap result = nxTools.table(
@@ -260,7 +264,9 @@ public final class yacyClient {
     public static int queryRWICount(yacySeed target, String wordHash) {
         try {
             // should we use the proxy?
-            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && 
+                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
             
             // sending request
             final HashMap result = nxTools.table(
@@ -294,7 +300,9 @@ public final class yacyClient {
         if (yacyCore.seedDB.mySeed == null) return -1;
         
         // should we use the proxy?
-        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
         
         // building url
         final String querystr =
@@ -351,7 +359,9 @@ public final class yacyClient {
         final String key = crypt.randomSalt();
         try {            
             // should we use the proxy?
-            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && 
+                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
             
             // building url
             final String url = "http://" + targetPeer.getAddress() + "/yacy/search.html";
@@ -469,7 +479,9 @@ public final class yacyClient {
         if (yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return null; }
         
         // should we use the proxy?
-        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
                 
         // adding all needed parameters
         final String key = crypt.randomSalt();
@@ -516,7 +528,9 @@ public final class yacyClient {
         // this post a message to the remote message board
         
         // should we use the proxy?
-        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
         
         // adding all needed parameters
         final String key = crypt.randomSalt();
@@ -563,7 +577,9 @@ public final class yacyClient {
         if (yacyCore.seedDB.mySeed == targetSeed) { return null; }
 
         // should we use the proxy?
-        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
         
         // construct request
         final String key = crypt.randomSalt();
@@ -634,7 +650,9 @@ public final class yacyClient {
          */
         
         // should we use the proxy?
-        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) &&
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
 
         // construct request
         final String key = crypt.randomSalt();
@@ -715,7 +733,9 @@ public final class yacyClient {
         if (address == null) { return null; }
         
         // should we use the proxy?
-        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
         
         // prepare post values
         final serverObjects post = new serverObjects(7);
@@ -784,7 +804,9 @@ public final class yacyClient {
         if (address == null) { return null; }
         
         // should we use the proxy?
-        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
         
         // prepare post values
         final serverObjects post = new serverObjects(5+urls.length);
@@ -833,7 +855,9 @@ public final class yacyClient {
     public static HashMap getProfile(yacySeed targetSeed) {
         
         // should we use the proxy?
-        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+        boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                           (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
         
         // this post a message to the remote message board
         final serverObjects post = new serverObjects(2);
@@ -869,7 +893,9 @@ public final class yacyClient {
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             // should we use the proxy?
-            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());            
+            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) && 
+                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
+                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());            
             
             final HashMap result = nxTools.table(
                     httpc.wget(
