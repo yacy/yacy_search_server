@@ -141,8 +141,11 @@ public final class httpRemoteProxyConfig {
         newConfig.remoteProxyUse  = true;
         newConfig.remoteProxyUse4SSL = true;
         newConfig.remoteProxyUse4Yacy = true;
-        newConfig.remoteProxyHost = proxyHostName;
         newConfig.remoteProxyPort = proxyHostPort;
+        newConfig.remoteProxyHost = proxyHostName;
+        if ((newConfig.remoteProxyHost == null) || (newConfig.remoteProxyHost.length() == 0)) {
+            newConfig.remoteProxyUse = false;
+        }
         
         return newConfig;
     }
@@ -161,6 +164,9 @@ public final class httpRemoteProxyConfig {
         
         // reading the proxy host name
         newConfig.remoteProxyHost = sb.getConfig("remoteProxyHost", "").trim();
+        if ((newConfig.remoteProxyHost == null) || (newConfig.remoteProxyHost.length() == 0)) {
+            newConfig.remoteProxyUse = false;
+        }
         
         // reading the proxy host port
         try {
