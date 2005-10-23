@@ -71,11 +71,12 @@ public class wikiCode {
     private String ListLevel="";
     private String defListLevel="";
     private plasmaSwitchboard sb;
-    private boolean escape = false;     //needed for escape
-    private boolean escaped = false;     //yat another varaible needed for <pre> not getting in the way
-    private boolean escapeSpan = false; //needed for escape symbols [= and =] spanning over several lines    
-    private boolean preformatted = false;     //needed for preformatted test
+    private boolean escape = false;           //needed for escape
+    private boolean escaped = false;          //needed for <pre> not getting in the way
+    private boolean escapeSpan = false;       //needed for escape symbols [= and =] spanning over several lines 
+    private boolean preformatted = false;     //needed for preformatted text
     private boolean preformattedSpan = false; //needed for <pre> and </pre> spanning over several lines
+    private int preindented = 0;              //needed for indented <pre>s
         
     public wikiCode(plasmaSwitchboard switchboard){
         sb=switchboard;
@@ -430,25 +431,37 @@ public class wikiCode {
 	//both <pre> and </pre> in the same line
 	else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&((p1 = result.indexOf("&lt;/pre&gt;"))>=0)&&(!(escaped))){
 	    String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11,p1)+"</pre>";
-	    result = transformLine(result.substring(0,p0)+"!preformatted!!Text!"+result.substring(p1+12), switchboard);
+            result = transformLine(result.substring(0,p0)+"!preformatted!!Text!"+result.substring(p1+12), switchboard);
 	    result = result.replaceAll("!preformatted!!Text!", preformattedText);
 	}
 	
 	//start <pre>
 	else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&(!preformattedSpan)&&(!(escaped))){
 	    preformatted = true;    //prevent surplus line breaks
+	    String bq ="";  //gets filled with <blockquote>s as needed
 	    String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11);
-	    result = transformLine(result.substring(0,p0)+"!preformatted!!Text!", switchboard);
-	    result = result.replaceAll("!preformatted!!Text!", preformattedText);
+	    //taking care of indented lines
+	    while(result.substring(preindented,p0).startsWith(":")){
+	        preindented++;
+		bq = bq + "<blockquote>";
+	    }
+            result = transformLine(result.substring(preindented,p0)+"!preformatted!!Text!", switchboard);
+            result = bq + result.replaceAll("!preformatted!!Text!", preformattedText);
 	    preformattedSpan = true;
 	}
 	
 	//end </pre>
 	else if(((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(preformattedSpan)&&(!(escaped))){
 	    preformattedSpan = false;
+	    String bq = ""; //gets filled with </blockquote>s as needed
 	    String preformattedText = result.substring(0,p0)+"</pre>";
+            //taking care of indented lines
+	    while (preindented > 0){
+	        bq = bq + "</blockquote>";
+                preindented--;
+	    }
 	    result = transformLine("!preformatted!!Text!"+result.substring(p0+12), switchboard);
-	    result = result.replaceAll("!preformatted!!Text!", preformattedText);
+	    result = result.replaceAll("!preformatted!!Text!", preformattedText)+bq;
 	    preformatted = false;
 	}
 	//end contrib [MN]	
