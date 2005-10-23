@@ -158,7 +158,7 @@ public class plasmaDbImporter extends Thread {
                 try {
                     wordCounter++;
                     wordHash = (String) importWordHashIterator.next();
-                    importWordIdxEntity = importWordIndex.getEntity(wordHash, true);
+                    importWordIdxEntity = importWordIndex.getEntity(wordHash, true, -1);
                     
                     if (importWordIdxEntity.size() == 0) {
                         importWordIdxEntity.deleteComplete();

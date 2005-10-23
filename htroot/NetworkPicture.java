@@ -69,12 +69,14 @@ public class NetworkPicture {
         int height = 480;
         int passiveLimit = 300;
         int potentialLimit = 300;
+        int maxCount = 1000;
         
         if (post != null) {
             width = post.getInt("width", 640);
             height = post.getInt("height", 420);
             passiveLimit = post.getInt("pal", 300);
             potentialLimit = post.getInt("pol", 300);
+            maxCount = post.getInt("max", 1000);
         }
         
         int innerradius = Math.min(width, height) / 5;
@@ -98,7 +100,6 @@ public class NetworkPicture {
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
         //System.out.println("Seed Minimum distance is       " + yacySeed.minDHTNumber);
         
-        final int maxCount = 300;
         yacySeed seed;
         int angle;
         long lastseen;

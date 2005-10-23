@@ -314,7 +314,7 @@ public final class plasmaWordIndexDistribution {
                     ((nexthash = (String) wordHashIterator.next()) != null) && 
                     (nexthash.trim().length() > 0)
             ) {
-                indexEntity = this.wordIndex.getEntity(nexthash, true);
+                indexEntity = this.wordIndex.getEntity(nexthash, true, -1);
                 if (indexEntity.size() == 0) {
                     indexEntity.deleteComplete();
                 } else if ((indexEntity.size() <= count)||        // if we havn't exceeded the limit
@@ -355,7 +355,7 @@ public final class plasmaWordIndexDistribution {
                         }
                     } catch (kelondroException e) {
                         this.log.logSevere("plasmaWordIndexDistribution/1: deleted DB for word " + indexEntity.wordHash(), e);
-                        try {indexEntity.deleteComplete();} catch (IOException ee) {}
+                        indexEntity.deleteComplete();
                     }
                 } else {
                     // make an on-the-fly entity and insert values
@@ -389,7 +389,7 @@ public final class plasmaWordIndexDistribution {
                         tmpEntities.add(tmpEntity);
                     } catch (kelondroException e) {
                         this.log.logSevere("plasmaWordIndexDistribution/2: deleted DB for word " + indexEntity.wordHash(), e);
-                        try {indexEntity.deleteComplete();} catch (IOException ee) {}
+                        indexEntity.deleteComplete();
                     }
                     indexEntity.close(); // important: is not closed elswhere and cannot be deleted afterwards
                     indexEntity = null;
@@ -427,7 +427,7 @@ public final class plasmaWordIndexDistribution {
                     urlHashes[c++] = indexEntry.getUrlHash();
                 }
                 wordIndex.removeEntries(indexEntities[i].wordHash(), urlHashes, true);
-                indexEntity = wordIndex.getEntity(indexEntities[i].wordHash(), true);
+                indexEntity = wordIndex.getEntity(indexEntities[i].wordHash(), true, -1);
                 sz = indexEntity.size();
                 indexEntity.close();
                 log.logFine("Deleted partial index (" + c + " URLs) for word " + indexEntities[i].wordHash() + "; " + sz + " entries left");

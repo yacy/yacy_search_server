@@ -151,7 +151,7 @@ public class IndexControl_p {
                 // generate an urlx array
                 plasmaWordIndexEntity index = null;
                 try {
-                    index = switchboard.wordIndex.getEntity(keyhash, true);
+                    index = switchboard.wordIndex.getEntity(keyhash, true, -1);
                     Iterator en = index.elements(true);
                     int i = 0;
                     urlx = new String[index.size()];
@@ -258,7 +258,7 @@ public class IndexControl_p {
             plasmaWordIndexEntity[] indexes = new plasmaWordIndexEntity[1];
             String result;
             long starttime = System.currentTimeMillis();
-            indexes[0] = switchboard.wordIndex.getEntity(keyhash, true);
+            indexes[0] = switchboard.wordIndex.getEntity(keyhash, true, -1);
             // built urlCache
             Iterator urlIter = indexes[0].elements(true);
             HashMap knownURLs = new HashMap();
@@ -436,7 +436,7 @@ public class IndexControl_p {
         // search for a word hash and generate a list of url links
         plasmaWordIndexEntity index = null;
         try {
-            index = switchboard.wordIndex.getEntity(keyhash, true);
+            index = switchboard.wordIndex.getEntity(keyhash, true, -1);
 
             final StringBuffer result = new StringBuffer(1024);
             if (index.size() == 0) {

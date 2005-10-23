@@ -88,7 +88,7 @@ public final class query {
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
             de.anomic.plasma.plasmaWordIndexEntity entity = null;
             try {
-                entity = sb.wordIndex.getEntity(env, true);
+                entity = sb.wordIndex.getEntity(env, true, -1);
                 prop.put("response", entity.size());
                 entity.close();
             } catch (IOException e) {

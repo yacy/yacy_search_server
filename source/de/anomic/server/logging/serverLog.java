@@ -182,4 +182,12 @@ public final class serverLog {
             if (fileIn != null) try {fileIn.close();}catch(Exception e){}
         }
     }
+    
+    public static final String format(String s, int n, int fillChar) {
+        int l = s.length();
+        if (l >= n) return s;
+        StringBuffer sb = new StringBuffer(l + n);
+        for (int i = l + n; i > n; n--) sb.insert(0, fillChar);
+        return sb.toString();
+    }
 }

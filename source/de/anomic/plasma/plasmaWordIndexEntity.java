@@ -50,6 +50,7 @@ import java.util.Set;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexEntity {
 
@@ -128,11 +129,7 @@ public final class plasmaWordIndexEntity {
 	if (theTmpMap == null) {
             int size = theIndex.size(); 
             if ((size == 0) && (delete)) {
-                try {
-                    deleteComplete();
-                } catch (IOException e) {
-                    delete = false;
-                }
+                deleteComplete();
                 return 0;
             } else {
                 return size;
@@ -164,6 +161,7 @@ public final class plasmaWordIndexEntity {
     }
     
     public boolean addEntry(plasmaWordIndexEntry entry) throws IOException {
+        if (entry == null) return false;
 	if (theTmpMap == null) {
 	    return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm(false).getBytes()) == null);
 	} else {
@@ -191,9 +189,9 @@ public final class plasmaWordIndexEntity {
         return count;
     }
     
-    public boolean deleteComplete() throws IOException {
+    public boolean deleteComplete() {
         if (theTmpMap == null) {
-            theIndex.close();
+            try {theIndex.close();} catch (IOException e) {}
             // remove file
             boolean success = theLocation.delete();
             // and also the paren directory if that is empty
@@ -257,10 +255,7 @@ public final class plasmaWordIndexEntity {
 	    } catch (IOException e) {
                 i = null;
 		throw new RuntimeException("dbenum: " + e.getMessage());
-	    } catch (kelondroException e) {
-                i = null;
-                throw new RuntimeException("dbenum: " + e.getMessage());
-            }
+	    }
 	}
         public void remove() {
             throw new UnsupportedOperationException();
@@ -305,8 +300,12 @@ public final class plasmaWordIndexEntity {
         // a time=-1 means: no timeout
         Iterator i = otherEntity.elements(true);
         long timeout = (time == -1) ? Long.MAX_VALUE : System.currentTimeMillis() + time;
+        try {
         while ((i.hasNext()) && (System.currentTimeMillis() < timeout)) {
             addEntry((plasmaWordIndexEntry) i.next());            
+        }
+        } catch (kelondroException e) {
+            serverLog.logSevere("PLASMA", "plasmaWordIndexEntity.merge: " + e.getMessage());
         }
     }
     

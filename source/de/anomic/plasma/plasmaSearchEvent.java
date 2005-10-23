@@ -63,6 +63,7 @@ public final class plasmaSearchEvent {
     private plasmaCrawlLURL urlStore;
     private plasmaSnippetCache snippetCache;
     private plasmaWordIndexEntity rcLocal, rcGlobal; // caches for results
+    private plasmaSearchProfile profileLocal, profileGlobal;
     private yacySearch[] searchThreads;
     
     public plasmaSearchEvent(plasmaSearchQuery query, serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL urlStore, plasmaSnippetCache snippetCache) {
@@ -73,6 +74,13 @@ public final class plasmaSearchEvent {
         this.snippetCache = snippetCache;
         this.rcLocal = new plasmaWordIndexEntity(null);
         this.rcGlobal = new plasmaWordIndexEntity(null);
+        if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
+            this.profileLocal  = new plasmaSearchProfile(4 * query.maximumTime / 10, query.wantedResults);
+            this.profileGlobal = new plasmaSearchProfile(6 * query.maximumTime / 10, query.wantedResults);
+        } else {
+            this.profileLocal = new plasmaSearchProfile(query.maximumTime, query.wantedResults);
+            this.profileGlobal = null;
+        }
         this.searchThreads = null;
     }
     
@@ -80,9 +88,8 @@ public final class plasmaSearchEvent {
         // combine all threads
         
         if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
-            int fetchcount = ((int) (query.maximumTime / 1000L)) * 5; // number of wanted results until break in search
-            int fetchpeers = ((int) (query.maximumTime / 1000L)) * 2; // number of target peers; means 30 peers in 10 seconds
-            long fetchtime = query.maximumTime * 6 / 10;           // time to waste
+            int fetchpeers = (int) (query.maximumTime / 1000L); // number of target peers; means 10 peers in 10 seconds
+            if (fetchpeers > 10) fetchpeers = 10;
             
             // remember time
             long start = System.currentTimeMillis();
@@ -91,16 +98,12 @@ public final class plasmaSearchEvent {
             serverInstantThread.oneTimeJob(this, "localSearch", log, 0);
         
             // do a global search
-            int globalContributions = globalSearch(fetchcount, fetchpeers, fetchtime);
+            int globalContributions = globalSearch(fetchpeers);
             log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
             
             try {
                 // combine the result and order
-                long remainingTime = query.maximumTime - (System.currentTimeMillis() - start);
-                if (remainingTime < 500) remainingTime = 500;
-                if (remainingTime > 3000) remainingTime = 3000;
-            
-                plasmaSearchResult result = order(remainingTime, query.wantedResults);
+                plasmaSearchResult result = order();
                 result.globalContributions = globalContributions;
                 result.localContributions = rcLocal.size();
                 
@@ -112,6 +115,7 @@ public final class plasmaSearchEvent {
                 rcLocal = null;
                 
                 // return search result
+                log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
                 return result;
             } catch (IOException e) {
                 return null;
@@ -120,14 +124,16 @@ public final class plasmaSearchEvent {
             // do a local search
             long start = System.currentTimeMillis();
             try {
-                localSearch(query.maximumTime);
-                plasmaSearchResult result = order(query.maximumTime - (System.currentTimeMillis() - start), query.wantedResults);
+                localSearch();
+                plasmaSearchResult result = order();
                 result.localContributions = rcLocal.size();
                 
                 // clean up
                 if ((rcLocal != null) && (!(rcLocal.isTMPEntity()))) rcLocal.close();
                 rcLocal = null;
                 
+                // return search result
+                log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
                 return result;
             } catch (IOException e) {
                 return null;
@@ -135,19 +141,14 @@ public final class plasmaSearchEvent {
         }
     }
     
-    
-    public void localSearch() throws IOException {
-        // method called by a one-time
-        localSearch(query.maximumTime * 6 / 10);
-    }
-    
-    public int localSearch(long time) throws IOException {
+    public int localSearch() throws IOException {
         // search for the set of hashes and return an array of urlEntry elements
         
-        long stamp = System.currentTimeMillis();
-        
         // retrieve entities that belong to the hashes
-        Set entities = wordIndex.getEntities(query.queryHashes, true, true);
+        profileLocal.startTimer();
+        Set entities = wordIndex.getEntities(query.queryHashes, true, true, profileLocal.getTargetTime(plasmaSearchProfile.PROCESS_COLLECTION));
+        profileLocal.setYieldTime(plasmaSearchProfile.PROCESS_COLLECTION);
+        profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_COLLECTION, (entities == null) ? 0 : entities.size());
         
         // since this is a conjunction we return an empty entity if any word is not known
         if (entities == null) {
@@ -156,31 +157,28 @@ public final class plasmaSearchEvent {
         }
         
         // join the result
-        long remainingTime = time - (System.currentTimeMillis() - stamp);
-        if (remainingTime < 1000) remainingTime = 1000;
-        rcLocal = plasmaWordIndexEntity.joinEntities(entities, remainingTime);
-        log.logFine("SEARCH TIME FOR FINDING " + rcLocal.size() + " ELEMENTS: " + ((System.currentTimeMillis() - stamp) / 1000) + " seconds");
-            
+        profileLocal.startTimer();
+        rcLocal = plasmaWordIndexEntity.joinEntities(entities, profileLocal.getTargetTime(plasmaSearchProfile.PROCESS_JOIN));
+        profileLocal.setYieldTime(plasmaSearchProfile.PROCESS_JOIN);
+        profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_JOIN, rcLocal.size());
+        
         return rcLocal.size();
     }
     
-    public int globalSearch(int fetchcount, int fetchpeers, long timelimit) {
+    public int globalSearch(int fetchpeers) {
         // do global fetching
         // the result of the fetch is then in the rcGlobal
         if (fetchpeers < 10) fetchpeers = 10;
-        if (fetchcount > query.wantedResults * 10) fetchcount = query.wantedResults * 10;
+
+        log.logFine("STARTING " + fetchpeers + " THREADS TO CATCH EACH " + profileGlobal.getTargetCount(plasmaSearchProfile.PROCESS_POSTSORT) + " URLs WITHIN " + (profileGlobal.duetime() / 1000) + " SECONDS");
         
-        // set a duetime for clients
-        long duetime = timelimit - 4000; // subtract network traffic overhead, guessed 4 seconds
-        if (duetime < 1000) { duetime = 1000; }
-        
-        long timeout = System.currentTimeMillis() + timelimit;
-        searchThreads = yacySearch.searchHashes(query.queryHashes, urlStore, rcGlobal, fetchcount, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, duetime);
+        long timeout = System.currentTimeMillis() + profileGlobal.duetime() + 4000;
+        searchThreads = yacySearch.searchHashes(query.queryHashes, urlStore, rcGlobal, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal);
         
         // wait until wanted delay passed or wanted result appeared
         while (System.currentTimeMillis() < timeout) {
             // check if all threads have been finished or results so far are enough
-            if (rcGlobal.size() >= fetchcount * 3) break; // we have enough
+            if (rcGlobal.size() >= profileGlobal.getTargetCount(plasmaSearchProfile.PROCESS_POSTSORT) * 3) break; // we have enough
             if (yacySearch.remainingWaiting(searchThreads) == 0) break; // we cannot expect more
             // wait a little time ..
             try {Thread.currentThread().sleep(100);} catch (InterruptedException e) {}
@@ -189,7 +187,7 @@ public final class plasmaSearchEvent {
         return rcGlobal.size();
     }
     
-    public plasmaSearchResult order(long maxTime, int minEntries) throws IOException {
+    public plasmaSearchResult order() throws IOException {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
@@ -197,19 +195,29 @@ public final class plasmaSearchEvent {
         searchResult.merge(rcLocal, -1);
         searchResult.merge(rcGlobal, -1);
         
+        long preorderTime = profileLocal.getTargetTime(plasmaSearchProfile.PROCESS_PRESORT);
+        long postorderTime = profileLocal.getTargetTime(plasmaSearchProfile.PROCESS_POSTSORT);
+        
+        profileLocal.startTimer();
+        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query);
+        preorder.addEntity(searchResult, preorderTime);
+        profileLocal.setYieldTime(plasmaSearchProfile.PROCESS_PRESORT);
+        profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_PRESORT, rcLocal.size());
+        
+        profileLocal.startTimer();
 	plasmaSearchResult acc = new plasmaSearchResult(query);
 	if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
         if (searchResult.size() == 0) return acc; // case that we have nothing to do
         
-	Iterator e = searchResult.elements(true);
+        // start url-fetch
 	plasmaWordIndexEntry entry;
-        long startCreateTime = System.currentTimeMillis();
+        long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + postorderTime;
         plasmaCrawlLURL.Entry page;
+        int minEntries = profileLocal.getTargetCount(plasmaSearchProfile.PROCESS_POSTSORT);
 	try {
-	    while (e.hasNext()) {
-                if ((acc.sizeFetched() >= minEntries) &&
-                    (System.currentTimeMillis() - startCreateTime >= maxTime)) break;
-                entry = (plasmaWordIndexEntry) e.next();
+	    while (preorder.hasNext()) {
+                if ((acc.sizeFetched() >= minEntries) && (System.currentTimeMillis() >= postorderLimitTime)) break;
+                entry = (plasmaWordIndexEntry) preorder.next();
                 // find the url entry
                 page = urlStore.getEntry(entry.getUrlHash());
                 // add a result
@@ -218,10 +226,15 @@ public final class plasmaSearchEvent {
 	} catch (kelondroException ee) {
 	    serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
 	}
-        long startSortTime = System.currentTimeMillis();
+        profileLocal.setYieldTime(plasmaSearchProfile.PROCESS_URLFETCH);
+        profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_URLFETCH, acc.sizeFetched());
+
+        // start postsorting
+        profileLocal.startTimer();
         acc.sortResults();
-        serverLog.logFine("PLASMA", "plasmaSearchEvent.order: minEntries = " + minEntries + ", effectiveEntries = " + acc.sizeOrdered() + ", demanded Time = " + maxTime + ", effectiveTime = " + (System.currentTimeMillis() - startCreateTime) + ", createTime = " + (startSortTime - startCreateTime) + ", sortTime = " + (System.currentTimeMillis() - startSortTime));
-	return acc;
+        profileLocal.setYieldTime(plasmaSearchProfile.PROCESS_POSTSORT);
+        profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_POSTSORT, acc.sizeOrdered());
+        return acc;
     }
     
     public void flushResults() {
@@ -229,32 +242,39 @@ public final class plasmaSearchEvent {
         // this must be called after search results had been computed
         // it is wise to call this within a separate thread because this method waits untill all 
         if (searchThreads == null) return;
-        
-        // wait untill all threads are finished
+
+        // wait until all threads are finished
         int remaining;
+        int count = 0;
+        String wordHash;
         long starttime = System.currentTimeMillis();
         while ((remaining = yacySearch.remainingWaiting(searchThreads)) > 0) {
-            try {Thread.currentThread().sleep(5000);} catch (InterruptedException e) {}
+            // flush the rcGlobal as much as is there so far
+            synchronized (rcGlobal) {
+                Iterator hashi = query.queryHashes.iterator();
+                while (hashi.hasNext()) {
+                    wordHash = (String) hashi.next();
+                    Iterator i = rcGlobal.elements(true);
+                    plasmaWordIndexEntry entry;
+                    while (i.hasNext()) {
+                        entry = (plasmaWordIndexEntry) i.next();
+                        wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), false);
+                    }
+                }
+                // the rcGlobal was flushed, empty it
+                count += rcGlobal.size();
+                rcGlobal.deleteComplete();
+            }    
+            // wait a little bit before trying again
+            try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {}
             if (System.currentTimeMillis() - starttime > 90000) {
                 yacySearch.interruptAlive(searchThreads);
-                serverLog.logFine("PLASMA", "SEARCH FLUSH: " + remaining + " PEERS STILL BUSY; ABANDONED");
+                serverLog.logFine("PLASMA", "SEARCH FLUSH: " + remaining + " PEERS STILL BUSY; ABANDONED; SEARCH WAS " + query.queryWords);
                 break;
             }
         }
         
-        // now flush the rcGlobal into wordIndex
-        Iterator hashi = query.queryHashes.iterator();
-        String wordHash;
-        while (hashi.hasNext()) {
-            wordHash = (String) hashi.next();
-            Iterator i = rcGlobal.elements(true);
-            plasmaWordIndexEntry entry;
-            while (i.hasNext()) {
-                entry = (plasmaWordIndexEntry) i.next();
-                wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), false);
-            }
-        }
-        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + rcGlobal.size() + " GLOBAL SEARCH RESULTS");
+        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + count + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
 	        
         // finally delete the temporary index
         rcGlobal = null;

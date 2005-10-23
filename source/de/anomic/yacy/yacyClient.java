@@ -58,6 +58,7 @@ import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.plasma.plasmaSearchProfile;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.tools.crypt;
@@ -337,9 +338,9 @@ public final class yacyClient {
         }
     }
 
-    public static int search(String wordhashes, int count, boolean global, yacySeed targetPeer,
+    public static int search(String wordhashes, boolean global, yacySeed targetPeer,
                              plasmaCrawlLURL urlManager, plasmaWordIndexEntity entityCache,
-                             plasmaURLPattern blacklist, plasmaSnippetCache snippets, long duetime) {
+                             plasmaURLPattern blacklist, plasmaSnippetCache snippets, plasmaSearchProfile profile) {
         // send a search request to peer with remote Hash
         // this mainly converts the words into word hashes
 
@@ -376,16 +377,18 @@ public final class yacyClient {
                 "&query=" + wordhashes;
              */
             final serverObjects obj = new serverObjects(9);
-                obj.put("myseed", yacyCore.seedDB.mySeed.genSeedStr(key));
-                obj.put("youare", targetPeer.hash);
-                obj.put("key", key);
-                obj.put("count", count);
-                obj.put("resource", ((global) ? "global" : "local"));
-                obj.put("query", wordhashes);
-                obj.put("ttl", "0");
-                obj.put("duetime", Long.toString(duetime));
-                obj.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
-                
+            long duetime = profile.duetime();
+            obj.put("myseed", yacyCore.seedDB.mySeed.genSeedStr(key));
+            obj.put("youare", targetPeer.hash);
+            obj.put("key", key);
+            obj.put("count", profile.getTargetCount(plasmaSearchProfile.PROCESS_POSTSORT));
+            obj.put("resource", ((global) ? "global" : "local"));
+            obj.put("query", wordhashes);
+            obj.put("ttl", "0");
+            obj.put("duetime", Long.toString(duetime));
+            obj.put("profile", profile.targetToString()); // new duetimes splitted by specific search tasks
+            obj.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
+
             //yacyCore.log.logDebug("yacyClient.search url=" + url);
             final long timestamp = System.currentTimeMillis();
             
@@ -400,7 +403,11 @@ public final class yacyClient {
                             obj
                     )
             );
+
+            // compute all computation times
             final long totalrequesttime = System.currentTimeMillis() - timestamp;
+            String returnProfile = (String) result.get("profile");
+            if (returnProfile != null) profile.putYield(returnProfile);
             
             /*
             HashMap result = nxTools.table(httpc.wget(new URL(url),
@@ -464,7 +471,7 @@ public final class yacyClient {
             } catch (NumberFormatException e) {
                 searchtime = totalrequesttime;
             }
-            yacyCore.log.logFine("yacyClient.search: processed " + results + " links from peer " + targetPeer.hash + ":" + targetPeer.getName() + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes) + ", duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
+            yacyCore.log.logFine("SEARCH " + results + " URLS FROM " + targetPeer.hash + ":" + targetPeer.getName() + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes) + ", duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
             return results;
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.search error: '" + targetPeer.get(yacySeed.NAME, "anonymous") + "' failed - " + e);

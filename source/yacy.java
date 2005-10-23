@@ -755,7 +755,7 @@ public final class yacy {
                 try {
                     wordCounter++;
                     wordHash = (String) importWordHashIterator.next();
-                    importWordIdxEntity = importWordIndex.getEntity(wordHash, true);
+                    importWordIdxEntity = importWordIndex.getEntity(wordHash, true, -1);
                     
                     if (importWordIdxEntity.size() == 0) {
                         importWordIdxEntity.deleteComplete();
@@ -878,7 +878,7 @@ public final class yacy {
                 try {
                     wordCounter++;
                     wordhash = (String) wordHashIterator.next();
-                    wordIdxEntity = wordIndex.getEntity(wordhash, true);
+                    wordIdxEntity = wordIndex.getEntity(wordhash, true, -1);
                     
                     // the combined container will fit, read the container
                     Iterator wordIdxEntries = wordIdxEntity.elements(true);

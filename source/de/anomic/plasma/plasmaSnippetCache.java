@@ -168,7 +168,7 @@ public class plasmaSnippetCache {
         return new result(line, source, null);
     }
     
-    public synchronized void storeToCache(String wordhashes, String urlhash, String snippet) {
+    public void storeToCache(String wordhashes, String urlhash, String snippet) {
         // generate key
         String key = urlhash + wordhashes;
 
@@ -371,13 +371,14 @@ public class plasmaSnippetCache {
             this.log);
     }
     
-    public void fetch(plasmaSearchResult acc, Set queryhashes, String urlmask, int fetchcount) {
+    public void fetch(plasmaSearchResult acc, Set queryhashes, String urlmask, int fetchcount, long maxTime) {
         // fetch snippets
         int i = 0;
         plasmaCrawlLURL.Entry urlentry;
         String urlstring;
         plasmaSnippetCache.result snippet;
-        while ((acc.hasMoreElements()) && (i < fetchcount)) {
+        long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
+        while ((acc.hasMoreElements()) && (i < fetchcount) && (System.currentTimeMillis() < limitTime)) {
             urlentry = acc.nextElement();
             if (urlentry.url().getHost().endsWith(".yacyh")) continue;
             urlstring = htmlFilterContentScraper.urlNormalform(urlentry.url());

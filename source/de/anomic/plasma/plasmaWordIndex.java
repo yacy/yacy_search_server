@@ -148,23 +148,29 @@ public final class plasmaWordIndex {
         return condenser.getWords().size();
     }
     
-    public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty) {
-        return ramCache.getIndex(wordHash, deleteIfEmpty);
+    public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty, long maxTime) {
+        return ramCache.getIndex(wordHash, deleteIfEmpty, maxTime);
     }
 
-    public Set getEntities(Set wordHashes, boolean deleteIfEmpty, boolean interruptIfEmpty) {
+    public Set getEntities(Set wordHashes, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
         
         // retrieve entities that belong to the hashes
         HashSet entities = new HashSet();
         String singleHash;
         plasmaWordIndexEntity singleEntity;
         Iterator i = wordHashes.iterator();
+        long start = System.currentTimeMillis();
+        long remaining;
         while (i.hasNext()) {
+            // check time
+            remaining = maxTime - (System.currentTimeMillis() - start);
+            if ((maxTime > 0) && (remaining <= 0)) break;
+            
             // get next hash:
             singleHash = (String) i.next();
             
             // retrieve index
-            singleEntity = getEntity(singleHash, true);
+            singleEntity = getEntity(singleHash, true, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - entities.size()));
             
             // check result
             if (((singleEntity == null) || (singleEntity.size() == 0)) && (interruptIfEmpty)) return null;

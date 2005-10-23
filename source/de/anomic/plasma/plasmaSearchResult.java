@@ -135,7 +135,6 @@ public final class plasmaSearchResult {
         String[] urlcomps;
         String[] descrcomps;
         long ranking;
-        long inc = 4096 * 4096;
         String queryhash;
         for (int i = 0; i < results.size(); i++) {
             // take out values from result array
@@ -147,14 +146,10 @@ public final class plasmaSearchResult {
             
             // apply pre-calculated order attributes
             ranking = 0;
-            if (query.order[0].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking  = 4096 * indexEntry.getQuality();
-            else if (query.order[0].equals(plasmaSearchQuery.ORDER_DATE)) ranking  = 4096 * indexEntry.getVirtualAge();
-            if (query.order[1].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking += indexEntry.getQuality();
-            else if (query.order[1].equals(plasmaSearchQuery.ORDER_DATE)) ranking += indexEntry.getVirtualAge();
             
             // apply 'common-sense' heuristic using references
-            for (int j = 0; j < urlcomps.length; j++) if (commonSense.contains(urlcomps[j])) ranking += inc;
-            for (int j = 0; j < descrcomps.length; j++) if (commonSense.contains(descrcomps[j])) ranking += inc;
+            for (int j = 0; j < urlcomps.length; j++) if (commonSense.contains(urlcomps[j])) ranking++;
+            for (int j = 0; j < descrcomps.length; j++) if (commonSense.contains(descrcomps[j])) ranking++;
             
             // apply query-in-result matching
             Set urlcomph = plasmaSearchQuery.words2hashes(urlcomps);
@@ -162,8 +157,8 @@ public final class plasmaSearchResult {
             Iterator shi = query.queryHashes.iterator();
             while (shi.hasNext()) {
                 queryhash = (String) shi.next();
-                if (urlcomph.contains(queryhash)) ranking += 10 * inc;
-                if (descrcomph.contains(queryhash)) ranking += 100 * inc;
+                if (urlcomph.contains(queryhash)) ranking += 10;
+                if (descrcomph.contains(queryhash)) ranking += 100;
             }
             
             // insert value

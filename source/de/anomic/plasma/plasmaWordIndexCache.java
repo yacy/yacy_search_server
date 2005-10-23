@@ -416,9 +416,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return ((long) intTime) * ((long) 1000) + startTime;
     }
     
-    private boolean flushFromAssortmentCluster(String key) {
+    private boolean flushFromAssortmentCluster(String key, long maxTime) {
 	// this should only be called if the assortment shall be deleted or returned in an index entity
-        plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(key);
+        maxTime = 8 * maxTime / 10; // reserve time for later adding to backend
+        plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(key, maxTime);
         if (container == null) {
             return false;
         } else {
@@ -428,12 +429,19 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
     }
 
-    public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty) {
+    public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty, long maxTime) {
         flushThread.pause();
+        long start = System.currentTimeMillis();
         flushFromMem(wordHash);
-        flushFromAssortmentCluster(wordHash);
+        if (maxTime < 0) {
+            flushFromAssortmentCluster(wordHash, -1);
+        } else {
+            long remaining = maxTime - (System.currentTimeMillis() - start);
+            if (remaining > 0) flushFromAssortmentCluster(wordHash, remaining);
+        }
         flushThread.proceed();
-	return backend.getIndex(wordHash, deleteIfEmpty);
+        long r = maxTime - (System.currentTimeMillis() - start);
+	return backend.getIndex(wordHash, deleteIfEmpty, (r < 0) ? 0 : r);
     }
     
     public long getUpdateTime(String wordHash) {
@@ -454,7 +462,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             hashScore.deleteScore(wordHash);
             hashDate.deleteScore(wordHash);
         }
-        assortmentCluster.removeFromAll(wordHash);
+        assortmentCluster.removeFromAll(wordHash, -1);
 	backend.deleteIndex(wordHash);
         flushThread.proceed();
     }
@@ -462,7 +470,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     public synchronized int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
         flushThread.pause();
         flushFromMem(wordHash);
-        flushFromAssortmentCluster(wordHash);
+        flushFromAssortmentCluster(wordHash, -1);
         int removed = backend.removeEntries(wordHash, urlHashes, deleteComplete);
         flushThread.proceed();
         return removed;
@@ -562,7 +570,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             } else {
                 // take out all words from the assortment to see if it fits
                 // together with the extracted assortment
-                plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordhash);
+                plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordhash, -1);
                 if (size + container.size() > assortmentCluster.clusterCapacity) {
                     // this will also be too big to integrate, add to entity
                     entity.addEntries(container);

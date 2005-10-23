@@ -158,18 +158,20 @@ public final class plasmaWordIndexAssortmentCluster {
         if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
         if (newContainer.size() <= clusterCount) newContainer = storeSingular(wordHash, newContainer);
         if (newContainer == null) return null;
-        newContainer.add(removeFromAll(wordHash));
+        newContainer.add(removeFromAll(wordHash, -1));
         if (newContainer.size() > clusterCapacity) return newContainer;
         storeStretched(wordHash, newContainer);
         return null;
     }
     
-    public plasmaWordIndexEntryContainer removeFromAll(String wordHash) {
+    public plasmaWordIndexEntryContainer removeFromAll(String wordHash, long maxTime) {
         // collect all records from all the assortments and return them
         plasmaWordIndexEntryContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
+        long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
 	for (int i = 0; i < clusterCount; i++) {
 	    buffer = assortments[i].remove(wordHash);
 	    if (buffer != null) record.add(buffer);
+            if (System.currentTimeMillis() > limitTime) break;
 	}
         return record;
     }

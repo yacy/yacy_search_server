@@ -53,12 +53,12 @@ import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaWordIndexEntity;
+import de.anomic.plasma.plasmaSearchProfile;
 import de.anomic.server.logging.serverLog;
 
 public class yacySearch extends Thread {
 
     final private Set wordhashes;
-    final private int count;
     final private boolean global;
     final private plasmaCrawlLURL urlManager;
     final private plasmaWordIndexEntity entityCache;
@@ -66,13 +66,12 @@ public class yacySearch extends Thread {
     final private plasmaSnippetCache snippetCache;
     final private yacySeed targetPeer;
     private int links;
-    final private long duetime;
+    final private plasmaSearchProfile profile;
 
-    public yacySearch(Set wordhashes, int count, boolean global, yacySeed targetPeer,
-                      plasmaCrawlLURL urlManager, plasmaWordIndexEntity entityCache, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, long duetime) {
+    public yacySearch(Set wordhashes, boolean global, yacySeed targetPeer,
+                      plasmaCrawlLURL urlManager, plasmaWordIndexEntity entityCache, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, plasmaSearchProfile profile) {
         super("yacySearch_" + targetPeer.getName());
         this.wordhashes = wordhashes;
-        this.count = count;
         this.global = global;
         this.urlManager = urlManager;
         this.entityCache = entityCache;
@@ -80,11 +79,11 @@ public class yacySearch extends Thread {
         this.snippetCache = snippetCache;
         this.targetPeer = targetPeer;
         this.links = -1;
-        this.duetime = duetime;
+        this.profile = (plasmaSearchProfile) profile.clone();
     }
 
     public void run() {
-        this.links = yacyClient.search(set2string(wordhashes), count, global, targetPeer, urlManager, entityCache, blacklist, snippetCache, duetime);
+        this.links = yacyClient.search(set2string(wordhashes), global, targetPeer, urlManager, entityCache, blacklist, snippetCache, profile);
         if (links != 0) {
             //yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + links + " links for word hash " + wordhashes);
             yacyCore.seedDB.mySeed.incRI(links);
@@ -102,7 +101,11 @@ public class yacySearch extends Thread {
     public int links() {
         return this.links;
     }
-
+    
+    public plasmaSearchProfile profile() {
+        return this.profile;
+    }
+    
     private static yacySeed[] selectPeers(Set wordhashes, int seedcount) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant
@@ -166,7 +169,7 @@ public class yacySearch extends Thread {
     }
 
     public static yacySearch[] searchHashes(Set wordhashes, plasmaCrawlLURL urlManager, plasmaWordIndexEntity entityCache,
-                           int count, int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, long duetime) {
+                           int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, plasmaSearchProfile profile) {
         // check own peer status
         if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
 
@@ -178,8 +181,8 @@ public class yacySearch extends Thread {
         if (targets == 0) return null;
         yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {           
-            searchThreads[i]= new yacySearch(wordhashes, count, true, targetPeers[i],
-                    urlManager, entityCache, blacklist, snippetCache, duetime);
+            searchThreads[i]= new yacySearch(wordhashes, true, targetPeers[i],
+                    urlManager, entityCache, blacklist, snippetCache, profile);
             searchThreads[i].start();
             try {Thread.currentThread().sleep(20);} catch (InterruptedException e) {}
 
