@@ -244,6 +244,7 @@ public final class robotsParser{
         try {
             downloadStart = System.currentTimeMillis();
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+            //TODO: adding Traffic statistic for robots download?
             if ((sb.remoteProxyConfig == null) || (!sb.remoteProxyConfig.useProxy())) {
                 con = httpc.getInstance(robotsURL.getHost(), robotsURL.getPort(), 10000, false);
             } else {

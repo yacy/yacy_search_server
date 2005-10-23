@@ -797,7 +797,7 @@ public final class plasmaWordIndexDistribution {
                         plasmaWordIndexDistribution.this.log.logInfo("Index selection of " + idxCount + " words [" + newIndexEntities[0].wordHash() + " .. " + newIndexEntities[newIndexEntities.length-1].wordHash() + "]" +
                                 " in " +
                                 (selectionTime / 1000) + " seconds (" +
-                                (1000 * idxCount / (selectionTime)) + " words/s)");                     
+                                (1000 * idxCount / (selectionTime+1)) + " words/s)");                     
                     }
                     
                     // query status of old worker thread
