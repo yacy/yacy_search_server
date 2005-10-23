@@ -131,6 +131,8 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
     public static final String X_YACY_PREVIOUS_REQUEST_LINE = "X-Previous-Request-Line";
     
+    public static final String X_YACY_INDEX_CONTROL = "X-YACY-Index-Control";
+    
     /* =============================================================
      * Constants defining http methods
      * ============================================================= */

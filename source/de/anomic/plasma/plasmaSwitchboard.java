@@ -631,36 +631,51 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 	
     synchronized public boolean htEntryStoreProcess(plasmaHTCache.Entry entry) throws IOException {
         
-        if (entry == null) return false;
+        if (entry == null) return false;               
         
         // store response header
         if (entry.responseHeader != null) {
-            cacheManager.storeHeader(entry.nomalizedURLHash, entry.responseHeader);
-            log.logInfo("WROTE HEADER for " + entry.cacheFile);
+            this.cacheManager.storeHeader(entry.nomalizedURLHash, entry.responseHeader);
+            this.log.logInfo("WROTE HEADER for " + entry.cacheFile);
+        }
+        
+        /*
+         * Evaluating request header:
+         * With the X-YACY-Index-Control header set to "no-index" a client could disallow
+         * yacy to index the response returned as answer to a request
+         */
+        boolean doIndexing = true;
+        if (entry.requestHeader != null) {
+            if (
+                    (entry.requestHeader.containsKey(httpHeader.X_YACY_INDEX_CONTROL)) &&
+                    (((String) entry.requestHeader.get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX"))
+            ) {
+                doIndexing = false;
+            }
         }
         
         // work off unwritten files
         if (entry.cacheArray == null)  {
-            log.logInfo("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
+            this.log.logInfo("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
         } else {
             String error = entry.shallStoreCacheForProxy();
             if (error == null) {
-                cacheManager.writeFile(entry.url, entry.cacheArray);
-                log.logInfo("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
+                this.cacheManager.writeFile(entry.url, entry.cacheArray);
+                this.log.logInfo("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
             } else {
-                log.logInfo("WRITE OF FILE " + entry.cacheFile + " FORBIDDEN: " + error);
+                this.log.logInfo("WRITE OF FILE " + entry.cacheFile + " FORBIDDEN: " + error);
             }
         }
 
-        if (plasmaParser.supportedContent(entry.url,entry.responseHeader.mime())){
+        if ((doIndexing) && plasmaParser.supportedContent(entry.url,entry.responseHeader.mime())){
             
             // registering the cachefile as in use
             if (entry.cacheFile.exists()) {
-                cacheManager.filesInUse.add(entry.cacheFile);
+                plasmaHTCache.filesInUse.add(entry.cacheFile);
             }
             
             // enqueue for further crawling
-            enQueue(sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
+            enQueue(this.sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
                     entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
                     entry.initiator(), entry.depth, entry.profile.handle(),
                     entry.name()

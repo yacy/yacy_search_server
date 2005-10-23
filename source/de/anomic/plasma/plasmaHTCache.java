@@ -699,8 +699,25 @@ public final class plasmaHTCache {
         return null;
     }
 
-        public boolean shallUseCacheForProxy() {
-        // decide upon header information if a specific file should be taken from the cache or not
+    /**
+     * decide upon header information if a specific file should be taken from the cache or not
+     * @return
+     */
+    public boolean shallUseCacheForProxy() {
+        // if the client requests a un-cached copy of the resource ...
+        if (
+                (this.requestHeader.containsKey(httpHeader.PRAGMA)) &&
+                (((String) this.requestHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE"))
+        ) return false;       
+        
+        if (
+                (this.requestHeader.containsKey(httpHeader.CACHE_CONTROL)) &&
+                (
+                        (((String) this.requestHeader.get(httpHeader.CACHE_CONTROL)).toUpperCase().startsWith("NO-CACHE")) ||
+                        (((String) this.requestHeader.get(httpHeader.CACHE_CONTROL)).toUpperCase().startsWith("MAX-AGE=0"))
+                )
+        ) return false;
+        
         
         //System.out.println("SHALL READ CACHE: requestHeader = " + requestHeader.toString() + ", responseHeader = " + responseHeader.toString());
         

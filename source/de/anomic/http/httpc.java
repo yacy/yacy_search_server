@@ -1072,13 +1072,36 @@ do upload
             String password, 
             httpRemoteProxyConfig theRemoteProxyConfig
     ) throws IOException {
+        return wget(url,timeout,user,password,theRemoteProxyConfig,null);
+    }
+    
+    public static ArrayList wget(
+            URL url, 
+            int timeout, 
+            String user, 
+            String password, 
+            httpRemoteProxyConfig theRemoteProxyConfig,
+            httpHeader requestHeader
+    ) throws IOException {
+        
+        int port = url.getPort();
+        boolean ssl = url.getProtocol().equals("https");
+        if (port < 0) port = (ssl) ? 443: 80;
+        String path = url.getPath();
+        String query = url.getQuery();
+        if ((query != null) && (query.length() > 0)) path = path + "?" + query;
+        
         // splitting of the byte array into lines
         byte[] a = singleGET(
-                url, 
+                url.getHost(), 
+                port, 
+                path, 
                 timeout, 
                 user, 
                 password, 
-                theRemoteProxyConfig
+                ssl, 
+                theRemoteProxyConfig, 
+                requestHeader
         );
         
         if (a == null) return null;
@@ -1100,8 +1123,19 @@ do upload
             String password, 
             httpRemoteProxyConfig theRemoteProxyConfig
     ) throws IOException {
+        return whead(url,timeout,user,password,theRemoteProxyConfig,null);
+    }
+    
+    public static httpHeader whead(
+            URL url, 
+            int timeout, 
+            String user, 
+            String password, 
+            httpRemoteProxyConfig theRemoteProxyConfig,
+            httpHeader requestHeader
+    ) throws IOException {
         // generate request header
-        httpHeader requestHeader = new httpHeader();
+        if (requestHeader == null) requestHeader = new httpHeader();
         if ((user != null) && (password != null) && (user.length() != 0)) {
             requestHeader.put(httpHeader.AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
         }

@@ -136,45 +136,49 @@ public class yacyPeerActions {
     }
 
     public void loadSeedLists() {
-	// uses the superseed to initialize the database with known seeds
+        // uses the superseed to initialize the database with known seeds
         
-	yacySeed     ys;
-	String       seedListFileURL;
+        yacySeed     ys;
+        String       seedListFileURL;
         URL          url;
-	ArrayList       seedList;
-	Iterator  enu;
+        ArrayList    seedList;
+        Iterator     enu;
         int          lc;
         int          sc = seedDB.sizeConnected();
         httpHeader   header;
         
         yacyCore.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
-
+        
         // - load the superseed: a list of URL's
-	disorderSet superseed = loadSuperseed(superseedFile, superseedURL);
-
+        disorderSet superseed = loadSuperseed(superseedFile, superseedURL);
+        
         // - use the superseed to further fill up the seedDB
         int ssc = 0;
-	for (int i = 0; i < superseed.size(); i++) {
-        if (Thread.currentThread().isInterrupted()) break;
-	    seedListFileURL = (String) superseed.any();
-	    if (seedListFileURL.startsWith("http://")) {
-		// load the seed list
-		try {
+        for (int i = 0; i < superseed.size(); i++) {
+            if (Thread.currentThread().isInterrupted()) break;
+            seedListFileURL = (String) superseed.any();
+            if (seedListFileURL.startsWith("http://")) {
+                // load the seed list
+                try {
+                    httpHeader reqHeader = new httpHeader();
+                    reqHeader.put(httpHeader.PRAGMA,"no-cache");
+                    reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
+                    
                     url = new URL(seedListFileURL);
-                    header = httpc.whead(url, 5000, null, null, this.sb.remoteProxyConfig);
+                    header = httpc.whead(url, 5000, null, null, this.sb.remoteProxyConfig,reqHeader);
                     if ((header == null) || (header.lastModified() == null)) {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available");
                     } else if ((header.age() > 86400000) && (ssc > 0)) {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        seedList = httpc.wget(url, 5000, null, null, this.sb.remoteProxyConfig);
+                        seedList = httpc.wget(url, 5000, null, null, this.sb.remoteProxyConfig,reqHeader);
                         enu = seedList.iterator();
                         lc = 0;
                         while (enu.hasNext()) {
                             ys = yacySeed.genRemoteSeed((String) enu.next(), null);
                             if ((ys != null) && (ys.isProper() == null) &&
-                            ((seedDB.mySeed == null) || (seedDB.mySeed.hash != ys.hash))) {
+                                    ((seedDB.mySeed == null) || (seedDB.mySeed.hash != ys.hash))) {
                                 if (connectPeer(ys, false)) lc++;
                                 //seedDB.writeMap(ys.hash, ys.getMap(), "init");
                                 //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());
@@ -184,13 +188,13 @@ public class yacyPeerActions {
                         yacyCore.log.logInfo("BOOTSTRAP: " + lc + " seeds from seed-list URL " + seedListFileURL + ", AGE=" + (header.age() / 3600000) + "h");
                     }
                     
-		} catch (Exception e) {
-		    // this is when wget fails; may be because of missing internet connection
-		    // we do nothing here and go silently over it
+                } catch (Exception e) {
+                    // this is when wget fails; may be because of missing internet connection
+                    // we do nothing here and go silently over it
                     yacyCore.log.logSevere("BOOTSTRAP: failed to load seeds from seed-list URL " + seedListFileURL);
-		}
-	    }
-  	}
+                }
+            }
+        }
         yacyCore.log.logInfo("BOOTSTRAP: " + (seedDB.sizeConnected() - sc) + " new seeds while bootstraping.");
     }
 
