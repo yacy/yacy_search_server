@@ -77,6 +77,7 @@ public class wikiCode {
     private boolean preformatted = false;     //needed for preformatted text
     private boolean preformattedSpan = false; //needed for <pre> and </pre> spanning over several lines
     private int preindented = 0;              //needed for indented <pre>s
+    private int escindented = 0;
         
     public wikiCode(plasmaSwitchboard switchboard){
         sb=switchboard;
@@ -397,10 +398,18 @@ public class wikiCode {
 	    }
 	}
 	
-	//escape code contributed by [MN]
+	//escape code ([=...=]) contributed by [MN]
 	//both [= and =] in the same line
 	else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>=0)&&(!(preformatted))){
 	    String escapeText = result.substring(p0+2,p1);
+	    
+	    //BUGS TO BE FIXED: [=[=text=]=]  does not work properly:
+	    //[=[= undx=]x=] should resolve as [= undx=]x, but resolves as [= undxx=]
+	    //ALSO [=[= und =]=]   [= und =] leads to an exception
+	    //
+	    //handlicg cases where the text inside [= and =] also contains
+	    //[= and =]. Example: [=[=...=]=]
+	    
 	    result = transformLine(result.substring(0,p0)+"!escape!!Text!"+result.substring(p1+2), switchboard);
 	    result = result.replaceAll("!escape!!Text!", escapeText);
 	}
@@ -409,9 +418,15 @@ public class wikiCode {
 	else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)&&(!(preformatted))){
 	    escape = true;    //prevent surplus line breaks
 	    escaped = true;   //prevents <pre> being parsed
+	    String bq = "";   //gets filled with <blockquote>s as needed
 	    String escapeText = result.substring(p0+2);
-	    result = transformLine(result.substring(0,p0)+"!escape!!Text!", switchboard);
-	    result = result.replaceAll("!escape!!Text!", escapeText);
+	    //taking care of indented lines
+	    while(result.substring(escindented,p0).startsWith(":")){
+		escindented++;
+		bq = bq + "<blockquote>";
+	    }
+	    result = transformLine(result.substring(escindented,p0)+"!escape!!Text!", switchboard);
+	    result = bq + result.replaceAll("!escape!!Text!", escapeText);
 	    escape = false;
 	    escapeSpan = true;
 	}
@@ -419,14 +434,20 @@ public class wikiCode {
 	//end =]
 	else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)&&(!(preformatted))){
 	    escapeSpan = false;
+	    String bq = ""; //gets filled with </blockquote>s as neede
 	    String escapeText = result.substring(0,p0);
+	    //taking care of indented lines
+	    while(escindented > 0){
+	        bq = bq + "</blockquote>";
+		escindented--;
+	    }
 	    result = transformLine("!escape!!Text!"+result.substring(p0+2), switchboard);
-	    result = result.replaceAll("!escape!!Text!", escapeText);
+	    result = result.replaceAll("!escape!!Text!", escapeText) + bq;
 	    escaped = false;
 	}
 	//end contrib [MN]
 
-	//preformatted code contributed by [MN]
+	//preformatted code (<pre>...</pre>) contributed by [MN]
 	//implementation very similar to escape code (see above)
 	//both <pre> and </pre> in the same line
 	else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&((p1 = result.indexOf("&lt;/pre&gt;"))>=0)&&(!(escaped))){
@@ -461,7 +482,7 @@ public class wikiCode {
                 preindented--;
 	    }
 	    result = transformLine("!preformatted!!Text!"+result.substring(p0+12), switchboard);
-	    result = result.replaceAll("!preformatted!!Text!", preformattedText)+bq;
+	    result = result.replaceAll("!preformatted!!Text!", preformattedText) + bq;
 	    preformatted = false;
 	}
 	//end contrib [MN]	
