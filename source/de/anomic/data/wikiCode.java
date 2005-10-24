@@ -170,11 +170,11 @@ public class wikiCode {
                                       result.substring(p1 + 2);
             }
 
-            if ((p0 = result.indexOf("''''")) >= 0) {
-                p1 = result.indexOf("''''", p0 + 4);
+            if ((p0 = result.indexOf("'''''")) >= 0) {
+                p1 = result.indexOf("'''''", p0 + 5);
                 if (p1 >= 0) result = result.substring(0, p0) + "<b><i>" +
-                                      result.substring(p0 + 4, p1) + "</i></b>" +
-                                      result.substring(p1 + 4);
+                                      result.substring(p0 + 5, p1) + "</i></b>" +
+                                      result.substring(p1 + 5);
             }
             if ((p0 = result.indexOf("'''")) >= 0) {
                 p1 = result.indexOf("'''", p0 + 3);
@@ -332,7 +332,7 @@ public class wikiCode {
 		    kl = result.substring(p0 + 2, p1);
 		
 		    // this is the part of the code that's responsible for images
-		    // contibuted by [MN]
+		    // contributed by [MN]
 		    if(kl.startsWith("Image:")){
 			    alt = "";
 			    align = "";
@@ -400,7 +400,8 @@ public class wikiCode {
 	
 	//escape code ([=...=]) contributed by [MN]
 	//both [= and =] in the same line
-	else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>=0)&&(!(preformatted))){
+	else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>0)&&(!(preformatted))){
+	    //if(p0 < p1){
 	    String escapeText = result.substring(p0+2,p1);
 	    
 	    //BUGS TO BE FIXED: [=[=text=]=]  does not work properly:
@@ -409,9 +410,13 @@ public class wikiCode {
 	    //
 	    //handlicg cases where the text inside [= and =] also contains
 	    //[= and =]. Example: [=[=...=]=]
+	    //if(escapeText)
 	    
-	    result = transformLine(result.substring(0,p0)+"!escape!!Text!"+result.substring(p1+2), switchboard);
-	    result = result.replaceAll("!escape!!Text!", escapeText);
+	    //else{
+	        result = transformLine(result.substring(0,p0)+"!escape!!Text!"+result.substring(p1+2), switchboard);
+	        result = result.replaceAll("!escape!!Text!", escapeText);
+	    //}
+	    //}
 	}
 	
 	//start [=
@@ -450,10 +455,12 @@ public class wikiCode {
 	//preformatted code (<pre>...</pre>) contributed by [MN]
 	//implementation very similar to escape code (see above)
 	//both <pre> and </pre> in the same line
-	else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&((p1 = result.indexOf("&lt;/pre&gt;"))>=0)&&(!(escaped))){
-	    String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11,p1)+"</pre>";
-            result = transformLine(result.substring(0,p0)+"!preformatted!!Text!"+result.substring(p1+12), switchboard);
-	    result = result.replaceAll("!preformatted!!Text!", preformattedText);
+	else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&((p1 = result.indexOf("&lt;/pre&gt;"))>0)&&(!(escaped))){
+	    //if(p0 < p1){
+	        String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11,p1)+"</pre>";
+                result = transformLine(result.substring(0,p0)+"!preformatted!!Text!"+result.substring(p1+12), switchboard);
+	        result = result.replaceAll("!preformatted!!Text!", preformattedText);
+	    //}
 	}
 	
 	//start <pre>
