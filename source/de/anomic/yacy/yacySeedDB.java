@@ -669,8 +669,9 @@ public final class yacySeedDB {
         String log = null; 
         File seedFile = null;
         try {            
-            // create a seed file which for uploading ...            
-            seedFile = new File("seedFile.txt");
+            // create a seed file which for uploading ...    
+            seedFile = File.createTempFile("seedFile",".txt",((plasmaSwitchboard)sb).cacheManager.cachePath);
+            seedFile.deleteOnExit();
             serverLog.logFine("YACY","SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             ArrayList uv = storeCache(seedFile, true);            
             
