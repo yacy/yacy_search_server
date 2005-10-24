@@ -57,6 +57,8 @@ import de.anomic.yacy.yacySearch;
 
 public final class plasmaSearchEvent {
     
+    public static plasmaSearchEvent lastEvent = null;
+    
     private serverLog log;
     private plasmaSearchQuery query;
     private plasmaWordIndex wordIndex;
@@ -82,6 +84,14 @@ public final class plasmaSearchEvent {
             this.profileGlobal = null;
         }
         this.searchThreads = null;
+    }
+    
+    public plasmaSearchQuery getQuery() {
+        return query;
+    }
+    
+    public yacySearch[] getSearchThreads() {
+        return searchThreads;
     }
     
     public plasmaSearchResult search() {
@@ -116,6 +126,7 @@ public final class plasmaSearchEvent {
                 
                 // return search result
                 log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
+                lastEvent = this;
                 return result;
             } catch (IOException e) {
                 return null;
@@ -134,6 +145,7 @@ public final class plasmaSearchEvent {
                 
                 // return search result
                 log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
+                lastEvent = this;
                 return result;
             } catch (IOException e) {
                 return null;

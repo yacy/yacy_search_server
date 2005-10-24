@@ -376,7 +376,7 @@ public class yacySeed {
         return s;
     }
 
-    public long decodeLex(String s) {
+    public static long decodeLex(String s) {
         long c = 0;
         for (int i = 0; i < s.length(); i++) {
             c = c * 96 + (byte) s.charAt(i) - 32;
@@ -414,9 +414,14 @@ public class yacySeed {
         return (myPos > wordPos) ? (myPos - wordPos) : (myPos + maxDHTDistance - wordPos);
     }
 
-    public long dhtDistance() {
+    public long dhtPosition() {
         // returns an absolute value
-        return decodeLex(hash.substring(0,9)) - minDHTNumber;
+        return dhtPosition(this.hash);
+    }
+
+    public static long dhtPosition(String ahash) {
+        // returns an absolute value
+        return decodeLex(ahash.substring(0,9)) - minDHTNumber;
     }
 
     public static yacySeed genLocalSeed(plasmaSwitchboard sb) {

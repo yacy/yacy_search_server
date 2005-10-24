@@ -454,7 +454,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             //File targetClass = rewriteClassFile(targetFile);
             Date targetDate;
             
-            if ((targetClass != null) && ((path.endsWith("png") || (path.endsWith("gif"))))) {
+            if ((targetClass != null) && (path.endsWith("png"))) {
                 // call an image-servlet to produce an on-the-fly - generated image
                 BufferedImage bi = null;
                 try {

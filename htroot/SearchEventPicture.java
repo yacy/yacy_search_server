@@ -1,14 +1,14 @@
-// NetworkPicture.java 
+// SearchEventPicture.java 
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// Created 08.10.2005
+// Created 24.10.2005
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2005-10-23 19:50:27 +0200 (Sun, 23 Oct 2005) $
+// $LastChangedRevision: 976 $
+// $LastChangedBy: orbiter $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,28 +51,18 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 import de.anomic.plasma.plasmaGrafics;
+import de.anomic.tools.ImagePainter;
 
 // draw a picture of the yacy network
 
-public class NetworkPicture {
+public class SearchEventPicture {
     
     public static BufferedImage respond(httpHeader header, serverObjects post, serverSwitch env) {
 
-        int width = 640;
-        int height = 480;
-        int passiveLimit = 300;
-        int potentialLimit = 300;
-        int maxCount = 1000;
+        ImagePainter ip = plasmaGrafics.getSearchEventPicture();
+        if (ip == null) return new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB); // empty image
         
-        if (post != null) {
-            width = post.getInt("width", 640);
-            height = post.getInt("height", 420);
-            passiveLimit = post.getInt("pal", 300);
-            potentialLimit = post.getInt("pol", 300);
-            maxCount = post.getInt("max", 1000);
-        }
-        
-        return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount).toImage(true);
+        return ip.toImage(true);
     }
     
 }

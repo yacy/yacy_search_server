@@ -106,6 +106,10 @@ public class yacySearch extends Thread {
         return this.profile;
     }
     
+    public yacySeed target() {
+        return targetPeer;
+    }
+    
     private static yacySeed[] selectPeers(Set wordhashes, int seedcount) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant

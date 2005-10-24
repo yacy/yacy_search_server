@@ -58,7 +58,7 @@ import java.awt.image.WritableRaster;
 import java.util.HashSet;
 import java.util.ArrayList;
 
-public class ImagePainter {
+public class ImagePainter implements Cloneable {
     
     // colors regarding RGB Color Model
     public static final long ADDITIVE_RED   = 0xFF0000;
@@ -131,6 +131,24 @@ public class ImagePainter {
         String s = Long.toHexString(c);
         while (s.length() < 6) s = "0" + s;
         return s;
+    }
+    
+    public Object clone() {
+        ImagePainter ip = new ImagePainter(this.width, this.height, 0);
+        System.arraycopy(this.grid, 0, ip.grid, 0, this.grid.length);
+        ip.defaultColR = this.defaultColR;
+        ip.defaultColG = this.defaultColG;
+        ip.defaultColB = this.defaultColB;
+        ip.defaultMode = this.defaultMode;
+        return ip;
+    }
+    
+    public int getWidth() {
+        return width;
+    }
+    
+    public int getHeight() {
+        return height;
     }
     
     public void setColor(long c) {
