@@ -153,7 +153,7 @@ public class plasmaGrafics {
         
         // draw disconnected senior and principals that have been seen lately
         count = 0;
-        e = yacyCore.seedDB.seedsSortedDisconnected(true, yacySeed.LASTSEEN);
+        e = yacyCore.seedDB.seedsSortedDisconnected(false, yacySeed.LASTSEEN);
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
@@ -167,7 +167,7 @@ public class plasmaGrafics {
         
         // draw juniors that have been seen lately
         count = 0;
-        e = yacyCore.seedDB.seedsSortedPotential(true, yacySeed.LASTSEEN);
+        e = yacyCore.seedDB.seedsSortedPotential(false, yacySeed.LASTSEEN);
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {

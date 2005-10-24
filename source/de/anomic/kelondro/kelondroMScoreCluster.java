@@ -45,6 +45,8 @@ import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.SortedMap;
+import java.util.Random; // only for testing
 
 public final class kelondroMScoreCluster {
     
@@ -60,27 +62,54 @@ public final class kelondroMScoreCluster {
         encnt = 0;
     }
     
-    public static SimpleDateFormat shortFormatter = new SimpleDateFormat("yyyyMMddHHmmss");
+    public static final String shortDateFormatString = "yyyyMMddHHmmss";
+    public static final SimpleDateFormat shortFormatter = new SimpleDateFormat(shortDateFormatString);
+    public static final long minutemillis = 60000;
+    public static long date2000 = 0;
+    
+    static {
+        try {
+            date2000 = shortFormatter.parse("20000101000000").getTime();
+        } catch (ParseException e) {}
+    }
+    
+    /*
+    public static int string2score(String s) {
+        int i = string2scoreX(s);
+        System.out.println("string2core(" + s + ") = " + i);
+        return i;
+    }
+    */
     
     public static int string2score(String s) {
         // this can be used to calculate a score from a string
-        try { // try a number
-            return Integer.parseInt(s);
-        } catch (NumberFormatException e) { 
-            try { // try a date
-                return (int) ((90000000 + System.currentTimeMillis() - shortFormatter.parse(s).getTime()) / 60000);
-            } catch (ParseException ee) {
-                // try it lex
-                int len = s.length();
-                if (len > 5) len = 5;
-                int c = 0;
-                for (int i = 0; i < len; i++) {
-                    c <<= 6;
-                    c += plainByteArray[(byte) s.charAt(i)];
-                }
-                for (int i = len; i < 5; i++) c <<= 6;
-                return c;
+        
+        try {
+            long l = 0;
+            if (s.length() == shortDateFormatString.length()) {
+                // try a date
+                l = ((shortFormatter.parse(s).getTime() - date2000) / minutemillis);
+                if (l > (60 + ((System.currentTimeMillis() - date2000) / minutemillis))) l = 0; // future date, more than one hour
+                if (l < 0) l = 0;
+            } else {
+                // try a number
+                l = Long.parseLong(s);
             }
+            // fix out-of-ranges
+            if (l > (long) Integer.MAX_VALUE) return Integer.MAX_VALUE;
+            if (l < (long) Integer.MIN_VALUE) return Integer.MIN_VALUE;
+            return (int) l;
+        } catch (Exception e) {
+            // try it lex
+            int len = s.length();
+            if (len > 5) len = 5;
+            int c = 0;
+            for (int i = 0; i < len; i++) {
+                c <<= 6;
+                c += plainByteArray[(byte) s.charAt(i)];
+            }
+            for (int i = len; i < 5; i++) c <<= 6;
+            return c;
         }
     }
     
@@ -263,12 +292,14 @@ public final class kelondroMScoreCluster {
     
     public synchronized Iterator scores(boolean up) {
         if (up) return new simpleScoreIterator();
-        else return scores(false, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        //else return scores(false, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        else return new reverseScoreIterator();
     }
     
     public synchronized Iterator scores(boolean up, int minScore, int maxScore) {
         return new komplexScoreIterator(up, minScore, maxScore);
     }
+    
     
     private class komplexScoreIterator implements Iterator {
 
@@ -318,6 +349,34 @@ public final class kelondroMScoreCluster {
         
     }
     
+    private class reverseScoreIterator implements Iterator {
+
+        SortedMap view;
+        Object key;
+        
+        public reverseScoreIterator() {
+            view = keyrefDB;
+        }
+       
+        public boolean hasNext() {
+            return view.size() > 0;
+        }
+        
+        public Object next() {
+            key = view.lastKey();
+            view = view.headMap(key);
+            Object value = keyrefDB.get(key);
+            //System.out.println("cluster reverse iterator: score = " + ((((Long) key).longValue() & 0xFFFFFFFF00000000L) >> 32) + ", handle = " + (((Long) key).longValue() & 0xFFFFFFFFL) + ", value = " + value);
+            return value;
+        }
+        
+        public void remove() {
+            Object val = keyrefDB.remove(key);
+            if (val != null) refkeyDB.remove(val);
+        }
+        
+    }
+    
     private class simpleScoreIterator implements Iterator {
 
         Iterator ii;
@@ -333,11 +392,13 @@ public final class kelondroMScoreCluster {
         
         public Object next() {
             entry = (Map.Entry) ii.next();
+            //System.out.println("cluster simple iterator: score = " + ((((Long) entry.getKey()).longValue() & 0xFFFFFFFF00000000L) >> 32) + ", handle = " + (((Long) entry.getKey()).longValue() & 0xFFFFFFFFL) + ", value = " + entry.getValue());
             return entry.getValue();
         }
         
         public void remove() {
             ii.remove();
+            if (entry.getValue() != null) refkeyDB.remove(entry.getValue());
         }
         
     }
@@ -349,25 +410,46 @@ public final class kelondroMScoreCluster {
         
         System.out.println("Test for Score: start");
         kelondroMScoreCluster s = new kelondroMScoreCluster();
-	int c = 0;
+	long c = 0;
 
 	// create cluster
         long time = System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++) {
-	    s.addScore("score#" + i + "xxx" + i + "xxx" + i + "xxx" + i + "xxx", i/10);
-	    c += i/10;
-	}
-	/*
+        Random random = new Random(1234);
+        int r;
+        int count = 20;
+        int[] mem = new int[count];
+        
+        for (int x = 0; x < 100; x++) {
+            for (int i = 0; i < count; i++) {
+                r = random.nextInt();
+                mem[i] = r;
+                s.addScore("score#" + r, r);
+                c += (long) r;
+            }
+            
+            // delete some
+            int p;
+            for (int i = 0; i < (count / 2); i++) {
+                p = (int) (random.nextFloat() * count);
+                if (s.existsScore("score#" + mem[p])) {
+                    System.out.println("delete score#" + mem[p]);
+                    s.deleteScore("score#" + mem[p]);
+                    c -= mem[p];
+                }
+            }
+        }
+        
         System.out.println("result:");
         Object[] result;
         result = s.getScores(s.size(), true);
         for (int i = 0; i < s.size(); i++) System.out.println("up: " + result[i]);
         result = s.getScores(s.size(), false);
         for (int i = 0; i < s.size(); i++) System.out.println("down: " + result[i]);
-	*/
+	
         System.out.println("finished create. time = " + (System.currentTimeMillis() - time));
         System.out.println("total=" + s.totalCount() + ", elements=" + s.size() + ", redundant count=" + c);
 
+        /*
 	// delete cluster
         time = System.currentTimeMillis();
         for (int i = 0; i < 10000; i++) {
@@ -376,6 +458,6 @@ public final class kelondroMScoreCluster {
 	}
         System.out.println("finished delete. time = " + (System.currentTimeMillis() - time));
         System.out.println("total=" + s.totalCount() + ", elements=" + s.size() + ", redundant count=" + c);
-
+        */
     }
 }

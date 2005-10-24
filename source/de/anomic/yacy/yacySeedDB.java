@@ -782,60 +782,60 @@ public final class yacySeedDB {
     }
 
     class seedEnum implements Enumeration {
-
-    kelondroMap.mapIterator it;
-    yacySeed nextSeed;
+        
+        kelondroMap.mapIterator it;
+        yacySeed nextSeed;
         kelondroMap database;
-
-    public seedEnum(boolean up, boolean rot, byte[] firstKey, kelondroMap database) {
+        
+        public seedEnum(boolean up, boolean rot, byte[] firstKey, kelondroMap database) {
             this.database = database;
-        try {
-        it = (firstKey == null) ? database.maps(up, rot) : database.maps(up, rot, firstKey);
-        nextSeed = internalNext();
-        } catch (IOException e) {
-        yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            try {
+                it = (firstKey == null) ? database.maps(up, rot) : database.maps(up, rot, firstKey);
+                nextSeed = internalNext();
+            } catch (IOException e) {
+                yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
-        it = null;
-        } catch (kelondroException e) {
-        yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                it = null;
+            } catch (kelondroException e) {
+                yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
-        it = null;
+                it = null;
+            }
         }
-    }
-
+        
         public seedEnum(boolean up, String field, kelondroMap database) {
             this.database = database;
-        try {
-        it = database.maps(up, field);
-        nextSeed = internalNext();
-        } catch (kelondroException e) {
-        yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            try {
+                it = database.maps(up, field);
+                nextSeed = internalNext();
+            } catch (kelondroException e) {
+                yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
                 if (database == seedPotentialDB) seedPotentialDB = resetSeedTable(seedPotentialDB, seedPotentialDBFile);
-        it = null;
+                it = null;
+            }
         }
+        
+        public boolean hasMoreElements() {
+            return (nextSeed != null);
         }
-                
-    public boolean hasMoreElements() {
-        return (nextSeed != null);
-    }
-
-    public yacySeed internalNext() {
-        if ((it == null) || (!(it.hasNext()))) return null;
+        
+        public yacySeed internalNext() {
+            if ((it == null) || (!(it.hasNext()))) return null;
             Map dna = (Map) it.next();
             String hash = (String) dna.remove("key");
             return new yacySeed(hash, dna);
-    }
-
-    public Object nextElement() {
-        yacySeed seed = nextSeed;
-        nextSeed = internalNext();
-        return seed;
-    }
-
+        }
+        
+        public Object nextElement() {
+            yacySeed seed = nextSeed;
+            nextSeed = internalNext();
+            return seed;
+        }
+        
     }
 
 }
