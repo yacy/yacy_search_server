@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Date;
 import java.util.Calendar;
+import java.lang.NumberFormatException;
 
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
@@ -256,7 +257,11 @@ public final class userDB {
         
         public long getTimeUsed() {
             if (this.mem.containsKey(TIME_USED)) {
-                return Long.valueOf((String)this.mem.get(TIME_USED)).longValue();
+                try{
+                    return Long.valueOf((String)this.mem.get(TIME_USED)).longValue();
+                }catch(NumberFormatException e){
+                    return 0;
+                }
             }
             try {
                 this.setProperty(TIME_USED,"0");
@@ -267,7 +272,11 @@ public final class userDB {
         }
         
         public Long getTimeLimit() {
-            return (this.mem.containsKey(TIME_LIMIT)?Long.valueOf((String)this.mem.get(TIME_LIMIT)):null);
+            try{
+                return (this.mem.containsKey(TIME_LIMIT)?Long.valueOf((String)this.mem.get(TIME_LIMIT)):null);
+            }catch(NumberFormatException e){
+                return new Long(0);
+            }
         }
         
         public long getTrafficSize() {
