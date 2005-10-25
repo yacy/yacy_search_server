@@ -1902,6 +1902,10 @@ cd ..
                 c.exec("cd " + remotePath, false);
             }
             c.exec("binary", false);
+            if (localFile.isAbsolute()) {
+                c.exec("lcd " + localFile.getParent(),false);
+                localFile = new File(localFile.getName());
+            }
             c.exec("put " + localFile.toString() + ((remoteName.length() == 0) ? "" : (" " + remoteName)), false);
             c.exec("close", false);
             c.exec("exit", false);
