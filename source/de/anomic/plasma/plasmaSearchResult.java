@@ -44,10 +44,13 @@ package de.anomic.plasma;
 
 import java.util.TreeMap;
 import java.util.Set;
+import java.util.Map;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.net.URL;
+import java.net.MalformedURLException;
 
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.serverCodings;
@@ -165,8 +168,69 @@ public final class plasmaSearchResult {
             //System.out.println("Ranking " + ranking + " for URL " + url.toString());
             pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), page);
         }
+        
+        // remove redundant paths
+        removeRedundant();
+        
         // flush memory
         results = null;
+    }
+    
+    public void removeRedundant() {
+        // remove all urls from the pageAcc structure that occur double by specific redundancy rules
+        // a link is redundant, if a sub-path of the url is cited before. redundant urls are removed
+        // we find redundant urls by iteration over all elements in pageAcc
+        Iterator i = pageAcc.entrySet().iterator();
+        HashMap paths = new HashMap(); // a url-subpath to pageAcc-key relation
+        Map.Entry entry;
+        String path;
+        
+        // first scan all entries and find all urls that are referenced
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            path = urlPath(((plasmaCrawlLURL.Entry) entry.getValue()).url());
+            paths.put(path, entry.getKey());
+            //if (path != null) path = shortenPath(path);
+            //if (path != null) paths.put(path, entry.getKey());
+        }
+        
+        // now scan the pageAcc again and remove all redundant urls
+        i = pageAcc.entrySet().iterator();
+        String shorten;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            path = urlPath(((plasmaCrawlLURL.Entry) entry.getValue()).url());
+            shorten = shortenPath(path);
+            // scan all subpaths of the url
+            while (shorten != null) {
+                if (paths.containsKey(shorten)) {
+                    System.out.println("deleting path from search result: " + path + " is redundant to " + shorten);
+                    try {
+                        i.remove();
+                    } catch (IllegalStateException e) {
+                        
+                    }
+                }
+                shorten = shortenPath(shorten);
+            }
+        }
+    }
+    
+    private static String shortenPath(String path) {
+	int pos = path.lastIndexOf('/');
+        if (pos < 0) return null;
+        return path.substring(0, pos);
+    }
+    
+    private static String urlPath(URL url) {
+        String port = ((url.getPort() < 0) ? "" : ":" + url.getPort());
+        String path = url.getPath();
+        if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
+        int pos = path.lastIndexOf('/');
+        if ((pos >= 0) && (path.length() > pos + 5) && (path.substring(pos + 1).toLowerCase().startsWith("index"))) {
+            path = path.substring(0, pos);
+        }
+        return url.getHost() + port + path;
     }
     
     public Object[] getReferences(int count) {
@@ -193,5 +257,26 @@ public final class plasmaSearchResult {
         System.out.println("Split '" + x + "' = {" + s + "}");
     }
     
-    
+    public static void main(String[] args) {
+        URL[] urls = new URL[6];
+        try {
+            urls[0] = new URL("http://www.yacy.net");
+            urls[1] = new URL("http://www.yacy.net/");
+            urls[2] = new URL("http://www.yacy.net/index.html");
+            urls[3] = new URL("http://www.yacy.net/yacy");
+            urls[4] = new URL("http://www.yacy.net/yacy/");
+            urls[5] = new URL("http://www.yacy.net/yacy/index.html");
+            String[] paths1 = new String[6]; for (int i = 0; i < 6; i++) {
+                paths1[i] = urlPath(urls[i]);
+                System.out.println("paths1[" + i + "] = " + paths1[i]);
+            }
+            String[] paths2 = new String[6]; for (int i = 0; i < 6; i++) {
+                paths2[i] = shortenPath(paths1[i]);
+                System.out.println("paths2[" + i + "] = " + paths2[i]);
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -1498,7 +1498,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 plasmaSnippetCache.result snippet;
                 long targetTime = timestamp + query.maximumTime;
                 if (targetTime < System.currentTimeMillis()) targetTime = System.currentTimeMillis() + 5000;
-                //kelondroMScoreCluster ref = new kelondroMScoreCluster();
                 while ((acc.hasMoreElements()) && (i < query.wantedResults) && (System.currentTimeMillis() < targetTime)) {
                     urlentry = acc.nextElement();
                     url = urlentry.url();
