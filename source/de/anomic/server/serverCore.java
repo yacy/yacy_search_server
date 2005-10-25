@@ -1000,8 +1000,13 @@ public final class serverCore extends serverAbstractThread implements serverThre
                                      */
                         } else if (result instanceof Boolean) {
                             if (((Boolean) result).equals(TERMINATE_CONNECTION)) break;
-                            // deactivating timeout. this is needed because of persistent connections
-                            if (!this.controlSocket.isClosed()) this.controlSocket.setSoTimeout(0);
+                            
+                            /* 
+                             * setting timeout to a very high level. 
+                             * this is needed because of persistent connection
+                             * support.
+                             */
+                            if (!this.controlSocket.isClosed()) this.controlSocket.setSoTimeout(30*60*1000);
                         } else if (result instanceof String) {
                             if (((String) result).startsWith("!")) {
                                 result = ((String) result).substring(1);
