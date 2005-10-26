@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-public class kelondroTree extends kelondroRecords implements Comparator {
+public class kelondroTree extends kelondroRecords implements Comparator, kelondroIndex {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 2; // our record definition of two bytes
