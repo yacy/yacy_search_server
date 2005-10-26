@@ -76,6 +76,8 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 
     private static int root       = 0; // pointer for FHandles-array: pointer to root node
 
+    private Search writeSearchObj = new Search();
+    
     public kelondroTree(File file, long buffersize, int key, int value) throws IOException {
 	this(file, buffersize, new int[] {key, value}, 1, 8);
     }
@@ -134,17 +136,16 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     }
 
     // Returns the value to which this map maps the specified key.
-    public synchronized byte[][] get(byte[] key) throws IOException {
-	//System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
-	Search search = new Search(key);
-	if (search.found()) {
+    public byte[][] get(byte[] key) throws IOException {
+        //System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
+        Search search = new Search();
+        search.process(key);
+        if (search.found()) {
             byte[][] result = search.getMatcher().getValues();
-            search = null;
-	    return result;
-	} else {
-            search = null;
-	    return null;
-	}
+            return result;
+        } else {
+            return null;
+        }
     }
     
     public long[] getLong(byte[] key) throws IOException {
@@ -174,21 +175,16 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	private Node thenode, parentnode;
 	private boolean found; // property if node was found
 	private byte child;    // -1: left child; 0: root node; 1: right child
-
-	protected Search(byte[] key) throws IOException {
-	    this.key = key;
-	    searchproc();
-	}
-	protected Search(Node node) throws IOException {
-	    this.key = node.getKey();
-	    searchproc();
+        private Handle thisHandle;
+        
+	protected Search() {
 	}
 
-	private void searchproc() throws IOException {
+	protected void process(byte[] key) throws IOException {    
 	    // searchs the database for the key and stores the result in the thisHandle
 	    // if the key was found, then found=true, thisHandle and leftchild is set;
 	    // else found=false and thisHandle and leftchild is undefined
-	    Handle thisHandle = getHandle(root);
+	    thisHandle = getHandle(root);
             parentnode = null;
             if (key == null) {
                 child = 0;
@@ -204,7 +200,6 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                 child = 0;
                 found = false;
                 int c;
-                Handle[] handles;
 		HashMap visitedNodeKeys = new HashMap(); // to detect loops
 		String otherkey;
 		//System.out.println("Starting Compare Loop in Database " + filename); // debug
@@ -328,145 +323,145 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     }
     
     // Associates the specified value with the specified key in this map
-    public synchronized byte[][] put(byte[][] newrow) throws IOException {
-	if (newrow.length != columns()) throw new IllegalArgumentException("put: wrong row length " + newrow.length + "; must be " + columns());
-	// first try to find the key element in the database
-        Search searchResult = new Search(newrow[0]);
-        if (searchResult.found()) {
-	    // a node with this key exist. simply overwrite the content and return old content
-	    Node e = searchResult.getMatcher();
-	    byte[][] result = e.setValues(newrow);
-            commitNode(e);
-            searchResult = null;
-	    return result;
-	} else if (searchResult.isRoot()) {
-	    // a node with this key does not exist and there is no node at all
-	    // this therefore creates the root node if an only if there was no root Node yet
-	    if (getHandle(root) != null) 
-		throw new kelondroException(filename, "tried to create root node twice");
-	    // we dont have any Nodes in the file, so start here to create one
-	    Node e = newNode();
-            e.setValues(newrow);
-	    // write the propetries
-	    e.setOHByte(magic,   (byte) 1);
-            e.setOHByte(balance, (byte) 0);
-            e.setOHHandle(parent, null);
-            e.setOHHandle(leftchild, null);
-            e.setOHHandle(rightchild, null);
-	    // do updates
-	    e.commit(CP_LOW);
-            setHandle(root, e.handle());
-            searchResult = null;
-	    return null;
-	} else {
-	    // a node with this key does not exist
-	    // this creates a new node if there is already at least a root node
-	    // to create the new node, it is necessary to assign it to a parent
-	    // it must also be defined weather this new node is a left child of the
-	    // parent or not. It is checked if the parent node already has a child on
-	    // that side, but not if the assigned position is appropriate.
-
-	    // create new node and assign values
-            Node parentNode = searchResult.getParent();
-	    Node theNode = newNode();
-            theNode.setValues(newrow);
-            theNode.setOHByte(0, (byte) 1); // fresh magic
-            theNode.setOHByte(1, (byte) 0); // fresh balance
-            theNode.setOHHandle(parent, parentNode.handle());
-            theNode.setOHHandle(leftchild, null);
-            theNode.setOHHandle(rightchild, null);
-            theNode.commit(CP_LOW);
-            
-	    // check consistency and link new node to parent node
-	    byte parentBalance;
-            if (searchResult.isLeft()) {
-		if (parentNode.getOHHandle(leftchild) != null) throw new kelondroException(filename, "tried to create leftchild node twice");
-                parentNode.setOHHandle(leftchild, theNode.handle());
-	    } else if (searchResult.isRight()) {
-		if (parentNode.getOHHandle(rightchild) != null) throw new kelondroException(filename, "tried to create rightchild node twice");
-                parentNode.setOHHandle(rightchild, theNode.handle());
-	    } else {
-                throw new kelondroException(filename, "neither left nor right child");
-            }
-            commitNode(parentNode);
-            
-	    // now update recursively the node balance of the parentNode
-	    // what do we have:
-	    // - new Node, called 'theNode'
-	    // - parent Node
-
-	    // set balance factor in parent node(s)
-	    boolean increasedHight = true;
-	    String path = "";
-            byte prevHight;
-            Handle parentSideHandle;
-	    while (increasedHight) {
-
-		// update balance
-		parentBalance = parentNode.getOHByte(balance); // {magic, balance}
-		prevHight = parentBalance;
-                parentSideHandle = parentNode.getOHHandle(leftchild);
-		if ((parentSideHandle != null) && (parentSideHandle.equals(theNode.handle()))) {
-		    // is left child
-		    parentBalance++; 
-		    path = "L" + path;
-		}
-                parentSideHandle =parentNode.getOHHandle(rightchild);
-		if ((parentSideHandle != null) && (parentSideHandle.equals(theNode.handle()))) {
-                    // is right child
-		    parentBalance--;
-		    path = "R" + path;
-		}
-		increasedHight = ((java.lang.Math.abs((int) parentBalance) - java.lang.Math.abs((int) prevHight)) > 0);
-		parentNode.setOHByte(balance, parentBalance);
+    public byte[][] put(byte[][] newrow) throws IOException {
+        if (newrow.length != columns()) throw new IllegalArgumentException("put: wrong row length " + newrow.length + "; must be " + columns());
+        // first try to find the key element in the database
+        synchronized(writeSearchObj) {
+            writeSearchObj.process(newrow[0]);
+            if (writeSearchObj.found()) {
+                // a node with this key exist. simply overwrite the content and return old content
+                Node e = writeSearchObj.getMatcher();
+                byte[][] result = e.setValues(newrow);
+                commitNode(e);
+                return result;
+            } else if (writeSearchObj.isRoot()) {
+                // a node with this key does not exist and there is no node at all
+                // this therefore creates the root node if an only if there was no root Node yet
+                if (getHandle(root) != null)
+                    throw new kelondroException(filename, "tried to create root node twice");
+                // we dont have any Nodes in the file, so start here to create one
+                Node e = newNode();
+                e.setValues(newrow);
+                // write the propetries
+                e.setOHByte(magic,   (byte) 1);
+                e.setOHByte(balance, (byte) 0);
+                e.setOHHandle(parent, null);
+                e.setOHHandle(leftchild, null);
+                e.setOHHandle(rightchild, null);
+                // do updates
+                e.commit(CP_LOW);
+                setHandle(root, e.handle());
+                return null;
+            } else {
+                // a node with this key does not exist
+                // this creates a new node if there is already at least a root node
+                // to create the new node, it is necessary to assign it to a parent
+                // it must also be defined weather this new node is a left child of the
+                // parent or not. It is checked if the parent node already has a child on
+                // that side, but not if the assigned position is appropriate.
+                
+                // create new node and assign values
+                Node parentNode = writeSearchObj.getParent();
+                Node theNode = newNode();
+                theNode.setValues(newrow);
+                theNode.setOHByte(0, (byte) 1); // fresh magic
+                theNode.setOHByte(1, (byte) 0); // fresh balance
+                theNode.setOHHandle(parent, parentNode.handle());
+                theNode.setOHHandle(leftchild, null);
+                theNode.setOHHandle(rightchild, null);
+                theNode.commit(CP_LOW);
+                
+                // check consistency and link new node to parent node
+                byte parentBalance;
+                if (writeSearchObj.isLeft()) {
+                    if (parentNode.getOHHandle(leftchild) != null) throw new kelondroException(filename, "tried to create leftchild node twice");
+                    parentNode.setOHHandle(leftchild, theNode.handle());
+                } else if (writeSearchObj.isRight()) {
+                    if (parentNode.getOHHandle(rightchild) != null) throw new kelondroException(filename, "tried to create rightchild node twice");
+                    parentNode.setOHHandle(rightchild, theNode.handle());
+                } else {
+                    throw new kelondroException(filename, "neither left nor right child");
+                }
                 commitNode(parentNode);
-
-		// here we either stop because we had no increased hight,
-		// or we have a balance greater then 1 or less than -1 and we do rotation
-		// or we crawl up the tree and change the next balance
-		if (!(increasedHight)) break; // finished
-
-		// check rotation need
-		if (java.lang.Math.abs((int) parentBalance) > 1) {
-		    // rotate and stop then
-		    //System.out.println("* DB DEBUG: " + path.substring(0,2) + " ROTATION AT NODE " + parentNode.handle().toString() + ": BALANCE=" + parentOHByte[balance]);
-		    if (path.startsWith("LL")) {
-			LL_RightRotation(parentNode, theNode);
-			break;
-		    }
-		    if (path.startsWith("RR")) {
-			RR_LeftRotation(parentNode, theNode);
-			break;
-		    }
-		    if (path.startsWith("RL")) {
-			Handle parentHandle = parentNode.handle();
-			LL_RightRotation(theNode, getNode(theNode.getOHHandle(leftchild), theNode, leftchild));
-			parentNode = getNode(parentHandle, null, 0); // reload the parent node
-			RR_LeftRotation(parentNode, getNode(parentNode.getOHHandle(rightchild), parentNode, rightchild));
-			break;
-		    }
-		    if (path.startsWith("LR")) {
-			Handle parentHandle = parentNode.handle();
-			RR_LeftRotation(theNode, getNode(theNode.getOHHandle(rightchild), theNode, rightchild));
-			parentNode = getNode(parentHandle, null, 0); // reload the parent node
-			LL_RightRotation(parentNode, getNode(parentNode.getOHHandle(leftchild), parentNode, leftchild));
-			break;
-		    }
-		    break;
-		} else {
-		    // crawl up the tree
-		    if (parentNode.getOHHandle(parent) == null) {
-			// root reached: stop
-			break;
-		    } else {
-			theNode = parentNode;
-			parentNode = getNode(parentNode.getOHHandle(parent), null, 0);
-		    }
-		}
-	    }
-
-	    return null; // that means: no previous stored value present
-	}
+                
+                // now update recursively the node balance of the parentNode
+                // what do we have:
+                // - new Node, called 'theNode'
+                // - parent Node
+                
+                // set balance factor in parent node(s)
+                boolean increasedHight = true;
+                String path = "";
+                byte prevHight;
+                Handle parentSideHandle;
+                while (increasedHight) {
+                    
+                    // update balance
+                    parentBalance = parentNode.getOHByte(balance); // {magic, balance}
+                    prevHight = parentBalance;
+                    parentSideHandle = parentNode.getOHHandle(leftchild);
+                    if ((parentSideHandle != null) && (parentSideHandle.equals(theNode.handle()))) {
+                        // is left child
+                        parentBalance++;
+                        path = "L" + path;
+                    }
+                    parentSideHandle =parentNode.getOHHandle(rightchild);
+                    if ((parentSideHandle != null) && (parentSideHandle.equals(theNode.handle()))) {
+                        // is right child
+                        parentBalance--;
+                        path = "R" + path;
+                    }
+                    increasedHight = ((java.lang.Math.abs((int) parentBalance) - java.lang.Math.abs((int) prevHight)) > 0);
+                    parentNode.setOHByte(balance, parentBalance);
+                    commitNode(parentNode);
+                    
+                    // here we either stop because we had no increased hight,
+                    // or we have a balance greater then 1 or less than -1 and we do rotation
+                    // or we crawl up the tree and change the next balance
+                    if (!(increasedHight)) break; // finished
+                    
+                    // check rotation need
+                    if (java.lang.Math.abs((int) parentBalance) > 1) {
+                        // rotate and stop then
+                        //System.out.println("* DB DEBUG: " + path.substring(0,2) + " ROTATION AT NODE " + parentNode.handle().toString() + ": BALANCE=" + parentOHByte[balance]);
+                        if (path.startsWith("LL")) {
+                            LL_RightRotation(parentNode, theNode);
+                            break;
+                        }
+                        if (path.startsWith("RR")) {
+                            RR_LeftRotation(parentNode, theNode);
+                            break;
+                        }
+                        if (path.startsWith("RL")) {
+                            Handle parentHandle = parentNode.handle();
+                            LL_RightRotation(theNode, getNode(theNode.getOHHandle(leftchild), theNode, leftchild));
+                            parentNode = getNode(parentHandle, null, 0); // reload the parent node
+                            RR_LeftRotation(parentNode, getNode(parentNode.getOHHandle(rightchild), parentNode, rightchild));
+                            break;
+                        }
+                        if (path.startsWith("LR")) {
+                            Handle parentHandle = parentNode.handle();
+                            RR_LeftRotation(theNode, getNode(theNode.getOHHandle(rightchild), theNode, rightchild));
+                            parentNode = getNode(parentHandle, null, 0); // reload the parent node
+                            LL_RightRotation(parentNode, getNode(parentNode.getOHHandle(leftchild), parentNode, leftchild));
+                            break;
+                        }
+                        break;
+                    } else {
+                        // crawl up the tree
+                        if (parentNode.getOHHandle(parent) == null) {
+                            // root reached: stop
+                            break;
+                        } else {
+                            theNode = parentNode;
+                            parentNode = getNode(parentNode.getOHHandle(parent), null, 0);
+                        }
+                    }
+                }
+                
+                return null; // that means: no previous stored value present
+            }
+        }
     }
 
     private void assignChild(Node parentNode, Node childNode, int childType) throws IOException {
@@ -593,17 +588,18 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     }
     
     // Removes the mapping for this key from this map if present (optional operation).
-    public synchronized byte[][] remove(byte[] key) throws IOException {
-	Search search = new Search(key);
-	if (search.found()) {
-	    Node result = search.getMatcher();
-	    byte[][] values = result.getValues();
-	    remove(result, search.getParent());
-            search = null;
-	    return values;
-	} else {
-	    return null;
-	}
+    public byte[][] remove(byte[] key) throws IOException {
+        synchronized(writeSearchObj) {
+            writeSearchObj.process(key);
+            if (writeSearchObj.found()) {
+                Node result = writeSearchObj.getMatcher();
+                byte[][] values = result.getValues();
+                remove(result, writeSearchObj.getParent());
+                return values;
+            } else {
+                return null;
+            }
+        }
     }
 
     public void removeAll() throws IOException {
@@ -762,17 +758,16 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	}
     }
 
-    public synchronized Iterator nodeIterator(boolean up, boolean rotating, byte[] firstKey) {
+    public Iterator nodeIterator(boolean up, boolean rotating, byte[] firstKey) {
 	// iterates the elements in a sorted way. returns Node - type Objects
 	try {
-            Search s = new Search(firstKey);
-            if (s.found()) {
-                Node matcher = s.getMatcher();
-                s = null;
+            Search search = new Search();
+            search.process(firstKey);
+            if (search.found()) {
+                Node matcher = search.getMatcher();
                 return new nodeIterator(up, rotating, matcher);
             } else {
-                Node nn = s.getParent();
-                s = null;
+                Node nn = search.getParent();
                 if (nn == null) {
                     return (new HashSet()).iterator(); // an empty iterator
                 } else {
@@ -944,22 +939,21 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	}
     }
 
-    public synchronized rowIterator rows(boolean up, boolean rotating) throws IOException {
+    public rowIterator rows(boolean up, boolean rotating) throws IOException {
 	// iterates the rows of the Nodes
 	// enumerated objects are of type byte[][]
         // iterates the elements in a sorted way.
 	return new rowIterator(new nodeIterator(up, rotating));
     }
     
-    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        Search s = new Search(firstKey);
-        if (s.found()) {
-            Node matcher = s.getMatcher();
-            s = null;
+    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        Search search = new Search();
+        search.process(firstKey);
+        if (search.found()) {
+            Node matcher = search.getMatcher();
             return new rowIterator(new nodeIterator(up, rotating, matcher));
         } else {
-            Node nn = s.getParent();
-            s = null;
+            Node nn = search.getParent();
             if (nn == null) {
                 return (Iterator) (new HashSet()).iterator();
             } else {
@@ -1002,15 +996,14 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	return new keyIterator(new nodeIterator(up, rotating));
     }
     
-    public synchronized Iterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        Search s = new Search(firstKey);
-        if (s.found()) {
-            Node matcher = s.getMatcher();
-            s = null;
+    public Iterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        Search search = new Search();
+        search.process(firstKey);
+        if (search.found()) {
+            Node matcher = search.getMatcher();
             return new keyIterator(new nodeIterator(up, rotating, matcher));
         } else {
-            Node nn = s.getParent();
-            s = null;
+            Node nn = search.getParent();
             if (nn == null) {
                 return (Iterator) (new HashSet()).iterator();
             } else {
