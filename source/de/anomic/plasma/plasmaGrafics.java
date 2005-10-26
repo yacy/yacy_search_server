@@ -121,8 +121,6 @@ public class plasmaGrafics {
         if (outerradius > innerradius * 2) outerradius = innerradius * 2;
     
         if (yacyCore.seedDB == null) return; // no other peers known
-        int size = yacyCore.seedDB.sizeConnected();
-        if (size == 0) return; // no other peers known
         
         networkPicture = new ImagePainter(width, height, "000010");
         networkPicture.setMode(ImagePainter.MODE_ADD);
