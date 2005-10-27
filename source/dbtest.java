@@ -188,6 +188,7 @@ final class dbTable implements kelondroIndex {
             
             if (commandCount >= batchlimit) {
                 sqlStatement.executeBatch();
+                commandCount = 0;
             }
             
             return row;
