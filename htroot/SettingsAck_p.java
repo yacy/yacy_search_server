@@ -372,8 +372,8 @@ public class SettingsAck_p {
              * ==================================================================== */
             env.setConfig("remoteProxyHost", remoteProxyHost);
             env.setConfig("remoteProxyPort", Integer.toString(remoteProxyPort));
-            env.getConfig("remoteProxyUser", remoteProxyUser);
-            env.getConfig("remoteProxyPwd", remoteProxyPwd);
+            env.setConfig("remoteProxyUser", remoteProxyUser);
+            env.setConfig("remoteProxyPwd", remoteProxyPwd);
             env.setConfig("remoteProxyNoProxy", remoteProxyNoProxyStr);
             env.setConfig("remoteProxyUse", (useRemoteProxy) ? "true" : "false");
             env.setConfig("remoteProxyUse4Yacy", (useRemoteProxy4Yacy) ? "true" : "false");

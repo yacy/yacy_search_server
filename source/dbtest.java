@@ -4,6 +4,10 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Random;
 
 import de.anomic.server.serverCodings;
@@ -48,7 +52,11 @@ public class dbtest {
             }
             
             if (dbe.equals("mysql")) {
-                //...
+                table = new dbTable("mysql");
+            }
+            
+            if (dbe.equals("pgsql")) {
+                table = new dbTable("pgsql");
             }
             
             long afterinit = System.currentTimeMillis();
@@ -66,6 +74,9 @@ public class dbtest {
                 Random random = new Random(randomstart);
                 for (int i = 0; i < count; i++) {
                     table.put(new byte[][]{randomHash(random), dummyvalue});
+                    if (i % 500 == 0) {
+                        System.out.println(i + " entries processed so far.");
+                    }
                 }
             }
             
@@ -73,13 +84,121 @@ public class dbtest {
             
             // finally close the database/table
             if (table instanceof kelondroTree) ((kelondroTree) table).close();
+            if (table instanceof dbTable) ((dbTable)table).closeDatabaseConnection();
             
             long afterclose = System.currentTimeMillis();
             
             System.out.println("Execution time: open=" + (afterinit - startup) + ", command=" + (aftercommand - afterinit) + ", close=" + (afterclose - aftercommand) + ", total=" + (afterclose - startup));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+}
+
+/*
+ * Commands to create a database using mysql:
+ * 
+ * CREATE database yacy;
+ * USE yacy;
+ * CREATE TABLE hash CHAR(12) not null primary key, value BLOB);
+ * insert into user (Host, User, Password) values ('%','yacy',password('yacy'));
+ * insert into db (User, Db, Select_priv, Insert_priv, Update_priv, Delete_priv) values ('yacy@%','yacy','Y','Y','Y','Y')
+ * grant ALL on yacy.* to yacy;
+ */
+final class dbTable implements kelondroIndex {
+
+
+    
+    private final String db_driver_str_mysql = "org.gjt.mm.mysql.Driver";
+    private final String db_driver_str_pgsql = "org.postgresql.Driver";
+    
+    private final String db_conn_str_mysql    = "jdbc:mysql://192.168.0.2:3306/yacy";
+    private final String db_conn_str_pgsql   = "jdbc:postgresql://192.168.0.2:5432";
+    
+    private final String db_usr_str    = "yacy";
+    private final String db_pwd_str    = "yacy";
+    
+    private Connection theDBConnection = null;  
+    private PreparedStatement sqlStatement;
+    private int commandCount = 0;
+    private int batchlimit = 1;
+    
+    public dbTable(String dbType) throws Exception {
+        openDatabaseConnection(dbType);
+    }
+    
+    private void openDatabaseConnection(String dbType) throws Exception{
+        try {
+            if (dbType == null) throw new IllegalArgumentException(); 
+            
+            String dbDriverStr = null, dbConnStr = null;            
+            if (dbType.equalsIgnoreCase("mysql")) {
+                dbDriverStr = db_driver_str_mysql;
+                dbConnStr = db_conn_str_mysql;
+            } else if (dbType.equalsIgnoreCase("pgsql")) {
+                dbDriverStr = db_driver_str_pgsql;
+                dbConnStr = db_conn_str_pgsql;
+            }                
+            
+            Class.forName(dbDriverStr).newInstance();
+            
+            this.theDBConnection = DriverManager.getConnection (dbConnStr,this.db_usr_str,this.db_pwd_str);
+            
+            String sqlQuery = new String
+            (
+                    "INSERT INTO test (" +
+                    "hash, " +
+                    "value) " +
+                    "VALUES (?,?)"
+            );        
+            
+            this.sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
+            
+        } catch (Exception e) {
+            throw new Exception ("Unable to establish a database connection.");
+        }
+        
+    }        
+    
+    public void closeDatabaseConnection() throws Exception {
+        try {
+            if (commandCount != 0) {
+                sqlStatement.executeBatch();
+            }
+            
+            sqlStatement.close();
+
+            this.theDBConnection.close();
+        } catch (Exception e) {
+            throw new Exception ("Unable to close the database connection.");
+        }
+    }
+    
+    
+    public byte[][] get(byte[] key) throws IOException {
+        return null;
+    }
+
+    public byte[][] put(byte[][] row) throws IOException {
+        try {
+            this.sqlStatement.setString(1,new String(row[0]));
+            sqlStatement.setBytes(2,row[1]);
+            sqlStatement.addBatch();
+            commandCount++;
+            
+            if (commandCount >= batchlimit) {
+                sqlStatement.executeBatch();
+            }
+            
+            return row;
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+
+    public byte[][] remove(byte[] key) throws IOException {
+        // TODO Auto-generated method stub
+        return null;
     }
     
 }

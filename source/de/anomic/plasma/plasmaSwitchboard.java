@@ -772,6 +772,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 return false; // nothing to do
             }
             
+            // if we were interrupted we should return now
+            if (Thread.currentThread().isInterrupted()) return false;
+            
             // do one processing step
             log.logFine("DEQUEUE: sbQueueSize=" + sbQueue.size() +
                          ", coreStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
@@ -781,16 +784,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             try {
                 nextentry = sbQueue.pop();
                 if (nextentry == null) return false;
-                
-                synchronized (this.indexingTasksInProcess) {
-                    this.indexingTasksInProcess.put(nextentry.urlHash(),nextentry);
-                }
-                
             } catch (IOException e) {
                 log.logSevere("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
                 return false;
             }
         }
+
+        synchronized (this.indexingTasksInProcess) {
+            this.indexingTasksInProcess.put(nextentry.urlHash(),nextentry);
+        }        
+        
         processResourceStack(nextentry);
         return true;
     }

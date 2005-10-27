@@ -660,7 +660,7 @@ public final class httpc {
             String remoteProxyUser = this.remoteProxyConfig.getProxyUser();
             String remoteProxyPwd  = this.remoteProxyConfig.getProxyPwd();
             if ((remoteProxyUser!=null)&&(remoteProxyUser.length()>0)) {
-                header.put(httpHeader.PROXY_AUTHORIZATION,serverCodings.standardCoder.encodeBase64String(remoteProxyUser + ":" + remoteProxyPwd));
+                header.put(httpHeader.PROXY_AUTHORIZATION,"Basic " + serverCodings.standardCoder.encodeBase64String(remoteProxyUser + ":" + remoteProxyPwd));
             }
         }
 
