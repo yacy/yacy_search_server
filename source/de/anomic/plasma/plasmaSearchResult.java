@@ -169,9 +169,6 @@ public final class plasmaSearchResult {
             pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), page);
         }
         
-        // remove redundant paths
-        removeRedundant();
-        
         // flush memory
         results = null;
     }

@@ -83,6 +83,7 @@ public class plasmaSearchProfile implements Cloneable {
     public static final char PROCESS_PRESORT      = 'r';
     public static final char PROCESS_URLFETCH     = 'u';
     public static final char PROCESS_POSTSORT     = 'o';
+    public static final char PROCESS_FILTER       = 'f';
     public static final char PROCESS_SNIPPETFETCH = 's';
     
     public static char[] sequence = new char[]{
@@ -91,6 +92,7 @@ public class plasmaSearchProfile implements Cloneable {
         PROCESS_PRESORT,
         PROCESS_URLFETCH,
         PROCESS_POSTSORT,
+        PROCESS_FILTER,
         PROCESS_SNIPPETFETCH
     };
 
@@ -114,7 +116,8 @@ public class plasmaSearchProfile implements Cloneable {
           1 * time / 12, 10 * count, 
           1 * time / 12, 10 * count, 
           2 * time / 12,  5 * count, 
-          4 * time / 12, count, 
+          3 * time / 12, count,
+          1 * time / 12, count, 
           1 * time / 12, 1
         );
     }
@@ -125,6 +128,7 @@ public class plasmaSearchProfile implements Cloneable {
             long time_presort,      int count_presort,
             long time_urlfetch,     int count_urlfetch,
             long time_postsort,     int count_postsort,
+            long time_filter,       int count_filter,
             long time_snippetfetch, int count_snippetfetch) {
         this();
         
@@ -133,12 +137,14 @@ public class plasmaSearchProfile implements Cloneable {
         targetTime.put(new Character(PROCESS_PRESORT), new Long(time_presort));
         targetTime.put(new Character(PROCESS_URLFETCH), new Long(time_urlfetch));
         targetTime.put(new Character(PROCESS_POSTSORT), new Long(time_postsort));
+        targetTime.put(new Character(PROCESS_FILTER), new Long(time_filter));
         targetTime.put(new Character(PROCESS_SNIPPETFETCH), new Long(time_snippetfetch));
         targetCount.put(new Character(PROCESS_COLLECTION), new Integer(count_collection));
         targetCount.put(new Character(PROCESS_JOIN), new Integer(count_join));
         targetCount.put(new Character(PROCESS_PRESORT), new Integer(count_presort));
         targetCount.put(new Character(PROCESS_URLFETCH), new Integer(count_urlfetch));
         targetCount.put(new Character(PROCESS_POSTSORT), new Integer(count_postsort));
+        targetCount.put(new Character(PROCESS_FILTER), new Integer(count_filter));
         targetCount.put(new Character(PROCESS_SNIPPETFETCH), new Integer(count_snippetfetch));
         
     }

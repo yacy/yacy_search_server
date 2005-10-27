@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy '#[clientname]#': Performance Settings of Search Sequence</title>
+#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#[header]#
+#[submenuPerformance]#
+<br>
+<h2>Timing Settings of Search Sequence</h2>
+
+<p>
+<div class=small><b>Settings for local search profile:</b></div>
+<table border="0" cellpadding="2" cellspacing="1">
+<form action="PerformanceSearch_p.html" method="post" enctype="multipart/form-data">
+<tr class="TableHeader" valign="bottom">
+<td class="small">Entity</td>
+<td class="small">Collection</td>
+<td class="small">Join</td>
+<td class="small">Pre-Sort</td>
+<td class="small">URL Fetch</td>
+<td class="small">Post-Sort</td>
+<td class="small">Filter</td>
+<td class="small">Snippet-Fetch</td>
+</tr>
+<tr class="TableCellDark">
+<td class="small" align="left">execution Time (percentage; sum of this must be 100)</td>
+<td class="small" align="right"><input name="searchProcessLocalTime_c" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalTime_c]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalTime_j" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalTime_j]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalTime_r" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalTime_r]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalTime_u" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalTime_u]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalTime_o" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalTime_o]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalTime_f" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalTime_f]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalTime_s" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalTime_s]#"></td>
+</tr>
+<tr class="TableCellDark">
+<td class="small" align="left">result count (percentage of requested amount)</td>
+<td class="small" align="right"><input name="searchProcessLocalCount_c" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalCount_c]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalCount_j" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalCount_j]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalCount_r" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalCount_r]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalCount_u" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalCount_u]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalCount_o" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalCount_o]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalCount_f" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalCount_f]#"></td>
+<td class="small" align="right"><input name="searchProcessLocalCount_s" type="text" align="right" size="8" maxlength="8" value="#[searchProcessLocalCount_s]#"></td>
+</tr>
+<tr class="TableCellLight">
+<td class="small" align="left" colspan="8">
+<input type="submit" name="submitlocalprofilecustom" value="Submit New Profile Values">&nbsp;&nbsp;&nbsp;
+<input type="submit" name="submitlocalprofiledefault" value="Reset To Default Values">&nbsp;&nbsp;&nbsp;
+</td>
+</tr>
+</form>
+</table>
+</p>
+
+#(submitlocalrespond)#
+::
+<p>Your settings are valid and will be used for next search.</p>
+::
+<p>Reset to default settings done.</p>
+::
+<p>Your settings cannot be accepted: sum of execution time percentage is not 100</p>
+#(/submitlocalrespond)#
+
+<p>
+<div class=small><b>Timing results of latest search request:</b></div>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small">Entity</td>
+<td class="small">Collection</td>
+<td class="small">Join</td>
+<td class="small">Pre-Sort</td>
+<td class="small">URL Fetch</td>
+<td class="small">Post-Sort</td>
+<td class="small">Filter</td>
+<td class="small">Snippet-Fetch</td>
+</tr>
+<tr class="TableCellDark">
+<td class="small" align="left">execution Time (absolute milliseconds)</td>
+<td class="small" align="right">#[latestLocalTimeAbs_c]#</td>
+<td class="small" align="right">#[latestLocalTimeAbs_j]#</td>
+<td class="small" align="right">#[latestLocalTimeAbs_r]#</td>
+<td class="small" align="right">#[latestLocalTimeAbs_u]#</td>
+<td class="small" align="right">#[latestLocalTimeAbs_o]#</td>
+<td class="small" align="right">#[latestLocalTimeAbs_f]#</td>
+<td class="small" align="right">#[latestLocalTimeAbs_s]#</td>
+</tr>
+<tr class="TableCellDark">
+<td class="small" align="left">execution Time (relative)</td>
+<td class="small" align="right">#[latestLocalTimeRel_c]#</td>
+<td class="small" align="right">#[latestLocalTimeRel_j]#</td>
+<td class="small" align="right">#[latestLocalTimeRel_r]#</td>
+<td class="small" align="right">#[latestLocalTimeRel_u]#</td>
+<td class="small" align="right">#[latestLocalTimeRel_o]#</td>
+<td class="small" align="right">#[latestLocalTimeRel_f]#</td>
+<td class="small" align="right">#[latestLocalTimeRel_s]#</td>
+</tr>
+<tr class="TableCellDark">
+<td class="small" align="left">result count (absolute amount)</td>
+<td class="small" align="right">#[latestLocalCountAbs_c]#</td>
+<td class="small" align="right">#[latestLocalCountAbs_j]#</td>
+<td class="small" align="right">#[latestLocalCountAbs_r]#</td>
+<td class="small" align="right">#[latestLocalCountAbs_u]#</td>
+<td class="small" align="right">#[latestLocalCountAbs_o]#</td>
+<td class="small" align="right">#[latestLocalCountAbs_f]#</td>
+<td class="small" align="right">#[latestLocalCountAbs_s]#</td>
+</tr>
+</table>
+</p>
+
+<p>
+The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:
+<img src="SearchEventPicture.png">
+</p>
+#[footer]#
+</body>
+</html>

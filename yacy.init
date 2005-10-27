@@ -587,3 +587,66 @@ indexTransfer.maxOpenFiles = 800
 
 # 
 storagePeerHash =
+
+# Search sequence settings
+# collection:
+# time = time to get a RWI out of RAM cache, assortments and WORDS files
+# count = maximum number of RWI-entries that shall be collected
+#
+# join:
+# time = time to perform the join between all collected RWIs
+# count = maximum number of entries that shall be joined
+#
+# presort:
+# time = time to do a sort of the joined URL-records
+# count = maximum number of entries that shall be pre-sorted
+#
+# urlfetch:
+# time = time to fetch the real URLs from the LURL database
+# count = maximum number of urls that shall be fetched
+#
+# postsort:
+# time = time for final sort of URLs
+# count = maximum number oof URLs that shall be retrieved during sort
+#
+# filter:
+# time = time to filter out unwanted urls (like redundant urls)
+# count = maximum number of urls that shall be filtered
+#
+# snippetfetch:
+# time = time to fetch snippets for selected URLs
+# count = maximum number of snipptes to be fetched
+#
+# all values are percent
+# time-percent is the percent of total search time
+# count-percent is the percent of total wanted urls in result
+# we distinguish local and remote search times
+searchProcessLocalTime_c = 25
+searchProcessLocalCount_c = 10000000
+searchProcessLocalTime_j = 10
+searchProcessLocalCount_j = 1000000
+searchProcessLocalTime_r = 10
+searchProcessLocalCount_r =100000
+searchProcessLocalTime_u = 30
+searchProcessLocalCount_u = 10000
+searchProcessLocalTime_o = 10
+searchProcessLocalCount_o = 100
+searchProcessLocalTime_f = 5
+searchProcessLocalCount_f = 100
+searchProcessLocalTime_s = 10
+searchProcessLocalCount_s = 30
+
+searchProcessRemoteTime_c =  25
+searchProcessRemoteCount_c = 1000000
+searchProcessRemoteTime_j = 10
+searchProcessRemoteCount_j = 1000000
+searchProcessRemoteTime_r = 10 
+searchProcessRemoteCount_r = 1000
+searchProcessRemoteTime_u = 30
+searchProcessRemoteCount_u = 1000
+searchProcessRemoteTime_o = 10
+searchProcessRemoteCount_o = 1000
+searchProcessRemoteTime_f = 5
+searchProcessRemoteCount_f = 100
+searchProcessRemoteTime_s = 10
+searchProcessRemoteCount_s = 10

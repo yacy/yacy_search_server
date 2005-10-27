@@ -90,6 +90,10 @@ public final class plasmaSearchEvent {
         return query;
     }
     
+    public plasmaSearchProfile getLocalProfile() {
+        return profileLocal;
+    }
+    
     public yacySearch[] getSearchThreads() {
         return searchThreads;
     }
@@ -246,6 +250,13 @@ public final class plasmaSearchEvent {
         acc.sortResults();
         profileLocal.setYieldTime(plasmaSearchProfile.PROCESS_POSTSORT);
         profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_POSTSORT, acc.sizeOrdered());
+        
+        // apply filter
+        profileLocal.startTimer();
+        acc.removeRedundant();
+        profileLocal.setYieldTime(plasmaSearchProfile.PROCESS_FILTER);
+        profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_FILTER, acc.sizeOrdered());
+        
         return acc;
     }
     
@@ -292,27 +303,4 @@ public final class plasmaSearchEvent {
         rcGlobal = null;
     }
     
-    
-    /*
-    public void preSearch() {
-        plasmaWordIndexEntity idx = null;
-        try {
-            // search the database locally
-            log.logFine("presearch: started job");
-            idx = searchHashes(query.queryHashes, time);
-            log.logFine("presearch: found " + idx.size() + " results");
-            plasmaSearchResult acc = order(idx, queryhashes, order, time, searchcount);
-            if (acc == null) return;
-            log.logFine("presearch: ordered results, now " + acc.sizeOrdered() + " URLs ready for fetch");
-            
-            // take some elements and fetch the snippets
-            snippetCache.fetch(acc, queryhashes, urlmask, fetchcount);
-        } catch (IOException e) {
-            log.logSevere("presearch: failed", e);
-        } finally {
-            if (idx != null) try { idx.close(); } catch (Exception e){}
-        }
-        log.logFine("presearch: job terminated");
-    }
-    */
 }

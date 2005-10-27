@@ -39,7 +39,7 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-/* A kelondroIndex is a table with indexed access on the first row
+/* A kelondroIndex is a table with indexed access on the first column
    Elements may be selected from the table with logarithmic computation time
    using the get-method. Inserts have also the same computation order and
    can be done with the put-method.
