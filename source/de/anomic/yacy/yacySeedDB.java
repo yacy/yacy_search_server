@@ -375,7 +375,10 @@ public final class yacySeedDB {
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             nameLookupCache.put(seed.getName(), seed);
-            seedActiveDB.set(seed.hash, seed.getMap());
+            Map seedPropMap = seed.getMap();
+            synchronized(seedPropMap) {
+                seedActiveDB.set(seed.hash, seedPropMap);
+            }
             seedPassiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
         } catch (IOException e){
@@ -391,25 +394,28 @@ public final class yacySeedDB {
     }
     
     public synchronized void addDisconnected(yacySeed seed) {
-    if (seed == null) return;
+        if (seed == null) return;
         try {
             nameLookupCache.remove(seed.getName());
             seedActiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
         } catch (Exception e) {}
-    //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
+        //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
-            seedPassiveDB.set(seed.hash, seed.getMap());
-    } catch (IOException e) {
-        yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-        seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
-    } catch (kelondroException e) {
-        yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-        seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
+            Map seedPropMap = seed.getMap();
+            synchronized(seedPropMap) {
+                seedPassiveDB.set(seed.hash, seedPropMap);
+            }
+        } catch (IOException e) {
+            yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
+        } catch (kelondroException e) {
+            yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
         } catch (IllegalArgumentException e) {
-        yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-        seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
-    }
+            yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+            seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
+        }
     }
     
     public synchronized void addPotential(yacySeed seed) {
@@ -422,7 +428,10 @@ public final class yacySeedDB {
     if (seed.isProper() != null) return;
     //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
-            seedPotentialDB.set(seed.hash, seed.getMap());
+            Map seedPropMap = seed.getMap();
+            synchronized(seedPropMap) {
+                seedPotentialDB.set(seed.hash, seedPropMap);
+            }
     } catch (IOException e) {
         yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
         seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);

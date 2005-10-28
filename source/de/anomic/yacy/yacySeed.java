@@ -123,55 +123,55 @@ public class yacySeed {
     public int available;
     public int selectscore = -1; // only for debugging
 
-    public yacySeed(String hash, Map dna) {
+    public yacySeed(String theHash, Map theDna) {
         // create a seed with a pre-defined hash map
-        this.hash = hash;
-        this.dna = dna;
+        this.hash = theHash;
+        this.dna = theDna;
         this.available = 0;
     }
 
-    public yacySeed(String hash) {      
-        dna = new HashMap();
+    public yacySeed(String theHash) {      
+        this.dna = new HashMap(22);
 
         // settings that can only be computed by originating peer:
         // at first startup -
-        this.hash = hash;          // the hash key of the peer - very important. should be static somehow, even after restart
-        dna.put(NAME, "&empty;");  // the name that the peer has given itself
-        dna.put(BDATE, "&empty;"); // birthdate - first startup
-        dna.put(UTC, "+0000");
+        this.hash = theHash;            // the hash key of the peer - very important. should be static somehow, even after restart
+        this.dna.put(NAME, "&empty;");  // the name that the peer has given itself
+        this.dna.put(BDATE, "&empty;"); // birthdate - first startup
+        this.dna.put(UTC, "+0000");
         // later during operation -
-        dna.put(ISPEED, "0");  // the speed of indexing (pages/minute) of the peer
-        dna.put(UPTIME, "0");  // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        dna.put(LCOUNT, "0");  // the number of links that the peer has stored (LURL's)
-        dna.put(NCOUNT, "0");  // the number of links that the peer has noticed, but not loaded (NURL's)
-        dna.put(ICOUNT, "0");  // the number of words that the peer has indexed (as it says)
-        dna.put(SCOUNT, "0");  // the number of seeds that the peer has stored
-        dna.put(CCOUNT, "0");  // the number of clients that the peer connects (as connects/hour)
-        dna.put(VERSION, "0"); // the applications version
+        this.dna.put(ISPEED, "0");  // the speed of indexing (pages/minute) of the peer
+        this.dna.put(UPTIME, "0");  // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        this.dna.put(LCOUNT, "0");  // the number of links that the peer has stored (LURL's)
+        this.dna.put(NCOUNT, "0");  // the number of links that the peer has noticed, but not loaded (NURL's)
+        this.dna.put(ICOUNT, "0");  // the number of words that the peer has indexed (as it says)
+        this.dna.put(SCOUNT, "0");  // the number of seeds that the peer has stored
+        this.dna.put(CCOUNT, "0");  // the number of clients that the peer connects (as connects/hour)
+        this.dna.put(VERSION, "0"); // the applications version
 
         // settings that is created during the 'hello' phase - in first contact
-        dna.put(IP, "");                    // 123.234.345.456
-        dna.put(PORT, "&empty;");
-        dna.put(PEERTYPE, PEERTYPE_VIRGIN); // virgin/junior/senior/principal
-        dna.put(IPTYPE, "&empty;");         // static/dynamic (if the ip changes often for any reason)
+        this.dna.put(IP, "");                    // 123.234.345.456
+        this.dna.put(PORT, "&empty;");
+        this.dna.put(PEERTYPE, PEERTYPE_VIRGIN); // virgin/junior/senior/principal
+        this.dna.put(IPTYPE, "&empty;");         // static/dynamic (if the ip changes often for any reason)
 
         // settings that can only be computed by visiting peer
-        dna.put(LASTSEEN, yacyCore.universalDateShortString(new Date())); // for last-seen date
-        dna.put(USPEED, "0");               // the computated uplink speed of the peer
+        this.dna.put(LASTSEEN, yacyCore.universalDateShortString(new Date())); // for last-seen date
+        this.dna.put(USPEED, "0");               // the computated uplink speed of the peer
 
         // settings that are needed to organize the seed round-trip
-        dna.put(FLAGS, "0000");
+        this.dna.put(FLAGS, "0000");
         setFlagDirectConnect(false);
         setFlagAcceptRemoteCrawl(true);
         setFlagAcceptRemoteIndex(true);
 
         // index transfer
-        dna.put(INDEX_OUT, "0"); // send index
-        dna.put(INDEX_IN, "0");  // received Index
-        dna.put(URL_OUT, "0");   // send url
-        dna.put(URL_IN, "0");    // received URL
+        this.dna.put(INDEX_OUT, "0"); // send index
+        this.dna.put(INDEX_IN, "0");  // received Index
+        this.dna.put(URL_OUT, "0");   // send url
+        this.dna.put(URL_IN, "0");    // received URL
 
-        available = 0;
+        this.available = 0;
     }
 
     public String getIP()        { return get(IP, "");                       }
@@ -180,8 +180,9 @@ public class yacySeed {
     public String getPrincipal() { return get(PEERTYPE, PEERTYPE_PRINCIPAL); }
 
     public String get(String key, String dflt) {
-        final Object o = dna.get(key);
-        if (o == null) { return dflt; } else { return (String) o; }
+        final Object o = this.dna.get(key);
+        if (o == null) { return dflt; }
+        return (String) o;
     }
 
     public void setIP(String ip) { put(IP, ip);                       }
@@ -191,11 +192,13 @@ public class yacySeed {
     public void setLastSeen()    { put(LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - getUTCDiff()))); }
 
     public void put(String key, String value) {
-        dna.put(key, value);
+        synchronized(this.dna) {
+            this.dna.put(key, value);
+        }
     }
 
     public Map getMap() {
-        return dna;
+        return this.dna;
     }
 
     public String getName() {
@@ -203,31 +206,31 @@ public class yacySeed {
     }
 
     public String getHexHash() {
-        return b64Hash2hexHash(hash);
+        return b64Hash2hexHash(this.hash);
     }
 
     public void incSI(int count) {
-        String v = (String) dna.get(INDEX_OUT);
+        String v = (String) this.dna.get(INDEX_OUT);
         if (v == null) { v = "0"; }
-        dna.put(INDEX_OUT, Integer.toString(Integer.parseInt(v) + count));
+        put(INDEX_OUT, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public void incRI(int count) {
-        String v = (String) dna.get(INDEX_IN);
+        String v = (String) this.dna.get(INDEX_IN);
         if (v == null) { v = "0"; }
-        dna.put(INDEX_IN, Integer.toString(Integer.parseInt(v) + count));
+        put(INDEX_IN, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public void incSU(int count) {
-        String v = (String) dna.get(URL_OUT);
+        String v = (String) this.dna.get(URL_OUT);
         if (v == null) { v = "0"; }
-        dna.put(URL_OUT, Integer.toString(Integer.parseInt(v) + count));
+        put(URL_OUT, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public void incRU(int count) {
-        String v = (String) dna.get(URL_IN);
+        String v = (String) this.dna.get(URL_IN);
         if (v == null) { v = "0"; }
-        dna.put(URL_IN, Integer.toString(Integer.parseInt(v) + count));
+        put(URL_IN, Integer.toString(Integer.parseInt(v) + count));
     }
 
     // 12 * 6 bit = 72 bit = 9 byte
@@ -249,17 +252,16 @@ public class yacySeed {
     }
 
     public String getAddress() {
-        final String ip   = (String) dna.get(IP);
-        final String port = (String) dna.get(PORT);
+        final String ip   = (String) this.dna.get(IP);
+        final String port = (String) this.dna.get(PORT);
         if (ip != null && ip.length() >= 8 && port != null && port.length() >= 2) {
             return ip + ":" + port;
-        } else {
-            return null;
         }
+        return null;
     }
 
     public long getUTCDiff() {
-        String utc = (String) dna.get(UTC);
+        String utc = (String) this.dna.get(UTC);
         if (utc == null) { utc = "+0200"; }
         return serverDate.UTCDiff(utc);        
     }
@@ -409,7 +411,7 @@ public class yacySeed {
         // computes a virtual distance, the result must be set in relation to maxDHTDistace
         // if the distance is small, this peer is more responsible for that word hash
         // if the distance is big, this peer is less responsible for that word hash
-        final long myPos = decodeLex(hash.substring(0,9));
+        final long myPos = decodeLex(this.hash.substring(0,9));
         final long wordPos = decodeLex(wordhash.substring(0,9));
         return (myPos > wordPos) ? (myPos - wordPos) : (myPos + maxDHTDistance - wordPos);
     }
@@ -497,10 +499,10 @@ public class yacySeed {
     }
 
     public String toString() {       
-        synchronized (dna) {
-            dna.put("Hash", this.hash);      // set hash into seed code structure
-            final String s = dna.toString(); // generate string representation
-            dna.remove("Hash");              // reconstruct original: hash is stored external
+        synchronized (this.dna) {
+            this.dna.put("Hash", this.hash);      // set hash into seed code structure
+            final String s = this.dna.toString(); // generate string representation
+            this.dna.remove("Hash");              // reconstruct original: hash is stored external
             return s;
         }
     }
@@ -522,7 +524,7 @@ public class yacySeed {
         // checks if everything is ok with that seed
         if (this.hash == null) { return "hash is null"; }
         if (this.hash.length() != yacySeedDB.commonHashLength) { return "wrong hash length (" + this.hash.length() + ")"; }
-        final String ip = (String) dna.get(IP);
+        final String ip = (String) this.dna.get(IP);
         if (ip == null) { return "IP is null"; }
         if (ip.length() < 8) { return "IP is too short: " + ip; }
         if (!natLib.isProper(ip)) { return "IP is not proper: " + ip; }
@@ -545,7 +547,9 @@ public class yacySeed {
     }
 
     public Object clone() {
-        return new yacySeed(this.hash, (HashMap) (new HashMap(dna)).clone());
+        synchronized(this.dna) {
+            return new yacySeed(this.hash, (HashMap) (new HashMap(this.dna)).clone());
+        }
     }
 
     /*
