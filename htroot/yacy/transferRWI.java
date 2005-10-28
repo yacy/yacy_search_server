@@ -130,8 +130,15 @@ public final class transferRWI {
                     serverCore.checkInterruption();
                     
                     urlHash = entry.getUrlHash();
-                    if ((!(unknownURL.contains(urlHash))) &&
-                    (!(sb.urlPool.loadedURL.exists(urlHash)))) {
+                    try {
+                        if (
+                                (!(unknownURL.contains(urlHash))) &&
+                                (!(sb.urlPool.loadedURL.exists(urlHash)))
+                        ) {
+                            unknownURL.add(urlHash);
+                        }
+                    } catch (Exception ex) {
+                        sb.getLog().logWarning("transferRWI: DB-Error while trying to determine if URL with hash '" + urlHash + "' is known.",ex);
                         unknownURL.add(urlHash);
                     }
                     received++;
