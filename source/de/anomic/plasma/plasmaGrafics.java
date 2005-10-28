@@ -183,9 +183,9 @@ public class plasmaGrafics {
         // draw description
         networkPicture.setColor("FFFFFF");
         networkPicture.setMode(ImagePainter.MODE_ADD);
-        networkPicture.print(2, 8, "THE YACY NETWORK", true);
-        networkPicture.print(2, 16, "DRAWING OF " + totalCount + " SELECTED PEERS", true);
-        networkPicture.print(width - 2, 8, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), false);
+        networkPicture.print(2, 8, 0, "THE YACY NETWORK", true);
+        networkPicture.print(2, 16, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", true);
+        networkPicture.print(width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), false);
         
         // set timestamp
         networkPictureDate = System.currentTimeMillis();

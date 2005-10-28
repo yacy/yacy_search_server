@@ -2,8 +2,8 @@
 // ---------------------------
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
-// last major change: 16.09.2004
+// Frankfurt, Germany, 2005
+// last major change: 16.09.2005
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@
 
 package de.anomic.tools;
 
+import java.io.File;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.GraphicsDevice;
@@ -57,6 +58,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.HashSet;
 import java.util.ArrayList;
+import javax.imageio.ImageIO;
+import java.io.IOException;
 
 public class ImagePainter implements Cloneable {
     
@@ -93,10 +96,10 @@ public class ImagePainter implements Cloneable {
     
     private static int[][] circles = new int[0][];
     
+    protected int  width, height;
     private byte[] grid; // one-dimensional arrays are much faster than two-dimensional
-    private int  width, height;
-    private int  defaultColR, defaultColG, defaultColB;
-    private byte defaultMode;
+    private int    defaultColR, defaultColG, defaultColB;
+    private byte   defaultMode;
     
     public ImagePainter(int width, int height, String backgroundColor) {
         this(width, height, colNum(backgroundColor));
@@ -165,7 +168,7 @@ public class ImagePainter implements Cloneable {
         this.defaultMode = m;
     }
     
-    private void plot(int x, int y) {
+    protected void plot(int x, int y) {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
         int n = 3 * (x + y * width);
@@ -191,7 +194,7 @@ public class ImagePainter implements Cloneable {
     }
     
     
-    private void line(int Ax, int Ay, int Bx, int By) {
+    protected void line(int Ax, int Ay, int Bx, int By) {
         // Bresenham's line drawing algorithm
         int dX = Math.abs(Bx-Ax);
         int dY = Math.abs(By-Ay);
@@ -331,22 +334,6 @@ public class ImagePainter implements Cloneable {
         }
     }
     
-    private void print(int x, int y, char letter) {
-        int index = (int) letter - 0x20;
-        if (index >= font.length) return;
-        long character = font[index];
-        long row;
-        for (int i = 0; i < 5; i++) {
-            row = character & 0x1f;
-            character = character >> 5;
-            for (int j = 0; j < 5; j++) {
-                if ((row & 1) == 1) plot(x + 5 - j, y);
-                row = row >> 1;
-            }
-            y--;
-        }
-    }
-    
     public void dot(int x, int y, int radius, boolean filled) {
         if (filled) {
             for (int r = radius; r >= 0; r--) circle(x, y, r);
@@ -360,11 +347,44 @@ public class ImagePainter implements Cloneable {
         
     }
     
-    public void print(int x, int y, String message, boolean alignRight) {
-        int xx = (alignRight) ? x : x - 6 * message.length();
+    private void print(int x, int y, int angle, char letter) {
+        int index = (int) letter - 0x20;
+        if (index >= font.length) return;
+        long character = font[index];
+        long row;
+        for (int i = 0; i < 5; i++) {
+            row = character & 0x1f;
+            character = character >> 5;
+            if (angle == 0) {
+                for (int j = 0; j < 5; j++) {
+                    if ((row & 1) == 1) plot(x + 5 - j, y);
+                    row = row >> 1;
+                }
+                y--;
+            }
+            if (angle == 90) {
+                for (int j = 0; j < 5; j++) {
+                    if ((row & 1) == 1) plot(x, y - 5 + j);
+                    row = row >> 1;
+                }
+                x--;
+            }
+        }
+    }
+    
+    public void print(int x, int y, int angle, String message, boolean alignLeft) {
+        int xx = 0, yy = 0;
+        if (angle == 0) {
+            xx = (alignLeft) ? x : x - 6 * message.length();
+            yy = y;
+        } else if (angle == 90) {
+            xx = x;
+            yy = (alignLeft) ? y : y + 6 * message.length();
+        }
         for (int i = 0; i < message.length(); i++) {
-            print(xx, y, message.charAt(i));
-            xx += 6;
+            print(xx, yy, angle, message.charAt(i));
+            if (angle == 0) xx += 6;
+            else if (angle == 90) yy -= 6;
         }
     }
     
@@ -380,7 +400,7 @@ public class ImagePainter implements Cloneable {
         int xp = x - 3 * message.length();
         if ((angle > (90 + arcDist)) && (angle < (270 - arcDist))) xp = x - 6 * message.length();
         if ((angle < (90 - arcDist)) || (angle > (270 + arcDist))) xp = x;
-        print(xp, yp, message, true);
+        print(xp, yp, 0, message, true);
     }
     
     public void arcLine(int cx, int cy, int innerRadius, int outerRadius, int angle) {
@@ -402,6 +422,7 @@ public class ImagePainter implements Cloneable {
         int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
         arc(x, y, innerRadius, outerRadius, fromArc, toArc);
     }
+
     
     public BufferedImage toImage(boolean complementary) {
         /*
@@ -462,5 +483,12 @@ public class ImagePainter implements Cloneable {
             return new BufferedImage(0, 0, BufferedImage.TYPE_INT_RGB);
         }
     }
+    
+    public void toPNG(boolean complementary, File f) throws IOException {
+        BufferedImage bi = toImage(complementary);
+        ImageIO.write(bi, "png", f);
+    }
 
+    
+    
 }

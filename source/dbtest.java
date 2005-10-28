@@ -9,10 +9,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Random;
+import java.util.Date;
 
 import de.anomic.server.serverCodings;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.tools.ImageChart;
 
 public class dbtest {
 
@@ -33,6 +35,8 @@ public class dbtest {
     }
     
     public static void main(String[] args) {
+        System.setProperty("java.awt.headless", "true");
+        
         String dbe = args[0];       // the database engine
         String command = args[1];   // test command
         String tablename = args[2]; // name of test-table
@@ -40,6 +44,9 @@ public class dbtest {
         long startup = System.currentTimeMillis();
         try {
             kelondroIndex table = null;
+            // create a memory profiler
+            memprofiler profiler = new memprofiler(1024, 320, 120, new File(tablename + ".profile.png"));
+            profiler.start();
             
             // create the database access
             if (dbe.equals("kelondro")) {
@@ -89,6 +96,7 @@ public class dbtest {
             long afterclose = System.currentTimeMillis();
             
             System.out.println("Execution time: open=" + (afterinit - startup) + ", command=" + (aftercommand - afterinit) + ", close=" + (afterclose - aftercommand) + ", total=" + (afterclose - startup));
+            profiler.terminate();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -202,4 +210,48 @@ final class dbTable implements kelondroIndex {
         return null;
     }
     
+}
+
+final class memprofiler extends Thread {
+    
+    ImageChart memChart;
+    boolean run;
+    File outputFile;
+    long start;
+    
+    public memprofiler(int width, int height, int expectedTimeSeconds, File outputFile) {
+        this.outputFile = outputFile;
+        int expectedKilobytes = (int) 20 * 1024;//(Runtime.getRuntime().totalMemory() / 1024);
+        memChart = new ImageChart(width, height, "000010", 50, 20, 20, 20, "MEMORY CHART FROM EXECUTION AT " + new Date());
+        int timescale = 10; // steps with each 10 seconds
+        int memscale = 1024;
+        memChart.declareDimension(ImageChart.DIMENSION_BOTTOM, timescale, (width - 40) * timescale / expectedTimeSeconds, "FFFFFF", "555555", "SECONDS");
+        memChart.declareDimension(ImageChart.DIMENSION_LEFT, memscale, (height - 40) * memscale / expectedKilobytes , "FFFFFF", "555555", "KILOBYTES");
+        run = true;
+        start = System.currentTimeMillis();
+    }
+    
+    public void run() {
+        int seconds0 = 0, kilobytes0 = 0;
+        int seconds1 = 0, kilobytes1 = 0;
+        while(run) {
+            memChart.setColor("FF0000");
+            seconds1 = (int) ((System.currentTimeMillis() - start) / 1000);
+            kilobytes1 = (int) (Runtime.getRuntime().freeMemory() / 1024);
+            memChart.chartLine(ImageChart.DIMENSION_BOTTOM, ImageChart.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
+            seconds0 = seconds1;
+            kilobytes0 = kilobytes1;
+            try {Thread.sleep(200);} catch (InterruptedException e) {}
+        }
+        try {
+            memChart.toPNG(true, outputFile);
+        } catch (IOException e) {}
+    }
+    
+    public void terminate() {
+        run = false;
+        while (this.isAlive()) {
+            try {Thread.sleep(1000);} catch (InterruptedException e) {}
+        }
+    }
 }
