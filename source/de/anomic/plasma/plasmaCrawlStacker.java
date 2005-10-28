@@ -703,7 +703,7 @@ public final class plasmaCrawlStacker {
                     }
                 }
                 
-                log.logInfo("Shutdown of remaining stackCrawl threads finish.");
+                log.logInfo("Shutdown of remaining stackCrawl threads finished.");
             } catch (Exception e) {
                 log.logSevere("Unexpected error while trying to shutdown all remaining stackCrawl threads.",e);
             }
