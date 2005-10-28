@@ -520,7 +520,12 @@ public final class serverCore extends serverAbstractThread implements serverThre
          * @see org.apache.commons.pool.impl.GenericObjectPool#returnObject(java.lang.Object)
          */
         public void returnObject(Object obj) throws Exception  {
-            super.returnObject(obj);
+            if (obj instanceof Session) {
+                super.returnObject(obj);
+            } else {
+                serverLog.logSevere("SESSION-POOL","Object of wront type '" + obj.getClass().getName() +
+                                    "'returned to pool.");
+            }
         }        
         
         public synchronized void close() throws Exception {
@@ -541,7 +546,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     Thread currentThread = threadList[currentThreadIdx];
                     if (currentThread.isAlive()) {
-                        ((Session)currentThread).setStopped(true);
+                        if (currentThread instanceof Session) {
+                            ((Session)currentThread).setStopped(true);
+                        }
                     }
                 }          
 
@@ -557,8 +564,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     Thread currentThread = threadList[currentThreadIdx];
                     if (currentThread.isAlive()) {
-                        serverCore.this.log.logInfo("Trying to shutdown session thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
-                        ((Session)currentThread).close();
+                        if (currentThread instanceof Session) {
+                            serverCore.this.log.logInfo("Trying to shutdown session thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
+                            ((Session)currentThread).close();
+                        }
                     }
                 }                
                 
@@ -567,8 +576,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                     Thread currentThread = threadList[currentThreadIdx];
                     if (currentThread.isAlive()) {
-                        serverCore.this.log.logFine("Waiting for session thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
-                        try { currentThread.join(500); } catch (InterruptedException ex) {}
+                        if (currentThread instanceof Session) {
+                            serverCore.this.log.logFine("Waiting for session thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
+                            try { currentThread.join(500); } catch (InterruptedException ex) {}
+                        }
                     }
                 }
                 
@@ -616,8 +627,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
          * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
          */
         public boolean validateObject(Object obj) {
-            if (obj instanceof Session) 
-            {
+            if (obj instanceof Session) {
                 Session theSession = (Session) obj;
                 if (!theSession.isAlive() || theSession.isInterrupted()) return false;
                 if (theSession.isRunning()) return true;
