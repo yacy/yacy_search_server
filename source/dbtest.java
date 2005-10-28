@@ -15,6 +15,7 @@ import de.anomic.server.serverCodings;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.tools.ImageChart;
+import de.anomic.server.serverMemory;
 
 public class dbtest {
 
@@ -237,11 +238,11 @@ final class memprofiler extends Thread {
         while(run) {
             memChart.setColor("FF0000");
             seconds1 = (int) ((System.currentTimeMillis() - start) / 1000);
-            kilobytes1 = (int) (Runtime.getRuntime().freeMemory() / 1024);
+            kilobytes1 = (int) (serverMemory.used() / 1024);
             memChart.chartLine(ImageChart.DIMENSION_BOTTOM, ImageChart.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
             seconds0 = seconds1;
             kilobytes0 = kilobytes1;
-            try {Thread.sleep(200);} catch (InterruptedException e) {}
+            try {Thread.sleep(100);} catch (InterruptedException e) {}
         }
         try {
             memChart.toPNG(true, outputFile);
