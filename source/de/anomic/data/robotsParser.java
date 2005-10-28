@@ -163,66 +163,69 @@ public final class robotsParser{
         
         // generating the hostname:poart string needed to do a DB lookup
         String urlHostPort = nexturl.getHost() + ":" + ((nexturl.getPort()==-1)?80:nexturl.getPort());
-        urlHostPort = urlHostPort.toLowerCase();
+        urlHostPort = urlHostPort.toLowerCase().intern();
         
-        // doing a DB lookup to determine if the robots data is already available
-        plasmaCrawlRobotsTxt.Entry robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
-        
-        // if we have not found any data or the data is older than 7 days, we need to load it from the remote server
-        if (
-                (robotsTxt4Host == null) || 
-                (robotsTxt4Host.getLoadedDate() == null) ||
-                (System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000)
-           ) {
-            URL robotsURL = null;
-            // generating the proper url to download the robots txt
-            try {                 
-                robotsURL = new URL(nexturl.getProtocol(),nexturl.getHost(),(nexturl.getPort()==-1)?80:nexturl.getPort(),"/robots.txt");
-            } catch (MalformedURLException e) {
-                serverLog.logSevere("ROBOTS","Unable to generate robots.txt URL for URL '" + nexturl.toString() + "'.");
-                return false;
-            }
+        plasmaCrawlRobotsTxt.Entry robotsTxt4Host = null;
+        synchronized(urlHostPort) {
+            // doing a DB lookup to determine if the robots data is already available
+            robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
             
-            Object[] result = null;
-            boolean accessCompletelyRestricted = false;
-            byte[] robotsTxt = null;
-            String eTag = null;
-            Date modDate = null;
-            try { 
-                serverLog.logFine("ROBOTS","Trying to download the robots.txt file from URL '" + robotsURL + "'.");
-                result = downloadRobotsTxt(robotsURL,5,robotsTxt4Host);
-                
-                if (result != null) {
-                    accessCompletelyRestricted = ((Boolean)result[0]).booleanValue();
-                    robotsTxt = (byte[])result[1];
-                    eTag = (String) result[2];
-                    modDate = (Date) result[3];
-                } else if (robotsTxt4Host != null) {
-                    robotsTxt4Host.setLoadedDate(new Date());
-                    plasmaSwitchboard.robots.addEntry(robotsTxt4Host);
+            // if we have not found any data or the data is older than 7 days, we need to load it from the remote server
+            if (
+                    (robotsTxt4Host == null) || 
+                    (robotsTxt4Host.getLoadedDate() == null) ||
+                    (System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000)
+            ) {
+                URL robotsURL = null;
+                // generating the proper url to download the robots txt
+                try {                 
+                    robotsURL = new URL(nexturl.getProtocol(),nexturl.getHost(),(nexturl.getPort()==-1)?80:nexturl.getPort(),"/robots.txt");
+                } catch (MalformedURLException e) {
+                    serverLog.logSevere("ROBOTS","Unable to generate robots.txt URL for URL '" + nexturl.toString() + "'.");
+                    return false;
                 }
-            } catch (Exception e) {
-                serverLog.logSevere("ROBOTS","Unable to download the robots.txt file from URL '" + robotsURL + "'. " + e.getMessage());
-            }
-            
-            if ((robotsTxt4Host==null)||((robotsTxt4Host!=null)&&(result!=null))) {
-                ArrayList denyPath = null;
-                if (accessCompletelyRestricted) {
-                    denyPath = new ArrayList();
-                    denyPath.add("/");
-                } else {
-                    // parsing the robots.txt Data and converting it into an arraylist
-                    try {
-                        denyPath = robotsParser.parse(robotsTxt);
-                    } catch (IOException e) {
-                        serverLog.logSevere("ROBOTS","Unable to parse the robots.txt file from URL '" + robotsURL + "'.");
-                    }
-                } 
                 
-                // storing the data into the robots DB
-                robotsTxt4Host = plasmaSwitchboard.robots.addEntry(urlHostPort,denyPath,new Date(),modDate,eTag);
-            } 
-        }        
+                Object[] result = null;
+                boolean accessCompletelyRestricted = false;
+                byte[] robotsTxt = null;
+                String eTag = null;
+                Date modDate = null;
+                try { 
+                    serverLog.logFine("ROBOTS","Trying to download the robots.txt file from URL '" + robotsURL + "'.");
+                    result = downloadRobotsTxt(robotsURL,5,robotsTxt4Host);
+                    
+                    if (result != null) {
+                        accessCompletelyRestricted = ((Boolean)result[0]).booleanValue();
+                        robotsTxt = (byte[])result[1];
+                        eTag = (String) result[2];
+                        modDate = (Date) result[3];
+                    } else if (robotsTxt4Host != null) {
+                        robotsTxt4Host.setLoadedDate(new Date());
+                        plasmaSwitchboard.robots.addEntry(robotsTxt4Host);
+                    }
+                } catch (Exception e) {
+                    serverLog.logSevere("ROBOTS","Unable to download the robots.txt file from URL '" + robotsURL + "'. " + e.getMessage());
+                }
+                
+                if ((robotsTxt4Host==null)||((robotsTxt4Host!=null)&&(result!=null))) {
+                    ArrayList denyPath = null;
+                    if (accessCompletelyRestricted) {
+                        denyPath = new ArrayList();
+                        denyPath.add("/");
+                    } else {
+                        // parsing the robots.txt Data and converting it into an arraylist
+                        try {
+                            denyPath = robotsParser.parse(robotsTxt);
+                        } catch (IOException e) {
+                            serverLog.logSevere("ROBOTS","Unable to parse the robots.txt file from URL '" + robotsURL + "'.");
+                        }
+                    } 
+                    
+                    // storing the data into the robots DB
+                    robotsTxt4Host = plasmaSwitchboard.robots.addEntry(urlHostPort,denyPath,new Date(),modDate,eTag);
+                } 
+            }
+        }
         
         if (robotsTxt4Host.isDisallowed(nexturl.getPath())) {
             return true;        
