@@ -106,6 +106,7 @@ public class wikiCode {
     }
     
     public static String replaceHTML(String result) {
+        if (result == null) return null;
         int p0;
 	
 	// avoide html inside
