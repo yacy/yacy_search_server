@@ -96,23 +96,18 @@ public class plasmaCrawlNURL extends plasmaURL {
     private kelondroStack musicStack;     // links pointing to music resources
 
     private final HashSet stackIndex;           // to find out if a specific link is already on any stack
-
+    private File cacheStacksPath;
+    private int bufferkb;
+    
     public plasmaCrawlNURL(File cacheStacksPath, int bufferkb) throws IOException {
         super();
-
-
+        this.cacheStacksPath = cacheStacksPath;
+        this.bufferkb = bufferkb;
+        
         // create a stack for newly entered entries
         if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path
 
-        File cacheFile = new File(cacheStacksPath, "urlNotice1.db");
-        if (cacheFile.exists()) {
-            // open existing cache
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400);
-        } else {
-            // create new cache
-            cacheFile.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, ce);
-        }
+        openHashCache();
 
         File coreStackFile = new File(cacheStacksPath, "urlNoticeLocal0.stack");
         File limitStackFile = new File(cacheStacksPath, "urlNoticeLimit0.stack");
@@ -132,6 +127,28 @@ public class plasmaCrawlNURL extends plasmaURL {
         // init stack Index
         stackIndex = new HashSet();
         new initStackIndex().start();
+    }
+    
+    private void openHashCache() throws IOException {
+        File cacheFile = new File(cacheStacksPath, "urlNotice1.db");
+        if (cacheFile.exists()) {
+            // open existing cache
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400);
+        } else {
+            // create new cache
+            cacheFile.getParentFile().mkdirs();
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, ce);
+        }
+    }
+    
+    private void resetHashCache() throws IOException {
+        if (urlHashCache != null) {
+            try {urlHashCache.close();} catch (IOException e) {}
+            urlHashCache = null;
+            File cacheFile = new File(cacheStacksPath, "urlNotice1.db");
+            cacheFile.delete();
+        }
+        openHashCache();
     }
     
     public void close() {
@@ -451,9 +468,21 @@ public class plasmaCrawlNURL extends plasmaURL {
                 };
                 urlHashCache.put(entry);
             } catch (IOException e) {
-                serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString());
+                serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", resetting NURL-DB");
+                try {
+                    resetHashCache();
+                } catch (IOException ee) {
+                    serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", reset of NURL-DB failed");
+                    System.exit(0); // this is REALLY severe
+                }
             } catch (kelondroException e) {
-                serverLog.logSevere("PLASMA", "plasmaCrawlNURL.store failed: " + e.getMessage());
+                serverLog.logSevere("PLASMA", "plasmaCrawlNURL.store failed: " + e.toString() + ", resetting NURL-DB");
+                try {
+                    resetHashCache();
+                } catch (IOException ee) {
+                    serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", reset of NURL-DB failed");
+                    System.exit(0); // this is REALLY severe
+                }
             }
         }
 
