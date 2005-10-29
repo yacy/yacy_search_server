@@ -111,6 +111,7 @@ public class wikiCode {
 	// avoide html inside
 	//p0 = 0; while ((p0 = result.indexOf("&", p0)) >= 0) result = result.substring(0, p0) + "&amp;" + result.substring(p0 + 1);
 	p0 = 0; while ((p0 = result.indexOf('"', p0)) >= 0) result = result.substring(0, p0) + "&quot;" + result.substring(p0 + 1);
+	p0 = 0; while ((p0 = result.indexOf('&', p0)) >= 0) result = result.substring(0, p0) + "&amp;" + result.substring(p0 + 1);
 	p0 = 0; while ((p0 = result.indexOf("<", p0)) >= 0) result = result.substring(0, p0) + "&lt;" + result.substring(p0 + 1);
 	p0 = 0; while ((p0 = result.indexOf(">", p0)) >= 0) result = result.substring(0, p0) + "&gt;" + result.substring(p0 + 1);
 	//p0 = 0; while ((p0 = result.indexOf("*", p0)) >= 0) result = result.substring(0, p0) + "&#149;" + result.substring(p0 + 1);

@@ -1,0 +1,16 @@
+<xml version="1.0">
+<indexingQueue>
+#{list}#
+  <entry>
+    <initiator>#[initiator]#</initiator>
+    <depth>#[depth]#</depth>
+    <modified>#[modified]#</modified>
+    <anchor>#[anchor]#</anchor>
+    <url>#[url]#</url>
+    <size>#[size]#</size>
+    <hash>#[hash]#</hash>
+    <inProcess>#(inProcess)#false::true#(/inProcess)#</inProcess>
+  </entry>
+#{/list}#
+</indexingQueue>
+</xml>
