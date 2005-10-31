@@ -1,4 +1,4 @@
-// ImageChart.java 
+// ymageChart.java 
 // ---------------------------
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
@@ -39,12 +39,12 @@
 // Contributions and changes to the program code must be marked as such.
 
 
-package de.anomic.tools;
+package de.anomic.ymage;
 
 import java.io.File;
 import java.io.IOException;
 
-public class ImageChart extends ImagePainter {
+public class ymageChart extends ymageMatrixPainter {
     
     public static final int DIMENSION_RIGHT  = 0;
     public static final int DIMENSION_TOP    = 1;
@@ -61,7 +61,7 @@ public class ImageChart extends ImagePainter {
     String[] colscale = new String[]{null,null,null,null};
     String[] tablenames = new String[]{"","","",""};
     
-    public ImageChart(int width, int height, String backgroundColor,
+    public ymageChart(int width, int height, String backgroundColor,
                       int leftborder, int rightborder, int topborder, int bottomborder,
                       String name) {
         super(width, height, backgroundColor);
@@ -149,7 +149,7 @@ public class ImageChart extends ImagePainter {
    
     public static void main(String[] args) {
         System.setProperty("java.awt.headless", "true");
-        ImageChart ip = new ImageChart(640, 480, "000010", 40, 40, 20, 20, "TESTCHART");
+        ymageChart ip = new ymageChart(640, 480, "000010", 40, 40, 20, 20, "TESTCHART");
         ip.declareDimension(DIMENSION_BOTTOM, 10, 30, "FFFFFF", "555555", "time");
         ip.declareDimension(DIMENSION_TOP, 10, 40, "FFFFFF", null, "count");
         ip.declareDimension(DIMENSION_LEFT, 100, 30, "FFFFFF", "555555", "money");
@@ -161,9 +161,11 @@ public class ImageChart extends ImagePainter {
         //ip.print(100, 100, 0, "1234", false);
         //ip.print(100, 100, 90, "TEXT", true);
         //ip.print(100, 100, 90, "1234", false);
+        /*
         try {
             ip.toPNG(true, new File("/Users/admin/dev/yacy/trunk/testimage.png"));
         } catch (IOException e) {}
+         */
     }
     
 }

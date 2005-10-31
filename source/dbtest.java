@@ -14,7 +14,8 @@ import java.util.Date;
 import de.anomic.server.serverCodings;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.tools.ImageChart;
+import de.anomic.ymage.ymageChart;
+import de.anomic.ymage.ymagePNGEncoderAWT;
 import de.anomic.server.serverMemory;
 
 public class dbtest {
@@ -215,7 +216,7 @@ final class dbTable implements kelondroIndex {
 
 final class memprofiler extends Thread {
     
-    ImageChart memChart;
+    ymageChart memChart;
     boolean run;
     File outputFile;
     long start;
@@ -223,11 +224,11 @@ final class memprofiler extends Thread {
     public memprofiler(int width, int height, int expectedTimeSeconds, File outputFile) {
         this.outputFile = outputFile;
         int expectedKilobytes = (int) 20 * 1024;//(Runtime.getRuntime().totalMemory() / 1024);
-        memChart = new ImageChart(width, height, "000010", 50, 20, 20, 20, "MEMORY CHART FROM EXECUTION AT " + new Date());
+        memChart = new ymageChart(width, height, "000010", 50, 20, 20, 20, "MEMORY CHART FROM EXECUTION AT " + new Date());
         int timescale = 10; // steps with each 10 seconds
         int memscale = 1024;
-        memChart.declareDimension(ImageChart.DIMENSION_BOTTOM, timescale, (width - 40) * timescale / expectedTimeSeconds, "FFFFFF", "555555", "SECONDS");
-        memChart.declareDimension(ImageChart.DIMENSION_LEFT, memscale, (height - 40) * memscale / expectedKilobytes , "FFFFFF", "555555", "KILOBYTES");
+        memChart.declareDimension(ymageChart.DIMENSION_BOTTOM, timescale, (width - 40) * timescale / expectedTimeSeconds, "FFFFFF", "555555", "SECONDS");
+        memChart.declareDimension(ymageChart.DIMENSION_LEFT, memscale, (height - 40) * memscale / expectedKilobytes , "FFFFFF", "555555", "KILOBYTES");
         run = true;
         start = System.currentTimeMillis();
     }
@@ -239,13 +240,13 @@ final class memprofiler extends Thread {
             memChart.setColor("FF0000");
             seconds1 = (int) ((System.currentTimeMillis() - start) / 1000);
             kilobytes1 = (int) (serverMemory.used() / 1024);
-            memChart.chartLine(ImageChart.DIMENSION_BOTTOM, ImageChart.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
+            memChart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
             seconds0 = seconds1;
             kilobytes0 = kilobytes1;
             try {Thread.sleep(100);} catch (InterruptedException e) {}
         }
         try {
-            memChart.toPNG(true, outputFile);
+            ymagePNGEncoderAWT.toPNG(memChart, true, outputFile);
         } catch (IOException e) {}
     }
     

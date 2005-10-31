@@ -45,12 +45,13 @@
 
 package de.anomic.plasma;
 
-import java.awt.image.BufferedImage; 
 import java.util.Iterator;
 import java.util.Enumeration;
 import java.util.Date;
 
-import de.anomic.tools.ImagePainter;
+import de.anomic.ymage.ymagePainter;
+import de.anomic.ymage.ymageMatrix;
+import de.anomic.ymage.ymageMatrixPainter;
 
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -61,17 +62,17 @@ public class plasmaGrafics {
     private static int shortestName = 10;
     private static int longestName = 12;
     
-    private static ImagePainter networkPicture = null;
+    private static ymagePainter networkPicture = null;
     private static long         networkPictureDate = 0;
     
     
-    public static ImagePainter getSearchEventPicture() {
+    public static ymagePainter getSearchEventPicture() {
         if (plasmaSearchEvent.lastEvent == null) return null;
         yacySearch[] searches = plasmaSearchEvent.lastEvent.getSearchThreads();
         if (searches == null) return null; // this was a local search and there are no threads
         
         // get a copy of a recent network picture
-        ImagePainter eventPicture = (ImagePainter) getNetworkPicture(120000).clone();
+        ymagePainter eventPicture = (ymagePainter) getNetworkPicture(120000).clone();
         
         // get dimensions
         int cr = Math.min(eventPicture.getWidth(), eventPicture.getHeight()) / 5 - 20;
@@ -83,7 +84,7 @@ public class plasmaGrafics {
         
         // draw in the search peers
         for (int j = 0; j < searches.length; j++) {
-            eventPicture.setColor((searches[j].isAlive()) ? ImagePainter.ADDITIVE_RED : ImagePainter.ADDITIVE_GREEN);
+            eventPicture.setColor((searches[j].isAlive()) ? ymageMatrix.ADDITIVE_RED : ymageMatrix.ADDITIVE_GREEN);
             hash = searches[j].target().hash;
             angle = (int) ((long) 360 * (yacySeed.dhtPosition(hash) / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
@@ -92,8 +93,8 @@ public class plasmaGrafics {
         // draw in the search target
         plasmaSearchQuery query = plasmaSearchEvent.lastEvent.getQuery();
         Iterator i = query.queryHashes.iterator();
-        eventPicture.setMode(ImagePainter.MODE_ADD);
-        eventPicture.setColor(ImagePainter.ADDITIVE_BLACK);
+        eventPicture.setMode(ymageMatrix.MODE_ADD);
+        eventPicture.setColor(ymageMatrix.ADDITIVE_BLACK);
         while (i.hasNext()) {
             hash = (String) i.next();
             angle = (int) ((long) 360 * (yacySeed.dhtPosition(hash) / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
@@ -103,11 +104,11 @@ public class plasmaGrafics {
         return eventPicture;
     }
     
-    public static ImagePainter getNetworkPicture(long maxAge) {
+    public static ymagePainter getNetworkPicture(long maxAge) {
         return getNetworkPicture(maxAge, 640, 480, 300, 300, 1000);
     }
     
-    public static ImagePainter getNetworkPicture(long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount) {
+    public static ymagePainter getNetworkPicture(long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount) {
         if ((networkPicture == null) || ((System.currentTimeMillis() - networkPictureDate) > maxAge)) {
             drawNetworkPicture(width, height, passiveLimit, potentialLimit, maxCount);
         }
@@ -122,8 +123,8 @@ public class plasmaGrafics {
     
         if (yacyCore.seedDB == null) return; // no other peers known
         
-        networkPicture = new ImagePainter(width, height, "000010");
-        networkPicture.setMode(ImagePainter.MODE_ADD);
+        networkPicture = new ymageMatrixPainter(width, height, "000010");
+        networkPicture.setMode(ymageMatrix.MODE_ADD);
 
         // draw network circle
         networkPicture.setColor("008020");
@@ -182,7 +183,7 @@ public class plasmaGrafics {
         
         // draw description
         networkPicture.setColor("FFFFFF");
-        networkPicture.setMode(ImagePainter.MODE_ADD);
+        networkPicture.setMode(ymageMatrix.MODE_ADD);
         networkPicture.print(2, 8, 0, "THE YACY NETWORK", true);
         networkPicture.print(2, 16, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", true);
         networkPicture.print(width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), false);
@@ -191,7 +192,7 @@ public class plasmaGrafics {
         networkPictureDate = System.currentTimeMillis();
     }
     
-    private static void drawNetworkPicturePeer(ImagePainter img, int x, int y, int innerradius, int outerradius, yacySeed seed, String colorDot, String colorLine, String colorText) {
+    private static void drawNetworkPicturePeer(ymagePainter img, int x, int y, int innerradius, int outerradius, yacySeed seed, String colorDot, String colorLine, String colorText) {
         String name = seed.getName().toUpperCase();
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
@@ -201,7 +202,7 @@ public class plasmaGrafics {
         if (linelength > outerradius) linelength = outerradius;
         int dotsize = 6 + 2 * (int) (seed.getLinkCount() / 500000L);
         if (dotsize > 18) dotsize = 18;
-        img.setMode(ImagePainter.MODE_ADD);
+        img.setMode(ymageMatrix.MODE_ADD);
         // draw dot
         img.setColor(colorDot);
         img.arcDot(x, y, innerradius, angle, dotsize);
@@ -217,7 +218,7 @@ public class plasmaGrafics {
             if (ppm10 > 3) ppm10 = 3;
             // draw a wave around crawling peers
             long strength;
-            img.setMode(ImagePainter.MODE_SUB);
+            img.setMode(ymageMatrix.MODE_SUB);
             img.setColor("303030");
             img.arcArc(x, y, innerradius, angle, dotsize + 1, dotsize + 1, 0, 360);
             int waveradius = innerradius / 2;

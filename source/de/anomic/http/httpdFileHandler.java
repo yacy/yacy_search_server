@@ -96,8 +96,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import java.awt.image.BufferedImage; 
-import javax.imageio.ImageIO; 
+import javax.imageio.ImageIO;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaParser;
@@ -110,7 +109,10 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.data.userDB;
-
+import de.anomic.ymage.ymagePainter;
+import de.anomic.ymage.ymageMatrixPainter;
+import de.anomic.ymage.ymagePNGEncoderAWT;
+import de.anomic.ymage.ymagePNGEncoderJDE;
 
 public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
     
@@ -456,12 +458,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
             if ((targetClass != null) && (path.endsWith("png"))) {
                 // call an image-servlet to produce an on-the-fly - generated image
-                BufferedImage bi = null;
+                ymagePainter yp = null;
                 try {
                     requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
                     requestHeader.put("PATH", path);
                     // in case that there are no args given, args = null or empty hashmap
-                    bi = (BufferedImage) rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
+                    yp = (ymagePainter) rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
                 } catch (InvocationTargetException e) {
                     this.theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                     e.getMessage() +
@@ -471,7 +473,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'",e);
                     targetClass = null;
                 }
-                if (bi == null) {
+                if (yp == null) {
                     // error with image generation; send file-not-found
                     httpd.sendRespondError(this.connectionProperties,out,3,404,"File not Found",null,null);
                 } else {
@@ -481,7 +483,9 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     
                     // generate an byte array from the generated image
                     serverByteBuffer baos = new serverByteBuffer();
-                    ImageIO.write(bi, targetExt, baos);
+                    //ymagePNGEncoderJDE jde = new ymagePNGEncoderJDE((ymageMatrixPainter) yp, ymagePNGEncoderJDE.FILTER_NONE, 0);
+                    //byte[] result = jde.pngEncode();
+                    ImageIO.write(ymagePNGEncoderAWT.toImage((ymageMatrixPainter) yp, true), targetExt, baos);
                     byte[] result = baos.toByteArray();
                     baos.close(); baos = null;
                     

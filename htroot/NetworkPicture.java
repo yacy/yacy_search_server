@@ -44,19 +44,17 @@
 // Contributions and changes to the program code must be marked as such.
 
 
-import java.awt.image.BufferedImage;
-
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-
+import de.anomic.ymage.ymagePainter;
 import de.anomic.plasma.plasmaGrafics;
 
 // draw a picture of the yacy network
 
 public class NetworkPicture {
     
-    public static BufferedImage respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static ymagePainter respond(httpHeader header, serverObjects post, serverSwitch env) {
 
         int width = 640;
         int height = 480;
@@ -77,7 +75,7 @@ public class NetworkPicture {
         if (passiveLimit > 500) passiveLimit = 500;
         if (potentialLimit > 500) potentialLimit = 500;
         if (maxCount > 1000) maxCount = 1000;
-        return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount).toImage(true);
+        return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount);
     }
     
 }

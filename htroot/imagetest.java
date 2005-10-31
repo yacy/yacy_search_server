@@ -46,7 +46,9 @@
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.ImagePainter;
+import de.anomic.ymage.ymagePainter;
+import de.anomic.ymage.ymageMatrixPainter;
+import de.anomic.ymage.ymageMatrix;
 
 import java.awt.Graphics2D; 
 import java.awt.Color; 
@@ -64,7 +66,7 @@ import java.lang.reflect.Method;
 public class imagetest {
     
 
-    public static BufferedImage respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static ymagePainter respond(httpHeader header, serverObjects post, serverSwitch env) {
         /*
         BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB); 
         Graphics2D g = bi.createGraphics();
@@ -96,26 +98,26 @@ public class imagetest {
         for (int i = 20; i < 100; i++) r.setPixel(i, 34, new int[]{0, 0, 255});
         return bi;
         */
-        ImagePainter img = new ImagePainter(800, 600, 0);
+        ymagePainter img = new ymageMatrixPainter(800, 600, "000000");
         
-        img.setMode(ImagePainter.MODE_ADD);
-        img.setColor(ImagePainter.ADDITIVE_BLACK);
+        img.setMode(ymageMatrix.MODE_ADD);
+        img.setColor(ymageMatrix.ADDITIVE_BLACK);
         for (int y = 0; y < 600; y = y + 50) img.print(0, 6 + y, 0, "" + y, true);
         for (int x = 0; x < 800; x = x + 50) img.print(x, 6    , 0, "" + x, true);
-        img.setColor(ImagePainter.ADDITIVE_RED);
+        img.setColor(ymageMatrix.ADDITIVE_RED);
         img.dot(550, 110, 90, true);
-        img.setColor(ImagePainter.ADDITIVE_GREEN);
+        img.setColor(ymageMatrix.ADDITIVE_GREEN);
         img.dot(480, 200, 90, true);
-        img.setColor(ImagePainter.ADDITIVE_BLUE);
+        img.setColor(ymageMatrix.ADDITIVE_BLUE);
         img.dot(620, 200, 90, true);
-        img.setColor(ImagePainter.ADDITIVE_RED);
+        img.setColor(ymageMatrix.ADDITIVE_RED);
         img.arc(300, 270, 30, 70, 0, 360);
         img.setColor("330000");
         img.arc(220, 110, 50, 90, 30, 110);
         img.arc(210, 120, 50, 90, 30, 110);
-        img.setColor(ImagePainter.ADDITIVE_BLACK);
+        img.setColor(ymageMatrix.ADDITIVE_BLACK);
         img.print(50, 110, 0, "BROADCAST MESSAGE #772: NODE %882 BLACK abcefghijklmnopqrstuvwxyz", true);
-        img.setColor(ImagePainter.ADDITIVE_GREEN);
+        img.setColor(ymageMatrix.ADDITIVE_GREEN);
         img.print(50, 120, 0, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz", true);
         for (long i = 0; i < 256; i++) {
             img.setColor(i);
@@ -138,14 +140,14 @@ public class imagetest {
         for (int i = 0; i <= 360; i++) {
             img.arc(550, 400, 40, 41 + i/9, 0, i);
         }
-        img.setColor(ImagePainter.ADDITIVE_BLACK);
+        img.setColor(ymageMatrix.ADDITIVE_BLACK);
         int angle;
         for (byte c = (byte) 'A'; c <= 'Z'; c++) {
             angle = ((byte) c - (byte) 'A') * 360 / ((byte) 'Z' - (byte) 'A');
             img.arcLine(550, 400, 81, 100, angle);
             img.arcPrint(550, 400, 100, angle, "ANGLE" + angle + ":" + (char) c);
         }
-        return img.toImage(true);
+        return img;
         
     }
     

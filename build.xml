@@ -144,6 +144,7 @@
   <mkdir dir="${build}/de/anomic/plasma/parser"/>
   <mkdir dir="${build}/de/anomic/server"/>
   <mkdir dir="${build}/de/anomic/tools"/>
+  <mkdir dir="${build}/de/anomic/ymage"/>
   <mkdir dir="${build}/de/anomic/yacy"/>
   <mkdir dir="${build}/de/anomic/yacy/seedUpload"/>   
 

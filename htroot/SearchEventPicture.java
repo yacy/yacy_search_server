@@ -51,18 +51,20 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 import de.anomic.plasma.plasmaGrafics;
-import de.anomic.tools.ImagePainter;
+import de.anomic.ymage.ymagePainter;
+import de.anomic.ymage.ymageMatrixPainter;
+import de.anomic.ymage.ymageMatrix;
 
 // draw a picture of the yacy network
 
 public class SearchEventPicture {
     
-    public static BufferedImage respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static ymagePainter respond(httpHeader header, serverObjects post, serverSwitch env) {
 
-        ImagePainter ip = plasmaGrafics.getSearchEventPicture();
-        if (ip == null) return new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB); // empty image
+        ymagePainter yp = plasmaGrafics.getSearchEventPicture();
+        if (yp == null) return new ymageMatrixPainter(1, 1, "000000"); // empty image
         
-        return ip.toImage(true);
+        return yp;
     }
     
 }
