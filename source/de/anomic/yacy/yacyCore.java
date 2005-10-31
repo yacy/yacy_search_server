@@ -105,7 +105,7 @@ public class yacyCore {
     private String lastSeedUpload_myPeerType = "";
     private String lastSeedUpload_myIP = "";
 
-    private int onlineMode = 1;
+    private static int onlineMode = 1;
     private plasmaSwitchboard switchboard;
 
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("America/Los_Angeles");
@@ -221,6 +221,15 @@ public class yacyCore {
     return ((onlineMode == 2) || ((System.currentTimeMillis() - lastOnlineTime) < 10000));
     }
 
+    public static int getOnlineMode() {
+        return onlineMode;
+    }
+    
+    public static void setOnlineMode(int newOnlineMode) {
+    	onlineMode = newOnlineMode;
+    	return;
+    }
+    
     public void loadSeeds() {
         //new Thread(new vprobe()).start();
         peerActions.loadSeedLists(); // start to bootstrap the network here

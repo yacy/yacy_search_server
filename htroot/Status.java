@@ -225,9 +225,11 @@ public class Status {
             prop.put("popup", 1);
         }
 
-        if (env.getConfig("onlineMode", "1").equals("1")) {
-            prop.put("omode", 1);
-        } else {
+        if (env.getConfig("onlineMode", "1").equals("0")) {
+            prop.put("omode", 0);
+        } else if (env.getConfig("onlineMode", "1").equals("1")) {
+                prop.put("omode", 1);
+            } else {
             prop.put("omode", 2);
         }
 

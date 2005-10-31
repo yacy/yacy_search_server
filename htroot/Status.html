@@ -78,18 +78,30 @@ Last upload: #[lastUpload]# ago.
 </td></tr>
 <tr class="TableCellLight"><td>Online-mode</td><td>
 #(omode)#
-<!-- online Mode 0 -->
+You are in <i>Cache-browsing</i> mode.<br>
+Only Website from the Proxycache are accessable.
+To switch online-mode, press one of the following buttons:
+<form action="SettingsAck_p.html" method="get">
+<input type="submit" name="emode" value="event-based Mode">
+<input type="submit" name="pmode" value="Permanent Mode">
+</form>
 ::
 You are in <i>event-based</i> online mode.<br>
 The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.
 Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.
 Use this only if you have a flatrate or you have an always-on connection.
-To start permanent mode, press this button:
+To switch online-mode, press one of the following buttons:
 <form action="SettingsAck_p.html" method="get">
 <input type="submit" name="pmode" value="Go on-line">
+<input type="submit" name="cmode" value="Go to Cache-Mode">
 </form>
 ::
 You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.
+To switch online-mode, press one of the following buttons:
+<form action="SettingsAck_p.html" method="get">
+<input type="submit" name="emode" value="event-based Mode">
+<input type="submit" name="cmode" value="Go to Cache-Mode">
+</form>
 #(/omode)#
 </td></tr>
 </table>

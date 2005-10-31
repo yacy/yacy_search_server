@@ -409,8 +409,15 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     null,                            // initiator
                     switchboard.defaultProxyProfile  // profile
             );
-            
-            if (cacheExists && cacheEntry.shallUseCacheForProxy()) {
+            if (yacyCore.getOnlineMode() == 0) {
+            	if (cacheExists) {
+            		fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);
+            	}
+            	else {
+            		httpd.sendRespondError(conProp,respond,4,404,null,"URL not availabe in Cache",null);
+            	}
+            }
+            else if (cacheExists && cacheEntry.shallUseCacheForProxy()) {
                 fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);
             } else {            
                 fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);

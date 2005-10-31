@@ -287,6 +287,7 @@ peerName=anomic
 peerCycle=2
 
 # The p2p maintenance can run in either of two online modes:
+# - don't process jobs and only access available in cache -> mode 0
 # - process any job only if we are online, which is technically only the case
 #   if the proxy is used -> mode 1
 # - process jobs periodically, with periodes according to peerCycle -> mode 2
