@@ -63,6 +63,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     private long threadBlockTimestamp = System.currentTimeMillis();
     private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0;
     private Object syncObject = null;
+    private boolean intermissionObedient = true;
     
     protected final void announceThreadBlockApply() {
         // shall only be used, if a thread blocks for an important reason
@@ -113,6 +114,11 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     public void setMemPreReqisite(long freeBytes) {
         // sets minimum required amount of memory for the job execution
         memprereq = freeBytes;
+    }
+    
+    public void setObeyIntermission(boolean obey) {
+        // defines if the thread should obey the intermission command
+        intermissionObedient = obey;
     }
     
     public final String getShortDescription() {
@@ -237,7 +243,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         Runtime rt = Runtime.getRuntime();
                 
         while (running) {
-	    if (this.intermission > 0) {
+	    if ((this.intermissionObedient) && (this.intermission > 0)) {
                 long itime = this.intermission - System.currentTimeMillis();
 		if (itime > 0) {
                     logSystem("thread '" + this.getName() + "' breaks for intermission: " + (itime / 1000) + " seconds");

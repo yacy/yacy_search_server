@@ -371,6 +371,7 @@ public final class yacy {
                         30000 /*command max length incl. GET args*/);
                 server.setName("httpd:"+port);
                 server.setPriority(Thread.MAX_PRIORITY);
+                server.setObeyIntermission(false);
                 if (server == null) {
                     serverLog.logSevere("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
                 } else {

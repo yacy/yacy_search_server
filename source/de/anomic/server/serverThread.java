@@ -68,6 +68,9 @@ public interface serverThread {
     public void setMemPreReqisite(long freeBytes);
     // sets minimum required amount of memory for the job execution
     
+    public void setObeyIntermission(boolean obey);
+    // defines if the thread should obey the intermission command
+        
     public String getShortDescription();
     // returns short description string for online display
     
