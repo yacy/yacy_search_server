@@ -149,6 +149,8 @@ public final class plasmaSearchResult {
             
             // apply pre-calculated order attributes
             ranking = 0;
+            if (query.order[0].equals(plasmaSearchQuery.ORDER_DATE)) ranking += 10 * indexEntry.getVirtualAge();
+            //if (query.order[0].equals(plasmaSearchQuery.ORDER_QUALITY)) ranking += indexEntry.getQuality();
             
             // apply 'common-sense' heuristic using references
             for (int j = 0; j < urlcomps.length; j++) if (commonSense.contains(urlcomps[j])) ranking++;
