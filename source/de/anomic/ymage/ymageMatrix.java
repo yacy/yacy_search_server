@@ -72,6 +72,19 @@ public class ymageMatrix implements Cloneable {
     private byte   defaultMode;
     private boolean grabComplementary = false;
     
+    public ymageMatrix(ymageMatrix matrix) {
+        // clones the matrix
+        this.width = matrix.width;
+        this.height = matrix.height;
+        this.defaultColR = matrix.defaultColR;
+        this.defaultColG = matrix.defaultColG;
+        this.defaultColB = matrix.defaultColB;
+        this.defaultMode = matrix.defaultMode;
+        this.grabComplementary = matrix.grabComplementary;
+        this.grid = new byte[3 * width * height];
+        System.arraycopy(matrix.grid, 0, this.grid, 0, matrix.grid.length);
+    }
+    
     public ymageMatrix(int width, int height, String backgroundColor) {
         this(width, height, colNum(backgroundColor));
     }
@@ -83,7 +96,7 @@ public class ymageMatrix implements Cloneable {
         this.defaultColG = 0xFF;
         this.defaultColB = 0xFF;
         this.defaultMode = MODE_REPLACE;
-        grid = new byte[3*width*height];
+        grid = new byte[3 * width * height];
         
         // fill grid with background color
         byte bgR = (byte) (backgroundColor >> 16);
@@ -108,13 +121,7 @@ public class ymageMatrix implements Cloneable {
     }
     
     public Object clone() {
-        ymageMatrix ip = new ymageMatrix(this.width, this.height, 0);
-        System.arraycopy(this.grid, 0, ip.grid, 0, this.grid.length);
-        ip.defaultColR = this.defaultColR;
-        ip.defaultColG = this.defaultColG;
-        ip.defaultColB = this.defaultColB;
-        ip.defaultMode = this.defaultMode;
-        return ip;
+        return new ymageMatrix(this);
     }
     
     public int getWidth() {

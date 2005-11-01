@@ -72,7 +72,8 @@ public class plasmaGrafics {
         if (searches == null) return null; // this was a local search and there are no threads
         
         // get a copy of a recent network picture
-        ymagePainter eventPicture = (ymagePainter) getNetworkPicture(120000).clone();
+        ymagePainter eventPicture = getNetworkPicture(120000);
+        if (eventPicture instanceof ymageMatrixPainter) eventPicture = new ymageMatrixPainter((ymageMatrix) eventPicture);
         
         // get dimensions
         int cr = Math.min(eventPicture.getWidth(), eventPicture.getHeight()) / 5 - 20;

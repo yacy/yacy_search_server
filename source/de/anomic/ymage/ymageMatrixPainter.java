@@ -66,6 +66,10 @@ public class ymageMatrixPainter extends ymageMatrix implements ymagePainter {
         super(width, height, backgroundColor);
     }
     
+    public ymageMatrixPainter(ymageMatrix matrix) {
+        super(matrix);
+    }
+    
     private static int[] getCircleCoords(int radius) {
         if ((radius - 1) < circles.length) return circles[radius - 1];
         
