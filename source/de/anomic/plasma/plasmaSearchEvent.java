@@ -44,14 +44,10 @@ package de.anomic.plasma;
 
 import java.util.Iterator;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.TreeMap;
-import java.util.Enumeration;
 import java.io.IOException;
 
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverInstantThread;
 import de.anomic.yacy.yacySearch;
 

@@ -55,18 +55,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 
 import de.anomic.data.wikiCode;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

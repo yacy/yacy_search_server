@@ -45,16 +45,13 @@
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.io.File;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;

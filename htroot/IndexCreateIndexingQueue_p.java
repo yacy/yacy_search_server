@@ -47,14 +47,12 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Locale;
 import java.io.IOException;
 
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlEURL;
-import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverObjects;

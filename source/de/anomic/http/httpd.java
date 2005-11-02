@@ -61,7 +61,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.lang.StringIndexOutOfBoundsException;
 
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;

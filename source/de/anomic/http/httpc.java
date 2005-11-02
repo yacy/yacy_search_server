@@ -42,8 +42,6 @@ package de.anomic.http;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilterInputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

@@ -112,7 +112,6 @@ import de.anomic.data.userDB;
 import de.anomic.ymage.ymagePainter;
 import de.anomic.ymage.ymageMatrixPainter;
 import de.anomic.ymage.ymagePNGEncoderAWT;
-import de.anomic.ymage.ymagePNGEncoderJDE;
 
 public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
     

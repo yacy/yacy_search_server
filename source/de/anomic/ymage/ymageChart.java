@@ -41,9 +41,6 @@
 
 package de.anomic.ymage;
 
-import java.io.File;
-import java.io.IOException;
-
 public class ymageChart extends ymageMatrixPainter {
     
     public static final int DIMENSION_RIGHT  = 0;

@@ -50,18 +50,6 @@ import de.anomic.ymage.ymagePainter;
 import de.anomic.ymage.ymageMatrixPainter;
 import de.anomic.ymage.ymageMatrix;
 
-import java.awt.Graphics2D; 
-import java.awt.Color; 
-import java.awt.image.BufferedImage; 
-import java.awt.image.WritableRaster; 
-import javax.imageio.ImageIO; 
-import java.io.File; 
-import java.io.IOException; 
-import java.io.FileOutputStream; 
-import java.io.ByteArrayOutputStream; 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 
 public class imagetest {
     

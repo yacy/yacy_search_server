@@ -41,10 +41,6 @@
 package de.anomic.ymage;
 
 import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsConfiguration;
-import java.awt.Transparency;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;

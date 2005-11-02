@@ -52,12 +52,10 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.TreeSet;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSearchQuery;
-import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;

@@ -46,10 +46,7 @@
 // javac -classpath .:../classes Wiki.java
 // if the shell's current path is HTROOT
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,11 +57,9 @@ import de.anomic.data.wikiBoard;
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyCore;
 
 public class Wiki {

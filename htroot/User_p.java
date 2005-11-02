@@ -46,8 +46,6 @@
 //javac -classpath .:../Classes Message.java
 //if the shell's current path is HTROOT
 
-import java.util.logging.Handler;
-import java.util.logging.Logger;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.io.IOException;

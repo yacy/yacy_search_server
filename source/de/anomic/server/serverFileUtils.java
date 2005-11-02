@@ -55,7 +55,6 @@ import java.io.BufferedOutputStream;
 import java.io.PrintWriter;
 import java.util.zip.GZIPOutputStream;
 import java.util.HashSet;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Hashtable;

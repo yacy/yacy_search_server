@@ -44,8 +44,6 @@
 // Contributions and changes to the program code must be marked as such.
 
 
-import java.awt.image.BufferedImage;
-
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -53,7 +51,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.plasma.plasmaGrafics;
 import de.anomic.ymage.ymagePainter;
 import de.anomic.ymage.ymageMatrixPainter;
-import de.anomic.ymage.ymageMatrix;
 
 // draw a picture of the yacy network
 

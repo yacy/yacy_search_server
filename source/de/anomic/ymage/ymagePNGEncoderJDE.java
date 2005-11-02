@@ -41,7 +41,6 @@
 
 package de.anomic.ymage;
 
-import java.util.*;
 import java.util.zip.*;
 import java.io.*;
 

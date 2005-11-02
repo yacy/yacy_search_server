@@ -60,7 +60,6 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCodings;
-import de.anomic.plasma.plasmaSwitchboard;
 
 public final class userDB {
     

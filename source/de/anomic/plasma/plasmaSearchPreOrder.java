@@ -43,13 +43,8 @@
 package de.anomic.plasma;
 
 import java.util.TreeMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.net.URL;
 
-import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.serverCodings;
 
 public final class plasmaSearchPreOrder {

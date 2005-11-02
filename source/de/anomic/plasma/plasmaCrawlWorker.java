@@ -52,18 +52,12 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.http.httpdProxyHandler;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.logging.serverMiniLogFormatter;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
 

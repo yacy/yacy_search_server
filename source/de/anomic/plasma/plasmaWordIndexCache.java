@@ -44,7 +44,6 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;

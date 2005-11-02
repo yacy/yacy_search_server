@@ -50,21 +50,9 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.HashMap;
 
-import de.anomic.data.wikiBoard;
-import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyCore;
 
 public class wikiCode {
     private String numListLevel="";

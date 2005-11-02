@@ -59,7 +59,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
@@ -70,12 +69,10 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TimeZone;
 import java.util.TreeMap;
 
 import de.anomic.server.serverCore;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyCore;
 
 public final class httpHeader extends TreeMap implements Map {
 

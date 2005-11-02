@@ -4,7 +4,6 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public final class httpdByteCountInputStream extends FilterInputStream {
     

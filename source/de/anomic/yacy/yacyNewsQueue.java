@@ -43,16 +43,10 @@ package de.anomic.yacy;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.server.serverCodings;
-import de.anomic.yacy.yacySeedDB;
 
 public class yacyNewsQueue {
     

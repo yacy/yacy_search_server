@@ -49,7 +49,6 @@
 import java.lang.Math;
 import java.text.DecimalFormat;
 import java.util.Date;
-import java.io.File;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdByteCountInputStream;
@@ -59,7 +58,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
