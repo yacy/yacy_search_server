@@ -78,6 +78,15 @@ public final class serverCodings {
 	for (int i = 0; i < alpha.length; i++) ahpla[alpha[i]] = (byte) i;
     }
 
+    
+    public char encodeBase64Byte(byte b) {
+        return alpha[b];
+    }
+
+    public byte decodeBase64Byte(char b) {
+        return ahpla[b];
+    }
+    
     public String encodeBase64Long(long c, int length) {
 	if (length < 0) length = 0;	
     StringBuffer s = new StringBuffer(length); //String s = "";

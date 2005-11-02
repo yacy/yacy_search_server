@@ -257,21 +257,30 @@ public final class plasmaSearchResult {
     }
     
     public static void main(String[] args) {
-        URL[] urls = new URL[6];
+        URL[] urls = new URL[10];
         try {
             urls[0] = new URL("http://www.yacy.net");
-            urls[1] = new URL("http://www.yacy.net/");
-            urls[2] = new URL("http://www.yacy.net/index.html");
-            urls[3] = new URL("http://www.yacy.net/yacy");
-            urls[4] = new URL("http://www.yacy.net/yacy/");
-            urls[5] = new URL("http://www.yacy.net/yacy/index.html");
-            String[] paths1 = new String[6]; for (int i = 0; i < 6; i++) {
+            urls[1] = new URL("http://www.yacy.de/");
+            urls[2] = new URL("http://yacy.net/");
+            urls[3] = new URL("http://www.yacy.net:80/");
+            urls[4] = new URL("http://yacy.net:80/");
+            urls[5] = new URL("http://www.yacy.net/index.html");
+            urls[6] = new URL("http://www.yacy.net/yacy");
+            urls[7] = new URL("http://www.yacy.net/yacy/");
+            urls[8] = new URL("http://www.yacy.net/yacy/index.html");
+            urls[9] = new URL("ftp://www.yacy.net/yacy/index.html");
+            String hash, fill;
+            String[] paths1 = new String[urls.length]; for (int i = 0; i < urls.length; i++) {
+                fill = ""; for (int j = 0; j < 35 - urls[i].toString().length(); j++) fill +=" ";
                 paths1[i] = urlPath(urls[i]);
-                System.out.println("paths1[" + i + "] = " + paths1[i]);
+                hash = plasmaURL.urlHash(urls[i]);
+                System.out.println("paths1[" + urls[i] + fill +"] = " + hash + ", typeID=" + plasmaURL.flagTypeID(hash) + ", tldID=" + plasmaURL.flagTLDID(hash) + ", lengthID=" + plasmaURL.flagLengthID(hash) + " / " + paths1[i]);
             }
-            String[] paths2 = new String[6]; for (int i = 0; i < 6; i++) {
+            String[] paths2 = new String[urls.length]; for (int i = 0; i < urls.length; i++) {
+                fill = ""; for (int j = 0; j < 35 - urls[i].toString().length(); j++) fill +=" ";
                 paths2[i] = shortenPath(paths1[i]);
-                System.out.println("paths2[" + i + "] = " + paths2[i]);
+                hash = plasmaURL.urlHash(urls[i]);
+                System.out.println("paths2[" + urls[i] + fill + "] = " + hash + ", typeID=" + plasmaURL.flagTypeID(hash) + ", tldID=" + plasmaURL.flagTLDID(hash) + ", lengthID=" + plasmaURL.flagLengthID(hash) + " / " + paths2[i]);
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();
