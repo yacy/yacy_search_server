@@ -115,6 +115,10 @@ public class News {
             // show overview
             prop.put("table", 0);
             prop.put("page", 0);
+            prop.put("table_insize", yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB));
+            prop.put("table_prsize", yacyCore.newsPool.size(yacyNewsPool.PROCESSED_DB));
+            prop.put("table_ousize", yacyCore.newsPool.size(yacyNewsPool.OUTGOING_DB));
+            prop.put("table_pusize", yacyCore.newsPool.size(yacyNewsPool.PUBLISHED_DB));
         } else {
             // generate table
             prop.put("table", 1);
