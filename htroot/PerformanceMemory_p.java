@@ -193,9 +193,9 @@ public class PerformanceMemory_p {
         slt = yacyCore.newsPool.dbCacheFillStatus();
         putprop(prop, env, "News", set);
         
-        req = sb.robots.size();
-        chk = sb.robots.dbCacheChunkSize();
-        slt = sb.robots.dbCacheFillStatus();
+        req = plasmaSwitchboard.robots.size();
+        chk = plasmaSwitchboard.robots.dbCacheChunkSize();
+        slt = plasmaSwitchboard.robots.dbCacheFillStatus();
         putprop(prop, env, "Robots", set);        
         
         req = sb.profiles.size();

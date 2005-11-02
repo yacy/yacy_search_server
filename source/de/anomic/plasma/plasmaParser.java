@@ -516,13 +516,13 @@ public final class plasmaParser {
     
     public void close() {
         // clearing the parser list
-        synchronized (this.enabledParserList) {
-            this.enabledParserList.clear();
+        synchronized (enabledParserList) {
+            enabledParserList.clear();
         }
         
         // closing the parser object pool
         try {
-            this.theParserPool.close();
+            theParserPool.close();
         } catch (Exception e) { }
     }
     
@@ -712,8 +712,8 @@ public final class plasmaParser {
             File in = new File(args[0]);
             //File out = new File(args[1]);
             plasmaParser theParser = new plasmaParser();
-            theParser.initRealtimeParsableMimeTypes("application/xhtml+xml,text/html,text/plain");
-            theParser.initParseableMimeTypes("application/atom+xml,application/gzip,application/java-archive,application/msword,application/octet-stream,application/pdf,application/rdf+xml,application/rss+xml,application/rtf,application/x-gzip,application/x-tar,application/xml,application/zip,text/rss,text/rtf,text/xml,application/x-bzip2,application/postscript");
+            plasmaParser.initRealtimeParsableMimeTypes("application/xhtml+xml,text/html,text/plain");
+            plasmaParser.initParseableMimeTypes("application/atom+xml,application/gzip,application/java-archive,application/msword,application/octet-stream,application/pdf,application/rdf+xml,application/rss+xml,application/rtf,application/x-gzip,application/x-tar,application/xml,application/zip,text/rss,text/rtf,text/xml,application/x-bzip2,application/postscript");
             FileInputStream theInput = new FileInputStream(in);
             ByteArrayOutputStream theOutput = new ByteArrayOutputStream();
             serverFileUtils.copy(theInput, theOutput);

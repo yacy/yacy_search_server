@@ -325,9 +325,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // loading the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
         File robotsDBFile = new File(this.plasmaPath, "crawlRobotsTxt.db");
-        this.robots = new plasmaCrawlRobotsTxt(robotsDBFile, ramRobots);
+        robots = new plasmaCrawlRobotsTxt(robotsDBFile, ramRobots);
         this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() + 
-                           ", " + this.robots.size() + " entries" + 
+                           ", " + robots.size() + " entries" + 
                            ", " + ppRamString(robotsDBFile.length()/1024));        
         
         // start indexing management
@@ -461,7 +461,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.yc = new yacyCore(this);
         //log.logSystem("Started YaCy Protocol Core");
         System.gc(); try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
-        serverInstantThread.oneTimeJob(yc, "loadSeeds", yc.log, 3000);
+        serverInstantThread.oneTimeJob(yc, "loadSeeds", yacyCore.log, 3000);
         
         // initializing the stackCrawlThread
         this.sbStackCrawlThread = new plasmaCrawlStacker(this,this.plasmaPath,ramPreNURL);
@@ -1326,7 +1326,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // explicit delete/free resources
             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
-                cacheManager.filesInUse.remove(entry.cacheFile());
+                plasmaHTCache.filesInUse.remove(entry.cacheFile());
                 cacheManager.deleteFile(entry.url());
             }
             entry = null;              
@@ -1735,7 +1735,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
         if (authorization.length() == 0) return 1; // no authentication information given
         if ((((String) header.get("CLIENTIP", "")).equals("localhost")) && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
-        if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
+        if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         userDB.Entry entry = this.userDB.proxyAuth((String)header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
         if(entry.hasAdminRight())
             return 4;

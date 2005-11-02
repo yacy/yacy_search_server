@@ -125,7 +125,7 @@ public class ViewProfile {
 		    }
 		    //else only HTML tags get transformed to regular text    
 		    else{
-		        value=wikiTransformer.replaceHTML( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
+		        value=wikiCode.replaceHTML( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
 		    }
 
 		    //all known Keys which should be set as they are

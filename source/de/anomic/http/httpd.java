@@ -390,7 +390,7 @@ public final class httpd implements serverHandler {
                                                                  : httpHeader.readHeader(this.prop,this.session);                  
             
             // handling transparent proxy support
-            header.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy); 
+            httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy); 
             
             // determines if the connection should be kept alive
             handlePersistentConnection(header);
@@ -407,7 +407,7 @@ public final class httpd implements serverHandler {
                             try {
                                 Class soapHandlerClass = Class.forName("de.anomic.soap.httpdSoapHandler");
                                 Constructor classConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
-                                soapHandler  = (httpdHandler) classConstructor.newInstance(new Object[] { this.switchboard });
+                                soapHandler  = (httpdHandler) classConstructor.newInstance(new Object[] { switchboard });
                             } catch (Exception e) {
                                 sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
                                 return serverCore.TERMINATE_CONNECTION;
@@ -426,7 +426,7 @@ public final class httpd implements serverHandler {
                          */
                     } else {              
                         if (this.handleServerAuthentication(header)) {
-                            if (fileHandler == null) fileHandler  = new httpdFileHandler(this.switchboard);
+                            if (fileHandler == null) fileHandler  = new httpdFileHandler(switchboard);
                             fileHandler.doGet(this.prop, header, this.session.out);
                         }
                     }
@@ -439,7 +439,7 @@ public final class httpd implements serverHandler {
                 // pass to proxy
                 if (this.allowProxy) {
                     if (this.handleProxyAuthentication(header)) {
-                        if (proxyHandler != null) proxyHandler = new httpdProxyHandler(this.switchboard); 
+                        if (proxyHandler != null) proxyHandler = new httpdProxyHandler(switchboard); 
                         proxyHandler.doGet(this.prop, header, this.session.out);
                     }
                 } else {
@@ -489,7 +489,7 @@ public final class httpd implements serverHandler {
             else  header = httpHeader.readHeader(this.prop,this.session);
             
             // handle transparent proxy support
-            header.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
+            httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
             
             // determines if the connection should be kept alive
             boolean persistent = handlePersistentConnection(header);
@@ -499,7 +499,7 @@ public final class httpd implements serverHandler {
                 // pass to server
                 if (allowServer) {
                     if (handleServerAuthentication(header)) {
-                        if (fileHandler == null) fileHandler  = new httpdFileHandler(this.switchboard);
+                        if (fileHandler == null) fileHandler  = new httpdFileHandler(switchboard);
                         fileHandler.doHead(prop, header, this.session.out);
                     }
                 } else {
@@ -512,7 +512,7 @@ public final class httpd implements serverHandler {
                 // pass to proxy
                 if (allowProxy) {
                     if (handleProxyAuthentication(header)) {
-                        if (proxyHandler != null) proxyHandler = new httpdProxyHandler(this.switchboard); 
+                        if (proxyHandler != null) proxyHandler = new httpdProxyHandler(switchboard); 
                         proxyHandler.doHead(prop, header, this.session.out);
                     }
                 } else {
@@ -542,7 +542,7 @@ public final class httpd implements serverHandler {
             else header = httpHeader.readHeader(this.prop,this.session);
             
             // handle transparent proxy support
-            header.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
+            httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
             
             // determines if the connection should be kept alive
             boolean persistent = handlePersistentConnection(header);
@@ -565,7 +565,7 @@ public final class httpd implements serverHandler {
                                 Constructor soapHandlerConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
                                 
                                 // creating the new object
-                                soapHandler = (httpdHandler)soapHandlerConstructor.newInstance( new Object[] { this.switchboard } );   
+                                soapHandler = (httpdHandler)soapHandlerConstructor.newInstance( new Object[] { switchboard } );   
                             } catch (Exception e) {
                                 sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
                                 return serverCore.TERMINATE_CONNECTION;
@@ -583,7 +583,7 @@ public final class httpd implements serverHandler {
                          */
                     } else {       
                         if (handleServerAuthentication(header)) {
-                            if (fileHandler == null) fileHandler  = new httpdFileHandler(this.switchboard);
+                            if (fileHandler == null) fileHandler  = new httpdFileHandler(switchboard);
                             fileHandler.doPost(prop, header, this.session.out, this.session.in);
                         }
                     }
@@ -596,7 +596,7 @@ public final class httpd implements serverHandler {
                 // pass to proxy
                 if (allowProxy) {
                     if (handleProxyAuthentication(header)) {
-                        if (proxyHandler != null) proxyHandler = new httpdProxyHandler(this.switchboard); 
+                        if (proxyHandler != null) proxyHandler = new httpdProxyHandler(switchboard); 
                         proxyHandler.doPost(prop, header, this.session.out, this.session.in);
                     }
                 } else {
@@ -665,7 +665,7 @@ public final class httpd implements serverHandler {
         // pass to proxy
         if (allowProxy) {
             if (handleProxyAuthentication(header)) {
-                if (proxyHandler != null) proxyHandler = new httpdProxyHandler(this.switchboard); 
+                if (proxyHandler != null) proxyHandler = new httpdProxyHandler(switchboard); 
                 proxyHandler.doConnect(prop, header, this.session.in, this.session.out);
             } 
         } else {
@@ -952,7 +952,7 @@ public final class httpd implements serverHandler {
     }
     
     public Object clone() {
-        return new httpd(this.switchboard, new httpdFileHandler(this.switchboard), new httpdProxyHandler(this.switchboard));        
+        return new httpd(switchboard, new httpdFileHandler(switchboard), new httpdProxyHandler(switchboard));        
     }
     
     public static final void sendRespondBody(

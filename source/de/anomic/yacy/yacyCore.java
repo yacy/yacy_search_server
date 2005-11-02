@@ -217,7 +217,7 @@ public class yacyCore {
     }
 
     public boolean online() {
-        this.onlineMode = Integer.parseInt(switchboard.getConfig("onlineMode", "1"));
+        onlineMode = Integer.parseInt(switchboard.getConfig("onlineMode", "1"));
     return ((onlineMode == 2) || ((System.currentTimeMillis() - lastOnlineTime) < 10000));
     }
 

@@ -67,7 +67,6 @@ public class IndexCreateLoaderQueue_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        wikiCode wikiTransformer = new wikiCode(switchboard);
         serverObjects prop = new serverObjects();
         
 
@@ -90,9 +89,9 @@ public class IndexCreateLoaderQueue_p {
                 
                 initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
                 prop.put("loader-set_list_"+count+"_dark", ((dark) ? 1 : 0) );
-                prop.put("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : wikiTransformer.replaceHTML(initiator.getName())) );
+                prop.put("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())) );
                 prop.put("loader-set_list_"+count+"_depth", theMsg.depth );
-                prop.put("loader-set_list_"+count+"_url", wikiTransformer.replaceHTML(theMsg.url.toString())); // null pointer exception here !!! maybe url = null; check reason.
+                prop.put("loader-set_list_"+count+"_url", wikiCode.replaceHTML(theMsg.url.toString())); // null pointer exception here !!! maybe url = null; check reason.
                 dark = !dark;
                 count++;
             }

@@ -317,7 +317,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 return;
             } else {
                 userDB.Entry entry = sb.userDB.proxyAuth(authorization);
-                if (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6)))) {
+                if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization.trim().substring(6)))) {
                     // Authentication successfull. remove brute-force flag
                     serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
                 }else if(entry != null && entry.hasAdminRight()){
@@ -343,7 +343,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         // handle bfHost in case we have authentified correctly
         if ((authorization != null) &&
             (adminAccountBase64MD5.length() != 0) &&
-            (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization.trim().substring(6))))) {
+            (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization.trim().substring(6))))) {
             // remove brute-force flag
             serverCore.bfHost.remove(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
         }

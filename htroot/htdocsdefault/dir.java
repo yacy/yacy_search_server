@@ -112,8 +112,6 @@ public class dir {
         final String uploadAccountBase64MD5   = switchboard.getConfig("uploadAccountBase64MD5", "");
         final String downloadAccountBase64MD5 = switchboard.getConfig("downloadAccountBase64MD5", "");
 
-        final String logoutAccountBase64MD5 = de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(":"));
-
         userDB.Entry entry = switchboard.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
         boolean adminAuthorization, downloadAuthorization, uploadAuthorization;
         if(entry == null){
@@ -158,10 +156,10 @@ public class dir {
             }
         }
         if (action.equals("downloadPassword") && adminAuthorization) {
-            switchboard.setConfig("downloadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String("download:" + post.get("password", ""))));
+            switchboard.setConfig("downloadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String("download:" + post.get("password", ""))));
         }
         if (action.equals("uploadPassword") && adminAuthorization) {
-            switchboard.setConfig("uploadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String("upload:" + post.get("password", ""))));
+            switchboard.setConfig("uploadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String("upload:" + post.get("password", ""))));
         }        
         if (action.equals("upload") && (uploadAuthorization || adminAuthorization)) {
             String filename = new File(post.get("file", "dummy")).getName();

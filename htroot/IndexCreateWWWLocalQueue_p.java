@@ -67,7 +67,6 @@ public class IndexCreateWWWLocalQueue_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        wikiCode wikiTransformer = new wikiCode(switchboard);
         serverObjects prop = new serverObjects();
  
         if (post != null) {
@@ -107,12 +106,12 @@ public class IndexCreateWWWLocalQueue_p {
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", ((dark) ? 1 : 0) );
-                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : wikiTransformer.replaceHTML(initiator.getName())) );
+                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
                     prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
                     prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
-                    prop.put("crawler-queue_list_"+showNum+"_anchor", wikiTransformer.replaceHTML(urle.name()));
-                    prop.put("crawler-queue_list_"+showNum+"_url", wikiTransformer.replaceHTML(urle.url().toString()));
+                    prop.put("crawler-queue_list_"+showNum+"_anchor", wikiCode.replaceHTML(urle.name()));
+                    prop.put("crawler-queue_list_"+showNum+"_url", wikiCode.replaceHTML(urle.url().toString()));
                     prop.put("crawler-queue_list_"+showNum+"_hash", urle.hash());
                     dark = !dark;
                     showNum++;

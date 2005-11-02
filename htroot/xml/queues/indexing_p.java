@@ -105,11 +105,11 @@ public class indexing_p {
                     totalSize += entrySize;
                     if ((pcentry != null)&&(pcentry.url() != null)) {
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
-                        prop.put("list_"+i+"_initiator", ((initiator == null) ? "proxy" : wikiTransformer.replaceHTML(initiator.getName())));
+                        prop.put("list_"+i+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())));
                         prop.put("list_"+i+"_depth", pcentry.depth());
                         prop.put("list_"+i+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
-                        prop.put("list_"+i+"_anchor", (pcentry.anchorName()==null)?"":wikiTransformer.replaceHTML(pcentry.anchorName()));
-                        prop.put("list_"+i+"_url", wikiTransformer.replaceHTML(pcentry.normalizedURLString()));
+                        prop.put("list_"+i+"_anchor", (pcentry.anchorName()==null)?"":wikiCode.replaceHTML(pcentry.anchorName()));
+                        prop.put("list_"+i+"_url", wikiCode.replaceHTML(pcentry.normalizedURLString()));
                         prop.put("list_"+i+"_size", entrySize);
                         prop.put("list_"+i+"_inProcess", (inProcess)?1:0);
                         prop.put("list_"+i+"_hash", pcentry.urlHash());

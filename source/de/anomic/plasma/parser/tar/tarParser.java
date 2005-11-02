@@ -118,7 +118,7 @@ public class tarParser extends AbstractParser implements Parser {
                 String entryExt = (idx > -1) ? entryName.substring(idx+1) : null;
                 
                 // trying to determine the mimeType per file extension   
-                String entryMime = theParser.getMimeTypeByFileExt(entryExt);
+                String entryMime = plasmaParser.getMimeTypeByFileExt(entryExt);
                 
                 // getting the entry content
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
