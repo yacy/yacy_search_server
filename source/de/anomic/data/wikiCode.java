@@ -65,7 +65,7 @@ public class wikiCode {
     private boolean preformatted = false;     //needed for preformatted text
     private boolean preformattedSpan = false; //needed for <pre> and </pre> spanning over several lines
     private int preindented = 0;              //needed for indented <pre>s
-    private int escindented = 0;
+    private int escindented = 0;              //needed for indented [=s
         
     public wikiCode(plasmaSwitchboard switchboard){
         sb=switchboard;
@@ -98,9 +98,10 @@ public class wikiCode {
         int p0;
 	
 	// avoide html inside
-	//p0 = 0; while ((p0 = result.indexOf("&", p0)) >= 0) result = result.substring(0, p0) + "&amp;" + result.substring(p0 + 1);
+	// Ampersands have to be replaced first. If they were replaced later,
+	// other replaced characters containing ampersands would get messed up.
+	p0 = 0; while ((p0 = result.indexOf("&", p0)) >= 0) {result = result.substring(0, p0) + "&amp;" + result.substring(p0 + 1); p0++;}
 	p0 = 0; while ((p0 = result.indexOf('"', p0)) >= 0) result = result.substring(0, p0) + "&quot;" + result.substring(p0 + 1);
-	p0 = 0; while ((p0 = result.indexOf('&', p0)) >= 0) {result = result.substring(0, p0) + "&amp;" + result.substring(p0 + 1); p0++;}
 	p0 = 0; while ((p0 = result.indexOf("<", p0)) >= 0) result = result.substring(0, p0) + "&lt;" + result.substring(p0 + 1);
 	p0 = 0; while ((p0 = result.indexOf(">", p0)) >= 0) result = result.substring(0, p0) + "&gt;" + result.substring(p0 + 1);
 	//p0 = 0; while ((p0 = result.indexOf("*", p0)) >= 0) result = result.substring(0, p0) + "&#149;" + result.substring(p0 + 1);
