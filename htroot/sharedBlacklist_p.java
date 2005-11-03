@@ -140,10 +140,15 @@ public class sharedBlacklist_p {
 		//Name = "RootServer";
 
 		//Make Adresse
-		address = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
-                try {
-                    otherBlacklist = httpc.wget(new URL(address), 6000, null, null, switchboard.remoteProxyConfig); //get List
-                } catch (Exception e) {}
+        address = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
+        try {
+            httpHeader reqHeader = new httpHeader();
+            reqHeader.put(httpHeader.PRAGMA,"no-cache");
+            reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
+            
+            // get List
+            otherBlacklist = httpc.wget(new URL(address), 12000, null, null, switchboard.remoteProxyConfig,reqHeader); 
+        } catch (Exception e) {}
                 
 		//Make HTML-Optionlist with retrieved items
 		for(i = 0; i <= (otherBlacklist.size() -1); i++){
