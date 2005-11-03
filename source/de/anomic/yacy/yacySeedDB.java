@@ -118,7 +118,7 @@ public final class yacySeedDB {
         seedPotentialDB = openSeedTable(seedPotentialDBFile);
         
         // create or init own seed
-        myOwnSeedFile = new File(sb.getRootPath(), sb.getConfig("yacyOwnSeedFile", "mySeed.txt"));
+        myOwnSeedFile = sb.getOwnSeedFile();
         if (myOwnSeedFile.length() > 0) {
             // load existing identity
             mySeed = yacySeed.load(myOwnSeedFile);

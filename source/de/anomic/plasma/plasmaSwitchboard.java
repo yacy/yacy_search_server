@@ -460,7 +460,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
         this.yc = new yacyCore(this);
         //log.logSystem("Started YaCy Protocol Core");
-        System.gc(); try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
+//      System.gc(); try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
         serverInstantThread.oneTimeJob(yc, "loadSeeds", yacyCore.log, 3000);
         
         // initializing the stackCrawlThread
@@ -835,6 +835,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         } catch (IOException e) {}
         
         return hasDoneSomething;
+    }
+
+    /**
+     * Creates a new File instance with absolute path of ours Seed File.<br>
+     * @return a new File instance
+     */
+    public File getOwnSeedFile() {
+        return new File(getRootPath(), getConfig("yacyOwnSeedFile", "mySeed.txt"));
     }
 
     /**
