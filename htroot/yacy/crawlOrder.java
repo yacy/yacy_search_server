@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last change: 02.05.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,15 +45,12 @@
 // You must compile this file with
 // javac -classpath .:../classes crawlOrder.java
 
-
 import java.util.ArrayList;
 import java.util.Date;
-
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -59,25 +59,24 @@ import de.anomic.yacy.yacySeed;
 
 public final class crawlOrder {
 
-    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
+        // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
+        serverObjects prop = new serverObjects();
         
-	if ((post == null) || (env == null)) return prop;
+        if ((post == null) || (env == null)) return prop;
 
-	int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
-	int crawlingdepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
+        int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
+        int crawlingdepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
 
-	// request values
-	String iam        = (String) post.get("iam", "");       // seed hash of requester
-      	String youare     = (String) post.get("youare", "");    // seed hash of the target peer, needed for network stability
-	String process    = (String) post.get("process", "");   // process type
-	String key        = (String) post.get("key", "");       // transmission key
-	int    orderDepth = Integer.parseInt((String) post.get("depth", "0"));     // crawl depth
+        // request values
+        String iam        = (String) post.get("iam", "");       // seed hash of requester
+        String youare     = (String) post.get("youare", "");    // seed hash of the target peer, needed for network stability
+        String process    = (String) post.get("process", "");   // process type
+        String key        = (String) post.get("key", "");       // transmission key
+        int    orderDepth = Integer.parseInt((String) post.get("depth", "0"));     // crawl depth
         
-	// response values
+        // response values
         /*
          the result can have one of the following values:
          negative cases, no retry
@@ -89,29 +88,29 @@ public final class crawlOrder {
          
          positive case with crawling
            stacked     - the resource is processed asap
-	 
-         positive case without crawling	 
+     
+         positive case without crawling     
            double      - the resource is already in database, believed to be fresh and not reloaded
                          the resource is also returned in lurl
         */
-	String  response    = "denied";
-	String  reason      = "false-input";
-	String  delay       = "5";
+        String  response    = "denied";
+        String  reason      = "false-input";
+        String  delay       = "5";
         String  lurl        = "";
         boolean granted     = switchboard.getConfig("crawlResponse", "false").equals("true");
-	int     acceptDepth = Integer.parseInt(switchboard.getConfig("crawlResponseDepth", "0"));
+        int     acceptDepth = Integer.parseInt(switchboard.getConfig("crawlResponseDepth", "0"));
         int     ppm         = yacyCore.seedDB.mySeed.getPPM();
-	int     acceptDelay = (ppm == 0) ? 10 : (2 + 60 / yacyCore.seedDB.mySeed.getPPM());
-	
+        int     acceptDelay = (ppm == 0) ? 10 : (2 + 60 / yacyCore.seedDB.mySeed.getPPM());
+
         if (orderDepth > acceptDepth) orderDepth = acceptDepth;
 
-	// check if requester is authorized
+        // check if requester is authorized
         if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
-	    // this request has a wrong target
+        // this request has a wrong target
             response = "denied";
-	    reason = "authentify-problem";
+            reason = "authentify-problem";
             delay = "3600"; // may request one hour later again
-	} else if (orderDepth > 0) {
+        } else if (orderDepth > 0) {
             response = "denied";
             reason = "order depth must be 0";
             delay = "3600"; // may request one hour later again
@@ -155,10 +154,12 @@ public final class crawlOrder {
                 }
                 if (refencoded != null) {
                     // old method: only one url
+                    env.getLog().logFinest("crawlOrder: refencoded=" + refencoded + " key=" + key);
                     refv.add(crypt.simpleDecode(refencoded, key)); // the referrer url
                 } else {
                     // new method: read a vector of urls
                     while ((refencoded = (String) post.get("ref" + refv.size(), null)) != null) {
+                        env.getLog().logFinest("crawlOrder: refencoded=" + refencoded + " key=" + key);
                         refv.add(crypt.simpleDecode(refencoded, key));
                     }
                 }
@@ -180,6 +181,8 @@ public final class crawlOrder {
                     }
                     
                     // adding URL to noticeURL Queue
+                    env.getLog().logFinest("crawlOrder: a: url='" + newURL + "'");
+                    
                     stackresult = stack(switchboard, newURL, refURL, iam, youare);
                     response = (String) stackresult[0];
                     reason = (String) stackresult[1];
@@ -191,6 +194,8 @@ public final class crawlOrder {
                     int doubleCount = 0;
                     int rejectedCount = 0;
                     for (int i = 0; i < count; i++) {
+                        env.getLog().logFinest("crawlOrder: b: url='" + (String) urlv.get(i) + "'");
+                        
                         stackresult = stack(switchboard, (String) urlv.get(i), (String) refv.get(i), iam, youare);
                         response = (String) stackresult[0];
                         prop.put("list_" + i + "_job", (String) stackresult[0] + "," + (String) stackresult[1]);
@@ -203,7 +208,7 @@ public final class crawlOrder {
                     lurl = "";
                     delay = Integer.toString(stackCount * acceptDelay + 1);
                 }
-	    }
+            }
         } catch (Exception e) {
             // mist
             e.printStackTrace();
@@ -211,22 +216,22 @@ public final class crawlOrder {
             delay = "600";
         }
 
-	prop.put("response", response);
-	prop.put("reason", reason);
-	prop.put("delay", delay);
-	prop.put("depth", acceptDepth);
+        prop.put("response", response);
+        prop.put("reason", reason);
+        prop.put("delay", delay);
+        prop.put("depth", acceptDepth);
         prop.put("lurl", lurl);
         prop.put("forward", "");
         prop.put("key", key);
         
-	// return rewrite properties
-	return prop;
+        // return rewrite properties
+        return prop;
     }
-    
 
     private static Object[] stack(plasmaSwitchboard switchboard, String url, String referrer, String iam, String youare) {
         String response, reason, lurl;
         // stack url
+        switchboard.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
         String reasonString = switchboard.sbStackCrawlThread.stackCrawl(url, referrer, iam, "REMOTE-CRAWLING", new Date(), 0, switchboard.defaultRemoteProfile);
         if (reasonString == null) {
             // liftoff!
@@ -253,5 +258,5 @@ public final class crawlOrder {
         }
         return new Object[]{response, reason, lurl};
     }
-    
+
 }
