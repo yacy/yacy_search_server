@@ -163,15 +163,21 @@ public class listManager {
     }
 
     public static String getListString(String filename, boolean withcomments){
-        String temp = "";
-        String line = "";
-        BufferedReader br = null;
+        StringBuffer temp = new StringBuffer();
+        
+        BufferedReader br = null;        
         try{
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(listsPath ,filename))));
+            File listFile;
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile = new File(listsPath ,filename))));
+            temp.ensureCapacity((int) listFile.length());
+            
             // Read the List
+            String line = "";
             while ((line = br.readLine()) != null) {
                 if ((!line.startsWith("#") || withcomments) || !line.equals("")) {
-                    temp += line + serverCore.crlfString;
+                    //temp += line + serverCore.crlfString;
+                    temp.append(line)
+                        .append(serverCore.crlfString);
                 }
             }
             br.close();
@@ -180,7 +186,7 @@ public class listManager {
             if (br!=null) try { br.close(); } catch (Exception e) {}
         }
 
-        return temp;
+        return temp.toString();
     }
 
     // get a Directory Listing as a String Array
