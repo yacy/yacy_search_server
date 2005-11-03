@@ -649,15 +649,7 @@ public final class plasmaParser {
     }
     
     public static String urlNormalform(String us) {
-        if (us == null) return null;
-        if (us.length() == 0) return null;
-        int p;
-        if ((p = us.indexOf("#")) >= 0) us = us.substring(0, p);
-        if (us.endsWith(":80")) us = us.substring(0, us.length() - 3);
-        p = us.indexOf(":80/");
-        if (p >= 0) us = us.substring(0,p).concat(us.substring(p + 3)); 
-        if (((us.endsWith("/")) && (us.lastIndexOf('/', us.length() - 2) < 8))) us = us.substring(0, us.length() - 1);
-        return us;
+        return htmlFilterContentScraper.urlNormalform(us);
     }   
     
     static Map allReflinks(Map links) {

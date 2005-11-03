@@ -296,7 +296,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         String path       = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
         String argsString = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS); // is null if no args were given
         String httpVersion= conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
-        String url = "http://" + requestHeader.get(httpHeader.HOST,"localhost") + path;
         
         // check hack attacks in path
         if (path.indexOf("..") >= 0) {

@@ -65,7 +65,12 @@ import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
@@ -174,6 +179,43 @@ public final class httpc {
         config.minEvictableIdleTimeMillis = 30000;
 
         theHttpcPool = new httpcPool(new httpcFactory(),config);
+    }
+    
+    // initializing a dummy trustManager to enable https connections
+    static SSLSocketFactory theSSLSockFactory = null;
+    static {
+        // Create a trust manager that does not validate certificate chains
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+ 
+            public void checkClientTrusted(
+                    java.security.cert.X509Certificate[] certs, String authType) {
+            }
+ 
+            public void checkServerTrusted(
+                    java.security.cert.X509Certificate[] certs, String authType) {
+            }
+        } };
+ 
+        // Install the all-trusting trust manager
+        try {
+            SSLContext sc = SSLContext.getInstance("SSL");
+            // Create empty HostnameVerifier
+            HostnameVerifier hv = new HostnameVerifier() {
+                public boolean verify(String urlHostName, javax.net.ssl.SSLSession session) {
+                    // logger.info("Warning: URL Host: "+urlHostName+"
+                    // vs."+session.getPeerHost());
+                    return true;
+                }
+            };
+ 
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(theSSLSockFactory = sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier(hv);
+        } catch (Exception e) {
+        }        
     }
 
     /**
@@ -493,8 +535,9 @@ public final class httpc {
             }
 
             // creating a socket
-            this.socket = (ssl) ? SSLSocketFactory.getDefault().createSocket()
-                                : new Socket();
+            this.socket = (ssl) 
+                        ? theSSLSockFactory.createSocket()
+                        : new Socket();
             
             // creating a socket address
             InetSocketAddress address = new InetSocketAddress(hostip, port);
@@ -700,7 +743,7 @@ public final class httpc {
 
         // send request
         if ((this.remoteProxyUse) && (!(method.equals(httpHeader.METHOD_CONNECT))))
-            path = "http://" + this.savedRemoteHost + path;
+            path = (this.savedRemoteHost.endsWith("443")?"https://":"http://") + this.savedRemoteHost + path;
         serverCore.send(this.clientOutput, method + " " + path + " HTTP/1.0"); // if set to HTTP/1.1, servers give time-outs?
 
         // send header

@@ -254,15 +254,17 @@ public final class plasmaCrawlLURL extends plasmaURL {
         return null;
     }
 
-    public void removeStack(int stack, int pos) {
+    public boolean removeStack(int stack, int pos) {
+        Object prevElement = null;
         switch (stack) {
-            case 1: externResultStack.remove(pos); break;
-            case 2: searchResultStack.remove(pos); break;
-            case 3: transfResultStack.remove(pos); break;
-            case 4: proxyResultStack.remove(pos); break;
-            case 5: lcrawlResultStack.remove(pos); break;
-            case 6: gcrawlResultStack.remove(pos); break;
+            case 1: prevElement = externResultStack.remove(pos); break;
+            case 2: prevElement = searchResultStack.remove(pos); break;
+            case 3: prevElement = transfResultStack.remove(pos); break;
+            case 4: prevElement = proxyResultStack.remove(pos); break;
+            case 5: prevElement = lcrawlResultStack.remove(pos); break;
+            case 6: prevElement = gcrawlResultStack.remove(pos); break;
         }
+        return prevElement != null;
     }
 
     public void clearStack(int stack) {
@@ -276,16 +278,18 @@ public final class plasmaCrawlLURL extends plasmaURL {
         }
     }
 
-    public void remove(String urlHash) {
-        super.remove(urlHash);
+    public boolean remove(String urlHash) {
+        boolean exists1 = super.remove(urlHash);
         for (int stack = 1; stack <= 6; stack++) {
             for (int i = getStackSize(stack) - 1; i >= 0; i--) {
                 if (getUrlHash(stack,i).equals(urlHash)) {
-                    removeStack(stack,i);
-                    return;
+                    boolean exits2 = removeStack(stack,i);
+                    exists1 = exists1 || exits2;
+                    return exists1;
                 }
             }
         }
+        return exists1;
     }
 
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);

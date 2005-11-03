@@ -432,7 +432,7 @@ public final class plasmaCrawlWorker extends Thread {
                         
                         // generating url hash 
                         String urlhash = plasmaURL.urlHash(redirectionUrl);
-
+                        
                         // removing url from loader queue
                         plasmaCrawlLoader.switchboard.urlPool.noticeURL.remove(urlhash);                        
                         

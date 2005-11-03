@@ -48,7 +48,9 @@ import java.util.Date;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -166,7 +168,19 @@ public final class crawlOrder {
                 int count = Math.min(urlv.size(), refv.size());
                 if (count == 1) {
                     // old method: only one url
-                    stackresult = stack(switchboard, (String) urlv.get(0), (String) refv.get(0), iam, youare);
+
+                    // normalizing URL
+                    String newURL = plasmaParser.urlNormalform((String)urlv.get(0));
+                    if (!newURL.equals(urlv.get(0))) {
+                        env.getLog().logWarning("crawlOrder: Received not normalized URL " + urlv.get(0));    
+                    }
+                    String refURL = plasmaParser.urlNormalform((String) refv.get(0));
+                    if ((refURL != null) && (!refURL.equals(refv.get(0)))) {
+                        env.getLog().logWarning("crawlOrder: Received not normalized Referer URL " + refv.get(0) + " of URL " + urlv.get(0));    
+                    }
+                    
+                    // adding URL to noticeURL Queue
+                    stackresult = stack(switchboard, newURL, refURL, iam, youare);
                     response = (String) stackresult[0];
                     reason = (String) stackresult[1];
                     lurl = (String) stackresult[2];

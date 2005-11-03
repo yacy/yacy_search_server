@@ -452,11 +452,14 @@ public class plasmaURL {
 	}
     }
 
-    public void remove(String urlHash) {
-	try {
-            existsIndex.remove(urlHash);
-	    urlHashCache.remove(urlHash.getBytes());
-	} catch (IOException e) {}
+    public boolean remove(String urlHash) {
+        try {
+            boolean existsInIndex = this.existsIndex.remove(urlHash); 
+            boolean existsInCache = (this.urlHashCache.remove(urlHash.getBytes())!= null);
+            return existsInIndex || existsInCache;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public static final int flagTypeID(String hash) {
@@ -495,7 +498,15 @@ public class plasmaURL {
             dom = dom.substring(p + 1);
         }
         int port = url.getPort();
-        if (port <= 0) port = (isHTTP) ? 80 : 21;
+        if (port <= 0) {
+            if (isHTTP) {
+                port = 80;
+            } else if (url.getProtocol().equalsIgnoreCase("https")) {
+                port = 443;
+            } else {
+                port = 21;
+            }
+        }
         String path = url.getPath();
         if (path.startsWith("/")) path = path.substring(1);
         if (path.endsWith("/")) path = path.substring(0, path.length() - 1);

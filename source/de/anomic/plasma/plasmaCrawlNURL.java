@@ -352,10 +352,12 @@ public class plasmaCrawlNURL extends plasmaURL {
         return new Entry(hash);
     }
 
-    public synchronized void remove(String hash) {
+    public synchronized boolean remove(String hash) {
         try {
-            urlHashCache.remove(hash.getBytes());
-        } catch (IOException e) {}
+            return (urlHashCache.remove(hash.getBytes())!=null);
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public class Entry {

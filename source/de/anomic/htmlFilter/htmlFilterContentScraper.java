@@ -110,10 +110,25 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     public static String urlNormalform(String us) {
         if (us == null) return null;
         if (us.length() == 0) return null;
+        
+        /* TODO: what about 
+         * - case insensitive domain names
+         * - chars that should be escaped in URLs
+         */
         int p;
+        
+        // cutting of everything behind #
         if ((p = us.indexOf("#")) >= 0) us = us.substring(0, p);
-        if (us.endsWith(":80")) us = us.substring(0, us.length() - 3);
-        if ((p = us.indexOf(":80/")) >= 0) us = us.substring(0,p).concat(us.substring(p + 3));
+        
+        if (us.startsWith("https")) {
+            if (us.endsWith(":443")) us = us.substring(0, us.length() - 4);
+            p = us.indexOf(":443/");
+            if (p >= 0) us = us.substring(0,p).concat(us.substring(p + 4));            
+        } else if (us.startsWith("http")) {
+            if (us.endsWith(":80")) us = us.substring(0, us.length() - 3);
+            p = us.indexOf(":80/");
+            if (p >= 0) us = us.substring(0,p).concat(us.substring(p + 3));
+        } 
         if (((us.endsWith("/")) && (us.lastIndexOf('/', us.length() - 2) < 8))) us = us.substring(0, us.length() - 1);
         return us;
     }        

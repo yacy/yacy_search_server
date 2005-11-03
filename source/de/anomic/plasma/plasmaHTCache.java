@@ -436,8 +436,13 @@ public final class plasmaHTCache {
             remotePath = remotePath + "ndx";
         }
         remotePath = remotePath.replaceAll("[?&:]", "_"); // yes this is not reversible, but that is not needed
-        final int port = url.getPort();
-        if (port < 0 || port == 80) {
+        int port = url.getPort();
+        if (port < 0) {
+            if (url.getProtocol().equalsIgnoreCase("http"))       port = 80;
+            else if (url.getProtocol().equalsIgnoreCase("https")) port = 443;
+            else if (url.getProtocol().equalsIgnoreCase("ftp"))   port = 21;
+        }
+        if (port == 80) {
             return new File(this.cachePath, url.getHost() + remotePath);
         } else {
             return new File(this.cachePath, url.getHost() + "!" + port + remotePath);           
@@ -453,6 +458,8 @@ public final class plasmaHTCache {
 //      this.log.logFinest("plasmaHTCache: getURL:  IN: File=[" + f + "]");
         String s = f.toString().replace('\\', '/');
         final String c = cachePath.toString().replace('\\', '/');
+        
+        String protocol = "http";
         int pos = s.lastIndexOf(c);
         if (pos >= 0) {
             s = s.substring(pos + c.length());
@@ -466,12 +473,19 @@ public final class plasmaHTCache {
             
             pos = s.indexOf("!");
             if (pos >= 0) {
+                String temp = s.substring(pos + 1);
+                if (temp.startsWith("443/")) {
+                    protocol = "https";
+                } else if (temp.startsWith("21/")) {
+                    protocol = "ftp";
+                }
+                
                 s = s.substring(0, pos) + ":" + s.substring(pos + 1);
             }
             if (s.endsWith("ndx")) { s = s.substring(0, s.length() - 3); }
 //          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);    
             try {
-                return new URL("http://" + s);
+                return new URL(protocol + "://" + s);
             } catch (Exception e) {
                 return null;
             }

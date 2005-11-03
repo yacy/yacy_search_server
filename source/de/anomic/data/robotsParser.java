@@ -139,30 +139,23 @@ public final class robotsParser{
         }
         
         return deny;
-    }
-    
-    public static boolean containsRobotsData(URL nexturl) {
-        // generating the hostname:poart string needed to do a DB lookup
-        String urlHostPort = nexturl.getHost() + ":" + ((nexturl.getPort()==-1)?80:nexturl.getPort());
-        urlHostPort = urlHostPort.toLowerCase();
-        
-        // doing a DB lookup to determine if the robots data is already available
-        plasmaCrawlRobotsTxt.Entry robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
-        
-        // if we have not found any data or the data is older than 7 days, we need to load it from the remote server
-        if ((robotsTxt4Host == null) || (robotsTxt4Host.getLoadedDate() == null) ||
-                (System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000)) {
-            return false;
-        }
-        return true;
-    }
-    
+    }        
     
     public static boolean isDisallowed(URL nexturl) {
         if (nexturl == null) throw new IllegalArgumentException();               
         
         // generating the hostname:poart string needed to do a DB lookup
-        String urlHostPort = nexturl.getHost() + ":" + ((nexturl.getPort()==-1)?80:nexturl.getPort());
+        String urlHostPort = null;
+        int port = nexturl.getPort();
+        if (port == -1) {
+            if (nexturl.getProtocol().equalsIgnoreCase("http")) {
+                port = 80;
+            } else if (nexturl.getProtocol().equalsIgnoreCase("https")) {
+                port = 443;
+            }
+            
+        }
+        urlHostPort = nexturl.getHost() + ":" + port;
         urlHostPort = urlHostPort.toLowerCase().intern();
         
         plasmaCrawlRobotsTxt.Entry robotsTxt4Host = null;
@@ -179,7 +172,7 @@ public final class robotsParser{
                 URL robotsURL = null;
                 // generating the proper url to download the robots txt
                 try {                 
-                    robotsURL = new URL(nexturl.getProtocol(),nexturl.getHost(),(nexturl.getPort()==-1)?80:nexturl.getPort(),"/robots.txt");
+                    robotsURL = new URL(nexturl.getProtocol(),nexturl.getHost(),port,"/robots.txt");
                 } catch (MalformedURLException e) {
                     serverLog.logSevere("ROBOTS","Unable to generate robots.txt URL for URL '" + nexturl.toString() + "'.");
                     return false;
@@ -249,9 +242,9 @@ public final class robotsParser{
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             //TODO: adding Traffic statistic for robots download?
             if ((sb.remoteProxyConfig == null) || (!sb.remoteProxyConfig.useProxy())) {
-                con = httpc.getInstance(robotsURL.getHost(), robotsURL.getPort(), 10000, false);
+                con = httpc.getInstance(robotsURL.getHost(), robotsURL.getPort(), 10000, robotsURL.getProtocol().equalsIgnoreCase("https"));
             } else {
-                con = httpc.getInstance(robotsURL.getHost(), robotsURL.getPort(), 10000, false, sb.remoteProxyConfig);
+                con = httpc.getInstance(robotsURL.getHost(), robotsURL.getPort(), 10000, robotsURL.getProtocol().equalsIgnoreCase("https"), sb.remoteProxyConfig);
             }
             
             // if we previously have downloaded this robots.txt then we can set the if-modified-since header

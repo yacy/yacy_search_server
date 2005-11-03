@@ -1155,6 +1155,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 while (i.hasNext()) {
                     e = (Map.Entry) i.next();
                     nexturlstring = (String) e.getKey();
+                    nexturlstring = plasmaParser.urlNormalform(nexturlstring);
   
                     sbStackCrawlThread.enqueue(nexturlstring, entry.url().toString(), initiatorHash, (String) e.getValue(), loadDate, entry.depth() + 1, entry.profile());
 
@@ -1217,11 +1218,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                      );
                     
                     String urlHash = newEntry.hash();
-                    //log.logDebug("Remove NURL for '" + entry.normalizedURLString() + "'");
-                    urlPool.noticeURL.remove(urlHash); // worked-off
                     
-                    if (((processCase == 4) || (processCase == 5) || (processCase == 6)) &&
-			(entry.profile().localIndexing())) {
+                    if (((processCase == 4) || (processCase == 5) || (processCase == 6)) && (entry.profile().localIndexing())) {
                         // remove stopwords
                         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + entry.url());
                         indexingEndTime = System.currentTimeMillis();
@@ -1287,6 +1285,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         
                         if (log.isLoggable(Level.INFO)) {
                             log.logInfo("*Indexed " + words + " words in URL " + entry.url() + 
+                                        " [" + entry.urlHash() + "]" +
                                         "\n\tDescription:  " + descr + 
                                         "\n\tMimeType: "  + document.getMimeType() + " | " + 
                                         "Size: " + document.text.length + " bytes | " +
@@ -1328,9 +1327,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         } catch (IOException e) {
             log.logSevere("ERROR in plasmaSwitchboard.process(): " + e.toString());
         } finally {
+            // removing current entry from in process list
             synchronized (this.indexingTasksInProcess) {
                 this.indexingTasksInProcess.remove(entry.urlHash());
             }            
+            
+            // removing current entry from notice URL queue
+            boolean removed = urlPool.noticeURL.remove(entry.urlHash()); // worked-off
+            if (!removed) {
+                log.logFinest("Unable to remove indexed URL " + entry.url() + " from Crawler Queue. This could be because of an URL redirect.");
+            }
             
             // explicit delete/free resources
             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {

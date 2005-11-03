@@ -157,7 +157,10 @@ public class yacyPeerActions {
         for (int i = 0; i < superseed.size(); i++) {
             if (Thread.currentThread().isInterrupted()) break;
             seedListFileURL = (String) superseed.any();
-            if (seedListFileURL.startsWith("http://")) {
+            if (
+                    seedListFileURL.startsWith("http://") || 
+                    seedListFileURL.startsWith("https://")
+            ) {
                 // load the seed list
                 try {
                     httpHeader reqHeader = new httpHeader();

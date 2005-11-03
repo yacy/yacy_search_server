@@ -676,7 +676,12 @@ public class yacyCore {
             try{
                 final String seedURLStr = sb.getConfig("seedURL", "");
                 if (seedURLStr.length() == 0) { throw new MalformedURLException("The seed-file url must not be empty."); }
-                if (!seedURLStr.toLowerCase().startsWith("http://")) { throw new MalformedURLException("Unsupported protocol."); }
+                if (!(
+                        seedURLStr.toLowerCase().startsWith("http://") ||
+                        seedURLStr.toLowerCase().startsWith("https://")
+                )){ 
+                    throw new MalformedURLException("Unsupported protocol."); 
+                }
                 seedURL = new URL(seedURLStr);
             } catch(MalformedURLException e) {
                 final String errorMsg = "Malformed seed file URL '" + sb.getConfig("seedURL", "") + "'. " + e.getMessage();
