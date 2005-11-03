@@ -174,10 +174,31 @@ public class yacySeed {
         this.available = 0;
     }
 
+    /**
+     * try to get the IP<br>
+     * @return the IP or null
+     */
     public String getIP()        { return get(IP, "");                       }
-    public String getJunior()    { return get(PEERTYPE, PEERTYPE_JUNIOR);    }
-    public String getSenior()    { return get(PEERTYPE, PEERTYPE_SENIOR);    }
-    public String getPrincipal() { return get(PEERTYPE, PEERTYPE_PRINCIPAL); }
+    /**
+     * try to get the peertype<br>
+     * @return the peertype or null
+     */
+    public String getPeerType()  { return get(PEERTYPE, "");                 }
+    /**
+     * try to get the peertype<br>
+     * @return the peertype or "junior"
+     */
+    public String orJunior()     { return get(PEERTYPE, PEERTYPE_JUNIOR);    }
+    /**
+     * try to get the peertype<br>
+     * @return the peertype or "senior"
+     */
+    public String orSenior()     { return get(PEERTYPE, PEERTYPE_SENIOR);    }
+    /**
+     * try to get the peertype<br>
+     * @return the peertype or "principal"
+     */
+    public String orPrincipal()  { return get(PEERTYPE, PEERTYPE_PRINCIPAL); }
 
     public String get(String key, String dflt) {
         final Object o = this.dna.get(key);
@@ -185,12 +206,14 @@ public class yacySeed {
         return (String) o;
     }
 
-    public void setIP(String ip) { put(IP, ip);                       }
-    public void setJunior()      { put(PEERTYPE, PEERTYPE_JUNIOR);    }
-    public void setSenior()      { put(PEERTYPE, PEERTYPE_SENIOR);    }
-    public void setPrincipal()   { put(PEERTYPE, PEERTYPE_PRINCIPAL); }
-    public void setLastSeen()    { put(LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - getUTCDiff()))); }
-
+    public void setIP()              { put(IP, "");                       }
+    public void setIP(String ip  )   { put(IP, ip);                       }
+    public void setPort(String port) { put(PORT, port);                   }
+    public void setJunior()          { put(PEERTYPE, PEERTYPE_JUNIOR);    }
+    public void setSenior()          { put(PEERTYPE, PEERTYPE_SENIOR);    }
+    public void setPrincipal()       { put(PEERTYPE, PEERTYPE_PRINCIPAL); }
+    public void setLastSeen()        { put(LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - getUTCDiff()))); }
+    
     public void put(String key, String value) {
         synchronized(this.dna) {
             this.dna.put(key, value);
