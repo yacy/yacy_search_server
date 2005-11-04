@@ -427,9 +427,9 @@ public final class plasmaHTCache {
      * @return new File
      */
     public File getCachePath(URL url) {
-//      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
+        this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
         String remotePath = url.getFile();
-        if (remotePath.endsWith("/")) { remotePath = remotePath + "index.html"; }
+        if (remotePath.endsWith("/")) { remotePath = remotePath + "ndx"; }
         if (!remotePath.startsWith("/")) { remotePath = "/" + remotePath; }        
         remotePath = remotePath.replaceAll("[?&:]", "_"); // yes this is not reversible, but that is not needed
         int port = url.getPort();
@@ -438,11 +438,14 @@ public final class plasmaHTCache {
             else if (url.getProtocol().equalsIgnoreCase("https")) port = 443;
             else if (url.getProtocol().equalsIgnoreCase("ftp"))   port = 21;
         }
+        File path;
         if (port == 80) {
-            return new File(this.cachePath, url.getHost() + remotePath);
+            path = new File(this.cachePath, url.getHost() + remotePath);
         } else {
-            return new File(this.cachePath, url.getHost() + "!" + port + remotePath);           
+            path = new File(this.cachePath, url.getHost() + "!" + port + remotePath);           
         }
+        this.log.logFinest("plasmaHTCache: getCachePath: OUT=" + path.toString());
+        return path;
     }
 
     /**
@@ -478,7 +481,7 @@ public final class plasmaHTCache {
                 
                 s = s.substring(0, pos) + ":" + s.substring(pos + 1);
             }
-            if (s.endsWith("index.html")) { s = s.substring(0, s.length() - 10); }
+            if (s.endsWith("ndx")) { s = s.substring(0, s.length() - 3); }
 //          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);    
             try {
                 return new URL(protocol + "://" + s);
