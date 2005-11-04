@@ -122,19 +122,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // cutting of everything behind #
         int cpos = us.indexOf("#");
         if (cpos >= 0) { us = us.substring(0, cpos); }
-
-        if (us.startsWith("http")) {
-            if (us.endsWith(":80")) {
-                us = us.substring(0, us.length() - 3);
-                serverLog.logFinest("htmlFilter", "urlNormalform:  :80=" + us);
-            } else {
-                cpos = us.indexOf(":80/");
-                if (cpos >= 0) {
-                    us = us.substring(0, cpos).concat(us.substring(cpos + 3));
-                    serverLog.logFinest("htmlFilter", "urlNormalform:  :80/=" + us);
-                }
-            }
-        } else if (us.startsWith("https")) {
+        if (us.startsWith("https")) {
             if (us.endsWith(":443")) {
                 us = us.substring(0, us.length() - 4);
                 serverLog.logFinest("htmlFilter", "urlNormalform:  :443=" + us);
@@ -145,6 +133,17 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                     serverLog.logFinest("htmlFilter", "urlNormalform:  :443/=" + us);
                 }
             }
+        } else if (us.startsWith("http")) {
+            if (us.endsWith(":80")) {
+                us = us.substring(0, us.length() - 3);
+                serverLog.logFinest("htmlFilter", "urlNormalform:  :80=" + us);
+            } else {
+                cpos = us.indexOf(":80/");
+                if (cpos >= 0) {
+                    us = us.substring(0, cpos).concat(us.substring(cpos + 3));
+                    serverLog.logFinest("htmlFilter", "urlNormalform:  :80/=" + us);
+                }
+            } 
         }
         if (((us.endsWith("/")) && (us.lastIndexOf('/', us.length() - 2) < 8))) us = us.substring(0, us.length() - 1);
         serverLog.logFiner("htmlFilter", "urlNormalform: OUT=" + us);        
