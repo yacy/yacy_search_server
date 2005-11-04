@@ -5,8 +5,9 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
-//last major change: $LastChangedDate$ by $LastChangedBy$
-//Revision: $LastChangedRevision$
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -52,7 +53,6 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Date;
-
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
@@ -62,16 +62,16 @@ import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
 
 public final class plasmaCrawlWorker extends Thread {
-    
+
     private static final int DEFAULT_CRAWLING_RETRY_COUNT = 5;   
     private static final String threadBaseName = "CrawlerWorker";
-    
+
     private final CrawlerPool     myPool;
     private final plasmaSwitchboard sb;
     private final plasmaHTCache   cacheManager;
     private final serverLog       log;
     private int socketTimeout;
-    
+
     public plasmaCrawlLoaderMessage theMsg;
     private URL url;
     private String name;
@@ -80,12 +80,12 @@ public final class plasmaCrawlWorker extends Thread {
     private int depth;
     private long startdate;
     private plasmaCrawlProfile.entry profile;
-    //private String error;
-    
+//  private String error;
+
     private boolean running = false;
     private boolean stopped = false;
     private boolean done = false;   
-    
+
     private static boolean doCrawlerLogging = false; 
     /**
      * Do logging configuration for special proxy access log file
@@ -104,50 +104,49 @@ public final class plasmaCrawlWorker extends Thread {
 //            System.err.println("PROXY: Unable to configure proxy access logging.");        
 //        }
 //    }    
-        
+
     public plasmaCrawlWorker(
-            ThreadGroup theTG, 
+            ThreadGroup theTG,
             CrawlerPool thePool,
             plasmaSwitchboard theSb,
             plasmaHTCache theCacheManager,
             serverLog theLog) {
         super(theTG,threadBaseName + "_inPool");
-                
+
         this.myPool = thePool;
         this.sb = theSb;
         this.cacheManager = theCacheManager;
         this.log = theLog;
-        
+
         // setting the crawler timeout properly
         this.socketTimeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
     }
-    
+
     public long getDuration() {
-        long startDate = this.startdate;
+        final long startDate = this.startdate;
         return (startDate != 0) ? System.currentTimeMillis() - startDate : 0;
     }
 
     public synchronized void execute(plasmaCrawlLoaderMessage theNewMsg) {
         this.theMsg = theNewMsg;
-        
+
         this.url = theNewMsg.url;
         this.name = theNewMsg.name;
         this.referer = theNewMsg.referer;
         this.initiator = theNewMsg.initiator;
         this.depth = theNewMsg.depth;
         this.profile = theNewMsg.profile;
-        
-        this.startdate = System.currentTimeMillis();        
-        //this.error = null;        
-        
 
-        this.done = false;        
-        if (!this.running)  {
-           // this.setDaemon(true);
+        this.startdate = System.currentTimeMillis();
+//      this.error = null;
+
+        this.done = false;
+        if (!this.running) {
+//         this.setDaemon(true);
            this.start();
-        }  else { 
+        }  else {
            this.notifyAll();
-        }            
+        }
     }
 
     public void reset() {
@@ -158,37 +157,35 @@ public final class plasmaCrawlWorker extends Thread {
         this.depth = 0;
         this.startdate = 0;
         this.profile = null;
-        //this.error = null;   
+//      this.error = null;
     }
-    
-    public void run()  {
+
+    public void run() {
         this.running = true;
-        
+
         // The thread keeps running.
-        while (!this.stopped && !Thread.interrupted()) { 
-             if (this.done)  { 
+        while (!this.stopped && !Thread.interrupted()) {
+            if (this.done) {
                  // We are waiting for a task now.
-                synchronized (this)  {
-                   try  {
-                      this.wait(); //Wait until we get a request to process.
-                   } 
-                   catch (InterruptedException e) {
-                       this.stopped = true;
-                       // log.error("", e);
-                   }
+                synchronized (this) {
+                    try {
+                        this.wait(); //Wait until we get a request to process.
+                    }
+                    catch (InterruptedException e) {
+                        this.stopped = true;
+                        // log.error("", e);
+                    }
                 }
-             } 
-             else 
-             { 
+            } else {
                 //There is a task....let us execute it.
-                try  {
-                   execute();
+                try {
+                    execute();
                 }  catch (Exception e) {
                     // log.error("", e);
-                } 
-                finally  {
+                }
+                finally {
                     reset();
-                    
+
                     if (!this.stopped && !this.isInterrupted()) {
                         try {
                             this.myPool.returnObject(this);
@@ -199,32 +196,31 @@ public final class plasmaCrawlWorker extends Thread {
                         }
                     }
                 }
-             }
-          }
+            }
+        }
     }
-    
+
     public void execute() throws IOException {
         try {
             // setting threadname
             this.setName(plasmaCrawlWorker.threadBaseName + "_" + this.url);
-            
+
             // refreshing timeout value
             this.socketTimeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
-            
+
             // loading resource
-            load(
-                    this.url, 
-                    this.name, 
-                    this.referer, 
-                    this.initiator, 
-                    this.depth, 
-                    this.profile,
-                    this.socketTimeout, 
-                    this.sb.remoteProxyConfig,
-                    this.cacheManager, 
-                    this.log
+            load(this.url,
+                 this.name,
+                 this.referer,
+                 this.initiator,
+                 this.depth,
+                 this.profile,
+                 this.socketTimeout,
+                 this.sb.remoteProxyConfig,
+                 this.cacheManager,
+                 this.log
             );
-            
+
         } catch (IOException e) {
             //throw e;
         }
@@ -232,7 +228,7 @@ public final class plasmaCrawlWorker extends Thread {
             this.done = true;
         }
     }
-    
+
     public void setStopped(boolean isStopped) {
         this.stopped = isStopped;           
     }
@@ -240,7 +236,7 @@ public final class plasmaCrawlWorker extends Thread {
     public boolean isRunning() {
         return this.running;
     }
-    
+
     public void close() {
         if (this.isAlive()) {
             try {
@@ -250,15 +246,15 @@ public final class plasmaCrawlWorker extends Thread {
                     this.log.logInfo(closedSockets + " HTTP-client sockets of thread '" + this.getName() + "' closed.");
                 }
             } catch (Exception e) {}
-        }            
-    }    
+        }
+    }
 
     public static void load(
-            URL url, 
+            URL url,
             String name,
-            String referer, 
-            String initiator, 
-            int depth, 
+            String referer,
+            String initiator,
+            int depth,
             plasmaCrawlProfile.entry profile,
             int socketTimeout,
             httpRemoteProxyConfig theRemoteProxyConfig,
@@ -269,23 +265,23 @@ public final class plasmaCrawlWorker extends Thread {
              name,
              referer,
              initiator,
-             depth, 
+             depth,
              profile,
-             socketTimeout, 
+             socketTimeout,
              theRemoteProxyConfig,
-             cacheManager, 
-             log, 
+             cacheManager,
+             log,
              DEFAULT_CRAWLING_RETRY_COUNT,
              true
         );
     }
-    
+
     private static void load(
             URL url,
             String name,
-            String referer, 
-            String initiator, 
-            int depth, 
+            String referer,
+            String initiator,
+            int depth,
             plasmaCrawlProfile.entry profile,
             int socketTimeout,
             httpRemoteProxyConfig theRemoteProxyConfig,
@@ -295,44 +291,44 @@ public final class plasmaCrawlWorker extends Thread {
             boolean useContentEncodingGzip
         ) throws IOException {
         if (url == null) return;
-        
+
         // if the recrawling limit was exceeded we stop crawling now
         if (crawlingRetryCount <= 0) return;
-        
+
         // getting a reference to the plasmaSwitchboard
-        plasmaSwitchboard sb = plasmaCrawlLoader.switchboard;           
-        
+        plasmaSwitchboard sb = plasmaCrawlLoader.switchboard;
+
         Date requestDate = new Date(); // remember the time...
         String host = url.getHost();
         String path = url.getPath();
         int port = url.getPort();
         boolean ssl = url.getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443 : 80;
-    
+
         // check if url is in blacklist
         String hostlow = host.toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
             log.logInfo("CRAWLER Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
             sb.urlPool.errorURL.newEntry(
-                    url, 
+                    url,
                     referer,
-                    initiator, 
+                    initiator,
                     yacyCore.seedDB.mySeed.hash,
-                    name, 
-                    "denied_(url_in_blacklist)", 
-                    new bitfield(plasmaURL.urlFlagLength), 
+                    name,
+                    "denied_(url_in_blacklist)",
+                    new bitfield(plasmaURL.urlFlagLength),
                     true
             );
             return;
-        }            
-        
+        }
+
         // TODO: resolve yacy and yacyh domains
         String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
-        
+
         // set referrer; in some case advertise a little bit:
         referer = (referer == null) ? "" : referer.trim();
         if (referer.length() == 0) referer = "http://www.yacy.net/yacy/";
-        
+
         // take a file from the net
         httpc remote = null;
         try {
@@ -343,36 +339,36 @@ public final class plasmaCrawlWorker extends Thread {
             requestHeader.put(httpHeader.ACCEPT_LANGUAGE, sb.getConfig("crawler.acceptLanguage","en-us,en;q=0.5"));
             requestHeader.put(httpHeader.ACCEPT_CHARSET, sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"));
             if (useContentEncodingGzip) requestHeader.put(httpHeader.ACCEPT_ENCODING, "gzip,deflate");
-    
-            //System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
-                    
+
+//          System.out.println("CRAWLER_REQUEST_HEADER=" + requestHeader.toString()); // DEBUG
+
             // open the connection
-            remote = ((theRemoteProxyConfig != null) && (theRemoteProxyConfig.useProxy())) 
+            remote = ((theRemoteProxyConfig != null) && (theRemoteProxyConfig.useProxy()))
                    ? httpc.getInstance(host, port, socketTimeout, ssl, theRemoteProxyConfig,"CRAWLER",null)
                    : httpc.getInstance(host, port, socketTimeout, ssl, "CRAWLER",null);
-            
+
             // specifying if content encoding is allowed
             remote.setAllowContentEncoding(useContentEncodingGzip);
-            
+
             // send request
             httpc.response res = remote.GET(path, requestHeader);
-                
+
             if (res.status.startsWith("200") || res.status.startsWith("203")) {
                 // the transfer is ok
-                
+
                 // TODO: aborting download if content is to long ...
                 long contentLength = res.responseHeader.contentLength();
-                
+
                 // reserve cache entry
                 plasmaHTCache.Entry htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);
-                
+
                 // request has been placed and result has been returned. work off response
                 File cacheFile = cacheManager.getCachePath(url);
                 try {
                     if (plasmaParser.supportedContent(url,res.responseHeader.mime())) {
                         if (cacheFile.isFile()) {
                             cacheManager.deleteFile(url);
-                        }                        
+                        }
                         // we write the new cache entry to file system directly
                         cacheFile.getParentFile().mkdirs();
                         FileOutputStream fos = null;
@@ -388,7 +384,7 @@ public final class plasmaCrawlWorker extends Thread {
                     } else {
                         // if the response has not the right file type then reject file
                         remote.close();
-                        log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + url.toString());                        
+                        log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + url.toString());
                     }
                     // enQueue new entry with response header
                     if (profile != null) {
@@ -404,49 +400,49 @@ public final class plasmaCrawlWorker extends Thread {
                     log.logSevere("CRAWLER LOADER ERROR1: with URL=" + url.toString() + ": " + e.toString());
                 }
             } else if (res.status.startsWith("30")) {
-                if (crawlingRetryCount > 0) {                    
+                if (crawlingRetryCount > 0) {
                     if (res.responseHeader.containsKey(httpHeader.LOCATION)) {
                         // getting redirection URL
                         String redirectionUrlString = (String) res.responseHeader.get(httpHeader.LOCATION);
                         redirectionUrlString = redirectionUrlString.trim();
-                        
+
                         // normalizing URL
                         redirectionUrlString = plasmaParser.urlNormalform(redirectionUrlString);
-                        
+
                         // generating the new URL object
                         URL redirectionUrl = new URL(url, redirectionUrlString);
-                        
+
                         // returning the used httpc
-                        httpc.returnInstance(remote); 
+                        httpc.returnInstance(remote);
                         remote = null;
-                        
+
                         // restart crawling with new url
                         log.logInfo("CRAWLER Redirection detected ('" + res.status + "') for URL " + url.toString());
                         log.logInfo("CRAWLER ..Redirecting request to: " + redirectionUrl);
-                        
+
                         // if we are already doing a shutdown we don't need to retry crawling
                         if (Thread.currentThread().isInterrupted()) {
                             log.logSevere("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
                             return;
-                        }                        
-                        
-                        // generating url hash 
+                        }
+
+                        // generating url hash
                         String urlhash = plasmaURL.urlHash(redirectionUrl);
                         
                         // removing url from loader queue
-                        plasmaCrawlLoader.switchboard.urlPool.noticeURL.remove(urlhash);                        
-                        
+                        plasmaCrawlLoader.switchboard.urlPool.noticeURL.remove(urlhash);
+
                         // retry crawling with new url
                         load(redirectionUrl,
                              name,
                              referer,
                              initiator,
-                             depth, 
+                             depth,
                              profile,
-                             socketTimeout, 
+                             socketTimeout,
                              theRemoteProxyConfig,
-                             cacheManager, 
-                             log, 
+                             cacheManager,
+                             log,
                              --crawlingRetryCount,
                              useContentEncodingGzip
                         );
@@ -463,39 +459,39 @@ public final class plasmaCrawlWorker extends Thread {
         } catch (Exception e) {
             boolean retryCrawling = false;
             String errorMsg = e.getMessage();
-            
+
             if (e instanceof MalformedURLException) {
-                log.logWarning("CRAWLER Malformed URL '" + url.toString() + "' detected. ");    
+                log.logWarning("CRAWLER Malformed URL '" + url.toString() + "' detected. ");
             } else if (e instanceof NoRouteToHostException) {
-                log.logWarning("CRAWLER No route to host found while trying to crawl URL  '" + url.toString() + "'."); 
-            } else if ((e instanceof UnknownHostException) || 
-                       ((errorMsg != null) && (errorMsg.indexOf("unknown host") >= 0))) {                    
+                log.logWarning("CRAWLER No route to host found while trying to crawl URL  '" + url.toString() + "'.");
+            } else if ((e instanceof UnknownHostException) ||
+                       ((errorMsg != null) && (errorMsg.indexOf("unknown host") >= 0))) {
                 log.logWarning("CRAWLER Unknown host in URL '" + url.toString() + "'. " +
                         "Referer URL: " + ((referer == null) ?"Unknown":referer));
             } else if (e instanceof java.net.BindException) {
-                log.logWarning("CRAWLER BindException detected while trying to download content from '" + url.toString() + 
+                log.logWarning("CRAWLER BindException detected while trying to download content from '" + url.toString() +
                 "'. Retrying request.");
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
-                log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + url.toString() + 
+                log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + url.toString() +
                 "'. Retrying request without using gzip content encoding.");
-                retryCrawling = true;                  
+                retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Read timed out") >= 0)) {
-                log.logWarning("CRAWLER Read timeout while receiving content from '" + url.toString() + 
+                log.logWarning("CRAWLER Read timeout while receiving content from '" + url.toString() +
                 "'. Retrying request.");
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("connect timed out") >= 0)) {
-                log.logWarning("CRAWLER Timeout while trying to connect to '" + url.toString() + 
-                "'. Retrying request."); 
-                retryCrawling = true;                                                                           
+                log.logWarning("CRAWLER Timeout while trying to connect to '" + url.toString() +
+                "'. Retrying request.");
+                retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Connection timed out") >= 0)) {
-                log.logWarning("CRAWLER Connection timeout while receiving content from '" + url.toString() + 
-                "'. Retrying request."); 
-                retryCrawling = true;                                                       
+                log.logWarning("CRAWLER Connection timeout while receiving content from '" + url.toString() +
+                "'. Retrying request.");
+                retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Connection refused") >= 0)) {
                 log.logWarning("CRAWLER Connection refused while trying to connect to '" + url.toString() + "'.");
             } else if ((errorMsg != null) && (errorMsg.indexOf("There is not enough space on the disk") >= 0)) {
-                log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + url.toString() + "'. " + 
+                log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + url.toString() + "'. " +
                 "Pausing crawlers. ");
                 plasmaCrawlLoader.switchboard.pauseCrawling();
             } else if ((errorMsg != null) && (errorMsg.indexOf("Network is unreachable") >=0)) {
@@ -505,40 +501,39 @@ public final class plasmaCrawlWorker extends Thread {
             } else {
                 log.logSevere("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
             }
-            
-            
-            if (retryCrawling) {    
+
+            if (retryCrawling) {
                 // if we are already doing a shutdown we don't need to retry crawling
                 if (Thread.currentThread().isInterrupted()) {
                     log.logSevere("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
                     return;
                 }
-                
+
                 // returning the used httpc
                 httpc.returnInstance(remote);
-                remote = null;                    
-                
-                // setting the retry counter to 1 
+                remote = null;
+
+                // setting the retry counter to 1
                 if (crawlingRetryCount > 2) crawlingRetryCount = 2;
-                
+
                 // retry crawling
                 load(url,
-                        name,
-                        referer,
-                        initiator,
-                        depth,
-                        profile,
-                        socketTimeout,
-                        theRemoteProxyConfig,
-                        cacheManager,
-                        log,
-                        --crawlingRetryCount,
-                        false
-                );         
+                     name,
+                     referer,
+                     initiator,
+                     depth,
+                     profile,
+                     socketTimeout,
+                     theRemoteProxyConfig,
+                     cacheManager,
+                     log,
+                     --crawlingRetryCount,
+                     false
+                );
             }
         } finally {
             if (remote != null) httpc.returnInstance(remote);
         }
     }
-    
+
 }

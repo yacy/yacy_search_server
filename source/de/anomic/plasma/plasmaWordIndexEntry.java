@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 01.06.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,18 +50,17 @@ package de.anomic.plasma;
 
 import java.net.URL;
 import java.util.Properties;
-
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 // import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexEntry {
-	
+
     // an wordEntry can be filled in either of two ways:
     // by the discrete values of the entry
     // or by the encoded entry-string
-    
+
     // the size of a word hash
     public static final int wordHashLength   = yacySeedDB.commonHashLength; // 12
     public static final int  urlHashLength   = yacySeedDB.commonHashLength; // 12
@@ -69,7 +71,7 @@ public final class plasmaWordIndexEntry {
 
     // the associated hash
     private final String urlHash;
-    
+
     // discrete values
     private int    count;       // words in file
     private int    posintext;   // first position of the word in text as number of word; 0=unknown or irrelevant position
@@ -100,7 +102,7 @@ public final class plasmaWordIndexEntry {
 
     // create a word hash
     public static String word2hash(String word) {
-	return serverCodings.encodeMD5B64(word.toLowerCase(), true).substring(0, wordHashLength);
+        return serverCodings.encodeMD5B64(word.toLowerCase(), true).substring(0, wordHashLength);
     }
 
     // doctype calculation
@@ -133,7 +135,9 @@ public final class plasmaWordIndexEntry {
         char doctype = DT_UNKNOWN;
         if (mime == null) doctype = DT_UNKNOWN;
         else if (mime.endsWith("/gif")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/jpg")) doctype = DT_IMAGE;
         else if (mime.endsWith("/jpeg")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/png")) doctype = DT_IMAGE;
         else if (mime.endsWith("/html")) doctype = DT_HTML;
         else if (mime.endsWith("/rtf")) doctype = DT_DOC;
         else if (mime.endsWith("/pdf")) doctype = DT_PDFPS;
@@ -163,7 +167,7 @@ public final class plasmaWordIndexEntry {
         //xhtml   = application/xhtml+xml
         //xla     = application/msexcel
         //xls     = application/msexcel
-        //xsl	  = application/xml
+        //xsl     = application/xml
         //xml     = application/xml
         //Z       = application/x-compress
         //zip     = application/zip
@@ -183,19 +187,19 @@ public final class plasmaWordIndexEntry {
     // therefore they are all public
     public plasmaWordIndexEntry(String urlHash, int count, int posintext, int posinphrase, int posofphrase, int virtualage, int quality, String language, char doctype, boolean local) {
 
-	// ** hier fehlt noch als Attribut: <Wortposition im Text>, damit 'nearby' getrackt werden kann **
+    // ** hier fehlt noch als Attribut: <Wortposition im Text>, damit 'nearby' getrackt werden kann **
 
-	if ((language == null) || (language.length() != plasmaCrawlLURL.urlLanguageLength)) language = "uk";
-	this.urlHash = urlHash;
-	this.count = count;
+    if ((language == null) || (language.length() != plasmaCrawlLURL.urlLanguageLength)) language = "uk";
+        this.urlHash = urlHash;
+        this.count = count;
         this.posintext = posintext;
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
-	this.age = virtualage;
-	this.quality = quality;
-	this.language = language.getBytes();
-	this.doctype = doctype;
-	this.localflag = (local) ? LT_LOCAL : LT_GLOBAL;
+        this.age = virtualage;
+        this.quality = quality;
+        this.language = language.getBytes();
+        this.doctype = doctype;
+        this.localflag = (local) ? LT_LOCAL : LT_GLOBAL;
     }
     
     public plasmaWordIndexEntry(String urlHash, String code) {
@@ -233,16 +237,16 @@ public final class plasmaWordIndexEntry {
        this.localflag = pr.getProperty("f", ""+LT_LOCAL).charAt(0);
     }
 
-   private String b64save(long x, int l) {
-	try {
-	    return serverCodings.enhancedCoder.encodeBase64Long(x, l);
-	} catch (Exception e) {
-	    // if x does not fit into l
-	    return "________".substring(0, l);
-	}
+    private String b64save(long x, int l) {
+        try {
+            return serverCodings.enhancedCoder.encodeBase64Long(x, l);
+        } catch (Exception e) {
+            // if x does not fit into l
+            return "________".substring(0, l);
+        }
     }
     
-   public String toEncodedForm(boolean longAttr) {
+    public String toEncodedForm(boolean longAttr) {
        // attention: this integrates NOT the URL into the encoding
        // if you need a complete dump, use toExternalForm()
        StringBuffer buf = new StringBuffer(longAttr?18:12);
@@ -299,19 +303,19 @@ public final class plasmaWordIndexEntry {
    }
         
     public String getUrlHash() {
-	return urlHash;
+        return urlHash;
     }
     
     public int getQuality() {
-	return quality;
+        return quality;
     }
 
     public int getVirtualAge() {
-	return age;
+        return age;
     }
     
     public int getCount() {
-	return count;
+        return count;
     }
 
     public int posintext() {
@@ -327,11 +331,11 @@ public final class plasmaWordIndexEntry {
     }
     
     public String getLanguage() {
-	return new String(language);
+        return new String(language);
     }
 
     public char getType() {
-	return doctype;
+        return doctype;
     }
 
     public boolean isLocal() {
@@ -339,9 +343,9 @@ public final class plasmaWordIndexEntry {
     }
 
     public static void main(String[] args) {
-	// outputs the word hash to a given word
-	if (args.length != 1) System.exit(0);
-	System.out.println("WORDHASH: " + word2hash(args[0]));
+        // outputs the word hash to a given word
+        if (args.length != 1) System.exit(0);
+        System.out.println("WORDHASH: " + word2hash(args[0]));
     }
-    
+   
 }

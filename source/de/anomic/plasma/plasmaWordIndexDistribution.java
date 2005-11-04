@@ -4,8 +4,9 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2005
 //
-//last major change: $LastChangedDate$ by $LastChangedBy$
-//Revision: $LastChangedRevision$
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -48,7 +49,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.HashSet;
 import java.util.HashMap;
-
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -59,14 +59,14 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.kelondro.kelondroException;
 
 public final class plasmaWordIndexDistribution {
-    
+
     // distributes parts of the index to other peers
     // stops as soon as an error occurrs
-    
+
     private int indexCount;
     private int juniorPeerCount, seniorPeerCount;
     private long maxTime;
-    
+
     private final plasmaURLPool urlPool;
     private final plasmaWordIndex wordIndex;
     final serverLog log;
@@ -77,9 +77,9 @@ public final class plasmaWordIndexDistribution {
     private boolean gzipBody;
     private int timeout;
     private int maxOpenFiles;
-    
+
     public transferIndexThread transferIdxThread = null;
-    
+
     public plasmaWordIndexDistribution(
             plasmaURLPool urlPool, 
             plasmaWordIndex wordIndex, 
@@ -101,32 +101,32 @@ public final class plasmaWordIndexDistribution {
         this.timeout = timeout;
         this.maxOpenFiles = maxOpenFiles;
     }
-    
+
     public void enable() {
         enabled = true;
     }
-    
+
     public void disable() {
         enabled = false;
     }
-    
+
     public void enableWhileCrawling() {
         this.enabledWhileCrawling = true;
     }
-    
+
     public void disableWhileCrawling() {
         this.enabledWhileCrawling = false;
     }
-    
+
     public void close() {
         closed = true;
         if (transferIdxThread != null) {
             stopTransferWholeIndex(false);
         }
     }
-    
+
     public boolean job() {
-        
+
         if (this.closed) {
             log.logFine("no word distribution: closed");
             return false;
@@ -163,17 +163,17 @@ public final class plasmaWordIndexDistribution {
             log.logFine("no word distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize());
             return false;
         }
-        
+
         // do the transfer
         int peerCount = (yacyCore.seedDB.mySeed.isJunior()) ? juniorPeerCount : seniorPeerCount;
         long starttime = System.currentTimeMillis();
         int transferred = performTransferIndex(indexCount, peerCount, true);
-        
+
         if (transferred <= 0) {
             log.logFine("no word distribution: transfer failed");
             return false;
         }
-        
+
         // adopt transfer count
         if ((System.currentTimeMillis() - starttime) > (maxTime * peerCount))
             indexCount--;
@@ -183,9 +183,9 @@ public final class plasmaWordIndexDistribution {
         
         // show success
         return true;
-        
+
     }
-    
+
     public void setCounts(int indexCount, int juniorPeerCount, int seniorPeerCount, long maxTimePerTransfer) {
         this.maxTime = maxTimePerTransfer;
         this.indexCount = indexCount;
@@ -193,10 +193,10 @@ public final class plasmaWordIndexDistribution {
         this.juniorPeerCount = juniorPeerCount;
         this.seniorPeerCount = seniorPeerCount;
     }
-    
+
     public int performTransferIndex(int indexCount, int peerCount, boolean delete) {
         if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return -1;
-        
+
         // collect index
         String startPointHash = selectTransferStart();
         log.logFine("Selected hash " + startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash));
@@ -213,10 +213,10 @@ public final class plasmaWordIndexDistribution {
         for (int i = 0; i < indexEntities.length; i++) {
             indexCount += indexEntities[i].size();
         }
-        
+
         // find start point for DHT-selection
         String keyhash = indexEntities[indexEntities.length - 1].wordHash(); // DHT targets must have greater hashes
-        
+
         // iterate over DHT-peers and send away the indexes
         yacySeed seed;
         int hc = 0;
@@ -250,7 +250,7 @@ public final class plasmaWordIndexDistribution {
             }
         }
         if (peerNames.length() > 0) peerNames = peerNames.substring(2); // remove comma
-        
+
         // clean up and finish with deletion of indexes
         if (hc >= peerCount) {
             // success
@@ -279,7 +279,7 @@ public final class plasmaWordIndexDistribution {
             return -1;
         }
     }
-    
+
     private String selectTransferStart() {
         String startPointHash;
         // first try to select with increasing probality a good start point
@@ -291,7 +291,7 @@ public final class plasmaWordIndexDistribution {
         startPointHash = yacyCore.seedDB.mySeed.hash.substring(0, 11) + "z";
         return startPointHash;
     }
-    
+
     Object[] /* of {plasmaWordIndexEntity[], HashMap(String, plasmaCrawlLURL.Entry)}*/
            selectTransferIndexes(String hash, int count, int maxOpenFiles) {
         // the hash is a start hash from where the indexes are picked
@@ -407,7 +407,7 @@ public final class plasmaWordIndexDistribution {
             return new Object[]{new plasmaWordIndexEntity[0], new HashMap(0)};
         }
     }
-    
+
     boolean deleteTransferIndexes(plasmaWordIndexEntity[] indexEntities) throws IOException {
         String wordhash;
         Iterator urlIter;
@@ -457,15 +457,14 @@ public final class plasmaWordIndexDistribution {
         }
         return success;
     }
-    
-    
+
     public void startTransferWholeIndex(yacySeed seed, boolean delete) {
         if (transferIdxThread == null) {
             this.transferIdxThread = new transferIndexThread(seed,delete);
             this.transferIdxThread.start();
         }
     }    
-    
+
     public void stopTransferWholeIndex(boolean wait) {
         if ((transferIdxThread != null) && (transferIdxThread.isAlive()) && (!transferIdxThread.isFinished())) {
             try {
@@ -473,7 +472,7 @@ public final class plasmaWordIndexDistribution {
             } catch (InterruptedException e) { }
         }
     }    
-    
+
     public void abortTransferWholeIndex(boolean wait) {
         if (transferIdxThread != null) {
             if (!transferIdxThread.isFinished())
@@ -483,8 +482,7 @@ public final class plasmaWordIndexDistribution {
                 transferIdxThread = null;
         }
     } 
-    
-    
+
     private class transferIndexWorkerThread extends Thread{
         // connection properties
         private boolean gzipBody = false;
@@ -904,5 +902,6 @@ public final class plasmaWordIndexDistribution {
             } 
             return false;
         }
-    }   
+    }
+
 }

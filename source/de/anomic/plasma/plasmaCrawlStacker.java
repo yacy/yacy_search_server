@@ -7,9 +7,9 @@
 //
 // This file was contributed by Martin Thelian
 //
-// $LastChangedDate: 2005-10-07 15:49:07 +0200 (Fri, 07 Oct 2005) $
-// $LastChangedRevision: 874 $
-// $LastChangedBy: allo $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -175,6 +175,7 @@ public final class plasmaCrawlStacker {
     public String stackCrawl(String nexturlString, String referrerString, String initiatorHash, String name, Date loadDate, int currentdepth, plasmaCrawlProfile.entry profile) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
+        this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
         
         long startTime = System.currentTimeMillis();
         String reason = null; // failure reason
@@ -798,29 +799,29 @@ public final class plasmaCrawlStacker {
                 }
             }
                 
-            private void execute() {                   
+            private void execute() {
                 try {
-                    String rejectReason = dequeue(this.theMsg);                    
-                    
+                    String rejectReason = dequeue(this.theMsg);
+
                     if (rejectReason != null) {
                         plasmaCrawlStacker.this.sb.urlPool.errorURL.newEntry(
-                                new URL(this.theMsg.url()), 
-                                this.theMsg.referrerHash(), 
-                                this.theMsg.initiatorHash(), 
+                                new URL(this.theMsg.url()),
+                                this.theMsg.referrerHash(),
+                                this.theMsg.initiatorHash(),
                                 yacyCore.seedDB.mySeed.hash,
-                                this.theMsg.name, 
-                                rejectReason, 
-                                new bitfield(plasmaURL.urlFlagLength), 
+                                this.theMsg.name,
+                                rejectReason,
+                                new bitfield(plasmaURL.urlFlagLength),
                                 false
                         );
-                    }    
+                    }
                 } catch (Exception e) {
-                    e.printStackTrace();    
+                    e.printStackTrace();
                 } finally {
                     this.done = true;
                 }
-                
-            }              
-    }
-}
 
+            }
+    }
+
+}
