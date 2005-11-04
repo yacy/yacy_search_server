@@ -428,10 +428,10 @@ public final class plasmaHTCache {
      */
     public File getCachePath(URL url) {
 //      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
-        String remotePath = url.getPath();
-        if (remotePath.endsWith("/")) { remotePath = remotePath + "ndx"; }
+        String remotePath = url.getFile();
+        if (remotePath.endsWith("/")) { remotePath = remotePath + "index.html"; }
         if (!remotePath.startsWith("/")) { remotePath = "/" + remotePath; }        
-//      remotePath = remotePath.replaceAll("[?&:]", "_"); // yes this is not reversible, but that is not needed
+        remotePath = remotePath.replaceAll("[?&:]", "_"); // yes this is not reversible, but that is not needed
         int port = url.getPort();
         if (port < 0) {
             if (url.getProtocol().equalsIgnoreCase("http"))       port = 80;
@@ -478,7 +478,7 @@ public final class plasmaHTCache {
                 
                 s = s.substring(0, pos) + ":" + s.substring(pos + 1);
             }
-            if (s.endsWith("ndx")) { s = s.substring(0, s.length() - 3); }
+            if (s.endsWith("index.html")) { s = s.substring(0, s.length() - 10); }
 //          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);    
             try {
                 return new URL(protocol + "://" + s);
