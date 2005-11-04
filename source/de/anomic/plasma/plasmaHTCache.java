@@ -427,7 +427,7 @@ public final class plasmaHTCache {
      * @return new File
      */
     public File getCachePath(URL url) {
-        this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
+//      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
         String remotePath = url.getFile();
         if (remotePath.endsWith("/")) { remotePath = remotePath + "ndx"; }
         if (!remotePath.startsWith("/")) { remotePath = "/" + remotePath; }        
@@ -438,14 +438,19 @@ public final class plasmaHTCache {
             else if (url.getProtocol().equalsIgnoreCase("https")) port = 443;
             else if (url.getProtocol().equalsIgnoreCase("ftp"))   port = 21;
         }
-        File path;
+        if (port == 80) {
+            return new File(this.cachePath, url.getHost() + remotePath);
+        } else {
+            return new File(this.cachePath, url.getHost() + "!" + port + remotePath);
+        }
+/*      File path;
         if (port == 80) {
             path = new File(this.cachePath, url.getHost() + remotePath);
         } else {
-            path = new File(this.cachePath, url.getHost() + "!" + port + remotePath);           
+            path = new File(this.cachePath, url.getHost() + "!" + port + remotePath);
         }
         this.log.logFinest("plasmaHTCache: getCachePath: OUT=" + path.toString());
-        return path;
+        return path;*/
     }
 
     /**
