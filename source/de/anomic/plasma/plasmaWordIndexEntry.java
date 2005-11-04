@@ -134,10 +134,10 @@ public final class plasmaWordIndexEntry {
         // serverLog.logFinest("PLASMA", "docType mime=" + mime);
         char doctype = DT_UNKNOWN;
         if (mime == null) doctype = DT_UNKNOWN;
-        else if (mime.endsWith("/gif")) doctype = DT_IMAGE;
-        else if (mime.endsWith("/jpg")) doctype = DT_IMAGE;
+        else if (mime.startsWith("image/")) doctype = DT_IMAGE;
+/*      else if (mime.endsWith("/gif")) doctype = DT_IMAGE;
         else if (mime.endsWith("/jpeg")) doctype = DT_IMAGE;
-        else if (mime.endsWith("/png")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/png")) doctype = DT_IMAGE; */
         else if (mime.endsWith("/html")) doctype = DT_HTML;
         else if (mime.endsWith("/rtf")) doctype = DT_DOC;
         else if (mime.endsWith("/pdf")) doctype = DT_PDFPS;
@@ -147,7 +147,7 @@ public final class plasmaWordIndexEntry {
         else if (mime.endsWith("/mspowerpoint")) doctype = DT_DOC;
         else if (mime.endsWith("/postscript")) doctype = DT_PDFPS;
         else if (mime.startsWith("text/")) doctype = DT_TEXT;
-        else if (mime.startsWith("image/")) doctype = DT_IMAGE;
+//      else if (mime.startsWith("image/")) doctype = DT_IMAGE;
         else if (mime.startsWith("audio/")) doctype = DT_AUDIO;
         else if (mime.startsWith("video/")) doctype = DT_MOVIE;
         //bz2     = application/x-bzip2
