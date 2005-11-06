@@ -98,16 +98,17 @@ public final class robotsParser{
         ArrayList deny = new ArrayList();
         
         int pos;
-        String line = null;
-        boolean rule4Yacy = false;
+        String line = null, lineUpper = null;
+        boolean rule4Yacy = false;        
         while ((line = reader.readLine()) != null) {
             line = line.trim();
+            lineUpper = line.toUpperCase();
             if (line.length() == 0) {
                 // we have reached the end of the rule block
                 rule4Yacy = false;
             } else if (line.startsWith("#")) {
                 // we can ignore this. Just a comment line
-            } else if ((!rule4Yacy) && (line.startsWith("User-agent:"))) {
+            } else if ((!rule4Yacy) && (lineUpper.startsWith("User-agent:".toUpperCase()))) {
                 // cutting off comments at the line end
                 pos = line.indexOf("#");
                 if (pos != -1) {
@@ -120,7 +121,13 @@ public final class robotsParser{
                     String userAgent = line.substring(pos).trim();
                     rule4Yacy = (userAgent.equals("*") || (userAgent.toLowerCase().indexOf("yacy") >=0));
                 }
-            } else if (line.startsWith("Disallow:") && rule4Yacy) {
+            } else if (lineUpper.startsWith("Disallow:".toUpperCase()) && rule4Yacy) {                
+                // cutting off comments at the line end
+                pos = line.indexOf("#");
+                if (pos != -1) {
+                    line = line.substring(0,pos);
+                }
+                
                 pos = line.indexOf(" ");
                 if (pos != -1) {
                     // getting the path
