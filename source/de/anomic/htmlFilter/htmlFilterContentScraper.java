@@ -110,7 +110,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public static String urlNormalform(String us) {
-//      serverLog.logFiner("htmlFilter", "urlNormalform:  IN=" + us);
+        serverLog.logFiner("htmlFilter", "urlNormalform:  IN=" + us);
         if (us == null) { return null; }
         if (us.length() == 0) { return null; }
 
@@ -125,28 +125,28 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (us.startsWith("https")) {
             if (us.endsWith(":443")) {
                 us = us.substring(0, us.length() - 4);
-//              serverLog.logFinest("htmlFilter", "urlNormalform: :443=" + us);
+                serverLog.logFinest("htmlFilter", "urlNormalform: :443=" + us);
             } else {
                 cpos = us.indexOf(":443/");
                 if (cpos >= 0) {
                     us = us.substring(0, cpos).concat(us.substring(cpos + 4));
-//                  serverLog.logFinest("htmlFilter", "urlNormalform: :443/=" + us);
+                    serverLog.logFinest("htmlFilter", "urlNormalform: :443/=" + us);
                 }
             }
         } else if (us.startsWith("http")) {
             if (us.endsWith(":80")) {
                 us = us.substring(0, us.length() - 3);
-//              serverLog.logFinest("htmlFilter", "urlNormalform: :80=" + us);
+                serverLog.logFinest("htmlFilter", "urlNormalform: :80=" + us);
             } else {
                 cpos = us.indexOf(":80/");
                 if (cpos >= 0) {
                     us = us.substring(0, cpos).concat(us.substring(cpos + 3));
-//                  serverLog.logFinest("htmlFilter", "urlNormalform: :80/=" + us);
+                    serverLog.logFinest("htmlFilter", "urlNormalform: :80/=" + us);
                 }
             } 
         }
         if (((us.endsWith("/")) && (us.lastIndexOf('/', us.length() - 2) < 8))) us = us.substring(0, us.length() - 1);
-//      serverLog.logFine("htmlFilter", "urlNormalform: OUT=" + us);        
+        serverLog.logFine("htmlFilter", "urlNormalform: OUT=" + us);        
         return us;
     }
 
