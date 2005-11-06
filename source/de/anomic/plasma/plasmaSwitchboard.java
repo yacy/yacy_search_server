@@ -107,6 +107,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -1563,7 +1564,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             prop.put("results_" + i + "_urlhash", urlhash);
                             prop.put("results_" + i + "_urlname", urlname);
                             prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
-                            prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
+                            prop.put("results_" + i + "_size", Long.toString(urlentry.size()));                            
+                            prop.put("results_" + i + "_words",URLEncoder.encode(query.queryWords.toString(),"UTF-8"));
+                            // adding snippet if available
                             if (snippet.line == null) {
                                 prop.put("results_" + i + "_snippet", 0);
                                 prop.put("results_" + i + "_snippet_text", "");

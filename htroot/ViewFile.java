@@ -45,7 +45,10 @@
 //if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaParserDocument;
@@ -61,11 +64,27 @@ public class ViewFile {
     public static final int VIEW_MODE_AS_PARSED_TEXT = 2;
     public static final int VIEW_MODE_AS_PARSED_SENTENCES = 3;
     public static final int VIEW_MODE_AS_IFRAME = 4;
+    
+    public static final String[] highlightingColors = new String[] {
+        "255,255,100",
+        "255,155,155",
+        "0,255,0",
+        "0,255,255",
+        "204,153,0",
+        "204,153,255"
+    };
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     
+        if (post.containsKey("words"))
+            try {
+                prop.put("error_words",URLEncoder.encode((String) post.get("words"), "UTF-8"));
+            } catch (UnsupportedEncodingException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
         
         if (post != null) {
             // getting the url hash from which the content should be loaded
@@ -76,7 +95,7 @@ public class ViewFile {
                 return prop;
             }
             
-            String viewMode = post.get("viewMode","plain");
+            String viewMode = post.get("viewMode","sentences");
             
             // getting the urlEntry that belongs to the url hash
             Entry urlEntry = sb.urlPool.loadedURL.getEntry(urlHash);
@@ -151,8 +170,26 @@ public class ViewFile {
                     
                     boolean dark = true;
                     for (int i=0; i < sentences.length; i++) {
+                        String currentSentence = sentences[i];
+                        
+                        // Search word highlighting
+                        String words = post.get("words",null);
+                        if (words != null) {
+                            try {
+                                words = URLDecoder.decode(words,"UTF-8");
+                            } catch (UnsupportedEncodingException e) {}
+                            
+                            String[] wordArray = words.substring(1,words.length()-1).split(",");
+                            for (int j=0; j < wordArray.length; j++) {
+                                String currentWord = wordArray[j].trim(); 
+                                currentSentence = currentSentence.replaceAll(currentWord,
+                                        "<b style=\"color: black; background-color: rgb(" + highlightingColors[j%6] + ");\">" + currentWord + "</b>");
+                            }
+                        }
+                        
+                        
                         prop.put("viewMode_sentences_" + i + "_nr",Integer.toString(i+1)); 
-                        prop.put("viewMode_sentences_" + i + "_text",sentences[i]);   
+                        prop.put("viewMode_sentences_" + i + "_text",currentSentence);   
                         prop.put("viewMode_sentences_" + i + "_dark",((dark) ? 1 : 0) ); dark=!dark;
                     }
                     prop.put("viewMode_sentences",sentences.length);
