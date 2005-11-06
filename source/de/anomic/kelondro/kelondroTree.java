@@ -136,7 +136,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     }
 
     // Returns the value to which this map maps the specified key.
-    public byte[][] get(byte[] key) throws IOException {
+    public synchronized byte[][] get(byte[] key) throws IOException {
         //System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
         Search search = new Search();
         search.process(key);
@@ -148,7 +148,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         }
     }
     
-    public long[] getLong(byte[] key) throws IOException {
+    public synchronized long[] getLong(byte[] key) throws IOException {
         byte[][] row = get(key);
         long[] longs = new long[columns() - 1];
         if (row == null) {
@@ -295,14 +295,14 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	}
     }
 
-    public boolean isChild(Node childn, Node parentn, int child) throws IOException {
+    public synchronized boolean isChild(Node childn, Node parentn, int child) throws IOException {
 	if (childn == null) throw new IllegalArgumentException("isLeftChild: Node parameter is NULL");
 	Handle lc = parentn.getOHHandle(child);
 	if (lc == null) return false;
 	return (lc.equals(childn.handle()));
     }
     
-    public long[] putLong(byte[] key, long[] newlongs) throws IOException {
+    public synchronized long[] putLong(byte[] key, long[] newlongs) throws IOException {
         byte[][] newrow = new byte[newlongs.length + 1][];
         newrow[0] = key;
         for (int i = 0; i < newlongs.length; i++) {
@@ -579,7 +579,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     }
 
     // Associates the specified value with the specified key in this map
-    public byte[] put(byte[] key, byte[] value) throws IOException {
+    public synchronized byte[] put(byte[] key, byte[] value) throws IOException {
 	byte[][] row = new byte[2][];
 	row[0] = key;
 	row[1] = value;
@@ -602,7 +602,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         }
     }
 
-    public void removeAll() throws IOException {
+    public synchronized void removeAll() throws IOException {
         while (size() > 0) remove(lastNode(), null);
     }
     
@@ -716,9 +716,14 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     private Node firstNode(Node node) throws IOException {
         if (node == null) throw new IllegalArgumentException("firstNode: node=null"); 
 	Handle h = node.getOHHandle(leftchild);
-	while (h != null) {
+        HashSet visitedNodeKeys = new HashSet(); // to detect loops
+        String nodeKey;
+        while (h != null) {
             try {
                 node = getNode(h, node, leftchild);
+                nodeKey = new String(node.getKey());
+                if (visitedNodeKeys.contains(nodeKey)) throw new kelondroException(this.filename, "firstNode: database contains loops: '" + nodeKey + "' appears twice.");
+                visitedNodeKeys.add(nodeKey);
             } catch (IllegalArgumentException e) {
                 // return what we have
                 return node;
@@ -737,9 +742,14 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     private Node lastNode(Node node) throws IOException {
 	if (node == null) throw new IllegalArgumentException("lastNode: node=null"); 
         Handle h = node.getOHHandle(rightchild);
+        HashSet visitedNodeKeys = new HashSet(); // to detect loops
+        String nodeKey;
 	while (h != null) {
 	    try {
                 node = getNode(h, node, rightchild);
+                nodeKey = new String(node.getKey());
+                if (visitedNodeKeys.contains(nodeKey)) throw new kelondroException(this.filename, "lastNode: database contains loops: '" + nodeKey + "' appears twice.");
+                visitedNodeKeys.add(nodeKey);
             } catch (IllegalArgumentException e) {
                 // return what we have
                 return node;
@@ -758,7 +768,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	}
     }
 
-    public Iterator nodeIterator(boolean up, boolean rotating, byte[] firstKey) {
+    public synchronized Iterator nodeIterator(boolean up, boolean rotating, byte[] firstKey) {
 	// iterates the elements in a sorted way. returns Node - type Objects
 	try {
             Search search = new Search();
@@ -939,14 +949,14 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	}
     }
 
-    public rowIterator rows(boolean up, boolean rotating) throws IOException {
+    public synchronized rowIterator rows(boolean up, boolean rotating) throws IOException {
 	// iterates the rows of the Nodes
 	// enumerated objects are of type byte[][]
         // iterates the elements in a sorted way.
 	return new rowIterator(new nodeIterator(up, rotating));
     }
     
-    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
         Search search = new Search();
         search.process(firstKey);
         if (search.found()) {
