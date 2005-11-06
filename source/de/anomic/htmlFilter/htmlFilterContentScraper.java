@@ -108,16 +108,16 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (url == null) return null;
         return urlNormalform(url.toString());
     }
-
+/*
     public static String urlNormalform(String us) {
-        serverLog.logFiner("htmlFilter", "urlNormalform:  IN=" + us);
         if (us == null) { return null; }
         if (us.length() == 0) { return null; }
 
-        /* TODO: what about 
-         * - case insensitive domain names
-         * - chars that should be escaped in URLs
-         */
+        serverLog.logFiner("htmlFilter", "urlNormalform:  IN=" + us);
+        
+        // TODO: what about 
+        // - case insensitive domain names
+        // - chars that should be escaped in URLs
 
         // cutting of everything behind #
         int cpos = us.indexOf("#");
@@ -148,6 +148,40 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (((us.endsWith("/")) && (us.lastIndexOf('/', us.length() - 2) < 8))) us = us.substring(0, us.length() - 1);
         serverLog.logFine("htmlFilter", "urlNormalform: OUT=" + us);        
         return us;
+    }
+ */
+
+    public static String urlNormalform(String us) {
+        if (us == null) { return null; }
+        if (us.length() == 0) { return null; }
+        serverLog.logFinest("htmlFilter", "urlNormalform: '" + us + "'");
+        try {
+            final URL url = new URL(us);
+            boolean defaultPort = false;
+            if (url.getProtocol().equals("http")) {
+                if (url.getPort() < 0 || url.getPort() == 80)  { defaultPort = true; }
+            } else if (url.getProtocol().equals("ftp")) {
+                if (url.getPort() < 0 || url.getPort() == 21)  { defaultPort = true; }
+            } else if (url.getProtocol().equals("https")) {
+                if (url.getPort() < 0 || url.getPort() == 443) { defaultPort = true; }
+            }
+            if (defaultPort) {
+                if (url.getFile().equals("/")) {
+                    return url.getProtocol() + "://" + url.getHost();
+                } else {
+                    return url.getProtocol() + "://" + url.getHost() + url.getFile();
+                }
+            } else {
+                if (url.getFile().equals("/")) {
+                    return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort();
+                } else {
+                    return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() +  url.getFile();
+                }
+            }
+        } catch (MalformedURLException e) {
+            serverLog.logSevere("urlNormalform", e.toString());
+        }
+        return null;
     }
 
     private String absolutePath(String relativePath) {
