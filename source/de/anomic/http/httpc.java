@@ -393,7 +393,7 @@ public final class httpc {
         try {
             ip = InetAddress.getByName(host).getHostAddress();
             if ((ip != null) && (!(ip.equals("127.0.0.1"))) && (!(ip.equals("localhost")))) {
-                nameCacheHit.put(host, ip);
+                if (host.indexOf("dyndns") < 0) nameCacheHit.put(host, ip);
                 return ip;
             }
             return null;
@@ -412,6 +412,7 @@ public final class httpc {
     */
     public static boolean dnsFetch(String host) {
         if ((nameCacheHit.get(host) != null) /*|| (nameCacheMiss.contains(host)) */) return false;
+        if (host.indexOf("dyndns") < 0) return false;
         try {
             String ip = InetAddress.getByName(host).getHostAddress();
             if ((ip != null) && (!(ip.equals("127.0.0.1"))) && (!(ip.equals("localhost")))) {
