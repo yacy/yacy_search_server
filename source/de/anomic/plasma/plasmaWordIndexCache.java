@@ -574,18 +574,25 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     return -container.size();
                 } else {
                     // the combined container will fit, read the container
-                    Iterator entries = entity.elements(true);
-                    plasmaWordIndexEntry entry;
-                    while (entries.hasNext()) {
-                        entry = (plasmaWordIndexEntry) entries.next();
-                        container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
+                    try {
+                        Iterator entries = entity.elements(true);
+                        plasmaWordIndexEntry entry;
+                        while (entries.hasNext()) {
+                            entry = (plasmaWordIndexEntry) entries.next();
+                            container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
+                        }
+                        // we have read all elements, now delete the entity
+                        entity.deleteComplete();
+                        entity.close(); entity = null;
+                        // integrate the container into the assortments; this will work
+                        assortmentCluster.storeTry(wordhash, container);
+                        return size;
+                    } catch (kelondroException e) {
+                        // database corrupted, we simply give up the database and delete it
+                        try {entity.close();} catch (Exception ee) {} entity = null;
+                        try {db.delete();} catch (Exception ee) {}
+                        return 0;                        
                     }
-                    // we have read all elements, now delete the entity
-                    entity.deleteComplete();
-                    entity.close(); entity = null;
-                    // integrate the container into the assortments; this will work
-                    assortmentCluster.storeTry(wordhash, container);
-                    return size;
                 }
             }
         } finally {

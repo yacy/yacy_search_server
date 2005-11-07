@@ -663,7 +663,7 @@ public final class yacy {
                 wordhash = wordfile.getName().substring(0, 12);
                 migration = wordIndexCache.migrateWords2Assortment(wordhash);
                 if (migration == 0)
-                    log.logInfo("SKIPPED  " + wordhash + ": too big");
+                    log.logInfo("SKIPPED  " + wordhash + ": " + ((wordfile.exists()) ? "too big" : "database corrupted; deleted"));
                 else if (migration > 0)
                     log.logInfo("MIGRATED " + wordhash + ": " + migration + " entries");
                 else
