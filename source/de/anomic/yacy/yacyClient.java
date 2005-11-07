@@ -447,7 +447,7 @@ public final class yacyClient {
                 link = urlManager.addEntry(lEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
                 // save the url entry
                 final plasmaWordIndexEntry entry = new plasmaWordIndexEntry(link.hash(), link.wordCount(), 0, 0, 0,
-                                                                      plasmaWordIndex.calcVirtualAge(link.moddate()), link.quality(),
+                                                                      plasmaWordIndex.microDateDays(link.moddate()), link.quality(),
                                                                       link.language(), link.doctype(), false);
                 if (link.snippet() != null) {
                     // we don't store the snippets along the url entry, because they are search-specific.

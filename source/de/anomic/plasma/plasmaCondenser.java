@@ -70,12 +70,24 @@ public final class plasmaCondenser {
 
     private final static int numlength = 5;
 
-    private Properties analysis;
+    //private Properties analysis;
     private TreeMap words; // a string (the words) to (statProp) - relation
     private HashMap sentences;
     private int wordminsize;
     private int wordcut;
 
+    public int RESULT_NUMB_TEXT_BYTES = -1;
+    public int RESULT_NUMB_WORDS = -1;
+    public int RESULT_DIFF_WORDS = -1;
+    public int RESULT_SIMI_WORDS = -1;
+    public int RESULT_WORD_ENTROPHY = -1;
+    public int RESULT_NUMB_SENTENCES = -1;
+    public int RESULT_DIFF_SENTENCES = -1;
+    public int RESULT_SIMI_SENTENCES = -1;
+    public int RESULT_AVERAGE_WORD_OCC = -1;
+    public int RESULT_INFORMATION_VALUE = -1;
+
+    
     public plasmaCondenser(InputStream text) throws IOException {
 	this(text, 3, 2);
     }
@@ -83,14 +95,10 @@ public final class plasmaCondenser {
     public plasmaCondenser(InputStream text, int wordminsize, int wordcut) throws IOException {
 	this.wordminsize = wordminsize;
 	this.wordcut = wordcut;
-	analysis = new Properties();
+	//analysis = new Properties();
 	words = new TreeMap();
 	sentences = new HashMap();
 	createCondensement(text);
-    }
-
-    public Properties getAnalysis() {
-	return analysis;
     }
     
     public int excludeWords(TreeSet stopwords) {
@@ -303,30 +311,20 @@ public final class plasmaCondenser {
 	    }
 	}
 
-	//-------------------
-
-	// what do we have here:
-	// sentences
-	// words
-
-	// we now have the sentence structure and word list
-	// create properties with this information
-
-	analysis.setProperty("NUMB_TEXT_BYTES", Long.toHexString(wordenum.count()));
-	analysis.setProperty("NUMB_WORDS", Long.toHexString(allwordcounter));
-	analysis.setProperty("DIFF_WORDS", Long.toHexString(wordHandleCount));
-	analysis.setProperty("SIMI_WORDS", Long.toHexString(words.size()));
-	analysis.setProperty("WORD_ENTROPHY", Long.toHexString((allwordcounter == 0) ? 0 : (255 * words.size() / allwordcounter)));
-	analysis.setProperty("NUMB_SENTENCES", Long.toHexString(allsentencecounter));
-	analysis.setProperty("DIFF_SENTENCES", Long.toHexString(sentenceHandleCount));
-	analysis.setProperty("SIMI_SENTENCES", Long.toHexString(sentences.size()));
-	analysis.setProperty("AVERAGE_WORD_OCC", Long.toHexString((words.size() == 0) ? 0 : (allwordcounter / words.size())));
-	analysis.setProperty("INFORMATION_VALUE", Long.toHexString((allwordcounter == 0) ? 0 : (wordenum.count() * words.size() / allwordcounter / 16)));
-
-	// string, characterisation of text content (a guess)
-
+	// store result
+        this.RESULT_NUMB_TEXT_BYTES = wordenum.count();
+	this.RESULT_NUMB_WORDS = allwordcounter;
+	this.RESULT_DIFF_WORDS = wordHandleCount;
+	this.RESULT_SIMI_WORDS = words.size();
+	this.RESULT_WORD_ENTROPHY = (allwordcounter == 0) ? 0 : (255 * words.size() / allwordcounter);
+	this.RESULT_NUMB_SENTENCES = allsentencecounter;
+	this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
+	this.RESULT_SIMI_SENTENCES = sentences.size();
+	this.RESULT_AVERAGE_WORD_OCC = (words.size() == 0) ? 0 : (allwordcounter / words.size());
+	this.RESULT_INFORMATION_VALUE = (allwordcounter == 0) ? 0 : (wordenum.count() * words.size() / allwordcounter / 16);
     }
 
+        
     public void print() {
 	String[] s = sentences();
 
@@ -670,7 +668,7 @@ public final class plasmaCondenser {
 	    // output result
 	    pc.writeMapToFile(new File(args[2]));
 	    pc.print();
-	    System.out.println("ANALYSIS:" + pc.getAnalysis().toString());
+	    //System.out.println("ANALYSIS:" + pc.getAnalysis().toString());
 	} catch (IOException e) {
 	    System.out.println("Problem with input file: " + e.getMessage());
 	}

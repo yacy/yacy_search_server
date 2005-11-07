@@ -461,11 +461,11 @@ public class dir {
                 "AAAAAAAAAAAA", /*referrer*/
                 0, /*copycount*/
                 false, /*localneed*/
-                Integer.parseInt(condenser.getAnalysis().getProperty("INFORMATION_VALUE","0"), 16),
+                condenser.RESULT_INFORMATION_VALUE,
                 "**", /*language*/
                 plasmaWordIndexEntry.DT_SHARE, /*doctype*/
                 phrase.length(), /*size*/
-                (int) Long.parseLong(condenser.getAnalysis().getProperty("NUMB_WORDS","0"), 16),
+                condenser.RESULT_NUMB_WORDS,
                 5 /*process case*/
             );
 

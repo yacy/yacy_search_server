@@ -130,10 +130,12 @@ import de.anomic.kelondro.kelondroTables;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
@@ -148,7 +150,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static int crawlSlots = 10;
     public static int indexingSlots = 100;
     public static int stackCrawlSlots = 10000;
-
+    public static int maxCRLDump = 300000;
+    public static int maxCRGDump = 100000;
+    
     // couloured list management
     public static TreeSet blueList = null;
     public static TreeSet stopwords = null;
@@ -158,13 +162,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  File                        htCachePath;
     private File                        plasmaPath;
     public  File                        listsPath;
+    public  File                        htDocsPath;
+    public  File                        rankingPath;
     public  plasmaURLPool               urlPool;
     public  plasmaWordIndex             wordIndex;
     public  plasmaHTCache               cacheManager;
     public  plasmaSnippetCache          snippetCache;
     public  plasmaCrawlLoader           cacheLoader;
     public  plasmaSwitchboardQueue      sbQueue;
-    //public  plasmaStackCrawlThread      sbStackCrawlThread;
     public  plasmaCrawlStacker          sbStackCrawlThread;
     public  messageBoard                messageDB;
     public  wikiBoard                   wikiDB;
@@ -176,11 +181,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  HashMap                     outgoingCookies, incomingCookies;
     public  kelondroTables              facilityDB;
     public  plasmaParser                parser;
-    public  plasmaWordIndexClassicCacheMigration classicCache;
     public  long                        proxyLastAccess;
     public  yacyCore                    yc;
     public  HashMap                     indexingTasksInProcess;
     public  userDB                      userDB;
+    //public  StringBuffer                crl; // local citation references
+    public  StringBuffer                crg; // global citation references
     
     /*
      * Remote Proxy configuration
@@ -215,10 +221,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         setLog(new serverLog("PLASMA"));
 
         // load values from configs
-        this.plasmaPath   = new File(rootPath, getConfig("dbPath", "PLASMADB"));
+        this.plasmaPath   = new File(rootPath, getConfig("dbPath", "DATA/PLASMADB"));
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
-        this.listsPath      = new File(rootPath, getConfig("listsPath", "LISTS"));
-        this.log.logConfig("Lists Path: " + this.listsPath.toString());
+        this.listsPath      = new File(rootPath, getConfig("listsPath", "DATA/LISTS"));
+        this.log.logConfig("Lists Path:     " + this.listsPath.toString());
+        this.htDocsPath   = new File(rootPath, getConfig("htDocsPath", "DATA/HTDOCS"));
+        this.log.logConfig("HTDOCS Path:    " + this.htDocsPath.toString());
+        this.rankingPath   = new File(rootPath, getConfig("rankingPath", "DATA/RANKING"));
+        this.log.logConfig("Ranking Path:    " + this.rankingPath.toString());
         
         /* ============================================================================
          * Remote Proxy configuration
@@ -256,7 +266,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 //            this.remoteProxyHost = null;
 //            this.remoteProxyPort = 0;
 //        }
-        this.proxyLastAccess = System.currentTimeMillis() - 60000;        
+        this.proxyLastAccess = System.currentTimeMillis() - 60000;
+        crg = new StringBuffer(maxCRGDump);
+        //crl = new StringBuffer(maxCRLDump);
         
         // configuring list path
         if (!(listsPath.exists())) listsPath.mkdirs();
@@ -529,16 +541,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         indexDistribution.setCounts(150, 1, 3, 10000);
         deployThread("20_dhtdistribution", "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
                      new serverInstantThread(indexDistribution, "job", null), 600000);
-            
-        // init migratiion from 0.37 -> 0.38
-        classicCache = new plasmaWordIndexClassicCacheMigration(plasmaPath, wordIndex);
-        
-        if (classicCache.size() > 0) {
-            setConfig("99_indexcachemigration_idlesleep" , 10000);
-            setConfig("99_indexcachemigration_busysleep" , 40);
-            deployThread("99_indexcachemigration", "index cache migration", "migration of index cache data structures 0.37 -> 0.38", null,
-            new serverInstantThread(classicCache, "oneStepMigration", "size"), 30000);
-        }
         
         // test routine for snippet fetch
         //Set query = new HashSet();
@@ -732,6 +734,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             parser.close();            
             cacheManager.close();
             sbQueue.close();
+            //flushCitationReference(crl, "crl");
+            flushCitationReference(crg, "crg");
 	} catch (IOException e) {}
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
@@ -930,7 +934,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
         if ((urlEntry.url() == null) || (urlEntry.url().toString().length() < 10)) {
             log.logInfo(stats + ": URL with hash " + ((urlEntry.hash()==null)?"Unknown":urlEntry.hash()) + " already removed from queue.");
-            return true;            
+            return true;
         }
         String profileHandle = urlEntry.profileHandle();
         //System.out.println("DEBUG plasmaSwitchboard.processCrawling: profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
@@ -1088,7 +1092,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
     private void processResourceStack(plasmaSwitchboardQueue.Entry entry) {
         // work off one stack entry with a fresh resource
-        try {    
+        try {
             long stackStartTime = 0, stackEndTime = 0, 
                  parsingStartTime = 0, parsingEndTime = 0, 
                  indexingStartTime = 0, indexingEndTime = 0,
@@ -1147,12 +1151,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             parsingEndTime = System.currentTimeMillis();
             
-            Date loadDate = null;
+            Date docDate = null;
             if (entry.responseHeader() != null) {
-                loadDate = entry.responseHeader().lastModified();
-                if (loadDate == null) loadDate = entry.responseHeader().date();
+                docDate = entry.responseHeader().lastModified();
+                if (docDate == null) docDate = entry.responseHeader().date();
             }
-            if (loadDate == null) loadDate = new Date();
+            if (docDate == null) docDate = new Date();
             
             // put anchors on crawl stack
             stackStartTime = System.currentTimeMillis();
@@ -1167,9 +1171,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 while (i.hasNext()) {
                     e = (Map.Entry) i.next();
                     nexturlstring = (String) e.getKey();
-                    nexturlstring = plasmaParser.urlNormalform(nexturlstring);
+                    nexturlstring = htmlFilterContentScraper.urlNormalform(null, nexturlstring);
   
-                    sbStackCrawlThread.enqueue(nexturlstring, entry.url().toString(), initiatorHash, (String) e.getValue(), loadDate, entry.depth() + 1, entry.profile());
+                    sbStackCrawlThread.enqueue(nexturlstring, entry.url().toString(), initiatorHash, (String) e.getValue(), docDate, entry.depth() + 1, entry.profile());
 
 //                    rejectReason = stackCrawl(nexturlstring, entry.normalizedURLString(), initiatorHash, (String) e.getValue(), loadDate, entry.depth() + 1, entry.profile());
 //                    if (rejectReason == null) {
@@ -1202,30 +1206,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logFine("Condensing for '" + entry.normalizedURLString() + "'");
                 plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(document.getText()));
  
+                // generate citation reference
+                generateCitationReference(entry.urlHash(), docDate, document, condenser);
+                
                 //log.logInfo("INDEXING HEADLINE:" + descr);
                 try {
                     //log.logDebug("Create LURL-Entry for '" + entry.normalizedURLString() + "', " +
                     //             "responseHeader=" + entry.responseHeader().toString());
                     
-                    Date lastModified = null;
-                    if (entry.responseHeader() == null) {
-                        lastModified = new Date();
-                    } else {
-                        lastModified = entry.responseHeader().lastModified();
-                        if (lastModified == null) lastModified = entry.responseHeader().date();
-                        if (lastModified == null) lastModified = new Date();
-                    }
                     plasmaCrawlLURL.Entry newEntry = urlPool.loadedURL.addEntry(
-                                        entry.url(), descr, lastModified, new Date(),
+                                        entry.url(), descr, docDate, new Date(),
                                         initiatorHash,
                                         yacyCore.seedDB.mySeed.hash,
                                         referrerHash,
                                         0, true,
-                                        Integer.parseInt(condenser.getAnalysis().getProperty("INFORMATION_VALUE","0"), 16),
+                                        condenser.RESULT_INFORMATION_VALUE,
                                         plasmaWordIndexEntry.language(entry.url()),
                                         plasmaWordIndexEntry.docType(document.getMimeType()),
                                         entry.size(),
-                                        (int) Long.parseLong(condenser.getAnalysis().getProperty("NUMB_WORDS","0"), 16),
+                                        condenser.RESULT_NUMB_WORDS,
                                         processCase
                                      );
                     
@@ -1245,17 +1244,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if (((storagePeerHash = getConfig("storagePeerHash",null))== null) || 
                             (storagePeerHash.trim().length() == 0) ||
                             ((seed = yacyCore.seedDB.getConnected(storagePeerHash))==null)){                           
-                            words = wordIndex.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
+                            words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
                         } else {
                             HashMap urlCache = new HashMap(1);
                             urlCache.put(newEntry.hash(),newEntry);
                             
                             ArrayList tmpEntities = new ArrayList(condenser.getWords().size());
                             
-                            int age = plasmaWordIndex.calcVirtualAge(lastModified);
                             int quality = 0;
                             try {
-                                quality = Integer.parseInt(condenser.getAnalysis().getProperty("INFORMATION_VALUE","0"), 16);
+                                quality = condenser.RESULT_INFORMATION_VALUE;
                             } catch (NumberFormatException e) {
                                 System.out.println("INTERNAL ERROR WITH CONDENSER.INFORMATION_VALUE: " + e.toString() + ": in URL " + newEntry.url().toString());
                             }                     
@@ -1272,7 +1270,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String wordHash = plasmaWordIndexEntry.word2hash(word);
                                 plasmaWordIndexEntity wordIdxEntity = new plasmaWordIndexEntity(wordHash);
                                 plasmaWordIndexEntry wordIdxEntry = new plasmaWordIndexEntry(urlHash, count, p++, 0, 0,
-                                        age, quality, language, doctype, true);
+                                        plasmaWordIndex.microDateDays(docDate), quality, language, doctype, true);
                                 wordIdxEntity.addEntry(wordIdxEntry);
                                 tmpEntities.add(wordIdxEntity);
                                 // wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry));
@@ -1284,7 +1282,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             String error = yacyClient.transferIndex(seed,(plasmaWordIndexEntity[])tmpEntities.toArray(new plasmaWordIndexEntity[tmpEntities.size()]),urlCache,true,120000);
                             
                             if (error != null) {
-                                words = wordIndex.addPageIndex(entry.url(), urlHash, loadDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
+                                words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
                             }
                             
                             // cleanup
@@ -1334,15 +1332,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 }
             }
             
-            document = null; 
-            
+            document = null;
+
         } catch (IOException e) {
             log.logSevere("ERROR in plasmaSwitchboard.process(): " + e.toString());
         } finally {
             // removing current entry from in process list
             synchronized (this.indexingTasksInProcess) {
                 this.indexingTasksInProcess.remove(entry.urlHash());
-            }            
+            }
             
             // removing current entry from notice URL queue
             boolean removed = urlPool.noticeURL.remove(entry.urlHash()); // worked-off
@@ -1355,11 +1353,84 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 plasmaHTCache.filesInUse.remove(entry.cacheFile());
                 cacheManager.deleteFile(entry.url());
             }
-            entry = null;              
+            entry = null;
         }
     }
 
-
+    private void generateCitationReference(String baseurlhash, Date docDate, plasmaParserDocument document, plasmaCondenser condenser) {
+        // generate citation reference
+        Map hl = document.getHyperlinks();
+        Iterator it = hl.entrySet().iterator();
+        String nexturlhash;
+        StringBuffer cpg = new StringBuffer(12 * (hl.size() + 1) + 1);
+        StringBuffer cpl = new StringBuffer(12 * (hl.size() + 1) + 1);
+        String lhp = baseurlhash.substring(6); // local hash part
+        int GCount = 0;
+        int LCount = 0;
+        while (it.hasNext()) {
+            nexturlhash = plasmaURL.urlHash((String) ((Map.Entry) it.next()).getKey());
+            if (nexturlhash != null) {
+                if (nexturlhash.substring(6).equals(lhp)) {
+                    cpl.append(nexturlhash.substring(0, 6));
+                    LCount++;
+                } else {
+                    cpg.append(nexturlhash);
+                    GCount++;
+                }
+            }
+        }
+        
+        // append this reference to buffer
+        // generate header info
+        String head = baseurlhash + "=" +
+                   plasmaWordIndex.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
+                   plasmaWordIndex.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
+                   serverCodings.enhancedCoder.encodeBase64LongSmart(LCount, 2) +  // count of links to local resources
+                   serverCodings.enhancedCoder.encodeBase64LongSmart(GCount, 2) +  // count of links to global resources
+                   serverCodings.enhancedCoder.encodeBase64LongSmart(document.getImages().size(), 2) + // count of Images in document
+                   serverCodings.enhancedCoder.encodeBase64LongSmart(0, 2) +       // count of links to other documents
+                   serverCodings.enhancedCoder.encodeBase64LongSmart(document.getText().length, 3) +   // length of plain text in bytes
+                   serverCodings.enhancedCoder.encodeBase64LongSmart(condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
+                   serverCodings.enhancedCoder.encodeBase64LongSmart(condenser.RESULT_SIMI_WORDS, 3) + // count of all unique words
+                   serverCodings.enhancedCoder.encodeBase64LongSmart(0, 1); // Flags (update, popularity, attention, vote)
+                   
+        //crl.append(head); crl.append ('|'); crl.append(cpl); crl.append((char) 13); crl.append((char) 10);
+        crg.append(head); crg.append ('|'); crg.append(cpg); crg.append((char) 13); crg.append((char) 10);
+        
+        // if buffer is full, flush it.
+        /*
+        if (crl.length() > maxCRLDump) {
+            flushCitationReference(crl, "crl");
+            crl = new StringBuffer(maxCRLDump);
+        }
+         **/
+        if (crg.length() > maxCRGDump) {
+            flushCitationReference(crg, "crg");
+            crg = new StringBuffer(maxCRGDump);
+        }
+    }
+    
+    private void flushCitationReference(StringBuffer cr, String type) {
+        if (cr.length() < 12) return;
+        String filename = type.toUpperCase() + "-A-" + new serverDate().toShortString(true) + "." + cr.substring(0, 12) + ".cr.gz";
+        File path = new File(rankingPath, (type.equals("crl") ? "LOCAL/010_cr/" : "GLOBAL/010_owncr/"));
+        path.mkdirs();
+        File file = new File(path, filename);
+        
+        // generate header
+        StringBuffer header = new StringBuffer(200);
+        header.append("# Name=YaCy " + ((type.equals("crl")) ? "Local" : "Global") + " Citation Reference Ticket"); header.append((char) 13); header.append((char) 10);
+        header.append("# Created=" + System.currentTimeMillis()); header.append((char) 13); header.append((char) 10);
+        header.append("# Structure=<Referee-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>,'|',*<Anchor-" + ((type.equals("crl")) ? "6" : "12") + ">"); header.append((char) 13); header.append((char) 10);
+        header.append("# ---"); header.append((char) 13); header.append((char) 10);
+        cr.insert(0, header.toString());
+        try {
+            serverFileUtils.writeAndZip(cr.toString().getBytes(), file);
+            log.logFine("wrote citation reference dump " + file.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     
     private void processLocalCrawling(plasmaCrawlNURL.Entry urlEntry, plasmaCrawlProfile.entry profile, String stats) {
         // work off one Crawl stack entry

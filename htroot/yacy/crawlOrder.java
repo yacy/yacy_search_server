@@ -47,6 +47,7 @@
 
 import java.util.ArrayList;
 import java.util.Date;
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaParser;
@@ -171,11 +172,11 @@ public final class crawlOrder {
                     // old method: only one url
 
                     // normalizing URL
-                    String newURL = plasmaParser.urlNormalform((String)urlv.get(0));
+                    String newURL = htmlFilterContentScraper.urlNormalform(null, (String)urlv.get(0));
                     if (!newURL.equals(urlv.get(0))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized URL " + urlv.get(0));    
                     }
-                    String refURL = plasmaParser.urlNormalform((String) refv.get(0));
+                    String refURL = htmlFilterContentScraper.urlNormalform(null, (String) refv.get(0));
                     if ((refURL != null) && (!refURL.equals(refv.get(0)))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized Referer URL " + refv.get(0) + " of URL " + urlv.get(0));    
                     }

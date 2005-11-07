@@ -87,19 +87,35 @@ public final class serverCodings {
         return ahpla[b];
     }
     
+    
+    public String encodeBase64LongSmart(long c, int length) {
+        if (c >= maxBase64(length)) {
+            StringBuffer s = new StringBuffer(length);
+            while (length > 0) {
+                s.insert(0,alpha[0x3F]);
+                length--;
+            }
+            return s.toString();
+        } else {
+            return encodeBase64Long(c, length);
+        }
+    }
     public String encodeBase64Long(long c, int length) {
-	if (length < 0) length = 0;	
-    StringBuffer s = new StringBuffer(length); //String s = "";
-	if (c == 0) s.insert(0,alpha[0]); //s = alpha[0] + s;
-	else while (c > 0) {
-	    s.insert(0,alpha[(byte) (c & 0x3F)]); //s = alpha[(byte) (c & 0x3F)] + s;
-	    c >>= 6;
-	}
-	if ((length != 0) && (s.length() > length))
-	    throw new RuntimeException("encodeBase64 result '" + s + "' exceeds demanded length of " + length + " digits");
-	if (length == 0) length = 1; // rare exception for the case that c == 0
-	while (s.length() < length) s.insert(0,alpha[0]); //s = alpha[0] + s;
-	return s.toString();
+        if (length < 0) length = 0;
+        StringBuffer s = new StringBuffer(length); //String s = "";
+        if (c == 0) {
+            s.insert(0,alpha[0]); //s = alpha[0] + s;
+        } else {
+            while (c > 0) {
+                s.insert(0,alpha[(byte) (c & 0x3F)]); //s = alpha[(byte) (c & 0x3F)] + s;
+                c >>= 6;
+            }
+        }
+        if ((length != 0) && (s.length() > length))
+            throw new RuntimeException("encodeBase64 result '" + s + "' exceeds demanded length of " + length + " digits");
+        if (length == 0) length = 1; // rare exception for the case that c == 0
+        while (s.length() < length) s.insert(0,alpha[0]); //s = alpha[0] + s;
+        return s.toString();
     }
 
     public long decodeBase64Long(String s) {

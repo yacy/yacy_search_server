@@ -63,15 +63,15 @@ import java.util.Iterator;
 public final class serverFileUtils {
     
     public static int copy(InputStream source, OutputStream dest) throws IOException {
-		byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[4096];
         
-		int c, total = 0;
-		while ((c = source.read(buffer)) > 0) {
+        int c, total = 0;
+        while ((c = source.read(buffer)) > 0) {
             dest.write(buffer, 0, c);
             dest.flush();
             total += c;
         }
-		dest.flush();
+        dest.flush();
         
         return total;
     }
@@ -79,10 +79,10 @@ public final class serverFileUtils {
     public static void copy(InputStream source, File dest) throws IOException {
         FileOutputStream fos = null;
         try {
-			fos = new FileOutputStream(dest);
-			copy(source, fos);
+            fos = new FileOutputStream(dest);
+            copy(source, fos);
         } finally {
-			if (fos != null) try {fos.close();} catch (Exception e) {}
+            if (fos != null) try {fos.close();} catch (Exception e) {}
         }
     }
     
@@ -135,12 +135,33 @@ public final class serverFileUtils {
         try {
             byteOut = new ByteArrayOutputStream((int)(source.length()/2));
             zipOut = new GZIPOutputStream(byteOut);
-            copy(source,zipOut);
+            copy(source, zipOut);
             zipOut.close();
             return byteOut.toByteArray();
         } finally {
             if (zipOut != null) try { zipOut.close(); } catch (Exception e) {}
             if (byteOut != null) try { byteOut.close(); } catch (Exception e) {}
+        }
+    }
+    
+    public static void writeAndZip(byte[] source, File dest) throws IOException {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(dest);
+            writeAndZip(source, fos);
+        } finally {
+            if (fos != null) try {fos.close();} catch (Exception e) {}
+        }
+    }
+    
+    public static void writeAndZip(byte[] source, OutputStream dest) throws IOException {
+        GZIPOutputStream zipOut = null;
+        try {
+            zipOut = new GZIPOutputStream(dest);
+            write(source, zipOut);
+            zipOut.close();
+        } finally {
+            if (zipOut != null) try { zipOut.close(); } catch (Exception e) {}
         }
     }
     
@@ -205,4 +226,11 @@ public final class serverFileUtils {
         }
     }
     
+    public static void main(String[] args) {
+        try {
+            writeAndZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

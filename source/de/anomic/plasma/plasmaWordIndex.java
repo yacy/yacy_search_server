@@ -60,6 +60,7 @@ import java.net.URL;
 
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaWordIndex {
@@ -103,27 +104,40 @@ public final class plasmaWordIndex {
 
     public int addEntries(plasmaWordIndexEntryContainer entries, boolean highPriority) {
         return ramCache.addEntries(entries, System.currentTimeMillis(), highPriority);
-    }   
+    }
 
-    public static int calcVirtualAge(Date modified) {
+    private static final int hour = 3600000;
+    private static final int day  = 86400000;
+    
+    public static int microDateDays(Date modified) {
 	// this calculates a virtual age from a given date
 	// the purpose is to have an age in days of a given modified date
 	// from a fixed standpoint in the past
-	//if (modified == null) return 0;
-	// this is milliseconds. we need days
 	// one day has 60*60*24 seconds = 86400 seconds
 	// we take mod 64**3 = 262144, this is the mask of the storage
-	return (int) ((modified.getTime() / 86400000) % 262144);
+	return (int) ((modified.getTime() / day) % 262144);
+    }
+    
+    public static String microDateHoursStr(long time) {
+	return serverCodings.enhancedCoder.encodeBase64Long(microDateHoursInt(time), 3);
+    }
+    
+    public static int microDateHoursInt(long time) {
+	return (int) ((time / hour) % 262144);
+    }
+    
+    public static int microDateHoursAge(String mdhs) {
+        return microDateHoursInt(System.currentTimeMillis()) - (int) serverCodings.enhancedCoder.decodeBase64Long(mdhs);
     }
     
     public int addPageIndex(URL url, String urlHash, Date urlModified, plasmaCondenser condenser,
                                    String language, char doctype) {
         // this is called by the switchboard to put in a new page into the index
 	// use all the words in one condenser object to simultanous create index entries
-	int age = calcVirtualAge(urlModified);
+	int age = microDateDays(urlModified);
 	int quality = 0;
 	try {
-	    quality = Integer.parseInt(condenser.getAnalysis().getProperty("INFORMATION_VALUE","0"), 16);
+	    quality = condenser.RESULT_INFORMATION_VALUE;
 	} catch (NumberFormatException e) {
 	    System.out.println("INTERNAL ERROR WITH CONDENSER.INFORMATION_VALUE: " + e.toString() + ": in URL " + url.toString());
 	}

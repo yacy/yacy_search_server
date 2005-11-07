@@ -471,6 +471,7 @@ public class plasmaCrawlNURL extends plasmaURL {
                 urlHashCache.put(entry);
             } catch (IOException e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", resetting NURL-DB");
+                e.printStackTrace();
                 try {
                     resetHashCache();
                 } catch (IOException ee) {
@@ -479,6 +480,7 @@ public class plasmaCrawlNURL extends plasmaURL {
                 }
             } catch (kelondroException e) {
                 serverLog.logSevere("PLASMA", "plasmaCrawlNURL.store failed: " + e.toString() + ", resetting NURL-DB");
+                e.printStackTrace();
                 try {
                     resetHashCache();
                 } catch (IOException ee) {

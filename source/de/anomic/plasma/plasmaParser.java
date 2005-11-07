@@ -592,7 +592,7 @@ public final class plasmaParser {
     
     public plasmaParserDocument transformScraper(URL location, String mimeType, htmlFilterContentScraper scraper) {
         try {
-            plasmaParserDocument ppd =  new plasmaParserDocument(new URL(urlNormalform(location)),
+            plasmaParserDocument ppd =  new plasmaParserDocument(new URL(htmlFilterContentScraper.urlNormalform(location)),
                                 mimeType, null, null, scraper.getHeadline(),
                                 null, null,
                                 scraper.getText(), scraper.getAnchors(), scraper.getImages());
@@ -643,6 +643,7 @@ public final class plasmaParser {
         
     }
     
+    /*
     public static String urlNormalform(URL url) {
         if (url == null) return null;
         return urlNormalform(url.toString());
@@ -651,6 +652,7 @@ public final class plasmaParser {
     public static String urlNormalform(String us) {
         return htmlFilterContentScraper.urlNormalform(us);
     }   
+    */
     
     static Map allReflinks(Map links) {
         // we find all links that are part of a reference inside a url

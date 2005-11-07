@@ -130,7 +130,7 @@ public class IndexCreate_p {
                         if (!(crawlingStart.startsWith("http"))) crawlingStart = "http://" + crawlingStart;
 
                         // normalizing URL
-                        crawlingStart = plasmaParser.urlNormalform(crawlingStart);
+                        crawlingStart = htmlFilterContentScraper.urlNormalform(null, crawlingStart);
                         
                         // check if url is proper
                         URL crawlingStartURL = null;
@@ -230,7 +230,7 @@ public class IndexCreate_p {
                                     nexturlstring = nexturlstring.trim();
                                     
                                     // normalizing URL
-                                    nexturlstring = plasmaParser.urlNormalform(nexturlstring);                                    
+                                    nexturlstring = htmlFilterContentScraper.urlNormalform(null, nexturlstring);                                    
                                     
                                     // generating an url object
                                     URL nexturlURL = null;

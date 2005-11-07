@@ -537,7 +537,7 @@ public class plasmaURL {
         
     public static final String oldurlHash(String url) {
 	if ((url == null) || (url.length() < 10)) return null;
-        String hash = serverCodings.encodeMD5B64(htmlFilterContentScraper.urlNormalform(url), true).substring(0, urlHashLength);
+        String hash = serverCodings.encodeMD5B64(htmlFilterContentScraper.urlNormalform(null, url), true).substring(0, urlHashLength);
         return hash;
     }
     

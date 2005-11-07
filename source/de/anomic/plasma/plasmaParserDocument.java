@@ -42,6 +42,8 @@
 
 package de.anomic.plasma;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -91,7 +93,7 @@ public class plasmaParserDocument {
     
     private String absolutePath(String relativePath) {
         try {
-            return plasmaParser.urlNormalform(new URL(location, relativePath));
+            return htmlFilterContentScraper.urlNormalform(location, relativePath);
         } catch (Exception e) {
             return "";
         }
@@ -191,7 +193,7 @@ public class plasmaParserDocument {
                     } else {
 			ext = url.substring(extpos).toLowerCase();
                     }
-                    normal = plasmaParser.urlNormalform(url);
+                    normal = htmlFilterContentScraper.urlNormalform(null, url);
                     if (normal != null) {
                         if (plasmaParser.mediaExtContains(ext.substring(1))) {
                             // this is not an normal anchor, its a media link
@@ -209,7 +211,7 @@ public class plasmaParserDocument {
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
             url = (String) entry.getKey();
-            normal = plasmaParser.urlNormalform(url);
+            normal = htmlFilterContentScraper.urlNormalform(null, url);
             if (normal != null) medialinks.put(normal, entry.getValue()); // avoid NullPointerException
         }
         expandHyperlinks();
