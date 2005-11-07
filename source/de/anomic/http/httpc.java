@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -59,7 +60,9 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
@@ -118,6 +121,8 @@ public final class httpc {
 
     // the dns cache
     private static final HashMap nameCacheHit = new HashMap();
+    public static final LinkedList nameCacheNoCachingPatterns = new LinkedList();
+    public static final HashSet nameCacheNoCachingList = new HashSet();
     //private static HashSet nameCacheMiss = new HashSet();
 
     /**
@@ -386,45 +391,66 @@ public final class httpc {
     * @param host Hostname of the host in demand.
     * @return String with the ip. null, if the host could not be resolved.
     */
-    public static String dnsResolve(String host) {
-        String ip = (String) nameCacheHit.get(host);
+    public static InetAddress dnsResolve(String host) {
+        if ((host == null)||(host.length() == 0)) return null;
+        host = host.toLowerCase().trim();
+        
+        // trying to resolve host by doing a name cache lookup
+        InetAddress ip = (InetAddress) nameCacheHit.get(host);
         if (ip != null) return ip;
+        
         // if (nameCacheMiss.contains(host)) return null;
-        try {
-            ip = InetAddress.getByName(host).getHostAddress();
-            if ((ip != null) && (!(ip.equals("127.0.0.1"))) && (!(ip.equals("localhost")))) {
-                if (host.indexOf("dyndns") < 0) nameCacheHit.put(host, ip);
-                return ip;
+        try {  
+            boolean doCaching = true;
+            ip = InetAddress.getByName(host);
+            if (
+                    (ip == null) ||
+                    (ip.isLoopbackAddress()) ||
+                    (nameCacheNoCachingList.contains(ip.getHostName()))
+            ) {
+                doCaching = false;
+            } else {
+                Iterator noCachingPatternIter = nameCacheNoCachingPatterns.iterator();
+                while (noCachingPatternIter.hasNext()) {
+                    String nextPattern = (String) noCachingPatternIter.next();
+                    if (ip.getHostName().matches(nextPattern)) {
+                        // disallow dns caching for this host
+                        nameCacheNoCachingList.add(ip.getHostName());
+                        doCaching = false;
+                        break;
+                    }
+                }
             }
-            return null;
+            
+            if (doCaching) nameCacheHit.put(ip.getHostName(), ip);
+            return ip;
         } catch (UnknownHostException e) {
             //nameCacheMiss.add(host);
         }
         return null;
     }
 
-    /**
-    * Checks wether an hostname already is in the DNS-cache.
-    * FIXME: This method should use dnsResolve, as the code is 90% identical?
-    *
-    * @param host Searched for hostname.
-    * @return true, if the hostname already is in the cache.
-    */
-    public static boolean dnsFetch(String host) {
-        if ((nameCacheHit.get(host) != null) /*|| (nameCacheMiss.contains(host)) */) return false;
-        if (host.indexOf("dyndns") < 0) return false;
-        try {
-            String ip = InetAddress.getByName(host).getHostAddress();
-            if ((ip != null) && (!(ip.equals("127.0.0.1"))) && (!(ip.equals("localhost")))) {
-                nameCacheHit.put(host, ip);
-                return true;
-            }
-            return false;
-        } catch (UnknownHostException e) {
-            //nameCacheMiss.add(host);
-            return false;
-        }
-    }
+//    /**
+//    * Checks wether an hostname already is in the DNS-cache.
+//    * FIXME: This method should use dnsResolve, as the code is 90% identical?
+//    *
+//    * @param host Searched for hostname.
+//    * @return true, if the hostname already is in the cache.
+//    */
+//    public static boolean dnsFetch(String host) {
+//        if ((nameCacheHit.get(host) != null) /*|| (nameCacheMiss.contains(host)) */) return false;
+//        try {
+//            String ip = InetAddress.getByName(host).getHostAddress();
+//            if ((ip != null) && (!(ip.equals("127.0.0.1"))) && (!(ip.equals("localhost")))) {
+//                nameCacheHit.put(host, ip);
+//                return true;
+//            }
+//            return false;
+//        } catch (UnknownHostException e) {
+//            //nameCacheMiss.add(host);
+//            return false;
+//        }
+//    }
 
     /**
     * Returns the given date in an HTTP-usable format.
@@ -527,13 +553,13 @@ public final class httpc {
             }
             
             this.host = server + ((port == 80) ? "" : (":" + port));
-            String hostip;
-            if ((server.equals("localhost")) || (server.equals("127.0.0.1")) || (server.startsWith("192.168.")) || (server.startsWith("10."))) {
-                hostip = server;
-            } else {
+            InetAddress hostip;
+//            if ((server.equals("localhost")) || (server.equals("127.0.0.1")) || (server.startsWith("192.168.")) || (server.startsWith("10."))) {
+//                hostip = server;
+//            } else {
                 hostip = dnsResolve(server);
                 if (hostip == null) throw new UnknownHostException(server);
-            }
+//            }
 
             // creating a socket
             this.socket = (ssl) 

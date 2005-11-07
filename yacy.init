@@ -651,3 +651,6 @@ searchProcessRemoteTime_f = 5
 searchProcessRemoteCount_f = 100
 searchProcessRemoteTime_s = 10
 searchProcessRemoteCount_s = 10
+
+# a list of domain name patterns that should not be cached by the httpc dns cache
+httpc.nameCacheNoCachingPatterns = .*.dyndns.org, .*.dynalias.org

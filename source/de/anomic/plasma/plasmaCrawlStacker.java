@@ -206,24 +206,22 @@ public final class plasmaCrawlStacker {
         }
         
         // check if ip is local ip address
-        try {
-            InetAddress hostAddress = InetAddress.getByName(nexturl.getHost());
-            if (hostAddress.isSiteLocalAddress()) {
-                reason = "denied_(private_ip_address)";
-                this.log.logFine("Host in URL '" + nexturlString + "' has private ip address." +
-                                 "Stack processing time: " + (System.currentTimeMillis()-startTime));
-                return reason;                
-            } else if (hostAddress.isLoopbackAddress()) {
-                reason = "denied_(loopback_ip_address)";
-                this.log.logFine("Host in URL '" + nexturlString + "' has loopback ip address." + 
-                                 "Stack processing time: " + (System.currentTimeMillis()-startTime));
-                return reason;                  
-            }
-        } catch (UnknownHostException e) {
+        InetAddress hostAddress = httpc.dnsResolve(nexturl.getHost());
+        if (hostAddress == null) {
             reason = "denied_(unknown_host)";
             this.log.logFine("Unknown host in URL '" + nexturlString + "'." +
-                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
-            return reason;
+                    "Stack processing time: " + (System.currentTimeMillis()-startTime));
+            return reason;                
+        } else if (hostAddress.isSiteLocalAddress()) {
+            reason = "denied_(private_ip_address)";
+            this.log.logFine("Host in URL '" + nexturlString + "' has private ip address." +
+                    "Stack processing time: " + (System.currentTimeMillis()-startTime));
+            return reason;                
+        } else if (hostAddress.isLoopbackAddress()) {
+            reason = "denied_(loopback_ip_address)";
+            this.log.logFine("Host in URL '" + nexturlString + "' has loopback ip address." + 
+                    "Stack processing time: " + (System.currentTimeMillis()-startTime));
+            return reason;                  
         }
         
         // check blacklist

@@ -449,8 +449,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         testresult = facilityDB.selectLong("statistik", (new serverDate()).toShortString(false).substring(0, 11));
         */
         
+        /*
+         * Initializing httpc
+         */
         // initializing yacyDebugMode
         httpc.yacyDebugMode = getConfig("yacyDebugMode", "false").equals("true");
+        
+        // init nameCacheNoCachingList
+        String noCachingList = getConfig("httpc.nameCacheNoCachingPatterns","");
+        String[] noCachingEntries = noCachingList.split(",");
+        for (int i=0; i<noCachingEntries.length; i++) {
+            String entry = noCachingEntries[i].trim();
+            httpc.nameCacheNoCachingPatterns.add(entry);
+        }
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");

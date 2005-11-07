@@ -142,7 +142,7 @@ public final class serverLog {
         Logger.getLogger(appName).fine(message);
     }
     public static void logFine(String appName, String message, Throwable thrown) {
-        Logger.getLogger(appName).log(Level.FINER,message,thrown);
+        Logger.getLogger(appName).log(Level.FINE,message,thrown);
     }
     
     public static void logFiner(String appName, String message) {

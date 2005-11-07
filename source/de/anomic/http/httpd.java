@@ -1062,22 +1062,19 @@ public final class httpd implements serverHandler {
             String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP,"127.0.0.1");
             
             // check if ip is local ip address
-            try {
-                InetAddress hostAddress = InetAddress.getByName(clientIP);
-                if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
-                    tp.put("host", serverCore.publicLocalIP().getHostAddress());
-                    tp.put("port", switchboard.getConfig("port", "8080"));
-                } else {
-                    tp.put("host", serverCore.publicIP());
-                    tp.put("port", (serverCore.portForwardingEnabled && (serverCore.portForwarding != null)) 
-                                   ? Integer.toString(serverCore.portForwarding.getPort()) 
-                                   : switchboard.getConfig("port", "8080"));
-                }
-            } catch (UnknownHostException e) {
+            InetAddress hostAddress = httpc.dnsResolve(clientIP);
+            if (hostAddress == null) {
+                tp.put("host", serverCore.publicLocalIP().getHostAddress());
+                tp.put("port", switchboard.getConfig("port", "8080"));                    
+            } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
                 tp.put("host", serverCore.publicLocalIP().getHostAddress());
                 tp.put("port", switchboard.getConfig("port", "8080"));
-            }            
-            
+            } else {
+                tp.put("host", serverCore.publicIP());
+                tp.put("port", (serverCore.portForwardingEnabled && (serverCore.portForwarding != null)) 
+                        ? Integer.toString(serverCore.portForwarding.getPort()) 
+                                : switchboard.getConfig("port", "8080"));
+            }                   
 
             tp.put("peerName", yacyCore.seedDB.mySeed.getName());
             tp.put("errorMessageType", errorcase);            
@@ -1318,9 +1315,12 @@ public final class httpd implements serverHandler {
         
         boolean isThisHostIP = false;
         try {
-            InetAddress hostAddress = InetAddress.getByName(hostName);
-            InetAddress forwardingAddress = InetAddress.getByName(serverCore.portForwarding.getHost());
+            //InetAddress hostAddress = InetAddress.getByName(hostName);
+            InetAddress hostAddress = httpc.dnsResolve(hostName);
+            //InetAddress forwardingAddress = InetAddress.getByName(serverCore.portForwarding.getHost());
+            InetAddress forwardingAddress = httpc.dnsResolve(serverCore.portForwarding.getHost());
             
+            if ((hostAddress==null)||(forwardingAddress==null)) return false;
             if (hostAddress.equals(forwardingAddress)) return true;              
         } catch (Exception e) {}   
         return isThisHostIP;        
@@ -1331,7 +1331,10 @@ public final class httpd implements serverHandler {
         
         boolean isThisHostIP = false;
         try {
-            final InetAddress clientAddress = InetAddress.getByName(hostName);
+//             final InetAddress clientAddress = InetAddress.getByName(hostName);
+            final InetAddress clientAddress = httpc.dnsResolve(hostName);
+            if (clientAddress == null) return false;
+            
             if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
             
             final InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());

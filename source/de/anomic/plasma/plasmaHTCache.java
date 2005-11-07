@@ -57,6 +57,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -336,14 +337,14 @@ public final class plasmaHTCache {
         // start to prefetch ip's from dns                       
         String dom;
         long start = System.currentTimeMillis();
-        String ip, result = "";
+        String result = "";
         c = 0;
         while ((doms.size() > 0) && (c < 50) && ((System.currentTimeMillis() - start) < 60000)) {
             dom = (String) doms.getMaxObject();
-            ip = httpc.dnsResolve(dom);
+            InetAddress ip = httpc.dnsResolve(dom);
             if (ip == null) continue;
-            result += ", " + dom + "=" + ip;
-            this.log.logConfig("PRE-FILLED " + dom + "=" + ip);
+            result += ", " + dom + "=" + ip.getHostAddress();
+            this.log.logConfig("PRE-FILLED " + dom + "=" + ip.getHostAddress());
             c++;
             doms.deleteScore(dom);
             // wait a short while to prevent that this looks like a DoS

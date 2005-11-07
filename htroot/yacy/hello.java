@@ -50,6 +50,7 @@ import java.net.InetAddress;
 import java.util.Date;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -108,17 +109,19 @@ public final class hello {
             boolean isLocalIP = false;
             if (serverCore.portForwardingEnabled) {
                 try {
-                    final InetAddress clientAddress = InetAddress.getByName(clientip);                    
-                    if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) {
-                        isLocalIP = true;
-                    } else {
-                        final InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
-                        for (i = 0; i < localAddress.length; i++) {
-                            if (localAddress[i].equals(clientAddress)) {
-                                isLocalIP = true;
-                                break;
-                            }
-                        }  
+                    final InetAddress clientAddress = httpc.dnsResolve(clientip);   
+                    if (clientAddress != null) {                        
+                        if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) {
+                            isLocalIP = true;
+                        } else {
+                            final InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
+                            for (i = 0; i < localAddress.length; i++) {
+                                if (localAddress[i].equals(clientAddress)) {
+                                    isLocalIP = true;
+                                    break;
+                                }
+                            }  
+                        }
                     }
                 } catch (Exception e) {}
             }
