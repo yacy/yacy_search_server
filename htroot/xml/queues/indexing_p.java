@@ -97,8 +97,15 @@ public class indexing_p {
                 if ((switchboard.sbQueue.size() > 0)) {
                     entryList.addAll(switchboard.sbQueue.list(0));
                 }
+                int size=10;
+                if(post!= null && post.containsKey("num")){
+                    size=(int)Integer.parseInt((String)post.get("num"));
+                }
+                if(size>entryList.size()){
+                    size=entryList.size();
+                }
                 
-                for (i = 0; i < entryList.size(); i++) {
+                for (i = 0; i < size; i++) {
                     boolean inProcess = i < inProcessCount;
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
                     long entrySize = pcentry.size();
