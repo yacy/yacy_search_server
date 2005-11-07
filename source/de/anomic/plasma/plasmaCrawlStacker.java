@@ -60,6 +60,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.data.robotsParser;
 import de.anomic.http.httpc;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRecords.Node;
 import de.anomic.server.serverCodings;
@@ -467,7 +468,7 @@ public final class plasmaCrawlStacker {
         private final serverSemaphore readSync;
         private final serverSemaphore writeSync;
         private final LinkedList urlEntryHashCache;
-        private final kelondroTree urlEntryCache;
+        private kelondroTree urlEntryCache;
         
         public stackCrawlQueue(File cacheStacksPath, int bufferkb) throws IOException  {
             // init the read semaphore
@@ -486,19 +487,28 @@ public final class plasmaCrawlStacker {
             if (cacheFile.exists()) {
                 // open existing cache
                 this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400);
-                
-                // loop through the list and fill the messageList with url hashs
-                Iterator iter = this.urlEntryCache.nodeIterator(true,false);
-                Node n;
-                while (iter.hasNext()) {
-                    n = (Node) iter.next();
-                    if (n == null) {
-                        System.out.println("ERROR! null element found");
-                        continue;
+                try {
+                    // loop through the list and fill the messageList with url hashs
+                    Iterator iter = this.urlEntryCache.nodeIterator(true,false);
+                    Node n;
+                    while (iter.hasNext()) {
+                        n = (Node) iter.next();
+                        if (n == null) {
+                            System.out.println("ERROR! null element found");
+                            continue;
+                        }
+                        String urlHash = new String(n.getKey());
+                        this.urlEntryHashCache.add(urlHash);
+                        this.readSync.V();
                     }
-                    String urlHash = new String(n.getKey());
-                    this.urlEntryHashCache.add(urlHash);
-                    this.readSync.V();
+                } catch (kelondroException e) {
+                    /* if we have an error, we start with a fresh database */
+                    plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue. Reseting DB.\n",e);
+                    
+                    // deleting old db and creating a new db
+                    try {this.urlEntryCache.close();}catch(Exception ex){}
+                    cacheFile.delete();
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, plasmaCrawlNURL.ce);
                 }
             } else {
                 // create new cache
