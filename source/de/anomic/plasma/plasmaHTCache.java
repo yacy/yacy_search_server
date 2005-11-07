@@ -429,8 +429,8 @@ public final class plasmaHTCache {
     public File getCachePath(URL url) {
 //      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
         String remotePath = url.getFile();
-        if (remotePath.endsWith("/")) { remotePath = remotePath + "ndx"; }
         if (!remotePath.startsWith("/")) { remotePath = "/" + remotePath; }        
+        if (remotePath.endsWith("/")) { remotePath = remotePath + "ndx"; }
         remotePath = remotePath.replaceAll("[?&:]", "_"); // yes this is not reversible, but that is not needed
         int port = url.getPort();
         if (port < 0) {
