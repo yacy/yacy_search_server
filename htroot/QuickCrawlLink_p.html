@@ -1,0 +1,69 @@
+<html>
+<head>
+	<title>YaCy '#[clientname]#': Quick Crawl Link</title>
+	#[metas]#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr><td>
+  <table class="Heading" border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr height="36">
+    <td width="240">
+	<a href="http://www.yacy.net">
+	<img width="52" height="33" border="0" src="/env/grafics/yacy.gif" align="top">
+	</a>
+    </td>
+    <td width="50%" align="center">
+		<div class="Headline">#[clientname]#: Quick Crawl Link</div>
+    </td>
+    <td width="240" align="right">
+    </td>
+  </tr>
+  </table>
+</td></tr>
+</table>
+<br><br>
+
+#(mode)#<!-- 0 -->
+<table style="margin-left: auto; margin-right: auto;">
+<tr>
+<td>
+<b>Quickly adding Bookmarks:</b>
+<p>Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.
+If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.</p>
+</td>
+</tr>
+<tr>
+	<td><a href="javascript:w = window.open('http://#[host]#:#[port]#/QuickCrawlLink_p.html?localIndexing=on&amp;crawlingQ=on&amp;xdstopw=on&amp;title='+escape(document.title)+'&amp;url='+location.href,'_blank','height=150,width=500,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();"><img src="/env/grafics/addlink.gif" border="0">&nbsp;Crawl with YaCy</a></td></tr>
+</table>
+
+::<!-- 1 -->
+<table style="margin-left: auto; margin-right: auto;">
+<tr>
+	<td><b>Title:</b></td>
+	<td>#[title]#</td>
+</tr>
+<tr>
+	<td><b>Link:</b></td>
+	<td><a href="#[url]#">#[url]#</a></td>
+</tr>	
+<tr>
+	<td><b>Status:</b></td>
+	<td>
+		#(status)#<!-- 0 -->
+		<font color="green">URL successfully added to Crawler Queue</font>
+		::<!-- 1 -->
+		<font color="red">Malformed URL</font>
+		::<!-- 2 -->
+		<font color="red">Unable to create new crawling profile for URL: #[error]#</font>
+		::<!-- 3 -->
+		<font color="red">Unable to add URL to crawler queue: #[error]#</font>						
+		#(/status)#
+	</td>
+</tr>	
+</table>
+#(/mode)#
+
+</body>
+</html>

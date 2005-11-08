@@ -338,9 +338,16 @@ public final class yacyClient {
         }
     }
 
-    public static int search(String wordhashes, boolean global, yacySeed targetPeer,
-                             plasmaCrawlLURL urlManager, plasmaWordIndexEntity entityCache,
-                             plasmaURLPattern blacklist, plasmaSnippetCache snippets, plasmaSearchProfile profile) {
+    public static int search(
+            String wordhashes, 
+            boolean global, 
+            yacySeed targetPeer,
+           plasmaCrawlLURL urlManager, 
+           plasmaWordIndexEntity entityCache,
+           plasmaURLPattern blacklist, 
+           plasmaSnippetCache snippets, 
+           plasmaSearchProfile profile
+    ) {
         // send a search request to peer with remote Hash
         // this mainly converts the words into word hashes
 
