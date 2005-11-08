@@ -65,6 +65,45 @@ public final class Settings_p {
         
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
+        String page = (post == null) ? "admin" : post.get("page", "admin");
+        
+        if (page.equals("admin")) {
+        	prop.put("settingsTables", "Settings_Admin.inc");
+        }
+        else if (page.equals("general")) {
+            prop.put("settingsTables", "Settings_General.inc");
+        }
+        else if (page.equals("ProxyAccess")) {
+            prop.put("settingsTables", "Settings_ProxyAccess.inc");
+        }
+        else if (page.equals("http")) {
+            prop.put("settingsTables", "Settings_Http.inc");
+        }
+        else if (page.equals("proxy")) {
+            prop.put("settingsTables", "Settings_Proxy.inc");
+        }
+        else if (page.equals("ServerAccess")) {	
+            prop.put("settingsTables", "Settings_ServerAccess.inc");
+        }
+        else if (page.equals("SystemBehaviour")) {
+            prop.put("settingsTables", "Settings_SystemBehaviour.inc");
+        }
+        else if (page.equals("seed")) {
+            prop.put("settingsTables", "Settings_Seed.inc");
+        }
+        else if (page.equals("messageForwarding")) {
+            prop.put("settingsTables", "Settings_MessageForwarding.inc");
+        }
+        else if (page.equals("portForwarding")) {
+            prop.put("settingsTables", "Settings_PortForwarding.inc");
+        }
+        else if (page.equals("parser")) {
+            prop.put("settingsTables", "Settings_Parser.inc");
+        }
+        else {
+        	prop.put("settingsTables", "Settings_Admin.inc");
+        }
+
         prop.put("port", env.getConfig("port", "8080"));               
         
         prop.put("peerName", env.getConfig("peerName", "nameless"));

@@ -1,0 +1,31 @@
+<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend id="parser">Content Parser Settings</legend>
+<p>With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.<br>
+For a detailed description of the various MIME-types take a look at <a href="http://www.iana.org/assignments/media-types/">http://www.iana.org/assignments/media-types/</a></p>
+<p>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small" >Activate</td>
+<td class="small" >Mime-Type</td>
+<td class="small" >Parser&nbsp;Class&nbsp;Name</td>
+<td class="small" ></td>
+</tr>
+#{parser}#
+<tr class="TableCellDark">
+	<td class="small" align="center"><input type="checkbox" name="#[mime]#" align="top" #(status)#::checked#(/status)#></td>
+	<td class="small" >#[mime]#</td>
+	<td class="small" title="Full qualified name: #[name]#">#[shortname]#</td>
+	<td class="small" width="100%"></td>
+	</tr>
+#{/parser}#
+  <tr class="TableCellLight">
+    <td class="small" align="center"><input type="checkbox" name="allParserEnabled" align="top" #(allParserEnabled)#::checked#(/allParserEnabled)#>
+    <td colspan="2" class="small" >Enable all parsers</td>
+    <td class="small">&nbsp;</td>
+  </tr>
+  <tr class="TableCellLight">
+    <td colspan="4" class="small" ><input type="submit" name="parserSettings" value="submit">&nbsp;Changes take effect immediately</td>
+  </tr>
+</table>
+</fieldset>
+</form><br>
