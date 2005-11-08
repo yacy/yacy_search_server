@@ -99,48 +99,62 @@ public final class robotsParser{
         
         int pos;
         String line = null, lineUpper = null;
-        boolean rule4Yacy = false;        
+        boolean rule4Yacy = false, inBlock = false;        
+        
         while ((line = reader.readLine()) != null) {
             line = line.trim();
             lineUpper = line.toUpperCase();
+            
             if (line.length() == 0) {
                 // we have reached the end of the rule block
-                rule4Yacy = false;
+                rule4Yacy = false; inBlock = false;
             } else if (line.startsWith("#")) {
                 // we can ignore this. Just a comment line
-            } else if ((!rule4Yacy) && (lineUpper.startsWith("User-agent:".toUpperCase()))) {
-                // cutting off comments at the line end
-                pos = line.indexOf("#");
-                if (pos != -1) {
-                    line = line.substring(0,pos);
+            } else if (lineUpper.startsWith("User-agent:".toUpperCase())) {
+                
+                if (inBlock) {
+                    inBlock = false;
+                    rule4Yacy = false;
                 }
                 
-                // getting out the robots name
-                pos = line.indexOf(" ");
-                if (pos != -1) {
-                    String userAgent = line.substring(pos).trim();
-                    rule4Yacy = (userAgent.equals("*") || (userAgent.toLowerCase().indexOf("yacy") >=0));
+                if (!rule4Yacy) {
+                    // cutting off comments at the line end
+                    pos = line.indexOf("#");
+                    if (pos != -1) {
+                        line = line.substring(0,pos);
+                    }
+                    
+                    // getting out the robots name
+                    pos = line.indexOf(" ");
+                    if (pos != -1) {
+                        String userAgent = line.substring(pos).trim();
+                        rule4Yacy = (userAgent.equals("*") || (userAgent.toLowerCase().indexOf("yacy") >=0));
+                    }
                 }
-            } else if (lineUpper.startsWith("Disallow:".toUpperCase()) && rule4Yacy) {                
-                // cutting off comments at the line end
-                pos = line.indexOf("#");
-                if (pos != -1) {
-                    line = line.substring(0,pos);
-                }
+            } else if (lineUpper.startsWith("Disallow:".toUpperCase())) {
+                inBlock = true;
                 
-                pos = line.indexOf(" ");
-                if (pos != -1) {
-                    // getting the path
-                    String path = line.substring(pos).trim();
+                if (rule4Yacy) {
+                    // cutting off comments at the line end
+                    pos = line.indexOf("#");
+                    if (pos != -1) {
+                        line = line.substring(0,pos);
+                    }
                     
-                    // unencoding all special charsx
-                    path = URLDecoder.decode(path,"UTF-8");
-                    
-                    // escaping all occurences of ; because this char is used as special char in the Robots DB
-                    path = path.replaceAll(";","%3B");                    
-                    
-                    // adding it to the pathlist
-                    deny.add(path);
+                    pos = line.indexOf(" ");
+                    if (pos != -1) {
+                        // getting the path
+                        String path = line.substring(pos).trim();
+                        
+                        // unencoding all special charsx
+                        path = URLDecoder.decode(path,"UTF-8");
+                        
+                        // escaping all occurences of ; because this char is used as special char in the Robots DB
+                        path = path.replaceAll(";","%3B");                    
+                        
+                        // adding it to the pathlist
+                        deny.add(path);
+                    }
                 }
             }
         }
@@ -248,7 +262,11 @@ public final class robotsParser{
             downloadStart = System.currentTimeMillis();
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             //TODO: adding Traffic statistic for robots download?
-            if ((sb.remoteProxyConfig == null) || (!sb.remoteProxyConfig.useProxy())) {
+            if (
+                    (sb == null) || 
+                    (sb.remoteProxyConfig == null) || 
+                    (!sb.remoteProxyConfig.useProxy())
+            ) {
                 con = httpc.getInstance(robotsURL.getHost(), robotsURL.getPort(), 10000, robotsURL.getProtocol().equalsIgnoreCase("https"));
             } else {
                 con = httpc.getInstance(robotsURL.getHost(), robotsURL.getPort(), 10000, robotsURL.getProtocol().equalsIgnoreCase("https"), sb.remoteProxyConfig);
@@ -320,4 +338,28 @@ public final class robotsParser{
         }            
         return new Object[]{new Boolean(accessCompletelyRestricted),robotsTxt,eTag,lastMod};
     }
+    
+    public static void main(String[] args) {
+        try {
+        robotsParser parser = new robotsParser();
+        
+        URL robotsURL = new URL("http://www.bigfoot2002.de.vu/robots.txt");
+        Object[] result = parser.downloadRobotsTxt(robotsURL,5,null);
+        
+        if (result != null) {
+            boolean accessCompletelyRestricted = ((Boolean)result[0]).booleanValue();
+            byte[] robotsTxt = (byte[])result[1];
+            String eTag = (String) result[2];
+            Date modDate = (Date) result[3];
+        
+            if (!accessCompletelyRestricted) {
+                ArrayList denyPath = robotsParser.parse(robotsTxt);
+            }
+
+        }
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
