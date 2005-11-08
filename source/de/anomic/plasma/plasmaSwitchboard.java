@@ -1836,7 +1836,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if ((((String) header.get("CLIENTIP", "")).equals("localhost")) && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
         if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         userDB.Entry entry = this.userDB.proxyAuth((String)header.get(httpHeader.AUTHORIZATION, "xxxxxx"));
-        if(entry.hasAdminRight())
+        if((entry != null) && (entry.hasAdminRight()))
             return 4;
         return 0; // wrong password
     }
