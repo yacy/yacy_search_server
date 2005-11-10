@@ -380,7 +380,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                 url = urle.url().toString();
                 txt = urle.url().toString();
 
-                // Kosmetik, die wirklich benutzte URL behält die ':80'
+                // Kosmetik, die wirklich benutzte URL behaelt die ':80'
                 if (txt.endsWith(":80")) txt = txt.substring(0, txt.length() - 3);
                 if ((p = txt.indexOf(":80/")) != -1) {
                     txt = txt.substring(0, p).concat(txt.substring(p + 3)); // den '/' erstmal nicht abschneiden

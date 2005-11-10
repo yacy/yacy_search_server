@@ -125,7 +125,8 @@ public class natLib {
     //TODO: This is not IPv6 compatible
     public static boolean isProper(String ip) {
 	plasmaSwitchboard sb=plasmaSwitchboard.getSwitchboard();
-	String yacyDebugMode = sb.getConfig("yacyDebugMode", "false");
+        if (sb == null) return false;
+        String yacyDebugMode = sb.getConfig("yacyDebugMode", "false");
 	if(yacyDebugMode.equals("true")){
 		return true;
 	}

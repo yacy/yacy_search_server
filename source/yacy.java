@@ -83,6 +83,7 @@ import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyClient;
 
 /**
 * This is the main class of the proxy. Several threads are started from here:
@@ -1069,6 +1070,20 @@ public final class yacy {
         serverLog.logConfig("DELETE-STOPWORDS", "FINISHED");
     }
 
+    private static void transferCR(String targetaddress, String crfile) {
+        File f = new File(crfile);
+        try {
+            byte[] b = serverFileUtils.read(f);
+            String result = yacyClient.transfer(targetaddress, f.getName(), b);
+            if (result == null)
+                serverLog.logInfo("TRANSFER-CR", "transmitted file " + crfile + " to " + targetaddress + " successfully");
+            else
+                serverLog.logInfo("TRANSFER-CR", "error transmitting file " + crfile + " to " + targetaddress + ": " + result);
+        } catch (IOException e) {
+            serverLog.logInfo("TRANSFER-CR", "could not read file " + crfile);
+        }
+    }
+    
     /**
     * Main-method which is started by java. Checks for special arguments or
     * starts up the application.
@@ -1134,6 +1149,11 @@ public final class yacy {
             int minlength = Integer.parseInt(args[2]);
             int maxlength = Integer.parseInt(args[3]);
             cleanwordlist(args[1], minlength, maxlength);
+        } else if ((args.length >= 1) && (args[0].equals("-transfercr"))) {
+            // transfer a single cr file to a remote peer
+             String targetaddress = args[1];
+             String crfile = args[2];
+             transferCR(targetaddress, crfile);
         } else {
             if (args.length == 1) applicationRoot= args[0];
             startup(applicationRoot, startupMemFree, startupMemTotal);

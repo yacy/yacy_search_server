@@ -258,12 +258,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public static void main(String[] args) {
-        String test = "Nokia kürzt bei Forschung und Entwicklung";
+        /*
         try {
             htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL("http://localhost"));
             scraper.scrapeText(test.getBytes());
             System.out.println(new String(scraper.getText()));
         } catch (MalformedURLException e) {}
+         */
     }
 
 }

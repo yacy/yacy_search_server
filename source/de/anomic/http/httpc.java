@@ -1128,7 +1128,8 @@ do upload
             boolean ssl,
             httpRemoteProxyConfig theRemoteProxyConfig,
             httpHeader requestHeader, 
-            serverObjects props
+            serverObjects props,
+            HashMap files
     ) throws IOException {
 
         if (requestHeader == null) requestHeader = new httpHeader();
@@ -1143,7 +1144,7 @@ do upload
             } else {
                 con = httpc.getInstance(host, port, timeout, ssl, theRemoteProxyConfig);
             }
-            httpc.response res = con.POST(path, requestHeader, props, null);
+            httpc.response res = con.POST(path, requestHeader, props, files);
 
             //System.out.println("response=" + res.toString());
             if (res.status.startsWith("2")) {
@@ -1164,7 +1165,8 @@ do upload
             String user, 
             String password,
             httpRemoteProxyConfig theRemoteProxyConfig,
-            serverObjects props
+            serverObjects props,
+            HashMap files
     ) throws IOException {
         int port = u.getPort();
         boolean ssl = u.getProtocol().equals("https");
@@ -1182,7 +1184,8 @@ do upload
                 ssl, 
                 theRemoteProxyConfig, 
                 null, 
-                props
+                props,
+                files
         );
     }
 
@@ -1198,7 +1201,8 @@ do upload
                     null, 
                     null, 
                     null, 
-                    props
+                    props,
+                    null
             );
         } catch (MalformedURLException e) {
             throw new IOException("Malformed URL: " + e.getMessage());
@@ -1328,7 +1332,8 @@ do upload
             String user, 
             String password, 
             httpRemoteProxyConfig theRemoteProxyConfig, 
-            serverObjects props
+            serverObjects props,
+            HashMap files
     ) throws IOException {
         // splitting of the byte array into lines
         byte[] a = singlePOST(
@@ -1337,7 +1342,8 @@ do upload
                 user, 
                 password, 
                 theRemoteProxyConfig, 
-                props
+                props,
+                files
         );
         
         //System.out.println("wput-out=" + new String(a));

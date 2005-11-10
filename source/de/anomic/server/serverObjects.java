@@ -123,14 +123,14 @@ public final class serverObjects extends Hashtable implements Cloneable {
     }
 
     // new get with default objects
-    public Object get(Object key, Object dflt) {
+    public Object get(String key, Object dflt) {
 	Object result = super.get(key);
 	if (result == null) return dflt; else return result;
     }
 
     // string variant
     public String get(String key, String dflt) {
-	return (String) this.get((Object) key, (Object) dflt);
+	return (String) this.get(key, (Object) dflt);
     }
 
     public int getInt(String key, int dflt) {

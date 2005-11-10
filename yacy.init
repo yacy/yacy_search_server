@@ -490,10 +490,10 @@ ramCachePreNURL = 4194304
 # is only valid in unix/shell environments and
 # not for first startup of YaCy
 
-# -Xms<size> set initial Java heap size
+# -Xmx<size> set maximum Java heap size
 javastart_Xmx=Xmx64m
 
-# -Xmx<size> set maximum Java heap size
+# -Xms<size> set initial Java heap size
 javastart_Xms=Xms10m
 
 

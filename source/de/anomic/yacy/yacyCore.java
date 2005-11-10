@@ -398,7 +398,12 @@ public class yacyCore {
             } catch (IOException e) {
                 log.logSevere("publishMySeed: problem with news encoding", e);
             }
-
+            seedDB.mySeed.setUnusedFlags();
+            
+            // include current citation-rank file count
+            seedDB.mySeed.put(yacySeed.CRWCNT, Integer.toString(switchboard.rankingOwnDistribution.size()));
+            seedDB.mySeed.put(yacySeed.CRTCNT, Integer.toString(switchboard.rankingOtherDistribution.size()));
+            
             // holding a reference to all started threads
             int contactedSeedCount = 0;
             final List syncList = Collections.synchronizedList(new LinkedList()); // memory for threads

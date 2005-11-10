@@ -203,13 +203,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             //htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
         }
         
-
-        
-
-        
-
-        
-
         // initialise an message digest for Content-MD5 support ...
         try {
             this.md5Digest = MessageDigest.getInstance("MD5");

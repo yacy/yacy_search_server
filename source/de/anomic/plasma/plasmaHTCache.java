@@ -470,7 +470,7 @@ public final class plasmaHTCache {
             s = s.substring(pos + c.length());
             while (s.startsWith("/")) s = s.substring(1);
             
-            // dieser Block kann später gelöscht werden
+            // dieser Block kann spaeter geloescht werden
             pos = s.indexOf("+");
             if (pos >= 0) { 
                 s = s.substring(0, pos) + ":" + s.substring(pos + 1);

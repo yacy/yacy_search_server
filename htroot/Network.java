@@ -59,6 +59,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyNewsPool;
+import de.anomic.yacy.yacyVersion;
 
 public class Network {
 
@@ -338,6 +339,7 @@ public class Network {
                             if (page == 1) {
                                 prop.put(STR_TABLE_LIST + conCount + "_acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0); // green=on or red=off 
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);  // green=on or red=off
+                                prop.put(STR_TABLE_LIST + conCount + "_rankingreceive", (seed.getVersion() >= yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION) ? 1 : 0);
                             } else { // Passive, Potential Peers
                                 if (seed.getFlagAcceptRemoteCrawl()) {
                                     prop.put(STR_TABLE_LIST + conCount + "_acceptcrawl", 2); // red/green: offline, was on
@@ -349,6 +351,11 @@ public class Network {
                                 } else {
                                     prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", 0);  // red/red; offline was off
                                 }
+                                if (seed.getVersion() >= yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION) {
+                                    prop.put(STR_TABLE_LIST + conCount + "_rankingreceive", 1);
+                                } else {
+                                    prop.put(STR_TABLE_LIST + conCount + "_rankingreceive", 0);
+                                }
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_version", yacy.combinedVersionString2PrettyString(seed.get(yacySeed.VERSION, "0.1")));
                             prop.put(STR_TABLE_LIST + conCount + "_lastSeen", lastseen);
@@ -356,6 +363,8 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
                             prop.put(STR_TABLE_LIST + conCount + "_links", groupDigits(seed.get(yacySeed.LCOUNT, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_words", groupDigits(seed.get(yacySeed.ICOUNT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_CRWCnt", seed.get(yacySeed.CRWCNT, "0"));
+                            prop.put(STR_TABLE_LIST + conCount + "_CRTCnt", seed.get(yacySeed.CRTCNT, "0"));
                             prop.put(STR_TABLE_LIST + conCount + "_sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));

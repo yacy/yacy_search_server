@@ -106,7 +106,7 @@ public class CacheAdmin_p {
             final TreeSet fList = new TreeSet();
             File object;
             int size = list.length - 1;
-            for (int i = size; i >= 0 ; i--) { // Rückwärts ist schneller
+            for (int i = size; i >= 0 ; i--) { // Rueckwaerts ist schneller
                 object = new File(dir, list[i]);
                 if (!object.getName().equalsIgnoreCase("responseHeader.db")) {
                     if (object.isDirectory()) {

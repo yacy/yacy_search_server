@@ -41,6 +41,7 @@
 package de.anomic.server;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -254,6 +255,10 @@ public final class serverCodings {
 	return encodeHex(encodeMD5Raw(file));
     }
 
+    public static String encodeMD5Hex(byte[] b) {
+	// generate a hex representation from the md5 of a byte-array
+	return encodeHex(encodeMD5Raw(b));
+    }
 
     private static byte[] encodeMD5Raw(String key) {
 	try {
@@ -284,6 +289,25 @@ public final class serverCodings {
 	    System.out.println("file not found:" + file.toString());
 	} catch (java.io.IOException e) {
 	    System.out.println("file error with " + file.toString() + ": " + e.getMessage());
+	}
+	return null;
+    }
+
+    private static byte[] encodeMD5Raw(byte[] b) {
+	try {
+	    MessageDigest digest = MessageDigest.getInstance("MD5");
+	    digest.reset();
+	    InputStream  in = new ByteArrayInputStream(b);
+	    byte[] buf = new byte[2048];
+	    int n;
+	    while ((n = in.read(buf)) > 0) digest.update(buf, 0, n);
+	    in.close();
+	    // now compute the hex-representation of the md5 digest
+	    return digest.digest();
+	} catch (java.security.NoSuchAlgorithmException e) {
+	    System.out.println("Internal Error at md5:" + e.getMessage());
+	} catch (java.io.IOException e) {
+	    System.out.println("byte[] error: " + e.getMessage());
 	}
 	return null;
     }

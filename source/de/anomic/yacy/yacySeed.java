@@ -108,7 +108,9 @@ public class yacySeed {
     public static final String NCOUNT    = "NCount";
     public static final String ICOUNT    = "ICount";
     public static final String SCOUNT    = "SCount";
-    public static final String CCOUNT    = "CCount";
+    public static final String CCOUNT    = "CCount"; // Connection Count
+    public static final String CRWCNT    = "CRWCnt"; // Citation Rank (Own) - Count
+    public static final String CRTCNT    = "CRTCnt"; // Citation Rank (Other) - Count
 
     public static final String IP        = "IP";
     public static final String PORT      = "Port";
@@ -159,12 +161,16 @@ public class yacySeed {
         this.dna.put(LASTSEEN, yacyCore.universalDateShortString(new Date())); // for last-seen date
         this.dna.put(USPEED, "0");               // the computated uplink speed of the peer
 
+        this.dna.put(CRWCNT, "0");
+        this.dna.put(CRTCNT, "0");
+
         // settings that are needed to organize the seed round-trip
         this.dna.put(FLAGS, "0000");
         setFlagDirectConnect(false);
         setFlagAcceptRemoteCrawl(true);
         setFlagAcceptRemoteIndex(true);
-
+        setUnusedFlags();
+        
         // index transfer
         this.dna.put(INDEX_OUT, "0"); // send index
         this.dna.put(INDEX_IN, "0");  // received Index
@@ -368,6 +374,9 @@ public class yacySeed {
         //if (getVersion() < 0.335) return false;
         return getFlag(2);
     }
+    public void setUnusedFlags() {
+        for (int i = 3; i < 24; i++) setFlag(i, true);
+    }
     public boolean isVirgin() {
         return get(PEERTYPE, "").equals(PEERTYPE_VIRGIN);
     }
@@ -515,6 +524,13 @@ public class yacySeed {
     return newSeed;
     }
 
+    public static String randomHash() {
+        String hash =
+            serverCodings.encodeMD5B64(System.currentTimeMillis() + "a", true).substring(0, 6) +
+            serverCodings.encodeMD5B64(System.currentTimeMillis() + "b", true).substring(0, 6);
+        return hash;
+    }
+    
     public static yacySeed genRemoteSeed(String seedStr, String key) {
         // this method is used to convert the external representation of a seed into a seed object
 //      yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);

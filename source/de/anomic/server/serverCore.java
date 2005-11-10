@@ -308,23 +308,24 @@ public final class serverCore extends serverAbstractThread implements serverThre
         try {
             
             // if a static IP was configured, we have to return it here ...
-			plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-			if(sb != null){
-			String staticIP=sb.getConfig("staticIP", "");
-				if( (!staticIP.equals("")) && sb.getConfig("yacyDebugMode", "false").equals("true") ){
-					return staticIP;
-				}
-			}
+            plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+            if(sb != null){
+                String staticIP=sb.getConfig("staticIP", "");
+                if( (!staticIP.equals("")) && sb.getConfig("yacyDebugMode", "false").equals("true") ){
+                    return staticIP;
+                }
+            }
             
-            // If port forwarding was enabled we need to return the remote IP Address  
+            // If port forwarding was enabled we need to return the remote IP Address
             if ((serverCore.portForwardingEnabled)&&(serverCore.portForwarding != null)) {
-				//does not return serverCore.portForwarding.getHost(), because hostnames are not valid, except in DebugMode
+                //does not return serverCore.portForwarding.getHost(), because hostnames are not valid, except in DebugMode
                 return InetAddress.getByName(serverCore.portForwarding.getHost()).getHostAddress();
             }
             
             // otherwise we return the real IP address of this host
-            return publicLocalIP().getHostAddress();
-            
+            InetAddress pLIP = publicLocalIP();
+            if (pLIP != null) return pLIP.getHostAddress();
+            return null;
         } catch (java.net.UnknownHostException e) {
             System.err.println("ERROR: (internal) " + e.getMessage());
             return null;

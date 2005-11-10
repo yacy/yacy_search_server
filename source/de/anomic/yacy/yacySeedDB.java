@@ -224,83 +224,45 @@ public final class yacySeedDB {
 
     public Enumeration seedsSortedConnected(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
-    return new seedEnum(up, field, seedActiveDB);
+        return new seedEnum(up, field, seedActiveDB);
     }
     
     public Enumeration seedsSortedDisconnected(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
-    return new seedEnum(up, field, seedPassiveDB);
+        return new seedEnum(up, field, seedPassiveDB);
     }
     
     public Enumeration seedsSortedPotential(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
-    return new seedEnum(up, field, seedPotentialDB);
+        return new seedEnum(up, field, seedPotentialDB);
     }
-        
+    
     public Enumeration seedsConnected(boolean up, boolean rot, String firstHash) {
         // enumerates seed-type objects: all seeds sequentially without order
-    return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedActiveDB);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedActiveDB);
     }
     
     public Enumeration seedsDisconnected(boolean up, boolean rot, String firstHash) {
         // enumerates seed-type objects: all seeds sequentially without order
-    return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedPassiveDB);
-    }
-        
-    public Enumeration seedsPotential(boolean up, boolean rot, String firstHash) {
-        // enumerates seed-type objects: all seeds sequentially without order
-    return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedPotentialDB);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedPassiveDB);
     }
     
-    public yacySeed anySeed() {
-    // return just any probe candidate
-    yacySeed seed;
-    if ((seedQueue == null) || (seedQueue.size() == 0)) {
-        if (seedActiveDB.size() <= 0) return null;
-
-        // fill up the queue
-        seedQueue = new disorderHeap();
-            Iterator keyIt;
-            try {
-                keyIt = seedActiveDB.keys(true, false); // iteration of String - Objects
-            } catch (IOException e) {
-                yacyCore.log.logSevere("yacySeedCache.anySeed: seed.db not available: " + e.getMessage());
-                keyIt = (new HashSet()).iterator();
-            }
-        String seedHash;
-        String myIP = (mySeed == null) ? "" : ((String) mySeed.get(yacySeed.IP, "127.0.0.1"));
-        while (keyIt.hasNext()) {
-        seedHash = (String) keyIt.next();
-        try {
-            seed = new yacySeed(seedHash, seedActiveDB.get(seedHash));
-            // check here if the seed is equal to the own seed
-            // this should never be the case, but it happens if a redistribution circle exists
-            if ((mySeed != null) && (seedHash.equals(mySeed.hash))) {
-            // this seed should not be in the database
-            seedActiveDB.remove(seedHash);
-            } else {
-            // add to queue
-            seedQueue.add(seed);
-            }
-        } catch (IOException e) {}
+    public Enumeration seedsPotential(boolean up, boolean rot, String firstHash) {
+        // enumerates seed-type objects: all seeds sequentially without order
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedPotentialDB);
+    }
+    
+    public yacySeed anySeedVersion(float minVersion) {
+        // return just any seed that has a specific minimum version number
+        yacySeed seed;
+        Enumeration e = seedsConnected(true, true, yacySeed.randomHash());
+        int maxtry = seedActiveDB.size();
+        for (int i = 0; i < maxtry; i++) {
+            seed = (yacySeed) e.nextElement();
+            System.out.println("ENUMSEED: " + ((seed == null) ? "NULL" : seed.getName()));
+            if ((seed != null) && (seed.getVersion() >= minVersion)) return seed;
         }
-        // the queue is filled up!
-    }
-    if ((seedQueue == null) || (seedQueue.size() == 0)) return null;
-    return (yacySeed) seedQueue.remove();
-    }
-
-    public yacySeed anySeedType(String type) {
-    // this returns any seed that has a special PeerType
-    yacySeed ys;
-    String t;
-    for (int i = 0; i < seedActiveDB.size(); i++) {
-        ys = anySeed();
-        if (ys == null) return null;
-        t = (String) ys.get(yacySeed.PEERTYPE, "");
-        if ((t != null) && (t.equals(type))) return ys;
-    }
-    return null;
+        return null;
     }
 
     public yacySeed[] seedsByAge(boolean up, int count) {
@@ -648,8 +610,9 @@ public final class yacySeedDB {
             
             // store other seeds
             yacySeed ys;
-            for (int i = 0; i < seedActiveDB.size(); i++) {
-                ys = anySeed();
+            Enumeration se = seedsConnected(true, false, null);
+            while (se.hasMoreElements()) {
+                ys = (yacySeed) se.nextElement();
                 if (ys != null) {
                     line = ys.genSeedStr(null);
                     v.add(line);
