@@ -117,7 +117,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
-import java.util.WeakHashMap;
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
 import de.anomic.data.userDB;
@@ -165,7 +164,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  File                        listsPath;
     public  File                        htDocsPath;
     public  File                        rankingPath;
-    public  WeakHashMap                 rankingPermissions;
+    public  HashMap                     rankingPermissions;
     public  plasmaURLPool               urlPool;
     public  plasmaWordIndex             wordIndex;
     public  plasmaHTCache               cacheManager;
@@ -233,7 +232,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("HTDOCS Path:    " + this.htDocsPath.toString());
         this.rankingPath   = new File(rootPath, getConfig("rankingPath", "DATA/RANKING"));
         this.log.logConfig("Ranking Path:    " + this.rankingPath.toString());
-        this.rankingPermissions = new WeakHashMap(); // mapping of permission - to filename.
+        this.rankingPermissions = new HashMap(); // mapping of permission - to filename.
         
         /* ============================================================================
          * Remote Proxy configuration
