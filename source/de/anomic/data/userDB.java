@@ -204,6 +204,7 @@ public final class userDB {
     public class Entry {
         public static final String MD5ENCODED_USERPWD_STRING = "MD5_user:pwd";
         public static final String AUTHENTICATION_METHOD = "auth_method";
+        public static final String LOGGED_OUT = "loggedOut";
         public static final String USER_FIRSTNAME = "firstName";
         public static final String USER_LASTNAME = "lastName";
         public static final String USER_ADDRESS = "address";
@@ -315,7 +316,7 @@ public final class userDB {
             //TODO: more returnvalues.
             //Exception if false, or CONSTANTS
 			long timeUsed=this.updateLastAccess(true);
-            if(this.hasProxyRight() == false)
+            if(this.hasProxyRight() == false || this.isLoggedOut())
                 return false;
 
 			if( this.getTimeLimit() == null || this.getTimeLimit().longValue() <= 0 || ( timeUsed < this.getTimeLimit().longValue()) )//no timelimit or timelimit not reached
@@ -392,6 +393,14 @@ public final class userDB {
         }
         public boolean hasAdminRight() {
             return (this.mem.containsKey(ADMIN_RIGHT)?((String)this.mem.get(ADMIN_RIGHT)).equals("true"):false);
+        }
+        public boolean isLoggedOut(){
+        	   return (this.mem.containsKey(LOGGED_OUT)?((String)this.mem.get(LOGGED_OUT)).equals("true"):false);
+        }
+        public void logout(){
+        	   try{
+        		   setProperty(LOGGED_OUT, "true");
+        	   }catch(IOException e){}
         }
         
         public String toString() {
