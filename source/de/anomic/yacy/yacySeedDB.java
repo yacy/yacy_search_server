@@ -259,7 +259,7 @@ public final class yacySeedDB {
         int maxtry = seedActiveDB.size();
         for (int i = 0; i < maxtry; i++) {
             seed = (yacySeed) e.nextElement();
-            System.out.println("ENUMSEED: " + ((seed == null) ? "NULL" : seed.getName()));
+            System.out.println("ENUMSEED: " + ((seed == null) ? "NULL" : (seed.hash + ":" + seed.getName())));
             if ((seed != null) && (seed.getVersion() >= minVersion)) return seed;
         }
         return null;

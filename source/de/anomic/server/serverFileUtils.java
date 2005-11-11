@@ -206,24 +206,24 @@ public final class serverFileUtils {
         return (Hashtable) prop;
     }
 
-    public static void saveMap(File f, Map props, String comment) throws IOException {
+    public static void saveMap(File file, Map props, String comment) throws IOException {
         PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(f)));
-            pw.println("# " + comment);
-            Iterator i = props.entrySet().iterator();
-            String key, value;
-            Map.Entry entry;
-            while (i.hasNext()) {
-                entry  = (Map.Entry) i.next();
-                key = (String) entry.getKey();
-                value = ((String) entry.getValue()).replaceAll("\n", "\\\\n");
-                pw.println(key + "=" + value);
-            }
-            pw.println("# EOF");
-        } finally {
-          if (pw!=null)try{pw.close();}catch(Exception e){}  
+        File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
+        pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tf)));
+        pw.println("# " + comment);
+        Iterator i = props.entrySet().iterator();
+        String key, value;
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry  = (Map.Entry) i.next();
+            key = (String) entry.getKey();
+            value = ((String) entry.getValue()).replaceAll("\n", "\\\\n");
+            pw.println(key + "=" + value);
         }
+        pw.println("# EOF");
+        pw.close();
+        file.delete();
+        tf.renameTo(file);
     }
     
     public static void main(String[] args) {
