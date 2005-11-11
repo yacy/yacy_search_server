@@ -68,6 +68,7 @@ import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
+import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
@@ -301,39 +302,6 @@ public final class plasmaCrawlLURL extends plasmaURL {
         }
     }
 
-    /**
-     * This function shortens the String url<br>
-     *
-     * Example returns:<br>
-     * <dl><dt>normal domain:</dt><dd>http://domain.net/leftpath..rightpath</dd>
-     * <dt>long domain:</dt><dd>http://very_very_long_domain.net/le..</dd></dl>
-     * @param String like a URL
-     * @return the shorten or the old String
-     */
-    public static String cutUrlText(String url, int len) {
-        // This is contributed by Thomas Quella (borg-0300)
-        int la = url.length();
-        if (la > len) {
-            int cpos;
-            cpos = url.indexOf("://");
-            if (cpos >= 0) {
-                cpos = url.indexOf("/", cpos + 3);
-                if (cpos >= 0) {
-                    if (cpos < len-(len / 3)) { // at least 1/3 characters for the path
-                        final int lb = ((len - cpos) / 2) - 1;
-                        if (lb * 2 + 2 + cpos < len) { la--; } // if smaller(odd), half right path + 1
-                        url = url.substring(0, cpos + lb).concat("..").concat(url.substring(la - lb));
-                    } else {
-                        url = url.substring(0, len - 2).concat("..");
-                    }
-                } else { // very crazy domain or very short len
-                    url = url.substring(0, len - 2).concat("..");
-                } // no slash at end
-            } // NO URL !?
-        } // URL < len
-        return url;
-    }
-
     public serverObjects genTableProps(int tabletype, int lines, boolean showInit, boolean showExec, String dfltInit, String dfltExec, String feedbackpage, boolean makeLink) {
         serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps tabletype=" + tabletype    +    " lines=" + lines    +
                                                                     " showInit=" + showInit     + " showExec=" + showExec +
@@ -387,7 +355,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                     serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps Remove ':80' URL=" + txt);
                 }
 
-                txt = cutUrlText(txt, 72); // shorten the string text like a URL
+                txt = nxTools.cutUrlText(txt, 72); // shorten the string text like a URL
 
                 cachepath = (urle.url() == null) ? "-not-cached-" : url.substring(url.indexOf("://") + 3);
                 if (cachepath.endsWith("/")) cachepath = cachepath + "ndx";

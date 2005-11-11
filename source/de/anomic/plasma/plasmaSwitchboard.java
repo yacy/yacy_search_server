@@ -5,9 +5,9 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate:$
+// $LastChangedRevision:$
+// $LastChangedBy:$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -139,6 +139,7 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
+import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -607,7 +608,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         (getConfig(STR_REMOTEPROFILE, "").length() == 0) ||
         (profiles.getEntry(getConfig(STR_REMOTEPROFILE, "")) == null)) {
             // generate new default entry for remote crawling
-            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, false, true, true, false, true, true, false);
+//          defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, false, true, true, false, true, true, false);
+            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, true, true, true, true, true, true, false);
             setConfig(STR_REMOTEPROFILE, defaultRemoteProfile.handle());
         } else {
             defaultRemoteProfile = profiles.getEntry(getConfig(STR_REMOTEPROFILE, ""));
@@ -1657,7 +1659,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             prop.put("results_" + i + "_description", descr);
                             prop.put("results_" + i + "_url", urlstring);
                             prop.put("results_" + i + "_urlhash", urlhash);
-                            prop.put("results_" + i + "_urlname", urlname);
+                            prop.put("results_" + i + "_urlname", nxTools.cutUrlText(urlname, 120));
                             prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
                             prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
                             prop.put("results_" + i + "_words",URLEncoder.encode(query.queryWords.toString(),"UTF-8"));
@@ -1667,7 +1669,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 prop.put("results_" + i + "_snippet_text", "");
                             } else {
                                 prop.put("results_" + i + "_snippet", 1);
-                                prop.put("results_" + i + "_snippet_text", snippet.line.toString().trim());
+                                prop.put("results_" + i + "_snippet_text", snippet.line.trim());
                             }
                             i++;
                         }

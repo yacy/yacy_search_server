@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 04.05.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -139,6 +142,39 @@ public class nxTools {
 	    }
 	}
         return null;
+    }
+
+    /**
+     * This function shorten URL Strings<br>
+     *
+     * Example returns:<br>
+     * <dl><dt>normal domain:</dt><dd>http://domain.net/leftpath..rightpath</dd>
+     * <dt>long domain:</dt><dd>http://very_very_long_domain.net/le..</dd></dl>
+     * @param String like a URL
+     * @return the shorten or the old String
+     */
+    public static String cutUrlText(String url, int len) {
+        // This is contributed by Thomas Quella (borg-0300)
+        int la = url.length();
+        if (la > len) {
+            int cpos;
+            cpos = url.indexOf("://");
+            if (cpos >= 0) {
+                cpos = url.indexOf("/", cpos + 3);
+                if (cpos >= 0) {
+                    if (cpos < len-(len / 3)) { // at least 1/3 characters for the path
+                        final int lb = ((len - cpos) / 2) - 1;
+                        if (lb * 2 + 2 + cpos < len) { la--; } // if smaller(odd), half right path + 1
+                        return url.substring(0, cpos + lb).concat("..").concat(url.substring(la - lb));
+                    } else {
+                        return url.substring(0, len - 2).concat("..");
+                    }
+                } else { // very crazy domain or very short len
+                    return url.substring(0, len - 2).concat("..");
+                } // no slash at end
+            } // NO URL !?
+        } // URL < len
+        return url;
     }
 
 }
