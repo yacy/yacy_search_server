@@ -121,8 +121,11 @@ public final class robotsParser{
                     // cutting off comments at the line end
                     pos = line.indexOf("#");
                     if (pos != -1) {
-                        line = line.substring(0,pos);
+                        line = line.substring(0,pos).trim();
                     }
+                    
+                    // replacing all tabs with spaces
+                    line = line.replaceAll("\t"," ");
                     
                     // getting out the robots name
                     pos = line.indexOf(" ");
@@ -138,9 +141,18 @@ public final class robotsParser{
                     // cutting off comments at the line end
                     pos = line.indexOf("#");
                     if (pos != -1) {
-                        line = line.substring(0,pos);
+                        line = line.substring(0,pos).trim();
+                    }
+                                       
+                    // cutting of tailing *
+                    if (line.endsWith("*")) {
+                        line = line.substring(0,line.length()-1);
                     }
                     
+                    // replacing all tabs with spaces
+                    line = line.replaceAll("\t"," ");
+                    
+                    // getting the path
                     pos = line.indexOf(" ");
                     if (pos != -1) {
                         // getting the path
