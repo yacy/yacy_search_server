@@ -188,7 +188,7 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 #File: index.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Search Page==YaCy: Suchseite
+YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
 P2P WEB SEARCH==P2P Internet Suche
 Enter search word list, separated by space:==Geben Sie die Suchbegriffe hier ein:
 "Search"==Suche
@@ -260,6 +260,7 @@ Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter 
 Index Control==Index Kontrolle
 Index Administration==Index Administration
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Der lokale Index besteht im Moment aus #[wcount]# W&ouml;rtern und #[ucount]# URL-Links.
+To transfer the whole index to an other peer, click <a href="IndexTransfer_p.html">here</a>.==Um den kompletten Index an einen anderen Peer zu &uuml;bertragen, klicken Sie <a href="IndexTransfer_p.html">hier</a>.
 Word==Wort:
 value="Show URL Entries for Wort:">==value="URL Eintr&auml;ge f&uuml;r Wort zeigen">
 Word-Hash:==Wort-Hash:
@@ -533,14 +534,14 @@ Title==Titel
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 The local index currently consists of \(at least\)==Der lokale Index besteht zur Zeit aus (ungefähr)
-reverse word indexes and==Worten und
+reverse word indexes and==W&ouml;rtern und
 URL references==URLs
 Chunk Size==Chunk-Größe
 Words Range==Worte-Bereich
-Transfered Words==Übertragene Worte
+Transfered Words==Übertragene W&ouml;rter
 Delete<br>Index==Index<br>löschen
-"true"==ja
-"false"==nein
+true==ja
+false==nein
 Selection==Auswahl
 words==Worte
 words/s==Worte/s
@@ -658,6 +659,7 @@ Version==Version
 Uptime==Uptime
 Links==Links
 RWIs==RWIs
+Own/Other==Eigene/Andere
 Accept<br>Crawl==Akzeptiert<br>Crawl
 Accept<br>Index==Akzeptiert<br>Index
 Sent<br>Words==Gesendete<br>W&ouml;rter
@@ -667,8 +669,8 @@ Received<br>URLs==Empfangene<br>URLs
 PPM==PPM
 Seeds==Seeds
 Connects<br>per hour==Verbindungen<br>pro Stunde
-no==nein
-yes==ja
+"no"==nein
+"yes"==ja
 You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
 You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online Modus oder Sie benutzen nicht die Proxy Option.
 To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy Netzwerk zu verbinden, m&uuml;ssen Sie den Proxy benutzen, indem Sie die Browser Einstellungen auf
@@ -698,13 +700,13 @@ A change in the personal profile will create a news entry. You can see recently 
 profile entries on the Network page, where that profile change is visualized with a '\*' beside the 'P' \(profile\) - selector.==Profil Eintr&auml;ge auf der Netzwerk Seite werden nach einer &Auml;nderung mit einem '*' neben dem 'P' (Profil) gekennzeichnet.
 More news services will follow.==Mehr News Services werden folgen.
 Above you can see four menues:==Sie k&ouml;nnen diese vier Men&uuml;s sehen:
-<b>Incoming News</b>: latest news that arrived your peer.==<b>Eingehende News:</b> die neusten News, die Ihren Peer erreicht haben.
+<b>Incoming News \(\#\[insize\]\#\)</b>: latest news that arrived your peer.==<b>Eingehende News(#[insize]#)</b>: Die neusten News, die Ihren Peer erreicht haben.
 Only these news will be used to display specific news services as explained above.==Nur diese News werden benutzt, um spezifische News Services anzuzeigen.
 You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Sie k&ouml;nnen diese News mit einem Button auf der Seite abarbeiten (als "gelesen" markieren). Dann werden diese Nachrichten nicht mehr auf der Netzwerk und der Index Create Seite erscheinen.
-<b>Processed News</b>: this is simply an archive of incoming news that you removed by processing.==<b>Gelesene News</b>: Hier ist ein simples Archiv der bereits gelesenen News.
-<b>Outgoing News</b>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<b>Ausgehende News</b>: Hier k&ouml;nnen Sie die News sehen, die durch Sie enstanden sind. Diese News werden sofort an andere Peers &uuml;bertragen.
+<b>Processed News \(\#\[prsize\]\#\)</b>: this is simply an archive of incoming news that you removed by processing.==<b>Gelesene News (#[prsize]#)</b>: Hier ist ein simples Archiv der bereits gelesenen News.
+<b>Outgoing News \(\#\[ousize\]\#\)</b>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<b>Ausgehende News (#[ousize]#)</b>: Hier k&ouml;nnen Sie die News sehen, die durch Sie enstanden sind. Diese News werden sofort an andere Peers &uuml;bertragen.
 you can stop the broadcast if you want.==Sie k&ouml;nnen die Weiterverteilung stoppen, wenn Sie wollen.
-<b>Published News</b>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<b>Ver&ouml;ffentlichte News</b>: Ihre News, die gen&uuml;gend verbreitet oder aus der Verbreitungsliste gel&ouml;scht wurden.
+<b>Published News \(\#\[pusize\]\#\)</b>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<b>Ver&ouml;ffentlichte News (#[pusize]#)</b>: Ihre News, die gen&uuml;gend verbreitet oder aus der Verbreitungsliste gel&ouml;scht wurden.
 Originator==Initiator
 Created==Geschaffen
 Category==Kategorie
@@ -748,6 +750,74 @@ You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransich
 on the==auf der
 <a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a><a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a>
 Page.==Seite ansehen.
+
+#-------------------------------------------------------
+#File: SettingsAck_p.html
+
+YaCy '#[clientname]#': Settings Acknowledge==
+Settings Receipt:==Einstellungen angenommen:
+No information has been submitted==Es wurden keine Informationen &uuml;bertragen.
+Nothing changed==Nichts wurde ver&auml;ndert.
+Error with submitted information.==Es gab einen Fehler bei der &Uuml;bertragung der Informationen.
+Nothing changed.==Nichts wurde ver&auml;ndert.
+The user name must be given.==Der User Name muss angegeben werden
+Your request cannot be processed.<br>Nothing changed.==Ihre Anfrage konnte nicht bearbeitet werden.<br>Nichts wurde ver&auml;ndert.
+The password redundancy check failed. You have probably misstyped your password.==Die Passwort&uuml;berpr&uuml;fung schlug fehl. Sie haben sich wahrscheinlich vertippt.
+Shutting down.</b><br>Application will terminate after working off all crawling tasks.==Runterfahren</b><br>Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
+Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
+Your new administration account name is \#\[user\]\#. The password has been accepted.<br>If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br>Wenn Sie zur&uuml;ck auf die Einstellungen Seite gehen wollen, m&uuml;ssen Sie sich neu einloggen.
+Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden ge&auml;ndert.
+Your proxy account check has been disabled, since you did not supply a password.
+The new proxy IP filter is set to
+The proxy port is:
+if you changed the Port or Port Forwarding Settings, you need to restart YaCy.
+Your proxy access setting has been changed.
+Your new proxy account name is #[user]#. The password has been accepted.
+If you open any public web page through the proxy, you must log-in then.
+The new proxy IP filter is set to #[filter]#.
+The proxy port is:
+if you changed the Port or Port Forwarding Settings, you need to restart YaCy.
+Your server access filter is now set to #[filter]#
+Auto pop-up of the Status page is now <b>disabled</b>==Automatisches Pop-Up auf der Status Seite ist nun <b>deaktiviert.</b>
+Auto pop-up of the Status page is now <b>enabled</b>==Automatisches Pop-Up auf der Status Seite ist nun <b>aktiviert.</b>
+You are now permanently <b>online</b>. After a short while you should see the effect on the <a href="Status.html">status</a> page.==Sie sind nun im <b>permanenten Online Modus</b>. Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der <a href="Status.html">Status</a> Seite sehen.
+The Peer Name is:==Der Name dieses peers ist:
+Your static Ip\(or DynDns\) is:==Ihre statische IP(oder DynDns) ist:
+Seed Settings changed.#(success)#::You are now a principal peer.
+Seed Settings changed, but something is wrong.==Seed Einstellungen wurden ge&auml;ndert, aber etwas war falsch.
+Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
+Please return to the settings page and modify the data.==Bitte kehren Sie auf die Einstellungen Seite zur&uuml;ck und modifizieren Sie die Daten.
+The remote-proxy setting has been changed
+The new setting is effective immediately, you don't need to re-start.
+The submitted peer name is already used by another peer. Please choose a different name.</b> The Peer name has not been changed.
+Your Peer Language is:==Ihre Peer Sprache ist:
+The submitted peer name is not well-formed. Please choose a different name.</b> The Peer name has not been changed.
+Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
+The new parser settings where changed successfully.
+Parsing of the following mime-types was enabled:
+Seed Upload method was changed successfully.
+You are now a principal peer.
+Seed Upload Method:
+Seed File URL:
+Your proxy networking settings have been changed.
+Transparent Proxy Support is:
+Connection Keep-Alive Support is:
+Your message forwarding settings have been changed.
+Message Forwarding Support is:
+Message Forwarding Command:
+Recipient Address:
+Your port forwarding settings have been changed.
+Port Forwarding Support is:
+Port Forwarding Port:
+Port Forwarding Host:
+Port Forwarding uses proxy:
+Port Forwarding Settings changed, but something is wrong.
+Port Forwarding was deactivated automatically.
+Please return to the settings page and modify the data.==Bitte kehren Sie auf die Einstellungen Seite zur&uuml;ck und modifizieren Sie die Daten.
+You are now <b>event-based online</b>. After a short while you should see the effect on the <a href="Status.html">status</a> page.==Sie sind nun im  <b>aktivit&auml;tsbasierten Modus</b>. Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der <a href="Status.html">Status</a> Seite sehen.
+You are now in <b>Cache Mode</b>. Only Proxy-cache ist available in this mode. After a short while you should see the effect on the <a href="Status.html">status</a> page.==Sie sind nun im <b>Cache Modus</b>. Nur der Proxy Cache ist in diesem Modus verf&uuml;gbar. Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der <a href="Status.html">Status</a> Seite sehen.
+You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie k&ouml;nnen nun zur&uuml;ck auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, um weitere &Auml;nderungen vorzunehmen.
+
 
 #-------------------------------------------------------
 #File: Skins_p.html
@@ -822,23 +892,32 @@ Auto-popup on start-up==Popup bei YaCy-Start
 Disabled. To enable this again please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page==Deaktiviert. Um diese Funktion wieder zu aktivieren benutzen Sie bitte die <a href="Settings_p.html#SystemBehaviour">Einstellungen-Seite</a>.
 Enabled ==Aktiviert
 Online-mode==Onlinemodus
-You are in <i>event-based</i> online mode.=Sie sind im <i>aktivit&auml;tsbasierten</i> Onlinemodus.
+You are in <i>Cache-browsing</i> mode.==Sie sind im <i>Cache</i> Modus.
+Only Website from the Proxycache are accessable.==Nur Webseiten aus dem Proxycache sind aufrufbar.
+To switch online-mode, press one of the following buttons:==Um den Online Modus zu wechseln, klicken Sie auf einen der folgenden Buttons:
+"event-based Mode"=="aktivit&auml;tsbasierten Modus"
+"Permanent Mode"=="Permanenter Modus"
+You are in <i>event-based</i> online mode.==Sie sind im <i>aktivit&auml;tsbasierten</i> Onlinemodus.
 The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.==Das YaCy-P2P-Netzwerk wird aktiviert, wenn Sie den Proxy das erste Mal benutzen oder in den permanenten Modus wechseln.
 Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.==Vorsicht: Das Benutzen des Proxys im permanenten Modus h&auml;lt ihre Internetverbindung so lange offen, wie YaCy l&auml;uft.
 Use this only if you have a flatrate or you have an always-on connection.==Benutzen Sie das nur, wenn Sie eine Flatrate haben oder immer online sind.
-To start permanent mode, press this button:==Um den permanenten Modus zu aktivieren, klicken Sie auf diesen Button:
-Go on-line==Online gehen
+"Go on-line"=="Online gehen"
+"Go to Cache-Mode"=="In Cache-Modus gehen"
 You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <i>permanenten</i> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein m&ouml;chten, m&uuml;ssen Sie den Proxy abschalten um offline zu gehen.
-Memory Usage==Speicherverbrauch
-free:==Frei:
-total:==Gesamt:
-max:==Maximal:
-Do Garbage-Collect now==Garbage-Collect durchf&uuml;hren
-Traffic==Netzwerkverkehr
-Out:==Ausgehend:
-In:==Eingehend:
-System Resources==Systemressourcen
-Processors:==Prozessoren:
+Last Refresh:==Letztes Update:
+
+#alte �bersetzung. vielleicht sp�ter noch zu gebrauchen!
+
+#Memory Usage==Speicherverbrauch
+#free:==Frei:
+#total:==Gesamt:
+#max:==Maximal:
+#Do Garbage-Collect now==Garbage-Collect durchf&uuml;hren
+#Traffic==Netzwerkverkehr
+#Out:==Ausgehend:
+#In:==Eingehend:
+#System Resources==Systemressourcen
+#Processors:==Prozessoren:
 
 #-------------------------------------------------------
 #File: Steering.html
@@ -856,6 +935,33 @@ Shutting down.==Runterfahren
 Application will terminate after working off all scheduled tasks.==Der YaCy Proxy f&auml;hrt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
 Then YaCy will restart.==Dann wird YaCy neu gestartet.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie k&ouml;nnen nun zur&uuml;ck auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie &Auml;nderungen vornehmen wollen.
+
+#-------------------------------------------------------
+#File: ViewFile.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy \'\#\[clientname\]\#\': View URL Content==YaCy '#[clientname]#': Zeige URL Inhalte
+View URL Content==Zeige URL Inhalte
+#URL==URL
+#Hash==Hash
+Word Count==Anzahl W&ouml;rter
+Description==Beschreibung
+Size==Gr&ouml;sse
+View as:==Zeige als:
+#Original==Original
+Plain Text==Quelltext
+Parsed Text==Geparsten Text
+Parsed Sentences==Geparste S&auml;tze
+No URL hash submitted.==Es wurde kein URL Hash &uuml;vertragen.
+Unable to find URL Entry in DB==Es war nicht m&ouml;glich den URL Eintrag in der DB zu finden.
+Invalid URL==Ung&uuml;ltige URL
+Unable to download resource content.==Es war nicht m&ouml;glich den Inhalt der Quelle runterzuladen.
+Unable to parse resource content.==Es war nicht m&ouml;glich den Inahlt der Quelle zu parsen.
+Plain Resource Content==Reiner Quellen Inhalt
+Parsed Resource Content==Geparster Quellen Inhalt
+Parsed Resource Sentences==Geparste Quellen S&auml;tze
+Original Resource Content==Original Quellen Inhalt
+
 
 #-------------------------------------------------------
 #File: ViewLog_p.html
@@ -933,3 +1039,4 @@ English Forum==Englisches Forum
 #Deutsches Forum==Deutsches Forum
 Download YaCy==YaCy herunterladen
 Contact==Kontakt
+
