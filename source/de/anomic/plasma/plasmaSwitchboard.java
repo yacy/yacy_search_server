@@ -5,9 +5,9 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
 //
-// $LastChangedDate:$
-// $LastChangedRevision:$
-// $LastChangedBy:$
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -608,8 +608,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         (getConfig(STR_REMOTEPROFILE, "").length() == 0) ||
         (profiles.getEntry(getConfig(STR_REMOTEPROFILE, "")) == null)) {
             // generate new default entry for remote crawling
-//          defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, false, true, true, false, true, true, false);
-            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, true, true, true, true, true, true, false);
+            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, false, true, true, false, true, true, false);
             setConfig(STR_REMOTEPROFILE, defaultRemoteProfile.handle());
         } else {
             defaultRemoteProfile = profiles.getEntry(getConfig(STR_REMOTEPROFILE, ""));
