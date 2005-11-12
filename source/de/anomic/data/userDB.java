@@ -164,6 +164,12 @@ public final class userDB {
         if(tmp.length == 2){
             entry=this.getEntry(tmp[0]);
             if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(auth)) ){
+            		if(entry.isLoggedOut()){
+            			try{
+            				entry.setProperty(Entry.LOGGED_OUT, "false");
+            			}catch(IOException e){}
+            			return null;
+            		}
 				return entry;
 			}
 		}
@@ -316,7 +322,7 @@ public final class userDB {
             //TODO: more returnvalues.
             //Exception if false, or CONSTANTS
 			long timeUsed=this.updateLastAccess(true);
-            if(this.hasProxyRight() == false || this.isLoggedOut())
+            if(this.hasProxyRight() == false)
                 return false;
 
 			if( this.getTimeLimit() == null || this.getTimeLimit().longValue() <= 0 || ( timeUsed < this.getTimeLimit().longValue()) )//no timelimit or timelimit not reached
