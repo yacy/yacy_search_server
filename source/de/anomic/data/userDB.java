@@ -161,6 +161,7 @@ public final class userDB {
             auth=codings.decodeBase64String(auth);
         }catch(StringIndexOutOfBoundsException e){} //no valid Base64
         String[] tmp=auth.split(":");
+        System.out.println("proxyAuth: "+auth);
         if(tmp.length == 2){
             entry=this.getEntry(tmp[0]);
             if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(auth)) ){
@@ -171,6 +172,10 @@ public final class userDB {
             			return null;
             		}
 				return entry;
+			}else{ //wrong/no auth, so auth is removed from browser
+				try{
+    					entry.setProperty(Entry.LOGGED_OUT, "false");
+    				}catch(IOException e){}
 			}
 		}
 		return null;
@@ -194,6 +199,7 @@ public final class userDB {
 	 * @param ip the IP of the User
 	 */
 	public Entry ipAuth(String ip) {
+		System.out.println("ipAuth: "+ip);
         if(this.ipUsers.containsKey(ip)){
             String user=(String)this.ipUsers.get(ip);
             Entry entry=this.getEntry(user);
@@ -401,12 +407,20 @@ public final class userDB {
             return (this.mem.containsKey(ADMIN_RIGHT)?((String)this.mem.get(ADMIN_RIGHT)).equals("true"):false);
         }
         public boolean isLoggedOut(){
+        	System.out.println("isLoggedOut:"+this.mem.get(LOGGED_OUT));
         	   return (this.mem.containsKey(LOGGED_OUT)?((String)this.mem.get(LOGGED_OUT)).equals("true"):false);
         }
-        public void logout(){
+        public void logout(String ip){
         	   try{
         		   setProperty(LOGGED_OUT, "true");
+        		   if(ipUsers.containsKey(ip)){
+        			   ipUsers.remove(ip);
+        		   }
         	   }catch(IOException e){}
+        	   System.out.println("Logout: "+ip);
+        }
+        public void logout(){
+        		logout("xxxxxx");
         }
         
         public String toString() {
