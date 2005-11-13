@@ -46,9 +46,12 @@
 //javac -classpath .:../Classes Message.java
 //if the shell's current path is HTROOT
 
+import java.io.IOException;
+
 import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -62,6 +65,8 @@ public class User{
 
         //default values
         prop.put("logged_in", 0);
+        prop.put("logged-in_limit", 0);
+        prop.put("status", 0);
         entry=sb.userDB.proxyAuth(((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")));
         if(entry != null){
         		prop.put("logged-in_identified-by", 1);
@@ -74,10 +79,35 @@ public class User{
         if(entry != null){
         		prop.put("logged-in", 1);
         		prop.put("logged-in_username", entry.getUserName());
+        		if(entry.getTimeLimit().intValue() > 0){
+        			prop.put("logged-in_limit", 1);
+        			prop.put("logged-in_limit_timelimit", entry.getTimeLimit());
+        			prop.put("logged-in_limit_timeused", entry.getTimeUsed());
+        		}
         }
-        if(post!= null && post.containsKey("logout") && entry != null){
-        		entry.logout(((String)header.get("CLIENTIP", "xxxxxx")));
-        		prop.put("logged-in", 0);
+        if(post!= null && entry != null){
+        		if(post.containsKey("logout")){
+        			entry.logout(((String)header.get("CLIENTIP", "xxxxxx")));
+        			prop.put("logged-in", 0);
+        		}else if(post.containsKey("changepass")){
+        			prop.put("status", 1); //password
+        			if(entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(entry.getUserName()+":"+(String)post.get("oldpass", "")))){
+        			if(((String)post.get("newpass")).equals((String)post.get("newpass2"))){
+        			if(!((String)post.get("newpass", "")).equals("")){
+        				try {
+							entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(entry.getUserName()+":"+(String)post.get("newpass", "")));
+							prop.put("status_password", 0); //changes
+						} catch (IOException e) {}
+        			}else{
+        				prop.put("status_password", 3); //empty
+        			}
+        			}else{
+        				prop.put("status_password", 2); //pws do not match
+        			}
+        			}else{
+        				prop.put("status_password", 1); //old pw wrong
+        			}
+        		}
         }
         // return rewrite properties
         return prop;

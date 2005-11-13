@@ -16,7 +16,42 @@ You are currently logged in as #[username]#.<br />
 <form action="User.html">
   <input type="submit" name="logout" value="logout">
 </form>
+#(limit)#::
+You have used <i>#[timeused]#</i> minutes of your onlinetime limit of <i>#[timelimit]#</i> minutes per day.<br />
+#(/limit)#
+<form action="User.html" method="POST">
+<table border="1">
+</table>
+<tr>
+  <td>old Password</td>
+  <td><input type="password" name="oldpass" /></td>
+</tr><tr>
+  <td>new Password</td>
+  <td><input type="password" name="newpass"></td>
+</tr><tr>
+  <td>new Password(repetition)</td>
+  <td><input type="password" name="newpass2"></td>
+</tr><tr>
+  <td colspan="2"><input type="submit" name="changepass" value="change"></td>
+</tr>
+</table>
+</form>
+<p />
+<b>
 #(/logged-in)#
+#(status)#
+::
+#(password)#
+Password was changed.
+::
+old Password is wrong.
+::
+new Password and its repetition do not match.
+::
+new Password is empty.
+#(/password)#
+#(/status)#
+</b>
 
 #[footer]#
 </body>
