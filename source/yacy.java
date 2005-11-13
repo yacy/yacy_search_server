@@ -267,7 +267,7 @@ public final class yacy {
 
             // read environment
             //new
-            final int port    = Integer.parseInt(sb.getConfig("port", "8080"));
+            final String port = sb.getConfig("port", "8080");
             int timeout       = Integer.parseInt(sb.getConfig("httpdTimeout", "60000"));
             if (timeout < 60000) timeout = 60000;
 

@@ -54,14 +54,17 @@ import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.channels.ClosedByInterruptException;
 import java.security.KeyStore;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import javax.net.ServerSocketFactory;
@@ -93,7 +96,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static Hashtable bfHost = new Hashtable(); // for brute-force prevention
     
     // class variables
-    private int port;                      // the listening port
+    private String port;                      // the listening port
     
     public static boolean portForwardingEnabled = false;
     public static serverPortForwarding portForwarding = null;
@@ -169,14 +172,14 @@ public final class serverCore extends serverAbstractThread implements serverThre
 
     // class initializer
     public serverCore(
-            int port, 
+            String port, 
             int timeout,
             boolean blockAttack,
             serverHandler handlerPrototype, 
             serverSwitch switchboard,
             int commandMaxLength
     ) throws IOException {
-        this.port = port;
+        this.port = port.trim();
         this.timeout = timeout;
         
         this.commandMaxLength = commandMaxLength;
@@ -199,13 +202,63 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         // Open a new server-socket channel
         try {
+            this.log.logInfo("Trying to bind server to port " + port);
+            
+            // parsing the port configuration
+            String bindIP = null;
+            int bindPort;
+            
+            int pos = -1;
+            if ((pos = port.indexOf(":"))!= -1) {
+                bindIP = port.substring(0,pos).trim();
+                port = port.substring(pos+1); 
+                
+                if (bindIP.startsWith("#")) {
+                    String interfaceName = bindIP.substring(1);
+                    String hostName = null;
+                    this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
+
+                    Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+                    if (interfaces != null) {
+                        while (interfaces.hasMoreElements()) {
+                            NetworkInterface interf = (NetworkInterface) interfaces.nextElement();
+                            if (interf.getName().equalsIgnoreCase(interfaceName)) {
+                                Enumeration addresses = interf.getInetAddresses();
+                                if (addresses != null) {
+                                    while (addresses.hasMoreElements()) {
+                                        InetAddress address = (InetAddress)addresses.nextElement();
+                                        if (address instanceof Inet4Address) {
+                                            hostName = address.getHostAddress();
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (hostName == null) {
+                        this.log.logWarning("Unable to find interface with name '" + interfaceName + "'. Binding server to all interfaces");
+                        bindIP = null;
+                    } else {
+                        this.log.logInfo("Binding server to interface '" + interfaceName + "' with IP '" + hostName + "'.");
+                        bindIP = hostName;
+                    }
+                } 
+            }
+            bindPort = Integer.parseInt(port);            
+            
             // Binds the ServerSocket to a specific address 
             this.socket = new ServerSocket();
-            this.socket.bind(new InetSocketAddress(port));
+            this.socket.bind((bindIP == null) 
+                             ? new InetSocketAddress(bindPort)
+                             : new InetSocketAddress(bindIP, bindPort));
             
             // this.socket = new ServerSocket(port);
         } catch (java.net.BindException e) {
-            System.out.println("FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number"); System.exit(0);
+            String errorMsg = "FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number";
+            this.log.logSevere(errorMsg);
+            System.out.println(errorMsg);             
+            System.exit(0);
         }
 
 
