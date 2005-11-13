@@ -173,9 +173,11 @@ public final class userDB {
             		}
 				return entry;
 			}else{ //wrong/no auth, so auth is removed from browser
+				/*FIXME: This cannot work
 				try{
     					entry.setProperty(Entry.LOGGED_OUT, "false");
     				}catch(IOException e){}
+    				*/
 			}
 		}
 		return null;
