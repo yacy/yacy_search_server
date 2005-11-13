@@ -430,25 +430,25 @@ public final class plasmaCrawlLURL extends plasmaURL {
         // if the url cannot be found, this returns null
         this.urlHash = urlHash;
         try {
-        byte[][] entry = urlHashCache.get(urlHash.getBytes());
-        if (entry != null) {
-            this.url = new URL(new String(entry[1]).trim());
-            this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2]).trim();
-            this.moddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[3])));
-            this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[4])));
-            this.referrerHash = (entry[5]==null)?dummyHash:new String(entry[5]);
-            this.copyCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6]));
-            this.flags = new String(entry[7]);
-            this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
-            this.language = new String(entry[9]);
-            this.doctype = (char) entry[10][0];
-            this.size = (long) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[11]));
-            this.wordCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[12]));
-            this.snippet = null;
-            return;
-        }
+            byte[][] entry = plasmaCrawlLURL.this.urlHashCache.get(urlHash.getBytes());
+            if (entry != null) {
+                this.url = new URL(new String(entry[1]).trim());
+                this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2]).trim();
+                this.moddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[3])));
+                this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[4])));
+                this.referrerHash = (entry[5]==null)?dummyHash:new String(entry[5]);
+                this.copyCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6]));
+                this.flags = new String(entry[7]);
+                this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
+                this.language = new String(entry[9]);
+                this.doctype = (char) entry[10][0];
+                this.size = serverCodings.enhancedCoder.decodeBase64Long(new String(entry[11]));
+                this.wordCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[12]));
+                this.snippet = null;
+                return;
+            }
         } catch (Exception e) {
-                serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString(), e);
+            serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString(), e);
         }
     }
 

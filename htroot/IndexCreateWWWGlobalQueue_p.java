@@ -100,10 +100,10 @@ public class IndexCreateWWWGlobalQueue_p {
             yacySeed initiator;
             String profileHandle;
             plasmaCrawlProfile.entry profileEntry;
-            int i;
+            int i, showNum = 0;
             for (i = 0; i < crawlerList.length; i++) {
                 urle = crawlerList[i];
-                if (urle != null) {
+                if ((urle != null)&&(urle.url()!=null)) {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
@@ -115,9 +115,10 @@ public class IndexCreateWWWGlobalQueue_p {
                     prop.put("crawler-queue_list_"+i+"_anchor", wikiCode.replaceHTML(urle.name()));
                     prop.put("crawler-queue_list_"+i+"_url", wikiCode.replaceHTML(urle.url().toString()));
                     dark = !dark;
+                    showNum++;
                 }
             }
-            prop.put("crawler-queue_list", i);
+            prop.put("crawler-queue_list", showNum);
         }
 
         // return rewrite properties
