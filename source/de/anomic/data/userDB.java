@@ -161,7 +161,6 @@ public final class userDB {
             auth=codings.decodeBase64String(auth);
         }catch(StringIndexOutOfBoundsException e){} //no valid Base64
         String[] tmp=auth.split(":");
-        System.out.println("proxyAuth: "+auth);
         if(tmp.length == 2){
             entry=this.getEntry(tmp[0]);
             if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(auth)) ){

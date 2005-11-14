@@ -11,10 +11,6 @@ public final class yacyVersion {
     public static void migrate(plasmaSwitchboard sb){
     		//set preset accounts/passwords
         String acc;
-        if ((acc = sb.getConfig("proxyAccount", "")).length() > 0) {
-            sb.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
-            sb.setConfig("proxyAccount", "");
-        }
         if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
             sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
             sb.setConfig("serverAccount", "");

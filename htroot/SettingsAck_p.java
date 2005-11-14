@@ -157,20 +157,6 @@ public class SettingsAck_p {
             if (filter.length() == 0) filter = "*";
             // check passed. set account:
             env.setConfig("proxyClient", filter);
-            /*if (pw1.length() == 0) {
-                // only ip filter setting without account
-                env.setConfig("proxyAccountBase64MD5", "");
-                env.setConfig("proxyAccount", "");
-                prop.put("info", 6);//proxy account has changed(no pw)
-                prop.put("info_filter", filter);
-            } else {
-                // also paccount setting
-                env.setConfig("proxyAccountBase64MD5", serverCodings.standardCoder.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(user + ":" + pw1)));
-                env.setConfig("proxyAccount", "");
-                prop.put("info", 7);//proxy account has changed
-                prop.put("info_user", user);
-                prop.put("info_filter", filter);
-            }*/
             env.setConfig("use_proxyAccounts", use_proxyAccounts);//"true" or "false"
 			if (use_proxyAccounts.equals("false")){
                 prop.put("info", 6);//proxy account has changed(no pw)
