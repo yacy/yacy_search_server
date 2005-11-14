@@ -321,21 +321,34 @@ public class plasmaSnippetCache {
         if (resource == null) return null;
         httpHeader header = null;
         try {
-            header = cacheManager.getCachedResponse(plasmaURL.urlHash(url));
+            header = this.cacheManager.getCachedResponse(plasmaURL.urlHash(url));
         } catch (IOException e) {}
         
         if (header == null) {
-            String filename = cacheManager.getCachePath(url).getName();
+            String filename = this.cacheManager.getCachePath(url).getName();
             int p = filename.lastIndexOf('.');
-            if ((p < 0) ||
-                ((p >= 0) && (plasmaParser.supportedFileExtContains(filename.substring(p + 1))))) {
-                return parser.parseSource(url, "text/html", resource);
+            if (
+                    (p < 0) ||
+                    ((p >= 0) && (plasmaParser.supportedFileExtContains(filename.substring(p + 1))))
+            ) {
+                String supposedMime = "text/html";
+                
+                // if the mimeType Parser is installed we can set the mimeType to null to force
+                // a mimetype detection
+                if (plasmaParser.supportedMimeTypesContains("application/octet-stream")) {
+                    supposedMime = null;
+                } else if (p != -1){
+                    // otherwise we try to determine the mimeType per file Extension
+                    supposedMime = plasmaParser.getMimeTypeByFileExt(filename.substring(p + 1));
+                }
+
+                return this.parser.parseSource(url, supposedMime, resource);
             } else {
                 return null;
             }
         } else {
             if (plasmaParser.supportedMimeTypesContains(header.mime())) {
-                return parser.parseSource(url, header.mime(), resource);
+                return this.parser.parseSource(url, header.mime(), resource);
             } else {
                 return null;
             }
