@@ -201,7 +201,6 @@ public final class userDB {
 	 * @param ip the IP of the User
 	 */
 	public Entry ipAuth(String ip) {
-		System.out.println("ipAuth: "+ip);
         if(this.ipUsers.containsKey(ip)){
             String user=(String)this.ipUsers.get(ip);
             Entry entry=this.getEntry(user);
@@ -409,7 +408,6 @@ public final class userDB {
             return (this.mem.containsKey(ADMIN_RIGHT)?((String)this.mem.get(ADMIN_RIGHT)).equals("true"):false);
         }
         public boolean isLoggedOut(){
-        	System.out.println("isLoggedOut:"+this.mem.get(LOGGED_OUT));
         	   return (this.mem.containsKey(LOGGED_OUT)?((String)this.mem.get(LOGGED_OUT)).equals("true"):false);
         }
         public void logout(String ip){
@@ -419,7 +417,6 @@ public final class userDB {
         			   ipUsers.remove(ip);
         		   }
         	   }catch(IOException e){}
-        	   System.out.println("Logout: "+ip);
         }
         public void logout(){
         		logout("xxxxxx");
