@@ -849,6 +849,10 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	    this.count = 0;
             this.up = up;
             this.rot = rotating;
+            init(start);
+	}
+        
+        private void init(Node start) throws IOException {
             this.nextNode = start;
             
             // fill node stack for start node
@@ -872,7 +876,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                 if (searchNode == null) throw new kelondroException(filename, "start node does not exist (node null)");
             }
             // now every parent node to the start node is on the stack
-	}
+        }
         
         public void finalize() {
             nextNode = null;
@@ -880,11 +884,16 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         }
             
 	public boolean hasNext() {
-            return nextNode != null;
+            return (rot) || (nextNode != null);
 	}
 
         public Object next() {
 	    count++;
+            if ((rot) && (nextNode == null)) try {
+                init((up) ? firstNode() : lastNode());
+            } catch (IOException e) {
+                throw new kelondroException(filename, "io-error while rot");
+            }
             if (nextNode == null) throw new kelondroException(filename, "no more entries available");
 	    if ((count > size()) && (!(rot))) throw new kelondroException(filename, "internal loopback; database corrupted");
             Object ret = nextNode;
@@ -953,23 +962,11 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	// iterates the rows of the Nodes
 	// enumerated objects are of type byte[][]
         // iterates the elements in a sorted way.
-	return new rowIterator(new nodeIterator(up, rotating));
+	return new rowIterator(nodeIterator(up, rotating));
     }
     
     public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        Search search = new Search();
-        search.process(firstKey);
-        if (search.found()) {
-            Node matcher = search.getMatcher();
-            return new rowIterator(new nodeIterator(up, rotating, matcher));
-        } else {
-            Node nn = search.getParent();
-            if (nn == null) {
-                return (Iterator) (new HashSet()).iterator();
-            } else {
-                return new rowIterator(new nodeIterator(up, rotating, nn));
-            }
-        }
+        return new rowIterator(nodeIterator(up, rotating, firstKey));
     }
     
     public class rowIterator implements Iterator {
@@ -1003,23 +1000,11 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	// iterates only the keys of the Nodes
 	// enumerated objects are of type String
         // iterates the elements in a sorted way.
-	return new keyIterator(new nodeIterator(up, rotating));
+	return new keyIterator(nodeIterator(up, rotating));
     }
     
     public Iterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        Search search = new Search();
-        search.process(firstKey);
-        if (search.found()) {
-            Node matcher = search.getMatcher();
-            return new keyIterator(new nodeIterator(up, rotating, matcher));
-        } else {
-            Node nn = search.getParent();
-            if (nn == null) {
-                return (Iterator) (new HashSet()).iterator();
-            } else {
-                return new keyIterator(new nodeIterator(up, rotating, nn));
-            }
-        }
+        return new keyIterator(nodeIterator(up, rotating, firstKey));
     }
     
     public class keyIterator implements Iterator {
@@ -1331,9 +1316,9 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 
     public static void main(String[] args) {
 	//cmd(args);
-        bigtest(Integer.parseInt(args[0]));
+        //bigtest(Integer.parseInt(args[0]));
         //randomtest(Integer.parseInt(args[0]));
-        //smalltest();
+        smalltest();
     }
  
     public static String[] permutations(int letters) {
@@ -1441,15 +1426,28 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         try {
             kelondroTree tt = new kelondroTree(f, 0, 4, 4);
             byte[] b;
-            b = testWord('B'); tt.put(b, b); tt.print();
-            b = testWord('C'); tt.put(b, b); tt.print();
-            b = testWord('D'); tt.put(b, b); tt.print();
-            b = testWord('A'); tt.put(b, b); tt.print();
-            b = testWord('D'); tt.remove(b); tt.print();
-            b = testWord('B'); tt.remove(b); tt.print();
-            b = testWord('B');
-            tt.put(b, b); tt.print();
-            System.out.println("elements: " + countElements(tt));
+            b = testWord('B'); tt.put(b, b); //tt.print();
+            b = testWord('C'); tt.put(b, b); //tt.print();
+            b = testWord('D'); tt.put(b, b); //tt.print();
+            b = testWord('A'); tt.put(b, b); //tt.print();
+            b = testWord('D'); tt.remove(b); //tt.print();
+            b = testWord('B'); tt.remove(b); //tt.print();
+            b = testWord('B'); tt.put(b, b); //tt.print();
+            b = testWord('D'); tt.put(b, b);
+            b = testWord('E'); tt.put(b, b);
+            b = testWord('F'); tt.put(b, b);
+            b = testWord('G'); tt.put(b, b);
+            //b = testWord('H'); tt.put(b, b);
+            b = testWord('I'); tt.put(b, b);
+            b = testWord('J'); tt.put(b, b);
+            b = testWord('K'); tt.put(b, b);
+            b = testWord('L'); tt.put(b, b);
+            int c = countElements(tt);
+            System.out.println("elements: " + c);
+            Iterator i = tt.nodeIterator(true, true, testWord('G'));
+            for (int j = 0; j < c; j++) {
+                System.out.println("Node " + j + ": " + new String(((Node) i.next()).getKey()));
+            }
             System.out.println("TERMINATED");
         } catch (IOException e) {
             e.printStackTrace();

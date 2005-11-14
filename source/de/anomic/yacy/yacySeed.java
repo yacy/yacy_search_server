@@ -524,6 +524,8 @@ public class yacySeed {
     return newSeed;
     }
 
+    //public static String randomHash() { return "zLXFf5lTteUv"; } // only for debugging
+    
     public static String randomHash() {
         String hash =
             serverCodings.encodeMD5B64(System.currentTimeMillis() + "a", true).substring(0, 6) +
