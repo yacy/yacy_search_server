@@ -51,9 +51,12 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
+import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaCrawlLURL.Entry;
+import de.anomic.plasma.plasmaCrawlProfile.entry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -78,6 +81,9 @@ public class ViewFile {
         
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     
+        
+
+        
         if (post.containsKey("words"))
             try {
                 prop.put("error_words",URLEncoder.encode((String) post.get("words"), "UTF-8"));
@@ -115,6 +121,8 @@ public class ViewFile {
             
             // loading the resource content as byte array
             byte[] resource = null;
+            httpHeader resHeader = null;
+            String resMime = null;
             try {
                 resource = sb.cacheManager.loadResource(url);
                 if (resource == null) {
@@ -126,6 +134,16 @@ public class ViewFile {
                         prop.put("viewMode",VIEW_MODE_NO_TEXT);
                         return prop;
                     } 
+                }
+                resHeader = sb.cacheManager.getCachedResponse(urlEntry.hash());
+                if (resHeader == null) {
+                    resHeader = httpc.whead(url,5000,null,null,sb.remoteProxyConfig);
+                    if (resource == null) {
+                        prop.put("error",4);
+                        prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                        return prop;
+                    } 
+                    resMime = resHeader.mime();
                 }
             } catch (IOException e) {
                 if (url == null) {
@@ -153,6 +171,7 @@ public class ViewFile {
                     prop.put("viewMode",VIEW_MODE_NO_TEXT);
                     return prop;                
                 }
+                resMime = document.getMimeType();
                 
                 if (viewMode.equals("parsed")) {
                     String content = new String(document.getText());
@@ -202,6 +221,7 @@ public class ViewFile {
             prop.put("error_wordCount",Integer.toString(urlEntry.wordCount()));
             prop.put("error_desc",urlEntry.descr());
             prop.put("error_size",urlEntry.size());
+            prop.put("error_mimeType",resMime);
         }        
         
         return prop;
