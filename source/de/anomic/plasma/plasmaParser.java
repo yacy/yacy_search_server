@@ -258,6 +258,11 @@ public final class plasmaParser {
     }
     
     public static boolean supportedContent(URL url, String mimeType) {
+        // TODO: we need some exceptions here to index URLs like this
+        //       http://www.musicabona.com/respighi/12668/cd/index.html.fr
+        if ((mimeType!=null)&&(mimeType.trim().equalsIgnoreCase("text/html"))) {
+            return supportedMimeTypesContains(mimeType);
+        }
         return supportedMimeTypesContains(mimeType) && supportedFileExt(url);
     }
     
@@ -715,8 +720,10 @@ public final class plasmaParser {
             //plasmaParserDocument document = theParser.parseSource(new URL("http://brain.yacy"), "application/pdf", theOutput.toByteArray());
             //byte[] theText = document.getText();
             //serverFileUtils.write(theText, out);
-            String[] sentences = document.getSentences();
-            for (int i = 0; i < sentences.length; i++) System.out.println("line " + i + ":" + sentences[i]);
+            if (document != null) {
+                String[] sentences = document.getSentences();
+                if (sentences != null) for (int i = 0; i < sentences.length; i++) System.out.println("line " + i + ":" + sentences[i]);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
