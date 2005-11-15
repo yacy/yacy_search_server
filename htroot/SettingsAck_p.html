@@ -28,18 +28,26 @@ Your request cannot be processed.<br>Nothing changed.
 <b>Your administration account setting has been made.</b><br>
 Your new administration account name is #[user]#. The password has been accepted.<br>If you go back to the Settings page, you must log-in again.
 ::<!-- 6 -->
-<b>Your proxy access setting has been changed.<br>
-Your proxy account check has been disabled, since you did not supply a password.</b><p>
-The new proxy IP filter is set to #[filter]#<br>
-The proxy port is: <font color="#556699">#[port]#</font><p>
-<u>if you changed the Port or Port Forwarding Settings, you need to restart YaCy.</u>
+	<b>Your proxy access setting has been changed.<br>
+	Your proxy account check has been disabled, since you did not supply a password.</b><p>
+	The new proxy IP filter is set to <font color="#556699">#[filter]#</font><br>
+	The proxy port is: <font color="#556699">#[port]#</font><p>
+	#(restart)#
+	::
+		Port rebinding will be done in a view seconds.<br>
+		You can reach your YaCy server under the new location <a href="http://#[ip]#:#[port]#/">http://#[ip]#:#[port]#/</a>
+	#(/restart)#
 ::<!-- 7 -->
-<b>Your proxy access setting has been changed.</b><br>
-Your new proxy account name is #[user]#. The password has been accepted.<br>
-If you open any public web page through the proxy, you must log-in then.<p>
-The new proxy IP filter is set to #[filter]#.<br>
-The proxy port is: <font color="#556699">#[port]#</font><p>
-<u>if you changed the Port or Port Forwarding Settings, you need to restart YaCy.</u>
+	<b>Your proxy access setting has been changed.</b><br>
+	Your new proxy account name is <font color="#556699">#[user]#</font>. The password has been accepted.<br>
+	If you open any public web page through the proxy, you must log-in then.<p>
+	The new proxy IP filter is set to <font color="#556699">#[filter]#</font>.<br>
+	The proxy port is: <font color="#556699">#[port]#</font><p>
+	#(restart)#
+	::
+		Port rebinding will be done in a view seconds.<br>
+		You can reach your YaCy server under the new location <a href="http://#[ip]#:#[port]#/">http://#[ip]#:#[port]#/</a>
+	#(/restart)#
 ::<!-- 8 -->
 <b>Your server access filter is now set to #[filter]#</b><br>
 <!--Your new server account name is #[user]#. The password has been accepted.<br>
@@ -143,10 +151,12 @@ Please return to the settings page and modify the data.<br>
 You are now <b>event-based online</b>. After a short while you should see the effect on the <a href="Status.html">status</a> page.<br>
 ::<!-- 25 -->
 You are now in <b>Cache Mode</b>. Only Proxy-cache ist available in this mode. After a short while you should see the effect on the <a href="Status.html">status</a> page.<br>
+::<!-- 26 -->
+<p><font color="red">Unable to bild the server to the new Port: <font color="#556699">#[port]#</font></font><br>
+This values seems not to be a valid port configuration. 
 #(/info)#
 </p>
 <p>You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.</p>
-
 #[footer]#
 </body>
 </html>

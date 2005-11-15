@@ -60,6 +60,7 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.channels.ClosedByInterruptException;
@@ -80,6 +81,7 @@ import de.anomic.icap.icapd;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacySeedDB;
 import de.anomic.plasma.plasmaSwitchboard;
 
 public final class serverCore extends serverAbstractThread implements serverThread {
@@ -97,6 +99,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     
     // class variables
     private String port;                      // the listening port
+    public boolean forceRestart = false;     // specifies if the server should try to do a restart
     
     public static boolean portForwardingEnabled = false;
     public static serverPortForwarding portForwarding = null;
@@ -115,7 +118,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     /**
      * The session-object pool
      */
-    final SessionPool theSessionPool;
+    SessionPool theSessionPool;
     final ThreadGroup theSessionThreadGroup = new ThreadGroup("sessionThreadGroup");
     private Config cralwerPoolConfig = null;
 
@@ -171,15 +174,13 @@ public final class serverCore extends serverAbstractThread implements serverThre
     }
 
     // class initializer
-    public serverCore(
-            String port, 
+    public serverCore( 
             int timeout,
             boolean blockAttack,
             serverHandler handlerPrototype, 
             serverSwitch switchboard,
             int commandMaxLength
     ) throws IOException {
-        this.port = port.trim();
         this.timeout = timeout;
         
         this.commandMaxLength = commandMaxLength;
@@ -189,79 +190,26 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         // initialize logger
         this.log = new serverLog("SERVER");
+
+        // init servercore
+        init();
+    }
+    
+    public synchronized void init() {
+        this.log.logInfo("Initializing serverCore ...");
         
-        /*
-         try {
-         ServerSocketFactory ssf = getServerSocketFactory(false, new File("D:\\dev\\proxy\\addon\\testkeys"), "passphrase");
-         this.socket = ssf.createServerSocket(port);
-         //((SSLServerSocket) this.socket ).setNeedClientAuth(true);
-          } catch (java.net.BindException e) {
-          System.out.println("FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number"); System.exit(0);
-          }
-          */
+        // read some config values
+        this.port = this.switchboard.getConfig("port", "8080").trim();
         
         // Open a new server-socket channel
         try {
-            this.log.logInfo("Trying to bind server to port " + port);
-            
-            // parsing the port configuration
-            String bindIP = null;
-            int bindPort;
-            
-            int pos = -1;
-            if ((pos = port.indexOf(":"))!= -1) {
-                bindIP = port.substring(0,pos).trim();
-                port = port.substring(pos+1); 
-                
-                if (bindIP.startsWith("#")) {
-                    String interfaceName = bindIP.substring(1);
-                    String hostName = null;
-                    this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
-
-                    Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
-                    if (interfaces != null) {
-                        while (interfaces.hasMoreElements()) {
-                            NetworkInterface interf = (NetworkInterface) interfaces.nextElement();
-                            if (interf.getName().equalsIgnoreCase(interfaceName)) {
-                                Enumeration addresses = interf.getInetAddresses();
-                                if (addresses != null) {
-                                    while (addresses.hasMoreElements()) {
-                                        InetAddress address = (InetAddress)addresses.nextElement();
-                                        if (address instanceof Inet4Address) {
-                                            hostName = address.getHostAddress();
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (hostName == null) {
-                        this.log.logWarning("Unable to find interface with name '" + interfaceName + "'. Binding server to all interfaces");
-                        bindIP = null;
-                    } else {
-                        this.log.logInfo("Binding server to interface '" + interfaceName + "' with IP '" + hostName + "'.");
-                        bindIP = hostName;
-                    }
-                } 
-            }
-            bindPort = Integer.parseInt(port);            
-            
-            // Binds the ServerSocket to a specific address 
-            this.socket = new ServerSocket();
-            this.socket.bind((bindIP == null) 
-                             ? new InetSocketAddress(bindPort)
-                             : new InetSocketAddress(bindIP, bindPort));
-            
-            // this.socket = new ServerSocket(port);
-        } catch (java.net.BindException e) {
+            this.initPort(this.port);
+        } catch (Exception e) {
             String errorMsg = "FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number";
             this.log.logSevere(errorMsg);
             System.out.println(errorMsg);             
             System.exit(0);
         }
-
-
 
         // init port forwarding            
         try {
@@ -273,6 +221,13 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.log.logSevere("Unable to initialize server port forwarding.",e);
             this.switchboard.setConfig("portForwardingEnabled","false");
         }
+        
+        // init session pool
+        initSessionPool();        
+    }
+    
+    public void initSessionPool() {
+        this.log.logInfo("Initializing session pool ...");
         
         // implementation of session thread pool
         this.cralwerPoolConfig = new GenericObjectPool.Config();
@@ -295,13 +250,75 @@ public final class serverCore extends serverAbstractThread implements serverThre
         this.cralwerPoolConfig.minEvictableIdleTimeMillis = this.thresholdSleep; 
         this.cralwerPoolConfig.testOnReturn = true;
         
-        this.theSessionPool = new SessionPool(new SessionFactory(this.theSessionThreadGroup),this.cralwerPoolConfig);  
+        this.theSessionPool = new SessionPool(new SessionFactory(this.theSessionThreadGroup),this.cralwerPoolConfig);        
+    }
+    
+    public void initPort(String thePort) throws IOException {
+        this.log.logInfo("Trying to bind server to port " + thePort);
         
+        // Binds the ServerSocket to a specific address 
+        InetSocketAddress bindAddress = null;
+        this.socket = new ServerSocket();
+        this.socket.bind(bindAddress = generateSocketAddress(thePort));
+        
+        // updating the port information
+        yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(bindAddress.getPort()));    
+    }
+    
+    public InetSocketAddress generateSocketAddress(String thePort) throws SocketException {
+        
+        // parsing the port configuration
+        String bindIP = null;
+        int bindPort;
+        
+        int pos = -1;
+        if ((pos = thePort.indexOf(":"))!= -1) {
+            bindIP = thePort.substring(0,pos).trim();
+            thePort = thePort.substring(pos+1); 
+            
+            if (bindIP.startsWith("#")) {
+                String interfaceName = bindIP.substring(1);
+                String hostName = null;
+                this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
+
+                Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+                if (interfaces != null) {
+                    while (interfaces.hasMoreElements()) {
+                        NetworkInterface interf = (NetworkInterface) interfaces.nextElement();
+                        if (interf.getName().equalsIgnoreCase(interfaceName)) {
+                            Enumeration addresses = interf.getInetAddresses();
+                            if (addresses != null) {
+                                while (addresses.hasMoreElements()) {
+                                    InetAddress address = (InetAddress)addresses.nextElement();
+                                    if (address instanceof Inet4Address) {
+                                        hostName = address.getHostAddress();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (hostName == null) {
+                    this.log.logWarning("Unable to find interface with name '" + interfaceName + "'. Binding server to all interfaces");
+                    bindIP = null;
+                } else {
+                    this.log.logInfo("Binding server to interface '" + interfaceName + "' with IP '" + hostName + "'.");
+                    bindIP = hostName;
+                }
+            } 
+        }
+        bindPort = Integer.parseInt(thePort);    
+        
+        return (bindIP == null) 
+        ? new InetSocketAddress(bindPort)
+        : new InetSocketAddress(bindIP, bindPort);
     }
     
     public void initPortForwarding() throws Exception {
         // doing the port forwarding stuff
         if (this.switchboard.getConfig("portForwardingEnabled","false").equalsIgnoreCase("true")) {
+            this.log.logInfo("Initializing port forwarding ...");
             try {
                 String localHost = this.socket.getInetAddress().getHostName();
                 Integer localPort = new Integer(this.socket.getLocalPort());
@@ -441,52 +458,62 @@ public final class serverCore extends serverAbstractThread implements serverThre
     
     // class body
     public boolean job() throws Exception {
-        // prepare for new connection
-        // idleThreadCheck();
-        this.switchboard.handleBusyState(this.theSessionPool.getNumActive() /*activeThreads.size() */);
-
-        this.log.logFinest(
-        "* waiting for connections, " + this.theSessionPool.getNumActive() + " sessions running, " +
-        this.theSessionPool.getNumIdle() + " sleeping");
-        
-        // wait for new connection
-        announceThreadBlockApply();
-        Socket controlSocket = this.socket.accept();
-        announceThreadBlockRelease();
-
-        String cIP = clientAddress(controlSocket);
-        //System.out.println("server bfHosts=" + bfHost.toString());
-        if (bfHost.get(cIP) != null) {
-            Integer attempts = (Integer) bfHost.get(cIP);
-            if (attempts == null) attempts = new Integer(1); else attempts = new Integer(attempts.intValue() + 1);
-            bfHost.put(cIP, attempts);
-            this.log.logWarning("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP + ", ATTEMPT " + attempts.intValue());
-            // add a delay to make brute-force harder
+        try {
+            // prepare for new connection
+            // idleThreadCheck();
+            this.switchboard.handleBusyState(this.theSessionPool.getNumActive() /*activeThreads.size() */);
+            
+            this.log.logFinest(
+                    "* waiting for connections, " + this.theSessionPool.getNumActive() + " sessions running, " +
+                    this.theSessionPool.getNumIdle() + " sleeping");
+            
+            // wait for new connection
             announceThreadBlockApply();
-            try {Thread.sleep(attempts.intValue() * 2000);} catch (InterruptedException e) {}
+            Socket controlSocket = this.socket.accept();
             announceThreadBlockRelease();
-            if ((attempts.intValue() >= 10) && (this.denyHost != null)) {
-                this.denyHost.put(cIP, "deny");
+            
+            String cIP = clientAddress(controlSocket);
+            //System.out.println("server bfHosts=" + bfHost.toString());
+            if (bfHost.get(cIP) != null) {
+                Integer attempts = (Integer) bfHost.get(cIP);
+                if (attempts == null) attempts = new Integer(1); else attempts = new Integer(attempts.intValue() + 1);
+                bfHost.put(cIP, attempts);
+                this.log.logWarning("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP + ", ATTEMPT " + attempts.intValue());
+                // add a delay to make brute-force harder
+                announceThreadBlockApply();
+                try {Thread.sleep(attempts.intValue() * 2000);} catch (InterruptedException e) {}
+                announceThreadBlockRelease();
+                if ((attempts.intValue() >= 10) && (this.denyHost != null)) {
+                    this.denyHost.put(cIP, "deny");
+                }
             }
-        }
-        
-        if ((this.denyHost == null) || (this.denyHost.get(cIP) == null)) {
-            // setting the timeout properly
-            controlSocket.setSoTimeout(this.timeout);
             
-            // getting a free session thread from the pool
-            Session connection = (Session) this.theSessionPool.borrowObject();
+            if ((this.denyHost == null) || (this.denyHost.get(cIP) == null)) {
+                // setting the timeout properly
+                controlSocket.setSoTimeout(this.timeout);
+                
+                // getting a free session thread from the pool
+                Session connection = (Session) this.theSessionPool.borrowObject();
+                
+                // processing the new request
+                connection.execute(controlSocket,this.timeout);
+            } else {
+                this.log.logWarning("ACCESS FROM " + cIP + " DENIED");
+            }
             
-            // processing the new request
-            connection.execute(controlSocket,this.timeout);
-        } else {
-            this.log.logWarning("ACCESS FROM " + cIP + " DENIED");
+            return true;
+        } catch (SocketException e) {
+            if (this.forceRestart) {
+                // reinitialize serverCore
+                init(); 
+                this.forceRestart = false;
+                return true;
+            }
+            throw e;
         }
-
-        return true;
     }
 
-    public void close() {
+    public synchronized void close() {
         // consuming the isInterrupted Flag. Otherwise we could not properly close the session pool
         Thread.interrupted();
         
@@ -1192,5 +1219,29 @@ public final class serverCore extends serverAbstractThread implements serverThre
         if (currentThread.isInterrupted()) throw new InterruptedException();  
         if ((currentThread instanceof serverCore.Session) && ((serverCore.Session)currentThread).isStopped()) throw new InterruptedException();
     }
-
+    
+    public void reconnect() {
+        Thread restart = new Restarter();
+        restart.start();
+    }
+    
+    // restarting the serverCore
+    public class Restarter extends Thread { 
+        public serverCore theServerCore = null;
+        public void run() {
+            // waiting for a while
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
+            // signaling restart
+            serverCore.this.forceRestart = true;
+            
+            // closing socket to notify the thread
+            serverCore.this.close();
+        }
+    }
 }

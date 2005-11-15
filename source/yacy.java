@@ -327,7 +327,7 @@ public final class yacy {
             // start main threads
             try {
                 final httpd protocolHandler = new httpd(sb, new httpdFileHandler(sb), new httpdProxyHandler(sb));
-                final serverCore server = new serverCore(port,
+                final serverCore server = new serverCore(
                         timeout /*control socket timeout in milliseconds*/,
                         true /* block attacks (wrong protocol) */,
                         protocolHandler /*command class*/,

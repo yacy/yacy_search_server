@@ -46,6 +46,8 @@
 // javac -classpath .:../Classes SettingsAck_p.java
 // if the shell's current path is HTROOT
 
+import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -127,10 +129,30 @@ public class SettingsAck_p {
         
         // proxy password
         if (post.containsKey("proxyaccount")) {
-            // set new port
+            /* 
+             * set new port
+             */
             String port = (String) post.get("port");
-            env.setConfig("port", port);
             prop.put("info_port", port);
+            if (!env.getConfig("port", port).equals(port)) {
+                // validation port
+                serverCore theServerCore = (serverCore) env.getThread("10_httpd");
+                try {
+                    InetSocketAddress theNewAddress = theServerCore.generateSocketAddress(port);
+                    String hostName = theNewAddress.getHostName();
+                    prop.put("info_restart",1);
+                    prop.put("info_restart_ip",(hostName.equals("0.0.0.0"))?"localhost":hostName);
+                    prop.put("info_restart_port",Integer.toString(theNewAddress.getPort()));
+                    
+                    env.setConfig("port", port);
+                    
+                    theServerCore.reconnect();                    
+                } catch (SocketException e) {
+                    prop.put("info_restart",0);
+                }
+            } else {
+                prop.put("info_restart",26);
+            }
             
             // read and process data
             String filter = (String) post.get("proxyfilter");
