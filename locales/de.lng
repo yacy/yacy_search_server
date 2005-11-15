@@ -775,7 +775,6 @@ Your proxy access setting has been changed.
 Your new proxy account name is #[user]#. The password has been accepted.
 If you open any public web page through the proxy, you must log-in then.
 The new proxy IP filter is set to #[filter]#.
-The proxy port is:
 if you changed the Port or Port Forwarding Settings, you need to restart YaCy.
 Your server access filter is now set to #[filter]#
 Auto pop-up of the Status page is now <b>disabled</b>==Automatisches Pop-Up auf der Status Seite ist nun <b>deaktiviert.</b>
@@ -796,7 +795,7 @@ Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and 
 The new parser settings where changed successfully.
 Parsing of the following mime-types was enabled:
 Seed Upload method was changed successfully.
-You are now a principal peer.
+You are now a principal peer.==Sie sind nun ein Principal Peer.
 Seed Upload Method:
 Seed File URL:
 Your proxy networking settings have been changed.
