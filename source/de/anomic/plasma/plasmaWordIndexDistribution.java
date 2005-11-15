@@ -652,10 +652,11 @@ public final class plasmaWordIndexDistribution {
         private boolean gzipBody = false;
         private int timeout = 60000;
         private int maxOpenFiles = 800;
-        private int transferedIndexCount = 0;
+        private int transferedEntryCount = 0;
+        private int transferedEntityCount = 0;
         private String status = "Running";
         private String oldStartingPointHash = "------------", startPointHash = "------------";
-        private int wordsDBSize = 0;
+        private int initialWordsDBSize = 0;
         private int chunkSize = 500;   
         private final long startingTime = System.currentTimeMillis();
         private final plasmaSwitchboard sb;
@@ -667,7 +668,7 @@ public final class plasmaWordIndexDistribution {
             this.seed = seed;
             this.delete = delete;
             this.sb = plasmaSwitchboard.getSwitchboard();
-            this.wordsDBSize = sb.wordIndex.size();   
+            this.initialWordsDBSize = sb.wordIndex.size();   
             this.gzipBody = "true".equalsIgnoreCase(sb.getConfig("indexTransfer.gzipBody","false"));
             this.timeout = (int) sb.getConfigLong("indexTransfer.timeout",60000);
             this.maxOpenFiles = (int) sb.getConfigLong("indexTransfer.maxOpenFiles",800);
@@ -698,17 +699,24 @@ public final class plasmaWordIndexDistribution {
             return new int[]{this.chunkSize,500};
         }
         
-        public int getTransferedIndexCount() {
-            return this.transferedIndexCount;
+        public int getTransferedEntryCount() {
+            return this.transferedEntryCount;
         }
         
-        public float getTransferedIndexPercent() {
-            if (wordsDBSize == 0) return 100;
-            else return (float)(this.transferedIndexCount*100/wordsDBSize);
+        public int getTransferedEntityCount() {
+            return this.transferedEntityCount;
         }
         
-        public int getTransferedIndexSpeed() {
-            return (int) ((1000 * transferedIndexCount) / (System.currentTimeMillis()-startingTime));
+        public float getTransferedEntityPercent() {
+            long currentWordsDBSize = sb.wordIndex.size(); 
+            if (initialWordsDBSize == 0) return 100;
+            else if (currentWordsDBSize >= initialWordsDBSize) return 0;
+            //else return (float) ((initialWordsDBSize-currentWordsDBSize)/(initialWordsDBSize/100));
+            else return (float)(this.transferedEntityCount*100/initialWordsDBSize);
+        }
+        
+        public int getTransferedEntitySpeed() {
+            return (int) ((1000 * transferedEntryCount) / (System.currentTimeMillis()-startingTime));
         }
         
         public yacySeed getSeed() {
@@ -839,7 +847,8 @@ public final class plasmaWordIndexDistribution {
                                 try {
                                     if (deleteTransferIndexes(oldIndexEntities)) {
                                         plasmaWordIndexDistribution.this.log.logFine("Deleted all " + oldIndexEntities.length + " transferred whole-word indexes locally");
-                                        transferedIndexCount += idxCount;
+                                        transferedEntryCount += idxCount;
+                                        transferedEntityCount += oldIndexEntities.length;
                                     } else {
                                         plasmaWordIndexDistribution.this.log.logSevere("Deleted not all transferred whole-word indexes");
                                     }
@@ -848,7 +857,8 @@ public final class plasmaWordIndexDistribution {
                                 }
                             } else {
                                 this.closeEntities(oldIndexEntities);
-                                transferedIndexCount += idxCount;
+                                transferedEntryCount += idxCount;
+                                transferedEntityCount += oldIndexEntities.length;
                             }
                             oldIndexEntities = null;
                         }

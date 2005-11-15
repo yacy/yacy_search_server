@@ -74,7 +74,7 @@ public final class IndexTransfer_p {
                 if (seed == null) {
                     prop.put("running_status","Disconnected peer");
                 } else {                    
-                    boolean deleteIndex = ((String)post.get("deleteIndex", "0")).equals("1");                    
+                    boolean deleteIndex = post.get("deleteIndex", "0").equals("1");                    
                     switchboard.indexDistribution.startTransferWholeIndex(seed,deleteIndex);
                     prop.put("LOCATION","");
                     return prop;
@@ -99,7 +99,6 @@ public final class IndexTransfer_p {
         prop.put("ucount", Integer.toString(ucount = switchboard.urlPool.loadedURL.size()));
         prop.put("running",(transfThread==null)?0:1);
         if (transfThread != null) {
-            int transferedIdxCount = transfThread.getTransferedIndexCount();
             String[] status = transfThread.getStatus();
             String[] range  = transfThread.getRange();
             int[] chunk     = transfThread.getChunkSize();
@@ -113,9 +112,10 @@ public final class IndexTransfer_p {
             prop.put("running_transfer.twchunk", Integer.toString(chunk[1]));
 
             
-            prop.put("running_twcount",transferedIdxCount);
-            prop.put("running_twpercent",Float.toString(transfThread.getTransferedIndexPercent()));
-            prop.put("running_twspeed",Integer.toString(transfThread.getTransferedIndexSpeed()));
+            prop.put("running_twEntityCount",transfThread.getTransferedEntityCount());
+            prop.put("running_twEntryCount",transfThread.getTransferedEntryCount());
+            prop.put("running_twEntityPercent",Float.toString(transfThread.getTransferedEntityPercent()));
+            prop.put("running_twEntitySpeed",Integer.toString(transfThread.getTransferedEntitySpeed()));
             
             prop.put("running_deleteIndex", transfThread.deleteIndex()?1:0);
             prop.put("running_peerName",transfThread.getSeed().getName());

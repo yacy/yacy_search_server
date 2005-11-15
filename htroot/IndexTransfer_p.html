@@ -17,7 +17,7 @@
 <tr class="TableHeader" valign="bottom">
 <td>&nbsp;</td>
 <td class="small" >Status</td>
-<td class="small" >Chunk Size</td>
+<td class="small" >Chunk Size<br>(Word Entries)</td>
 <td class="small" >Words Range</td>
 <td class="small" >Transfered Words</td>
 <td class="small" >Delete<br>Index</td>
@@ -55,7 +55,9 @@
       <td class="small" ><font color="#(stopped)#green::red#(/stopped)#">#[selection.status]#</font></td>
       <td class="small" align="rigth">#[selection.twchunk]# words</td>
       <td class="small" align="right"><tt>#[selection.twrange]#</tt></td>
-      <td class="small" rowspan="2" align="right">#[twcount]# (#[twpercent]#%)<br>#[twspeed]# words/s</td>
+      <td class="small" rowspan="2" align="left">#[twEntityCount]# Entities (#[twEntityPercent]#%)<br>
+      											  #[twEntryCount]# Entries<br>
+      											  #[twEntitySpeed]# entities/s</td>
       <td class="small" rowspan="2">#(deleteIndex)#false::true#(/deleteIndex)#</td>
       <td class="small" rowspan="2">#[peerName]#</td>
       <td class="small" rowspan="2">#(stopped)#<input type="submit" name="stopIndexTransfer" value="Stop Index Transfer">::
