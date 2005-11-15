@@ -626,7 +626,7 @@ public final class yacy {
             while (words.hasMoreElements()) try {
                 wordfile = (File) words.nextElement();
                 wordhash = wordfile.getName().substring(0, 12);
-                System.out.println("NOW: " + wordhash);
+                //System.out.println("NOW: " + wordhash);
                 migrationStatus = wordIndexCache.migrateWords2Assortment(wordhash);
                 if (migrationStatus instanceof Integer) {
                     int migrationCount = ((Integer)migrationStatus).intValue();

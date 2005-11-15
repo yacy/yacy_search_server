@@ -378,6 +378,13 @@ public final class plasmaWordIndexDistribution {
                             indexEntity.removeEntry(nextUrlHash, true);
                             this.urlPool.loadedURL.remove(nextUrlHash);
                         }
+                        
+                        // deleting entity if there are no more entries left
+                        // This could occure if there are unknownURLs in the entity
+                        if (indexEntity.size() == 0) {
+                            indexEntity.deleteComplete();
+                        }                       
+                        
                         // use whats remaining
                         this.log.logFine("Selected partial index (" + tmpEntity.size() + " from " + indexEntity.size() +" URLs, " + unknownURLEntries.size() + " not bound) for word " + tmpEntity.wordHash());
                         tmpEntities.add(tmpEntity);
