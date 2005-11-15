@@ -75,6 +75,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 public class kelondroRecords {
 
@@ -145,6 +146,8 @@ public class kelondroRecords {
     protected long                  XcacheStartup; // startup time; for cache aging
     protected kelondroMScoreCluster cacheScore;   // controls cache aging
 
+    // optional logger
+    protected Logger theLogger = null;
 
     public kelondroRecords(File file, long buffersize /* bytes */,
                            short ohbytec, short ohhandlec,
@@ -236,6 +239,17 @@ public class kelondroRecords {
 	// thats it!
     }
 
+    public void setLogger(Logger newLogger) {
+        this.theLogger = newLogger;
+    }
+    
+    public void logWarning(String message) {
+        if (this.theLogger == null)
+            System.err.println("KELONDRO WARNING for file " + this.filename + ": " + message);
+        else
+            this.theLogger.warning("KELONDRO WARNING for file " + this.filename + ": " + message);
+    }
+    
     public void clear() throws IOException {
         // Removes all mappings from this map
 	//throw new UnsupportedOperationException("clear not supported");

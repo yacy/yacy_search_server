@@ -626,6 +626,7 @@ public final class yacy {
             while (words.hasMoreElements()) try {
                 wordfile = (File) words.nextElement();
                 wordhash = wordfile.getName().substring(0, 12);
+                System.out.println("NOW: " + wordhash);
                 migration = wordIndexCache.migrateWords2Assortment(wordhash);
                 if (migration == 0)
                     log.logInfo("SKIPPED  " + wordhash + ": " + ((wordfile.exists()) ? "too big" : "database corrupted; deleted"));

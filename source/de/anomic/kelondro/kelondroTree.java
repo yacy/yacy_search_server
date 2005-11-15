@@ -208,17 +208,17 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                         parentnode = thenode;
                         thenode = getNode(thisHandle, thenode, (child == -1) ? leftchild : rightchild);
                     } catch (IllegalArgumentException e) {
-                        System.out.println("WARNING: kelondroTree.Search.searchproc: fixed a broken handle");
+                        logWarning("kelondroTree.Search.process: fixed a broken handle");
                         found = false;
                         return;
                     }
                     if (thenode == null) {
-                        throw new kelondroException(filename, "kelondroTree.searchproc: thenode==null");
+                        throw new kelondroException(filename, "kelondroTree.Search.process: thenode==null");
                     }
                     try {
                         otherkey = new String(thenode.getKey());
                     } catch (NullPointerException e) {
-                        throw new kelondroException(filename, "kelondroTree.searchproc: nullpointer" + e.getMessage());
+                        throw new kelondroException(filename, "kelondroTree.Search.process: nullpointer" + e.getMessage());
                     }
 		    if (visitedNodeKeys.containsKey(otherkey)) {
                         // we have loops in the database.
@@ -228,6 +228,8 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                         thenode.setOHHandle(parent, null);
                         thenode.setOHHandle(leftchild, null);
                         thenode.setOHHandle(rightchild, null);
+                        thenode.commit(CP_NONE);
+                        /*
                         Iterator fix = visitedNodeKeys.entrySet().iterator();
                         Map.Entry entry;
                         while (fix.hasNext()) {
@@ -239,9 +241,10 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                             thenode.setOHHandle(leftchild, null);
                             thenode.setOHHandle(rightchild, null);
                         }
-                        thenode.commit(CP_NONE);
-                        //printCache();
-                        throw new kelondroException(filename, "database contains loops; the loop-nodes have been auto-fixed");
+                        */
+                        logWarning("kelondroTree.Search.process: database contains loops; the loop-nodes have been auto-fixed");
+                        found = false;
+                        return;
                     }
                     //System.out.println("Comparing key = '" + new String(key) + "' with '" + otherkey + "':"); // debug
                     c = compare(key, thenode.getKey());
@@ -804,7 +807,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                 int c = compare(firstKey, nextNode.getKey());
                 if ((c > 0) && (up)) {
                     // firstKey > nextNode.getKey()
-                    System.out.println("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
+                    logWarning("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
                     nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
                 }
                 if ((c < 0) && (!(up))) {
@@ -871,9 +874,9 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                 
                 // go to next node
                 searchHandle = searchNode.getOHHandle(ct);
-                if (searchHandle == null) throw new kelondroException(filename, "start node does not exist (handle null)");
+                if (searchHandle == null) throw new kelondroException(filename, "nodeIterator.init: start node does not exist (handle null)");
                 searchNode = getNode(searchHandle, searchNode, ct);
-                if (searchNode == null) throw new kelondroException(filename, "start node does not exist (node null)");
+                if (searchNode == null) throw new kelondroException(filename, "nodeIterator.init: start node does not exist (node null)");
             }
             // now every parent node to the start node is on the stack
         }
@@ -894,8 +897,8 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
             } catch (IOException e) {
                 throw new kelondroException(filename, "io-error while rot");
             }
-            if (nextNode == null) throw new kelondroException(filename, "no more entries available");
-	    if ((count > size()) && (!(rot))) throw new kelondroException(filename, "internal loopback; database corrupted");
+            if (nextNode == null) throw new kelondroException(filename, "nodeIterator.next: no more entries available");
+	    if ((count > size()) && (!(rot))) throw new kelondroException(filename, "nodeIterator.next: internal loopback; database corrupted");
             Object ret = nextNode;
             
             // middle-case
@@ -906,10 +909,18 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                 if (childHandle != null) {
                     //System.out.println("go to other leg, stack size=" + nodeStack.size());
                     // we have walked one leg of the tree; now go to the other one: step down to next child
+                    HashSet visitedNodeHandles = new HashSet(); // to detect loops
                     nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
                     nextNode = getNode(childHandle, nextNode, childtype);
                     childtype = (up) ? leftchild : rightchild;
                     while ((childHandle = nextNode.getOHHandle(childtype)) != null) {
+                        if (visitedNodeHandles.contains(childHandle)) {
+                            // try to repair the nextNode
+                            nextNode.setOHHandle(childtype, null);
+                            logWarning("nodeIterator.next: internal loopback; fixed loop and try to go on");
+                            break;
+                        }
+                        visitedNodeHandles.add(childHandle);
                         try {
                             nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
                             nextNode = getNode(childHandle, nextNode, childtype);

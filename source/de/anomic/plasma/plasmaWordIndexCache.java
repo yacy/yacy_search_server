@@ -579,6 +579,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                         plasmaWordIndexEntry entry;
                         while (entries.hasNext()) {
                             entry = (plasmaWordIndexEntry) entries.next();
+                            System.out.println("ENTRY = " + entry.getUrlHash());
                             container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
                         }
                         // we have read all elements, now delete the entity

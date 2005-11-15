@@ -68,7 +68,7 @@ public class enumerateFiles implements Enumeration {
         TreeSet t = new TreeSet();
         String[] l = root.list();
         // System.out.println("D " + l.toString());
-        for (int i = 0; i < l.length; i++) t.add(new File(root, l[i]));
+        if (l != null) for (int i = 0; i < l.length; i++) t.add(new File(root, l[i]));
         this.hierarchy.add(t);
         // start with search by filling the buffer
         this.buffer = nextElement0();
