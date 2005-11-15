@@ -327,21 +327,18 @@ public final class plasmaWordIndexDistribution {
                         while (urlIter.hasNext()) {
                             indexEntry = (plasmaWordIndexEntry) urlIter.next();                            
                             lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
-                            if ((lurl == null) || (lurl.toString() == null)) {
+                            if ((lurl == null) || (lurl.url() == null)) {
                                 unknownURLEntries.add(indexEntry.getUrlHash());
                             } else {
-                                if (lurl.toString() == null) {
-                                    this.urlPool.loadedURL.remove(indexEntry.getUrlHash());
-                                    unknownURLEntries.add(indexEntry.getUrlHash());
-                                } else {
-                                    knownURLs.put(indexEntry.getUrlHash(), lurl);
-                                }
+                                knownURLs.put(indexEntry.getUrlHash(), lurl);
                             }
                         }
                         // now delete all entries that have no url entry
                         hashIter = unknownURLEntries.iterator();
                         while (hashIter.hasNext()) {
-                            indexEntity.removeEntry((String) hashIter.next(), false);
+                            String nextUrlHash = (String) hashIter.next();
+                            indexEntity.removeEntry(nextUrlHash, false);
+                            this.urlPool.loadedURL.remove(nextUrlHash);
                         }
                         
                         if (indexEntity.size() == 0) {
@@ -366,23 +363,20 @@ public final class plasmaWordIndexDistribution {
                         while ((urlIter.hasNext()) && (count > 0)) {
                             indexEntry = (plasmaWordIndexEntry) urlIter.next();
                             lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
-                            if (lurl == null) {
+                            if ((lurl == null) || (lurl.url()==null)) {
                                 unknownURLEntries.add(indexEntry.getUrlHash());
                             } else {
-                                if (lurl.toString() == null) {
-                                    this.urlPool.loadedURL.remove(indexEntry.getUrlHash());
-                                    unknownURLEntries.add(indexEntry.getUrlHash());
-                                } else {
-                                    knownURLs.put(indexEntry.getUrlHash(), lurl);
-                                    tmpEntity.addEntry(indexEntry);
-                                    count--;
-                                }
+                                knownURLs.put(indexEntry.getUrlHash(), lurl);
+                                tmpEntity.addEntry(indexEntry);
+                                count--;
                             }
                         }
                         // now delete all entries that have no url entry
                         hashIter = unknownURLEntries.iterator();
                         while (hashIter.hasNext()) {
-                            indexEntity.removeEntry((String) hashIter.next(), true);
+                            String nextUrlHash = (String) hashIter.next();
+                            indexEntity.removeEntry(nextUrlHash, true);
+                            this.urlPool.loadedURL.remove(nextUrlHash);
                         }
                         // use whats remaining
                         this.log.logFine("Selected partial index (" + tmpEntity.size() + " from " + indexEntity.size() +" URLs, " + unknownURLEntries.size() + " not bound) for word " + tmpEntity.wordHash());
