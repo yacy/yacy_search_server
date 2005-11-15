@@ -50,9 +50,11 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyVersion;
 
 public final class crawlReceipt {
 
@@ -62,9 +64,10 @@ public final class crawlReceipt {
      */
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
+        // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
+        serverObjects prop = new serverObjects();
+        serverLog log = switchboard.getLog();
         
 	if ((post == null) || (env == null)) return prop;
 
@@ -76,7 +79,7 @@ public final class crawlReceipt {
         String youare     = (String) post.get("youare", "");    // seed hash of the target peer, needed for network stability
 	String process    = (String) post.get("process", "");  // process type
 	String key        = (String) post.get("key", "");      // transmission key
-	String urlhash    = (String) post.get("urlhash", "");  // the url hash that has been crawled
+	String receivedUrlhash    = (String) post.get("urlhash", "");  // the url hash that has been crawled
         String result     = (String) post.get("result", "");   // the result; either "ok" or "fail"
         String reason     = (String) post.get("reason", "");   // the reason for that result
         String words      = (String) post.get("wordh", "");    // priority word hashes
@@ -110,25 +113,33 @@ public final class crawlReceipt {
             // error with url / wrong key
             prop.put("delay", "3600");
         } else if (result.equals("fill")) {
-            // put new data into database
-            switchboard.urlPool.loadedURL.addEntry(switchboard.urlPool.loadedURL.newEntry(propStr, true), youare, iam, 1);
-            switchboard.urlPool.noticeURL.remove(urlhash);
-            
-            // write log
-            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
-            if (entry == null) {
-                switchboard.getLog().logSevere("RECEIVED wrong RECEIPT for hash " + urlhash + " from peer " + iam);
+            // generating a new loaded URL entry
+            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.newEntry(propStr, true);
+            if ((entry == null)||(entry.url()==null)) {
+                log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT for hash " + receivedUrlhash + " from peer " + iam +
+                              "\n\tURL properties: "+ propStr);
             } else {
-                switchboard.getLog().logInfo("RECEIVED RECEIPT for URL " + urlhash + ":" + entry.url());
+                // put new entry into database
+                switchboard.urlPool.loadedURL.addEntry(entry, youare, iam, 1);
+                
+                // generating url hash
+                String newUrlHash = plasmaURL.urlHash(entry.url());
+                String oldUrlHash = plasmaURL.oldurlHash(entry.url());
+                
+                // removing URL from notice URL                
+                switchboard.urlPool.noticeURL.remove(newUrlHash);
+                switchboard.urlPool.noticeURL.remove(oldUrlHash); 
+                
+                log.logInfo("crawlReceipt: RECEIVED RECEIPT for URL " + receivedUrlhash + ":" + entry.url());
             }
             
             // ready for more
             prop.put("delay", "10");
         } else {
-            plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(urlhash);
+            plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(receivedUrlhash);
             if (en != null) {
                 switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(plasmaURL.urlFlagLength), false);
-                switchboard.urlPool.noticeURL.remove(urlhash);
+                switchboard.urlPool.noticeURL.remove(receivedUrlhash);
             }
             prop.put("delay", "100"); // what shall we do with that???
         }
