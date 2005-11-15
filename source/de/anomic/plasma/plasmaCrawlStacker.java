@@ -72,6 +72,7 @@ import de.anomic.yacy.yacyCore;
 public final class plasmaCrawlStacker {
     
     final WorkerPool theWorkerPool;
+    private GenericObjectPool.Config theWorkerPoolConfig = null; 
     final ThreadGroup theWorkerThreadGroup = new ThreadGroup("stackCrawlThreadGroup");
     final serverLog log = new serverLog("STACKCRAWL");
     final plasmaSwitchboard sb;
@@ -85,9 +86,39 @@ public final class plasmaCrawlStacker {
         this.log.logInfo(this.queue.size() + " entries in the stackCrawl queue.");
         this.log.logInfo("STACKCRAWL thread initialized.");
         
-        this.theWorkerPool = new WorkerPool(new WorkterFactory(this.theWorkerThreadGroup));  
+        // configuring the thread pool
+        // implementation of session thread pool
+        this.theWorkerPoolConfig = new GenericObjectPool.Config();
+
+        // The maximum number of active connections that can be allocated from pool at the same time,
+        // 0 for no limit
+        this.theWorkerPoolConfig.maxActive = Integer.parseInt(sb.getConfig("stacker.MaxActiveThreads","50"));
+
+        // The maximum number of idle connections connections in the pool
+        // 0 = no limit.        
+        this.theWorkerPoolConfig.maxIdle = Integer.parseInt(sb.getConfig("stacker.MaxIdleThreads","10"));
+        this.theWorkerPoolConfig.minIdle = Integer.parseInt(sb.getConfig("stacker.MinIdleThreads","5"));    
+
+        // block undefinitely 
+        this.theWorkerPoolConfig.maxWait = -1; 
+
+        // Action to take in case of an exhausted DBCP statement pool
+        // 0 = fail, 1 = block, 2= grow        
+        this.theWorkerPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
+        this.theWorkerPoolConfig.minEvictableIdleTimeMillis = 30000; 
+        
+        // creating worker pool
+        this.theWorkerPool = new WorkerPool(new WorkterFactory(this.theWorkerThreadGroup),this.theWorkerPoolConfig);  
         
     }
+    
+    public GenericObjectPool.Config getPoolConfig() {
+        return this.theWorkerPoolConfig;
+    }    
+    
+    public void setPoolConfig(GenericObjectPool.Config newConfig) {
+        this.theWorkerPool.setConfig(newConfig);
+    }    
     
     public void close() {
         try {

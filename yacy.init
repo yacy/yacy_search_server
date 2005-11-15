@@ -559,6 +559,11 @@ crawler.MaxActiveThreads = 10
 crawler.MaxIdleThreads = 7
 crawler.MinIdleThreads = 5
 
+# maximum number of crawl-stacker threads
+stacker.MaxActiveThreads = 50
+stacker.MaxIdleThreads = 10
+stacker.MinIdleThreads = 5
+
 # maximum size of indexing queue
 indexer.slots = 100
 

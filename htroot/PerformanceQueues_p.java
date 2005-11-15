@@ -224,6 +224,25 @@ public class PerformanceQueues_p {
             switchboard.setConfig("httpdMaxActiveSessions",maxActive);
             switchboard.setConfig("httpdMaxIdleSessions",maxIdle);
             switchboard.setConfig("httpdMinIdleSessions",minIdle);
+            
+            /*
+             * Configuring the crawlStacker pool
+             */
+            GenericObjectPool.Config stackerPoolConfig = switchboard.sbStackCrawlThread.getPoolConfig();
+            maxActive = Integer.parseInt(post.get("CrawlStacker Session Pool_maxActive","10"));
+            maxIdle = Integer.parseInt(post.get("CrawlStacker Session Pool_maxIdle","10"));
+            minIdle = Integer.parseInt(post.get("CrawlStacker Session Pool_minIdle","5"));
+            
+            stackerPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
+            stackerPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
+            stackerPoolConfig.maxActive = maxActive;   
+            
+            switchboard.sbStackCrawlThread.setPoolConfig(stackerPoolConfig);     
+            
+            // storing the new values into configfile
+            switchboard.setConfig("stacker.MaxActiveThreads",maxActive);
+            switchboard.setConfig("stacker.MaxIdleThreads",maxIdle);
+            switchboard.setConfig("stacker.MinIdleThreads",minIdle);
         }        
         
         if ((post != null) && (post.containsKey("proxyControlSubmit"))) {
@@ -266,9 +285,14 @@ public class PerformanceQueues_p {
         prop.put("pool_1_name","httpd Session Pool");
         prop.put("pool_1_maxActive",httpdPoolConfig.maxActive);
         prop.put("pool_1_maxIdle",httpdPoolConfig.maxIdle);
-        prop.put("pool_1_minIdle",httpdPoolConfig.minIdle);                
-        prop.put("pool",2);
+        prop.put("pool_1_minIdle",httpdPoolConfig.minIdle);     
         
+        GenericObjectPool.Config stackerPoolConfig = switchboard.sbStackCrawlThread.getPoolConfig();
+        prop.put("pool_2_name","CrawlStacker Session Pool");
+        prop.put("pool_2_maxActive",stackerPoolConfig.maxActive);
+        prop.put("pool_2_maxIdle",stackerPoolConfig.maxIdle);
+        prop.put("pool_2_minIdle",stackerPoolConfig.minIdle);                
+        prop.put("pool",3);        
         
         // return rewrite values for templates
         return prop;
