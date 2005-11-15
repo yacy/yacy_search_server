@@ -559,7 +559,13 @@ crawler.MaxActiveThreads = 10
 crawler.MaxIdleThreads = 7
 crawler.MinIdleThreads = 5
 
+# maximum size of indexing queue
+indexer.slots = 100
+
+# specifies if yacy should set it's own referer if no referer URL
+# was set by the client.
 useYacyReferer = true
+
 #allow only 443(https-port) for https-proxy?
 #if you want to tunnel other protokols, set to false
 secureHttps = true

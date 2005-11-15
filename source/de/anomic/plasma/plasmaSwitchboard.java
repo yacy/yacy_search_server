@@ -151,6 +151,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static int crawlSlots = 10;
     public static int indexingSlots = 100;
     public static int stackCrawlSlots = 10000;
+    
     public static int maxCRLDump = 300000;
     public static int maxCRGDump = 100000;
     
@@ -241,36 +242,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.remoteProxyConfig = httpRemoteProxyConfig.init(this);
         this.log.logConfig("Remote proxy configuration:\n" + this.remoteProxyConfig.toString());
         
-        //        // reading the proxy host name
-        //        this.remoteProxyHost = getConfig("remoteProxyHost", "");
-        //
-        //        // reading the proxy host port
-        //        try {
-        //            this.remoteProxyPort = Integer.parseInt(getConfig("remoteProxyPort", "3128"));
-        //        } catch (NumberFormatException e) {
-        //            this.remoteProxyPort = 3128;
-        //        }
-        //
-        //        // determining if remote proxy should be used for yacy -> yacy communication
-        //        this.remoteProxyUse4Yacy = getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true");
-        //
-        //        // determining addresses for which the remote proxy should not be used
-        //        this.remoteProxyNoProxy = getConfig("remoteProxyNoProxy","");
-        //        this.remoteProxyNoProxyPatterns = this.remoteProxyNoProxy.split(",");
-        //
-        //        // determining if remote Proxy should be used
-        //        if (getConfig("remoteProxyUse", "false").equalsIgnoreCase("true")) {
-        //            this.remoteProxyUse = true;
-        //            this.log.logConfig("Using remote proxy:" +
-        //                          "\n\tHost: " + this.remoteProxyHost +
-        //                          "\n\tPort: " + this.remoteProxyPort +
-        //                          "\n\tUseProxy4Yacy: " + Boolean.toString(this.remoteProxyUse4Yacy)
-        //            );
-        //        } else {
-        //            this.remoteProxyUse = false;
-        //            this.remoteProxyHost = null;
-        //            this.remoteProxyPort = 0;
-        //        }
+        // setting timestamp of last proxy access
         this.proxyLastAccess = System.currentTimeMillis() - 60000;
         crg = new StringBuffer(maxCRGDump);
         //crl = new StringBuffer(maxCRLDump);
@@ -377,9 +349,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logConfig("Starting Parser");
         this.parser = new plasmaParser();
         
-        // initialize switchboard queue
-        sbQueue = new plasmaSwitchboardQueue(this.cacheManager, urlPool.loadedURL, new File(plasmaPath, "switchboardQueue1.stack"), 10, profiles);
-        indexingTasksInProcess = new HashMap();
+        /* ======================================================================
+         * initialize switchboard queue
+         * ====================================================================== */
+        // create queue
+        this.sbQueue = new plasmaSwitchboardQueue(this.cacheManager, this.urlPool.loadedURL, new File(this.plasmaPath, "switchboardQueue1.stack"), 10, this.profiles);
+        
+        // setting the indexing queue slots
+        indexingSlots = (int) getConfigLong("indexer.slots", 100);
+        
+        // create in process list
+        this.indexingTasksInProcess = new HashMap();
         
         // going through the sbQueue Entries and registering all content files as in use
         int count = 0;
@@ -391,7 +371,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 count++;
             }
         }
-        log.logConfig(count + " files in htcache reported to the cachemanager as in use.");
+        this.log.logConfig(count + " files in htcache reported to the cachemanager as in use.");
         
         // define an extension-blacklist
         log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
