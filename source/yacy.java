@@ -855,13 +855,13 @@ public final class yacy {
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) {
                             urlCounter++;
                             plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash);                       
-                            minimizedUrlDB.newEntry(urlEntry);
+                            plasmaCrawlLURL.Entry newEntry = minimizedUrlDB.newEntry(urlEntry);
                             if (urlCounter % 500 == 0) {
                                 log.logInfo(urlCounter + " URLs found so far.");
                             }
                         }
                     }
-                    // we have read all elements, now delete the entity
+                    // we have read all elements, now we can close it
                     wordIdxEntity.close(); wordIdxEntity = null;
                     
                     if (wordCounter%500 == 0) {

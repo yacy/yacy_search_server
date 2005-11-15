@@ -186,6 +186,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
          */
         return new Entry(
                 oldEntry.url(),
+                oldEntry.hash(),
                 oldEntry.descr(),
                 oldEntry.moddate(),
                 oldEntry.loaddate(),
@@ -388,7 +389,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
     private String descr;
     private Date   moddate;
     private Date   loaddate;
-    private String urlHash;
+    String urlHash;
     private String referrerHash;
     private int    copyCount;
     private String flags;
@@ -399,11 +400,40 @@ public final class plasmaCrawlLURL extends plasmaURL {
     private int    wordCount;
         private String snippet;
 
-    public Entry(URL url, String descr, Date moddate, Date loaddate,
-             String referrerHash, int copyCount, boolean localNeed,
-             int quality, String language, char doctype, long size, int wordCount) {
+    public Entry(
+            URL url, 
+            String descr, 
+            Date moddate, 
+            Date loaddate,
+            String referrerHash, 
+            int copyCount, 
+            boolean localNeed,
+            int quality, 
+            String language, 
+            char doctype, 
+            long size, 
+            int wordCount
+    ) {
+        this(url,null,descr,moddate,loaddate,referrerHash,copyCount,localNeed,quality,language,doctype,size,wordCount);
+    }
+    
+    Entry(
+            URL url, 
+            String theUrlHash,
+            String descr, 
+            Date moddate, 
+            Date loaddate,
+            String referrerHash, 
+            int copyCount, 
+            boolean localNeed,
+            int quality, 
+            String language, 
+            char doctype, 
+            long size, 
+            int wordCount
+    ) {    
         // create new entry and store it into database
-        this.urlHash = urlHash(url);
+        this.urlHash = (theUrlHash == null) ? urlHash(url) : theUrlHash;
         this.url = url;
         this.descr = (descr==null)?this.url.toString():descr;
         this.moddate = moddate;
@@ -417,7 +447,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         this.size = size;
         this.wordCount = wordCount;
         this.snippet = null;
-        store();
+        store();        
     }
 
     public Entry(String urlHash) {
