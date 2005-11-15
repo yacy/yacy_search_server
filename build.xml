@@ -173,7 +173,7 @@
   <copy file="${doc}/Download.html" tofile="${doc}/Download.html.up" filtering="true" />
 </target>
   	
-<target name="compileMainSources" depends="init" description="Compiling the yacy sources ...">
+<target name="compileMain" depends="init" description="Compiling the yacy sources ...">
  
   <!-- defining the classpath that should be used for compiling -->   
   <path id="project.class.path">
@@ -217,7 +217,7 @@
 </target>
 	
 <!-- compiling optional content parsers and building install packages -->
-<target name="compileParsers" depends="compileMainSources" description="Compiling and zipping all additional parsers">
+<target name="compileParsers" depends="compileMain" description="Compiling and zipping all additional parsers">
   <subant target="${extensionTarget}">
     <property name="src" location="${src}"/>
     <property name="build" location="${build}"/>
@@ -232,7 +232,7 @@
 </target>
  
 <!-- compiling optional seed uploaders and building install packages -->   
-<target name="compileSeedUploaders" depends="compileMainSources" description="Compiling and zipping additional seed uploaders">
+<target name="compileSeedUploaders" depends="compileMain" description="Compiling and zipping additional seed uploaders">
   <subant target="${extensionTarget}">
     <property name="src" location="${src}"/>
     <property name="build" location="${build}"/>
@@ -248,7 +248,7 @@
 </target>   
  
 <!-- compiling optional soap API and building install packages -->   
-<target name="compileSoap" depends="compileMainSources" description="Compiling and zipping additional yacy SOAP API">
+<target name="compileSoap" depends="compileMain" description="Compiling and zipping additional yacy SOAP API">
   <subant target="${extensionTarget}">
     <property name="src" location="${src}"/>
     <property name="build" location="${build}"/>
@@ -262,7 +262,7 @@
   </subant>
 </target>       
    
-<target name="compilePortForwarding" depends="compileMainSources" description="Compiling and zipping additional port forwarder"> 
+<target name="compilePortForwarding" depends="compileMain" description="Compiling and zipping additional port forwarder"> 
     <javac srcdir="${src}/de/anomic/server/" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
         <include name="serverPortForwardingSch.java"/>
         <classpath>
@@ -289,10 +289,10 @@
 </target>   
     
 <target name="compileExtensions" 
-	    depends="compileMainSources,compileParsers,compileSeedUploaders,compileSoap,compilePortForwarding">
+	    depends="compileMain,compileParsers,compileSeedUploaders,compileSoap,compilePortForwarding">
 </target>	
 	
-<target name="all" depends="compileMainSources,compileExtensions">
+<target name="all" depends="compileMain,compileExtensions">
   <delete file="${build}/yacy.java" />
 </target>	
 	
@@ -316,7 +316,7 @@
 <!-- ======================================================================================================= 
 	 making a release file for yacy 
 	 ======================================================================================================= -->   
-<target name="distMain" depends="compileMainSources" description="Compiling sources and make a release file ...">
+<target name="distMain" depends="compileMain" description="Compiling sources and make a release file ...">
 
   <tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
 
@@ -479,7 +479,7 @@
 </target>
 
 <!-- run a single file (selected in NetBeans4) -->
-<target name="run-single" depends="compileMainSources" description="Run Single File">
+<target name="run-single" depends="compileMain" description="Run Single File">
   <fail unless="classname">Must set property 'classname'</fail>
   <java classname="yacy" fork="yes">
     <classpath refid="run.classpath"/>
