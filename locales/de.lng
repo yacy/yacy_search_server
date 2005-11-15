@@ -776,7 +776,7 @@ Your new proxy account name is #[user]#. The password has been accepted.
 If you open any public web page through the proxy, you must log-in then.
 The new proxy IP filter is set to #[filter]#.
 if you changed the Port or Port Forwarding Settings, you need to restart YaCy.
-Your server access filter is now set to #[filter]#
+Your server access filter is now set to #[filter]#==
 Auto pop-up of the Status page is now <b>disabled</b>==Automatisches Pop-Up auf der Status Seite ist nun <b>deaktiviert.</b>
 Auto pop-up of the Status page is now <b>enabled</b>==Automatisches Pop-Up auf der Status Seite ist nun <b>aktiviert.</b>
 You are now permanently <b>online</b>. After a short while you should see the effect on the <a href="Status.html">status</a> page.==Sie sind nun im <b>permanenten Online Modus</b>. Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der <a href="Status.html">Status</a> Seite sehen.
@@ -1038,4 +1038,3 @@ English Forum==Englisches Forum
 #Deutsches Forum==Deutsches Forum
 Download YaCy==YaCy herunterladen
 Contact==Kontakt
-
