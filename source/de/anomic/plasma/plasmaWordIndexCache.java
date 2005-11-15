@@ -550,11 +550,11 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
     }
 
-    public int migrateWords2Assortment(String wordhash) throws IOException {
+    public Object migrateWords2Assortment(String wordhash) throws IOException {
         // returns the number of entries that had been added to the assortments
         // can be negative if some assortments have been moved to the backend
         File db = plasmaWordIndexEntity.wordHash2path(databaseRoot, wordhash);
-        if (!(db.exists())) return 0;
+        if (!(db.exists())) return "not available";
         plasmaWordIndexEntity entity = null;
         try {
             entity =  new plasmaWordIndexEntity(databaseRoot, wordhash, true);
@@ -562,7 +562,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             if (size > assortmentCluster.clusterCapacity) {
                 // this will be too big to integrate it
                 entity.close(); entity = null;
-                return 0;
+                return "too big";
             } else {
                 // take out all words from the assortment to see if it fits
                 // together with the extracted assortment
@@ -571,7 +571,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     // this will also be too big to integrate, add to entity
                     entity.addEntries(container);
                     entity.close(); entity = null;
-                    return -container.size();
+                    return new Integer(-container.size());
                 } else {
                     // the combined container will fit, read the container
                     try {
@@ -579,7 +579,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                         plasmaWordIndexEntry entry;
                         while (entries.hasNext()) {
                             entry = (plasmaWordIndexEntry) entries.next();
-                            System.out.println("ENTRY = " + entry.getUrlHash());
+                            // System.out.println("ENTRY = " + entry.getUrlHash());
                             container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
                         }
                         // we have read all elements, now delete the entity
@@ -587,12 +587,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                         entity.close(); entity = null;
                         // integrate the container into the assortments; this will work
                         assortmentCluster.storeTry(wordhash, container);
-                        return size;
+                        return new Integer(size);
                     } catch (kelondroException e) {
                         // database corrupted, we simply give up the database and delete it
                         try {entity.close();} catch (Exception ee) {} entity = null;
                         try {db.delete();} catch (Exception ee) {}
-                        return 0;                        
+                        return "database corrupted; deleted";                        
                     }
                 }
             }

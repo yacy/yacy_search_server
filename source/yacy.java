@@ -622,18 +622,23 @@ public final class yacy {
             enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
             String wordhash;
             File wordfile;
-            int migration;
+            Object migrationStatus;
             while (words.hasMoreElements()) try {
                 wordfile = (File) words.nextElement();
                 wordhash = wordfile.getName().substring(0, 12);
                 System.out.println("NOW: " + wordhash);
-                migration = wordIndexCache.migrateWords2Assortment(wordhash);
-                if (migration == 0)
-                    log.logInfo("SKIPPED  " + wordhash + ": " + ((wordfile.exists()) ? "too big" : "database corrupted; deleted"));
-                else if (migration > 0)
-                    log.logInfo("MIGRATED " + wordhash + ": " + migration + " entries");
-                else
-                    log.logInfo("REVERSED " + wordhash + ": " + (-migration) + " entries");
+                migrationStatus = wordIndexCache.migrateWords2Assortment(wordhash);
+                if (migrationStatus instanceof Integer) {
+                    int migrationCount = ((Integer)migrationStatus).intValue();
+                    if (migrationCount == 0)
+                        log.logInfo("SKIPPED  " + wordhash + ": empty");
+                    else if (migrationCount > 0)
+                        log.logInfo("MIGRATED " + wordhash + ": " + migrationCount + " entries");
+                    else
+                        log.logInfo("REVERSED " + wordhash + ": " + (-migrationCount) + " entries");                    
+                } else if (migrationStatus instanceof String) {
+                    log.logInfo("SKIPPED  " + wordhash + ": " + migrationStatus);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

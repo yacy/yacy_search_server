@@ -169,6 +169,8 @@ public class zipParser extends AbstractParser implements Parser {
                     docImages);
         } catch (Exception e) {            
             throw new ParserException("Unable to parse the zip content. " + e.getMessage());
+        } catch (Error e) {
+            throw new ParserException("Unable to parse the zip content. " + e.getMessage());
         }
     }
     
