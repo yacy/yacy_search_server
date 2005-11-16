@@ -404,14 +404,15 @@ public class wikiCode {
 	    //if(escapeText)
 	    
 	    //else{
-	        result = transformLine(result.substring(0,p0)+"!escape!!Text!"+result.substring(p1+2), switchboard);
-	        result = result.replaceAll("!escape!!Text!", escapeText);
+	        result = transformLine(result.substring(0,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!"+result.substring(p1+2).replaceAll("!esc!", "!esc!!"), switchboard);
+	        result = result.replaceAll("!esc!txt!", escapeText);
+		result = result.replaceAll("!esc!!", "!esc!");
 	    //}
 	    //}
 	}
 	
 	//start [=
-	else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)&&(!(preformatted))){
+	else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)&&(!preformatted)){
 	    escape = true;    //prevent surplus line breaks
 	    escaped = true;   //prevents <pre> being parsed
 	    String bq = "";   //gets filled with <blockquote>s as needed
@@ -421,14 +422,14 @@ public class wikiCode {
 		escindented++;
 		bq = bq + "<blockquote>";
 	    }
-	    result = transformLine(result.substring(escindented,p0)+"!escape!!Text!", switchboard);
-	    result = bq + result.replaceAll("!escape!!Text!", escapeText);
+	    result = transformLine(result.substring(escindented,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!", switchboard);
+	    result = bq + result.replaceAll("!esc!txt!", escapeText);
 	    escape = false;
 	    escapeSpan = true;
 	}
 	
 	//end =]
-	else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)&&(!(preformatted))){
+	else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)&&(!preformatted)){
 	    escapeSpan = false;
 	    String bq = ""; //gets filled with </blockquote>s as neede
 	    String escapeText = result.substring(0,p0);
@@ -437,8 +438,8 @@ public class wikiCode {
 	        bq = bq + "</blockquote>";
 		escindented--;
 	    }
-	    result = transformLine("!escape!!Text!"+result.substring(p0+2), switchboard);
-	    result = result.replaceAll("!escape!!Text!", escapeText) + bq;
+	    result = transformLine("!esc!txt!"+result.substring(p0+2).replaceAll("!esc!", "!esc!!"), switchboard);
+	    result = result.replaceAll("!esc!txt!", escapeText) + bq;
 	    escaped = false;
 	}
 	//end contrib [MN]
@@ -449,13 +450,14 @@ public class wikiCode {
 	else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&((p1 = result.indexOf("&lt;/pre&gt;"))>0)&&(!(escaped))){
 	    //if(p0 < p1){
 	        String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11,p1)+"</pre>";
-                result = transformLine(result.substring(0,p0)+"!preformatted!!Text!"+result.substring(p1+12), switchboard);
-	        result = result.replaceAll("!preformatted!!Text!", preformattedText);
+                result = transformLine(result.substring(0,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!"+result.substring(p1+12).replaceAll("!pre!", "!pre!!"), switchboard);
+	        result = result.replaceAll("!pre!txt!", preformattedText);
+		result = result.replaceAll("!pre!!", "!pre!");
 	    //}
 	}
 	
 	//start <pre>
-	else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&(!preformattedSpan)&&(!(escaped))){
+	else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&(!preformattedSpan)&&(!escaped)){
 	    preformatted = true;    //prevent surplus line breaks
 	    String bq ="";  //gets filled with <blockquote>s as needed
 	    String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11);
@@ -464,13 +466,14 @@ public class wikiCode {
 	        preindented++;
 		bq = bq + "<blockquote>";
 	    }
-            result = transformLine(result.substring(preindented,p0)+"!preformatted!!Text!", switchboard);
-            result = bq + result.replaceAll("!preformatted!!Text!", preformattedText);
+            result = transformLine(result.substring(preindented,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!", switchboard);
+            result = bq + result.replaceAll("!pre!txt!", preformattedText);
+	    result = result.replaceAll("!pre!!", "!pre!");
 	    preformattedSpan = true;
 	}
 	
 	//end </pre>
-	else if(((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(preformattedSpan)&&(!(escaped))){
+	else if(((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(preformattedSpan)&&(!escaped)){
 	    preformattedSpan = false;
 	    String bq = ""; //gets filled with </blockquote>s as needed
 	    String preformattedText = result.substring(0,p0)+"</pre>";
@@ -479,8 +482,9 @@ public class wikiCode {
 	        bq = bq + "</blockquote>";
                 preindented--;
 	    }
-	    result = transformLine("!preformatted!!Text!"+result.substring(p0+12), switchboard);
-	    result = result.replaceAll("!preformatted!!Text!", preformattedText) + bq;
+	    result = transformLine("!pre!txt!"+result.substring(p0+12).replaceAll("!pre!", "!pre!!"), switchboard);
+	    result = result.replaceAll("!pre!txt!", preformattedText) + bq;
+	    result = result.replaceAll("!pre!!", "!pre!");
 	    preformatted = false;
 	}
 	//end contrib [MN]	
@@ -520,6 +524,9 @@ public class wikiCode {
       
       [= escape characters =]
       <pre> preformatted text </pre>
+      
+      what would be nice in addition to that:
+      || tables
 
     */
 
