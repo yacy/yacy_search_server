@@ -191,7 +191,7 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
 P2P WEB SEARCH==P2P Internet Suche
 Enter search word list, separated by space:==Geben Sie die Suchbegriffe hier ein:
-"Search"==Suche
+"Search"==Suchen
 Searching...==Suche l&auml;uft...
 Max. number of results:==Max. Anzahl Ergebnisse:
 order by:==sortieren nach:
@@ -248,7 +248,7 @@ installation guide==f&uuml;r eine Anleitung
 Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativ k&ouml;nnen Sie auch den Proxy im permanent online Modus laufen lassen. Dies garantiert eine globale Suche.
 To do this, press this button:==Um dies zu tun, klicken Sie bitte folgenden Button:
 "go online"==gehe online
-The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers==Die globale Suche hat #[globalresults]# Ergebnisse, die von anderen Peers bereitgestellt wurden, gefunden.
+The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enthält #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
 You can enrich the search results by using the 'global' option; you must also switch to online mode==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn sie die 'global' Option benutzen. Sie m&uuml;ssen aber erst in den online Modus wechseln,
 (by using the proxy) to contribute to the global index.==(indem Sie den Proxy benutzen) um im globalen Index suchen zu k&ouml;nnen.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
