@@ -917,6 +917,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                         if (visitedNodeHandles.contains(childHandle)) {
                             // try to repair the nextNode
                             nextNode.setOHHandle(childtype, null);
+                            nextNode.commit(CP_NONE);
                             logWarning("nodeIterator.next: internal loopback; fixed loop and try to go on");
                             break;
                         }
