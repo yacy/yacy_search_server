@@ -94,22 +94,22 @@ public final class transferURL {
                     yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
                 } else {
                     lEntry = sb.urlPool.loadedURL.newEntry(urls, true);
-                    if (
-                            (lEntry != null) && 
-                            (lEntry.url() != null) &&
-                            (blockBlacklist) &&
-                            (plasmaSwitchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath()))
-                    ) {
-                        yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName);
-                        lEntry = null;
-                    }
-                    if ((lEntry != null)&&(lEntry.url() != null)) {
-                        sb.urlPool.loadedURL.addEntry(lEntry, iam, iam, 3);
-                        yacyCore.log.logFine("transferURL: received URL '" + lEntry.url() + "' from peer " + otherPeerName);
-                        received++;
+                    if ((lEntry != null) && (lEntry.url() != null)) {
+                        if (
+                                (blockBlacklist) &&
+                                (plasmaSwitchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath()))
+                        ){
+                            yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName);
+                            lEntry = null;
+                        } else {
+                            sb.urlPool.loadedURL.addEntry(lEntry, iam, iam, 3);
+                            yacyCore.log.logFine("transferURL: received URL '" + lEntry.url() + "' from peer " + otherPeerName);
+                            received++;                            
+                        }
                     } else {
                         yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + 
                                                 "\n\tURL Property: " + urls);
+                        // TODO: should we send back an error message???
                     }
                 }
             }
