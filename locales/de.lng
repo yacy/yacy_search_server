@@ -719,6 +719,7 @@ Attributes==Attribute
 
 #-------------------------------------------------------
 #File: ProxyIndexingMonitor_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Index Monitor for Proxy Indexing==Index Profil f&uuml;r den Proxy Index
 This is the control page for web pages that your peer has indexed during the current application run-time==Dies ist die Kontrollseite f&uuml;r Internetseiten, die Ihr Peer w&auml;hrend der aktuellen Sitzung
@@ -744,13 +745,36 @@ The size in MB of the cache.==Die Gr&ouml;sse des Cache in MB.
 "Set proxy profile"=="Proxy Profil speichern"
 The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DATA/PLASMADB/crawlProfiles0.db fehlt entweder oder ist defekt.
 Please delete that file and restart.==Bitte l&ouml;schen Sie diese Datei und starten Sie YaCy neu.
-Proxy pre-fetch is now set to depth==Proxy Indizierung erfolgt nun bis zu einer Tiefe von
-Proxy caching is now set \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cache ist nun #(caching)#aus::an#(/caching)#.
+Pre-fetch is now set to depth==Proxy Indizierung erfolgt nun bis zu einer Tiefe von
+Caching is now \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cache ist nun #(caching)#aus::an#(/caching)#.
 An error has occurred:==Es trat ein Fehler auf:
 You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransichten von frisch indexierten Seiten
 on the==auf der
 <a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a><a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a>
 Page.==Seite ansehen.
+
+#-------------------------------------------------------
+#File: Settings_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Einstellungen
+<h2>Settings</h2>==<h2>Einstellungen</h2>
+This is the configuration page for YaCy. Access to this page should be limited to an administration person only.==Dies ist die Konfigurationsseite f&uuml;r YaCy. Zugriff auf diese Seite sollte nur der Administrator haben.
+To restrict the access to this page, please set an administrator account and password <a href="#admin">below.</a>==Um den Zugriff auf diese Seite zu beschr&auml;nken, richten Sie bitte <a href="#admin">hier</a> ein Administrator Konto mit Passwort ein.
+If you want to restore all settings to the default values,==Wenn Sie alle Einstellungen auf die urspr&uuml;nglichen Werte zur&uuml;cksetzen wollen,
+but <b>forgot your administration password</b>, you must stop the proxy,==aber Ihr <b>Administatorpasswort vergessen haben</b>, m&uuml;ssen Sie YaCy stoppen,
+delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/httpProxy.conf' im YaCy Hauptordner l&ouml;schen und YaCy neu starten.
+Administration Account Settings==Administrations Konto Einstellungen
+Server Access Settings==Server Zugangs Einstellungen
+General Settings==Generelle Einstellungen
+System Behaviour Settings==System Einstellungen
+Server Access Settings==Server Zugangs Einstellungen
+Seed Upload Settings==Seed Upload Einstellungen
+HTTP Networking==HTTP Netzwerk
+Message Forwarding \(optional\)==Nachrichten Weiterleitung (optional)
+#Remote Proxy \(optional\)==Remote Proxy (optional)
+Content Parser Settings==Inhalt Parser Einstellungen
+Port Forwarding \(optional\)==Port Weiterleitung (optional)
 
 #-------------------------------------------------------
 #File: SettingsAck_p.html
@@ -794,17 +818,17 @@ The submitted peer name is not well-formed. Please choose a different name.</b> 
 Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
 The new parser settings where changed successfully.
 Parsing of the following mime-types was enabled:
-Seed Upload method was changed successfully.
-You are now a principal peer.
-Seed Upload Method:
-Seed File URL:
+Seed Upload method was changed successfully.==Seed Upload Methode wurde erfolgreich ge&auml;ndert.
+You are now a principal peer.==Sie sind nun ein Principal Peer.
+Seed Upload Method:==Seed Upload Methode:
+Seed File URL:==Seed datei URL:
 Your proxy networking settings have been changed.
 Transparent Proxy Support is:
 Connection Keep-Alive Support is:
-Your message forwarding settings have been changed.
-Message Forwarding Support is:
-Message Forwarding Command:
-Recipient Address:
+Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich ge&auml;ndert.
+Message Forwarding Support is:==Nachrichten Weiterleitungs Unterst&uml;tzung:
+Message Forwarding Command:==Nachrichten Weiterleitungskommando:
+Recipient Address:==Empf&auml;nger Adresse:
 Your port forwarding settings have been changed.
 Port Forwarding Support is:
 Port Forwarding Port:
@@ -903,7 +927,7 @@ Use this only if you have a flatrate or you have an always-on connection.==Benut
 "Go on-line"=="Online gehen"
 "Go to Cache-Mode"=="In Cache-Modus gehen"
 You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <i>permanenten</i> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein m&ouml;chten, m&uuml;ssen Sie den Proxy abschalten um offline zu gehen.
-Last Refresh:==Letztes Update:
+Last Refresh:==Letzte Aktualisierung:
 
 #alte Übersetzung. vielleicht später noch zu gebrauchen!
 
