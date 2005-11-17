@@ -1,4 +1,4 @@
-// plasmaCRFile.java
+// plasmaCRProcess.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -54,7 +54,7 @@ import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.tools.bitfield;
 
-public class plasmaRankingCRFile {
+public class plasmaRankingCRProcess {
     
     /*
     header.append("# Name=YaCy " + ((type.equals("crl")) ? "Local" : "Global") + " Citation Reference Ticket"); header.append((char) 13); header.append((char) 10);
@@ -202,8 +202,52 @@ public class plasmaRankingCRFile {
         
     }
     
-    public static long crFileCreated(File f) throws IOException {
-        return (new kelondroAttrSeq(f)).created();
+    public static void genrci(File cr_in, File rci_out) throws IOException {
+        if (!(cr_in.exists())) return;
+        kelondroAttrSeq cr = new kelondroAttrSeq(cr_in);
+        kelondroAttrSeq rci;
+        if (!(rci_out.exists())) {
+            rci = new kelondroAttrSeq("Global Ranking Reverse Citation Index",
+                    "<AnchorDom-6>,'='," +
+                    "<UDate-3>," +
+                    "'|',*<Referee-12>");
+            rci.toFile(rci_out);
+        }
+        rci = new kelondroAttrSeq(rci_out);
+        
+        // loop over all referees
+        Iterator i = cr.keys();
+        String referee, anchor, anchorDom;
+        kelondroAttrSeq.Entry cr_entry, rci_entry;
+        long cr_UDate, rci_UDate;
+        while (i.hasNext()) {
+            referee = (String) i.next();
+            cr_entry = cr.getEntry(referee);
+            cr_UDate = cr_entry.getAttr("UDate", 0);
+            
+            // loop over all anchors
+            Iterator j = cr_entry.getSeq().iterator();
+            while (j.hasNext()) {
+                // get domain of anchors
+                anchor = (String) j.next();
+                if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
+
+                // update domain-specific entry
+                rci_entry = rci.removeEntry(anchorDom);
+                if (rci_entry == null) rci_entry = rci.newEntry(anchorDom);
+                rci_entry.addSeq(referee);
+                
+                // update Update-Date
+                rci_UDate = rci_entry.getAttr("UDate", 0);
+                if (cr_UDate > rci_UDate) rci_entry.setAttr("UDate", cr_UDate);
+                
+                // insert entry
+                rci.addEntry(rci_entry);
+            }
+        }
+
+        // finished. write to file
+        rci.toFile(rci_out);
     }
     
     public static void main(String[] args) {
@@ -243,7 +287,7 @@ public class plasmaRankingCRFile {
                 for (int i = 0; i < list.length; i++) {
                     f = new File(acc_dir, list[i]);
                     try {
-                        d = (System.currentTimeMillis() - crFileCreated(f)) / 3600000;
+                        d = (System.currentTimeMillis() - (new kelondroAttrSeq(f)).created()) / 3600000;
                         if (d > max_age_hours) {
                             // file is considered to be too old, it is not recycled
                             System.out.println("file " + f.getName() + " is old (" + d + " hours) and not recycled, only moved to backup");
@@ -260,6 +304,13 @@ public class plasmaRankingCRFile {
                         f.delete();
                     }
                 }
+            }
+            if ((args.length == 2) && (args[0].equals("-genrci"))) {
+                File root_path = new File(args[1]);
+                File cr_file = new File(root_path, "DATA/RANKING/GLOBAL/020_con0/CRG-a-acc.cr.gz");
+                File rci_file = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0/RCI-0.rci.gz");
+                rci_file.getParentFile().mkdirs();
+                genrci(cr_file, rci_file);
             }
         } catch (IOException e) {
             e.printStackTrace();

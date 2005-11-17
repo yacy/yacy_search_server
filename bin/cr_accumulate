@@ -1,2 +1,3 @@
 cd `dirname $0`/..
-java -classpath source:classes de.anomic.plasma.plasmaRankingCRFile -accumulate .
+java -classpath source:classes de.anomic.plasma.plasmaRankingCRProcess -accumulate .
+java -classpath source:classes de.anomic.plasma.plasmaRankingCRProcess -recycle . 168

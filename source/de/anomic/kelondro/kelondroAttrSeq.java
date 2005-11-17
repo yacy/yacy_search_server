@@ -80,7 +80,7 @@ public class kelondroAttrSeq {
 	this.structure = null;
         this.created = 0;
         this.name = "";
-        this.entries = readPropFile(file);
+        this.entries = readAttrFile(file);
     }
 
     public kelondroAttrSeq(String name, String struct) {
@@ -95,14 +95,21 @@ public class kelondroAttrSeq {
         this.theLogger = newLogger;
     }
     
-    public void logWarning(String message) {
+    public void logInfo(String message) {
         if (this.theLogger == null)
-            System.err.println("KELONDRO WARNING for file " + this.file + ": " + message);
+            System.err.println("ATTRSEQ INFO for file " + this.file + ": " + message);
         else
-            this.theLogger.warning("KELONDRO WARNING for file " + this.file + ": " + message);
+            this.theLogger.info("ATTRSEQ INFO for file " + this.file + ": " + message);
     }
     
-    private TreeMap readPropFile(File file) throws IOException {
+    public void logWarning(String message) {
+        if (this.theLogger == null)
+            System.err.println("ATTRSEQ WARNING for file " + this.file + ": " + message);
+        else
+            this.theLogger.warning("ATTRSEQ WARNING for file " + this.file + ": " + message);
+    }
+    
+    private TreeMap readAttrFile(File file) throws IOException {
         TreeMap entries = new TreeMap();
         BufferedReader br = null;
         int p;
@@ -171,6 +178,10 @@ public class kelondroAttrSeq {
     
     public Iterator keys() {
         return entries.keySet().iterator();
+    }
+    
+    public Entry newEntry(String pivot) {
+        return new Entry(pivot, new HashMap(), new TreeSet());
     }
     
     public Entry newEntry(String pivot, HashMap props, TreeSet seq) {
@@ -334,6 +345,10 @@ public class kelondroAttrSeq {
             this.seq = seq;
         }
         
+        public void addSeq(String s) {
+            this.seq.add(s);
+        }
+        
         public String toString() {
             // creates only the attribute field and the sequence, not the pivot
             StringBuffer sb = new StringBuffer(70);
@@ -377,28 +392,4 @@ public class kelondroAttrSeq {
         }
     }
     
-    /*
-      Class-A File format:
-      
-      UDate  : latest update timestamp of the URL (as virtual date, hours since epoch)
-      VDate  : last visit timestamp of the URL (as virtual date, hours since epoch)
-      LCount : count of links to local resources
-      GCount : count of links to global resources
-      ICount : count of links to images (in document)
-      DCount : count of links to other documents
-      TLength: length of the plain text content (bytes)
-      WACount: total number of all words in content
-      WUCount: number of unique words in content (removed doubles)
-      Flags  : Flags (0=update, 1=popularity, 2=attention, 3=vote)
-     
-      Class-a File format is an extension of Class-A plus the following attributes
-      FUDate : first update timestamp of the URL
-      FDDate : first update timestamp of the domain
-      LUDate : latest update timestamp of the URL
-      UCount : Update Counter (of 'latest update timestamp')
-      PCount : Popularity Counter (proxy clicks)
-      ACount : Attention Counter (search result clicks)
-      VCount : Votes
-      Vita   : Vitality (normed number of updates per time)
-     */
 }
