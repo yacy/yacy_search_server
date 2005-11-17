@@ -46,6 +46,7 @@ package de.anomic.plasma;
 
 import java.io.IOException;
 import java.io.File;
+import java.util.Random;
 
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedDB;
@@ -59,21 +60,45 @@ public final class plasmaRankingDistribution {
 
     public static final String CR_OWN   = "GLOBAL/010_owncr";
     public static final String CR_OTHER = "GLOBAL/014_othercr/";
+
+    public static final int METHOD_NONE           =  0;
+    public static final int METHOD_ANYSENIOR      =  1;
+    public static final int METHOD_ANYPRINCIPAL   =  2;
+    public static final int METHOD_MIXEDSENIOR    =  9;
+    public static final int METHOD_MIXEDPRINCIPAL = 10;
+    public static final int METHOD_FIXEDADDRESS   = 99;
     
     private final serverLog log;
-    private File sourcePath;
+    private File sourcePath;     // where to load cr-files
+    private int method;          // of peer selection
+    private int percentage;      // to select any other peer
+    private String address[];      // of fixed other peer
+    private static Random random = new Random(System.currentTimeMillis());
     
-    public plasmaRankingDistribution(serverLog log, File sourcePath) {
-        this.log = log;
+    public plasmaRankingDistribution(serverLog log, File sourcePath, int method, int percentage, String address[]) {
+        this.log        = log;
         this.sourcePath = sourcePath;
+        this.method     = method;
+        this.percentage = percentage;
+        this.address    = address;
     }
 
+    public void setMethod(int method, int percentage, String address[]) {
+        this.method     = method;
+        this.percentage = percentage;
+        this.address    = address;
+    }
+    
     public int size() {
         if ((sourcePath.exists()) && (sourcePath.isDirectory())) return sourcePath.list().length; else return 0;
     }
 
-    public boolean performTransferRanking() {
+    public boolean transferRanking(int count) {
 
+        if (method == METHOD_NONE) {
+            log.logFine("no ranking distribution: no transfer method given");
+            return false;
+        }
         if (yacyCore.seedDB == null) {
             log.logFine("no ranking distribution: seedDB == null");
             return false;
@@ -98,28 +123,63 @@ public final class plasmaRankingDistribution {
             return false;
         }
         
-        yacySeed target = yacyCore.seedDB.anySeedVersion(yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION);
-        //if (target == null) target = yacyCore.seedDB.getConnected("nAEhLbmYNor"); // only for debugging
-        //if (target == null) target = yacyCore.seedDB.lookupByName("G5"); // only for debugging
+        if (outfiles.length > count) count = outfiles.length;
+        File crfile = null;
         
-        if (target == null) {
-            log.logFine("no ranking distribution: no target available");
-            return false;
+        for (int i = 0; i < count; i++) {
+            crfile = new File(sourcePath, outfiles[i]);
+            
+            if ((method == METHOD_ANYSENIOR) || (method == METHOD_ANYPRINCIPAL)) {
+                transferRankingAnySeed(crfile, 5);
+            }
+            if (method == METHOD_FIXEDADDRESS) {
+                transferRankingAddress(crfile);
+            }
+            if ((method == METHOD_MIXEDSENIOR) || (method == METHOD_MIXEDPRINCIPAL)) {
+                if (random.nextInt(100) > percentage) {
+                    if (!(transferRankingAddress(crfile))) transferRankingAnySeed(crfile, 5);
+                } else {
+                    if (!(transferRankingAnySeed(crfile, 5))) transferRankingAddress(crfile);
+                }
+            }
+            
         }
-        
+        log.logFine("no ranking distribution: no target available");
+        return false;
+    }
+    
+    private boolean transferRankingAnySeed(File crfile, int trycount) {
+        yacySeed target = null;
+        for (int j = 0; j < trycount; j++) {
+            target = yacyCore.seedDB.anySeedVersion(yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION);
+            
+            if (target == null) continue;
+            String targetaddress = target.getAddress();
+            if (transferRankingAddress(crfile, targetaddress)) return true;
+        }
+        return false;
+    }
+    
+    private boolean transferRankingAddress(File crfile) {
+        // try all addresses
+        for (int i = 0; i < address.length; i++) {
+            if (transferRankingAddress(crfile, address[i])) return true;
+        }
+        return false;
+    }
+    
+    private boolean transferRankingAddress(File crfile, String address) {
         // do the transfer
         long starttime = System.currentTimeMillis();
-        File crfile = new File(sourcePath, outfiles[0]);
-        String targetaddress = target.getAddress();
         String result = "unknown";
         try {
             byte[] b = serverFileUtils.read(crfile);
-            result = yacyClient.transfer(targetaddress, crfile.getName(), b);
+            result = yacyClient.transfer(address, crfile.getName(), b);
             if (result == null) {
-                log.logInfo("RankingDistribution - transmitted file " + crfile + " to " + targetaddress + " successfully in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds");
+                log.logInfo("RankingDistribution - transmitted file " + crfile + " to " + address + " successfully in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds");
                 crfile.delete(); // the file is not needed any more locally
             } else {
-                log.logInfo("RankingDistribution - error transmitting file " + crfile + " to " + targetaddress + ": " + result);
+                log.logInfo("RankingDistribution - error transmitting file " + crfile + " to " + address + ": " + result);
             }
         } catch (IOException e) {
             log.logInfo("RankingDistribution - could not read file " + crfile + ": " + e.getMessage());

@@ -226,6 +226,13 @@ public final class serverFileUtils {
         tf.renameTo(file);
     }
     
+    public static void moveAll(File from_dir, File to_dir) {
+        if (!(from_dir.isDirectory())) return;
+        if (!(to_dir.isDirectory())) return;
+        String[] list = from_dir.list();
+        for (int i = 0; i < list.length; i++) (new File(from_dir, list[i])).renameTo(new File(to_dir, list[i]));
+    }
+    
     public static void main(String[] args) {
         try {
             writeAndZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));

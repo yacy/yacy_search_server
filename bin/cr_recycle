@@ -1,0 +1,2 @@
+cd `dirname $0`/..
+java -classpath source:classes de.anomic.plasma.plasmaRankingCRFile -recycle . 168

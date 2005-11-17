@@ -978,7 +978,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     }
     
     public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        return new rowIterator(nodeIterator(up, rotating, firstKey));
+        return new rowIterator((firstKey == null) ? nodeIterator(up, rotating) : nodeIterator(up, rotating, firstKey));
     }
     
     public class rowIterator implements Iterator {
@@ -1250,7 +1250,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 		} else if (args[0].equals("-n")) {
 		    kelondroTree fm = new kelondroTree(new File(args[1]), 0x100000);
 		    //byte[][] keys = fm.getSequentialKeys(args[2].getBytes(), 500, true);
-                    Iterator rowIt = fm.rows(true, false, args[2].getBytes());
+                    Iterator rowIt = fm.rows(true, false, (args[2].length() == 0) ? null : args[2].getBytes());
                     Vector v = new Vector();
                     while (rowIt.hasNext()) v.add(new String(((byte[][]) rowIt.next())[0]));
                     ret = v.toString().getBytes(); 
@@ -1327,10 +1327,10 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     }
 
     public static void main(String[] args) {
-	//cmd(args);
+	cmd(args);
         //bigtest(Integer.parseInt(args[0]));
         //randomtest(Integer.parseInt(args[0]));
-        smalltest();
+        //smalltest();
     }
  
     public static String[] permutations(int letters) {

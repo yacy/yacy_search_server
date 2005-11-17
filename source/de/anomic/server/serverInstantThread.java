@@ -104,7 +104,8 @@ public final class serverInstantThread extends serverAbstractThread implements s
             serverLog.logSevere("SERVER", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (InvocationTargetException e) {
-            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread, thread '" + this.getName() + "': " + e.getMessage(), e);
+            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + e.getTargetException().getMessage(), e.getTargetException());
+            e.getTargetException().printStackTrace();
         }
         return jobHasDoneSomething;
     }

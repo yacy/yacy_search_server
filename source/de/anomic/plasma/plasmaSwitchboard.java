@@ -152,8 +152,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static int indexingSlots = 100;
     public static int stackCrawlSlots = 10000;
     
-    public static int maxCRLDump = 300000;
-    public static int maxCRGDump = 100000;
+    public static int maxCRLDump = 500000;
+    public static int maxCRGDump = 200000;
     
     // couloured list management
     public static TreeSet blueList = null;
@@ -431,8 +431,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         cleanProfiles();
         
         // init ranking transmission
-        rankingOwnDistribution = new plasmaRankingDistribution(log, new File(rankingPath, plasmaRankingDistribution.CR_OWN));
-        rankingOtherDistribution = new plasmaRankingDistribution(log, new File(rankingPath, plasmaRankingDistribution.CR_OTHER));
+        rankingOwnDistribution = new plasmaRankingDistribution(log, new File(rankingPath, plasmaRankingDistribution.CR_OWN), plasmaRankingDistribution.METHOD_ANYSENIOR, 0, null);
+        rankingOtherDistribution = new plasmaRankingDistribution(log, new File(rankingPath, plasmaRankingDistribution.CR_OTHER), plasmaRankingDistribution.METHOD_MIXEDSENIOR, 30, new String[]{"kaskelix.de:8080", "yacy.dyndns.org:8000", "suma-lab.de:8080"});
         
         // init facility DB
         /*
@@ -818,8 +818,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         boolean hasDoneSomething = false;
         
-        // do a transmission
-        rankingOwnDistribution.performTransferRanking();
+        // do transmission of cr-files
+        int count = rankingOwnDistribution.size() / 100;
+        if (count == 0) count = 1;
+        if (count > 5) count = 5;
+        rankingOwnDistribution.transferRanking(count);
+        rankingOtherDistribution.transferRanking(1);
         
         // clean up error stack
         if ((urlPool.errorURL.stackSize() > 1000)) {

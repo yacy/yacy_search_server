@@ -129,11 +129,13 @@ public class yacySeed {
         // create a seed with a pre-defined hash map
         this.hash = theHash;
         this.dna = theDna;
+        String flags = (String) this.dna.get(FLAGS);
+        if ((flags == null) || (flags.length() != 4)) this.dna.put(FLAGS, "____");
         this.available = 0;
     }
 
     public yacySeed(String theHash) {      
-        this.dna = new HashMap(22);
+        this.dna = new HashMap();
 
         // settings that can only be computed by originating peer:
         // at first startup -
@@ -165,7 +167,7 @@ public class yacySeed {
         this.dna.put(CRTCNT, "0");
 
         // settings that are needed to organize the seed round-trip
-        this.dna.put(FLAGS, "0000");
+        this.dna.put(FLAGS, "____");
         setFlagDirectConnect(false);
         setFlagAcceptRemoteCrawl(true);
         setFlagAcceptRemoteIndex(true);
@@ -350,15 +352,16 @@ public class yacySeed {
     }
 
     private boolean getFlag(int flag) {
-        final String flags = get(FLAGS, "0000");
+        final String flags = get(FLAGS, "____");
         return (new bitfield(flags.getBytes())).get(flag);
     }
 
     private void setFlag(int flag, boolean value) {
-        final String flags = get(FLAGS, "0000");
+        String flags = get(FLAGS, "____");
+        if (flags.length() != 4) flags = "____";
         final bitfield f = new bitfield(flags.getBytes());
         f.set(flag, value);
-        put(FLAGS, f.toString());
+        put(FLAGS, new String(f.getBytes()));
     }
 
     public void setFlagDirectConnect(boolean value) {setFlag(0, value);}
