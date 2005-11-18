@@ -67,7 +67,7 @@ public class plasmaRankingCRProcess {
         // open file
         kelondroAttrSeq source_cr = null;
         try {
-            source_cr = new kelondroAttrSeq(f);
+            source_cr = new kelondroAttrSeq(f, false);
         } catch (IOException e) {
             return false;
         }
@@ -83,7 +83,7 @@ public class plasmaRankingCRProcess {
             new_entry = source_cr.getEntry(key);
             new_flags = new bitfield(serverCodings.enhancedCoder.encodeBase64Long((long) new_entry.getAttr("Flags", 0), 1).getBytes());
             // enrich information with additional values
-            if ((acc_entry = acc.removeEntry(key)) != null) {
+            if ((acc_entry = acc.getEntry(key)) != null) {
                 FUDate = (int) acc_entry.getAttr("FUDate", 0);
                 FDDate = (int) acc_entry.getAttr("FDDate", 0);
                 LUDate = (int) acc_entry.getAttr("LUDate", 0);
@@ -130,7 +130,7 @@ public class plasmaRankingCRProcess {
             acc_entry.setAttr("ACount", (long) ACount);
             acc_entry.setAttr("VCount", (long) VCount);
             acc_entry.setAttr("Vita", (long) Vita);
-            acc.addEntry(acc_entry);
+            acc.putEntry(acc_entry);
         }
         
         return true;
@@ -161,10 +161,10 @@ public class plasmaRankingCRProcess {
                     "<Referee-12>,'='," +
                     "<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>," +
                     "<FUDate-3>,<FDDate-3>,<LUDate-3>,<UCount-2>,<PCount-2>,<ACount-2>,<VCount-2>,<Vita-2>," +
-                    "'|',*<Anchor-12>");
+                    "'|',*<Anchor-12>", false);
             acc.toFile(to_file);
         }
-        acc = new kelondroAttrSeq(to_file);
+        acc = new kelondroAttrSeq(to_file, false);
         
         // collect source files
         kelondroAttrSeq source_cr = null;
@@ -202,21 +202,25 @@ public class plasmaRankingCRProcess {
         
     }
     
-    public static void genrci(File cr_in, File rci_out) throws IOException {
-        if (!(cr_in.exists())) return;
-        kelondroAttrSeq cr = new kelondroAttrSeq(cr_in);
-        kelondroAttrSeq rci;
+    public static int genrci(File cr_in, File rci_out) throws IOException {
+        if (!(cr_in.exists())) return 0;
+        final kelondroAttrSeq cr = new kelondroAttrSeq(cr_in, false);
+        if (rci_out.exists()) rci_out.delete(); // we want only fresh rci here (during testing) 
         if (!(rci_out.exists())) {
-            rci = new kelondroAttrSeq("Global Ranking Reverse Citation Index",
+            kelondroAttrSeq rcix = new kelondroAttrSeq("Global Ranking Reverse Citation Index",
                     "<AnchorDom-6>,'='," +
                     "<UDate-3>," +
-                    "'|',*<Referee-12>");
-            rci.toFile(rci_out);
+                    "'|',*<Referee-12>", false);
+            rcix.toFile(rci_out);
         }
-        rci = new kelondroAttrSeq(rci_out);
+        final kelondroAttrSeq rci = new kelondroAttrSeq(rci_out, false);
         
         // loop over all referees
-        Iterator i = cr.keys();
+        int count = 0;
+        int size = cr.size();
+        long start = System.currentTimeMillis();
+	long l;
+        final Iterator i = cr.keys();
         String referee, anchor, anchorDom;
         kelondroAttrSeq.Entry cr_entry, rci_entry;
         long cr_UDate, rci_UDate;
@@ -233,7 +237,7 @@ public class plasmaRankingCRProcess {
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 
                 // update domain-specific entry
-                rci_entry = rci.removeEntry(anchorDom);
+                rci_entry = rci.getEntry(anchorDom);
                 if (rci_entry == null) rci_entry = rci.newEntry(anchorDom);
                 rci_entry.addSeq(referee);
                 
@@ -242,12 +246,18 @@ public class plasmaRankingCRProcess {
                 if (cr_UDate > rci_UDate) rci_entry.setAttr("UDate", cr_UDate);
                 
                 // insert entry
-                rci.addEntry(rci_entry);
+                rci.putEntry(rci_entry);
+            }
+            count++;
+            if ((count % 1000) == 0) {
+                l = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l)) + " seconds remaining; mem = " + Runtime.getRuntime().freeMemory());  
             }
         }
 
         // finished. write to file
         rci.toFile(rci_out);
+        return count;
     }
     
     public static void main(String[] args) {
@@ -270,7 +280,11 @@ public class plasmaRankingCRProcess {
                 if (!(acc_dir.exists())) acc_dir.mkdirs();
                 if (!(to_file.getParentFile().exists())) to_file.getParentFile().mkdirs();
                 serverFileUtils.moveAll(from_dir, ready_dir);
+                long start = System.currentTimeMillis();
+                int files = ready_dir.list().length;
                 accumulate(ready_dir, tmp_dir, err_dir, acc_dir, to_file);
+                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                System.out.println("Finished accumulate for " + files + " files in " + seconds + " seconds (" + (files / seconds) + " files/second)");
             }
             if ((args.length == 3) && (args[0].equals("-recycle"))) {
                 File root_path = new File(args[1]);
@@ -282,12 +296,14 @@ public class plasmaRankingCRProcess {
                 if (!(acc_dir.exists())) return;
                 if (!(bkp_dir.exists())) bkp_dir.mkdirs();
                 String[] list = acc_dir.list();
+                long start = System.currentTimeMillis();
+                int files = list.length;
                 long d;
                 File f;
                 for (int i = 0; i < list.length; i++) {
                     f = new File(acc_dir, list[i]);
                     try {
-                        d = (System.currentTimeMillis() - (new kelondroAttrSeq(f)).created()) / 3600000;
+                        d = (System.currentTimeMillis() - (new kelondroAttrSeq(f, false)).created()) / 3600000;
                         if (d > max_age_hours) {
                             // file is considered to be too old, it is not recycled
                             System.out.println("file " + f.getName() + " is old (" + d + " hours) and not recycled, only moved to backup");
@@ -304,13 +320,18 @@ public class plasmaRankingCRProcess {
                         f.delete();
                     }
                 }
+                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                System.out.println("Finished recycling of " + files + " files in " + seconds + " seconds (" + (files / seconds) + " files/second)");
             }
             if ((args.length == 2) && (args[0].equals("-genrci"))) {
                 File root_path = new File(args[1]);
                 File cr_file = new File(root_path, "DATA/RANKING/GLOBAL/020_con0/CRG-a-acc.cr.gz");
                 File rci_file = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0/RCI-0.rci.gz");
                 rci_file.getParentFile().mkdirs();
-                genrci(cr_file, rci_file);
+                long start = System.currentTimeMillis();
+                int count = genrci(cr_file, rci_file);
+                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                System.out.println("Finished RCI generation: " + count + " citation references in " + seconds + " seconds (" + (count / seconds) + " CR-records/second)");
             }
         } catch (IOException e) {
             e.printStackTrace();

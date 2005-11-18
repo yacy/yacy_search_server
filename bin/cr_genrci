@@ -1,2 +1,2 @@
 cd `dirname $0`/..
-java  -Xms300m -Xmx900m -classpath source:classes de.anomic.plasma.plasmaRankingCRProcess -genrci .
+java -server -Xms1400m -Xmx1400m -classpath source:classes de.anomic.plasma.plasmaRankingCRProcess -genrci .

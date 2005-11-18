@@ -81,26 +81,27 @@ public final class serverCodings {
 
     
     public char encodeBase64Byte(byte b) {
-        return alpha[b];
+        return (char) alpha[b];
     }
 
     public byte decodeBase64Byte(char b) {
         return ahpla[b];
     }
     
-    
     public String encodeBase64LongSmart(long c, int length) {
         if (c >= maxBase64(length)) {
             StringBuffer s = new StringBuffer(length);
+            s.setLength(length);
             while (length > 0) {
-                s.insert(0,alpha[0x3F]);
-                length--;
+                s.setCharAt(--length, alpha[0]);
             }
             return s.toString();
         } else {
             return encodeBase64Long(c, length);
         }
     }
+    
+    /*
     public String encodeBase64Long(long c, int length) {
         if (length < 0) length = 0;
         StringBuffer s = new StringBuffer(length); //String s = "";
@@ -116,6 +117,17 @@ public final class serverCodings {
             throw new RuntimeException("encodeBase64 result '" + s + "' exceeds demanded length of " + length + " digits");
         if (length == 0) length = 1; // rare exception for the case that c == 0
         while (s.length() < length) s.insert(0,alpha[0]); //s = alpha[0] + s;
+        return s.toString();
+    }
+    */
+    
+    public String encodeBase64Long(long c, int length) {
+        StringBuffer s = new StringBuffer(length);
+        s.setLength(length);
+        while (length > 0) {
+            s.setCharAt(--length, alpha[(byte) (c & 0x3F)]);
+            c >>= 6;
+        }
         return s.toString();
     }
 

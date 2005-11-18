@@ -51,7 +51,7 @@ public class serverMemory {
     private static final Runtime runtime = Runtime.getRuntime();
     
     public static long free() {
-        // memory that is free without increasing of total memory takenn from os
+        // memory that is free without increasing of total memory taken from os
         return runtime.freeMemory();
     }
     
