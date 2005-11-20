@@ -1255,7 +1255,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             int httpStatusCode = 404; 
             String httpStatusText = null; 
             String errorMessage = null; 
-            Exception errorExc = e;
+            Exception errorExc = null;
             boolean unknownError = false;
             
             if (e instanceof ConnectException) {
@@ -1289,6 +1289,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 } else {
                     errorMessage = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
                     unknownError = true;
+                    errorExc = e;
                 }
             }
             
