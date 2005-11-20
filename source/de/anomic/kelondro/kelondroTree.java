@@ -218,7 +218,8 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                     try {
                         otherkey = new String(thenode.getKey());
                     } catch (NullPointerException e) {
-                        throw new kelondroException(filename, "kelondroTree.Search.process: nullpointer" + e.getMessage());
+                        throw new kelondroException(filename, "kelondroTree.Search.process: nullpointer" + e.getMessage() +
+                                                    "\nNode: " + thenode.toString());
                     }
 		    if (visitedNodeKeys.containsKey(otherkey)) {
                         // we have loops in the database.

@@ -70,6 +70,8 @@ public class zipParser extends AbstractParser implements Parser {
     public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
     static { 
         SUPPORTED_MIME_TYPES.put("application/zip","zip");
+        SUPPORTED_MIME_TYPES.put("application/x-zip","zip");
+        SUPPORTED_MIME_TYPES.put("application/x-zip-compressed","zip");
         SUPPORTED_MIME_TYPES.put("application/java-archive","jar");
     }     
 

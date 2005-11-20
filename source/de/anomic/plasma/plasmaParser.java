@@ -282,7 +282,7 @@ public final class plasmaParser {
         }
     }
     
-    public static boolean supportedFileExt(URL url) {
+    public static String getFileExt(URL url) {
         // getting the file path
         String name = url.getFile();
         
@@ -299,9 +299,15 @@ public final class plasmaParser {
         }
             
         // termining last position of . in file path
-        p = (p != -1) ? name.lastIndexOf('.',p) : name.lastIndexOf('.');
-        if (p < 0) return true; // seams to be strange, but this is a directory entry or default file (html)
-        return supportedFileExtContains(name.substring(p + 1));
+        p = name.lastIndexOf('.');
+        if (p < 0) return name; // seams to be strange, but this is a directory entry or default file (html)
+        return name.substring(p + 1);        
+    }
+    
+    public static boolean supportedFileExt(URL url) {
+        // getting the file path
+        String name = getFileExt(url);
+        return supportedFileExtContains(name);
     }
     
     public static boolean supportedFileExtContains(String fileExt) {
@@ -503,7 +509,7 @@ public final class plasmaParser {
                             String mimeType = (String) mimeTypeIterator.next();
                             availableParserList.put(mimeType,fullClassName);
                             serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'." +
-                                              ((neededLibxBuf.length()>0)?"\nDependencies: " + neededLibxBuf.toString():""));
+                                              ((neededLibxBuf.length()>0)?"\n   Dependencies: " + neededLibxBuf.toString():""));
                         }
                         
                     } catch (Exception e) { /* we can ignore this for the moment */
@@ -536,9 +542,21 @@ public final class plasmaParser {
         Parser theParser = null;
         try {
             mimeType = getRealMimeType(mimeType);
+            String fileExt = getFileExt(location);
+            
+            // TODO: Handling of not trustable mimeTypes
+            // text/plain, octet-stream
+            if (
+                    (mimeType.equalsIgnoreCase("text/plain") && !fileExt.equalsIgnoreCase("txt")) || 
+                    (mimeType.equalsIgnoreCase("text/xml")   && !fileExt.equalsIgnoreCase("txt"))
+            ) {
+                if (enabledParserList.containsKey("application/octet-stream")) {
+                    mimeType = "application/octet-stream";
+                }
+            }
             
             // getting the correct parser for the given mimeType
-            theParser = this.getParser(mimeType);
+            theParser = this.getParser(mimeType);            
             
             // if a parser was found we use it ...
             if (theParser != null) {
@@ -568,6 +586,18 @@ public final class plasmaParser {
         Parser theParser = null;
         try {
             mimeType = getRealMimeType(mimeType);
+            String fileExt = getFileExt(location);
+            
+            // TODO: Handling of not trustable mimeTypes
+            // text/plain, octet-stream
+            if (
+                    (mimeType.equalsIgnoreCase("text/plain") && !fileExt.equalsIgnoreCase("txt")) || 
+                    (mimeType.equalsIgnoreCase("text/xml")   && !fileExt.equalsIgnoreCase("txt"))
+            ) {
+                if (enabledParserList.containsKey("application/octet-stream")) {
+                    mimeType = "application/octet-stream";
+                }
+            }          
             
             // getting the correct parser for the given mimeType
             theParser = this.getParser(mimeType);
@@ -712,7 +742,26 @@ public final class plasmaParser {
             //File out = new File(args[1]);
             plasmaParser theParser = new plasmaParser();
             plasmaParser.initRealtimeParsableMimeTypes("application/xhtml+xml,text/html,text/plain");
-            plasmaParser.initParseableMimeTypes("application/atom+xml,application/gzip,application/java-archive,application/msword,application/octet-stream,application/pdf,application/rdf+xml,application/rss+xml,application/rtf,application/x-gzip,application/x-tar,application/xml,application/zip,text/rss,text/rtf,text/xml,application/x-bzip2,application/postscript");
+            plasmaParser.initParseableMimeTypes(
+                    "application/atom+xml," +
+                    "application/gzip," +
+                    "application/java-archive," +
+                    "application/msword," +
+                    "application/octet-stream," +
+                    "application/pdf," +
+                    "application/rdf+xml," +
+                    "application/rss+xml," +
+                    "application/rtf," +
+                    "application/x-gzip," +
+                    "application/x-tar," +
+                    "application/xml," +
+                    "application/zip," +
+                    "text/rss," +
+                    "text/rtf," +
+                    "text/xml," +
+                    "application/x-bzip2," +
+                    "application/postscript," +
+                    "text/x-vcard");
             FileInputStream theInput = new FileInputStream(in);
             ByteArrayOutputStream theOutput = new ByteArrayOutputStream();
             serverFileUtils.copy(theInput, theOutput);

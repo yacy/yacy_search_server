@@ -63,8 +63,11 @@ public class bzipParser extends AbstractParser implements Parser {
      * @see #getSupportedMimeTypes()
      */
     public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
+    static String fileExtensions = "bz2,tbz,tbz2";
     static { 
-        SUPPORTED_MIME_TYPES.put("application/x-bzip2","bz2,tbz,tbz2");
+        SUPPORTED_MIME_TYPES.put("application/x-bzip2",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/bzip2", fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-bz2", fileExtensions);
     }     
     
     /**
