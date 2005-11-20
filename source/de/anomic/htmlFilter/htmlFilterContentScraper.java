@@ -150,7 +150,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     
     public static String urlNormalform(URL url) {
         boolean defaultPort = false;
-        serverLog.logFinest("htmlFilter", "urlNormalform: '" + url.toString() + "'");
+        //serverLog.logFinest("htmlFilter", "urlNormalform: '" + url.toString() + "'");
         if (url.getProtocol().equals("http")) {
             if (url.getPort() < 0 || url.getPort() == 80)  { defaultPort = true; }
         } else if (url.getProtocol().equals("ftp")) {

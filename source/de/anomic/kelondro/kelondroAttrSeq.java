@@ -50,11 +50,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
@@ -186,11 +185,11 @@ public class kelondroAttrSeq {
         return entries.keySet().iterator();
     }
     
-    public Entry newEntry(String pivot) {
-        return new Entry(pivot, new HashMap(), new TreeSet());
+    public Entry newEntry(String pivot, boolean tree) {
+        return new Entry(pivot, new HashMap(), (tree) ? (Map) new TreeMap() : (Map) new HashMap());
     }
     
-    public Entry newEntry(String pivot, HashMap props, TreeSet seq) {
+    public Entry newEntry(String pivot, HashMap props, Map seq) {
         return new Entry(pivot, props, seq);
     }
     
@@ -210,7 +209,7 @@ public class kelondroAttrSeq {
     public Entry getEntry(String pivot) {
         Object e = entries.get(pivot);
         if (e == null) return null;
-        if (e instanceof String) return new Entry(pivot, (String) e);
+        if (e instanceof String) return new Entry(pivot, (String) e, false);
         if (e instanceof Entry) return (Entry) e;
         return null;
     }
@@ -218,7 +217,7 @@ public class kelondroAttrSeq {
     public Entry removeEntry(String pivot) {
         Object e = entries.remove(pivot);
         if (e == null) return null;
-        if (e instanceof String) return new Entry(pivot, (String) e);
+        if (e instanceof String) return new Entry(pivot, (String) e, false);
         if (e instanceof Entry) return (Entry) e;
         return null;
     }
@@ -229,8 +228,8 @@ public class kelondroAttrSeq {
         protected int      pivot_len = -1;
         protected String[] prop_names = null;
         protected int[]    prop_len = null, prop_pos = null;
-        protected String   seq_name = null;
-        protected int      seq_len = -1;
+        protected String[] seq_names = null;
+        protected int[]    seq_len = null, seq_pos = null;
         
         // example:
         //# Structure=<pivot-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>,'|',*<Anchor-12>
@@ -273,17 +272,30 @@ public class kelondroAttrSeq {
             }
             
             // parse sequence definition:
-            a = atom(seqs);
-            if (a == null) return;
-            seq_name = (String) a[0];
-            seq_len = ((Integer) a[1]).intValue();
+            if (seqs.startsWith("*")) seqs = seqs.substring(1);
+            l = new ArrayList();
+            st = new StringTokenizer(seqs, ",");
+            while (st.hasMoreTokens()) {
+                a = atom(st.nextToken());
+                if (a == null) break;
+                l.add(a);
+            }
+            seq_names = new String[l.size()];
+            seq_len = new int[l.size()];
+            seq_pos = new int[l.size()];
+            p = 0;
+            for (int i = 0; i < l.size(); i++) {
+                a = (Object[]) l.get(i);
+                seq_names[i] = (String) a[0];
+                seq_len[i] = ((Integer) a[1]).intValue();
+                seq_pos[i] = p;
+                p += seq_len[i];
+            }
         }
         
         private Object[] atom(String a) {
             if (a.startsWith("<")) {
                 a = a.substring(1);
-            } else if (a.startsWith("*<")) {
-                a = a.substring(2);
             } else return null;
             if (a.endsWith(">")) {
                 a = a.substring(0, a.length() - 1);
@@ -307,8 +319,12 @@ public class kelondroAttrSeq {
                     sb.append('<'); sb.append(prop_names[i]); sb.append('-'); sb.append(Integer.toString(prop_len[i])); sb.append(">,");
                 }
             }
-            sb.append("'|',");
-            sb.append("*<"); sb.append(seq_name); sb.append('-'); sb.append(Integer.toString(seq_len)); sb.append('>');
+            sb.append("'|'");
+            if (seq_names.length > 0) {
+                for (int i = 0; i < seq_names.length; i++) {
+                    sb.append(",<"); sb.append(seq_names[i]); sb.append('-'); sb.append(Integer.toString(seq_len[i])); sb.append('>');
+                }
+            }
             return sb.toString();
         }
     }
@@ -316,25 +332,33 @@ public class kelondroAttrSeq {
     public class Entry {
         String  pivot;
         HashMap attrs;
-        TreeSet seq;
+        Map     seq;
         
-        public Entry(String pivot, HashMap attrs, TreeSet seq) {
+        public Entry(String pivot, HashMap attrs, Map seq) {
             this.pivot = pivot;
             this.attrs = attrs;
             this.seq = seq;
         }
         
-        public Entry(String pivot, String attrseq) {
+        public Entry(String pivot, String attrseq, boolean tree) {
             this.pivot = pivot;
             attrs = new HashMap();
-            seq = new TreeSet();
+            seq = (tree) ? (Map) new TreeMap() : (Map) new HashMap();
             for (int i = 0; i < structure.prop_names.length; i++) {
                 attrs.put(structure.prop_names[i], new Long(serverCodings.enhancedCoder.decodeBase64Long(attrseq.substring(structure.prop_pos[i], structure.prop_pos[i] + structure.prop_len[i]))));
             }
             
-            int p = attrseq.indexOf('|');
-            for (int i = p + 1; i < attrseq.length(); i = i + structure.seq_len) {
-                seq.add(attrseq.substring(i, i + structure.seq_len));
+            int p = attrseq.indexOf('|') + 1;
+            long[] seqattrs = new long[structure.seq_names.length - 1];
+            String seqname;
+            while (p < attrseq.length()) {
+                seqname = attrseq.substring(p, p + structure.seq_len[0]);
+                p += structure.seq_len[0];
+                for (int i = 1; i < structure.seq_names.length; i++) {
+                    seqattrs[i - 1] = serverCodings.enhancedCoder.decodeBase64Long(attrseq.substring(p, p + structure.seq_len[i]));
+                    p += structure.seq_len[i];
+                }
+                seq.put(seqname, seqattrs);
             }
         }
         
@@ -351,30 +375,37 @@ public class kelondroAttrSeq {
             attrs.put(key, new Long(attr));
         }
         
-        public TreeSet getSeq() {
+        public Map getSeq() {
             return seq;
         }
         
-        public void setSeq(TreeSet seq) {
+        public void setSeq(Map seq) {
             this.seq = seq;
         }
         
-        public void addSeq(String s) {
-            this.seq.add(s);
+        public void addSeq(String s, long[] seqattrs) {
+            this.seq.put(s, seqattrs);
         }
         
         public String toString() {
             // creates only the attribute field and the sequence, not the pivot
-            StringBuffer sb = new StringBuffer(100 + structure.seq_len * seq.size());
+            StringBuffer sb = new StringBuffer(100 + structure.seq_len[0] * seq.size());
             Long val;
             for (int i = 0; i < structure.prop_names.length; i++) {
                 val = (Long) attrs.get(structure.prop_names[i]);
                 sb.append(serverCodings.enhancedCoder.encodeBase64LongSmart((val == null) ? 0 : val.longValue(), structure.prop_len[i]));
             }
             sb.append('|');
-            Iterator q = seq.iterator();
+            Iterator q = seq.entrySet().iterator();
+            Map.Entry entry;
+            long[] seqattrs;
             while (q.hasNext()) {
-                sb.append((String) q.next());
+                entry = (Map.Entry) q.next();
+                sb.append((String) entry.getKey());
+                seqattrs = (long[]) entry.getValue();
+                for (int i = 1; i < structure.seq_names.length; i++) {
+                    sb.append(serverCodings.enhancedCoder.encodeBase64Long(seqattrs[i - 1], structure.seq_len[i]));
+                }
             }
             return sb.toString();
         }

@@ -48,6 +48,7 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
 
 import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.server.serverCodings;
@@ -230,16 +231,18 @@ public class plasmaRankingCRProcess {
             cr_UDate = cr_entry.getAttr("UDate", 0);
             
             // loop over all anchors
-            Iterator j = cr_entry.getSeq().iterator();
+            Iterator j = cr_entry.getSeq().entrySet().iterator();
+            Map.Entry entry;
             while (j.hasNext()) {
                 // get domain of anchors
-                anchor = (String) j.next();
+                entry = (Map.Entry) j.next();
+                anchor = (String) entry.getKey();
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 
                 // update domain-specific entry
                 rci_entry = rci.getEntry(anchorDom);
-                if (rci_entry == null) rci_entry = rci.newEntry(anchorDom);
-                rci_entry.addSeq(referee);
+                if (rci_entry == null) rci_entry = rci.newEntry(anchorDom, false);
+                rci_entry.addSeq(referee, null);
                 
                 // update Update-Date
                 rci_UDate = rci_entry.getAttr("UDate", 0);

@@ -47,6 +47,7 @@ package de.anomic.plasma;
 import java.io.IOException;
 import java.io.File;
 import java.util.Random;
+import java.util.StringTokenizer;
 
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedDB;
@@ -75,6 +76,19 @@ public final class plasmaRankingDistribution {
     private String address[];      // of fixed other peer
     private static Random random = new Random(System.currentTimeMillis());
     
+    public plasmaRankingDistribution(serverLog log, File sourcePath, int method, int percentage, String addresses) {
+        this.log        = log;
+        this.sourcePath = sourcePath;
+        this.method     = method;
+        this.percentage = percentage;
+        StringTokenizer st = new StringTokenizer(addresses, ",");
+        int c = 0; while (st.hasMoreTokens()) {st.nextToken(); c++;}
+        st = new StringTokenizer(addresses, ",");
+        this.address = new String[c];
+        c = 0;
+        while (st.hasMoreTokens()) {this.address[c++] = st.nextToken();}
+    }
+
     public plasmaRankingDistribution(serverLog log, File sourcePath, int method, int percentage, String address[]) {
         this.log        = log;
         this.sourcePath = sourcePath;

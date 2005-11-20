@@ -53,9 +53,12 @@ import java.io.InputStreamReader;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.PrintWriter;
+import java.util.StringTokenizer;
 import java.util.zip.GZIPOutputStream;
-import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.Properties;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -173,7 +176,7 @@ public final class serverFileUtils {
         copy(new ByteArrayInputStream(source), dest);
     }
     
-    public static HashSet loadSet(String filename) {
+    public static HashSet loadList(String filename) {
         HashSet set = new HashSet();
         BufferedReader br = null;
         try {
@@ -222,6 +225,44 @@ public final class serverFileUtils {
         }
         pw.println("# EOF");
         pw.close();
+        file.delete();
+        tf.renameTo(file);
+    }
+    
+    public static Set loadSet(File file, int chunksize, boolean tree) throws IOException {
+        Set set = (tree) ? (Set) new TreeSet() : (Set) new HashSet();
+        byte[] b = read(file);
+        for (int i = 0; (i + chunksize) <= b.length; i++) {
+            set.add(new String(b, i, chunksize));
+        }
+        return set;
+    }
+
+    public static Set loadSet(File file, String sep, boolean tree) throws IOException {
+        Set set = (tree) ? (Set) new TreeSet() : (Set) new HashSet();
+        byte[] b = read(file);
+        StringTokenizer st = new StringTokenizer(new String(b), sep);
+        while (st.hasMoreTokens()) {
+            set.add(st.nextToken());
+        }
+        return set;
+    }
+
+    public static void saveSet(File file, Set set, String sep) throws IOException {
+        File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tf));
+        Iterator i = set.iterator();
+        String key;
+        if (i.hasNext()) {
+            key = i.next().toString();
+            bos.write(key.getBytes());
+        }
+        while (i.hasNext()) {
+            key = i.next().toString();
+            if (sep != null) bos.write(sep.getBytes());
+            bos.write(key.getBytes());
+        }
+        bos.close();
         file.delete();
         tf.renameTo(file);
     }

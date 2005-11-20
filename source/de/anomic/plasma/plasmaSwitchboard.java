@@ -431,8 +431,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         cleanProfiles();
         
         // init ranking transmission
-        rankingOwnDistribution = new plasmaRankingDistribution(log, new File(rankingPath, plasmaRankingDistribution.CR_OWN), plasmaRankingDistribution.METHOD_ANYSENIOR, 0, null);
-        rankingOtherDistribution = new plasmaRankingDistribution(log, new File(rankingPath, plasmaRankingDistribution.CR_OTHER), plasmaRankingDistribution.METHOD_MIXEDSENIOR, 30, new String[]{"kaskelix.de:8080", "yacy.dyndns.org:8000", "suma-lab.de:8080"});
+        /*
+        CRDist0Path    = GLOBAL/010_owncr
+        CRDist0Method  = 1
+        CRDist0Percent = 0
+        CRDist0Target  =
+        CRDist1Path    = GLOBAL/014_othercr/1
+        CRDist1Method  = 9
+        CRDist1Percent = 30
+        CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080
+         **/
+        rankingOwnDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN)), (int) getConfigLong("CRDist0Method", plasmaRankingDistribution.METHOD_ANYSENIOR), (int) getConfigLong("CRDist0Percent", 0), getConfig("CRDist0Target", ""));
+        rankingOtherDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig("CRDist1Path", plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong("CRDist1Method", plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong("CRDist1Percent", 30), getConfig("CRDist1Target", "kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080"));
         
         // init facility DB
         /*
@@ -1411,7 +1421,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private void flushCitationReference(StringBuffer cr, String type) {
         if (cr.length() < 12) return;
         String filename = type.toUpperCase() + "-A-" + new serverDate().toShortString(true) + "." + cr.substring(0, 12) + ".cr.gz";
-        File path = new File(rankingPath, (type.equals("crl") ? "LOCAL/010_cr/" : "GLOBAL/010_owncr/"));
+        File path = new File(rankingPath, (type.equals("crl") ? "LOCAL/010_cr/" : getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN)));
         path.mkdirs();
         File file = new File(path, filename);
         
