@@ -2,11 +2,11 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Performance Settings of Search Sequence</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
-#[submenuPerformance]#
+#%env/templates/header.template%#
+#%env/templates/submenuPerformance.template%#
 <br>
 <h2>Timing Settings of Search Sequence</h2>
 
@@ -113,6 +113,6 @@
 The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:
 <img src="SearchEventPicture.png">
 </p>
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

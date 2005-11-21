@@ -2,10 +2,10 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': User Page</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body>
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>User Page</h2><br>
 #(logged-in)#
@@ -53,6 +53,6 @@ new Password is empty.
 #(/status)#
 </b>
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

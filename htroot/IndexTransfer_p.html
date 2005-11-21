@@ -2,11 +2,11 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Index Transfer</title>
-#[metas]#
+#%env/templates/metas.template%#
 <meta http-equiv="REFRESH" content="30">
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>Index Transfer</h2>
 
@@ -74,6 +74,6 @@
 </form>
 <p><font size="-3"><i>Last Refresh:</i> #[date]#</font></p>
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

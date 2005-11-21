@@ -2,12 +2,12 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Watch Crawler</title>
-#[metas]#
+#%env/templates/metas.template%#
 <script src="/js/ajax.js"></script>
 <script src="/js/WatchCrawler.js"></script>
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br>
 <h2>Watch Crawler</h2>
 <p />
@@ -24,6 +24,6 @@ Indexing Queue:<br />
 </tr>
 </table>
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

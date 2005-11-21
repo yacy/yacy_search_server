@@ -2,10 +2,10 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Index Sharing</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>Index Sharing</h2>
 
@@ -38,6 +38,6 @@ The local index currently consists of (at least) #[wcount]# reverse word indexes
 </tr>
 </table>
 </p>
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

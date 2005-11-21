@@ -2,11 +2,11 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Search Page</title>
-#[metas]#
+#%env/templates/metas.template%#
 <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="index.rss?search=#[former]#">
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br>
 <center><h2><font size="2" face="Helvetica, Arial" color="#212942"><img src="/env/grafics/kaskelix.png" align="middle" alt="YaCy logo Kaskelix"><br>P2P WEB SEARCH</font></h2></center><br>
 <center>#[promoteSearchPageGreeting]#</center><br>
@@ -132,6 +132,6 @@ with the target of implementing a P2P-based global search engine.<br>
 Architecture (C) by Michael Peter Christen,
 <img src="/env/grafics/mcemailh.gif"></i></center>
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

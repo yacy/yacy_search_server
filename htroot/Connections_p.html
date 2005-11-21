@@ -2,11 +2,11 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Connection Tracking</title>
-#[metas]#
+#%env/templates/metas.template%#
 <meta http-equiv="REFRESH" content="30">
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <p><h2>Connection Tracking</h2></p>
 <p><h3>Incoming Connections</h3></p>
 <p>Showing #[numActiveRunning]# active connections, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.<br>
@@ -32,7 +32,7 @@
 </table>
 </p>
 
-#[footer]#
+#%env/templates/footer.template%#
 
 </body>
 </html>

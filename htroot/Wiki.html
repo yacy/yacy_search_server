@@ -2,12 +2,12 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Wiki</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <p>#[pagecontent]#</p>
 <p>#[pageedit]# Changes will be published as announcement on YaCyNews</p>
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

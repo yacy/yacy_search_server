@@ -2,11 +2,11 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Performance Settings for Memory</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
-#[submenuPerformance]#
+#%env/templates/header.template%#
+#%env/templates/submenuPerformance.template%#
 <br>
 <h2>Performance Settings for Memory</h2>
 
@@ -312,6 +312,6 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 </table>
 </p>
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

@@ -2,11 +2,11 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Index Creation / Loader Queue</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
-#[submenuIndexCreate]#
+#%env/templates/header.template%#
+#%env/templates/submenuIndexCreate.template%#
 <br>
 <h2>Index Creation: Loader Queue</h2>
 
@@ -32,6 +32,6 @@ There are #[num]# entries in the loader set:<br>
 #(/loader-set)#
 </p>
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

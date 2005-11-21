@@ -2,10 +2,10 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Language selection</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>Language selection</h2>
 <p>
@@ -43,6 +43,6 @@ Unable to get URL: #[url]#
 Error saving the language file.
 #(status)#</b>
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

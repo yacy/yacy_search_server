@@ -2,11 +2,11 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Index Creation / WWW Global Crawl Queue</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
-#[submenuIndexCreate]#
+#%env/templates/header.template%#
+#%env/templates/submenuIndexCreate.template%#
 <br>
 <h2>Index Creation: WWW Global Crawl Queue</h2>
 <p>
@@ -45,6 +45,6 @@ There are #[num]# entries in the global crawler queue. Showing #[show-num]# most
 #(/crawler-queue)#
 </p>
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

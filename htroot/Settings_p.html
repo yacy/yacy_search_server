@@ -2,10 +2,10 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Settings</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>Settings</h2>
 <p>This is the configuration page for YaCy. Access to this page should be limited to an administration person only.
@@ -45,6 +45,6 @@ delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root fold
 </p>
 #%[settingsTables]%#
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

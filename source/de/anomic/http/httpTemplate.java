@@ -45,12 +45,14 @@ package de.anomic.http;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import de.anomic.server.serverFileUtils;
@@ -422,6 +424,28 @@ public final class httpTemplate {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    /*
+     * loads all Files from path into a filename->content HashMap
+     */
+    public static HashMap loadTemplates(File path) {
+        // reads all templates from a path
+        // we use only the folder from the given file path
+        HashMap result = new HashMap();
+        if (path == null) return result;
+        if (!(path.isDirectory())) path = path.getParentFile();
+        if ((path == null) || (!(path.isDirectory()))) return result;
+        String[] templates = path.list();
+        int c;
+        for (int i = 0; i < templates.length; i++) {
+            if (templates[i].endsWith(".template")) 
+                try {
+                    //System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
+                    result.put(templates[i].substring(0, templates[i].length() - 9),
+                            new String(serverFileUtils.read(new File(path, templates[i]))));
+                } catch (Exception e) {}
+        }
+        return result;
     }
     
 }

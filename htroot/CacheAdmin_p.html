@@ -2,10 +2,10 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Local Cache Management</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>Local Cache</h2><br>
 
@@ -21,6 +21,6 @@ The current cache size is #[cachesize]# KB. The maximum cache size is #[cachemax
 </td>
 </tr></table>
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

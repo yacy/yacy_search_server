@@ -2,10 +2,10 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Remote Peer Profile</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>Remote Peer Profile:</h2>
 <p>
@@ -72,6 +72,6 @@ The peer #[peername]# is not online.
 #{/other}#
 </table>
 #(/success)#
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

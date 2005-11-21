@@ -2,10 +2,10 @@
 <html>
 <head>
 <title>YaCy: Help</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>Help</h2>
 
@@ -105,6 +105,6 @@ This matches heise.de/ with a string in front of it, for example "http://www.", 
 A possible URL which would match this regexp is: http://www.heise.de/newsticker/meldung/59421<br>
 An URL which would not match is: http://www.heise.de/tp/r4/artikel/20/20701/1.html<br>
 There is ".html" at the end, which is not included with the Regular Expression.
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

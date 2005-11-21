@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Shared Blacklist</title>
-#[metas]#
+#%env/templates/metas.template%#
 <script>
 <!--
 function selectall(){
@@ -14,7 +14,7 @@ function selectall(){
 </script>
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>Add Items to Blacklist</h2>
 
@@ -60,6 +60,6 @@ Wrong Invocation! Please invoke with sharedBlacklist.html?name=PeerName
 </p>
 </form>
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

@@ -2,11 +2,11 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Incoming Cookies Monitor</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
-#[submenuCookie]#
+#%env/templates/header.template%#
+#%env/templates/submenuCookie.template%#
 <br>
 <h2>Cookie Monitor: Incoming Cookies</h2>
 <font size="1">
@@ -30,6 +30,6 @@ Showing #[num]# entries from a total of #[total]# Cookies.<br>
 </table>
 </p>
 </font>
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>

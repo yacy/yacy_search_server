@@ -195,7 +195,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
                 if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
             }
-            if (templates.size() == 0) templates.putAll(loadTemplates(htTemplatePath));
+            //This is now handles by #%env/templates/foo%#
+            //if (templates.size() == 0) templates.putAll(httpTemplate.loadTemplates(htTemplatePath));
             
             // create htLocaleDefault, htLocalePath
             if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
@@ -728,26 +729,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         }
     }
 
-    private static HashMap loadTemplates(File path) {
-        // reads all templates from a path
-        // we use only the folder from the given file path
-        HashMap result = new HashMap();
-        if (path == null) return result;
-        if (!(path.isDirectory())) path = path.getParentFile();
-        if ((path == null) || (!(path.isDirectory()))) return result;
-        String[] templates = path.list();
-        int c;
-        for (int i = 0; i < templates.length; i++) {
-            if (templates[i].endsWith(".template")) 
-                try {
-                    //System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
-                    result.put(templates[i].substring(0, templates[i].length() - 9),
-                            new String(serverFileUtils.read(new File(path, templates[i]))));
-                } catch (Exception e) {}
-        }
-        return result;
-    }
-    
     private File rewriteClassFile(File template) {
         try {
             String f = template.getCanonicalPath();

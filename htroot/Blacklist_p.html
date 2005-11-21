@@ -2,10 +2,10 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': Blacklist Manager</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>Blacklist</h2>
 <p>This function provides an URL filter to the proxy; any blacklisted URL is blocked
@@ -116,6 +116,6 @@ File: <input type="text" name="file">
 #(/status)#
 
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>
