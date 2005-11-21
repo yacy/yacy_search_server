@@ -69,6 +69,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexCache;
 import de.anomic.plasma.plasmaWordIndexClassicDB;
@@ -1054,6 +1055,25 @@ public final class yacy {
         }
     }
     
+    private static void domlist(String homePath, String targetName) {
+        File root = new File(homePath);
+        try {
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000);
+            Iterator eiter = pool.loadedURL.entries(true, false);
+            HashSet doms = new HashSet();
+            plasmaCrawlLURL.Entry entry;
+            URL url;
+            while (eiter.hasNext()) {
+                entry = (plasmaCrawlLURL.Entry) eiter.next();
+                if ((entry != null) && (entry.url() != null)) doms.add(entry.url().getHost());
+            }
+            serverFileUtils.saveSet(new File(root, targetName), doms, new String(serverCore.crlf));
+            pool.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     /**
     * Main-method which is started by java. Checks for special arguments or
     * starts up the application.
@@ -1094,15 +1114,15 @@ public final class yacy {
         } else if ((args.length >= 1) && (args[0].equals("-importDB"))) {
             // attention: this may run long and should not be interrupted!
             String importRoot = null;
-            if (args.length == 3) { 
+            if (args.length == 3) {
                 applicationRoot= args[1];
-                importRoot = args[2];            
+                importRoot = args[2];
             } else if (args.length == 2) {
                 importRoot = args[1];
             } else {
                 System.err.println("Usage: -importDB [homeDbRoot] importDbRoot");
             }
-            importDB(applicationRoot, importRoot);            
+            importDB(applicationRoot, importRoot);
         } else if ((args.length >= 1) && (args[0].equals("-deletestopwords"))) {
             // delete those words in the index that are listed in the stopwords file
             if (args.length == 2) applicationRoot= args[1];
@@ -1121,9 +1141,14 @@ public final class yacy {
             cleanwordlist(args[1], minlength, maxlength);
         } else if ((args.length >= 1) && (args[0].equals("-transfercr"))) {
             // transfer a single cr file to a remote peer
-             String targetaddress = args[1];
-             String crfile = args[2];
-             transferCR(targetaddress, crfile);
+            String targetaddress = args[1];
+            String crfile = args[2];
+            transferCR(targetaddress, crfile);
+        } else if ((args.length >= 1) && (args[0].equals("-domlist"))) {
+            // generate a url list and save it in a file
+            if (args.length == 2) applicationRoot= args[1];
+            String outfile = "domlist_" + System.currentTimeMillis() + ".txt";
+            domlist(applicationRoot, outfile);
         } else {
             if (args.length == 1) applicationRoot= args[0];
             startup(applicationRoot, startupMemFree, startupMemTotal);

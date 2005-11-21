@@ -58,7 +58,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Properties;
@@ -716,25 +716,31 @@ public final class plasmaCrawlLURL extends plasmaURL {
     }
     } // class Entry
 
-    public class kenum implements Enumeration {
+    public class kiter implements Iterator {
         // enumerates entry elements
         kelondroTree.rowIterator i;
-        public kenum(boolean up, boolean rotating) throws IOException {
+        public kiter(boolean up, boolean rotating) throws IOException {
             i = urlHashCache.rows(up, rotating);
         }
 
-        public boolean hasMoreElements() {
+        public boolean hasNext() {
             return i.hasNext();
         }
 
-        public Object nextElement() {
-            return new Entry(new String(((byte[][])i.next())[0]));
+        public Object next() {
+            byte[] e = ((byte[][])i.next())[0];
+            if (e == null) return null; else return new Entry(new String(e));
         }
+        
+        public void remove() {
+            i.remove();
+        }
+        
     }
 
-    public Enumeration elements(boolean up, boolean rotating) throws IOException {
+    public Iterator entries(boolean up, boolean rotating) throws IOException {
         // enumerates entry elements
-        return new kenum(up, rotating);
+        return new kiter(up, rotating);
     }
 
     public static void main(String[] args) {
@@ -748,9 +754,9 @@ public final class plasmaCrawlLURL extends plasmaURL {
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache
             final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), 1);
-            final Enumeration enu = urls.elements(true, false);
-            while (enu.hasMoreElements()) {
-                ((Entry) enu.nextElement()).print();
+            final Iterator enu = urls.entries(true, false);
+            while (enu.hasNext()) {
+                ((Entry) enu.next()).print();
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -494,7 +494,7 @@ public class kelondroRecords {
                     try {
                         parentNode.setOHHandle(referenceInParent, null);
                         parentNode.commit(CP_NONE);
-                        throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. The bad node has been auto-fixed");
+                        logWarning("INTERNAL ERROR, Node/init in " + filename + ": node handle index " + handle.index + " exceeds size. The bad node has been auto-fixed");
                     } catch (IOException ee) {
                         throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. It was tried to fix the bad node, but failed with an IOException: " + ee.getMessage());
                     }
