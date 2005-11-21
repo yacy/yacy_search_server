@@ -2,10 +2,10 @@
 <html>
 <head>
 <title>YaCy '#[clientname]#': User Administration</title>
-#[metas]#
+#%env/templates/metas.template%#
 </head>
 <body>
-#[header]#
+#%env/templates/header.template%#
 <br><br>
 <h2>User Administration</h2><br>
 <table>
@@ -27,7 +27,8 @@
 
 <td width="100%">
 <form action="User_p.html" method="POST">
-Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly>
+<!-- Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly> -->
+<input type="hidden" name="current_user" value="#[current_user]#">
 Current User: #[username]#
 <p />
 <table border="1">
@@ -101,6 +102,6 @@ If you want to manage more Users, return to the <a href="User_p.html?change_user
 
 #(/page)#
 
-#[footer]#
+#%env/templates/footer.template%#
 </body>
 </html>
