@@ -73,6 +73,8 @@ public class vcfParser extends AbstractParser implements Parser {
     /**
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
+     * 
+     * TODO: support of x-mozilla-cpt and x-mozilla-html tags
      */
     public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
     static { 
