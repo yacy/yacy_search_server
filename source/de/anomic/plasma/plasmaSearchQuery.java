@@ -54,6 +54,7 @@ public final class plasmaSearchQuery {
     
     public static final String ORDER_QUALITY = "quality";
     public static final String ORDER_DATE    = "date";
+    public static final String ORDER_YBR     = "ybr";
     
     public static final int SEARCHDOM_LOCAL = 0;
     public static final int SEARCHDOM_GROUPDHT = 1;

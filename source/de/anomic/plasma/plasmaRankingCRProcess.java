@@ -53,6 +53,7 @@ import java.util.Map;
 import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverDate;
 import de.anomic.tools.bitfield;
 
 public class plasmaRankingCRProcess {
@@ -131,13 +132,13 @@ public class plasmaRankingCRProcess {
             acc_entry.setAttr("ACount", (long) ACount);
             acc_entry.setAttr("VCount", (long) VCount);
             acc_entry.setAttr("Vita", (long) Vita);
-            acc.putEntry(acc_entry);
+            acc.putEntrySmall(acc_entry);
         }
         
         return true;
     }
     
-    public static void accumulate(File from_dir, File tmp_dir, File err_dir, File bkp_dir, File to_file) throws IOException {
+    public static void accumulate(File from_dir, File tmp_dir, File err_dir, File bkp_dir, File to_file, int max_files) throws IOException {
         if (!(from_dir.isDirectory())) {
             System.out.println("source path " + from_dir + " is not a directory.");
             return;
@@ -171,7 +172,8 @@ public class plasmaRankingCRProcess {
         kelondroAttrSeq source_cr = null;
         File source_file = null;
         String[] files = from_dir.list();
-        for (int i = 0; i < files.length; i++) {
+        if (files.length < max_files) max_files = files.length;
+        for (int i = 0; i < max_files; i++) {
             // open file
             source_file = new File(from_dir, files[i]);
             if (accumulate_upd(source_file, acc)) {
@@ -206,7 +208,7 @@ public class plasmaRankingCRProcess {
     public static int genrci(File cr_in, File rci_out) throws IOException {
         if (!(cr_in.exists())) return 0;
         final kelondroAttrSeq cr = new kelondroAttrSeq(cr_in, false);
-        if (rci_out.exists()) rci_out.delete(); // we want only fresh rci here (during testing) 
+        //if (rci_out.exists()) rci_out.delete(); // we want only fresh rci here (during testing) 
         if (!(rci_out.exists())) {
             kelondroAttrSeq rcix = new kelondroAttrSeq("Global Ranking Reverse Citation Index",
                     "<AnchorDom-6>,'='," +
@@ -267,7 +269,7 @@ public class plasmaRankingCRProcess {
         // java -classpath source de.anomic.plasma.kelondroPropFile -transcode DATA/RANKING/GLOBAL/CRG-test-unsorted-original.cr DATA/RANKING/GLOBAL/CRG-test-generated.cr
         try {
             if ((args.length == 5) && (args[0].equals("-accumulate"))) {
-                accumulate(new File(args[1]), new File(args[2]), new File(args[3]), new File(args[4]), new File(args[5]));
+                accumulate(new File(args[1]), new File(args[2]), new File(args[3]), new File(args[4]), new File(args[5]), Integer.parseInt(args[6]));
             }
             if ((args.length == 2) && (args[0].equals("-accumulate"))) {
                 File root_path = new File(args[1]);
@@ -276,7 +278,8 @@ public class plasmaRankingCRProcess {
                 File tmp_dir = new File(root_path, "DATA/RANKING/GLOBAL/016_tmp");
                 File err_dir = new File(root_path, "DATA/RANKING/GLOBAL/017_err");
                 File acc_dir = new File(root_path, "DATA/RANKING/GLOBAL/018_acc");
-                File to_file = new File(root_path, "DATA/RANKING/GLOBAL/020_con0/CRG-a-acc.cr.gz");
+                String filename = "CRG-a-" + new serverDate().toShortString(true) + ".cr.gz";
+                File to_file = new File(root_path, "DATA/RANKING/GLOBAL/020_con0/" + filename);
                 if (!(ready_dir.exists())) ready_dir.mkdirs();
                 if (!(tmp_dir.exists())) tmp_dir.mkdirs();
                 if (!(err_dir.exists())) err_dir.mkdirs();
@@ -285,7 +288,7 @@ public class plasmaRankingCRProcess {
                 serverFileUtils.moveAll(from_dir, ready_dir);
                 long start = System.currentTimeMillis();
                 int files = ready_dir.list().length;
-                accumulate(ready_dir, tmp_dir, err_dir, acc_dir, to_file);
+                accumulate(ready_dir, tmp_dir, err_dir, acc_dir, to_file, 1000);
                 long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
                 System.out.println("Finished accumulate for " + files + " files in " + seconds + " seconds (" + (files / seconds) + " files/second)");
             }
@@ -328,13 +331,16 @@ public class plasmaRankingCRProcess {
             }
             if ((args.length == 2) && (args[0].equals("-genrci"))) {
                 File root_path = new File(args[1]);
-                File cr_file = new File(root_path, "DATA/RANKING/GLOBAL/020_con0/CRG-a-acc.cr.gz");
+                File cr_filedir = new File(root_path, "DATA/RANKING/GLOBAL/020_con0");
                 File rci_file = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0/RCI-0.rci.gz");
                 rci_file.getParentFile().mkdirs();
-                long start = System.currentTimeMillis();
-                int count = genrci(cr_file, rci_file);
-                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
-                System.out.println("Finished RCI generation: " + count + " citation references in " + seconds + " seconds (" + (count / seconds) + " CR-records/second)");
+                String[] cr_filenames = cr_filedir.list();
+                for (int i = 0; i < cr_filenames.length; i++) {
+                    long start = System.currentTimeMillis();
+                    int count = genrci(new File(cr_filedir, cr_filenames[i]), rci_file);
+                    long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                    System.out.println("Completed RCI generation for input file " + cr_filenames[i] + ": " + count + " citation references in " + seconds + " seconds (" + (count / seconds) + " CR-records/second)");
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

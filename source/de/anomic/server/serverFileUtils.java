@@ -176,11 +176,11 @@ public final class serverFileUtils {
         copy(new ByteArrayInputStream(source), dest);
     }
     
-    public static HashSet loadList(String filename) {
+    public static HashSet loadList(File file) {
         HashSet set = new HashSet();
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();

@@ -206,6 +206,10 @@ public class kelondroAttrSeq {
             entries.put(entry.pivot, entry);
     }
     
+    public void putEntrySmall(Entry entry) {
+        entries.put(entry.pivot, entry.toString());
+    }
+    
     public Entry getEntry(String pivot) {
         Object e = entries.get(pivot);
         if (e == null) return null;
@@ -351,7 +355,7 @@ public class kelondroAttrSeq {
             int p = attrseq.indexOf('|') + 1;
             long[] seqattrs = new long[structure.seq_names.length - 1];
             String seqname;
-            while (p < attrseq.length()) {
+            while (p + structure.seq_len[0] <= attrseq.length()) {
                 seqname = attrseq.substring(p, p + structure.seq_len[0]);
                 p += structure.seq_len[0];
                 for (int i = 1; i < structure.seq_names.length; i++) {

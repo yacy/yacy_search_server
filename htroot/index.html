@@ -26,8 +26,12 @@ Max. number of results:
 </select>
 &nbsp;&nbsp;order by: 
 <select NAME="order">
-<option value="Quality-Date" #(order-quality)#::selected#(/order-quality)#>Quality-Date</option>
-<option value="Date-Quality" #(order-date)#::selected#(/order-date)#>Date-Quality</option>
+<option value="YBR-Date-Quality" #(order-ybr-date-quality)#::selected#(/order-ybr-date-quality)#>YBR-Date-Quality</option>
+<option value="YBR-Quality-Date" #(order-ybr-quality-date)#::selected#(/order-ybr-quality-date)#>YBR-Quality-Date</option>
+<option value="Date-YBR-Quality" #(order-date-ybr-quality)#::selected#(/order-date-ybr-quality)#>Date-YBR-Quality</option>
+<option value="Quality-YBR-Date" #(order-quality-ybr-date)#::selected#(/order-quality-ybr-date)#>Quality-YBR-Date</option>
+<option value="Date-Quality-YBR" #(order-date-quality-ybr)#::selected#(/order-date-quality-ybr)#>Date-Quality-YBR</option>
+<option value="Quality-Date-YBR" #(order-quality-date-ybr)#::selected#(/order-quality-date-ybr)#>Quality-Date-YBR</option>
 </select>
 </td></tr><tr><td>
 Resource:
@@ -101,7 +105,7 @@ from 'late' peers.
 <p><b>#[description]#</b><br>
 #(snippet)#::<i>#[text]#</i><br>#(/snippet)#
 <a href="#[url]#">#[urlname]#</a><br>
-#[date]# | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br></p>
+#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br></p>
 <!-- link end -->
 #{/results}#
 

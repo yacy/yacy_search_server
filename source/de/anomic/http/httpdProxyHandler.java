@@ -231,7 +231,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // load the yellow-list
             f = switchboard.getConfig("proxyYellowList", null);
             if (f != null) {
-                yellowList = serverFileUtils.loadList(f); 
+                yellowList = serverFileUtils.loadList(new File(f)); 
                 this.theLogger.logConfig("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
             } else {
                 yellowList = new HashSet();

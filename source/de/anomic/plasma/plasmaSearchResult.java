@@ -111,8 +111,8 @@ public final class plasmaSearchResult {
         URL url = page.url();
         String descr = page.descr();
         if ((url == null) || (descr == null)) return;
-        String[] urlcomps = url.toString().split(splitrex); // word components of the url
-        String[] descrcomps = descr.split(splitrex); // words in the description
+        String[] urlcomps = url.toString().toLowerCase().split(splitrex); // word components of the url
+        String[] descrcomps = descr.toLowerCase().split(splitrex); // words in the description
         
         // store everything
         Object[] resultVector = new Object[] {indexEntry, page, urlcomps, descrcomps};
@@ -137,7 +137,7 @@ public final class plasmaSearchResult {
         plasmaCrawlLURL.Entry page;
         String[] urlcomps;
         String[] descrcomps;
-        long ranking;
+        long ranking, factor;
         String queryhash;
         for (int i = 0; i < results.size(); i++) {
             // take out values from result array
@@ -149,12 +149,18 @@ public final class plasmaSearchResult {
             
             // apply pre-calculated order attributes
             ranking = 0;
-            if (query.order[0].equals(plasmaSearchQuery.ORDER_DATE)) ranking += 10 * indexEntry.getVirtualAge();
-            //if (query.order[0].equals(plasmaSearchQuery.ORDER_QUALITY)) ranking += indexEntry.getQuality();
+            factor = 4096L*4096L;
             
+            for (int j = 0; j < 3; j++) {
+                if (query.order[j].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking += factor * indexEntry.getQuality() / 64L;
+                else if (query.order[j].equals(plasmaSearchQuery.ORDER_DATE)) ranking += factor * indexEntry.getVirtualAge() / 64L;
+                else if (query.order[j].equals(plasmaSearchQuery.ORDER_YBR))  ranking += factor * plasmaSearchPreOrder.ybr_p(indexEntry.getUrlHash());
+                factor = factor / 4096L;
+            }
+
             // apply 'common-sense' heuristic using references
-            for (int j = 0; j < urlcomps.length; j++) if (commonSense.contains(urlcomps[j])) ranking++;
-            for (int j = 0; j < descrcomps.length; j++) if (commonSense.contains(descrcomps[j])) ranking++;
+            for (int j = 0; j < urlcomps.length; j++) if (commonSense.contains(urlcomps[j])) ranking += 10L*4096L*4096L / urlcomps.length;
+            for (int j = 0; j < descrcomps.length; j++) if (commonSense.contains(descrcomps[j])) ranking += 10L*4096L*4096L / descrcomps.length;
             
             // apply query-in-result matching
             Set urlcomph = plasmaSearchQuery.words2hashes(urlcomps);
@@ -162,17 +168,32 @@ public final class plasmaSearchResult {
             Iterator shi = query.queryHashes.iterator();
             while (shi.hasNext()) {
                 queryhash = (String) shi.next();
-                if (urlcomph.contains(queryhash)) ranking += 10;
-                if (descrcomph.contains(queryhash)) ranking += 100;
+                if (urlcomph.contains(queryhash)) ranking += 90L*4096L*4096L / urlcomps.length / query.queryHashes.size();
+                if (descrcomph.contains(queryhash)) ranking += 40L*4096L*4096L / descrcomps.length / query.queryHashes.size();
             }
             
+            
             // insert value
-            //System.out.println("Ranking " + ranking + " for URL " + url.toString());
+            //System.out.println("Ranking " + ranking + ", YBR-" + plasmaSearchPreOrder.ybr(indexEntry.getUrlHash()) + " for URL " + page.url());
             pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), page);
         }
         
         // flush memory
         results = null;
+    }
+    
+    public void removeDoubleDom() {
+        Iterator i = pageAcc.entrySet().iterator();
+        HashSet doms = new HashSet();
+        Map.Entry entry;
+        String dom;
+        
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            dom = ((plasmaCrawlLURL.Entry) entry.getValue()).url().getHost();
+            if (doms.contains(dom)) i.remove(); else doms.add(dom);
+        }
+        
     }
     
     public void removeRedundant() {

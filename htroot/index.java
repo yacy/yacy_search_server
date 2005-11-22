@@ -56,6 +56,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSearchQuery;
+import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -103,8 +104,12 @@ public class index {
             prop.put("count-50", 0);
             prop.put("count-100", 0);
             prop.put("count-1000", 0);
-            prop.put("order-quality", 0);
-            prop.put("order-date", 0);
+            prop.put("order-ybr-date-quality", plasmaSearchPreOrder.canUseYBR() ? 1 : 0);
+            prop.put("order-ybr-quality-date", 0);
+            prop.put("order-date-ybr-quality", 0);
+            prop.put("order-quality-ybr-date", 0);
+            prop.put("order-date-quality-ybr", plasmaSearchPreOrder.canUseYBR() ? 0 : 1);
+            prop.put("order-quality-date-ybr", 0);
             prop.put("resource-global", ((global) ? 1 : 0));
             prop.put("resource-local", ((global) ? 0 : 1));
             prop.put("time-1", 0);
@@ -137,8 +142,16 @@ public class index {
                                     (yacyCore.seedDB.mySeed != null) &&
                                     (yacyCore.seedDB.mySeed.getAddress() != null));
 
-        final String order1 = (order.equals("Quality-Date")) ? plasmaSearchQuery.ORDER_QUALITY : plasmaSearchQuery.ORDER_DATE;
-        final String order2 = (order.equals("Quality-Date")) ? plasmaSearchQuery.ORDER_DATE : plasmaSearchQuery.ORDER_QUALITY;
+        String order1="", order2="", order3="";
+        if (order.startsWith("YBR"))        order1 = plasmaSearchQuery.ORDER_YBR;
+        if (order.startsWith("Date"))       order1 = plasmaSearchQuery.ORDER_DATE;
+        if (order.startsWith("Quality"))    order1 = plasmaSearchQuery.ORDER_QUALITY;
+        if (order.indexOf("-YBR-") > 0)     order2 = plasmaSearchQuery.ORDER_YBR;
+        if (order.indexOf("-Date-") > 0)    order2 = plasmaSearchQuery.ORDER_DATE;
+        if (order.indexOf("-Quality-") > 0) order2 = plasmaSearchQuery.ORDER_QUALITY;
+        if (order.endsWith("YBR"))          order3 = plasmaSearchQuery.ORDER_YBR;
+        if (order.endsWith("Date"))         order3 = plasmaSearchQuery.ORDER_DATE;
+        if (order.endsWith("Quality"))      order3 = plasmaSearchQuery.ORDER_QUALITY;
         String urlmask = "";
         if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
             urlmask = ".*";
@@ -147,7 +160,7 @@ public class index {
         }
 
         // do the search
-        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, new String[]{order1, order2}, count, searchtime, urlmask, referer,
+        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, new String[]{order1, order2, order3}, count, searchtime, urlmask, referer,
                                                              ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
                                                              "", 20);
         final serverObjects prop = sb.searchFromLocal(thisSearch);
@@ -240,8 +253,12 @@ public class index {
         prop.put("count-50", ((count == 50)) ? 1 : 0);
         prop.put("count-100", ((count == 100)) ? 1 : 0);
         prop.put("count-1000", ((count == 1000)) ? 1 : 0);
-        prop.put("order-quality", ((order.equals("Quality-Date")) ? 1 : 0));
-        prop.put("order-date", ((order.equals("Date-Quality")) ? 1 : 0));
+        prop.put("order-ybr-date-quality", ((order.equals("YBR-Date-Quality")) ? 1 : 0));
+        prop.put("order-ybr-quality-date", ((order.equals("YBR-Quality-Date")) ? 1 : 0));
+        prop.put("order-date-ybr-quality", ((order.equals("Date-YBR-Quality")) ? 1 : 0));
+        prop.put("order-quality-ybr-date", ((order.equals("Quality-YBR-Date")) ? 1 : 0));
+        prop.put("order-date-quality-ybr", ((order.equals("Date-Quality-YBR")) ? 1 : 0));
+        prop.put("order-quality-date-ybr", ((order.equals("Quality-Date-YBR")) ? 1 : 0));
         prop.put("resource-global", ((global) ? 1 : 0));
         prop.put("resource-local", ((global) ? 0 : 1));
         prop.put("time-1", ((searchtime == 1000) ? 1 : 0));

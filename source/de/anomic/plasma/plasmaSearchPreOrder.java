@@ -42,15 +42,52 @@
 
 package de.anomic.plasma;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Iterator;
 
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverFileUtils;
 
 public final class plasmaSearchPreOrder {
     
+    private static Set[] ybrTables = null; // block-rank tables
+    private static boolean useYBR = true;
+    
     private TreeMap pageAcc; // key = order hash; value = plasmaLURL.entry
     private plasmaSearchQuery query;
+    
+    public static void loadYBR(File rankingPath, int count) {
+        // load ranking tables
+        if (rankingPath.exists()) {
+            ybrTables = new Set[count];
+            String ybrName;
+            try {
+                for (int i = 0; i < count; i++) {
+                    ybrName = "YBR-4-" + serverCodings.encodeHex(i, 2) + ".idx";
+                    ybrTables[i] = serverFileUtils.loadSet(new File(rankingPath, ybrName), 6, false);
+                }
+            } catch (IOException e) {
+                ybrTables = null;
+            }
+        } else {
+            ybrTables = null;
+        }
+    }
+    
+    public static boolean canUseYBR() {
+        return ybrTables != null;
+    }
+    
+    public static boolean isUsingYBR() {
+        return useYBR;
+    }
+    
+    public static void switchYBR(boolean usage) {
+        useYBR = usage;
+    }
     
     public plasmaSearchPreOrder(plasmaSearchQuery query) {
         this.pageAcc = new TreeMap();
@@ -63,7 +100,6 @@ public final class plasmaSearchPreOrder {
         theClone.pageAcc = (TreeMap) this.pageAcc.clone();
         return theClone;
     }
-    
     
     public boolean hasNext() {
         return pageAcc.size() > 0;
@@ -87,12 +123,34 @@ public final class plasmaSearchPreOrder {
     
     public void addEntry(plasmaWordIndexEntry indexEntry) {
         long ranking = 0;
-        if (query.order[0].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking  = 4096 * indexEntry.getQuality();
-        else if (query.order[0].equals(plasmaSearchQuery.ORDER_DATE)) ranking  = 4096 * indexEntry.getVirtualAge();
-        if (query.order[1].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking += indexEntry.getQuality();
-        else if (query.order[1].equals(plasmaSearchQuery.ORDER_DATE)) ranking += indexEntry.getVirtualAge();
+        long factor = 1024 * 1024;
+        
+        for (int i = 0; i < 3; i++) {
+            if (query.order[i].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking  = factor * indexEntry.getQuality();
+            else if (query.order[i].equals(plasmaSearchQuery.ORDER_DATE)) ranking  = factor * indexEntry.getVirtualAge();
+            else if (query.order[i].equals(plasmaSearchQuery.ORDER_YBR))  ranking  = factor * ybr_p(indexEntry.getUrlHash());
+            factor = factor / 1024;
+        }
+
         pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), indexEntry);
     }
 
+    public static int ybr_p(String urlHash) {
+        return 16 - ybr(urlHash);
+    }
+    
+    public static int ybr(String urlHash) {
+        if (ybrTables == null) return 16;
+        if (!(useYBR)) return 16;
+        final String domHash = urlHash.substring(6);
+        for (int i = 0; i < ybrTables.length; i++) {
+            if (ybrTables[i].contains(domHash)) {
+                //System.out.println("YBR FOUND: " + urlHash + " (" + i + ")");
+                return i;
+            }
+        }
+        //System.out.println("NOT FOUND: " + urlHash);
+        return 16;
+    }
     
 }

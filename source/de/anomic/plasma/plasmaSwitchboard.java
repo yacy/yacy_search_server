@@ -281,6 +281,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             ppRamString(stopwordsFile.length()/1024));
         }
         
+        // load ranking tables
+        File rankingPath = new File(rootPath, "ranking/YBR");
+        if (rankingPath.exists()) {
+            plasmaSearchPreOrder.loadYBR(rankingPath, 12);
+        }
+
         // read memory amount
         int ramLURL    = (int) getConfigLong("ramCacheLURL", 1024) / 1024;
         int ramNURL    = (int) getConfigLong("ramCacheNURL", 1024) / 1024;
@@ -1555,14 +1561,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public serverObjects searchFromLocal(plasmaSearchQuery query) {
         
         // tell all threads to do nothing for a specific time
-        //log.logInfo("A");
         wordIndex.intermission(2 * query.maximumTime);
-        //log.logInfo("B");
         intermissionAllThreads(2 * query.maximumTime);
-        //log.logInfo("C");
         
         serverObjects prop = new serverObjects();
-        //log.logInfo("D");
         try {
             // filter out words that appear in bluelist
             //log.logInfo("E");
@@ -1654,6 +1656,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             prop.put("results_" + i + "_urlhash", urlhash);
                             prop.put("results_" + i + "_urlname", nxTools.cutUrlText(urlname, 120));
                             prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
+                            prop.put("results_" + i + "_ybr", plasmaSearchPreOrder.ybr(urlentry.hash()));
                             prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
                             prop.put("results_" + i + "_words",URLEncoder.encode(query.queryWords.toString(),"UTF-8"));
                             // adding snippet if available

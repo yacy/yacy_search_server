@@ -47,8 +47,11 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.server.serverCodings;
@@ -57,11 +60,9 @@ import de.anomic.tools.bitfield;
 
 public class plasmaRankingRCIEvaluation {
     
-    public static int[] rcieval(File rci_file) throws IOException {
+    public static int[] rcieval(kelondroAttrSeq rci) throws IOException {
         // collect information about which entry has how many references
         // the output is a reference-count:occurrences relation
-        if (!(rci_file.exists())) return null;
-        final kelondroAttrSeq rci = new kelondroAttrSeq(rci_file, false);
         HashMap counts = new HashMap();
         Iterator i = rci.keys();
         String key;
@@ -102,40 +103,169 @@ public class plasmaRankingRCIEvaluation {
     
     public static int[] interval(int[] counts, int parts) {
         long limit = sum(counts) / 2;
-        int[] pos = new int[parts];
+        int[] partition = new int[parts];
         int s = 0, p = parts - 1;
-        for (int i = 0; i < counts.length; i++) {
+        for (int i = 1; i < counts.length; i++) {
             s += counts[i];
             if ((s > limit) && (p >= 0)) {
-                pos[p--] = i - 1;
-                limit = (2 * limit - s + counts[i]) / 2;
-                s = counts[i];
+                partition[p--] = i;
+                limit = (2 * limit - s) / 2;
+                s = 0;
             }
         }
-        pos[0] = counts.length - 1;
-        return pos;
+        partition[0] = counts.length - 1;
+        for (int i = 1; i < 10; i++) partition[i] = (partition[i - 1] + 4 * partition[i]) / 5;
+        return partition;
+    }
+    
+    /*
+    public static int[] generateYBRLimits(int[] counts, int[] partition) {
+        int[] limits = new int[partition.length];
+        int min;
+        int j = 0;
+        for (int i = partition.length - 1; i >= 0; i--) {
+            min = counts[j];
+            while (j <= partition[i]) {
+                if (counts[j] < min) min = counts[j];
+                j++;
+            }
+            limits[i] = min;
+        }
+        return limits;
+    }
+    */
+    
+    public static void checkPartitionTable0(int[] counts, int[] partition) {
+        int sumsum = 0;
+        int sum;
+        int j = 0;
+        for (int i = partition.length - 1; i >= 0; i--) {
+            sum = 0;
+            while (j <= partition[i]) {
+                sum += counts[j++];
+            }
+            System.out.println("sum of YBR-" + i + " entries: " + sum);
+            sumsum += sum;
+        }
+        System.out.println("complete sum = " + sumsum);
+    }
+    
+    public static void checkPartitionTable1(int[] counts, int[] partition) {
+        int sumsum = 0;
+        int[] sum = new int[partition.length];
+        for (int i = 0; i < partition.length; i++) sum[i] = 0;
+        for (int i = 0; i < counts.length; i++) sum[orderIntoYBI(partition, i)] += counts[i];
+        for (int i = partition.length - 1; i >= 0; i--) {
+            System.out.println("sum of YBR-" + i + " entries: " + sum[i]);
+            sumsum += sum[i];
+        }
+        System.out.println("complete sum = " + sumsum);
+    }
+    
+    public static int orderIntoYBI(int[] partition, int count) {
+        for (int i = 0; i < partition.length - 1; i++) {
+            if ((count >= (partition[i + 1] + 1)) && (count <= partition[i])) return i;
+        }
+        return partition.length - 1;
+    }
+    
+    public static HashSet[] genRankingTable(kelondroAttrSeq rci, int[] partition) {
+        HashSet[] ranked = new HashSet[partition.length];
+        for (int i = 0; i < partition.length; i++) ranked[i] = new HashSet();
+        Iterator i = rci.keys();
+        String key;
+        kelondroAttrSeq.Entry entry;
+        while (i.hasNext()) {
+            key = (String) i.next();
+            entry = rci.getEntry(key);
+            ranked[orderIntoYBI(partition, entry.getSeq().size())].add(key);
+        }
+        return ranked;
+    }
+
+    public static HashMap genReverseDomHash(File domlist) {
+        HashSet domset = serverFileUtils.loadList(domlist);
+        HashMap dommap = new HashMap();
+        Iterator i = domset.iterator();
+        String dom;
+        while (i.hasNext()) {
+            dom = (String) i.next();
+            if (dom.startsWith("www.")) dom = dom.substring(4);
+            try {
+                dommap.put(plasmaURL.urlHash(new URL("http://" + dom)).substring(6), dom);
+                dommap.put(plasmaURL.urlHash(new URL("http://www." + dom)).substring(6), "www." + dom);
+            } catch (MalformedURLException e) {}
+        }
+        return dommap;
+    }
+
+    public static void storeRankingTable(HashSet[] ranking, File tablePath) throws IOException {
+        String hash;
+        String filename;
+        if (!(tablePath.exists())) tablePath.mkdirs();
+        for (int i = 0; i < ranking.length; i++) {
+            filename = "YBR-4-" + serverCodings.encodeHex(i, 2) + ".idx";
+            serverFileUtils.saveSet(new File(tablePath, filename), ranking[i], "");
+        }
     }
     
     public static void main(String[] args) {
         try {
+            if ((args.length == 2) && (args[0].equals("-genybr"))) {
+                File root_path = new File(args[1]);
+                File rci_file = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0/RCI-0.rci.gz");
+                long start = System.currentTimeMillis();
+                if (!(rci_file.exists())) return;
+                final kelondroAttrSeq rci = new kelondroAttrSeq(rci_file, false);
+                int counts[] = rcieval(rci);
+                int[] partition = interval(counts, 16);
+                HashSet[] ranked = genRankingTable(rci, partition);
+                storeRankingTable(ranked, new File(root_path, "ranking/YBR"));
+                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                System.out.println("Finished YBR generation in " + seconds + " seconds.");
+            }
             if ((args.length == 2) && (args[0].equals("-rcieval"))) {
                 File root_path = new File(args[1]);
                 File rci_file = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0/RCI-0.rci.gz");
                 long start = System.currentTimeMillis();
-                int count[] = rcieval(rci_file);
+                if (!(rci_file.exists())) return;
+                final kelondroAttrSeq rci = new kelondroAttrSeq(rci_file, false);
+                int counts[] = rcieval(rci);
                 long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
-                System.out.println("Finished RCI evaluation in " + seconds + " seconds");
+                System.out.println("Finished RCI evaluation in " + seconds + " seconds. " + counts.length + " counts in array.");
                 /*
                 System.out.println("count table:");
-                for (int i = 0; i < count.length; i++) {
-                    System.out.println(i + " references: " + count[i] + " times");
+                for (int i = 0; i < counts.length; i++) {
+                    System.out.println(i + " references: " + counts[i] + " times");
                 }
                 */
-                int[] pos = interval(count, 16);
+                int[] partition = interval(counts, 16);
                 System.out.println("partition position table:");
-                for (int i = 0; i < pos.length; i++) {
-                    System.out.println("position " + i + ": " + pos[i]);
+                for (int i = 0; i < partition.length - 1; i++) {
+                    System.out.println("YBR-" + i + ": " + (partition[i + 1] + 1) + " - " + partition[i] + " references");
                 }
+                System.out.println("YBR-" + (partition.length - 1) + ": 0 - " + partition[partition.length - 1] + " references");
+                checkPartitionTable0(counts, partition);
+                checkPartitionTable1(counts, partition);
+                int sum = 0;
+                for (int i = 0; i < counts.length; i++) sum += counts[i];
+                System.out.println("sum of all references: " + sum);
+                
+                // now print out the table
+                HashSet[] ranked = genRankingTable(rci, partition);
+                HashMap dommap = genReverseDomHash(new File(root_path, "domlist.txt"));
+                String hash, dom;
+                for (int i = 0; i < 9; i++) {
+                    System.out.print("YBR-" + i + ": ");
+                    Iterator k = ranked[i].iterator();
+                    while (k.hasNext()) {
+                        hash = (String) k.next();
+                        dom = (String) dommap.get(hash);
+                        if (dom == null) System.out.print("[" + hash + "], "); else System.out.print(dom + ", ");
+                    }
+                    System.out.println();
+                }
+                
             }
         } catch (IOException e) {
             e.printStackTrace();

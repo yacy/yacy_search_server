@@ -249,7 +249,8 @@ public final class plasmaSearchEvent {
         
         // apply filter
         profileLocal.startTimer();
-        acc.removeRedundant();
+        acc.removeDoubleDom();
+        //acc.removeRedundant();
         profileLocal.setYieldTime(plasmaSearchProfile.PROCESS_FILTER);
         profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_FILTER, acc.sizeOrdered());
         

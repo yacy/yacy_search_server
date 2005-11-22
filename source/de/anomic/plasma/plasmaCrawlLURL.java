@@ -64,6 +64,7 @@ import java.util.Locale;
 import java.util.Properties;
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
@@ -719,17 +720,27 @@ public final class plasmaCrawlLURL extends plasmaURL {
     public class kiter implements Iterator {
         // enumerates entry elements
         kelondroTree.rowIterator i;
+        boolean error = false;
+        
         public kiter(boolean up, boolean rotating) throws IOException {
             i = urlHashCache.rows(up, rotating);
+            error = false;
         }
 
         public boolean hasNext() {
+            if (error) return false;
             return i.hasNext();
         }
 
         public Object next() {
-            byte[] e = ((byte[][])i.next())[0];
-            if (e == null) return null; else return new Entry(new String(e));
+            try {
+                byte[] e = ((byte[][])i.next())[0];
+                if (e == null) return null; else return new Entry(new String(e));
+            } catch (kelondroException e) {
+                e.printStackTrace();
+                error = true;
+                return null;
+            }
         }
         
         public void remove() {
