@@ -61,10 +61,13 @@
 
 package de.anomic.http;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.PushbackInputStream;
 import java.net.BindException;
 import java.net.ConnectException;
@@ -105,6 +108,10 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     private static int timeout = 30000;
     private static boolean yacyTrigger = true;
     public static boolean isTransparentProxy = false;
+    private static Process redirectorProcess;
+    private static boolean redirectorEnabled=false;
+    private static PrintWriter redirectorWriter;
+    private static BufferedReader redirectorReader;
 //    public static boolean remoteProxyUse = false;
 //    public static String remoteProxyHost = "";
 //    public static int remoteProxyPort = -1;
@@ -119,9 +126,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     private File   htRootPath = null;
 
     private static boolean doAccessLogging = false; 
-	private static HashSet users = null;
-    
-    /**
+	/**
      * Do logging configuration for special proxy access log file
      */
     static {
@@ -168,8 +173,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             }
         } catch (Exception e) { 
             serverLog.logSevere("PROXY","Unable to configure proxy access logging.",e);        
-        }
-		users = new HashSet();
+        }	
     }
     
     /**
@@ -235,6 +239,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 this.theLogger.logConfig("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
             } else {
                 yellowList = new HashSet();
+            }
+        }
+        String redirectorPath=switchboard.getConfig("externalRedirector", "");
+        if(redirectorPath.length() >0 && redirectorEnabled==false){    
+            try {
+                redirectorProcess=Runtime.getRuntime().exec(redirectorPath);
+                redirectorWriter = new PrintWriter(redirectorProcess.getOutputStream());
+                redirectorReader = new BufferedReader(new InputStreamReader(redirectorProcess.getInputStream()));
+                redirectorEnabled=true;
+            } catch (IOException e) {
+                System.out.println("redirector not Found");
             }
         }
     }
@@ -338,6 +353,20 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             URL url = null;
             try {
                 url = httpHeader.getRequestURL(conProp);
+                //redirector
+                if (redirectorEnabled){
+                    redirectorWriter.println(url.toString());
+                    redirectorWriter.flush();
+                    String newUrl=redirectorReader.readLine();
+                    url=new URL(newUrl);
+                    conProp.setProperty(httpHeader.CONNECTION_PROP_HOST, url.getHost());
+                    conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, url.getPath());
+                    requestHeader.put(httpHeader.HOST, url.getHost());
+                    requestHeader.put(httpHeader.CONNECTION_PROP_PATH, url.getPath());
+                    host=url.getHost();
+                    port=url.getPort();//TODO:this does not work.
+                    path=url.getPath();
+                }
             } catch (MalformedURLException e) {
                 String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;

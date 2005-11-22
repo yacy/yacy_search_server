@@ -688,3 +688,6 @@ rankingPath = DATA/RANKING
 # a list of domain name patterns that should not be cached by the httpc dns cache
 httpc.nameCacheNoCachingPatterns = .*.dyndns.org, .*.dynalias.org
 
+#externalRedirectors
+#squid Redirector compatible
+externalRedirector=
