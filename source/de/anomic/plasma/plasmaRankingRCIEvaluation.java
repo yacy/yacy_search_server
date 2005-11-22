@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.server.serverCodings;
@@ -169,9 +170,9 @@ public class plasmaRankingRCIEvaluation {
         return partition.length - 1;
     }
     
-    public static HashSet[] genRankingTable(kelondroAttrSeq rci, int[] partition) {
-        HashSet[] ranked = new HashSet[partition.length];
-        for (int i = 0; i < partition.length; i++) ranked[i] = new HashSet();
+    public static TreeSet[] genRankingTable(kelondroAttrSeq rci, int[] partition) {
+        TreeSet[] ranked = new TreeSet[partition.length];
+        for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet();
         Iterator i = rci.keys();
         String key;
         kelondroAttrSeq.Entry entry;
@@ -199,7 +200,7 @@ public class plasmaRankingRCIEvaluation {
         return dommap;
     }
 
-    public static void storeRankingTable(HashSet[] ranking, File tablePath) throws IOException {
+    public static void storeRankingTable(TreeSet[] ranking, File tablePath) throws IOException {
         String hash;
         String filename;
         if (!(tablePath.exists())) tablePath.mkdirs();
@@ -219,7 +220,7 @@ public class plasmaRankingRCIEvaluation {
                 final kelondroAttrSeq rci = new kelondroAttrSeq(rci_file, false);
                 int counts[] = rcieval(rci);
                 int[] partition = interval(counts, 16);
-                HashSet[] ranked = genRankingTable(rci, partition);
+                TreeSet[] ranked = genRankingTable(rci, partition);
                 storeRankingTable(ranked, new File(root_path, "ranking/YBR"));
                 long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
                 System.out.println("Finished YBR generation in " + seconds + " seconds.");
@@ -252,7 +253,7 @@ public class plasmaRankingRCIEvaluation {
                 System.out.println("sum of all references: " + sum);
                 
                 // now print out the table
-                HashSet[] ranked = genRankingTable(rci, partition);
+                TreeSet[] ranked = genRankingTable(rci, partition);
                 HashMap dommap = genReverseDomHash(new File(root_path, "domlist.txt"));
                 String hash, dom;
                 for (int i = 0; i < 9; i++) {

@@ -91,7 +91,7 @@ public final class search {
         }
         final long timestamp = System.currentTimeMillis();
         
-        plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, new String[]{plasmaSearchQuery.ORDER_QUALITY, plasmaSearchQuery.ORDER_DATE},
+        plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, new String[]{plasmaSearchQuery.ORDER_YBR, plasmaSearchQuery.ORDER_DATE, plasmaSearchQuery.ORDER_QUALITY},
                                                         count, duetime, ".*");
         
         prop = sb.searchFromRemote(squery);
