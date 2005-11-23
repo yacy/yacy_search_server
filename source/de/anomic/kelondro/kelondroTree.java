@@ -1299,11 +1299,11 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     // Returns -1, 0, or 1 as the first argument
     // is less than, equal to, or greater than the second.
     // two arrays are also equal if one array is a subset of the other's array with filled-up char(0)-values
-    public int compare(byte[] a, byte[] b) {
+    public static int compare(byte[] a, byte[] b) {
 	int i = 0;
-	int al = a.length;
-	int bl = b.length;
-	int len = (al > bl) ? bl : al;
+	final int al = a.length;
+	final int bl = b.length;
+	final int len = (al > bl) ? bl : al;
 	while (i < len) {
 	    if (a[i] > b[i]) return  1;
 	    if (a[i] < b[i]) return -1;

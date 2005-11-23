@@ -1,4 +1,4 @@
-// kelondroArray.java
+// kelondroHashtable.java
 // ------------------
 // part of the Kelondro Database
 // (C) by Michael Peter Christen; mc@anomic.de

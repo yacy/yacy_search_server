@@ -313,7 +313,7 @@ public final class serverByteBuffer extends OutputStream {
         return equals(buffer, 0, pattern);
     }
     
-        public static boolean equals(byte[] buffer, int offset, byte[] pattern) {
+    public static boolean equals(byte[] buffer, int offset, byte[] pattern) {
         // compares two byte arrays: true, if pattern appears completely at offset position
         if (buffer.length < offset + pattern.length) return false;
         for (int i = 0; i < pattern.length; i++) if (buffer[offset + i] != pattern[i]) return false;

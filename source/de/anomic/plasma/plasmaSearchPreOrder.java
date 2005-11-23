@@ -44,16 +44,16 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.Iterator;
 
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
+import de.anomic.kelondro.kelondroBinSearch;
 
 public final class plasmaSearchPreOrder {
     
-    private static Set[] ybrTables = null; // block-rank tables
+    private static kelondroBinSearch[] ybrTables = null; // block-rank tables
     private static boolean useYBR = true;
     
     private TreeMap pageAcc; // key = order hash; value = plasmaLURL.entry
@@ -62,12 +62,12 @@ public final class plasmaSearchPreOrder {
     public static void loadYBR(File rankingPath, int count) {
         // load ranking tables
         if (rankingPath.exists()) {
-            ybrTables = new Set[count];
+            ybrTables = new kelondroBinSearch[count];
             String ybrName;
             try {
                 for (int i = 0; i < count; i++) {
                     ybrName = "YBR-4-" + serverCodings.encodeHex(i, 2) + ".idx";
-                    ybrTables[i] = serverFileUtils.loadSet(new File(rankingPath, ybrName), 6, false);
+                    ybrTables[i] = new kelondroBinSearch(serverFileUtils.read(new File(rankingPath, ybrName)), 6);
                 }
             } catch (IOException e) {
                 ybrTables = null;
@@ -123,13 +123,13 @@ public final class plasmaSearchPreOrder {
     
     public void addEntry(plasmaWordIndexEntry indexEntry) {
         long ranking = 0;
-        long factor = 1024 * 1024;
+        long factor = 4096L*4096L;
         
         for (int i = 0; i < 3; i++) {
-            if (query.order[i].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking  = factor * indexEntry.getQuality();
-            else if (query.order[i].equals(plasmaSearchQuery.ORDER_DATE)) ranking  = factor * indexEntry.getVirtualAge();
+            if (query.order[i].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking  = factor * indexEntry.getQuality() / 64L;
+            else if (query.order[i].equals(plasmaSearchQuery.ORDER_DATE)) ranking  = factor * indexEntry.getVirtualAge() / 64L;
             else if (query.order[i].equals(plasmaSearchQuery.ORDER_YBR))  ranking  = factor * ybr_p(indexEntry.getUrlHash());
-            factor = factor / 1024;
+            factor = factor / 4096L;
         }
 
         pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), indexEntry);
@@ -144,7 +144,7 @@ public final class plasmaSearchPreOrder {
         if (!(useYBR)) return 16;
         final String domHash = urlHash.substring(6);
         for (int i = 0; i < ybrTables.length; i++) {
-            if (ybrTables[i].contains(domHash)) {
+            if (ybrTables[i].contains(domHash.getBytes())) {
                 //System.out.println("YBR FOUND: " + urlHash + " (" + i + ")");
                 return i;
             }

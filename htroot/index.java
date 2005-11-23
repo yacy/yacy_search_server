@@ -114,7 +114,8 @@ public class index {
             prop.put("resource-local", ((global) ? 0 : 1));
             prop.put("time-1", 0);
             prop.put("time-3", 0);
-            prop.put("time-10", 1);
+            prop.put("time-6", 1);
+            prop.put("time-10", 0);
             prop.put("time-30", 0);
             prop.put("time-60", 0);
             prop.put("results", "");
@@ -263,6 +264,7 @@ public class index {
         prop.put("resource-local", ((global) ? 0 : 1));
         prop.put("time-1", ((searchtime == 1000) ? 1 : 0));
         prop.put("time-3", ((searchtime == 3000) ? 1 : 0));
+        prop.put("time-6", ((searchtime == 6000) ? 1 : 0));
         prop.put("time-10", ((searchtime == 10000) ? 1 : 0));
         prop.put("time-30", ((searchtime == 30000) ? 1 : 0));
         prop.put("time-60", ((searchtime == 60000) ? 1 : 0));

@@ -284,7 +284,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // load ranking tables
         File rankingPath = new File(rootPath, "ranking/YBR");
         if (rankingPath.exists()) {
-            plasmaSearchPreOrder.loadYBR(rankingPath, 12);
+            plasmaSearchPreOrder.loadYBR(rankingPath, 15);
         }
 
         // read memory amount

@@ -172,6 +172,13 @@ public final class plasmaSearchResult {
                 if (descrcomph.contains(queryhash)) ranking += 40L*4096L*4096L / descrcomps.length / query.queryHashes.size();
             }
             
+            // prefer short urls
+            ranking -= 64L * page.url().toString().length();
+            ranking -= 64L * urlcomps.length;
+            
+            // prefer long descriptions
+            ranking += 64L * (40 - Math.abs(40 - Math.min(40, page.descr().length())));
+            ranking += 64L * ( 8 - Math.abs( 8 - Math.min( 8, descrcomps.length)));
             
             // insert value
             //System.out.println("Ranking " + ranking + ", YBR-" + plasmaSearchPreOrder.ybr(indexEntry.getUrlHash()) + " for URL " + page.url());
