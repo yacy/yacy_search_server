@@ -330,6 +330,30 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
             respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2);
             
+            URL url = null;
+            try {
+                url = httpHeader.getRequestURL(conProp);
+                //redirector
+                if (redirectorEnabled){
+                    synchronized(redirectorProcess){
+                        redirectorWriter.println(url.toString());
+                        redirectorWriter.flush();
+                    }
+                    String newUrl=redirectorReader.readLine();
+                    url=new URL(newUrl);
+                    conProp.setProperty(httpHeader.CONNECTION_PROP_HOST, url.getHost()+":"+url.getPort());
+                    conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, url.getPath());
+                    requestHeader.put(httpHeader.HOST, url.getHost()+":"+url.getPort());
+                    requestHeader.put(httpHeader.CONNECTION_PROP_PATH, url.getPath());
+                }
+            } catch (MalformedURLException e) {
+                String errorMsg = "ERROR: internal error with url generation: host=" +
+                                  host + ", port=" + port + ", path=" + path + ", args=" + args;
+                serverLog.logSevere("PROXY", errorMsg);
+                httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
+                return;
+            }
+            
             String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
             String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
             String args =    conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
@@ -350,32 +374,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 ext = path.substring(pos + 1).toLowerCase();
             }
             
-            URL url = null;
-            try {
-                url = httpHeader.getRequestURL(conProp);
-                //redirector
-                if (redirectorEnabled){
-                    synchronized(redirectorProcess){
-                        redirectorWriter.println(url.toString());
-                        redirectorWriter.flush();
-                    }
-                    String newUrl=redirectorReader.readLine();
-                    url=new URL(newUrl);
-                    conProp.setProperty(httpHeader.CONNECTION_PROP_HOST, url.getHost()+":"+url.getPort());
-                    conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, url.getPath());
-                    requestHeader.put(httpHeader.HOST, url.getHost()+":"+url.getPort());
-                    requestHeader.put(httpHeader.CONNECTION_PROP_PATH, url.getPath());
-                    host=url.getHost();
-                    port=url.getPort();
-                    path=url.getPath();
-                }
-            } catch (MalformedURLException e) {
-                String errorMsg = "ERROR: internal error with url generation: host=" +
-                                  host + ", port=" + port + ", path=" + path + ", args=" + args;
-                serverLog.logSevere("PROXY", errorMsg);
-                httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
-                return;
-            }
             
             // check the blacklist
             // blacklist idea inspired by [AS]:
