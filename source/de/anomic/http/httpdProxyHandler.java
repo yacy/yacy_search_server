@@ -334,14 +334,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             final String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
             final String args =    conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
             final String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
-            
-            int port, pos;        
-            if ((pos = host.indexOf(":")) < 0) {
-                port = 80;
-            } else {
-                port = Integer.parseInt(host.substring(pos + 1));
-                host = host.substring(0, pos);
-            }
+            int pos=0;
+            int port=0;
             
             URL url = null;
             try {
@@ -365,6 +359,13 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 serverLog.logSevere("PROXY", errorMsg);
                 httpd.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
                 return;
+            }
+
+            if ((pos = host.indexOf(":")) < 0) {
+                port = 80;
+            } else {
+                port = Integer.parseInt(host.substring(pos + 1));
+                host = host.substring(0, pos);
             }
             
             String ext;
