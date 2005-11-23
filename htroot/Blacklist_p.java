@@ -128,13 +128,22 @@ public class Blacklist_p {
                 } catch (IOException e) {}
 
 
-            } else if (post.containsKey("activatelistbutton")) {
-                if( listManager.ListInListslist(BLACKLIST_ACTIVE, filename) ){ 
-                    listManager.removeListFromListslist(BLACKLIST_ACTIVE, filename);
-                } else { // inactive list -> enable
-                    listManager.addListToListslist(BLACKLIST_ACTIVE, filename);
-                }
-                listManager.reloadBlacklists();
+            } else if (post.containsKey("changebutton")) {
+                if (post.containsKey("proxylist")){
+                    if( !(post.get("proxylist").equals("on")) && listManager.ListInListslist(BLACKLIST_ACTIVE, filename) ){ 
+                        listManager.removeListFromListslist(BLACKLIST_ACTIVE, filename);
+                    } else if ( post.get("proxylist").equals("on") && !(listManager.ListInListslist(BLACKLIST_ACTIVE, filename)) ) { // inactive list -> enable
+                        listManager.addListToListslist(BLACKLIST_ACTIVE, filename);
+                    }
+				}
+                if (post.containsKey("sharedlist")){
+                    if( !(post.get("sharedlist").equals("on")) && listManager.ListInListslist(BLACKLIST_SHARED, filename) ){ 
+                        listManager.removeListFromListslist(BLACKLIST_SHARED, filename);
+                    } else if ( post.get("sharedlist").equals("on") && !(listManager.ListInListslist(BLACKLIST_SHARED, filename)) ) { // inSHARED list -> enable
+                        listManager.addListToListslist(BLACKLIST_SHARED, filename);
+                    }
+				}
+                    listManager.reloadBlacklists();
 
             } else if (post.containsKey("sharelistbutton")) {
                 if (listManager.ListInListslist(BLACKLIST_SHARED, filename)) { 

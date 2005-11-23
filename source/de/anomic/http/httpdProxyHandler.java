@@ -355,16 +355,18 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 url = httpHeader.getRequestURL(conProp);
                 //redirector
                 if (redirectorEnabled){
-                    redirectorWriter.println(url.toString());
-                    redirectorWriter.flush();
+                    synchronized(redirectorProcess){
+                        redirectorWriter.println(url.toString());
+                        redirectorWriter.flush();
+                    }
                     String newUrl=redirectorReader.readLine();
                     url=new URL(newUrl);
-                    conProp.setProperty(httpHeader.CONNECTION_PROP_HOST, url.getHost());
+                    conProp.setProperty(httpHeader.CONNECTION_PROP_HOST, url.getHost()+":"+url.getPort());
                     conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, url.getPath());
-                    requestHeader.put(httpHeader.HOST, url.getHost());
+                    requestHeader.put(httpHeader.HOST, url.getHost()+":"+url.getPort());
                     requestHeader.put(httpHeader.CONNECTION_PROP_PATH, url.getPath());
                     host=url.getHost();
-                    port=url.getPort();//TODO:this does not work.
+                    port=url.getPort();
                     path=url.getPath();
                 }
             } catch (MalformedURLException e) {
