@@ -322,13 +322,26 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         
         try {
             // remembering the starting time of the request
-            Date requestDate = new Date(); // remember the time...
+            final Date requestDate = new Date(); // remember the time...
             this.connectionProperties.put(httpHeader.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
             if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
             switchboard.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
             respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2);
+            
+            String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
+            final String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
+            final String args =    conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
+            final String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
+            
+            int port, pos;        
+            if ((pos = host.indexOf(":")) < 0) {
+                port = 80;
+            } else {
+                port = Integer.parseInt(host.substring(pos + 1));
+                host = host.substring(0, pos);
+            }
             
             URL url = null;
             try {
@@ -354,27 +367,13 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 return;
             }
             
-            String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
-            String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
-            String args =    conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
-            String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
-            
-            int port, pos;        
-            if ((pos = host.indexOf(":")) < 0) {
-                port = 80;
-            } else {
-                port = Integer.parseInt(host.substring(pos + 1));
-                host = host.substring(0, pos);
-            }
-            
             String ext;
             if ((pos = path.lastIndexOf('.')) < 0) {
                 ext = "";
             } else {
                 ext = path.substring(pos + 1).toLowerCase();
             }
-            
-            
+
             // check the blacklist
             // blacklist idea inspired by [AS]:
             // respond a 404 for all AGIS ("all you get is shit") servers
