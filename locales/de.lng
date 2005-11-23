@@ -27,16 +27,16 @@ from being loaded. You can define several blacklists and activate them separatel
 You may also provide your blacklist to other peers by sharing them; in return you may==Sie k&ouml;nnen ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
 collect blacklist entries from other peers.==Im Gegenzug k&ouml;nnen Sie sich selber von anderen Peers Blacklists runterladen.
 Edit list:==Liste bearbeiten:
-"active"==aktiv
-not active==nicht aktiv
-"shared"==freigegeben
-"not shared"==nicht freigegeben
-"select"==w&auml;hle
+\(active\)\#not active::active\#\(/active\)\# \#\(shared\)\#not shared::shared\#\(/shared\)==(active)#nicht aktiv::aktiv#(/active)# #(shared)#nicht freigegeben::freigegeben#(/shared)
+"select"=="w&auml;hle"
 New list:==Neue Liste:
-"create"==anlegen
+"create"=="anlegen"
 Enable/disable this list==Liste an/ausschalten
 Share/don't share this list==Liste teilen/nicht teilen
+Change==&Auml;ndern
 Delete this list==Liste l&ouml;schen
+/>active==/>aktiv
+/>shared==/>freigegeben
 Active list:==Aktivierte Liste:
 These are the domain name / path patterns in this blacklist:==Dies sind die Domainnamen / -pfade die in der Blackliste sind:
 You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
@@ -614,11 +614,8 @@ Active Peers==Aktive Peers
 Passive Peers==Passive Peers
 Potential Peers==Potenzielle Peers
 Manually contacting Peer==Kontaktiere Peer manuell
-no remote==Kein
-peer for this list known==Peer bekannt oder online.
-Showing==Gezeigt werden
-entries from a total of==Eintr&auml;ge von insgesamt
-peers==Peers
+no remote \#\[peertype\]\# peer for this list known==Kein remote Peer #[peertype]# bekannt oder online.
+Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Gezeigt werden #[num]# Eintr&auml;ge von insgesamt #[total]# Peers.
 send&nbsp;<b>M</b>essage/<br>show&nbsp;<b>P</b>rofile/<br>edit&nbsp;<b>W</b>iki==Sende Nachricht (<b>m</b>)/<br>Zeige Profil (<b>p</b>)/<br>&Auml;ndere Wiki (<b>w</b>)
 Name==Name
 Address==Adresse
@@ -654,12 +651,7 @@ Network Total==Netzwerk insgesamt
 YaCy Cluster Indexing Speed:==YaCy Cluster Index Geschwindigkeit:
 Pages Per Minute \(Accumulated PPM over Active Peers\).==Seiten pro Minute (PPM von Aktiven Peers)
 Your Peer:==Ihr Peer:
-Name==Name
-Type=Typ
 Version==Version
-Uptime==Uptime
-Links==Links
-RWIs==RWIs
 Own/Other==Eigene/Andere
 Accept<br>Crawl==Akzeptiert<br>Crawl
 Accept<br>Index==Akzeptiert<br>Index
@@ -672,6 +664,15 @@ Seeds==Seeds
 Connects<br>per hour==Verbindungen<br>pro Stunde
 "no"==nein
 "yes"==ja
+Network legend:==Netzwerk Legende:
+dark font==schwarze Schrift
+senior/principal peers==Senior/Principal Peers
+lightred font==hellrote Schrift
+passiv peers \(< 5 hour passiv time\)==Passive Peers (< 5 Stunden passiv)
+turquoise font==t&uuml;rkise Schrift
+junior peers==Junior Peers
+red point==roter Punkt
+this peer==Ihr Peer
 You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
 You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online Modus oder Sie benutzen nicht die Proxy Option.
 To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy Netzwerk zu verbinden, m&uuml;ssen Sie den Proxy benutzen, indem Sie die Browser Einstellungen auf
