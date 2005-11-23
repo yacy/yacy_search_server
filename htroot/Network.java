@@ -311,6 +311,9 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_port", seed.get(yacySeed.PORT, "-") );
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_hash", seed.hash);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_age", seed.getAge());
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_CRWCnt", seed.get(yacySeed.CRWCNT, "0"));
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_CRTCnt", seed.get(yacySeed.CRTCNT, "0"));
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_seeds", seed.get(yacySeed.SCOUNT, "-"));
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_connects", groupDigits(seed.get(yacySeed.CCOUNT, "0")));
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 0);
@@ -363,14 +366,11 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
                             prop.put(STR_TABLE_LIST + conCount + "_links", groupDigits(seed.get(yacySeed.LCOUNT, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_words", groupDigits(seed.get(yacySeed.ICOUNT, "0")));
-                            prop.put(STR_TABLE_LIST + conCount + "_CRWCnt", seed.get(yacySeed.CRWCNT, "0"));
-                            prop.put(STR_TABLE_LIST + conCount + "_CRTCnt", seed.get(yacySeed.CRTCNT, "0"));
                             prop.put(STR_TABLE_LIST + conCount + "_sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_ppm", PPM);
-                            prop.put(STR_TABLE_LIST + conCount + "_seeds", seed.get(yacySeed.SCOUNT, "-"));
                             conCount++;
                         } // seed != null
                     } // while

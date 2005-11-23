@@ -64,10 +64,16 @@ public final class plasmaSearchPreOrder {
         if (rankingPath.exists()) {
             ybrTables = new kelondroBinSearch[count];
             String ybrName;
+            File f;
             try {
                 for (int i = 0; i < count; i++) {
                     ybrName = "YBR-4-" + serverCodings.encodeHex(i, 2) + ".idx";
-                    ybrTables[i] = new kelondroBinSearch(serverFileUtils.read(new File(rankingPath, ybrName)), 6);
+                    f = new File(rankingPath, ybrName);
+                    if (f.exists()) {
+                        ybrTables[i] = new kelondroBinSearch(serverFileUtils.read(f), 6);
+                    } else {
+                        ybrTables[i] = null;
+                    }
                 }
             } catch (IOException e) {
                 ybrTables = null;
@@ -144,7 +150,7 @@ public final class plasmaSearchPreOrder {
         if (!(useYBR)) return 16;
         final String domHash = urlHash.substring(6);
         for (int i = 0; i < ybrTables.length; i++) {
-            if (ybrTables[i].contains(domHash.getBytes())) {
+            if ((ybrTables[i] != null) && (ybrTables[i].contains(domHash.getBytes()))) {
                 //System.out.println("YBR FOUND: " + urlHash + " (" + i + ")");
                 return i;
             }
