@@ -276,6 +276,11 @@ public final class plasmaWordIndexDistribution {
             return indexCount;
         } else {
             log.logSevere("Index distribution failed. Too few peers (" + hc + ") received the index, not deleted locally.");
+            // simply close the indexEntities
+            for (int i = 0; i < indexEntities.length; i++) try {
+                indexEntities[i].close();
+            } catch (IOException ee) {}            
+
             return -1;
         }
     }
