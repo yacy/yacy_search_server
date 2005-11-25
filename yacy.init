@@ -19,7 +19,7 @@ port = 8080
 # since this applies only to the client-proxy connection,
 # it can be rather short
 # milliseconds
-clientTimeout = 8000
+clientTimeout = 30000
 
 # maximal number of httpd sessions
 # a client may open several connections at one, and the httpdMaxActiveSessions value sets

@@ -1084,7 +1084,7 @@ public final class httpd implements serverHandler {
             
             switch (errorcase) {
                 case 4:
-                    tp.put("errorMessageType_detailedErrorMsg",(detailedErrorMsgText==null)?"":detailedErrorMsgText);
+                    tp.put("errorMessageType_detailedErrorMsg",(detailedErrorMsgText==null)?"":detailedErrorMsgText.replaceAll("\n","<br>"));
                     break;
                 case 5:
                     tp.put("errorMessageType_file",(detailedErrorMsgFile==null)?"":detailedErrorMsgFile);

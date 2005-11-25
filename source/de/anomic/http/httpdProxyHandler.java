@@ -74,6 +74,7 @@ import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Date;
@@ -1295,7 +1296,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             } else if (e instanceof NoRouteToHostException) {
                 errorMessage = "No route to destination host";                    
             } else if (e instanceof UnknownHostException) {
-                errorMessage = "IP address of the destination host could not be determined";                    
+                errorMessage = "IP address of the destination host could not be determined";
+            } else if (e instanceof SocketTimeoutException) {
+                errorMessage = "Unable to establish a connection to the destination host. Connect timed out.";
             } else {
                 String exceptionMsg = e.getMessage();
                 if ((exceptionMsg != null) && (exceptionMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
