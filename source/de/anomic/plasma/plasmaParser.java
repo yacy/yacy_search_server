@@ -260,10 +260,12 @@ public final class plasmaParser {
     public static boolean supportedContent(URL url, String mimeType) {
         // TODO: we need some exceptions here to index URLs like this
         //       http://www.musicabona.com/respighi/12668/cd/index.html.fr
-        if ((mimeType!=null)&&(mimeType.trim().equalsIgnoreCase("text/html"))) {
+        mimeType = getRealMimeType(mimeType);
+        if (mimeType.equals("text/html")) {
             return supportedMimeTypesContains(mimeType);
+        } else {
+            return supportedMimeTypesContains(mimeType) && supportedFileExt(url);
         }
-        return supportedMimeTypesContains(mimeType) && supportedFileExt(url);
     }
     
     public static boolean supportedRealTimeContent(URL url, String mimeType) {

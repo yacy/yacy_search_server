@@ -77,7 +77,7 @@ public class kelondroAttrSeq {
     public kelondroAttrSeq(File file, boolean tree) throws IOException {
         this.file = file;
 	this.structure = null;
-        this.created = 0;
+        this.created = -1;
         this.name = "";
         this.entries = (tree) ? (Map) new TreeMap() : (Map) new HashMap();
         readAttrFile(file);
@@ -144,6 +144,9 @@ public class kelondroAttrSeq {
             }
         }
         br.close();
+        if (structure == null) throw new IOException("file contains no structure tag");
+        if (name == null) throw new IOException("file contains no name tag");
+        if (created == -1) throw new IOException("file contains no created tag");
     }
     
     public int size() {

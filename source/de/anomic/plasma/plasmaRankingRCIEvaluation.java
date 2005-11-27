@@ -119,23 +119,6 @@ public class plasmaRankingRCIEvaluation {
         return partition;
     }
     
-    /*
-    public static int[] generateYBRLimits(int[] counts, int[] partition) {
-        int[] limits = new int[partition.length];
-        int min;
-        int j = 0;
-        for (int i = partition.length - 1; i >= 0; i--) {
-            min = counts[j];
-            while (j <= partition[i]) {
-                if (counts[j] < min) min = counts[j];
-                j++;
-            }
-            limits[i] = min;
-        }
-        return limits;
-    }
-    */
-    
     public static void checkPartitionTable0(int[] counts, int[] partition) {
         int sumsum = 0;
         int sum;
@@ -204,7 +187,7 @@ public class plasmaRankingRCIEvaluation {
         String hash;
         String filename;
         if (!(tablePath.exists())) tablePath.mkdirs();
-        for (int i = 0; i < ranking.length; i++) {
+        for (int i = 0; i < ranking.length - 1; i++) {
             filename = "YBR-4-" + serverCodings.encodeHex(i, 2) + ".idx";
             serverFileUtils.saveSet(new File(tablePath, filename), ranking[i], "");
         }
@@ -217,30 +200,13 @@ public class plasmaRankingRCIEvaluation {
                 File rci_file = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0/RCI-0.rci.gz");
                 long start = System.currentTimeMillis();
                 if (!(rci_file.exists())) return;
+                
+                // create partition table
                 final kelondroAttrSeq rci = new kelondroAttrSeq(rci_file, false);
                 int counts[] = rcieval(rci);
                 int[] partition = interval(counts, 16);
-                TreeSet[] ranked = genRankingTable(rci, partition);
-                storeRankingTable(ranked, new File(root_path, "ranking/YBR"));
-                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
-                System.out.println("Finished YBR generation in " + seconds + " seconds.");
-            }
-            if ((args.length == 2) && (args[0].equals("-rcieval"))) {
-                File root_path = new File(args[1]);
-                File rci_file = new File(root_path, "DATA/RANKING/GLOBAL/030_rci0/RCI-0.rci.gz");
-                long start = System.currentTimeMillis();
-                if (!(rci_file.exists())) return;
-                final kelondroAttrSeq rci = new kelondroAttrSeq(rci_file, false);
-                int counts[] = rcieval(rci);
-                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
-                System.out.println("Finished RCI evaluation in " + seconds + " seconds. " + counts.length + " counts in array.");
-                /*
-                System.out.println("count table:");
-                for (int i = 0; i < counts.length; i++) {
-                    System.out.println(i + " references: " + counts[i] + " times");
-                }
-                */
-                int[] partition = interval(counts, 16);
+                
+                // check the table
                 System.out.println("partition position table:");
                 for (int i = 0; i < partition.length - 1; i++) {
                     System.out.println("YBR-" + i + ": " + (partition[i + 1] + 1) + " - " + partition[i] + " references");
@@ -252,15 +218,27 @@ public class plasmaRankingRCIEvaluation {
                 for (int i = 0; i < counts.length; i++) sum += counts[i];
                 System.out.println("sum of all references: " + sum);
                 
-                // now print out the table
+                // create ranking
                 TreeSet[] ranked = genRankingTable(rci, partition);
+                storeRankingTable(ranked, new File(root_path, "ranking/YBR"));
+                long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
+                System.out.println("Finished YBR generation in " + seconds + " seconds.");
+            }
+            if ((args.length == 2) && (args[0].equals("-rcieval"))) {
+                File root_path = new File(args[1]);
+                
+                // load a partition table
+                plasmaSearchPreOrder.loadYBR(new File(root_path, "ranking/YBR"), 16);
+                
+                // load domain list and generate hash index for domains
                 HashMap dommap = genReverseDomHash(new File(root_path, "domlist.txt"));
+                
+                // print out the table
                 String hash, dom;
                 for (int i = 0; i < 9; i++) {
                     System.out.print("YBR-" + i + ": ");
-                    Iterator k = ranked[i].iterator();
-                    while (k.hasNext()) {
-                        hash = (String) k.next();
+                    for (int j = 0; j < plasmaSearchPreOrder.ybrTables[i].size(); j++) {
+                        hash = new String(plasmaSearchPreOrder.ybrTables[i].get(j));
                         dom = (String) dommap.get(hash);
                         if (dom == null) System.out.print("[" + hash + "], "); else System.out.print(dom + ", ");
                     }

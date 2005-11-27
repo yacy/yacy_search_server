@@ -77,6 +77,16 @@ public class kelondroBinSearch {
         if (c > 0) /* buffer > t */ return contains(t, beginPos, pivot);
         return false;
     }
+    
+    public int size() {
+        return count;
+    }
+    
+    public byte[] get(int element) {
+        byte[] a = new byte[chunksize];
+        System.arraycopy(this.chunks, element * this.chunksize, a, 0, chunksize);
+        return a;
+    }
 
     private void selectBuffer(int element) {
         System.arraycopy(this.chunks, element * this.chunksize, this.buffer, 0, chunksize);

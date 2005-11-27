@@ -53,7 +53,7 @@ import de.anomic.kelondro.kelondroBinSearch;
 
 public final class plasmaSearchPreOrder {
     
-    private static kelondroBinSearch[] ybrTables = null; // block-rank tables
+    public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
     private static boolean useYBR = true;
     
     private TreeMap pageAcc; // key = order hash; value = plasmaLURL.entry
