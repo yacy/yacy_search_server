@@ -365,7 +365,9 @@ public final class plasmaCrawlWorker extends Thread {
                 if (!htCache.cacheFile.getCanonicalPath().startsWith(cacheManager.cachePath.getAbsolutePath())) {
                     // if the response has not the right file type then reject file
                     remote.close();
-                    log.logInfo("REJECTED URL " + url.toString() + " because of an invalid file path '" + htCache.cacheFile.getAbsolutePath() + "'.");
+                    log.logInfo("REJECTED URL " + url.toString() + " because of an invalid file path ('" +
+                                htCache.cacheFile.getCanonicalPath() + "' does not start with '" +
+                                cacheManager.cachePath.getAbsolutePath() + "').");
                     return;                    
                 }
                 
