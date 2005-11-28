@@ -140,7 +140,10 @@ public class IndexCreateIndexingQueue_p {
                     entryList.addAll(switchboard.sbQueue.list(0));
                 }
                                 
-                for (int i = 0; i < entryList.size(); i++) {
+                int count=entryList.size();
+                if(count>100)count=100;
+                for (int i = 0; i < count; i++) {
+
                     boolean inProcess = i < inProcessCount;
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
                     long entrySize = pcentry.size();
