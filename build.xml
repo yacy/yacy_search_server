@@ -64,6 +64,7 @@
 <property name="libx" location="libx"/>
 <property name="build" location="classes"/>
 <property name="htroot" location="htroot"/>
+<property name="www" location="DATA/HTDOCS/www"/>
 <property name="locales" location="locales"/>
 <property name="release" location="RELEASE"/>
     
@@ -214,6 +215,12 @@
          classpathref="project.class.path"
          debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}"/>
+
+  <!-- compile www directory -->
+  <javac srcdir="${www}/" 
+         classpathref="project.class.path"
+	     debug="true" debuglevel="lines,vars,source" 
+	     source="${javacSource}" target="${javacTarget}"/>	
 </target>
 	
 <!-- compiling optional content parsers and building install packages -->
@@ -319,7 +326,7 @@
 <target name="distMain" depends="compileMain" description="Compiling sources and make a release file ...">
 
   <tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
-
+  	
   <!-- copy class files -->
   <tarfileset dir="${build}" prefix="${releaseDir}/classes" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
     <include name="**/*.*"/>

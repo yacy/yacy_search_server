@@ -43,78 +43,93 @@ package de.anomic.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 public final class serverClassLoader extends ClassLoader {
 
-    private final Hashtable classes;
+    private final HashMap classes;
 
     public serverClassLoader() {
-	super(ClassLoader.getSystemClassLoader());
-	classes = new Hashtable();
+        super(ClassLoader.getSystemClassLoader());
+        this.classes = new HashMap();
     }
 
     public serverClassLoader(ClassLoader parent) {
-	super(parent);
-	classes = new Hashtable();
+        super(parent);
+        classes = new HashMap();
     }
 
     public Package[] packages() {
-	return super.getPackages();
+        return super.getPackages();
     }
 
     public Class loadClass(File classfile) throws ClassNotFoundException {
-	// we consider that the classkey can either be only the name of a class, or a partial or
-	// complete path to a class file
-
-	// normalize classkey: strip off '.class'
-	//if (classkey.endsWith(".class")) classkey = classkey.substring(0, classkey.length() - 6);
-
-	// try to find the class in the hashtable
-	Class c = (Class) classes.get(classfile);
-	if (c != null) return c;
-
-	// consider classkey as a file and extract the file name
-	//File classfile = new File(classkey);
-	// this file cannot exist for real, since we stripped off the .class
-	// we constructed the classfile for the only purpose to strip off the name:
-
-	// get the class name out of the classfile
-	String classname = classfile.getName();
-        int p = classname.indexOf(".");
-        classname = classname.substring(0, p);
-
-	// now that we have the name, we can create the real class file
-	//classfile = new File(classkey + ".class");
-
-	// first try: take the class out of the cache, denoted by the classname
+        // we consider that the classkey can either be only the name of a class, or a partial or
+        // complete path to a class file
+        
+        // normalize classkey: strip off '.class'
+        //if (classkey.endsWith(".class")) classkey = classkey.substring(0, classkey.length() - 6);
+        
+        String classFileName = null;
         try {
-	    c = findLoadedClass(classname);
-	    if (c == null) {
-		// second try: ask the system
-		c = findSystemClass(classname);
-	    }
-	    if (c == null) {
-		// third try
-		throw new ClassNotFoundException("internal trigger");
-	    }
-	} catch (ClassNotFoundException e) {
-	    //System.out.println("INTERNAL ERROR1 in cachedClassLoader: " + e.getMessage());
-	    // third try: load the file from the file system
-	    byte[] b;
-	    try {
+            classFileName = classfile.getCanonicalPath();
+        } catch (IOException e) {
+            throw new ClassNotFoundException("Unable to resolve the classfile path");
+        }
+        
+        // try to load the class
+        synchronized(classFileName.intern()) {
+            // first try: take the class out of the cache, denoted by the classname    
+            Class c = (Class) this.classes.get(classfile);
+            if (c != null) return c;
+            
+            // consider classkey as a file and extract the file name
+            //File classfile = new File(classkey);
+            // this file cannot exist for real, since we stripped off the .class
+            // we constructed the classfile for the only purpose to strip off the name:
+            
+            // get the class name out of the classfile
+            String classname = classfile.getName();
+            int p = classname.indexOf(".");
+            classname = classname.substring(0, p);
+            
+            // now that we have the name, we can create the real class file
+            //classfile = new File(classkey + ".class");
+            
+
+// This code doesn't work properly if there are multiple classes with the same name
+// This is because we havn't definded package names in our servlets
+//                
+//          try {
+//          c = findLoadedClass(classname);
+//          if (c == null) {
+//          // second try: ask the system
+//          c = findSystemClass(classname);
+//          }
+//          if (c == null) {
+//          // third try
+//          throw new ClassNotFoundException("internal trigger");
+//          }
+//          } catch (ClassNotFoundException e) {
+            //System.out.println("INTERNAL ERROR1 in cachedClassLoader: " + e.getMessage());
+            
+            // third try: load the file from the file system
+            byte[] b;
+            try {
                 b = serverFileUtils.read(classfile);
-		// now make a class out of the stream
-		//  System.out.println("loading class " + classname + " from file " + classfile.toString());
-		c = this.defineClass(classname, b, 0, b.length);
-		resolveClass(c);
-		classes.put(classfile, c);
-	    } catch (IOException ee) {
-		//System.out.println("INTERNAL ERROR2 in cachedClassLoader: " + ee.getMessage());
-		throw new ClassNotFoundException(classfile.toString());
-	    }
-	}
-	return c;
+                // now make a class out of the stream
+                //  System.out.println("loading class " + classname + " from file " + classfile.toString());
+                c = this.defineClass(classname, b, 0, b.length);
+                resolveClass(c);
+                this.classes.put(classfile, c);
+            } catch (IOException ee) {
+                //System.out.println("INTERNAL ERROR2 in cachedClassLoader: " + ee.getMessage());
+                throw new ClassNotFoundException(classfile.toString());
+            }
+//          }
+            return c;
+        }
     }
 
 }
