@@ -362,7 +362,7 @@ public final class plasmaCrawlWorker extends Thread {
 
                 // reserve cache entry
                 plasmaHTCache.Entry htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);
-                if (!htCache.cacheFile.getCanonicalPath().startsWith(cacheManager.cachePath.getAbsolutePath())) {
+                if (!htCache.cacheFile.getCanonicalPath().startsWith(cacheManager.cachePath.getCanonicalPath())) {
                     // if the response has not the right file type then reject file
                     remote.close();
                     log.logInfo("REJECTED URL " + url.toString() + " because of an invalid file path ('" +
