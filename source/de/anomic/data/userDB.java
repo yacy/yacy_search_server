@@ -162,7 +162,7 @@ public final class userDB {
         }catch(StringIndexOutOfBoundsException e){} //no valid Base64
         String[] tmp=auth.split(":");
         if(tmp.length == 2){
-            entry=this.getEntry(tmp[0]);
+            /*entry=this.getEntry(tmp[0]);
             if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(auth)) ){
             		if(entry.isLoggedOut()){
             			try{
@@ -171,13 +171,17 @@ public final class userDB {
             			return null;
             		}
 				return entry;
+             */
+            entry=this.passwordAuth(tmp[0], tmp[1]);
+            if(entry != null){
+                //return entry;
 			}else{ //wrong/no auth, so auth is removed from browser
 				/*FIXME: This cannot work
 				try{
     					entry.setProperty(Entry.LOGGED_OUT, "false");
-    				}catch(IOException e){}
-    				*/
+    				}catch(IOException e){}*/
 			}
+            return entry;
 		}
 		return null;
 	}
@@ -212,6 +216,19 @@ public final class userDB {
             return null;
         }
 	}
+    public Entry passwordAuth(String user, String password){
+        Entry entry=this.getEntry(user);
+        if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(user+":"+password)) ){
+                if(entry.isLoggedOut()){
+                    try{
+                        entry.setProperty(Entry.LOGGED_OUT, "false");
+                    }catch(IOException e){}
+                    return null;
+                }
+        }
+        return entry;
+
+    }
     
     public class Entry {
         public static final String MD5ENCODED_USERPWD_STRING = "MD5_user:pwd";
