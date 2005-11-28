@@ -140,9 +140,7 @@ public class IndexCreateIndexingQueue_p {
                     entryList.addAll(switchboard.sbQueue.list(0));
                 }
                                 
-                int count=entryList.size();
-                if(count>100)count=100;
-                for (int i = 0; i < count; i++) {
+                for (int i = 0; i < entryList.size(); i++) {
                     boolean inProcess = i < inProcessCount;
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
                     long entrySize = pcentry.size();
@@ -153,7 +151,7 @@ public class IndexCreateIndexingQueue_p {
                         prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())));
                         prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
                         prop.put("indexing-queue_list_"+entryCount+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
-                        prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
+                        prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":wikiCode.replaceHTML(pcentry.anchorName()));
                         prop.put("indexing-queue_list_"+entryCount+"_url", wikiCode.replaceHTML(pcentry.normalizedURLString()));
                         prop.put("indexing-queue_list_"+entryCount+"_size", bytesToString(entrySize));
                         prop.put("indexing-queue_list_"+entryCount+"_inProcess", (inProcess)?1:0);
