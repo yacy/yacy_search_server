@@ -82,7 +82,7 @@ public abstract class AbstractParser implements Parser{
     /**
      * Parser name
      */
-    protected String parserName = this.getClass().getSimpleName();
+    protected String parserName = this.getClass().getName();
     
     /**
      * The Constructor of this class.
