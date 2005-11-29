@@ -64,7 +64,6 @@
 <property name="libx" location="libx"/>
 <property name="build" location="classes"/>
 <property name="htroot" location="htroot"/>
-<property name="www" location="DATA/HTDOCS/www"/>
 <property name="locales" location="locales"/>
 <property name="release" location="RELEASE"/>
     
