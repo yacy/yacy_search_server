@@ -75,7 +75,7 @@
 <!-- determining if the .svn directory exists -->   
 <condition property="svnEntriesFileExists">
     <available file=".svn/entries" />        
-</condition>       
+</condition> 
 
 <!-- 
     if the .svn directory exists we try to determine the real
@@ -215,12 +215,6 @@
          classpathref="project.class.path"
          debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}"/>
-
-  <!-- compile www directory -->
-  <javac srcdir="${www}/" 
-         classpathref="project.class.path"
-	     debug="true" debuglevel="lines,vars,source" 
-	     source="${javacSource}" target="${javacTarget}"/>	
 </target>
 	
 <!-- compiling optional content parsers and building install packages -->
