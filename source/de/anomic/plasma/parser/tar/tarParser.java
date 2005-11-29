@@ -44,13 +44,16 @@
 package de.anomic.plasma.parser.tar;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
@@ -61,6 +64,7 @@ import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverFileUtils;
 
 public class tarParser extends AbstractParser implements Parser {
 
@@ -71,6 +75,7 @@ public class tarParser extends AbstractParser implements Parser {
     public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
     static { 
         SUPPORTED_MIME_TYPES.put("application/x-tar","tar");
+        SUPPORTED_MIME_TYPES.put("application/tar","tar");
     }     
 
     /**
@@ -83,6 +88,7 @@ public class tarParser extends AbstractParser implements Parser {
     
     public tarParser() {        
         super(LIBX_DEPENDENCIES);
+        parserName = "Tape Archive File Parser"; 
     }
     
     public Hashtable getSupportedMimeTypes() {
@@ -92,6 +98,18 @@ public class tarParser extends AbstractParser implements Parser {
     public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
         
         try {           
+            // creating a new parser class to parse the unzipped content
+            plasmaParser theParser = new plasmaParser();       
+            
+            /*
+             * If the mimeType was not reported correcly by the webserve we
+             * have to decompress it first
+             */
+            String ext = plasmaParser.getFileExt(location).toLowerCase();
+            if (ext.equals("gz") || ext.equals("tgz")) {
+                source = new GZIPInputStream(source);
+            }
+            
             StringBuffer docKeywords = new StringBuffer();
             StringBuffer docShortTitle = new StringBuffer();  
             StringBuffer docLongTitle = new StringBuffer();   
@@ -100,11 +118,7 @@ public class tarParser extends AbstractParser implements Parser {
             serverByteBuffer docText = new serverByteBuffer();
             Map docAnchors = new HashMap();
             Map docImages = new HashMap(); 
-            
-            
-            // creating a new parser class to parse the unzipped content
-            plasmaParser theParser = new plasmaParser();            
-            
+                        
             // looping through the contained files
             TarEntry entry;
             TarInputStream tin = new TarInputStream(source);                      
@@ -113,22 +127,34 @@ public class tarParser extends AbstractParser implements Parser {
                 if (entry.isDirectory()) continue;
                 
                 // Get the entry name
-                String entryName = entry.getName();                
-                int idx = entryName.lastIndexOf(".");
-                String entryExt = (idx > -1) ? entryName.substring(idx+1) : null;
+                int idx = -1;
+                String entryName = entry.getName();
+                idx = entryName.lastIndexOf("/");
+                if (idx != -1) entryName = entryName.substring(idx+1);
+                idx = entryName.lastIndexOf(".");
+                String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
                 
                 // trying to determine the mimeType per file extension   
                 String entryMime = plasmaParser.getMimeTypeByFileExt(entryExt);
                 
                 // getting the entry content
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                byte[] buf = new byte[(int) entry.getSize()];
-                int bytesRead = tin.read(buf);
-                bos.write(buf);
-                byte[] ut = bos.toByteArray();           
-                
-                // parsing the content
-                plasmaParserDocument theDoc = theParser.parseSource(location,entryMime,ut);
+                plasmaParserDocument theDoc = null;
+                File tempFile = null;
+                try {
+
+
+                    byte[] buf = new byte[(int) entry.getSize()];
+                    int bytesRead = tin.read(buf);
+
+                    tempFile = File.createTempFile("tarParser_" + ((idx>-1)?entryName.substring(0,idx):entryName), (entryExt.length()>0)?"."+entryExt:entryExt);
+                    serverFileUtils.write(buf, tempFile);           
+                    
+                    // parsing the content
+                    
+                    theDoc = theParser.parseSource(tempFile.toURL(),entryMime,tempFile);
+                } finally {
+                    if (tempFile != null) try {tempFile.delete(); } catch(Exception ex){}
+                }
                 if (theDoc == null) continue;
                 
                 // merging all documents together

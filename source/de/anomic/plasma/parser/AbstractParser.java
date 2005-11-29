@@ -73,6 +73,16 @@ public abstract class AbstractParser implements Parser{
      * purposes.
      */
     protected serverLog theLogger = null;
+
+    /**
+     * Version number of the parser
+     */    
+    protected String parserVersionNr = "0.1";
+    
+    /**
+     * Parser name
+     */
+    protected String parserName = this.getClass().getSimpleName();
     
     /**
      * The Constructor of this class.
@@ -165,4 +175,18 @@ public abstract class AbstractParser implements Parser{
         this.theLogger = log;
     }
     
+    /**
+     * Returns the version number of the parser
+     * @return parser version number
+     */
+    public String getVersion() {
+        return this.parserVersionNr;
+    }
+    
+    /**
+     * Return the name of the parser
+     */
+    public String getName() {
+        return parserName;
+    }
 }

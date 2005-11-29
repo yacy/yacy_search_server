@@ -73,10 +73,11 @@ implements Parser {
      * a list of library names that are needed by this parser
      * @see Parser#getLibxDependences()
      */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {};
+    private static final String[] LIBX_DEPENDENCIES = new String[] {};    
     
 	public rtfParser() {
 		super(LIBX_DEPENDENCIES);
+        parserName = "Rich Text Format Parser";  
 	}
 
 	public plasmaParserDocument parse(URL location, String mimeType,

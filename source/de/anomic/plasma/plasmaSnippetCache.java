@@ -327,8 +327,9 @@ public class plasmaSnippetCache {
         if (header == null) {
             String filename = this.cacheManager.getCachePath(url).getName();
             int p = filename.lastIndexOf('.');
-            if (
+            if (    // if no extension is available
                     (p < 0) ||
+                    // or the extension is supported by one of the parsers
                     ((p >= 0) && (plasmaParser.supportedFileExtContains(filename.substring(p + 1))))
             ) {
                 String supposedMime = "text/html";

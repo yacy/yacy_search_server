@@ -7,23 +7,30 @@ For a detailed description of the various MIME-types take a look at <a href="htt
 <tr class="TableHeader" valign="bottom">
 <td class="small" >Activate</td>
 <td class="small" >Mime-Type</td>
-<td class="small" >Parser&nbsp;Class&nbsp;Name</td>
+<td class="small" >Parser&nbsp;Usage</td>
 <td class="small" ></td>
 </tr>
 #{parser}#
 <tr class="TableCellDark">
-	<td class="small" align="center"><input type="checkbox" name="#[mime]#" align="top" #(status)#::checked#(/status)#></td>
-	<td class="small" >#[mime]#</td>
-	<td class="small" title="Full qualified name: #[name]#">#[shortname]#</td>
+	<td colspan="2">#[name]# V#[version]#</td>
+	<td>#[usage]#</td>
+	<td>&nbsp;</td>
+</tr>
+#{mime}#
+<tr class="TableCellLight">
+	<td class="small" align="center"><input type="checkbox" name="#[mimetype]#" align="top" #(status)#::checked#(/status)#></td>
+	<td class="small">#[mimetype]#</td>
+	<td class="small">&nbsp;</td>
 	<td class="small" width="100%"></td>
-	</tr>
+</tr>
+#{/mime}#
 #{/parser}#
-  <tr class="TableCellLight">
+  <tr class="TableCellDark">
     <td class="small" align="center"><input type="checkbox" name="allParserEnabled" align="top" #(allParserEnabled)#::checked#(/allParserEnabled)#>
     <td colspan="2" class="small" >Enable all parsers</td>
     <td class="small">&nbsp;</td>
   </tr>
-  <tr class="TableCellLight">
+  <tr class="TableCellDark">
     <td colspan="4" class="small" ><input type="submit" name="parserSettings" value="submit">&nbsp;Changes take effect immediately</td>
   </tr>
 </table>

@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import org.apache.log4j.Level;
@@ -74,7 +75,10 @@ implements Parser {
     static { 
         SUPPORTED_MIME_TYPES.put("text/xml","xml");
         SUPPORTED_MIME_TYPES.put("application/xml","xml"); 
-        SUPPORTED_MIME_TYPES.put("application/octet-stream","");
+        SUPPORTED_MIME_TYPES.put("application/x-xml","xml");        
+        SUPPORTED_MIME_TYPES.put("application/octet-stream","");        
+        SUPPORTED_MIME_TYPES.put("application/x-compress","");
+        SUPPORTED_MIME_TYPES.put("application/x-compressed","");
     } 
     
     /**
@@ -88,14 +92,56 @@ implements Parser {
         "xerces.jar"
     };
     
+    /**
+     * Helping structure used to detect loops in the mimeType detection
+     * process
+     */
+    private static Hashtable threadLoopDetection = new Hashtable();
+    
     public mimeTypeParser() {
         super(LIBX_DEPENDENCIES);
+        parserName = "MimeType Parser"; 
+    }
+    
+    public String getMimeType (File sourceFile) {
+        String mimeType = null;
+        
+        try {    
+            Magic theMagic = new Magic();           
+            MagicMatch match = theMagic.getMagicMatch(sourceFile);        
+            
+            // if a match was found we can return the new mimeType
+            if (match!=null) {
+                Collection subMatches = match.getSubMatches();
+                if ((subMatches != null) && (!subMatches.isEmpty())) {
+                    mimeType = ((MagicMatch) subMatches.iterator().next()).getMimeType();
+                } else {
+                    mimeType = match.getMimeType();
+                }
+                return mimeType;
+            }
+        } catch (Exception e) {
+            
+        }
+        return null;        
     }
     
     public plasmaParserDocument parse(URL location, String mimeType, File sourceFile) throws ParserException {
         
+        String orgMimeType = mimeType;
+        
         // determining the mime type of the file ...
         try {       
+            // adding current thread to loop detection list
+            Integer loopDepth = null;
+            if (threadLoopDetection.containsKey(Thread.currentThread())) {
+                loopDepth = (Integer) threadLoopDetection.get(Thread.currentThread());                
+            } else {
+                loopDepth = new Integer(0);
+            }
+            if (loopDepth.intValue() > 5) return null;
+            threadLoopDetection.put(Thread.currentThread(),new Integer(loopDepth.intValue()+1));
+            
             // deactivating the logging for jMimeMagic
             Logger theLogger = Logger.getLogger("net.sf.jmimemagic");
             theLogger.setLevel(Level.OFF);
@@ -115,6 +161,7 @@ implements Parser {
                 
                 // to avoid loops we have to test if the mimetype has changed ...
                 if (this.getSupportedMimeTypes().containsKey(mimeType)) return null;
+                if (orgMimeType.equals(mimeType)) return null;
                 
                 plasmaParser theParser = new plasmaParser();
                 return theParser.parseSource(location,mimeType,sourceFile);
@@ -123,6 +170,13 @@ implements Parser {
             
         } catch (Exception e) {
             return null;
+        } finally {
+            Integer loopDepth = (Integer) threadLoopDetection.get(Thread.currentThread());                
+            if (loopDepth.intValue() <= 1) {
+                threadLoopDetection.remove(Thread.currentThread());
+            } else {
+                threadLoopDetection.put(Thread.currentThread(), new Integer(loopDepth.intValue()-1));
+            }
         }
     }
     

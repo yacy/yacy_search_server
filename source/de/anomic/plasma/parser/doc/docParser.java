@@ -75,6 +75,7 @@ implements Parser {
     
 	public docParser() {
 		super(LIBX_DEPENDENCIES);
+        parserName = "Word Document Parser";
 	}
 
 	public plasmaParserDocument parse(URL location, String mimeType,

@@ -122,4 +122,17 @@ public interface Parser {
      */
     public void setLogger(serverLog log);
     
+    /**
+     * Returns the version number of the current parser
+     * @return parser version number
+     */
+    public String getVersion();
+    
+    /**
+     * Returns the name of the parser
+     * @return parser name
+     */
+    public String getName();
 }
+
+

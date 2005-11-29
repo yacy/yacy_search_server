@@ -79,10 +79,11 @@ public class zipParser extends AbstractParser implements Parser {
      * a list of library names that are needed by this parser
      * @see Parser#getLibxDependences()
      */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {};    
+    private static final String[] LIBX_DEPENDENCIES = new String[] {};        
     
     public zipParser() {        
         super(LIBX_DEPENDENCIES);
+        parserName = "Compressed Archive File Parser"; 
     }
     
     public Hashtable getSupportedMimeTypes() {

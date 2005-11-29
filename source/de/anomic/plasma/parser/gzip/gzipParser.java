@@ -76,6 +76,7 @@ public class gzipParser extends AbstractParser implements Parser {
     
     public gzipParser() {        
         super(LIBX_DEPENDENCIES);
+        parserName = "GNU Zip Compressed Archive Parser";
     }
     
     public Hashtable getSupportedMimeTypes() {

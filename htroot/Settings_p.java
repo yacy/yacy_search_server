@@ -45,13 +45,16 @@
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -249,29 +252,42 @@ public final class Settings_p {
          * Parser Configuration
          */
         plasmaSwitchboard sb = (plasmaSwitchboard)env;
-        Hashtable enabledParsers = sb.parser.getEnabledParserList();
-        Hashtable availableParsers = sb.parser.getAvailableParserList();
+        HashSet enabledParsers = sb.parser.getEnabledParserList();
+        HashSet parserInfos = new HashSet(sb.parser.getAvailableParserList().values());
         
-        // fetching a list of all available mimetypes
-        List availableParserKeys = Arrays.asList(availableParsers.keySet().toArray(new String[availableParsers.size()]));
-        
-        // sort it
-        Collections.sort(availableParserKeys);
+//        // fetching a list of all available mimetypes
+//        List availableParserKeys = Arrays.asList(availableParsers.entrySet().toArray(new ParserInfo[availableParsers.size()]));
+//        
+//        // sort it
+//        Collections.sort(availableParserKeys);
         
         // loop through the mimeTypes and add it to the properties
         boolean allParsersEnabled = true;
         int parserIdx = 0;
-        Iterator availableParserIter = availableParserKeys.iterator();
+        
+        Iterator availableParserIter = parserInfos.iterator();
         while (availableParserIter.hasNext()) {
-            String mimeType = (String) availableParserIter.next();
-            String parserName = (String) availableParsers.get(mimeType);
-            boolean parserIsEnabled = enabledParsers.containsKey(mimeType);
+            ParserInfo parserInfo = (ParserInfo) availableParserIter.next();
+            prop.put("parser_" + parserIdx + "_name", parserInfo.parserName);
+            prop.put("parser_" + parserIdx + "_version", parserInfo.parserVersionNr);
+            prop.put("parser_" + parserIdx + "_usage", Integer.toString(parserInfo.usageCount));
             
-            prop.put("parser_" + parserIdx + "_mime", mimeType);
-            prop.put("parser_" + parserIdx + "_name", parserName);
-            prop.put("parser_" + parserIdx + "_shortname", parserName.substring(parserName.lastIndexOf(".")+1));
-            prop.put("parser_" + parserIdx + "_status", parserIsEnabled ? 1:0);
-            allParsersEnabled &= parserIsEnabled;
+            int mimeIdx = 0;
+            Enumeration mimeTypeIter = parserInfo.supportedMimeTypes.keys();
+            while (mimeTypeIter.hasMoreElements()) {
+                String mimeType = (String)mimeTypeIter.nextElement();
+                
+                boolean parserIsEnabled = enabledParsers.contains(mimeType);
+                
+                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_mimetype", mimeType);
+                //prop.put("parser_" + parserIdx + "_name", parserName);
+                //prop.put("parser_" + parserIdx + "_shortname", parserName.substring(parserName.lastIndexOf(".")+1));
+                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_status", enabledParsers.contains(mimeType) ? 1:0);
+                allParsersEnabled &= parserIsEnabled;
+                
+                mimeIdx++;
+            }
+            prop.put("parser_" + parserIdx + "_mime", mimeIdx);
             
             parserIdx++;
         }

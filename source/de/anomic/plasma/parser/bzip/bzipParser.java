@@ -77,9 +77,10 @@ public class bzipParser extends AbstractParser implements Parser {
     private static final String[] LIBX_DEPENDENCIES = new String[] {
         "bzip2.jar"
     };
-
+    
     public bzipParser() {        
         super(LIBX_DEPENDENCIES);
+        parserName = "Bzip 2 UNIX Compressed File Parser";
     }
     
     public Hashtable getSupportedMimeTypes() {
@@ -105,7 +106,6 @@ public class bzipParser extends AbstractParser implements Parser {
             
             int read = 0;
             byte[] data = new byte[1024];
-                                                
             CBZip2InputStream zippedContent = new CBZip2InputStream(source);        
             
             tempFile = File.createTempFile("bunzip","tmp");

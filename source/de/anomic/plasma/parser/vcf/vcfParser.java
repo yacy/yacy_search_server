@@ -86,10 +86,11 @@ public class vcfParser extends AbstractParser implements Parser {
      * a list of library names that are needed by this parser
      * @see Parser#getLibxDependences()
      */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {"commons-codec-1.3.jar"};    
+    private static final String[] LIBX_DEPENDENCIES = new String[] {"commons-codec-1.3.jar"};        
     
     public vcfParser() {        
         super(LIBX_DEPENDENCIES);
+        parserName = "vCard Parser"; 
     }
     
     public Hashtable getSupportedMimeTypes() {

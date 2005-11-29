@@ -346,7 +346,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         int argc;
         if (argsString == null) {
             // no args here, maybe a POST with multipart extension
-            int length;
+            int length = 0;
             //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
             if (method.equals(httpHeader.METHOD_POST)) {
 
@@ -356,10 +356,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 } else if (requestHeader.gzip()) {
                     length = -1;
                     gzipBody = new GZIPInputStream(body);
-                } else {
-                    httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null); 
-                    return;
                 }
+//                } else {
+//                    httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null); 
+//                    return;
+//                }
                 
                 // if its a POST, it can be either multipart or as args in the body
                 if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
@@ -438,7 +439,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
             }else{
                     //you cannot share a .png/.gif file with a name like a class in htroot.
-                    if ( !(targetFile.exists()) && !((path.endsWith("png")||path.endsWith("gif"))&&targetClass!=null ) ){
+                    if ( !(targetFile.exists()) && !((path.endsWith("png")||path.endsWith("gif")||path.endsWith(".stream"))&&targetClass!=null ) ){
                         targetFile = new File(htDocsPath, path);
                         targetClass = rewriteClassFile(new File(htDocsPath, path));
                     }
@@ -486,6 +487,20 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     Thread.currentThread().sleep(200); // see below
                     serverFileUtils.write(result, out);
                 }
+            } else if ((targetClass != null) && (path.endsWith(".stream"))) {
+                // call rewrite-class
+                requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
+                requestHeader.put("PATH", path);
+                requestHeader.put("INPUTSTREAM", body);
+                requestHeader.put("OUTPUTSTREAM", out);
+             
+                httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null);                
+                
+                // in case that there are no args given, args = null or empty hashmap
+                serverObjects tp = (serverObjects) rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
+             
+                this.forceConnectionClose();
+                return;                
             } else if ((targetFile.exists()) && (targetFile.canRead())) {
                 // we have found a file that can be written to the client
                 // if this file uses templates, then we use the template

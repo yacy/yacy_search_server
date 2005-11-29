@@ -91,10 +91,11 @@ public class rssParser extends AbstractParser implements Parser {
         "informa-0.6.0.jar",
         "commons-logging.jar",
         "jdom.jar"
-    };    
+    };       
     
 	public rssParser() {
 		super(LIBX_DEPENDENCIES);
+        parserName = "Rich Site Summary/Atom Feed Parser"; 
 	}
 
 	public plasmaParserDocument parse(URL location, String mimeType,

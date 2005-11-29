@@ -74,10 +74,11 @@ public class pdfParser extends AbstractParser implements Parser {
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] {
         "PDFBox-0.7.2.jar"
-    };    
+    };        
     
     public pdfParser() {        
         super(LIBX_DEPENDENCIES);
+        parserName = "Acrobat Portable Document Parser"; 
     }
     
     public Hashtable getSupportedMimeTypes() {
