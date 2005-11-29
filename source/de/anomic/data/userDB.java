@@ -227,7 +227,18 @@ public final class userDB {
                 }
         }
         return entry;
-
+    }
+    public Entry md5Auth(String user, String md5){
+        Entry entry=this.getEntry(user);
+        if( entry != null && entry.getMD5EncodedUserPwd().equals(md5)){
+                if(entry.isLoggedOut()){
+                    try{
+                        entry.setProperty(Entry.LOGGED_OUT, "false");
+                    }catch(IOException e){}
+                    return null;
+                }
+        }
+        return entry;
     }
     
     public class Entry {
