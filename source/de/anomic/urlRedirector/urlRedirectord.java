@@ -24,6 +24,7 @@ public class urlRedirectord implements serverHandler {
     private static plasmaSwitchboard switchboard = null;
     private serverLog theLogger = new serverLog("URL-REDIRECTOR");
     private static plasmaCrawlProfile.entry profile = null;
+    private String nextURL;
     
     public urlRedirectord() {
         if (switchboard == null) {
@@ -64,6 +65,10 @@ public class urlRedirectord implements serverHandler {
                 this.theLogger.logSevere("Unable to create a crawling profile for the URL-Redirector",e);
             }
         }
+    }
+    
+    public String getURL() {
+        return this.nextURL;
     }
     
     public void initSession(Session theSession){
@@ -139,7 +144,7 @@ public class urlRedirectord implements serverHandler {
                     }
                     
                     int pos = line.indexOf(" ");
-                    String nextURL = (pos != -1) ? line.substring(0,pos):line; 
+                    nextURL = (pos != -1) ? line.substring(0,pos):line; 
                     
                     this.theLogger.logFine("Receiving request " + line);
                     outputWriter.print("\r\n");
@@ -168,6 +173,7 @@ public class urlRedirectord implements serverHandler {
                     if (reasonString != null) {
                         this.theLogger.logFine("URL " + nextURL + " rejected. Reason: " + reasonString);
                     }
+                    nextURL = null;
                 }
             }        
             

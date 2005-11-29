@@ -61,6 +61,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.server.serverCore.Session;
+import de.anomic.urlRedirector.urlRedirectord;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
@@ -72,9 +73,9 @@ public final class Connections_p {
         serverObjects prop = new serverObjects();
                  
         // determines if name lookup should be done or not
-        boolean doNameLookup = true;
-        if ((post != null) && post.containsKey("nameLookup") && post.get("nameLookup","true").equals("false")) {
-            doNameLookup = false;
+        boolean doNameLookup = false;
+        if ((post != null) && post.containsKey("nameLookup") && post.get("nameLookup","true").equals("true")) {
+            doNameLookup = true;
         }
         
         // getting the virtualHost string
@@ -116,8 +117,12 @@ public final class Connections_p {
                 int userPort = currentSession.getUserPort();
                 if (userAddress == null) continue;
                 
+                String dest = null;
+                String prot = null;
                 serverHandler cmdObj = currentSession.getCommandObj();
                 if (cmdObj instanceof httpd) {
+                    prot = "http";
+                    
                     
                     // getting the http command object
                     httpd currentHttpd =  (httpd)cmdObj;
@@ -126,49 +131,52 @@ public final class Connections_p {
                     Properties conProp = (Properties) currentHttpd.getConProp().clone();
                     
                     // getting the destination host
-                    String dest = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
+                    dest = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
                     if (dest==null)continue;
-                    if (dest.equals(virtualHost)) dest = yacyCore.seedDB.mySeed.getName() + ".yacy";
+                } else if (cmdObj instanceof urlRedirectord) {
+                    prot = "urlRedirector";
                     
-
-                    
-                    // determining if the source is a yacy host
-                    yacySeed seed = null;
-                    if (doNameLookup) {
-                        seed = yacyCore.seedDB.lookupByIP(userAddress,true,false,false);
-                        if (seed != null) {
-                            if ((seed.hash.equals(yacyCore.seedDB.mySeed.hash)) && 
-                                    (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
-                                seed = null;
-                            }
+                    urlRedirectord urlRedir = (urlRedirectord)cmdObj;
+                    commandLine = urlRedir.getURL();
+                }                
+                
+                if ((dest != null) && (dest.equals(virtualHost))) dest = yacyCore.seedDB.mySeed.getName() + ".yacy";
+                
+                // determining if the source is a yacy host
+                yacySeed seed = null;
+                if (doNameLookup) {
+                    seed = yacyCore.seedDB.lookupByIP(userAddress,true,false,false);
+                    if (seed != null) {
+                        if ((seed.hash.equals(yacyCore.seedDB.mySeed.hash)) && 
+                                (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
+                            seed = null;
                         }
                     }
-                    
-                    prop.put("list_" + idx + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
-                    prop.put("list_" + idx + "_sessionName",currentSession.getName());
-                    prop.put("list_" + idx + "_proto","http");             
-                    if (sessionTime > 1000*60) {
-                        prop.put("list_" + idx + "_ms",0);
-                        prop.put("list_" + idx + "_ms_duration",serverDate.intervalToString(sessionTime));
-                    } else {
-                        prop.put("list_" + idx + "_ms",1);
-                        prop.put("list_" + idx + "_ms_duration",Long.toString(sessionTime));
-                    }
-                    prop.put("list_" + idx + "_source",(seed!=null)?seed.getName()+".yacy":userAddress.getHostAddress()+":"+userPort);
-                    prop.put("list_" + idx + "_dest",dest);
-                    if (blockingRequest) {
-                        prop.put("list_" + idx + "_running",0);
-                        prop.put("list_" + idx + "_running_reqNr",Integer.toString(commandCount+1));
-                        numActivePending++;
-                    } else {
-                        prop.put("list_" + idx + "_running",1);
-                        prop.put("list_" + idx + "_running_command",commandLine);
-                        numActiveRunning++;
-                    }
-                    prop.put("list_" + idx + "_used",Integer.toString(commandCount));
-                    
-                    idx++;
                 }
+                
+                prop.put("list_" + idx + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
+                prop.put("list_" + idx + "_sessionName",currentSession.getName());
+                prop.put("list_" + idx + "_proto",prot);             
+                if (sessionTime > 1000*60) {
+                    prop.put("list_" + idx + "_ms",0);
+                    prop.put("list_" + idx + "_ms_duration",serverDate.intervalToString(sessionTime));
+                } else {
+                    prop.put("list_" + idx + "_ms",1);
+                    prop.put("list_" + idx + "_ms_duration",Long.toString(sessionTime));
+                }
+                prop.put("list_" + idx + "_source",(seed!=null)?seed.getName()+".yacy":userAddress.getHostAddress()+":"+userPort);
+                prop.put("list_" + idx + "_dest",(dest==null)?"-":dest);
+                if (blockingRequest) {
+                    prop.put("list_" + idx + "_running",0);
+                    prop.put("list_" + idx + "_running_reqNr",Integer.toString(commandCount+1));
+                    numActivePending++;
+                } else {
+                    prop.put("list_" + idx + "_running",1);
+                    prop.put("list_" + idx + "_running_command",(commandLine==null)?"":commandLine);
+                    numActiveRunning++;
+                }
+                prop.put("list_" + idx + "_used",Integer.toString(commandCount));                
+                idx++;                
             }
         }     
         prop.put("list",idx);

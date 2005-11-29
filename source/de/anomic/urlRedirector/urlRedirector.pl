@@ -7,20 +7,20 @@
 #
 # This scripts forwards URLs from squid to YaCy where the
 # URLs are used to download and index the content of the URLs.
-
 use strict;
 use Socket qw(:DEFAULT :crlf);
 use IO::Handle;
 use Digest::MD5;
 
 # setting administrator username + pwd, hostname + port
-my $user = "admin";
+my $user = "user";
 my $pwd  = "";
 my $host = "localhost";
 my $port = "8080";
 
-my %mediaExt;
+my @mediaExt;
 my @requestData;
+
 $|=1;
 
 sub isCGI {
@@ -39,11 +39,14 @@ sub isPOST {
 }
 
 sub isMediaExt {
- my $url = lc shift;
+ my $url = $_[0];
+ my @extList = @{$_[1]};
  my $pos = rindex $url, ".";
+ 
  if ($pos != -1) {
     my $ext = substr($url,$pos+1,length($url));
-    return exists($mediaExt{$ext});
+    my @match = grep(/$ext/,@extList);
+    return scalar(@match);
  }
  return 0;
 }
@@ -56,7 +59,7 @@ $host = inet_aton($host) or die "$host: unknown host";
 
 socket(SOCK, AF_INET, SOCK_STREAM, $protocol) or die "socket() failed: $!";
 my $dest_addr = sockaddr_in($port,$host);
-connect(SOCK,$dest_addr) or die "connect() failed: $!";
+connect(SOCK,$dest_addr) or die("connect() failed: $!");
 
 # enabling autoflush
 SOCK->autoflush(1);
@@ -76,7 +79,8 @@ print SOCK "PWD ".$md5Pwd.CRLF;
 # Getting a list of file extensions that should be ignored
 print SOCK "MEDIAEXT".CRLF;
 $msg_in = lc <SOCK>;
-%mediaExt = split(/,\s*/, $msg_in);
+chomp $msg_in;
+@mediaExt = split(/,\s*/, $msg_in);
 
 # 1) Reading URLs from stdIn 
 # 2) Send it to Yacy
@@ -93,19 +97,22 @@ while (defined($msg_out = <>)) {
     
     # testing if the URL is CGI
     if (isCGI($requestData[0])) { 
-     print STDOUT "URL is cgi: ".$msg_out.CRLF;
+     print STDOUT CRLF;
+     print STDERR "URL is cgi: ".$msg_out.CRLF;
      next; 
     }
     
     # testing if the URL is a POST request
     if (isPOST($requestData[0])){ 
-     print STDOUT "URL is post: ".$msg_out.CRLF;
+     print STDOUT CRLF;
+     print STDERR "URL is post: ".$msg_out.CRLF;
      next; 
     }
     
     # testing if the requested content is a media content
-    if (isMediaExt($requestData[0])) {
-     print STDOUT "URL has media extension: ".$msg_out.CRLF;
+    if (isMediaExt($requestData[0],\@mediaExt)) {
+     print STDOUT CRLF;
+     print STDERR "URL has media extension: ".$msg_out.CRLF;
      next; 
     }
     
@@ -117,6 +124,7 @@ while (defined($msg_out = <>)) {
     if (defined($msg_in = <SOCK>)) {
        print STDOUT $msg_in;
     } else {
+      print STDERR "Socket closed".CRLF;
       close SOCK;
       exit(1);
     }
