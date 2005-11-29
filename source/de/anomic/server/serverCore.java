@@ -79,6 +79,7 @@ import org.apache.commons.pool.impl.GenericObjectPool.Config;
 import de.anomic.http.httpc;
 import de.anomic.icap.icapd;
 import de.anomic.server.logging.serverLog;
+import de.anomic.urlRedirector.urlRedirectord;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -1042,12 +1043,15 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         // now we need to initialize the session
                         if (this.commandCounter == 0) {
                             // first we need to determine the proper protocol handler
-                            if (this.request.indexOf("ICAP") >= 0) reqProtocol = "ICAP";
-                            else reqProtocol = "HTTP";                            
+                            if (this.request.indexOf("ICAP") >= 0)          reqProtocol = "ICAP";
+                            else if (this.request.startsWith("REDIRECTOR")) reqProtocol = "REDIRECTOR";
+                            else                                            reqProtocol = "HTTP";                            
                             
                             // next we need to get the proper protocol handler
                             if (reqProtocol.equals("ICAP")) {
                                 this.commandObj = new icapd();
+                            } else if (reqProtocol.equals("REDIRECTOR")) {
+                                this.commandObj = new urlRedirectord();
                             } else {
 //                                if ((this.commandObj != null) && 
 //                                        (this.commandObj.getClass().getName().equals(serverCore.this.handlerPrototype.getClass().getName()))) {

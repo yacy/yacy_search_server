@@ -227,7 +227,7 @@ public final class plasmaCrawlStacker {
          */
         URL nexturl = null;
         if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = plasmaURL.dummyHash;
-        String referrerHash = plasmaURL.urlHash(referrerString);
+        String referrerHash = (referrerString==null)?null:plasmaURL.urlHash(referrerString);
         try {
             nexturl = new URL(nexturlString);
         } catch (MalformedURLException e) {
