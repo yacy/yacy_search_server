@@ -9,6 +9,8 @@ import java.net.URL;
 import java.util.Date;
 
 import de.anomic.data.userDB;
+import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -144,7 +146,7 @@ public class urlRedirectord implements serverHandler {
                     }
                     
                     int pos = line.indexOf(" ");
-                    nextURL = (pos != -1) ? line.substring(0,pos):line; 
+                    this.nextURL = (pos != -1) ? line.substring(0,pos):line; 
                     
                     this.theLogger.logFine("Receiving request " + line);
                     outputWriter.print("\r\n");
@@ -152,10 +154,16 @@ public class urlRedirectord implements serverHandler {
                     
                     String reasonString = null;
                     try {
-                        if (plasmaParser.supportedFileExt(new URL(nextURL))) {
+                        // generating URL Object
+                        URL reqURL = new URL(this.nextURL);
+                        
+                        // getting URL mimeType
+                        httpHeader header = httpc.whead(reqURL, 10000, null, null, switchboard.remoteProxyConfig);                        
+                        
+                        if (plasmaParser.supportedContent(reqURL,header.mime())) {
                             // enqueuing URL for crawling
                             reasonString = switchboard.sbStackCrawlThread.stackCrawl(
-                                    nextURL, 
+                                    this.nextURL, 
                                     null, 
                                     yacyCore.seedDB.mySeed.hash, 
                                     "URL Redirector", 
