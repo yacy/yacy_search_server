@@ -394,6 +394,11 @@ public final class plasmaParser {
         // nothing todo here at the moment
     }
     
+    public static void enableAllParsers() {
+        Set availableMimeTypes = availableParserList.keySet();
+        setEnabledParserList(availableMimeTypes);
+    }
+    
     public static String[] setEnabledParserList(Set mimeTypeSet) {
         
         HashSet newEnabledParsers = new HashSet();
@@ -810,28 +815,7 @@ public final class plasmaParser {
             plasmaParser.initRealtimeParsableMimeTypes("application/xhtml+xml,text/html,text/plain");
             
             // configure all other supported mimeTypes
-            plasmaParser.initParseableMimeTypes(
-                    "application/atom+xml," +
-                    "application/gzip," +
-                    "application/java-archive," +
-                    "application/msword," +
-                    "application/octet-stream," +
-                    "application/pdf," +
-                    "application/rdf+xml," +
-                    "application/rss+xml," +
-                    "application/rtf," +
-                    "application/x-gzip," +
-                    "application/x-tar," +
-                    "application/xml," +
-                    "application/zip," +
-                    "text/rss," +
-                    "text/rtf," +
-                    "text/xml," +
-                    "application/x-bzip2," +
-                    "application/postscript," +
-                    "text/x-vcard," + 
-                    "application/vnd.oasis.opendocument.text," + 
-                    "application/x-vnd.oasis.opendocument.text");
+            plasmaParser.enableAllParsers();
 
             // parsing the content
             plasmaParserDocument document = theParser.parseSource(contentURL, contentMimeType, contentFile);
