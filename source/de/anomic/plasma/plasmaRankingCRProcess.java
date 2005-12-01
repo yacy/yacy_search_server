@@ -207,7 +207,7 @@ public class plasmaRankingCRProcess {
     
     public static int genrci(File cr_in, File rci_out) throws IOException {
         if (!(cr_in.exists())) return 0;
-        final kelondroAttrSeq cr = new kelondroAttrSeq(cr_in, false);
+        kelondroAttrSeq cr = new kelondroAttrSeq(cr_in, false);
         //if (rci_out.exists()) rci_out.delete(); // we want only fresh rci here (during testing) 
         if (!(rci_out.exists())) {
             kelondroAttrSeq rcix = new kelondroAttrSeq("Global Ranking Reverse Citation Index",
@@ -258,9 +258,13 @@ public class plasmaRankingCRProcess {
                 l = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
                 System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l)) + " seconds remaining; mem = " + Runtime.getRuntime().freeMemory());  
             }
+            i.remove();
         }
 
         // finished. write to file
+        cr = null;
+        cr_in = null;
+        System.gc();
         rci.toFile(rci_out);
         return count;
     }
