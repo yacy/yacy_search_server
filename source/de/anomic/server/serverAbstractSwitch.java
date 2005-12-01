@@ -99,7 +99,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
         // doing a config settings migration
         HashMap migratedSettings = yacyVersion.migrateSwitchboardConfigSettings(this,(HashMap) removedProps);
-        configProps.putAll(migratedSettings);
+        if(migratedSettings!=null) configProps.putAll(migratedSettings);
         
 	    // merge new props from init to config
 	    // this is necessary for migration, when new properties are attached
