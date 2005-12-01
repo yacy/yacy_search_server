@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyVersion;
 
 public abstract class serverAbstractSwitch implements serverSwitch {
 
@@ -77,7 +78,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	new File(configFile.getParent()).mkdir();
 
 	// predefine init's
-	Map initProps;
+	Map initProps, removedProps = new HashMap();
 	if (initFile.exists()) initProps = serverFileUtils.loadHashMap(initFile); else initProps = new HashMap();
 
 	// load config's from last save
@@ -89,10 +90,17 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	    Iterator i = configProps.keySet().iterator();
 	    String key;
 	    while (i.hasNext()) {
-		key = (String) i.next();
-		if (!(initProps.containsKey(key))) i.remove();
+	        key = (String) i.next();
+	        if (!(initProps.containsKey(key))) {
+                removedProps.put(key,this.configProps.get(key));
+                i.remove();
+            }
 	    }
 
+        // doing a config settings migration
+        HashMap migratedSettings = yacyVersion.migrateSwitchboardConfigSettings(this,(HashMap) removedProps);
+        configProps.putAll(migratedSettings);
+        
 	    // merge new props from init to config
 	    // this is necessary for migration, when new properties are attached
 	    initProps.putAll(configProps);

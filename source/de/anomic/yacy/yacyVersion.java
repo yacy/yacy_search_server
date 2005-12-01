@@ -1,6 +1,9 @@
 package de.anomic.yacy;
 
+import java.util.HashMap;
+
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
 
 public final class yacyVersion {    
@@ -41,5 +44,13 @@ public final class yacyVersion {
             sb.setConfig("downloadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
             sb.setConfig("downloadAccountBase64", "");
         }
+    }
+    
+    public static HashMap migrateSwitchboardConfigSettings(serverAbstractSwitch sb, HashMap removedSettings) {
+        if ((removedSettings == null)||(removedSettings.size() == 0)) return null;
+        HashMap migratedSettings = new HashMap();        
+        
+        return migratedSettings;
+        
     }
 }
