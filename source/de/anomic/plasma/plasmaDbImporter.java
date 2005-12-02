@@ -196,7 +196,7 @@ public class plasmaDbImporter extends Thread {
                         newContainer.add(importWordIdxEntry,System.currentTimeMillis());
                         
                         if (entryCounter % 500 == 0) {
-                            this.log.logFine(entryCounter + " word entries and " + wordCounter + " word entries processed so far.");
+                            this.log.logFine(entryCounter + " word entries and " + wordCounter + " word entities processed so far.");
                         }
                     }
                     
