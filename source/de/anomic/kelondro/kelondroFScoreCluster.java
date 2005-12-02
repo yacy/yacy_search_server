@@ -125,7 +125,7 @@ public class kelondroFScoreCluster {
     private class scoreIterator implements Iterator {
         // iteration of score objects
         
-        kelondroTree.rowIterator iterator;
+        Iterator iterator;
         
         public scoreIterator(boolean up, boolean rotating) throws IOException {
             iterator = countrefDB.rows(up, rotating);

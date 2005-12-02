@@ -719,7 +719,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
 
     public class kiter implements Iterator {
         // enumerates entry elements
-        kelondroTree.rowIterator i;
+        Iterator i;
         boolean error = false;
         
         public kiter(boolean up, boolean rotating) throws IOException {

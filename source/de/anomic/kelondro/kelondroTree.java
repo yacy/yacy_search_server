@@ -971,7 +971,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	}
     }
 
-    public synchronized rowIterator rows(boolean up, boolean rotating) throws IOException {
+    public synchronized Iterator rows(boolean up, boolean rotating) throws IOException {
 	// iterates the rows of the Nodes
 	// enumerated objects are of type byte[][]
         // iterates the elements in a sorted way.

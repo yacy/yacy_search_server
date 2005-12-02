@@ -50,6 +50,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
@@ -257,7 +258,7 @@ public class plasmaCrawlEURL extends plasmaURL {
 
     public class kenum implements Enumeration {
 	// enumerates entry elements
-	kelondroTree.rowIterator i;
+	Iterator i;
 	public kenum(boolean up, boolean rotating) throws IOException {
             i = urlHashCache.rows(up, rotating);
         }

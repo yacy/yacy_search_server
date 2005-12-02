@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.Random;
 import java.util.Date;
+import java.util.Iterator;
 
 import de.anomic.server.serverCodings;
 import de.anomic.kelondro.kelondroIndex;
@@ -20,12 +21,18 @@ import de.anomic.server.serverMemory;
 public class dbtest {
 
     public final static int keylength = 12;
-    public final static int valuelength = 446; // sum of all data length as defined in plasmaURL
+    public final static int valuelength = 223; // sum of all data length as defined in plasmaURL
     public final static long buffer = 8192 * 1024; // 8 MB buffer
-    public static byte[] dummyvalue = new byte[valuelength];
+    public static byte[] dummyvalue1 = new byte[valuelength];
+    public static byte[] dummyvalue2 = new byte[valuelength];
     static {
         // fill the dummy value
-        for (int i = 0; i < valuelength; i++) dummyvalue[i] = '.';
+        for (int i = 0; i < valuelength; i++) dummyvalue1[i] = '.';
+        dummyvalue1[0] = '[';
+        dummyvalue1[valuelength - 1] = ']';
+        for (int i = 0; i < valuelength; i++) dummyvalue2[i] = '-';
+        dummyvalue2[0] = '{';
+        dummyvalue2[valuelength - 1] = '}';
     }
     
     public static byte[] randomHash(Random r) {
@@ -55,7 +62,7 @@ public class dbtest {
                 if (tablefile.exists()) {
                     table = new kelondroTree(tablefile, buffer);
                 } else {
-                    table = new kelondroTree(tablefile, buffer, keylength, valuelength);
+                    table = new kelondroTree(tablefile, buffer, new int[]{keylength, valuelength, valuelength});
                 }
             }
             
@@ -81,10 +88,19 @@ public class dbtest {
                 long randomstart = Long.parseLong(args[4]);
                 Random random = new Random(randomstart);
                 for (int i = 0; i < count; i++) {
-                    table.put(new byte[][]{randomHash(random), dummyvalue});
+                    table.put(new byte[][]{randomHash(random), dummyvalue1, dummyvalue2});
                     if (i % 500 == 0) {
                         System.out.println(i + " entries processed so far.");
                     }
+                }
+            }
+            if (command.equals("list")) {
+                Iterator i = table.rows(true, false);
+                byte[][] row;
+                while (i.hasNext()) {
+                    row = (byte[][]) i.next();
+                    for (int j = 0; j < row.length; j++) System.out.print(new String(row[j]) + ",");
+                    System.out.println();
                 }
             }
             
@@ -116,8 +132,6 @@ public class dbtest {
  */
 final class dbTable implements kelondroIndex {
 
-
-    
     private final String db_driver_str_mysql = "org.gjt.mm.mysql.Driver";
     private final String db_driver_str_pgsql = "org.postgresql.Driver";
     
@@ -211,6 +225,10 @@ final class dbTable implements kelondroIndex {
         return null;
     }
     
+    public Iterator rows(boolean up, boolean rotating) throws IOException {
+        // Objects are of type byte[][]
+        return null;
+    }
 }
 
 final class memprofiler extends Thread {
