@@ -99,7 +99,7 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
     }
 
     public void close() throws IOException {
-        RAFile.close();
+        if (RAFile != null) RAFile.close();
         RAFile = null;
     }
 
