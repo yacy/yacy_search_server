@@ -122,7 +122,7 @@ public final class plasmaCrawlStacker {
     
     public void close() {
         try {
-            this.log.logFine("Shutdown. Terminationg worker threads.");
+            this.log.logFine("Shutdown. Terminating worker threads.");
             if (this.theWorkerPool != null) this.theWorkerPool.close();
         } catch (Exception e1) {
             this.log.logSevere("Unable to shutdown all remaining stackCrawl threads", e1);
