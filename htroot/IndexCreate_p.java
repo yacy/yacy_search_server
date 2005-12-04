@@ -48,12 +48,10 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 import de.anomic.data.wikiCode;
@@ -75,11 +73,6 @@ import de.anomic.yacy.yacyNewsPool;
 
 public class IndexCreate_p {
     
-    private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
-    private static String daydate(Date date) {
-        if (date == null) return ""; else return dayFormatter.format(date);
-    }
-    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
@@ -90,8 +83,6 @@ public class IndexCreate_p {
         prop.put("refreshbutton", 0);
                             
         switchboard.cleanProfiles();
-        
-        int i;
         
         if (post != null) {
             if (post.containsKey("crawlingstart")) {
@@ -211,7 +202,7 @@ public class IndexCreate_p {
                                 serverFileUtils.write(fileContent,os);
                                 os.close();
                                 
-                                String headline = scraper.getHeadline();
+                                //String headline = scraper.getHeadline();
                                 HashMap hyperlinks = (HashMap) scraper.getAnchors();
                                 
                                 // creating a crawler profile

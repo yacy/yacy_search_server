@@ -44,7 +44,6 @@
 //if the shell's current path is HTROOT
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -61,7 +60,6 @@ public class autoconfig {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         
         serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = (plasmaSwitchboard)env;
         
         // getting the http host header
         String hostSocket = (String) header.get(httpHeader.CONNECTION_PROP_HOST);
