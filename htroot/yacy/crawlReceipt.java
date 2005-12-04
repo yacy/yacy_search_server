@@ -54,7 +54,6 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyVersion;
 
 public final class crawlReceipt {
 
@@ -69,20 +68,20 @@ public final class crawlReceipt {
         serverObjects prop = new serverObjects();
         serverLog log = switchboard.getLog();
         
-	if ((post == null) || (env == null)) return prop;
+        if ((post == null) || (env == null)) return prop;
 
-	int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
-	int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
+        //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
+        //int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
 
-	// request values
-	String iam        = (String) post.get("iam", "");      // seed hash of requester
+        // request values
+        String iam        = (String) post.get("iam", "");      // seed hash of requester
         String youare     = (String) post.get("youare", "");    // seed hash of the target peer, needed for network stability
-	String process    = (String) post.get("process", "");  // process type
-	String key        = (String) post.get("key", "");      // transmission key
-	String receivedUrlhash    = (String) post.get("urlhash", "");  // the url hash that has been crawled
+        //String process    = (String) post.get("process", "");  // process type
+        String key        = (String) post.get("key", "");      // transmission key
+        String receivedUrlhash    = (String) post.get("urlhash", "");  // the url hash that has been crawled
         String result     = (String) post.get("result", "");   // the result; either "ok" or "fail"
         String reason     = (String) post.get("reason", "");   // the reason for that result
-        String words      = (String) post.get("wordh", "");    // priority word hashes
+        //String words      = (String) post.get("wordh", "");    // priority word hashes
         String propStr    = crypt.simpleDecode((String) post.get("lurlEntry", ""), key);
         
         /*

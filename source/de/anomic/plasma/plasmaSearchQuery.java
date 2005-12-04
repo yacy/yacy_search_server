@@ -97,7 +97,6 @@ public final class plasmaSearchQuery {
         this.wantedResults = wantedResults;
         this.maximumTime = maximumTime;
         this.urlMask = urlMask;
-        this.referrer = referrer;
         this.domType = -1;
         this.domGroupName = null;
         this.domMaxTargets = -1;

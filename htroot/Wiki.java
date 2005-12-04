@@ -64,8 +64,8 @@ import de.anomic.yacy.yacyCore;
 
 public class Wiki {
 
-    private static String ListLevel = "";
-    private static String numListLevel = "";
+    //private static String ListLevel = "";
+    //private static String numListLevel = "";
 
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     public static String dateString(Date date) {

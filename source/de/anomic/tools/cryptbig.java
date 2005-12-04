@@ -256,7 +256,7 @@ public class cryptbig {
 	    String encryptionDate   = dateFormatter.format(new Date()); // 17 byte
 	    String inFileSize       = serverCodings.standardCoder.encodeBase64Long(inFile.length(), 11); // 64 / 6 = 11; 11 byte
 	    String flag             = "1"; // 1 byte
-	    int    inFileNameLength = inFileName.length(); // 256
+	    //int    inFileNameLength = inFileName.length(); // 256
 	    String X                = inFileDate + encryptionDate + inFileSize + flag + inFileName;
 
 	    System.out.println("TEST: preserving inFileDate    : " + dateFormatter.parse(inFileDate, new ParsePosition(0)));

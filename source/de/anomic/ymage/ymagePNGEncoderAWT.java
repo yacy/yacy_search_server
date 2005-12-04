@@ -63,8 +63,6 @@ public class ymagePNGEncoderAWT {
             gr.clearRect(0, 0, matrix.getWidth(), matrix.getHeight());
             
             WritableRaster wr = bi.getRaster();
-            int n;
-            int r, g, b;
             matrix.getColorMode(complementary);
             for (int i = matrix.getWidth() - 1; i >= 0; i--) {
                 for (int j = matrix.getHeight() - 1; j >= 0; j--) {

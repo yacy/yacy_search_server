@@ -50,7 +50,6 @@ import java.util.Random;
 import java.util.StringTokenizer;
 
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;

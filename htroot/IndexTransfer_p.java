@@ -94,9 +94,8 @@ public final class IndexTransfer_p {
         
         // insert constants
         plasmaWordIndexDistribution.transferIndexThread transfThread = switchboard.indexDistribution.transferIdxThread;
-        int wcount = 0, ucount = 0;
-        prop.put("wcount", Integer.toString(wcount = switchboard.wordIndex.size()));
-        prop.put("ucount", Integer.toString(ucount = switchboard.urlPool.loadedURL.size()));
+        prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
+        prop.put("ucount", Integer.toString(switchboard.urlPool.loadedURL.size()));
         prop.put("running",(transfThread==null)?0:1);
         if (transfThread != null) {
             String[] status = transfThread.getStatus();

@@ -1,4 +1,4 @@
-// /xml/queues/indexing_p.java
+// /xml.queues/indexing_p.java
 // -------------------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -44,11 +44,12 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
+package xml.queues;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
-import java.util.Iterator;
 import java.io.IOException;
 
 import de.anomic.data.wikiCode;
@@ -70,10 +71,10 @@ public class indexing_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        wikiCode wikiTransformer = new wikiCode(switchboard);
+        //wikiCode wikiTransformer = new wikiCode(switchboard);
         serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
-        int showRejectedCount = 10;
+        //int showRejectedCount = 10;
         
         yacySeed initiator;
         

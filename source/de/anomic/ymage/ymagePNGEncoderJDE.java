@@ -104,7 +104,6 @@ public class ymagePNGEncoderJDE extends Object
         }
         width = matrix.getWidth();
         height = matrix.getHeight();
-        this.matrix = matrix;
 
         /*
          * start with an array that is big enough to hold all the pixels

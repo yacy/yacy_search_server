@@ -144,7 +144,7 @@ public final class IndexImport_p {
             long currWordEntryCount = currThread.getWordEntryCounter();
             long currWordEntityCounter = currThread.getWordEntityCounter();
             long currUrlCounter = currThread.getUrlCounter();
-            long currImportDbSize = currThread.getImportWordDbSize();
+            //long currImportDbSize = currThread.getImportWordDbSize();
             long estimatedTime = currThread.getEstimatedTime();
             long elapsedTime = currThread.getElapsedTime();
             int jobNr = currThread.getJobNr();

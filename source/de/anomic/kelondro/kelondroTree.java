@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -1484,7 +1483,6 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         String[] s = permutations(elements);
         kelondroTree tt;
         File testFile = new File("test.db");
-        byte[] b;
         try {
             for (int i = 0; i < s.length; i++) {
                 System.out.println("*** probing tree " + i + " for permutation " + s[i]);

@@ -47,7 +47,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 import org.apache.log4j.Level;

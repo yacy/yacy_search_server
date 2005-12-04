@@ -43,10 +43,8 @@
 
 package de.anomic.plasma.parser.tar;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.io.PushbackInputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;

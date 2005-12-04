@@ -50,7 +50,6 @@ import java.util.Date;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
-import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -67,8 +66,8 @@ public final class crawlOrder {
         
         if ((post == null) || (env == null)) return prop;
 
-        int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
-        int crawlingdepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
+        //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
+        //int crawlingdepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
 
         // request values
         String iam        = (String) post.get("iam", "");       // seed hash of requester
@@ -192,8 +191,8 @@ public final class crawlOrder {
                 } else {
                     // new method: several urls
                     int stackCount = 0;
-                    int doubleCount = 0;
-                    int rejectedCount = 0;
+                    //int doubleCount = 0;
+                    //int rejectedCount = 0;
                     for (int i = 0; i < count; i++) {
                         env.getLog().logFinest("crawlOrder: b: url='" + (String) urlv.get(i) + "'");
                         

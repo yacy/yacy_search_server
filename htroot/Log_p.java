@@ -50,7 +50,6 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.GuiHandler;
@@ -59,7 +58,6 @@ public class Log_p {
     
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         String log = "";
         boolean reversed = false;

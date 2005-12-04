@@ -44,7 +44,6 @@ package de.anomic.server;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 public final class serverClassLoader extends ClassLoader {
 

@@ -135,7 +135,6 @@ public class plasmaGrafics {
         //System.out.println("Seed Minimum distance is       " + yacySeed.minDHTNumber);
         
         yacySeed seed;
-        int angle;
         long lastseen;
         
         // draw connected senior and principals

@@ -57,7 +57,6 @@ import java.util.TreeSet;
 import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
-import de.anomic.tools.bitfield;
 
 public class plasmaRankingRCIEvaluation {
     

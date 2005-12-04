@@ -465,7 +465,8 @@ public class kelondroRecords {
             this.headChanged = true;
             this.tailChanged = true;
 	}
-        
+    
+	/*
 	private Node(Handle handle) throws IOException {
 	    // this creates an entry with an pre-reserved entry position
 	    // values can be written using the setValues() method
@@ -479,7 +480,8 @@ public class kelondroRecords {
             // init the content
             initContent();
 	}
-
+	*/
+	
         private Node(Handle handle, Node parentNode, int referenceInParent) throws IOException {
 	    // this creates an entry with an pre-reserved entry position
 	    // values can be written using the setValues() method
@@ -863,7 +865,6 @@ public class kelondroRecords {
             for (int cp = 0; cp < 3; cp++) {
                 Iterator i = XcacheHeaders[cp].entrySet().iterator();
                 Map.Entry entry;
-                byte[] b;
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
                     

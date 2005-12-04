@@ -64,7 +64,7 @@ public class Steering {
         // handle access rights
         switch (sb.adminAuthenticated(header)) {
             case 0: // wrong password given
-                try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {} // prevent brute-force
+                try {Thread.sleep(3000);} catch (InterruptedException e) {} // prevent brute-force
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
             case 1: // no password given

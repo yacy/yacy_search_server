@@ -82,7 +82,6 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.urlRedirector.urlRedirectord;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacySeedDB;
 import de.anomic.plasma.plasmaSwitchboard;
 
 public final class serverCore extends serverAbstractThread implements serverThread {

@@ -86,7 +86,7 @@ public class IndexMonitor {
                 return prop;
             }
             String adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "");
-            boolean authenticated = (adminAccountBase64MD5.equals(serverCodings.standardCoder.encodeMD5Hex(authorization)));
+            boolean authenticated = (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization)));
             if (!authenticated) {
                 // force log-in (again, because wrong password was given)
                 prop.put("AUTHENTICATE", "admin log-in");

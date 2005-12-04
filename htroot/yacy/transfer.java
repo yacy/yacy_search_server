@@ -55,7 +55,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacySeedDB;
 
 public final class transfer {
 

@@ -90,10 +90,6 @@ public class SettingsAck_p {
         
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
-        // set values
-        String s;
-        int pos;
-        
         if (post == null) {
             prop.put("info", 1);//no information submitted
             return prop;
@@ -381,7 +377,7 @@ public class SettingsAck_p {
             String remoteProxyPwd = post.get("remoteProxyPwd", "");
             
             String remoteProxyNoProxyStr = post.get("remoteProxyNoProxy", "");
-            String[] remoteProxyNoProxyPatterns = remoteProxyNoProxyStr.split(",");
+            //String[] remoteProxyNoProxyPatterns = remoteProxyNoProxyStr.split(",");
             
             /* ====================================================================
              * Storing settings into config file

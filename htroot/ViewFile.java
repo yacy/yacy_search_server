@@ -52,11 +52,9 @@ import java.net.URLEncoder;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaCrawlLURL.Entry;
-import de.anomic.plasma.plasmaCrawlProfile.entry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

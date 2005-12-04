@@ -470,7 +470,7 @@ public class dir {
             );
 
             final String urlHash = newEntry.hash();
-            final int words = switchboard.wordIndex.addPageIndex(url, urlHash, new Date(), condenser, "**", plasmaWordIndexEntry.DT_SHARE);
+            /*final int words =*/ switchboard.wordIndex.addPageIndex(url, urlHash, new Date(), condenser, "**", plasmaWordIndexEntry.DT_SHARE);
         } catch (IOException e) {}
     }
 

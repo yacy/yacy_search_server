@@ -49,7 +49,6 @@ import java.util.Date;
 import java.util.HashMap;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -65,7 +64,6 @@ public class MessageSend_p {
 
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
 	serverObjects prop = new serverObjects();
 
 	String body = "";
@@ -125,7 +123,7 @@ public class MessageSend_p {
 	// send written message to peer
             try {
                 int messagesize = Integer.parseInt(post.get("messagesize", "0"));
-                int attachmentsize = Integer.parseInt(post.get("attachmentsize", "0"));
+                //int attachmentsize = Integer.parseInt(post.get("attachmentsize", "0"));
                 
                 if (messagesize < 1000) messagesize = 1000; // debug
                 if (subject.length() > 100) subject = subject.substring(0, 100);
