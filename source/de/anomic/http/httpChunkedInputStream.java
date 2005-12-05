@@ -57,7 +57,7 @@ import de.anomic.server.serverByteBuffer;
  */
 public final class httpChunkedInputStream extends InputStream {
     
-    //private static final int READ_CHUNK_STATE_NORMAL = 0;
+    private static final int READ_CHUNK_STATE_NORMAL = 0;
     private static final int READ_CHUNK_STATE_CR_READ = 1;
     private static final int READ_CHUNK_STATE_IN_EXT_CHUNK = 2;
     private static final int READ_CHUNK_STATE_FINISHED = -1;
@@ -174,13 +174,13 @@ public final class httpChunkedInputStream extends InputStream {
     throws IOException {           
         
         serverByteBuffer baos = new serverByteBuffer();
-        int state = 0; 
+        int state = READ_CHUNK_STATE_NORMAL; 
         while (state != READ_CHUNK_STATE_FINISHED) {
             int b = in.read();
             if (b == -1) throw new IOException("Malformed chunk. Unexpected end");
             
             switch (state) {
-            case 0: 
+            case READ_CHUNK_STATE_NORMAL: // 0
                 switch (b) {
                 case CR:
                     state = READ_CHUNK_STATE_CR_READ;
@@ -195,7 +195,7 @@ public final class httpChunkedInputStream extends InputStream {
                 }
                 break;
                 
-            case 1:
+            case READ_CHUNK_STATE_CR_READ: // 1
                 if (b == LF) {
                     state = READ_CHUNK_STATE_FINISHED;
                 } else {
@@ -204,7 +204,7 @@ public final class httpChunkedInputStream extends InputStream {
                 }
                 break;
                 
-            case 2:
+            case READ_CHUNK_STATE_IN_EXT_CHUNK: // 2
                 switch (b) {
                 case CR:
                     state = READ_CHUNK_STATE_CR_READ;
