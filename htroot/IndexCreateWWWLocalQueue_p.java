@@ -45,13 +45,18 @@
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaCrawlNURL.Entry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -70,10 +75,65 @@ public class IndexCreateWWWLocalQueue_p {
         serverObjects prop = new serverObjects();
  
         if (post != null) {
-            if (post.containsKey("clearcrawlqueue")) {
-                int c = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-                switchboard.urlPool.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
-                switchboard.cleanProfiles();
+            if (post.containsKey("deleteEntries")) {
+                int c = 0;
+                
+                String pattern = post.get("pattern", ".*").trim();
+                String option  = post.get("option", ".*").trim();
+                if (pattern.equals(".*")) {
+                    c = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+                    switchboard.urlPool.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
+                    switchboard.cleanProfiles();
+                } else{
+                    Pattern compiledPattern = null;
+                    try {
+                        // compiling the regular expression
+                        compiledPattern = Pattern.compile(pattern);
+                        
+                        // iterating through the list of URLs
+                        Iterator iter = switchboard.urlPool.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
+                        while (iter.hasNext()) {
+                            String value = null;
+                            String nextHash = new String((byte[]) iter.next());
+                            Entry entry = switchboard.urlPool.noticeURL.getEntry(nextHash);
+                            if (entry == null) continue;
+                            
+                            if ((option.equals("URL")&&(entry.url() != null))) {
+                                value = entry.url().toString();
+                            } else if ((option.equals("AnchorName"))) {
+                                value = entry.name();
+                            } else if ((option.equals("Profile"))) {
+                                String profileHandle = entry.profileHandle();
+                                if (profileHandle == null) {
+                                    value = "unknown";
+                                } else {                                    
+                                    plasmaCrawlProfile.entry profile = switchboard.profiles.getEntry(profileHandle);
+                                    if (profile == null) {
+                                        value = "unknown";
+                                    } else {                                    
+                                        value = profile.name();
+                                    }
+                                }
+                            } else if ((option.equals("Depth"))) {
+                                value = Integer.toString(entry.depth());
+                            } else if ((option.equals("Initiator"))) {
+                                value = (entry.initiator()==null)?"proxy":wikiCode.replaceHTML(entry.initiator());
+                            } else if ((option.equals("ModifiedDate"))) {
+                                value = daydate(entry.loaddate());
+                            }
+                            
+                            if (value != null) {
+                                Matcher matcher = compiledPattern.matcher(value);
+                                if (matcher.find()) {
+                                    switchboard.urlPool.noticeURL.remove(nextHash);
+                                }                                    
+                            }
+                            
+                        }
+                    } catch (PatternSyntaxException e) {
+                        e.printStackTrace();
+                    }
+                }
                 
                 prop.put("info", 3);//crawling queue cleared
                 prop.put("info_numEntries", c);

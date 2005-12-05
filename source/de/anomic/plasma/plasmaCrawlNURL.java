@@ -251,6 +251,19 @@ public class plasmaCrawlNURL extends plasmaURL {
             default: return null;
         }
     }
+    
+    public Iterator iterator(int stackType) {
+        switch (stackType) {
+        case STACK_TYPE_CORE:     return coreStack.iterator();
+        case STACK_TYPE_LIMIT:    return limitStack.iterator();
+        case STACK_TYPE_OVERHANG: return overhangStack.iterator();
+        case STACK_TYPE_REMOTE:   return remoteStack.iterator();
+        case STACK_TYPE_IMAGE:    return imageStack.iterator();
+        case STACK_TYPE_MOVIE:    return movieStack.iterator();
+        case STACK_TYPE_MUSIC:    return musicStack.iterator();
+        default: return null;
+        }        
+    }
 
     public Entry pop(int stackType) {
         switch (stackType) {

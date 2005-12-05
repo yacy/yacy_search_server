@@ -18,9 +18,20 @@ It may also contain urls that are computed by the proxy-prefetch.
 The local crawler queue is empty<br><br>
 ::
 <form action="IndexCreateWWWLocalQueue_p.html" method="post" enctype="multipart/form-data">
-<input type="submit" name="clearcrawlqueue" value="clear local crawl queue">
+	Delete Enties: 
+	<input type="text" name="pattern" value=".*" size="20" maxlength="200"/>	
+	<select name="option" size="1">
+	   <option value="Initiator">Initiator</option>
+	   <option value="Profile">Profile</option>
+	   <option value="Depth">Depth</option>
+	   <option value="ModifiedDate">Modified Date</option>
+	   <option value="AnchorName">Anchor Name</option>
+	   <option value="URL" selected="selected">URL</option>
+	</select>
+	<input type="submit" name="deleteEntries" value="Delete"><i>This may take a quite long time</i>
 </form>
 <br>
+<hr>
 There are #[num]# entries in the local crawler queue. Showing #[show-num]# most recent entries:
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader">
