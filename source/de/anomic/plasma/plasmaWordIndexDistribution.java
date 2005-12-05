@@ -202,7 +202,7 @@ public final class plasmaWordIndexDistribution {
         log.logFine("Selected hash " + startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash));
         Object[] selectResult = selectTransferIndexes(startPointHash, indexCount, this.maxOpenFiles);
         plasmaWordIndexEntity[] indexEntities = (plasmaWordIndexEntity[]) selectResult[0];
-        Integer openedFiles = (Integer) selectResult[2];
+        //Integer openedFiles = (Integer) selectResult[2];
         HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry 
         if ((indexEntities == null) || (indexEntities.length == 0)) {
             log.logFine("No index available for index transfer, hash start-point " + startPointHash);
@@ -415,7 +415,6 @@ public final class plasmaWordIndexDistribution {
     }
 
     boolean deleteTransferIndexes(plasmaWordIndexEntity[] indexEntities) throws IOException {
-        String wordhash;
         Iterator urlIter;
         plasmaWordIndexEntry indexEntry;
         plasmaWordIndexEntity indexEntity;
@@ -672,8 +671,7 @@ public final class plasmaWordIndexDistribution {
         private int chunkSize = 500;   
         private final long startingTime = System.currentTimeMillis();
         private final plasmaSwitchboard sb;
-        private final Runtime rt = Runtime.getRuntime();
-        transferIndexWorkerThread worker = null;
+        private transferIndexWorkerThread worker = null;
         
         public transferIndexThread(yacySeed seed, boolean delete) {
             super(new ThreadGroup("TransferIndexThreadGroup"),"TransferIndex_" + seed.getName());
@@ -911,6 +909,7 @@ public final class plasmaWordIndexDistribution {
             } catch (IOException ee) {}
         }
         
+        /*
         private boolean isAborted() {
             if (finished || Thread.currentThread().isInterrupted()) {
                 this.status = "aborted";
@@ -918,6 +917,7 @@ public final class plasmaWordIndexDistribution {
             } 
             return false;
         }
+        */
     }
 
 }

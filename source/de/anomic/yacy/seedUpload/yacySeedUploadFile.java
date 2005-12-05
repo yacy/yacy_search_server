@@ -58,7 +58,7 @@ public class yacySeedUploadFile implements yacySeedUploader {
 
     public String uploadSeedFile(serverSwitch sb, yacySeedDB seedDB, File seedFile) throws Exception {
         
-        String logt, seedFilePath = "";
+        String seedFilePath = "";
         try {
             seedFilePath = sb.getConfig(CONFIG_FILE_PATH,"");
             if (seedFilePath.length() == 0) throw new Exception("Path to seed file is not configured properly");

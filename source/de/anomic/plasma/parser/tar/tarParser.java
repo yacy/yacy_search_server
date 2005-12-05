@@ -142,7 +142,7 @@ public class tarParser extends AbstractParser implements Parser {
 
 
                     byte[] buf = new byte[(int) entry.getSize()];
-                    int bytesRead = tin.read(buf);
+                    /*int bytesRead =*/ tin.read(buf);
 
                     tempFile = File.createTempFile("tarParser_" + ((idx>-1)?entryName.substring(0,idx):entryName), (entryExt.length()>0)?"."+entryExt:entryExt);
                     serverFileUtils.write(buf, tempFile);           

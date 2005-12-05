@@ -47,7 +47,6 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroDynTree;
 import de.anomic.server.serverCodings;
@@ -91,9 +90,10 @@ public class plasmaWordConnotation {
         addSentence(sentence.split(" "));
     }
     
+    /*
     public String[] getConnotation(String word, int count) {
         TreeMap map = new TreeMap();
         return null;
     }
-    
+    */
 }

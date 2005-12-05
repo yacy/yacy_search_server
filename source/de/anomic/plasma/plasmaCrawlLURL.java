@@ -390,7 +390,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
     private String descr;
     private Date   moddate;
     private Date   loaddate;
-    String urlHash;
+    private String urlHash;
     private String referrerHash;
     private int    copyCount;
     private String flags;
@@ -399,7 +399,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
     private char   doctype;
     private long   size;
     private int    wordCount;
-        private String snippet;
+    private String snippet;
 
     public Entry(
             URL url, 
@@ -489,7 +489,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
         this.urlHash = prop.getProperty("hash", dummyHash);
         try {
-        byte[][] entry = urlHashCache.get(urlHash.getBytes());
+        //byte[][] entry = urlHashCache.get(urlHash.getBytes());
         //if (entry == null) {
             this.referrerHash = prop.getProperty("referrer", dummyHash);
             this.moddate = shortDayFormatter.parse(prop.getProperty("mod", "20000101"));

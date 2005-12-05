@@ -102,7 +102,7 @@ public class yacyCore {
     // class variables
     private int lastSeedUpload_seedDBSize = 0;
     public long lastSeedUpload_timeStamp = System.currentTimeMillis();
-    private String lastSeedUpload_myPeerType = "";
+    //private String lastSeedUpload_myPeerType = "";
     private String lastSeedUpload_myIP = "";
 
     private static int onlineMode = 1;
@@ -310,7 +310,7 @@ public class yacyCore {
         }
         log.logInfo("re-connect own seed");
         final String oldAddress = seedDB.mySeed.getAddress();
-        final int newSeeds = publishMySeed(true);
+        /*final int newSeeds =*/ publishMySeed(true);
         return (oldAddress != null && oldAddress.equals(seedDB.mySeed.getAddress()));
     }
 
@@ -731,7 +731,7 @@ public class yacyCore {
             this.lastSeedUpload_timeStamp = System.currentTimeMillis();
 
             this.lastSeedUpload_myIP = seedDB.mySeed.get(yacySeed.IP, "127.0.0.1");
-            this.lastSeedUpload_myPeerType = seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
+            //this.lastSeedUpload_myPeerType = seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         }
     }
 

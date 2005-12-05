@@ -158,29 +158,35 @@ public final class plasmaWordIndexAssortment {
     }
 
     public plasmaWordIndexEntryContainer remove(String wordHash) {
-        // deletes a word index from assortment database
-	// and returns the content record
-        byte[][] row = null;
-        try {
-            row = assortments.remove(wordHash.getBytes());
-        } catch (IOException e) {
-            log.logSevere("removeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB " + assortments.file(), e);
-            resetDatabase();
-	    return null;
-        } catch (kelondroException e) {
-            log.logSevere("removeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB " + assortments.file(), e);
-            resetDatabase();
-	    return null;
-        }
-        if (row == null) return null;
-        long updateTime = kelondroRecords.bytes2long(row[2]);
-        plasmaWordIndexEntry[] wordEntries = new plasmaWordIndexEntry[this.bufferStructureLength];
-        plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
-	for (int i = 0; i < assortmentLength; i++) {
-            container.add(new plasmaWordIndexEntry[]{new plasmaWordIndexEntry(new String(row[3 + 2 * i]), new String(row[4 + 2 * i]))}, updateTime);
+		// deletes a word index from assortment database
+		// and returns the content record
+		byte[][] row = null;
+		try {
+			row = assortments.remove(wordHash.getBytes());
+		} catch (IOException e) {
+			log.logSevere("removeAssortment/IO-error: " + e.getMessage()
+					+ " - reset assortment-DB " + assortments.file(), e);
+			resetDatabase();
+			return null;
+		} catch (kelondroException e) {
+			log.logSevere("removeAssortment/kelondro-error: " + e.getMessage()
+					+ " - reset assortment-DB " + assortments.file(), e);
+			resetDatabase();
+			return null;
+		}
+		if (row == null)
+			return null;
+		long updateTime = kelondroRecords.bytes2long(row[2]);
+		// plasmaWordIndexEntry[] wordEntries = new plasmaWordIndexEntry[this.bufferStructureLength];
+		plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
+		for (int i = 0; i < assortmentLength; i++) {
+			container.add(
+					new plasmaWordIndexEntry[] { new plasmaWordIndexEntry(
+							new String(row[3 + 2 * i]), new String(
+									row[4 + 2 * i])) }, updateTime);
+		}
+		return container;
 	}
-        return container;
-    }
     
     private void resetDatabase() {
         // deletes the assortment database and creates a new one

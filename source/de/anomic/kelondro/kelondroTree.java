@@ -170,7 +170,6 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	//   be returned, together with the information wether the new key shall be left or right child.
 	//
 
-	private byte[] key;
 	private Node thenode, parentnode;
 	private boolean found; // property if node was found
 	private byte child;    // -1: left child; 0: root node; 1: right child
@@ -1115,7 +1114,6 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         Handle handle;
         Node node;
         int linelength, width = (1 << (height - 1)) * (columnSize(0) + 1);
-        Handle[] childs;
         String key;
         for (int h = 1; h < height; h++) {
             linelength = width / (thisline.size() * 2);

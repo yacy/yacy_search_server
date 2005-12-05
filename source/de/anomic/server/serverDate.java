@@ -66,7 +66,7 @@ public final class serverDate {
     private final static int[] dimnormal = {january, normalfebruary, march, april, may, june, july, august, september, october, november, december};
     private final static int[] dimleap = {january, leapfebruary, march, april, may, june, july, august, september, october, november, december};
     private final static String[] wkday = {"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
-    private final static String[] month = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+    //private final static String[] month = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
     // find out time zone and DST offset
     private static Calendar thisCalendar = GregorianCalendar.getInstance();
@@ -317,16 +317,16 @@ public final class serverDate {
         } catch (java.text.ParseException e) {
             System.out.println("Parse Exception: " + e.getMessage() + ", pos " + e.getErrorOffset());
         }
-        String testresult;
+        //String testresult;
         int cycles = 10000;
         long start;
         
         start = System.currentTimeMillis();
-        for (int i = 0; i < cycles; i++) testresult = new serverDate().toShortString(false);
+        for (int i = 0; i < cycles; i++) /*testresult =*/ new serverDate().toShortString(false);
         System.out.println("time for " + cycles + " calls to serverDate:" + (System.currentTimeMillis() - start) + " milliseconds");
         
         start = System.currentTimeMillis();
-        for (int i = 0; i < cycles; i++) testresult = testSDateShortString();
+        for (int i = 0; i < cycles; i++) /*testresult =*/ testSDateShortString();
         System.out.println("time for " + cycles + " calls to   javaDate:" + (System.currentTimeMillis() - start) + " milliseconds");
     }    
 }

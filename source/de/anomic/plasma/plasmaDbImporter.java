@@ -20,13 +20,13 @@ public class plasmaDbImporter extends Thread {
     
     private final plasmaCrawlLURL importUrlDB;
     private final plasmaWordIndex importWordIndex;
-    private final String importPath;
+    //private final String importPath;
     private final File importRoot;
     private final int importStartSize;
     
     private final serverLog log;
     private boolean stopped = false;
-    private boolean paused = false;
+    //private boolean paused = false;
     private String wordHash = "------------";
     
     long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = wordChunkStart;
@@ -85,7 +85,7 @@ public class plasmaDbImporter extends Thread {
         }
         
         if (theImportPath == null) throw new NullPointerException();
-        this.importPath = theImportPath;
+        //this.importPath = theImportPath;
         this.importRoot = new File(theImportPath);
         
         if (theHomeIndexDB == null) throw new NullPointerException();

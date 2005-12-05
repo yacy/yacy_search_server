@@ -98,7 +98,7 @@ public class pdfParser extends AbstractParser implements Parser {
 //            Logger theLogger = Logger.getLogger("org.pdfbox");
 //            theLogger.setLevel(Level.INFO);            
             
-            String docTitle = null, docSubject = null, docAuthor = null, docKeyWords = null;
+            String docTitle = null, docSubject = null, /*docAuthor = null,*/ docKeyWords = null;
             
             PDFParser parser = new PDFParser(source);
             parser.parse();
@@ -111,7 +111,7 @@ public class pdfParser extends AbstractParser implements Parser {
             if (theDocInfo != null) {
                 docTitle = theDocInfo.getTitle();
                 docSubject = theDocInfo.getSubject();
-                docAuthor = theDocInfo.getAuthor();
+                //docAuthor = theDocInfo.getAuthor();
                 docKeyWords = theDocInfo.getKeywords();
             }
             

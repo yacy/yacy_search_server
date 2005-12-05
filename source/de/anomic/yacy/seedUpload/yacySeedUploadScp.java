@@ -144,7 +144,6 @@ class sshc {
             
             channel.connect();
             
-            byte[] tmp=new byte[1];
             checkAck(in);
             
             // send "C0644 filesize filename", where filename should not include '/'

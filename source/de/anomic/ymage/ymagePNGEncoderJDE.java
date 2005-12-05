@@ -96,8 +96,7 @@ public class ymagePNGEncoderJDE extends Object
     public byte[] pngEncode( boolean encodeAlpha )
     {
         byte[]  pngIdBytes = { -119, 80, 78, 71, 13, 10, 26, 10 };
-        int     i;
-
+        
         if (matrix == null)
         {
             return null;
@@ -375,7 +374,6 @@ public class ymagePNGEncoderJDE extends Object
         int nBytes = width * bytesPerPixel;
         int leftInsert = offset;
         int leftExtract = 0;
-        byte current_byte;
 
         for (i=actualStart; i < startPos + nBytes; i++)
         {
@@ -433,7 +431,7 @@ public class ymagePNGEncoderJDE extends Object
         byte[] compressedLines; // the resultant compressed lines
         int nCompressed;        // how big is the compressed area?
 
-        int depth;              // color depth ( handle only 8 or 32 )
+        //int depth;              // color depth ( handle only 8 or 32 )
 
         bytesPerPixel = (encodeAlpha) ? 4 : 3;
 

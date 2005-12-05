@@ -169,7 +169,6 @@ public class plasmaRankingCRProcess {
         acc = new kelondroAttrSeq(to_file, false);
         
         // collect source files
-        kelondroAttrSeq source_cr = null;
         File source_file = null;
         String[] files = from_dir.list();
         if (files.length < max_files) max_files = files.length;

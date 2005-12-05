@@ -121,7 +121,7 @@ public class rssParser extends AbstractParser implements Parser {
             String feedDescription = channel.getDescription();
             
             // getting the channel site url
-            URL	channelSiteURL = channel.getSite();
+            //URL	channelSiteURL = channel.getSite();
             
             ImageIF channelImage = channel.getImage();
             if (channelImage != null) {

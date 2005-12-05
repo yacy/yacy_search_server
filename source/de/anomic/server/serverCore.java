@@ -46,8 +46,6 @@
 package de.anomic.server;
 
 // standard server
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,14 +62,18 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.channels.ClosedByInterruptException;
-import java.security.KeyStore;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+/*
+import java.io.File;
+import java.io.FileInputStream;
+import java.security.KeyStore;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
+*/
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool.Config;
@@ -126,6 +128,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         return this.theSessionThreadGroup;
     }
     
+    /*
     private static ServerSocketFactory getServerSocketFactory(boolean dflt, File keyfile, String passphrase) {
         // see doc's at
         // http://java.sun.com/developer/technicalArticles/Security/secureinternet/
@@ -163,6 +166,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
 	    }
 	}
     }
+    */
     
     public static String clientAddress(Socket s) {
         InetAddress uAddr = s.getInetAddress();
@@ -1001,7 +1005,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             try {
                 // set up some reflection
                 Class[] stringType    = {"".getClass()};
-                Class[] exceptionType = {Class.forName("java.lang.Throwable")};
+                //Class[] exceptionType = {Class.forName("java.lang.Throwable")};
                 
                 Object result;
 //                // send greeting
@@ -1150,10 +1154,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     shortReset();
                     
                 } // end of while
-            } catch (java.lang.ClassNotFoundException e) {
+            } /* catch (java.lang.ClassNotFoundException e) {
                 System.out.println("Internal error: Wrapper class not found: " + e.getMessage());
                 System.exit(0);
-            } catch (java.io.IOException e) {
+            } */ catch (java.io.IOException e) {
                 // connection interruption: more or less normal
             }
             //announceMoreExecTime(System.currentTimeMillis() - this.start);

@@ -124,7 +124,7 @@ public class zipParser extends AbstractParser implements Parser {
                 // getting the entry content
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 byte[] buf = new byte[(int) entry.getSize()];
-                int bytesRead = zippedContent.read(buf);
+                /*int bytesRead =*/ zippedContent.read(buf);
                 bos.write(buf);
                 byte[] ut = bos.toByteArray();           
                 

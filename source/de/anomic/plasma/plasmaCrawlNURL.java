@@ -179,13 +179,15 @@ public class plasmaCrawlNURL extends plasmaURL {
         }
     }
 
+    /*
     private static String normalizeHost(String host) {
         if (host.length() > urlHostLength) host = host.substring(0, urlHostLength);
         host = host.toLowerCase();
         while (host.length() < urlHostLength) host = host + " ";
         return host;
     }
-
+    */
+    
     private static String normalizeHandle(int h) {
         String d = Integer.toHexString(h);
         while (d.length() < urlHandleLength) d = "0" + d;

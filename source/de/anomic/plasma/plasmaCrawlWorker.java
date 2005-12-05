@@ -87,7 +87,8 @@ public final class plasmaCrawlWorker extends Thread {
     private boolean stopped = false;
     private boolean done = false;   
 
-    private static boolean doCrawlerLogging = false; 
+    //private static boolean doCrawlerLogging = false; 
+    
     /**
      * Do logging configuration for special proxy access log file
      */
@@ -324,7 +325,7 @@ public final class plasmaCrawlWorker extends Thread {
         }
 
         // TODO: resolve yacy and yacyh domains
-        String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
+        //String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
 
         // set referrer; in some case advertise a little bit:
         referer = (referer == null) ? "" : referer.trim();
@@ -358,7 +359,7 @@ public final class plasmaCrawlWorker extends Thread {
                 // the transfer is ok
 
                 // TODO: aborting download if content is to long ...
-                long contentLength = res.responseHeader.contentLength();
+                //long contentLength = res.responseHeader.contentLength();
 
                 // reserve cache entry
                 plasmaHTCache.Entry htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);

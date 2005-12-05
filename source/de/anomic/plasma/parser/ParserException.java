@@ -47,7 +47,9 @@ package de.anomic.plasma.parser;
 public class ParserException extends Exception
 {
 
-    public ParserException() {
+	private static final long serialVersionUID = 1L;
+
+	public ParserException() {
         super();
     }
 

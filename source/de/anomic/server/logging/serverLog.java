@@ -110,20 +110,12 @@ public final class serverLog {
     public void logFinest(String message, Throwable thrown) {this.theLogger.log(Level.FINEST,message,thrown);} 
     public boolean isFinest() { return this.theLogger.isLoggable(Level.FINEST); }
     
-    private void log(Level level, String msg, Throwable thrown) {
-        this.theLogger.log(level, msg, thrown);
-    }    
-    
     public boolean isLoggable(Level level) {
         return this.theLogger.isLoggable(level);
     }
     
     
     // static log messages: log everything
-    private static void log(String appName, int messageLevel, String message) {
-        Logger.getLogger(appName).log(Level.parse(Integer.toString(messageLevel)),message);
-    }
-    
     public static void logSevere(String appName, String message) {
         Logger.getLogger(appName).severe(message);
     }

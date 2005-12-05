@@ -132,7 +132,6 @@ public class loaderThreads {
     protected class loaderThread extends Thread {
         private URL url;
         private Exception error;
-        private long starttime;
         private loaderProcess process;
         private ArrayList page;
         private boolean loaded;
@@ -141,7 +140,6 @@ public class loaderThreads {
             this.url = url;
             this.process = process;
             this.error = null;
-            this.starttime = System.currentTimeMillis();
             this.page = null;
             this.loaded = false;
         }

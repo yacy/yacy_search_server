@@ -91,6 +91,7 @@ public class plasmaParserDocument {
         this.condenser = null;
     }
     
+    /*
     private String absolutePath(String relativePath) {
         try {
             return htmlFilterContentScraper.urlNormalform(location, relativePath);
@@ -98,6 +99,7 @@ public class plasmaParserDocument {
             return "";
         }
     }
+    */
     
     public String getMimeType() {
         return this.mimeType;

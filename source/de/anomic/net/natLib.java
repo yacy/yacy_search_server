@@ -115,7 +115,7 @@ public class natLib {
     private static boolean isIP(String ip) {
 	if (ip == null) return false;
 	try {
-	    InetAddress dummy = InetAddress.getByName(ip);
+	    /*InetAddress dummy =*/ InetAddress.getByName(ip);
 	    return true;
 	} catch (Exception e) {
 	    return false;

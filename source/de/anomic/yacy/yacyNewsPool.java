@@ -222,7 +222,6 @@ public class yacyNewsPool {
     public synchronized yacyNewsRecord getByOriginator(int dbKey, String category, String originatorHash) throws IOException {
         yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record;
-        String s;
         for (int i = queue.size() - 1; i >= 0; i--) {
             record = queue.top(i);
             if ((record != null) &&

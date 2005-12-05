@@ -48,7 +48,7 @@ import java.util.Properties;
 
 public class whois {
 
-    public static Properties whois(String dom) {
+    public static Properties Whois(String dom) {
         try {
             Process p = Runtime.getRuntime().exec("whois " + dom);
             BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -84,7 +84,7 @@ public class whois {
     }
 
     public static void main(String[] args) {
-        Properties p = whois(args[0]);
+        Properties p = Whois(args[0]);
         if (p != null) {
             System.out.println(p);
             System.out.println("---" + evaluateWhois(p));

@@ -193,7 +193,6 @@ public final class serverCodings {
 	    if (rfc1113compliant) while (in.charAt(in.length() - 1) == '=') in = in.substring(0, in.length() - 1);
 	    byte[] out = new byte[in.length() / 4 * 3 + (((in.length() % 4) == 0) ? 0 : in.length() % 4 - 1)];
 	    long l;
-	    char c1, c2, c3;
 	    while (posIn + 3 < in.length()) {
 		l = decodeBase64Long(in.substring(posIn, posIn + 4));
 		out[posOut+2] = (byte) (l % 256); l = l / 256;

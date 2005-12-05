@@ -68,7 +68,9 @@ import java.util.Map;
 
 public final class serverObjects extends Hashtable implements Cloneable {
 
-    public serverObjects() {
+    private static final long serialVersionUID = 1L;
+
+	public serverObjects() {
         super();
     }
     

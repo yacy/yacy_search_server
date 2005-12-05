@@ -38,7 +38,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+//import java.io.RandomAccessFile;
 
 public class plasmaStore {
 
@@ -104,26 +104,28 @@ public class plasmaStore {
     }
     */
 
+    /*
     private static long[] appendFileToStack(File fragment, File dest) throws IOException {
-	// returns a long[2] with
-	// long[0] = startOfFileFragemt in dest
-	// long[1] = lengthOfFileFragment in dest
-	long l = fragment.length();
-	long p = dest.length();
-	RandomAccessFile fo = new RandomAccessFile(dest, "rw");
-	FileInputStream  fi = new FileInputStream(fragment); 
-	byte[] buffer = new byte[1024];
-	int c;
-	fo.seek(p);
-	while ((c = fi.read(buffer)) >= 0) fo.write(buffer, 0, c);
-	fi.close();
-	fo.close();
-	long[] r = new long[2];
-	r[0] = p;
-	r[1] = l;
-	return r;
-    }
-
+		// returns a long[2] with
+		// long[0] = startOfFileFragemt in dest
+		// long[1] = lengthOfFileFragment in dest
+		long l = fragment.length();
+		long p = dest.length();
+		RandomAccessFile fo = new RandomAccessFile(dest, "rw");
+		FileInputStream fi = new FileInputStream(fragment);
+		byte[] buffer = new byte[1024];
+		int c;
+		fo.seek(p);
+		while ((c = fi.read(buffer)) >= 0)
+			fo.write(buffer, 0, c);
+		fi.close();
+		fo.close();
+		long[] r = new long[2];
+		r[0] = p;
+		r[1] = l;
+		return r;
+	}
+	*/
 
     /*
     public static void main(String[] args) {

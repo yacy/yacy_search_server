@@ -427,11 +427,14 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
      * @param obj 
      * 
      */
+    
     public void passivateObject(Object obj) { 
         //log.debug(" passivateObject..." + obj);
+    	/*
         if (obj instanceof plasmaCrawlWorker)  {
             plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;             
         }
+     */
     }
-
+    
 }

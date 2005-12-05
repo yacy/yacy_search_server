@@ -133,7 +133,7 @@ public final class plasmaSearchEvent {
             }
         } else {
             // do a local search
-            long start = System.currentTimeMillis();
+            //long start = System.currentTimeMillis();
             try {
                 localSearch();
                 plasmaSearchResult result = order();
@@ -193,7 +193,7 @@ public final class plasmaSearchEvent {
             if (rcGlobal.size() >= profileGlobal.getTargetCount(plasmaSearchProfile.PROCESS_POSTSORT) * 3) break; // we have enough
             if (yacySearch.remainingWaiting(searchThreads) == 0) break; // we cannot expect more
             // wait a little time ..
-            try {Thread.currentThread().sleep(100);} catch (InterruptedException e) {}
+            try {Thread.sleep(100);} catch (InterruptedException e) {}
         }
         
         return rcGlobal.size();
@@ -286,7 +286,7 @@ public final class plasmaSearchEvent {
                 rcGlobal.deleteComplete();
             }    
             // wait a little bit before trying again
-            try {Thread.currentThread().sleep(3000);} catch (InterruptedException e) {}
+            try {Thread.sleep(3000);} catch (InterruptedException e) {}
             if (System.currentTimeMillis() - starttime > 90000) {
                 yacySearch.interruptAlive(searchThreads);
                 serverLog.logFine("PLASMA", "SEARCH FLUSH: " + remaining + " PEERS STILL BUSY; ABANDONED; SEARCH WAS " + query.queryWords);

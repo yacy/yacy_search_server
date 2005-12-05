@@ -81,12 +81,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private final flush flushThread;
 
     // calculated constants
-    private static String minKey, maxKey;
+    private static String maxKey;
     static {
-        maxKey = "";
-        for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += 'z';
-        minKey = "";
-        for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
+        maxKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += 'z';
+        //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
 
     public plasmaWordIndexCache(File databaseRoot, plasmaWordIndexInterface backend, int assortmentbufferkb, serverLog log) {
@@ -201,7 +199,6 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             synchronized (cache) {
                 int i = dumpArray.size();
                 String wordHash;
-                plasmaWordIndexEntryContainer container;
                 long creationTime;
                 plasmaWordIndexEntry wordEntry;
                 byte[][] row;
@@ -304,24 +301,22 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
 
         public void run() {
-            String nextHash;
-            Runtime rt = Runtime.getRuntime();
             long pausetime;
             while (!terminate) {
                 if (intermission > 0) {
                     if (this.intermission > System.currentTimeMillis()) {
-                        try {this.sleep(this.intermission - System.currentTimeMillis());} catch (InterruptedException e) {}
+                        try {sleep(this.intermission - System.currentTimeMillis());} catch (InterruptedException e) {}
                     }
                     this.intermission = 0;
                 }
                 if (pause) {
-                    try {this.sleep(300);} catch (InterruptedException e) {}
+                    try {sleep(300);} catch (InterruptedException e) {}
                 } else {
                     flushFromMem();
                     try {
                         pausetime = 1 + java.lang.Math.min(1000, 5 * maxWordsHigh/(cache.size() + 1));
                         if (cache.size() == 0) pausetime = 2000;
-                        this.sleep(pausetime);
+                        sleep(pausetime);
                     } catch (InterruptedException e) {}
                 }              
             }

@@ -114,11 +114,13 @@ public class ymageMatrix implements Cloneable {
         //return Integer.parseInt(col.substring(0,2), 16) << 16 | Integer.parseInt(col.substring(2,4), 16) << 8 | Integer.parseInt(col.substring(4,6), 16);
     }
     
+    /*
     private static String colStr(long c) {
         String s = Long.toHexString(c);
         while (s.length() < 6) s = "0" + s;
         return s;
     }
+    */ 
     
     public Object clone() {
         return new ymageMatrix(this);

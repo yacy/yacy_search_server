@@ -672,8 +672,8 @@ public final class yacyClient {
         String access = (String) phase1.get("access");
         String nextaddress = (String) phase1.get("address");
         String protocol = (String) phase1.get("protocol");
-        String path = (String) phase1.get("path");
-        String maxsize = (String) phase1.get("maxsize");
+        //String path = (String) phase1.get("path");
+        //String maxsize = (String) phase1.get("maxsize");
         String response = (String) phase1.get("response");
         if ((response == null) || (protocol == null) || (access == null)) return "wrong return values from other peer; phase 1";
         if (!(response.equals("ok"))) return "remote peer rejected transfer: " + response;
@@ -1011,7 +1011,7 @@ public final class yacyClient {
         System.out.println("yacyClient Test");
         try {
             final plasmaSwitchboard sb = new plasmaSwitchboard(args[0], "httpProxy.init", "DATA/SETTINGS/httpProxy.conf");
-            final yacyCore core = new yacyCore(sb);
+            /*final yacyCore core =*/ new yacyCore(sb);
             yacyCore.peerActions.loadSeedLists();
             final yacySeed target = yacyCore.seedDB.getConnected(args[1]);
             final String wordhashe = plasmaWordIndexEntry.word2hash("test");

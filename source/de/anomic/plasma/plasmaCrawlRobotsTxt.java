@@ -116,8 +116,12 @@ public class plasmaCrawlRobotsTxt {
     public void removeEntry(String hostName) {
         try {
             robotsTable.remove(hostName.toLowerCase());
-        } catch (IOException e) {}
-    }        
+        } catch (IOException e) {
+        	
+        } catch (kelondroException e) {
+    			resetDatabase();
+        }
+    }
     
     public Entry getEntry(String hostName) {
         try {
@@ -126,6 +130,9 @@ public class plasmaCrawlRobotsTxt {
             return new Entry(hostName, record);
         } catch (IOException e) {
             return null;
+        } catch (kelondroException e) {
+        		resetDatabase();
+        		return null;
         }
     }    
     

@@ -194,10 +194,12 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         // If we reach this point, the process is closed
     }
     
+    /*
     private final void logError(String text) {
         if (log == null) serverLog.logSevere("THREAD-CONTROL", text);
         else log.logSevere(text);
     }    
+    */
     
     private final void logError(String text,Throwable thrown) {
         if (log == null) serverLog.logSevere("THREAD-CONTROL", text, thrown);
@@ -209,10 +211,12 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         else log.logConfig(text);
     }
     
+    /*
     private void logSystem(String text, Throwable thrown) {
         if (log == null) serverLog.logConfig("THREAD-CONTROL", text, thrown);
         else log.logConfig(text,thrown);
     }    
+    */
     
     public void jobExceptionHandler(Exception e) {
         if (!(e instanceof ClosedByInterruptException)) {
@@ -235,8 +239,6 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
             else
                 logSystem("thread '" + this.getName() + "' deployed, " + ((this.busyPause < 0) ? "starting job." : "starting loop."));
         }
-        int outerloop;
-        long innerpause;
         long timestamp;
         long memstamp0, memstamp1;
         boolean isBusy;

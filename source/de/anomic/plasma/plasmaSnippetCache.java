@@ -390,7 +390,6 @@ public class plasmaSnippetCache {
         int i = 0;
         plasmaCrawlLURL.Entry urlentry;
         String urlstring;
-        plasmaSnippetCache.result snippet;
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         while ((acc.hasMoreElements()) && (i < fetchcount) && (System.currentTimeMillis() < limitTime)) {
             urlentry = acc.nextElement();

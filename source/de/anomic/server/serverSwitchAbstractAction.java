@@ -44,7 +44,7 @@ import de.anomic.server.logging.serverLog;
 
 public abstract class serverSwitchAbstractAction {
 
-    private serverLog log = null;
+    protected serverLog log = null;
     private String shortDescr = "", longDescr = "";
     
     public void setDescription(String shortText, String longText) {

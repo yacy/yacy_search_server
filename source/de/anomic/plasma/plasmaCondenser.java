@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -153,7 +152,6 @@ public final class plasmaCondenser {
 	statProp sp, sp1;
 	int wordHandle;
 	int wordHandleCount = 0;
-	int sentenceHandle;
 	int sentenceHandleCount = 0;
 	int allwordcounter = 0;
 	int allsentencecounter = 0;
@@ -601,6 +599,7 @@ public final class plasmaCondenser {
 	}
     }
 
+    /*
     private static void addLineSearchProp(Properties prop, String s, String[] searchwords, HashSet foundsearch) {
 	// we store lines containing a key in search vector
 	int p;
@@ -622,7 +621,8 @@ public final class plasmaCondenser {
 	    }
 	}
     }
-
+    */
+    
     public static Set getWords(byte[] text) {
 	if (text == null) return null;
         ByteArrayInputStream buffer = new ByteArrayInputStream(text);

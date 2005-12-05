@@ -114,11 +114,10 @@ public final class serverByteBuffer extends OutputStream {
 	    FileInputStream fis = new FileInputStream(f);
 //	    byte[] buf = new byte[512];
 //	    int p = 0;
-	    int l;
 //	    while ((l = fis.read(buf)) > 0) {
 //		System.arraycopy(buf, 0, buffer, p, l);
 //		p += l;
-        l = fis.read(buffer);
+        /*int l =*/ fis.read(buffer);
 //	    }
 	    fis.close();
 	} catch (FileNotFoundException e) {
@@ -230,13 +229,15 @@ public final class serverByteBuffer extends OutputStream {
 	return tmp;
     }
 
+    /*
     private serverByteBuffer trim(int start) {
 	if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
 	offset = offset + start;
 	length = length - start;
 	return this;
     }
-        
+    */
+    
     private serverByteBuffer trim(int start, int end) {
         // the end value is outside (+1) of the wanted target array
 	if (start > length) throw new IndexOutOfBoundsException("trim: start > length");

@@ -68,7 +68,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.disorderHeap;
 import de.anomic.yacy.yacySeed;
 
 public final class yacySeedDB {
@@ -87,7 +86,6 @@ public final class yacySeedDB {
     // class objects
     private File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
 
-    private disorderHeap seedQueue;
     private kelondroMap seedActiveDB, seedPassiveDB, seedPotentialDB;
     private int seedDBBufferKB;
     
@@ -146,9 +144,6 @@ public final class yacySeedDB {
         
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();
-        
-        // set up seed queue (for probing candidates)
-        seedQueue = null;
     }
     
     public synchronized void removeMySeed() {

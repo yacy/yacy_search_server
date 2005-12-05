@@ -75,7 +75,7 @@ public final class plasmaCrawlStacker {
     final ThreadGroup theWorkerThreadGroup = new ThreadGroup("stackCrawlThreadGroup");
     final serverLog log = new serverLog("STACKCRAWL");
     final plasmaSwitchboard sb;
-    private boolean stopped = false;
+    //private boolean stopped = false;
     private stackCrawlQueue queue;
     
     public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, int dbCacheSize) throws IOException {
@@ -152,7 +152,7 @@ public final class plasmaCrawlStacker {
             worker.execute(theMsg);
         } catch (InterruptedException e) {
             Thread.interrupted();
-            this.stopped = true;
+            //this.stopped = true;
         }
         catch (Exception e) {
             this.log.logSevere("plasmaStackCrawlThread.run/loop", e);

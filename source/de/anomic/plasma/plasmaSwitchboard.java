@@ -391,16 +391,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
-        int remoteport;
-        try { remoteport = Integer.parseInt(getConfig("remoteProxyPort","3128")); }
-        catch (NumberFormatException e) { remoteport = 3128; }
         
         crawlSlots = Integer.parseInt(getConfig("crawler.MaxActiveThreads", "10"));
         this.crawlingIsPaused = Boolean.valueOf(getConfig("crawler.isPaused", "false")).booleanValue();
         plasmaCrawlLoader.switchboard = this;
-        this.cacheLoader = new plasmaCrawlLoader(
-        this.cacheManager,
-        this.log);
+        this.cacheLoader = new plasmaCrawlLoader(this.cacheManager, this.log);
         
         // starting message board
         this.log.logConfig("Starting Message Board");
@@ -506,9 +501,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         new serverInstantThread(this, "cleanupJob", "cleanupJobSize"), 10000); // all 5 Minutes
         deployThread("82_crawlstack", "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
         new serverInstantThread(sbStackCrawlThread, "job", "size"), 8000);
-        serverInstantThread indexingThread = null;
         deployThread("80_indexing", "Parsing/Indexing", "thread that performes document parsing and indexing", "/IndexCreateIndexingQueue_p.html",
-        indexingThread = new serverInstantThread(this, "deQueue", "queueSize"), 10000);
+        new serverInstantThread(this, "deQueue", "queueSize"), 10000);
         for (int i = 1; i < indexing_cluster; i++) {
             setConfig((i + 80) + "_indexing_idlesleep", getConfig("80_indexing_idlesleep", ""));
             setConfig((i + 80) + "_indexing_busysleep", getConfig("80_indexing_busysleep", ""));
@@ -1179,8 +1173,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 Map hl = document.getHyperlinks();
                 Iterator i = hl.entrySet().iterator();
                 String nexturlstring;
-                String rejectReason;
-                int c = 0;
+                //String rejectReason;
                 Map.Entry e;
                 while (i.hasNext()) {
                     e = (Map.Entry) i.next();

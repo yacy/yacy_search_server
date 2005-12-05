@@ -277,12 +277,14 @@ public final class plasmaSearchResult {
         }
     }
     
+    /*
     private void printSplitLog(String x, String[] y) {
         String s = "";
         for (int i = 0; i < y.length; i++) s = s + ", " + y[i];
         if (s.length() > 0) s = s.substring(2);
         System.out.println("Split '" + x + "' = {" + s + "}");
     }
+    */
     
     public static void main(String[] args) {
         URL[] urls = new URL[10];

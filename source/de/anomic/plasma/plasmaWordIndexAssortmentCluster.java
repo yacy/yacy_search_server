@@ -57,11 +57,10 @@ import de.anomic.server.logging.serverLog;
 public final class plasmaWordIndexAssortmentCluster {
     
     // class variables
-    private File assortmentsPath;
     private int clusterCount;
     public int clusterCapacity;
     
-    private serverLog log;
+    //private serverLog log;
     private plasmaWordIndexAssortment[] assortments;
     private long completeBufferKB;
 
@@ -71,7 +70,7 @@ public final class plasmaWordIndexAssortmentCluster {
 	this.clusterCount = clusterCount;
         this.clusterCapacity = clusterCount * (clusterCount + 1) / 2;
         this.completeBufferKB = bufferkb;
-        this.log = log;
+        //this.log = log;
 	this.assortments = new plasmaWordIndexAssortment[clusterCount];
 
         // open cluster and close it directly again to detect the element sizes

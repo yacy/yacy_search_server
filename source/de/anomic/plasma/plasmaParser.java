@@ -865,9 +865,11 @@ final class plasmaParserFactory implements KeyedPoolableObjectFactory {
      * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
      */
     public void destroyObject(Object key, Object obj) {
+    	/*
         if (obj instanceof Parser) {
             Parser theParser = (Parser) obj;
         }
+    */
     }
     
     /**
@@ -875,7 +877,7 @@ final class plasmaParserFactory implements KeyedPoolableObjectFactory {
      */
     public boolean validateObject(Object key, Object obj) {
         if (obj instanceof Parser) {
-            Parser theParser = (Parser) obj;
+            //Parser theParser = (Parser) obj;
             return true;
         }
         return true;

@@ -183,7 +183,6 @@ public class plasmaRankingRCIEvaluation {
     }
 
     public static void storeRankingTable(TreeSet[] ranking, File tablePath) throws IOException {
-        String hash;
         String filename;
         if (!(tablePath.exists())) tablePath.mkdirs();
         for (int i = 0; i < ranking.length - 1; i++) {
