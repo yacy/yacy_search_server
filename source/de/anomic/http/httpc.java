@@ -535,7 +535,7 @@ public final class httpc {
         //serverLog.logDebug("HTTPC", handle + " initialized");
         this.remoteProxyUse = false;
         //this.timeout = timeout;
-		//if(yacyDebugMode){ this.timeout=60000; }
+		if(yacyDebugMode){ this.timeout=60000; }
         this.savedRemoteHost = server;
 
         try {
