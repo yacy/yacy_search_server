@@ -128,8 +128,9 @@ public final class plasmaSearchQuery {
         }
         
         // the string is clean now, but we must generate a set out of it
-        final String[] a = words.split(" ");
         final TreeSet query = new TreeSet(kelondroMSetTools.fastStringComparator);
+        if (words.length() == 0) return query; // split returns always one element
+        final String[] a = words.split(" ");
         for (int i = 0; i < a.length; i++) { query.add(a[i]); }
         return query;
     }

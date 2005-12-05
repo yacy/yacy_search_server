@@ -313,6 +313,9 @@ public final class plasmaWordIndexEntity {
     
     public static plasmaWordIndexEntity joinEntities(Set entities, long time) throws IOException {
         
+    		// big problem here: there cannot be a time-out for join, since a time-out will leave the joined set too big.
+    		// this will result in a OR behavior of the search instead of an AND behavior
+    	
         long stamp = System.currentTimeMillis();
         
         // order entities by their size
@@ -339,12 +342,12 @@ public final class plasmaWordIndexEntity {
         // we now must pairwise build up a conjunction of these sets
         Long k = (Long) map.firstKey(); // the smallest, which means, the one with the least entries
         plasmaWordIndexEntity searchA, searchB, searchResult = (plasmaWordIndexEntity) map.remove(k);
-        while ((map.size() > 0) && (searchResult.size() > 0) && (time > 0)) {
+        while ((map.size() > 0) && (searchResult.size() > 0)) {
             // take the first element of map which is a result and combine it with result
             k = (Long) map.firstKey(); // the next smallest...
             time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
-        searchA = searchResult;
-        searchB = (plasmaWordIndexEntity) map.remove(k);
+            searchA = searchResult;
+            searchB = (plasmaWordIndexEntity) map.remove(k);
             searchResult = plasmaWordIndexEntity.joinConstructive(searchA, searchB, 2 * time / (map.size() + 1));
         // close the input files/structures
         if (searchA != searchResult) searchA.close();
