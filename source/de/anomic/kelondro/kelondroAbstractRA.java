@@ -128,8 +128,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
 
     private static final byte cr = 13;
     private static final byte lf = 10;
-    private static final String crlf = new String(new byte[] {cr, lf});
-
+    
     public void writeLine(final String line) throws IOException {
         this.write(line.getBytes());
         this.write(cr);

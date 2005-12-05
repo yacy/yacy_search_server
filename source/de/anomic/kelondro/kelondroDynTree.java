@@ -59,15 +59,15 @@ public class kelondroDynTree {
     private File file;
 
     // some properties to control caching and buffering
-    private int maxcountCache = 1000, maxsizeCache = 100;
+    //private int maxcountCache = 1000, maxsizeCache = 100;
     private int maxcountBuffer = 1000, maxsizeBuffer = 100;
-    private long maxageCache = 60000, cycletimeCache = 10000;
+    //private long maxageCache = 60000, cycletimeCache = 10000;
     private long maxageBuffer = 60000, cycletimeBuffer = 10000;
     private long buffersize = 0;
 
     // data structures for the cache and buffer
     private Hashtable buffer, cache;
-    private long cycleCache, cycleBuffer;
+    private long cycleBuffer;
     
     public kelondroDynTree(File file, long buffersize, int keylength, int nodesize, int[] columns) throws IOException {
         // creates a new DynTree
@@ -75,7 +75,7 @@ public class kelondroDynTree {
         this.columns = columns;
         this.buffer = new Hashtable();
         this.cache = new Hashtable();
-        this.cycleCache = Long.MIN_VALUE;
+        //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
         if (file.exists()) throw new IOException("DynTree " + file.toString() + " already exists");
         this.table = new kelondroDyn(file, buffersize, keylength, nodesize);
@@ -87,7 +87,7 @@ public class kelondroDynTree {
         this.file = file;
         this.buffer = new Hashtable();
         this.cache = new Hashtable();
-        this.cycleCache = Long.MIN_VALUE;
+        //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
         if (!(file.exists())) throw new IOException("DynTree " + file.toString() + " does not exist");
         this.table = new kelondroDyn(file, buffersize);
@@ -110,13 +110,14 @@ public class kelondroDynTree {
         if (size == 0) this.file.delete();
     }
 
-
+    /*
     public void setReadCacheAttr(int maxcount, int maxsize, long maxage, long cycletime) {
         maxcountCache = maxcount;
         maxsizeCache = maxsize;
         maxageCache = maxage;
         cycletimeCache = cycletime;
     }
+    */
     
     public void setWriteBufferAttr(int maxcount, int maxsize, long maxage, long cycletime) {
         maxcountBuffer = maxcount;
@@ -252,7 +253,7 @@ public class kelondroDynTree {
         return tc.get(key);
     }
 
-    
+    /*
     // clean-up method for cache:
     private void flushCache() {
         if ((System.currentTimeMillis() - this.cycleCache < this.cycletimeCache) &&
@@ -272,6 +273,7 @@ public class kelondroDynTree {
             }
         }
     }
+    */
     
     // write buffered
     public synchronized void put(String tablename, byte[][] newrow) {

@@ -120,7 +120,7 @@ public final class httpTemplate {
 
     private static final byte lbr  = (byte)'[';
     private static final byte rbr  = (byte)']';
-    private static final byte[] pOpen  = {hash, lbr};
+    //private static final byte[] pOpen  = {hash, lbr};
     private static final byte[] pClose = {rbr, hash};
 
     private static final byte lcbr  = (byte)'{';
@@ -130,11 +130,11 @@ public final class httpTemplate {
 
     private static final byte lrbr  = (byte)'(';
     private static final byte rrbr  = (byte)')';
-    private static final byte[] aOpen  = {hash, lrbr};
+    //private static final byte[] aOpen  = {hash, lrbr};
     private static final byte[] aClose = {rrbr, hash};
 
     private static final byte ps  = (byte)'%';
-    private static final byte[] iOpen  = {hash, ps};
+    //private static final byte[] iOpen  = {hash, ps};
     private static final byte[] iClose = {ps, hash};
 
 	/**
@@ -142,7 +142,6 @@ public final class httpTemplate {
 	 * the function returns true, if the pattern is found
 	 */
     private static boolean transferUntil(PushbackInputStream i, OutputStream o, byte[] pattern) throws IOException {
-        int ppos = 0;
         int b, bb;
         boolean equal;
         while ((b = i.read()) > 0) {
@@ -176,8 +175,7 @@ public final class httpTemplate {
         PushbackInputStream pis = new PushbackInputStream(in, 100);
         ByteArrayOutputStream keyStream;
         String key;
-	String multi_key;
-        boolean consistent;
+        String multi_key;
         byte[] replacement;
 	int bb;
 	
@@ -436,7 +434,6 @@ public final class httpTemplate {
         if (!(path.isDirectory())) path = path.getParentFile();
         if ((path == null) || (!(path.isDirectory()))) return result;
         String[] templates = path.list();
-        int c;
         for (int i = 0; i < templates.length; i++) {
             if (templates[i].endsWith(".template")) 
                 try {

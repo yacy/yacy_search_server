@@ -103,6 +103,7 @@ public class kelondroDyn extends kelondroTree {
         }
     }
     
+    /*
     private void readSegmentCount() {
         try {
             segmentCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(getText(0)));
@@ -111,6 +112,7 @@ public class kelondroDyn extends kelondroTree {
             writeSegmentCount();
         }
     }
+    */
     
     public synchronized int sizeDyn() {
         //this.segmentCount = 0;

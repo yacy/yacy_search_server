@@ -44,7 +44,6 @@
 
 package de.anomic.icap;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -154,7 +153,6 @@ public class icapd implements serverHandler {
     
     public Boolean OPTIONS(String arg) throws IOException {
         
-        BufferedInputStream in = new BufferedInputStream(this.session.in);
         BufferedOutputStream out = new BufferedOutputStream(this.session.out);   
         
         // parsing the http request line
@@ -243,6 +241,7 @@ public class icapd implements serverHandler {
         return this.prop.getProperty(icapHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
     }
     
+    /*
     private void blacklistService(icapHeader reqHeader, InputStream in, OutputStream out) {
         try {
             
@@ -250,6 +249,7 @@ public class icapd implements serverHandler {
             e.printStackTrace();
         }
     }
+    */
     
     private void indexingService(icapHeader reqHeader, InputStream in, OutputStream out) {
         try {

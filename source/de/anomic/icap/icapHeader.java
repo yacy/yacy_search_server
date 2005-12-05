@@ -57,7 +57,9 @@ import de.anomic.server.serverCore;
 
 public class icapHeader extends TreeMap implements Map {
 
-    /* =============================================================
+    private static final long serialVersionUID = 1L;
+	
+	/* =============================================================
      * Constants defining icap methods
      * ============================================================= */
     public static final String METHOD_REQMOD = "REQMOD";
@@ -184,7 +186,7 @@ public class icapHeader extends TreeMap implements Map {
         
         // write header
         Iterator i = keySet().iterator();
-        String key, value;
+        String key;
         char tag;
         int count;
         while (i.hasNext()) {

@@ -182,7 +182,7 @@ public final class yacy {
 
             // check java version
             try {
-                String[] check = "a,b".split(","); // split needs java 1.4
+                /*String[] check =*/ "a,b".split(","); // split needs java 1.4
             } catch (NoSuchMethodError e) {
                 System.err.println("STARTUP: Java Version too low. You need at least Java 1.4.2 to run YACY");
                 Thread.sleep(3000);
@@ -275,7 +275,7 @@ public final class yacy {
             // create some directories
             final File htRootPath = new File(homePath, sb.getConfig("htRootPath", "htroot"));
             final File htDocsPath = new File(homePath, sb.getConfig("htDocsPath", "DATA/HTDOCS"));
-            File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
+            //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
             // create default notifier picture
             if (!((new File(htRootPath, "env/grafics/notifier.gif")).exists())) try {
@@ -430,7 +430,7 @@ public final class yacy {
 
                     // idle until the processes are down
                     while (server.isAlive()) {
-                        Thread.currentThread().sleep(2000); // wait a while
+                        Thread.sleep(2000); // wait a while
                     }
                     serverLog.logConfig("SHUTDOWN", "server has terminated");
                     sb.close();
@@ -451,12 +451,12 @@ public final class yacy {
                 serverLog.logConfig("SHUTDOWN", "Wait maximally 5 minutes for " + (Thread.activeCount() - 1) + " running threads to restart YaCy");
                 while (Thread.activeCount() > 1 && count <= 60) { // wait 5 minutes                 
                     count++;
-                    try { Thread.currentThread().sleep(5000); } catch (InterruptedException e) {}
+                    try { Thread.sleep(5000); } catch (InterruptedException e) {}
                 }
             }
             if (count < 60) {
                 System.gc();
-                try { Thread.currentThread().sleep(5000); } catch (InterruptedException e) {}
+                try { Thread.sleep(5000); } catch (InterruptedException e) {}
                 startupMemFree  = Runtime.getRuntime().freeMemory();  // the amount of free memory in the Java Virtual Machine
                 startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
                 startup(homePath, startupMemFree, startupMemTotal);
@@ -861,7 +861,7 @@ public final class yacy {
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) {
                             urlCounter++;
                             plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash);                       
-                            plasmaCrawlLURL.Entry newEntry = minimizedUrlDB.newEntry(urlEntry);
+                            /*plasmaCrawlLURL.Entry newEntry =*/ minimizedUrlDB.newEntry(urlEntry);
                             if (urlCounter % 500 == 0) {
                                 log.logInfo(urlCounter + " URLs found so far.");
                             }
@@ -1062,7 +1062,6 @@ public final class yacy {
             Iterator eiter = pool.loadedURL.entries(true, false);
             HashSet doms = new HashSet();
             plasmaCrawlLURL.Entry entry;
-            URL url;
             while (eiter.hasNext()) {
                 entry = (plasmaCrawlLURL.Entry) eiter.next();
                 if ((entry != null) && (entry.url() != null)) doms.add(entry.url().getHost());

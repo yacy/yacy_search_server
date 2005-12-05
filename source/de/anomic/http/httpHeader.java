@@ -350,7 +350,7 @@ public final class httpHeader extends TreeMap implements Map {
 	  Server=Apache/1.3.26
 	*/
     
-    private static SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+    //private static SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
     private static SimpleDateFormat EMLFormatter     = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US);
     
     public static Date parseHTTPDate(String s) {
@@ -687,7 +687,7 @@ public final class httpHeader extends TreeMap implements Map {
         String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
         String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
         String args =    conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
-        String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
+        //String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
         
         int port, pos;        
         if ((pos = host.indexOf(":")) < 0) {

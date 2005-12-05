@@ -353,19 +353,19 @@ public final class robotsParser{
     
     public static void main(String[] args) {
         try {
-        robotsParser parser = new robotsParser();
+        //robotsParser parser = new robotsParser();
         
         URL robotsURL = new URL("http://www.bigfoot2002.de.vu/robots.txt");
-        Object[] result = parser.downloadRobotsTxt(robotsURL,5,null);
+        Object[] result = downloadRobotsTxt(robotsURL,5,null);
         
         if (result != null) {
             boolean accessCompletelyRestricted = ((Boolean)result[0]).booleanValue();
             byte[] robotsTxt = (byte[])result[1];
-            String eTag = (String) result[2];
-            Date modDate = (Date) result[3];
+            //String eTag = (String) result[2];
+            //Date modDate = (Date) result[3];
         
             if (!accessCompletelyRestricted) {
-                ArrayList denyPath = robotsParser.parse(robotsTxt);
+                /*ArrayList denyPath =*/ robotsParser.parse(robotsTxt);
             }
 
         }

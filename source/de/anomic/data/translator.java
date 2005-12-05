@@ -80,8 +80,7 @@ public class translator {
 	public static Hashtable loadTranslationsLists(File translationFile){
 		Hashtable lists = new Hashtable(); //list of translationLists for different files.
 		Hashtable translationList = new Hashtable(); //current Translation Table
-        FileInputStream fileIn = null;
-
+        
 		ArrayList list = listManager.getListArray(translationFile);
 		Iterator it = list.iterator();
 		String line = "";

@@ -44,7 +44,9 @@ package de.anomic.kelondro;
 public class kelondroException extends java.lang.RuntimeException {
     
 
-    public kelondroException() {
+	private static final long serialVersionUID = 1L;
+
+	public kelondroException() {
         super("unspecific-error");
     }
     

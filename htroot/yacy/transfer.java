@@ -65,11 +65,11 @@ public final class transfer {
 
         
         String process   = (String) post.get("process", "");  // permission or store
-        String key       = (String) post.get("key", "");      // a transmission key from the client
+        //String key       = (String) post.get("key", "");      // a transmission key from the client
         String otherpeer = (String) post.get("iam", "");      // identification of the client (a peer-hash)
         String purpose   = (String) post.get("purpose", "");  // declares how the file shall be treated
         String filename  = (String) post.get("filename", ""); // a name of a file without path
-        long   filesize  = Long.parseLong((String) post.get("filesize", "")); // the size of the file
+        //long   filesize  = Long.parseLong((String) post.get("filesize", "")); // the size of the file
         
         yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
         if (otherseed == null) {
@@ -93,7 +93,7 @@ public final class transfer {
             if (purpose.equals("crcon")) {
                 // consolidation of cr files
                 //System.out.println("yacy/transfer:post=" + post.toString());
-                String cansendprotocol = (String) post.get("can-send-protocol", "http");
+                //String cansendprotocol = (String) post.get("can-send-protocol", "http");
                 String access = serverCodings.encodeMD5B64(otherpeer + ":" + filename, true) + ":" + serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true);
                 prop.put("response", "ok");
                 prop.put("process_access", access);
