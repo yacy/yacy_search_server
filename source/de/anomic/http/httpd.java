@@ -488,7 +488,7 @@ public final class httpd implements serverHandler {
             httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
             
             // determines if the connection should be kept alive
-            //boolean persistent = handlePersistentConnection(header);
+            handlePersistentConnection(header);
             
             // return multi-line message
             if (this.prop.getProperty("HOST").equals(virtualHost)) {
@@ -541,7 +541,7 @@ public final class httpd implements serverHandler {
             httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
             
             // determines if the connection should be kept alive
-            //boolean persistent = handlePersistentConnection(header);
+            handlePersistentConnection(header);
             
             // return multi-line message
             if (prop.getProperty("HOST").equals(virtualHost)) {
