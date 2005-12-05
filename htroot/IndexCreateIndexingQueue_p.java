@@ -124,7 +124,7 @@ public class IndexCreateIndexingQueue_p {
             
             dark = true;
             plasmaSwitchboardQueue.Entry pcentry;
-            int inProcessCount = 0, entryCount = 0;
+            int inProcessCount = 0, entryCount = 0, totalCount = 0; 
             long totalSize = 0;
             try {
                 ArrayList entryList = new ArrayList();
@@ -141,6 +141,7 @@ public class IndexCreateIndexingQueue_p {
                 }
                                 
                 int count=entryList.size();
+                totalCount = count;
                 if(count>100)count=100;
                 for (int i = 0; i < count; i++) {
 
@@ -164,8 +165,9 @@ public class IndexCreateIndexingQueue_p {
                     }
                 }
             } catch (IOException e) {}
-
-            prop.put("indexing-queue_num", entryCount);//num entries in queue
+            
+            prop.put("indexing-queue_show", entryCount);//show shown entries
+            prop.put("indexing-queue_num", totalCount);//num entries in queue 
             prop.put("indexing-queue_totalSize", bytesToString(totalSize));//num entries in queue 
             prop.put("indexing-queue_list", entryCount);
         }
