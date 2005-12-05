@@ -94,7 +94,7 @@ public final class transfer {
                 // consolidation of cr files
                 //System.out.println("yacy/transfer:post=" + post.toString());
                 String cansendprotocol = (String) post.get("can-send-protocol", "http");
-                String access = serverCodings.enhancedCoder.encodeMD5B64(otherpeer + ":" + filename, true) + ":" + serverCodings.enhancedCoder.encodeMD5B64("" + System.currentTimeMillis(), true);
+                String access = serverCodings.encodeMD5B64(otherpeer + ":" + filename, true) + ":" + serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true);
                 prop.put("response", "ok");
                 prop.put("process_access", access);
                 prop.put("process_address", yacyCore.seedDB.mySeed.getAddress());
@@ -113,7 +113,7 @@ public final class transfer {
                 byte[] filebytes = (byte[]) post.get("filename$file");
                 String accesscode = (String) post.get("access", "");   // one-time authentication
                 String md5 = (String) post.get("md5", "");   // one-time authentication
-                java.util.HashMap perm = sb.rankingPermissions;
+                //java.util.HashMap perm = sb.rankingPermissions;
                 //System.out.println("PERMISSIONDEBUG: accesscode=" + accesscode + ", permissions=" + perm.toString());
                 String grantedFile = (String) sb.rankingPermissions.get(accesscode);
                 prop.put("process_tt", "");

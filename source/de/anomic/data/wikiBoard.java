@@ -68,24 +68,22 @@ public class wikiBoard {
     private kelondroMap datbase = null;
     private kelondroMap bkpbase = null;
     private HashMap authors = new HashMap();
-    private int sn = 0;
-
+    
     public wikiBoard(File actpath, File bkppath, int bufferkb) throws IOException {
-	new File(actpath.getParent()).mkdir();
-        if (datbase == null) {
-	    if (actpath.exists())
-		datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb/2 * 0x40));
-	    else
-		datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb/2 * 0x400, keyLength, recordSize));
-	}
-	new File(bkppath.getParent()).mkdir();
-	if (bkpbase == null) {
-	    if (bkppath.exists())
-		bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb/2 * 0x400));
-	    else
-		bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb/2 * 0x400, keyLength + dateFormat.length(), recordSize));
-	}
-	sn = 0;
+    		new File(actpath.getParent()).mkdir();
+    			if (datbase == null) {
+    				if (actpath.exists())
+    					datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb/2 * 0x40));
+    				else
+    					datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb/2 * 0x400, keyLength, recordSize));
+    			}
+    			new File(bkppath.getParent()).mkdir();
+    			if (bkpbase == null) {
+    				if (bkppath.exists())
+    					bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb/2 * 0x400));
+    				else
+    					bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb/2 * 0x400, keyLength + dateFormat.length(), recordSize));
+    			}
     }
 
     public int sizeOfTwo() {

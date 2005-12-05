@@ -484,7 +484,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     
                     // write the array to the client
                     httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, targetDate, null, null, null, null);
-                    Thread.currentThread().sleep(200); // see below
+                    Thread.sleep(200); // see below
                     serverFileUtils.write(result, out);
                 }
             } else if ((targetClass != null) && (path.endsWith(".stream"))) {
@@ -497,7 +497,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null);                
                 
                 // in case that there are no args given, args = null or empty hashmap
-                serverObjects tp = (serverObjects) rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
+                /*serverObjects tp = (serverObjects)*/ rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
              
                 this.forceConnectionClose();
                 return;                
@@ -508,7 +508,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 String mimeType = mimeTable.getProperty(targetExt,"text/html");
                 byte[] result;
                 boolean zipContent = requestHeader.acceptGzip() && httpd.shallTransportZipped("." + conProp.getProperty("EXT",""));
-                String md5String = null;
                 if (path.endsWith("html") || 
                         path.endsWith("xml") || 
                         path.endsWith("rss") || 
@@ -645,7 +644,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             for ( int i = 0; i < digest.length; i++ )
                                 digestString.append(Integer.toHexString( digest[i]&0xff));
 
-                            md5String = digestString.toString();
                         }                        
                     } finally {
                         if (zippedOut != null) try {zippedOut.close();} catch(Exception e) {}
@@ -667,7 +665,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 
                 // write the array to the client
                 httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, (zipContent)?"gzip":null, null);
-                Thread.currentThread().sleep(200); // this solved the message problem (!!)
+                Thread.sleep(200); // this solved the message problem (!!)
                 serverFileUtils.write(result, out);
             } else {
                 httpd.sendRespondError(conProp,out,3,404,"File not Found",null,null);
@@ -761,7 +759,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     
     private final Method rewriteMethod(File classFile) {                
         Method m = null;
-        long start = System.currentTimeMillis();
         // now make a class out of the stream
         try {
             if (useTemplateCache) {

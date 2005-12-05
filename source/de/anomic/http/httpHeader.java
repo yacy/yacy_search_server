@@ -77,7 +77,9 @@ import de.anomic.server.logging.serverLog;
 public final class httpHeader extends TreeMap implements Map {
 
     
-    /* =============================================================
+	private static final long serialVersionUID = 17L;
+	
+	/* =============================================================
      * Constants defining http versions
      * ============================================================= */
     public static final String HTTP_VERSION_0_9 = "HTTP/0.9";
@@ -664,7 +666,7 @@ public final class httpHeader extends TreeMap implements Map {
         
         // write header
         Iterator i = keySet().iterator();
-        String key, value;
+        String key;
         char tag;
         int count;
         while (i.hasNext()) {

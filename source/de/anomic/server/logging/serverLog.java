@@ -209,7 +209,7 @@ public final class serverLog {
             if(!log.canRead()) log.mkdir();
 
             // generating the root logger
-            Logger logger = Logger.getLogger("");
+            /*Logger logger =*/ Logger.getLogger("");
 
 //          System.setOut(new PrintStream(new LoggerOutputStream(Logger.getLogger("STDOUT"),Level.FINEST)));
 //          System.setErr(new PrintStream(new LoggerOutputStream(Logger.getLogger("STDERR"),Level.SEVERE)));

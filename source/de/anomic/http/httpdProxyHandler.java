@@ -1141,7 +1141,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     (sslSocket.isConnected()) &&
                     ((cs.isAlive()) || (sc.isAlive()))) {
                 // idle
-                try {Thread.currentThread().sleep(1000);} catch (InterruptedException e) {} // wait a while
+                try {Thread.sleep(1000);} catch (InterruptedException e) {} // wait a while
             }
             // set stop mode
             cs.pleaseTerminate();
@@ -1260,7 +1260,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         // normal creation of httpc object
         return newhttpc(server, port, timeout);
     }
-    
+    /*
     private void textMessage(OutputStream out, String body) throws IOException {
         out.write(("HTTP/1.1 200 OK\r\n").getBytes());
         out.write((httpHeader.SERVER + ": AnomicHTTPD (www.anomic.de)\r\n").getBytes());
@@ -1272,7 +1272,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         out.write(body.getBytes());
         out.flush();
     }
-    
+    */
     private void handleProxyException(Exception e, httpc remote, Properties conProp, OutputStream respond, URL url) {
         // this may happen if 
         // - the targeted host does not exist 

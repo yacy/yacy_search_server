@@ -154,7 +154,6 @@ public class cryptbig {
 	    if (enc == null) return null;
 	    return serverCodings.standardCoder.encodeBase64(enc);
 	} catch (UnsupportedEncodingException e) {
-	} catch (java.io.IOException e) {
 	}
 	return null;
     }
@@ -168,7 +167,6 @@ public class cryptbig {
 	    if (dec == null) return null;
 	    return new String(dec, "UTF8");
 	} catch (UnsupportedEncodingException e) {
-	} catch (java.io.IOException e) {
 	}
 	return null;
     }

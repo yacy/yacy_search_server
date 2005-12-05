@@ -464,7 +464,6 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         if (!(path.isDirectory())) path = path.getParentFile();
         if ((path == null) || (!(path.isDirectory()))) return result;
         String[] templates = path.list();
-        int c;
         for (int i = 0; i < templates.length; i++) {
             if (templates[i].endsWith(".template")) try {
             //System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));

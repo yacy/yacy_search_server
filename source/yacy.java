@@ -185,7 +185,7 @@ public final class yacy {
                 String[] check = "a,b".split(","); // split needs java 1.4
             } catch (NoSuchMethodError e) {
                 System.err.println("STARTUP: Java Version too low. You need at least Java 1.4.2 to run YACY");
-                Thread.currentThread().sleep(3000);
+                Thread.sleep(3000);
                 System.exit(-1);
             }
             

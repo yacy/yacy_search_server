@@ -833,7 +833,7 @@ cd ..
     for (int i = 1; i< cmd.length; i++) s = s + " " + cmd[i];
     try {
       send(s);
-      String reply = receive();
+      /*String reply =*/ receive();
     } catch (IOException e) {}
     return true;
   }
@@ -1038,7 +1038,6 @@ cd ..
       
       // read file system data
       String line;
-      int i = 0;
       Vector files = new Vector();
       while ((line = ClientStream.readLine()) != null)
         if (!line.startsWith("total ")) files.addElement(line);
@@ -1100,7 +1099,7 @@ cd ..
     Enumeration x = l.elements();
     String remote;
     File local;
-    int idx; // the search for " " is only for improper lists from the server. this fails if the file name has a " " in it
+    //int idx; // the search for " " is only for improper lists from the server. this fails if the file name has a " " in it
     while (x.hasMoreElements()) {
       remote = (String) x.nextElement();
       //idx = remote.lastIndexOf(" ");
@@ -1764,7 +1763,7 @@ cd ..
   }
 
 
-  private String login() throws IOException {
+  public String login() throws IOException {
     // force anonymous login if not already connected
     if (this.account == null) {
       login("anonymous", "bob@");
@@ -1773,7 +1772,7 @@ cd ..
       return this.account;
   }
 
-  private String sys() throws IOException {
+  public String sys() throws IOException {
     // send system command
     send("SYST");
 
@@ -1797,7 +1796,9 @@ cd ..
   }
 
  class ee extends SecurityException {
-    private int value = 0;
+    
+	private static final long serialVersionUID = 1L;
+	private int value = 0;
     public ee() {}
     public ee(int value) {
         super();

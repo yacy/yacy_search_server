@@ -79,7 +79,6 @@ import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverCore.Session;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -113,9 +112,6 @@ public final class httpc {
 
     // --- The GMT standard date format used in the HTTP protocol
     private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
-    private static final SimpleDateFormat EMLFormatter     = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US);
-    private static final SimpleDateFormat ShortFormatter   = new SimpleDateFormat("yyyyMMddHHmmss");
-    //Mo 06 Sep 2004 23:32
     static final HashMap reverseMappingCache = new HashMap();
 
     // the dns cache
@@ -134,9 +130,8 @@ public final class httpc {
     private Socket socket = null; // client socket for commands
     private Thread socketOwner = null;
     String host = null;
-    private long timeout;
-    private long handle;
-
+    //private long timeout;
+    
     // output and input streams for client control connection
     PushbackInputStream clientInput = null;
     private OutputStream clientOutput = null;
@@ -537,13 +532,10 @@ public final class httpc {
             String incomingByteCountAccounting,
             String outgoingByteCountAccounting
     ) throws IOException {
-        this.handle = System.currentTimeMillis();
         //serverLog.logDebug("HTTPC", handle + " initialized");
         this.remoteProxyUse = false;
-        this.timeout = timeout;
-		if(yacyDebugMode){
-			this.timeout=60000;
-		}
+        //this.timeout = timeout;
+		//if(yacyDebugMode){ this.timeout=60000; }
         this.savedRemoteHost = server;
 
         try {
@@ -642,8 +634,7 @@ public final class httpc {
         }
 
         this.host = null;
-        this.timeout = 0;
-        this.handle = 0;
+        //this.timeout = 0;
 
         this.remoteProxyUse = false;
         this.remoteProxyConfig = null;
@@ -1525,8 +1516,7 @@ do upload
         public int statusCode = 503;
         public String statusText = "internal error";
         private boolean gzip; // for gunzipping on-the-fly
-        private String encoding;
-
+        
         /**
         * Constructor for this class. Reads in the content for the given outer
         * instance and parses it.
@@ -1893,10 +1883,12 @@ final class httpcFactory implements org.apache.commons.pool.PoolableObjectFactor
      * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
      */
     public boolean validateObject(Object obj) {
+    		/*
         if (obj instanceof httpc) {
             httpc theHttpc = (httpc) obj;
             return true;
         }
+        */
         return true;
     }
 
@@ -1914,9 +1906,11 @@ final class httpcFactory implements org.apache.commons.pool.PoolableObjectFactor
      */
     public void passivateObject(Object obj) {
         //log.debug(" passivateObject..." + obj);
+    		/*
         if (obj instanceof Session)  {
             httpc theHttpc = (httpc) obj;
         }
+        */
     }
 }
 

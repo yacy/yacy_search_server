@@ -127,8 +127,6 @@ public final class httpd implements serverHandler {
     // needed for logging
     private final serverLog log = new serverLog("HTTPD");
 
-    private final serverCodings codings = new serverCodings(true);
-    
     // class methods
     public httpd(serverSwitch s, httpdHandler fileHandler, httpdHandler proxyHandler) {
         // handler info
@@ -203,7 +201,6 @@ public final class httpd implements serverHandler {
         // each pattern may contain one wildcard-character '*' which matches anything
         StringTokenizer st = new StringTokenizer(latch,",");
         String pattern;
-        int pos;
         while (st.hasMoreTokens()) {
             pattern = st.nextToken();
             if (key.matches(pattern)) return true;
@@ -356,7 +353,7 @@ public final class httpd implements serverHandler {
         }
         
         parseRequestLine(unknownCommand, args);
-        String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER,"HTTP/0.9");
+        //String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER,"HTTP/0.9");
         
         sendRespondError(this.prop,this.session.out,0,501,null,unknownCommand + " method not implemented",null);
         return serverCore.TERMINATE_CONNECTION;
@@ -491,7 +488,7 @@ public final class httpd implements serverHandler {
             httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
             
             // determines if the connection should be kept alive
-            boolean persistent = handlePersistentConnection(header);
+            //boolean persistent = handlePersistentConnection(header);
             
             // return multi-line message
             if (this.prop.getProperty("HOST").equals(virtualHost)) {
@@ -544,7 +541,7 @@ public final class httpd implements serverHandler {
             httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
             
             // determines if the connection should be kept alive
-            boolean persistent = handlePersistentConnection(header);
+            //boolean persistent = handlePersistentConnection(header);
             
             // return multi-line message
             if (prop.getProperty("HOST").equals(virtualHost)) {
@@ -817,7 +814,7 @@ public final class httpd implements serverHandler {
         // we need some constants
         byte[] namec = (new String("name=")).getBytes();
         byte[] filenamec = (new String("filename=")).getBytes();
-        byte[] semicolonc = (new String(";")).getBytes();
+        //byte[] semicolonc = (new String(";")).getBytes();
         byte[] quotec = new byte[] {(byte) '"'};
         
         // now loop over boundaries
@@ -935,7 +932,6 @@ public final class httpd implements serverHandler {
         // return a position of a pattern in an array
         if (start > array.length - pattern.length) return -1;
         if (pattern.length == 0) return start;
-        int i;
         for (int pos = start; pos <= array.length - pattern.length; pos++)
             if ((array[pos] == pattern[0]) && (equals(array, pos, pattern, 0, pattern.length)))
                 return pos;
@@ -1259,7 +1255,7 @@ public final class httpd implements serverHandler {
             
             // write header
             Iterator i = header.keySet().iterator();
-            String key, value;
+            String key;
             char tag;
             int count;
             //System.out.println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");

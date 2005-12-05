@@ -47,7 +47,8 @@ import java.util.Set;
 
 public class disorderSet extends HashSet implements Set {
 
-    disorderHeap dh;
+    private static final long serialVersionUID = 1L;
+	disorderHeap dh;
 
     public disorderSet() {
 	super();

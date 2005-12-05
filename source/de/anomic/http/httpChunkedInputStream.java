@@ -57,7 +57,7 @@ import de.anomic.server.serverByteBuffer;
  */
 public final class httpChunkedInputStream extends InputStream {
     
-    private static final int READ_CHUNK_STATE_NORMAL = 0;
+    //private static final int READ_CHUNK_STATE_NORMAL = 0;
     private static final int READ_CHUNK_STATE_CR_READ = 1;
     private static final int READ_CHUNK_STATE_IN_EXT_CHUNK = 2;
     private static final int READ_CHUNK_STATE_FINISHED = -1;
