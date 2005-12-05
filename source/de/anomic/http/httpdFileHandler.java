@@ -497,7 +497,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null);                
                 
                 // in case that there are no args given, args = null or empty hashmap
-                /*serverObjects tp = (serverObjects)*/ rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
+                /* serverObjects tp = (serverObjects) */ rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
              
                 this.forceConnectionClose();
                 return;                
