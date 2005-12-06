@@ -231,6 +231,7 @@ final class dbTable implements kelondroIndex {
     }
 }
 
+
 final class memprofiler extends Thread {
     
     ymageChart memChart;
