@@ -131,7 +131,7 @@ public final class httpc {
     // class variables
     private Socket socket = null; // client socket for commands
     private Thread socketOwner = null;
-    String host = null;
+    private String host = null;
     //private long timeout;
     
     // output and input streams for client control connection
@@ -872,15 +872,17 @@ public final class httpc {
 
     /**
     * Call the server with the CONNECT-method.
+    * This is used to establish https-connections through a https-proxy
     *
     * @param host To which host should a connection be made?
     * @param port Which port should be connected?
     * @param requestHeader prefilled httpHeader.
     * @return Instance of response with the content.
     */
-    public response CONNECT(String host, int port, httpHeader requestHeader) throws IOException {
+    
+    public response CONNECT(String remotehost, int remoteport, httpHeader requestHeader) throws IOException {
         try {
-            send(httpHeader.METHOD_CONNECT, host + ":" + port, requestHeader, false);
+            send(httpHeader.METHOD_CONNECT, remotehost + ":" + remoteport, requestHeader, false);
             return new response(false);
         } catch (SocketException e) {
             throw new IOException(e.getMessage());
@@ -1520,6 +1522,67 @@ do upload
             return openSockets;
         }
     }
+    
+    /**
+     * This method outputs the input stream to either an output socket or an
+     * file or both. If the length of the input stream is given in the
+     * header, exactly that lenght is written. Otherwise the stream is
+     * written, till it is closed. If this instance is zipped, stream the
+     * input stream through gzip to unzip it on the fly.
+     *
+     * @param procOS OutputStream where the stream is to be written. If null
+     * no write happens.
+     * @param bufferOS OutputStream where the stream is to be written too.
+     * If null no write happens.
+     * @param clientInput InputStream where the content is to be read from.
+     * @throws IOException
+     */
+     public static void writeContentX(InputStream clientInput, boolean usegzip, long length, OutputStream procOS, OutputStream bufferOS) throws IOException {
+         // we write length bytes, but if length == -1 (or < 0) then we
+         // write until the input stream closes
+         // procOS == null -> no write to procOS
+         // file == null -> no write to file
+         // If the Content-Encoding is gzip, we gunzip on-the-fly
+         // and change the Content-Encoding and Content-Length attributes in the header
+         byte[] buffer = new byte[2048];
+         int l;
+         long len = 0;
+
+         // using the proper intput stream
+         InputStream dis = (usegzip) ? (InputStream) new GZIPInputStream(clientInput) : (InputStream) clientInput;
+
+         // we have three methods of reading: length-based, length-based gzip and connection-close-based
+         try {
+             if (length > 0) {
+                 // we read exactly 'length' bytes
+                 while ((len < length) && ((l = dis.read(buffer)) >= 0)) {
+                     if (procOS != null) procOS.write(buffer, 0, l);
+                     if (bufferOS != null) bufferOS.write(buffer, 0, l);
+                     len += l;
+                 }
+             } else {
+                 // no content-length was given, thus we read until the connection closes
+                 while ((l = dis.read(buffer, 0, buffer.length)) >= 0) {
+                     if (procOS != null) procOS.write(buffer, 0, l);
+                     if (bufferOS != null) bufferOS.write(buffer, 0, l);
+                 }
+             }
+         } catch (java.net.SocketException e) {
+             throw new IOException("Socket exception: " + e.getMessage());
+         } catch (java.net.SocketTimeoutException e) {
+             throw new IOException("Socket time-out: " + e.getMessage());
+         } finally {
+             // close the streams
+             if (procOS != null) {
+                 if (procOS instanceof httpChunkedOutputStream)
+                     ((httpChunkedOutputStream)procOS).finish();
+                 procOS.flush();
+             }
+             if (bufferOS != null) bufferOS.flush();
+             buffer = null;
+         }
+     }
+
 
     /**
     * Inner Class to get the response of an http-request and parse it.
@@ -1669,7 +1732,7 @@ do upload
         public byte[] writeContent() throws IOException {
             int contentLength = (int) this.responseHeader.contentLength();
             serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-            writeContentX(null, sbb, httpc.this.clientInput);
+            writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), null, sbb);
             return sbb.getBytes();
         }
 
@@ -1684,7 +1747,7 @@ do upload
         public byte[] writeContent(OutputStream procOS) throws IOException {
             int contentLength = (int) this.responseHeader.contentLength();
             serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-            writeContentX(procOS, sbb, httpc.this.clientInput);
+            writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, sbb);
             return sbb.getBytes();
         }
 
@@ -1702,7 +1765,7 @@ do upload
             FileOutputStream bufferOS = null;
             try {
                 if (file != null) bufferOS = new FileOutputStream(file);
-                writeContentX(procOS, bufferOS, httpc.this.clientInput);
+                writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, bufferOS);
             } finally {
                 if (bufferOS != null) {
                     bufferOS.close();
@@ -1710,70 +1773,7 @@ do upload
                 }
             }
         }
-
-        /**
-        * This method outputs the input stream to either an output socket or an
-        * file or both. If the length of the input stream is given in the
-        * header, exactly that lenght is written. Otherwise the stream is
-        * written, till it is closed. If this instance is zipped, stream the
-        * input stream through gzip to unzip it on the fly.
-        *
-        * @param procOS OutputStream where the stream is to be written. If null
-        * no write happens.
-        * @param bufferOS OutputStream where the stream is to be written too.
-        * If null no write happens.
-        * @param clientInput InputStream where the content is to be read from.
-        * @throws IOException
-        */
-        public void writeContentX(OutputStream procOS, OutputStream bufferOS, InputStream clientInput) throws IOException {
-            // we write length bytes, but if length == -1 (or < 0) then we
-            // write until the input stream closes
-            // procOS == null -> no write to procOS
-            // file == null -> no write to file
-            // If the Content-Encoding is gzip, we gunzip on-the-fly
-            // and change the Content-Encoding and Content-Length attributes in the header
-            byte[] buffer = new byte[2048];
-            int l;
-            long len = 0;
-
-            // find out length
-            long length = this.responseHeader.contentLength();
-
-            // using the proper intput stream
-            InputStream dis = (this.gzip) ? (InputStream) new GZIPInputStream(clientInput) : (InputStream) clientInput;
-
-            // we have three methods of reading: length-based, length-based gzip and connection-close-based
-            try {
-                if (length > 0) {
-                    // we read exactly 'length' bytes
-                    while ((len < length) && ((l = dis.read(buffer)) >= 0)) {
-                        if (procOS != null) procOS.write(buffer, 0, l);
-                        if (bufferOS != null) bufferOS.write(buffer, 0, l);
-                        len += l;
-                    }
-                } else {
-                    // no content-length was given, thus we read until the connection closes
-                    while ((l = dis.read(buffer, 0, buffer.length)) >= 0) {
-                        if (procOS != null) procOS.write(buffer, 0, l);
-                        if (bufferOS != null) bufferOS.write(buffer, 0, l);
-                    }
-                }
-            } catch (java.net.SocketException e) {
-                throw new IOException("Socket exception: " + e.getMessage());
-            } catch (java.net.SocketTimeoutException e) {
-                throw new IOException("Socket time-out: " + e.getMessage());
-            } finally {
-                // close the streams
-                if (procOS != null) {
-                    if (procOS instanceof httpChunkedOutputStream)
-                        ((httpChunkedOutputStream)procOS).finish();
-                    procOS.flush();
-                }
-                if (bufferOS != null) bufferOS.flush();
-                buffer = null;
-            }
-        }
-
+        
         /**
         * This method outputs a logline to the serverlog with the current
         * status of this instance.

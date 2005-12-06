@@ -211,6 +211,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             serverLog.logWarning("HTTPDFileHandler", "Content-MD5 support not availabel ...");
         }
     }
+    
     /*
      * Returns the path of a (existing) localized File, or the english one, if not availible.
      * @param path is relative from htroot

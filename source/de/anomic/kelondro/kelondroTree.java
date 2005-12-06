@@ -941,19 +941,19 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                         nextNode = null;
                     } else {
                         Object[] stacktop;
-                        Node parent = null;
+                        Node parentNode = null;
                         int parentpointer = (up) ? rightchild : leftchild;
                         while ((nodeStack.size() != 0) && (parentpointer == ((up) ? rightchild : leftchild))) {
                             //System.out.println("step up");
                             // go on, walk up further
                             stacktop = (Object[]) nodeStack.removeLast(); // top of stack: Node/parentpointer pair
-                            parent = (Node) stacktop[0];
+                            parentNode = (Node) stacktop[0];
                             parentpointer = ((Integer) stacktop[1]).intValue();
                         }
                         if ((nodeStack.size() == 0) && (parentpointer == ((up) ? rightchild : leftchild))) {
                             nextNode = null;
                         } else {
-                            nextNode = parent;
+                            nextNode = parentNode;
                         }
                     }
                 }

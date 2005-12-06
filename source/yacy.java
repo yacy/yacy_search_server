@@ -142,8 +142,8 @@ public final class yacy {
     public static String combinedVersionString2PrettyString(String s) {
         long svn;
         try {svn = (long) (100000000.0 * Double.parseDouble(s));} catch (NumberFormatException ee) {svn = 0;}
-        double version = (Math.floor((double) svn / (double) 100000) / (double) 1000);
-        String vStr = (version < 0.11) ? "dev" : Double.toString(version);
+        double v = (Math.floor((double) svn / (double) 100000) / (double) 1000);
+        String vStr = (v < 0.11) ? "dev" : Double.toString(v);
         //while (vStr.length() < 5) vStr = vStr + "0";
         svn = svn % 100000;
         if (svn > 4000) svn=svn / 10; // fix a previous bug online
@@ -160,8 +160,8 @@ public final class yacy {
     * @param svn Current version given from svn.
     * @return String with the combined version
     */
-    public static float versvn2combinedVersion(float version, int svn) {
-        return (float) (((double) version * 100000000.0 + ((double) svn)) / 100000000.0);
+    public static float versvn2combinedVersion(float v, int svn) {
+        return (float) (((double) v * 100000000.0 + ((double) svn)) / 100000000.0);
     }
 
     /**

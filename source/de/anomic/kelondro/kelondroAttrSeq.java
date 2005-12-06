@@ -109,13 +109,13 @@ public class kelondroAttrSeq {
             this.theLogger.warning("ATTRSEQ WARNING for file " + this.file + ": " + message);
     }
     
-    private void readAttrFile(File file) throws IOException {
+    private void readAttrFile(File loadfile) throws IOException {
         BufferedReader br = null;
         int p;
-        if (file.toString().endsWith(".gz")) {
-            br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
+        if (loadfile.toString().endsWith(".gz")) {
+            br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(loadfile))));
         } else {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(loadfile)));
         }
         String line;
         String key;
@@ -137,7 +137,7 @@ public class kelondroAttrSeq {
             if ((p = line.indexOf('=')) > 0) {
                 key = line.substring(0, p).trim();
                 if (entries.containsKey(key)) {
-                    logWarning("read PropFile " + file.toString() + ", key " + key + ": double occurrence");
+                    logWarning("read PropFile " + loadfile.toString() + ", key " + key + ": double occurrence");
                 } else {
                     entries.put(key, line.substring(p + 1).trim());
                 }
@@ -309,10 +309,10 @@ public class kelondroAttrSeq {
             } else return null;
             int p = a.indexOf('-');
             if (p < 0) return null;
-            String name = a.substring(0, p);
+            String atomname = a.substring(0, p);
             try {
                 int x = Integer.parseInt(a.substring(p + 1));
-                return new Object[]{name, new Integer(x)};
+                return new Object[]{atomname, new Integer(x)};
             } catch (NumberFormatException e) {
                 return null;
             }

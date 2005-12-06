@@ -172,8 +172,8 @@ public final class httpd implements serverHandler {
      * Must be called at least once, but can be called again to re-use the object.
      * @see de.anomic.server.serverHandler#initSession(de.anomic.server.serverCore.Session)
      */
-    public void initSession(serverCore.Session session) throws IOException {
-        this.session = session;
+    public void initSession(serverCore.Session newsession) throws IOException {
+        this.session = newsession;
         this.userAddress = session.userAddress; // client InetAddress
         this.clientIP = this.userAddress.getHostAddress();
         if (this.userAddress.isAnyLocalAddress()) this.clientIP = "localhost";

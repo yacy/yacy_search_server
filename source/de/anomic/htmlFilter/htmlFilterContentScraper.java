@@ -86,7 +86,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     private HashMap images;
     private String title;
     private String headline;
-    private serverByteBuffer text;
+    private serverByteBuffer content;
     private URL root;
 
     public htmlFilterContentScraper(URL root) {
@@ -98,13 +98,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         this.images = new HashMap();
         this.title = "";
         this.headline = "";
-        this.text = new serverByteBuffer(1024);
+        this.content = new serverByteBuffer(1024);
     }
 
     public void scrapeText(byte[] newtext) {
 //      System.out.println("SCRAPE: " + new String(newtext));
-        if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append(32);
-        text.append(super.stripAll(new serverByteBuffer(newtext, newtext.length + 1)).trim()).append(32);
+        if ((content.length() != 0) && (content.byteAt(content.length() - 1) != 32)) content.append(32);
+        content.append(super.stripAll(new serverByteBuffer(newtext, newtext.length + 1)).trim()).append(32);
     }
 
     
@@ -222,8 +222,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // extract headline from content
         if (title.length() > 0) hl = title.trim();
         else if (headline.length() > 0) hl = headline.trim();
-        else if (text.length() > 80) hl = new String(text.getBytes(), 0, 80).trim();
-        else hl = text.trim().toString();
+        else if (content.length() > 80) hl = new String(content.getBytes(), 0, 80).trim();
+        else hl = content.trim().toString();
 
         // clean the line: may contain too many funny symbols
         for (int i = 0; i < hl.length(); i++)
@@ -238,7 +238,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public byte[] getText() {
-        return text.getBytes();
+        return content.getBytes();
     }
 
     public Map getAnchors() {
@@ -256,7 +256,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         images = null;
         title = null;
         headline = null;
-        text = null;
+        content = null;
         root = null;
     }
 
@@ -265,7 +265,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     System.out.println("HEADLINE:" + headline);
     System.out.println("ANCHORS :" + anchors.toString());
     System.out.println("IMAGES  :" + images.toString());
-    System.out.println("TEXT    :" + new String(text.getBytes()));
+    System.out.println("TEXT    :" + new String(content.getBytes()));
     }
 
     public static void main(String[] args) {
