@@ -78,46 +78,44 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     private Search writeSearchObj = new Search();
     
     public kelondroTree(File file, long buffersize, int key, int value) throws IOException {
-	this(file, buffersize, new int[] {key, value}, 1, 8);
-    }
-    
-    public kelondroTree(kelondroRA ra, long buffersize, int key, int value) throws IOException {
-	this(ra, buffersize, new int[] {key, value}, 1, 8);
-    }
-    
-    public kelondroTree(File file, long buffersize, int[] columns) throws IOException {
-	// this creates a new tree file
-	this(file, buffersize, columns, columns.length /*txtProps*/, 80 /*txtPropWidth*/);
+        this(file, buffersize, new int[] { key, value }, 1, 8);
     }
 
-    public kelondroTree(File file, long buffersize,
-                        int[] columns, int txtProps, int txtPropsWidth) throws IOException {
-	// this creates a new tree file
-	super(file, buffersize,
-              thisOHBytes, thisOHHandles,
-              columns, thisFHandles, columns.length /*txtProps*/, 80 /*txtPropWidth*/);
-	setHandle(root, null); // define the root value
+    public kelondroTree(kelondroRA ra, long buffersize, int key, int value) throws IOException {
+        this(ra, buffersize, new int[] { key, value }, 1, 8);
+    }
+
+    public kelondroTree(File file, long buffersize, int[] columns) throws IOException {
+        // this creates a new tree file
+        this(file, buffersize, columns, columns.length /* txtProps */, 80 /* txtPropWidth */);
+    }
+
+    public kelondroTree(File file, long buffersize, int[] columns, int txtProps, int txtPropsWidth) throws IOException {
+        // this creates a new tree file
+        super(file, buffersize, thisOHBytes, thisOHHandles, columns, thisFHandles, txtProps, txtPropsWidth);
+        setHandle(root, null); // define the root value
     }
     
     public kelondroTree(kelondroRA ra, long buffersize, int[] columns) throws IOException {
-	// this creates a new tree within a kelondroRA
-        this(ra, buffersize, columns, columns.length /*txtProps*/, 80 /*txtPropWidth*/);
-    }
-    
-    public kelondroTree(kelondroRA ra, long buffersize, int[] columns, int txtProps, int txtPropsWidth) throws IOException {
-	// this creates a new tree within a kelondroRA
-	super(ra, buffersize, thisOHBytes, thisOHHandles, columns, thisFHandles, txtProps, txtPropsWidth);
-	setHandle(root, null); // define the root value
-    }
-    
-    public kelondroTree(File file, long buffersize) throws IOException{
-	// this opens a file with an existing tree file
-	super(file, buffersize);
+        // this creates a new tree within a kelondroRA
+        this(ra, buffersize, columns, columns.length /* txtProps */, 80 /* txtPropWidth */);
     }
 
-    public kelondroTree(kelondroRA ra, long buffersize) throws IOException{
-	// this opens a file with an existing tree in a kelondroRA
-	super(ra, buffersize);
+    public kelondroTree(kelondroRA ra, long buffersize, int[] columns, int txtProps, int txtPropsWidth) throws IOException {
+        // this creates a new tree within a kelondroRA
+        super(ra, buffersize, thisOHBytes, thisOHHandles, columns,
+                thisFHandles, txtProps, txtPropsWidth);
+        setHandle(root, null); // define the root value
+    }
+
+    public kelondroTree(File file, long buffersize) throws IOException {
+        // this opens a file with an existing tree file
+        super(file, buffersize);
+    }
+
+    public kelondroTree(kelondroRA ra, long buffersize) throws IOException {
+        // this opens a file with an existing tree in a kelondroRA
+        super(ra, buffersize);
     }
 
     public void clear() throws IOException {

@@ -76,6 +76,7 @@ import de.anomic.plasma.plasmaWordIndexClassicDB;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
@@ -84,7 +85,6 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyVersion;
 
 /**
 * This is the main class of the proxy. Several threads are started from here:
@@ -164,6 +164,41 @@ public final class yacy {
         return (float) (((double) v * 100000000.0 + ((double) svn)) / 100000000.0);
     }
 
+    public static void presetPasswords(plasmaSwitchboard sb) {
+        // set preset accounts/passwords
+        String acc;
+        if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
+            sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+            sb.setConfig("serverAccount", "");
+        }
+        if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
+            sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+            sb.setConfig("adminAccount", "");
+        }
+
+        // fix unsafe old passwords
+        if ((acc = sb.getConfig("proxyAccountBase64", "")).length() > 0) {
+            sb.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+            sb.setConfig("proxyAccountBase64", "");
+        }
+        if ((acc = sb.getConfig("serverAccountBase64", "")).length() > 0) {
+            sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+            sb.setConfig("serverAccountBase64", "");
+        }
+        if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
+            sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+            sb.setConfig("adminAccountBase64", "");
+        }
+        if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {
+            sb.setConfig("uploadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+            sb.setConfig("uploadAccountBase64", "");
+        }
+        if ((acc = sb.getConfig("downloadAccountBase64", "")).length() > 0) {
+            sb.setConfig("downloadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+            sb.setConfig("downloadAccountBase64", "");
+        }
+    }
+    
     /**
     * Starts up the whole application. Sets up all datastructures and starts
     * the main threads.
@@ -323,8 +358,8 @@ public final class yacy {
             serverFileUtils.copy(new File(htRootPath, "htdocsdefault/dir.html"), new File(shareDefaultPath, "dir.html"));
             //} catch (IOException e) {}
 
-
-            yacyVersion.migrate(sb);
+            presetPasswords(sb);
+            
             // start main threads
             try {
                 final httpd protocolHandler = new httpd(sb, new httpdFileHandler(sb), new httpdProxyHandler(sb));

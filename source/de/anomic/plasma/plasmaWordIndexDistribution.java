@@ -489,9 +489,6 @@ public final class plasmaWordIndexDistribution {
     } 
 
     private class transferIndexWorkerThread extends Thread{
-        // connection properties
-        private boolean gzipBody = false;
-        private int timeout = 60000;
         
         // status fields
         private boolean finished = false;
@@ -517,16 +514,12 @@ public final class plasmaWordIndexDistribution {
                 yacySeed seed, 
                 plasmaWordIndexEntity[] indexEntities, 
                 HashMap urlCache, 
-                boolean gzipBody, 
-                int timeout,
                 long iteration, 
                 int idxCount, 
                 int chunkSize,
                 String endPointHash,
                 String startPointHash) {
             super(new ThreadGroup("TransferIndexThreadGroup"),"TransferIndexWorker_" + seed.getName());
-            this.gzipBody = gzipBody;
-            this.timeout = timeout;
             this.iteration = iteration;
             this.seed = seed;
             this.indexEntities = indexEntities;
@@ -592,7 +585,7 @@ public final class plasmaWordIndexDistribution {
                 
                 // transfering seleted words to remote peer
                 this.status = "Running: Transfering chunk " + iteration;
-                String error = yacyClient.transferIndex(seed, indexEntities, urlCache, this.gzipBody, this.timeout);
+                String error = yacyClient.transferIndex(seed, indexEntities, urlCache, gzipBody, timeout);
                 if (error == null) {
                     // words successfully transfered
                     transferTime = System.currentTimeMillis() - start;
@@ -660,9 +653,6 @@ public final class plasmaWordIndexDistribution {
         private yacySeed seed = null;
         private boolean delete = false;
         private boolean finished = false;
-        private boolean gzipBody = false;
-        private int timeout = 60000;
-        private int maxOpenFiles = 800;
         private int transferedEntryCount = 0;
         private int transferedEntityCount = 0;
         private String status = "Running";
@@ -679,9 +669,9 @@ public final class plasmaWordIndexDistribution {
             this.delete = delete;
             this.sb = plasmaSwitchboard.getSwitchboard();
             this.initialWordsDBSize = sb.wordIndex.size();   
-            this.gzipBody = "true".equalsIgnoreCase(sb.getConfig("indexTransfer.gzipBody","false"));
-            this.timeout = (int) sb.getConfigLong("indexTransfer.timeout",60000);
-            this.maxOpenFiles = (int) sb.getConfigLong("indexTransfer.maxOpenFiles",800);
+            //gzipBody = "true".equalsIgnoreCase(sb.getConfig("indexTransfer.gzipBody","false"));
+            //timeout = (int) sb.getConfigLong("indexTransfer.timeout",60000);
+            //this.maxOpenFiles = (int) sb.getConfigLong("indexTransfer.maxOpenFiles",800);
         }
         
         public void run() {
@@ -690,7 +680,7 @@ public final class plasmaWordIndexDistribution {
         
         public void stopIt(boolean wait) throws InterruptedException {
             this.finished = true;
-            this.join();
+            if (wait) this.join();
         }
         
         public boolean isFinished() {
@@ -775,7 +765,7 @@ public final class plasmaWordIndexDistribution {
                     
                     // selecting 500 words to transfer
                     this.status = "Running: Selecting chunk " + iteration;
-                    Object[] selectResult = selectTransferIndexes(this.startPointHash, this.chunkSize, this.maxOpenFiles-openedFiles.intValue());
+                    Object[] selectResult = selectTransferIndexes(this.startPointHash, this.chunkSize, maxOpenFiles - openedFiles.intValue());
                     newIndexEntities = (plasmaWordIndexEntity[]) selectResult[0];                                        
                     HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry
                     openedFiles = (Integer) selectResult[2];
@@ -877,7 +867,7 @@ public final class plasmaWordIndexDistribution {
                     
                     // handover chunk to transfer worker
                     if (!((newIndexEntities == null) || (newIndexEntities.length == 0))) {
-                        worker = new transferIndexWorkerThread(seed,newIndexEntities,urlCache,gzipBody,timeout,iteration,idxCount,idxCount,startPointHash,oldStartingPointHash);
+                        worker = new transferIndexWorkerThread(seed,newIndexEntities,urlCache,iteration,idxCount,idxCount,startPointHash,oldStartingPointHash);
                         worker.start();
                     }
                 }

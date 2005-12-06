@@ -242,7 +242,7 @@ public class listManager {
          final String f = switchboard.getConfig("proxyBlackListsActive", "");
          de.anomic.plasma.plasmaSwitchboard.urlBlacklist.clear();
          if (f != "") {
-             de.anomic.plasma.plasmaSwitchboard.urlBlacklist.loadLists("black", f, "/");
+             de.anomic.plasma.plasmaSwitchboard.urlBlacklist.loadList(f, "/");
          }
 //       switchboard.urlBlacklist.clear();
 //       if (f != "") switchboard.urlBlacklist.loadLists("black", f, "/");

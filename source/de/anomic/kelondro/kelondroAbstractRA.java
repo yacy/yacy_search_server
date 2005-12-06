@@ -143,7 +143,8 @@ abstract class kelondroAbstractRA implements kelondroRA {
         while (true) {
             c = read();
             if (c < 0) {
-                if (bbsize == 0) return null; else return new String(bb, 0, bbsize);
+                if (bbsize == 0) return null;
+                return new String(bb, 0, bbsize);
             }
             if (c == cr) continue;
             if (c == lf) return new String(bb, 0, bbsize);

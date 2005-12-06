@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyVersion;
+import de.anomic.server.serverAbstractSwitch;
 
 public abstract class serverAbstractSwitch implements serverSwitch {
 
@@ -65,64 +65,88 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     protected int           serverJobs;
     
     public serverAbstractSwitch(String rootPath, String initPath, String configPath) throws IOException {
-	// we initialize the switchboard with a property file,
-	// but maintain these properties then later in a new 'config' file
-	// to reset all changed configs, the config file must
-	// be deleted, but not the init file
-	// the only attribute that will always be read from the init is the
-	// file name of the config file
+        // we initialize the switchboard with a property file,
+        // but maintain these properties then later in a new 'config' file
+        // to reset all changed configs, the config file must
+        // be deleted, but not the init file
+        // the only attribute that will always be read from the init is the
+        // file name of the config file
         this.rootPath = rootPath;
-	configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
-	File initFile = new File(rootPath, initPath);
-	configFile = new File(rootPath, configPath); //propertiesFile(config);
-	new File(configFile.getParent()).mkdir();
+        configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
+        File initFile = new File(rootPath, initPath);
+        configFile = new File(rootPath, configPath); // propertiesFile(config);
+        new File(configFile.getParent()).mkdir();
 
-	// predefine init's
-	Map initProps, removedProps = new HashMap();
-	if (initFile.exists()) initProps = serverFileUtils.loadHashMap(initFile); else initProps = new HashMap();
+        // predefine init's
+        Map initProps, removedProps = new HashMap();
+        if (initFile.exists())
+            initProps = serverFileUtils.loadHashMap(initFile);
+        else
+            initProps = new HashMap();
 
-	// load config's from last save
-	if (configFile.exists()) configProps = serverFileUtils.loadHashMap(configFile); else configProps = new HashMap();
-	
-	synchronized (configProps) {
+        // load config's from last save
+        if (configFile.exists())
+            configProps = serverFileUtils.loadHashMap(configFile);
+        else
+            configProps = new HashMap();
 
-	    // remove all values from config that do not appear in init (out-dated settings)
-	    Iterator i = configProps.keySet().iterator();
-	    String key;
-	    while (i.hasNext()) {
-	        key = (String) i.next();
-	        if (!(initProps.containsKey(key))) {
-                removedProps.put(key,this.configProps.get(key));
-                i.remove();
+        synchronized (configProps) {
+            // remove all values from config that do not appear in init
+            // (out-dated settings)
+            Iterator i = configProps.keySet().iterator();
+            String key;
+            while (i.hasNext()) {
+                key = (String) i.next();
+                if (!(initProps.containsKey(key))) {
+                    removedProps.put(key, this.configProps.get(key));
+                    i.remove();
+                }
             }
-	    }
 
-        // doing a config settings migration
-        HashMap migratedSettings = yacyVersion.migrateSwitchboardConfigSettings(this,(HashMap) removedProps);
-        if(migratedSettings!=null) configProps.putAll(migratedSettings);
-        
-	    // merge new props from init to config
-	    // this is necessary for migration, when new properties are attached
-	    initProps.putAll(configProps);
-	    configProps = initProps;
-	    
-	    // save result; this may initially create a config file after initialization
-	    saveConfig();
-	}
+            // doing a config settings migration
+            //HashMap migratedSettings = migrateSwitchConfigSettings((HashMap) removedProps);
+            //if (migratedSettings != null) configProps.putAll(migratedSettings);
 
-	// other settings
-	authorization = new HashMap();
-        
+            // merge new props from init to config
+            // this is necessary for migration, when new properties are attached
+            initProps.putAll(configProps);
+            configProps = initProps;
+
+            // save result; this may initially create a config file after
+            // initialization
+            saveConfig();
+        }
+
+        // other settings
+        authorization = new HashMap();
+
         // init thread control
         workerThreads = new TreeMap();
-        
+
         // init switch actions
-	switchActions = new TreeMap();
+        switchActions = new TreeMap();
 
         // init busy state control
         serverJobs = 0;
     }
 
+    /*
+    public static HashMap migrateSwitchConfigSettings(HashMap removedSettings) {
+        if ((removedSettings == null) || (removedSettings.size() == 0)) return null;
+        HashMap migratedSettings = new HashMap();
+
+        if (removedSettings.containsKey("parseableMimeTypes")) {
+            String value = (String) removedSettings.get("parseableMimeTypes");
+            migratedSettings.put("parseableMimeTypes.CRAWLER", value);
+            migratedSettings.put("parseableMimeTypes.PROXY", value);
+            migratedSettings.put("parseableMimeTypes.URLREDIRECTOR", value);
+            migratedSettings.put("parseableMimeTypes.ICAP", value);
+        }
+
+        return migratedSettings;
+    }
+    */
+    
     // a logger for this switchboard
     public void setLog(serverLog log) {
 	this.log = log;

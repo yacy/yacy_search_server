@@ -91,18 +91,19 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
     }
 
     private boolean growTail(long newPos) throws IOException {
-        if (tailCurrSize >= tailMaxSize) {
+        if (newPos >= tailMaxSize) {
             System.out.println("cannot grow " + name);
             return false;
         }
         if (tailCurrSize == 0) {
             // first grow
-            this.tailCurrSize = tailMaxSize / 10;
+            this.tailCurrSize = newPos;
             if (tailCurrSize < 1024) tailCurrSize = 1024;
             if (tailCurrSize > tailMaxSize) tailCurrSize = tailMaxSize;
         } else {
             // next grow
             tailCurrSize = tailCurrSize * 2;
+            if (tailCurrSize < newPos) tailCurrSize = newPos;
             if (tailCurrSize > tailMaxSize) tailCurrSize = tailMaxSize;
             bufferTail.force();
         }

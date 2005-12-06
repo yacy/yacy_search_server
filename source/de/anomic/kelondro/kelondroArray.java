@@ -95,7 +95,7 @@ public class kelondroArray extends kelondroRecords {
     
     public synchronized int seti(int index, int value) throws IOException {
         int before = getHandle(index).hashCode();
-        setHandle(index, new Handle(index));
+        setHandle(index, new Handle(value));
         return before;
     }
 

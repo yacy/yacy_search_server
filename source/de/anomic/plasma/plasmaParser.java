@@ -443,6 +443,7 @@ public final class plasmaParser {
         File tempFile = null;
         try {
             tempFile = File.createTempFile("parseSource", ".tmp");
+            serverFileUtils.write(source, tempFile);
             return parseSource(location, mimeType, tempFile);
         } catch (Exception e) {   
             return null;

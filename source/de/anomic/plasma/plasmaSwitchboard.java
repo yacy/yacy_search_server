@@ -266,7 +266,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         urlBlacklist = new plasmaURLPattern(ulrBlackListFile);
         String f = getConfig("proxyBlackListsActive", null);
         if (f != null) {
-            urlBlacklist.loadLists("black", f, "/");
+            urlBlacklist.loadList(f, "/");
             this.log.logConfig("loaded black-list from file " + ulrBlackListFile.getName() + ", " +
             urlBlacklist.size() + " entries, " +
             ppRamString(ulrBlackListFile.length()/1024));
@@ -359,7 +359,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * initialize switchboard queue
          * ====================================================================== */
         // create queue
-        this.sbQueue = new plasmaSwitchboardQueue(this.cacheManager, this.urlPool.loadedURL, new File(this.plasmaPath, "switchboardQueue1.stack"), 10, this.profiles);
+        this.sbQueue = new plasmaSwitchboardQueue(this.cacheManager, this.urlPool.loadedURL, new File(this.plasmaPath, "switchboardQueue1.stack"), this.profiles);
         
         // setting the indexing queue slots
         indexingSlots = (int) getConfigLong("indexer.slots", 100);

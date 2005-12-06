@@ -64,13 +64,13 @@ public class plasmaURLPattern {
         return hostpaths.size();
     }
 
-    public void loadLists(String mapname, String filenames, String sep) {
+    public void loadList(String filenames, String sep) {
         // File listsPath = new File(getRootPath(), getConfig("listsPath", "DATA/LISTS"));
         final String[] filenamesarray = filenames.split(",");
 
         if( filenamesarray.length > 0) {
             for (int i = 0; i < filenamesarray.length; i++) {
-                hostpaths.putAll(kelondroMSetTools.loadMap(mapname, (new File(rootPath, filenamesarray[i])).toString(), sep));
+                hostpaths.putAll(kelondroMSetTools.loadMap(new File(rootPath, filenamesarray[i]).toString(), sep));
             }
         }
     }

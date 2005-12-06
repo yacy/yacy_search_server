@@ -65,7 +65,7 @@ public class plasmaSwitchboardQueue {
     private plasmaHTCache htCache;
     private plasmaCrawlLURL lurls;
 
-    public plasmaSwitchboardQueue(plasmaHTCache htCache, plasmaCrawlLURL lurls, File sbQueueStackPath, int bufferkb, plasmaCrawlProfile profiles) throws IOException {
+    public plasmaSwitchboardQueue(plasmaHTCache htCache, plasmaCrawlLURL lurls, File sbQueueStackPath, plasmaCrawlProfile profiles) throws IOException {
         this.profiles = profiles;
         this.htCache = htCache;
         this.lurls = lurls;

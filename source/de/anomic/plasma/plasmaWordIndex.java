@@ -184,7 +184,7 @@ public final class plasmaWordIndex {
             singleHash = (String) i.next();
             
             // retrieve index
-            singleEntity = getEntity(singleHash, true, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - entities.size()));
+            singleEntity = getEntity(singleHash, deleteIfEmpty, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - entities.size()));
             
             // check result
             if (((singleEntity == null) || (singleEntity.size() == 0)) && (interruptIfEmpty)) return null;

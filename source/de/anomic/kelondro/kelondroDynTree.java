@@ -170,34 +170,34 @@ public class kelondroDynTree {
     protected class treeCache {
 
         private String tablename;
-        private Hashtable cache;
+        private Hashtable tcache;
         public long timestamp;
         
         treeCache(String tablename) {
             this.tablename = tablename;
-            this.cache = new Hashtable(); // for key-row relations
+            this.tcache = new Hashtable(); // for key-row relations
             this.timestamp = Long.MAX_VALUE; // to flag no-update
         }
         
         public byte[][] get(byte[] key) throws IOException {
-            byte[][] entry = (byte[][]) cache.get(key);
+            byte[][] entry = (byte[][]) tcache.get(key);
             if (entry == null) {
                 kelondroTree t = getTree(this.tablename);
                 entry = t.get(key);
                 t.close();
-                this.cache.put(key, entry);
+                this.tcache.put(key, entry);
                 this.timestamp = System.currentTimeMillis();
             } 
             return entry;
         }
         
         protected void put(byte[][] entry) { // this is only used internal
-            this.cache.put(entry[0], entry);
+            this.tcache.put(entry[0], entry);
             this.timestamp = System.currentTimeMillis();
         }
         
         protected void remove(byte[] key) {
-            this.cache.remove(key);
+            this.tcache.remove(key);
             this.timestamp = System.currentTimeMillis();
         }
     }
@@ -205,35 +205,35 @@ public class kelondroDynTree {
     protected class treeBuffer {
         
         private String tablename;
-        private Hashtable buffer;
+        private Hashtable tbuffer;
         public long timestamp;
         
         treeBuffer(String tablename) {
             this.tablename = tablename;
-            this.buffer = new Hashtable(); // for key-row relations
+            this.tbuffer = new Hashtable(); // for key-row relations
             this.timestamp = Long.MAX_VALUE; // to flag no-update
         }
         
         public void put(byte[][] entry) {
-            this.buffer.put(entry[0], entry);
+            this.tbuffer.put(entry[0], entry);
             this.timestamp = System.currentTimeMillis();
         }
         
         public void remove(byte[] key) {
-            this.buffer.remove(key);
+            this.tbuffer.remove(key);
             this.timestamp = System.currentTimeMillis();
         }
 
         protected void flush() throws IOException {
             this.timestamp = System.currentTimeMillis();
-            if (this.buffer.size() == 0) return;
-            Enumeration e = this.buffer.keys();
+            if (this.tbuffer.size() == 0) return;
+            Enumeration e = this.tbuffer.keys();
             kelondroTree t = getTree(this.tablename);
             byte[][] entry;
             byte[] key;
             while (e.hasMoreElements()) {
                 key = (byte[]) e.nextElement();
-                entry = (byte[][]) this.buffer.get(key);
+                entry = (byte[][]) this.tbuffer.get(key);
                 t.put(entry);
             }
             t.close();
@@ -327,7 +327,7 @@ public class kelondroDynTree {
             tablename = (String) e.nextElement();
             tb = (treeBuffer) buffer.get(tablename);
             if ((System.currentTimeMillis() - tb.timestamp > this.maxageBuffer) ||
-                (tb.buffer.size() > this.maxsizeBuffer) ||
+                (tb.tbuffer.size() > this.maxsizeBuffer) ||
                 (buffer.size() > this.maxcountBuffer)) {
                 try {tb.flush();} catch (IOException ee) {}
                 tb = null;

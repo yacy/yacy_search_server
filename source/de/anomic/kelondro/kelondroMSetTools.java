@@ -356,7 +356,7 @@ public class kelondroMSetTools {
     
     // ------------------------------------------------------------------------------------------------
 
-    public static TreeMap loadMap(String mapname, String filename, String sep) {
+    public static TreeMap loadMap(String filename, String sep) {
         TreeMap map = new TreeMap();
         BufferedReader br = null;
         try {
