@@ -26,10 +26,10 @@ public class plasmaDbImporter extends Thread {
     
     private final serverLog log;
     private boolean stopped = false;
-    //private boolean paused = false;
+    private boolean paused = false;
     private String wordHash = "------------";
     
-    long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = wordChunkStart;
+    long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = this.wordChunkStart;
     String wordChunkStartHash = "------------", wordChunkEndHash;
     private long urlCounter = 0, wordCounter = 0, entryCounter = 0;
     
@@ -40,6 +40,74 @@ public class plasmaDbImporter extends Thread {
     
     public void stoppIt() {
         this.stopped = true;
+        this.continueIt();
+    }
+    
+    public void pauseIt() {
+        synchronized(this) {
+            this.paused = true;
+        }
+    }
+    
+    public void continueIt() {
+        synchronized(this) {
+            if (this.paused) {
+                this.paused = false;
+                this.notifyAll();
+            }
+        }
+    }
+    
+    public boolean isPaused() {
+        synchronized(this) {
+            return this.paused;
+        }
+    }
+    
+    /**
+     * Can be used to close all still running importer threads
+     * e.g. on server shutdown
+     */
+    public static void close() {
+        /* waiting for all threads to finish */
+        int threadCount  = runningJobs.activeCount();    
+        Thread[] threadList = new Thread[threadCount];     
+        threadCount = plasmaDbImporter.runningJobs.enumerate(threadList);
+        
+        if (threadCount == 0) return;
+        
+        serverLog log = new serverLog("DB-IMPORT");
+        try {
+            // trying to gracefull stop all still running sessions ...
+            log.logInfo("Signaling shutdown to " + threadCount + " remaining dbImporter threads ...");
+            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
+                Thread currentThread = threadList[currentThreadIdx];
+                if (currentThread.isAlive()) {
+                    ((plasmaDbImporter)currentThread).stoppIt();
+                }
+            }      
+            
+            // waiting a few ms for the session objects to continue processing
+            try { Thread.sleep(500); } catch (InterruptedException ex) {}    
+            
+            // interrupting all still running or pooled threads ...
+            log.logInfo("Sending interruption signal to " + runningJobs.activeCount() + " remaining dbImporter threads ...");
+            plasmaDbImporter.runningJobs.interrupt();  
+            
+            // we need to use a timeout here because of missing interruptable session threads ...
+            log.logFine("Waiting for " + runningJobs.activeCount() + " remaining dbImporter threads to finish shutdown ...");
+            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
+                Thread currentThread = threadList[currentThreadIdx];
+                if (currentThread.isAlive()) {
+                    log.logFine("Waiting for dbImporter thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
+                    try { currentThread.join(500); } catch (InterruptedException ex) {}
+                }
+            }
+            
+            log.logInfo("Shutdown of remaining dbImporter threads finished.");
+        } catch (Exception e) {
+            log.logSevere("Unexpected error while trying to shutdown all remaining dbImporter threads.",e);
+        }
     }
     
     public String getError() {
@@ -94,7 +162,7 @@ public class plasmaDbImporter extends Thread {
         if (theHomeUrlDB == null) throw new NullPointerException();
         this.homeUrlDB = theHomeUrlDB;
         
-        if (this.homeWordIndex.getRoot().equals(importRoot)) {
+        if (this.homeWordIndex.getRoot().equals(this.importRoot)) {
             throw new IllegalArgumentException("Import and home DB directory must not be equal");
         }
         
@@ -120,7 +188,7 @@ public class plasmaDbImporter extends Thread {
         try {
             importWordsDB();
         } finally {
-            globalEnd = System.currentTimeMillis();
+            this.globalEnd = System.currentTimeMillis();
             finishedJobs.add(this);
         }
     }
@@ -249,6 +317,15 @@ public class plasmaDbImporter extends Thread {
     }    
     
     private boolean isAborted() {
+        synchronized(this) {
+            if (this.paused) {
+                try {
+                    this.wait();
+                }
+                catch (InterruptedException e){}
+            }
+        }
+        
         return (this.stopped) || Thread.currentThread().isInterrupted();
     }
     

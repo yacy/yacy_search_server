@@ -387,7 +387,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // define a realtime parsable mimetype list
         log.logConfig("Parser: Initializing Mime Types");
         plasmaParser.initRealtimeParsableMimeTypes(getConfig("parseableRealtimeMimeTypes","application/xhtml+xml,text/html,text/plain"));
-        plasmaParser.initParseableMimeTypes(getConfig("parseableMimeTypes",null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_PROXY,getConfig("parseableMimeTypes.PROXY",null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER,getConfig("parseableMimeTypes.CRAWLER",null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_ICAP,getConfig("parseableMimeTypes.ICAP",null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_URLREDIRECTOR,getConfig("parseableMimeTypes.URLREDIRECTOR",null));
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
@@ -721,7 +724,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         wordIndex.close(waitingBoundSeconds);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
         try {
-            //sbStackCrawlThread.stopIt();
+            // closing all still running db importer jobs
+            plasmaDbImporter.close();
+            
             indexDistribution.close();
             cacheLoader.close();
             wikiDB.close();
@@ -1141,7 +1146,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             plasmaParserDocument document = null;
             httpHeader entryRespHeader = entry.responseHeader();
             String mimeType = (entryRespHeader == null)?null:entryRespHeader.mime();
-            if (plasmaParser.supportedContent(entry.url(),mimeType)){
+            if (plasmaParser.supportedContent(
+                    entry.url(),
+                    mimeType)
+            ){
                 if ((entry.cacheFile().exists()) && (entry.cacheFile().length() > 0)) {
                     log.logFine("(Parser) '" + entry.normalizedURLString() + "' is not parsed yet, parsing now from File");
                     document = parser.parseSource(entry.url(), mimeType, entry.cacheFile());

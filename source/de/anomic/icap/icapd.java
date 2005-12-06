@@ -372,8 +372,7 @@ public class icapd implements serverHandler {
             reader.close();
             resHdrStream.close();
             
-            if ((!(plasmaParser.supportedMimeTypesContains(httpResHeader.mime()))) &&
-                    (!(plasmaParser.supportedFileExt(httpRequestURL)))) {
+            if (!plasmaParser.supportedContent(plasmaParser.PARSER_MODE_ICAP, httpRequestURL, httpResHeader.mime())) {
                 this.log.logInfo("Wrong mimeType or fileExtension for indexing:" +
                                  "\nMimeType:    " + httpResHeader.mime() +
                                  "\nRequest Line:" + httpRequestLine);

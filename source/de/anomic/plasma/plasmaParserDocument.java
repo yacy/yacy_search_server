@@ -196,7 +196,7 @@ public class plasmaParserDocument {
 			ext = url.substring(extpos).toLowerCase();
                     }
                     normal = htmlFilterContentScraper.urlNormalform(null, url);
-                    if (normal != null) {
+                    if (normal != null) { //TODO: extension function is not correct
                         if (plasmaParser.mediaExtContains(ext.substring(1))) {
                             // this is not an normal anchor, its a media link
                             medialinks.put(normal, entry.getValue());

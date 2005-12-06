@@ -154,6 +154,7 @@ implements Parser {
                 Collection subMatches = match.getSubMatches();
                 if ((subMatches != null) && (!subMatches.isEmpty())) {
                     mimeType = ((MagicMatch) subMatches.iterator().next()).getMimeType();
+                    if ((mimeType == null)||(mimeType.length() == 0)) mimeType = match.getMimeType();
                 } else {
                     mimeType = match.getMimeType();
                 }

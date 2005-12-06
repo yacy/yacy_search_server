@@ -763,7 +763,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 
                 // make a transformer
                 if ((!(transformer.isIdentityTransformer())) &&
-                        ((ext == null) || (!(plasmaParser.mediaExtContains(ext)))) &&
+                        ((ext == null) || (!(plasmaParser.supportedRealtimeFileExtContains(url)))) &&
                         ((cachedResponseHeader == null) || (plasmaParser.realtimeParsableMimeTypesContains(cachedResponseHeader.mime())))) {
                     hfos = new htmlFilterOutputStream((chunkedOut != null) ? chunkedOut : respond, null, transformer, (ext.length() == 0));
                 } else {

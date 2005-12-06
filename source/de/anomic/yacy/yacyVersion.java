@@ -50,6 +50,14 @@ public final class yacyVersion {
         if ((removedSettings == null)||(removedSettings.size() == 0)) return null;
         HashMap migratedSettings = new HashMap();        
         
+        if (removedSettings.containsKey("parseableMimeTypes")) {
+            String value = (String) removedSettings.get("parseableMimeTypes");
+            migratedSettings.put("parseableMimeTypes.CRAWLER", value);
+            migratedSettings.put("parseableMimeTypes.PROXY", value);
+            migratedSettings.put("parseableMimeTypes.URLREDIRECTOR", value);
+            migratedSettings.put("parseableMimeTypes.ICAP", value);
+        }
+        
         return migratedSettings;
         
     }

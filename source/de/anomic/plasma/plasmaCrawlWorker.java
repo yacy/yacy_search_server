@@ -375,7 +375,7 @@ public final class plasmaCrawlWorker extends Thread {
                 // request has been placed and result has been returned. work off response
                 File cacheFile = cacheManager.getCachePath(url);
                 try {
-                    if (plasmaParser.supportedContent(url,res.responseHeader.mime())) {
+                    if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,url,res.responseHeader.mime())) {
                         if (cacheFile.isFile()) {
                             cacheManager.deleteFile(url);
                         }
@@ -521,7 +521,7 @@ public final class plasmaCrawlWorker extends Thread {
                 }
 
                 // returning the used httpc
-                httpc.returnInstance(remote);
+                if (remote != null) httpc.returnInstance(remote);
                 remote = null;
 
                 // setting the retry counter to 1

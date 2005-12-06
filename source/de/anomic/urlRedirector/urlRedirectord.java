@@ -160,7 +160,11 @@ public class urlRedirectord implements serverHandler {
                         // getting URL mimeType
                         httpHeader header = httpc.whead(reqURL, 10000, null, null, switchboard.remoteProxyConfig);                        
                         
-                        if (plasmaParser.supportedContent(reqURL,header.mime())) {
+                        if (plasmaParser.supportedContent(
+                                plasmaParser.PARSER_MODE_URLREDIRECTOR,
+                                reqURL,
+                                header.mime())
+                        ) {
                             // enqueuing URL for crawling
                             reasonString = switchboard.sbStackCrawlThread.stackCrawl(
                                     this.nextURL, 

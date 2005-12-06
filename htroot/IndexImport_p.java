@@ -102,8 +102,12 @@ public final class IndexImport_p {
                 plasmaDbImporter.finishedJobs.clear();
                 prop.put("LOCATION","");
                 return prop;
-            } else if (post.containsKey("stopIndexDbImport")) {
-                // getting the job nr of the thread that should be stopped
+            } else if (
+                    (post.containsKey("stopIndexDbImport")) ||
+                    (post.containsKey("pauseIndexDbImport")) ||
+                    (post.containsKey("continueIndexDbImport"))
+            ) {
+                // getting the job nr of the thread
                 String jobNr = (String) post.get("jobNr");
                 
                 Thread[] importThreads = new Thread[plasmaDbImporter.runningJobs.activeCount()*2];
@@ -112,12 +116,13 @@ public final class IndexImport_p {
                 for (int i=0; i < activeCount; i++) {
                     plasmaDbImporter currThread = (plasmaDbImporter) importThreads[i];
                     if (currThread.getJobNr() == Integer.valueOf(jobNr).intValue()) {
-                        currThread.stoppIt();
-                        try {
-                            currThread.join();
-                        } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                        if (post.containsKey("stopIndexDbImport")) {
+                            currThread.stoppIt();
+                            try { currThread.join(); } catch (InterruptedException e) {e.printStackTrace();}                            
+                        } else if (post.containsKey("pauseIndexDbImport")) {
+                            currThread.pauseIt();
+                        } else if (post.containsKey("continueIndexDbImport")) {
+                            currThread.continueIt();
                         }
                         break;
                     }                    
@@ -138,30 +143,30 @@ public final class IndexImport_p {
         
         for (int i=0; i < activeCount; i++) {
             plasmaDbImporter currThread = (plasmaDbImporter) importThreads[i];
+
+            // root path of the source db
+            prop.put("running.jobs_" + i + "_path",            currThread.getImportRoot().toString());
             
-            File importPath = currThread.getImportRoot();
-            String currWordHash = currThread.getCurrentWordhash();
-            long currWordEntryCount = currThread.getWordEntryCounter();
-            long currWordEntityCounter = currThread.getWordEntityCounter();
-            long currUrlCounter = currThread.getUrlCounter();
-            //long currImportDbSize = currThread.getImportWordDbSize();
-            long estimatedTime = currThread.getEstimatedTime();
-            long elapsedTime = currThread.getElapsedTime();
-            int jobNr = currThread.getJobNr();
-            int percent = currThread.getProcessingStatus();
+            // specifies if the importer is still running
+            prop.put("running.jobs_" + i + "_stopped",         currThread.isAlive() ? 1:0);
             
-            boolean isRunning = currThread.isAlive();
+            // specifies if the importer was paused
+            prop.put("running.jobs_" + i + "_paused",          currThread.isPaused() ? 1:0);
             
-            prop.put("running.jobs_" + i + "_path", importPath.toString());
-            prop.put("running.jobs_" + i + "_stopped", isRunning ? 1:0);
-            prop.put("running.jobs_" + i + "_percent", Integer.toString(percent));
-            prop.put("running.jobs_" + i + "_elapsed", serverDate.intervalToString(elapsedTime));
-            prop.put("running.jobs_" + i + "_estimated", serverDate.intervalToString(estimatedTime));
-            prop.put("running.jobs_" + i + "_wordHash", currWordHash);
-            prop.put("running.jobs_" + i + "_url_num", Long.toString(currUrlCounter));
-            prop.put("running.jobs_" + i + "_word_entity_num", Long.toString(currWordEntityCounter));
-            prop.put("running.jobs_" + i + "_word_entry_num", Long.toString(currWordEntryCount));
-            prop.put("running.jobs_" + i + "_stopped_job_nr", Integer.toString(jobNr));
+            // setting the status
+            prop.put("running.jobs_" + i + "_status",          currThread.isPaused() ? 2 : currThread.isAlive() ? 1 : 0);
+            
+            // other information
+            prop.put("running.jobs_" + i + "_percent",         Integer.toString(currThread.getProcessingStatus()));
+            prop.put("running.jobs_" + i + "_elapsed",         serverDate.intervalToString(currThread.getElapsedTime()));
+            prop.put("running.jobs_" + i + "_estimated",       serverDate.intervalToString(currThread.getEstimatedTime()));
+            prop.put("running.jobs_" + i + "_wordHash",        currThread.getCurrentWordhash());
+            prop.put("running.jobs_" + i + "_url_num",         Long.toString(currThread.getUrlCounter()));
+            prop.put("running.jobs_" + i + "_word_entity_num", Long.toString(currThread.getWordEntityCounter()));
+            prop.put("running.jobs_" + i + "_word_entry_num",  Long.toString(currThread.getWordEntryCounter()));
+            
+            // job number of the importer thread
+            prop.put("running.jobs_" + i + "_job_nr", Integer.toString(currThread.getJobNr()));
         }
         prop.put("running.jobs",activeCount);
         
@@ -174,10 +179,10 @@ public final class IndexImport_p {
             String error = currThread.getError();
             prop.put("finished.jobs_" + i + "_path", currThread.getImportRoot().toString());
             if (error != null) {
-                prop.put("finished.jobs_" + i + "_stopped", 2);
-                prop.put("finished.jobs_" + i + "_stopped_errorMsg", error);
+                prop.put("finished.jobs_" + i + "_status", 2);
+                prop.put("finished.jobs_" + i + "_status_errorMsg", error);
             } else {
-                prop.put("finished.jobs_" + i + "_stopped", 0);
+                prop.put("finished.jobs_" + i + "_status", 0);
             }
             prop.put("finished.jobs_" + i + "_percent", Integer.toString(currThread.getProcessingStatus()));
             prop.put("finished.jobs_" + i + "_elapsed", serverDate.intervalToString(currThread.getElapsedTime()));         

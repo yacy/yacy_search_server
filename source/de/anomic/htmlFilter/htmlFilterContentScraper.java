@@ -51,6 +51,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverByteBuffer;
 
@@ -163,6 +166,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // (this is different from previous normal forms where a '/' must not appear in root paths; here it must appear. Makes everything easier.)
         int cpos = path.indexOf("#");
         if (cpos >= 0) path = path.substring(0, cpos);
+        
+        Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)(?<!/[.]{2}/)[.]{2}(?=/)|/\\.(?=/)");
+        Matcher matcher = pathPattern.matcher(path);
+        while (matcher.find()) {
+            path = matcher.replaceAll("");
+            matcher.reset(path);
+        }  
+        
         if (defaultPort) {
             return url.getProtocol() + "://" + url.getHost() + path;
         } else {

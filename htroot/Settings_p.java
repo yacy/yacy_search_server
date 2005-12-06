@@ -49,6 +49,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaParser;
+import de.anomic.plasma.plasmaParserConfig;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.serverObjects;
@@ -248,7 +250,10 @@ public final class Settings_p {
          * Parser Configuration
          */
         plasmaSwitchboard sb = (plasmaSwitchboard)env;
-        HashSet enabledParsers = sb.parser.getEnabledParserList();
+        
+        HashMap configList = plasmaParser.getParserConfigList();        
+        plasmaParserConfig[] configArray = (plasmaParserConfig[]) configList.values().toArray(new plasmaParserConfig[configList.size()]);
+        
         HashSet parserInfos = new HashSet(sb.parser.getAvailableParserList().values());
         
 //        // fetching a list of all available mimetypes
@@ -258,7 +263,7 @@ public final class Settings_p {
 //        Collections.sort(availableParserKeys);
         
         // loop through the mimeTypes and add it to the properties
-        boolean allParsersEnabled = true;
+        boolean[] allParsersEnabled = new boolean[configList.size()];
         int parserIdx = 0;
         
         Iterator availableParserIter = parserInfos.iterator();
@@ -267,20 +272,23 @@ public final class Settings_p {
             prop.put("parser_" + parserIdx + "_name", parserInfo.parserName);
             prop.put("parser_" + parserIdx + "_version", parserInfo.parserVersionNr);
             prop.put("parser_" + parserIdx + "_usage", Integer.toString(parserInfo.usageCount));
+            prop.put("parser_" + parserIdx + "_colspan",Integer.toString(configArray.length+1));
             
             int mimeIdx = 0;
             Enumeration mimeTypeIter = parserInfo.supportedMimeTypes.keys();
             while (mimeTypeIter.hasMoreElements()) {
                 String mimeType = (String)mimeTypeIter.nextElement();
                 
-                boolean parserIsEnabled = enabledParsers.contains(mimeType);
-                
                 prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_mimetype", mimeType);
                 //prop.put("parser_" + parserIdx + "_name", parserName);
                 //prop.put("parser_" + parserIdx + "_shortname", parserName.substring(parserName.lastIndexOf(".")+1));
-                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_status", enabledParsers.contains(mimeType) ? 1:0);
-                allParsersEnabled &= parserIsEnabled;
-                
+                for (int i=0; i<configArray.length; i++) {
+                    HashSet enabledParsers =  configArray[i].getEnabledParserList();
+                    prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode_" + i + "_optionName", configArray[i].parserMode + "." + mimeType);
+                    prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode_" + i + "_status", enabledParsers.contains(mimeType) ? 1:0);
+                    allParsersEnabled[i] &= enabledParsers.contains(mimeType);
+                }
+                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode",configArray.length);
                 mimeIdx++;
             }
             prop.put("parser_" + parserIdx + "_mime", mimeIdx);
@@ -288,8 +296,13 @@ public final class Settings_p {
             parserIdx++;
         }
         
-        prop.put("allParserEnabled",allParsersEnabled ? 1:0);
+        for (int i=0; i<configArray.length; i++) {
+            prop.put("parserMode_" + i + "_name",configArray[i].parserMode);
+            prop.put("parserMode_" + i + "_allParserEnabled",allParsersEnabled[i] ? 1:0);
+        }
+        prop.put("parserMode",configArray.length);
         prop.put("parser", parserIdx);
+        prop.put("parser.colspan", Integer.toString(configArray.length+3));
         
         // return rewrite properties
         return prop;

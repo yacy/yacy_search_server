@@ -5,33 +5,41 @@ For a detailed description of the various MIME-types take a look at <a href="htt
 <p>
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader" valign="bottom">
-<td class="small" >Activate</td>
+#{parserMode}#
+	<td class="small" >#[name]#</td>
+#{/parserMode}#
 <td class="small" >Mime-Type</td>
 <td class="small" >Parser&nbsp;Usage</td>
 <td class="small" ></td>
 </tr>
 #{parser}#
 <tr class="TableCellDark">
-	<td colspan="2">#[name]# V#[version]#</td>
+	<td colspan="#[colspan]#"><nobr>#[name]# V#[version]#<nobr></td>
 	<td>#[usage]#</td>
 	<td>&nbsp;</td>
 </tr>
 #{mime}#
 <tr class="TableCellLight">
-	<td class="small" align="center"><input type="checkbox" name="#[mimetype]#" align="top" #(status)#::checked#(/status)#></td>
+#{parserMode}#
+	<td class="small" align="center"><input type="checkbox" name="#[optionName]#" align="top" #(status)#::checked#(/status)#></td>
+#{/parserMode}#	
 	<td class="small">#[mimetype]#</td>
 	<td class="small">&nbsp;</td>
 	<td class="small" width="100%"></td>
 </tr>
 #{/mime}#
 #{/parser}#
+<!--
   <tr class="TableCellDark">
-    <td class="small" align="center"><input type="checkbox" name="allParserEnabled" align="top" #(allParserEnabled)#::checked#(/allParserEnabled)#>
+#{parserMode}#  
+    <td class="small" align="center"><input type="checkbox" name="#[name]#.allParserEnabled" align="top" #(allParserEnabled)#::checked#(/allParserEnabled)#>
+#{/parserMode}#	    
     <td colspan="2" class="small" >Enable all parsers</td>
     <td class="small">&nbsp;</td>
   </tr>
+-->  
   <tr class="TableCellDark">
-    <td colspan="4" class="small" ><input type="submit" name="parserSettings" value="submit">&nbsp;Changes take effect immediately</td>
+    <td colspan="#[parser.colspan]#" class="small" ><input type="submit" name="parserSettings" value="submit">&nbsp;Changes take effect immediately</td>
   </tr>
 </table>
 </fieldset>

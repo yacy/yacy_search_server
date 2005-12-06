@@ -40,6 +40,8 @@
 
 package de.anomic.http;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -1239,6 +1241,31 @@ do upload
         );
         
         if (a == null) return null;
+        
+        // support of gzipped data (requested by roland)      
+        if ((a.length > 1) && (((a[1] << 8) | a[0]) == GZIPInputStream.GZIP_MAGIC)) {
+            try {
+                ByteArrayInputStream byteInput = new ByteArrayInputStream(a);
+                ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
+                GZIPInputStream zippedContent = new GZIPInputStream(byteInput);
+                byte[] data = new byte[1024];
+                int read = 0;
+                
+                // reading gzip file and store it uncompressed
+                while((read = zippedContent.read(data, 0, 1024)) != -1) {
+                    byteOutput.write(data, 0, read);
+                }
+                zippedContent.close();
+                byteOutput.close();   
+                
+                a = byteOutput.toByteArray();
+            } catch (Exception e) {
+                if (!e.getMessage().equals("Not in GZIP format")) {
+                    throw new IOException(e.getMessage());
+                }
+            }
+        }
+        
         int s = 0;
         int e;
         ArrayList v = new ArrayList();
@@ -1872,6 +1899,7 @@ final class httpcFactory implements org.apache.commons.pool.PoolableObjectFactor
      * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
      */
     public void destroyObject(Object obj) {
+        assert(obj instanceof httpc): "Invalid object type added to pool.";
         if (obj instanceof httpc) {
             httpc theHttpc = (httpc) obj;
 
@@ -1883,12 +1911,7 @@ final class httpcFactory implements org.apache.commons.pool.PoolableObjectFactor
      * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
      */
     public boolean validateObject(Object obj) {
-    		/*
-        if (obj instanceof httpc) {
-            httpc theHttpc = (httpc) obj;
-            return true;
-        }
-        */
+        assert(obj instanceof httpc): "Invalid object type in pool.";
         return true;
     }
 
@@ -1905,12 +1928,7 @@ final class httpcFactory implements org.apache.commons.pool.PoolableObjectFactor
      *
      */
     public void passivateObject(Object obj) {
-        //log.debug(" passivateObject..." + obj);
-    		/*
-        if (obj instanceof Session)  {
-            httpc theHttpc = (httpc) obj;
-        }
-        */
+        assert(obj instanceof httpc): "Invalid object type returned to pool.";
     }
 }
 

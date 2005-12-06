@@ -49,14 +49,18 @@
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaParser;
+import de.anomic.plasma.plasmaParserConfig;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -537,32 +541,82 @@ public class SettingsAck_p {
         /*
          * Parser configuration
          */
-        if (post.containsKey("parserSettings")) {   
-            plasmaSwitchboard sb = (plasmaSwitchboard)env;
-			post.remove("parserSettings");
+        if (post.containsKey("parserSettings")) {
+            post.remove("parserSettings");
             
-            String[] enabledMimes = null;
-            if (post.containsKey("allParserEnabled")) {
-                // enable all available parsers
-                enabledMimes = plasmaParser.setEnabledParserList(sb.parser.getAvailableParserList().keySet());
-            } else {
-                // activate all received parsers       
-                enabledMimes = plasmaParser.setEnabledParserList(post.keySet());
+            HashMap newConfigList = new HashMap();       
+            Set parserModes = plasmaParser.getParserConfigList().keySet();
+            
+            // looping through all received settings
+            int pos;
+            Enumeration keyEnum = post.keys();
+            while (keyEnum.hasMoreElements()) {                
+                String key = (String) keyEnum.nextElement();
+                if ((pos = key.indexOf(".")) != -1) {
+                    String currParserMode = key.substring(0,pos).trim().toUpperCase();
+                    String currMimeType = key.substring(pos+1).replaceAll("\n", "");
+                    if (parserModes.contains(currParserMode)) {
+                        HashSet currEnabledMimeTypes;
+                        if (newConfigList.containsKey(currParserMode)) {
+                            currEnabledMimeTypes = (HashSet) newConfigList.get(currParserMode);
+                        } else {
+                            currEnabledMimeTypes = new HashSet();
+                            newConfigList.put(currParserMode, currEnabledMimeTypes);
+                        }
+                        currEnabledMimeTypes.add(currMimeType);
+                    }
+                }
             }
-            Arrays.sort(enabledMimes);
             
-            StringBuffer enabledMimesTxt = new StringBuffer();
-            for (int i=0; i < enabledMimes.length; i++) {
-                enabledMimesTxt.append(enabledMimes[i]).append(",");
-                prop.put("info_parser_" + i + "_enabledMime",enabledMimes[i]);
+            int enabledMimesCount = 0;
+            StringBuffer currEnabledMimesTxt = new StringBuffer();
+            Iterator parserModeIter = newConfigList.keySet().iterator();
+            while (parserModeIter.hasNext()) {                
+                String currParserMode = (String)parserModeIter.next();
+                String[] enabledMimes = plasmaParser.setEnabledParserList(currParserMode, (Set)newConfigList.get(currParserMode));
+                Arrays.sort(enabledMimes);
+                
+                currEnabledMimesTxt.setLength(0);
+                for (int i=0; i < enabledMimes.length; i++) {
+                    currEnabledMimesTxt.append(enabledMimes[i]).append(",");
+                    prop.put("info_parser_" + enabledMimesCount + "_parserMode",currParserMode);
+                    prop.put("info_parser_" + enabledMimesCount + "_enabledMime",enabledMimes[i]);
+                    enabledMimesCount++;
+                }
+                if (currEnabledMimesTxt.length() > 0) currEnabledMimesTxt.deleteCharAt(currEnabledMimesTxt.length()-1);  
+                env.setConfig("parseableMimeTypes." + currParserMode,currEnabledMimesTxt.toString());
             }
-            prop.put("info_parser",enabledMimes.length);
-            if (enabledMimesTxt.length() > 0) enabledMimesTxt.deleteCharAt(enabledMimesTxt.length()-1);            
-            
-            env.setConfig("parseableMimeTypes",enabledMimesTxt.toString());
-            
+            prop.put("info_parser",enabledMimesCount);
             prop.put("info", 18);
             return prop;
+            
+//            plasmaSwitchboard sb = (plasmaSwitchboard)env;
+//            
+//            HashMap configList = plasmaParser.getParserConfigList(); 
+//            Iterator parserModeIter = configList.keySet().iterator();
+//            
+//            String[] enabledMimes = null;
+//            if (post.containsKey("allParserEnabled")) {
+//                // enable all available parsers
+//                enabledMimes = plasmaParser.setEnabledParserList(sb.parser.getAvailableParserList().keySet());
+//            } else {
+//                // activate all received parsers       
+//                enabledMimes = plasmaParser.setEnabledParserList(post.keySet());
+//            }
+//            Arrays.sort(enabledMimes);
+//            
+//            StringBuffer enabledMimesTxt = new StringBuffer();
+//            for (int i=0; i < enabledMimes.length; i++) {
+//                enabledMimesTxt.append(enabledMimes[i]).append(",");
+//                prop.put("info_parser_" + i + "_enabledMime",enabledMimes[i]);
+//            }
+//            prop.put("info_parser",enabledMimes.length);
+//            if (enabledMimesTxt.length() > 0) enabledMimesTxt.deleteCharAt(enabledMimesTxt.length()-1);            
+//            
+//            env.setConfig("parseableMimeTypes",enabledMimesTxt.toString());
+//            
+//            prop.put("info", 18);
+//            return prop;
         }
         
         

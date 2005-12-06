@@ -98,7 +98,11 @@ proxyCacheSize = 200
 # parseableRealtimeMimeTypes: specifies mime-types that can be indexed on the fly
 # parseableMime: specifies mime-types that can be indexed but not on the fly
 parseableRealtimeMimeTypes=application/xhtml+xml,text/html,text/plain
-parseableMimeTypes=
+parseableMimeTypes.CRAWLER=
+parseableMimeTypes.PROXY=
+parseableMimeTypes.ICAP=
+parseableMimeTypes.URLREDIRECTOR=
+
 
 # media extension string
 # a comma-separated list of extensions that denote media file formats
