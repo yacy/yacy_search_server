@@ -189,7 +189,7 @@ public final class plasmaWordIndexEntry {
 
     // ** hier fehlt noch als Attribut: <Wortposition im Text>, damit 'nearby' getrackt werden kann **
 
-    if ((language == null) || (language.length() != plasmaCrawlLURL.urlLanguageLength)) language = "uk";
+    if ((language == null) || (language.length() != plasmaURL.urlLanguageLength)) language = "uk";
         this.urlHash = urlHash;
         this.count = count;
         this.posintext = posintext;

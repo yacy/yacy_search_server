@@ -1558,7 +1558,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (date == null) return ""; else return DateFormatter.format(date);
     }
     
-    //public serverObjects searchFromLocal(Set querywords, String order1, String order2, int count, boolean global, long time /*milliseconds*/, String urlmask) {
     public serverObjects searchFromLocal(plasmaSearchQuery query) {
         
         // tell all threads to do nothing for a specific time
@@ -1607,6 +1606,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 String host, hash, address, descr = "";
                 yacySeed seed;
                 plasmaSnippetCache.result snippet;
+                String formerSearch = query.words(" ");
                 long targetTime = timestamp + query.maximumTime;
                 if (targetTime < System.currentTimeMillis()) targetTime = System.currentTimeMillis() + 5000;
                 while ((acc.hasMoreElements()) && (i < query.wantedResults) && (System.currentTimeMillis() < targetTime)) {
@@ -1652,9 +1652,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
                             // suppress line: there is no match in that resource
                         } else {
+                            prop.put("results_" + i + "_delete", "/index.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + query.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
                             prop.put("results_" + i + "_description", descr);
                             prop.put("results_" + i + "_url", urlstring);
                             prop.put("results_" + i + "_urlhash", urlhash);
+                            prop.put("results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(urlhash));
                             prop.put("results_" + i + "_urlname", nxTools.cutUrlText(urlname, 120));
                             prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
                             prop.put("results_" + i + "_ybr", plasmaSearchPreOrder.ybr(urlentry.hash()));

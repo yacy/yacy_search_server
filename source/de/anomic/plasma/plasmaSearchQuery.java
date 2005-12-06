@@ -46,15 +46,15 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Iterator;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.serverByteBuffer;
 
 public final class plasmaSearchQuery {
     
-    public static final String ORDER_QUALITY = "quality";
-    public static final String ORDER_DATE    = "date";
-    public static final String ORDER_YBR     = "ybr";
+    public static final String ORDER_QUALITY = "Quality";
+    public static final String ORDER_DATE    = "Date";
+    public static final String ORDER_YBR     = "YBR";
     
     public static final int SEARCHDOM_LOCAL = 0;
     public static final int SEARCHDOM_GROUPDHT = 1;
@@ -102,6 +102,10 @@ public final class plasmaSearchQuery {
         this.domMaxTargets = -1;
     }
 
+    public String orderString() {
+    		return order[0] + "-" + order[1] + "-" + order[2];
+    }
+    
     public static Set words2hashes(String[] words) {
 	TreeSet hashes = new TreeSet();
         for (int i = 0; i < words.length; i++) hashes.add(plasmaWordIndexEntry.word2hash(words[i]));
@@ -117,7 +121,7 @@ public final class plasmaSearchQuery {
     
     public static TreeSet cleanQuery(String words) {
         // convert Umlaute
-        words = htmlFilterContentScraper.convertUmlaute(new serverByteBuffer(words.getBytes())).toString();
+        words = htmlFilterAbstractScraper.convertUmlaute(new serverByteBuffer(words.getBytes())).toString();
         
         // remove funny symbols
         final String seps = "' .,:/-&";
@@ -135,6 +139,32 @@ public final class plasmaSearchQuery {
         return query;
     }
     
+    public int size() {
+    		return queryHashes.size();
+    }
+    
+    public String words(String separator) {
+    		StringBuffer result = new StringBuffer(8 * queryWords.size());
+    		Iterator i = queryWords.iterator();
+    		if (i.hasNext()) result.append((String) i.next());
+    		while (i.hasNext()) {
+    			result.append(separator);
+    			result.append((String) i.next());
+    		}
+    		return result.toString();
+    }
+    
+    public String hashes(String separator) {
+		StringBuffer result = new StringBuffer(8 * queryHashes.size());
+		Iterator i = queryHashes.iterator();
+		if (i.hasNext()) result.append((String) i.next());
+		while (i.hasNext()) {
+			result.append(separator);
+			result.append((String) i.next());
+		}
+		return result.toString();
+    }
+
     public void filterOut(Set blueList) {
         // filter out words that appear in this set
         Iterator it = queryWords.iterator();

@@ -135,6 +135,12 @@ public class index {
             kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
         }
 
+        // if a minus-button was hit, remove a special reference first
+        if (post.containsKey("deleteref")) {
+        		final String delHash = (String) post.get("deleteref", "");
+        		sb.removeReferences(delHash, query);
+        }
+        
         // prepare search order
         final String order = (String) post.get("order", "");
         final int count = Integer.parseInt((String) post.get("count", "10"));
@@ -185,7 +191,7 @@ public class index {
             if (((String) post.get("search", "")).length() < 3) {
                 prop.put("num-results", 2); // no results - at least 3 chars
             } else {
-                prop.put("num-results", 1);//no results
+                prop.put("num-results", 1); //no results
             }
         } else {
             final int linkcount = Integer.parseInt(prop.get("linkcount", "0"));

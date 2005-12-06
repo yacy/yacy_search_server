@@ -51,6 +51,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -242,7 +243,7 @@ public final class crawlOrder {
             // case where we have already the url loaded;
             reason = reasonString;
             // send lurl-Entry as response
-            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(plasmaCrawlLURL.urlHash(url));
+            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(plasmaURL.urlHash(url));
             if (entry != null) {
                 response = "double";
                 switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);

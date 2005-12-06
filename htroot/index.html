@@ -7,6 +7,14 @@
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
+
+<SCRIPT LANGUAGE="JavaScript">
+picEmpty = new Image(11, 11);
+picEmpty.src = "/env/grafics/empty.gif";
+picMinus = new Image(11, 11);
+picMinus.src = "/env/grafics/minus.gif";
+</SCRIPT>
+
 <br>
 <center><h2><font size="2" face="Helvetica, Arial" color="#212942"><img src="/env/grafics/kaskelix.png" align="middle" alt="YaCy logo Kaskelix"><br>P2P WEB SEARCH</font></h2></center><br>
 <center>#[promoteSearchPageGreeting]#</center><br>
@@ -109,10 +117,13 @@ from 'late' peers.
 
 #{results}#
 <!-- link begin -->
-<p><b>#[description]#</b><br>
-#(snippet)#::<i>#[text]#</i><br>#(/snippet)#
-<a href="#[url]#">#[urlname]#</a><br>
-#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br></p>
+<p>
+<a href="#[delete]#" onMouseover="document.minus_#[urlhexhash]#.src=picMinus.src" onMouseout="document.minus_#[urlhexhash]#.src=picEmpty.src">
+<img src="/env/grafics/empty.gif" name="minus_#[urlhexhash]#"></a>&nbsp;<b>#[description]#</b><br>
+#(snippet)#::<img src="/env/grafics/empty.gif">&nbsp;<i>#[text]#</i><br>#(/snippet)#
+<img src="/env/grafics/empty.gif">&nbsp;<a href="#[url]#">#[urlname]#</a><br>
+<img src="/env/grafics/empty.gif">&nbsp;#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
+</p>
 <!-- link end -->
 #{/results}#
 

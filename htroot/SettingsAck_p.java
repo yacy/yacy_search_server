@@ -60,7 +60,6 @@ import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaParser;
-import de.anomic.plasma.plasmaParserConfig;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;

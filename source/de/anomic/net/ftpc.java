@@ -63,9 +63,9 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -1618,7 +1618,7 @@ cd ..
 
   private void get(String fileDest, String fileName) throws IOException {
     // store time for statistics
-    long start = GregorianCalendar.getInstance(GMTTimeZone).getTime().getTime();
+    long start = Calendar.getInstance(GMTTimeZone).getTime().getTime();
 
     // prepare data channel
     if (DataSocketPassiveMode) createPassiveDataPort(); else createActiveDataPort();
@@ -1674,7 +1674,7 @@ cd ..
       //if (!success) throw new IOException(reply);
 
       // write statistics
-      long stop = GregorianCalendar.getInstance(GMTTimeZone).getTime().getTime();
+      long stop = Calendar.getInstance(GMTTimeZone).getTime().getTime();
       out.print("---- downloaded " +
         ((length < 2048) ? length + " bytes" : ((int) length / 1024) + " kbytes") +
         " in " +

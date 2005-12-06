@@ -69,7 +69,7 @@ public final class serverDate {
     //private final static String[] month = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
     // find out time zone and DST offset
-    private static Calendar thisCalendar = GregorianCalendar.getInstance();
+    private static Calendar thisCalendar = Calendar.getInstance();
     //private static long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
     //private static long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
     //private static long offsetHours = zoneOffsetHours + DSTOffsetHours; // this must be subtracted from current Date().getTime() to produce a GMT Time
