@@ -102,7 +102,7 @@ public class urlRedirectord implements serverHandler {
         return null;
     }
     
-    public Boolean REDIRECTOR(String requestLine) throws IOException {
+    public Boolean REDIRECTOR(String requestLine) {
         try {
             
             boolean authenticated = false;

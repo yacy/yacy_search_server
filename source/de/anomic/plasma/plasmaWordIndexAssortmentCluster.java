@@ -87,7 +87,7 @@ public final class plasmaWordIndexAssortmentCluster {
         
 	// initialize cluster using the cluster elements size for optimal buffer size
 	for (int i = 0; i < clusterCount; i++) {
-	    assortments[i] = new plasmaWordIndexAssortment(assortmentsPath, i + 1, (int) ((long) completeBufferKB * (long) sizes[i] / (long) sumSizes), log);
+	    assortments[i] = new plasmaWordIndexAssortment(assortmentsPath, i + 1, (int) (completeBufferKB * (long) sizes[i] / (long) sumSizes), log);
 	}
     }
 

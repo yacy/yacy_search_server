@@ -984,12 +984,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             int toshift = limitCrawlTriggerJobSize() / 5;
             if (toshift > 1000) toshift = 1000;
             if (toshift > limitCrawlTriggerJobSize()) toshift = limitCrawlTriggerJobSize();
-            try {
-                for (int i = 0; i < toshift; i++) {
-                    urlPool.noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);
-                }
-                log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl");
-            } catch (IOException e) {}
+            for (int i = 0; i < toshift; i++) {
+                urlPool.noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);
+            }
+            log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl");
         }
         
         
@@ -1105,7 +1103,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     private void processResourceStack(plasmaSwitchboardQueue.Entry entry) {
         // work off one stack entry with a fresh resource
-        try {
             long stackStartTime = 0, stackEndTime = 0,
             parsingStartTime = 0, parsingEndTime = 0,
             indexingStartTime = 0, indexingEndTime = 0,
@@ -1349,9 +1346,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             document = null;
             
-        } catch (IOException e) {
-            log.logSevere("ERROR in plasmaSwitchboard.process(): " + e.toString());
-        } finally {
             // removing current entry from in process list
             synchronized (this.indexingTasksInProcess) {
                 this.indexingTasksInProcess.remove(entry.urlHash());
@@ -1369,7 +1363,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 cacheManager.deleteFile(entry.url());
             }
             entry = null;
-        }
     }
     
     private void generateCitationReference(String baseurlhash, Date docDate, plasmaParserDocument document, plasmaCondenser condenser) {

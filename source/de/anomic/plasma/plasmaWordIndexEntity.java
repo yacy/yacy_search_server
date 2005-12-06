@@ -69,7 +69,7 @@ public final class plasmaWordIndexEntity {
         delete      = deleteIfEmpty;
     }
 
-    public static boolean removePlasmaIndex(File databaseRoot, String wordHash) throws IOException {
+    public static boolean removePlasmaIndex(File databaseRoot, String wordHash) {
         File f = wordHash2path(databaseRoot, wordHash);
         boolean success = true;
         if (f.exists()) success = f.delete();

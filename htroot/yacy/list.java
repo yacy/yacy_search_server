@@ -64,7 +64,7 @@ public final class list {
         final serverObjects prop = new serverObjects();
         if (prop == null) { return null; }
         
-        final String col = (String) post.get("col", "");
+        final String col = post.get("col", "");
         final File listsPath = new File(ss.getRootPath(),ss.getConfig("listsPath", "DATA/LISTS"));
 
         if (col.equals("black")) {

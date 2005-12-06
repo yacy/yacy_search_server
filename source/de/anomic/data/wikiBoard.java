@@ -302,10 +302,8 @@ public class wikiBoard {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);
 	    Map record = base.get(key);
-	    if (record == null)
-		return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
-	    else
-		return new entry(key, record);
+	    if (record == null) return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
+        return new entry(key, record);
 	} catch (IOException e) {
 	    return null;
 	}

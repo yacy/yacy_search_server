@@ -128,9 +128,8 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         if (hit(text)) {
 //          System.out.println("FILTERHIT: " + text);
             return genBlueLetters(text.length);
-        } else {
-            return text;
         }
+        return text;
     }
 
     public byte[] transformTag0(String tagname, Properties tagopts, byte quotechar) {

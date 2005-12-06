@@ -71,11 +71,11 @@ public final class crawlOrder {
         //int crawlingdepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
 
         // request values
-        String iam        = (String) post.get("iam", "");       // seed hash of requester
-        String youare     = (String) post.get("youare", "");    // seed hash of the target peer, needed for network stability
-        String process    = (String) post.get("process", "");   // process type
-        String key        = (String) post.get("key", "");       // transmission key
-        int    orderDepth = Integer.parseInt((String) post.get("depth", "0"));     // crawl depth
+        String iam        = post.get("iam", "");       // seed hash of requester
+        String youare     = post.get("youare", "");    // seed hash of the target peer, needed for network stability
+        String process    = post.get("process", "");   // process type
+        String key        = post.get("key", "");       // transmission key
+        int    orderDepth = post.getInt("depth", 0);   // crawl depth
         
         // response values
         /*
@@ -142,14 +142,14 @@ public final class crawlOrder {
                 // read the urls/referrer-vector
                 ArrayList urlv = new ArrayList();
                 ArrayList refv = new ArrayList();
-                String refencoded = (String) post.get("referrer", null);
-                String urlencoded = (String) post.get("url", null);
+                String refencoded = post.get("referrer", null);
+                String urlencoded = post.get("url", null);
                 if (urlencoded != null) {
                     // old method: only one url
                     urlv.add(crypt.simpleDecode(urlencoded, key)); // the url string to crawl
                 } else {
                     // new method: read a vector of urls
-                    while ((urlencoded = (String) post.get("url" + urlv.size(), null)) != null) {
+                    while ((urlencoded = post.get("url" + urlv.size(), null)) != null) {
                         urlv.add(crypt.simpleDecode(urlencoded, key));
                     }
                 }
@@ -159,7 +159,7 @@ public final class crawlOrder {
                     refv.add(crypt.simpleDecode(refencoded, key)); // the referrer url
                 } else {
                     // new method: read a vector of urls
-                    while ((refencoded = (String) post.get("ref" + refv.size(), null)) != null) {
+                    while ((refencoded = post.get("ref" + refv.size(), null)) != null) {
                         env.getLog().logFinest("crawlOrder: refencoded=" + refencoded + " key=" + key);
                         refv.add(crypt.simpleDecode(refencoded, key));
                     }

@@ -184,7 +184,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             serverHandler handlerPrototype, 
             serverSwitch switchboard,
             int commandMaxLength
-    ) throws IOException {
+    ) {
         this.timeout = timeout;
         
         this.commandMaxLength = commandMaxLength;

@@ -99,7 +99,7 @@ public class kelondroArray extends kelondroRecords {
         return before;
     }
 
-    public synchronized int geti(int index) throws IOException {
+    public synchronized int geti(int index) {
         return getHandle(index).hashCode();
     }
     

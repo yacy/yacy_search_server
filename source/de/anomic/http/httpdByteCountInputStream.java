@@ -80,7 +80,7 @@ public final class httpdByteCountInputStream extends FilterInputStream {
         this.finish();
     }
     
-    public void finish() throws IOException {
+    public void finish() {
         if (this.finished) return;
         
         this.finished = true;

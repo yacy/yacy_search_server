@@ -202,7 +202,7 @@ public final class plasmaCrawlWorker extends Thread {
         }
     }
 
-    public void execute() throws IOException {
+    public void execute() {
         try {
             // setting threadname
             this.setName(plasmaCrawlWorker.threadBaseName + "_" + this.url);

@@ -99,7 +99,7 @@ public class kelondroFScoreCluster {
         refcountDB.setText(0, serverCodings.enhancedCoder.encodeBase64Long(getTotalCount() + 1, countlength).getBytes());
     }
     
-    public long getTotalCount() throws IOException {
+    public long getTotalCount() {
         return serverCodings.enhancedCoder.decodeBase64Long(new String(refcountDB.getText(0)));
     }
 

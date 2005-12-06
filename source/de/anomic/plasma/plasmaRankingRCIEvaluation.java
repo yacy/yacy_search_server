@@ -60,7 +60,7 @@ import de.anomic.server.serverFileUtils;
 
 public class plasmaRankingRCIEvaluation {
     
-    public static int[] rcieval(kelondroAttrSeq rci) throws IOException {
+    public static int[] rcieval(kelondroAttrSeq rci) {
         // collect information about which entry has how many references
         // the output is a reference-count:occurrences relation
         HashMap counts = new HashMap();

@@ -299,7 +299,7 @@ public final class yacy {
             sb.setConfig("applicationRoot", homePath);
             sb.setConfig("startupTime", Long.toString(startup));
             serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + vDATE);
-            yacyCore.latestVersion = (float) version;
+            yacyCore.latestVersion = version;
 
             // read environment
             //new
@@ -651,39 +651,36 @@ public final class yacy {
         // run with "java -classpath classes yacy -migratewords"
         try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
-        try {
-            serverLog log = new serverLog("WORDMIGRATION");
-            log.logInfo("STARTING MIGRATION");
-            plasmaWordIndexCache wordIndexCache = new plasmaWordIndexCache(dbroot, new plasmaWordIndexClassicDB(dbroot, log), 20000, log);
-            enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
-            String wordhash;
-            File wordfile;
-            Object migrationStatus;
-            while (words.hasMoreElements()) try {
+        serverLog log = new serverLog("WORDMIGRATION");
+        log.logInfo("STARTING MIGRATION");
+        plasmaWordIndexCache wordIndexCache = new plasmaWordIndexCache(dbroot, new plasmaWordIndexClassicDB(dbroot, log), 20000, log);
+        enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
+        String wordhash;
+        File wordfile;
+        Object migrationStatus;
+        while (words.hasMoreElements())
+            try {
                 wordfile = (File) words.nextElement();
                 wordhash = wordfile.getName().substring(0, 12);
-                //System.out.println("NOW: " + wordhash);
+                // System.out.println("NOW: " + wordhash);
                 migrationStatus = wordIndexCache.migrateWords2Assortment(wordhash);
                 if (migrationStatus instanceof Integer) {
-                    int migrationCount = ((Integer)migrationStatus).intValue();
+                    int migrationCount = ((Integer) migrationStatus).intValue();
                     if (migrationCount == 0)
                         log.logInfo("SKIPPED  " + wordhash + ": empty");
                     else if (migrationCount > 0)
                         log.logInfo("MIGRATED " + wordhash + ": " + migrationCount + " entries");
                     else
-                        log.logInfo("REVERSED " + wordhash + ": " + (-migrationCount) + " entries");                    
+                        log.logInfo("REVERSED " + wordhash + ": " + (-migrationCount) + " entries");
                 } else if (migrationStatus instanceof String) {
                     log.logInfo("SKIPPED  " + wordhash + ": " + migrationStatus);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            log.logInfo("FINISHED MIGRATION JOB, WAIT FOR DUMP");
-            wordIndexCache.close(60);
-            log.logInfo("TERMINATED MIGRATION");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        log.logInfo("FINISHED MIGRATION JOB, WAIT FOR DUMP");
+        wordIndexCache.close(60);
+        log.logInfo("TERMINATED MIGRATION");
     }
     
     public static void importDB(String homePath, String importPath) {

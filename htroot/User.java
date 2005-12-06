@@ -91,11 +91,11 @@ public class User{
         			prop.put("logged-in", 0);
         		}else if(post.containsKey("changepass")){
         			prop.put("status", 1); //password
-        			if(entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(entry.getUserName()+":"+(String)post.get("oldpass", "")))){
-        			if(((String)post.get("newpass")).equals((String)post.get("newpass2"))){
-        			if(!((String)post.get("newpass", "")).equals("")){
+        			if(entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(entry.getUserName()+":"+post.get("oldpass", "")))){
+        			if(post.get("newpass").equals(post.get("newpass2"))){
+        			if(!post.get("newpass", "").equals("")){
         				try {
-							entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(entry.getUserName()+":"+(String)post.get("newpass", "")));
+							entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
 							prop.put("status_password", 0); //changes
 						} catch (IOException e) {}
         			}else{

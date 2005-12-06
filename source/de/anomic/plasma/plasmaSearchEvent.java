@@ -229,7 +229,7 @@ public final class plasmaSearchEvent {
 	try {
 	    while (preorder.hasNext()) {
                 if ((acc.sizeFetched() >= minEntries) && (System.currentTimeMillis() >= postorderLimitTime)) break;
-                entry = (plasmaWordIndexEntry) preorder.next();
+                entry = preorder.next();
                 // find the url entry
                 page = urlStore.getEntry(entry.getUrlHash());
                 // add a result

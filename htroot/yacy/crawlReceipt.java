@@ -74,15 +74,15 @@ public final class crawlReceipt {
         //int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
 
         // request values
-        String iam        = (String) post.get("iam", "");      // seed hash of requester
-        String youare     = (String) post.get("youare", "");    // seed hash of the target peer, needed for network stability
-        //String process    = (String) post.get("process", "");  // process type
-        String key        = (String) post.get("key", "");      // transmission key
-        String receivedUrlhash    = (String) post.get("urlhash", "");  // the url hash that has been crawled
-        String result     = (String) post.get("result", "");   // the result; either "ok" or "fail"
-        String reason     = (String) post.get("reason", "");   // the reason for that result
-        //String words      = (String) post.get("wordh", "");    // priority word hashes
-        String propStr    = crypt.simpleDecode((String) post.get("lurlEntry", ""), key);
+        String iam        = post.get("iam", "");      // seed hash of requester
+        String youare     = post.get("youare", "");    // seed hash of the target peer, needed for network stability
+        //String process    = post.get("process", "");  // process type
+        String key        = post.get("key", "");      // transmission key
+        String receivedUrlhash    = post.get("urlhash", "");  // the url hash that has been crawled
+        String result     = post.get("result", "");   // the result; either "ok" or "fail"
+        String reason     = post.get("reason", "");   // the reason for that result
+        //String words      = post.get("wordh", "");    // priority word hashes
+        String propStr    = crypt.simpleDecode(post.get("lurlEntry", ""), key);
         
         /*
          the result can have one of the following values:

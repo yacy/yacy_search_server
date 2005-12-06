@@ -44,7 +44,6 @@
 
 package de.anomic.icap;
 
-import java.io.IOException;
 import java.text.Collator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -286,7 +285,7 @@ public class icapHeader extends TreeMap implements Map {
         
     }
     
-    public static icapHeader readHeader(Properties prop, serverCore.Session theSession) throws IOException {
+    public static icapHeader readHeader(Properties prop, serverCore.Session theSession) {
         // reading all headers
         icapHeader header = new icapHeader();
         int p;

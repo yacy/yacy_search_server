@@ -167,27 +167,32 @@ public class messageBoard {
 
 	public String author() {
 	    String a = (String) record.get("author");
-	    if (a == null) return "anonymous"; else return a;
+	    if (a == null) return "anonymous";
+        return a;
 	}
 
 	public String recipient() {
 	    String a = (String) record.get("recipient");
-	    if (a == null) return "anonymous"; else return a;
+	    if (a == null) return "anonymous";
+        return a;
 	}
 
 	public String authorHash() {
 	    String a = (String) record.get("ahash");
-	    if (a == null) return null; else return a;
+	    if (a == null) return null;
+        return a;
 	}
 
 	public String recipientHash() {
 	    String a = (String) record.get("rhash");
-	    if (a == null) return null; else return a;
+	    if (a == null) return null;
+        return a;
 	}
 
         public String subject() {
 	    String s = (String) record.get("subject");
-	    if (s == null) return ""; else return s;
+	    if (s == null) return "";
+        return s;
 	}
 
 	public byte[] message() {

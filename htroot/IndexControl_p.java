@@ -347,27 +347,16 @@ public class IndexControl_p {
 
         // generate list
         if (post.containsKey("urlhashsimilar")) {
-            try {
-                final Iterator hashIt = switchboard.urlPool.loadedURL.urlHashes(urlhash, true);
-                StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br>");
-                String hash;
-                int i = 0;
-                while (hashIt.hasNext() && i < 256) {
-                    hash = (String) hashIt.next();
-                    result.append("<a href=\"/IndexControl_p.html?")
-                          .append("keystring=")
-                          .append("&keyhash=")
-                          .append("&urlhash=").append(hash)
-                          .append("&urlstring=")
-                          .append("&urlhashsearch=")
-                          .append("\" class=\"tt\">").append(hash).append("</a> ")
-                          .append(((i + 1) % 8 == 0) ? "<br>" : "");
-                    i++;
-                }
-                prop.put("result", result.toString());
-            } catch (IOException e) {
-                prop.put("result", "Error: " + e.getMessage());
+            final Iterator hashIt = switchboard.urlPool.loadedURL.urlHashes(urlhash, true);
+            StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br>");
+            String hash;
+            int i = 0;
+            while (hashIt.hasNext() && i < 256) {
+                hash = (String) hashIt.next();
+                result.append("<a href=\"/IndexControl_p.html?").append("keystring=").append("&keyhash=").append("&urlhash=").append(hash).append("&urlstring=").append("&urlhashsearch=").append("\" class=\"tt\">").append(hash).append("</a> ").append(((i + 1) % 8 == 0) ? "<br>" : "");
+                i++;
             }
+            prop.put("result", result.toString());
         }
 
         // list known hosts

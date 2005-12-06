@@ -194,10 +194,9 @@ public final class userDB {
 		Entry entry=proxyAuth(auth);
 		if(entry == null){
 			return null;
-		}else{
-			this.ipUsers.put(ip, entry.getUserName());
-			return entry;
 		}
+        this.ipUsers.put(ip, entry.getUserName());
+        return entry;
 	}
 	/*
 	 * authenticate a user by ip, if he had used proxyAuth in the last 10 Minutes
@@ -212,9 +211,8 @@ public final class userDB {
                 return null;
             }
             return entry; //All OK
-        }else{ //not known 
-            return null;
         }
+        return null;
 	}
     public Entry passwordAuth(String user, String password){
         Entry entry=this.getEntry(user);
@@ -359,10 +357,11 @@ public final class userDB {
             if(this.hasProxyRight() == false)
                 return false;
 
-			if( this.getTimeLimit() == null || this.getTimeLimit().longValue() <= 0 || ( timeUsed < this.getTimeLimit().longValue()) )//no timelimit or timelimit not reached
-				return true;
-			else
-				return false;
+			return ( this.getTimeLimit() == null ||
+                      this.getTimeLimit().longValue() <= 0 ||
+                      ( timeUsed < this.getTimeLimit().longValue())
+                    ); //no timelimit or timelimit not reached
+
 		}
         public long updateLastAccess(boolean incrementTimeUsed) {
 			return updateLastAccess(System.currentTimeMillis(), incrementTimeUsed);

@@ -106,7 +106,7 @@ public final class kelondroStack extends kelondroRecords {
     
     public class Counter implements Iterator {
 	Handle nextHandle = null;
-	public Counter() throws IOException {
+	public Counter() {
 	    nextHandle = getHandle(root);
 	}
 	public boolean hasNext() {
@@ -284,12 +284,8 @@ public final class kelondroStack extends kelondroRecords {
     */
 
     public Iterator iterator() {
-	// iterates the elements in an ordered way. returns Node - type Objects
-	try {
-	    return new Counter();
-	} catch (IOException e) {
-	    throw new RuntimeException("error creating an iteration: " + e.getMessage());
-	}
+        // iterates the elements in an ordered way. returns Node - type Objects
+        return new Counter();
     }
 
     public int imp(File file, String separator) throws IOException {

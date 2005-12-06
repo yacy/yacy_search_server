@@ -60,7 +60,7 @@ public class Statistics {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         serverObjects prop = new serverObjects();
-        int page = (post == null) ? 0 : Integer.parseInt((String) post.get("page", "0"));
+        int page = (post == null) ? 0 : Integer.parseInt(post.get("page", "0"));
         
         prop.put("page", page);
         switch (page) {

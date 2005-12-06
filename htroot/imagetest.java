@@ -131,7 +131,7 @@ public class imagetest {
         img.setColor(ymageMatrix.ADDITIVE_BLACK);
         int angle;
         for (byte c = (byte) 'A'; c <= 'Z'; c++) {
-            angle = ((byte) c - (byte) 'A') * 360 / ((byte) 'Z' - (byte) 'A');
+            angle = (c - (byte) 'A') * 360 / ((byte) 'Z' - (byte) 'A');
             img.arcLine(550, 400, 81, 100, angle);
             img.arcPrint(550, 400, 100, angle, "ANGLE" + angle + ":" + (char) c);
         }

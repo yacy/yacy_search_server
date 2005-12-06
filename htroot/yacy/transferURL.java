@@ -67,10 +67,10 @@ public final class transferURL {
         if (prop == null || sb == null) { return null; }
 
         // request values
-        final String iam      = (String) post.get("iam", "");      // seed hash of requester
-//      final String youare   = (String) post.get("youare", "");   // seed hash of the target peer, needed for network stability
-//      final String key      = (String) post.get("key", "");      // transmission key
-        final int urlc        = Integer.parseInt(post.get("urlc", ""));    // number of transported urls
+        final String iam      = post.get("iam", "");      // seed hash of requester
+//      final String youare   = post.get("youare", "");   // seed hash of the target peer, needed for network stability
+//      final String key      = post.get("key", "");      // transmission key
+        final int urlc        = post.getInt("urlc", 0);    // number of transported urls
         final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
         final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
 

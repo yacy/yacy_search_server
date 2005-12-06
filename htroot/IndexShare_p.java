@@ -73,8 +73,8 @@ public class IndexShare_p {
         if (post.containsKey("indexsharesetting")) {
             switchboard.setConfig("allowDistributeIndex", (post.containsKey("distribute")) ? "true" : "false");
             switchboard.setConfig("allowReceiveIndex", (post.containsKey("receive")) ? "true" : "false");
-            switchboard.setConfig("defaultLinkReceiveFrequency", (String) post.get("linkfreq", "30"));
-            switchboard.setConfig("defaultWordReceiveFrequency", (String) post.get("wordfreq", "10"));
+            switchboard.setConfig("defaultLinkReceiveFrequency", post.get("linkfreq", "30"));
+            switchboard.setConfig("defaultWordReceiveFrequency", post.get("wordfreq", "10"));
         }
 
         // insert constants

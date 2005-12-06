@@ -165,11 +165,7 @@ public class plasmaCrawlBalancer {
         }
         
         public Object next() {
-            try {
-                return ((kelondroRecords.Node) ni.next()).getKey();
-            } catch (IOException e) {
-                return null;
-            }
+            return ((kelondroRecords.Node) ni.next()).getKey();
         }
         
         public void remove() {

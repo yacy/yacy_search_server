@@ -212,7 +212,7 @@ public final class httpTemplate {
 			int num=0;
 			if(pattern.containsKey(multi_key) && pattern.get(multi_key) != null){
 			    try{
-				num=(int)Integer.parseInt((String)pattern.get(multi_key)); // Key contains the iteration number as string
+				num=Integer.parseInt((String)pattern.get(multi_key)); // Key contains the iteration number as string
 			    }catch(NumberFormatException e){
 				num=0;
 			    }
@@ -257,7 +257,7 @@ public final class httpTemplate {
 		if(pattern.containsKey(prefix + key) && pattern.get(prefix + key) != null){
 			String patternId=(String)pattern.get(prefix + key);
 		    try{
-    	        whichPattern=(int)Integer.parseInt(patternId); //index
+    	        whichPattern=Integer.parseInt(patternId); //index
 		    }catch(NumberFormatException e){
     			whichPattern=0;
 				byName=true;

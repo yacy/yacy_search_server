@@ -64,7 +64,8 @@ public class IndexCreateIndexingQueue_p {
     
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(Date date) {
-        if (date == null) return ""; else return dayFormatter.format(date);
+        if (date == null) return "";
+        return dayFormatter.format(date);
     }
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -190,7 +191,7 @@ public class IndexCreateIndexingQueue_p {
             yacySeed initiatorSeed, executorSeed;
             int j=0;
             for ( int i = switchboard.urlPool.errorURL.stackSize() - 1; i >= (switchboard.urlPool.errorURL.stackSize() - showRejectedCount); i--) {
-                entry = (plasmaCrawlEURL.Entry) switchboard.urlPool.errorURL.getStack(i);
+                entry = switchboard.urlPool.errorURL.getStack(i);
                 initiatorHash = entry.initiator();
                 executorHash = entry.executor();
                 url = entry.url().toString();

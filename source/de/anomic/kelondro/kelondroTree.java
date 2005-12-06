@@ -270,32 +270,32 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	    return found;
 	}
 
-	public Node getMatcher() throws IOException {
+	public Node getMatcher() {
 	    if (found) return thenode; 
 	    else throw new IllegalArgumentException("wrong access of matcher");
 	}
 
-	public Node getParent() throws IOException {
+	public Node getParent() {
 	    if (found) return parentnode; else return thenode; 
 	}
 
-	public boolean isRoot() throws IOException {
+	public boolean isRoot() {
 	    if (found) throw new IllegalArgumentException("wrong access of isRoot");
 	    else return (child == 0);
 	}
 
-	public boolean isLeft() throws IOException {
+	public boolean isLeft() {
 	    if (found) throw new IllegalArgumentException("wrong access of leftchild");
 	    else return (child == -1);
 	}
         
-        public boolean isRight() throws IOException {
+        public boolean isRight() {
 	    if (found) throw new IllegalArgumentException("wrong access of leftchild");
 	    else return (child == 1);
 	}
     }
 
-    public synchronized boolean isChild(Node childn, Node parentn, int child) throws IOException {
+    public synchronized boolean isChild(Node childn, Node parentn, int child) {
 	if (childn == null) throw new IllegalArgumentException("isLeftChild: Node parameter is NULL");
 	Handle lc = parentn.getOHHandle(child);
 	if (lc == null) return false;
@@ -974,7 +974,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	return new rowIterator(nodeIterator(up, rotating));
     }
     
-    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) {
         return new rowIterator((firstKey == null) ? nodeIterator(up, rotating) : nodeIterator(up, rotating, firstKey));
     }
     
@@ -1005,14 +1005,14 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         
     }
 
-    public synchronized keyIterator keys(boolean up, boolean rotating) throws IOException {
+    public synchronized keyIterator keys(boolean up, boolean rotating) {
 	// iterates only the keys of the Nodes
 	// enumerated objects are of type String
         // iterates the elements in a sorted way.
 	return new keyIterator(nodeIterator(up, rotating));
     }
     
-    public Iterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public Iterator keys(boolean up, boolean rotating, byte[] firstKey) {
         return new keyIterator(nodeIterator(up, rotating, firstKey));
     }
     
@@ -1033,13 +1033,9 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         }
         
         public Object next() {
-            try {
-		Node nextNode = (Node) nodeIterator.next();
-		if (nextNode == null) throw new kelondroException(filename, "no more elements available");
-                return new String(nextNode.getKey());
-            } catch (IOException e) {
-                throw new kelondroException(filename, "io-error: " + e.getMessage());
-            }
+            Node nextNode = (Node) nodeIterator.next();
+            if (nextNode == null) throw new kelondroException(filename, "no more elements available");
+            return new String(nextNode.getKey());
         }
         
         public void remove() {
@@ -1279,15 +1275,12 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     
 
     public int compare(Object a, Object b) {
-	try {
-	    if ((a instanceof byte[]) && (b instanceof byte[])) {
-		return compare((byte[]) a, (byte[]) b);
-	    } else if ((a instanceof Node) && (b instanceof Node)) {
-		return compare(((Node) a).getKey(), ((Node) b).getKey());
-	    } else throw new IllegalArgumentException("Object type or Object type combination not supported");
-	} catch (IOException e) {
-	    throw new kelondroException(filename, "IOException: " + e.getMessage());
-	}
+        if ((a instanceof byte[]) && (b instanceof byte[])) {
+            return compare((byte[]) a, (byte[]) b);
+        } else if ((a instanceof Node) && (b instanceof Node)) {
+            return compare(((Node) a).getKey(), ((Node) b).getKey());
+        } else
+            throw new IllegalArgumentException("Object type or Object type combination not supported");
     }
   
     // Compares its two arguments for order.
@@ -1374,7 +1367,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                 for (int i = 0; i < steps; i++) {
                     if ((d.length() < 3) || ((t.length() > 0) && (((int) System.currentTimeMillis() % 7) < 2))) {
                         // add one
-                        c = t.charAt((int) (System.currentTimeMillis() % (long) t.length()));
+                        c = t.charAt((int) (System.currentTimeMillis() % t.length()));
                         b = testWord(c);
                         tt.put(b, b);
                         d = d + c;
@@ -1382,7 +1375,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                         System.out.println("added " + new String(b));
                     } else {
                         // delete one
-                        c = d.charAt((int) (System.currentTimeMillis() % (long) d.length()));
+                        c = d.charAt((int) (System.currentTimeMillis() % d.length()));
                         b = testWord(c);
                         tt.remove(b);
                         d = d.substring(0, d.indexOf(c)) + d.substring(d.indexOf(c) + 1);
@@ -1526,7 +1519,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         }
     }
     
-    public static int countElements(kelondroTree t) throws IOException {
+    public static int countElements(kelondroTree t) {
         int count = 0;
         Iterator iter = t.nodeIterator(true, false);
         Node n;

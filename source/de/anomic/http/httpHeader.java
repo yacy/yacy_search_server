@@ -271,27 +271,29 @@ public final class httpHeader extends TreeMap implements Map {
 
     // we override the put method to make use of the reverseMappingCache
     public Object put(Object key, Object value) {
-	String k = (String) key;
+        String k = (String) key;
         String upperK = k.toUpperCase();
-	if (reverseMappingCache == null) {
-	    return super.put(k, value);
-	} else {
-	    if (reverseMappingCache.containsKey(upperK)) {
-		// we put in the value using the reverse mapping
-		return super.put(reverseMappingCache.get(upperK), value);
-	    } else {
-		// we put in without a cached key and store the key afterwards
-		Object r = super.put(k, value);
-		reverseMappingCache.put(upperK, k);
-		return r;
-	    }
-	}
+        
+        if (reverseMappingCache == null) {
+            return super.put(k, value);
+        }
+        
+        if (reverseMappingCache.containsKey(upperK)) {
+            // we put in the value using the reverse mapping
+            return super.put(reverseMappingCache.get(upperK), value);
+        }
+        
+        // we put in without a cached key and store the key afterwards
+        Object r = super.put(k, value);
+        reverseMappingCache.put(upperK, k);
+        return r;
     }
 
     // to make the occurrence of multiple keys possible, we add them using a counter
     public Object add(Object key, Object value) {
         int c = keyCount((String) key);
-        if (c == 0) return put(key, value); else return put("*" + key + "-" + c, value);
+        if (c == 0) return put(key, value);
+        return put("*" + key + "-" + c, value);
     }
     
     public int keyCount(String key) {
@@ -303,8 +305,9 @@ public final class httpHeader extends TreeMap implements Map {
     
     // a convenience method to access the map with fail-over defaults
     public Object get(Object key, Object dflt) {
-	Object result = get(key);
-	if (result == null) return dflt; else return result;
+        Object result = get(key);
+        if (result == null) return dflt;
+        return result;
     }
 
     // return multiple results
@@ -377,7 +380,7 @@ public final class httpHeader extends TreeMap implements Map {
 
     private Date headerDate(String kind) {
         if (containsKey(kind)) return new Date(parseHTTPDate((String) get(kind)).getTime());
-        else return null;
+        return null;
     }
     
     public String mime() {
@@ -403,7 +406,8 @@ public final class httpHeader extends TreeMap implements Map {
     public long age() {
         Date lm = lastModified();
         Date sd = date();
-        if (lm == null) return Long.MAX_VALUE; else return ((sd == null) ? new Date() : sd).getTime() - lm.getTime();
+        if (lm == null) return Long.MAX_VALUE;
+        return ((sd == null) ? new Date() : sd).getTime() - lm.getTime();
     }
     
     public long contentLength() {
@@ -413,9 +417,8 @@ public final class httpHeader extends TreeMap implements Map {
             } catch (NumberFormatException e) {
                 return -1;
             }
-        } else {
-            return -1;
         }
+        return -1;
     }
 
     public boolean acceptGzip() {
@@ -467,9 +470,8 @@ public final class httpHeader extends TreeMap implements Map {
             String cmd = s.substring(0,p);
             String args = s.substring(p+1);
             return parseRequestLine(cmd,args, prop,virtualHost);
-        } else {
-            return prop;
         }
+        return prop;
     }
     
     public static Properties parseRequestLine(String cmd, String args, Properties prop, String virtualHost) {

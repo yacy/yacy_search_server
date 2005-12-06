@@ -320,13 +320,12 @@ public final class httpd implements serverHandler {
             if(entry != null){
 			    if(entry.canSurf()){
 				    return true;
-				} else {
-					HashMap tp=new HashMap();
-					tp.put("limit", "0");//time per day
-					tp.put("limit_timelimit", entry.getTimeLimit());
-					sendRespondError(this.prop, this.session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
-		            return false;
 				}
+                HashMap tp=new HashMap();
+                tp.put("limit", "0");//time per day
+                tp.put("limit_timelimit", entry.getTimeLimit());
+                sendRespondError(this.prop, this.session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
+                return false;
 			}
             // ask for authenticate
             this.session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
@@ -334,10 +333,9 @@ public final class httpd implements serverHandler {
             this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
             this.session.out.write("\r\n".getBytes());                   
             return false;
-        }else{
-			return true;
-		}
-        //return false; //UNREACHABLE
+        }
+        
+        return true;
     }
     
     public Boolean UNKNOWN(String requestLine) throws IOException {
@@ -375,7 +373,7 @@ public final class httpd implements serverHandler {
     }    
     
     
-    public Boolean GET(String arg) throws IOException {
+    public Boolean GET(String arg) {
         try {
             // parsing the http request line
             parseRequestLine(httpHeader.METHOD_GET,arg);
@@ -474,7 +472,7 @@ public final class httpd implements serverHandler {
         }        
     }
 
-    public Boolean HEAD(String arg) throws IOException {
+    public Boolean HEAD(String arg) {
         try {
             parseRequestLine(httpHeader.METHOD_HEAD,arg);
             
@@ -527,7 +525,7 @@ public final class httpd implements serverHandler {
         }
     }
     
-    public Boolean POST(String arg) throws IOException {
+    public Boolean POST(String arg) {
         try {
             parseRequestLine(httpHeader.METHOD_POST,arg);
             

@@ -40,7 +40,6 @@
 
 package de.anomic.http;
 
-import java.io.IOException;
 import java.util.LinkedList;
 
 import de.anomic.server.serverAbstractSwitch;
@@ -51,7 +50,7 @@ public final class httpdSwitchboard extends serverAbstractSwitch implements serv
 
     private final LinkedList cacheStack;
         
-    public httpdSwitchboard(String rootPath, String initPath, String configPath) throws IOException {
+    public httpdSwitchboard(String rootPath, String initPath, String configPath) {
         super(rootPath, initPath, configPath);
         cacheStack = new LinkedList();
      }
@@ -68,10 +67,9 @@ public final class httpdSwitchboard extends serverAbstractSwitch implements serv
         if (cacheStack.size() > 0) {
             System.out.println("Process: " + cacheStack.removeFirst().toString());
             return true;
-        } else {
-            System.out.println("Process: queue is empty");
-            return false;
         }
+        System.out.println("Process: queue is empty");
+        return false;
     }
 
     public serverObjects action(String actionName, serverObjects actionInput) {

@@ -127,7 +127,7 @@ public class sharedBlacklist_p {
 			if (seed != null && seed.hash.equals(Hash) ) {
 			    IP = seed.get(yacySeed.IP, "127.0.0.1"); 
 			    Port = seed.get(yacySeed.PORT, "8080");
-			    Name = (String) seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
+			    Name = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
 				prop.put("status", 0);//nothing
 			}else{
 			    //status = "No Seed found"; //wrong? The Name not known?

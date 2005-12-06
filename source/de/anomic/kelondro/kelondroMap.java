@@ -188,9 +188,9 @@ public class kelondroMap {
                     valuel = Long.parseLong(value);
                     accumulator = (Long) accMap.get(accfields[i]);
                     if (add) {
-                        accMap.put(accfields[i], new Long(accumulator.longValue() + ((long) valuel)));
+                        accMap.put(accfields[i], new Long(accumulator.longValue() + valuel));
                     } else {
-                        accMap.put(accfields[i], new Long(accumulator.longValue() - ((long) valuel)));
+                        accMap.put(accfields[i], new Long(accumulator.longValue() - valuel));
                     }
                 } catch (NumberFormatException e) {}
             }
@@ -287,7 +287,7 @@ public class kelondroMap {
         return dyn.dynKeys(up, rotating);
     }
 
-    public synchronized kelondroDyn.dynKeyIterator keys(final boolean up, final boolean rotating, final byte[] firstKey) throws IOException {
+    public synchronized kelondroDyn.dynKeyIterator keys(final boolean up, final boolean rotating, final byte[] firstKey) {
         // simple enumeration of key names without special ordering
         return dyn.dynKeys(up, rotating, firstKey);
     }
@@ -305,7 +305,7 @@ public class kelondroMap {
         return new mapIterator(keys(up, rotating));
     }
 
-    public synchronized mapIterator maps(final boolean up, final boolean rotating, final byte[] firstKey) throws IOException {
+    public synchronized mapIterator maps(final boolean up, final boolean rotating, final byte[] firstKey) {
         return new mapIterator(keys(up, rotating, firstKey));
     }
 
@@ -315,11 +315,13 @@ public class kelondroMap {
 
     public synchronized long getAcc(final String field) {
         final Long accumulator = (Long) accMap.get(field);
-        if (accumulator == null) return -1; else return accumulator.longValue();
+        if (accumulator == null) return -1;
+        return accumulator.longValue();
     }
 
     public synchronized int size() {
-        if ((sortfields != null) || (accfields != null)) return elementCount; else return dyn.size();
+        if ((sortfields != null) || (accfields != null)) return elementCount;
+        return dyn.size();
     }
 
     public void close() throws IOException {

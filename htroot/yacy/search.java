@@ -69,14 +69,14 @@ public final class search {
 
         //System.out.println("yacy: search received request = " + post.toString());
 
-        final String  oseed  = (String) post.get("myseed", ""); // complete seed of the requesting peer
-//      final String  youare = (String) post.get("youare", ""); // seed hash of the target peer, used for testing network stability
-        final String  key    = (String) post.get("key", "");    // transmission key for response
-        final String  query  = (String) post.get("query", "");  // a string of word hashes
-//      final String  fwdep  = (String) post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
-//      final String  fwden  = (String) post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
-        final long    duetime= Long.parseLong((String) post.get("duetime", "3000"));
-        final int     count  = Integer.parseInt((String) post.get("count", "10"));         // maximum number of wanted results
+        final String  oseed  = post.get("myseed", ""); // complete seed of the requesting peer
+//      final String  youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
+        final String  key    = post.get("key", "");    // transmission key for response
+        final String  query  = post.get("query", "");  // a string of word hashes
+//      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
+//      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
+        final long    duetime= post.getLong("duetime", 3000);
+        final int     count  = post.getInt("count", 10); // maximum number of wanted results
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
         if (yacyCore.seedDB == null) {

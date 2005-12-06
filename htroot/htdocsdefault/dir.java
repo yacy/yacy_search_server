@@ -168,7 +168,7 @@ public class dir {
             if (pos >= 0) { filename = filename.substring(pos + 1); }
             final File newfile    = new File(dir, filename);
             final File newfilemd5 = new File(dir, filename + ".md5");
-            final byte[] binary = (byte[]) post.get("file$file", (Object) new byte[0]);
+            final byte[] binary = (byte[]) post.get("file$file", new byte[0]);
             try {
                 serverFileUtils.write(binary, newfile);
                 String md5s = serverCodings.encodeMD5Hex(newfile);

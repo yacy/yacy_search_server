@@ -159,7 +159,8 @@ public final class htmlFilterOutputStream extends OutputStream {
             bb = bb.append((byte) 32).append(key.getBytes()).append((byte) '=');
             bb = bb.append(quotechar).append(prop.getProperty(key).getBytes()).append(quotechar);
         }
-        if (bb.length() > 0) return bb.getBytes(1); else return bb.getBytes();
+        if (bb.length() > 0) return bb.getBytes(1);
+        return bb.getBytes();
     }
 
     private byte[] filterTag(String tag, boolean opening, byte[] content, byte quotechar) {
@@ -169,85 +170,87 @@ public final class htmlFilterOutputStream extends OutputStream {
             if (tag == null) {
                 // and this is not a tag opener/closer
                 if (scraper != null) scraper.scrapeText(content);
-                if (transformer != null) return transformer.transformText(content); else return content;
-            } else {
-                // we have a new tag
-                if (opening) {
-                    if ((scraper != null) && (scraper.isTag0(tag))) {
-                        // this single tag is collected at once here
-                        scraper.scrapeTag0(tag, new serverByteBuffer(content).propParser());
-                    }
-                    if ((transformer != null) && (transformer.isTag0(tag))) {
-                        // this single tag is collected at once here
-                        return transformer.transformTag0(tag, new serverByteBuffer(content).propParser(), quotechar);
-                    } else if (((scraper != null) && (scraper.isTag1(tag))) ||
-                               ((transformer != null) && (transformer.isTag1(tag)))) {
-                        // ok, start collecting
-                        filterTag = tag;
-                        filterOpts = new serverByteBuffer(content).propParser();
-                        filterCont = new serverByteBuffer();
-                        return new byte[0];
-                    } else {
-                         // we ignore that thing and return it again
-                         return genTag0raw(tag, true, content);
-                    }
-                } else {
-                    // we ignore that thing and return it again
-                    return genTag0raw(tag, false, content);
-                }
+                if (transformer != null) return transformer.transformText(content);
+                return content;
             }
-        } else {
-            // we are collection tag text for the tag 'filterTag'
-            if (tag == null) {
-                // go on collecting content
-                if (scraper != null) scraper.scrapeText(content);
-                if (transformer != null) {
-                    filterCont.append(transformer.transformText(content));
-                } else {
-                    filterCont.append(content);
+            
+            // we have a new tag
+            if (opening) {
+                if ((scraper != null) && (scraper.isTag0(tag))) {
+                    // this single tag is collected at once here
+                    scraper.scrapeTag0(tag, new serverByteBuffer(content).propParser());
                 }
-                return new byte[0];
-            } else {
-                // it's a tag! which one?
-                if ((opening) || (!(tag.equals(filterTag)))) {
-                    // this tag is not our concern. just add it
-                    filterCont.append(genTag0raw(tag, opening, content));
+                if ((transformer != null) && (transformer.isTag0(tag))) {
+                    // this single tag is collected at once here
+                    return transformer.transformTag0(tag, new serverByteBuffer(content).propParser(), quotechar);
+                } else if (((scraper != null) && (scraper.isTag1(tag))) ||
+                           ((transformer != null) && (transformer.isTag1(tag)))) {
+                    // ok, start collecting
+                    filterTag = tag;
+                    filterOpts = new serverByteBuffer(content).propParser();
+                    filterCont = new serverByteBuffer();
                     return new byte[0];
                 } else {
-                    // it's our closing tag! return complete result.
-                    byte[] ret;
-                    if (scraper != null) scraper.scrapeTag1(filterTag, filterOpts, filterCont.getBytes());
-                    if (transformer != null) {
-                        ret = transformer.transformTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
-                    } else {
-                        ret = genTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
-                    }
-                    filterTag = null;
-                    filterOpts = null;
-                    filterCont = null;
-                    return ret;
+                     // we ignore that thing and return it again
+                     return genTag0raw(tag, true, content);
                 }
             }
+            
+            // we ignore that thing and return it again
+            return genTag0raw(tag, false, content);
+            
         }
+        
+        // we are collection tag text for the tag 'filterTag'
+        if (tag == null) {
+            // go on collecting content
+            if (scraper != null) scraper.scrapeText(content);
+            if (transformer != null) {
+                filterCont.append(transformer.transformText(content));
+            } else {
+                filterCont.append(content);
+            }
+            return new byte[0];
+        }
+        
+        // it's a tag! which one?
+        if ((opening) || (!(tag.equals(filterTag)))) {
+            // this tag is not our concern. just add it
+            filterCont.append(genTag0raw(tag, opening, content));
+            return new byte[0];
+        }
+        
+        // it's our closing tag! return complete result.
+        byte[] ret;
+        if (scraper != null) scraper.scrapeTag1(filterTag, filterOpts, filterCont.getBytes());
+        if (transformer != null) {
+            ret = transformer.transformTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
+        } else {
+            ret = genTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
+        }
+        filterTag = null;
+        filterOpts = null;
+        filterCont = null;
+        return ret;
     }
 
     private byte[] filterFinalize(byte quotechar) {
         if (filterTag == null) {
             return new byte[0];
-        } else {
-            // it's our closing tag! return complete result.
-            byte[] ret;
-            if (scraper != null) scraper.scrapeTag1(filterTag, filterOpts, filterCont.getBytes());
-            if (transformer != null) {
-                ret = transformer.transformTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
-            } else {
-                ret = genTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
-            }
-            filterTag = null;
-            filterOpts = null;
-            filterCont = null;
-            return ret;
         }
+        
+        // it's our closing tag! return complete result.
+        byte[] ret;
+        if (scraper != null) scraper.scrapeTag1(filterTag, filterOpts, filterCont.getBytes());
+        if (transformer != null) {
+            ret = transformer.transformTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
+        } else {
+            ret = genTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
+        }
+        filterTag = null;
+        filterOpts = null;
+        filterCont = null;
+        return ret;
     }
 
     private byte[] filterSentence(byte[] in, byte quotechar) {
@@ -255,6 +258,7 @@ public final class htmlFilterOutputStream extends OutputStream {
 //      System.out.println("FILTER0: " + new String(in)); // debug
         // scan the string and parse structure
         if (in.length > 2 && in[0] == lb) {
+            
             // a tag
             String tag;
             int tagend;
@@ -265,18 +269,18 @@ public final class htmlFilterOutputStream extends OutputStream {
                 byte[] text = new byte[in.length - tagend - 1];
                 System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
                 return filterTag(tag, false, text, quotechar);
-            } else {
-                // an opening tag
-                tagend = tagEnd(in, 1);
-                tag = new String(in, 1, tagend - 1);
-                byte[] text = new byte[in.length - tagend - 1];
-                System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
-                return filterTag(tag, true, text, quotechar);
             }
-        } else {
-            // a text
-            return filterTag(null, true, in, quotechar);
+            
+            // an opening tag
+            tagend = tagEnd(in, 1);
+            tag = new String(in, 1, tagend - 1);
+            byte[] text = new byte[in.length - tagend - 1];
+            System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
+            return filterTag(tag, true, text, quotechar);
         }
+        
+        // a text
+        return filterTag(null, true, in, quotechar);
     }
 
     private static int tagEnd(byte[] tag, int start) {

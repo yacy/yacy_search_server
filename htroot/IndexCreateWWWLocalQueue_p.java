@@ -66,7 +66,8 @@ public class IndexCreateWWWLocalQueue_p {
     
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(Date date) {
-        if (date == null) return ""; else return dayFormatter.format(date);
+        if (date == null) return "";
+        return dayFormatter.format(date);
     }
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {

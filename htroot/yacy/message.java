@@ -78,8 +78,8 @@ public final class message {
 
 //      System.out.println("yacy/message:post=" + post.toString());
 
-        String process = (String) post.get("process", "permission");
-        String key =  (String) post.get("key", "");
+        String process = post.get("process", "permission");
+        String key =  post.get("key", "");
 
         int messagesize = 10240;
         int attachmentsize = 0;
@@ -89,7 +89,7 @@ public final class message {
 
 //      System.out.println("DEBUG yacy/message: message post values = " + post.toString());
 
-        String youare = (String) post.get("youare", ""); // seed hash of the target peer, needed for network stability
+        String youare = post.get("youare", ""); // seed hash of the target peer, needed for network stability
         // check if we are the right target and requester has correct information about this peer
         if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
             // this request has a wrong target
@@ -110,7 +110,7 @@ public final class message {
 
         if (process.equals("post")) {
             // post: post message to message board
-            String otherSeedString = (String) post.get("myseed", "");
+            String otherSeedString = post.get("myseed", "");
             if (otherSeedString.length() == 0) {
                 prop.put("response", "-1"); // request rejected
                 return prop;
@@ -118,8 +118,8 @@ public final class message {
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
             yacySeed otherSeed = yacySeed.genRemoteSeed(otherSeedString, key);
 
-            String subject = crypt.simpleDecode((String) post.get("subject", ""), key); // message's subject
-            String message = crypt.simpleDecode((String) post.get("message", ""), key); // message body
+            String subject = crypt.simpleDecode(post.get("subject", ""), key); // message's subject
+            String message = crypt.simpleDecode(post.get("message", ""), key); // message body
 
             prop.put("response", "Thank you!");
 

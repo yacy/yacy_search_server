@@ -1130,30 +1130,25 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         this.theLogger.logInfo("SSL CONNECTION TO " + host + ":" + port + " ESTABLISHED");
         
         // start stream passing with mediate processes
-        try {
-            Mediate cs = new Mediate(sslSocket, clientIn, promiscuousOut);
-            Mediate sc = new Mediate(sslSocket, promiscuousIn, clientOut);
-            cs.start();
-            sc.start();
-            while ((sslSocket != null) &&
-                    (sslSocket.isBound()) &&
-                    (!(sslSocket.isClosed())) &&
-                    (sslSocket.isConnected()) &&
-                    ((cs.isAlive()) || (sc.isAlive()))) {
-                // idle
-                try {Thread.sleep(1000);} catch (InterruptedException e) {} // wait a while
-            }
-            // set stop mode
-            cs.pleaseTerminate();
-            sc.pleaseTerminate();
-            // wake up thread
-            cs.interrupt();
-            sc.interrupt();
-            // ...hope they have terminated...
-        } catch (IOException e) {
-            //System.out.println("promiscuous termination: " + e.getMessage());
+        Mediate cs = new Mediate(sslSocket, clientIn, promiscuousOut);
+        Mediate sc = new Mediate(sslSocket, promiscuousIn, clientOut);
+        cs.start();
+        sc.start();
+        while ((sslSocket != null) &&
+               (sslSocket.isBound()) &&
+               (!(sslSocket.isClosed())) &&
+               (sslSocket.isConnected()) &&
+               ((cs.isAlive()) || (sc.isAlive()))) {
+            // idle
+            try {Thread.sleep(1000);} catch (InterruptedException e) {} // wait a while
         }
-        
+        // set stop mode
+        cs.pleaseTerminate();
+        sc.pleaseTerminate();
+        // wake up thread
+        cs.interrupt();
+        sc.interrupt();
+        // ...hope they have terminated...
     }
     
     public class Mediate extends Thread {
@@ -1163,7 +1158,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         InputStream in;
         OutputStream out;
         
-        public Mediate(Socket socket, InputStream in, OutputStream out) throws IOException {
+        public Mediate(Socket socket, InputStream in, OutputStream out) {
             this.terminate = false;
             this.in = in;
             this.out = out;

@@ -61,7 +61,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
     private final serverLog log;
     private int       size;
 
-    public plasmaWordIndexClassicDB(File databaseRoot, serverLog log) throws IOException {
+    public plasmaWordIndexClassicDB(File databaseRoot, serverLog log) {
 	this.databaseRoot = databaseRoot;
         this.log = log;
         this.size = 0;
@@ -197,12 +197,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
     
     
     public void deleteIndex(String wordHash) {
-        try {
-            plasmaWordIndexEntity.removePlasmaIndex(databaseRoot, wordHash);
-        } catch (IOException e) {
-            log.logSevere("plasmaWordIndexClassic.deleteIndex: " + e.getMessage());
-            return;
-        }
+        plasmaWordIndexEntity.removePlasmaIndex(databaseRoot, wordHash);
     }
 
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {

@@ -313,79 +313,74 @@ public class wikiCode {
 	    // end contrib [MN]	
 
 
-            // create  links
-	    String kl, kv, alt, align;
+            // create links
+            String kl, kv, alt, align;
             int p;
             // internal links and images
             while ((p0 = result.indexOf("[[")) >= 0) {
-	        p1 = result.indexOf("]]", p0 + 2);
-	        if (p1 <= p0) break; else; {
-		    kl = result.substring(p0 + 2, p1);
-		
-		    // this is the part of the code that's responsible for images
-		    // contributed by [MN]
-		    if(kl.startsWith("Image:")){
-			    alt = "";
-			    align = "";
-			    kv = "";
-			    kl = kl.substring(6);
-			
-			    // are there any arguments for the image?
-			    if ((p = kl.indexOf("|")) > 0) {
-                	        kv = kl.substring(p+1);
-                	        kl = kl.substring(0, p);
-			
-			    	    // if there are 2 arguments, write them into ALIGN and ALT
-				    if ((p = kv.indexOf("|")) > 0) {
-				        align = " align=\"" + kv.substring(0, p) +"\"";
-                		        alt = " alt=\"" + kv.substring(p + 1) +"\"";
-                		    }
-				
-				    // if there is just one, put it into ALT
-				    else alt = " alt=\"" + kv +"\"";
-			    }
-			
-			    result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt +">" + result.substring(p1 + 2);
-		    }
-		    // end contrib [MN]
-		
-		    // if it's no image, it might be an internal link
-                    else {
-		
-			    if ((p = kl.indexOf("|")) > 0) {
-                	        kv = kl.substring(p + 1);
-                	        kl = kl.substring(0, p);
-                	    } else {
-                	        kv = kl;
-                	    }
-			    if (switchboard.wikiDB.read(kl) != null)
-		    	    result = result.substring(0, p0) +
-				    "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" +
-				    result.substring(p1 + 2);
-			    else
-			        result = result.substring(0, p0) +
-				    "<a class=\"unknown\" href=\"Wiki.html?page=" + kl + "&edit=Edit\">" + kv + "</a>" +
-				    result.substring(p1 + 2);
-		    }
-	        }
-	    }
-        
-            // external links
-            while ((p0 = result.indexOf("[")) >= 0) {
-	        p1 = result.indexOf("]", p0 + 1);
-                if (p1 <= p0) break; else {
-		    kl = result.substring(p0 + 1, p1);
-                    if ((p = kl.indexOf(" ")) > 0) {
+                p1 = result.indexOf("]]", p0 + 2);
+                if (p1 <= p0) break;
+                kl = result.substring(p0 + 2, p1);
+
+                // this is the part of the code that's responsible for images
+                // contributed by [MN]
+                if (kl.startsWith("Image:")) {
+                    alt = "";
+                    align = "";
+                    kv = "";
+                    kl = kl.substring(6);
+
+                    // are there any arguments for the image?
+                    if ((p = kl.indexOf("|")) > 0) {
+                        kv = kl.substring(p + 1);
+                        kl = kl.substring(0, p);
+
+                        // if there are 2 arguments, write them into ALIGN and
+                        // ALT
+                        if ((p = kv.indexOf("|")) > 0) {
+                            align = " align=\"" + kv.substring(0, p) + "\"";
+                            alt = " alt=\"" + kv.substring(p + 1) + "\"";
+                        }
+
+                        // if there is just one, put it into ALT
+                        else
+                            alt = " alt=\"" + kv + "\"";
+                    }
+
+                    result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt + ">" + result.substring(p1 + 2);
+                }
+                // end contrib [MN]
+
+                // if it's no image, it might be an internal link
+                else {
+                    if ((p = kl.indexOf("|")) > 0) {
                         kv = kl.substring(p + 1);
                         kl = kl.substring(0, p);
                     } else {
                         kv = kl;
                     }
-                    if (!(kl.startsWith("http://"))) kl = "http://" + kl;
-		    result = result.substring(0, p0) +
-		        "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" +
-		        result.substring(p1 + 1);
-	        }
+                    if (switchboard.wikiDB.read(kl) != null)
+                        result = result.substring(0, p0) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + result.substring(p1 + 2);
+                    else
+                        result = result.substring(0, p0) + "<a class=\"unknown\" href=\"Wiki.html?page=" + kl + "&edit=Edit\">" + kv + "</a>" + result.substring(p1 + 2);
+                }
+
+            }
+        
+            // external links
+            while ((p0 = result.indexOf("[")) >= 0) {
+                p1 = result.indexOf("]", p0 + 1);
+                if (p1 <= p0) break;
+                kl = result.substring(p0 + 1, p1);
+                if ((p = kl.indexOf(" ")) > 0) {
+                    kv = kl.substring(p + 1);
+                    kl = kl.substring(0, p);
+                } else {
+                    kv = kl;
+                }
+                if (!(kl.startsWith("http://"))) kl = "http://" + kl;
+                result = result.substring(0, p0) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + result.substring(p1 + 1);
+	        
 	    }
 	}
 	
@@ -489,8 +484,8 @@ public class wikiCode {
 	}
 	//end contrib [MN]	
 		
-	if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)) return result; 
-	else return result + "<br>";
+	if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)) return result;
+    return result + "<br>";
     }
     /*
       what we need (have):

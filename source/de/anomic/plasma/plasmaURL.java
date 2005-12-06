@@ -425,7 +425,7 @@ public class plasmaURL {
     public kelondroTree urlHashCache;
     private HashSet existsIndex;
 
-    public plasmaURL() throws IOException {
+    public plasmaURL() {
         urlHashCache = null;
         existsIndex = new HashSet();
     }
@@ -541,7 +541,7 @@ public class plasmaURL {
         return hash;
     }
     
-    public Iterator urlHashes(String urlHash, boolean up) throws IOException {
+    public Iterator urlHashes(String urlHash, boolean up) {
         return urlHashCache.rows(up, false, urlHash.getBytes());
     }
 

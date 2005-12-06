@@ -584,14 +584,14 @@ public class kelondroRecords {
 	    return new Handle(this.handle.index);
 	}
         
-	protected void setOHByte(int i, byte b) throws IOException {
+	protected void setOHByte(int i, byte b) {
 	    if (i >= OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong index " + i);
 	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
             this.headChunk[i] = b;
             this.headChanged = true;
 	}
         
-        protected void setOHHandle(int i, Handle handle) throws IOException {
+        protected void setOHHandle(int i, Handle handle) {
             if (i >= OHHANDLEC) throw new IllegalArgumentException("setOHHandle: wrong array size " + i);
             if (this.handle.index == NUL) throw new kelondroException(filename, "setOHHandle: no handle assigned");
             if (handle == null) {
@@ -603,13 +603,13 @@ public class kelondroRecords {
             this.headChanged = true;
         }
         
-	protected byte getOHByte(int i) throws IOException {
+	protected byte getOHByte(int i) {
 	    if (i >= OHBYTEC) throw new IllegalArgumentException("getOHByte: wrong index " + i);
 	    if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
             return this.headChunk[i];
 	}
         
-        protected Handle getOHHandle(int i) throws IOException {
+        protected Handle getOHHandle(int i) {
             if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
             if (i >= OHHANDLEC) throw new kelondroException(filename, "handle index out of bounds: " + i);
             int h = bytes2int(this.headChunk, OHBYTEC + 4 * i);
@@ -634,7 +634,7 @@ public class kelondroRecords {
 	    return result; // return previous value
 	}
         
-	public byte[] getKey() throws IOException {
+	public byte[] getKey() {
             // read key
             return trimCopy(headChunk, overhead, COLWIDTHS[0]);
 	} 
@@ -918,7 +918,7 @@ public class kelondroRecords {
 	entryFile.writeInt(handle.index);
     }
 
-    protected Handle getHandle(int pos) throws IOException {
+    protected Handle getHandle(int pos) {
 	if (pos >= HANDLES.length) throw new IllegalArgumentException("getHandle: handle array exceeded");
 	return (HANDLES[pos].index == NUL) ? null : HANDLES[pos];
     }
@@ -933,7 +933,7 @@ public class kelondroRecords {
 	entryFile.write(text);
     }
 
-    public byte[] getText(int pos) throws IOException {
+    public byte[] getText(int pos) {
 	if (pos >= TXTPROPS.length) throw new IllegalArgumentException("getText: text array exceeded");
 	return TXTPROPS[pos];
     }
@@ -1018,7 +1018,7 @@ public class kelondroRecords {
     public static long bytes2long(byte[] b) {
         if (b == null) return 0;
         long x = 0;
-        for (int i = 0; i < b.length; i++) x = (x << 8) | (0xff & (int) b[i]);
+        for (int i = 0; i < b.length; i++) x = (x << 8) | (0xff & b[i]);
         return x;
     }
     

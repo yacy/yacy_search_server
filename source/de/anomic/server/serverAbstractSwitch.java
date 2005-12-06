@@ -64,7 +64,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     protected serverLog     log;
     protected int           serverJobs;
     
-    public serverAbstractSwitch(String rootPath, String initPath, String configPath) throws IOException {
+    public serverAbstractSwitch(String rootPath, String initPath, String configPath) {
         // we initialize the switchboard with a property file,
         // but maintain these properties then later in a new 'config' file
         // to reset all changed configs, the config file must
@@ -329,19 +329,19 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     public void intermissionAllThreads(long pause) {
         Iterator e = workerThreads.keySet().iterator();
         while (e.hasNext()) {
-            ((serverThread) workerThreads.get((String) e.next())).intermission(pause);
+            ((serverThread) workerThreads.get(e.next())).intermission(pause);
         }
     }
     
     public synchronized void terminateAllThreads(boolean waitFor) {
         Iterator e = workerThreads.keySet().iterator();
         while (e.hasNext()) {
-            ((serverThread) workerThreads.get((String) e.next())).terminate(false);
+            ((serverThread) workerThreads.get(e.next())).terminate(false);
         }
         if (waitFor) {
             e = workerThreads.keySet().iterator();
             while (e.hasNext()) {
-                ((serverThread) workerThreads.get((String) e.next())).terminate(true);
+                ((serverThread) workerThreads.get(e.next())).terminate(true);
                 e.remove();
             }
         }

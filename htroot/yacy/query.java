@@ -67,11 +67,11 @@ public final class query {
 
 //      System.out.println("YACYQUERY: RECEIVED POST = " + ((post == null) ? "NULL" : post.toString()));
 
-//      final String iam    = (String) post.get("iam", "");    // complete seed of the requesting peer
-        final String youare = (String) post.get("youare", ""); // seed hash of the target peer, used for testing network stability
-//      final String key    = (String) post.get("key", "");    // transmission key for response
-        final String obj    = (String) post.get("object", ""); // keyword for query subject
-        final String env    = (String) post.get("env", "");    // argument to query
+//      final String iam    = post.get("iam", "");    // complete seed of the requesting peer
+        final String youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
+//      final String key    = post.get("key", "");    // transmission key for response
+        final String obj    = post.get("object", ""); // keyword for query subject
+        final String env    = post.get("env", "");    // argument to query
 
         prop.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
 

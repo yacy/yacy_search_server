@@ -158,7 +158,7 @@ public class kelondroMScoreIndex {
         Object[] s = new Object[maxCount];
         Iterator it = scores(up, minScore, maxScore);
         int i = 0;
-        while ((i < maxCount) && (it.hasNext())) s[i++] = (Object) it.next();
+        while ((i < maxCount) && (it.hasNext())) s[i++] = it.next();
         if (i < maxCount) {
             // re-copy the result array
             Object[] sc = new Object[i];

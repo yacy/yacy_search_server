@@ -141,11 +141,7 @@ public class yacyNewsDB {
         }
         
         public Object next() {
-            try {
-                return b2r((byte[][]) nodeIterator.next());
-            } catch (IOException e) {
-                return null;
-            }
+            return b2r((byte[][]) nodeIterator.next());
         }
         
         public void remove() {
@@ -162,7 +158,7 @@ public class yacyNewsDB {
         }
     }
 
-    private static yacyNewsRecord b2r(byte[][] b) throws IOException {
+    private static yacyNewsRecord b2r(byte[][] b) {
         if (b == null) return null;
         return new yacyNewsRecord(
             new String(b[0]),
@@ -173,7 +169,7 @@ public class yacyNewsDB {
         );
     }
 
-    private static byte[][] r2b(yacyNewsRecord r) throws IOException {
+    private static byte[][] r2b(yacyNewsRecord r) {
         if (r == null) return null;
         String attributes = r.attributes().toString();
         if (attributes.length() > attributesMaxLength) throw new IllegalArgumentException("attribute length=" + attributes.length() + " exceeds maximum size=" + attributesMaxLength);

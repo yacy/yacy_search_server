@@ -277,8 +277,8 @@ public class cryptbig {
 	    // - after the magic String we write C, B and A
 	    try {
 		String A = new String(ecipher.doFinal(X.getBytes("UTF8")));
-		String B = new String(ecipher.doFinal(serverCodings.standardCoder.encodeBase64Long((long) A.length(), 2).getBytes("UTF8"))); // most probable not longer than 4
-		String C = serverCodings.standardCoder.encodeBase64Long((long) B.length(), 1); // fixed length 1 (6 bits, that should be enough)
+		String B = new String(ecipher.doFinal(serverCodings.standardCoder.encodeBase64Long(A.length(), 2).getBytes("UTF8"))); // most probable not longer than 4
+		String C = serverCodings.standardCoder.encodeBase64Long(B.length(), 1); // fixed length 1 (6 bits, that should be enough)
 		fout.write(magicString.getBytes()); // the magic string, used to identify a 'crypt'-file
 		fout.write(C.getBytes());
 		fout.write(B.getBytes());

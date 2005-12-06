@@ -48,7 +48,6 @@
 package de.anomic.plasma;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -68,7 +67,7 @@ public final class plasmaWordIndex {
     private final File databaseRoot;
     private final plasmaWordIndexCache ramCache;
 
-    public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) throws IOException {
+    public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) {
         this.databaseRoot = databaseRoot;
         plasmaWordIndexClassicDB fileDB = new plasmaWordIndexClassicDB(databaseRoot, log);
         this.ramCache = new plasmaWordIndexCache(databaseRoot, fileDB, bufferkb, log);
@@ -379,13 +378,11 @@ public final class plasmaWordIndex {
 
     public static void main(String[] args) {
 //      System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
-        try {
-            plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, new serverLog("TESTAPP"));
-            Iterator iter = index.wordHashes("5A8yhZMh_Kmv", true, true);
-            while (iter.hasNext()) {
-                System.out.println("File: " + (String) iter.next());
-            }
-        } catch (IOException e) {}
+        plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, new serverLog("TESTAPP"));
+        Iterator iter = index.wordHashes("5A8yhZMh_Kmv", true, true);
+        while (iter.hasNext()) {
+            System.out.println("File: " + (String) iter.next());
+        }
     }
 
 }

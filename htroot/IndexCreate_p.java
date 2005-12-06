@@ -93,21 +93,21 @@ public class IndexCreate_p {
                     // set new properties
                     String newcrawlingfilter = post.get("crawlingFilter", ".*");
                     env.setConfig("crawlingFilter", newcrawlingfilter);
-                    int newcrawlingdepth = Integer.parseInt((String) post.get("crawlingDepth", "0"));
+                    int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "0"));
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
-                    boolean crawlingQ = ((String) post.get("crawlingQ", "")).equals("on");
+                    boolean crawlingQ = post.get("crawlingQ", "").equals("on");
                     env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
-                    boolean storeHTCache = ((String) post.get("storeHTCache", "")).equals("on");
+                    boolean storeHTCache = post.get("storeHTCache", "").equals("on");
                     env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
-                    boolean localIndexing = ((String) post.get("localIndexing", "")).equals("on");
+                    boolean localIndexing = post.get("localIndexing", "").equals("on");
                     env.setConfig("localIndexing", (localIndexing) ? "true" : "false");
-                    boolean crawlOrder = ((String) post.get("crawlOrder", "")).equals("on");
+                    boolean crawlOrder = post.get("crawlOrder", "").equals("on");
                     env.setConfig("crawlOrder", (crawlOrder) ? "true" : "false");
-                    boolean xsstopw = ((String) post.get("xsstopw", "")).equals("on");
+                    boolean xsstopw = post.get("xsstopw", "").equals("on");
                     env.setConfig("xsstopw", (xsstopw) ? "true" : "false");
-                    boolean xdstopw = ((String) post.get("xdstopw", "")).equals("on");
+                    boolean xdstopw = post.get("xdstopw", "").equals("on");
                     env.setConfig("xdstopw", (xdstopw) ? "true" : "false");
-                    boolean xpstopw = ((String) post.get("xpstopw", "")).equals("on");
+                    boolean xpstopw = post.get("xpstopw", "").equals("on");
                     env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
                     
                     String crawlingMode = post.get("crawlingMode","url");
@@ -166,7 +166,7 @@ public class IndexCreate_p {
                                     m.remove("storeHTCache");
                                     m.remove("generalFilter");
                                     m.remove("specificFilter");
-                                    m.put("intention", ((String) post.get("intention", "")).replace(',', '/'));
+                                    m.put("intention", post.get("intention", "").replace(',', '/'));
                                     yacyCore.newsPool.publishMyNews(new yacyNewsRecord("crwlstrt", m));
                                 }
                                 
@@ -260,16 +260,16 @@ public class IndexCreate_p {
             
             if (post.containsKey("distributedcrawling")) {
                 long newBusySleep = Integer.parseInt(env.getConfig("62_remotetriggeredcrawl_busysleep", "100"));
-                if (((String) post.get("dcr", "")).equals("acceptCrawlMax")) {
+                if (post.get("dcr", "").equals("acceptCrawlMax")) {
                     env.setConfig("crawlResponse", "true");
                     newBusySleep = 100;
-                } else if (((String) post.get("dcr", "")).equals("acceptCrawlLimited")) {
+                } else if (post.get("dcr", "").equals("acceptCrawlLimited")) {
                     env.setConfig("crawlResponse", "true");
                     int newppm = Integer.parseInt(post.get("acceptCrawlLimit", "1"));
                     if (newppm < 1) newppm = 1;
                     newBusySleep = 60000 / newppm;
                     if (newBusySleep < 100) newBusySleep = 100;
-                } else if (((String) post.get("dcr", "")).equals("acceptCrawlDenied")) {
+                } else if (post.get("dcr", "").equals("acceptCrawlDenied")) {
                     env.setConfig("crawlResponse", "false");
                 }
                 serverThread rct = switchboard.getThread("62_remotetriggeredcrawl");
@@ -319,7 +319,7 @@ public class IndexCreate_p {
             prop.put("acceptCrawlLimitedChecked", 0);
             prop.put("acceptCrawlDeniedChecked", 1);
         }
-        int ppm = (int) ((long) 60000 / busySleep);
+        int ppm = (int) (60000L / busySleep);
         if (ppm > 60) ppm = 60;
         prop.put("PPM", ppm);
         prop.put("xsstopwChecked", env.getConfig("xsstopw", "").equals("true") ? 1 : 0);

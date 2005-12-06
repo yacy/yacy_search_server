@@ -241,7 +241,7 @@ final class memprofiler extends Thread {
     
     public memprofiler(int width, int height, int expectedTimeSeconds, File outputFile) {
         this.outputFile = outputFile;
-        int expectedKilobytes = (int) 20 * 1024;//(Runtime.getRuntime().totalMemory() / 1024);
+        int expectedKilobytes = 20 * 1024;//(Runtime.getRuntime().totalMemory() / 1024);
         memChart = new ymageChart(width, height, "000010", 50, 20, 20, 20, "MEMORY CHART FROM EXECUTION AT " + new Date());
         int timescale = 10; // steps with each 10 seconds
         int memscale = 1024;

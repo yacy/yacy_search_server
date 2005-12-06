@@ -204,10 +204,6 @@ public final class plasmaWordIndexAssortment {
     public Iterator hashes(String startWordHash, boolean up, boolean rot) {
         try {
             return assortments.keys(up, rot, startWordHash.getBytes());
-        } catch (IOException e) {
-            log.logSevere("iterateAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB " + assortments.file(), e);
-            resetDatabase();
-            return null;
         } catch (kelondroException e) {
             log.logSevere("iterateAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB " + assortments.file(), e);
             resetDatabase();

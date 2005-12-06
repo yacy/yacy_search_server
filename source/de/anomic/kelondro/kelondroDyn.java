@@ -97,7 +97,7 @@ public class kelondroDyn extends kelondroTree {
 
     private void writeSegmentCount() {
         try {
-            setText(0, serverCodings.enhancedCoder.encodeBase64Long((long) segmentCount, 8).getBytes());
+            setText(0, serverCodings.enhancedCoder.encodeBase64Long(segmentCount, 8).getBytes());
         } catch (Exception e) {
             
         }
@@ -186,7 +186,7 @@ public class kelondroDyn extends kelondroTree {
 	return new dynKeyIterator(super.rows(up, rotating));
     }
 
-    public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating, byte[] firstKey) {
 	return new dynKeyIterator(super.rows(up, rotating, firstKey));
     }
     
@@ -196,18 +196,18 @@ public class kelondroDyn extends kelondroTree {
             // use cache
             //System.out.println("cache hit: " + super.filename + "/" + new String(key));
             return segmentCacheContent;
-        } else {
-            // read from db
-            byte[][] r = get(key);
-            if (r == null) return null;
-
-            // update cache
-            segmentCacheKey = key;
-            segmentCacheContent = r[1];
-
-            // return result
-            return r[1];
         }
+        
+        // read from db
+        byte[][] r = get(key);
+        if (r == null) return null;
+
+        // update cache
+        segmentCacheKey = key;
+        segmentCacheContent = r[1];
+
+        // return result
+        return r[1];
     }
 
     private synchronized void setValueCached(byte[] key, byte[] value) throws IOException {
@@ -327,7 +327,7 @@ public class kelondroDyn extends kelondroTree {
 	return (key != null) && (getValueCached(dynKey(key, 0)) != null);
     }
 
-    public synchronized kelondroRA getRA(String filekey) throws IOException {
+    public synchronized kelondroRA getRA(String filekey) {
 	// this returns always a RARecord, even if no existed bevore
 	//return new kelondroBufferedRA(new RARecord(filekey), 512, 0);
         return new RARecord(filekey);
@@ -471,16 +471,16 @@ public class kelondroDyn extends kelondroTree {
                 for (int i = 0; i < steps; i++) {
                     if ((d.length() < 3) || ((t.length() > 0) && (((int) System.currentTimeMillis() % 7) < 3))) {
                         // add one
-                        c = t.charAt((int) (System.currentTimeMillis() % (long) t.length()));
+                        c = t.charAt((int) (System.currentTimeMillis() % t.length()));
                         b = testWord(c);
-                        cont = new byte[(int) (System.currentTimeMillis() % (long) 777)];
+                        cont = new byte[(int) (System.currentTimeMillis() % 777L)];
                         tt.putDyn(new String(b), 0, cont, 0, cont.length);
                         d = d + c;
                         t = t.substring(0, t.indexOf(c)) + t.substring(t.indexOf(c) + 1);
                         System.out.println("added " + new String(b) + ", " + cont.length + " bytes");
                     } else {
                         // delete one
-                        c = d.charAt((int) (System.currentTimeMillis() % (long) d.length()));
+                        c = d.charAt((int) (System.currentTimeMillis() % d.length()));
                         b = testWord(c);
                         tt.remove(new String(b));
                         d = d.substring(0, d.indexOf(c)) + d.substring(d.indexOf(c) + 1);

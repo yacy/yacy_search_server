@@ -130,7 +130,7 @@ public final class plasmaSearchResult {
         // treated as 'typical' for this search request
         Object[] references = getReferences(16);
         Set commonSense = new HashSet();
-        for (int i = 0; i < references.length; i++) commonSense.add((String) references[i]);
+        for (int i = 0; i < references.length; i++) commonSense.add(references[i]);
         
         Object[] resultVector;
         plasmaWordIndexEntry indexEntry;

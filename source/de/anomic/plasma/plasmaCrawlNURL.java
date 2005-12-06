@@ -280,7 +280,7 @@ public class plasmaCrawlNURL extends plasmaURL {
         }
     }
 
-    public void shift(int fromStack, int toStack) throws IOException {
+    public void shift(int fromStack, int toStack) {
         Entry entry = pop(fromStack);
         if (entry.url() == null) return;
         push(toStack, entry.url.getHost(), entry.hash());

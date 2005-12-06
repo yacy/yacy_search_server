@@ -455,7 +455,8 @@ public final class httpc {
     * @return String with the date.
     */
     public static String dateString(Date date) {
-        if (date == null) return ""; else return HTTPGMTFormatter.format(date);
+        if (date == null) return "";
+        return HTTPGMTFormatter.format(date);
     }
 
     /**
@@ -627,11 +628,11 @@ public final class httpc {
         }
         
         if (this.clientInputByteCount != null) {
-            try { this.clientInputByteCount.finish();} catch (IOException e) {}
+            this.clientInputByteCount.finish();
             this.clientInputByteCount = null;
         }
         if (this.clientOutputByteCount != null) {
-            try { this.clientOutputByteCount.finish();} catch (IOException e) {}
+            this.clientOutputByteCount.finish();
             this.clientOutputByteCount = null;
         }
 

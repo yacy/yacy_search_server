@@ -1680,7 +1680,7 @@ cd ..
         " in " +
         (((stop - start) < 2000) ? (stop - start) + " milliseconds" : (((int) ((stop - start) / 100)) / 10) + " seconds"));
       if (start == stop) err.println(logPrefix + ""); else
-        out.println(logPrefix + " (" + ((long) (length * 1000 / 1024 / (stop - start))) + " kbytes/second)");
+        out.println(logPrefix + " (" + (length * 1000 / 1024 / (stop - start)) + " kbytes/second)");
 
     } else
       throw new IOException(reply);

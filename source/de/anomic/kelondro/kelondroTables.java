@@ -145,7 +145,7 @@ public class kelondroTables {
         return table.maps(up, rotating);
     }
     
-    public synchronized kelondroMap.mapIterator /* of Map-Elements */ maps(String tablename, boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized kelondroMap.mapIterator /* of Map-Elements */ maps(String tablename, boolean up, boolean rotating, byte[] firstKey) {
         kelondroMap table = (kelondroMap) mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.maps: map table '" + tablename + "' does not exist.");
         return table.maps(up, rotating, firstKey);
@@ -157,7 +157,7 @@ public class kelondroTables {
         return table.maps(up, field);
     }
     
-    public synchronized Iterator /* of byte[][]-Elements */ rows(String tablename, boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized Iterator /* of byte[][]-Elements */ rows(String tablename, boolean up, boolean rotating, byte[] firstKey) {
         kelondroTree tree = (kelondroTree) tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.bytes: tree table '" + tablename + "' does not exist.");
         return tree.rows(up, rotating, firstKey);

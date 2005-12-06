@@ -375,7 +375,8 @@ public class kelondroAttrSeq {
         
         public long getAttr(String key, long dflt) {
             Long i = (Long) attrs.get(key);
-            if (i == null) return dflt; else return i.longValue();
+            if (i == null) return dflt;
+            return i.longValue();
         }
         
         public void setAttr(String key, long attr) {

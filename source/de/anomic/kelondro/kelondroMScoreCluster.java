@@ -96,8 +96,8 @@ public final class kelondroMScoreCluster {
                 l = Long.parseLong(s);
             }
             // fix out-of-ranges
-            if (l > (long) Integer.MAX_VALUE) return Integer.MAX_VALUE;
-            if (l < (long) Integer.MIN_VALUE) return Integer.MIN_VALUE;
+            if (l > Integer.MAX_VALUE) return Integer.MAX_VALUE;
+            if (l < Integer.MIN_VALUE) return Integer.MIN_VALUE;
             return (int) l;
         } catch (Exception e) {
             // try it lex
@@ -213,21 +213,18 @@ public final class kelondroMScoreCluster {
         if (obj == null) return 0;
         //System.out.println("setScore " + obj.getClass().getName());
         Long usk = (Long) refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
-        
-        if (usk == null) {
-            return 0;
-        } else {
-            // delete old entry
-            keyrefDB.remove(usk);
-            
-            // get previous handle and score
-            int oldScore = (int) ((usk.longValue() & 0xFFFFFFFF00000000L) >> 32);
+        if (usk == null) return 0;
 
-            // decrease overall counter
-            gcount -= oldScore;
-            
-            return oldScore;
-        }        
+        // delete old entry
+        keyrefDB.remove(usk);
+        
+        // get previous handle and score
+        int oldScore = (int) ((usk.longValue() & 0xFFFFFFFF00000000L) >> 32);
+
+        // decrease overall counter
+        gcount -= oldScore;
+        
+        return oldScore;        
     }
 
     public synchronized boolean existsScore(Object obj) {
@@ -237,33 +234,30 @@ public final class kelondroMScoreCluster {
     public synchronized int getScore(Object obj) {
         if (obj == null) return 0;
         Long cs = (Long) refkeyDB.get(obj);
-        if (cs == null) {
-            return 0;
-        } else {
-            return (int) ((cs.longValue() & 0xFFFFFFFF00000000L) >> 32);
-        }
+        if (cs == null) return 0;
+        return (int) ((cs.longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
     
     public synchronized int getMaxScore() {
         if (refkeyDB.size() == 0) return -1;
-	return (int) ((((Long) keyrefDB.lastKey()).longValue() & 0xFFFFFFFF00000000L) >> 32);
+        return (int) ((((Long) keyrefDB.lastKey()).longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
     public int getMinScore() {
         if (refkeyDB.size() == 0) return -1;
-	return (int) ((((Long) keyrefDB.firstKey()).longValue() & 0xFFFFFFFF00000000L) >> 32);
+        return (int) ((((Long) keyrefDB.firstKey()).longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
     public synchronized Object getMaxObject() {
         if (refkeyDB.size() == 0) return null;
         //return getScores(1, false)[0];
-	return keyrefDB.get((Long) keyrefDB.lastKey());
+        return keyrefDB.get(keyrefDB.lastKey());
     }
     
     public synchronized Object getMinObject() {
         if (refkeyDB.size() == 0) return null;
         //return getScores(1, true)[0];
-	return keyrefDB.get((Long) keyrefDB.firstKey());
+        return keyrefDB.get(keyrefDB.firstKey());
     }
     
     public synchronized Object[] getScores(int maxCount, boolean up) {
@@ -275,7 +269,7 @@ public final class kelondroMScoreCluster {
         Object[] s = new Object[maxCount];
         Iterator it = scores(up, minScore, maxScore);
         int i = 0;
-        while ((i < maxCount) && (it.hasNext())) s[i++] = (Object) it.next();
+        while ((i < maxCount) && (it.hasNext())) s[i++] = it.next();
         if (i < maxCount) {
             // re-copy the result array
             Object[] sc = new Object[i];
@@ -292,14 +286,12 @@ public final class kelondroMScoreCluster {
     
     public synchronized Iterator scores(boolean up) {
         if (up) return new simpleScoreIterator();
-        //else return scores(false, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        else return new reverseScoreIterator();
+        return new reverseScoreIterator();
     }
     
     public synchronized Iterator scores(boolean up, int minScore, int maxScore) {
         return new komplexScoreIterator(up, minScore, maxScore);
     }
-    
     
     private class komplexScoreIterator implements Iterator {
 
@@ -424,7 +416,7 @@ public final class kelondroMScoreCluster {
                 r = random.nextInt();
                 mem[i] = r;
                 s.addScore("score#" + r, r);
-                c += (long) r;
+                c += r;
             }
             
             // delete some

@@ -68,7 +68,7 @@ public class Log_p {
                 reversed=true;
             }
             if(post.containsKey("lines")){
-                lines = (int)Integer.parseInt((String)post.get("lines"));
+                lines = Integer.parseInt((String)post.get("lines"));
             }
         }
         

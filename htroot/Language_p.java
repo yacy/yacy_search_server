@@ -67,41 +67,43 @@ import de.anomic.data.translator;
 public class Language_p {
 
     public static HashMap langMap(serverSwitch env) {
-	String[] ms = env.getConfig("htLocaleLang", "").split(",");
-	HashMap map = new HashMap();
-	int p;
-	for (int i = 0; i < ms.length; i++) {
-	    p = ms[i].indexOf("/");
-	    if (p > 0) map.put(ms[i].substring(0, p), ms[i].substring(p + 1));
-	}
-	return map;
+        String[] ms = env.getConfig("htLocaleLang", "").split(",");
+        HashMap map = new HashMap();
+        int p;
+        for (int i = 0; i < ms.length; i++) {
+            p = ms[i].indexOf("/");
+            if (p > 0)
+                map.put(ms[i].substring(0, p), ms[i].substring(p + 1));
+        }
+        return map;
     }
         
-	private static boolean changeLang(serverSwitch env, String langPath, String lang){
-		if(lang.equals("default")){
-			env.setConfig("htLocaleSelection", "default");
-			return true;
-		}else{
-			String htRootPath = env.getConfig("htRootPath", "htroot");
-			File sourceDir = new File(env.getRootPath(), htRootPath);
-			File destDir = new File(env.getRootPath(), htRootPath +  "/locale/"+lang.substring(0,lang.length()-4));//cut .lng
-			File translationFile = new File(langPath, lang);
+	private static boolean changeLang(serverSwitch env, String langPath, String lang) {
+        if (lang.equals("default")) {
+            env.setConfig("htLocaleSelection", "default");
+            return true;
+        }
+        String htRootPath = env.getConfig("htRootPath", "htroot");
+        File sourceDir = new File(env.getRootPath(), htRootPath);
+        File destDir = new File(env.getRootPath(), htRootPath + "/locale/" + lang.substring(0, lang.length() - 4));// cut
+        // .lng
+        File translationFile = new File(langPath, lang);
 
-			if(translator.translateFiles(sourceDir, destDir, translationFile, "html")){
-			//if(translator.translateFilesRecursive(sourceDir, destDir, translationFile, "html")){
-				env.setConfig("htLocaleSelection", lang.substring(0,lang.length()-4));
-				try{
-			    	BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-					bw.write(env.getConfig("svnRevision", "Error getting Version"));
-					bw.close();
-				}catch(IOException e){
-					//Error
-				}
-				return true;
-			}
-		}
-		return false;
-	}
+        if (translator.translateFiles(sourceDir, destDir, translationFile, "html")) {
+            // if(translator.translateFilesRecursive(sourceDir, destDir,
+            // translationFile, "html")){
+            env.setConfig("htLocaleSelection", lang.substring(0, lang.length() - 4));
+            try {
+                BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+                bw.write(env.getConfig("svnRevision", "Error getting Version"));
+                bw.close();
+            } catch (IOException e) {
+                // Error
+            }
+            return true;
+        }
+        return false;
+    }
 
 	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 	//listManager.switchboard = (plasmaSwitchboard) env;

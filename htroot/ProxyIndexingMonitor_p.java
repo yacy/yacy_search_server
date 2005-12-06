@@ -84,11 +84,11 @@ public class ProxyIndexingMonitor_p {
 
             if (post.containsKey("proxyprofileset")) try {
                 // read values and put them in global settings
-                int newProxyPrefetchDepth = Integer.parseInt((String) post.get("proxyPrefetchDepth", "0"));
+                int newProxyPrefetchDepth = post.getInt("proxyPrefetchDepth", 0);
                 if (newProxyPrefetchDepth < 0) newProxyPrefetchDepth = 0; 
                 if (newProxyPrefetchDepth > 20) newProxyPrefetchDepth = 20; // self protection ?
                 env.setConfig("proxyPrefetchDepth", Integer.toString(newProxyPrefetchDepth));
-                boolean proxyStoreHTCache = ((String) post.get("proxyStoreHTCache", "")).equals("on");
+                boolean proxyStoreHTCache = (post.get("proxyStoreHTCache", "")).equals("on");
                 env.setConfig("proxyStoreHTCache", (proxyStoreHTCache) ? "true" : "false");
 
                 // added proxyCache, proxyCacheSize - Borg-0300

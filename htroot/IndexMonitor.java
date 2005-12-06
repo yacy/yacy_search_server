@@ -96,7 +96,7 @@ public class IndexMonitor {
         
         // custom number of lines
         if (post.containsKey("count")) {
-            showIndexedCount = Integer.parseInt((String) post.get("count", "40"));
+            showIndexedCount = Integer.parseInt(post.get("count", "40"));
         }
         
         // do the commands

@@ -75,7 +75,7 @@ public final class httpChunkedInputStream extends InputStream {
     private boolean isClosed = false;
     
     
-    public httpChunkedInputStream(InputStream in) throws IOException {
+    public httpChunkedInputStream(InputStream in) {
         
         if (in == null)throw new IllegalArgumentException("InputStream must not be null");
         

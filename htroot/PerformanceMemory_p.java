@@ -210,9 +210,9 @@ public class PerformanceMemory_p {
         prop.put("bestTotal", bestTotal / MB);
         
         // parse initialization memory settings
-        String Xmx = (String) env.getConfig("javastart_Xmx", "Xmx64m").substring(3);
+        String Xmx = env.getConfig("javastart_Xmx", "Xmx64m").substring(3);
         prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
-        String Xms = (String) env.getConfig("javastart_Xms", "Xms10m").substring(3);
+        String Xms = env.getConfig("javastart_Xms", "Xms10m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
         
         // return rewrite values for templates

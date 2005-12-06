@@ -74,9 +74,7 @@ public class yacyPeerActions {
     public  long principalConnects;
     public  long disconnects;
     
-    public yacyPeerActions(yacySeedDB seedDB, plasmaSwitchboard switchboard, 
-			 File superseedFile,
-			 String superseedURL) throws IOException {
+    public yacyPeerActions(yacySeedDB seedDB, plasmaSwitchboard switchboard, File superseedFile, String superseedURL) {
         this.seedDB = seedDB;
         this.sb = switchboard;
         this.actions = new HashSet();
@@ -299,7 +297,7 @@ public class yacyPeerActions {
             if (disconnectedSeed == null) {
                 dtimeUTC0 = 0; // never disconnected: virtually disconnected maximum time ago
             } else try {
-                dtimeUTC0 = yacyCore.shortFormatter.parse((String) disconnectedSeed.get("disconnected", "20040101000000")).getTime() - seed.getUTCDiff();
+                dtimeUTC0 = yacyCore.shortFormatter.parse(disconnectedSeed.get("disconnected", "20040101000000")).getTime() - seed.getUTCDiff();
             } catch (java.text.ParseException e) {
                 dtimeUTC0 = 0;
             }
@@ -357,7 +355,7 @@ public class yacyPeerActions {
                     return true;
                 } else {
                     // the seed is new
-                    if (((String) seed.get(yacySeed.IP, "127.0.0.1")).equals((String) seedDB.mySeed.get(yacySeed.IP, "127.0.0.1"))) {
+                    if (seed.get(yacySeed.IP, "127.0.0.1").equals(seedDB.mySeed.get(yacySeed.IP, "127.0.0.1"))) {
                         // seed from the same IP as the calling client: can be the case if there runs another one over a NAT
                         yacyCore.log.logFine("connect: saved NEW seed (myself IP) " + seed.getAddress());
                     } else {

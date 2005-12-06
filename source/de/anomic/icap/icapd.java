@@ -198,11 +198,11 @@ public class icapd implements serverHandler {
         return this.prop.getProperty(icapHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
     }
     
-    public Boolean REQMOD(String arg) throws IOException {
+    public Boolean REQMOD(String arg) {
         return serverCore.TERMINATE_CONNECTION;
     }    
     
-    public Boolean RESPMOD(String arg) throws IOException {
+    public Boolean RESPMOD(String arg) {
         try {
             InputStream in = this.session.in;
             OutputStream out = this.session.out;      
@@ -217,7 +217,7 @@ public class icapd implements serverHandler {
             handlePersistentConnection(icapReqHeader);            
             
             // determining the requested service and call it or send back an error message
-            String reqService = (String) this.prop.getProperty(icapHeader.CONNECTION_PROP_PATH,"");
+            String reqService = this.prop.getProperty(icapHeader.CONNECTION_PROP_PATH,"");
             if (reqService.equalsIgnoreCase("/resIndexing")) {
                 indexingService(icapReqHeader,in,out);
             } else {

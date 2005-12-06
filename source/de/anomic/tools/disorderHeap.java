@@ -60,13 +60,13 @@ public class disorderHeap {
     
     public synchronized void add(Object element) {
 	// add one element into the list at an arbitrary position
-	int pos = (int) ((System.currentTimeMillis() / 7) % ((long) (list.size() + 1)));
+	int pos = (int) ((System.currentTimeMillis() / 7) % (list.size() + 1));
 	list.add(pos, element);
     }
 
     public synchronized Object remove() {
 	if (list.size() == 0) return null;
-	int pos = (int) ((System.currentTimeMillis() / 13) % ((long) list.size()));
+	int pos = (int) ((System.currentTimeMillis() / 13) % list.size());
 	return list.remove(pos);
     }
 

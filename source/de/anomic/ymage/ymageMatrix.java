@@ -157,16 +157,16 @@ public class ymageMatrix implements Cloneable {
             grid[n + 1] = (byte) defaultColG;
             grid[n + 2] = (byte) defaultColB;
         } else if (this.defaultMode == MODE_ADD) {
-            int r = ((int) (0xff & grid[n    ])) + defaultColR; if (r > 0xff) r = 0xff;
-            int g = ((int) (0xff & grid[n + 1])) + defaultColG; if (g > 0xff) g = 0xff;
-            int b = ((int) (0xff & grid[n + 2])) + defaultColB; if (b > 0xff) b = 0xff;
+            int r = (0xff & grid[n    ]) + defaultColR; if (r > 0xff) r = 0xff;
+            int g = (0xff & grid[n + 1]) + defaultColG; if (g > 0xff) g = 0xff;
+            int b = (0xff & grid[n + 2]) + defaultColB; if (b > 0xff) b = 0xff;
             grid[n    ] = (byte) r;
             grid[n + 1] = (byte) g;
             grid[n + 2] = (byte) b;
         } else if (this.defaultMode == MODE_SUB) {
-            int r = ((int) (0xff & grid[n    ])) - defaultColR; if (r < 0) r = 0;
-            int g = ((int) (0xff & grid[n + 1])) - defaultColG; if (g < 0) g = 0;
-            int b = ((int) (0xff & grid[n + 2])) - defaultColB; if (b < 0) b = 0;
+            int r = (0xff & grid[n    ]) - defaultColR; if (r < 0) r = 0;
+            int g = (0xff & grid[n + 1]) - defaultColG; if (g < 0) g = 0;
+            int b = (0xff & grid[n + 2]) - defaultColB; if (b < 0) b = 0;
             grid[n    ] = (byte) r;
             grid[n + 1] = (byte) g;
             grid[n + 2] = (byte) b;

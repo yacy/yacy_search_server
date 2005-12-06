@@ -166,7 +166,7 @@ public final class plasmaCrawlStacker {
             String name, 
             Date loadDate, 
             int currentdepth, 
-            plasmaCrawlProfile.entry profile) throws MalformedURLException {
+            plasmaCrawlProfile.entry profile) {
         try {            
             this.queue.addMessage(new stackCrawlMessage(
                     initiatorHash,
@@ -184,7 +184,7 @@ public final class plasmaCrawlStacker {
         }
     }
     
-    public String dequeue(stackCrawlMessage theMsg) throws InterruptedException {
+    public String dequeue(stackCrawlMessage theMsg) {
         
         plasmaCrawlProfile.entry profile = this.sb.profiles.getEntry(theMsg.profileHandle());
         if (profile == null) {

@@ -68,7 +68,7 @@ public final class httpdByteCountOutputStream extends BufferedOutputStream {
         }
     }    
     
-    public void finish() throws IOException {
+    public void finish() {
         if (this.finished) return;
         
         this.finished = true;

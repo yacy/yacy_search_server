@@ -64,11 +64,11 @@ public final class transfer {
         serverObjects prop = new serverObjects();
 
         
-        String process   = (String) post.get("process", "");  // permission or store
-        //String key       = (String) post.get("key", "");      // a transmission key from the client
-        String otherpeer = (String) post.get("iam", "");      // identification of the client (a peer-hash)
-        String purpose   = (String) post.get("purpose", "");  // declares how the file shall be treated
-        String filename  = (String) post.get("filename", ""); // a name of a file without path
+        String process   = post.get("process", "");  // permission or store
+        //String key       = post.get("key", "");      // a transmission key from the client
+        String otherpeer = post.get("iam", "");      // identification of the client (a peer-hash)
+        String purpose   = post.get("purpose", "");  // declares how the file shall be treated
+        String filename  = post.get("filename", ""); // a name of a file without path
         //long   filesize  = Long.parseLong((String) post.get("filesize", "")); // the size of the file
         
         yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
@@ -111,8 +111,8 @@ public final class transfer {
             prop.put("process", 1);
             if (purpose.equals("crcon")) {
                 byte[] filebytes = (byte[]) post.get("filename$file");
-                String accesscode = (String) post.get("access", "");   // one-time authentication
-                String md5 = (String) post.get("md5", "");   // one-time authentication
+                String accesscode = post.get("access", "");   // one-time authentication
+                String md5 = post.get("md5", "");   // one-time authentication
                 //java.util.HashMap perm = sb.rankingPermissions;
                 //System.out.println("PERMISSIONDEBUG: accesscode=" + accesscode + ", permissions=" + perm.toString());
                 String grantedFile = (String) sb.rankingPermissions.get(accesscode);

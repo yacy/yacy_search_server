@@ -124,9 +124,9 @@ public class PerformanceQueues_p {
             
             if ((post != null) && (post.containsKey("submitdelay"))) {
                 // load with new values
-                idlesleep = Long.parseLong((String) post.get(threadName + "_idlesleep", "1000"));
-                busysleep = Long.parseLong((String) post.get(threadName + "_busysleep",  "100"));
-                memprereq = Long.parseLong((String) post.get(threadName + "_memprereq",    "0")) * 1024;
+                idlesleep = post.getLong(threadName + "_idlesleep", 1000);
+                busysleep = post.getLong(threadName + "_busysleep",  100);
+                memprereq = post.getLong(threadName + "_memprereq",    0) * 1024;
                 
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
@@ -171,13 +171,13 @@ public class PerformanceQueues_p {
         prop.put("table", c);
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
-            int wordCacheMaxLow = Integer.parseInt((String) post.get("wordCacheMaxLow", "8000"));
-            int wordCacheMaxHigh = Integer.parseInt((String) post.get("wordCacheMaxHigh", "10000"));
+            int wordCacheMaxLow = post.getInt("wordCacheMaxLow", 8000);
+            int wordCacheMaxHigh = post.getInt("wordCacheMaxHigh", 10000);
             if (wordCacheMaxLow > wordCacheMaxHigh) wordCacheMaxLow = wordCacheMaxHigh;
             switchboard.setConfig("wordCacheMaxLow", Integer.toString(wordCacheMaxLow));
             switchboard.setConfig("wordCacheMaxHigh", Integer.toString(wordCacheMaxHigh));
             switchboard.wordIndex.setMaxWords(wordCacheMaxLow, wordCacheMaxHigh);
-            int maxWaitingWordFlush = Integer.parseInt((String) post.get("maxWaitingWordFlush", "180"));
+            int maxWaitingWordFlush = post.getInt("maxWaitingWordFlush", 180);
             switchboard.setConfig("maxWaitingWordFlush", Integer.toString(maxWaitingWordFlush));
         }
         
@@ -246,7 +246,7 @@ public class PerformanceQueues_p {
         }        
         
         if ((post != null) && (post.containsKey("proxyControlSubmit"))) {
-            int onlineCautionDelay = Integer.parseInt((String) post.get("onlineCautionDelay", "30000"));
+            int onlineCautionDelay = post.getInt("onlineCautionDelay", 30000);
             switchboard.setConfig("onlineCautionDelay", Integer.toString(onlineCautionDelay));
         }
         

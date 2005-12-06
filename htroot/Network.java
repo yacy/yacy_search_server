@@ -70,7 +70,7 @@ public class Network {
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        final boolean overview = (post == null) || (((String) post.get("page", "0")).equals("0"));
+        final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
 
         final String mySeedType = yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
         final boolean iAmActive = (mySeedType.equals(yacySeed.PEERTYPE_SENIOR) || mySeedType.equals(yacySeed.PEERTYPE_PRINCIPAL));

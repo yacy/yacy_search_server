@@ -87,19 +87,19 @@ public final class plasmaCondenser {
     public int RESULT_INFORMATION_VALUE = -1;
 
     
-    public plasmaCondenser(InputStream text) throws IOException {
-	this(text, 3, 2);
+    public plasmaCondenser(InputStream text) {
+        this(text, 3, 2);
     }
 
-    public plasmaCondenser(InputStream text, int wordminsize, int wordcut) throws IOException {
-	this.wordminsize = wordminsize;
-	this.wordcut = wordcut;
-	//analysis = new Properties();
-	words = new TreeMap();
-	sentences = new HashMap();
-	createCondensement(text);
+    public plasmaCondenser(InputStream text, int wordminsize, int wordcut) {
+        this.wordminsize = wordminsize;
+        this.wordcut = wordcut;
+        // analysis = new Properties();
+        words = new TreeMap();
+        sentences = new HashMap();
+        createCondensement(text);
     }
-    
+
     public int excludeWords(TreeSet stopwords) {
         // subtracts the given stopwords from the word list
         // the word list shrinkes. This returns the number of shrinked words
@@ -109,15 +109,15 @@ public final class plasmaCondenser {
     }
 
     public Set getWords() {
-	return words.keySet();
+        return words.keySet();
     }
 
     public int wordCount(String word) {
-	// number of occurrences of one word
-	// if the word did not occur, this simply returns 0
-	statProp sp = (statProp) words.get(word);
-	if (sp == null) return 0;
-	return sp.count;
+        // number of occurrences of one word
+        // if the word did not occur, this simply returns 0
+        statProp sp = (statProp) words.get(word);
+        if (sp == null) return 0;
+        return sp.count;
     }
 
     public static class statProp {
@@ -140,7 +140,7 @@ public final class plasmaCondenser {
 	return s;
     }
 
-    private void createCondensement(InputStream is) throws IOException {
+    private void createCondensement(InputStream is) {
 
 	words = new TreeMap(kelondroMSetTools.fastStringComparator);
 	sentences = new HashMap();
@@ -460,7 +460,7 @@ public final class plasmaCondenser {
 	unsievedWordsEnum e;
 	int ml;
 
-	public sievedWordsEnum(InputStream is, int minLength) throws IOException {
+	public sievedWordsEnum(InputStream is, int minLength) {
 	    e = new unsievedWordsEnum(is);
 	    buffer = nextElement0();
 	    ml = minLength;
@@ -503,7 +503,7 @@ public final class plasmaCondenser {
 	linesFromFileEnum e;
 	String s;
 
-	public unsievedWordsEnum(InputStream is) throws IOException {
+	public unsievedWordsEnum(InputStream is) {
 	    e = new linesFromFileEnum(is);
 	    s = "";
 	    buffer = nextElement0();
@@ -559,7 +559,7 @@ public final class plasmaCondenser {
 	BufferedReader raf;
 	int counter = 0;
 
-	public linesFromFileEnum(InputStream is) throws IOException {
+	public linesFromFileEnum(InputStream is) {
 	    raf = new BufferedReader(new InputStreamReader(is));
 	    buffer = nextElement0();
 	    counter = 0;
@@ -624,14 +624,10 @@ public final class plasmaCondenser {
     */
     
     public static Set getWords(byte[] text) {
-	if (text == null) return null;
+        if (text == null) return null;
         ByteArrayInputStream buffer = new ByteArrayInputStream(text);
-        try {
-            plasmaCondenser condenser = new plasmaCondenser(buffer);
-            return condenser.getWords();
-        } catch (IOException e) {
-            return null;
-        }
+        plasmaCondenser condenser = new plasmaCondenser(buffer);
+        return condenser.getWords();
     }
         
     public static void main(String[] args) {

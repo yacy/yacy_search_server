@@ -68,7 +68,7 @@ public class index {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
-        boolean global = (post == null) ? true : ((String) post.get("resource", "global")).equals("global");
+        boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
@@ -126,7 +126,7 @@ public class index {
 
         // SEARCH
         // process search words
-        final String querystring = (String) post.get("search", "");
+        final String querystring = post.get("search", "");
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
         final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
         // filter out stopwords
@@ -137,14 +137,14 @@ public class index {
 
         // if a minus-button was hit, remove a special reference first
         if (post.containsKey("deleteref")) {
-        		final String delHash = (String) post.get("deleteref", "");
+        		final String delHash = post.get("deleteref", "");
         		sb.removeReferences(delHash, query);
         }
         
         // prepare search order
-        final String order = (String) post.get("order", "");
-        final int count = Integer.parseInt((String) post.get("count", "10"));
-        final long searchtime = 1000 * Long.parseLong((String) post.get("time", "1"));
+        final String order = post.get("order", "");
+        final int count = Integer.parseInt(post.get("count", "10"));
+        final long searchtime = 1000 * Long.parseLong(post.get("time", "1"));
         final boolean yacyonline = ((yacyCore.seedDB != null) &&
                                     (yacyCore.seedDB.mySeed != null) &&
                                     (yacyCore.seedDB.mySeed.getAddress() != null));
@@ -188,7 +188,7 @@ public class index {
         }
 
         if (prop == null || prop.size() == 0) {
-            if (((String) post.get("search", "")).length() < 3) {
+            if (post.get("search", "").length() < 3) {
                 prop.put("num-results", 2); // no results - at least 3 chars
             } else {
                 prop.put("num-results", 1); //no results
@@ -212,7 +212,7 @@ public class index {
                         word = (String) references[i];
                         if (word != null) {
                             prop.put("combine_words_" + i + "_word", word);
-                            prop.put("combine_words_" + i + "_newsearch", ((String) post.get("search", "")).replace(' ', '+') + "+" + word);
+                            prop.put("combine_words_" + i + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
                             prop.put("combine_words_" + i + "_count", count);
                             prop.put("combine_words_" + i + "_order", order);
                             prop.put("combine_words_" + i + "_resource", ((global) ? "global" : "local"));
@@ -274,10 +274,10 @@ public class index {
         prop.put("time-10", ((searchtime == 10000) ? 1 : 0));
         prop.put("time-30", ((searchtime == 30000) ? 1 : 0));
         prop.put("time-60", ((searchtime == 60000) ? 1 : 0));
-        prop.put("former", (String) post.get("search", ""));
+        prop.put("former", post.get("search", ""));
 
         // 'enrich search' variables
-        prop.put("num-results_former", (String) post.get("search", ""));
+        prop.put("num-results_former", post.get("search", ""));
         prop.put("num-results_time", searchtime / 1000);
         prop.put("num-results_count", count);
         prop.put("num-results_resource", (global) ? "global" : "local");

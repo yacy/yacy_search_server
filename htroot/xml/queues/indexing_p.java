@@ -65,7 +65,8 @@ public class indexing_p {
     
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(Date date) {
-        if (date == null) return ""; else return dayFormatter.format(date);
+        if (date == null) return "";
+        return dayFormatter.format(date);
     }
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -99,9 +100,8 @@ public class indexing_p {
                     entryList.addAll(switchboard.sbQueue.list(0));
                 }
                 int size=10;
-                if(post!= null && post.containsKey("num")){
-                    size=(int)Integer.parseInt((String)post.get("num"));
-                }
+                if (post!= null) size = post.getInt("num", 10);
+                
                 if(size>entryList.size()){
                     size=entryList.size();
                 }

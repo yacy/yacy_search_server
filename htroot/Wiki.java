@@ -98,7 +98,7 @@ public class Wiki {
 	    // store a new page
             switchboard.wikiDB.write(switchboard.wikiDB.newEntry(pagename, author, ip,
 								 post.get("reason", "edit"),
-								 ((String) post.get("content", "")).getBytes()));
+								 post.get("content", "").getBytes()));
             // create a news message
             HashMap map = new HashMap();
             map.put("page", pagename);
@@ -143,7 +143,7 @@ public class Wiki {
                      "</b></font></td></tr>" +
 		     "<tr class=\"WikiBackground\"><td>" + 
 		     "<table width=\"100%\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\"><tr><td>" +
-                     wikiTransformer.transform(((String) post.get("content", ""))) +
+                     wikiTransformer.transform((post.get("content", ""))) +
                      "</td></tr></table>" +
 		     "</td></tr></table>");
 		     
@@ -154,7 +154,7 @@ public class Wiki {
 			 "<input type=\"submit\" name=\"view\" value=\"Discard\"><br><br><br>" +
 			 "<h2>Edit</h2>"+
 			 "<p>Author:<br><input name=\"author\" type=\"text\" size=\"80\" maxlength=\"80\" value=\"" + author + "\"></p>" +
-			 "<p>Text:<br><textarea name=\"content\" cols=\"80\" rows=\"24\">" + ((String) post.get("content", "")) + "</textarea></p>" +
+			 "<p>Text:<br><textarea name=\"content\" cols=\"80\" rows=\"24\">" + (post.get("content", "")) + "</textarea></p>" +
 			 "<input type=\"hidden\" name=\"page\" value=\"" + pagename + "\">" +
 			 "<input type=\"hidden\" name=\"reason\" value=\"edit\">" +
 			 "<input type=\"submit\" name=\"submit\" value=\"Submit\">" +

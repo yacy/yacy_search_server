@@ -45,7 +45,6 @@ package de.anomic.plasma;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -127,9 +126,7 @@ public class plasmaParserDocument {
     }
     
     public plasmaCondenser getCondenser() {
-        if (condenser == null) try {
-            condenser = new plasmaCondenser(new ByteArrayInputStream(getText()), 0, 0);
-        } catch (IOException e) {}
+        if (condenser == null) condenser = new plasmaCondenser(new ByteArrayInputStream(getText()), 0, 0);
         return condenser;
     }
     

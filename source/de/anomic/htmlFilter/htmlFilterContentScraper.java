@@ -174,21 +174,16 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             matcher.reset(path);
         }  
         
-        if (defaultPort) {
-            return url.getProtocol() + "://" + url.getHost() + path;
-        } else {
-            return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + path;
-        }
+        if (defaultPort) return url.getProtocol() + "://" + url.getHost() + path;
+        return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + path;
     }
     
     public static String urlNormalform(URL baseURL, String us) {
         if (us == null) { return null; }
         if (us.length() == 0) { return null; }
         try {
-            if (baseURL == null)
-                return urlNormalform(new URL(us));
-            else
-                return urlNormalform(new URL(baseURL, us));
+            if (baseURL == null) return urlNormalform(new URL(us));
+            return urlNormalform(new URL(baseURL, us));
         } catch (MalformedURLException e) {
             serverLog.logSevere("urlNormalform", e.toString());
             return null;

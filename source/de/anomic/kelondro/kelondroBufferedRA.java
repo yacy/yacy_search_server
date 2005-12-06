@@ -41,7 +41,6 @@
 
 package de.anomic.kelondro;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA {
@@ -57,7 +56,7 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
     private int bufferOffsetFilter;
     private int bufferStart;
     
-    public kelondroBufferedRA(kelondroRA ra, int minBufferSize, int bufferStartMin) throws FileNotFoundException {
+    public kelondroBufferedRA(kelondroRA ra, int minBufferSize, int bufferStartMin) {
         // calculate buffer organization parameters
         this.bufferSizeExp = 0;
         minBufferSize--;
@@ -108,13 +107,13 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
             int r = ra.read();
             seekpos++;
             return r;
-        } else {
-            int bn = (int) seekpos >> bufferSizeExp; // buffer page number
-            int offset = (int) seekpos & bufferOffsetFilter; // buffer page offset
-            seekpos++;
-            updateToBuffer(bn);
-            return 0xFF & buffer[offset];
         }
+        
+        int bn = (int) seekpos >> bufferSizeExp; // buffer page number
+        int offset = (int) seekpos & bufferOffsetFilter; // buffer page offset
+        seekpos++;
+        updateToBuffer(bn);
+        return 0xFF & buffer[offset];
     }
 
     // pseudo-native method write
@@ -142,30 +141,33 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
     }
 
     public int read(byte[] b, int off, int len) throws IOException {
+
+        // check buffer size
         if (seekpos < bufferStart) {
             // do not use buffer
             ra.seek(seekpos);
             int r = ra.read(b, off, len);
             seekpos += len;
             return r;
-        } else {
-            int bn1 = (int) seekpos >> bufferSizeExp; // buffer page number, first position
-            int bn2 = (int) (seekpos + len - 1) >> bufferSizeExp; // buffer page number, last position
-            int offset = (int) seekpos & bufferOffsetFilter; // buffer page offset
-            updateToBuffer(bn1);
-            if (bn1 == bn2) {
-                // simple case
-                System.arraycopy(buffer, offset, b, off, len);
-                seekpos += len;
-                return len;
-            } else {
-                // do recursively
-                int thislen = bufferSize - offset;
-                System.arraycopy(buffer, offset, b, off, thislen);
-                seekpos += thislen;
-                return thislen + read(b, off + thislen, len - thislen);
-            }
         }
+        
+        // check simple case
+        int bn1 = (int) seekpos >> bufferSizeExp; // buffer page number, first position
+        int bn2 = (int) (seekpos + len - 1) >> bufferSizeExp; // buffer page number, last position
+        int offset = (int) seekpos & bufferOffsetFilter; // buffer page offset
+        updateToBuffer(bn1);
+        if (bn1 == bn2) {
+            // simple case
+            System.arraycopy(buffer, offset, b, off, len);
+            seekpos += len;
+            return len;
+        }
+        
+        // do recursively
+        int thislen = bufferSize - offset;
+        System.arraycopy(buffer, offset, b, off, thislen);
+        seekpos += thislen;
+        return thislen + read(b, off + thislen, len - thislen);
     }
 
     public void write(byte[] b, int off, int len) throws IOException {

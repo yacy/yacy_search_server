@@ -155,7 +155,7 @@ public class plasmaSearchProfile implements Cloneable {
         p.targetCount = (HashMap) this.targetCount.clone();
         p.yieldTime = (HashMap) this.yieldTime.clone();
         p.yieldCount = (HashMap) this.yieldCount.clone();
-        return (Object) p;
+        return p;
     }
     
     public plasmaSearchProfile(String s) {

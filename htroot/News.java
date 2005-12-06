@@ -61,8 +61,8 @@ public class News {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        boolean overview = (post == null) || (((String) post.get("page", "0")).equals("0"));
-        int tableID = (overview) ? -1 : Integer.parseInt((String) post.get("page", "0")) - 1;
+        boolean overview = (post == null) || (post.get("page", "0").equals("0"));
+        int tableID = (overview) ? -1 : Integer.parseInt(post.get("page", "0")) - 1;
 
         // execute commands
         if (post != null) {

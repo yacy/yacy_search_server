@@ -42,7 +42,6 @@
 
 package de.anomic.kelondro;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,13 +55,13 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
     private int cacheElementSize;
     private long seekpos;
     
-    public kelondroCachedRA(kelondroRA ra, int cachesize, int elementsize) throws FileNotFoundException {
+    public kelondroCachedRA(kelondroRA ra, int cachesize, int elementsize) {
 	this.ra  = ra;
         this.name = ra.name();
         this.cacheMemory = new HashMap();
         this.cacheScore = new kelondroMScoreCluster();
         this.cacheElementSize = elementsize;
-        this.cacheMaxElements = (int) (cachesize / cacheElementSize);
+        this.cacheMaxElements = cachesize / cacheElementSize;
         this.seekpos = 0;
     }
 
@@ -135,14 +134,14 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
             System.arraycopy(buffer, offset, b, off, len);
             seekpos += len;
             return len;
-        } else {
-            // do recursively
-            int thislen = cacheElementSize - offset;
-            //System.out.println("C2: bn1=" + bn1 + ", bn2=" + bn2 +", offset=" + offset + ", off=" + off + ", len=" + len + ", thislen=" + thislen);
-            System.arraycopy(buffer, offset, b, off, thislen);
-            seekpos += thislen;
-            return thislen + read(b, off + thislen, len - thislen);
         }
+        
+        // do recursively
+        int thislen = cacheElementSize - offset;
+        //System.out.println("C2: bn1=" + bn1 + ", bn2=" + bn2 +", offset=" + offset + ", off=" + off + ", len=" + len + ", thislen=" + thislen);
+        System.arraycopy(buffer, offset, b, off, thislen);
+        seekpos += thislen;
+        return thislen + read(b, off + thislen, len - thislen);
     }
 
     public void write(byte[] b, int off, int len) throws IOException {
