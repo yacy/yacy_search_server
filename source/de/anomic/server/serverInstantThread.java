@@ -50,6 +50,8 @@ public final class serverInstantThread extends serverAbstractThread implements s
     private Method jobExecMethod, jobCountMethod;
     private Object environment;
     
+    public static int instantThreadCounter = 0;
+    
     public serverInstantThread(Object env, String jobExec, String jobCount) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
@@ -90,6 +92,7 @@ public final class serverInstantThread extends serverAbstractThread implements s
     }
         
     public boolean job() throws Exception {
+        instantThreadCounter++;
         boolean jobHasDoneSomething = false;
         try {
             Object result = jobExecMethod.invoke(environment, new Object[0]);
@@ -107,6 +110,7 @@ public final class serverInstantThread extends serverAbstractThread implements s
             serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + e.getTargetException().getMessage(), e.getTargetException());
             e.getTargetException().printStackTrace();
         }
+        instantThreadCounter--;
         return jobHasDoneSomething;
     }
     
@@ -120,6 +124,17 @@ public final class serverInstantThread extends serverAbstractThread implements s
         thread.setLog(log);
         thread.start();
         return thread;
+    }
+    
+    public static serverThread oneTimeJob(Runnable thread, long startupDelay) {
+        serverLog log = new serverLog(thread.getClass().getName() + "/run");
+        log.setLevel(java.util.logging.Level.INFO);
+        return oneTimeJob(thread, "run", log, startupDelay);
+    }
+    
+    public static serverThread oneTimeJob(Runnable thread, long startupDelay, int maxJobs) {
+        while (instantThreadCounter >= maxJobs) try {Thread.sleep(100);} catch (InterruptedException e) {break;}
+        return oneTimeJob( thread, startupDelay);
     }
     
 }

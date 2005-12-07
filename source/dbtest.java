@@ -17,6 +17,7 @@ import de.anomic.kelondro.kelondroTree;
 import de.anomic.ymage.ymageChart;
 import de.anomic.ymage.ymagePNGEncoderAWT;
 import de.anomic.server.serverMemory;
+import de.anomic.server.serverInstantThread;
 
 public class dbtest {
 
@@ -35,11 +36,110 @@ public class dbtest {
         dummyvalue2[valuelength - 1] = '}';
     }
     
-    public static byte[] randomHash(Random r) {
+    public static byte[] randomHash(final long r0, final long r1) {
         // a long can have 64 bit, but a 12-byte hash can have 6 * 12 = 72 bits
         // so we construct a generic Hash using two long values
-        return (serverCodings.enhancedCoder.encodeBase64Long(Math.abs(r.nextLong()), 11).substring(5) +
-                serverCodings.enhancedCoder.encodeBase64Long(Math.abs(r.nextLong()), 11).substring(5)).getBytes();
+        return (serverCodings.enhancedCoder.encodeBase64Long(Math.abs(r0), 11).substring(5) +
+                serverCodings.enhancedCoder.encodeBase64Long(Math.abs(r1), 11).substring(5)).getBytes();
+    }
+    
+    public static byte[] randomHash(Random r) {
+        return randomHash(r.nextLong(), r.nextLong());
+    }
+    
+    public final static class STEntry {
+        private final byte[] key;
+        private final byte[] value;
+
+        public STEntry(final long aSource) {
+            this.key = randomHash(aSource, aSource);
+            this.value = new byte[valuelength];
+            final byte[] tempKey = String.valueOf(aSource).getBytes();
+            System.arraycopy(tempKey, 0, this.value, 0, tempKey.length);
+        }
+
+        public STEntry(final byte[] aKey, final byte[] aValue) {
+            this.key = aKey;
+            this.value = aValue;
+        }
+
+        public boolean isValid() {
+            final long source = new Long(new String(this.value).trim()).longValue();
+            return new String(this.key).equals(new String(randomHash(source, source)));
+        }
+
+        public byte[] getKey() {
+            return this.key;
+        }
+
+        public byte[] getValue() {
+            return this.value;
+        }
+
+        public String toString() {
+            return new String(this.key) + "#" + new String(this.value);
+        }
+
+    }
+
+    public static abstract class STJob implements Runnable {
+        private final kelondroIndex table;
+
+        private final long source;
+
+        public STJob(final kelondroIndex aTable, final long aSource) {
+            this.table = aTable;
+            this.source = aSource;
+        }
+
+        public kelondroIndex getTable() {
+            return this.table;
+        }
+
+        public abstract void run();
+
+        public long getSource() {
+            return this.source;
+        }
+    }
+
+    public static final class WriteJob extends STJob {
+        public WriteJob(final kelondroIndex aTable, final long aSource) {
+            super(aTable, aSource);
+        }
+
+        public void run() {
+            final STEntry entry = new STEntry(this.getSource());
+            try {
+                getTable().put(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() });
+            } catch (IOException e) {
+                System.err.println(e);
+            }
+        }
+    }
+
+    public static final class ReadJob extends STJob {
+        public ReadJob(final kelondroIndex aTable, final long aSource) {
+            super(aTable, aSource);
+        }
+
+        public void run() {
+            final STEntry entry = new STEntry(this.getSource());
+            try {
+                final byte[][] entryBytes = getTable().get(entry.getKey());
+                if (entryBytes != null) {
+                    final STEntry dbEntry = new STEntry(entryBytes[0], entryBytes[1]);
+                    if (!dbEntry.isValid()) {
+                        System.out.println(dbEntry);
+                    } else {
+                        getTable().remove(entry.getKey());
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println(e);
+            }
+        }
+
     }
     
     public static void main(String[] args) {
@@ -75,12 +175,14 @@ public class dbtest {
             }
             
             long afterinit = System.currentTimeMillis();
+            System.out.println("Test for db-engine " + dbe +  " started to create file " + tablename + " with test " + command);
             
             // execute command
             if (command.equals("create")) {
                 // do nothing, since opening of the database access must handle this
                 System.out.println("Database created");
             }
+            
             if (command.equals("fill")) {
                 // fill database with random entries;
                 // args: <number-of-entries> <random-startpoint>
@@ -94,6 +196,7 @@ public class dbtest {
                     }
                 }
             }
+            
             if (command.equals("list")) {
                 Iterator i = table.rows(true, false);
                 byte[][] row;
@@ -103,6 +206,39 @@ public class dbtest {
                     System.out.println();
                 }
             }
+            
+            if (command.equals("stressThreaded")) {
+                // 
+                // args: <number-of-writes> <number-of-reads-per-write> <random-startpoint>
+                long writeCount = Long.parseLong(args[3]);
+                long readCount = Long.parseLong(args[4]);
+                long randomstart = Long.parseLong(args[5]);
+                final Random random = new Random(randomstart);
+                for (int i = 0; i < writeCount; i++) {
+                    serverInstantThread.oneTimeJob(new WriteJob(table, i), random.nextLong() % 1000, 10);
+                    for (int j = 0; j < readCount; j++) {
+                        serverInstantThread.oneTimeJob(new ReadJob(table, random.nextLong() % writeCount), 1000 + random.nextLong() % 1000, 10);
+                    }
+                }
+                while (serverInstantThread.instantThreadCounter > 0)
+                    try {Thread.sleep(100);} catch (InterruptedException e) {} // wait for all tasks to finish
+                try {Thread.sleep(6000);} catch (InterruptedException e) {}
+            }
+            
+            if (command.equals("stressSequential")) {
+                // 
+                // args: <number-of-writes> <number-of-reads> <random-startpoint>
+                long writeCount = Long.parseLong(args[3]);
+                long readCount = Long.parseLong(args[4]);
+                System.out.print("Writing ...");
+                for (int i = 0; i < writeCount; i++) new WriteJob(table, i).run();
+                System.out.println(" done.");
+
+                System.out.print("Reading ...");
+                for (int i = 0; i < readCount; i++) new ReadJob(table, i).run();
+                System.out.println(" done.");
+            }
+            
             
             long aftercommand = System.currentTimeMillis();
             
