@@ -106,6 +106,7 @@ package de.anomic.plasma;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -672,16 +673,29 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
         }
         
+        // check if ip is local ip address
+        InetAddress hostAddress = httpc.dnsResolve(entry.url.getHost());
+        if (hostAddress == null) {
+            this.log.logFine("Unknown host in URL '" + entry.url + "'. Will not be indexed.");
+            doIndexing = false;             
+        } else if (hostAddress.isSiteLocalAddress()) {
+            this.log.logFine("Host in URL '" + entry.url + "' has private ip address.. Will not be indexed.");
+            doIndexing = false;               
+        } else if (hostAddress.isLoopbackAddress()) {
+            this.log.logFine("Host in URL '" + entry.url + "' has loopback ip address.. Will not be indexed.");
+            doIndexing = false;                  
+        }
+        
         // work off unwritten files
         if (entry.cacheArray == null)  {
-            this.log.logInfo("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
+            this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
         } else {
             String error = entry.shallStoreCacheForProxy();
             if (error == null) {
                 this.cacheManager.writeFile(entry.url, entry.cacheArray);
-                this.log.logInfo("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
+                this.log.logFine("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
             } else {
-                this.log.logInfo("WRITE OF FILE " + entry.cacheFile + " FORBIDDEN: " + error);
+                this.log.logFine("WRITE OF FILE " + entry.cacheFile + " FORBIDDEN: " + error);
             }
         }
         
