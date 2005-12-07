@@ -40,12 +40,14 @@
 // done inside the copyright notive above. A re-distribution must contain
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -1087,7 +1089,7 @@ public final class yacy {
         }
     }
     
-    private static void domlist(String homePath, String targetName) {
+    private static void domlist(String homePath, boolean html, String targetName) {
         File root = new File(homePath);
         try {
             plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000);
@@ -1098,11 +1100,61 @@ public final class yacy {
                 entry = (plasmaCrawlLURL.Entry) eiter.next();
                 if ((entry != null) && (entry.url() != null)) doms.add(entry.url().getHost());
             }
-            serverFileUtils.saveSet(new File(root, targetName), doms, new String(serverCore.crlf));
+            
+            // output file
+            if (html) {
+                    File file = new File(root, targetName);
+                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                    Iterator i = doms.iterator();
+                    String key;
+                    while (i.hasNext()) {
+                        key = i.next().toString();
+                        bos.write(("<a href=\"http://" + key + "\">" + key + "</a><br>").getBytes());
+                        bos.write(serverCore.crlf);
+                    }
+                    bos.close();
+            } else {
+                // plain text list
+                serverFileUtils.saveSet(new File(root, targetName), doms, new String(serverCore.crlf));
+            }
             pool.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    private static void urllist(String homePath, boolean html, String targetName) {
+        File root = new File(homePath);
+        try {
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000);
+            Iterator eiter = pool.loadedURL.entries(true, false);
+            plasmaCrawlLURL.Entry entry;
+            File file = new File(root, targetName);
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+            while (eiter.hasNext()) {
+                entry = (plasmaCrawlLURL.Entry) eiter.next();
+                if ((entry != null) && (entry.url() != null)) {
+                    if (html) {
+                        bos.write(("<a href=\"" + entry.url() + "\">" + entry.descr() + "</a><br>").getBytes());
+                        bos.write(serverCore.crlf);
+                    } else {
+                        bos.write(entry.url().toString().getBytes());
+                        bos.write(serverCore.crlf);
+                    }
+                }
+            }
+            bos.close();
+            pool.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private static String[] shift(String[] args, int pos, int count) {
+        String[] newargs = new String[args.length - count];
+        System.arraycopy(args, 0, newargs, 0, pos);
+        System.arraycopy(args, pos + count, newargs, pos, args.length - pos - count);
+        return newargs;
     }
     
     /**
@@ -1177,9 +1229,24 @@ public final class yacy {
             transferCR(targetaddress, crfile);
         } else if ((args.length >= 1) && (args[0].equals("-domlist"))) {
             // generate a url list and save it in a file
+            boolean html = false;
+            if (args.length >= 3 && args[1].equals("-format")) {
+                if (args[2].equals("html")) html = true;
+                args = shift(args, 1, 2);
+            }
             if (args.length == 2) applicationRoot= args[1];
-            String outfile = "domlist_" + System.currentTimeMillis() + ".txt";
-            domlist(applicationRoot, outfile);
+            String outfile = "domlist_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
+            domlist(applicationRoot, html, outfile);
+        } else if ((args.length >= 1) && (args[0].equals("-urllist"))) {
+            // generate a url list and save it in a file
+            boolean html = false;
+            if (args.length >= 3 && args[1].equals("-format")) {
+                if (args[2].equals("html")) html = true;
+                args = shift(args, 1, 2);
+            }
+            if (args.length == 2) applicationRoot= args[1];
+            String outfile = "urllist_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
+            urllist(applicationRoot, html, outfile);
         } else {
             if (args.length == 1) applicationRoot= args[0];
             startup(applicationRoot, startupMemFree, startupMemTotal);
