@@ -679,10 +679,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             this.log.logFine("Unknown host in URL '" + entry.url + "'. Will not be indexed.");
             doIndexing = false;             
         } else if (hostAddress.isSiteLocalAddress()) {
-            this.log.logFine("Host in URL '" + entry.url + "' has private ip address.. Will not be indexed.");
+            this.log.logFine("Host in URL '" + entry.url + "' has private ip address. Will not be indexed.");
             doIndexing = false;               
         } else if (hostAddress.isLoopbackAddress()) {
-            this.log.logFine("Host in URL '" + entry.url + "' has loopback ip address.. Will not be indexed.");
+            this.log.logFine("Host in URL '" + entry.url + "' has loopback ip address. Will not be indexed.");
             doIndexing = false;                  
         }
         
@@ -733,7 +733,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public void close() {
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         terminateAllThreads(true);
-        log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing (stand by..)");
+        log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing (stand by...)");
         int waitingBoundSeconds = Integer.parseInt(getConfig("maxWaitingWordFlush", "120"));
         wordIndex.close(waitingBoundSeconds);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
@@ -1607,7 +1607,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // fetch snippets
             //if (query.domType != plasmaSearchQuery.SEARCHDOM_GLOBALDHT) snippetCache.fetch(acc.cloneSmart(), query.queryHashes, query.urlMask, 10, 1000);
-            log.logFine("SEARCH TIME AFTER ORDERING OF SEARCH RESULT: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+            log.logFine("SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
             // result is a List of urlEntry elements: prepare answer
             if (acc == null) {

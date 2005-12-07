@@ -12,7 +12,7 @@
 
 <p>
 <div class=small id="startCrawling"><b>Start Crawling Job:</b>&nbsp;
-You can define URLs as start points for Web page crawling and start that crawling here.
+You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".
 </div>
 <table border="0" cellpadding="5" cellspacing="0" width="100%">
 <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
@@ -25,26 +25,27 @@ You can define URLs as start points for Web page crawling and start that crawlin
     <td class=small>Crawling Depth:</td>
     <td class=small><input name="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#"></td>
     <td class=small colspan="2">
-    A minimum of 1 is recommended.
-    Be careful with the prefetch number. Consider a branching factor of average 20;
-    A prefetch-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
+    This defines how often the Crawler will follow links embedded in websites.<br>
+	A minimum of 1 is recommended and means that the page you enter under "Starting Point" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.
+    Be careful with the depth. Consider a branching factor of average 20;
+    A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Crawling Filter:</td>
     <td class=small><input name="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#"></td>
     <td class=small colspan="2">
-    This is an emacs-like regular expression that must match with the crawled URL.
+    This is an emacs-like regular expression that must match with the URLs which are used to be crawled.
     Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase
-    the crawl depth.
+    the crawling depth.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Accept URLs with '?' / dynamic URLs:</td>
     <td class=small><input type="checkbox" name="crawlingQ" align="top" #(crawlingQChecked)#::checked#(/crawlingQChecked)#></td>
     <td class=small colspan="2">
-    URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
-    is accessed with URL's containing question marks. If you are unsure, do not check this to avoid crawl loops.
+    A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
+    is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
@@ -60,7 +61,7 @@ You can define URLs as start points for Web page crawling and start that crawlin
     <td class=small>Do Local Indexing:</td>
     <td class=small><input type="checkbox" name="localIndexing" align="top" #(localIndexingChecked)#::checked#(/localIndexingChecked)#></td>
     <td class=small colspan="2">
-    This should be switched on by default, unless you want to crawl only to fill the
+    This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
     <a href="CacheAdmin_p.html" class=small>Proxy Cache</a> without indexing.
     </td>
   </tr>
@@ -72,17 +73,17 @@ You can define URLs as start points for Web page crawling and start that crawlin
                     This message will appear in the 'Other Peer Crawl Start' table of other peers.
     </td>
     <td class=small colspan="2">
-    If checked, the crawl will try to assign the leaf nodes of the search tree to remote peers.
-    If you need your crawling results locally, you must switch this off.
-    Only senior and principal peer's can initiate or receive remote crawls.
-    <b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can ommit starting a crawl with the same start point.
+    If checked, the crawler will contact other peers and use them as remote indexers for your crawl. .
+    If you need your crawling results locally, you should switch this off.
+    Only senior and principal peers can initiate or receive remote crawls.
+    <b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can omit starting a crawl with the same start point.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Exclude <i>static</i> Stop-Words</td>
     <td class=small><input type="checkbox" name="xsstopw" align="top" #(xsstopwChecked)#::checked#(/xsstopwChecked)#></td>
     <td class=small colspan="2">
-    To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,
+    This can be useful to circumvent that extremely common words are added to the database, i.e. "the", "he", "she", "it"... To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,
     check this box.
     </td>
   </tr>
@@ -118,8 +119,8 @@ You can define URLs as start points for Web page crawling and start that crawlin
     	</tr>    	
     	</table>
     </td>
-    <td class=small colspan="3" rowspan="2">Existing start URL's are re-crawled.
-    Other already visited URL's are sorted out as 'double'.
+    <td class=small colspan="3" rowspan="2">Existing start URLs are re-crawled.
+    Other already visited URLs are sorted out as 'double'.
     A complete re-crawl will be available soon.
     </td>
   </tr> 
@@ -146,7 +147,7 @@ Your peer can search and index for other peers and they can search for you.</div
         <input type="radio" name="dcr" value="acceptCrawlLimited" align="top" #(acceptCrawlLimitedChecked)#::checked#(/acceptCrawlLimitedChecked)#>
     </td><td class=small>
         Accept remote crawling requests and perform crawl at maximum of
-        <input name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[PPM]#"> Pages Per Minute (minimum is 1, low system load at PPM <= 30)
+        <input name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[PPM]#"> Pages Per Minute (minimum is 1, low system load usually at PPM <= 30)
     </td>
   </tr><tr valign="top" class="TableCellDark">
     <td class=small width="10%">
@@ -165,17 +166,17 @@ Your peer can search and index for other peers and they can search for you.</div
 <p>
 #(error)#<!-- 0 -->
 ::<!-- 1 -->
-Error with profile management. Please stop yacy, delete the File DATA/PLASMADB/crawlProfiles0.db and restart.
+Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.
 ::<!-- 2 -->
 Error: #[errmsg]#
 ::<!-- 3 -->
 Application not yet initialized. Sorry. Please wait some seconds and repeat the request.
 ::<!-- 4 -->
-<b>ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</b> Please try again with different filter</p><br>
+<b>ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</b> Please try again with different filter.</p><br>
 ::<!-- 5 -->
 Crawling of "#[crawlingURL]#" failed. Reason: #[reasonString]#<br>
 ::<!-- 6 -->
-Error with url input "#[crawlingStart]#": #[error]#
+Error with URL input "#[crawlingStart]#": #[error]#
 ::<!-- 7 -->
 Error with file input "#[crawlingStart]#": #[error]#
 #(/error)#
@@ -192,13 +193,13 @@ You can monitor the crawling progress either by watching the URL queues
 <a href="/IndexCreateLoaderQueue_p.html">indexing queue</a>)
 or see the fill/process count of all queues on the
 <a href="/Performance_p.html">performance page</a>.
-<b>Please wait some seconds, because the request is enqueued and delayed until the http server is idle for a certain time.</b>
-The indexing result is presented on the
+<b>Please wait some seconds, because the request is enqueued and delayed until the proxy/HTTP-server is idle for a certain time.</b>
+The indexing results are presented on the
 <a href="IndexMonitor.html">Index Monitor</a>-page.
 <b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>
 If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.<br>
 ::
-Removed #[numEntries]# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty
+Removed #[numEntries]# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty.
 ::
 Crawling paused successfully.
 ::
@@ -227,7 +228,7 @@ Continue crawling.
     <td class="small"><b>Start URL</b></td>
 	<td width="16" class="small"><b>Depth</b></td>
 	<td width="60" class="small"><b>Filter</b></td>
-	<td width="10" class="small"><b>Accept '?'</b></td>
+	<td width="10" class="small"><b>Accept '?' URLs</b></td>
 	<td width="10" class="small"><b>Fill Proxy Cache</b></td>
 	<td width="10" class="small"><b>Local Indexing</b></td>
 	<td width="10" class="small"><b>Remote Indexing</b></td>
@@ -254,7 +255,7 @@ Continue crawling.
     <td class="small"><b>Start URL</b></td>
     <td class="small"><b>Intention/Description</b></td>
     <td class="small"><b>Depth</b></td>
-    <td class="small"><b>Accept '?'</b></td>
+    <td class="small"><b>Accept '?' URLs</b></td>
   </tr>
 #{otherCrawlStartInProgress}#
   <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
@@ -276,7 +277,7 @@ Continue crawling.
     <td class="small"><b>Start URL</b></td>
     <td class="small"><b>Intention/Description</b></td>
     <td class="small"><b>Depth</b></td>
-    <td class="small"><b>Accept '?'</b></td>
+    <td class="small"><b>Accept '?' URLs</b></td>
   </tr>
 #{otherCrawlStartFinished}#
   <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
