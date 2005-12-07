@@ -104,8 +104,8 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             }
 
             // doing a config settings migration
-            //HashMap migratedSettings = migrateSwitchConfigSettings((HashMap) removedProps);
-            //if (migratedSettings != null) configProps.putAll(migratedSettings);
+            HashMap migratedSettings = migrateSwitchConfigSettings((HashMap) removedProps);
+            if (migratedSettings != null) configProps.putAll(migratedSettings);
 
             // merge new props from init to config
             // this is necessary for migration, when new properties are attached
@@ -130,7 +130,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         serverJobs = 0;
     }
 
-    /*
+
     public static HashMap migrateSwitchConfigSettings(HashMap removedSettings) {
         if ((removedSettings == null) || (removedSettings.size() == 0)) return null;
         HashMap migratedSettings = new HashMap();
@@ -145,7 +145,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
         return migratedSettings;
     }
-    */
+
     
     // a logger for this switchboard
     public void setLog(serverLog log) {
