@@ -1171,6 +1171,43 @@ public final class yacy {
     }
     
     /**
+     * Uses an Iteration over urlHash.db to detect malformed URL-Entries.
+     * Damaged URL-Entries will be marked in a HashSet and removed at the end of the function.
+     *
+     * @param homePath Root-Path where all information is to be found.
+     */
+    private static void urldbcleanup(String homePath) {
+        File root = new File(homePath);
+        File dbroot = new File(root, "DATA/PLASMADB");
+        try {
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304);
+            Iterator eiter = currentUrlDB.entries(true, false);
+            int iteratorCount=0;
+            while (eiter.hasNext()) {
+                eiter.next();
+                iteratorCount++;
+            }
+            try { Thread.sleep(1000); } catch (InterruptedException e) {}
+            System.out.println("URLs vorher: " + currentUrlDB.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + plasmaCrawlLURL.damagedURLS.size());
+            synchronized(plasmaCrawlLURL.damagedURLS)
+            {
+                Iterator eiter2 = plasmaCrawlLURL.damagedURLS.iterator();
+                String urlHash;
+                while (eiter2.hasNext()) {
+                    urlHash = (String) eiter2.next();
+                    currentUrlDB.remove(urlHash);
+                    System.out.println("Removed UrlDB-Entry for urlHash: " + urlHash);
+                }
+            }
+            plasmaCrawlLURL.damagedURLS.clear();
+            System.out.println("URLs nachher: " + currentUrlDB.size() + " kaputte URLs: " + plasmaCrawlLURL.damagedURLS.size());
+            currentUrlDB.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /**
     * Main-method which is started by java. Checks for special arguments or
     * starts up the application.
     *
@@ -1260,6 +1297,10 @@ public final class yacy {
             if (args.length == 2) applicationRoot= args[1];
             String outfile = "urllist_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
             urllist(applicationRoot, html, outfile);
+        } else if ((args.length >= 1) && (args[0].equals("-urldbcleanup"))) {
+            // generate a url list and save it in a file
+            if (args.length == 2) applicationRoot= args[1];
+            urldbcleanup(applicationRoot);
         } else {
             if (args.length == 1) applicationRoot= args[0];
             startup(applicationRoot, startupMemFree, startupMemTotal);

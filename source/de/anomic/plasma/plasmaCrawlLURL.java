@@ -57,14 +57,18 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Set;
+
 import de.anomic.http.httpc;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
@@ -85,6 +89,8 @@ public final class plasmaCrawlLURL extends plasmaURL {
     private final LinkedList lcrawlResultStack; // 5 - local index: result of local crawling
     private final LinkedList gcrawlResultStack; // 6 - local index: triggered external
 
+    public static Set damagedURLS = Collections.synchronizedSet(new HashSet());
+    
     public plasmaCrawlLURL(File cachePath, int bufferkb) throws IOException {
         super();
         int[] ce = {
@@ -478,6 +484,10 @@ public final class plasmaCrawlLURL extends plasmaURL {
                 this.snippet = null;
                 return;
             }
+        } catch (MalformedURLException e) {
+            plasmaCrawlLURL.damagedURLS.add(this.urlHash);
+            System.out.println("DEBUG: Marked damaged Entry for removal (malformedURL). UrlHash: " + this.urlHash);
+            //serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString(), e);
         } catch (Exception e) {
             serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString(), e);
         }
