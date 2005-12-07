@@ -1848,6 +1848,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return 0; // wrong password
     }
     
+    public boolean verifyAuthentication(httpHeader header, boolean strict) {
+        // handle access rights
+        switch (adminAuthenticated(header)) {
+        case 0: // wrong password given
+            try { Thread.sleep(3000); } catch (InterruptedException e) { } // prevent brute-force
+            return false;
+        case 1: // no password given
+            return false;
+        case 2: // no password stored
+            return !strict;
+        case 3: // soft-authenticated for localhost only
+            return true;
+        case 4: // hard-authenticated, all ok
+            return true;
+        }
+        return false;
+    }
+    
     public void terminate() {
         this.terminate = true;
         this.shutdownSync.V();

@@ -137,8 +137,13 @@ public class index {
 
         // if a minus-button was hit, remove a special reference first
         if (post.containsKey("deleteref")) {
-        		final String delHash = post.get("deleteref", "");
-        		sb.removeReferences(delHash, query);
+            if (!sb.verifyAuthentication(header, true)) {
+                final serverObjects prop = new serverObjects();
+                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                return prop;
+            }
+            final String delHash = post.get("deleteref", "");
+            sb.removeReferences(delHash, query);
         }
         
         // prepare search order

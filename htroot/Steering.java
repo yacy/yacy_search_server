@@ -62,19 +62,9 @@ public class Steering {
         if (prop == null) { return prop; }
 
         // handle access rights
-        switch (sb.adminAuthenticated(header)) {
-            case 0: // wrong password given
-                try {Thread.sleep(3000);} catch (InterruptedException e) {} // prevent brute-force
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                return prop;
-            case 1: // no password given
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                return prop;
-            case 2: // no password stored
-                //prop.put("info", 1); // actions only with password
-                //return prop;
-            case 3: // soft-authenticated for localhost only
-            case 4: // hard-authenticated, all ok
+        if (!sb.verifyAuthentication(header, false)) {
+            prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+            return prop;
         }
 
         if (post.containsKey("shutdown")) {
