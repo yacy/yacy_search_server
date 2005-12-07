@@ -105,7 +105,7 @@ public final class httpc {
     private static final String vDATE = "20040602";
     private static String userAgent;
     private static final int terminalMaxLength = 30000;
-    private static final TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
+    private static final TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
     /**
     * This string is initialized on loading of this class and contains
     * information about the current OS.
@@ -113,7 +113,10 @@ public final class httpc {
     public static String systemOST;
 
     // --- The GMT standard date format used in the HTTP protocol
-    private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+    private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+    static {
+         HTTPGMTFormatter.setTimeZone(GMTTimeZone);
+    }
     static final HashMap reverseMappingCache = new HashMap();
 
     // the dns cache

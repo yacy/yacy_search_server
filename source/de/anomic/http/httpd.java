@@ -1171,14 +1171,32 @@ public final class httpd implements serverHandler {
             String contentEnc,
             String transferEnc
     ) throws IOException {    
+        sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,contentType,contentLength,moddate,expires,cookie,contentEnc,transferEnc,true);
+    }
+
+    public static final void sendRespondHeader(
+            Properties conProp,
+            OutputStream respond,
+            String httpVersion,
+            int httpStatusCode,
+            String httpStatusText,
+            String contentType,
+            long contentLength,
+            Date moddate,
+            Date expires,
+            String cookie,
+            String contentEnc,
+            String transferEnc,
+            boolean nocache
+    ) throws IOException {
         
         httpHeader headers = new httpHeader();
         
         headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));              
         headers.put(httpHeader.LAST_MODIFIED, httpc.dateString(moddate)); 
-        headers.put(httpHeader.PRAGMA, "no-cache");        
         
+        if (nocache)             headers.put(httpHeader.PRAGMA, "no-cache");
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_TYPE,  (contentType == null)? "text/html" : contentType);  
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_LENGTH, Long.toString(contentLength));
         if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);

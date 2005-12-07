@@ -451,6 +451,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
             //File targetClass = rewriteClassFile(targetFile);
             Date targetDate;
+            boolean nocache = false;
             
             if ((targetClass != null) && (path.endsWith("png"))) {
                 // call an image-servlet to produce an on-the-fly - generated image
@@ -475,6 +476,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 } else {
                     // send an image to client
                     targetDate = new Date(System.currentTimeMillis());
+                    nocache = true;
                     String mimeType = mimeTable.getProperty(targetExt,"text/html");
                     
                     // generate an byte array from the generated image
@@ -486,7 +488,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     baos.close(); baos = null;
                     
                     // write the array to the client
-                    httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, targetDate, null, null, null, null);
+                    httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, targetDate, null, null, null, null, nocache);
                     Thread.sleep(200); // see below
                     serverFileUtils.write(result, out);
                 }
@@ -583,6 +585,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             throw e;
                         }
                         targetDate = new Date(System.currentTimeMillis());
+                        nocache = true;
                     }
                     // read templates
                     tp.putAll(templates);
@@ -667,7 +670,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
                 
                 // write the array to the client
-                httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, (zipContent)?"gzip":null, null);
+                httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, (zipContent)?"gzip":null, null, nocache);
                 Thread.sleep(200); // this solved the message problem (!!)
                 serverFileUtils.write(result, out);
             } else {
