@@ -943,12 +943,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // do a local crawl
-        plasmaCrawlNURL.Entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
-        String stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
-        if ((urlEntry.url() == null) || (urlEntry.url().toString().length() < 10)) {
-            log.logInfo(stats + ": URL with hash " + ((urlEntry.hash()==null)?"Unknown":urlEntry.hash()) + " already removed from queue.");
-            return true;
-        }
+        String stats = null;
+        boolean validEntry = false;
+        plasmaCrawlNURL.Entry urlEntry = null;
+        do {
+            urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
+            stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+            
+            // if the queue is empty
+            if (urlEntry == null) return false;
+            
+            // if we have received a new entry
+            if ((urlEntry.url() == null) || (urlEntry.url().toString().length() < 10)) {
+                log.logInfo(stats + ": URL with hash " + ((urlEntry.hash()==null)?"Unknown":urlEntry.hash()) + " already removed from queue.");
+                validEntry = false;
+            } else {
+                validEntry = true;
+            }
+        } while(!validEntry);
+            
         String profileHandle = urlEntry.profileHandle();
         //System.out.println("DEBUG plasmaSwitchboard.processCrawling: profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
         if (profileHandle == null) {
