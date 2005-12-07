@@ -104,8 +104,8 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             }
 
             // doing a config settings migration
-            HashMap migratedSettings = migrateSwitchConfigSettings((HashMap) removedProps);
-            if (migratedSettings != null) configProps.putAll(migratedSettings);
+            //HashMap migratedSettings = migrateSwitchConfigSettings((HashMap) removedProps);
+            //if (migratedSettings != null) configProps.putAll(migratedSettings);
 
             // merge new props from init to config
             // this is necessary for migration, when new properties are attached
@@ -129,23 +129,6 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         // init busy state control
         serverJobs = 0;
     }
-
-
-    public static HashMap migrateSwitchConfigSettings(HashMap removedSettings) {
-        if ((removedSettings == null) || (removedSettings.size() == 0)) return null;
-        HashMap migratedSettings = new HashMap();
-
-        if (removedSettings.containsKey("parseableMimeTypes")) {
-            String value = (String) removedSettings.get("parseableMimeTypes");
-            migratedSettings.put("parseableMimeTypes.CRAWLER", value);
-            migratedSettings.put("parseableMimeTypes.PROXY", value);
-            migratedSettings.put("parseableMimeTypes.URLREDIRECTOR", value);
-            migratedSettings.put("parseableMimeTypes.ICAP", value);
-        }
-
-        return migratedSettings;
-    }
-
     
     // a logger for this switchboard
     public void setLog(serverLog log) {

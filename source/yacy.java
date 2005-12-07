@@ -89,7 +89,7 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 
 /**
-* This is the main class of the proxy. Several threads are started from here:
+* This is the main class of YaCy. Several threads are started from here:
 * <ul>
 * <li>one single instance of the plasmaSwitchboard is generated, which itself
 * starts a thread with a plasmaHTMLCache object. This object simply counts
@@ -200,6 +200,18 @@ public final class yacy {
             sb.setConfig("downloadAccountBase64", "");
         }
     }
+    
+    
+    public static void migrateSwitchConfigSettings(plasmaSwitchboard sb) {
+        String value = "";
+        if ((value = sb.getConfig("parseableMimeTypes","")).length() > 0) {
+            sb.setConfig("parseableMimeTypes.CRAWLER", value);
+            sb.setConfig("parseableMimeTypes.PROXY", value);
+            sb.setConfig("parseableMimeTypes.URLREDIRECTOR", value);
+            sb.setConfig("parseableMimeTypes.ICAP", value);
+        }
+    }
+    
     
     /**
     * Starts up the whole application. Sets up all datastructures and starts
@@ -361,6 +373,7 @@ public final class yacy {
             //} catch (IOException e) {}
 
             presetPasswords(sb);
+            migrateSwitchConfigSettings(sb);
             
             // start main threads
             try {
