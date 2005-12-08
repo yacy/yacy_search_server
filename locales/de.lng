@@ -195,13 +195,12 @@ Enter search word list, separated by space:==Geben Sie die Suchbegriffe hier ein
 Searching...==Suche l&auml;uft...
 Max. number of results:==Max. Anzahl Ergebnisse:
 order by:==sortieren nach:
-# ">" to avoid replacing value=
-
-"Quality-Date"==Qualit&auml;t-Datum
-"Date-Quality"==Datum-Qualit&auml;t
-Quality-Date==Qualit&auml;t-Datum
-Date-Quality==Datum-Qualit&auml;t
-
+YBR-Date-Quality==YBR-Datum-Qualit&auml;t
+YBR-Quality-Date==YBR-Qualit&auml;t-Datum
+Date-YBR-Quality==Datum-YBR-Qualit&auml;t
+Quality-YBR-Date==Qualit&auml;t-YBR-Datum
+Date-Quality-YBR==Datum-Qualit&auml;t-YBR
+Quality-Date-YBR==Qualit&auml;t-Datum-YBR
 Resource:==Quelle:
 global==global
 local==lokal
@@ -227,6 +226,7 @@ Please repeat your search to see if there are late-responses from remote peers==
 If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
 then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen crawl nach der gesuchten Information, um sie
 available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um crawls von anderen Peers zu erlauben. Danke!
+"delete"=="l&ouml;schen"
 results from a total number of==Resultate aus
 known links.==bekannten Links.
 You can try to==Sie k&ouml;nnen versuchen

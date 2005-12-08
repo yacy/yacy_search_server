@@ -38,7 +38,7 @@ Max. number of results:
 <option #(count-100)#::selected#(/count-100)#>100</option>
 <option #(count-1000)#::selected#(/count-1000)#>1000</option>
 </select>
-&nbsp;&nbsp;order by: 
+&nbsp;&nbsp;order by:
 <select NAME="order">
 <option value="YBR-Date-Quality" #(order-ybr-date-quality)#::selected#(/order-ybr-date-quality)#>YBR-Date-Quality</option>
 <option value="YBR-Quality-Date" #(order-ybr-quality-date)#::selected#(/order-ybr-quality-date)#>YBR-Quality-Date</option>
@@ -53,7 +53,7 @@ Resource:
 <option value="global" #(resource-global)#::selected#(/resource-global)#>global</option>
 <option value="local" #(resource-local)#::selected#(/resource-local)#>local</option>
 </select>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max. search time (seconds): 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max. search time (seconds):
 <select NAME="time">
 <option #(time-1)#::selected#(/time-1)#>1</option>
 <option #(time-3)#::selected#(/time-3)#>3</option>
@@ -94,7 +94,7 @@ If everybody contributes, the results will get better.</p>
 <li>YaCy tries to index singular instead of plural words. Please use the singular form</li>
 <li>Only complete words are indexed, not parts of words</li>
 <li>Don't use stopwords as search words</li>
-<li>During this test phase the reaction time of remote peers is unknown. 
+<li>During this test phase the reaction time of remote peers is unknown.
 Please repeat your search to see if there are late-responses from remote peers</li>
 </ul></p>
 <p>If you think the information you searched should exist in the global index,
@@ -119,7 +119,7 @@ from 'late' peers.
 <!-- link begin -->
 <p>
 <a href="#[delete]#" onMouseover="document.minus_#[urlhexhash]#.src=picMinus.src" onMouseout="document.minus_#[urlhexhash]#.src=picEmpty.src">
-<img src="/env/grafics/empty.gif" name="minus_#[urlhexhash]#"></a>&nbsp;<b>#[description]#</b><br>
+<img src="/env/grafics/empty.gif" title="delete" alt="delete" name="minus_#[urlhexhash]#"></a>&nbsp;<b>#[description]#</b><br>
 #(snippet)#::<img src="/env/grafics/empty.gif">&nbsp;<i>#[text]#</i><br>#(/snippet)#
 <img src="/env/grafics/empty.gif">&nbsp;<a href="#[url]#">#[urlname]#</a><br>
 <img src="/env/grafics/empty.gif">&nbsp;#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
