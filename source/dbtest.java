@@ -54,6 +54,7 @@ public class dbtest {
         public STEntry(final long aSource) {
             this.key = randomHash(aSource, aSource);
             this.value = new byte[valuelength];
+            for (int i = 0; i < valuelength; i++) this.value[i] = 0;
             final byte[] tempKey = String.valueOf(aSource).getBytes();
             System.arraycopy(tempKey, 0, this.value, 0, tempKey.length);
         }
@@ -128,6 +129,7 @@ public class dbtest {
             try {
                 final byte[][] entryBytes = getTable().get(entry.getKey());
                 if (entryBytes != null) {
+                    System.out.println("ENTRY=" + new String(entryBytes[1]));
                     final STEntry dbEntry = new STEntry(entryBytes[0], entryBytes[1]);
                     if (!dbEntry.isValid()) {
                         System.out.println(dbEntry);
@@ -139,7 +141,6 @@ public class dbtest {
                 System.err.println(e);
             }
         }
-
     }
     
     public static void main(String[] args) {

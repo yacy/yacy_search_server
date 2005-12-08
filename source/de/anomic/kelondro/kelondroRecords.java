@@ -151,26 +151,26 @@ public class kelondroRecords {
 
     public kelondroRecords(File file, long buffersize /* bytes */,
                            short ohbytec, short ohhandlec,
-			   int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
-	// creates a new file
-	// file: the file that shall be created
-	// oha : overhead size array of four bytes: oha[0]=# of bytes, oha[1]=# of shorts, oha[2]=# of ints, oha[3]=# of longs, 
-	// columns: array with size of column width; columns.length is number of columns
-	// FHandles: number of integer properties
-	// txtProps: number of text properties
+                           int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
+        // creates a new file
+        // file: the file that shall be created
+        // oha : overhead size array of four bytes: oha[0]=# of bytes, oha[1]=# of shorts, oha[2]=# of ints, oha[3]=# of longs, 
+        // columns: array with size of column width; columns.length is number of columns
+        // FHandles: number of integer properties
+        // txtProps: number of text properties
 
-	if (file.exists()) throw new IOException("kelondroRecords: file " + file + " already exist");
-	this.filename   = file.getCanonicalPath();
+        assert (!file.exists()): "file " + file + " already exist";
+        this.filename = file.getCanonicalPath();
         kelondroRA raf = new kelondroFileRA(this.filename);
-        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename));
-        //kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
+        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
+        // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
         init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
         initCache(buffersize);
     }
     
     public kelondroRecords(kelondroRA ra, long buffersize /* bytes */,
                            short ohbytec, short ohhandlec,
-			   int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
+                           int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
         this.filename = null;
         init(ra, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
         initCache(buffersize);
@@ -179,95 +179,99 @@ public class kelondroRecords {
     private void init(kelondroRA ra, short ohbytec, short ohhandlec,
                       int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
 
-	// store dynamic run-time data
-	this.entryFile  = ra;
-	this.overhead   = ohbytec + 4 * ohhandlec;
-	this.recordsize = this.overhead;
-	for (int i = 0; i < columns.length; i++) this.recordsize += columns[i];
+        // store dynamic run-time data
+        this.entryFile = ra;
+        this.overhead = ohbytec + 4 * ohhandlec;
+        this.recordsize = this.overhead;
+        for (int i = 0; i < columns.length; i++)
+            this.recordsize += columns[i];
         this.headchunksize = overhead + columns[0];
         this.tailchunksize = this.recordsize - this.headchunksize;
 
-	// store dynamic run-time seek pointers 
-	POS_HANDLES     =  POS_COLWIDTHS + columns.length * 4;
-	POS_TXTPROPS    =  POS_HANDLES + FHandles * 4;
-	POS_NODES       =  POS_TXTPROPS + txtProps * txtPropWidth;
+        // store dynamic run-time seek pointers
+        POS_HANDLES = POS_COLWIDTHS + columns.length * 4;
+        POS_TXTPROPS = POS_HANDLES + FHandles * 4;
+        POS_NODES = POS_TXTPROPS + txtProps * txtPropWidth;
 
-	// store dynamic back-up variables
-	USEDC           = 0;
-	FREEC           = 0;
-	FREEH           = new Handle(NUL);
-	OHBYTEC         = ohbytec;
-	OHHANDLEC       = ohhandlec;
-	COLWIDTHS       = columns;
-	HANDLES         = new Handle[FHandles]; for (int i = 0; i < FHandles; i++) HANDLES[i] = new Handle(NUL);
-	TXTPROPS        = new byte[txtProps][];  for (int i = 0; i < txtProps; i++) TXTPROPS[i] = new byte[0];
-	TXTPROPW        = txtPropWidth;
+        // store dynamic back-up variables
+        USEDC     = 0;
+        FREEC     = 0;
+        FREEH     = new Handle(NUL);
+        OHBYTEC   = ohbytec;
+        OHHANDLEC = ohhandlec;
+        COLWIDTHS = columns;
+        HANDLES   = new Handle[FHandles];
+        for (int i = 0; i < FHandles; i++) HANDLES[i] = new Handle(NUL);
+        TXTPROPS  = new byte[txtProps][];
+        for (int i = 0; i < txtProps; i++) TXTPROPS[i] = new byte[0];
+        TXTPROPW  = txtPropWidth;
 
-	// write data to file
-	entryFile.seek(POS_MAGIC);       entryFile.writeByte(4);     // magic marker for this file type
-	entryFile.seek(POS_BUSY);        entryFile.writeByte(0);     // unlock: default
-	entryFile.seek(POS_PORT);        entryFile.writeShort(4444); // default port (not used yet)
-	entryFile.seek(POS_DESCR);       entryFile.write("--AnomicRecords file structure--".getBytes());
-	entryFile.seek(POS_COLUMNS);     entryFile.writeShort(this.COLWIDTHS.length);
-	entryFile.seek(POS_OHBYTEC);	 entryFile.writeShort(OHBYTEC);
-	entryFile.seek(POS_OHHANDLEC);	 entryFile.writeShort(OHHANDLEC);
-	entryFile.seek(POS_USEDC);       entryFile.writeInt(this.USEDC);
-	entryFile.seek(POS_FREEC);       entryFile.writeInt(this.FREEC);
-	entryFile.seek(POS_FREEH);       entryFile.writeInt(this.FREEH.index);
-	entryFile.seek(POS_MD5PW);       entryFile.write("PASSWORDPASSWORD".getBytes());
-	entryFile.seek(POS_ENCRYPTION);  entryFile.write("ENCRYPTION!#$%&?".getBytes());
-	entryFile.seek(POS_OFFSET);      entryFile.writeLong(POS_NODES);
-	entryFile.seek(POS_INTPROPC);    entryFile.writeInt(FHandles);
-	entryFile.seek(POS_TXTPROPC);    entryFile.writeInt(txtProps);
-	entryFile.seek(POS_TXTPROPW);    entryFile.writeInt(txtPropWidth);
+        // write data to file
+        entryFile.seek(POS_MAGIC);      entryFile.writeByte(4); // magic marker for this file type
+        entryFile.seek(POS_BUSY);       entryFile.writeByte(0); // unlock: default
+        entryFile.seek(POS_PORT);       entryFile.writeShort(4444); // default port (not used yet)
+        entryFile.seek(POS_DESCR);      entryFile.write("--AnomicRecords file structure--".getBytes());
+        entryFile.seek(POS_COLUMNS);    entryFile.writeShort(this.COLWIDTHS.length);
+        entryFile.seek(POS_OHBYTEC);    entryFile.writeShort(OHBYTEC);
+        entryFile.seek(POS_OHHANDLEC);  entryFile.writeShort(OHHANDLEC);
+        entryFile.seek(POS_USEDC);      entryFile.writeInt(this.USEDC);
+        entryFile.seek(POS_FREEC);      entryFile.writeInt(this.FREEC);
+        entryFile.seek(POS_FREEH);      entryFile.writeInt(this.FREEH.index);
+        entryFile.seek(POS_MD5PW);      entryFile.write("PASSWORDPASSWORD".getBytes());
+        entryFile.seek(POS_ENCRYPTION); entryFile.write("ENCRYPTION!#$%&?".getBytes());
+        entryFile.seek(POS_OFFSET);     entryFile.writeLong(POS_NODES);
+        entryFile.seek(POS_INTPROPC);   entryFile.writeInt(FHandles);
+        entryFile.seek(POS_TXTPROPC);   entryFile.writeInt(txtProps);
+        entryFile.seek(POS_TXTPROPW);   entryFile.writeInt(txtPropWidth);
 
-	// write configuration arrays
-	for (int i = 0; i < this.COLWIDTHS.length; i++) {
-	    entryFile.seek(POS_COLWIDTHS + 4 * i);
-	    entryFile.writeInt(COLWIDTHS[i]);
-	}
-	for (int i = 0; i < this.HANDLES.length; i++) {
-	    entryFile.seek(POS_HANDLES + 4 * i);
-	    entryFile.writeInt(NUL);
-	    HANDLES[i] = new Handle(NUL);
-	}
-	for (int i = 0; i < this.TXTPROPS.length; i++) {
-	    entryFile.seek(POS_TXTPROPS + TXTPROPW * i);
-	    for (int j = 0; j < TXTPROPW; j++) entryFile.writeByte(0);
-	}
-
-	// thats it!
+        // write configuration arrays
+        for (int i = 0; i < this.COLWIDTHS.length; i++) {
+            entryFile.seek(POS_COLWIDTHS + 4 * i);
+            entryFile.writeInt(COLWIDTHS[i]);
+        }
+        for (int i = 0; i < this.HANDLES.length; i++) {
+            entryFile.seek(POS_HANDLES + 4 * i);
+            entryFile.writeInt(NUL);
+            HANDLES[i] = new Handle(NUL);
+        }
+        for (int i = 0; i < this.TXTPROPS.length; i++) {
+            entryFile.seek(POS_TXTPROPS + TXTPROPW * i);
+            for (int j = 0; j < TXTPROPW; j++)
+                entryFile.writeByte(0);
+        }
     }
 
     public void setLogger(Logger newLogger) {
         this.theLogger = newLogger;
     }
-    
+
     public void logWarning(String message) {
         if (this.theLogger == null)
             System.err.println("KELONDRO WARNING for file " + this.filename + ": " + message);
         else
             this.theLogger.warning("KELONDRO WARNING for file " + this.filename + ": " + message);
     }
-    
+
     public void clear() throws IOException {
         // Removes all mappings from this map
-	//throw new UnsupportedOperationException("clear not supported");
+        // throw new UnsupportedOperationException("clear not supported");
         USEDC = 0;
-	FREEC = 0;
-	FREEH = new Handle(NUL);
-	entryFile.seek(POS_USEDC); entryFile.writeInt(this.USEDC);
-	entryFile.seek(POS_FREEC); entryFile.writeInt(this.FREEC);
-	entryFile.seek(POS_FREEH); entryFile.writeInt(this.FREEH.index);
+        FREEC = 0;
+        FREEH = new Handle(NUL);
+        entryFile.seek(POS_USEDC);
+        entryFile.writeInt(this.USEDC);
+        entryFile.seek(POS_FREEC);
+        entryFile.writeInt(this.FREEC);
+        entryFile.seek(POS_FREEH);
+        entryFile.writeInt(this.FREEH.index);
     }
 
     public kelondroRecords(File file, long buffersize) throws IOException{
-	// opens an existing tree
-	if (!file.exists()) throw new IOException("kelondroRecords: file " + file.getAbsoluteFile().toString() + " does not exist");
-
+        // opens an existing tree
+        assert (file.exists()): "file " + file.getAbsoluteFile().toString() + " does not exist";
         this.filename = file.getCanonicalPath();
         kelondroRA raf = new kelondroFileRA(this.filename);
-        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename));
+        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
         //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
         init(raf);
@@ -281,48 +285,48 @@ public class kelondroRecords {
     }
 
     private void init(kelondroRA ra) throws IOException {
-        
         // assign values that are only present at run-time
-	this.entryFile = ra;
+        this.entryFile = ra;
 
-	// read dynamic variables that are back-ups of stored values in file; read/defined on instantiation
-	entryFile.seek(POS_USEDC); this.USEDC = entryFile.readInt();
-	entryFile.seek(POS_FREEC); this.FREEC = entryFile.readInt();
-	entryFile.seek(POS_FREEH); this.FREEH = new Handle(entryFile.readInt());
+        // read dynamic variables that are back-ups of stored values in file;
+        // read/defined on instantiation
+        entryFile.seek(POS_USEDC);     this.USEDC = entryFile.readInt();
+        entryFile.seek(POS_FREEC);     this.FREEC = entryFile.readInt();
+        entryFile.seek(POS_FREEH);     this.FREEH = new Handle(entryFile.readInt());
 
-	entryFile.seek(POS_OHBYTEC); OHBYTEC = entryFile.readShort();
-	entryFile.seek(POS_OHHANDLEC); OHHANDLEC = entryFile.readShort();
+        entryFile.seek(POS_OHBYTEC);   this.OHBYTEC = entryFile.readShort();
+        entryFile.seek(POS_OHHANDLEC); this.OHHANDLEC = entryFile.readShort();
 
-	entryFile.seek(POS_COLUMNS); this.COLWIDTHS = new int[entryFile.readShort()];
-	entryFile.seek(POS_INTPROPC); this.HANDLES = new Handle[entryFile.readInt()];
-	entryFile.seek(POS_TXTPROPC); this.TXTPROPS = new byte[entryFile.readInt()][];
-	entryFile.seek(POS_TXTPROPW); this.TXTPROPW = entryFile.readInt();
+        entryFile.seek(POS_COLUMNS);   this.COLWIDTHS = new int[entryFile.readShort()];
+        entryFile.seek(POS_INTPROPC);  this.HANDLES = new Handle[entryFile.readInt()];
+        entryFile.seek(POS_TXTPROPC);  this.TXTPROPS = new byte[entryFile.readInt()][];
+        entryFile.seek(POS_TXTPROPW);  this.TXTPROPW = entryFile.readInt();
 
         if (COLWIDTHS.length == 0) throw new kelondroException(filename, "init: zero columns; strong failure");
         
-	// calculate dynamic run-time seek pointers
-	POS_HANDLES = POS_COLWIDTHS + COLWIDTHS.length * 4;
-	POS_TXTPROPS = POS_HANDLES  + HANDLES.length * 4;
-	POS_NODES  = POS_TXTPROPS  + TXTPROPS.length * TXTPROPW;
+        // calculate dynamic run-time seek pointers
+        POS_HANDLES = POS_COLWIDTHS + COLWIDTHS.length * 4;
+        POS_TXTPROPS = POS_HANDLES + HANDLES.length * 4;
+        POS_NODES = POS_TXTPROPS + TXTPROPS.length * TXTPROPW;
 
-	// read configuration arrays
-	for (int i = 0; i < COLWIDTHS.length; i++) {
-	    entryFile.seek(POS_COLWIDTHS + 4 * i);
-	    COLWIDTHS[i] = entryFile.readInt();
-	}
-	for (int i = 0; i < HANDLES.length; i++) {
-	    entryFile.seek(POS_HANDLES + 4 * i);
-	    HANDLES[i] = new Handle(entryFile.readInt());
-	}
-	for (int i = 0; i < TXTPROPS.length; i++) {
-	    entryFile.seek(POS_TXTPROPS + TXTPROPW * i);
-	    TXTPROPS[i] = new byte[TXTPROPW];
-	    entryFile.readFully(TXTPROPS[i], 0, TXTPROPS[i].length);
-	}
+        // read configuration arrays
+        for (int i = 0; i < COLWIDTHS.length; i++) {
+            entryFile.seek(POS_COLWIDTHS + 4 * i);
+            COLWIDTHS[i] = entryFile.readInt();
+        }
+        for (int i = 0; i < HANDLES.length; i++) {
+            entryFile.seek(POS_HANDLES + 4 * i);
+            HANDLES[i] = new Handle(entryFile.readInt());
+        }
+        for (int i = 0; i < TXTPROPS.length; i++) {
+            entryFile.seek(POS_TXTPROPS + TXTPROPW * i);
+            TXTPROPS[i] = new byte[TXTPROPW];
+            entryFile.readFully(TXTPROPS[i], 0, TXTPROPS[i].length);
+        }
 
-	// assign remaining values that are only present at run-time
-	this.overhead = OHBYTEC + 4 * OHHANDLEC;
-	this.recordsize = this.overhead;
+        // assign remaining values that are only present at run-time
+        this.overhead = OHBYTEC + 4 * OHHANDLEC;
+        this.recordsize = this.overhead;
         for (int i = 0; i < COLWIDTHS.length; i++) this.recordsize += COLWIDTHS[i];
         this.headchunksize = this.overhead + COLWIDTHS[0];
         this.tailchunksize = this.recordsize - this.headchunksize;
@@ -380,7 +384,6 @@ public class kelondroRecords {
         return new int[]{XcacheSize - (XcacheHeaders[CP_HIGH].size() + XcacheHeaders[CP_MEDIUM].size() + XcacheHeaders[CP_LOW].size()), XcacheHeaders[CP_HIGH].size(), XcacheHeaders[CP_MEDIUM].size(), XcacheHeaders[CP_LOW].size()};
     }
     
-   
     protected Node newNode() throws IOException {
         return new Node();
     }
@@ -415,48 +418,46 @@ public class kelondroRecords {
         }
         dispose(handle);
     }
-    
 
-        
     public class Node {
-	// an Node holds all information of one row of data. This includes the key to the entry
-	// which is stored as entry element at position 0
-	// an Node object can be created in two ways:
-	// 1. instantiation with an index number. After creation the Object does not hold any
-	//    value information until such is retrieved using the getValue() method
-	// 2. instantiation with a value array. the values are not directly written into the
-	//    file. Expanding the tree structure is then done using the save() method. at any
-	//    time it is possible to verify the save state using the saved() predicate.
-	// Therefore an entry object has three modes:
-	// a: holding an index information only (saved() = true)
-	// b: holding value information only (saved() = false)
-	// c: holding index and value information at the same time (saved() = true)
-	//    which can be the result of one of the two processes as follow:
-	//    (i)  created with index and after using the getValue() method, or
-	//    (ii) created with values and after calling the save() method
-	// the method will therefore throw an IllegalStateException when the following
-	// process step is performed:
-	//    - create the Node with index and call then the save() method
-	// this case can be decided with
-	//    ((index != NUL) && (values == null))
-	// The save() method represents the insert function for the tree. Balancing functions
-	// are applied automatically. While balancing, the Node does never change its index key,
-	// but its parent/child keys.
-	//private byte[]    ohBytes  = null;  // the overhead bytes, OHBYTEC values
-	//private Handle[]  ohHandle= null;  // the overhead handles, OHHANDLEC values
-	//private byte[][]  values  = null;  // an array of byte[] nodes is the value vector
-	private Handle handle    = null; // index of the entry, by default NUL means undefined
+        // an Node holds all information of one row of data. This includes the key to the entry
+        // which is stored as entry element at position 0
+        // an Node object can be created in two ways:
+        // 1. instantiation with an index number. After creation the Object does not hold any
+        //    value information until such is retrieved using the getValue() method
+        // 2. instantiation with a value array. the values are not directly written into the
+        //    file. Expanding the tree structure is then done using the save() method. at any
+        //    time it is possible to verify the save state using the saved() predicate.
+        // Therefore an entry object has three modes:
+        // a: holding an index information only (saved() = true)
+        // b: holding value information only (saved() = false)
+        // c: holding index and value information at the same time (saved() = true)
+        //    which can be the result of one of the two processes as follow:
+        //    (i)  created with index and after using the getValue() method, or
+        //    (ii) created with values and after calling the save() method
+        // the method will therefore throw an IllegalStateException when the following
+        // process step is performed:
+        //    - create the Node with index and call then the save() method
+        // this case can be decided with
+        //    ((index != NUL) && (values == null))
+        // The save() method represents the insert function for the tree. Balancing functions
+        // are applied automatically. While balancing, the Node does never change its index key,
+        // but its parent/child keys.
+        //private byte[]    ohBytes  = null;  // the overhead bytes, OHBYTEC values
+        //private Handle[]  ohHandle= null;  // the overhead handles, OHHANDLEC values
+        //private byte[][]  values  = null;  // an array of byte[] nodes is the value vector
+        private Handle handle = null; // index of the entry, by default NUL means undefined
         private byte[] headChunk = null; // contains ohBytes, ohHandles and the key value
         private byte[] tailChunk = null; // contains all values except the key value
         private boolean headChanged = false;
         private boolean tailChanged = false;
         
-	private Node() throws IOException {
-	    // create a new empty node and reserve empty space in file for it
+        private Node() throws IOException {
+            // create a new empty node and reserve empty space in file for it
             // use this method only if you want to extend the file with new entries
             // without the need to have content in it.
             this.handle = new Handle();
-            
+
             // create empty chunks
             this.headChunk = new byte[headchunksize];
             this.tailChunk = new byte[tailchunksize];
@@ -464,7 +465,7 @@ public class kelondroRecords {
             for (int i = 0; i < tailchunksize; i++) this.tailChunk[i] = 0;
             this.headChanged = true;
             this.tailChanged = true;
-	}
+        }
     
 	/*
 	private Node(Handle handle) throws IOException {
@@ -483,15 +484,18 @@ public class kelondroRecords {
 	*/
 	
         private Node(Handle handle, Node parentNode, int referenceInParent) throws IOException {
-	    // this creates an entry with an pre-reserved entry position
-	    // values can be written using the setValues() method
-	    // but we expect that values are already there in the file ready to be read which we do not here
-	    if (handle == null) throw new IllegalArgumentException("INTERNAL ERROR: node handle is null.");
-
-            // the parentNode can be given if an auto-fix in the following case is wanted
+            // this creates an entry with an pre-reserved entry position values can be written
+            // using the setValues() method but we expect that values are already there in the file
+            // ready to be read which we do not here
+            assert (handle != null): "node handle is null";
+            assert (handle.index >= 0): "node handle too low: " + handle.index;
+            assert (handle.index < USEDC + FREEC) : "node handle too high: " + handle.index + ", USEDC=" + USEDC + ", FREEC=" + FREEC;
+            
+            // the parentNode can be given if an auto-fix in the following case
+            // is wanted
             if (handle.index >= USEDC + FREEC) {
                 if (parentNode == null) {
-                    throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index exceeds size. No auto-fix node was submitted. This is a serious failure.");  
+                    throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index exceeds size. No auto-fix node was submitted. This is a serious failure.");
                 } else {
                     try {
                         parentNode.setOHHandle(referenceInParent, null);
@@ -504,11 +508,11 @@ public class kelondroRecords {
             }
 
             // use given handle
-	    this.handle = new Handle(handle.index);
-            
+            this.handle = new Handle(handle.index);
+
             // init the content
             initContent();
-	}
+        }
         
         private void initContent() throws IOException {
             // create chunks; read them from file or cache
@@ -573,52 +577,53 @@ public class kelondroRecords {
                 while (valuewidth-- > 0) targetarray[targetoffset + valuewidth] = 0;
             } else {
                 System.arraycopy(value, 0, targetarray, targetoffset, Math.min(value.length, valuewidth)); // error?
-                if (value.length < valuewidth)
+                if (value.length < valuewidth) {
                     while (valuewidth-- > value.length) targetarray[targetoffset + valuewidth] = 0;
+                }
             }
         }
         
         protected Handle handle() {
-	    // if this entry has an index, return it
-	    if (this.handle.index == NUL) throw new kelondroException(filename, "the entry has no index assigned");
-	    return new Handle(this.handle.index);
-	}
-        
-	protected void setOHByte(int i, byte b) {
-	    if (i >= OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong index " + i);
-	    if (this.handle.index == NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
+            // if this entry has an index, return it
+            if (this.handle.index == NUL) throw new kelondroException(filename, "the entry has no index assigned");
+            return new Handle(this.handle.index);
+        }
+
+        protected void setOHByte(int i, byte b) {
+            if (i >= OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong index " + i);
+            if (this.handle.index == NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
             this.headChunk[i] = b;
             this.headChanged = true;
-	}
+        }
         
-        protected void setOHHandle(int i, Handle handle) {
-            if (i >= OHHANDLEC) throw new IllegalArgumentException("setOHHandle: wrong array size " + i);
-            if (this.handle.index == NUL) throw new kelondroException(filename, "setOHHandle: no handle assigned");
-            if (handle == null) {
+        protected void setOHHandle(int i, Handle otherhandle) {
+            assert (i < OHHANDLEC): "setOHHandle: wrong array size " + i;
+            assert (this.handle.index != NUL): "setOHHandle: no handle assigned ind file" + filename;
+            if (otherhandle == null) {
                 NUL2bytes(this.headChunk, OHBYTEC + 4 * i);
             } else {
-                if (handle.index > USEDC + FREEC) throw new kelondroException(filename, "INTERNAL ERROR, setOHHandles: handle " + i + " exceeds file size (" + handle.index + " > " + (USEDC + FREEC) + ")");
-                int2bytes(handle.index, this.headChunk, OHBYTEC + 4 * i);
+                if (otherhandle.index > USEDC + FREEC) throw new kelondroException(filename, "INTERNAL ERROR, setOHHandles: handle " + i + " exceeds file size (" + handle.index + " > " + (USEDC + FREEC) + ")");
+                int2bytes(otherhandle.index, this.headChunk, OHBYTEC + 4 * i);
             }
             this.headChanged = true;
         }
         
-	protected byte getOHByte(int i) {
-	    if (i >= OHBYTEC) throw new IllegalArgumentException("getOHByte: wrong index " + i);
-	    if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
+        protected byte getOHByte(int i) {
+            if (i >= OHBYTEC) throw new IllegalArgumentException("getOHByte: wrong index " + i);
+            if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
             return this.headChunk[i];
-	}
-        
+        }
+
         protected Handle getOHHandle(int i) {
             if (this.handle.index == NUL) throw new kelondroException(filename, "Cannot load OH values");
-            if (i >= OHHANDLEC) throw new kelondroException(filename, "handle index out of bounds: " + i);
+            assert (i < OHHANDLEC): "handle index out of bounds: " + i + " in file " + filename;
             int h = bytes2int(this.headChunk, OHBYTEC + 4 * i);
             return (h == NUL) ? null : new Handle(h);
         }
         
-	public byte[][] setValues(byte[][] row) throws IOException {
-	    // if the index is defined, then write values directly to the file, else only to the object
-	    byte[][] result = getValues(); // previous value (this loads the values if not already happened)
+        public byte[][] setValues(byte[][] row) throws IOException {
+            // if the index is defined, then write values directly to the file, else only to the object
+            byte[][] result = getValues(); // previous value (this loads the values if not already happened)
             
             // set values
             if (this.handle.index != NUL) {
@@ -631,15 +636,16 @@ public class kelondroRecords {
             }
             this.headChanged = true;
             this.tailChanged = true;
-	    return result; // return previous value
-	}
-        
-	public byte[] getKey() {
+            return result; // return previous value
+        }
+
+        public byte[] getKey() {
             // read key
             return trimCopy(headChunk, overhead, COLWIDTHS[0]);
-	} 
-        
-	public byte[][] getValues() throws IOException {
+        }
+
+        public byte[][] getValues() throws IOException {
+            
             if (this.tailChunk == null) {
                 // load all values from the database file
                 this.tailChunk = new byte[tailchunksize];
@@ -649,61 +655,68 @@ public class kelondroRecords {
                     entryFile.readFully(this.tailChunk, 0, this.tailChunk.length);
                 }
             }
-            
+
             // create return value
             byte[][] values = new byte[COLWIDTHS.length][];
-            
+
             // read key
             values[0] = trimCopy(headChunk, overhead, COLWIDTHS[0]);
-            
+
             // read remaining values
             int offset = 0;
             for (int i = 1; i < COLWIDTHS.length; i++) {
                 values[i] = trimCopy(tailChunk, offset, COLWIDTHS[i]);
                 offset += COLWIDTHS[i];
             }
-            
+
             return values;
         }
-        
+
         public synchronized void commit(int cachePriority) throws IOException {
-            // this must be called after all write operations to the node are finished
-            
+            // this must be called after all write operations to the node are
+            // finished
+
             // place the data to the file
-            
+
             if (this.headChunk == null) {
                 // there is nothing to save
                 throw new kelondroException(filename, "no values to save (header missing)");
             }
-            
+
             // save head
             if (this.headChanged) {
                 synchronized (entryFile) {
                     entryFile.seek(seekpos(this.handle));
-                    //System.out.print("#write "); printChunk(this.handle, this.headChunk); System.out.println();
+                    // System.out.print("#write "); printChunk(this.handle,
+                    // this.headChunk); System.out.println();
                     entryFile.write(this.headChunk);
                 }
                 update2Cache(cachePriority);
             }
-            
+
             // save tail
-            if ((this.tailChunk != null) && (this.tailChanged)) synchronized (entryFile) {
-                entryFile.seek(seekpos(this.handle) + headchunksize);
-                entryFile.write(this.tailChunk);
-            }
+            if ((this.tailChunk != null) && (this.tailChanged))
+                synchronized (entryFile) {
+                    entryFile.seek(seekpos(this.handle) + headchunksize);
+                    entryFile.write(this.tailChunk);
+                }
         }
-        
+
         public synchronized void collapse() {
-            // this must be called after all write and read operations to the node are finished
+            // this must be called after all write and read operations to the
+            // node are finished
             this.headChunk = null;
             this.tailChunk = null;
             this.handle = null;
         }
-        
+
         private byte[] trimCopy(byte[] a, int offset, int length) {
-            if (length > a.length - offset) length = a.length - offset;
-            while ((length > 0) && (a[offset + length - 1] == 0)) length--;
-            if (length == 0) return null;
+            if (length > a.length - offset)
+                length = a.length - offset;
+            while ((length > 0) && (a[offset + length - 1] == 0))
+                length--;
+            if (length == 0)
+                return null;
             byte[] b = new byte[length];
             System.arraycopy(a, offset, b, 0, length);
             return b;
@@ -804,9 +817,9 @@ public class kelondroRecords {
                     // we simply clear the cache
                     String error = "cachScore error: " + e.getMessage() + "; cachesize=" + XcacheSize + ", cache.size()=[" + XcacheHeaders[0].size() + "," + XcacheHeaders[1].size() + "," + XcacheHeaders[2].size() + "], cacheScore.size()=" + cacheScore.size();
                     cacheScore = new kelondroMScoreCluster();
-                    XcacheHeaders[0] = new HashMap();
-                    XcacheHeaders[1] = new HashMap();
-                    XcacheHeaders[2] = new HashMap();
+                    XcacheHeaders[CP_LOW]    = new HashMap();
+                    XcacheHeaders[CP_MEDIUM] = new HashMap();
+                    XcacheHeaders[CP_HIGH]   = new HashMap();
                     throw new kelondroException(filename, error);
                     
                 }
@@ -829,9 +842,9 @@ public class kelondroRecords {
                 
                 // store the cache entry
                 //XcacheHeaders.remove(cacheHandle);
-                if (priority != CP_LOW) XcacheHeaders[CP_LOW].remove(cacheHandle);
+                if (priority != CP_LOW)    XcacheHeaders[CP_LOW].remove(cacheHandle);
                 if (priority != CP_MEDIUM) XcacheHeaders[CP_MEDIUM].remove(cacheHandle);
-                if (priority != CP_HIGH) XcacheHeaders[CP_HIGH].remove(cacheHandle);
+                if (priority != CP_HIGH)   XcacheHeaders[CP_HIGH].remove(cacheHandle);
                 XcacheHeaders[priority].put(cacheHandle, cacheEntry);
                 if ((cacheScore != null) && (priority == CP_HIGH)) {
                     cacheScore.setScore(cacheHandle, (int) ((System.currentTimeMillis() - XcacheStartup) / 1000));
@@ -893,117 +906,125 @@ public class kelondroRecords {
     }
 
     public synchronized int columns() {
-	return this.COLWIDTHS.length;
+        return this.COLWIDTHS.length;
     }
-    
+
     public synchronized int columnSize(int column) {
-	if ((column < 0) || (column >= this.COLWIDTHS.length)) return -1;
-	return this.COLWIDTHS[column];
+        if ((column < 0) || (column >= this.COLWIDTHS.length)) return -1;
+        return this.COLWIDTHS[column];
     }
-    
+
     private long seekpos(Handle handle) {
-	return POS_NODES + ((long) recordsize * handle.index);
+        assert (handle.index >= 0): "handle index too low: " + handle.index;
+        assert (handle.index < FREEC + USEDC): "handle index too high:" + handle.index;
+        return POS_NODES + ((long) recordsize * handle.index);
     }
-    
+
     // additional properties
     public synchronized int handles() {
-	return this.HANDLES.length;
+        return this.HANDLES.length;
     }
-    
+
     protected void setHandle(int pos, Handle handle) throws IOException {
-	if (pos >= HANDLES.length) throw new IllegalArgumentException("setHandle: handle array exceeded");
-	if (handle == null) handle = new Handle(NUL);
-	HANDLES[pos] = handle;
-	entryFile.seek(POS_HANDLES + 4 * pos);
-	entryFile.writeInt(handle.index);
+        if (pos >= HANDLES.length) throw new IllegalArgumentException("setHandle: handle array exceeded");
+        if (handle == null) handle = new Handle(NUL);
+        synchronized (entryFile) {
+            HANDLES[pos] = handle;
+            entryFile.seek(POS_HANDLES + 4 * pos);
+            entryFile.writeInt(handle.index);
+        }
     }
 
     protected Handle getHandle(int pos) {
-	if (pos >= HANDLES.length) throw new IllegalArgumentException("getHandle: handle array exceeded");
-	return (HANDLES[pos].index == NUL) ? null : HANDLES[pos];
+        if (pos >= HANDLES.length) throw new IllegalArgumentException("getHandle: handle array exceeded");
+        return (HANDLES[pos].index == NUL) ? null : HANDLES[pos];
     }
 
     // custom texts
     public void setText(int pos, byte[] text) throws IOException {
-	if (pos >= TXTPROPS.length) throw new IllegalArgumentException("setText: text array exceeded");
-	if (text.length > TXTPROPW) throw new IllegalArgumentException("setText: text lemgth exceeded");
-	if (text == null) text = new byte[0];
-	TXTPROPS[pos] = text;
-	entryFile.seek(POS_TXTPROPS + TXTPROPW * pos);
-	entryFile.write(text);
+        if (pos >= TXTPROPS.length) throw new IllegalArgumentException("setText: text array exceeded");
+        if (text.length > TXTPROPW) throw new IllegalArgumentException("setText: text lemgth exceeded");
+        if (text == null) text = new byte[0];
+        synchronized (entryFile) {
+            TXTPROPS[pos] = text;
+            entryFile.seek(POS_TXTPROPS + TXTPROPW * pos);
+            entryFile.write(text);
+        }
     }
 
     public byte[] getText(int pos) {
-	if (pos >= TXTPROPS.length) throw new IllegalArgumentException("getText: text array exceeded");
-	return TXTPROPS[pos];
+        if (pos >= TXTPROPS.length) throw new IllegalArgumentException("getText: text array exceeded");
+        return TXTPROPS[pos];
     }
-    
+
     // Returns true if this map contains no key-value mappings.
     public boolean isEmpty() {
-	return (USEDC == 0);
+        return (USEDC == 0);
     }
 
     // Returns the number of key-value mappings in this map.
     public int size() {
-	return this.USEDC;
+        return this.USEDC;
     }
 
     protected int free() {
-	return this.FREEC;
+        return this.FREEC;
     }
 
     private void dispose(Handle h) throws IOException {
-	// delete element with handle h
-	// this element is then connected to the deleted-chain and can be re-used
-	// change counter
-	synchronized (entryFile) {
-	    USEDC--; entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
-	    FREEC++; entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
-	    // change pointer
-	    if (this.FREEH.index == NUL) {
-		// the first entry
-		entryFile.seek(seekpos(h)); entryFile.writeInt(NUL); // write null link at end of free-list
-	    } else {
-		// another entry
-		entryFile.seek(seekpos(h)); entryFile.writeInt(this.FREEH.index); // extend free-list
-	    }
-	    // write new FREEH Handle link
-	    this.FREEH = h;
-	    entryFile.seek(POS_FREEH); entryFile.writeInt(this.FREEH.index);
-	}
+        // delete element with handle h
+        // this element is then connected to the deleted-chain and can be
+        // re-used change counter
+        synchronized (entryFile) {
+            USEDC--;
+            entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
+            FREEC++;
+            entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
+            // change pointer
+            if (this.FREEH.index == NUL) {
+                // the first entry
+                entryFile.seek(seekpos(h)); entryFile.writeInt(NUL); // write null link at end of free-list
+            } else {
+                // another entry
+                entryFile.seek(seekpos(h)); entryFile.writeInt(this.FREEH.index); // extend free-list
+            }
+            // write new FREEH Handle link
+            this.FREEH = h;
+            entryFile.seek(POS_FREEH); entryFile.writeInt(this.FREEH.index);
+        }
     }
 
     public void close() throws IOException {
-	if (this.entryFile != null) this.entryFile.close();
-	this.entryFile = null;
+        if (this.entryFile != null) this.entryFile.close();
+        this.entryFile = null;
     }
 
     public void finalize() {
-	try {
-	    close();
-	} catch (IOException e) {}
+        try {
+            close();
+        } catch (IOException e) { }
     }
 
     protected static String[] line2args(String line) {
-	// parse the command line
-	if ((line == null) || (line.length() == 0)) return null;
-	String args[];
-	StringTokenizer st = new StringTokenizer(line);
-	
-	args = new String[st.countTokens()];
-	for (int i = 0; st.hasMoreTokens(); i++) {
-	    args[i] = st.nextToken();
-	}
-	st = null;
-	return args;
+        // parse the command line
+        if ((line == null) || (line.length() == 0)) return null;
+        String args[];
+        StringTokenizer st = new StringTokenizer(line);
+
+        args = new String[st.countTokens()];
+        for (int i = 0; st.hasMoreTokens(); i++) {
+            args[i] = st.nextToken();
+        }
+        st = null;
+        return args;
     }
 
     protected static boolean equals(byte[] a, byte[] b) {
-	if (a == b) return true;
-	if ((a == null) || (b == null)) return false;
-	if (a.length != b.length) return false;
-	for (int n = 0; n < a.length; n++) if (a[n] != b[n]) return false;
-	return true;
+        if (a == b) return true;
+        if ((a == null) || (b == null)) return false;
+        if (a.length != b.length) return false;
+        for (int n = 0; n < a.length; n++) if (a[n] != b[n]) return false;
+        return true;
     }
     
     public static byte[] long2bytes(long x, int length) {
@@ -1045,101 +1066,148 @@ public class kelondroRecords {
     }
 
     public void print(boolean records) throws IOException {
-	System.out.println("REPORT FOR FILE '" + this.filename + "':");
-	System.out.println("--");
-	System.out.println("CONTROL DATA");
-	System.out.print(  "  HANDLES    : " + HANDLES.length + " int-values");
-	if (HANDLES.length == 0) System.out.println(); else {
-	    System.out.print("  {" + HANDLES[0].toString());
-	    for (int i = 1; i < HANDLES.length; i++) System.out.print(", " + HANDLES[i].toString());
-	    System.out.println("}");
-	}
-	System.out.print(  "  TXTPROPS   : " + TXTPROPS.length + " strings, max length " + TXTPROPW + " bytes");
-	if (TXTPROPS.length == 0) System.out.println(); else {
-	    System.out.print("  {'" + (new String(TXTPROPS[0])).trim()); System.out.print("'");
-	    for (int i = 1; i < TXTPROPS.length; i++) System.out.print(", '" + (new String(TXTPROPS[i])).trim() + "'");
-	    System.out.println("}");
-	}
-	System.out.println("  USEDC      : " + this.USEDC);
-	System.out.println("  FREEC      : " + this.FREEC);
-	System.out.println("  FREEH      : " + FREEH.toString());
-	System.out.println("  Data Offset: 0x" + Long.toHexString(POS_NODES));
-	System.out.println("--");
-	System.out.println("RECORDS");
-	System.out.print(  "  Columns    : " + columns() + " columns  {" + COLWIDTHS[0]);
-	for (int i = 1; i < columns(); i++) System.out.print(", " + COLWIDTHS[i]);
-	System.out.println("}");
-	System.out.println("  Overhead   : " + this.overhead + " bytes  ("+ OHBYTEC + " OH bytes, " + OHHANDLEC + " OH Handles)");
-	System.out.println("  Recordsize : " + this.recordsize + " bytes");
-	System.out.println("--");
+        System.out.println("REPORT FOR FILE '" + this.filename + "':");
+        System.out.println("--");
+        System.out.println("CONTROL DATA");
+        System.out.print("  HANDLES    : " + HANDLES.length + " int-values");
+        if (HANDLES.length == 0)
+            System.out.println();
+        else {
+            System.out.print("  {" + HANDLES[0].toString());
+            for (int i = 1; i < HANDLES.length; i++)
+                System.out.print(", " + HANDLES[i].toString());
+            System.out.println("}");
+        }
+        System.out.print("  TXTPROPS   : " + TXTPROPS.length + " strings, max length " + TXTPROPW + " bytes");
+        if (TXTPROPS.length == 0)
+            System.out.println();
+        else {
+            System.out.print("  {'" + (new String(TXTPROPS[0])).trim());
+            System.out.print("'");
+            for (int i = 1; i < TXTPROPS.length; i++)
+                System.out.print(", '" + (new String(TXTPROPS[i])).trim() + "'");
+            System.out.println("}");
+        }
+        System.out.println("  USEDC      : " + this.USEDC);
+        System.out.println("  FREEC      : " + this.FREEC);
+        System.out.println("  FREEH      : " + FREEH.toString());
+        System.out.println("  Data Offset: 0x" + Long.toHexString(POS_NODES));
+        System.out.println("--");
+        System.out.println("RECORDS");
+        System.out.print("  Columns    : " + columns() + " columns  {" + COLWIDTHS[0]);
+        for (int i = 1; i < columns(); i++) System.out.print(", " + COLWIDTHS[i]);
+        System.out.println("}");
+        System.out.println("  Overhead   : " + this.overhead + " bytes  (" + OHBYTEC + " OH bytes, " + OHHANDLEC + " OH Handles)");
+        System.out.println("  Recordsize : " + this.recordsize + " bytes");
+        System.out.println("--");
         printCache();
         System.out.println("--");
-        
-	if (!(records)) return;
-	// print also all records
-	for (int i = 0; i < USEDC + FREEC; i++) System.out.println("NODE: " + new Node(new Handle(i), null, 0).toString());
+
+        if (!(records)) return;
+        // print also all records
+        for (int i = 0; i < USEDC + FREEC; i++)
+            System.out.println("NODE: " + new Node(new Handle(i), null, 0).toString());
     }
 
     public String toString() {
-	return size() + " RECORDS IN FILE " + filename;
+        return size() + " RECORDS IN FILE " + filename;
     }
     
     protected class Handle implements Comparable {
-	private int index;
-	private Handle() throws IOException {
-	    // reserves a new record and returns index of record
-	    // the return value is not a seek position
-	    // the seek position can be retrieved using the seekpos() function
-	    if (FREEC == 0) {
-		// generate new entry
-		index = USEDC + FREEC;
-		USEDC++; entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
-	    } else {
-		// re-use record from free-list
-		USEDC++; entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
-		FREEC--; entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
-		// take link
-		if (FREEH.index == NUL) {
-		    System.out.println("INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (FREEC + 1) + " records. Affected file: " + filename);
-                    // try to heal..
-                    USEDC = USEDC + FREEC + 1; entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
-                    FREEC = 0; entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
-                    index = USEDC - 1;
-		} else {
-		    index = FREEH.index;
-		    // read link to next element to FREEH chain
-		    entryFile.seek(seekpos(FREEH)); FREEH.index = entryFile.readInt();
-		    // write new FREEH link
-		    entryFile.seek(POS_FREEH); entryFile.writeInt(FREEH.index);
-		}
-	    }
-	}
-	protected Handle(int index) {
-	    this.index = index;
-	}
-	public String toString() {
-	    if (index == NUL) return "NULL";
-	    String s = Integer.toHexString(index);
-	    while (s.length() < 4) s = "0" + s;
-	    return s;
-	}
-	public boolean equals(Handle h) {
-	    return (this.index == h.index);
-	}
+        private int index;
+
+        private Handle() throws IOException {
+            // reserves a new record and returns index of record
+            // the return value is not a seek position
+            // the seek position can be retrieved using the seekpos() function
+            synchronized (this) {
+                if (FREEC == 0) {
+                    // generate new entry
+                    synchronized (entryFile) {
+                        index = USEDC + FREEC;
+                        USEDC++;
+                        entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
+                    }
+                } else {
+                    // re-use record from free-list
+                    synchronized (entryFile) {
+                        USEDC++;
+                        entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
+                        FREEC--;
+                        entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
+                    }
+                    // take link
+                    if (FREEH.index == NUL) {
+                        System.out.println("INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (FREEC + 1) + " records. Affected file: " + filename);
+                        // try to heal..
+                        synchronized (entryFile) {
+                            USEDC = USEDC + FREEC + 1;
+                            entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
+                            FREEC = 0;
+                            entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
+                            index = USEDC - 1;
+                        }
+                    } else {
+                        synchronized (entryFile) {
+                            index = FREEH.index;
+                            // read link to next element to FREEH chain
+                            entryFile.seek(seekpos(FREEH)); FREEH.index = entryFile.readInt();
+                            // write new FREEH link
+                            entryFile.seek(POS_FREEH); entryFile.writeInt(FREEH.index);
+                        }
+                    }
+                }
+            }
+        }
+        
+        protected Handle(int i) {
+            assert (i == NUL) || (i >= 0) : "node handle index too low: " + i;
+            assert (i == NUL) || (i < USEDC + FREEC) : "node handle index too high: " + i + ", USEDC=" + USEDC + ", FREEC=" + FREEC;
+            this.index = i;
+        }
+
+        public boolean isNUL() {
+            return index == NUL;
+        }
+        
+        public String toString() {
+            if (index == NUL) return "NULL";
+            String s = Integer.toHexString(index);
+            while (s.length() < 4) s = "0" + s;
+            return s;
+        }
+
+        public boolean equals(Handle h) {
+            assert (index != NUL);
+            assert (h.index != NUL);
+            return (this.index == h.index);
+        }
+
         public boolean equals(Object h) {
-	    return (this.index == ((Handle) h).index);
-	}
+            assert (index != NUL);
+            assert (((Handle) h).index != NUL);
+            return (this.index == ((Handle) h).index);
+        }
+
         public int compare(Object h0, Object h1) {
+            assert (((Handle) h0).index != NUL);
+            assert (((Handle) h1).index != NUL);
             if (((Handle) h0).index < ((Handle) h1).index) return -1;
             if (((Handle) h0).index > ((Handle) h1).index) return 1;
             return 0;
         }
-        public int compareTo(Object h) { // this is needed for a treeMap compare
+
+        public int compareTo(Object h) {
+            // this is needed for a treeMap
+            assert (index != NUL);
+            assert (((Handle) h).index != NUL);
             if (index < ((Handle) h).index) return -1;
             if (index > ((Handle) h).index) return 1;
             return 0;
         }
+
         public int hashCode() {
+            assert (index != NUL);
             return this.index;
         }
     }

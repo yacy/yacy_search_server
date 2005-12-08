@@ -133,7 +133,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     }
 
     // Returns the value to which this map maps the specified key.
-    public synchronized byte[][] get(byte[] key) throws IOException {
+    public byte[][] get(byte[] key) throws IOException {
         //System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
         Search search = new Search();
         search.process(key);
@@ -145,7 +145,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         }
     }
     
-    public synchronized long[] getLong(byte[] key) throws IOException {
+    public long[] getLong(byte[] key) throws IOException {
         byte[][] row = get(key);
         long[] longs = new long[columns() - 1];
         if (row == null) {
@@ -1311,8 +1311,8 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     // Returns the comparator used to order this map,
     // or null if this  map uses its keys' natural order.
     
-    public synchronized Comparator comparator() {
-	return this;
+    public Comparator comparator() {
+        return this;
     }
 
     public static void main(String[] args) {
