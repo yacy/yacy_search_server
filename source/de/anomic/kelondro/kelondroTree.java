@@ -76,6 +76,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     private static int root       = 0; // pointer for FHandles-array: pointer to root node
 
     private Search writeSearchObj = new Search();
+    private kelondroLock writeLock = new kelondroLock();
     
     public kelondroTree(File file, long buffersize, int key, int value) throws IOException {
         this(file, buffersize, new int[] { key, value }, 1, 8);
@@ -134,15 +135,18 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 
     // Returns the value to which this map maps the specified key.
     public byte[][] get(byte[] key) throws IOException {
-        //System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
+        // System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
+        byte[][] result = null;
+        //writeLock.stay(2000, 1000);
         Search search = new Search();
         search.process(key);
         if (search.found()) {
-            byte[][] result = search.getMatcher().getValues();
-            return result;
+            result = search.getMatcher().getValues();
         } else {
-            return null;
+            result = null;
         }
+        //writeLock.release();
+        return result;
     }
     
     public long[] getLong(byte[] key) throws IOException {
@@ -289,7 +293,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	    else return (child == -1);
 	}
         
-        public boolean isRight() {
+    public boolean isRight() {
 	    if (found) throw new IllegalArgumentException("wrong access of leftchild");
 	    else return (child == 1);
 	}
@@ -324,6 +328,8 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     
     // Associates the specified value with the specified key in this map
     public byte[][] put(byte[][] newrow) throws IOException {
+        byte[][] result = null;
+        //writeLock.stay(2000, 1000);
         if (newrow.length != columns()) throw new IllegalArgumentException("put: wrong row length " + newrow.length + "; must be " + columns());
         // first try to find the key element in the database
         synchronized(writeSearchObj) {
@@ -331,9 +337,8 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
             if (writeSearchObj.found()) {
                 // a node with this key exist. simply overwrite the content and return old content
                 Node e = writeSearchObj.getMatcher();
-                byte[][] result = e.setValues(newrow);
+                result = e.setValues(newrow);
                 commitNode(e);
-                return result;
             } else if (writeSearchObj.isRoot()) {
                 // a node with this key does not exist and there is no node at all
                 // this therefore creates the root node if an only if there was no root Node yet
@@ -351,7 +356,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                 // do updates
                 e.commit(CP_LOW);
                 setHandle(root, e.handle());
-                return null;
+                result = null;
             } else {
                 // a node with this key does not exist
                 // this creates a new node if there is already at least a root node
@@ -459,9 +464,11 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                     }
                 }
                 
-                return null; // that means: no previous stored value present
+                result = null;; // that means: no previous stored value present
             }
         }
+        //writeLock.release();
+        return result;
     }
 
     private void assignChild(Node parentNode, Node childNode, int childType) throws IOException {

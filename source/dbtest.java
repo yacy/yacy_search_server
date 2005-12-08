@@ -216,9 +216,9 @@ public class dbtest {
                 long randomstart = Long.parseLong(args[5]);
                 final Random random = new Random(randomstart);
                 for (int i = 0; i < writeCount; i++) {
-                    serverInstantThread.oneTimeJob(new WriteJob(table, i), random.nextLong() % 1000, 10);
+                    serverInstantThread.oneTimeJob(new WriteJob(table, i), random.nextLong() % 1000, 20);
                     for (int j = 0; j < readCount; j++) {
-                        serverInstantThread.oneTimeJob(new ReadJob(table, random.nextLong() % writeCount), 1000 + random.nextLong() % 1000, 10);
+                        serverInstantThread.oneTimeJob(new ReadJob(table, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
                     }
                 }
                 while (serverInstantThread.instantThreadCounter > 0)
@@ -231,13 +231,14 @@ public class dbtest {
                 // args: <number-of-writes> <number-of-reads> <random-startpoint>
                 long writeCount = Long.parseLong(args[3]);
                 long readCount = Long.parseLong(args[4]);
-                System.out.print("Writing ...");
-                for (int i = 0; i < writeCount; i++) new WriteJob(table, i).run();
-                System.out.println(" done.");
-
-                System.out.print("Reading ...");
-                for (int i = 0; i < readCount; i++) new ReadJob(table, i).run();
-                System.out.println(" done.");
+                long randomstart = Long.parseLong(args[5]);
+                final Random random = new Random(randomstart);
+                for (int i = 0; i < writeCount; i++) {
+                    new WriteJob(table, i).run();
+                    for (int j = 0; j < readCount; j++) {
+                        new ReadJob(table, random.nextLong() % writeCount).run();
+                    }
+                }
             }
             
             
