@@ -696,8 +696,19 @@ public final class plasmaParser {
 
             // printing out all parsed sentences
             if (document != null) {
+                // found text
                 String[] sentences = document.getSentences();
                 if (sentences != null) for (int i = 0; i < sentences.length; i++) System.out.println("line " + i + ":" + sentences[i]);
+                
+                // found links
+                int anchorNr = 0;
+                Map anchors = document.getAnchors();
+                Iterator anchorIter = anchors.keySet().iterator();
+                while (anchorIter.hasNext()) {
+                    String key = (String) anchorIter.next();
+                    System.out.println("URL " + anchorNr + ":\t" + key + " | " + anchors.get(key));
+                    anchorNr++;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
