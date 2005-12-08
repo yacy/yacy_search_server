@@ -76,7 +76,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     private static int root       = 0; // pointer for FHandles-array: pointer to root node
 
     private Search writeSearchObj = new Search();
-    private kelondroLock writeLock = new kelondroLock();
+    //private kelondroLock writeLock = new kelondroLock();
     
     public kelondroTree(File file, long buffersize, int key, int value) throws IOException {
         this(file, buffersize, new int[] { key, value }, 1, 8);

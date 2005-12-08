@@ -76,8 +76,8 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
         this.tailCurrSize = 0;
         this.mapBody = mapBody;
         this.RAFile     = new RandomAccessFile(file, "rw");
-	this.RAChannel  = RAFile.getChannel();
-	this.bufferHead = RAChannel.map(FileChannel.MapMode.READ_WRITE, 0, (int) bodyOffset);
+        this.RAChannel  = RAFile.getChannel();
+        this.bufferHead = RAChannel.map(FileChannel.MapMode.READ_WRITE, 0, (int) bodyOffset);
         if (mapBody)
             this.bufferBody = RAChannel.map(FileChannel.MapMode.READ_WRITE, bodyOffset, (int) (tailOffset - bodyOffset));
         else
