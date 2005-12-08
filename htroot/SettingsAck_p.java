@@ -147,10 +147,11 @@ public class SettingsAck_p {
                     
                     theServerCore.reconnect();                    
                 } catch (SocketException e) {
-                    prop.put("info_restart",0);
+                    prop.put("info",26);
+                    return prop;
                 }
             } else {
-                prop.put("info_restart",26);
+                prop.put("info_restart",0);
             }
             
             // read and process data
@@ -163,7 +164,7 @@ public class SettingsAck_p {
 				use_proxyAccounts = "false";
 			}
             // do checks
-            if ((filter == null) || (use_proxyAccounts == null)) {
+            if ((filter == null) || (use_proxyAccounts == null)) { 
                 prop.put("info", 1);//error with submitted information
                 return prop;
             }
