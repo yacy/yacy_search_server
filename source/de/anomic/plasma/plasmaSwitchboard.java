@@ -1129,7 +1129,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     private void processResourceStack(plasmaSwitchboardQueue.Entry entry) {
-        // work off one stack entry with a fresh resource
+        try {
+            // work off one stack entry with a fresh resource
             long stackStartTime = 0, stackEndTime = 0,
             parsingStartTime = 0, parsingEndTime = 0,
             indexingStartTime = 0, indexingEndTime = 0,
@@ -1158,12 +1159,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             
             log.logFine("processResourceStack processCase=" + processCase +
-            ", depth=" + entry.depth() +
-            ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().generalDepth())) +
-            ", filter=" + ((entry.profile() == null) ? "null" : entry.profile().generalFilter()) +
-            ", initiatorHash=" + initiatorHash +
-            ", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
-            ", url=" + entry.url()); // DEBUG
+                    ", depth=" + entry.depth() +
+                    ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().generalDepth())) +
+                    ", filter=" + ((entry.profile() == null) ? "null" : entry.profile().generalFilter()) +
+                    ", initiatorHash=" + initiatorHash +
+                    ", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
+                    ", url=" + entry.url()); // DEBUG
             
             // parse content
             parsingStartTime = System.currentTimeMillis();
@@ -1201,7 +1202,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // put anchors on crawl stack
             stackStartTime = System.currentTimeMillis();
             if (((processCase == 4) || (processCase == 5)) &&
-            ((entry.profile() == null) || (entry.depth() < entry.profile().generalDepth()))) {
+                    ((entry.profile() == null) || (entry.depth() < entry.profile().generalDepth()))) {
                 Map hl = document.getHyperlinks();
                 Iterator i = hl.entrySet().iterator();
                 String nexturlstring;
@@ -1223,7 +1224,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     //                    }
                 }
                 log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.normalizedURLString() +
-                ", NEW CRAWL STACK SIZE IS " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
+                        ", NEW CRAWL STACK SIZE IS " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
             }
             stackEndTime = System.currentTimeMillis();
             
@@ -1254,17 +1255,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     //             "responseHeader=" + entry.responseHeader().toString());
                     
                     plasmaCrawlLURL.Entry newEntry = urlPool.loadedURL.addEntry(
-                    entry.url(), descr, docDate, new Date(),
-                    initiatorHash,
-                    yacyCore.seedDB.mySeed.hash,
-                    referrerHash,
-                    0, true,
-                    condenser.RESULT_INFORMATION_VALUE,
-                    plasmaWordIndexEntry.language(entry.url()),
-                    plasmaWordIndexEntry.docType(document.getMimeType()),
-                    entry.size(),
-                    condenser.RESULT_NUMB_WORDS,
-                    processCase
+                            entry.url(), descr, docDate, new Date(),
+                            initiatorHash,
+                            yacyCore.seedDB.mySeed.hash,
+                            referrerHash,
+                            0, true,
+                            condenser.RESULT_INFORMATION_VALUE,
+                            plasmaWordIndexEntry.language(entry.url()),
+                            plasmaWordIndexEntry.docType(document.getMimeType()),
+                            entry.size(),
+                            condenser.RESULT_NUMB_WORDS,
+                            processCase
                     );
                     
                     String urlHash = newEntry.hash();
@@ -1281,8 +1282,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         String storagePeerHash;
                         yacySeed seed;
                         if (((storagePeerHash = getConfig("storagePeerHash",null))== null) ||
-                        (storagePeerHash.trim().length() == 0) ||
-                        ((seed = yacyCore.seedDB.getConnected(storagePeerHash))==null)){
+                                (storagePeerHash.trim().length() == 0) ||
+                                ((seed = yacyCore.seedDB.getConnected(storagePeerHash))==null)){
                             words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
                         } else {
                             HashMap urlCache = new HashMap(1);
@@ -1309,7 +1310,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String wordHash = plasmaWordIndexEntry.word2hash(word);
                                 plasmaWordIndexEntity wordIdxEntity = new plasmaWordIndexEntity(wordHash);
                                 plasmaWordIndexEntry wordIdxEntry = new plasmaWordIndexEntry(urlHash, count, p++, 0, 0,
-                                plasmaWordIndex.microDateDays(docDate), quality, language, doctype, true);
+                                        plasmaWordIndex.microDateDays(docDate), quality, language, doctype, true);
                                 wordIdxEntity.addEntry(wordIdxEntry);
                                 tmpEntities.add(wordIdxEntity);
                                 // wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry));
@@ -1334,15 +1335,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         
                         if (log.isLoggable(Level.INFO)) {
                             log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
-                            " [" + entry.urlHash() + "]" +
-                            "\n\tDescription:  " + descr +
-                            "\n\tMimeType: "  + document.getMimeType() + " | " +
-                            "Size: " + document.text.length + " bytes | " +
-                            "Anchors: " + ((document.anchors==null)?0:document.anchors.size()) +
-                            "\n\tStackingTime:  " + (stackEndTime-stackStartTime) + " ms | " +
-                            "ParsingTime:  " + (parsingEndTime-parsingStartTime) + " ms | " +
-                            "IndexingTime: " + (indexingEndTime-indexingStartTime) + " ms | " +
-                            "StorageTime: " + (storageEndTime-storageStartTime) + " ms");
+                                    " [" + entry.urlHash() + "]" +
+                                    "\n\tDescription:  " + descr +
+                                    "\n\tMimeType: "  + document.getMimeType() + " | " +
+                                    "Size: " + document.text.length + " bytes | " +
+                                    "Anchors: " + ((document.anchors==null)?0:document.anchors.size()) +
+                                    "\n\tStackingTime:  " + (stackEndTime-stackStartTime) + " ms | " +
+                                    "ParsingTime:  " + (parsingEndTime-parsingStartTime) + " ms | " +
+                                    "IndexingTime: " + (indexingEndTime-indexingStartTime) + " ms | " +
+                                    "StorageTime: " + (storageEndTime-storageStartTime) + " ms");
                         }
                         
                         // if this was performed for a remote crawl request, notify requester
@@ -1363,15 +1364,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } else {
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
                 urlPool.errorURL.newEntry(entry.url(), referrerHash,
-                ((entry.proxy()) ? plasmaURL.dummyHash : entry.initiator()),
-                yacyCore.seedDB.mySeed.hash,
-                descr, noIndexReason, new bitfield(plasmaURL.urlFlagLength), true);
+                        ((entry.proxy()) ? plasmaURL.dummyHash : entry.initiator()),
+                        yacyCore.seedDB.mySeed.hash,
+                        descr, noIndexReason, new bitfield(plasmaURL.urlFlagLength), true);
                 if ((processCase == 6) && (initiator != null)) {
                     yacyClient.crawlReceipt(initiator, "crawl", "rejected", noIndexReason, null, "");
                 }
             }
-            
             document = null;
+        } finally {
+            // The following code must be into the finally block, otherwise it will not be executed
+            // on errors!
             
             // removing current entry from in process list
             synchronized (this.indexingTasksInProcess) {
@@ -1390,6 +1393,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 cacheManager.deleteFile(entry.url());
             }
             entry = null;
+        }
     }
     
     private void generateCitationReference(String baseurlhash, Date docDate, plasmaParserDocument document, plasmaCondenser condenser) {
