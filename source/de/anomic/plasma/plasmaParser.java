@@ -568,7 +568,7 @@ public final class plasmaParser {
             String parserClassName = null;
             ParserInfo parserInfo = null;
             synchronized (plasmaParser.availableParserList) {
-    	        if (plasmaParser.availableParserList.contains(mimeType)) {
+    	        if (plasmaParser.availableParserList.containsKey(mimeType)) {
                     parserInfo = (ParserInfo)plasmaParser.availableParserList.get(mimeType);
     	            parserClassName = parserInfo.parserClassName;
     	        } else {
@@ -708,6 +708,10 @@ public final class plasmaParser {
         if (!PARSER_MODE.contains(parserMode)) throw new IllegalArgumentException();
         
         plasmaParserConfig config = (plasmaParserConfig) parserConfigList.get(parserMode);
+        if (config == null) {
+            config = new plasmaParserConfig(parserMode);
+            parserConfigList.put(parserMode, config);
+        }
         config.enableAllParsers();        
     }
     

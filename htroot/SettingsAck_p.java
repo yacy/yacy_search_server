@@ -542,9 +542,14 @@ public class SettingsAck_p {
          */
         if (post.containsKey("parserSettings")) {
             post.remove("parserSettings");
-            
-            HashMap newConfigList = new HashMap();       
+                        
             Set parserModes = plasmaParser.getParserConfigList().keySet();
+            HashMap newConfigList = new HashMap();     
+            Iterator parserModeIter = parserModes.iterator();
+            while (parserModeIter.hasNext()) {
+                String currParserMode = (String)parserModeIter.next();
+                newConfigList.put(currParserMode, new HashSet());
+            }
             
             // looping through all received settings
             int pos;
@@ -556,12 +561,8 @@ public class SettingsAck_p {
                     String currMimeType = key.substring(pos+1).replaceAll("\n", "");
                     if (parserModes.contains(currParserMode)) {
                         HashSet currEnabledMimeTypes;
-                        if (newConfigList.containsKey(currParserMode)) {
-                            currEnabledMimeTypes = (HashSet) newConfigList.get(currParserMode);
-                        } else {
-                            currEnabledMimeTypes = new HashSet();
-                            newConfigList.put(currParserMode, currEnabledMimeTypes);
-                        }
+                        assert (newConfigList.containsKey(currParserMode)) : "Unexpected Error";
+                        currEnabledMimeTypes = (HashSet) newConfigList.get(currParserMode);
                         currEnabledMimeTypes.add(currMimeType);
                     }
                 }
@@ -569,7 +570,7 @@ public class SettingsAck_p {
             
             int enabledMimesCount = 0;
             StringBuffer currEnabledMimesTxt = new StringBuffer();
-            Iterator parserModeIter = newConfigList.keySet().iterator();
+            parserModeIter = newConfigList.keySet().iterator();
             while (parserModeIter.hasNext()) {                
                 String currParserMode = (String)parserModeIter.next();
                 String[] enabledMimes = plasmaParser.setEnabledParserList(currParserMode, (Set)newConfigList.get(currParserMode));
