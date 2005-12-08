@@ -51,6 +51,8 @@ package de.anomic.server;
 
 import java.net.InetAddress;
 import java.util.Iterator;
+import java.util.Map;
+
 import de.anomic.server.logging.serverLog;
 
 public interface serverSwitch {
@@ -93,7 +95,8 @@ public interface serverSwitch {
     public String getConfig(String key, String dflt);
     public long getConfigLong(String key, long dflt);
     public Iterator configKeys();
-
+    public Map getRemoved();
+        
     // the switchboard also shall maintain a job list
     // jobs can be queued by submitting a job object
     // to work off a queue job, use deQueue, which is meant to

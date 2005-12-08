@@ -57,6 +57,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     private final File      configFile;
     private Map             configProps;
     private final String    configComment;
+    private Map             configRemoved;
     private final HashMap   authorization;
     private String          rootPath;
     private final TreeMap   workerThreads;
@@ -78,7 +79,8 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         new File(configFile.getParent()).mkdir();
 
         // predefine init's
-        Map initProps, removedProps = new HashMap();
+        Map initProps;
+        configRemoved = new HashMap();
         if (initFile.exists())
             initProps = serverFileUtils.loadHashMap(initFile);
         else
@@ -98,7 +100,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             while (i.hasNext()) {
                 key = (String) i.next();
                 if (!(initProps.containsKey(key))) {
-                    removedProps.put(key, this.configProps.get(key));
+                    configRemoved.put(key, this.configProps.get(key));
                     i.remove();
                 }
             }
@@ -217,7 +219,11 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	}
     }
 
-
+    public Map getRemoved() {
+        // returns configuration that had been removed during initialization
+        return configRemoved;
+    }
+    
     // add/remove action listener
     public void deployAction(String actionName, String actionShortDescription, String actionLongDescription,
 			     serverSwitchAction newAction) {
