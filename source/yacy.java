@@ -67,6 +67,7 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
+import de.anomic.http.httpc.response;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -1195,8 +1196,50 @@ public final class yacy {
                 String urlHash;
                 while (eiter2.hasNext()) {
                     urlHash = (String) eiter2.next();
-                    currentUrlDB.remove(urlHash);
-                    System.out.println("Removed UrlDB-Entry for urlHash: " + urlHash);
+                    
+                    // trying to fix the invalid URL
+                    httpc theHttpc = null;
+                    String oldUrlStr = null;
+                    try {
+                        // getting the url data as byte array
+                        byte[][] entry = currentUrlDB.urlHashCache.get(urlHash.getBytes());
+                        
+                        // getting the wrong url string
+                        oldUrlStr = new String(entry[1]).trim();
+                        
+                        int pos = -1;
+                        if ((pos = oldUrlStr.indexOf("://"))!= -1) {
+                            // trying to correct the url
+                            String newUrlStr = "http://" + oldUrlStr.substring(pos+3);                            
+                            URL newUrl = new URL(newUrlStr);                            
+
+                            // doing a http head request to test if the url is correct
+                            theHttpc = httpc.getInstance(newUrl.getHost(), newUrl.getPort(), 30000, false);
+                            response res = theHttpc.HEAD(newUrl.getPath(), null);
+                            
+                            if (res.statusCode == 200) {                                
+                                entry[1] = newUrl.toString().getBytes();
+                                currentUrlDB.urlHashCache.put(entry);
+                                System.out.println("UrlDB-Entry with urlHash '" + urlHash + 
+                                        "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
+                            } else {
+                                currentUrlDB.remove(urlHash);
+                                System.out.println("UrlDB-Entry with urlHash '" + urlHash +
+                                        "' removed\n\tURL: " + oldUrlStr +
+                                        "\n\tConnection Status: " + res.status);
+                            }
+                        }
+                    } catch (Exception e) {
+                        currentUrlDB.remove(urlHash);
+                        System.out.println("UrlDB-Entry with urlHash '" + urlHash + 
+                                           "' removed\n\tURL: " + oldUrlStr + 
+                                           "\n\tExecption: " + e.getMessage());
+                    } finally {
+                        if (theHttpc != null) try {
+                            theHttpc.close();
+                            httpc.returnInstance(theHttpc);
+                        } catch (Exception e) {}
+                    }
                 }
             }
             plasmaCrawlLURL.damagedURLS.clear();
