@@ -1191,12 +1191,17 @@ public final class httpd implements serverHandler {
     ) throws IOException {
         
         httpHeader headers = new httpHeader();
+        Date now = new Date(System.currentTimeMillis());
         
         headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));              
-        headers.put(httpHeader.LAST_MODIFIED, httpc.dateString(moddate)); 
+        headers.put(httpHeader.DATE, httpc.dateString(now));
+	if (moddate.after(now)) moddate = now;
+        headers.put(httpHeader.LAST_MODIFIED, httpc.dateString(moddate));
         
-        if (nocache)             headers.put(httpHeader.PRAGMA, "no-cache");
+        if (nocache) {
+            if (httpVersion.toUpperCase().equals(headers.HTTP_VERSION_1_1)) headers.put(httpHeader.CACHE_CONTROL, "no-cache");
+            else headers.put(httpHeader.PRAGMA, "no-cache");
+        }
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_TYPE,  (contentType == null)? "text/html" : contentType);  
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_LENGTH, Long.toString(contentLength));
         if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
@@ -1232,65 +1237,68 @@ public final class httpd implements serverHandler {
         if (header == null) header = new httpHeader();
         
         try {                        
-            if ((httpStatusText == null)||(httpStatusText.length()==0)) {
-                if (httpVersion.equals(httpHeader.HTTP_VERSION_1_0) && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
-                    httpStatusText = (String) httpHeader.http1_0.get(Integer.toString(httpStatusCode));
-                else if (httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
-                    httpStatusText = (String) httpHeader.http1_1.get(Integer.toString(httpStatusCode));
-                else httpStatusText = "Unknown";
+            // "HTTP/0.9" does not have a header in the response
+            if (! httpVersion.toUpperCase().equals("HTTP/0.9")) {
+                if ((httpStatusText == null)||(httpStatusText.length()==0)) {
+                    if (httpVersion.equals(httpHeader.HTTP_VERSION_1_0) && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
+                        httpStatusText = (String) httpHeader.http1_0.get(Integer.toString(httpStatusCode));
+                    else if (httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
+                        httpStatusText = (String) httpHeader.http1_1.get(Integer.toString(httpStatusCode));
+                    else httpStatusText = "Unknown";
+                }
+                
+                // prepare header
+                if (!header.containsKey(httpHeader.DATE)) 
+                    header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
+                if (!header.containsKey(httpHeader.CONTENT_TYPE)) 
+                    header.put(httpHeader.CONTENT_TYPE, "text/html"); // fix this
+                if (!header.containsKey(httpHeader.CONNECTION) && conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT))
+                    header.put(httpHeader.CONNECTION, conProp.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT));
+                if (!header.containsKey(httpHeader.PROXY_CONNECTION) && conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT))
+                    header.put(httpHeader.PROXY_CONNECTION, conProp.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT));                        
+                
+                if (conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT) && 
+                    conProp.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") && 
+                    !header.containsKey(httpHeader.TRANSFER_ENCODING) && 
+                    !header.containsKey(httpHeader.CONTENT_LENGTH))
+                    header.put(httpHeader.CONTENT_LENGTH, "0");
+                
+                // adding some yacy specific headers
+                header.put(httpHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT,conProp.getProperty(httpHeader.CONNECTION_PROP_KEEP_ALIVE_COUNT));
+                header.put(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE));
+                header.put(httpHeader.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(httpHeader.CONNECTION_PROP_PREV_REQUESTLINE));
+                
+                
+                StringBuffer headerStringBuffer = new StringBuffer(560);
+                
+                // write status line
+                headerStringBuffer.append(httpVersion).append(" ")
+                .append(Integer.toString(httpStatusCode)).append(" ")
+                .append(httpStatusText).append("\r\n");
+                
+                // write header
+                Iterator i = header.keySet().iterator();
+                String key;
+                char tag;
+                int count;
+                //System.out.println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+                while (i.hasNext()) {
+                    key = (String) i.next();
+                    tag = key.charAt(0);
+                    if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
+                        count = header.keyCount(key);
+                        for (int j = 0; j < count; j++) {
+                            headerStringBuffer.append(key).append(": ").append((String) header.getSingle(key, j)).append("\r\n");  
+                        }
+                        //System.out.println("#" + key + ": " + value);
+                    }            
+                }
+                // end header
+                headerStringBuffer.append("\r\n");
+                
+                // sending headers to the client
+                respond.write(headerStringBuffer.toString().getBytes());
             }
-            
-            // prepare header
-            if (!header.containsKey(httpHeader.DATE)) 
-                header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
-            if (!header.containsKey(httpHeader.CONTENT_TYPE)) 
-                header.put(httpHeader.CONTENT_TYPE, "text/html"); // fix this
-            if (!header.containsKey(httpHeader.CONNECTION) && conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT))
-                header.put(httpHeader.CONNECTION, conProp.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT));
-            if (!header.containsKey(httpHeader.PROXY_CONNECTION) && conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT))
-                header.put(httpHeader.PROXY_CONNECTION, conProp.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT));                        
-            
-            if (conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT) && 
-                conProp.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") && 
-                !header.containsKey(httpHeader.TRANSFER_ENCODING) && 
-                !header.containsKey(httpHeader.CONTENT_LENGTH))
-                header.put(httpHeader.CONTENT_LENGTH, "0");
-            
-            // adding some yacy specific headers
-            header.put(httpHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT,conProp.getProperty(httpHeader.CONNECTION_PROP_KEEP_ALIVE_COUNT));
-            header.put(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE));
-            header.put(httpHeader.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(httpHeader.CONNECTION_PROP_PREV_REQUESTLINE));
-            
-            
-            StringBuffer headerStringBuffer = new StringBuffer(560);
-            
-            // write status line
-            headerStringBuffer.append(httpVersion).append(" ")
-            .append(Integer.toString(httpStatusCode)).append(" ")
-            .append(httpStatusText).append("\r\n");
-            
-            // write header
-            Iterator i = header.keySet().iterator();
-            String key;
-            char tag;
-            int count;
-            //System.out.println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
-            while (i.hasNext()) {
-                key = (String) i.next();
-                tag = key.charAt(0);
-                if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
-                    count = header.keyCount(key);
-                    for (int j = 0; j < count; j++) {
-                        headerStringBuffer.append(key).append(": ").append((String) header.getSingle(key, j)).append("\r\n");  
-                    }
-                    //System.out.println("#" + key + ": " + value);
-                }            
-            }
-            // end header
-            headerStringBuffer.append("\r\n");
-            
-            // sending headers to the client
-            respond.write(headerStringBuffer.toString().getBytes());
             respond.flush();
             
             conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_HEADER,header);

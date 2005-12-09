@@ -488,9 +488,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     baos.close(); baos = null;
                     
                     // write the array to the client
-                    httpd.sendRespondHeader(this.connectionProperties, out, "HTTP/1.1", 200, null, mimeType, result.length, targetDate, null, null, null, null, nocache);
-                    Thread.sleep(200); // see below
-                    serverFileUtils.write(result, out);
+                    httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, null, null, nocache);
+                    if (! method.equals(httpHeader.METHOD_HEAD)) {
+                        Thread.sleep(200); // see below
+                        serverFileUtils.write(result, out);
+                    }
                 }
             } else if ((targetClass != null) && (path.endsWith(".stream"))) {
                 // call rewrite-class
@@ -671,8 +673,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 
                 // write the array to the client
                 httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, (zipContent)?"gzip":null, null, nocache);
-                Thread.sleep(200); // this solved the message problem (!!)
-                serverFileUtils.write(result, out);
+                if (! method.equals(httpHeader.METHOD_HEAD)) {
+                    Thread.sleep(200); // this solved the message problem (!!)
+                    serverFileUtils.write(result, out);
+                }
             } else {
                 httpd.sendRespondError(conProp,out,3,404,"File not Found",null,null);
                 return;
