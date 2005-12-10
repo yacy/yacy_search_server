@@ -216,7 +216,7 @@ public class dbtest {
                 long randomstart = Long.parseLong(args[5]);
                 final Random random = new Random(randomstart);
                 for (int i = 0; i < writeCount; i++) {
-                    serverInstantThread.oneTimeJob(new WriteJob(table, i), random.nextLong() % 1000, 20);
+                    serverInstantThread.oneTimeJob(new WriteJob(table, i), random.nextLong() % 1000, 50);
                     for (int j = 0; j < readCount; j++) {
                         serverInstantThread.oneTimeJob(new ReadJob(table, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
                     }

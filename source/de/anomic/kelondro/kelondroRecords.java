@@ -130,9 +130,12 @@ public class kelondroRecords {
     private long POS_NODES  = 0; // starts after end of POS_TXTPROPS which is POS_TXTPROPS + TXTPROPS.length * TXTPROPW
 
     // dynamic variables that are back-ups of stored values in file; read/defined on instantiation
+    /*
     private   int               USEDC;       // counter of used elements
     private   int               FREEC;       // counter of free elements in list of free Nodes
     private   Handle            FREEH;       // pointer to first element in list of free Nodes, empty = NUL
+    */
+    private   usageControl      USAGE;       // counter for used and re-use records and pointer to free-list
     private   short             OHBYTEC;     // number of extra bytes in each node
     private   short             OHHANDLEC;   // number of handles in each node
     protected int               COLWIDTHS[]; // array with widths of columns
@@ -149,6 +152,42 @@ public class kelondroRecords {
     // optional logger
     protected Logger theLogger = null;
 
+    private class usageControl {
+        private   int               USEDC;       // counter of used elements
+        private   int               FREEC;       // counter of free elements in list of free Nodes
+        private   Handle            FREEH;       // pointer to first element in list of free Nodes, empty = NUL
+
+        public usageControl() throws IOException {
+            read();
+        }
+        
+        public usageControl(int usedc, int freec, Handle freeh) {
+            this.USEDC = usedc;
+            this.FREEC = freec;
+            this.FREEH = freeh; 
+        }
+        
+        public void write() throws IOException {
+            synchronized (entryFile) {
+                entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
+                entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
+                entryFile.seek(POS_FREEH); entryFile.writeInt(FREEH.index);
+            }
+        }
+        
+        public void read() throws IOException {
+            synchronized (entryFile) {
+                entryFile.seek(POS_USEDC); this.USEDC = entryFile.readInt();
+                entryFile.seek(POS_FREEC); this.FREEC = entryFile.readInt();
+                entryFile.seek(POS_FREEH); this.FREEH = new Handle(entryFile.readInt());
+            }
+        }
+        
+        public int allCount() {
+            return this.USEDC + this.FREEC;
+        }
+    }
+    
     public kelondroRecords(File file, long buffersize /* bytes */,
                            short ohbytec, short ohhandlec,
                            int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
@@ -194,9 +233,7 @@ public class kelondroRecords {
         POS_NODES = POS_TXTPROPS + txtProps * txtPropWidth;
 
         // store dynamic back-up variables
-        USEDC     = 0;
-        FREEC     = 0;
-        FREEH     = new Handle(NUL);
+        USAGE     = new usageControl(0, 0, new Handle(NUL));
         OHBYTEC   = ohbytec;
         OHHANDLEC = ohhandlec;
         COLWIDTHS = columns;
@@ -214,9 +251,9 @@ public class kelondroRecords {
         entryFile.seek(POS_COLUMNS);    entryFile.writeShort(this.COLWIDTHS.length);
         entryFile.seek(POS_OHBYTEC);    entryFile.writeShort(OHBYTEC);
         entryFile.seek(POS_OHHANDLEC);  entryFile.writeShort(OHHANDLEC);
-        entryFile.seek(POS_USEDC);      entryFile.writeInt(this.USEDC);
-        entryFile.seek(POS_FREEC);      entryFile.writeInt(this.FREEC);
-        entryFile.seek(POS_FREEH);      entryFile.writeInt(this.FREEH.index);
+        entryFile.seek(POS_USEDC);      entryFile.writeInt(this.USAGE.USEDC);
+        entryFile.seek(POS_FREEC);      entryFile.writeInt(this.USAGE.FREEC);
+        entryFile.seek(POS_FREEH);      entryFile.writeInt(this.USAGE.FREEH.index);
         entryFile.seek(POS_MD5PW);      entryFile.write("PASSWORDPASSWORD".getBytes());
         entryFile.seek(POS_ENCRYPTION); entryFile.write("ENCRYPTION!#$%&?".getBytes());
         entryFile.seek(POS_OFFSET);     entryFile.writeLong(POS_NODES);
@@ -255,15 +292,12 @@ public class kelondroRecords {
     public void clear() throws IOException {
         // Removes all mappings from this map
         // throw new UnsupportedOperationException("clear not supported");
-        USEDC = 0;
-        FREEC = 0;
-        FREEH = new Handle(NUL);
-        entryFile.seek(POS_USEDC);
-        entryFile.writeInt(this.USEDC);
-        entryFile.seek(POS_FREEC);
-        entryFile.writeInt(this.FREEC);
-        entryFile.seek(POS_FREEH);
-        entryFile.writeInt(this.FREEH.index);
+        synchronized (USAGE) {
+            this.USAGE.USEDC = 0;
+            this.USAGE.FREEC = 0;
+            this.USAGE.FREEH = new Handle(NUL);
+        }
+        this.USAGE.write();
     }
 
     public kelondroRecords(File file, long buffersize) throws IOException{
@@ -290,9 +324,7 @@ public class kelondroRecords {
 
         // read dynamic variables that are back-ups of stored values in file;
         // read/defined on instantiation
-        entryFile.seek(POS_USEDC);     this.USEDC = entryFile.readInt();
-        entryFile.seek(POS_FREEC);     this.FREEC = entryFile.readInt();
-        entryFile.seek(POS_FREEH);     this.FREEH = new Handle(entryFile.readInt());
+        this.USAGE = new usageControl();
 
         entryFile.seek(POS_OHBYTEC);   this.OHBYTEC = entryFile.readShort();
         entryFile.seek(POS_OHHANDLEC); this.OHHANDLEC = entryFile.readShort();
@@ -489,11 +521,11 @@ public class kelondroRecords {
             // ready to be read which we do not here
             assert (handle != null): "node handle is null";
             assert (handle.index >= 0): "node handle too low: " + handle.index;
-            assert (handle.index < USEDC + FREEC) : "node handle too high: " + handle.index + ", USEDC=" + USEDC + ", FREEC=" + FREEC;
+            //assert (handle.index < USAGE.allCount()) : "node handle too high: " + handle.index + ", USEDC=" + USAGE.USEDC + ", FREEC=" + USAGE.FREEC;
             
             // the parentNode can be given if an auto-fix in the following case
             // is wanted
-            if (handle.index >= USEDC + FREEC) {
+            if (handle.index >= USAGE.allCount()) {
                 if (parentNode == null) {
                     throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index exceeds size. No auto-fix node was submitted. This is a serious failure.");
                 } else {
@@ -602,7 +634,7 @@ public class kelondroRecords {
             if (otherhandle == null) {
                 NUL2bytes(this.headChunk, OHBYTEC + 4 * i);
             } else {
-                if (otherhandle.index > USEDC + FREEC) throw new kelondroException(filename, "INTERNAL ERROR, setOHHandles: handle " + i + " exceeds file size (" + handle.index + " > " + (USEDC + FREEC) + ")");
+                if (otherhandle.index >= USAGE.allCount()) throw new kelondroException(filename, "INTERNAL ERROR, setOHHandles: handle " + i + " exceeds file size (" + handle.index + " >= " + USAGE.allCount() + ")");
                 int2bytes(otherhandle.index, this.headChunk, OHBYTEC + 4 * i);
             }
             this.headChanged = true;
@@ -916,7 +948,7 @@ public class kelondroRecords {
 
     private long seekpos(Handle handle) {
         assert (handle.index >= 0): "handle index too low: " + handle.index;
-        assert (handle.index < FREEC + USEDC): "handle index too high:" + handle.index;
+        assert (handle.index < USAGE.allCount()): "handle index too high:" + handle.index;
         return POS_NODES + ((long) recordsize * handle.index);
     }
 
@@ -959,38 +991,33 @@ public class kelondroRecords {
 
     // Returns true if this map contains no key-value mappings.
     public boolean isEmpty() {
-        return (USEDC == 0);
+        return (USAGE.USEDC == 0);
     }
 
     // Returns the number of key-value mappings in this map.
     public int size() {
-        return this.USEDC;
+        return USAGE.USEDC;
     }
 
     protected int free() {
-        return this.FREEC;
+        return USAGE.FREEC;
     }
 
     private void dispose(Handle h) throws IOException {
         // delete element with handle h
         // this element is then connected to the deleted-chain and can be
         // re-used change counter
-        synchronized (entryFile) {
-            USEDC--;
-            entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
-            FREEC++;
-            entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
-            // change pointer
-            if (this.FREEH.index == NUL) {
-                // the first entry
-                entryFile.seek(seekpos(h)); entryFile.writeInt(NUL); // write null link at end of free-list
-            } else {
-                // another entry
-                entryFile.seek(seekpos(h)); entryFile.writeInt(this.FREEH.index); // extend free-list
+        synchronized (USAGE) {
+            USAGE.USEDC--;
+            USAGE.FREEC++;
+            synchronized (entryFile) {
+                // change pointer
+                entryFile.seek(seekpos(h));
+                entryFile.writeInt(USAGE.FREEH.index); // extend free-list
+                // write new FREEH Handle link
+                USAGE.FREEH = h;
             }
-            // write new FREEH Handle link
-            this.FREEH = h;
-            entryFile.seek(POS_FREEH); entryFile.writeInt(this.FREEH.index);
+            USAGE.write();
         }
     }
 
@@ -1088,9 +1115,9 @@ public class kelondroRecords {
                 System.out.print(", '" + (new String(TXTPROPS[i])).trim() + "'");
             System.out.println("}");
         }
-        System.out.println("  USEDC      : " + this.USEDC);
-        System.out.println("  FREEC      : " + this.FREEC);
-        System.out.println("  FREEH      : " + FREEH.toString());
+        System.out.println("  USEDC      : " + USAGE.USEDC);
+        System.out.println("  FREEC      : " + USAGE.FREEC);
+        System.out.println("  FREEH      : " + USAGE.FREEH.toString());
         System.out.println("  Data Offset: 0x" + Long.toHexString(POS_NODES));
         System.out.println("--");
         System.out.println("RECORDS");
@@ -1105,7 +1132,7 @@ public class kelondroRecords {
 
         if (!(records)) return;
         // print also all records
-        for (int i = 0; i < USEDC + FREEC; i++)
+        for (int i = 0; i < USAGE.allCount(); i++)
             System.out.println("NODE: " + new Node(new Handle(i), null, 0).toString());
     }
 
@@ -1120,49 +1147,40 @@ public class kelondroRecords {
             // reserves a new record and returns index of record
             // the return value is not a seek position
             // the seek position can be retrieved using the seekpos() function
-            synchronized (this) {
-                if (FREEC == 0) {
+            synchronized (USAGE) {
+                if (USAGE.FREEC == 0) {
                     // generate new entry
+                    index = USAGE.allCount();
+                    USAGE.USEDC++;
                     synchronized (entryFile) {
-                        index = USEDC + FREEC;
-                        USEDC++;
-                        entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
+                        entryFile.seek(POS_USEDC); entryFile.writeInt(USAGE.USEDC);
                     }
                 } else {
                     // re-use record from free-list
-                    synchronized (entryFile) {
-                        USEDC++;
-                        entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
-                        FREEC--;
-                        entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
-                    }
+                    USAGE.USEDC++;
+                    USAGE.FREEC--;
                     // take link
-                    if (FREEH.index == NUL) {
-                        System.out.println("INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (FREEC + 1) + " records. Affected file: " + filename);
+                    if (USAGE.FREEH.index == NUL) {
+                        System.out.println("INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records. Affected file: " + filename);
                         // try to heal..
-                        synchronized (entryFile) {
-                            USEDC = USEDC + FREEC + 1;
-                            entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
-                            FREEC = 0;
-                            entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
-                            index = USEDC - 1;
-                        }
+                        USAGE.USEDC = USAGE.allCount() + 1;
+                        USAGE.FREEC = 0;
+                        index = USAGE.USEDC - 1;
                     } else {
+                        index = USAGE.FREEH.index;
                         synchronized (entryFile) {
-                            index = FREEH.index;
                             // read link to next element to FREEH chain
-                            entryFile.seek(seekpos(FREEH)); FREEH.index = entryFile.readInt();
-                            // write new FREEH link
-                            entryFile.seek(POS_FREEH); entryFile.writeInt(FREEH.index);
+                            entryFile.seek(seekpos(USAGE.FREEH)); USAGE.FREEH.index = entryFile.readInt();
                         }
                     }
+                    USAGE.write();
                 }
             }
         }
         
         protected Handle(int i) {
             assert (i == NUL) || (i >= 0) : "node handle index too low: " + i;
-            assert (i == NUL) || (i < USEDC + FREEC) : "node handle index too high: " + i + ", USEDC=" + USEDC + ", FREEC=" + FREEC;
+            //assert (i == NUL) || (i < USAGE.allCount()) : "node handle index too high: " + i + ", USEDC=" + USAGE.USEDC + ", FREEC=" + USAGE.FREEC;
             this.index = i;
         }
 

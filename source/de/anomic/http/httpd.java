@@ -1199,7 +1199,7 @@ public final class httpd implements serverHandler {
         headers.put(httpHeader.LAST_MODIFIED, httpc.dateString(moddate));
         
         if (nocache) {
-            if (httpVersion.toUpperCase().equals(headers.HTTP_VERSION_1_1)) headers.put(httpHeader.CACHE_CONTROL, "no-cache");
+            if (httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_1_1)) headers.put(httpHeader.CACHE_CONTROL, "no-cache");
             else headers.put(httpHeader.PRAGMA, "no-cache");
         }
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_TYPE,  (contentType == null)? "text/html" : contentType);  
