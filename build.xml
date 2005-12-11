@@ -209,6 +209,7 @@
     <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>    
   </javac> 
 	
+	
   <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
   <javac srcdir="${htroot}/" 
          classpathref="project.class.path"
@@ -537,6 +538,16 @@
       <include name="**/*.java" />
     </fileset>
   </javadoc>
+</target>
+
+
+<!-- creates an image of this build.xml with ant2svg, see http://www.spiritedsw.com/ant2svg/ for details -->
+<target name="ant2svg" description="Creates an image of the build.xml with ant2svg">
+    <taskdef name="ant2svg"
+        classname="org.apache.tools.ant.taskdefs.optional.ant2svg.Ant2SvgTask"/>
+	<ant2svg/>
+	<ant2svg srcfile="build.xml"/>
+	<ant2svg destfile="doc/build_dependencies.svg"/>
 </target>
 
 </project>
