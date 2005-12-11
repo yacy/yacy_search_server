@@ -118,7 +118,7 @@ public class kelondroRecords {
 
     // values that are only present at run-time
     protected String     filename;     // the database's file name
-    protected kelondroRA entryFile;    // the database file
+    protected kelondroIOChunks entryFile;    // the database file
     private   int        overhead;     // OHBYTEC + 4 * OHHANDLEC = size of additional control bytes
     private   int        headchunksize;// overheadsize + key element column size
     private   int        tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
@@ -169,17 +169,17 @@ public class kelondroRecords {
         
         public void write() throws IOException {
             synchronized (entryFile) {
-                entryFile.seek(POS_USEDC); entryFile.writeInt(USEDC);
-                entryFile.seek(POS_FREEC); entryFile.writeInt(FREEC);
-                entryFile.seek(POS_FREEH); entryFile.writeInt(FREEH.index);
+                entryFile.writeInt(POS_USEDC, USEDC);
+                entryFile.writeInt(POS_FREEC, FREEC);
+                entryFile.writeInt(POS_FREEH, FREEH.index);
             }
         }
         
         public void read() throws IOException {
             synchronized (entryFile) {
-                entryFile.seek(POS_USEDC); this.USEDC = entryFile.readInt();
-                entryFile.seek(POS_FREEC); this.FREEC = entryFile.readInt();
-                entryFile.seek(POS_FREEH); this.FREEH = new Handle(entryFile.readInt());
+                this.USEDC = entryFile.readInt(POS_USEDC);
+                this.FREEC = entryFile.readInt(POS_FREEC);
+                this.FREEH = new Handle(entryFile.readInt(POS_FREEH));
             }
         }
         
@@ -218,12 +218,13 @@ public class kelondroRecords {
     private void init(kelondroRA ra, short ohbytec, short ohhandlec,
                       int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
 
+        // create new Chunked IO
+        this.entryFile = new kelondroRAIOChunks(ra, ra.name());
+        
         // store dynamic run-time data
-        this.entryFile = ra;
         this.overhead = ohbytec + 4 * ohhandlec;
         this.recordsize = this.overhead;
-        for (int i = 0; i < columns.length; i++)
-            this.recordsize += columns[i];
+        for (int i = 0; i < columns.length; i++) this.recordsize += columns[i];
         this.headchunksize = overhead + columns[0];
         this.tailchunksize = this.recordsize - this.headchunksize;
 
@@ -244,37 +245,35 @@ public class kelondroRecords {
         TXTPROPW  = txtPropWidth;
 
         // write data to file
-        entryFile.seek(POS_MAGIC);      entryFile.writeByte(4); // magic marker for this file type
-        entryFile.seek(POS_BUSY);       entryFile.writeByte(0); // unlock: default
-        entryFile.seek(POS_PORT);       entryFile.writeShort(4444); // default port (not used yet)
-        entryFile.seek(POS_DESCR);      entryFile.write("--AnomicRecords file structure--".getBytes());
-        entryFile.seek(POS_COLUMNS);    entryFile.writeShort(this.COLWIDTHS.length);
-        entryFile.seek(POS_OHBYTEC);    entryFile.writeShort(OHBYTEC);
-        entryFile.seek(POS_OHHANDLEC);  entryFile.writeShort(OHHANDLEC);
-        entryFile.seek(POS_USEDC);      entryFile.writeInt(this.USAGE.USEDC);
-        entryFile.seek(POS_FREEC);      entryFile.writeInt(this.USAGE.FREEC);
-        entryFile.seek(POS_FREEH);      entryFile.writeInt(this.USAGE.FREEH.index);
-        entryFile.seek(POS_MD5PW);      entryFile.write("PASSWORDPASSWORD".getBytes());
-        entryFile.seek(POS_ENCRYPTION); entryFile.write("ENCRYPTION!#$%&?".getBytes());
-        entryFile.seek(POS_OFFSET);     entryFile.writeLong(POS_NODES);
-        entryFile.seek(POS_INTPROPC);   entryFile.writeInt(FHandles);
-        entryFile.seek(POS_TXTPROPC);   entryFile.writeInt(txtProps);
-        entryFile.seek(POS_TXTPROPW);   entryFile.writeInt(txtPropWidth);
+        entryFile.writeByte(POS_MAGIC, 4); // magic marker for this file type
+        entryFile.writeByte(POS_BUSY, 0); // unlock: default
+        entryFile.writeShort(POS_PORT, 4444); // default port (not used yet)
+        entryFile.write(POS_DESCR, "--AnomicRecords file structure--".getBytes());
+        entryFile.writeShort(POS_COLUMNS, this.COLWIDTHS.length);
+        entryFile.writeShort(POS_OHBYTEC, OHBYTEC);
+        entryFile.writeShort(POS_OHHANDLEC, OHHANDLEC);
+        entryFile.writeInt(POS_USEDC, this.USAGE.USEDC);
+        entryFile.writeInt(POS_FREEC, this.USAGE.FREEC);
+        entryFile.writeInt(POS_FREEH, this.USAGE.FREEH.index);
+        entryFile.write(POS_MD5PW, "PASSWORDPASSWORD".getBytes());
+        entryFile.write(POS_ENCRYPTION, "ENCRYPTION!#$%&?".getBytes());
+        entryFile.writeLong(POS_OFFSET, POS_NODES);
+        entryFile.writeInt(POS_INTPROPC, FHandles);
+        entryFile.writeInt(POS_TXTPROPC, txtProps);
+        entryFile.writeInt(POS_TXTPROPW, txtPropWidth);
 
         // write configuration arrays
         for (int i = 0; i < this.COLWIDTHS.length; i++) {
-            entryFile.seek(POS_COLWIDTHS + 4 * i);
-            entryFile.writeInt(COLWIDTHS[i]);
+            entryFile.writeInt(POS_COLWIDTHS + 4 * i, COLWIDTHS[i]);
         }
         for (int i = 0; i < this.HANDLES.length; i++) {
-            entryFile.seek(POS_HANDLES + 4 * i);
-            entryFile.writeInt(NUL);
+            entryFile.writeInt(POS_HANDLES + 4 * i, NUL);
             HANDLES[i] = new Handle(NUL);
         }
+        byte[] ea = new byte[TXTPROPW];
+        for (int j = 0; j < TXTPROPW; j++) ea[j] = 0;
         for (int i = 0; i < this.TXTPROPS.length; i++) {
-            entryFile.seek(POS_TXTPROPS + TXTPROPW * i);
-            for (int j = 0; j < TXTPROPW; j++)
-                entryFile.writeByte(0);
+            entryFile.write(POS_TXTPROPS + TXTPROPW * i, ea);
         }
     }
 
@@ -319,20 +318,20 @@ public class kelondroRecords {
     }
 
     private void init(kelondroRA ra) throws IOException {
-        // assign values that are only present at run-time
-        this.entryFile = ra;
+        // read from Chunked IO
+        this.entryFile = new kelondroRAIOChunks(ra, ra.name());
 
         // read dynamic variables that are back-ups of stored values in file;
         // read/defined on instantiation
         this.USAGE = new usageControl();
 
-        entryFile.seek(POS_OHBYTEC);   this.OHBYTEC = entryFile.readShort();
-        entryFile.seek(POS_OHHANDLEC); this.OHHANDLEC = entryFile.readShort();
+        this.OHBYTEC = entryFile.readShort(POS_OHBYTEC);
+        this.OHHANDLEC = entryFile.readShort(POS_OHHANDLEC);
 
-        entryFile.seek(POS_COLUMNS);   this.COLWIDTHS = new int[entryFile.readShort()];
-        entryFile.seek(POS_INTPROPC);  this.HANDLES = new Handle[entryFile.readInt()];
-        entryFile.seek(POS_TXTPROPC);  this.TXTPROPS = new byte[entryFile.readInt()][];
-        entryFile.seek(POS_TXTPROPW);  this.TXTPROPW = entryFile.readInt();
+        this.COLWIDTHS = new int[entryFile.readShort(POS_COLUMNS)];
+        this.HANDLES = new Handle[entryFile.readInt(POS_INTPROPC)];
+        this.TXTPROPS = new byte[entryFile.readInt(POS_TXTPROPC)][];
+        this.TXTPROPW = entryFile.readInt(POS_TXTPROPW);
 
         if (COLWIDTHS.length == 0) throw new kelondroException(filename, "init: zero columns; strong failure");
         
@@ -343,17 +342,14 @@ public class kelondroRecords {
 
         // read configuration arrays
         for (int i = 0; i < COLWIDTHS.length; i++) {
-            entryFile.seek(POS_COLWIDTHS + 4 * i);
-            COLWIDTHS[i] = entryFile.readInt();
+            COLWIDTHS[i] = entryFile.readInt(POS_COLWIDTHS + 4 * i);
         }
         for (int i = 0; i < HANDLES.length; i++) {
-            entryFile.seek(POS_HANDLES + 4 * i);
-            HANDLES[i] = new Handle(entryFile.readInt());
+            HANDLES[i] = new Handle(entryFile.readInt(POS_HANDLES + 4 * i));
         }
         for (int i = 0; i < TXTPROPS.length; i++) {
-            entryFile.seek(POS_TXTPROPS + TXTPROPW * i);
             TXTPROPS[i] = new byte[TXTPROPW];
-            entryFile.readFully(TXTPROPS[i], 0, TXTPROPS[i].length);
+            entryFile.readFully(POS_TXTPROPS + TXTPROPW * i, TXTPROPS[i], 0, TXTPROPS[i].length);
         }
 
         // assign remaining values that are only present at run-time
@@ -553,10 +549,7 @@ public class kelondroRecords {
                 // read overhead and key
                 //System.out.println("**NO CACHE for " + this.handle.index + "**");
                 this.headChunk = new byte[headchunksize];
-                synchronized (entryFile) {
-                    entryFile.seek(seekpos(this.handle));
-                    entryFile.readFully(this.headChunk, 0, this.headChunk.length);
-                }
+                entryFile.readFully(seekpos(this.handle), this.headChunk, 0, this.headChunk.length);
                 this.headChanged = false;
             } else synchronized(XcacheHeaders) {
                 byte[] cacheEntry = null;
@@ -575,11 +568,8 @@ public class kelondroRecords {
                     //System.out.println("**CACHE miss for " + this.handle.index + "**");
                     this.headChunk = new byte[headchunksize];
                     //this.tailChunk = new byte[tailchunksize];
-                    synchronized (entryFile) {
-                        entryFile.seek(seekpos(this.handle));
-                        entryFile.readFully(this.headChunk, 0, this.headChunk.length);
-                        //entryFile.readFully(this.tailChunk, 0, this.tailChunk.length);
-                    }
+                    entryFile.readFully(seekpos(this.handle), this.headChunk, 0, this.headChunk.length);
+
                     this.headChanged = true; // provoke a cache store
                     cp = CP_HIGH;
                     if (OHHANDLEC == 3) {
@@ -682,10 +672,7 @@ public class kelondroRecords {
                 // load all values from the database file
                 this.tailChunk = new byte[tailchunksize];
                 // read values
-                synchronized (entryFile) {
-                    entryFile.seek(seekpos(this.handle) + headchunksize);
-                    entryFile.readFully(this.tailChunk, 0, this.tailChunk.length);
-                }
+                entryFile.readFully(seekpos(this.handle) + headchunksize, this.tailChunk, 0, this.tailChunk.length);
             }
 
             // create return value
@@ -717,21 +704,14 @@ public class kelondroRecords {
 
             // save head
             if (this.headChanged) {
-                synchronized (entryFile) {
-                    entryFile.seek(seekpos(this.handle));
-                    // System.out.print("#write "); printChunk(this.handle,
-                    // this.headChunk); System.out.println();
-                    entryFile.write(this.headChunk);
-                }
+                entryFile.write(seekpos(this.handle), this.headChunk);
                 update2Cache(cachePriority);
             }
 
             // save tail
-            if ((this.tailChunk != null) && (this.tailChanged))
-                synchronized (entryFile) {
-                    entryFile.seek(seekpos(this.handle) + headchunksize);
-                    entryFile.write(this.tailChunk);
-                }
+            if ((this.tailChunk != null) && (this.tailChanged)) {
+                entryFile.write(seekpos(this.handle) + headchunksize, this.tailChunk);
+            }
         }
 
         public synchronized void collapse() {
@@ -898,10 +878,10 @@ public class kelondroRecords {
             for (int i = 0; i < size() + 3; i++) {
                 // print from  file to compare
                 System.out.print("#F " + i + ": ");
-                try {synchronized (entryFile) {
-                    entryFile.seek(seekpos(new Handle(i)));
-                    for (int j = 0; j < headchunksize; j++) System.out.print(entryFile.readByte() + ",");
-                }} catch (IOException e) {}
+                try {
+                    for (int j = 0; j < headchunksize; j++) 
+                        System.out.print(entryFile.readByte(j + seekpos(new Handle(i))) + ",");
+                } catch (IOException e) {}
                 
                 System.out.println();
             }
@@ -920,10 +900,10 @@ public class kelondroRecords {
                     
                     // print from  file to compare
                     System.out.print("#F " + cp + " " + ((Handle) entry.getKey()).index + ": ");
-                    try {synchronized (entryFile) {
-                        entryFile.seek(seekpos((Handle) entry.getKey()));
-                        for (int j = 0; j < headchunksize; j++) System.out.print(entryFile.readByte() + ",");
-                    }} catch (IOException e) {}
+                    try {
+                        for (int j = 0; j < headchunksize; j++)
+                            System.out.print(entryFile.readByte(j + seekpos((Handle) entry.getKey())) + ",");
+                    } catch (IOException e) {}
                     
                     System.out.println();
                 }
@@ -960,11 +940,8 @@ public class kelondroRecords {
     protected void setHandle(int pos, Handle handle) throws IOException {
         if (pos >= HANDLES.length) throw new IllegalArgumentException("setHandle: handle array exceeded");
         if (handle == null) handle = new Handle(NUL);
-        synchronized (entryFile) {
-            HANDLES[pos] = handle;
-            entryFile.seek(POS_HANDLES + 4 * pos);
-            entryFile.writeInt(handle.index);
-        }
+        HANDLES[pos] = handle;
+        entryFile.writeInt(POS_HANDLES + 4 * pos, handle.index);
     }
 
     protected Handle getHandle(int pos) {
@@ -977,11 +954,8 @@ public class kelondroRecords {
         if (pos >= TXTPROPS.length) throw new IllegalArgumentException("setText: text array exceeded");
         if (text.length > TXTPROPW) throw new IllegalArgumentException("setText: text lemgth exceeded");
         if (text == null) text = new byte[0];
-        synchronized (entryFile) {
-            TXTPROPS[pos] = text;
-            entryFile.seek(POS_TXTPROPS + TXTPROPW * pos);
-            entryFile.write(text);
-        }
+        TXTPROPS[pos] = text;
+        entryFile.write(POS_TXTPROPS + TXTPROPW * pos, text);
     }
 
     public byte[] getText(int pos) {
@@ -1010,13 +984,10 @@ public class kelondroRecords {
         synchronized (USAGE) {
             USAGE.USEDC--;
             USAGE.FREEC++;
-            synchronized (entryFile) {
-                // change pointer
-                entryFile.seek(seekpos(h));
-                entryFile.writeInt(USAGE.FREEH.index); // extend free-list
-                // write new FREEH Handle link
-                USAGE.FREEH = h;
-            }
+            // change pointer
+            entryFile.writeInt(seekpos(h), USAGE.FREEH.index); // extend free-list
+            // write new FREEH Handle link
+            USAGE.FREEH = h;
             USAGE.write();
         }
     }
@@ -1152,9 +1123,7 @@ public class kelondroRecords {
                     // generate new entry
                     index = USAGE.allCount();
                     USAGE.USEDC++;
-                    synchronized (entryFile) {
-                        entryFile.seek(POS_USEDC); entryFile.writeInt(USAGE.USEDC);
-                    }
+                    entryFile.writeInt(POS_USEDC, USAGE.USEDC);
                 } else {
                     // re-use record from free-list
                     USAGE.USEDC++;
@@ -1168,10 +1137,8 @@ public class kelondroRecords {
                         index = USAGE.USEDC - 1;
                     } else {
                         index = USAGE.FREEH.index;
-                        synchronized (entryFile) {
-                            // read link to next element to FREEH chain
-                            entryFile.seek(seekpos(USAGE.FREEH)); USAGE.FREEH.index = entryFile.readInt();
-                        }
+                        // read link to next element to FREEH chain
+                        USAGE.FREEH.index = entryFile.readInt(seekpos(USAGE.FREEH));
                     }
                     USAGE.write();
                 }

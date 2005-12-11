@@ -45,14 +45,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.FileDescriptor;
 import java.util.Map;
 import java.util.Properties;
 
 public final class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
 
     protected RandomAccessFile RAFile;
-    protected FileDescriptor   RADescriptor;
     
     public kelondroFileRA(String file) throws IOException, FileNotFoundException {
         this(new File(file));
@@ -60,20 +58,8 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
 
     public kelondroFileRA(File file) throws IOException, FileNotFoundException {
         this.name = file.getName();
-	RAFile  = new RandomAccessFile(file, "rw");
-        RADescriptor = RAFile.getFD();
+        RAFile = new RandomAccessFile(file, "rw");
     }
-
-    /*
-    private void sync() throws IOException {
-        try {
-            RADescriptor.sync();
-            //try {Thread.currentThread().sleep(8);} catch (InterruptedException e) {return;}
-        } catch (SyncFailedException e) {
-            throw new IOException(e.getMessage());
-        }
-    }
-    */
     
     // pseudo-native method read
     public int read() throws IOException {
@@ -95,7 +81,7 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
     }
 
     public void seek(long pos) throws IOException {
-	RAFile.seek(pos);
+        RAFile.seek(pos);
     }
 
     public void close() throws IOException {

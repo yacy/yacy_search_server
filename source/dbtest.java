@@ -115,6 +115,8 @@ public class dbtest {
                 getTable().put(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() });
             } catch (IOException e) {
                 System.err.println(e);
+                e.printStackTrace();
+                System.exit(0);
             }
         }
     }
@@ -139,6 +141,8 @@ public class dbtest {
                 }
             } catch (IOException e) {
                 System.err.println(e);
+                e.printStackTrace();
+                System.exit(0);
             }
         }
     }

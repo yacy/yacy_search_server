@@ -90,7 +90,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
         final int ch1 = this.read();
         final int ch2 = this.read();
         if ((ch1 | ch2) < 0) throw new IOException();
-        return (short) ((ch1 << 8) + (ch2 << 0));
+        return (short) ((ch1 << 8) | (ch2 << 0));
     }
 
     public void writeShort(final int v) throws IOException {
@@ -112,7 +112,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
     }
 
     public long readLong() throws IOException {
-        return ((long) (readInt()) << 32) + (readInt() & 0xFFFFFFFFL);
+        return ((long) (readInt()) << 32) | (readInt() & 0xFFFFFFFFL);
     }
 
     public void writeLong(final long v) throws IOException {
