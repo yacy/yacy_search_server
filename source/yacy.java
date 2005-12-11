@@ -1180,70 +1180,67 @@ public final class yacy {
     private static void urldbcleanup(String homePath) {
         File root = new File(homePath);
         File dbroot = new File(root, "DATA/PLASMADB");
+        HashSet damagedURLS = new HashSet();
         try {
             plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304);
             Iterator eiter = currentUrlDB.entries(true, false);
-            int iteratorCount=0;
-            while (eiter.hasNext()) {
+            int iteratorCount = 0;
+            while (eiter.hasNext()) try {
                 eiter.next();
                 iteratorCount++;
+            } catch (RuntimeException e) {
+                String m = e.getMessage();
+                damagedURLS.add(m.substring(m.length() - 12));
             }
-            try { Thread.sleep(1000); } catch (InterruptedException e) {}
-            System.out.println("URLs vorher: " + currentUrlDB.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + plasmaCrawlLURL.damagedURLS.size());
-            synchronized(plasmaCrawlLURL.damagedURLS)
-            {
-                Iterator eiter2 = plasmaCrawlLURL.damagedURLS.iterator();
-                String urlHash;
-                while (eiter2.hasNext()) {
-                    urlHash = (String) eiter2.next();
-                    
-                    // trying to fix the invalid URL
-                    httpc theHttpc = null;
-                    String oldUrlStr = null;
-                    try {
-                        // getting the url data as byte array
-                        byte[][] entry = currentUrlDB.urlHashCache.get(urlHash.getBytes());
-                        
-                        // getting the wrong url string
-                        oldUrlStr = new String(entry[1]).trim();
-                        
-                        int pos = -1;
-                        if ((pos = oldUrlStr.indexOf("://"))!= -1) {
-                            // trying to correct the url
-                            String newUrlStr = "http://" + oldUrlStr.substring(pos+3);                            
-                            URL newUrl = new URL(newUrlStr);                            
+            try { Thread.sleep(1000); } catch (InterruptedException e) { }
+            System.out.println("URLs vorher: " + currentUrlDB.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
 
-                            // doing a http head request to test if the url is correct
-                            theHttpc = httpc.getInstance(newUrl.getHost(), newUrl.getPort(), 30000, false);
-                            response res = theHttpc.HEAD(newUrl.getPath(), null);
-                            
-                            if (res.statusCode == 200) {                                
-                                entry[1] = newUrl.toString().getBytes();
-                                currentUrlDB.urlHashCache.put(entry);
-                                System.out.println("UrlDB-Entry with urlHash '" + urlHash + 
-                                        "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
-                            } else {
-                                currentUrlDB.remove(urlHash);
-                                System.out.println("UrlDB-Entry with urlHash '" + urlHash +
-                                        "' removed\n\tURL: " + oldUrlStr +
-                                        "\n\tConnection Status: " + res.status);
-                            }
+            Iterator eiter2 = damagedURLS.iterator();
+            String urlHash;
+            while (eiter2.hasNext()) {
+                urlHash = (String) eiter2.next();
+
+                // trying to fix the invalid URL
+                httpc theHttpc = null;
+                String oldUrlStr = null;
+                try {
+                    // getting the url data as byte array
+                    byte[][] entry = currentUrlDB.urlHashCache.get(urlHash.getBytes());
+
+                    // getting the wrong url string
+                    oldUrlStr = new String(entry[1]).trim();
+
+                    int pos = -1;
+                    if ((pos = oldUrlStr.indexOf("://")) != -1) {
+                        // trying to correct the url
+                        String newUrlStr = "http://" + oldUrlStr.substring(pos + 3);
+                        URL newUrl = new URL(newUrlStr);
+
+                        // doing a http head request to test if the url is correct
+                        theHttpc = httpc.getInstance(newUrl.getHost(), newUrl.getPort(), 30000, false);
+                        response res = theHttpc.HEAD(newUrl.getPath(), null);
+
+                        if (res.statusCode == 200) {
+                            entry[1] = newUrl.toString().getBytes();
+                            currentUrlDB.urlHashCache.put(entry);
+                            System.out.println("UrlDB-Entry with urlHash '" + urlHash + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
+                        } else {
+                            currentUrlDB.remove(urlHash);
+                            System.out.println("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + res.status);
                         }
-                    } catch (Exception e) {
-                        currentUrlDB.remove(urlHash);
-                        System.out.println("UrlDB-Entry with urlHash '" + urlHash + 
-                                           "' removed\n\tURL: " + oldUrlStr + 
-                                           "\n\tExecption: " + e.getMessage());
-                    } finally {
-                        if (theHttpc != null) try {
-                            theHttpc.close();
-                            httpc.returnInstance(theHttpc);
-                        } catch (Exception e) {}
                     }
+                } catch (Exception e) {
+                    currentUrlDB.remove(urlHash);
+                    System.out.println("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tExecption: " + e.getMessage());
+                } finally {
+                    if (theHttpc != null) try {
+                        theHttpc.close();
+                        httpc.returnInstance(theHttpc);
+                    } catch (Exception e) { }
                 }
             }
-            plasmaCrawlLURL.damagedURLS.clear();
-            System.out.println("URLs nachher: " + currentUrlDB.size() + " kaputte URLs: " + plasmaCrawlLURL.damagedURLS.size());
+
+            System.out.println("URLs nachher: " + currentUrlDB.size() + " kaputte URLs: " + damagedURLS.size());
             currentUrlDB.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -1251,16 +1248,23 @@ public final class yacy {
     }
     
     /**
-    * Main-method which is started by java. Checks for special arguments or
-    * starts up the application.
-    *
-    * @param args Given arguments from the command line.
-    */
+     * Main-method which is started by java. Checks for special arguments or
+     * starts up the application.
+     * 
+     * @param args
+     *            Given arguments from the command line.
+     */
     public static void main(String args[]) {
 
         // check memory amount
         System.gc();
-        long startupMemFree  = Runtime.getRuntime().freeMemory(); // the amount of free memory in the Java Virtual Machine
+        long startupMemFree  = Runtime.getRuntime().freeMemory(); // the
+                                                                    // amount of
+                                                                    // free
+                                                                    // memory in
+                                                                    // the Java
+                                                                    // Virtual
+                                                                    // Machine
         long startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
 
         // go into headless awt mode

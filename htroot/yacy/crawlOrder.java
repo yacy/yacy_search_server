@@ -45,6 +45,7 @@
 // You must compile this file with
 // javac -classpath .:../classes crawlOrder.java
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -243,12 +244,12 @@ public final class crawlOrder {
             // case where we have already the url loaded;
             reason = reasonString;
             // send lurl-Entry as response
-            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(plasmaURL.urlHash(url));
-            if (entry != null) {
+            try {
+                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(plasmaURL.urlHash(url));
                 response = "double";
                 switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
                 lurl = crypt.simpleEncode(entry.toString());
-            } else {
+            } catch (IOException e) {
                 response = "rejected";
                 lurl = "";
             }

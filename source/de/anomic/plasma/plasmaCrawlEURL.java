@@ -109,7 +109,7 @@ public class plasmaCrawlEURL extends plasmaURL {
         return e;
     }
 
-    public synchronized Entry getEntry(String hash) {
+    public synchronized Entry getEntry(String hash) throws IOException {
 	return new Entry(hash);
     }
 
@@ -157,32 +157,30 @@ public class plasmaCrawlEURL extends plasmaURL {
 	    
 	}
 
-	public Entry(String hash) {
-	    // generates an plasmaEURLEntry using the url hash
-	    // to speed up the access, the url-hashes are buffered
-	    // in the hash cache.
-	    // we have two options to find the url:
-	    // - look into the hash cache
-	    // - look into the filed properties
-	    // if the url cannot be found, this returns null
-	    this.hash = hash;
-	    try {
-		byte[][] entry = urlHashCache.get(hash.getBytes());
-		if (entry != null) {
-		    this.referrer   = new String(entry[1]);
-                    this.initiator  = new String(entry[2]);
-                    this.executor   = new String(entry[3]);
-                    this.url        = new URL(new String(entry[4]).trim());
-                    this.name       = new String(entry[5]).trim();
-                    this.initdate  = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6])));
-                    this.trydate   = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[7])));
-                    this.trycount   = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
-                    this.failreason = new String(entry[9]);
-                    this.flags      = new bitfield(entry[10]);
-		    return;
-		}
-	    } catch (Exception e) {}
-	}
+	    public Entry(String hash) throws IOException {
+            // generates an plasmaEURLEntry using the url hash
+            // to speed up the access, the url-hashes are buffered
+            // in the hash cache.
+            // we have two options to find the url:
+            // - look into the hash cache
+            // - look into the filed properties
+            // if the url cannot be found, this returns null
+            this.hash = hash;
+            byte[][] entry = urlHashCache.get(hash.getBytes());
+            if (entry != null) {
+                this.referrer = new String(entry[1]);
+                this.initiator = new String(entry[2]);
+                this.executor = new String(entry[3]);
+                this.url = new URL(new String(entry[4]).trim());
+                this.name = new String(entry[5]).trim();
+                this.initdate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6])));
+                this.trydate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[7])));
+                this.trycount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
+                this.failreason = new String(entry[9]);
+                this.flags = new bitfield(entry[10]);
+                return;
+            }
+        }
         
 	private void store() {
 	    // stores the values from the object variables into the database
@@ -257,16 +255,20 @@ public class plasmaCrawlEURL extends plasmaURL {
     }
 
     public class kenum implements Enumeration {
-	// enumerates entry elements
-	Iterator i;
-	public kenum(boolean up, boolean rotating) throws IOException {
+        // enumerates entry elements
+        Iterator i;
+        public kenum(boolean up, boolean rotating) throws IOException {
             i = urlHashCache.rows(up, rotating);
         }
-	public boolean hasMoreElements() {
+        public boolean hasMoreElements() {
             return i.hasNext();
         }
-	public Object nextElement() {
-            return new Entry(new String(((byte[][]) i.next())[0]));
+	    public Object nextElement() {
+            try {
+                return new Entry(new String(((byte[][]) i.next())[0]));
+            } catch (IOException e) {
+                return null;
+            }
         }
     }
     

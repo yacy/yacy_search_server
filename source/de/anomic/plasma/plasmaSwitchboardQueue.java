@@ -273,7 +273,7 @@ public class plasmaSwitchboardQueue {
             return responseHeader;
         }
 
-        public URL referrerURL() {
+        public URL referrerURL() throws IOException {
             if (referrerURL == null) {
                 if ((referrerHash == null) || (referrerHash.equals(plasmaURL.dummyHash))) return null;
                 referrerURL = lurls.getEntry(referrerHash).url();

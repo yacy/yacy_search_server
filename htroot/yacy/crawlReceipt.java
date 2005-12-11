@@ -43,6 +43,8 @@
 // javac -classpath .:../classes crawlOrder.java
 
 
+import java.io.IOException;
+
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -135,10 +137,12 @@ public final class crawlReceipt {
             // ready for more
             prop.put("delay", "10");
         } else {
-            plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(receivedUrlhash);
-            if (en != null) {
+            try {
+                plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(receivedUrlhash);
                 switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(plasmaURL.urlFlagLength), false);
                 switchboard.urlPool.noticeURL.remove(receivedUrlhash);
+            } catch (IOException e) {
+
             }
             prop.put("delay", "100"); // what shall we do with that???
         }

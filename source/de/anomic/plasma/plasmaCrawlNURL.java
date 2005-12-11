@@ -363,7 +363,7 @@ public class plasmaCrawlNURL extends plasmaURL {
         }
     }
 
-    public synchronized Entry getEntry(String hash) {
+    public synchronized Entry getEntry(String hash) throws IOException {
         return new Entry(hash);
     }
 
@@ -431,7 +431,7 @@ public class plasmaCrawlNURL extends plasmaURL {
                return str.toString();
         }
 
-        public Entry(String hash) {
+        public Entry(String hash) throws IOException {
             // generates an plasmaNURLEntry using the url hash
             // to speed up the access, the url-hashes are buffered
             // in the hash cache.
@@ -440,26 +440,28 @@ public class plasmaCrawlNURL extends plasmaURL {
             // - look into the filed properties
             // if the url cannot be found, this returns null
             this.hash = hash;
-            try {
-                byte[][] entry = urlHashCache.get(hash.getBytes());
-                if (entry != null) {
-                    this.initiator     = new String(entry[1]);
-                    this.url           = new URL(new String(entry[2]).trim());
-                    this.referrer      = (entry[3]==null) ? dummyHash : new String(entry[3]);
-                    this.name          = (entry[4] == null) ? "" : new String(entry[4]).trim();
-                    this.loaddate      = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[5])));
+            byte[][] entry = urlHashCache.get(hash.getBytes());
+            if (entry != null) {
+                //try {
+                    this.initiator = new String(entry[1]);
+                    this.url = new URL(new String(entry[2]).trim());
+                    this.referrer = (entry[3] == null) ? dummyHash : new String(entry[3]);
+                    this.name = (entry[4] == null) ? "" : new String(entry[4]).trim();
+                    this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[5])));
                     this.profileHandle = (entry[6] == null) ? null : new String(entry[6]).trim();
-                    this.depth         = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[7]));
-                    this.anchors       = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
-                    this.forkfactor    = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[9]));
-                    this.flags         = new bitfield(entry[10]);
-                    this.handle        = Integer.parseInt(new String(entry[11]));
+                    this.depth = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[7]));
+                    this.anchors = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
+                    this.forkfactor = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[9]));
+                    this.flags = new bitfield(entry[10]);
+                    this.handle = Integer.parseInt(new String(entry[11]));
                     return;
-                } else {
-                    // show that we found nothing
-                    this.url = null;
-                }
-            } catch (Exception e) {
+                //} catch (MalformedURLException e) {
+                //    throw new IOException("plasmaCrawlNURL/Entry: " + e);
+                //}
+            } else {
+                // show that we found nothing
+                throw new IOException("hash not found");
+                //this.url = null;
             }
         }
 

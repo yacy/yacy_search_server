@@ -57,17 +57,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.Set;
 
 import de.anomic.http.httpc;
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
@@ -89,7 +85,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
     private final LinkedList lcrawlResultStack; // 5 - local index: result of local crawling
     private final LinkedList gcrawlResultStack; // 6 - local index: triggered external
 
-    public static Set damagedURLS = Collections.synchronizedSet(new HashSet());
+    //public static Set damagedURLS = Collections.synchronizedSet(new HashSet());
     
     public plasmaCrawlLURL(File cachePath, int bufferkb) throws IOException {
         super();
@@ -173,7 +169,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
 
-    public synchronized Entry getEntry(String hash) {
+    public synchronized Entry getEntry(String hash) throws IOException {
         return new Entry(hash);
     }
 
@@ -347,9 +343,9 @@ public final class plasmaCrawlLURL extends plasmaURL {
 //          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps initiatorHash=" + initiatorHash + " executorHash=" + executorHash);
             urlHash = getUrlHash(tabletype, i);
 //          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
-            urle = getEntry(urlHash);
-//          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
-            if (urle != null) try {
+            try {
+                urle = getEntry(urlHash);
+//              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
                 initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                 executorSeed = yacyCore.seedDB.getConnected(executorHash);
 
@@ -457,41 +453,38 @@ public final class plasmaCrawlLURL extends plasmaURL {
         store();        
     }
 
-    public Entry(String urlHash) {
-        // generates an plasmaLURLEntry using the url hash
-        // to speed up the access, the url-hashes are buffered
-        // in the hash cache.
-        // we have two options to find the url:
-        // - look into the hash cache
-        // - look into the filed properties
-        // if the url cannot be found, this returns null
-        this.urlHash = urlHash;
-        try {
+        public Entry(String urlHash) throws IOException {
+            // generates an plasmaLURLEntry using the url hash
+            // to speed up the access, the url-hashes are buffered
+            // in the hash cache.
+            // we have two options to find the url:
+            // - look into the hash cache
+            // - look into the filed properties
+            // if the url cannot be found, this returns null
+            this.urlHash = urlHash;
             byte[][] entry = plasmaCrawlLURL.this.urlHashCache.get(urlHash.getBytes());
-            if (entry != null) {
-                this.url = new URL(new String(entry[1]).trim());
-                this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2]).trim();
-                this.moddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[3])));
-                this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[4])));
-                this.referrerHash = (entry[5]==null)?dummyHash:new String(entry[5]);
-                this.copyCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6]));
-                this.flags = new String(entry[7]);
-                this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
-                this.language = new String(entry[9]);
-                this.doctype = (char) entry[10][0];
-                this.size = serverCodings.enhancedCoder.decodeBase64Long(new String(entry[11]));
-                this.wordCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[12]));
-                this.snippet = null;
-                return;
+            try {
+                if (entry != null) {
+                    this.url = new URL(new String(entry[1]).trim());
+                    this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2]).trim();
+                    this.moddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[3])));
+                    this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[4])));
+                    this.referrerHash = (entry[5] == null) ? dummyHash : new String(entry[5]);
+                    this.copyCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6]));
+                    this.flags = new String(entry[7]);
+                    this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
+                    this.language = new String(entry[9]);
+                    this.doctype = (char) entry[10][0];
+                    this.size = serverCodings.enhancedCoder.decodeBase64Long(new String(entry[11]));
+                    this.wordCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[12]));
+                    this.snippet = null;
+                    return;
+                }
+            } catch (Exception e) {
+                serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString(), e);
+                throw new IOException("plasmaLURL.entry/1: " + e.toString());
             }
-        } catch (MalformedURLException e) {
-            plasmaCrawlLURL.damagedURLS.add(this.urlHash);
-            System.out.println("DEBUG: Marked damaged Entry for removal (malformedURL). UrlHash: " + this.urlHash);
-            //serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString(), e);
-        } catch (Exception e) {
-            serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString(), e);
         }
-    }
 
     public Entry(Properties prop, boolean setGlobal) {
         // generates an plasmaLURLEntry using the properties from the argument
@@ -742,14 +735,15 @@ public final class plasmaCrawlLURL extends plasmaURL {
             return i.hasNext();
         }
 
-        public Object next() {
+        public Object next() throws RuntimeException {
+            byte[] e = ((byte[][]) i.next())[0];
+            if (e == null) return null;
+            String hash = null;
             try {
-                byte[] e = ((byte[][])i.next())[0];
-                if (e == null) return null; else return new Entry(new String(e));
-            } catch (kelondroException e) {
-                e.printStackTrace();
-                error = true;
-                return null;
+                hash = new String(e);
+                return new Entry(hash);
+            } catch (IOException ex) {
+                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + hash);
             }
         }
         

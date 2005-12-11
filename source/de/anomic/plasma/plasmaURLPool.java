@@ -71,7 +71,7 @@ public class plasmaURLPool {
         return null;
     }
     
-    public URL getURL(String urlhash) {
+    public URL getURL(String urlhash) throws IOException {
         if (urlhash.equals(plasmaURL.dummyHash)) return null;
         plasmaCrawlNURL.Entry ne = noticeURL.getEntry(urlhash);
         if (ne != null) return ne.url();

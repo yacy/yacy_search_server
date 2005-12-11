@@ -43,6 +43,7 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -96,9 +97,12 @@ public class IndexCreateWWWLocalQueue_p {
                         while (iter.hasNext()) {
                             String value = null;
                             String nextHash = new String((byte[]) iter.next());
-                            Entry entry = switchboard.urlPool.noticeURL.getEntry(nextHash);
-                            if (entry == null) continue;
-                            
+                            Entry entry = null;
+                            try {
+                                entry = switchboard.urlPool.noticeURL.getEntry(nextHash);
+                            } catch (IOException e) {
+                                continue;
+                            }
                             if ((option.equals("URL")&&(entry.url() != null))) {
                                 value = entry.url().toString();
                             } else if ((option.equals("AnchorName"))) {

@@ -47,7 +47,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -167,9 +166,9 @@ public class IndexControl_p {
                 }
             }
             if (delurlref) {
-                for (int i = 0; i < urlx.length; i++) {
+                for (int i = 0; i < urlx.length; i++) try {
                     switchboard.removeAllUrlReferences(urlx[i], true);
-                }
+                } catch (IOException e) {}
             }
             if (delurl || delurlref) {
                 for (int i = 0; i < urlx.length; i++) {
@@ -189,9 +188,9 @@ public class IndexControl_p {
         // delete selected URLs
         if (post.containsKey("keyhashdelete")) {
             if (delurlref) {
-                for (int i = 0; i < urlx.length; i++) {
+                for (int i = 0; i < urlx.length; i++) try {
                     switchboard.removeAllUrlReferences(urlx[i], true);
-                }
+                } catch (IOException e) {}
             }
             if (delurl || delurlref) {
                 for (int i = 0; i < urlx.length; i++) {
@@ -212,20 +211,24 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("urlhashdeleteall")) {
-            int i = switchboard.removeAllUrlReferences(urlhash, true);
-            prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
+            try {
+                int i = switchboard.removeAllUrlReferences(urlhash, true);
+                prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
+            } catch (IOException e) {
+                prop.put("result", "Deleted nothing because the url-hash could not be resolved");
+            }
         }
 
         if (post.containsKey("urlhashdelete")) {
-            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
-            URL url = entry.url();
-            if (url == null) {
-                prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
-            } else {
+            try {
+                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
+                URL url = entry.url();
                 urlstring = htmlFilterContentScraper.urlNormalform(url);
                 prop.put("urlstring", "");
                 switchboard.urlPool.loadedURL.remove(urlhash);
                 prop.put("result", "Removed URL " + urlstring);
+            } catch (IOException e) {
+                prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             }
         }
 
@@ -267,16 +270,16 @@ public class IndexControl_p {
             plasmaCrawlLURL.Entry lurl;
             while (urlIter.hasNext()) {
                 indexEntry = (plasmaWordIndexEntry) urlIter.next();
-                lurl = switchboard.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
-                if (lurl == null) {
-                    unknownURLEntries.add(indexEntry.getUrlHash());
-                } else {
+                try {
+                    lurl = switchboard.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
                     if (lurl.toString() == null) {
                         switchboard.urlPool.loadedURL.remove(indexEntry.getUrlHash());
                         unknownURLEntries.add(indexEntry.getUrlHash());
                     } else {
                         knownURLs.put(indexEntry.getUrlHash(), lurl);
                     }
+                } catch (IOException e) {
+                    unknownURLEntries.add(indexEntry.getUrlHash());
                 }
             }
             // now delete all entries that have no url entry
@@ -327,21 +330,21 @@ public class IndexControl_p {
                 prop.put("urlhash", urlhash);
                 plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
                 prop.put("result", genUrlProfile(switchboard, entry, urlhash));
-            } catch (MalformedURLException e) {
+            } catch (Exception e) {
                 prop.put("urlstring", "wrong url: " + urlstring);
                 prop.put("urlhash", "");
             }
         }
 
         if (post.containsKey("urlhashsearch")) {
-            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
-            URL url = entry.url();
-            if (url == null) {
-                prop.put("result", "No Entry for URL hash " + urlhash);
-            } else {
+            try {
+                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
+                URL url = entry.url();
                 urlstring = url.toString();
                 prop.put("urlstring", urlstring);
                 prop.put("result", genUrlProfile(switchboard, entry, urlhash));
+            } catch (IOException e) {
+                prop.put("result", "No Entry for URL hash " + urlhash);
             }
         }
 
@@ -391,6 +394,12 @@ public class IndexControl_p {
     public static String genUrlProfile(plasmaSwitchboard switchboard, plasmaCrawlLURL.Entry entry, String urlhash) {
         if (entry == null) { return "No entry found for URL-hash " + urlhash; }
         URL url = entry.url();
+        String referrer = null;
+        try {
+            referrer = switchboard.urlPool.loadedURL.getEntry(entry.referrerHash()).url().toString();
+        } catch (IOException e) {
+            referrer = "<unknown>";
+        }
         if (url == null) { return "No entry found for URL-hash " + urlhash; }
         String result = "<table>" +
         "<tr><td class=\"small\">URL String</td><td class=\"tt\">" + htmlFilterContentScraper.urlNormalform(url) + "</td></tr>" +
@@ -398,7 +407,7 @@ public class IndexControl_p {
         "<tr><td class=\"small\">Description</td><td class=\"tt\">" + entry.descr() + "</td></tr>" +
         "<tr><td class=\"small\">Modified-Date</td><td class=\"tt\">" + entry.moddate() + "</td></tr>" +
         "<tr><td class=\"small\">Loaded-Date</td><td class=\"tt\">" + entry.loaddate() + "</td></tr>" +
-        "<tr><td class=\"small\">Referrer</td><td class=\"tt\">" + switchboard.urlPool.loadedURL.getEntry(entry.referrerHash()).url() + "</td></tr>" +
+        "<tr><td class=\"small\">Referrer</td><td class=\"tt\">" + referrer + "</td></tr>" +
         "<tr><td class=\"small\">Doctype</td><td class=\"tt\">" + entry.doctype() + "</td></tr>" +
         "<tr><td class=\"small\">Copy-Count</td><td class=\"tt\">" + entry.copyCount() + "</td></tr>" +
         "<tr><td class=\"small\">Local-Flag</td><td class=\"tt\">" + entry.local() + "</td></tr>" +

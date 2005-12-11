@@ -1230,8 +1230,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // create index
             String descr = document.getMainLongTitle();
-            URL referrerURL = entry.referrerURL();
-            String referrerHash = (referrerURL == null) ? plasmaURL.dummyHash : plasmaURL.urlHash(referrerURL);
+            String referrerHash;
+            try {
+                URL referrerURL = entry.referrerURL();
+                referrerHash = plasmaURL.urlHash(referrerURL);
+            } catch (IOException e) {
+                referrerHash = plasmaURL.dummyHash;
+            }
             String noIndexReason = "unspecified";
             if (processCase == 4) {
                 // proxy-load
@@ -1480,8 +1485,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         URL refererURL = null;
         String refererHash = urlEntry.referrerHash();
-        if ((refererHash != null) && (!refererHash.equals(plasmaURL.dummyHash))) {
+        if ((refererHash != null) && (!refererHash.equals(plasmaURL.dummyHash))) try {
             refererURL = this.urlPool.getURL(refererHash);
+        } catch (IOException e) {
+            refererURL = null;
         }
         cacheLoader.loadParallel(urlEntry.url(), urlEntry.name(), (refererURL!=null)?refererURL.toString():null, urlEntry.initiator(), urlEntry.depth(), profile);
         log.logInfo(stats + ": enqueued for load " + urlEntry.url() + " [" + urlEntry.hash() + "]");
@@ -1519,60 +1526,63 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // do the request
-        HashMap page = yacyClient.crawlOrder(remoteSeed, urlEntry.url(), urlPool.getURL(urlEntry.referrerHash()));
+        try {
+            HashMap page = yacyClient.crawlOrder(remoteSeed, urlEntry.url(), urlPool.getURL(urlEntry.referrerHash()));
         
-        
-        // check success
-        /*
-         the result of the 'response' value can have one of the following values:
-         negative cases, no retry
-           denied      - the peer does not want to crawl that
-           exception   - an exception occurred
-         
-         negative case, retry possible
-           rejected    - the peer has rejected to process, but a re-try should be possible
-         
-         positive case with crawling
-           stacked     - the resource is processed asap
-         
-         positive case without crawling
-           double      - the resource is already in database, believed to be fresh and not reloaded
-                         the resource is also returned in lurl
-         */
-        if ((page == null) || (page.get("delay") == null)) {
-            log.logInfo("CRAWL: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CAUSE: unknown (URL=" + urlEntry.url().toString() + ")");
-            if (remoteSeed != null) yacyCore.peerActions.peerDeparture(remoteSeed);
-            return false;
-        } else try {
-            log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: remoteSeed=" + remoteSeed.getName() + ", url=" + urlEntry.url().toString() + ", response=" + page.toString()); // DEBUG
-            
-            int newdelay = Integer.parseInt((String) page.get("delay"));
-            yacyCore.dhtAgent.setCrawlDelay(remoteSeed.hash, newdelay);
-            String response = (String) page.get("response");
-            if (response.equals("stacked")) {
-                log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " PLACED URL=" + urlEntry.url().toString() + "; NEW DELAY=" + newdelay);
-                return true;
-            } else if (response.equals("double")) {
-                String lurl = (String) page.get("lurl");
-                if ((lurl != null) && (lurl.length() != 0)) {
-                    String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
-                    plasmaCrawlLURL.Entry entry = urlPool.loadedURL.addEntry(
-                    urlPool.loadedURL.newEntry(propStr, true),
-                    yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1);
-                    urlPool.noticeURL.remove(entry.hash());
-                    log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
-                    return true;
-                } else {
-                    log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " REJECTED. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + ")");
+            // check success
+            /*
+             * the result of the 'response' value can have one of the following
+             * values: negative cases, no retry denied - the peer does not want
+             * to crawl that exception - an exception occurred
+             * 
+             * negative case, retry possible rejected - the peer has rejected to
+             * process, but a re-try should be possible
+             * 
+             * positive case with crawling stacked - the resource is processed
+             * asap
+             * 
+             * positive case without crawling double - the resource is already
+             * in database, believed to be fresh and not reloaded the resource
+             * is also returned in lurl
+             */
+            if ((page == null) || (page.get("delay") == null)) {
+                log.logInfo("CRAWL: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CAUSE: unknown (URL=" + urlEntry.url().toString() + ")");
+                if (remoteSeed != null)
+                    yacyCore.peerActions.peerDeparture(remoteSeed);
+                return false;
+            } else
+                try {
+                    log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: remoteSeed=" + remoteSeed.getName() + ", url=" + urlEntry.url().toString() + ", response=" + page.toString()); // DEBUG
+
+                    int newdelay = Integer.parseInt((String) page.get("delay"));
+                    yacyCore.dhtAgent.setCrawlDelay(remoteSeed.hash, newdelay);
+                    String response = (String) page.get("response");
+                    if (response.equals("stacked")) {
+                        log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " PLACED URL=" + urlEntry.url().toString() + "; NEW DELAY=" + newdelay);
+                        return true;
+                    } else if (response.equals("double")) {
+                        String lurl = (String) page.get("lurl");
+                        if ((lurl != null) && (lurl.length() != 0)) {
+                            String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
+                            plasmaCrawlLURL.Entry entry = urlPool.loadedURL.addEntry(urlPool.loadedURL.newEntry(propStr, true), yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1);
+                            urlPool.noticeURL.remove(entry.hash());
+                            log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
+                            return true;
+                        } else {
+                            log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " REJECTED. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + ")");
+                            return false;
+                        }
+                    } else {
+                        log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " DENIED. RESPONSE=" + response + ", CAUSE=" + page.get("reason") + ", URL=" + urlEntry.url().toString());
+                        return false;
+                    }
+                } catch (Exception e) {
+                    // wrong values
+                    log.logSevere(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " FAILED. CLIENT RETURNED: " + page.toString(), e);
                     return false;
                 }
-            } else {
-                log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " DENIED. RESPONSE=" + response + ", CAUSE=" + page.get("reason") + ", URL=" + urlEntry.url().toString());
-                return false;
-            }
-        } catch (Exception e) {
-            // wrong values
-            log.logSevere(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " FAILED. CLIENT RETURNED: " + page.toString(), e);
+        } catch (IOException e) {
+            log.logSevere(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " FAILED. URL CANNOT BE RETRIEVED from referrer hash: " + urlEntry.referrerHash(), e);
             return false;
         }
     }
@@ -1825,11 +1835,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     // method for index deletion
-    public int removeAllUrlReferences(URL url, boolean fetchOnline) {
+    public int removeAllUrlReferences(URL url, boolean fetchOnline) throws IOException {
         return removeAllUrlReferences(plasmaURL.urlHash(url), fetchOnline);
     }
     
-    public int removeAllUrlReferences(String urlhash, boolean fetchOnline) {
+    public int removeAllUrlReferences(String urlhash, boolean fetchOnline) throws IOException {
         // find all the words in a specific resource and remove the url reference from every word index
         // finally, delete the url entry
         
