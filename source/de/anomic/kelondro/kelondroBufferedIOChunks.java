@@ -52,16 +52,19 @@ import java.util.Map;
 public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks implements kelondroIOChunks {
 
     protected kelondroRA ra;
-    private int bufferkb;
+    private int bufferMaxSize, bufferCurrSize;
     private long commitTimeout;
     private HashMap buffer;
     private long lastCommit = 0;
+    
+    private static final int overhead = 40;
     
     
     public kelondroBufferedIOChunks(kelondroRA ra, String name, int bufferkb, long commitTimeout) {
         this.name = name;
         this.ra = ra;
-        this.bufferkb = bufferkb;
+        this.bufferMaxSize = 1024 * bufferkb;
+        this.bufferCurrSize = 0;
         this.commitTimeout = commitTimeout;
         this.buffer = new HashMap();
         this.lastCommit = System.currentTimeMillis();
@@ -71,35 +74,33 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         assert (b.length >= off + len): "read pos=" + pos  + ", b.length=" + b.length + ", off=" + off + ", len=" + len;
         
         // check commit time
-        if (this.lastCommit + this.commitTimeout > System.currentTimeMillis()) {
+        if ((bufferCurrSize > bufferMaxSize) ||
+            (this.lastCommit + this.commitTimeout < System.currentTimeMillis())) {
             commit();
             this.lastCommit = System.currentTimeMillis();
         }
-        
+
         // do the read
-        if ((off == 0) && (b.length == len)) {
-            synchronized (this.buffer) {
-                byte[] bb = (byte[]) buffer.get(new Long(pos));
-                if (bb == null) {
-                    synchronized (this.ra) {
-                        this.ra.seek(pos);
-                        return ra.read(b, off, len);
-                    }
+        synchronized (this.buffer) {
+            byte[] bb = (byte[]) buffer.get(new Long(pos));
+            if (bb == null) {
+                // entry not known, read direktly from IO
+                synchronized (this.ra) {
+                    this.ra.seek(pos + off);
+                    return ra.read(b, off, len);
+                }
+            } else {
+                // use buffered entry
+                if (bb.length >= off + len) {
+                    // the bufferd entry is long enough
+                    System.arraycopy(bb, off, b, off, len);
+                    return len;
                 } else {
-                    if (bb.length >= len) {
-                        System.arraycopy(bb, 0, b, off, len);
-                        return len;
-                    } else {
-                        System.arraycopy(bb, 0, b, off, bb.length); 
-                        return bb.length;
-                    }
+                    // the entry is not long enough. transmit only a part
+                    System.arraycopy(bb, off, b, off, bb.length - off);
+                    return bb.length - off;
                 }
             }
-        } else {
-            byte[] bb = new byte[len];
-            int r = read(pos + off, bb, 0, len);
-            System.arraycopy(bb, 0, b, off, r);
-            return r;
         }
     }
 
@@ -107,14 +108,16 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         assert (b.length >= off + len): "write pos=" + pos + ", b.length=" + b.length + ", b='" + new String(b) + "', off=" + off + ", len=" + len;
 
         // do the write into buffer
-        byte[] bb = new byte[len];
+        byte[] bb = kelondroObjectSpace.alloc(len);
         System.arraycopy(b, off, bb, 0, len);
         synchronized (buffer) {
-            buffer.put(new Long(pos), bb);
+            buffer.put(new Long(pos + off), bb);
+            bufferCurrSize += overhead + pos + off;
         }
         
         // check commit time
-        if (this.lastCommit + this.commitTimeout > System.currentTimeMillis()) {
+        if ((bufferCurrSize > bufferMaxSize) ||
+            (this.lastCommit + this.commitTimeout < System.currentTimeMillis())) {
             commit();
             this.lastCommit = System.currentTimeMillis();
         }
@@ -134,9 +137,11 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
                     b = (byte[]) entry.getValue();
                     this.ra.seek(pos);
                     this.ra.write(b);
+                    kelondroObjectSpace.recycle(b);
                 }
             }
             buffer.clear();
+            bufferCurrSize = 0;
         }
     }
     
@@ -152,5 +157,5 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         if (this.ra != null) this.close();
         super.finalize();
     }
-
+    
 }

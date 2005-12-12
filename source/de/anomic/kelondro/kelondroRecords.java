@@ -72,6 +72,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Map;
 import java.util.Iterator;
@@ -151,6 +152,9 @@ public class kelondroRecords {
 
     // optional logger
     protected Logger theLogger = null;
+    
+    // Random. This is used to shift flush-times of write-buffers to differrent time
+    private static Random random = new Random(System.currentTimeMillis());
 
     private class usageControl {
         private   int               USEDC;       // counter of used elements
@@ -219,8 +223,8 @@ public class kelondroRecords {
                       int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
 
         // create new Chunked IO
-        //this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 1024, 5000);
-        this.entryFile = new kelondroRAIOChunks(ra, ra.name());
+        this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 1024, 8000 + random.nextLong() % 2000);
+        //this.entryFile = new kelondroRAIOChunks(ra, ra.name());
         
         // store dynamic run-time data
         this.overhead = ohbytec + 4 * ohhandlec;
@@ -276,6 +280,8 @@ public class kelondroRecords {
         for (int i = 0; i < this.TXTPROPS.length; i++) {
             entryFile.write(POS_TXTPROPS + TXTPROPW * i, ea);
         }
+        
+        this.entryFile.commit();
     }
 
     public void setLogger(Logger newLogger) {
@@ -320,8 +326,8 @@ public class kelondroRecords {
 
     private void init(kelondroRA ra) throws IOException {
         // read from Chunked IO
-        //this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 1024, 5000);
-        this.entryFile = new kelondroRAIOChunks(ra, ra.name());
+        this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 1024, 8000 + random.nextLong() % 2000);
+        //this.entryFile = new kelondroRAIOChunks(ra, ra.name());
 
         // read dynamic variables that are back-ups of stored values in file;
         // read/defined on instantiation

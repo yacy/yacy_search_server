@@ -59,11 +59,14 @@ public abstract class kelondroAbstractIOChunks {
 
     // derived methods:
     public void readFully(long pos, byte[] b, int off, int len) throws IOException {
-        final int r = read(pos, b, off, len);
-        if (r < 0) return; // read exceeded EOF
-        if (r < len) {
+        if (len < 0) throw new IndexOutOfBoundsException("length is negative:" + len);
+        if (b.length < off + len) throw new IndexOutOfBoundsException("bounds do not fit: b.length=" + b.length + ", off=" + off + ", len=" + len);
+        while (len > 0) {
+            int r = read(pos, b, off, len);
+            if (r < 0) throw new IOException("EOF"); // read exceeded EOF
             pos += r;
-            readFully(pos, b, off + r, len - r);
+            off += r;
+            len -= r;
         }
     }
 

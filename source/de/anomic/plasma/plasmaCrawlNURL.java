@@ -120,9 +120,27 @@ public class plasmaCrawlNURL extends plasmaURL {
         limitStack = new plasmaCrawlBalancer(limitStackFile, 0);
         overhangStack = new plasmaCrawlBalancer(overhangStackFile, 0);
         remoteStack = new plasmaCrawlBalancer(remoteStackFile, 0);
-        if (imageStackFile.exists()) imageStack = new kelondroStack(imageStackFile, 0); else imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength});
-        if (movieStackFile.exists()) movieStack = new kelondroStack(movieStackFile, 0); else movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength});
-        if (musicStackFile.exists()) musicStack = new kelondroStack(musicStackFile, 0); else musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        if (imageStackFile.exists()) try {
+            imageStack = new kelondroStack(imageStackFile, 0);
+        } catch (IOException e) {
+            imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        } else {
+            imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        }
+        if (movieStackFile.exists()) try {
+            movieStack = new kelondroStack(movieStackFile, 0);
+        } catch (IOException e) {
+            movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        } else {
+            movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        }
+        if (musicStackFile.exists()) try {
+            musicStack = new kelondroStack(musicStackFile, 0);
+        } catch (IOException e) {
+            musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        } else {
+            musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength});
+        }
 
         // init stack Index
         stackIndex = new HashSet();
@@ -267,7 +285,7 @@ public class plasmaCrawlNURL extends plasmaURL {
         }        
     }
 
-    public Entry pop(int stackType) {
+    public Entry pop(int stackType) throws IOException {
         switch (stackType) {
             case STACK_TYPE_CORE:     return pop(coreStack);
             case STACK_TYPE_LIMIT:    return pop(limitStack);
@@ -281,9 +299,12 @@ public class plasmaCrawlNURL extends plasmaURL {
     }
 
     public void shift(int fromStack, int toStack) {
-        Entry entry = pop(fromStack);
-        if (entry.url() == null) return;
-        push(toStack, entry.url.getHost(), entry.hash());
+        try {
+            Entry entry = pop(fromStack);
+            push(toStack, entry.url.getHost(), entry.hash());
+        } catch (IOException e) {
+            return;
+        }
     }
 
     public void clear(int stackType) {
@@ -301,33 +322,25 @@ public class plasmaCrawlNURL extends plasmaURL {
         } catch (IOException e) {}
     }
 
-    private Entry pop(kelondroStack stack) {
+    private Entry pop(kelondroStack stack) throws IOException {
         // this is a filo - pop
-        try {
-            if (stack.size() > 0) {
-                Entry e = new Entry(new String(stack.pop()[0]));
-                stackIndex.remove(e.hash);
-                return e;
-            } else {
-                return null;
-            }
-        } catch (IOException e) {
-            return null;
+        if (stack.size() > 0) {
+            Entry e = new Entry(new String(stack.pop()[0]));
+            stackIndex.remove(e.hash);
+            return e;
+        } else {
+            throw new IOException("crawl stack is empty");
         }
     }
 
-    private Entry pop(plasmaCrawlBalancer balancer) {
+    private Entry pop(plasmaCrawlBalancer balancer) throws IOException {
         // this is a filo - pop
-        try {
-            if (balancer.size() > 0) {
-                Entry e = new Entry(new String((byte[]) balancer.get()[1]));
-                stackIndex.remove(e.hash);
-                return e;
-            } else {
-                return null;
-            }
-        } catch (IOException e) {
-            return null;
+        if (balancer.size() > 0) {
+            Entry e = new Entry(new String((byte[]) balancer.get()[1]));
+            stackIndex.remove(e.hash);
+            return e;
+        } else {
+            throw new IOException("balancer stack is empty");
         }
     }
 
@@ -335,32 +348,30 @@ public class plasmaCrawlNURL extends plasmaURL {
         // this is a filo - top
         if (count > stack.size()) count = stack.size();
         ArrayList list = new ArrayList(count);
-        try {
-            for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
+            try {
                 byte[] hash = stack.top(i)[0];
-                if (hash == null) continue;
                 list.add(new Entry(new String(hash)));
+            } catch (IOException e) {
+                continue;
             }
-            return (Entry[])list.toArray(new Entry[list.size()]);
-        } catch (IOException e) {
-            return null;
         }
+        return (Entry[]) list.toArray(new Entry[list.size()]);
     }
 
     private Entry[] top(plasmaCrawlBalancer balancer, int count) {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
         ArrayList list = new ArrayList(count);
-        try {
             for (int i = 0; i < count; i++) {
-                byte[] hash = balancer.top(i);
-                if (hash == null) continue;
-                list.add(new Entry(new String(hash)));
+                try {
+                    byte[] hash = balancer.top(i);
+                    list.add(new Entry(new String(hash)));
+                } catch (IOException e) {
+                    continue;
+                }
             }
             return (Entry[])list.toArray(new Entry[list.size()]);
-        } catch (IOException e) {
-            return null;
-        }
     }
 
     public synchronized Entry getEntry(String hash) throws IOException {
@@ -460,7 +471,7 @@ public class plasmaCrawlNURL extends plasmaURL {
                 //}
             } else {
                 // show that we found nothing
-                throw new IOException("hash not found");
+                throw new IOException("NURL: hash " + hash + " not found");
                 //this.url = null;
             }
         }
