@@ -925,6 +925,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public boolean coreCrawlJob() {
+        try {
         if (urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) == 0) {
             //log.logDebug("CoreCrawl: queue is empty");
             return false;
@@ -993,6 +994,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         processLocalCrawling(urlEntry, profile, stats);
         return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
     
     public int limitCrawlTriggerJobSize() {

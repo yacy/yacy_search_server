@@ -219,6 +219,7 @@ public class kelondroRecords {
                       int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
 
         // create new Chunked IO
+        //this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 1024, 5000);
         this.entryFile = new kelondroRAIOChunks(ra, ra.name());
         
         // store dynamic run-time data
@@ -319,6 +320,7 @@ public class kelondroRecords {
 
     private void init(kelondroRA ra) throws IOException {
         // read from Chunked IO
+        //this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 1024, 5000);
         this.entryFile = new kelondroRAIOChunks(ra, ra.name());
 
         // read dynamic variables that are back-ups of stored values in file;
