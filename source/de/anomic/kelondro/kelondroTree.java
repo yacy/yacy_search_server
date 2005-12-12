@@ -78,35 +78,47 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     private Search writeSearchObj = new Search();
     //private kelondroLock writeLock = new kelondroLock();
     
-    public kelondroTree(File file, long buffersize, int key, int value) throws IOException {
-        this(file, buffersize, new int[] { key, value }, 1, 8);
+    public kelondroTree(File file, long buffersize, int key, int value, boolean exitOnFail) {
+        this(file, buffersize, new int[] { key, value }, 1, 8, exitOnFail);
     }
 
-    public kelondroTree(kelondroRA ra, long buffersize, int key, int value) throws IOException {
-        this(ra, buffersize, new int[] { key, value }, 1, 8);
+    public kelondroTree(kelondroRA ra, long buffersize, int key, int value, boolean exitOnFail) {
+        this(ra, buffersize, new int[] { key, value }, 1, 8, exitOnFail);
     }
 
-    public kelondroTree(File file, long buffersize, int[] columns) throws IOException {
+    public kelondroTree(File file, long buffersize, int[] columns, boolean exitOnFail) {
         // this creates a new tree file
-        this(file, buffersize, columns, columns.length /* txtProps */, 80 /* txtPropWidth */);
+        this(file, buffersize, columns, columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
     }
 
-    public kelondroTree(File file, long buffersize, int[] columns, int txtProps, int txtPropsWidth) throws IOException {
+    public kelondroTree(File file, long buffersize, int[] columns, int txtProps, int txtPropsWidth, boolean exitOnFail) {
         // this creates a new tree file
-        super(file, buffersize, thisOHBytes, thisOHHandles, columns, thisFHandles, txtProps, txtPropsWidth);
-        setHandle(root, null); // define the root value
+        super(file, buffersize, thisOHBytes, thisOHHandles, columns, thisFHandles, txtProps, txtPropsWidth, exitOnFail);
+        try {
+            setHandle(root, null); // define the root value
+        } catch (IOException e) {
+            super.logFailure("cannot set root handle / " + e.getMessage());
+            if (exitOnFail) System.exit(-1);
+            throw new RuntimeException("cannot set root handle / " + e.getMessage());
+        }
     }
     
-    public kelondroTree(kelondroRA ra, long buffersize, int[] columns) throws IOException {
+    public kelondroTree(kelondroRA ra, long buffersize, int[] columns, boolean exitOnFail) {
         // this creates a new tree within a kelondroRA
-        this(ra, buffersize, columns, columns.length /* txtProps */, 80 /* txtPropWidth */);
+        this(ra, buffersize, columns, columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
     }
 
-    public kelondroTree(kelondroRA ra, long buffersize, int[] columns, int txtProps, int txtPropsWidth) throws IOException {
+    public kelondroTree(kelondroRA ra, long buffersize, int[] columns, int txtProps, int txtPropsWidth, boolean exitOnFail) {
         // this creates a new tree within a kelondroRA
         super(ra, buffersize, thisOHBytes, thisOHHandles, columns,
-                thisFHandles, txtProps, txtPropsWidth);
-        setHandle(root, null); // define the root value
+                thisFHandles, txtProps, txtPropsWidth, exitOnFail);
+        try {
+            setHandle(root, null); // define the root value
+        } catch (IOException e) {
+            super.logFailure("cannot set root handle / " + e.getMessage());
+            if (exitOnFail) System.exit(-1);
+            throw new RuntimeException("cannot set root handle / " + e.getMessage());
+        }
     }
 
     public kelondroTree(File file, long buffersize) throws IOException {
@@ -1185,7 +1197,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                     // test script
                     File testFile = new File("test.db");
                     while (testFile.exists()) testFile.delete();
-                    kelondroTree fm = new kelondroTree(testFile, 0x100000, 4, 4);
+                    kelondroTree fm = new kelondroTree(testFile, 0x100000, 4, 4, true);
                     byte[] dummy = "".getBytes();
                     fm.put("abc0".getBytes(), dummy); fm.put("bcd0".getBytes(), dummy);
                     fm.put("def0".getBytes(), dummy); fm.put("bab0".getBytes(), dummy);
@@ -1263,7 +1275,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 		    int[] lens = new int[2];
 		    lens[0] = Integer.parseInt(args[1]);
 		    lens[1] = Integer.parseInt(args[2]);
-		    kelondroTree fm = new kelondroTree(f, 0x100000, lens);
+		    kelondroTree fm = new kelondroTree(f, 0x100000, lens, true);
 		    fm.close();
 		} else if (args[0].equals("-u")) {
 		    kelondroTree fm = new kelondroTree(new File(args[3]), 0x100000);
@@ -1366,7 +1378,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
             int steps = 0;
             while (true) {
                 if (testFile.exists()) testFile.delete();
-                tt = new kelondroTree(testFile, 200, 4 ,4);
+                tt = new kelondroTree(testFile, 200, 4 ,4, true);
                 steps = 10 + ((int) System.currentTimeMillis() % 7) * (((int) System.currentTimeMillis() + 17) % 11);
                 t = s;
                 d = "";
@@ -1432,7 +1444,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         File f = new File("test.db");
         if (f.exists()) f.delete();
         try {
-            kelondroTree tt = new kelondroTree(f, 0, 4, 4);
+            kelondroTree tt = new kelondroTree(f, 0, 4, 4, true);
             byte[] b;
             b = testWord('B'); tt.put(b, b); //tt.print();
             b = testWord('C'); tt.put(b, b); //tt.print();
@@ -1464,7 +1476,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     
     public static kelondroTree testTree(File f, String testentities) throws IOException {
         if (f.exists()) f.delete();
-        kelondroTree tt = new kelondroTree(f, 0, 4, 4);
+        kelondroTree tt = new kelondroTree(f, 0, 4, 4, true);
         byte[] b;
         for (int i = 0; i < testentities.length(); i++) {
             b = testWord(testentities.charAt(i));

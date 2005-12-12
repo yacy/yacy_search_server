@@ -100,7 +100,7 @@ public final class yacySeedDB {
             File seedActiveDBFile,
             File seedPassiveDBFile,
             File seedPotentialDBFile,
-            int bufferkb) throws IOException {
+            int bufferkb) {
         
         this.seedDBBufferKB = bufferkb;
         this.seedActiveDBFile = seedActiveDBFile;
@@ -116,15 +116,27 @@ public final class yacySeedDB {
         
         // create or init own seed
         myOwnSeedFile = sb.getOwnSeedFile();
-        if (myOwnSeedFile.length() > 0) {
+        if (myOwnSeedFile.length() > 0) try {
             // load existing identity
             mySeed = yacySeed.load(myOwnSeedFile);
+        } catch (IOException e) {
+            // create new identity
+            mySeed = yacySeed.genLocalSeed(sb);
+            try {
+                mySeed.save(myOwnSeedFile);
+            } catch (IOException ee) {
+                ee.printStackTrace();
+                System.exit(-1);
+            }
         } else {
             // create new identity
             mySeed = yacySeed.genLocalSeed(sb);
-            // save of for later use
-            mySeed.save(myOwnSeedFile); // in a file
-            //writeMap(mySeed.hash, mySeed.dna, "new"); // in a database
+            try {
+                mySeed.save(myOwnSeedFile);
+            } catch (IOException ee) {
+                ee.printStackTrace();
+                System.exit(-1);
+            }
         }
         
         if (sb.getConfig("portForwardingEnabled","false").equalsIgnoreCase("true")) {
@@ -172,7 +184,7 @@ public final class yacySeedDB {
         return new int[]{ac[0] + pa[0] + po[0], ac[1] + pa[1] + po[1], ac[2] + pa[2] + po[2], ac[3] + pa[3] + po[3]};
     }
     
-    private synchronized kelondroMap openSeedTable(File seedDBFile) throws IOException {
+    private synchronized kelondroMap openSeedTable(File seedDBFile) {
         if (seedDBFile.exists()) try {
             // open existing seed database
             return new kelondroMap(new kelondroDyn(seedDBFile, (seedDBBufferKB * 0x400) / 3), sortFields, accFields);
@@ -185,7 +197,7 @@ public final class yacySeedDB {
         }
         // create new seed database
         new File(seedDBFile.getParent()).mkdir();
-        return new kelondroMap(new kelondroDyn(seedDBFile, (seedDBBufferKB * 0x400) / 3, commonHashLength, 480), sortFields, accFields);
+        return new kelondroMap(new kelondroDyn(seedDBFile, (seedDBBufferKB * 0x400) / 3, commonHashLength, 480, true), sortFields, accFields);
     }
     
     private synchronized kelondroMap resetSeedTable(kelondroMap seedDB, File seedDBFile) {

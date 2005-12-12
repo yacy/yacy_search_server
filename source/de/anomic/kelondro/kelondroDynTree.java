@@ -69,7 +69,7 @@ public class kelondroDynTree {
     private Hashtable buffer, cache;
     private long cycleBuffer;
     
-    public kelondroDynTree(File file, long buffersize, int keylength, int nodesize, int[] columns) throws IOException {
+    public kelondroDynTree(File file, long buffersize, int keylength, int nodesize, int[] columns, boolean exitOnFail) {
         // creates a new DynTree
         this.file = file;
         this.columns = columns;
@@ -77,8 +77,8 @@ public class kelondroDynTree {
         this.cache = new Hashtable();
         //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
-        if (file.exists()) throw new IOException("DynTree " + file.toString() + " already exists");
-        this.table = new kelondroDyn(file, buffersize, keylength, nodesize);
+        if (file.exists()) file.delete();
+        this.table = new kelondroDyn(file, buffersize, keylength, nodesize, exitOnFail);
         this.treeRAHandles = new Hashtable();
     }
 
@@ -134,7 +134,11 @@ public class kelondroDynTree {
         if (table.existsDyn(key)) throw new IOException("table " + key + " already exists.");
         kelondroRA ra = table.getRA(key); // works always, even with no-existing entry
         treeRAHandles.put(key, ra);
-        return new kelondroTree(ra, buffersize, columns);
+        try {
+            return new kelondroTree(ra, buffersize, columns, false);
+        } catch (RuntimeException e) {
+            throw new IOException(e.getMessage());
+        }
     }
     
     protected kelondroTree getTree(String key) throws IOException {
@@ -348,7 +352,7 @@ public class kelondroDynTree {
                 kelondroDynTree dt = new kelondroDynTree(file, 0x100000L);
                 System.out.println("opened: table keylength=" + dt.table.columnSize(0) + ", sectorsize=" + dt.table.columnSize(1) + ", " + dt.table.size() + " entries.");
             } else {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 16, 512, new int[] {10,20,30});
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 16, 512, new int[] {10,20,30}, true);
                 String name;
                 kelondroTree t;
                 byte[][] line = new byte[][] {"".getBytes(), "abc".getBytes(), "def".getBytes()};

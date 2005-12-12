@@ -147,7 +147,7 @@ public class yacyCore {
         return (int) ((System.currentTimeMillis() - startupTime) / 1000);
     }
 
-    public yacyCore(plasmaSwitchboard sb) throws IOException {
+    public yacyCore(plasmaSwitchboard sb) {
         long time = System.currentTimeMillis();
 
         this.switchboard = sb;

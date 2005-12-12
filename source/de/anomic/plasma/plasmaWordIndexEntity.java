@@ -62,7 +62,7 @@ public final class plasmaWordIndexEntity {
     private File         theLocation;
     private boolean      delete;
 
-    public plasmaWordIndexEntity(File databaseRoot, String wordHash, boolean deleteIfEmpty) throws IOException {
+    public plasmaWordIndexEntity(File databaseRoot, String wordHash, boolean deleteIfEmpty) {
         theWordHash = wordHash;
         theIndex    = indexFile(databaseRoot, wordHash);
         theTmpMap   = null;
@@ -82,20 +82,23 @@ public final class plasmaWordIndexEntity {
         return success;
     }
 
-    private kelondroTree indexFile(File databaseRoot, String wordHash) throws IOException {
-        if (wordHash.length() < 12) throw new IOException("word hash wrong: '" + wordHash + "'");
+    private kelondroTree indexFile(File databaseRoot, String wordHash) {
+        if (wordHash.length() < 12) throw new RuntimeException("word hash wrong: '" + wordHash + "'");
     theLocation = wordHash2path(databaseRoot, wordHash);
     File fp = theLocation.getParentFile();
     if (fp != null) fp.mkdirs();
     kelondroTree kt;
     long cacheSize = theLocation.length();
     if (cacheSize > 1048576) cacheSize = 1048576;
-    if (theLocation.exists()) {
+    if (theLocation.exists()) try {
         // open existing index file
         kt = new kelondroTree(theLocation, cacheSize);
+    } catch (IOException e) {
+        theLocation.delete();
+        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceShort, false);
     } else {
         // create new index file
-        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceShort);
+        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceShort, false);
     }
     return kt; // everyone who get this should close it when finished!
     }

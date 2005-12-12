@@ -56,15 +56,16 @@ public class plasmaCrawlBalancer {
     private kelondroStack stack;
     private HashMap domainStacks;
     
-    public plasmaCrawlBalancer(File stackFile, long buffersize) throws IOException {
-        if (stackFile.exists())
+    public plasmaCrawlBalancer(File stackFile, long buffersize) {
+        if (stackFile.exists()) {
             try {
                 stack = new kelondroStack(stackFile, buffersize);
             } catch (IOException e) {
-                stack = new kelondroStack(stackFile, buffersize, new int[] {plasmaURL.urlHashLength});
+                stack = new kelondroStack(stackFile, buffersize, new int[] {plasmaURL.urlHashLength}, true);
             }
-        else
-            stack = new kelondroStack(stackFile, buffersize, new int[] {plasmaURL.urlHashLength});
+        } else {
+            stack = new kelondroStack(stackFile, buffersize, new int[] {plasmaURL.urlHashLength}, true);
+        }
         domainStacks = new HashMap();
     }
 
@@ -74,7 +75,7 @@ public class plasmaCrawlBalancer {
         stack = null;
     }
     
-    public void reset() throws IOException {
+    public void reset() {
         stack = kelondroStack.reset(stack);
         domainStacks = new HashMap();
     }

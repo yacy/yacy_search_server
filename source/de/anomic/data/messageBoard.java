@@ -67,15 +67,19 @@ public class messageBoard {
     private kelondroMap database = null;
     private int sn = 0;
 
-    public messageBoard(File path, int bufferkb) throws IOException {
-	new File(path.getParent()).mkdir();
-	if (database == null) {
-	    if (path.exists())
-		database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400));
-	    else
-		database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, categoryLength + dateFormat.length() + 2, recordSize));
-	}
-	sn = 0;
+    public messageBoard(File path, int bufferkb) {
+        new File(path.getParent()).mkdir();
+        if (database == null) {
+            if (path.exists()) try {
+                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400));
+            } catch (IOException e) {
+                path.delete();
+                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, categoryLength + dateFormat.length() + 2, recordSize, true));
+            } else {
+                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, categoryLength + dateFormat.length() + 2, recordSize, true));
+            }
+        }
+        sn = 0;
     }
 
     public int size() {

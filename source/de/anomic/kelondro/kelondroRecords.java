@@ -194,7 +194,8 @@ public class kelondroRecords {
     
     public kelondroRecords(File file, long buffersize /* bytes */,
                            short ohbytec, short ohhandlec,
-                           int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
+                           int[] columns, int FHandles, int txtProps, int txtPropWidth,
+                           boolean exitOnFail) {
         // creates a new file
         // file: the file that shall be created
         // oha : overhead size array of four bytes: oha[0]=# of bytes, oha[1]=# of shorts, oha[2]=# of ints, oha[3]=# of longs, 
@@ -202,20 +203,32 @@ public class kelondroRecords {
         // FHandles: number of integer properties
         // txtProps: number of text properties
 
-        assert (!file.exists()): "file " + file + " already exist";
-        this.filename = file.getCanonicalPath();
-        kelondroRA raf = new kelondroFileRA(this.filename);
-        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
-        // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
-        init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
+        assert (!file.exists()) : "file " + file + " already exist";
+        try {
+            this.filename = file.getCanonicalPath();
+            kelondroRA raf = new kelondroFileRA(this.filename);
+            // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
+            // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
+            init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
+        } catch (IOException e) {
+            logFailure("cannot create / " + e.getMessage());
+            if (exitOnFail)
+                System.exit(-1);
+        }
         initCache(buffersize);
     }
     
     public kelondroRecords(kelondroRA ra, long buffersize /* bytes */,
                            short ohbytec, short ohhandlec,
-                           int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
+                           int[] columns, int FHandles, int txtProps, int txtPropWidth,
+                           boolean exitOnFail) {
         this.filename = null;
-        init(ra, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
+        try {
+            init(ra, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
+        } catch (IOException e) {
+            logFailure("cannot create / " + e.getMessage());
+            if (exitOnFail) System.exit(-1);
+        }
         initCache(buffersize);
     }
    
@@ -293,6 +306,13 @@ public class kelondroRecords {
             System.err.println("KELONDRO WARNING for file " + this.filename + ": " + message);
         else
             this.theLogger.warning("KELONDRO WARNING for file " + this.filename + ": " + message);
+    }
+
+    public void logFailure(String message) {
+        if (this.theLogger == null)
+            System.err.println("KELONDRO FAILURE for file " + this.filename + ": " + message);
+        else
+            this.theLogger.severe("KELONDRO FAILURE for file " + this.filename + ": " + message);
     }
 
     public void clear() throws IOException {

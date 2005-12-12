@@ -120,12 +120,8 @@ public final class plasmaWordIndexAssortment {
             assortmentFile.delete(); // make space for new one
         }
         // create new assortment tree file
-        try {
-            assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
-            if (log != null) log.logConfig("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
-        } catch (IOException e){
-            serverLog.logSevere("PLASMA", "unable to create assortment database: " + e.getMessage(), e);
-        }
+        assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength), true);
+        if (log != null) log.logConfig("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
     }
 
     public void store(String wordHash, plasmaWordIndexEntryContainer newContainer) {
@@ -194,11 +190,7 @@ public final class plasmaWordIndexAssortment {
             assortments.close();
         } catch (IOException e) {}
         if (!(assortmentFile.delete())) throw new RuntimeException("cannot delete assortment database");
-        try {
-            assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength));
-        } catch (IOException e){
-            log.logSevere("unable to re-create assortment database: " + e.getMessage(), e);
-        }
+        assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength), true);
     }
     
     public Iterator hashes(String startWordHash, boolean up, boolean rot) {

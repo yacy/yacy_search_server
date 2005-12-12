@@ -70,9 +70,9 @@ public class kelondroDyn extends kelondroTree {
     private int reclen;
     private int segmentCount;
 
-    public kelondroDyn(File file, long buffersize /*bytes*/, int key, int nodesize) throws IOException {
+    public kelondroDyn(File file, long buffersize /*bytes*/, int key, int nodesize, boolean exitOnFail) {
 	// creates a new dynamic tree
-	super(file, buffersize, new int[] {key + counterlen, nodesize}, 1, 8);
+	super(file, buffersize, new int[] {key + counterlen, nodesize}, 1, 8, exitOnFail);
 	this.keylen = columnSize(0) - counterlen;
 	this.reclen = columnSize(1);
 	this.segmentCacheKey = null;
@@ -82,7 +82,7 @@ public class kelondroDyn extends kelondroTree {
         writeSegmentCount();
     }
 
-    public kelondroDyn(File file, long buffersize) throws IOException{
+    public kelondroDyn(File file, long buffersize) throws IOException {
 	// this opens a file with an existing dynamic tree
 	super(file, buffersize);
 	this.keylen = columnSize(0) - counterlen;
@@ -199,7 +199,7 @@ public class kelondroDyn extends kelondroTree {
         }
         
         // read from db
-        byte[][] r = get(key);
+        final byte[][] r = get(key);
         if (r == null) return null;
 
         // update cache
@@ -442,7 +442,7 @@ public class kelondroDyn extends kelondroTree {
 	    File f = new File(args[3]);
 	    kelondroDyn kd;
 	    try {
-		if (db.exists()) kd = new kelondroDyn(db, 0x100000); else kd = new kelondroDyn(db, 0x100000, 80, 200);
+		if (db.exists()) kd = new kelondroDyn(db, 0x100000); else kd = new kelondroDyn(db, 0x100000, 80, 200, true);
 		if (writeFile) kd.readFile(key, f); else kd.writeFile(key, f);
 	    } catch (IOException e) {
 		System.out.println("ERROR: " + e.toString());
@@ -463,7 +463,7 @@ public class kelondroDyn extends kelondroTree {
             int steps = 0;
             while (true) {
                 if (testFile.exists()) testFile.delete();
-                tt = new kelondroDyn(testFile, 0, 4 ,100);
+                tt = new kelondroDyn(testFile, 0, 4 ,100, true);
                 steps = ((int) System.currentTimeMillis() % 7) * (((int) System.currentTimeMillis() + 17) % 11);
                 t = s;
                 d = "";

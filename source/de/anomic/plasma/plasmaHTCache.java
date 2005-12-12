@@ -114,7 +114,7 @@ public final class plasmaHTCache {
             if (dbfile.exists())
                 this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400));
             else
-                this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, plasmaURL.urlHashLength, 150));
+                this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, plasmaURL.urlHashLength, 150, false));
         } catch (IOException e) {
             this.log.logSevere("the request header database could not be opened: " + e.getMessage());
             System.exit(0);

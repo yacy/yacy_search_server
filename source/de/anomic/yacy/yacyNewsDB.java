@@ -63,27 +63,30 @@ public class yacyNewsDB {
                  - yacyCore.universalDateShortPattern.length()
                  - 2;
     
-    public yacyNewsDB(File path, int bufferkb) throws IOException {
+    public yacyNewsDB(File path, int bufferkb) {
         this.path = path;
         this.bufferkb = bufferkb;
         
-        if (path.exists())
+        if (path.exists()) try {
             news = new kelondroTree(path, bufferkb * 0x400);
-        else
-            news = createDB(path, bufferkb);        
+        } catch (IOException e) {
+            news = createDB(path, bufferkb);
+        } else {
+            news = createDB(path, bufferkb);
+        }
     }
     
-    private static kelondroTree createDB(File path, int bufferkb) throws IOException {
+    private static kelondroTree createDB(File path, int bufferkb) {
         return new kelondroTree(path, bufferkb * 0x400, new int[] {
                 yacyNewsRecord.idLength(), // id = created + originator
                 yacyNewsRecord.categoryStringLength,    // category
                 yacyCore.universalDateShortPattern.length(), // received
                 2,
                 attributesMaxLength
-            });
+            }, true);
     }
 
-    private void resetDB() throws IOException {
+    private void resetDB() {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
         news = createDB(path, bufferkb);

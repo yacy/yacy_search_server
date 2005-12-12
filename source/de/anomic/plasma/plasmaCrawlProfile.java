@@ -52,7 +52,6 @@ import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.serverCodings;
-import de.anomic.server.logging.serverLog;
 
 public class plasmaCrawlProfile {
     
@@ -60,14 +59,19 @@ public class plasmaCrawlProfile {
     private File profileTableFile;
     private int bufferkb;
     
-    public plasmaCrawlProfile(File profileTableFile, int bufferkb) throws IOException {
-        this.profileTableFile = profileTableFile;
-        if (profileTableFile.exists()) {
-            profileTable = new kelondroMap(new kelondroDyn(profileTableFile, bufferkb * 1024));
+    public plasmaCrawlProfile(File file, int bufferkb) {
+        this.profileTableFile = file;
+        kelondroDyn dyn = null;
+        if (profileTableFile.exists()) try {
+            dyn = new kelondroDyn(file, bufferkb * 1024);
+        } catch (IOException e) {
+            profileTableFile.delete();
+            dyn = new kelondroDyn(file, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000, true);
         } else {
             profileTableFile.getParentFile().mkdirs();
-            profileTable = new kelondroMap(new kelondroDyn(profileTableFile, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000));
+            dyn = new kelondroDyn(file, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000, true);
         }
+        profileTable = new kelondroMap(dyn);
     }
     
     public int[] dbCacheChunkSize() {
@@ -80,16 +84,10 @@ public class plasmaCrawlProfile {
     
     private void resetDatabase() {
         // deletes the profile database and creates a new one
-        if (profileTable != null) try {
-            profileTable.close();
-        } catch (IOException e) {}
+        if (profileTable != null) try { profileTable.close(); } catch (IOException e) {}
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
-        try {
-            profileTableFile.getParentFile().mkdirs();
-            profileTable = new kelondroMap(new kelondroDyn(profileTableFile, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000));
-        } catch (IOException e){
-            serverLog.logSevere("PLASMA", "plasmaCrawlProfile.resetDatabase", e);
-        }
+        profileTableFile.getParentFile().mkdirs();
+        profileTable = new kelondroMap(new kelondroDyn(profileTableFile, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000, true));
     }
     
     public void close() {
@@ -104,11 +102,11 @@ public class plasmaCrawlProfile {
     
     public Iterator profiles(boolean up) {
         // enumerates profile entries
-	try {
-	    return new profileIterator(up);
-	} catch (IOException e) {
-	    return new HashSet().iterator();
-	}
+        try {
+            return new profileIterator(up);
+        } catch (IOException e) {
+            return new HashSet().iterator();
+        }
     }
     
     public class profileIterator implements Iterator {
@@ -156,7 +154,7 @@ public class plasmaCrawlProfile {
                            boolean crawlingQ,
                            boolean storeHTCache, boolean storeTXCache,
                            boolean localIndexing, boolean remoteIndexing,
-                           boolean xsstopw, boolean xdstopw, boolean xpstopw) throws IOException {
+                           boolean xsstopw, boolean xdstopw, boolean xpstopw) {
         
         entry ne = new entry(name, startURL, generalFilter, specificFilter,
                              generalDepth, specificDepth,
@@ -166,7 +164,20 @@ public class plasmaCrawlProfile {
             profileTable.set(ne.handle(), ne.map());
         } catch (kelondroException e) {
             resetDatabase();
-            profileTable.set(ne.handle(), ne.map());
+            try {
+                profileTable.set(ne.handle(), ne.map());
+            } catch (IOException ee) {
+                e.printStackTrace();
+                System.exit(0);
+            }
+        } catch (IOException e) {
+            resetDatabase();
+            try {
+                profileTable.set(ne.handle(), ne.map());
+            } catch (IOException ee) {
+                e.printStackTrace();
+                System.exit(0);
+            }
         }
         return ne;
     }

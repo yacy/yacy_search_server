@@ -93,7 +93,7 @@ public class yacyNewsPool {
     private int maxDistribution;
     
     
-    public yacyNewsPool(File yacyDBPath, int bufferkb) throws IOException {
+    public yacyNewsPool(File yacyDBPath, int bufferkb) {
         newsDB = new yacyNewsDB(new File(yacyDBPath, "news1.db"), bufferkb);
         outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut1.stack"), newsDB);
         publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished1.stack"), newsDB);
@@ -243,7 +243,7 @@ public class yacyNewsPool {
         return null;
     }
     
-    public void clear(int dbKey) throws IOException {
+    public void clear(int dbKey) {
         // this is called if a queue element shall be moved to another queue or off the queue
         // it depends on the dbKey how the record is handled
         switch (dbKey) {

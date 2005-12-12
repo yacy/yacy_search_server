@@ -99,7 +99,7 @@ public class plasmaCrawlNURL extends plasmaURL {
     private File cacheStacksPath;
     private int bufferkb;
     
-    public plasmaCrawlNURL(File cacheStacksPath, int bufferkb) throws IOException {
+    public plasmaCrawlNURL(File cacheStacksPath, int bufferkb) {
         super();
         this.cacheStacksPath = cacheStacksPath;
         this.bufferkb = bufferkb;
@@ -123,23 +123,23 @@ public class plasmaCrawlNURL extends plasmaURL {
         if (imageStackFile.exists()) try {
             imageStack = new kelondroStack(imageStackFile, 0);
         } catch (IOException e) {
-            imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength});
+            imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
         } else {
-            imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength});
+            imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
         }
         if (movieStackFile.exists()) try {
             movieStack = new kelondroStack(movieStackFile, 0);
         } catch (IOException e) {
-            movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength});
+            movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
         } else {
-            movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength});
+            movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
         }
         if (musicStackFile.exists()) try {
             musicStack = new kelondroStack(musicStackFile, 0);
         } catch (IOException e) {
-            musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength});
+            musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
         } else {
-            musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength});
+            musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
         }
 
         // init stack Index
@@ -147,19 +147,22 @@ public class plasmaCrawlNURL extends plasmaURL {
         new initStackIndex().start();
     }
     
-    private void openHashCache() throws IOException {
+    private void openHashCache() {
         File cacheFile = new File(cacheStacksPath, "urlNotice1.db");
-        if (cacheFile.exists()) {
+        if (cacheFile.exists()) try {
             // open existing cache
             urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400);
+        } catch (IOException e) {
+            cacheFile.delete();
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, ce, true);
         } else {
             // create new cache
             cacheFile.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, ce);
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, ce, true);
         }
     }
     
-    private void resetHashCache() throws IOException {
+    private void resetHashCache() {
         if (urlHashCache != null) {
             try {urlHashCache.close();} catch (IOException e) {}
             urlHashCache = null;
@@ -186,14 +189,47 @@ public class plasmaCrawlNURL extends plasmaURL {
         public void run() {
             Iterator i;
             try {
-                try { i =     coreStack.iterator(); while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));} catch (Exception e) {coreStack.reset();}
-                try { i =    limitStack.iterator(); while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));} catch (Exception e) {limitStack.reset();}
-                try { i = overhangStack.iterator(); while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));} catch (Exception e) {overhangStack.reset();}
-                try { i =   remoteStack.iterator(); while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));} catch (Exception e) {remoteStack.reset();}
-                try { i =    imageStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));} catch (Exception e) {imageStack = kelondroStack.reset(imageStack);}
-                try { i =    movieStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));} catch (Exception e) {movieStack = kelondroStack.reset(movieStack);}
-                try { i =    musicStack.iterator(); while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));} catch (Exception e) {musicStack = kelondroStack.reset(musicStack);}
-            } catch (IOException e) {}
+                i = coreStack.iterator();
+                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));
+            } catch (Exception e) {
+                coreStack.reset();
+            }
+            try {
+                i = limitStack.iterator();
+                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));
+            } catch (Exception e) {
+                limitStack.reset();
+            }
+            try {
+                i = overhangStack.iterator();
+                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));
+            } catch (Exception e) {
+                overhangStack.reset();
+            }
+            try {
+                i = remoteStack.iterator();
+                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));
+            } catch (Exception e) {
+                remoteStack.reset();
+            }
+            try {
+                i = imageStack.iterator();
+                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+            } catch (Exception e) {
+                imageStack = kelondroStack.reset(imageStack);
+            }
+            try {
+                i = movieStack.iterator();
+                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+            } catch (Exception e) {
+                movieStack = kelondroStack.reset(movieStack);
+            }
+            try {
+                i = musicStack.iterator();
+                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+            } catch (Exception e) {
+                musicStack = kelondroStack.reset(musicStack);
+            }
         }
     }
 
@@ -500,21 +536,11 @@ public class plasmaCrawlNURL extends plasmaURL {
             } catch (IOException e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", resetting NURL-DB");
                 e.printStackTrace();
-                try {
-                    resetHashCache();
-                } catch (IOException ee) {
-                    serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", reset of NURL-DB failed");
-                    System.exit(0); // this is REALLY severe
-                }
+                resetHashCache();
             } catch (kelondroException e) {
                 serverLog.logSevere("PLASMA", "plasmaCrawlNURL.store failed: " + e.toString() + ", resetting NURL-DB");
                 e.printStackTrace();
-                try {
-                    resetHashCache();
-                } catch (IOException ee) {
-                    serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", reset of NURL-DB failed");
-                    System.exit(0); // this is REALLY severe
-                }
+                resetHashCache();
             }
         }
 

@@ -34,7 +34,6 @@ public class urlRedirectord implements serverHandler {
         }
         
         if (profile == null) {
-            try {
                 profile = switchboard.profiles.newEntry(
                             // name
                             "URL Redirector",
@@ -63,9 +62,6 @@ public class urlRedirectord implements serverHandler {
                             // xpstopw
                             true
                     );
-            } catch (IOException e) {
-                this.theLogger.logSevere("Unable to create a crawling profile for the URL-Redirector",e);
-            }
         }
     }
     

@@ -63,17 +63,26 @@ public class kelondroFScoreCluster {
     private kelondroTree refcountDB;
     private kelondroTree countrefDB;
 
-    public kelondroFScoreCluster(File refcountDBfile, File countrefDBfile) throws IOException {
-        if ((refcountDBfile.exists()) && (countrefDBfile.exists())) {
+    public kelondroFScoreCluster(File refcountDBfile, File countrefDBfile, boolean exitOnFail) {
+        if ((refcountDBfile.exists()) && (countrefDBfile.exists())) try {
             refcountDB = new kelondroTree(refcountDBfile, 0x100000L);
             refcountDB.setText(0, serverCodings.enhancedCoder.encodeBase64Long(0, countlength).getBytes()); // counter of all occurrences
             countrefDB = new kelondroTree(countrefDBfile, 0x100000L);
             countrefDB.setText(0, serverCodings.enhancedCoder.encodeBase64Long(0, countlength).getBytes());
+        } catch (IOException e) {
+            refcountDBfile.delete();
+            countrefDBfile.delete();
+            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, new int[] {wordlength, countlength}, 1, countlength, exitOnFail);
+            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, new int[] {countlength + wordlength, 4}, 1, countlength, exitOnFail);
         } else if ((!(refcountDBfile.exists())) && (!(countrefDBfile.exists()))) {
-            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, new int[] {wordlength, countlength}, 1, countlength);
-            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, new int[] {countlength + wordlength, 4}, 1, countlength);
+            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, new int[] {wordlength, countlength}, 1, countlength, exitOnFail);
+            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, new int[] {countlength + wordlength, 4}, 1, countlength, exitOnFail);
         } else {
-            throw new IOException("both word/count db files must exists");
+            if (exitOnFail) {
+                System.exit(-1);
+            } else {
+                throw new RuntimeException("both word/count db files must exists");
+            }
         }
     }
     

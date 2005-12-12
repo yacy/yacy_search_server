@@ -60,7 +60,7 @@ public class plasmaCrawlEURL extends plasmaURL {
 
     private LinkedList rejectedStack = new LinkedList(); // strings: url
     
-    public plasmaCrawlEURL(File cachePath, int bufferkb) throws IOException {
+    public plasmaCrawlEURL(File cachePath, int bufferkb) {
         super();
         int[] ce = {
             urlHashLength,           // the url's hash
@@ -75,14 +75,17 @@ public class plasmaCrawlEURL extends plasmaURL {
 	    urlErrorLength,          // string describing load failure
             urlFlagLength            // extra space
         };
-	if (cachePath.exists()) {
-	    // open existing cache
-	    urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400);
-	} else {
-	    // create new cache
-	    cachePath.getParentFile().mkdirs();
-	    urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce);
-	}
+        if (cachePath.exists()) try {
+            // open existing cache
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400);
+        } catch (IOException e) {
+            cachePath.delete();
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce, true);
+        } else {
+            // create new cache
+            cachePath.getParentFile().mkdirs();
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce, true);
+        }
     }
 
     public synchronized Entry newEntry(URL url, String referrer, String initiator, String executor,

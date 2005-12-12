@@ -54,35 +54,37 @@ public class yacyNewsQueue {
     private kelondroStack queueStack;
     private yacyNewsDB newsDB;
     
-    public yacyNewsQueue(File path, yacyNewsDB newsDB) throws IOException {
+    public yacyNewsQueue(File path, yacyNewsDB newsDB) {
         this.path = path;
         this.newsDB = newsDB;
         
-        if (path.exists()) {
-            try {
-                queueStack = new kelondroStack(path, 0);
-            } catch (kelondroException e) {
-                path.delete();
-                queueStack = createStack(path);
-            }
-        } else
+        if (path.exists()) try {
+            queueStack = new kelondroStack(path, 0);
+        } catch (kelondroException e) {
+            path.delete();
             queueStack = createStack(path);
+        } catch (IOException e) {
+            path.delete();
+            queueStack = createStack(path);
+        } else {
+            queueStack = createStack(path);
+        }
     }
     
-    private static kelondroStack createStack(File path) throws IOException {
+    private static kelondroStack createStack(File path) {
         return new kelondroStack(path, 0, new int[] {
                 yacyNewsRecord.idLength(), // id = created + originator
                 yacyCore.universalDateShortPattern.length() // last touched
-            });
+            }, true);
     }
     
-    private void resetDB() throws IOException {
+    private void resetDB() {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
         queueStack = createStack(path);
     }
     
-    public void clear() throws IOException {
+    public void clear() {
         resetDB();
     }
     

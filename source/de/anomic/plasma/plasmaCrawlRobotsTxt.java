@@ -57,14 +57,13 @@ import java.util.Map;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.server.logging.serverLog;
 
 public class plasmaCrawlRobotsTxt {
     kelondroMap robotsTable;
     private final File robotsTableFile;
     private int bufferkb;
     
-    public plasmaCrawlRobotsTxt(File robotsTableFile, int bufferkb) throws IOException {
+    public plasmaCrawlRobotsTxt(File robotsTableFile, int bufferkb) {
         this.robotsTableFile = robotsTableFile;
         this.bufferkb = bufferkb;
         if (robotsTableFile.exists()) {
@@ -72,12 +71,14 @@ public class plasmaCrawlRobotsTxt {
                 robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024));
             } catch (kelondroException e) {
                 robotsTableFile.delete();
-                robotsTableFile.getParentFile().mkdirs();
-                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512));
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, true));
+            } catch (IOException e) {
+                robotsTableFile.delete();
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, true));
             }
         } else {
             robotsTableFile.getParentFile().mkdirs();
-            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512));
+            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, true));
         }
     }
     
@@ -95,12 +96,8 @@ public class plasmaCrawlRobotsTxt {
             robotsTable.close();
         } catch (IOException e) {}
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
-        try {
-            robotsTableFile.getParentFile().mkdirs();
-            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, this.bufferkb, 256, 512));
-        } catch (IOException e){
-            serverLog.logSevere("PLASMA", "robotsTxt.resetDatabase", e);
-        }
+        robotsTableFile.getParentFile().mkdirs();
+        robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, this.bufferkb, 256, 512, true));
     }
     
     public void close() {

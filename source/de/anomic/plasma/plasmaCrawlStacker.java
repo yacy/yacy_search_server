@@ -78,7 +78,7 @@ public final class plasmaCrawlStacker {
     //private boolean stopped = false;
     private stackCrawlQueue queue;
     
-    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, int dbCacheSize) throws IOException {
+    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, int dbCacheSize) {
         this.sb = sb;
         
         this.queue = new stackCrawlQueue(dbPath,dbCacheSize);
@@ -500,7 +500,7 @@ public final class plasmaCrawlStacker {
         private final LinkedList urlEntryHashCache;
         private kelondroTree urlEntryCache;
         
-        public stackCrawlQueue(File cacheStacksPath, int bufferkb) throws IOException  {
+        public stackCrawlQueue(File cacheStacksPath, int bufferkb) {
             // init the read semaphore
             this.readSync  = new serverSemaphore (0);
             
@@ -516,7 +516,12 @@ public final class plasmaCrawlStacker {
             File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
             if (cacheFile.exists()) {
                 // open existing cache
-                this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400);
+                try {
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400);
+                } catch (IOException e) {
+                    cacheFile.delete();
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, plasmaCrawlNURL.ce, true);
+                }
                 try {
                     // loop through the list and fill the messageList with url hashs
                     Iterator iter = this.urlEntryCache.nodeIterator(true,false);
@@ -538,12 +543,12 @@ public final class plasmaCrawlStacker {
                     // deleting old db and creating a new db
                     try {this.urlEntryCache.close();}catch(Exception ex){}
                     cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, plasmaCrawlNURL.ce);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, plasmaCrawlNURL.ce, true);
                 }
             } else {
                 // create new cache
                 cacheFile.getParentFile().mkdirs();
-                this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, plasmaCrawlNURL.ce);
+                this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, plasmaCrawlNURL.ce, true);
             }            
         }
         

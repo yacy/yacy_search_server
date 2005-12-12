@@ -58,7 +58,6 @@ import java.lang.NumberFormatException;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCodings;
 
 public final class userDB {
@@ -72,7 +71,7 @@ public final class userDB {
 	private final serverCodings codings = new serverCodings(true);
 	private HashMap ipUsers = new HashMap();
     
-    public userDB(File userTableFile, int bufferkb) throws IOException {
+    public userDB(File userTableFile, int bufferkb) {
         this.userTableFile = userTableFile;
         this.bufferkb = bufferkb;
         if (userTableFile.exists()) {
@@ -81,11 +80,15 @@ public final class userDB {
             } catch (kelondroException e) {
                 userTableFile.delete();
                 userTableFile.getParentFile().mkdirs();
-                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256));
+                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256, true));
+            } catch (IOException e) {
+                userTableFile.delete();
+                userTableFile.getParentFile().mkdirs();
+                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256, true));
             }
         } else {
             userTableFile.getParentFile().mkdirs();
-            this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256));
+            this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256, true));
         }
     }
     
@@ -103,12 +106,8 @@ public final class userDB {
             userTable.close();
         } catch (IOException e) {}
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
-        try {
-            userTableFile.getParentFile().mkdirs();
-            userTable = new kelondroMap(new kelondroDyn(userTableFile, this.bufferkb, 256, 512));
-        } catch (IOException e){
-            serverLog.logSevere("PLASMA", "user.resetDatabase", e);
-        }
+        userTableFile.getParentFile().mkdirs();
+        userTable = new kelondroMap(new kelondroDyn(userTableFile, this.bufferkb, 256, 512, true));
     }
     
     public void close() {

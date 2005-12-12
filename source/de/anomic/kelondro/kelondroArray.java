@@ -55,10 +55,16 @@ public class kelondroArray extends kelondroRecords {
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
     private static short thisOHHandles = 0; // and two handles overhead for a double-chained list
     
-    public kelondroArray(File file, int[] columns, int intprops) throws IOException {
-	// this creates a new array
-	super(file, 0, thisOHBytes, thisOHHandles, columns, intprops, columns.length /*txtProps*/, 80 /*txtPropWidth*/);
-        for (int i = 0; i < intprops; i++) setHandle(i, new Handle(0));
+    public kelondroArray(File file, int[] columns, int intprops, boolean exitOnFail) {
+        // this creates a new array
+        super(file, 0, thisOHBytes, thisOHHandles, columns, intprops, columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
+        for (int i = 0; i < intprops; i++) try {
+            setHandle(i, new Handle(0));
+        } catch (IOException e) {
+            super.logFailure("cannot set handle " + i + " / " + e.getMessage());
+            if (exitOnFail) System.exit(-1);
+            throw new RuntimeException("cannot set handle " + i + " / " + e.getMessage());
+        }
     }
 
     public kelondroArray(File file) throws IOException{
@@ -129,7 +135,7 @@ public class kelondroArray extends kelondroRecords {
                 // create <filename> <valuelen> 
                 File f = new File(args[1]);
                 if (f.exists()) f.delete();
-                kelondroArray fm = new kelondroArray(f, new int[]{Integer.parseInt(args[2])}, 2);
+                kelondroArray fm = new kelondroArray(f, new int[]{Integer.parseInt(args[2])}, 2, true);
                 fm.close();
             } else
             if ((args.length == 2) && (args[0].equals("-v"))) {
@@ -157,7 +163,7 @@ public class kelondroArray extends kelondroRecords {
             if ((args.length == 1) && (args[0].equals("-test"))) {
                 File testfile = new File("test.array");
                 if (testfile.exists()) testfile.delete();
-                kelondroArray fm = new kelondroArray(testfile, new int[]{30, 50}, 9);
+                kelondroArray fm = new kelondroArray(testfile, new int[]{30, 50}, 9, true);
                 for (int i = 0; i < 100; i++) {
                     fm.set(i, new byte[][]{("name" + i).getBytes(), ("value" + i).getBytes()});
                 }

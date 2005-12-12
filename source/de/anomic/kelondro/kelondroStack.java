@@ -67,15 +67,21 @@ public final class kelondroStack extends kelondroRecords {
     private static int root  = 0; // pointer for FHandles-array: pointer to root node
     private static int toor  = 1; // pointer for FHandles-array: pointer to root node
 
-    public kelondroStack(File file, long buffersize, int key, int value) throws IOException {
-	this(file, buffersize, new int[] {key, value});
+    public kelondroStack(File file, long buffersize, int key, int value, boolean exitOnFail) {
+        this(file, buffersize, new int[] { key, value }, exitOnFail);
     }
 
-    public kelondroStack(File file, long buffersize, int[] columns) throws IOException {
-	// this creates a new tree
-	super(file, buffersize, thisOHBytes, thisOHHandles, columns, thisFHandles, columns.length /*txtProps*/, 80 /*txtPropWidth*/);
-	setHandle(root, null); // define the root value
-	setHandle(toor, null); // define the toor value
+    public kelondroStack(File file, long buffersize, int[] columns, boolean exitOnFail) {
+        // this creates a new tree
+        super(file, buffersize, thisOHBytes, thisOHHandles, columns, thisFHandles, columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
+        try {
+            setHandle(root, null); // define the root value
+            setHandle(toor, null); // define the toor value
+        } catch (IOException e) {
+            super.logFailure("cannot set root/toor handles / " + e.getMessage());
+            if (exitOnFail) System.exit(-1);
+            throw new RuntimeException("cannot set root/toor handles / " + e.getMessage());
+        }
     }
 
     public kelondroStack(File file, long buffersize) throws IOException{
@@ -90,7 +96,7 @@ public final class kelondroStack extends kelondroRecords {
 	setHandle(toor, null); // reset the toor value
     }
 
-    public static kelondroStack reset(kelondroStack stack) throws IOException {
+    public static kelondroStack reset(kelondroStack stack) {
         // memorize settings to this file
         File f = new File(stack.filename);
         long bz = stack.XcacheSize * stack.cacheChunkSize(true);
@@ -101,7 +107,7 @@ public final class kelondroStack extends kelondroRecords {
         if (f.exists()) f.delete();
 
         // re-open a database with same settings as before
-        return new kelondroStack(f, bz, cols);
+        return new kelondroStack(f, bz, cols, true);
     }
     
     public class Counter implements Iterator {
@@ -410,7 +416,7 @@ public final class kelondroStack extends kelondroRecords {
 		    int[] lens = new int[2];
 		    lens[0] = Integer.parseInt(args[1]);
 		    lens[1] = Integer.parseInt(args[2]);
-		    kelondroStack fm = new kelondroStack(f, 0x100000, lens);
+		    kelondroStack fm = new kelondroStack(f, 0x100000, lens, true);
 		    fm.close();
 		} else if (args[0].equals("-p")) {
 		    kelondroStack fm = new kelondroStack(new File(args[3]), 0x100000);

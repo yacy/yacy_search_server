@@ -144,7 +144,7 @@ public class kelondroHashtable {
     
     private static final byte[] dummyKey = serverCodings.enhancedCoder.encodeBase64Long(0, 5).getBytes();
 
-    public kelondroHashtable(File file, int[] columns, int offset, int maxsize, int maxrehash) throws IOException {
+    public kelondroHashtable(File file, int[] columns, int offset, int maxsize, int maxrehash, boolean exitOnFail) {
 	// this creates a new hashtable
         // the key element is not part of the columns array
         // this is unlike the kelondroTree, where the key is part of a row
@@ -154,17 +154,23 @@ public class kelondroHashtable {
         // this number is needed to omit grow of the table in case of re-hashing
         // the maxsize is re-computed to a virtual folding height and will result in a tablesize
         // less than the given maxsize. The actual maxsize can be retrieved by maxsize()
-        this.hashArray = new kelondroArray(file, extCol(columns), 6);
+        this.hashArray = new kelondroArray(file, extCol(columns), 6, exitOnFail);
         this.offset = offset;
         this.maxk = kelondroMSetTools.log2a(maxsize); // equal to |log2(maxsize)| + 1
         if (this.maxk >= kelondroMSetTools.log2a(maxsize + power2(offset + 1) + 1) - 1) this.maxk--;
         this.maxrehash = maxrehash;
-        hashArray.seti(0, this.offset);
-        hashArray.seti(1, this.maxk);
-        hashArray.seti(2, this.maxrehash);
         dummyRow = new byte[hashArray.columns()][];
         dummyRow[0] = dummyKey;
-        for (int i = 0; i < hashArray.columns(); i++) dummyRow[i] = new byte[0];
+        for (int i = 0; i < hashArray.columns(); i++)
+        try {
+            hashArray.seti(0, this.offset);
+            hashArray.seti(1, this.maxk);
+            hashArray.seti(2, this.maxrehash);
+        } catch (IOException e) {
+            hashArray.logFailure("cannot set properties / " + e.getMessage());
+            if (exitOnFail) System.exit(-1);
+            throw new RuntimeException("cannot set properties / " + e.getMessage());
+        }
     }
 
     public kelondroHashtable(File file) throws IOException{

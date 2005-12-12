@@ -1,7 +1,6 @@
 package de.anomic.plasma;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -142,7 +141,7 @@ public class plasmaDbImporter extends Thread {
         return this.importWordIndex.size();
     }
     
-    public plasmaDbImporter(plasmaWordIndex theHomeIndexDB, plasmaCrawlLURL theHomeUrlDB, String theImportPath) throws IOException {
+    public plasmaDbImporter(plasmaWordIndex theHomeIndexDB, plasmaCrawlLURL theHomeUrlDB, String theImportPath) {
         super(runningJobs,"DB-Import_" + theImportPath);
         
         this.log = new serverLog("DB-IMPORT");

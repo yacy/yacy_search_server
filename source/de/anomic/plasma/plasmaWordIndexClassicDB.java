@@ -182,12 +182,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
     }
 
     public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty, long maxTime) {
-        try {
-            return new plasmaWordIndexEntity(databaseRoot, wordHash, deleteIfEmpty);
-        } catch (IOException e) {
-            log.logSevere("plasmaWordIndexClassic.getIndex: " + e.getMessage());
-            return null;
-        }
+        return new plasmaWordIndexEntity(databaseRoot, wordHash, deleteIfEmpty);
     }
     
     public long getUpdateTime(String wordHash) {

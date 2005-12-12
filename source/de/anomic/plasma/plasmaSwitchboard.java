@@ -118,6 +118,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
+
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
 import de.anomic.data.userDB;
@@ -220,7 +221,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private boolean crawlingIsPaused = false;
     private static plasmaSwitchboard sb;
     
-    public plasmaSwitchboard(String rootPath, String initPath, String configPath) throws IOException {
+    public plasmaSwitchboard(String rootPath, String initPath, String configPath) {
         super(rootPath, initPath, configPath);
         
         // set loglevel and log
@@ -370,16 +371,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // going through the sbQueue Entries and registering all content files as in use
         int count = 0;
-        ArrayList sbQueueEntries = this.sbQueue.list();
-        for (int i=0; i<sbQueueEntries.size(); i++) {
-            plasmaSwitchboardQueue.Entry entry = (plasmaSwitchboardQueue.Entry) sbQueueEntries.get(i);
-            if ((entry != null)&&(entry.url() != null)&&(entry.cacheFile().exists())) {
-                plasmaHTCache.filesInUse.add(entry.cacheFile());
-                count++;
+        try {
+            ArrayList sbQueueEntries = this.sbQueue.list();
+            for (int i = 0; i < sbQueueEntries.size(); i++) {
+                plasmaSwitchboardQueue.Entry entry = (plasmaSwitchboardQueue.Entry) sbQueueEntries.get(i);
+                if ((entry != null) && (entry.url() != null) && (entry.cacheFile().exists())) {
+                    plasmaHTCache.filesInUse.add(entry.cacheFile());
+                    count++;
+                }
             }
+            this.log.logConfig(count + " files in htcache reported to the cachemanager as in use.");
+        } catch (IOException e) {
+            this.log.logSevere("cannot find any files in htcache reported to the cachemanager: " + e.getMessage());
         }
-        this.log.logConfig(count + " files in htcache reported to the cachemanager as in use.");
-        
         // define an extension-blacklist
         log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
         plasmaParser.initMediaExt(plasmaParser.extString2extList(getConfig("mediaExt","")));
@@ -588,10 +592,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return (bytes / 1024) + "TByte";
     }
     
-    private void initProfiles() throws IOException {
+    private void initProfiles() {
         if ((profiles.size() == 0) ||
-        (getConfig(STR_PROXYPROFILE, "").length() == 0) ||
-        (profiles.getEntry(getConfig(STR_PROXYPROFILE, "")) == null)) {
+            (getConfig(STR_PROXYPROFILE, "").length() == 0) ||
+            (profiles.getEntry(getConfig(STR_PROXYPROFILE, "")) == null)) {
             // generate new default entry for proxy crawling
             defaultProxyProfile = profiles.newEntry("proxy", "", ".*", ".*", Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), false, true, true, true, false, true, true, true);
             setConfig(STR_PROXYPROFILE, defaultProxyProfile.handle());
@@ -608,15 +612,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             defaultRemoteProfile = profiles.getEntry(getConfig(STR_REMOTEPROFILE, ""));
         }
     }
+    
     private void resetProfiles() {
         final File pdb = new File(plasmaPath, "crawlProfiles0.db");
         if (pdb.exists()) pdb.delete();
-        try {
-            int ramProfiles = (int) getConfigLong("ramCacheProfiles",1024) / 1024;
-            profiles = new plasmaCrawlProfile(pdb, ramProfiles);
-            initProfiles();
-        } catch (IOException e) {}
+        int ramProfiles = (int) getConfigLong("ramCacheProfiles", 1024) / 1024;
+        profiles = new plasmaCrawlProfile(pdb, ramProfiles);
+        initProfiles();
     }
+    
     public boolean cleanProfiles() {
         if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (urlPool.noticeURL.stackSize() > 0)) return false;
         final Iterator iter = profiles.profiles(true);

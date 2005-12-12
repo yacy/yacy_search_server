@@ -69,21 +69,27 @@ public class wikiBoard {
     private kelondroMap bkpbase = null;
     private HashMap authors = new HashMap();
     
-    public wikiBoard(File actpath, File bkppath, int bufferkb) throws IOException {
+    public wikiBoard(File actpath, File bkppath, int bufferkb) {
     		new File(actpath.getParent()).mkdir();
-    			if (datbase == null) {
-    				if (actpath.exists())
-    					datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb/2 * 0x40));
-    				else
-    					datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb/2 * 0x400, keyLength, recordSize));
-    			}
-    			new File(bkppath.getParent()).mkdir();
-    			if (bkpbase == null) {
-    				if (bkppath.exists())
-    					bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb/2 * 0x400));
-    				else
-    					bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb/2 * 0x400, keyLength + dateFormat.length(), recordSize));
-    			}
+        if (datbase == null) {
+            if (actpath.exists()) try {
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x40));
+            } catch (IOException e) {
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, true));
+            } else {
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, true));
+            }
+        }
+        new File(bkppath.getParent()).mkdir();
+        if (bkpbase == null) {
+            if (bkppath.exists()) try {
+                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400));
+            } catch (IOException e) {
+                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, keyLength + dateFormat.length(), recordSize, true));
+            } else {
+                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, keyLength + dateFormat.length(), recordSize, true));
+            }
+        }
     }
 
     public int sizeOfTwo() {

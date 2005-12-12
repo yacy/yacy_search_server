@@ -167,7 +167,7 @@ public class dbtest {
                 if (tablefile.exists()) {
                     table = new kelondroTree(tablefile, buffer);
                 } else {
-                    table = new kelondroTree(tablefile, buffer, new int[]{keylength, valuelength, valuelength});
+                    table = new kelondroTree(tablefile, buffer, new int[]{keylength, valuelength, valuelength}, true);
                 }
             }
             

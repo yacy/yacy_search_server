@@ -87,7 +87,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
 
     //public static Set damagedURLS = Collections.synchronizedSet(new HashSet());
     
-    public plasmaCrawlLURL(File cachePath, int bufferkb) throws IOException {
+    public plasmaCrawlLURL(File cachePath, int bufferkb) {
         super();
         int[] ce = {
             urlHashLength,
@@ -108,11 +108,16 @@ public final class plasmaCrawlLURL extends plasmaURL {
         for (int i = 0; i < ce.length; i++) { segmentsize += ce[i]; }
         if (cachePath.exists()) {
             // open existing cache
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400);
+            try {
+                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400);
+            } catch (IOException e) {
+                cachePath.getParentFile().mkdirs();
+                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce, true);
+            }
         } else {
             // create new cache
             cachePath.getParentFile().mkdirs();
-           urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce, true);
         }
 
         // init result stacks

@@ -55,7 +55,7 @@ public class plasmaURLPool {
     public  final plasmaCrawlNURL        noticeURL;
     public  final plasmaCrawlEURL        errorURL;
     
-    public plasmaURLPool(File plasmaPath, int ramLURL, int ramNURL, int ramEURL) throws IOException {
+    public plasmaURLPool(File plasmaPath, int ramLURL, int ramNURL, int ramEURL) {
         loadedURL = new plasmaCrawlLURL(new File(plasmaPath, "urlHash.db"), ramLURL);
         noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL);
         errorURL = new plasmaCrawlEURL(new File(plasmaPath, "urlErr0.db"), ramEURL);
