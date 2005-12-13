@@ -149,15 +149,16 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     public byte[][] get(byte[] key) throws IOException {
         // System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
         byte[][] result = null;
-        //writeLock.stay(2000, 1000);
-        Search search = new Search();
-        search.process(key);
-        if (search.found()) {
-            result = search.getMatcher().getValues();
-        } else {
-            result = null;
+        // writeLock.stay(2000, 1000);
+        synchronized (writeSearchObj) {
+            writeSearchObj.process(key);
+            if (writeSearchObj.found()) {
+                result = writeSearchObj.getMatcher().getValues();
+            } else {
+                result = null;
+            }
         }
-        //writeLock.release();
+        // writeLock.release();
         return result;
     }
     
@@ -318,7 +319,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	return (lc.equals(childn.handle()));
     }
     
-    public synchronized long[] putLong(byte[] key, long[] newlongs) throws IOException {
+    public long[] putLong(byte[] key, long[] newlongs) throws IOException {
         byte[][] newrow = new byte[newlongs.length + 1][];
         newrow[0] = key;
         for (int i = 0; i < newlongs.length; i++) {
@@ -598,7 +599,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     }
 
     // Associates the specified value with the specified key in this map
-    public synchronized byte[] put(byte[] key, byte[] value) throws IOException {
+    public byte[] put(byte[] key, byte[] value) throws IOException {
 	byte[][] row = new byte[2][];
 	row[0] = key;
 	row[1] = value;
