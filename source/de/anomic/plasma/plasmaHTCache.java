@@ -130,7 +130,7 @@ public final class plasmaHTCache {
 
         // start the cache startup thread
         // this will collect information about the current cache size and elements
-        serverInstantThread.oneTimeJob(this, "cacheScan", this.log, 5000);
+        serverInstantThread.oneTimeJob(this, "cacheScan", this.log, 120000);
     }
 
     public int size() {
@@ -307,7 +307,7 @@ public final class plasmaHTCache {
     }
 
     public void cacheScan() {
-        //log.logSystem("STARTING CACHE SCANNING");
+        log.logConfig("STARTING HTCACHE SCANNING");
         kelondroMScoreCluster doms = new kelondroMScoreCluster();
         int c = 0;
         enumerateFiles ef = new enumerateFiles(this.cachePath, true, false, true, true);
@@ -320,6 +320,7 @@ public final class plasmaHTCache {
             doms.incScore(dom(f));
             this.currCacheSize += f.length();
             this.cacheAge.put(ageString(d, f), f);
+            try {Thread.sleep(10);} catch (InterruptedException e) {}
         }
         //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
         long ageHours = 0;
@@ -334,6 +335,7 @@ public final class plasmaHTCache {
             ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) + " OLD");
         cleanup();
 
+        log.logConfig("STARTING DNS PREFETCH");
         // start to prefetch ip's from dns                       
         String dom;
         long start = System.currentTimeMillis();
