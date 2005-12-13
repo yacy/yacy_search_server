@@ -134,12 +134,12 @@ public final class plasmaWordIndexAssortment {
         row[1] = kelondroRecords.long2bytes(1, 4);
         row[2] = kelondroRecords.long2bytes(newContainer.updated(), 8);
         Iterator entries = newContainer.entries();
-	plasmaWordIndexEntry entry;
+        plasmaWordIndexEntry entry;
         for (int i = 0; i < assortmentLength; i++) {
             entry = (plasmaWordIndexEntry) entries.next();
-	    row[3 + 2 * i] = entry.getUrlHash().getBytes();
-	    row[4 + 2 * i] = entry.toEncodedForm(true).getBytes();
-	}
+            row[3 + 2 * i] = entry.getUrlHash().getBytes();
+	        row[4 + 2 * i] = entry.toEncodedForm(true).getBytes();
+        }
         byte[][] oldrow = null;
         try {
             oldrow = assortments.put(row);
@@ -170,19 +170,41 @@ public final class plasmaWordIndexAssortment {
 			resetDatabase();
 			return null;
 		}
-		if (row == null)
-			return null;
-		long updateTime = kelondroRecords.bytes2long(row[2]);
-		// plasmaWordIndexEntry[] wordEntries = new plasmaWordIndexEntry[this.bufferStructureLength];
-		plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
-		for (int i = 0; i < assortmentLength; i++) {
-			container.add(
-					new plasmaWordIndexEntry[] { new plasmaWordIndexEntry(
-							new String(row[3 + 2 * i]), new String(
-									row[4 + 2 * i])) }, updateTime);
-		}
-		return container;
+        return row2container(wordHash, row);
 	}
+    
+    public plasmaWordIndexEntryContainer get(String wordHash) {
+        // gets a word index from assortment database
+        // and returns the content record
+        byte[][] row = null;
+        try {
+            row = assortments.get(wordHash.getBytes());
+        } catch (IOException e) {
+            log.logSevere("removeAssortment/IO-error: " + e.getMessage()
+                    + " - reset assortment-DB " + assortments.file(), e);
+            resetDatabase();
+            return null;
+        } catch (kelondroException e) {
+            log.logSevere("removeAssortment/kelondro-error: " + e.getMessage()
+                    + " - reset assortment-DB " + assortments.file(), e);
+            resetDatabase();
+            return null;
+        }
+        return row2container(wordHash, row);
+    }
+    
+    private plasmaWordIndexEntryContainer row2container(String wordHash, byte[][] row) {
+        if (row == null) return null;
+        final long updateTime = kelondroRecords.bytes2long(row[2]);
+        plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
+        for (int i = 0; i < assortmentLength; i++) {
+            container.add(
+                    new plasmaWordIndexEntry[] { new plasmaWordIndexEntry(
+                            new String(row[3 + 2 * i]), new String(
+                                    row[4 + 2 * i])) }, updateTime);
+        }
+        return container;
+    }
     
     private void resetDatabase() {
         // deletes the assortment database and creates a new one

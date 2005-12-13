@@ -57,46 +57,47 @@ import de.anomic.server.logging.serverLog;
 public final class plasmaWordIndexAssortmentCluster {
     
     // class variables
-    private int clusterCount;
-    public int clusterCapacity;
+    private int clusterCount;   // number of cluster files
+    public int clusterCapacity; // number of all url referrences that can be stored to a single word in the cluster
     
     //private serverLog log;
     private plasmaWordIndexAssortment[] assortments;
     private long completeBufferKB;
 
     public plasmaWordIndexAssortmentCluster(File assortmentsPath, int clusterCount, int bufferkb, serverLog log) {
-	// set class variables
-	if (!(assortmentsPath.exists())) assortmentsPath.mkdirs();
-	this.clusterCount = clusterCount;
+        // set class variables
+        if (!(assortmentsPath.exists())) assortmentsPath.mkdirs();
+        this.clusterCount = clusterCount;
         this.clusterCapacity = clusterCount * (clusterCount + 1) / 2;
         this.completeBufferKB = bufferkb;
-        //this.log = log;
-	this.assortments = new plasmaWordIndexAssortment[clusterCount];
+        // this.log = log;
+        this.assortments = new plasmaWordIndexAssortment[clusterCount];
 
         // open cluster and close it directly again to detect the element sizes
         int[] sizes = new int[clusterCount];
         int sumSizes = 1;
         plasmaWordIndexAssortment testAssortment;
         for (int i = 0; i < clusterCount; i++) {
-	    testAssortment = new plasmaWordIndexAssortment(assortmentsPath, i + 1, 0, null);
+            testAssortment = new plasmaWordIndexAssortment(assortmentsPath, i + 1, 0, null);
             sizes[i] = testAssortment.size() + clusterCount - i;
             sumSizes += sizes[i];
             testAssortment.close();
             testAssortment = null;
-	}
-        
-	// initialize cluster using the cluster elements size for optimal buffer size
-	for (int i = 0; i < clusterCount; i++) {
-	    assortments[i] = new plasmaWordIndexAssortment(assortmentsPath, i + 1, (int) (completeBufferKB * (long) sizes[i] / (long) sumSizes), log);
-	}
+        }
+
+        // initialize cluster using the cluster elements size for optimal buffer
+        // size
+        for (int i = 0; i < clusterCount; i++) {
+            assortments[i] = new plasmaWordIndexAssortment(assortmentsPath, i + 1, (int) (completeBufferKB * (long) sizes[i] / (long) sumSizes), log);
+        }
     }
 
     private plasmaWordIndexEntryContainer storeSingular(String wordHash, plasmaWordIndexEntryContainer newContainer) {
-	// this tries to store the record. If the record does not fit, or a same hash already
-	// exists and would not fit together with the new record, then the record is deleted from
-	// the assortmen(s) and returned together with the newRecord.
-	// if storage was successful, NULL is returned.
-	if (newContainer.size() > clusterCount) return newContainer; // it will not fit
+        // this tries to store the record. If the record does not fit, or a same hash already
+        // exists and would not fit together with the new record, then the record is deleted from
+        // the assortmen(s) and returned together with the newRecord.
+        // if storage was successful, NULL is returned.
+        if (newContainer.size() > clusterCount) return newContainer; // it will not fit
         plasmaWordIndexEntryContainer buffer;
         while ((buffer = assortments[newContainer.size() - 1].remove(wordHash)) != null) {
             newContainer.add(buffer);
@@ -109,18 +110,18 @@ public final class plasmaWordIndexAssortmentCluster {
     }
     
     private void storeForced(String wordHash, plasmaWordIndexEntryContainer newContainer) {
-	// this stores the record and overwrites an existing record.
-        // this is safe of we can be shure that the record does not exist before.
-	if ((newContainer == null) || (newContainer.size() == 0) || (newContainer.size() > clusterCount)) return; // it will not fit
+        // this stores the record and overwrites an existing record.
+        // this is safe if we can be shure that the record does not exist before.
+        if ((newContainer == null) || (newContainer.size() == 0) || (newContainer.size() > clusterCount)) return; // it will not fit
         assortments[newContainer.size() - 1].store(wordHash, newContainer);
     }
     
     private void storeStretched(String wordHash, plasmaWordIndexEntryContainer newContainer) {
-	// this stores the record and stretches the storage over
+        // this stores the record and stretches the storage over
         // all the assortments that are necessary to fit in the record
         // IMPORTANT: it must be ensured that the wordHash does not exist in the cluster before
         // i.e. by calling removeFromAll
-	if (newContainer.size() <= clusterCount) {
+        if (newContainer.size() <= clusterCount) {
             storeForced(wordHash, newContainer);
             return;
         }
@@ -154,9 +155,48 @@ public final class plasmaWordIndexAssortmentCluster {
     }
     
     public plasmaWordIndexEntryContainer storeTry(String wordHash, plasmaWordIndexEntryContainer newContainer) {
+        // this is called by the index ram cache flush process
+        // it returnes NULL if the storage was successful
+        // it returnes a new container if the given container cannot be stored
+        // containers that are returned will be stored in a WORDS file
         if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
+        
+        // split the container into several smaller containers that will take the whole thing
+        // first find out how the container can be splitted
+        int testsize = Math.min(clusterCount, newContainer.size());
+        int [] spaces = new int[testsize];
+        for (int i = testsize - 1; i >= 0; i--) spaces[i] = 0;
+        int need = newContainer.size();
+        int s = testsize - 1;
+        while (s >= 0) {
+            spaces[s] = (assortments[s].get(wordHash) == null) ? (s + 1) : 0;
+            need -= spaces[s];
+            assert (need >= 0);
+            if (need == 0) break;
+            s = (need < s) ? need : s - 1;
+        }
+        if (need == 0) {
+            // we found spaces so that we can put in the newContainer into these spaces
+            
+            plasmaWordIndexEntryContainer c;
+            Iterator i = newContainer.entries();
+            for (int j = testsize - 1; j >= 0; j--) {
+                if (spaces[j] == 0) continue;
+                c = new plasmaWordIndexEntryContainer(wordHash);
+                for (int k = 0; k <= j; k++) {
+                    assert (i.hasNext());
+                    c.add((plasmaWordIndexEntry) i.next(), newContainer.updated());
+                }
+                storeForced(wordHash, c);
+            }
+
+            return null;
+        }
+        
         if (newContainer.size() <= clusterCount) newContainer = storeSingular(wordHash, newContainer);
         if (newContainer == null) return null;
+        
+        // clean up the whole thing and try to insert the container then
         newContainer.add(removeFromAll(wordHash, -1));
         if (newContainer.size() > clusterCapacity) return newContainer;
         storeStretched(wordHash, newContainer);

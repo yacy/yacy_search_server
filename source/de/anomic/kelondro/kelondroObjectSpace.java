@@ -47,10 +47,12 @@ import java.util.HashMap;
 public class kelondroObjectSpace {
 
     private static final int minSize = 10;
+    private static final int maxSize = 4096;
+    
     private static HashMap objects = new HashMap();
     
     public static byte[] alloc(int len) {
-        if (len < minSize) return new byte[len];
+        if ((len < minSize) || (len > maxSize)) return new byte[len];
         synchronized (objects) {
             ArrayList buf = (ArrayList) objects.get(new Integer(len));
             if ((buf == null) || (buf.size() == 0)) return new byte[len];
@@ -59,7 +61,7 @@ public class kelondroObjectSpace {
     }
     
     public static void recycle(byte[] b) {
-        if (b.length < minSize) {
+        if ((b.length < minSize) || (b.length > maxSize)) {
             b = null;
             return;
         }
