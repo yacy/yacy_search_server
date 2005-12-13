@@ -45,28 +45,28 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks implements kelondroIOChunks {
 
     protected kelondroRA ra;
-    private int bufferMaxSize, bufferCurrSize;
+    private long bufferMaxSize, bufferCurrSize;
     private long commitTimeout;
-    private HashMap buffer;
+    private TreeMap buffer;
     private long lastCommit = 0;
     
     private static final int overhead = 40;
     
     
-    public kelondroBufferedIOChunks(kelondroRA ra, String name, int bufferkb, long commitTimeout) {
+    public kelondroBufferedIOChunks(kelondroRA ra, String name, long buffer, long commitTimeout) {
         this.name = name;
         this.ra = ra;
-        this.bufferMaxSize = 1024 * bufferkb;
+        this.bufferMaxSize = buffer;
         this.bufferCurrSize = 0;
         this.commitTimeout = commitTimeout;
-        this.buffer = new HashMap();
+        this.buffer = new TreeMap();
         this.lastCommit = System.currentTimeMillis();
     }
 
@@ -127,18 +127,39 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         synchronized (buffer) {
             if (buffer.size() == 0) return;
             Iterator i = buffer.entrySet().iterator();
-            Map.Entry entry;
-            long pos;
-            byte[] b;
+            Map.Entry entry = (Map.Entry) i.next();
+            long lastPos = ((Long) entry.getKey()).longValue();
+            byte[] lastChunk = (byte[]) entry.getValue();
+            long nextPos;
+            byte[] nextChunk, tmpChunk;
             synchronized (this.ra) {
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
-                    pos = ((Long) entry.getKey()).longValue();
-                    b = (byte[]) entry.getValue();
-                    this.ra.seek(pos);
-                    this.ra.write(b);
-                    kelondroObjectSpace.recycle(b);
+                    nextPos = ((Long) entry.getKey()).longValue();
+                    nextChunk = (byte[]) entry.getValue();
+                    if (lastPos + lastChunk.length == nextPos) {
+                        // try to combine the new chunk with the previous chunk
+                        //System.out.println("combining chunks pos0=" + lastPos + ", chunk0.length=" + lastChunk.length + ", pos1=" + nextPos + ", chunk1.length=" + nextChunk.length);
+                        tmpChunk = kelondroObjectSpace.alloc(lastChunk.length + nextChunk.length);
+                        System.arraycopy(lastChunk, 0, tmpChunk, 0, lastChunk.length);
+                        System.arraycopy(nextChunk, 0, tmpChunk, lastChunk.length, nextChunk.length);
+                        kelondroObjectSpace.recycle(lastChunk);
+                        lastChunk = tmpChunk;
+                        tmpChunk = null;
+                        kelondroObjectSpace.recycle(nextChunk);
+                    } else {
+                        // write the last chunk and take nextChunk next time als lastChunk
+                        this.ra.seek(lastPos);
+                        this.ra.write(lastChunk);
+                        kelondroObjectSpace.recycle(lastChunk);
+                        lastPos = nextPos;
+                        lastChunk = nextChunk;
+                    }
                 }
+                // at the end write just the last chunk
+                this.ra.seek(lastPos);
+                this.ra.write(lastChunk);
+                kelondroObjectSpace.recycle(lastChunk);
             }
             buffer.clear();
             bufferCurrSize = 0;

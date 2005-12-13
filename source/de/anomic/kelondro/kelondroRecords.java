@@ -209,13 +209,13 @@ public class kelondroRecords {
             kelondroRA raf = new kelondroFileRA(this.filename);
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
-            init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
+            init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth, buffersize / 10);
         } catch (IOException e) {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail)
                 System.exit(-1);
         }
-        initCache(buffersize);
+        initCache(buffersize / 10 * 9);
     }
     
     public kelondroRecords(kelondroRA ra, long buffersize /* bytes */,
@@ -224,19 +224,19 @@ public class kelondroRecords {
                            boolean exitOnFail) {
         this.filename = null;
         try {
-            init(ra, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth);
+            init(ra, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth, buffersize / 10);
         } catch (IOException e) {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail) System.exit(-1);
         }
-        initCache(buffersize);
+        initCache(buffersize / 10 * 9);
     }
    
     private void init(kelondroRA ra, short ohbytec, short ohhandlec,
-                      int[] columns, int FHandles, int txtProps, int txtPropWidth) throws IOException {
+                      int[] columns, int FHandles, int txtProps, int txtPropWidth, long writeBufferSize) throws IOException {
 
         // create new Chunked IO
-        this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 1024, 8000 + random.nextLong() % 2000);
+        this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), writeBufferSize, 30000 + random.nextLong() % 30000);
         //this.entryFile = new kelondroRAIOChunks(ra, ra.name());
         
         // store dynamic run-time data
@@ -334,19 +334,19 @@ public class kelondroRecords {
         //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
         //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
-        init(raf);
-        initCache(buffersize);
+        init(raf, buffersize / 10);
+        initCache(buffersize / 10 * 9);
     }
     
     public kelondroRecords(kelondroRA ra, long buffersize) throws IOException{
         this.filename = null;
-        init(ra);
-        initCache(buffersize);
+        init(ra, buffersize / 10);
+        initCache(buffersize / 10 * 9);
     }
 
-    private void init(kelondroRA ra) throws IOException {
+    private void init(kelondroRA ra, long writeBufferSize) throws IOException {
         // read from Chunked IO
-        this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 1024, 8000 + random.nextLong() % 2000);
+        this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), writeBufferSize, 30000 + random.nextLong() % 30000);
         //this.entryFile = new kelondroRAIOChunks(ra, ra.name());
 
         // read dynamic variables that are back-ups of stored values in file;
