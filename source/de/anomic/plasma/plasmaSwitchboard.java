@@ -737,30 +737,26 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public void close() {
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         terminateAllThreads(true);
-        log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing (stand by...)");
+        log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to database manager");
+        // closing all still running db importer jobs
+        plasmaDbImporter.close();
+        indexDistribution.close();
+        cacheLoader.close();
+        wikiDB.close();
+        userDB.close();
+        messageDB.close();
+        if (facilityDB != null) try {facilityDB.close();} catch (IOException e) {}
+        sbStackCrawlThread.close();
+        urlPool.close();
+        profiles.close();
+        robots.close();
+        parser.close();
+        cacheManager.close();
+        sbQueue.close();
+        flushCitationReference(crg, "crg");
+        log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to threaded indexing (stand by...)");
         int waitingBoundSeconds = Integer.parseInt(getConfig("maxWaitingWordFlush", "120"));
         wordIndex.close(waitingBoundSeconds);
-        log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager");
-        try {
-            // closing all still running db importer jobs
-            plasmaDbImporter.close();
-            
-            indexDistribution.close();
-            cacheLoader.close();
-            wikiDB.close();
-            userDB.close();
-            messageDB.close();
-            if (facilityDB != null) facilityDB.close();
-            sbStackCrawlThread.close();
-            urlPool.close();
-            profiles.close();
-            robots.close();
-            parser.close();
-            cacheManager.close();
-            sbQueue.close();
-            //flushCitationReference(crl, "crl");
-            flushCitationReference(crg, "crg");
-        } catch (IOException e) {}
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     

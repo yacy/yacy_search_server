@@ -167,17 +167,16 @@ public final class plasmaWordIndexAssortmentCluster {
         int [] spaces = new int[testsize];
         for (int i = testsize - 1; i >= 0; i--) spaces[i] = 0;
         int need = newContainer.size();
-        int s = testsize - 1;
-        while (s >= 0) {
-            spaces[s] = (assortments[s].get(wordHash) == null) ? (s + 1) : 0;
-            need -= spaces[s];
+        int selectedAssortment = testsize - 1;
+        while (selectedAssortment >= 0) {
+            spaces[selectedAssortment] = (assortments[selectedAssortment].get(wordHash) == null) ? (selectedAssortment + 1) : 0;
+            need -= spaces[selectedAssortment];
             assert (need >= 0);
             if (need == 0) break;
-            s = (need < s) ? need : s - 1;
+            selectedAssortment = (need < selectedAssortment) ? need : selectedAssortment - 1;
         }
         if (need == 0) {
             // we found spaces so that we can put in the newContainer into these spaces
-            
             plasmaWordIndexEntryContainer c;
             Iterator i = newContainer.entries();
             for (int j = testsize - 1; j >= 0; j--) {
@@ -189,7 +188,6 @@ public final class plasmaWordIndexAssortmentCluster {
                 }
                 storeForced(wordHash, c);
             }
-
             return null;
         }
         

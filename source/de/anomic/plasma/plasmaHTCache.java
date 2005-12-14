@@ -291,8 +291,8 @@ public final class plasmaHTCache {
         }
     }
 
-    public void close() throws IOException {
-        this.responseHeaderDB.close();
+    public void close() {
+        try {this.responseHeaderDB.close();} catch (IOException e) {}
     }
 
     private String ageString(long date, File f) {

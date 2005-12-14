@@ -82,9 +82,9 @@ public class plasmaURLPool {
         return null;
     }
     
-    public void close() throws IOException {
-        loadedURL.close();
+    public void close() {
+        try {loadedURL.close();} catch (IOException e) {}
         noticeURL.close();
-        errorURL.close();
+        try {errorURL.close();} catch (IOException e) {}
     }
 }

@@ -43,6 +43,7 @@
 //javac -classpath .:../classes PerformanceMemory_p.java
 //if the shell's current path is HTROOT
 
+import java.util.Iterator;
 import java.util.Map;
 import java.io.File;
 
@@ -52,6 +53,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyCore;
+import de.anomic.kelondro.kelondroObjectSpace;
 
 public class PerformanceMemory_p {
     
@@ -196,12 +198,12 @@ public class PerformanceMemory_p {
         req = plasmaSwitchboard.robots.size();
         chk = plasmaSwitchboard.robots.dbCacheChunkSize();
         slt = plasmaSwitchboard.robots.dbCacheFillStatus();
-        putprop(prop, env, "Robots", set);        
+        putprop(prop, env, "Robots", set);
         
         req = sb.profiles.size();
         chk = sb.profiles.dbCacheChunkSize();
         slt = sb.profiles.dbCacheFillStatus();
-        putprop(prop, env, "Profiles", set);        
+        putprop(prop, env, "Profiles", set);
         
         prop.put("usedTotal", usedTotal / MB);
         prop.put("currTotal", currTotal / MB);
@@ -214,6 +216,38 @@ public class PerformanceMemory_p {
         prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
         String Xms = env.getConfig("javastart_Xms", "Xms10m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
+
+        // create statistics about write cache object space
+        int chunksizes = Math.max(
+                           ((Integer) kelondroObjectSpace.statAlive().lastKey()).intValue(),
+                           ((Integer) kelondroObjectSpace.statHeap().lastKey()).intValue()
+                         );
+        int[] statAlive = new int[chunksizes];
+        int[] statHeap  = new int[chunksizes];
+        for (int i = 0; i < chunksizes; i++) { statAlive[i] = 0; statHeap[i] = 0; }
+        Map.Entry entry;
+        Iterator i = kelondroObjectSpace.statAlive().entrySet().iterator();
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            statAlive[((Integer) entry.getKey()).intValue() - 1] = ((Integer) entry.getValue()).intValue();
+        }
+        i = kelondroObjectSpace.statHeap().entrySet().iterator();
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            statHeap[((Integer) entry.getKey()).intValue() - 1] = ((Integer) entry.getValue()).intValue();
+        }
+        int c = 0;
+        for (int j = 0; j < chunksizes; j++) {
+            if ((statAlive[j] > 0) || (statHeap[j] > 0)) {
+                prop.put("sizes_" + c + "_chunk", Integer.toString(j + 1));
+                prop.put("alive_" + c + "_count", Integer.toString(statAlive[j]));
+                prop.put("heap_"  + c + "_count", Integer.toString(statHeap[j]));
+                c++;
+            }
+        }
+        prop.put("sizes", Integer.toString(c));
+        prop.put("alive", Integer.toString(c));
+        prop.put("heap" , Integer.toString(c));
         
         // return rewrite values for templates
         return prop;

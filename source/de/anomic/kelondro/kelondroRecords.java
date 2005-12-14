@@ -419,7 +419,7 @@ public class kelondroRecords {
         return new File(filename);
     }
     
-    protected int cacheChunkSize(boolean cacheControl) {
+    protected final int cacheChunkSize(boolean cacheControl) {
         return this.headchunksize + element_in_cache + ((cacheControl) ? cache_control_entry : 0);
     }
     
@@ -475,7 +475,7 @@ public class kelondroRecords {
         dispose(handle);
     }
 
-    public class Node {
+    public final class Node {
         // an Node holds all information of one row of data. This includes the key to the entry
         // which is stored as entry element at position 0
         // an Node object can be created in two ways:
@@ -732,12 +732,14 @@ public class kelondroRecords {
 
             // save head
             if (this.headChanged) {
+                //System.out.println("WRITEH(" + filename + ", " + seekpos(this.handle) + ", " + this.headChunk.length + ")");
                 entryFile.write(seekpos(this.handle), this.headChunk);
                 update2Cache(cachePriority);
             }
 
             // save tail
             if ((this.tailChunk != null) && (this.tailChanged)) {
+                //System.out.println("WRITET(" + filename + ", " + (seekpos(this.handle) + headchunksize) + ", " + this.tailChunk.length + ")");
                 entryFile.write(seekpos(this.handle) + headchunksize, this.tailChunk);
             }
         }
@@ -954,7 +956,7 @@ public class kelondroRecords {
         return this.COLWIDTHS[column];
     }
 
-    private long seekpos(Handle handle) {
+    private final long seekpos(Handle handle) {
         assert (handle.index >= 0): "handle index too low: " + handle.index;
         assert (handle.index < USAGE.allCount()): "handle index too high:" + handle.index;
         return POS_NODES + ((long) recordsize * handle.index);
@@ -1069,21 +1071,21 @@ public class kelondroRecords {
         return x;
     }
     
-    public static void NUL2bytes(byte[] b, int offset) {
+    public final static void NUL2bytes(byte[] b, int offset) {
         b[offset    ] = (byte) (0XFF & (NUL >> 24));
         b[offset + 1] = (byte) (0XFF & (NUL >> 16));
         b[offset + 2] = (byte) (0XFF & (NUL >>  8));
         b[offset + 3] = (byte) (0XFF & NUL);
     }
     
-    public static void int2bytes(long i, byte[] b, int offset) {
+    public final static void int2bytes(long i, byte[] b, int offset) {
         b[offset    ] = (byte) (0XFF & (i >> 24));
         b[offset + 1] = (byte) (0XFF & (i >> 16));
         b[offset + 2] = (byte) (0XFF & (i >>  8));
         b[offset + 3] = (byte) (0XFF & i);
     }
     
-    public static int bytes2int(byte[] b, int offset) {
+    public final static int bytes2int(byte[] b, int offset) {
         return (
             ((b[offset    ] & 0xff) << 24) |
             ((b[offset + 1] & 0xff) << 16) |

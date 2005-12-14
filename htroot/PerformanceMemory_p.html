@@ -312,6 +312,30 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 </table>
 </p>
 
+<p>
+<div class=small><b>Write Cache Object Allocation:</b></div>
+<table border="0" cellpadding="2" cellspacing="1">
+<tr class="TableHeader" valign="bottom">
+<td class="small">&nbsp;<br>Chunk Sizes</td>
+#{sizes}#
+<td class="small">#[chunk]#</td>
+#{/sizes}#
+</tr>
+<tr class="TableCellDark">
+<td class="TableHeader" align="left">now alive in write cache</td>
+#{alive}#
+<td class="small">#[count]#</td>
+#{/alive}#
+</tr>
+<tr class="TableCellDark">
+<td class="TableHeader" align="left">currently held in write buffer heap</td>
+#{heap}#
+<td class="small">#[count]#</td>
+#{/heap}#
+</tr>
+</table>
+</p>
+
 #%env/templates/footer.template%#
 </body>
 </html>

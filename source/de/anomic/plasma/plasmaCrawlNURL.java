@@ -174,14 +174,12 @@ public class plasmaCrawlNURL extends plasmaURL {
     
     public void close() {
         coreStack.close();
-        try {
-            limitStack.close();
-            overhangStack.close();
-            remoteStack.close();
-            imageStack.close();
-            movieStack.close();
-            musicStack.close();
-        } catch (IOException e) {}
+        limitStack.close();
+        overhangStack.close();
+        remoteStack.close();
+        try {imageStack.close();} catch (IOException e) {}
+        try {movieStack.close();} catch (IOException e) {}
+        try {musicStack.close();} catch (IOException e) {}
         try { super.close(); } catch (IOException e) {}
     }
 

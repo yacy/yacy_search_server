@@ -116,9 +116,9 @@ public class wikiBoard {
         return new int[]{a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]};
     }
     
-    public void close() throws IOException {
-        datbase.close();
-        bkpbase.close();
+    public void close() {
+        try {datbase.close();} catch (IOException e) {}
+        try {bkpbase.close();} catch (IOException e) {}
     }
     
     private static String dateString() {

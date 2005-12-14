@@ -107,6 +107,8 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
     public void write(long pos, byte[] b, int off, int len) throws IOException {
         assert (b.length >= off + len): "write pos=" + pos + ", b.length=" + b.length + ", b='" + new String(b) + "', off=" + off + ", len=" + len;
 
+        //if (len > 10) System.out.println("WRITE(" + name + ", " + pos + ", " + b.length + ", "  + off + ", "  + len + ")");
+        
         // do the write into buffer
         byte[] bb = kelondroObjectSpace.alloc(len);
         System.arraycopy(b, off, bb, 0, len);

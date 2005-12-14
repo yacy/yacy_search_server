@@ -94,8 +94,8 @@ public class messageBoard {
         return database.cacheFillStatus();
     }
     
-    public void close() throws IOException {
-        database.close();
+    public void close() {
+        try {database.close();} catch (IOException e) {}
     }
     
     private static String dateString() {

@@ -464,7 +464,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             entries = null;
             
             // force flush (sometimes)
-            if (System.currentTimeMillis() % 5 == 0) flushFromMem();
+            if (System.currentTimeMillis() % 7 == 4) flushFromMem();
         }
         return added;
     }
