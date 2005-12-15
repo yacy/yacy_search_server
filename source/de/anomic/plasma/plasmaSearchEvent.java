@@ -44,6 +44,7 @@ package de.anomic.plasma;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.HashSet;
 import java.io.IOException;
 
 import de.anomic.kelondro.kelondroException;
@@ -51,9 +52,11 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverInstantThread;
 import de.anomic.yacy.yacySearch;
 
-public final class plasmaSearchEvent {
+public final class plasmaSearchEvent extends Thread implements Runnable {
     
     public static plasmaSearchEvent lastEvent = null;
+
+    private static HashSet flushThreads = new HashSet();
     
     private serverLog log;
     private plasmaSearchQuery query;
@@ -118,7 +121,8 @@ public final class plasmaSearchEvent {
                 result.localContributions = rcLocal.size();
                 
                 // flush results in a separate thread
-                serverInstantThread.oneTimeJob(this, "flushResults", log, 0);
+                this.start(); // start to flush results
+                //serverInstantThread.oneTimeJob(this, "flushResults", log, 0);
                 
                 // clean up
                 if ((rcLocal != null) && (!(rcLocal.isTMPEntity()))) rcLocal.close();
@@ -261,10 +265,16 @@ public final class plasmaSearchEvent {
         return acc;
     }
     
+    public void run() {
+        flushThreads.add(this); // this will care that the search event object is referenced from somewhere while it is still alive
+        flushResults();
+        flushThreads.remove(this);
+    }
+    
     public void flushResults() {
         // put all new results into wordIndex
         // this must be called after search results had been computed
-        // it is wise to call this within a separate thread because this method waits untill all 
+        // it is wise to call this within a separate thread because this method waits untill all
         if (searchThreads == null) return;
 
         // wait until all threads are finished
@@ -274,16 +284,19 @@ public final class plasmaSearchEvent {
         long starttime = System.currentTimeMillis();
         while ((remaining = yacySearch.remainingWaiting(searchThreads)) > 0) {
             // flush the rcGlobal as much as is there so far
-            synchronized (rcGlobal) {
+            if (rcGlobal.size() > 0) synchronized (rcGlobal) {
                 Iterator hashi = query.queryHashes.iterator();
                 while (hashi.hasNext()) {
                     wordHash = (String) hashi.next();
                     Iterator i = rcGlobal.elements(true);
                     plasmaWordIndexEntry entry;
+                    plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash, rcGlobal.size());
                     while (i.hasNext()) {
                         entry = (plasmaWordIndexEntry) i.next();
-                        wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), false);
+                        container.add(entry, System.currentTimeMillis());
                     }
+                    wordIndex.addEntries(container, true);
+                    log.logFine("FLUSHED " + wordHash + ": " + container.size() + " url entries");
                 }
                 // the rcGlobal was flushed, empty it
                 count += rcGlobal.size();
@@ -293,9 +306,10 @@ public final class plasmaSearchEvent {
             try {Thread.sleep(3000);} catch (InterruptedException e) {}
             if (System.currentTimeMillis() - starttime > 90000) {
                 yacySearch.interruptAlive(searchThreads);
-                serverLog.logFine("PLASMA", "SEARCH FLUSH: " + remaining + " PEERS STILL BUSY; ABANDONED; SEARCH WAS " + query.queryWords);
+                log.logFine("SEARCH FLUSH: " + remaining + " PEERS STILL BUSY; ABANDONED; SEARCH WAS " + query.queryWords);
                 break;
             }
+            log.logFine("FINISHED FLUSH RESULTS PROCESS for query " + query.hashes(","));
         }
         
         serverLog.logFine("PLASMA", "FINISHED FLUSHING " + count + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
