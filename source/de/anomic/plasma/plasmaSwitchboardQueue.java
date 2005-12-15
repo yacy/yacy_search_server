@@ -107,7 +107,7 @@ public class plasmaSwitchboardQueue {
             entry.url.toString().getBytes(),
             (entry.referrerHash == null) ? plasmaURL.dummyHash.getBytes() : entry.referrerHash.getBytes(),
             serverCodings.enhancedCoder.encodeBase64Long((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
-            new byte[entry.flags],
+            new byte[]{entry.flags},
             (entry.initiator == null) ? plasmaURL.dummyHash.getBytes() : entry.initiator.getBytes(),
             serverCodings.enhancedCoder.encodeBase64Long((long) entry.depth, plasmaURL.urlCrawlDepthLength).getBytes(),
             (entry.profileHandle == null) ? plasmaURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
