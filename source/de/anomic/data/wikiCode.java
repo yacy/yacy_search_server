@@ -53,6 +53,7 @@ import java.io.InputStreamReader;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.yacy.yacyCore;
 
 public class wikiCode {
     private String numListLevel="";
@@ -347,7 +348,14 @@ public class wikiCode {
                             alt = " alt=\"" + kv + "\"";
                     }
 
-                    result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt + ">" + result.substring(p1 + 2);
+                    // replace incomplete URLs and make them point to http://peerip:port/share/...
+                    if (!((kl.startsWith("http://"))||(kl.startsWith("ftp://")))) {
+                        final String ip = yacyCore.seedDB.mySeed.getAddress().trim();
+                        final String port = sb.getConfig("port", "8080").trim();
+                        kl = "http://" + ip + ":" + port + "/share/" + kl;
+                    }
+
+                    result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align.trim() + alt.trim() + ">" + result.substring(p1 + 2);
                 }
                 // end contrib [MN]
 
