@@ -1,6 +1,7 @@
 package de.anomic.plasma;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -247,17 +248,16 @@ public class plasmaDbImporter extends Thread {
                         entryCounter++;
                         importWordIdxEntry = (plasmaWordIndexEntry) importWordIdxEntries.next();
                         String urlHash = importWordIdxEntry.getUrlHash();                    
-                        if ((this.importUrlDB.exists(urlHash)) && (!this.homeUrlDB.exists(urlHash))) {
-                            urlCounter++;
-                            
+                        if ((this.importUrlDB.exists(urlHash)) && (!this.homeUrlDB.exists(urlHash))) try {
                             // importing the new url
                             plasmaCrawlLURL.Entry urlEntry = this.importUrlDB.getEntry(urlHash);                       
+                            urlCounter++;
                             this.homeUrlDB.newEntry(urlEntry);
                             
                             if (urlCounter % 500 == 0) {
                                 this.log.logFine(urlCounter + " URLs processed so far.");
                             }
-                        }
+                        } catch (IOException e) {}
                         
                         // adding word index entity to container
                         newContainer.add(importWordIdxEntry,System.currentTimeMillis());

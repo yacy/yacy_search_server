@@ -47,6 +47,7 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -91,10 +92,10 @@ public class IndexControl_p {
         }
 
         // default values
-        String keystring = ((String) post.get("keystring")).trim();
-        String keyhash = ((String) post.get("keyhash")).trim();
-        String urlstring = ((String) post.get("urlstring")).trim();
-        String urlhash = ((String) post.get("urlhash")).trim();
+        String keystring = ((String) post.get("keystring", "")).trim();
+        String keyhash = ((String) post.get("keyhash", "")).trim();
+        String urlstring = ((String) post.get("urlstring", "")).trim();
+        String urlhash = ((String) post.get("urlhash", "")).trim();
 
         if (!urlstring.startsWith("http://") &&
             !urlstring.startsWith("https://")) { urlstring = "http://" + urlstring; }
@@ -166,9 +167,7 @@ public class IndexControl_p {
                 }
             }
             if (delurlref) {
-                for (int i = 0; i < urlx.length; i++) try {
-                    switchboard.removeAllUrlReferences(urlx[i], true);
-                } catch (IOException e) {}
+                for (int i = 0; i < urlx.length; i++) switchboard.removeAllUrlReferences(urlx[i], true);
             }
             if (delurl || delurlref) {
                 for (int i = 0; i < urlx.length; i++) {
@@ -188,9 +187,7 @@ public class IndexControl_p {
         // delete selected URLs
         if (post.containsKey("keyhashdelete")) {
             if (delurlref) {
-                for (int i = 0; i < urlx.length; i++) try {
-                    switchboard.removeAllUrlReferences(urlx[i], true);
-                } catch (IOException e) {}
+                for (int i = 0; i < urlx.length; i++) switchboard.removeAllUrlReferences(urlx[i], true);
             }
             if (delurl || delurlref) {
                 for (int i = 0; i < urlx.length; i++) {
@@ -211,12 +208,12 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("urlhashdeleteall")) {
-            try {
+            //try {
                 int i = switchboard.removeAllUrlReferences(urlhash, true);
                 prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
-            } catch (IOException e) {
-                prop.put("result", "Deleted nothing because the url-hash could not be resolved");
-            }
+            //} catch (IOException e) {
+            //    prop.put("result", "Deleted nothing because the url-hash could not be resolved");
+            //}
         }
 
         if (post.containsKey("urlhashdelete")) {
@@ -311,11 +308,7 @@ public class IndexControl_p {
             while (hashIt.hasNext() && i < 256) {
                 hash = (String) hashIt.next();
                 result.append("<a href=\"/IndexControl_p.html?")
-                      .append("keystring=")
-                      .append("&keyhash=").append(hash)
-                      .append("&urlhash=")
-                      .append("&urlstring=")
-                      .append("&urlhashsearch=")
+                      .append("keyhash=").append(hash).append("&keyhashsearch=")
                       .append("\" class=\"tt\">").append(hash).append("</a> ")
                       .append(((i + 1) % 8 == 0) ? "<br>" : "");
                 i++;
@@ -326,12 +319,15 @@ public class IndexControl_p {
         if (post.containsKey("urlstringsearch")) {
             try {
                 URL url = new URL(urlstring);
-                urlhash = plasmaURL.urlHash(url);
-                prop.put("urlhash", urlhash);
+            urlhash = plasmaURL.urlHash(url);
+            prop.put("urlhash", urlhash);
                 plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash);
                 prop.put("result", genUrlProfile(switchboard, entry, urlhash));
-            } catch (Exception e) {
-                prop.put("urlstring", "wrong url: " + urlstring);
+            } catch (MalformedURLException e) {
+                prop.put("urlstring", "bad url: " + urlstring);
+                prop.put("urlhash", "");
+            } catch (IOException e) {
+                prop.put("urlstring", "unknown url: " + urlstring);
                 prop.put("urlhash", "");
             }
         }
@@ -356,7 +352,10 @@ public class IndexControl_p {
             int i = 0;
             while (hashIt.hasNext() && i < 256) {
                 hash = (String) hashIt.next();
-                result.append("<a href=\"/IndexControl_p.html?").append("keystring=").append("&keyhash=").append("&urlhash=").append(hash).append("&urlstring=").append("&urlhashsearch=").append("\" class=\"tt\">").append(hash).append("</a> ").append(((i + 1) % 8 == 0) ? "<br>" : "");
+                result.append("<a href=\"/IndexControl_p.html?")
+                .append("urlhash=").append(hash).append("&urlhashsearch=")
+                .append("\" class=\"tt\">").append(hash).append("</a> ")
+                .append(((i + 1) % 8 == 0) ? "<br>" : "");
                 i++;
             }
             prop.put("result", result.toString());
@@ -449,10 +448,10 @@ public class IndexControl_p {
                 final TreeMap tm = new TreeMap();
                 while (en.hasNext()) {
                     uh = ((plasmaWordIndexEntry)en.next()).getUrlHash();
-                    if (switchboard.urlPool.loadedURL.exists(uh)) {
+                    try {
                         us = switchboard.urlPool.loadedURL.getEntry(uh).url().toString();
                         tm.put(us, uh);
-                    } else {
+                    } catch (IOException e) {
                         tm.put("", uh);
                     }
                 }

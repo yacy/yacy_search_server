@@ -1221,12 +1221,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // create index
             String descr = document.getMainLongTitle();
             String referrerHash;
-            try {
-                URL referrerURL = entry.referrerURL();
-                referrerHash = plasmaURL.urlHash(referrerURL);
-            } catch (IOException e) {
-                referrerHash = plasmaURL.dummyHash;
-            }
+            URL referrerURL = entry.referrerURL();
+            referrerHash = plasmaURL.urlHash(referrerURL);
+            if (referrerHash == null) referrerHash = plasmaURL.dummyHash;
+
             String noIndexReason = "unspecified";
             if (processCase == 4) {
                 // proxy-load
@@ -1825,26 +1823,32 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     // method for index deletion
-    public int removeAllUrlReferences(URL url, boolean fetchOnline) throws IOException {
+    public int removeAllUrlReferences(URL url, boolean fetchOnline) {
         return removeAllUrlReferences(plasmaURL.urlHash(url), fetchOnline);
     }
     
-    public int removeAllUrlReferences(String urlhash, boolean fetchOnline) throws IOException {
+    public int removeAllUrlReferences(String urlhash, boolean fetchOnline) {
         // find all the words in a specific resource and remove the url reference from every word index
         // finally, delete the url entry
         
         // determine the url string
-        plasmaCrawlLURL.Entry entry = urlPool.loadedURL.getEntry(urlhash);
-        URL url = entry.url();
-        if (url == null) return 0;
-        // get set of words
-        //Set words = plasmaCondenser.getWords(getText(getResource(url, fetchOnline)));
-        Set words = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline)).getText());
-        // delete all word references
-        int count = removeReferences(urlhash, words);
-        // finally delete the url entry itself
-        urlPool.loadedURL.remove(urlhash);
-        return count;
+        try {
+            plasmaCrawlLURL.Entry entry = urlPool.loadedURL.getEntry(urlhash);
+            URL url = entry.url();
+            if (url == null)
+                return 0;
+            // get set of words
+            // Set words = plasmaCondenser.getWords(getText(getResource(url,
+            // fetchOnline)));
+            Set words = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline)).getText());
+            // delete all word references
+            int count = removeReferences(urlhash, words);
+            // finally delete the url entry itself
+            urlPool.loadedURL.remove(urlhash);
+            return count;
+        } catch (IOException e) {
+            return 0;
+        }
     }
     
     public int removeReferences(URL url, Set words) {

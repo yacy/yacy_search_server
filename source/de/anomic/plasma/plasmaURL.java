@@ -473,6 +473,7 @@ public class plasmaURL {
     }
     
     public static final String urlHash(String url) {
+        if ((url == null) || (url.length() == 0)) return null;
         try {
             return urlHash(new URL(url));
         } catch (MalformedURLException e) {
@@ -542,7 +543,7 @@ public class plasmaURL {
     }
     
     public Iterator urlHashes(String urlHash, boolean up) {
-        return urlHashCache.rows(up, false, urlHash.getBytes());
+        return urlHashCache.keys(up, false, urlHash.getBytes());
     }
 
 }

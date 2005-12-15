@@ -217,27 +217,31 @@ public final class plasmaSearchEvent {
         profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_PRESORT, rcLocal.size());
         
         profileLocal.startTimer();
-	plasmaSearchResult acc = new plasmaSearchResult(query);
-	if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
+        plasmaSearchResult acc = new plasmaSearchResult(query);
+        if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
         if (searchResult.size() == 0) return acc; // case that we have nothing to do
         
         // start url-fetch
-	plasmaWordIndexEntry entry;
+        plasmaWordIndexEntry entry;
         long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + postorderTime;
         plasmaCrawlLURL.Entry page;
         int minEntries = profileLocal.getTargetCount(plasmaSearchProfile.PROCESS_POSTSORT);
-	try {
-	    while (preorder.hasNext()) {
+        try {
+            while (preorder.hasNext()) {
                 if ((acc.sizeFetched() >= minEntries) && (System.currentTimeMillis() >= postorderLimitTime)) break;
                 entry = preorder.next();
                 // find the url entry
-                page = urlStore.getEntry(entry.getUrlHash());
-                // add a result
-		acc.addResult(entry, page);
-	    }
-	} catch (kelondroException ee) {
-	    serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
-	}
+                try {
+                    page = urlStore.getEntry(entry.getUrlHash());
+                    // add a result
+                    acc.addResult(entry, page);
+                } catch (IOException e) {
+                    // result was not found
+                }
+            }
+        } catch (kelondroException ee) {
+            serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
+        }
         profileLocal.setYieldTime(plasmaSearchProfile.PROCESS_URLFETCH);
         profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_URLFETCH, acc.sizeFetched());
 

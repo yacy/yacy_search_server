@@ -468,6 +468,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             // if the url cannot be found, this returns null
             this.urlHash = urlHash;
             byte[][] entry = plasmaCrawlLURL.this.urlHashCache.get(urlHash.getBytes());
+            if (entry == null) throw new IOException("url hash " + urlHash + " not found in LURL");
             try {
                 if (entry != null) {
                     this.url = new URL(new String(entry[1]).trim());

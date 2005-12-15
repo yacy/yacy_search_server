@@ -797,17 +797,16 @@ public final class yacy {
                         entryCounter++;
                         importWordIdxEntry = (plasmaWordIndexEntry) importWordIdxEntries.next();
                         String urlHash = importWordIdxEntry.getUrlHash();                    
-                        if ((importUrlDB.exists(urlHash)) && (!homeUrlDB.exists(urlHash))) {
-                            urlCounter++;
-                            
+                        if ((importUrlDB.exists(urlHash)) && (!homeUrlDB.exists(urlHash))) try {
                             // importing the new url
                             plasmaCrawlLURL.Entry urlEntry = importUrlDB.getEntry(urlHash);                       
+                            urlCounter++;
                             homeUrlDB.newEntry(urlEntry);
                             
                             if (urlCounter % 500 == 0) {
                                 log.logFine(urlCounter + " URLs processed so far.");
                             }
-                        }
+                        } catch (IOException e) {}
                         
                         // adding word index entity to container
                         newContainer.add(importWordIdxEntry,System.currentTimeMillis());
@@ -906,14 +905,14 @@ public final class yacy {
                     while (wordIdxEntries.hasNext()) {
                         wordIdxEntry = (plasmaWordIndexEntry) wordIdxEntries.next();
                         String urlHash = wordIdxEntry.getUrlHash();                    
-                        if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) {
-                            urlCounter++;
+                        if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
                             plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash);                       
+                            urlCounter++;
                             /*plasmaCrawlLURL.Entry newEntry =*/ minimizedUrlDB.newEntry(urlEntry);
                             if (urlCounter % 500 == 0) {
                                 log.logInfo(urlCounter + " URLs found so far.");
                             }
-                        }
+                        } catch (IOException e) {}
                     }
                     // we have read all elements, now we can close it
                     wordIdxEntity.close(); wordIdxEntity = null;

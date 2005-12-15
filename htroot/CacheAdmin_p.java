@@ -97,7 +97,7 @@ public class CacheAdmin_p {
 
         // generate sorted dir/file listing
         final String[] list = dir.list();
-        final StringBuffer tree  = new StringBuffer((list.length + 2) * 256);
+        final StringBuffer tree  = new StringBuffer((list == null) ? 70 : (list.length + 2) * 256);
         tree.append("Directory of<br>").append((pathString.length() == 0) ? "domain list" : linkPathString(pathString)).append("<br><br>");
         if (list == null) {
             tree.append("[empty]");

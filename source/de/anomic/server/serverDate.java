@@ -166,6 +166,7 @@ public final class serverDate {
         if (utime < utimeyearsacc[years]) years--; // the correction
         long remain = utime - utimeyearsacc[years];
         months = (int) (remain / (29 * dayMillis)); // a guess
+        if (months > 11) months = 11;
         if ((years & 3) == 0) {
             if (remain < dimleapacc[months]) months--; // correction
             remain = remain - dimleapacc[months];           

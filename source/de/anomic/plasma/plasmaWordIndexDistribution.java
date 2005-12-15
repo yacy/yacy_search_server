@@ -330,12 +330,16 @@ public final class plasmaWordIndexDistribution {
                         urlIter = indexEntity.elements(true);
                         unknownURLEntries.clear();
                         while (urlIter.hasNext()) {
-                            indexEntry = (plasmaWordIndexEntry) urlIter.next();                            
-                            lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
-                            if ((lurl == null) || (lurl.url() == null)) {
+                            indexEntry = (plasmaWordIndexEntry) urlIter.next();     
+                            try {
+                                lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
+                                if ((lurl == null) || (lurl.url() == null)) {
+                                    unknownURLEntries.add(indexEntry.getUrlHash());
+                                } else {
+                                    knownURLs.put(indexEntry.getUrlHash(), lurl);
+                                }
+                            } catch (IOException e) {
                                 unknownURLEntries.add(indexEntry.getUrlHash());
-                            } else {
-                                knownURLs.put(indexEntry.getUrlHash(), lurl);
                             }
                         }
                         // now delete all entries that have no url entry
@@ -367,13 +371,17 @@ public final class plasmaWordIndexDistribution {
                         unknownURLEntries.clear();
                         while ((urlIter.hasNext()) && (count > 0)) {
                             indexEntry = (plasmaWordIndexEntry) urlIter.next();
-                            lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
-                            if ((lurl == null) || (lurl.url()==null)) {
+                            try {
+                                lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
+                                if ((lurl == null) || (lurl.url()==null)) {
+                                    unknownURLEntries.add(indexEntry.getUrlHash());
+                                } else {
+                                    knownURLs.put(indexEntry.getUrlHash(), lurl);
+                                    tmpEntity.addEntry(indexEntry);
+                                    count--;
+                                }
+                            } catch (IOException e) {
                                 unknownURLEntries.add(indexEntry.getUrlHash());
-                            } else {
-                                knownURLs.put(indexEntry.getUrlHash(), lurl);
-                                tmpEntity.addEntry(indexEntry);
-                                count--;
                             }
                         }
                         // now delete all entries that have no url entry

@@ -75,8 +75,10 @@ public class plasmaURLPool {
         if (urlhash.equals(plasmaURL.dummyHash)) return null;
         plasmaCrawlNURL.Entry ne = noticeURL.getEntry(urlhash);
         if (ne != null) return ne.url();
-        plasmaCrawlLURL.Entry le = loadedURL.getEntry(urlhash);
-        if (le != null) return le.url();
+        try {
+            plasmaCrawlLURL.Entry le = loadedURL.getEntry(urlhash);
+            if (le != null) return le.url();
+        } catch (IOException e) {}
         plasmaCrawlEURL.Entry ee = errorURL.getEntry(urlhash);
         if (ee != null) return ee.url();
         return null;
