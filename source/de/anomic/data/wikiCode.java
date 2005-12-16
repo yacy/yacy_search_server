@@ -348,11 +348,13 @@ public class wikiCode {
                             alt = " alt=\"" + kv + "\"";
                     }
 
-                    // replace incomplete URLs and make them point to http://peerip:port/share/...
+                    // replace incomplete URLs and make them point to http://peerip:port/...
+                    // with this feature you can acces an image in DATA/HTDOCS/share/yacy.gif
+                    // using the wikicode [[Image:share/yacy.gif]]
+                    // or an image DATA/HTDOCS/grafics/kaskelix.jpg with [[Image:grafics/kaskelix.jpg]]
+                    // you are free to use other sub-paths of DATA/HTDOCS
                     if (!((kl.startsWith("http://"))||(kl.startsWith("ftp://")))) {
-                        final String ip = yacyCore.seedDB.mySeed.getAddress().trim();
-                        final String port = sb.getConfig("port", "8080").trim();
-                        kl = "http://" + ip + ":" + port + "/share/" + kl;
+                        kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
                     }
 
                     result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align.trim() + alt.trim() + ">" + result.substring(p1 + 2);
