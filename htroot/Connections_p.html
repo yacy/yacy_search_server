@@ -3,13 +3,15 @@
 <head>
 <title>YaCy '#[clientname]#': Connection Tracking</title>
 #%env/templates/metas.template%#
-<meta http-equiv="REFRESH" content="30">
+<meta http-equiv="REFRESH" content="3">
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
-<p><h2>Connection Tracking</h2></p>
-<p><h3>Incoming Connections</h3></p>
-<p>Showing #[numActiveRunning]# active connections, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.<br>
+<br><br>
+<h2>Connection Tracking</h2>
+<p>
+<h3>Incoming Connections</h3>
+Showing #[numActiveRunning]# active connections, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.<br>
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader" valign="bottom">
 	<td class="small">Protocol</td>
