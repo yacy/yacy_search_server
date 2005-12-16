@@ -349,7 +349,7 @@ public class wikiCode {
                     }
 
                     // replace incomplete URLs and make them point to http://peerip:port/...
-                    // with this feature you can acces an image in DATA/HTDOCS/share/yacy.gif
+                    // with this feature you can access an image in DATA/HTDOCS/share/yacy.gif
                     // using the wikicode [[Image:share/yacy.gif]]
                     // or an image DATA/HTDOCS/grafics/kaskelix.jpg with [[Image:grafics/kaskelix.jpg]]
                     // you are free to use other sub-paths of DATA/HTDOCS
@@ -385,12 +385,20 @@ public class wikiCode {
                 if ((p = kl.indexOf(" ")) > 0) {
                     kv = kl.substring(p + 1);
                     kl = kl.substring(0, p);
-                } else {
+                }
+                // No text for the link? -> <a href="http://www.url.com/">http://www.url.com/</a>
+                else {
                     kv = kl;
                 }
-                if (!(kl.startsWith("http://"))) kl = "http://" + kl;
+                // replace incomplete URLs and make them point to http://peerip:port/...
+                // with this feature you can access a file at DATA/HTDOCS/share/page.html
+                // using the wikicode [share/page.html]
+                // or a file DATA/HTDOCS/www/page.html with [www/page.html]
+                // you are free to use other sub-paths of DATA/HTDOCS
+                if (!((kl.startsWith("http://"))||(kl.startsWith("ftp://")))) {
+                    kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
+                }
                 result = result.substring(0, p0) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + result.substring(p1 + 1);
-	        
 	    }
 	}
 	
