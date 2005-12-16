@@ -122,6 +122,9 @@ public final class serverClassLoader extends ClassLoader {
                 c = this.defineClass(classname, b, 0, b.length);
                 resolveClass(c);
                 this.classes.put(classfile, c);
+            } catch (LinkageError ee) {
+                c = findLoadedClass(classname);
+                if (c!=null) return c;                
             } catch (IOException ee) {
                 //System.out.println("INTERNAL ERROR2 in cachedClassLoader: " + ee.getMessage());
                 throw new ClassNotFoundException(classfile.toString());
