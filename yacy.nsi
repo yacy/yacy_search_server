@@ -6,7 +6,7 @@
 ;last major change: 22.07.2005
 Name "YaCy"
 
-OutFile "yacy_v0.42_20051219_1219.exe"
+OutFile "yacy_v0.42_20051216_1219.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
