@@ -1104,7 +1104,7 @@ public final class yacy {
         }
     }
     
-    private static void domlist(String homePath, boolean html, String targetName) {
+    private static void domlist(String homePath, String format, String targetName) {
         File root = new File(homePath);
         try {
             plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000);
@@ -1117,7 +1117,7 @@ public final class yacy {
             }
             
             // output file
-            if (html) {
+            if (format.equals("html")) {
                 File file = new File(root, targetName + ".html");
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
                 Iterator i = doms.iterator();
@@ -1128,7 +1128,7 @@ public final class yacy {
                     bos.write(serverCore.crlf);
                 }
                 bos.close();
-            } else {
+            } else if (format.equals("zip")) {
                 ZipEntry zipEntry = new ZipEntry(targetName + ".txt");
                 File file = new File(root, targetName + ".zip");
                 ZipOutputStream bos = new ZipOutputStream(new FileOutputStream(file));
@@ -1141,6 +1141,10 @@ public final class yacy {
                     bos.write(serverCore.crlf);
                 }
                 bos.close();
+            }
+            else {
+                // plain text list
+                serverFileUtils.saveSet(new File(root, targetName + ".txt"), doms, new String(serverCore.crlf));
             }
             pool.close();
         } catch (IOException e) {
@@ -1337,14 +1341,15 @@ public final class yacy {
             transferCR(targetaddress, crfile);
         } else if ((args.length >= 1) && (args[0].equals("-domlist"))) {
             // generate a url list and save it in a file
-            boolean html = false;
+            String format = "txt";
             if (args.length >= 3 && args[1].equals("-format")) {
-                if (args[2].equals("html")) html = true;
+                if (args[2].equals("html")) format = args[2];
+                if (args[2].equals("zip")) format = args[2];
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= args[1];
             String outfile = "domlist_" + System.currentTimeMillis();
-            domlist(applicationRoot, html, outfile);
+            domlist(applicationRoot, format, outfile);
         } else if ((args.length >= 1) && (args[0].equals("-urllist"))) {
             // generate a url list and save it in a file
             boolean html = false;
