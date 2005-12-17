@@ -323,7 +323,7 @@ public class kelondroMHashMap {
         for (int i = 0; i < 100; i++) map.put(3333 + i, ("" + (1000 + i)).getBytes());
         Iterator i = map.entries();
         kelondroMHashMap.entry e;
-        System.out.println("AufzŠhlung der Elemente: count=" + map.size());
+        System.out.println("Enumeration of elements: count=" + map.size());
         int c = 0;
         while (i.hasNext()) {
             e = (kelondroMHashMap.entry) i.next();
