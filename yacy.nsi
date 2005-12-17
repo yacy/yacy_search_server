@@ -6,7 +6,7 @@
 ;last major change: 22.07.2005
 Name "YaCy"
 
-OutFile "yacy_v0.41_20051004_848.exe"
+OutFile "yacy_v0.42_20051219_1219.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -19,7 +19,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.41(Build 20051004) on your computer. Select which optional things you want to be installed."
+ComponentText "This will install YaCy v0.42(Build 20051216) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old Version was installed into another locAtion(eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install in to:"
@@ -74,6 +74,7 @@ Section "Binaries (required)"
 	File "htroot\*.csv"
 	File "htroot\*.class"
 	File "htroot\*.ico"
+    File "htroot\*.bmp"
 	#File "htroot\*.gif"
 	File "htroot\*.pac" #proxy autoconfig
 
@@ -82,6 +83,15 @@ Section "Binaries (required)"
 	File "htroot\yacy\*.html"
 	File "htroot\yacy\*.class"
 
+	#yacy javascript
+	SetOutPath "$INSTDIR\htroot\js"
+	File "htroot\js\*.js"
+
+	#yacy xml
+    #TODO: Split in source/binary
+	SetOutPath "$INSTDIR\htroot\xml"
+	File /r "htroot\xml\*"
+
 	#yacy/seedUpload
 	SetOutPath "$INSTDIR\htroot\yacy\seedUpload"
 	File "htroot\yacy\seedUpload\*.html"
@@ -89,6 +99,7 @@ Section "Binaries (required)"
 	#proxymsg non-devel
 	SetOutPath "$INSTDIR\htroot\proxymsg"
 	File "htroot\proxymsg\*.html"
+	File "htroot\proxymsg\*.inc"
 
 	#templates
 	SetOutPath "$INSTDIR\htroot\env"
@@ -98,6 +109,9 @@ Section "Binaries (required)"
 	SetOutPath "$INSTDIR\htroot\htdocsdefault"
 	File "htroot\htdocsdefault\*.html"
 	File "htroot\htdocsdefault\*.class"
+
+    SetOutPath "$INSTDIR\ranking"
+    File /r "ranking\*"
 
 	SetOutPath $INSTDIR
 
