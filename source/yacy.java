@@ -60,6 +60,8 @@ import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
@@ -1116,19 +1118,29 @@ public final class yacy {
             
             // output file
             if (html) {
-                    File file = new File(root, targetName);
-                    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                    Iterator i = doms.iterator();
-                    String key;
-                    while (i.hasNext()) {
-                        key = i.next().toString();
-                        bos.write(("<a href=\"http://" + key + "\">" + key + "</a><br>").getBytes());
-                        bos.write(serverCore.crlf);
-                    }
-                    bos.close();
+                File file = new File(root, targetName + ".html");
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                Iterator i = doms.iterator();
+                String key;
+                while (i.hasNext()) {
+                    key = i.next().toString();
+                    bos.write(("<a href=\"http://" + key + "\">" + key + "</a><br>").getBytes());
+                    bos.write(serverCore.crlf);
+                }
+                bos.close();
             } else {
-                // plain text list
-                serverFileUtils.saveSet(new File(root, targetName), doms, new String(serverCore.crlf));
+                ZipEntry zipEntry = new ZipEntry(targetName + ".txt");
+                File file = new File(root, targetName + ".zip");
+                ZipOutputStream bos = new ZipOutputStream(new FileOutputStream(file));
+                bos.putNextEntry(zipEntry);
+                Iterator i = doms.iterator();
+                String key;
+                while (i.hasNext()) {
+                    key = i.next().toString();
+                    bos.write((key).getBytes());
+                    bos.write(serverCore.crlf);
+                }
+                bos.close();
             }
             pool.close();
         } catch (IOException e) {
@@ -1331,7 +1343,7 @@ public final class yacy {
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= args[1];
-            String outfile = "domlist_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
+            String outfile = "domlist_" + System.currentTimeMillis();
             domlist(applicationRoot, html, outfile);
         } else if ((args.length >= 1) && (args[0].equals("-urllist"))) {
             // generate a url list and save it in a file
