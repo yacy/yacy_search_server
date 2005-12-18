@@ -353,7 +353,7 @@ public class wikiCode {
                     // using the wikicode [[Image:share/yacy.gif]]
                     // or an image DATA/HTDOCS/grafics/kaskelix.jpg with [[Image:grafics/kaskelix.jpg]]
                     // you are free to use other sub-paths of DATA/HTDOCS
-                    if (!((kl.startsWith("http://"))||(kl.startsWith("ftp://")))) {
+                    if (!((kl.indexOf("://"))>=0)) {
                         kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
                     }
 
@@ -395,7 +395,7 @@ public class wikiCode {
                 // using the wikicode [share/page.html]
                 // or a file DATA/HTDOCS/www/page.html with [www/page.html]
                 // you are free to use other sub-paths of DATA/HTDOCS
-                if (!((kl.startsWith("http://"))||(kl.startsWith("ftp://")))) {
+                if (!((kl.indexOf("://"))>=0)) {
                     kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
                 }
                 result = result.substring(0, p0) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + result.substring(p1 + 1);
