@@ -466,7 +466,7 @@ public final class plasmaHTCache {
         String s = f.toString().replace('\\', '/');
         final String c = cachePath.toString().replace('\\', '/');
         
-        String protocol = "http";
+        String protocol = "http://";
         int pos = s.lastIndexOf(c);
         if (pos >= 0) {
             s = s.substring(pos + c.length());
@@ -482,9 +482,9 @@ public final class plasmaHTCache {
             if (pos >= 0) {
                 String temp = s.substring(pos + 1);
                 if (temp.startsWith("443/")) {
-                    protocol = "https";
+                    protocol = "https://";
                 } else if (temp.startsWith("21/")) {
-                    protocol = "ftp";
+                    protocol = "ftp://";
                 }
                 
                 s = s.substring(0, pos) + ":" + s.substring(pos + 1);
@@ -492,7 +492,7 @@ public final class plasmaHTCache {
             if (s.endsWith("ndx")) { s = s.substring(0, s.length() - 3); }
 //          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);    
             try {
-                return new URL(protocol + "://" + s);
+                return new URL(protocol + s);
             } catch (Exception e) {
                 return null;
             }
@@ -522,7 +522,9 @@ public final class plasmaHTCache {
                 (ls.indexOf(".exe") >= 0) ||
                 (ls.indexOf(";jsessionid=") >= 0) ||
                 (ls.indexOf("sessionid/") >= 0) ||
-                (ls.indexOf("phpsessid=") >= 0));
+                (ls.indexOf("phpsessid=") >= 0) ||
+                (ls.indexOf("search.php?sid=") >= 0) ||
+                (ls.indexOf("memberlist.php?sid=") >= 0));
     }
 
     public Entry newEntry(Date initDate, int depth, URL url, String name,
