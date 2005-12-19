@@ -416,7 +416,7 @@ public final class yacy {
                             if(defaultLocales[i].getName().endsWith(".lng"))
                                 serverFileUtils.copy(defaultLocales[i], new File(localesPath, defaultLocales[i].getName()));
                         }
-                        serverLog.logInfo("STARTUP", "Copied the default lokales to DATA/LOCALE");
+                        serverLog.logInfo("STARTUP", "Copied the default locales to DATA/LOCALE");
                     }catch(NullPointerException e){
                         serverLog.logSevere("STARTUP", "Nullpointer Exception while copying the default Locales");
                     }
