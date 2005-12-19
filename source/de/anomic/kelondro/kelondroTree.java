@@ -904,7 +904,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
         }
             
 	public boolean hasNext() {
-            return (rot) || (nextNode != null);
+            return (rot && (size() > 0)) || (nextNode != null);
 	}
 
         public Object next() {
