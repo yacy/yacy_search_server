@@ -25,17 +25,19 @@
   </all>
   <your>
         <name>#[my-name]#</name>
-        <type>#(my-type)#virgin::junior::senior::principal#(/my-type)#</type>
+        <type>#(my-info)#virgin::junior::senior::principal#(/my-info)#</type>
         <version>#[my-version]#</version>
+        <utc>#[my-utc]#</utc>
         <uptime>#[my-uptime]#</uptime>
         <links>#[my-links]#</links>
         <words>#[my-words]#</words> 
-        <acceptcrawl>#[my-acceptcrawl]#</acceptcrawl>
-        <acceptindex>#[my-acceptindex]#</acceptindex>
+        <acceptcrawl>#(my-acceptcrawl)#0::1#(/my-acceptcrawl)#</acceptcrawl>
+        <acceptindex>#(my-dhtreceive)#0::1#(/my-dhtreceive)#</acceptindex>
         <sentwords>#[my-sI]#</sentwords>
         <senturls>#[my-sU]#</senturls>
         <receivedwords>#[my-rI]#</receivedwords>
         <receivedurls>#[my-rU]#</receivedurls>
+        <ppm>#[my-ppm]#</ppm>
         <seeds>#[my-seeds]#</seeds>
         <connects>#[my-connects]#</connects>
   </your>
