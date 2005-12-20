@@ -198,7 +198,10 @@ public class plasmaDbImporter extends Thread {
     }
     
     public int getProcessingStatus() {
-        return (this.importStartSize-this.importWordIndex.size())/(this.importStartSize/100);
+        // thid seems to be better:
+        // (this.importStartSize-this.importWordIndex.size())*100/((this.importStartSize==0)?1:this.importStartSize);
+        // but maxint (2,147,483,647) could be exceeded when WordIndexes reach 20M entries
+        return (this.importStartSize-this.importWordIndex.size())/((this.importStartSize<100)?1:(this.importStartSize)/100);
     }
     
     public long getElapsedTime() {
