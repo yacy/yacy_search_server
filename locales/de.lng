@@ -74,6 +74,22 @@ You can change anything, but some options need a restart, and some options can c
 For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in der Datei yacy.init
 "Save"==Speichern
 
+#-----------------------------------------------------------
+#File: Connections_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy \'\#\[clientname\]\#\': Connection Tracking==YaCy '#[clientname]#': Verbindungsstatus
+Connection Tracking==Verbindungsstatus
+Incoming Connections==Eingehende Verbindungen
+Showing \#\[numActiveRunning\]\# active connections, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive Verbindungen, #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt..
+Protocol==Protokoll
+Duration==Dauer
+Source IP\[:Port\]==Quell IP[:Port]
+Dest. IP\[:Port\]==Ziel IP[:Port]
+Command==Kommando
+Used==Benutzt
+Waiting for new request nr.==Warte auf neue Anfrage Nr.
+
 #-------------------------------------------------------
 #File: CookieMonitorIncoming_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
@@ -291,42 +307,41 @@ Changes will take effect immediately==&Auml;nderungen sind sofort aktiv
 
 Index Creation==Index Erzeugung
 Start Crawling Job:==Starte Crawling Aufgabe:
-You can define URLs as start points for Web page crawling and start that crawling here.==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten.
-Crawling Depth:==Crawl-Tiefe:
-"\#\[crawlingDepth\]\#">=="#[crawlingDepth]#">
-A minimum of 1 is recommended.==Ein Minimum von 1 ist empfohlen.
-Be careful with the prefetch number. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durschnittlichen Verzweigungsfaktor von 20;
-A prefetch-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
+You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. "Crawling" bedeutet, dass YaCy die angegebene Webseite runterl&auml;dt, alle Links extrahiert und dann den Inhalt hinter diesen Links runterl&auml;dt. Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
+Crawling Depth:==Crawling-Tiefe:
+This defines how often the Crawler will follow links embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links in Webseiten folgen wird.
+A minimum of 1 is recommended and means that the page you enter under \"Starting Point\" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.==Ein Minimum von 1 wird empfohlen und bedeutet, dass die Seite, die Sie unter "Startpunkt" angegeben haben, dem Index zugef&uugt wird, verlinkter Inhalt allerdings nicht. 2-4 ist gut f&uuml;r normales Indexieren.
+Be careful with the depth. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durschnittlichen Verzweigungsfaktor von 20;
+A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
 Crawling Filter:==Crawl-Maske:
-"\#\[crawlingFilter\]\#">=="#[crawlingFilter]#">
-This is an emacs-like regular expression that must match with the crawled URL.==Dies ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit der gecrawlten URL &uuml;bereinstimmen muss.
+This is an emacs-like regular expression that must match with the URLs which are used to be crawled.==Dies ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit der gecrawlten URL &uuml;bereinstimmen muss.
 Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase==Benutzen Sie dies z.B., um nur eine einzelne Domain zu crawlen. Wenn Sie diese Maske aktivieren, macht es Sinn
-the crawl depth.==die Crawl Tiefe zu erh&ouml;hen.
+the crawling depth.==die Crawling Tiefe zu erh&ouml;hen.
 Accept URLs with '\?' / dynamic URLs:==Akzeptiere URLs mit '?' / dynamische URLs:
-URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
-is accessed with URL's containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
+A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Ein Fragezeichen ist normalerweise ein Hinweis auf eine dynamische Seite. URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
+is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
 Store to Proxy Cache:==Speichern im Proxy-Cache:
 This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardm&auml;ssig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
 We recommend to leave this switched off unless you want to control the crawl results with the==Wir raten Ihnen, sie nicht zu aktivieren, ausser Sie wollen die Crawl Resulate mit
 Cache Monitor==Cache Monitor kontrollieren.
 Do Local Indexing:==Lokales Indexieren:
-This should be switched on by default, unless you want to crawl only to fill the==Dies sollte standardm&auml;ssig aktiviert sein, ausser Sie wollen den
+This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterl&auml;dt. Dies sollte standardm&auml;ssig aktiviert sein, ausser Sie wollen den
 Proxy Cache</a> without indexing.==Proxy Cache</a> ohne Indexierung f&uuml;llen.
 Do Remote Indexing:==Indexieren auf anderen Peers:
 Describe your intention to start this global crawl \(optional\):==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional):
 This message will appear in the 'Other Peer Crawl Start' table of other peers.==Diese Nachricht wird bei anderen Peers in der 'Anderer Peer Crawl Start' Tabelle angezeigt.
-If checked, the crawl will try to assign the leaf nodes of the search tree to remote peers.==Wenn aktiviert, wird der Crawl versuchen, die Verzweigungen im Suchbaum an remote Peers zu &uuml;bertragen.
-If you need your crawling results locally, you must switch this off.==Wenn Sie die Crawling Ergebnisse lokal ben&ouml;tigen, aktivieren Sie diese Funktion.
-Only senior and principal peer's can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl initiieren oder erhalten.
-<b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can ommit starting a crawl with the same start point.==<b>Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem gloablen Crawl zu informieren,</b> damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer f&uuml;r Ihren Crawl benutzen.
+If you need your crawling results locally, you should switch this off.==Wenn Sie die Crawling Ergebnisse lokal ben&ouml;tigen, sollten Sie diese Funktion aktivieren.
+Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl initiieren oder erhalten.
+<b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can omit starting a crawl with the same start point.==<b>Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem gloablen Crawl zu informieren,</b> damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
 Exclude <i>static</i> Stop-Words==Stop-Words ausschlie&szlig;en:
-To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,==Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt class=small>yacy.stopwords</tt> enthalten sind,
+This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem h&auml;fig vorkommende W&ouml;rter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt class=small>yacy.stopwords</tt> enthalten sind,
 check this box.==aktivieren Sie diese Box.
 Starting Point:==Startpunkt:
 From&nbsp;File:==Aus Datei:
 From&nbsp;URL:==Von URL:
-Existing start URL's are re-crawled.==Die existierende Start URL wird wieder gecrawlt.
-Other already visited URL's are sorted out as 'double'.==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert.
+Existing start URLs are re-crawled.==Die existierende Start URL wird wieder gecrawlt.
+Other already visited URLs are sorted out as \"double\".==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert.
 A complete re-crawl will be available soon.==Ein kompletter Re-Crawl wird bald m&ouml;glich sein.
 "Start New Crawl"=="Neuen Crawl starten"
 <b>Distributed Indexing: </b>==<b>Verteiltes Indexieren: </b>
@@ -334,7 +349,7 @@ Crawling and indexing can be done by remote peers.==Crawlen und Indexieren kann 
 Your peer can search and index for other peers and they can search for you.==Ihr Peer kann suchen und indexieren f&uuml;r andere Peers und diese k&ouml;nnen f&uuml;r Sie suchen.
 Accept remote crawling requests and perform crawl at maximum load==Akzeptiere Remote-Crawling Anfragen und crawle bis zur maximalen Auslastung.
 Accept remote crawling requests and perform crawl at maximum of==Akzeptiere Remote-Crawling Anfragen und crawle bis zu einem Maximum von
-Pages Per Minute \(minimum is 1, low system load at PPM <= 30\)==Seiten pro Minute (Minimum ist 1, langsame Systeme sollten unter 30 Seiten pro Minute laden)
+Pages Per Minute \(minimum is 1, low system load usually at PPM <= 30\)==Seiten pro Minute (Minimum ist 1, langsame Systeme sollten normalerweise unter 30 Seiten pro Minute laden)
 Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Akzeptiere keine Remote-Crawling Anfragen (bitte aktivieren Sie dies nur, wenn Sie nicht eine Seite pro Minute crawlen k&ouml;nnen; siehe Option oben)
 "set"=="Speichern"
 Error:==Fehler:
@@ -369,7 +384,7 @@ Crawl Thread==Crawl Art
 Start URL==Start URL
 Depth</b>==Tiefe</b>
 Filter</b>==Maske</b>
-Accept '\?'</b>==Akzeptiere'?'</b>
+Accept \"?\" URLs</b>==Akzeptiere '?' URLs</b>
 Fill Proxy Cache==F&uuml;lle Proxy Cache
 Local Indexing</b>==Lokales Indexieren</b>
 Remote Indexing</b>==Indexieren auf anderen Peers</b>
