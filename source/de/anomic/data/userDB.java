@@ -47,17 +47,17 @@ package de.anomic.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Date;
-import java.util.Calendar;
-import java.lang.NumberFormatException;
 
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 
 public final class userDB {
@@ -184,6 +184,22 @@ public final class userDB {
 		}
 		return null;
 	}
+    /*
+     * determinate, if a user has Adminrights from a authorisation http-headerfield
+     * it tests both userDB and oldstyle adminpw.
+     * @param auth the http-headerline for authorisation
+     */
+    public boolean hasAdminRight(String auth){
+        plasmaSwitchboard sb=plasmaSwitchboard.getSwitchboard();
+        String adminAccountBase64MD5 = sb.getConfig("adminAccountBase64MD5", "");
+        userDB.Entry entry = sb.userDB.proxyAuth(auth);
+        if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(auth.trim().substring(6)))) {
+            return true;
+        } else if(entry != null && entry.hasAdminRight()){
+            return true;
+        }
+        return false;
+    }
 	/*
 	 * use a ProxyAuth String to authenticate a user and save the ip/username for ipAuth
 	 * @param auth a base64 Encoded String, which contains "username:pw".

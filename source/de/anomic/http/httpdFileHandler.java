@@ -96,10 +96,11 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
 import javax.imageio.ImageIO;
 
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaParser;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCodings;
@@ -108,10 +109,9 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.data.userDB;
-import de.anomic.ymage.ymagePainter;
 import de.anomic.ymage.ymageMatrixPainter;
 import de.anomic.ymage.ymagePNGEncoderAWT;
+import de.anomic.ymage.ymagePainter;
 
 public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
     
@@ -313,11 +313,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             }
             
             // authorization is given
-            userDB.Entry entry = sb.userDB.proxyAuth(authorization);
-            if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization.trim().substring(6)))) {
+            if (sb.userDB.hasAdminRight(authorization)) {
                 // Authentication successfull. remove brute-force flag
-                serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
-            } else if(entry != null && entry.hasAdminRight()){
                 serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
             } else {
                 // a wrong authentication was given. Ask again
