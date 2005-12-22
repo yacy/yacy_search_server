@@ -43,6 +43,7 @@
 // javac -classpath .:../Classes Settings_p.java
 // if the shell's current path is HTROOT
 
+import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
@@ -80,6 +81,7 @@ public class IndexMonitor {
             (post.containsKey("clearlist")) ||
             (post.containsKey("deleteentry"))) {
             String authorization = ((String) header.get("Authorization", "xxxxxx")).trim().substring(6);
+            userDB.Entry entry = switchboard.userDB.proxyAuth(authorization);
             if (authorization.length() == 0) {
                 // force log-in
                 prop.put("AUTHENTICATE", "admin log-in");
@@ -87,7 +89,7 @@ public class IndexMonitor {
             }
             String adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "");
             boolean authenticated = (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization)));
-            if (!authenticated) {
+            if (!authenticated && !entry.hasAdminRight()) {
                 // force log-in (again, because wrong password was given)
                 prop.put("AUTHENTICATE", "admin log-in");
                 return prop;
