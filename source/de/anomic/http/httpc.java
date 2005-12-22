@@ -152,21 +152,23 @@ public final class httpc {
     private boolean allowContentEncoding = true;
 	static boolean useYacyReferer = true;
 	public static boolean yacyDebugMode = false;
-
-    static {
-        // set time-out of InetAddress.getByName cache ttl
-        java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
-		java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
-    }
-
+    
     /**
      * Indicates if the current object was removed from pool because the maximum limit
      * was exceeded.
      */
     boolean removedFromPool = false;
 
-    // Configuring the httpc object pool
+    static SSLSocketFactory theSSLSockFactory = null;
+    
     static {
+        // set time-out of InetAddress.getByName cache ttl
+        java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
+        java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
+
+        
+        // Configuring the httpc object pool
+        
         // implementation of session thread pool
         GenericObjectPool.Config config = new GenericObjectPool.Config();
 
@@ -183,11 +185,10 @@ public final class httpc {
         config.minEvictableIdleTimeMillis = 30000;
 
         theHttpcPool = new httpcPool(new httpcFactory(),config);
-    }
-    
-    // initializing a dummy trustManager to enable https connections
-    static SSLSocketFactory theSSLSockFactory = null;
-    static {
+        
+        
+        // initializing a dummy trustManager to enable https connections
+        
         // Create a trust manager that does not validate certificate chains
         TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
             public java.security.cert.X509Certificate[] getAcceptedIssuers() {
@@ -220,8 +221,21 @@ public final class httpc {
             HttpsURLConnection.setDefaultHostnameVerifier(hv);
         } catch (Exception e) {
         }        
+ 
+        
+        // provide system information for client identification
+        String loc = System.getProperty("user.timezone", "nowhere");
+        int p = loc.indexOf("/");
+        if (p > 0) loc = loc.substring(0,p);
+        loc = loc + "/" + System.getProperty("user.language", "dumb");
+        systemOST =
+                System.getProperty("os.arch", "no-os-arch") + " " +
+                System.getProperty("os.name", "no-os-name") + " " +
+                System.getProperty("os.version", "no-os-version") + "; " +
+                "java " + System.getProperty("java.version", "no-java-version") + "; " + loc;
+        userAgent = "yacy (www.yacy.net; v" + vDATE + "; " + systemOST + ")";
     }
-
+    
     /**
      * A reusable readline buffer
      * @see serverByteBuffer
@@ -471,21 +485,7 @@ public final class httpc {
         return new GregorianCalendar(GMTTimeZone).getTime();
     }
 
-    // FIXME: Why weren't all static parts put together? They are run one after
-    // each other on class loading? Hopefully. So why not put them into one
-    // static block?
-    static {
-        // provide system information for client identification
-        String loc = System.getProperty("user.timezone", "nowhere");
-        int p = loc.indexOf("/");
-        if (p > 0) loc = loc.substring(0,p);
-        loc = loc + "/" + System.getProperty("user.language", "dumb");
-        systemOST =
-                System.getProperty("os.arch", "no-os-arch") + " " + System.getProperty("os.name", "no-os-arch") + " " +
-                System.getProperty("os.version", "no-os-version") + "; " +
-                "java " + System.getProperty("java.version", "no-java-version") + "; " + loc;
-        userAgent = "yacy (www.yacy.net; v" + vDATE + "; " + systemOST + ")";
-    }
+
 
     /**
     * Initialize the httpc-instance with the given data. This method is used,

@@ -51,6 +51,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import de.anomic.http.httpHeader;
@@ -67,6 +68,7 @@ public class yacyPeerActions {
     private yacySeedDB seedDB;
     private plasmaSwitchboard sb;
     private HashSet actions;
+    private HashMap userAgents;
     private File superseedFile;
     private String superseedURL;
     public  long juniorConnects;
@@ -78,8 +80,9 @@ public class yacyPeerActions {
         this.seedDB = seedDB;
         this.sb = switchboard;
         this.actions = new HashSet();
+        this.userAgents = new HashMap();
         this.superseedFile = superseedFile;
-	this.superseedURL = superseedURL;
+        this.superseedURL = superseedURL;
         this.superseedURL = superseedURL;
         this.juniorConnects = 0;
         this.seniorConnects = 0;
@@ -406,5 +409,14 @@ public class yacyPeerActions {
         // perform all actions
         Iterator i = actions.iterator();
         while (i.hasNext()) ((yacyPeerAction) i.next()).processPeerPing(peer);
+    }
+    
+    public void setUserAgent(String IP, String userAgent) {
+        userAgents.put(IP, userAgent);
+    }
+    
+    public String getUserAgent(String IP) {
+        String userAgent = (String) userAgents.get(IP);
+        return (userAgent == null) ? "" : userAgent;
     }
 }

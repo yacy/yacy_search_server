@@ -95,7 +95,6 @@ public final class yacySeedDB {
     private final Hashtable nameLookupCache;
     private final Hashtable ipLookupCache;
     
-    
     public yacySeedDB(plasmaSwitchboard sb,
             File seedActiveDBFile,
             File seedPassiveDBFile,

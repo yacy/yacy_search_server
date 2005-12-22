@@ -264,14 +264,25 @@ public class yacySeed {
         put(URL_IN, Integer.toString(Integer.parseInt(v) + count));
     }
 
-    // 12 * 6 bit = 72 bit = 9 byte
+    // 12 * 6 bit = 72 bit = 18 characters hex-hash
+    public static String b64Hash2hexHash(String b64Hash) {
+        // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
+        return serverCodings.encodeHex(serverCodings.enhancedCoder.decodeBase64(b64Hash));
+    }
+    
     public static String hexHash2b64Hash(String hexHash) {
         return serverCodings.enhancedCoder.encodeBase64(serverCodings.decodeHex(hexHash));
     }
 
-    public static String b64Hash2hexHash(String b64Hash) {
-        // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
-        return serverCodings.encodeHex(serverCodings.enhancedCoder.decodeBase64(b64Hash));
+    //  12 * 6 bit = 72 bit = 9 byte
+    public static byte[] b64Hash2b256Hash(String b64Hash) {
+        assert (b64Hash.length() == 12);
+        return serverCodings.enhancedCoder.decodeBase64(b64Hash);
+    }
+    
+    public static String b256Hash2b64Hash(byte[] b256Hash) {
+        assert (b256Hash.length == 9);
+        return serverCodings.enhancedCoder.encodeBase64(b256Hash);
     }
 
     public float getVersion() {

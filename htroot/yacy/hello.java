@@ -86,6 +86,7 @@ public final class hello {
 
         // we easily know the caller's IP:
         final String clientip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum
+        final String userAgent = (String) header.get(httpHeader.USER_AGENT, "<unknown>");
         final String reportedip = remoteSeed.get(yacySeed.IP, "");
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         final float clientversion = remoteSeed.getVersion();
@@ -162,6 +163,7 @@ public final class hello {
                 yacyCore.peerActions.peerPing(remoteSeed);
             }
         }
+        yacyCore.peerActions.setUserAgent(clientip, userAgent);
         if (!((String)prop.get(yacySeed.YOURTYPE)).equals(reportedPeerType)) {
             yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() +
                                                            "' [" + reportedip +

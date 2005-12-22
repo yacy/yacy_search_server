@@ -266,8 +266,10 @@ public class Network {
                         case 3 : e = yacyCore.seedDB.seedsSortedPotential(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LASTSEEN)); break;
                         default: break;
                     }
+                    int p;
                     String startURL;
                     String wikiPage;
+                    String userAgent, location;
                     final StringBuffer alert = new StringBuffer();
                     int PPM;
                     while (e.hasMoreElements() && conCount < maxCount) {
@@ -305,6 +307,10 @@ public class Network {
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_shortname", shortname);
                             prop.put(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
+                            userAgent = yacyCore.peerActions.getUserAgent(seed.getIP());
+                            p = userAgent.lastIndexOf(';');
+                            location = (p > 0) ? userAgent.substring(p + 1, userAgent.length() - 1).trim(): "";
+                            prop.put(STR_TABLE_LIST + conCount + "_location", location);
                             if (complete) {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_ip", seed.get(yacySeed.IP, "-") );
@@ -315,6 +321,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_CRTCnt", seed.get(yacySeed.CRTCNT, "0"));
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_seeds", seed.get(yacySeed.SCOUNT, "-"));
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_connects", groupDigits(seed.get(yacySeed.CCOUNT, "0")));
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_userAgent", userAgent);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 0);
                             }
