@@ -238,8 +238,9 @@ public final class userDB {
                     }catch(IOException e){}
                     return null;
                 }
+                return entry;
         }
-        return entry;
+        return null;
     }
     public Entry md5Auth(String user, String md5){
         Entry entry=this.getEntry(user);
