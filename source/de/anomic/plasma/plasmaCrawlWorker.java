@@ -417,6 +417,11 @@ public final class plasmaCrawlWorker extends Thread {
                         String redirectionUrlString = (String) res.responseHeader.get(httpHeader.LOCATION);
                         redirectionUrlString = redirectionUrlString.trim();
 
+                        if (redirectionUrlString.length() == 0) {
+                            log.logWarning("CRAWLER Recirection of URL=" + url.toString() + " aborted. Location header is empty.");
+                            return;
+                        }
+                        
                         // normalizing URL
                         redirectionUrlString = htmlFilterContentScraper.urlNormalform(url, redirectionUrlString);
 
