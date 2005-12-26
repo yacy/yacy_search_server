@@ -119,6 +119,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
+import de.anomic.data.bookmarksDB;
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
 import de.anomic.data.userDB;
@@ -192,6 +193,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  yacyCore                    yc;
     public  HashMap                     indexingTasksInProcess;
     public  userDB                      userDB;
+    public  bookmarksDB                 bookmarksDB;
     //public  StringBuffer                crl; // local citation references
     public  StringBuffer                crg; // global citation references
     
@@ -429,6 +431,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("Loaded User DB from file " + userDbFile.getName() +
         ", " + this.userDB.size() + " entries" +
         ", " + ppRamString(userDbFile.length()/1024));
+        
+        //Init bookmarks DB
+        this.log.logConfig("Loading Bookmarks DB");
+        File bookmarksFile = new File(getRootPath(), "DATA/SETTINGS/bookmarks.db");
+        File tagsFile = new File(getRootPath(), "DATA/SETTINGS/tags.db");
+        this.bookmarksDB = new bookmarksDB(bookmarksFile, tagsFile, 512);
+        this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
+        this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
         
         // init cookie-Monitor
         this.log.logConfig("Starting Cookie Monitor");
@@ -744,6 +754,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         cacheLoader.close();
         wikiDB.close();
         userDB.close();
+        bookmarksDB.close();
         messageDB.close();
         if (facilityDB != null) try {facilityDB.close();} catch (IOException e) {}
         sbStackCrawlThread.close();
