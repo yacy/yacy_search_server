@@ -122,7 +122,11 @@ public class bookmarksDB {
     }
     private Vector string2vector(String string){
         Vector ret=new Vector();
-        ret.copyInto(string.split(","));
+        if(string.indexOf(",") > -1){
+            ret.copyInto(string.split(","));
+        }else{
+            ret = new Vector();
+        }
         return ret;
     }
     public Tag getTag(String tagName){
@@ -213,7 +217,13 @@ public class bookmarksDB {
             return string2vector((String)this.mem.get(URL_HASHES));
         }
         public void add(String urlHash){
-            Vector list=string2vector((String)this.mem.get(URL_HASHES));
+            String urlHashes = (String)this.mem.get(URL_HASHES);
+            Vector list;
+            if(urlHashes != null){
+                list=string2vector(urlHashes);
+            }else{
+                list=new Vector();
+            }
             list.add(urlHash);
             this.mem.put(URL_HASHES, vector2string(list));
         }
@@ -229,6 +239,9 @@ public class bookmarksDB {
                 bookmarksDB.this.tagsTable.set(getTagName(), mem);
             } catch (IOException e) {}
         }
+        public Iterator iterator(){
+            return string2vector((String) this.mem.get(URL_HASHES)).iterator();
+        }
     }
     /**
      * Subclass, which stores the bookmark
@@ -238,6 +251,7 @@ public class bookmarksDB {
         public static final String BOOKMARK_URL="bookmarkUrl";
         public static final String BOOKMARK_TITLE="bookmarkTitle";
         public static final String BOOKMARK_TAGS="bookmarkTags";
+        public static final String BOOKMARK_PUBLIC="bookmarkPublic";
         private String urlHash;
         private Map mem;
         public Bookmark(String urlHash, Map map){
@@ -245,6 +259,9 @@ public class bookmarksDB {
             this.mem=map;
         }
         public Bookmark(String url){
+            if(!url.toLowerCase().startsWith("http://")){
+                url="http://"+url;
+            }
             this.urlHash=plasmaURL.urlHash(url);
             mem=new HashMap();
             mem.put(BOOKMARK_URL, url);

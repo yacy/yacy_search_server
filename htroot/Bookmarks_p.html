@@ -16,6 +16,10 @@
 Url: <input type="text" name="url"><br />
 Title: <input type="text" name="title"><br />
 Tags(comma separated): <input type="text" name="tags"><br />
+Public: <select name="public">
+<option value="public ">yes</option>
+<option value="private" selected>no</option>
+</select>
 <input type="submit" name="add" value="create">
 </form>
 </td></tr>
@@ -23,15 +27,22 @@ Tags(comma separated): <input type="text" name="tags"><br />
 <td width="100%">
 #{bookmarks}#
 <a href="#[link]#">#[title]#</a><br />
-Tagged with #[tags]#
+Tagged with #[tags]#. <br />
+<a href="Bookmarks_p.html?delete=#[hash]#">Delete</a>
 <p />
 #{/bookmarks}#
+<p />
+#(next-page)#
+::<a href="Bookmarks_p.html?tag=#[tag]#&start=#[start]#">next page</a>
+#(/next-page)#
 &nbsp;
 </td>
 <td>
+<a href="Bookmarks_p.html">All</a><br />
 #{tags}#
 <a href="Bookmarks_p.html?tag=#[name]#">#[name]#</a><br />
 #{/tags}#
+
 &nbsp;
 </td>
 </tr>

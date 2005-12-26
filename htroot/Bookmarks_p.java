@@ -59,6 +59,9 @@ public class Bookmarks_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
     serverObjects prop = new serverObjects();
     plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+    int MAX_COUNT=10; //TODO: Changeable per Interface
+    String tag="";
+    int start=0;
     
     if(post != null){
         if(post.containsKey("add")){ //add an Entry
@@ -71,9 +74,20 @@ public class Bookmarks_p {
             }
         
             bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url);
-            bookmark.setProperty("title", title);
-            bookmark.setTags(tags);
-            bookmark.setBookmarksTable();
+            if(bookmark != null){
+                bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
+                bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_PUBLIC, (String) post.get("public"));
+                bookmark.setTags(tags);
+                bookmark.setBookmarksTable();
+            }else{
+                //ERROR
+            }
+        }
+        if(post.containsKey("tag")){
+            tag=(String) post.get("tag");
+        }
+        if(post.containsKey("start")){
+            start=Integer.parseInt((String) post.get("start"));
         }
     }
     Iterator it=switchboard.bookmarksDB.tagIterator(true);
@@ -84,9 +98,20 @@ public class Bookmarks_p {
     }
     prop.put("tags", count);
     count=0;
-    it=switchboard.bookmarksDB.bookmarkIterator(true);
+    if(!tag.equals("")){
+        it=switchboard.bookmarksDB.getTag(tag).iterator();
+    }else{
+        it=switchboard.bookmarksDB.bookmarkIterator(true);
+    }
     bookmarksDB.Bookmark bookmark;
-    while(it.hasNext() && count<10){
+    //skip the first entries (display next page)
+    count=0;
+    while(count < start && it.hasNext()){
+        it.next();
+        count++;
+    }
+    count=0;
+    while(count<MAX_COUNT && it.hasNext()){
         bookmark=(Bookmark) it.next();
         if(bookmark!=null){
             prop.put("bookmarks_"+count+"_link", bookmark.getUrl());
@@ -94,6 +119,11 @@ public class Bookmarks_p {
             prop.put("bookmarks_"+count+"_tags", bookmark.getTags());
             count++;
         }
+    }
+    if(it.hasNext()){
+        prop.put("next-page", 1);
+        prop.put("next-page_start", start+10);
+        prop.put("next-page_tag", tag);
     }
     prop.put("bookmarks", count);
     return prop;
