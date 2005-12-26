@@ -452,7 +452,7 @@ public class IndexControl_p {
                         us = switchboard.urlPool.loadedURL.getEntry(uh).url().toString();
                         tm.put(us, uh);
                     } catch (IOException e) {
-                        tm.put("", uh);
+                        tm.put(uh, uh);
                     }
                 }
 
@@ -462,13 +462,13 @@ public class IndexControl_p {
                     us = iter.next().toString();
                     uh = (String)tm.get(us);
                     result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" value=\"").append(uh).append("\" align=\"top\">");
-                    if (us.length() > 0) {
+                    if (us.equals(uh)) {
+                        result.append("<span class=\"tt\">").append(uh).append("&nbsp;&lt;unresolved URL Hash&gt;</span><br>");
+                    } else {
                         result.append("<a href=\"/IndexControl_p.html?").append("keystring=").append(keystring)
                               .append("&keyhash=").append(keyhash).append("&urlhash=").append(uh)
                               .append("&urlstringsearch=").append("&urlstring=").append(us).append("\" class=\"tt\">")
                               .append(uh).append("</a><span class=\"tt\">&nbsp;").append(us).append("</span><br>");
-                    } else {
-                        result.append("<span class=\"tt\">").append(uh).append("&nbsp;&lt;unresolved URL Hash&gt;</span><br>");
                     }
                 }
                 result.append("<input type=\"hidden\" name=\"keystring\" value=\"").append(keystring).append("\">")
