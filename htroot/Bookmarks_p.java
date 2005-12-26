@@ -68,8 +68,12 @@ public class Bookmarks_p {
         if(post.containsKey("add")){ //add an Entry
             String url=(String) post.get("url");
             String title=(String) post.get("title");
+            String tagsString = (String)post.get("tags");
+            if(tagsString.equals("")){
+                tagsString="unsorted"; //defaulttag
+            }
             Vector tags=new Vector();
-            String[] tagsArray=((String)post.get("tags")).split(",");
+            String[] tagsArray=tagsString.split(",");
             for(int i=0;i<tagsArray.length; i++){
                 tags.add(tagsArray[i].trim());
             }

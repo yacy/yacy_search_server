@@ -58,13 +58,8 @@ import de.anomic.plasma.plasmaURL;
 public class bookmarksDB {
     kelondroMap tagsTable;
     kelondroMap bookmarksTable;
-    private final File bookmarksFile;
-    private final File tagsFile;
-    private final int bufferkb;
+    
     public bookmarksDB(File bookmarksFile, File tagsFile, int bufferkb){
-        this.bookmarksFile=bookmarksFile;
-        this.tagsFile=tagsFile;
-        this.bufferkb=bufferkb;
         if(bookmarksFile.exists() && tagsFile.exists()){
             try {
                 this.bookmarksTable=new kelondroMap(new kelondroDyn(bookmarksFile, 1024*bufferkb));
@@ -122,8 +117,11 @@ public class bookmarksDB {
     }
     private Vector string2vector(String string){
         Vector ret=new Vector();
+        String[] hashes=string.split(",");
         if(string.indexOf(",") > -1){
-            ret.copyInto(string.split(","));
+            for(int i=0;i<hashes.length;i++){
+                ret.add(hashes[i]);
+            }
         }else{
             ret = new Vector();
             ret.add(string);
@@ -215,18 +213,24 @@ public class bookmarksDB {
             return tagName;
         }
         public Vector getUrlHashes(){
+            System.out.println(this.mem.get(URL_HASHES));
             return string2vector((String)this.mem.get(URL_HASHES));
         }
         public void add(String urlHash){
-            String urlHashes = (String)this.mem.get(URL_HASHES);
-            Vector list;
+            String urlHashes = (String)mem.get(URL_HASHES);
+            /*Vector list;
             if(urlHashes != null){
                 list=string2vector(urlHashes);
             }else{
                 list=new Vector();
             }
             list.add(urlHash);
-            this.mem.put(URL_HASHES, vector2string(list));
+            this.mem.put(URL_HASHES, vector2string(list));*/
+            if(urlHashes!=null && !urlHashes.equals("")){
+                this.mem.put(URL_HASHES, urlHashes+","+urlHash);
+            }else{
+                this.mem.put(URL_HASHES, urlHash);
+            }
         }
         public void delete(String urlHash){
             Vector list=string2vector((String) this.mem.get(URL_HASHES));
@@ -311,7 +315,7 @@ public class bookmarksDB {
             Iterator it=tags.iterator();
             while(it.hasNext()){
                 String tagName=(String) it.next();
-                Tag tag=getTag((String) tagName);
+                Tag tag=getTag(tagName);
                 if(tag == null){
                     tag=new Tag(tagName);
                 }
