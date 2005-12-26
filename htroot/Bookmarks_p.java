@@ -49,7 +49,6 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import de.anomic.data.bookmarksDB;
-import de.anomic.data.bookmarksDB.Bookmark;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -62,8 +61,13 @@ public class Bookmarks_p {
     int MAX_COUNT=10; //TODO: Changeable per Interface
     String tag="";
     int start=0;
-    Vector tagUrlHashes=null;
     
+    //defaultvalues
+    prop.put("edit", 0);
+    prop.put("title", "");
+    prop.put("url", "");
+    prop.put("tags", "");
+    prop.put("public", 1); //1=is public
     if(post != null){
         if(post.containsKey("add")){ //add an Entry
             String url=(String) post.get("url");
@@ -82,11 +86,23 @@ public class Bookmarks_p {
             if(bookmark != null){
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_PUBLIC, (String) post.get("public"));
-                bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
                 bookmark.setTags(tags);
                 bookmark.setBookmarksTable();
             }else{
                 //ERROR
+            }
+        }
+        if(post.containsKey("edit")){
+            String urlHash=(String) post.get("edit");
+            bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
+            prop.put("edit", 1); //edit mode
+            prop.put("title", bookmark.getTitle());
+            prop.put("url", bookmark.getUrl());
+            prop.put("tags", bookmark.getTags());
+            if(bookmark.getPublic()){
+                prop.put("public", 1);
+            }else{
+                prop.put("public", 0);
             }
         }
         if(post.containsKey("delete")){
@@ -103,10 +119,10 @@ public class Bookmarks_p {
     Iterator it=switchboard.bookmarksDB.tagIterator(true);
     int count=0;
     while(it.hasNext()){
-        prop.put("tags_"+count+"_name", ((bookmarksDB.Tag)it.next()).getTagName());
+        prop.put("taglist_"+count+"_name", ((bookmarksDB.Tag)it.next()).getTagName());
         count++;
     }
-    prop.put("tags", count);
+    prop.put("taglist", count);
     count=0;
     if(!tag.equals("")){
         it=switchboard.bookmarksDB.getBookmarksIterator(tag);

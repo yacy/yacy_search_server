@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
@@ -241,7 +240,6 @@ public class bookmarksDB {
             return tagName;
         }
         public Vector getUrlHashes(){
-            System.out.println(this.mem.get(URL_HASHES));
             return string2vector((String)this.mem.get(URL_HASHES));
         }
         public void add(String urlHash){
@@ -303,6 +301,14 @@ public class bookmarksDB {
             this.urlHash=plasmaURL.urlHash(url);
             mem=new HashMap();
             mem.put(BOOKMARK_URL, url);
+            try {
+                Map oldmap= bookmarksTable.get(this.urlHash);
+                mem.put(BOOKMARK_TIMESTAMP, oldmap.get(BOOKMARK_TIMESTAMP)); //preserve timestamp on edit
+                removeBookmark(this.urlHash); //prevent empty tags
+            } catch (IOException e) {
+                //entry not yet present (normal case)
+                mem.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+            }
         }
         public Bookmark(String urlHash, URL url){
             this.urlHash=urlHash;
@@ -331,6 +337,13 @@ public class bookmarksDB {
                 return (String) this.mem.get(BOOKMARK_TITLE);
             }
             return (String) this.mem.get(BOOKMARK_URL);
+        }
+        public boolean getPublic(){
+            if(this.mem.containsKey(BOOKMARK_PUBLIC)){
+                return ((String) this.mem.get(BOOKMARK_PUBLIC)).equals("public");
+            }else{
+                return false;
+            }
         }
         public void setProperty(String name, String value){
             mem.put(name, value);
