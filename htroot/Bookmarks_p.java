@@ -82,6 +82,7 @@ public class Bookmarks_p {
             if(bookmark != null){
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_PUBLIC, (String) post.get("public"));
+                bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
                 bookmark.setTags(tags);
                 bookmark.setBookmarksTable();
             }else{
@@ -107,18 +108,10 @@ public class Bookmarks_p {
     }
     prop.put("tags", count);
     count=0;
-    boolean viewTag=false;
     if(!tag.equals("")){
-        tagUrlHashes=switchboard.bookmarksDB.getTag(tag).getUrlHashes();
-        if(tagUrlHashes != null){
-            it=tagUrlHashes.iterator();
-            viewTag=true;
-        }else{ //tag does not exist
-            //TODO: Errorpage?
-            it=switchboard.bookmarksDB.bookmarkIterator(true);
-        }
+        it=switchboard.bookmarksDB.getBookmarksIterator(tag);
     }else{
-        it=switchboard.bookmarksDB.bookmarkIterator(true);
+        it=switchboard.bookmarksDB.getBookmarksIterator();
     }
     bookmarksDB.Bookmark bookmark;
     //skip the first entries (display next page)
@@ -129,11 +122,7 @@ public class Bookmarks_p {
     }
     count=0;
     while(count<MAX_COUNT && it.hasNext()){
-        if(viewTag){
-            bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
-        }else{
-            bookmark=(Bookmark) it.next();
-        }
+        bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
         if(bookmark!=null){
             prop.put("bookmarks_"+count+"_link", bookmark.getUrl());
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());

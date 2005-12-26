@@ -44,10 +44,13 @@ package de.anomic.data;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import de.anomic.kelondro.kelondroDyn;
@@ -161,6 +164,22 @@ public class bookmarksDB {
             return null;
         }
     }
+    public Iterator getBookmarksIterator(){
+        TreeSet set=new TreeSet(new bookmarkComparator());
+        Iterator it=bookmarkIterator(true);
+        Bookmark bm;
+        while(it.hasNext()){
+            bm=(Bookmark)it.next();
+            set.add(bm.getUrlHash());
+        }
+        return set.iterator();
+    }
+    public Iterator getBookmarksIterator(String tag){
+        TreeSet set=new TreeSet(new bookmarkComparator());
+        Vector hashes=getTag(tag).getUrlHashes();
+        set.addAll(hashes);
+        return set.iterator();
+    }
     public void removeBookmark(String urlHash){
         Bookmark bookmark = getBookmark(urlHash);
         if(bookmark == null) return; //does not exist
@@ -250,8 +269,15 @@ public class bookmarksDB {
         }
         public void setTagsTable(){
             try {
-                bookmarksDB.this.tagsTable.set(getTagName(), mem);
+                if(this.size() >0){
+                    bookmarksDB.this.tagsTable.set(getTagName(), mem);
+                }else{
+                    bookmarksDB.this.tagsTable.remove(getTagName());
+                }
             } catch (IOException e) {}
+        }
+        public int size(){
+            return ((String)this.mem.get(URL_HASHES)).length();
         }
     }
     /**
@@ -263,6 +289,7 @@ public class bookmarksDB {
         public static final String BOOKMARK_TITLE="bookmarkTitle";
         public static final String BOOKMARK_TAGS="bookmarkTags";
         public static final String BOOKMARK_PUBLIC="bookmarkPublic";
+        public static final String BOOKMARK_TIMESTAMP="bookmarkTimestamp";
         private String urlHash;
         private Map mem;
         public Bookmark(String urlHash, Map map){
@@ -337,6 +364,13 @@ public class bookmarksDB {
                 bookmarksDB.this.bookmarksTable.set(getUrlHash(), mem);
             } catch (IOException e) {}
         }
+        public long getTimeStamp(){
+            if(mem.containsKey(BOOKMARK_TIMESTAMP)){
+                return Long.parseLong((String)mem.get(BOOKMARK_TIMESTAMP));
+            }else{
+                return 0;
+            }
+        }
     }
     public class tagIterator implements Iterator{
         kelondroDyn.dynKeyIterator tagIter;
@@ -404,6 +438,17 @@ public class bookmarksDB {
                     //resetDatabase();
                 }
             }
+        }
+    }
+    /**
+     * Comparator to sort the Bookmarks with Timestamps
+     */
+    public class bookmarkComparator implements Comparator{
+        public int compare(Object obj1, Object obj2){
+            Bookmark bm1=getBookmark((String)obj1);
+            Bookmark bm2=getBookmark((String)obj2);
+            //TODO: what happens, if there is a big difference? (to much for int)
+            return (new Long(bm1.getTimeStamp() - bm2.getTimeStamp())).intValue();
         }
     }
 }
