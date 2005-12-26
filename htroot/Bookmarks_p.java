@@ -88,6 +88,10 @@ public class Bookmarks_p {
                 //ERROR
             }
         }
+        if(post.containsKey("delete")){
+            String urlHash=(String) post.get("delete");
+            switchboard.bookmarksDB.removeBookmark(urlHash);
+        }
         if(post.containsKey("tag")){
             tag=(String) post.get("tag");
         }
@@ -106,8 +110,13 @@ public class Bookmarks_p {
     boolean viewTag=false;
     if(!tag.equals("")){
         tagUrlHashes=switchboard.bookmarksDB.getTag(tag).getUrlHashes();
-        it=tagUrlHashes.iterator();
-        viewTag=true;
+        if(tagUrlHashes != null){
+            it=tagUrlHashes.iterator();
+            viewTag=true;
+        }else{ //tag does not exist
+            //TODO: Errorpage?
+            it=switchboard.bookmarksDB.bookmarkIterator(true);
+        }
     }else{
         it=switchboard.bookmarksDB.bookmarkIterator(true);
     }
@@ -129,6 +138,7 @@ public class Bookmarks_p {
             prop.put("bookmarks_"+count+"_link", bookmark.getUrl());
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.put("bookmarks_"+count+"_tags", bookmark.getTags());
+            prop.put("bookmarks_"+count+"_hash", bookmark.getUrlHash());
             count++;
         }
     }

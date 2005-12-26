@@ -162,6 +162,15 @@ public class bookmarksDB {
         }
     }
     public void removeBookmark(String urlHash){
+        Bookmark bookmark = getBookmark(urlHash);
+        if(bookmark == null) return; //does not exist
+        String[] tags = bookmark.getTags().split(",");
+        bookmarksDB.Tag tag;
+        for(int i=0;i<tags.length;i++){
+            tag=getTag(tags[i]);
+            tag.delete(urlHash);
+            tag.setTagsTable();
+        }
         try {
             bookmarksTable.remove(urlHash);
         } catch (IOException e) {}
@@ -237,7 +246,7 @@ public class bookmarksDB {
             if(list.contains(urlHash)){
                 list.remove(urlHash);
             }
-            this.mem.put(URL_HASHES, list);
+            this.mem.put(URL_HASHES, vector2string(list));
         }
         public void setTagsTable(){
             try {
