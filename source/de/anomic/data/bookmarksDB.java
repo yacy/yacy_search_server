@@ -126,6 +126,7 @@ public class bookmarksDB {
             ret.copyInto(string.split(","));
         }else{
             ret = new Vector();
+            ret.add(string);
         }
         return ret;
     }
@@ -238,9 +239,6 @@ public class bookmarksDB {
             try {
                 bookmarksDB.this.tagsTable.set(getTagName(), mem);
             } catch (IOException e) {}
-        }
-        public Iterator iterator(){
-            return string2vector((String) this.mem.get(URL_HASHES)).iterator();
         }
     }
     /**

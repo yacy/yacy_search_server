@@ -62,6 +62,7 @@ public class Bookmarks_p {
     int MAX_COUNT=10; //TODO: Changeable per Interface
     String tag="";
     int start=0;
+    Vector tagUrlHashes=null;
     
     if(post != null){
         if(post.containsKey("add")){ //add an Entry
@@ -98,8 +99,11 @@ public class Bookmarks_p {
     }
     prop.put("tags", count);
     count=0;
+    boolean viewTag=false;
     if(!tag.equals("")){
-        it=switchboard.bookmarksDB.getTag(tag).iterator();
+        tagUrlHashes=switchboard.bookmarksDB.getTag(tag).getUrlHashes();
+        it=tagUrlHashes.iterator();
+        viewTag=true;
     }else{
         it=switchboard.bookmarksDB.bookmarkIterator(true);
     }
@@ -112,7 +116,11 @@ public class Bookmarks_p {
     }
     count=0;
     while(count<MAX_COUNT && it.hasNext()){
-        bookmark=(Bookmark) it.next();
+        if(viewTag){
+            bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
+        }else{
+            bookmark=(Bookmark) it.next();
+        }
         if(bookmark!=null){
             prop.put("bookmarks_"+count+"_link", bookmark.getUrl());
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
