@@ -56,31 +56,47 @@ import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.server.logging.serverLog;
 
 public class bookmarksDB {
     kelondroMap tagsTable;
     kelondroMap bookmarksTable;
     
     public bookmarksDB(File bookmarksFile, File tagsFile, int bufferkb){
-        if(bookmarksFile.exists() && tagsFile.exists()){
+        //check if database exists
+        if(bookmarksFile.exists()){
             try {
+                //open it
                 this.bookmarksTable=new kelondroMap(new kelondroDyn(bookmarksFile, 1024*bufferkb));
-                this.tagsTable=new kelondroMap(new kelondroDyn(tagsFile, 1024*bufferkb));
             } catch (IOException e) {
-                //TODO: check if both are corrupted
+                //database reset :-((
                 bookmarksFile.delete();
                 bookmarksFile.getParentFile().mkdirs();
                 this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, 128, 256, true));
+            }
+        }else{
+            //new database
+            bookmarksFile.getParentFile().mkdirs();
+            this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, 128, 256, true));
+        }
+        //check if database exists
+        if(tagsFile.exists()){
+            try {
+                //open it
+                this.tagsTable=new kelondroMap(new kelondroDyn(tagsFile, 1024*bufferkb));
+            } catch (IOException e) {
+                //reset database
                 tagsFile.delete();
                 tagsFile.getParentFile().mkdirs();
                 this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, 128, 256, true));
+                rebuildTags();
             }
 
         }else{
-            bookmarksFile.getParentFile().mkdirs();
-            this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, 128, 256, true));
+            //new database
             tagsFile.getParentFile().mkdirs();
             this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, 128, 256, true));
+            rebuildTags();
         }
     }
     public void close(){
@@ -129,6 +145,27 @@ public class bookmarksDB {
             ret.add(string);
         }
         return ret;
+    }
+    public void rebuildTags(){
+        serverLog.logInfo("BOOKMARKS", "rebuilding tags.db from bookmarks.db...");
+        Iterator it=bookmarkIterator(true);
+        Bookmark bookmark;
+        Tag tag;
+        String[] tags;
+        while(it.hasNext()){
+            bookmark=(Bookmark) it.next();
+            tags = bookmark.getTags().split(",");
+            tag=null;
+            for(int i=0;i<tags.length;i++){
+                tag=getTag(tags[i]);
+                if(tag==null){
+                    tag=new Tag(tags[i]);
+                }
+                tag.add(bookmark.getUrlHash());
+                tag.setTagsTable();
+            }
+        }
+        serverLog.logInfo("BOOKMARKS", "Rebuilt "+tagsTable.size()+" tags using your "+bookmarksTable.size()+" bookmarks.");
     }
     public Tag getTag(String tagName){
         Map map;
@@ -183,11 +220,13 @@ public class bookmarksDB {
         Bookmark bookmark = getBookmark(urlHash);
         if(bookmark == null) return; //does not exist
         String[] tags = bookmark.getTags().split(",");
-        bookmarksDB.Tag tag;
+        bookmarksDB.Tag tag=null;
         for(int i=0;i<tags.length;i++){
             tag=getTag(tags[i]);
-            tag.delete(urlHash);
-            tag.setTagsTable();
+            if(tag !=null){
+                tag.delete(urlHash);
+                tag.setTagsTable();
+            }
         }
         try {
             bookmarksTable.remove(urlHash);
