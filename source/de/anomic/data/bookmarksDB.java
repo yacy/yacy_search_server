@@ -303,7 +303,11 @@ public class bookmarksDB {
             mem.put(BOOKMARK_URL, url);
             try {
                 Map oldmap= bookmarksTable.get(this.urlHash);
-                mem.put(BOOKMARK_TIMESTAMP, oldmap.get(BOOKMARK_TIMESTAMP)); //preserve timestamp on edit
+                if(oldmap != null && oldmap.containsKey(BOOKMARK_TIMESTAMP)){
+                    mem.put(BOOKMARK_TIMESTAMP, oldmap.get(BOOKMARK_TIMESTAMP)); //preserve timestamp on edit
+                }else{
+                    mem.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+                }
                 removeBookmark(this.urlHash); //prevent empty tags
             } catch (IOException e) {
                 //entry not yet present (normal case)
