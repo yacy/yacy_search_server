@@ -324,6 +324,7 @@ public class bookmarksDB {
     public class Bookmark{
         public static final String BOOKMARK_URL="bookmarkUrl";
         public static final String BOOKMARK_TITLE="bookmarkTitle";
+        public static final String BOOKMARK_DESCRIPTION="bookmarkDesc";
         public static final String BOOKMARK_TAGS="bookmarkTags";
         public static final String BOOKMARK_PUBLIC="bookmarkPublic";
         public static final String BOOKMARK_TIMESTAMP="bookmarkTimestamp";
@@ -372,6 +373,12 @@ public class bookmarksDB {
         public String getTags(){
             if(this.mem.containsKey(BOOKMARK_TAGS)){
                 return (String)this.mem.get(BOOKMARK_TAGS);
+            }
+            return "";
+        }
+        public String getDescription(){
+            if(this.mem.containsKey(BOOKMARK_DESCRIPTION)){
+                return (String) this.mem.get(BOOKMARK_DESCRIPTION);
             }
             return "";
         }

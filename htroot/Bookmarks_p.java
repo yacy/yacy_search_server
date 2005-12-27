@@ -65,6 +65,7 @@ public class Bookmarks_p {
     //defaultvalues
     prop.put("edit", 0);
     prop.put("title", "");
+    prop.put("description", "");
     prop.put("url", "");
     prop.put("tags", "");
     prop.put("public", 1); //1=is public
@@ -72,6 +73,7 @@ public class Bookmarks_p {
         if(post.containsKey("add")){ //add an Entry
             String url=(String) post.get("url");
             String title=(String) post.get("title");
+            String description=(String) post.get("description");
             String tagsString = (String)post.get("tags");
             if(tagsString.equals("")){
                 tagsString="unsorted"; //defaulttag
@@ -85,6 +87,7 @@ public class Bookmarks_p {
             bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url);
             if(bookmark != null){
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
+                bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_PUBLIC, (String) post.get("public"));
                 bookmark.setTags(tags);
                 bookmark.setBookmarksTable();
@@ -97,6 +100,7 @@ public class Bookmarks_p {
             bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
             prop.put("edit", 1); //edit mode
             prop.put("title", bookmark.getTitle());
+            prop.put("description", bookmark.getDescription());
             prop.put("url", bookmark.getUrl());
             prop.put("tags", bookmark.getTags());
             if(bookmark.getPublic()){
@@ -142,6 +146,7 @@ public class Bookmarks_p {
         if(bookmark!=null){
             prop.put("bookmarks_"+count+"_link", bookmark.getUrl());
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
+            prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
             prop.put("bookmarks_"+count+"_tags", bookmark.getTags());
             prop.put("bookmarks_"+count+"_hash", bookmark.getUrlHash());
             count++;

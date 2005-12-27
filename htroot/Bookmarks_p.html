@@ -15,6 +15,7 @@
 <form action="Bookmarks_p.html" method="GET">
 Url: <input type="text" name="url" value="#[url]#"><br />
 Title: <input type="text" name="title" value="#[title]#"><br />
+Description: <input type="text" name="description" value="#[description]#"><br />
 Tags(comma separated): <input type="text" name="tags" value="#[tags]#"><br />
 Public: <select name="public">
 <option value="public" #(public)#::selected#(/public)#>yes</option>
@@ -31,7 +32,8 @@ Public: <select name="public">
 <td width="100%">
 #{bookmarks}#
 <a href="#[link]#" target="_blank">#[title]#</a><br />
-Tagged with #[tags]#. <br />
+#[description]#<br />
+Tagged with <span class="bookmarkTags">#[tags]#</span>. <br />
 <a href="Bookmarks_p.html?edit=#[hash]#">Edit</a> / 
 <a href="Bookmarks_p.html?delete=#[hash]#">Delete</a>
 <p />
