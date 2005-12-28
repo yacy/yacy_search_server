@@ -1,4 +1,4 @@
-// /xml.bookmarks/tags_p.java
+// /xml.bookmarks/tags/get_p.java
 // -------------------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -44,7 +44,7 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
-//package xml.bookmarks;
+//package xml.bookmarks.tags;
 
 import java.util.Iterator;
 
@@ -54,15 +54,12 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class tags_p {
+public class get_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        //rename tags
-        if(post != null && post.containsKey("old") && post.containsKey("new")){
-            switchboard.bookmarksDB.renameTag((String)post.get("old"), (String)post.get("new"));
-        }
+
         Iterator it=switchboard.bookmarksDB.tagIterator(true);
         int count=0;
         bookmarksDB.Tag tag;

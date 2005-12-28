@@ -178,25 +178,30 @@ public class bookmarksDB {
             return null;
         }
     }
-    public void renameTag(String oldName, String newName){
+    public boolean renameTag(String oldName, String newName){
         Tag tag=getTag(oldName);
-        Vector urlHashes=tag.getUrlHashes();
-        try {
-            tagsTable.remove(oldName);
-        } catch (IOException e) {}
-        tag.tagName=newName;
-        tag.setTagsTable();
-        Iterator it=urlHashes.iterator();
-        Bookmark bookmark;
-        Vector tags;
-        while(it.hasNext()){
-            bookmark=getBookmark((String) it.next());
-            tags=string2vector(bookmark.getTags());
-            tags.remove(oldName);
-            tags.add(newName);
-            bookmark.setTags(tags);
-            bookmark.setBookmarksTable();
+            if (tag != null) {
+            Vector urlHashes = tag.getUrlHashes();
+            try {
+                tagsTable.remove(oldName);
+            } catch (IOException e) {
+            }
+            tag.tagName = newName;
+            tag.setTagsTable();
+            Iterator it = urlHashes.iterator();
+            Bookmark bookmark;
+            Vector tags;
+            while (it.hasNext()) {
+                bookmark = getBookmark((String) it.next());
+                tags = string2vector(bookmark.getTags());
+                tags.remove(oldName);
+                tags.add(newName);
+                bookmark.setTags(tags);
+                bookmark.setBookmarksTable();
+            }
+            return true;
         }
+        return false;
     }
     public void removeTag(String tagName){
         try {
