@@ -41,6 +41,7 @@
 //Contributions and changes to the program code must be marked as such.
 package de.anomic.data;
 
+import java.awt.print.Book;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -177,6 +178,26 @@ public class bookmarksDB {
             return null;
         }
     }
+    public void renameTag(String oldName, String newName){
+        Tag tag=getTag(oldName);
+        Vector urlHashes=tag.getUrlHashes();
+        try {
+            tagsTable.remove(oldName);
+        } catch (IOException e) {}
+        tag.tagName=newName;
+        tag.setTagsTable();
+        Iterator it=urlHashes.iterator();
+        Bookmark bookmark;
+        Vector tags;
+        while(it.hasNext()){
+            bookmark=getBookmark((String) it.next());
+            tags=string2vector(bookmark.getTags());
+            tags.remove(oldName);
+            tags.add(newName);
+            bookmark.setTags(tags);
+            bookmark.setBookmarksTable();
+        }
+    }
     public void removeTag(String tagName){
         try {
             tagsTable.remove(tagName);
@@ -283,19 +304,23 @@ public class bookmarksDB {
         }
         public void add(String urlHash){
             String urlHashes = (String)mem.get(URL_HASHES);
-            /*Vector list;
-            if(urlHashes != null){
+            Vector list;
+            if(urlHashes != null && !urlHashes.equals("")){
                 list=string2vector(urlHashes);
             }else{
                 list=new Vector();
             }
-            list.add(urlHash);
-            this.mem.put(URL_HASHES, vector2string(list));*/
-            if(urlHashes!=null && !urlHashes.equals("")){
-                this.mem.put(URL_HASHES, urlHashes+","+urlHash);
+            if(!list.contains(urlHash) && !urlHash.equals("")){
+                list.add(urlHash);
+            }
+            this.mem.put(URL_HASHES, vector2string(list));
+            /*if(urlHashes!=null && !urlHashes.equals("") ){
+                if(urlHashes.indexOf(urlHash) <0){
+                    this.mem.put(URL_HASHES, urlHashes+","+urlHash);
+                }
             }else{
                 this.mem.put(URL_HASHES, urlHash);
-            }
+            }*/
         }
         public void delete(String urlHash){
             Vector list=string2vector((String) this.mem.get(URL_HASHES));
@@ -314,7 +339,7 @@ public class bookmarksDB {
             } catch (IOException e) {}
         }
         public int size(){
-            return ((String)this.mem.get(URL_HASHES)).length();
+            return string2vector(((String)this.mem.get(URL_HASHES))).size();
         }
     }
     /**

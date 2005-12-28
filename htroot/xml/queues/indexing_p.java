@@ -44,7 +44,7 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
-package xml.queues;
+//package xml.queues;
 
 import java.util.ArrayList;
 import java.util.Date;
