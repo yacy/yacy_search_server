@@ -164,12 +164,16 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
         // (this is different from previous normal forms where a '/' must not appear in root paths; here it must appear. Makes everything easier.)
         if (path.length() == 0 || path.charAt(0) != '/') path = "/" + path;
-
+        
         Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)[.]{2}(?=/)|/\\.(?=/)|/(?=/)");
         Matcher matcher = pathPattern.matcher(path);
         while (matcher.find()) {
             path = matcher.replaceAll("");
             matcher.reset(path);
+        }
+
+        while (path.startsWith("/../")) {
+            path = path.substring(3);
         }
 
         if (defaultPort) return url.getProtocol() + "://" + url.getHost() + path;
