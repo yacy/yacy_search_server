@@ -53,7 +53,6 @@ import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverByteBuffer;
 
@@ -150,10 +149,10 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return us;
     }
     */
-    
+
     public static String urlNormalform(URL url) {
         boolean defaultPort = false;
-        //serverLog.logFinest("htmlFilter", "urlNormalform: '" + url.toString() + "'");
+        // serverLog.logFinest("htmlFilter", "urlNormalform: '" + url.toString() + "'");
         if (url.getProtocol().equals("http")) {
             if (url.getPort() < 0 || url.getPort() == 80)  { defaultPort = true; }
         } else if (url.getProtocol().equals("ftp")) {
@@ -162,25 +161,23 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             if (url.getPort() < 0 || url.getPort() == 443) { defaultPort = true; }
         }
         String path = url.getFile();
-        if ((path.length() == 0) || (path.charAt(0) != '/')) path = "/" + path;
+
         // (this is different from previous normal forms where a '/' must not appear in root paths; here it must appear. Makes everything easier.)
-        int cpos = path.indexOf("#");
-        if (cpos >= 0) path = path.substring(0, cpos);
-        
-        Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)(?<!/[.]{2}/)[.]{2}(?=/)|/\\.(?=/)");
+        if ((path.length() == 0) || (path.charAt(0) != '/')) path = "/" + path;
+
+        Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)(?<!/[.]{2}/)[.]{2}(?=/)|/\\.(?=/)|/(?=/)");
         Matcher matcher = pathPattern.matcher(path);
         while (matcher.find()) {
             path = matcher.replaceAll("");
             matcher.reset(path);
-        }  
-        
+        }
+
         if (defaultPort) return url.getProtocol() + "://" + url.getHost() + path;
         return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + path;
     }
-    
+
     public static String urlNormalform(URL baseURL, String us) {
-        if (us == null) { return null; }
-        if (us.length() == 0) { return null; }
+        if (us == null || us.length() == 0) { return null; }
         try {
             if (baseURL == null) return urlNormalform(new URL(us));
             return urlNormalform(new URL(baseURL, us));
@@ -263,14 +260,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     System.out.println("TEXT    :" + new String(content.getBytes()));
     }
 
-    public static void main(String[] args) {
-        /*
+/*
+    public static void main(String[] args) {  
         try {
             htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL("http://localhost"));
             scraper.scrapeText(test.getBytes());
             System.out.println(new String(scraper.getText()));
         } catch (MalformedURLException e) {}
-         */
     }
-
+*/
 }
