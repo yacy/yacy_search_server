@@ -172,10 +172,6 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             matcher.reset(path);
         }
 
-        while (path.startsWith("/../")) {
-            path = path.substring(3);
-        }
-
         if (defaultPort) return url.getProtocol() + "://" + url.getHost() + path;
         return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + path;
     }
