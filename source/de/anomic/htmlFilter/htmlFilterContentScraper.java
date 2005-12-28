@@ -163,9 +163,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         String path = url.getFile();
 
         // (this is different from previous normal forms where a '/' must not appear in root paths; here it must appear. Makes everything easier.)
-        if ((path.length() == 0) || (path.charAt(0) != '/')) path = "/" + path;
+        if (path.length() == 0 || path.charAt(0) != '/') path = "/" + path;
 
-        Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)(?<!/[.]{2}/)[.]{2}(?=/)|/\\.(?=/)|/(?=/)");
+        Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)[.]{2}(?=/)|/\\.(?=/)|/(?=/)");
         Matcher matcher = pathPattern.matcher(path);
         while (matcher.find()) {
             path = matcher.replaceAll("");
