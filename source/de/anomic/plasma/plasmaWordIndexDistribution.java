@@ -735,7 +735,9 @@ public final class plasmaWordIndexDistribution {
         }
         
         public int getTransferedEntitySpeed() {
-            return (int) ((1000 * transferedEntryCount) / (System.currentTimeMillis()-startingTime));
+            long transferTime = System.currentTimeMillis() - startingTime;
+            if (transferTime <= 0) transferTime = 1;
+            return (int) ((1000 * transferedEntryCount) / transferTime);
         }
         
         public yacySeed getSeed() {
