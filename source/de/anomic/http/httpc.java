@@ -76,6 +76,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -1215,6 +1216,9 @@ do upload
             httpRemoteProxyConfig theRemoteProxyConfig
     ) throws IOException {
         return wget(url,timeout,user,password,theRemoteProxyConfig,null);
+    }
+    public static ArrayList wget(URL url) throws IOException{
+        return wget(url, 6000, null, null, plasmaSwitchboard.getSwitchboard().remoteProxyConfig);
     }
     
     public static ArrayList wget(

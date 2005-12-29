@@ -1,10 +1,11 @@
-// /xml.bookmarks/tags/rename_p.java
+// /xml/util/gettitle_p.java
 // -------------------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
-// last major change: 28.12.2005
+//
+// last major change: 29.12.2005
 // this file is contributed by Alexander Schier
 //
 // This program is free software; you can redistribute it and/or modify
@@ -44,23 +45,42 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
-//package xml.bookmarks.tags;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.httpc;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class rename_p {
+public class gettitle_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        prop.put("result",0);//error
-        //rename tags
-        if(post != null && post.containsKey("old") && post.containsKey("new")){
-            if(switchboard.bookmarksDB.renameTag((String)post.get("old"), (String)post.get("new")))
-                prop.put("result", 1);//success
+        prop.put("title", "");
+        if(post!=null && post.containsKey("url")){
+            ArrayList content;
+            String url;
+            try {
+                url=(String) post.get("url");
+                if(url.toLowerCase().startsWith("http://")){
+                    url="http://"+url;
+                }
+                content = httpc.wget(new URL(url));
+                Iterator it=content.iterator();
+                String line;
+                String title;
+                while(it.hasNext()){
+                    line=(String) it.next();
+                    try{
+                        title=line.substring(line.toLowerCase().indexOf("<title>")+7, line.toLowerCase().indexOf("</title>"));
+                        prop.put("title", title);
+                        return prop;
+                    }catch(IndexOutOfBoundsException e){}
+                }
+            } catch (MalformedURLException e) {} catch (IOException e) {}
         }
         // return rewrite properties
         return prop;

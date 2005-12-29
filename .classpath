@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="source"/>
-	<classpathentry excluding="env/|htdocsdefault/|proxymsg/|xml/**|yacy/" kind="src" path="htroot"/>
+	<classpathentry excluding="env/|htdocsdefault/|proxymsg/|xml/**|yacy/|xml/util/|xml/util/|xml/bookmarks/tags/|xml/bookmarks/tags/|xml/queues/|xml/queues/" kind="src" path="htroot"/>
 	<classpathentry kind="src" path="htroot/htdocsdefault"/>
 	<classpathentry kind="src" path="htroot/yacy"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
@@ -29,5 +29,8 @@
 	<classpathentry kind="lib" path="libx/jrpm-head.jar"/>
 	<classpathentry kind="lib" path="libx/jrpm-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="libx/commons-codec-1.3.jar"/>
+	<classpathentry kind="src" path="htroot/xml/util"/>
+	<classpathentry kind="src" path="htroot/xml/bookmarks/tags"/>
+	<classpathentry kind="src" path="htroot/xml/queues"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

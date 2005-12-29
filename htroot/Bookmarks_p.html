@@ -3,6 +3,8 @@
 <head>
 <title>YaCy '#[clientname]#': Bookmarks</title>
 #%env/templates/metas.template%#
+<script src="/js/ajax.js"></script>
+<script src="/js/Bookmarks.js"></script>
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
@@ -13,7 +15,7 @@
 <tr><td colspan="2">
 #(edit)#<h3>Add Bookmark</h3>::<h3>Edit Bookmark</h3>#(/edit)#
 <form action="Bookmarks_p.html" method="GET">
-Url: <input type="text" name="url" value="#[url]#"><br />
+Url: <input type="text" name="url" value="#[url]#" onblur="loadTitle()"><br />
 Title: <input type="text" name="title" value="#[title]#"><br />
 Description: <input type="text" name="description" value="#[description]#"><br />
 Tags(comma separated): <input type="text" name="tags" value="#[tags]#"><br />

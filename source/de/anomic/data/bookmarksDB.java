@@ -41,7 +41,6 @@
 //Contributions and changes to the program code must be marked as such.
 package de.anomic.data;
 
-import java.awt.print.Book;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
