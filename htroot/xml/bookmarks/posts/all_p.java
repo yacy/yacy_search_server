@@ -1,11 +1,10 @@
-// /xml/util/gettitle_p.java
+// /xml/bookmarks/posts/all_p.java
 // -------------------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
-//
-// last major change: 29.12.2005
+// last major change: 27.12.2005
 // this file is contributed by Alexander Schier
 //
 // This program is free software; you can redistribute it and/or modify
@@ -45,43 +44,44 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 
+import de.anomic.data.bookmarksDB;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class gettitle_p {
+public class all_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        // return variable that accumulates replacements
+        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        prop.put("title", "");
-        if(post!=null && post.containsKey("url")){
-            ArrayList content;
-            String url;
-            try {
-                url=(String) post.get("url");
-                if(!url.toLowerCase().startsWith("http://")){
-                    url="http://"+url;
-                }
-                content = httpc.wget(new URL(url));
-                Iterator it=content.iterator();
-                String line;
-                String title;
-                while(it.hasNext()){
-                    line=(String) it.next();
-                    try{
-                        title=line.substring(line.toLowerCase().indexOf("<title>")+7, line.toLowerCase().indexOf("</title>"));
-                        prop.put("title", title);
-                        return prop;
-                    }catch(IndexOutOfBoundsException e){}
-                }
-            } catch (MalformedURLException e) {} catch (IOException e) {}
+        Iterator it;
+        if(post != null && post.containsKey("tag")){
+            it=switchboard.bookmarksDB.getBookmarksIterator((String) post.get("tag"));
+        }else{
+            it=switchboard.bookmarksDB.getBookmarksIterator();
         }
+        int count=0;
+        bookmarksDB.Bookmark bookmark;
+        Date date;
+        while(it.hasNext()){
+            bookmark=switchboard.bookmarksDB.getBookmark((String) it.next());
+            prop.put("posts_"+count+"_url", bookmark.getUrl());
+            prop.put("posts_"+count+"_title", bookmark.getTitle());
+            prop.put("posts_"+count+"_description", bookmark.getDescription());
+            prop.put("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
+            date=new Date(bookmark.getTimeStamp());
+            prop.put("posts_"+count+"_time", (new SimpleDateFormat("yyyy-MM-dd")).format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z");
+            prop.put("posts_"+count+"_tags", bookmark.getTags().replaceAll(","," "));
+            count++;
+        }
+        prop.put("posts", count);
+
         // return rewrite properties
         return prop;
     }
