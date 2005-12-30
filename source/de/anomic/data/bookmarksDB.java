@@ -44,7 +44,9 @@ package de.anomic.data;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -61,8 +63,10 @@ import de.anomic.server.logging.serverLog;
 public class bookmarksDB {
     kelondroMap tagsTable;
     kelondroMap bookmarksTable;
+    kelondroMap datesTable;
     
-    public bookmarksDB(File bookmarksFile, File tagsFile, int bufferkb){
+    public bookmarksDB(File bookmarksFile, File tagsFile, File datesFile, int bufferkb){
+        //bookmarks
         //check if database exists
         if(bookmarksFile.exists()){
             try {
@@ -72,13 +76,15 @@ public class bookmarksDB {
                 //database reset :-((
                 bookmarksFile.delete();
                 bookmarksFile.getParentFile().mkdirs();
-                this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, 128, 256, true));
+                //urlHash is 12 bytes long
+                this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, 12, 256, true));
             }
         }else{
             //new database
             bookmarksFile.getParentFile().mkdirs();
-            this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, 128, 256, true));
+            this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, 12, 256, true));
         }
+        //tags
         //check if database exists
         if(tagsFile.exists()){
             try {
@@ -88,15 +94,35 @@ public class bookmarksDB {
                 //reset database
                 tagsFile.delete();
                 tagsFile.getParentFile().mkdirs();
+                // max. 128 byte long tags
                 this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, 128, 256, true));
                 rebuildTags();
             }
-
         }else{
             //new database
             tagsFile.getParentFile().mkdirs();
             this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, 128, 256, true));
             rebuildTags();
+        }
+        // dates
+        //check if database exists
+        if(datesFile.exists()){
+            try {
+                //open it
+                this.datesTable=new kelondroMap(new kelondroDyn(datesFile, 1024*bufferkb));
+            } catch (IOException e) {
+                //reset database
+                datesFile.delete();
+                datesFile.getParentFile().mkdirs();
+                //YYYY-MM-DDTHH:mm:ssZ = 20 byte. currently used: YYYY-MM-DD = 10 bytes
+                this.datesTable = new kelondroMap(new kelondroDyn(datesFile, bufferkb * 1024, 20, 256, true));
+                rebuildDates();
+            }
+        }else{
+            //new database
+            datesFile.getParentFile().mkdirs();
+            this.datesTable = new kelondroMap(new kelondroDyn(datesFile, bufferkb * 1024, 20, 256, true));
+            rebuildDates();
         }
     }
     public void close(){
@@ -105,6 +131,9 @@ public class bookmarksDB {
         } catch (IOException e) {}
         try {
             tagsTable.close();
+        } catch (IOException e) {}
+        try {
+            datesTable.close();
         } catch (IOException e) {}
     }
     public int bookmarksSize(){
@@ -167,6 +196,24 @@ public class bookmarksDB {
         }
         serverLog.logInfo("BOOKMARKS", "Rebuilt "+tagsTable.size()+" tags using your "+bookmarksTable.size()+" bookmarks.");
     }
+    public void rebuildDates(){
+        serverLog.logInfo("BOOKMARKS", "rebuilding dates.db from bookmarks.db...");
+        Iterator it=bookmarkIterator(true);
+        Bookmark bookmark;
+        String date;
+        bookmarksDate bmDate;
+        while(it.hasNext()){
+            bookmark=(Bookmark) it.next();
+            date = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date(bookmark.getTimeStamp()));
+            bmDate=getDate(date);
+            if(bmDate==null){
+                bmDate=new bookmarksDate(date);
+            }
+            bmDate.add(bookmark.getUrlHash());
+            bmDate.setDatesTable();
+        }
+        serverLog.logInfo("BOOKMARKS", "Rebuilt "+datesTable.size()+" dates using your "+bookmarksTable.size()+" bookmarks.");
+    }
     public Tag getTag(String tagName){
         Map map;
         try {
@@ -176,6 +223,17 @@ public class bookmarksDB {
         } catch (IOException e) {
             return null;
         }
+    }
+    public bookmarksDate getDate(String date){
+        Map map;
+        try {
+            map=datesTable.get(date);
+            if(map==null) return null;
+            return new bookmarksDate(date, map);
+        } catch (IOException e) {
+            return null;
+        }
+        
     }
     public boolean renameTag(String oldName, String newName){
         Tag tag=getTag(oldName);
@@ -341,6 +399,67 @@ public class bookmarksDB {
                     bookmarksDB.this.tagsTable.remove(getTagName());
                 }
             } catch (IOException e) {}
+        }
+        public int size(){
+            return string2vector(((String)this.mem.get(URL_HASHES))).size();
+        }
+    }
+    class bookmarksDate{
+        public static final String URL_HASHES="urlHashes";
+        private Map mem;
+        String date;
+        public bookmarksDate(String mydate){
+            date=mydate;
+            mem=new HashMap();
+            mem.put(URL_HASHES, "");
+        }
+        public bookmarksDate(String mydate, Map map){
+            date=mydate;
+            mem=map;
+        }
+        public bookmarksDate(String mydate, Vector entries){
+            date=mydate;
+            mem=new HashMap();
+            mem.put(URL_HASHES, vector2string(entries));
+        }
+        public void add(String urlHash){
+            String urlHashes = (String)mem.get(URL_HASHES);
+            Vector list;
+            if(urlHashes != null && !urlHashes.equals("")){
+                list=string2vector(urlHashes);
+            }else{
+                list=new Vector();
+            }
+            if(!list.contains(urlHash) && !urlHash.equals("")){
+                list.add(urlHash);
+            }
+            this.mem.put(URL_HASHES, vector2string(list));
+            /*if(urlHashes!=null && !urlHashes.equals("") ){
+                if(urlHashes.indexOf(urlHash) <0){
+                    this.mem.put(URL_HASHES, urlHashes+","+urlHash);
+                }
+            }else{
+                this.mem.put(URL_HASHES, urlHash);
+            }*/
+        }
+        public void delete(String urlHash){
+            Vector list=string2vector((String) this.mem.get(URL_HASHES));
+            if(list.contains(urlHash)){
+                list.remove(urlHash);
+            }
+            this.mem.put(URL_HASHES, vector2string(list));
+        }
+        public void setDatesTable(){
+            try {
+                if(this.size() >0){
+                    bookmarksDB.this.datesTable.set(getDateString(), mem);
+                }else{
+                    bookmarksDB.this.datesTable.remove(getDateString());
+                }
+            } catch (IOException e) {}
+        }
+        public String getDateString(){
+            return date;
         }
         public int size(){
             return string2vector(((String)this.mem.get(URL_HASHES))).size();
