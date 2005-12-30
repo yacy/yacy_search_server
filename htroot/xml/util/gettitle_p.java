@@ -44,7 +44,7 @@
 // You must compile this file with
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
-
+package xml.util;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -45,7 +45,7 @@
 // if the shell's current path is HTROOT
 
 //package xml.bookmarks.tags;
-
+package xml.bookmarks.tags;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;

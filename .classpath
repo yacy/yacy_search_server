@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="source"/>
-	<classpathentry excluding="env/|htdocsdefault/|proxymsg/|xml/**|yacy/|xml/util/|xml/util/|xml/bookmarks/tags/|xml/bookmarks/tags/|xml/queues/|xml/queues/|xml/bookmarks/posts/|xml/bookmarks/posts/" kind="src" path="htroot"/>
+	<classpathentry excluding="env/|htdocsdefault/|proxymsg/|yacy/" kind="src" path="htroot"/>
 	<classpathentry kind="src" path="htroot/htdocsdefault"/>
 	<classpathentry kind="src" path="htroot/yacy"/>
-	<classpathentry kind="src" path="htroot/xml/queues"/>
-	<classpathentry kind="src" path="htroot/xml/util"/>
-	<classpathentry kind="src" path="htroot/xml/bookmarks/tags"/>
-	<classpathentry kind="src" path="htroot/xml/bookmarks/posts"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-collections.jar"/>
 	<classpathentry kind="lib" path="lib/commons-pool-1.2.jar"/>

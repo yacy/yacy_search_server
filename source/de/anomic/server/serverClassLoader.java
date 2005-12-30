@@ -119,7 +119,7 @@ public final class serverClassLoader extends ClassLoader {
                 b = serverFileUtils.read(classfile);
                 // now make a class out of the stream
                 //  System.out.println("loading class " + classname + " from file " + classfile.toString());
-                c = this.defineClass(classname, b, 0, b.length);
+                c = this.defineClass(null, b, 0, b.length);
                 resolveClass(c);
                 this.classes.put(classfile, c);
             } catch (LinkageError ee) {

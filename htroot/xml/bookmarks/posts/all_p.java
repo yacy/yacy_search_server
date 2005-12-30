@@ -43,7 +43,7 @@
 // You must compile this file with
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
-
+package xml.bookmarks.posts;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;

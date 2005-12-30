@@ -45,7 +45,7 @@
 // if the shell's current path is HTROOT
 
 //package xml.bookmarks.tags;
-
+package xml.bookmarks.tags;
 import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
