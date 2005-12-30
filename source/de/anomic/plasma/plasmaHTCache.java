@@ -65,6 +65,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -419,20 +422,10 @@ public final class plasmaHTCache {
         return plasmaParser.mediaExtContains(urlString);
     }
 
-    /** 
-     * this method creates from a given host and path a cache path
-     * from a given host (which may also be an IPv4 - number, but not IPv6 or
-     * a domain; all without leading 'http://') and a path (which must start
-     * with a leading '/', and may also end in an '/') a path to a file
-     * in the file system with root as given in cachePath is constructed
-     * it will also be ensured, that the complete path exists; if necessary
-     * that path will be generated
-     * @return new File
-     */
-    public File getCachePath(URL url) {
+/*    public File getCachePath(URL url) {
 //      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
         String remotePath = url.getFile();
-        if (!remotePath.startsWith("/")) { remotePath = "/" + remotePath; }        
+        if (!remotePath.startsWith("/")) { remotePath = "/" + remotePath; }
         if (remotePath.endsWith("/")) { remotePath = remotePath + "ndx"; }
         remotePath = remotePath.replaceAll("[?&:]", "_"); // yes this is not reversible, but that is not needed
         int port = url.getPort();
@@ -446,21 +439,9 @@ public final class plasmaHTCache {
         } else {
             return new File(this.cachePath, url.getHost() + "!" + port + remotePath);
         }
-/*      File path;
-        if (port == 80) {
-            path = new File(this.cachePath, url.getHost() + remotePath);
-        } else {
-            path = new File(this.cachePath, url.getHost() + "!" + port + remotePath);
-        }
-        this.log.logFinest("plasmaHTCache: getCachePath: OUT=" + path.toString());
-        return path;*/
-    }
+    } */
 
-    /**
-     * this is the reverse function to getCachePath: it constructs the url as string
-     * from a given storage path
-     */
-    public static URL getURL(File cachePath, File f) {
+/*    public static URL getURL(File cachePath, File f) {
 //      this.log.logFinest("plasmaHTCache: getURL:  IN: Path=[" + cachePath + "]");
 //      this.log.logFinest("plasmaHTCache: getURL:  IN: File=[" + f + "]");
         String s = f.toString().replace('\\', '/');
@@ -471,12 +452,6 @@ public final class plasmaHTCache {
         if (pos >= 0) {
             s = s.substring(pos + c.length());
             while (s.startsWith("/")) s = s.substring(1);
-            
-            // dieser Block kann spaeter geloescht werden
-            pos = s.indexOf("+");
-            if (pos >= 0) { 
-                s = s.substring(0, pos) + ":" + s.substring(pos + 1);
-            }
             
             pos = s.indexOf("!");
             if (pos >= 0) {
@@ -491,6 +466,107 @@ public final class plasmaHTCache {
             }
             if (s.endsWith("ndx")) { s = s.substring(0, s.length() - 3); }
 //          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);    
+            try {
+                return new URL(protocol + s);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }*/
+
+    /** 
+     * this method creates from a given host and path a cache path
+     * from a given host (which may also be an IPv4 - number, but not IPv6 or
+     * a domain; all without leading 'http://') and a path (which must start
+     * with a leading '/', and may also end in an '/') a path to a file
+     * in the file system with root as given in cachePath is constructed
+     * it will also be ensured, that the complete path exists; if necessary
+     * that path will be generated
+     * @return new File
+     */    
+    public File getCachePath(URL url) {
+//      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
+        String remotePath = url.getFile();
+        if (!remotePath.startsWith("/")) { remotePath = "/" + remotePath; }
+        if (remotePath.endsWith("/")) { remotePath = remotePath + "ndx"; }
+
+        Pattern pathPattern = Pattern.compile("/\\.\\./");
+        Matcher matcher = pathPattern.matcher(remotePath);
+        while (matcher.find()) {
+            remotePath = matcher.replaceAll("/!!/");
+            matcher.reset(remotePath);
+        }
+
+        remotePath = remotePath.replaceAll("[?&:]", "_"); // yes this is not reversible, but that is not needed
+
+        // only set NO default ports
+        int port = url.getPort();
+        if (port >= 0) {
+            if ((port ==  80 && url.getProtocol().equalsIgnoreCase("http" )) ||
+                (port == 443 && url.getProtocol().equalsIgnoreCase("https")) ||
+                (port ==  21 && url.getProtocol().equalsIgnoreCase("ftp"  ))) {
+                 port = -1;
+            }
+        }
+        if (port < 0) {
+            return new File(this.cachePath, url.getProtocol() + "/" + url.getHost() + remotePath);
+        } else {
+            return new File(this.cachePath, url.getProtocol() + "/" + url.getHost() + "!" + port + remotePath);
+        }
+/*      File path;
+        if (port < 0) {
+            path = new File(this.cachePath, url.getHost() + remotePath);
+        } else {
+            path = new File(this.cachePath, url.getHost() + "!" + port + remotePath);
+        }
+        this.log.logFinest("plasmaHTCache: getCachePath: OUT=" + path.toString());
+        return path; */
+    }
+
+    /**
+     * this is the reverse function to getCachePath: it constructs the url as string
+     * from a given storage path
+     */
+    public static URL getURL(File cachePath, File f) {
+//      this.log.logFinest("plasmaHTCache: getURL:  IN: Path=[" + cachePath + "] File=[" + f + "]");
+        final String c = cachePath.toString().replace('\\', '/');
+        String s = f.toString().replace('\\', '/');
+
+        if (s.endsWith("ndx")) { s = s.substring(0, s.length() - 3); }
+
+        int pos = s.lastIndexOf(c);
+        if (pos == 0) {
+            s = s.substring(pos + c.length());
+            while (s.startsWith("/")) { s = s.substring(1); }
+
+            String protocol = "";
+            if (s.startsWith("http/")) {
+                protocol = "http://";
+                s = s.substring(5);
+            } else if (s.startsWith("https/")) {
+                protocol = "https://";
+                s = s.substring(6);
+            } else if (s.startsWith("ftp/")) {
+                protocol = "ftp://";
+                s = s.substring(4);
+            } else {
+                return null;
+            }
+
+            Pattern pathPattern = Pattern.compile("/!!/");
+            Matcher matcher = pathPattern.matcher(s);
+            while (matcher.find()) {
+                s = matcher.replaceAll("/\\.\\./");
+                matcher.reset(s);
+            }
+
+            pos = s.indexOf("!");
+            if (pos >= 0) {
+                s = s.substring(0, pos) + ":" + s.substring(pos + 1);
+            }
+
+//          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);
             try {
                 return new URL(protocol + s);
             } catch (Exception e) {
@@ -563,8 +639,9 @@ public final class plasmaHTCache {
                  plasmaCrawlProfile.entry profile) {
 
         // normalize url
-        serverLog.logFine("PLASMA", "Entry: URL=" + url.toString());
+//      serverLog.logFine("PLASMA", "Entry: URL=" + url.toString());
         this.nomalizedURLString = htmlFilterContentScraper.urlNormalform(url);
+
         try {
             this.url            = new URL(this.nomalizedURLString);
         } catch (MalformedURLException e) {
@@ -651,7 +728,7 @@ public final class plasmaHTCache {
 
         // check status code
         if (!(this.responseStatus.startsWith("200") ||
-              this.responseStatus.startsWith("203"))) { return "bad_status_" + this.responseStatus.substring(0,3); }
+        this.responseStatus.startsWith("203"))) { return "bad_status_" + this.responseStatus.substring(0,3); }
 
         // check storage location
         // sometimes a file name is equal to a path name in the same directory;
