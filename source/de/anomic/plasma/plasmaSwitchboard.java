@@ -434,9 +434,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         //Init bookmarks DB
         this.log.logConfig("Loading Bookmarks DB");
-        File bookmarksFile = new File(getRootPath(), "DATA/DATA/bookmarks.db");
-        File tagsFile = new File(getRootPath(), "DATA/DATA/bookmarkTags.db");
-        File datesFile = new File(getRootPath(), "DATA/DATA/bookmarkDates.db");
+        File bookmarksFile = new File(getRootPath(), "DATA/SETTINGS/bookmarks.db");
+        File tagsFile = new File(getRootPath(), "DATA/SETTINGS/bookmarkTags.db");
+        File datesFile = new File(getRootPath(), "DATA/SETTINGS/bookmarkDates.db");
         this.bookmarksDB = new bookmarksDB(bookmarksFile, tagsFile, datesFile, 512);
         this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
         this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
