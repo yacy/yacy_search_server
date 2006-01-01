@@ -498,21 +498,25 @@ public final class plasmaHTCache {
             matcher.reset(remotePath);
         }
 
-        remotePath = remotePath.replaceAll("[?&:]", "_"); // yes this is not reversible, but that is not needed
+        remotePath = remotePath.replaceAll("[?&:!]", "_"); // yes this is not reversible, but that is not needed
 
         // only set NO default ports
         int port = url.getPort();
+        String protocol = url.getProtocol();
         if (port >= 0) {
-            if ((port ==  80 && url.getProtocol().equalsIgnoreCase("http" )) ||
-                (port == 443 && url.getProtocol().equalsIgnoreCase("https")) ||
-                (port ==  21 && url.getProtocol().equalsIgnoreCase("ftp"  ))) {
+            if ((port ==  80 && protocol.equalsIgnoreCase("http" )) ||
+                (port == 443 && protocol.equalsIgnoreCase("https")) ||
+                (port ==  21 && protocol.equalsIgnoreCase("ftp"  ))) {
                  port = -1;
             }
         }
+        if (url.getHost().toLowerCase().endsWith(".yacy")) {
+            protocol = "yacy";
+        }
         if (port < 0) {
-            return new File(this.cachePath, url.getProtocol() + "/" + url.getHost() + remotePath);
+            return new File(this.cachePath, protocol + "/" + url.getHost() + remotePath);
         } else {
-            return new File(this.cachePath, url.getProtocol() + "/" + url.getHost() + "!" + port + remotePath);
+            return new File(this.cachePath, protocol + "/" + url.getHost() + "!" + port + remotePath);
         }
 /*      File path;
         if (port < 0) {
@@ -550,6 +554,9 @@ public final class plasmaHTCache {
             } else if (s.startsWith("ftp/")) {
                 protocol = "ftp://";
                 s = s.substring(4);
+            } else if (s.startsWith("yacy/")) {
+                protocol = "http://";
+                s = s.substring(5);
             } else {
                 return null;
             }
@@ -728,7 +735,7 @@ public final class plasmaHTCache {
 
         // check status code
         if (!(this.responseStatus.startsWith("200") ||
-        this.responseStatus.startsWith("203"))) { return "bad_status_" + this.responseStatus.substring(0,3); }
+              this.responseStatus.startsWith("203"))) { return "bad_status_" + this.responseStatus.substring(0,3); }
 
         // check storage location
         // sometimes a file name is equal to a path name in the same directory;
