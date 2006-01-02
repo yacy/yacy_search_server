@@ -154,9 +154,8 @@ public final class plasmaHTCache {
 
     private void deleteOldCache(File directory) {
         String[] list = directory.list();
-        int size = list.length - 1;
         File object;
-        for (int i = size; i >= 0 ; i--) {
+        for (int i = list.length - 1; i >= 0 ; i--) {
             object = new File(directory, list[i]);
             if (object.isFile()) {
                 object.delete();
