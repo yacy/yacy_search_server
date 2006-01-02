@@ -102,13 +102,29 @@ public final class plasmaHTCache {
         this.maxCacheSize = maxCacheSize;
 
         // set/make cache path
-        if (!(htCachePath.exists())) {
+        if (!htCachePath.exists()) {
             htCachePath.mkdirs();
         }
-        if (!(htCachePath.isDirectory())) {
+        if (!htCachePath.isDirectory()) {
             // if the cache does not exists or is a file and not a directory, panic
             this.log.logSevere("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
             System.exit(0);
+        }
+
+        // delete old Cache
+        final String[] list = cachePath.list();
+        File object;
+        for (int i = list.length - 1; i >= 0 ; i--) {
+            object = new File(cachePath, list[i]);
+            if (object.isDirectory()) {
+                if (!object.getName().equals("http")  &&
+                    !object.getName().equals("yacy")  &&
+                    !object.getName().equals("https") &&
+                    !object.getName().equals("ftp")   &&
+                    !object.getName().equals("anon")) {
+                    deleteOldCache(object);
+                }
+            }
         }
 
         // open the response header database
@@ -134,6 +150,21 @@ public final class plasmaHTCache {
         // start the cache startup thread
         // this will collect information about the current cache size and elements
         serverInstantThread.oneTimeJob(this, "cacheScan", this.log, 120000);
+    }
+
+    private void deleteOldCache(File directory) {
+        String[] list = directory.list();
+        int size = list.length - 1;
+        File object;
+        for (int i = size; i >= 0 ; i--) {
+            object = new File(directory, list[i]);
+            if (object.isFile()) {
+                object.delete();
+            } else {
+                deleteOldCache(object);
+            }
+        }
+        directory.delete();
     }
 
     public int size() {
@@ -186,7 +217,7 @@ public final class plasmaHTCache {
      */
     public long getFreeSize() {
         return (this.currCacheSize >= this.maxCacheSize) ? 0 : this.maxCacheSize - this.currCacheSize;
-    }  
+    }
 
     public boolean writeFile(URL url, byte[] array) {
         if (array == null) return false;
