@@ -1,10 +1,10 @@
-// kelondroBinSearch.java
+// kelondroNaturalOrder.java
 // -----------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// created 22.11.2005
+// created 29.12.2005
 //
 // $LastChangedDate: 2005-09-22 22:01:26 +0200 (Thu, 22 Sep 2005) $
 // $LastChangedRevision: 774 $
@@ -45,62 +45,57 @@
 
 package de.anomic.kelondro;
 
+import java.util.Comparator;
 
-public class kelondroBinSearch {
+public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelondroOrder, Comparator {
     
-    private byte[] chunks;
-    private int    chunksize;
-    private byte[] buffer;
-    private int    count;
-    private kelondroOrder objectOrder = new kelondroNaturalOrder();
-    
-    public kelondroBinSearch(byte[] chunks, int chunksize) {
-        this.chunks = chunks;
-        this.chunksize = chunksize;
-        this.count = chunks.length / chunksize;
-        this.buffer = new byte[chunksize];
+    public kelondroNaturalOrder() {
     }
     
-    public boolean contains(byte[] t) {
-        return contains(t, 0, this.count);
+    public long cardinal(byte[] key) {
+        // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
+        long c = 0;
+        int p = 0;
+        while ((p < 8) && (p < key.length)) c = (c << 8) | ((long) key[p++] & 0xFF);
+        while (p++ < 8) c = (c << 8);
+        c = c >>> 1;
+        return c;
     }
 
-    private synchronized boolean contains(byte[] t, int beginPos, int endPos) {
-        // the endPos is exclusive, beginPos is inclusive
-        // this method is synchronized to make the use of the buffer possible
-        if (beginPos >= endPos) return false;
-        int pivot = (beginPos + endPos) / 2;
-        if ((pivot < 0) || (pivot >= this.count)) return false;
-        selectBuffer(pivot);
-        int c = objectOrder.compare(buffer, t);
-        if (c == 0) return true;
-        if (c < 0) /* buffer < t */ return contains(t, pivot + 1, endPos);
-        if (c > 0) /* buffer > t */ return contains(t, beginPos, pivot);
-        return false;
-    }
-    
-    public int size() {
-        return count;
-    }
-    
-    public byte[] get(int element) {
-        byte[] a = new byte[chunksize];
-        System.arraycopy(this.chunks, element * this.chunksize, a, 0, chunksize);
-        return a;
+    // Compares its two arguments for order.
+    // Returns -1, 0, or 1 as the first argument
+    // is less than, equal to, or greater than the second.
+    // two arrays are also equal if one array is a subset of the other's array
+    // with filled-up char(0)-values
+    public int compare(byte[] a, byte[] b) {
+        int i = 0;
+        final int al = a.length;
+        final int bl = b.length;
+        final int len = (al > bl) ? bl : al;
+        while (i < len) {
+            if (a[i] > b[i])
+                return 1;
+            if (a[i] < b[i])
+                return -1;
+            // else the bytes are equal and it may go on yet undecided
+            i++;
+        }
+        // check if we have a zero-terminated equality
+        if ((i == al) && (i < bl) && (b[i] == 0)) return 0;
+        if ((i == bl) && (i < al) && (a[i] == 0)) return 0;
+        // no, decide by length
+        if (al > bl) return 1;
+        if (al < bl) return -1;
+        // no, they are equal
+        return 0;
     }
 
-    private void selectBuffer(int element) {
-        System.arraycopy(this.chunks, element * this.chunksize, this.buffer, 0, chunksize);
-    }
-    
     public static void main(String[] args) {
-        String s = "4CEvsI8FRczRBo_ApRCkwfEbFLn1pIFXg39QGMgj5RHM6HpIMJq67QX3M5iQYr_LyI_5aGDaa_bYbRgJ9XnQjpmq6QkOoGWAoEaihRqhV3kItLFHjRtqauUR";
-        kelondroBinSearch bs = new kelondroBinSearch(s.getBytes(), 6);
-        for (int i = 0; i + 6 <= s.length(); i = i + 6) {
-            System.out.println(s.substring(i, i + 6) + ":" + ((bs.contains(s.substring(i, i + 6).getBytes())) ? "drin" : "draussen"));
-        }
-        for (int i = 0; i + 7 <= s.length(); i = i + 6) {
-            System.out.println(s.substring(i + 1, i + 7) + ":" + ((bs.contains(s.substring(i + 1, i + 7).getBytes())) ? "drin" : "draussen"));
-        }
+        byte[] t = new byte[12];
+        for (int i = 0; i < 12; i++) t[i] = (byte) 255;
+        t[0] = (byte) 127;
+        kelondroOrder o = new kelondroNaturalOrder();
+        System.out.println(o.partition(t, 16));
     }
+    
 }

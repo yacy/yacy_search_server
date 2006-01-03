@@ -50,7 +50,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,7 +57,7 @@ import java.util.LinkedList;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-public class kelondroTree extends kelondroRecords implements Comparator, kelondroIndex {
+public class kelondroTree extends kelondroRecords implements kelondroIndex {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 2; // our record definition of two bytes
@@ -76,7 +75,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
     private static int root       = 0; // pointer for FHandles-array: pointer to root node
 
     private Search writeSearchObj = new Search();
-    //private kelondroLock writeLock = new kelondroLock();
+    private kelondroOrder objectOrder = new kelondroNaturalOrder();
     
     public kelondroTree(File file, long buffersize, int key, int value, boolean exitOnFail) {
         this(file, buffersize, new int[] { key, value }, 1, 8, exitOnFail);
@@ -261,7 +260,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
                         return;
                     }
                     //System.out.println("Comparing key = '" + new String(key) + "' with '" + otherkey + "':"); // debug
-                    c = compare(key, thenode.getKey());
+                    c = objectOrder.compare(key, thenode.getKey());
                     //System.out.println(c); // debug
                     if (c == 0) {
                         found = true;
@@ -821,7 +820,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
             ii = new nodeIterator(up, rotating, start);
             nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
             if (nextNode != null) {
-                int c = compare(firstKey, nextNode.getKey());
+                int c = objectOrder.compare(firstKey, nextNode.getKey());
                 if ((c > 0) && (up)) {
                     // firstKey > nextNode.getKey()
                     logWarning("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
@@ -884,7 +883,7 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
             Node searchNode = getNode(searchHandle, null, 0);            
             byte[] startKey = start.getKey();
             int c, ct;
-            while ((c = compare(startKey, searchNode.getKey())) != 0) {
+            while ((c = objectOrder.compare(startKey, searchNode.getKey())) != 0) {
                 // the current 'thisNode' is not the start node, put it on the stack
                 ct = (c < 0) ? leftchild : rightchild;
                 nodeStack.addLast(new Object[]{searchNode, new Integer(ct)});
@@ -1293,46 +1292,8 @@ public class kelondroTree extends kelondroRecords implements Comparator, kelondr
 	}
     }
     
-
-    public int compare(Object a, Object b) {
-        if ((a instanceof byte[]) && (b instanceof byte[])) {
-            return compare((byte[]) a, (byte[]) b);
-        } else if ((a instanceof Node) && (b instanceof Node)) {
-            return compare(((Node) a).getKey(), ((Node) b).getKey());
-        } else
-            throw new IllegalArgumentException("Object type or Object type combination not supported");
-    }
-  
-    // Compares its two arguments for order.
-    // Returns -1, 0, or 1 as the first argument
-    // is less than, equal to, or greater than the second.
-    // two arrays are also equal if one array is a subset of the other's array with filled-up char(0)-values
-    public static int compare(byte[] a, byte[] b) {
-	int i = 0;
-	final int al = a.length;
-	final int bl = b.length;
-	final int len = (al > bl) ? bl : al;
-	while (i < len) {
-	    if (a[i] > b[i]) return  1;
-	    if (a[i] < b[i]) return -1;
-	    // else the bytes are equal and it may go on yet undecided
-	    i++;
-	}
-	// check if we have a zero-terminated equality
-	if ((i == al) && (i < bl) && (b[i] == 0)) return 0;
-	if ((i == bl) && (i < al) && (a[i] == 0)) return 0;
-	// no, decide by length
-	if (al > bl) return 1;
-	if (al < bl) return -1;
-	// no, they are equal
-	return 0;
-    }
-    
-    // Returns the comparator used to order this map,
-    // or null if this  map uses its keys' natural order.
-    
-    public Comparator comparator() {
-        return this;
+    public kelondroOrder order() {
+        return this.objectOrder;
     }
 
     public static void main(String[] args) {
