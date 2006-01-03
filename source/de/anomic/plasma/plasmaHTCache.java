@@ -101,6 +101,25 @@ public final class plasmaHTCache {
         this.cachePath = htCachePath;
         this.maxCacheSize = maxCacheSize;
 
+        // reset old HTCache ?
+        final String[] list = cachePath.list();
+        if (list != null) {
+            File object;
+            for (int i = list.length - 1; i >= 0 ; i--) {
+                object = new File(cachePath, list[i]);
+                if (object.isDirectory()) {
+                    if (!object.getName().equals("http")  &&
+                        !object.getName().equals("yacy")  &&
+                        !object.getName().equals("https") &&
+                        !object.getName().equals("ftp")   &&
+                        !object.getName().equals("anon")) {
+                        deleteOldHTCache(cachePath);
+                        break;
+                    }
+                }
+            }
+        }
+
         // set/make cache path
         if (!htCachePath.exists()) {
             htCachePath.mkdirs();
@@ -110,23 +129,7 @@ public final class plasmaHTCache {
             this.log.logSevere("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
             System.exit(0);
         }
-
-        // delete old Cache
-        final String[] list = cachePath.list();
-        File object;
-        for (int i = list.length - 1; i >= 0 ; i--) {
-            object = new File(cachePath, list[i]);
-            if (object.isDirectory()) {
-                if (!object.getName().equals("http")  &&
-                    !object.getName().equals("yacy")  &&
-                    !object.getName().equals("https") &&
-                    !object.getName().equals("ftp")   &&
-                    !object.getName().equals("anon")) {
-                    deleteOldCache(object);
-                }
-            }
-        }
-
+        
         // open the response header database
         File dbfile = new File(this.cachePath, "responseHeader.db");
         try {
@@ -152,7 +155,7 @@ public final class plasmaHTCache {
         serverInstantThread.oneTimeJob(this, "cacheScan", this.log, 120000);
     }
 
-    private void deleteOldCache(File directory) {
+    private void deleteOldHTCache(File directory) {
         String[] list = directory.list();
         File object;
         for (int i = list.length - 1; i >= 0 ; i--) {
@@ -160,7 +163,7 @@ public final class plasmaHTCache {
             if (object.isFile()) {
                 object.delete();
             } else {
-                deleteOldCache(object);
+                deleteOldHTCache(object);
             }
         }
         directory.delete();
@@ -269,9 +272,8 @@ public final class plasmaHTCache {
     
     private boolean deleteFile(File obj) {
         if (obj.exists() && !filesInUse.contains(obj)) {
-            long size = obj.length();
             if (obj.delete()) {
-                this.currCacheSize -= size;
+                this.currCacheSize -= obj.length();
                 return true;
             }
         }
