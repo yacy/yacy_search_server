@@ -6,14 +6,13 @@
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
+#%env/templates/submenuIndexControl.template%#
 <br><br>
 <h2>Index Administration</h2>
 
 <form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
+<p>The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references</p>
 <p>
-The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references<br>
-To transfer the whole index to an other peer, click <a href="IndexTransfer_p.html">here</a>.<br>
-To import an index from a file or a foreign peer click <a href="IndexImport_p.html">here</a>.<br>
 <table border="0" cellpadding="5" cellspacing="0">
 <tr valign="top" class="TableCellDark">
 <td width="70">Word</td>
