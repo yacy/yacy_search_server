@@ -56,6 +56,28 @@ was removed from blacklist==wurde aus Blacklist entfernt
 was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
 
 #-----------------------------------------------------------
+#File: Bookmarks_p.html
+
+YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
+<h2>Bookmarks==<h2>Lesezeichen
+Add Bookmark==Lesezeichen hinzuf&uuml;gen
+Edit Bookmark==Lesezeichen bearbeiten
+Url:==URL:
+Title:==Titel:
+Description:==Beschreibung:
+Tags \(comma separated\):==Tags (durch Komma trennen):
+Public:==&Ouml;ffentlich:
+yes==ja
+no==nein
+"create"=="erzeugen"
+"edit"=="bearbeiten"
+Tagged with==Tagged mit
+Edit==Bearbeiten
+Delete==L&ouml;schen
+next page==n&auml;chste Seite
+All==Alle
+
+#-----------------------------------------------------------
 #File: CacheAdmin_p.html
 
 YaCy: Local Cache Management==YaCy: Lokale Cache Verwaltung
@@ -278,6 +300,7 @@ Index Control==Index Kontrolle
 Index Administration==Index Administration
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Der lokale Index besteht im Moment aus #[wcount]# W&ouml;rtern und #[ucount]# URL-Links.
 To transfer the whole index to an other peer, click <a href="IndexTransfer_p.html">here</a>.==Um den kompletten Index an einen anderen Peer zu &uuml;bertragen, klicken Sie <a href="IndexTransfer_p.html">hier</a>.
+To import an index from a file or a foreign peer click <a href="IndexImport_p.html">here</a>.==Um einen Index aus einer Datei oder von einem fremden Peer zu importieren, klicken Sie <a href="IndexImport_p.html">hier</a>.
 Word==Wort:
 value="Show URL Entries for Wort:">==value="URL Eintr&auml;ge f&uuml;r Wort zeigen">
 Word-Hash:==Wort-Hash:
@@ -484,6 +507,36 @@ Delete Entries:==L&ouml;sche Eintr&auml;ge:
 This may take a quite long time.==Dies wird vielleicht einige Zeit dauern.
 
 #-------------------------------------------------------
+#File: IndexImport_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy \'\#\[clientname\]\#\': Index Import==YaCy '#[clientname]#': Index Import
+Index DB Import==Index Datenbank Import
+The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==Der lokale Index besteht zur Zeit aus (ungef&auml;hr) #[wcount]# W&ouml;rtern und #[ucount]# URLs.
+Import Job with the same path already started.==Ein Import mit dem selben Pfad ist bereits gestartet.
+Starting new Job==Neuen Import starten
+"Path to the PLASMADB directory of the foreign peer"=="Pfad zum PLASMADB Verzeichnis des fremden Peer"
+Import Path:==Import Pfad:
+"Start New Import"=="Neuen Import starten"
+Currently running jobs==Gerade laufende Aufgaben
+Path==Pfad
+Status==Status
+Elapsed<br>Time==Verstrichene Zeit
+Estimated<br>Time==Gesch&auml;tzte Dauer
+Word Hash==Wort Hash
+Word<br>Entities==Wort<br>Entities
+Word<br>Entries==Wort<br>Eintr&auml;ge
+Abort Import==Import abbrechen
+Pause Import==Import pausieren
+Finished::Running::Paused==Fertig::Laufend::Pausiert
+"Abort Import"=="Import abbrechen"
+"Pause Import"=="Import pausieren"
+"Continue Import"=="Import fortsetzen"
+Finished jobs==Fertige Importierungen
+"Clear List"=="Liste l&ouml;schen"
+Last Refresh:==Letzte Aktualisierung:
+
+#-------------------------------------------------------
 #File: IndexMonitor.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
@@ -552,13 +605,11 @@ Title==Titel
 #File: IndexTransfer_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-The local index currently consists of \(at least\)==Der lokale Index besteht zur Zeit aus (ungefähr)
-reverse word indexes and==W&ouml;rtern und
-URL references==URLs
-Chunk Size==Chunk-Größe
+The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==Der lokale Index besteht zur Zeit aus (ungef&auml;hr) #[wcount]# W&ouml;rtern und #[ucount]# URLs.
+Chunk Size<br>\(Word Entries\)==Chunk-Gr&ouml;sse<br>(Wort Eintr&auml;ge)
 Words Range==Worte-Bereich
 Transfered Words==Übertragene W&ouml;rter
-Delete<br>Index==Index<br>löschen
+Delete<br>Index==Index<br>l&ouml;schen
 true==ja
 false==nein
 Selection==Auswahl

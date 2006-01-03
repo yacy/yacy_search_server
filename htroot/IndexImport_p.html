@@ -10,13 +10,13 @@
 <br><br>
 <h2>Index DB Import</h2>
 
-<p>The local index currenly consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references</p>
+<p>The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.</p>
 <hr>
 #(error)#<!-- 0 -->
 	::<!-- 1 -->
 		<p><font color="red"><b>#[error_msg]#</b></font></p>
 	::<!-- 2 -->
-		<p><font color="red"><b>Import Job with the same path already started</b></font></p>
+		<p><font color="red"><b>Import Job with the same path already started.</b></font></p>
 #(/error)#
 <h3>Starting new Job</h3>
 <form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
@@ -61,7 +61,7 @@
       <td class="small" align="rigth">#[word_entry_num]#</td>
       <td class="small">
       	#(stopped)#::
-      		<input type="submit" name="stopIndexDbImport" value="Abort Import">      		
+      		<input type="submit" name="stopIndexDbImport" value="Abort Import">
       	#(/stopped)#
 	  </td>
       <td class="small">
@@ -70,11 +70,11 @@
       	::
       	<input type="submit" name="continueIndexDbImport" value="Continue Import">
       	#(/paused)#
-	  </td>	  
-    </tr>  
-</form>    
+	  </td>
+    </tr>
+</form>
 #{/running.jobs}#
-  </table> 
+  </table>
 
 
 <hr>
@@ -96,15 +96,15 @@
     <tr class="TableCellLight">
       <td class="small">#[path]#</td>
       <td class="small"><font color="#(status)#red::green::red#(/status)#">#(status)#Finished::<b>Error:</b> #[errorMsg]#::Paused#(/status)#</font></td>
-	  <td class="small" align="right">#[percent]#</td>     
-      <td class="small" align="right">#[elapsed]#</td>	   
+	  <td class="small" align="right">#[percent]#</td>
+      <td class="small" align="right">#[elapsed]#</td>
       <td class="small" align="right"><tt>#[wordHash]#</tt></td>
       <td class="small" align="rigth">#[url_num]#</td>
       <td class="small" align="rigth">#[word_entity_num]#</td>
       <td class="small" align="rigth">#[word_entry_num]#</td>
-    </tr>  
+    </tr>
 #{/finished.jobs}#
-  </table> 
+  </table>
   <input type="submit" name="clearFinishedJobList" value="Clear List">
 </form>
 <p><font size="-3"><i>Last Refresh:</i> #[date]#</font></p>
