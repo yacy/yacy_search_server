@@ -272,8 +272,9 @@ public final class plasmaHTCache {
     
     private boolean deleteFile(File obj) {
         if (obj.exists() && !filesInUse.contains(obj)) {
+            long size = obj.length();
             if (obj.delete()) {
-                this.currCacheSize -= obj.length();
+                this.currCacheSize -= size;
                 return true;
             }
         }
