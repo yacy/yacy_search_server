@@ -48,7 +48,7 @@ package de.anomic.kelondro;
 
 import java.util.Comparator;
 
-public class kelondroBase64Order extends kelondroAbstractOrder implements kelondroOrder, Comparator {
+public class kelondroBase64Order extends kelondroAbstractOrder implements kelondroOrder, kelondroCoding, Comparator {
 
     public static final kelondroBase64Order standardCoder = new kelondroBase64Order(true);
     public static final kelondroBase64Order enhancedCoder = new kelondroBase64Order(false);
@@ -84,9 +84,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         if (c >= max(length)) {
             StringBuffer s = new StringBuffer(length);
             s.setLength(length);
-            while (length > 0) {
-                s.setCharAt(--length, alpha[0]);
-            }
+            while (length > 0) s.setCharAt(--length, alpha[63]);
             return s.toString();
         } else {
             return encodeLong(c, length);
@@ -107,10 +105,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         while (s.endsWith("="))
             s = s.substring(0, s.length() - 1);
         long c = 0;
-        for (int i = 0; i < s.length(); i++) {
-            c <<= 6;
-            c += ahpla[s.charAt(i)];
-        }
+        for (int i = 0; i < s.length(); i++) c = (c << 6) | ahpla[s.charAt(i)];
         return c;
     }
 
@@ -118,10 +113,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         // computes the maximum number that can be coded with a base64-encoded
         // String of base len
         long c = 0;
-        for (int i = 0; i < len; i++) {
-            c <<= 6;
-            c += 63;
-        }
+        for (int i = 0; i < len; i++) c = (c << 6) | 63;
         return c;
     }
 
@@ -203,12 +195,35 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
     }
 
     public long cardinal(byte[] key) {
-        // TODO Auto-generated method stub
-        return 0;
+        // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
+        long c = 0;
+        int p = 0;
+        while ((p < 10) && (p < key.length)) c = (c << 6) | ahpla[key[p++]];
+        while (p++ < 10) c = (c << 6);
+        c = c << 3;
+        return c;
     }
 
     public int compare(byte[] a, byte[] b) {
-        // TODO Auto-generated method stub
+        int i = 0;
+        final int al = a.length;
+        final int bl = b.length;
+        final int len = (al > bl) ? bl : al;
+        while (i < len) {
+            if (ahpla[a[i]] > ahpla[b[i]])
+                return 1;
+            if (ahpla[a[i]] < ahpla[b[i]])
+                return -1;
+            // else the bytes are equal and it may go on yet undecided
+            i++;
+        }
+        // check if we have a zero-terminated equality
+        if ((i == al) && (i < bl) && (b[i] == 0)) return 0;
+        if ((i == bl) && (i < al) && (a[i] == 0)) return 0;
+        // no, decide by length
+        if (al > bl) return 1;
+        if (al < bl) return -1;
+        // no, they are equal
         return 0;
     }
 
