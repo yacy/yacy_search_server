@@ -1262,6 +1262,33 @@ public final class yacy {
         }
     }
     
+    private static void RWIHashList(String homePath, String targetName) {
+        serverLog log = new serverLog("HASHLIST");
+        File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
+        String wordChunkStartHash = "------------";
+        try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
+        log.logInfo("STARTING CREATION OF RWI-HASHLIST");
+        File root = new File(homePath);
+        File file = new File(root, targetName + ".txt");
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+            plasmaWordIndex WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, log);
+            Iterator WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, true, true);
+            int counter = 0;
+            while (WordHashIterator.hasNext()) {
+                counter++;
+                String wordHash = (String) WordHashIterator.next();
+                bos.write((wordHash).getBytes());
+                bos.write(serverCore.crlf);
+                if (counter % 500 == 0) {
+                    log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + wordHash);
+                }
+            }
+        } catch (IOException e) {
+        e.printStackTrace();
+    }
+    }
+    
     /**
      * Main-method which is started by java. Checks for special arguments or
      * starts up the application.
@@ -1364,6 +1391,11 @@ public final class yacy {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= args[1];
             urldbcleanup(applicationRoot);
+        } else if ((args.length >= 1) && (args[0].equals("-rwihashlist"))) {
+            // generate a url list and save it in a file
+            if (args.length == 2) applicationRoot= args[1];
+            String outfile = "rwihashlist_" + System.currentTimeMillis();
+            RWIHashList(applicationRoot, outfile);
         } else {
             if (args.length == 1) applicationRoot= args[0];
             startup(applicationRoot, startupMemFree, startupMemTotal);
