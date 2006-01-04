@@ -59,6 +59,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdProxyHandler;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
@@ -118,7 +119,7 @@ public class SettingsAck_p {
                 return prop;
             }
             // check passed. set account:
-            env.setConfig("adminAccountBase64MD5", serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(user + ":" + pw1)));
+            env.setConfig("adminAccountBase64MD5", serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("adminAccount", "");
             prop.put("info", 5);//admin account changed
             prop.put("info_user", user);
@@ -274,7 +275,7 @@ public class SettingsAck_p {
             if (filter.length() == 0) filter = "*";
             // check passed. set account:
             env.setConfig("serverClient", filter);
-            env.setConfig("serverAccountBase64MD5", serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(user + ":" + pw1)));
+            env.setConfig("serverAccountBase64MD5", serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("serverAccount", "");
             
             prop.put("info", 8);//server access filter updated

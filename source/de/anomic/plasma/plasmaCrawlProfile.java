@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
@@ -204,7 +205,7 @@ public class plasmaCrawlProfile {
                      boolean storeHTCache, boolean storeTXCache,
                      boolean localIndexing, boolean remoteIndexing,
                      boolean xsstopw, boolean xdstopw, boolean xpstopw) {
-            String handle = serverCodings.encodeMD5B64(Long.toString(System.currentTimeMillis()), true).substring(0, plasmaURL.urlCrawlProfileHandleLength);
+            String handle = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, plasmaURL.urlCrawlProfileHandleLength);
             mem = new HashMap();
             mem.put("handle", handle);
             mem.put("name", name);

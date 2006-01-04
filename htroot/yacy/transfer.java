@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaRankingDistribution;
 import de.anomic.server.serverFileUtils;
@@ -94,14 +95,14 @@ public final class transfer {
                 // consolidation of cr files
                 //System.out.println("yacy/transfer:post=" + post.toString());
                 //String cansendprotocol = (String) post.get("can-send-protocol", "http");
-                String access = serverCodings.encodeMD5B64(otherpeer + ":" + filename, true) + ":" + serverCodings.encodeMD5B64("" + System.currentTimeMillis(), true);
+                String access = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("" + System.currentTimeMillis()));
                 prop.put("response", "ok");
                 prop.put("process_access", access);
                 prop.put("process_address", yacyCore.seedDB.mySeed.getAddress());
                 prop.put("process_protocol", "http");
                 prop.put("process_path", "");  // currently empty; the store process will find a path
                 prop.put("process_maxsize", "-1"); // if response is too big we return the size of the file
-                sb.rankingPermissions.put(serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(access)), filename);
+                sb.rankingPermissions.put(serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access)), filename);
                 sb.getLog().logFine("RankingTransmission: granted peer " + otherpeerName + " to send CR file " + filename);
             }
             return prop;

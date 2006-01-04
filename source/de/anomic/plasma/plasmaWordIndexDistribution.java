@@ -56,6 +56,7 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyDHTAction;
 import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 
 public final class plasmaWordIndexDistribution {
@@ -289,7 +290,7 @@ public final class plasmaWordIndexDistribution {
         String startPointHash;
         // first try to select with increasing probality a good start point
         if (Math.round(Math.random() * 6) != 4) for (int i = 9; i > 0; i--) {
-            startPointHash = serverCodings.encodeMD5B64(Long.toString(i + System.currentTimeMillis()), true).substring(2, 2 + yacySeedDB.commonHashLength);
+            startPointHash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(i + System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
             if (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash) > ((double) i / (double) 10)) return startPointHash;
         }
         // if that fails, take simply the best start point (this is usually avoided, since that leads to always the same target peers)

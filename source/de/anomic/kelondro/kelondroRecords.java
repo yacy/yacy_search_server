@@ -95,11 +95,12 @@ public class kelondroRecords {
     public static final int CP_HIGH   =  2; // cache priority high; entry must be cached
     
     // static seek pointers
+    public  static int  LEN_DESCR      = 60;
     private static long POS_MAGIC      = 0;                     // 1 byte, byte: file type magic
     private static long POS_BUSY       = POS_MAGIC      + 1;    // 1 byte, byte: marker for synchronization
     private static long POS_PORT       = POS_BUSY       + 1;    // 2 bytes, short: hint for remote db access
     private static long POS_DESCR      = POS_PORT       + 2;    // 60 bytes, string: any description string
-    private static long POS_COLUMNS    = POS_DESCR      + 60;   // 2 bytes, short: number of columns in one entry
+    private static long POS_COLUMNS    = POS_DESCR      + LEN_DESCR; // 2 bytes, short: number of columns in one entry
     private static long POS_OHBYTEC    = POS_COLUMNS    + 2;    // 2 bytes, number of extra bytes on each Node
     private static long POS_OHHANDLEC  = POS_OHBYTEC    + 2;    // 2 bytes, number of Handles on each Node
     private static long POS_USEDC      = POS_OHHANDLEC  + 2;    // 4 bytes, int: used counter
@@ -297,6 +298,19 @@ public class kelondroRecords {
         this.entryFile.commit();
     }
 
+    public void setDescription(byte[] description) throws IOException {
+        if (description.length > LEN_DESCR)
+            entryFile.write(POS_DESCR, description, 0, LEN_DESCR);
+        else
+            entryFile.write(POS_DESCR, description);
+    }
+    
+    public byte[] getDescription() throws IOException {
+        byte[] b = new byte[LEN_DESCR];
+        entryFile.readFully(POS_DESCR, b, 0, LEN_DESCR);
+        return b;
+    }
+    
     public void setLogger(Logger newLogger) {
         this.theLogger = newLogger;
     }

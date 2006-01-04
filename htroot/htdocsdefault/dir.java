@@ -57,6 +57,7 @@ import java.util.Set;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -156,10 +157,10 @@ public class dir {
             }
         }
         if (action.equals("downloadPassword") && adminAuthorization) {
-            switchboard.setConfig("downloadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String("download:" + post.get("password", ""))));
+            switchboard.setConfig("downloadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString("download:" + post.get("password", ""))));
         }
         if (action.equals("uploadPassword") && adminAuthorization) {
-            switchboard.setConfig("uploadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String("upload:" + post.get("password", ""))));
+            switchboard.setConfig("uploadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString("upload:" + post.get("password", ""))));
         }        
         if (action.equals("upload") && (uploadAuthorization || adminAuthorization)) {
             String filename = new File(post.get("file", "dummy")).getName();

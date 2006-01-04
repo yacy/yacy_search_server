@@ -59,10 +59,10 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.data.robotsParser;
 import de.anomic.http.httpc;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRecords.Node;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
@@ -405,11 +405,11 @@ public final class plasmaCrawlStacker {
                 this.url           = new String(entryBytes[2]).trim();
                 this.referrerHash      = (entryBytes[3]==null) ? plasmaURL.dummyHash : new String(entryBytes[3]);
                 this.name          = (entryBytes[4] == null) ? "" : new String(entryBytes[4]).trim();
-                this.loaddate      = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entryBytes[5])));
+                this.loaddate      = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[5])));
                 this.profileHandle = (entryBytes[6] == null) ? null : new String(entryBytes[6]).trim();
-                this.depth         = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entryBytes[7]));
-                this.anchors       = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entryBytes[8]));
-                this.forkfactor    = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entryBytes[9]));
+                this.depth         = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[7]));
+                this.anchors       = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[8]));
+                this.forkfactor    = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[9]));
                 this.flags         = new bitfield(entryBytes[10]);
                 this.handle        = Integer.parseInt(new String(entryBytes[11]));
             } catch (Exception e) {
@@ -465,7 +465,7 @@ public final class plasmaCrawlStacker {
         
         public byte[][] getBytes() {
             // stores the values from the object variables into the database
-            String loaddatestr = serverCodings.enhancedCoder.encodeBase64Long(loaddate.getTime() / 86400000, plasmaURL.urlDateLength);
+            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, plasmaURL.urlDateLength);
             // store the hash in the hash cache
 
             // even if the entry exists, we simply overwrite it
@@ -477,9 +477,9 @@ public final class plasmaCrawlStacker {
                     this.name.getBytes(),
                     loaddatestr.getBytes(),
                     (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
-                    serverCodings.enhancedCoder.encodeBase64Long(this.depth, plasmaURL.urlCrawlDepthLength).getBytes(),
-                    serverCodings.enhancedCoder.encodeBase64Long(this.anchors, plasmaURL.urlParentBranchesLength).getBytes(),
-                    serverCodings.enhancedCoder.encodeBase64Long(this.forkfactor, plasmaURL.urlForkFactorLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, plasmaURL.urlCrawlDepthLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, plasmaURL.urlParentBranchesLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, plasmaURL.urlForkFactorLength).getBytes(),
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
             };

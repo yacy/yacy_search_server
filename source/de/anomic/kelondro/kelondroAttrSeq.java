@@ -59,7 +59,7 @@ import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 import java.util.logging.Logger;
 
-import de.anomic.server.serverCodings;
+
 import de.anomic.server.serverFileUtils;
 
 public class kelondroAttrSeq {
@@ -352,7 +352,7 @@ public class kelondroAttrSeq {
             attrs = new HashMap();
             seq = (tree) ? (Map) new TreeMap() : (Map) new HashMap();
             for (int i = 0; i < structure.prop_names.length; i++) {
-                attrs.put(structure.prop_names[i], new Long(serverCodings.enhancedCoder.decodeBase64Long(attrseq.substring(structure.prop_pos[i], structure.prop_pos[i] + structure.prop_len[i]))));
+                attrs.put(structure.prop_names[i], new Long(kelondroBase64Order.enhancedCoder.decodeLong(attrseq.substring(structure.prop_pos[i], structure.prop_pos[i] + structure.prop_len[i]))));
             }
             
             int p = attrseq.indexOf('|') + 1;
@@ -362,7 +362,7 @@ public class kelondroAttrSeq {
                 seqname = attrseq.substring(p, p + structure.seq_len[0]);
                 p += structure.seq_len[0];
                 for (int i = 1; i < structure.seq_names.length; i++) {
-                    seqattrs[i - 1] = serverCodings.enhancedCoder.decodeBase64Long(attrseq.substring(p, p + structure.seq_len[i]));
+                    seqattrs[i - 1] = kelondroBase64Order.enhancedCoder.decodeLong(attrseq.substring(p, p + structure.seq_len[i]));
                     p += structure.seq_len[i];
                 }
                 seq.put(seqname, seqattrs);
@@ -401,7 +401,7 @@ public class kelondroAttrSeq {
             Long val;
             for (int i = 0; i < structure.prop_names.length; i++) {
                 val = (Long) attrs.get(structure.prop_names[i]);
-                sb.append(serverCodings.enhancedCoder.encodeBase64LongSmart((val == null) ? 0 : val.longValue(), structure.prop_len[i]));
+                sb.append(kelondroBase64Order.enhancedCoder.encodeLongSmart((val == null) ? 0 : val.longValue(), structure.prop_len[i]));
             }
             sb.append('|');
             Iterator q = seq.entrySet().iterator();
@@ -412,7 +412,7 @@ public class kelondroAttrSeq {
                 sb.append((String) entry.getKey());
                 seqattrs = (long[]) entry.getValue();
                 for (int i = 1; i < structure.seq_names.length; i++) {
-                    sb.append(serverCodings.enhancedCoder.encodeBase64Long(seqattrs[i - 1], structure.seq_len[i]));
+                    sb.append(kelondroBase64Order.enhancedCoder.encodeLong(seqattrs[i - 1], structure.seq_len[i]));
                 }
             }
             return sb.toString();

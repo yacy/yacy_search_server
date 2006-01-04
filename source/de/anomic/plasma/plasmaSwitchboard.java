@@ -127,6 +127,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroTables;
@@ -1429,14 +1430,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String head = baseurlhash + "=" +
         plasmaWordIndex.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
         plasmaWordIndex.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
-        serverCodings.enhancedCoder.encodeBase64LongSmart(LCount, 2) +  // count of links to local resources
-        serverCodings.enhancedCoder.encodeBase64LongSmart(GCount, 2) +  // count of links to global resources
-        serverCodings.enhancedCoder.encodeBase64LongSmart(document.getImages().size(), 2) + // count of Images in document
-        serverCodings.enhancedCoder.encodeBase64LongSmart(0, 2) +       // count of links to other documents
-        serverCodings.enhancedCoder.encodeBase64LongSmart(document.getText().length, 3) +   // length of plain text in bytes
-        serverCodings.enhancedCoder.encodeBase64LongSmart(condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
-        serverCodings.enhancedCoder.encodeBase64LongSmart(condenser.RESULT_SIMI_WORDS, 3) + // count of all unique words
-        serverCodings.enhancedCoder.encodeBase64LongSmart(0, 1); // Flags (update, popularity, attention, vote)
+        kelondroBase64Order.enhancedCoder.encodeLongSmart(LCount, 2) +  // count of links to local resources
+        kelondroBase64Order.enhancedCoder.encodeLongSmart(GCount, 2) +  // count of links to global resources
+        kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getImages().size(), 2) + // count of Images in document
+        kelondroBase64Order.enhancedCoder.encodeLongSmart(0, 2) +       // count of links to other documents
+        kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getText().length, 3) +   // length of plain text in bytes
+        kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
+        kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.RESULT_SIMI_WORDS, 3) + // count of all unique words
+        kelondroBase64Order.enhancedCoder.encodeLongSmart(0, 1); // Flags (update, popularity, attention, vote)
         
         //crl.append(head); crl.append ('|'); crl.append(cpl); crl.append((char) 13); crl.append((char) 10);
         crg.append(head); crg.append('|'); crg.append(cpg); crg.append((char) 13); crg.append((char) 10);

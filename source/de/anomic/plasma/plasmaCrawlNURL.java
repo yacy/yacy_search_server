@@ -50,11 +50,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 
@@ -492,11 +493,11 @@ public class plasmaCrawlNURL extends plasmaURL {
                     this.url = new URL(new String(entry[2]).trim());
                     this.referrer = (entry[3] == null) ? dummyHash : new String(entry[3]);
                     this.name = (entry[4] == null) ? "" : new String(entry[4]).trim();
-                    this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[5])));
+                    this.loaddate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[5])));
                     this.profileHandle = (entry[6] == null) ? null : new String(entry[6]).trim();
-                    this.depth = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[7]));
-                    this.anchors = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
-                    this.forkfactor = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[9]));
+                    this.depth = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[7]));
+                    this.anchors = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8]));
+                    this.forkfactor = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[9]));
                     this.flags = new bitfield(entry[10]);
                     this.handle = Integer.parseInt(new String(entry[11]));
                     return;
@@ -512,7 +513,7 @@ public class plasmaCrawlNURL extends plasmaURL {
 
         private void store() {
             // stores the values from the object variables into the database
-            String loaddatestr = serverCodings.enhancedCoder.encodeBase64Long(loaddate.getTime() / 86400000, urlDateLength);
+            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, urlDateLength);
             // store the hash in the hash cache
             try {
                 // even if the entry exists, we simply overwrite it
@@ -524,9 +525,9 @@ public class plasmaCrawlNURL extends plasmaURL {
                     this.name.getBytes(),
                     loaddatestr.getBytes(),
                     (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
-                    serverCodings.enhancedCoder.encodeBase64Long(this.depth, urlCrawlDepthLength).getBytes(),
-                    serverCodings.enhancedCoder.encodeBase64Long(this.anchors, urlParentBranchesLength).getBytes(),
-                    serverCodings.enhancedCoder.encodeBase64Long(this.forkfactor, urlForkFactorLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, urlCrawlDepthLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, urlParentBranchesLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, urlForkFactorLength).getBytes(),
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
                 };

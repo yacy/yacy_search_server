@@ -51,6 +51,7 @@ package de.anomic.plasma;
 import java.net.URL;
 import java.util.Properties;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 // import de.anomic.server.logging.serverLog;
@@ -102,7 +103,7 @@ public final class plasmaWordIndexEntry {
 
     // create a word hash
     public static String word2hash(String word) {
-        return serverCodings.encodeMD5B64(word.toLowerCase(), true).substring(0, wordHashLength);
+        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase())).substring(0, wordHashLength);
     }
 
     // doctype calculation
@@ -205,12 +206,12 @@ public final class plasmaWordIndexEntry {
     public plasmaWordIndexEntry(String urlHash, String code) {
         // the code is not parsed but used later on
         this.urlHash = urlHash;
-        this.count = (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(6, 8));
-        this.posintext = (code.length() >= 14) ? (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(12, 14)) : 0;
-        this.posinphrase = (code.length() >= 15) ? (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(14, 16)) : 0;
-        this.posofphrase = (code.length() >= 16) ? (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(16, 18)) : 0;
-        this.age = (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(3, 6));
-        this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(code.substring(0, 3));
+        this.count = (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(6, 8));
+        this.posintext = (code.length() >= 14) ? (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(12, 14)) : 0;
+        this.posinphrase = (code.length() >= 15) ? (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(14, 16)) : 0;
+        this.posofphrase = (code.length() >= 16) ? (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(16, 18)) : 0;
+        this.age = (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(3, 6));
+        this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(0, 3));
         this.language = code.substring(8, 10).getBytes();
         this.doctype = code.charAt(10);
         this.localflag = code.charAt(11);
@@ -226,12 +227,12 @@ public final class plasmaWordIndexEntry {
        }
        // set values
        this.urlHash = pr.getProperty("h", "");
-       this.count = (int) serverCodings.enhancedCoder.decodeBase64Long(pr.getProperty("c", "A"));
-       this.posintext = (int) serverCodings.enhancedCoder.decodeBase64Long(pr.getProperty("t", "__"));
-       this.posinphrase = (int) serverCodings.enhancedCoder.decodeBase64Long(pr.getProperty("r", "__"));
-       this.posofphrase = (int) serverCodings.enhancedCoder.decodeBase64Long(pr.getProperty("o", "__"));
-       this.age = (int) serverCodings.enhancedCoder.decodeBase64Long(pr.getProperty("a", "A"));
-       this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(pr.getProperty("q", "__"));
+       this.count = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("c", "A"));
+       this.posintext = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("t", "__"));
+       this.posinphrase = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("r", "__"));
+       this.posofphrase = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("o", "__"));
+       this.age = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("a", "A"));
+       this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("q", "__"));
        this.language = pr.getProperty("l", "uk").getBytes();
        this.doctype = pr.getProperty("d", "u").charAt(0);
        this.localflag = pr.getProperty("f", ""+LT_LOCAL).charAt(0);
@@ -239,7 +240,7 @@ public final class plasmaWordIndexEntry {
 
     private String b64save(long x, int l) {
         try {
-            return serverCodings.enhancedCoder.encodeBase64Long(x, l);
+            return kelondroBase64Order.enhancedCoder.encodeLong(x, l);
         } catch (Exception e) {
             // if x does not fit into l
             return "________".substring(0, l);

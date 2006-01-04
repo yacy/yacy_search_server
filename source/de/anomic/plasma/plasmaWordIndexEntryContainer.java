@@ -55,7 +55,7 @@ package de.anomic.plasma;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.anomic.server.serverCodings;
+import de.anomic.kelondro.kelondroBase64Order;
 
 public final class plasmaWordIndexEntryContainer implements Comparable {
 
@@ -143,7 +143,7 @@ public final class plasmaWordIndexEntryContainer implements Comparable {
     }
 
     public int hashCode() {
-        return (int) serverCodings.enhancedCoder.decodeBase64Long(this.wordHash.substring(0, 4));
+        return (int) kelondroBase64Order.enhancedCoder.decodeLong(this.wordHash.substring(0, 4));
     }
     
 }

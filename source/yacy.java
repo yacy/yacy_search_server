@@ -70,6 +70,7 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.http.httpc.response;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -81,7 +82,6 @@ import de.anomic.plasma.plasmaWordIndexClassicDB;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
@@ -173,11 +173,11 @@ public final class yacy {
         // set preset accounts/passwords
         String acc;
         if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
-            sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+            sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(acc)));
             sb.setConfig("serverAccount", "");
         }
         if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
-            sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(acc)));
+            sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(acc)));
             sb.setConfig("adminAccount", "");
         }
 

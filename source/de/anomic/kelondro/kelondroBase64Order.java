@@ -1,0 +1,239 @@
+// kelondroBase64Order.java
+// -----------------------
+// part of The Kelondro Database
+// (C) by Michael Peter Christen; mc@anomic.de
+// first published on http://www.anomic.de
+// Frankfurt, Germany, 2005
+// created 03.01.2006
+//
+// $LastChangedDate: 2005-09-22 22:01:26 +0200 (Thu, 22 Sep 2005) $
+// $LastChangedRevision: 774 $
+// $LastChangedBy: orbiter $
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+// Using this software in any meaning (reading, learning, copying, compiling,
+// running) means that you agree that the Author(s) is (are) not responsible
+// for cost, loss of data or any harm that may be caused directly or indirectly
+// by usage of this softare or this documentation. The usage of this software
+// is on your own risk. The installation and usage (starting/running) of this
+// software may allow other people or application to access your computer and
+// any attached devices and is highly dependent on the configuration of the
+// software which must be done by the user of the software; the author(s) is
+// (are) also not responsible for proper configuration and usage of the
+// software, even if provoked by documentation provided together with
+// the software.
+//
+// Any changes to this file according to the GPL as documented in the file
+// gpl.txt aside this file in the shipment you received can be done to the
+// lines that follows this copyright notice here, but changes must not be
+// done inside the copyright notive above. A re-distribution must contain
+// the intact and unchanged copyright notice.
+// Contributions and changes to the program code must be marked as such.
+
+
+package de.anomic.kelondro;
+
+import java.util.Comparator;
+
+public class kelondroBase64Order extends kelondroAbstractOrder implements kelondroOrder, Comparator {
+
+    public static final kelondroBase64Order standardCoder = new kelondroBase64Order(true);
+    public static final kelondroBase64Order enhancedCoder = new kelondroBase64Order(false);
+
+    final boolean rfc1113compliant;
+
+    public final char[] alpha;
+    public final byte[] ahpla;
+
+    public kelondroBase64Order(boolean rfc1113compliant) {
+        // if we choose not to be rfc1113compliant,
+        // then we get shorter base64 results which are also filename-compatible
+        this.rfc1113compliant = rfc1113compliant;
+        alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+        if (!(rfc1113compliant)) {
+            alpha[62] = '-';
+            alpha[63] = '_';
+        }
+        ahpla = new byte[256];
+        for (int i = 0; i < 256; i++) ahpla[i] = -1;
+        for (int i = 0; i < alpha.length; i++) ahpla[alpha[i]] = (byte) i;
+    }
+
+    public char encodeByte(byte b) {
+        return (char) alpha[b];
+    }
+
+    public byte decodeByte(char b) {
+        return ahpla[b];
+    }
+
+    public String encodeLongSmart(long c, int length) {
+        if (c >= max(length)) {
+            StringBuffer s = new StringBuffer(length);
+            s.setLength(length);
+            while (length > 0) {
+                s.setCharAt(--length, alpha[0]);
+            }
+            return s.toString();
+        } else {
+            return encodeLong(c, length);
+        }
+    }
+
+    public String encodeLong(long c, int length) {
+        StringBuffer s = new StringBuffer(length);
+        s.setLength(length);
+        while (length > 0) {
+            s.setCharAt(--length, alpha[(byte) (c & 0x3F)]);
+            c >>= 6;
+        }
+        return s.toString();
+    }
+
+    public long decodeLong(String s) {
+        while (s.endsWith("="))
+            s = s.substring(0, s.length() - 1);
+        long c = 0;
+        for (int i = 0; i < s.length(); i++) {
+            c <<= 6;
+            c += ahpla[s.charAt(i)];
+        }
+        return c;
+    }
+
+    public static long max(int len) {
+        // computes the maximum number that can be coded with a base64-encoded
+        // String of base len
+        long c = 0;
+        for (int i = 0; i < len; i++) {
+            c <<= 6;
+            c += 63;
+        }
+        return c;
+    }
+
+    public String encodeString(String in) {
+        return encode(in.getBytes());
+    }
+
+    // we will use this encoding to encode strings with 2^8 values to
+    // b64-Strings
+    // we will do that by grouping each three input bytes to four output bytes.
+    public String encode(byte[] in) {
+        StringBuffer out = new StringBuffer(in.length / 3 * 4 + 3);
+        int pos = 0;
+        long l;
+        while (in.length - pos >= 3) {
+            l = ((((0XffL & (long) in[pos]) << 8) + (0XffL & (long) in[pos + 1])) << 8) + (0XffL & (long) in[pos + 2]);
+            pos += 3;
+            out = out.append(encodeLong(l, 4));
+        }
+        // now there may be remaining bytes
+        if (in.length % 3 != 0)
+            out = out.append((in.length % 3 == 2) ? encodeLong((((0XffL & (long) in[pos]) << 8) + (0XffL & (long) in[pos + 1])) << 8, 4).substring(0, 3) : encodeLong((((0XffL & (long) in[pos])) << 8) << 8, 4).substring(0, 2));
+        if (rfc1113compliant)
+            while (out.length() % 4 > 0)
+                out.append("=");
+        // return result
+        return out.toString();
+    }
+
+    public String decodeString(String in) {
+        try {
+            return new String(decode(in), "ISO-8859-1");
+        } catch (java.io.UnsupportedEncodingException e) {
+            System.out.println("internal error in base64: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public byte[] decode(String in) {
+        try {
+            int posIn = 0;
+            int posOut = 0;
+            if (rfc1113compliant)
+                while (in.charAt(in.length() - 1) == '=')
+                    in = in.substring(0, in.length() - 1);
+            byte[] out = new byte[in.length() / 4 * 3 + (((in.length() % 4) == 0) ? 0 : in.length() % 4 - 1)];
+            long l;
+            while (posIn + 3 < in.length()) {
+                l = decodeLong(in.substring(posIn, posIn + 4));
+                out[posOut + 2] = (byte) (l % 256);
+                l = l / 256;
+                out[posOut + 1] = (byte) (l % 256);
+                l = l / 256;
+                out[posOut] = (byte) (l % 256);
+                l = l / 256;
+                posIn += 4;
+                posOut += 3;
+            }
+            if (posIn < in.length()) {
+                if (in.length() - posIn == 3) {
+                    l = decodeLong(in.substring(posIn) + "A");
+                    l = l / 256;
+                    out[posOut + 1] = (byte) (l % 256);
+                    l = l / 256;
+                    out[posOut] = (byte) (l % 256);
+                    l = l / 256;
+                } else {
+                    l = decodeLong(in.substring(posIn) + "AA");
+                    l = l / 256 / 256;
+                    out[posOut] = (byte) (l % 256);
+                    l = l / 256;
+                }
+            }
+            return out;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // maybe the input was not base64
+            throw new RuntimeException("input probably not base64");
+        }
+    }
+
+    public long cardinal(byte[] key) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public int compare(byte[] a, byte[] b) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public static void main(String[] s) {
+        kelondroBase64Order b64 = new kelondroBase64Order(true);
+        if (s.length == 0) {
+            System.out.println("usage: -[ec|dc|es|ds|s2m] <arg>");
+            System.exit(0);
+        }
+        if (s[0].equals("-ec")) {
+            // generate a b64 encoding from a given cardinal
+            System.out.println(b64.encodeLong(Long.parseLong(s[1]), 4));
+        }
+        if (s[0].equals("-dc")) {
+            // generate a b64 decoding from a given cardinal
+            System.out.println(b64.decodeLong(s[1]));
+        }
+        if (s[0].equals("-es")) {
+            // generate a b64 encoding from a given string
+            System.out.println(b64.encodeString(s[1]));
+        }
+        if (s[0].equals("-ds")) {
+            // generate a b64 decoding from a given string
+            System.out.println(b64.decodeString(s[1]));
+        }
+    }
+    
+}

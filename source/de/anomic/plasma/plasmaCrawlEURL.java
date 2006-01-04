@@ -52,8 +52,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Iterator;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.server.serverCodings;
 import de.anomic.tools.bitfield;
 
 public class plasmaCrawlEURL extends plasmaURL {
@@ -176,9 +176,9 @@ public class plasmaCrawlEURL extends plasmaURL {
                 this.executor = new String(entry[3]);
                 this.url = new URL(new String(entry[4]).trim());
                 this.name = new String(entry[5]).trim();
-                this.initdate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6])));
-                this.trydate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[7])));
-                this.trycount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
+                this.initdate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[6])));
+                this.trydate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[7])));
+                this.trycount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8]));
                 this.failreason = new String(entry[9]);
                 this.flags = new bitfield(entry[10]);
                 return;
@@ -187,8 +187,8 @@ public class plasmaCrawlEURL extends plasmaURL {
         
 	private void store() {
 	    // stores the values from the object variables into the database
-            String initdatestr = serverCodings.enhancedCoder.encodeBase64Long(initdate.getTime() / 86400000, urlDateLength);
-            String trydatestr = serverCodings.enhancedCoder.encodeBase64Long(trydate.getTime() / 86400000, urlDateLength);
+            String initdatestr = kelondroBase64Order.enhancedCoder.encodeLong(initdate.getTime() / 86400000, urlDateLength);
+            String trydatestr = kelondroBase64Order.enhancedCoder.encodeLong(trydate.getTime() / 86400000, urlDateLength);
 
 	    // store the hash in the hash cache
 	    try {
@@ -202,8 +202,8 @@ public class plasmaCrawlEURL extends plasmaURL {
                     this.name.getBytes(),
                     initdatestr.getBytes(),
                     trydatestr.getBytes(),
-                    serverCodings.enhancedCoder.encodeBase64Long(this.trycount, urlRetryLength).getBytes(),
-		    this.failreason.getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.trycount, urlRetryLength).getBytes(),
+                    this.failreason.getBytes(),
                     this.flags.getBytes()
 		};
 		urlHashCache.put(entry);

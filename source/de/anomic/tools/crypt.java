@@ -46,7 +46,8 @@ package de.anomic.tools;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Random;
-import de.anomic.server.serverCodings;
+
+import de.anomic.kelondro.kelondroBase64Order;
 
 public class crypt {
 
@@ -58,14 +59,12 @@ public class crypt {
     private static Random saltrandom = new Random(System.currentTimeMillis());
 
     public static String randomSalt() {
-    // generate robust 48-bit random number
-    final long salt =
-        (saltrandom.nextLong() & 0XffffffffffffL) + 
-        (System.currentTimeMillis() & 0XffffffffffffL) +
-        ((1001 * saltcounter) & 0XffffffffffffL);
-    saltcounter++;
-    // we generate 48-bit salt values, that are represented as 8-character b64-encoded strings
-    return serverCodings.standardCoder.encodeBase64Long(salt & 0XffffffffffffL, 8);
+        // generate robust 48-bit random number
+        final long salt = (saltrandom.nextLong() & 0XffffffffffffL) + (System.currentTimeMillis() & 0XffffffffffffL) + ((1001 * saltcounter) & 0XffffffffffffL);
+        saltcounter++;
+        // we generate 48-bit salt values, that are represented as 8-character
+        // b64-encoded strings
+        return kelondroBase64Order.standardCoder.encodeLong(salt & 0XffffffffffffL, 8);
     }
 
     // --------------------------------------------------------
@@ -112,8 +111,8 @@ public class crypt {
     public static String simpleEncode(String content, String key, char method) {
     if (key == null) { key = "NULL"; }
     switch (method) {
-    case 'b' : return "b|" + serverCodings.enhancedCoder.encodeBase64String(content);
-    case 'z' : return "z|" + serverCodings.enhancedCoder.encodeBase64(gzip.gzipString(content));
+    case 'b' : return "b|" + kelondroBase64Order.enhancedCoder.encodeString(content);
+    case 'z' : return "z|" + kelondroBase64Order.enhancedCoder.encode(gzip.gzipString(content));
     case 'p' : return "p|" + content;
     default  : return null;
     }
@@ -123,8 +122,8 @@ public class crypt {
     if (encoded == null || encoded.length() < 3) { return null; }
     if (encoded.charAt(1) != '|') { return encoded; } // not encoded
     switch (encoded.charAt(0)) {
-    case 'b' : return serverCodings.enhancedCoder.decodeBase64String(encoded.substring(2));
-    case 'z' : return gzip.gunzipString(serverCodings.enhancedCoder.decodeBase64(encoded.substring(2)));
+    case 'b' : return kelondroBase64Order.enhancedCoder.decodeString(encoded.substring(2));
+    case 'z' : return gzip.gunzipString(kelondroBase64Order.enhancedCoder.decode(encoded.substring(2)));
     case 'p' : return encoded.substring(2);
     default  : return null;
     }

@@ -48,8 +48,8 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDynTree;
-import de.anomic.server.serverCodings;
 
 public class plasmaWordConnotation {
     
@@ -73,8 +73,8 @@ public class plasmaWordConnotation {
         //reference = reference.toLowerCase();
         byte[][] record = refDB.get(word, reference.getBytes());
         long c;
-        if (record == null) c = 0; else c = serverCodings.enhancedCoder.decodeBase64Long(new String(record[1]));
-        record[1] = serverCodings.enhancedCoder.encodeBase64Long(c++, countlength).getBytes();
+        if (record == null) c = 0; else c = kelondroBase64Order.enhancedCoder.decodeLong(new String(record[1]));
+        record[1] = kelondroBase64Order.enhancedCoder.encodeLong(c++, countlength).getBytes();
         refDB.put(word, record);
     }
     

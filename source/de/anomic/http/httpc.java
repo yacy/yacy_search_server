@@ -76,9 +76,9 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
@@ -725,7 +725,7 @@ public final class httpc {
             String remoteProxyUser = this.remoteProxyConfig.getProxyUser();
             String remoteProxyPwd  = this.remoteProxyConfig.getProxyPwd();
             if ((remoteProxyUser!=null)&&(remoteProxyUser.length()>0)) {
-                header.put(httpHeader.PROXY_AUTHORIZATION,"Basic " + serverCodings.standardCoder.encodeBase64String(remoteProxyUser + ":" + remoteProxyPwd));
+                header.put(httpHeader.PROXY_AUTHORIZATION,"Basic " + kelondroBase64Order.standardCoder.encodeString(remoteProxyUser + ":" + remoteProxyPwd));
             }
         }
 
@@ -1066,7 +1066,7 @@ do upload
         
         // setting host authorization header
         if ((user != null) && (password != null) && (user.length() != 0)) {
-            requestHeader.put(httpHeader.AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
+            requestHeader.put(httpHeader.AUTHORIZATION, kelondroBase64Order.standardCoder.encodeString(user + ":" + password));
         }
 
         httpc con = null;
@@ -1133,7 +1133,7 @@ do upload
 
         if (requestHeader == null) requestHeader = new httpHeader();
         if ((user != null) && (password != null) && (user.length() != 0)) {
-            requestHeader.put(httpHeader.AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
+            requestHeader.put(httpHeader.AUTHORIZATION, kelondroBase64Order.standardCoder.encodeString(user + ":" + password));
         }
 
         httpc con = null;
@@ -1308,7 +1308,7 @@ do upload
         // generate request header
         if (requestHeader == null) requestHeader = new httpHeader();
         if ((user != null) && (password != null) && (user.length() != 0)) {
-            requestHeader.put(httpHeader.AUTHORIZATION, serverCodings.standardCoder.encodeBase64String(user + ":" + password));
+            requestHeader.put(httpHeader.AUTHORIZATION, kelondroBase64Order.standardCoder.encodeString(user + ":" + password));
         }
         // parse query
 

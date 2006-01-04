@@ -59,7 +59,6 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.server.serverByteBuffer;
-import de.anomic.server.serverCodings;
 
 public class kelondroDyn extends kelondroTree {
 
@@ -97,7 +96,7 @@ public class kelondroDyn extends kelondroTree {
 
     private void writeSegmentCount() {
         try {
-            setText(0, serverCodings.enhancedCoder.encodeBase64Long(segmentCount, 8).getBytes());
+            setText(0, kelondroBase64Order.enhancedCoder.encodeLong(segmentCount, 8).getBytes());
         } catch (Exception e) {
             
         }

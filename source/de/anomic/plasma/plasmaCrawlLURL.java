@@ -64,6 +64,7 @@ import java.util.Locale;
 import java.util.Properties;
 
 import de.anomic.http.httpc;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
@@ -473,16 +474,16 @@ public final class plasmaCrawlLURL extends plasmaURL {
                 if (entry != null) {
                     this.url = new URL(new String(entry[1]).trim());
                     this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2]).trim();
-                    this.moddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[3])));
-                    this.loaddate = new Date(86400000 * serverCodings.enhancedCoder.decodeBase64Long(new String(entry[4])));
+                    this.moddate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[3])));
+                    this.loaddate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[4])));
                     this.referrerHash = (entry[5] == null) ? dummyHash : new String(entry[5]);
-                    this.copyCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[6]));
+                    this.copyCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[6]));
                     this.flags = new String(entry[7]);
-                    this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[8]));
+                    this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8]));
                     this.language = new String(entry[9]);
                     this.doctype = (char) entry[10][0];
-                    this.size = serverCodings.enhancedCoder.decodeBase64Long(new String(entry[11]));
-                    this.wordCount = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(entry[12]));
+                    this.size = kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[11]));
+                    this.wordCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[12]));
                     this.snippet = null;
                     return;
                 }
@@ -510,7 +511,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             this.url = new URL(crypt.simpleDecode(prop.getProperty("url", ""), null));
             this.descr = crypt.simpleDecode(prop.getProperty("descr", ""), null);
                     if (this.descr == null) this.descr = this.url.toString();
-            this.quality = (int) serverCodings.enhancedCoder.decodeBase64Long(prop.getProperty("q", ""));
+            this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(prop.getProperty("q", ""));
             this.language = prop.getProperty("lang", "uk");
             this.doctype = prop.getProperty("dt", "t").charAt(0);
             this.size = Long.parseLong(prop.getProperty("size", "0"));
@@ -526,8 +527,8 @@ public final class plasmaCrawlLURL extends plasmaURL {
 
     private void store() {
         // stores the values from the object variables into the database
-        final String moddatestr = serverCodings.enhancedCoder.encodeBase64Long(moddate.getTime() / 86400000, urlDateLength);
-        final String loaddatestr = serverCodings.enhancedCoder.encodeBase64Long(loaddate.getTime() / 86400000, urlDateLength);
+        final String moddatestr = kelondroBase64Order.enhancedCoder.encodeLong(moddate.getTime() / 86400000, urlDateLength);
+        final String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, urlDateLength);
 
         // store the hash in the hash cache
         try {
@@ -539,13 +540,13 @@ public final class plasmaCrawlLURL extends plasmaURL {
             moddatestr.getBytes(),
             loaddatestr.getBytes(),
             referrerHash.getBytes(),
-            serverCodings.enhancedCoder.encodeBase64Long(copyCount, urlCopyCountLength).getBytes(),
+            kelondroBase64Order.enhancedCoder.encodeLong(copyCount, urlCopyCountLength).getBytes(),
             flags.getBytes(),
-            serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength).getBytes(),
+            kelondroBase64Order.enhancedCoder.encodeLong(quality, urlQualityLength).getBytes(),
             language.getBytes(),
             new byte[] {(byte) doctype},
-            serverCodings.enhancedCoder.encodeBase64Long(size, urlSizeLength).getBytes(),
-            serverCodings.enhancedCoder.encodeBase64Long(wordCount, urlWordCountLength).getBytes(),
+            kelondroBase64Order.enhancedCoder.encodeLong(size, urlSizeLength).getBytes(),
+            kelondroBase64Order.enhancedCoder.encodeLong(wordCount, urlWordCountLength).getBytes(),
         };
         urlHashCache.put(entry);
         } catch (Exception e) {
@@ -632,7 +633,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             .append(",wc=")      .append(wordCount)
             .append(",cc=")      .append(copyCount)
             .append(",local=")   .append(((local()) ? "true" : "false"))
-            .append(",q=")       .append(serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength))
+            .append(",q=")       .append(kelondroBase64Order.enhancedCoder.encodeLong(quality, urlQualityLength))
             .append(",dt=")      .append(doctype)
             .append(",lang=")    .append(language)
             .append(",url=")     .append(crypt.simpleEncode(url.toString()))

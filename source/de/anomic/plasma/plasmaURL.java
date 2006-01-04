@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
@@ -463,13 +464,13 @@ public class plasmaURL {
     }
 
     public static final int flagTypeID(String hash) {
-        return (serverCodings.enhancedCoder.decodeBase64Byte(hash.charAt(11)) & 32) >> 5;
+        return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 32) >> 5;
     }
     public static final int flagTLDID(String hash) {
-        return (serverCodings.enhancedCoder.decodeBase64Byte(hash.charAt(11)) & 28) >> 2;
+        return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 28) >> 2;
     }
     public static final int flagLengthID(String hash) {
-        return (serverCodings.enhancedCoder.decodeBase64Byte(hash.charAt(11)) & 3);
+        return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 3);
     }
     
     public static final String urlHash(String url) {
@@ -521,24 +522,24 @@ public class plasmaURL {
         int domlengthKey = (l <= 8) ? 0 : (l <= 12) ? 1 : (l <= 16) ? 2 : 3;
         byte flagbyte = (byte) (((isHTTP) ? 0 : 32) | (id << 2) | domlengthKey);
         // form the 'local' part of the hash
-        String hash3 = serverCodings.encodeMD5B64(htmlFilterContentScraper.urlNormalform(url), true).substring(0, 5);
-        char   hash2 = serverCodings.encodeMD5B64(subdom + ":" + port + ":" + rootpath, true).charAt(0);
+        String hash3 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(htmlFilterContentScraper.urlNormalform(url))).substring(0, 5);
+        char   hash2 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
         // form the 'global' part of the hash
-        String hash1 = serverCodings.encodeMD5B64(url.getProtocol() + ":" + host + ":" + port, true).substring(0, 5);
-        char   hash0 = serverCodings.enhancedCoder.encodeBase64Byte(flagbyte);
+        String hash1 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.getProtocol() + ":" + host + ":" + port)).substring(0, 5);
+        char   hash0 = kelondroBase64Order.enhancedCoder.encodeByte(flagbyte);
         // combine the hashes
         return hash3 + hash2 + hash1 + hash0;
     }
     
     public static final String oldurlHash(URL url) {
 	if (url == null) return null;
-        String hash = serverCodings.encodeMD5B64(htmlFilterContentScraper.urlNormalform(url), true).substring(0, urlHashLength);
+        String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(htmlFilterContentScraper.urlNormalform(url))).substring(0, urlHashLength);
         return hash;
     }
         
     public static final String oldurlHash(String url) {
 	if ((url == null) || (url.length() < 10)) return null;
-        String hash = serverCodings.encodeMD5B64(htmlFilterContentScraper.urlNormalform(null, url), true).substring(0, urlHashLength);
+        String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(htmlFilterContentScraper.urlNormalform(null, url))).substring(0, urlHashLength);
         return hash;
     }
     

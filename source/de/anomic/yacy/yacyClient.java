@@ -50,6 +50,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import de.anomic.http.httpc;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -677,7 +678,7 @@ public final class yacyClient {
         String response = (String) phase1.get("response");
         if ((response == null) || (protocol == null) || (access == null)) return "wrong return values from other peer; phase 1";
         if (!(response.equals("ok"))) return "remote peer rejected transfer: " + response;
-        String accesscode = serverCodings.encodeMD5Hex(serverCodings.standardCoder.encodeBase64String(access));
+        String accesscode = serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access));
         if (protocol.equals("http")) {
             HashMap phase2 = transferStore(nextaddress, accesscode, filename, file);
             if (phase2 == null) return "no connection to remote address " + targetAddress + "; phase 2";

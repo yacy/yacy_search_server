@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.yacy.yacyCore;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.serverCodings;
@@ -167,7 +168,7 @@ public class yacyNewsDB {
             new String(b[0]),
             new String(b[1]),
             (b[2] == null) ? null : yacyCore.parseUniversalDate(new String(b[2]), serverDate.UTCDiffString()),
-            (int) serverCodings.enhancedCoder.decodeBase64Long(new String(b[3])),
+            (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(b[3])),
             serverCodings.string2map(new String(b[4]))
         );
     }
@@ -180,7 +181,7 @@ public class yacyNewsDB {
         b[0] = r.id().getBytes();
         b[1] = r.category().getBytes();
         b[2] = (r.received() == null) ? null : yacyCore.universalDateShortString(r.received()).getBytes();
-        b[3] = serverCodings.enhancedCoder.encodeBase64Long(r.distributed(), 2).getBytes();
+        b[3] = kelondroBase64Order.enhancedCoder.encodeLong(r.distributed(), 2).getBytes();
         b[4] = attributes.getBytes();
         return b;
     }

@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.Date;
 import java.util.Iterator;
 
-import de.anomic.server.serverCodings;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.ymage.ymageChart;
@@ -39,8 +39,8 @@ public class dbtest {
     public static byte[] randomHash(final long r0, final long r1) {
         // a long can have 64 bit, but a 12-byte hash can have 6 * 12 = 72 bits
         // so we construct a generic Hash using two long values
-        return (serverCodings.enhancedCoder.encodeBase64Long(Math.abs(r0), 11).substring(5) +
-                serverCodings.enhancedCoder.encodeBase64Long(Math.abs(r1), 11).substring(5)).getBytes();
+        return (kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r0), 11).substring(5) +
+                kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r1), 11).substring(5)).getBytes();
     }
     
     public static byte[] randomHash(Random r) {

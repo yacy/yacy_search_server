@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
@@ -68,7 +69,6 @@ public final class userDB {
     kelondroMap userTable;
     private final File userTableFile;
     private final int bufferkb;
-	private final serverCodings codings = new serverCodings(true);
 	private HashMap ipUsers = new HashMap();
     
     public userDB(File userTableFile, int bufferkb) {
@@ -157,7 +157,7 @@ public final class userDB {
 		Entry entry=null;
 		auth=auth.trim().substring(6);
         try{
-            auth=codings.decodeBase64String(auth);
+            auth=kelondroBase64Order.standardCoder.decodeString(auth);
         }catch(StringIndexOutOfBoundsException e){} //no valid Base64
         String[] tmp=auth.split(":");
         if(tmp.length == 2){

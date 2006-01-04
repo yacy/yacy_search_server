@@ -51,9 +51,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.server.serverCodings;
 
 public class messageBoard {
     
@@ -144,7 +144,7 @@ public class messageBoard {
             if (message == null)
 		record.put("message", "");
 	    else
-		record.put("message", serverCodings.enhancedCoder.encodeBase64(message));
+		record.put("message", kelondroBase64Order.enhancedCoder.encode(message));
             record.put("read", "false");
 	}
 
@@ -203,7 +203,7 @@ public class messageBoard {
 	    String m = (String) record.get("message");
 	    if (m == null) return new byte[0];
             record.put("read", "true");
-	    return serverCodings.enhancedCoder.decodeBase64(m);
+	    return kelondroBase64Order.enhancedCoder.decode(m);
 	}
         
         public boolean read() {

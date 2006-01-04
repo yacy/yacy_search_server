@@ -132,8 +132,6 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 
-import de.anomic.server.serverCodings;
-
 public class kelondroHashtable {
     
     private kelondroArray hashArray;
@@ -142,7 +140,7 @@ public class kelondroHashtable {
     private int maxrehash;
     private byte[][] dummyRow;
     
-    private static final byte[] dummyKey = serverCodings.enhancedCoder.encodeBase64Long(0, 5).getBytes();
+    private static final byte[] dummyKey = kelondroBase64Order.enhancedCoder.encodeLong(0, 5).getBytes();
 
     public kelondroHashtable(File file, int[] columns, int offset, int maxsize, int maxrehash, boolean exitOnFail) {
 	// this creates a new hashtable
@@ -218,7 +216,7 @@ public class kelondroHashtable {
         while (rowNumber >= hashArray.size()) hashArray.set(hashArray.size(), dummyRow);
         // write row
         byte[][] newrow = new byte[hashArray.columns()][];
-        newrow[0] = serverCodings.enhancedCoder.encodeBase64Long(hash.key(), 5).getBytes();
+        newrow[0] = kelondroBase64Order.enhancedCoder.encodeLong(hash.key(), 5).getBytes();
         System.arraycopy(row, 0, newrow, 1, row.length);
         hashArray.set(rowNumber, row);
         return oldrow;
@@ -232,7 +230,7 @@ public class kelondroHashtable {
             rowNumber = hash.node();
             if (rowNumber >= hashArray.size()) return new Object[]{new Integer(rowNumber), null};
             row = hashArray.get(rowNumber);
-            rowKey = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(row[0]));
+            rowKey = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(row[0]));
             if (rowKey == 0) return new Object[]{new Integer(rowNumber), null};
             hash.rehash();
         } while (rowKey != hash.key());

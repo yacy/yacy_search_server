@@ -57,11 +57,11 @@ import java.util.LinkedList;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
 
 import de.anomic.http.httpc;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.serverCodings;
 
 /**
  * Vcard specification: http://www.imc.org/pdi/vcard-21.txt
@@ -163,7 +163,7 @@ public class vcfParser extends AbstractParser implements Parser {
                                         if (!useLastLine) value += line.trim();
                                         else break;
                                     } while (line.length()!=0);
-                                    value = serverCodings.standardCoder.decodeBase64String(value);
+                                    value = kelondroBase64Order.standardCoder.decodeString(value);
                                 }  
                             } catch (Exception ey) {
                                 // Encoding error: This could occure e.g. if the base64 doesn't 

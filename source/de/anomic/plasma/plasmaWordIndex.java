@@ -57,9 +57,9 @@ import java.util.Set;
 import java.util.Date;
 import java.net.URL;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaWordIndex {
@@ -118,7 +118,7 @@ public final class plasmaWordIndex {
     }
     
     public static String microDateHoursStr(long time) {
-	return serverCodings.enhancedCoder.encodeBase64Long(microDateHoursInt(time), 3);
+	return kelondroBase64Order.enhancedCoder.encodeLong(microDateHoursInt(time), 3);
     }
     
     public static int microDateHoursInt(long time) {
@@ -126,7 +126,7 @@ public final class plasmaWordIndex {
     }
     
     public static int microDateHoursAge(String mdhs) {
-        return microDateHoursInt(System.currentTimeMillis()) - (int) serverCodings.enhancedCoder.decodeBase64Long(mdhs);
+        return microDateHoursInt(System.currentTimeMillis()) - (int) kelondroBase64Order.enhancedCoder.decodeLong(mdhs);
     }
     
     public int addPageIndex(URL url, String urlHash, Date urlModified, plasmaCondenser condenser,

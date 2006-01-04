@@ -53,8 +53,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.anomic.server.serverCodings;
-
 public class kelondroFScoreCluster {
     
     private static final int wordlength = 32;
@@ -66,9 +64,9 @@ public class kelondroFScoreCluster {
     public kelondroFScoreCluster(File refcountDBfile, File countrefDBfile, boolean exitOnFail) {
         if ((refcountDBfile.exists()) && (countrefDBfile.exists())) try {
             refcountDB = new kelondroTree(refcountDBfile, 0x100000L);
-            refcountDB.setText(0, serverCodings.enhancedCoder.encodeBase64Long(0, countlength).getBytes()); // counter of all occurrences
+            refcountDB.setText(0, kelondroBase64Order.enhancedCoder.encodeLong(0, countlength).getBytes()); // counter of all occurrences
             countrefDB = new kelondroTree(countrefDBfile, 0x100000L);
-            countrefDB.setText(0, serverCodings.enhancedCoder.encodeBase64Long(0, countlength).getBytes());
+            countrefDB.setText(0, kelondroBase64Order.enhancedCoder.encodeLong(0, countlength).getBytes());
         } catch (IOException e) {
             refcountDBfile.delete();
             countrefDBfile.delete();
@@ -96,20 +94,20 @@ public class kelondroFScoreCluster {
             c = 0;
         } else {
             // delete old entry
-            c = serverCodings.enhancedCoder.decodeBase64Long(new String(record[1]));
-            cs = serverCodings.enhancedCoder.encodeBase64Long(c, countlength);
+            c = kelondroBase64Order.enhancedCoder.decodeLong(new String(record[1]));
+            cs = kelondroBase64Order.enhancedCoder.encodeLong(c, countlength);
             countrefDB.remove((cs + word).getBytes());
             c++;
         }
-        cs = serverCodings.enhancedCoder.encodeBase64Long(c, countlength);
+        cs = kelondroBase64Order.enhancedCoder.encodeLong(c, countlength);
         refcountDB.put(word.getBytes(), cs.getBytes());
         countrefDB.put((cs + word).getBytes(), new byte[] {0,0,0,0});
         // increase overall counter
-        refcountDB.setText(0, serverCodings.enhancedCoder.encodeBase64Long(getTotalCount() + 1, countlength).getBytes());
+        refcountDB.setText(0, kelondroBase64Order.enhancedCoder.encodeLong(getTotalCount() + 1, countlength).getBytes());
     }
     
     public long getTotalCount() {
-        return serverCodings.enhancedCoder.decodeBase64Long(new String(refcountDB.getText(0)));
+        return kelondroBase64Order.enhancedCoder.decodeLong(new String(refcountDB.getText(0)));
     }
 
     public int getElementCount() {
@@ -122,7 +120,7 @@ public class kelondroFScoreCluster {
         if (record == null) {
             return 0;
         } else {
-            return serverCodings.enhancedCoder.decodeBase64Long(new String(record[1]));
+            return kelondroBase64Order.enhancedCoder.decodeLong(new String(record[1]));
         }
     }
     
@@ -146,7 +144,7 @@ public class kelondroFScoreCluster {
         
         public Object next() {
             String s = new String(((byte[][]) iterator.next())[0]);
-            return s.substring(countlength) + "-" + serverCodings.enhancedCoder.decodeBase64Long(s.substring(0, countlength));
+            return s.substring(countlength) + "-" + kelondroBase64Order.enhancedCoder.decodeLong(s.substring(0, countlength));
         }
         
         public void remove() {

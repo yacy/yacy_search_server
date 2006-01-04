@@ -69,6 +69,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
@@ -267,22 +269,22 @@ public class yacySeed {
     // 12 * 6 bit = 72 bit = 18 characters hex-hash
     public static String b64Hash2hexHash(String b64Hash) {
         // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
-        return serverCodings.encodeHex(serverCodings.enhancedCoder.decodeBase64(b64Hash));
+        return serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(b64Hash));
     }
     
     public static String hexHash2b64Hash(String hexHash) {
-        return serverCodings.enhancedCoder.encodeBase64(serverCodings.decodeHex(hexHash));
+        return kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
     }
 
     //  12 * 6 bit = 72 bit = 9 byte
     public static byte[] b64Hash2b256Hash(String b64Hash) {
         assert (b64Hash.length() == 12);
-        return serverCodings.enhancedCoder.decodeBase64(b64Hash);
+        return kelondroBase64Order.enhancedCoder.decode(b64Hash);
     }
     
     public static String b256Hash2b64Hash(byte[] b256Hash) {
         assert (b256Hash.length == 9);
-        return serverCodings.enhancedCoder.encodeBase64(b256Hash);
+        return kelondroBase64Order.enhancedCoder.encode(b256Hash);
     }
 
     public float getVersion() {
@@ -511,9 +513,9 @@ public class yacySeed {
     // more than the fast part. The effect is, that if the peer looses it's seed information and is reconstructed, it
     // still hosts most information of the distributed hash the an appropriate 'position'
     String hash =
-        serverCodings.encodeMD5B64(slow, true).substring(0, 4) + 
-        serverCodings.encodeMD5B64(medium, true).substring(0, 4) + 
-        serverCodings.encodeMD5B64(fast, true).substring(0, 4);
+        kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(slow)).substring(0, 4) + 
+        kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(medium)).substring(0, 4) + 
+        kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(fast)).substring(0, 4);
     yacyCore.log.logInfo("init: OWN SEED = " + hash);
 
     if (hash.length() != yacySeedDB.commonHashLength) {
@@ -542,8 +544,8 @@ public class yacySeed {
     
     public static String randomHash() {
         String hash =
-            serverCodings.encodeMD5B64(System.currentTimeMillis() + "a", true).substring(0, 6) +
-            serverCodings.encodeMD5B64(System.currentTimeMillis() + "b", true).substring(0, 6);
+            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(System.currentTimeMillis() + "a")).substring(0, 6) +
+            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(System.currentTimeMillis() + "b")).substring(0, 6);
         return hash;
     }
     

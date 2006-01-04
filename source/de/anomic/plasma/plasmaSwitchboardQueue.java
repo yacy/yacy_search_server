@@ -52,8 +52,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -106,10 +106,10 @@ public class plasmaSwitchboardQueue {
         sbQueueStack.push(new byte[][]{
             entry.url.toString().getBytes(),
             (entry.referrerHash == null) ? plasmaURL.dummyHash.getBytes() : entry.referrerHash.getBytes(),
-            serverCodings.enhancedCoder.encodeBase64Long((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
+            kelondroBase64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
             new byte[]{entry.flags},
             (entry.initiator == null) ? plasmaURL.dummyHash.getBytes() : entry.initiator.getBytes(),
-            serverCodings.enhancedCoder.encodeBase64Long((long) entry.depth, plasmaURL.urlCrawlDepthLength).getBytes(),
+            kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, plasmaURL.urlCrawlDepthLength).getBytes(),
             (entry.profileHandle == null) ? plasmaURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
             (entry.anchorName == null) ? "-".getBytes() : entry.anchorName.getBytes()
         });
@@ -202,7 +202,7 @@ public class plasmaSwitchboardQueue {
         }
 
         public Entry(byte[][] row) {
-            long ims = (row[2] == null) ? 0 : serverCodings.enhancedCoder.decodeBase64Long(new String(row[2]));
+            long ims = (row[2] == null) ? 0 : kelondroBase64Order.enhancedCoder.decodeLong(new String(row[2]));
             byte flags = (row[3] == null) ? 0 : row[3][0];
             try {
                 this.url = new URL(new String(row[0]));
@@ -213,7 +213,7 @@ public class plasmaSwitchboardQueue {
             this.ifModifiedSince = (ims == 0) ? null : new Date(ims);
             this.flags = ((flags & 1) == 1) ? (byte) 1 : (byte) 0;
             this.initiator = (row[4] == null) ? null : new String(row[4]);
-            this.depth = (int) serverCodings.enhancedCoder.decodeBase64Long(new String(row[5]));
+            this.depth = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(row[5]));
             this.profileHandle = new String(row[6]);
             this.anchorName = (row[7] == null) ? null : (new String(row[7])).trim();
 

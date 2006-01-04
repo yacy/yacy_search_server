@@ -50,7 +50,6 @@ import java.util.Properties;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
-
 public final class serverCodings {
 
     // this provides encoding and decoding of long cardinals into a 6-bit - based number format
@@ -79,7 +78,7 @@ public final class serverCodings {
 	for (int i = 0; i < alpha.length; i++) ahpla[alpha[i]] = (byte) i;
     }
 
-    
+    /*
     public char encodeBase64Byte(byte b) {
         return (char) alpha[b];
     }
@@ -100,26 +99,6 @@ public final class serverCodings {
             return encodeBase64Long(c, length);
         }
     }
-    
-    /*
-    public String encodeBase64Long(long c, int length) {
-        if (length < 0) length = 0;
-        StringBuffer s = new StringBuffer(length); //String s = "";
-        if (c == 0) {
-            s.insert(0,alpha[0]); //s = alpha[0] + s;
-        } else {
-            while (c > 0) {
-                s.insert(0,alpha[(byte) (c & 0x3F)]); //s = alpha[(byte) (c & 0x3F)] + s;
-                c >>= 6;
-            }
-        }
-        if ((length != 0) && (s.length() > length))
-            throw new RuntimeException("encodeBase64 result '" + s + "' exceeds demanded length of " + length + " digits");
-        if (length == 0) length = 1; // rare exception for the case that c == 0
-        while (s.length() < length) s.insert(0,alpha[0]); //s = alpha[0] + s;
-        return s.toString();
-    }
-    */
     
     public String encodeBase64Long(long c, int length) {
         StringBuffer s = new StringBuffer(length);
@@ -219,6 +198,7 @@ public final class serverCodings {
             throw new RuntimeException("input probably not base64");
 	}
     }
+    */
     
     public static String encodeHex(long in, int length) {
         String s = Long.toHexString(in);
@@ -241,7 +221,9 @@ public final class serverCodings {
 	}
 	return result;
     }
-
+    
+    
+/*
     public static String encodeMD5B64(String key, boolean enhanced) {
 	if (enhanced)
 	    return enhancedCoder.encodeBase64(encodeMD5Raw(key));
@@ -255,7 +237,10 @@ public final class serverCodings {
 	else
 	    return standardCoder.encodeBase64(encodeMD5Raw(file));
     }
-
+*/
+    // replace with "kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("
+    
+    
     public static String encodeMD5Hex(String key) {
 	// generate a hex representation from the md5 of a string
 	return encodeHex(encodeMD5Raw(key));
@@ -271,7 +256,7 @@ public final class serverCodings {
 	return encodeHex(encodeMD5Raw(b));
     }
 
-    private static byte[] encodeMD5Raw(String key) {
+    public static byte[] encodeMD5Raw(String key) {
 	try {
 	    MessageDigest digest = MessageDigest.getInstance("MD5");
 	    digest.reset();
@@ -283,7 +268,7 @@ public final class serverCodings {
 	return null;
     }
 
-    private static byte[] encodeMD5Raw(File file) {
+    public static byte[] encodeMD5Raw(File file) {
 	try {
 	    MessageDigest digest = MessageDigest.getInstance("MD5");
 	    digest.reset();
@@ -354,28 +339,15 @@ public final class serverCodings {
     }
     
     public static void main(String[] s) {
-	serverCodings b64 = new serverCodings(true);
-	if (s.length == 0) {System.out.println("usage: -[ec|dc|es|ds|s2m] <arg>"); System.exit(0);}
-	if (s[0].equals("-ec")) {
-	    // generate a b64 encoding from a given cardinal
-	    System.out.println(b64.encodeBase64Long(Long.parseLong(s[1]), 4));
-	}
-	if (s[0].equals("-dc")) {
-	    // generate a b64 decoding from a given cardinal
-	    System.out.println(b64.decodeBase64Long(s[1]));
-	}
-	if (s[0].equals("-es")) {
-	    // generate a b64 encoding from a given string
-	    System.out.println(b64.encodeBase64String(s[1]));
-	}
-	if (s[0].equals("-ds")) {
-	    // generate a b64 decoding from a given string
-	    System.out.println(b64.decodeBase64String(s[1]));
-	}
-	if (s[0].equals("-s2m")) {
-	    // generate a b64 decoding from a given string
-	    System.out.println(string2map(s[1]).toString());
-	}
+        if (s.length == 0) {
+            System.out.println("usage: -[ec|dc|es|ds|s2m] <arg>");
+            System.exit(0);
+        }
+
+        if (s[0].equals("-s2m")) {
+            // generate a b64 decoding from a given string
+            System.out.println(string2map(s[1]).toString());
+        }
     }
 
 }
