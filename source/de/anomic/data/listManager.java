@@ -227,7 +227,7 @@ public class listManager {
         for (int i=0;i<dirList.length;i++) {
             if (dirList[i].isDirectory() && (!excludeDotfiles || !dirList[i].getName().startsWith("."))) {
                 resultList.add(dirList[i]);
-                recursive = getDirsRecursive(dirList[i]);
+                recursive = getDirsRecursive(dirList[i], excludeDotfiles);
                 iter=recursive.iterator();
                 while (iter.hasNext()) {
                     resultList.add(iter.next());
