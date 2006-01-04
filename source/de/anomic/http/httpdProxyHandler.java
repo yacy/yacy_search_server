@@ -348,7 +348,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                         redirectorWriter.flush();
                     }
                     String newUrl=redirectorReader.readLine();
-                    url=new URL(newUrl);
+                    if(!newUrl.equals("")){
+                        try{
+                            url=new URL(newUrl);
+                        }catch(MalformedURLException e){}//just keep the old one
+                    }
                     conProp.setProperty(httpHeader.CONNECTION_PROP_HOST, url.getHost()+":"+url.getPort());
                     conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, url.getPath());
                     requestHeader.put(httpHeader.HOST, url.getHost()+":"+url.getPort());
