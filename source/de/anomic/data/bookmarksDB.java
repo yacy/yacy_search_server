@@ -150,31 +150,6 @@ public class bookmarksDB {
             return null;
         }
     }
-    //TODO: Move it in listmanager?
-    private String vector2string(Vector vector){
-        Iterator it=vector.iterator();
-        String ret="";
-        if(it.hasNext()){
-            ret=(String) it.next();
-            while(it.hasNext()){
-                ret+=","+(String)it.next();
-            }
-        }
-        return ret;
-    }
-    private Vector string2vector(String string){
-        Vector ret=new Vector();
-        String[] hashes=string.split(",");
-        if(string.indexOf(",") > -1){
-            for(int i=0;i<hashes.length;i++){
-                ret.add(hashes[i]);
-            }
-        }else{
-            ret = new Vector();
-            ret.add(string);
-        }
-        return ret;
-    }
     public void rebuildTags(){
         serverLog.logInfo("BOOKMARKS", "rebuilding tags.db from bookmarks.db...");
         Iterator it=bookmarkIterator(true);
@@ -250,7 +225,7 @@ public class bookmarksDB {
             Vector tags;
             while (it.hasNext()) {
                 bookmark = getBookmark((String) it.next());
-                tags = string2vector(bookmark.getTags());
+                tags = listManager.string2vector(bookmark.getTags());
                 tags.remove(oldName);
                 tags.add(newName);
                 bookmark.setTags(tags);
@@ -351,7 +326,7 @@ public class bookmarksDB {
         public Tag(String name, Vector entries){
             tagName=name;
             mem=new HashMap();
-            mem.put(URL_HASHES, vector2string(entries));
+            mem.put(URL_HASHES, listManager.vector2string(entries));
         }
         public Tag(String name){
             tagName=name;
@@ -362,20 +337,20 @@ public class bookmarksDB {
             return tagName;
         }
         public Vector getUrlHashes(){
-            return string2vector((String)this.mem.get(URL_HASHES));
+            return listManager.string2vector((String)this.mem.get(URL_HASHES));
         }
         public void add(String urlHash){
             String urlHashes = (String)mem.get(URL_HASHES);
             Vector list;
             if(urlHashes != null && !urlHashes.equals("")){
-                list=string2vector(urlHashes);
+                list=listManager.string2vector(urlHashes);
             }else{
                 list=new Vector();
             }
             if(!list.contains(urlHash) && !urlHash.equals("")){
                 list.add(urlHash);
             }
-            this.mem.put(URL_HASHES, vector2string(list));
+            this.mem.put(URL_HASHES, listManager.vector2string(list));
             /*if(urlHashes!=null && !urlHashes.equals("") ){
                 if(urlHashes.indexOf(urlHash) <0){
                     this.mem.put(URL_HASHES, urlHashes+","+urlHash);
@@ -385,11 +360,11 @@ public class bookmarksDB {
             }*/
         }
         public void delete(String urlHash){
-            Vector list=string2vector((String) this.mem.get(URL_HASHES));
+            Vector list=listManager.string2vector((String) this.mem.get(URL_HASHES));
             if(list.contains(urlHash)){
                 list.remove(urlHash);
             }
-            this.mem.put(URL_HASHES, vector2string(list));
+            this.mem.put(URL_HASHES, listManager.vector2string(list));
         }
         public void setTagsTable(){
             try {
@@ -401,7 +376,7 @@ public class bookmarksDB {
             } catch (IOException e) {}
         }
         public int size(){
-            return string2vector(((String)this.mem.get(URL_HASHES))).size();
+            return listManager.string2vector(((String)this.mem.get(URL_HASHES))).size();
         }
     }
     class bookmarksDate{
@@ -420,20 +395,20 @@ public class bookmarksDB {
         public bookmarksDate(String mydate, Vector entries){
             date=mydate;
             mem=new HashMap();
-            mem.put(URL_HASHES, vector2string(entries));
+            mem.put(URL_HASHES, listManager.vector2string(entries));
         }
         public void add(String urlHash){
             String urlHashes = (String)mem.get(URL_HASHES);
             Vector list;
             if(urlHashes != null && !urlHashes.equals("")){
-                list=string2vector(urlHashes);
+                list=listManager.string2vector(urlHashes);
             }else{
                 list=new Vector();
             }
             if(!list.contains(urlHash) && !urlHash.equals("")){
                 list.add(urlHash);
             }
-            this.mem.put(URL_HASHES, vector2string(list));
+            this.mem.put(URL_HASHES, listManager.vector2string(list));
             /*if(urlHashes!=null && !urlHashes.equals("") ){
                 if(urlHashes.indexOf(urlHash) <0){
                     this.mem.put(URL_HASHES, urlHashes+","+urlHash);
@@ -443,11 +418,11 @@ public class bookmarksDB {
             }*/
         }
         public void delete(String urlHash){
-            Vector list=string2vector((String) this.mem.get(URL_HASHES));
+            Vector list=listManager.string2vector((String) this.mem.get(URL_HASHES));
             if(list.contains(urlHash)){
                 list.remove(urlHash);
             }
-            this.mem.put(URL_HASHES, vector2string(list));
+            this.mem.put(URL_HASHES, listManager.vector2string(list));
         }
         public void setDatesTable(){
             try {
@@ -462,7 +437,7 @@ public class bookmarksDB {
             return date;
         }
         public int size(){
-            return string2vector(((String)this.mem.get(URL_HASHES))).size();
+            return listManager.string2vector(((String)this.mem.get(URL_HASHES))).size();
         }
     }
     /**
@@ -558,7 +533,7 @@ public class bookmarksDB {
             this.setTags(tags);
         }
         public void setTags(Vector tags){
-            mem.put(BOOKMARK_TAGS, vector2string(tags));
+            mem.put(BOOKMARK_TAGS, listManager.vector2string(tags));
             Iterator it=tags.iterator();
             while(it.hasNext()){
                 String tagName=(String) it.next();

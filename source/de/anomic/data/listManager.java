@@ -55,6 +55,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Vector;
+
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 
@@ -234,6 +236,32 @@ public class listManager {
         }
         return resultList;
     }
+    public static String vector2string(Vector vector){
+        Iterator it=vector.iterator();
+        String ret="";
+        if(it.hasNext()){
+            ret=(String) it.next();
+            while(it.hasNext()){
+                ret+=","+(String)it.next();
+            }
+        }
+        return ret;
+    }
+
+    public static Vector string2vector(String string){
+        Vector ret=new Vector();
+        String[] hashes=string.split(",");
+        if(string.indexOf(",") > -1){
+            for(int i=0;i<hashes.length;i++){
+                ret.add(hashes[i]);
+            }
+        }else{
+            ret = new Vector();
+            ret.add(string);
+        }
+        return ret;
+    }
+
 
 //=============Blacklist specific================
 
@@ -247,5 +275,4 @@ public class listManager {
 //       switchboard.urlBlacklist.clear();
 //       if (f != "") switchboard.urlBlacklist.loadLists("black", f, "/");
     }
-
 }
