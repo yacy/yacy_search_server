@@ -66,6 +66,7 @@ import java.util.Properties;
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
@@ -313,10 +314,10 @@ public final class plasmaCrawlLURL extends plasmaURL {
     }
 
     public serverObjects genTableProps(int tabletype, int lines, boolean showInit, boolean showExec, String dfltInit, String dfltExec, String feedbackpage, boolean makeLink) {
-        serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps tabletype=" + tabletype    +    " lines=" + lines    +
+/*      serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps tabletype=" + tabletype    +    " lines=" + lines    +
                                                                     " showInit=" + showInit     + " showExec=" + showExec +
                                                                     " dfltInit=" + dfltInit     + " dfltExec=" + dfltExec +
-                                                                " feedbackpage=" + feedbackpage + " makeLink=" + makeLink);
+                                                                " feedbackpage=" + feedbackpage + " makeLink=" + makeLink); */
         final serverObjects prop = new serverObjects();
         if (getStackSize(tabletype) == 0) {
             prop.put("table", 0);
@@ -338,11 +339,16 @@ public final class plasmaCrawlLURL extends plasmaURL {
 
         boolean dark = true;
         String urlHash, initiatorHash, executorHash;
-        plasmaCrawlLURL.Entry urle;
+        String cachepath, urlstr, urltxt;
         yacySeed initiatorSeed, executorSeed;
-        String cachepath,url,txt;
-        int p, c = 0;
+        plasmaCrawlLURL.Entry urle;
+        URL url;
 
+        // needed for getCachePath(url)
+        final plasmaSwitchboard switchboard = plasmaSwitchboard.getSwitchboard();
+        final plasmaHTCache cacheManager = switchboard.getCacheManager();
+
+        int cnt = 0;
         for (int i = getStackSize(tabletype) - 1; i >= (getStackSize(tabletype) - lines); i--) {
             initiatorHash = getInitiatorHash(tabletype, i);
             executorHash = getExecutorHash(tabletype, i);
@@ -355,40 +361,37 @@ public final class plasmaCrawlLURL extends plasmaURL {
                 initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                 executorSeed = yacyCore.seedDB.getConnected(executorHash);
 
-                url = urle.url().toString();
-                txt = urle.url().toString();
+                url = urle.url();
+                urlstr = url.toString();
 
                 // Kosmetik, die wirklich benutzte URL behaelt die ':80'
-                if (txt.endsWith(":80")) txt = txt.substring(0, txt.length() - 3);
-                if ((p = txt.indexOf(":80/")) != -1) {
-                    txt = txt.substring(0, p).concat(txt.substring(p + 3)); // den '/' erstmal nicht abschneiden
-                    serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps Remove ':80' URL=" + txt);
-                }
+//              if (txt.endsWith(":80")) txt = txt.substring(0, txt.length() - 3);
+//              if ((p = txt.indexOf(":80/")) != -1) {
+//                  txt = txt.substring(0, p).concat(txt.substring(p + 3)); // den '/' erstmal nicht abschneiden
+//                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps Remove ':80' URL=" + txt);
+//              }
+                urltxt = nxTools.cutUrlText(urlstr, 72); // shorten the string text like a URL
+                cachepath = (url == null) ? "-not-cached-" : cacheManager.getCachePath(url).toString().replace('\\', '/').substring(cacheManager.cachePath.toString().length() + 1);
 
-                txt = nxTools.cutUrlText(txt, 72); // shorten the string text like a URL
-
-                cachepath = (urle.url() == null) ? "-not-cached-" : url.substring(url.indexOf("://") + 3);
-                if (cachepath.endsWith("/")) cachepath = cachepath + "ndx";
-
-                prop.put("table_indexed_" + c + "_dark", (dark) ? 1 : 0);
-                prop.put("table_indexed_" + c + "_feedbackpage", feedbackpage);
-                prop.put("table_indexed_" + c + "_tabletype", tabletype);
-                prop.put("table_indexed_" + c + "_urlhash", urlHash);
-                prop.put("table_indexed_" + c + "_showInit", (showInit) ? 1 : 0);
-                prop.put("table_indexed_" + c + "_showInit_initiatorSeed", (initiatorSeed == null) ? dfltInit : initiatorSeed.getName());
-                prop.put("table_indexed_" + c + "_showExec", (showExec) ? 1 : 0);
-                prop.put("table_indexed_" + c + "_showExec_executorSeed", (executorSeed == null) ? dfltExec : executorSeed.getName());
-                prop.put("table_indexed_" + c + "_moddate", daydate(urle.moddate()));
-                prop.put("table_indexed_" + c + "_wordcount", urle.wordCount());
-                prop.put("table_indexed_" + c + "_urldescr", urle.descr());
-                prop.put("table_indexed_" + c + "_url", (urle.url() == null) ? "-not-cached-" : ((makeLink) ? ("<a href=\"CacheAdmin_p.html?action=info&path=" + cachepath + "\" class=\"small\" title=\"" + url + "\">" + txt + "</a>") : url));
+                prop.put("table_indexed_" + cnt + "_dark", (dark) ? 1 : 0);
+                prop.put("table_indexed_" + cnt + "_feedbackpage", feedbackpage);
+                prop.put("table_indexed_" + cnt + "_tabletype", tabletype);
+                prop.put("table_indexed_" + cnt + "_urlhash", urlHash);
+                prop.put("table_indexed_" + cnt + "_showInit", (showInit) ? 1 : 0);
+                prop.put("table_indexed_" + cnt + "_showInit_initiatorSeed", (initiatorSeed == null) ? dfltInit : initiatorSeed.getName());
+                prop.put("table_indexed_" + cnt + "_showExec", (showExec) ? 1 : 0);
+                prop.put("table_indexed_" + cnt + "_showExec_executorSeed", (executorSeed == null) ? dfltExec : executorSeed.getName());
+                prop.put("table_indexed_" + cnt + "_moddate", daydate(urle.moddate()));
+                prop.put("table_indexed_" + cnt + "_wordcount", urle.wordCount());
+                prop.put("table_indexed_" + cnt + "_urldescr", urle.descr());
+                prop.put("table_indexed_" + cnt + "_url", (urle.url() == null) ? "-not-cached-" : ((makeLink) ? ("<a href=\"CacheAdmin_p.html?action=info&path=" + cachepath + "\" class=\"small\" title=\"" + urlstr + "\">" + urltxt + "</a>") : urlstr));
                 dark = !dark;
-                c++;
+                cnt++;
             } catch (Exception e) {
                 serverLog.logSevere("PLASMA", "genTableProps", e);
             }
         }
-        prop.put("table_indexed", c);
+        prop.put("table_indexed", cnt);
         return prop;
     }
 
