@@ -336,7 +336,7 @@ This defines how often the Crawler will follow links embedded in websites.==Dies
 A minimum of 1 is recommended and means that the page you enter under \"Starting Point\" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.==Ein Minimum von 1 wird empfohlen und bedeutet, dass die Seite, die Sie unter "Startpunkt" angegeben haben, dem Index zugef&uugt wird, verlinkter Inhalt allerdings nicht. 2-4 ist gut f&uuml;r normales Indexieren.
 Be careful with the depth. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durschnittlichen Verzweigungsfaktor von 20;
 A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
-Crawling Filter:==Crawl-Maske:
+Crawling Filter:==Crawling Filter:
 This is an emacs-like regular expression that must match with the URLs which are used to be crawled.==Dies ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit der gecrawlten URL &uuml;bereinstimmen muss.
 Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase==Benutzen Sie dies z.B., um nur eine einzelne Domain zu crawlen. Wenn Sie diese Maske aktivieren, macht es Sinn
 the crawling depth.==die Crawling Tiefe zu erh&ouml;hen.
@@ -825,6 +825,24 @@ You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransich
 on the==auf der
 <a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a><a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a>
 Page.==Seite ansehen.
+
+#-------------------------------------------------------
+#File: QuickCrawlLink_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Schnell Crawl Link
+Quick Crawl Link==Schnell Crawl Link
+Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
+Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
+If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, w&auml;hrend Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zur YaCy Crawler Warteschlange hinzugef&uuml;gt, um indexiert zu werden.
+Crawl with YaCy==Mit YaCy crawlen
+Title:==Titel:
+Link:==link:
+Status:==Status:
+URL successfully added to Crawler Queue==Die Url wurde erfolgreich zur Crawler Warteschlange hinzugef&uuml;gt.
+Malformed URL==Fehler in der URL
+Unable to create new crawling profile for URL:==Es ist nicht m&ouml;glich f&uuml;r diese URL ein Crawling Profil zu erstellen:
+Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zur Crawler Warteschlange hinzuzuf&uuml;gen:
 
 #-------------------------------------------------------
 #File: Settings_p.html
