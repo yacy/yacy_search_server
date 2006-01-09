@@ -520,19 +520,19 @@ public final class plasmaHTCache {
      */    
     public File getCachePath(URL url) {
 //      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
-        String remotePath = url.getFile();
-        if (!remotePath.startsWith("/")) { remotePath = "/" + remotePath; }
-        if (remotePath.endsWith("/")) { remotePath = remotePath + "ndx"; }
+        String path = url.getPath();
+        String query = url.getQuery().replaceAll("[\"\\/:*?<>|]", "_"); // yes this is not reversible, but that is not needed (really?)
+        if (!path.startsWith("/")) { path = "/" + path; }
+        if (path.endsWith("/") && query == null) { path = path + "ndx"; }
 
         Pattern pathPattern = Pattern.compile("/\\.\\./");
-        Matcher matcher = pathPattern.matcher(remotePath);
+        Matcher matcher = pathPattern.matcher(path);
         while (matcher.find()) {
-            remotePath = matcher.replaceAll("/!!/");
-            matcher.reset(remotePath);
+            path = matcher.replaceAll("/!!/");
+            matcher.reset(path);
         }
-        remotePath = remotePath.replaceAll("[?&:!]", "_"); // yes this is not reversible, but that is not needed
-//      remotePath = remotePath.replaceAll("[\"\\/:*?<>|]", "_"); // yes this is not reversible, but that is not needed
-
+        if (query != null) { path = path.concat("_").concat(query); }
+        
         // only set NO default ports
         int port = url.getPort();
         String protocol = url.getProtocol();
@@ -547,9 +547,9 @@ public final class plasmaHTCache {
             protocol = "yacy";
         }
         if (port < 0) {
-            return new File(this.cachePath, protocol + "/" + url.getHost() + remotePath);
+            return new File(this.cachePath, protocol + "/" + url.getHost() + path);
         } else {
-            return new File(this.cachePath, protocol + "/" + url.getHost() + "!" + port + remotePath);
+            return new File(this.cachePath, protocol + "/" + url.getHost() + "!" + port + path);
         }
 /*      File path;
         if (port < 0) {
