@@ -160,7 +160,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         } else if (url.getProtocol().equals("https")) {
             if (url.getPort() < 0 || url.getPort() == 443) { defaultPort = true; }
         }
-        String path = url.getPath();
+        String path = url.getFile();
 
         // (this is different from previous normal forms where a '/' must not appear in root paths; here it must appear. Makes everything easier.)
         if (path.length() == 0 || path.charAt(0) != '/') path = "/" + path;
@@ -171,9 +171,6 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             path = matcher.replaceAll("");
             matcher.reset(path);
         }
-
-        String query = url.getQuery().replaceAll("[\"\\/:*?<>|]", "_");
-        if (query != null) { path = path.concat("_").concat(query); }
 
         if (defaultPort) return url.getProtocol() + "://" + url.getHost() + path;
         return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + path;
