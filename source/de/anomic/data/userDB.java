@@ -158,7 +158,7 @@ public final class userDB {
 		auth=auth.trim().substring(6);
         try{
             auth=kelondroBase64Order.standardCoder.decodeString(auth);
-        }catch(StringIndexOutOfBoundsException e){} //no valid Base64
+        }catch(RuntimeException e){} //no valid Base64
         String[] tmp=auth.split(":");
         if(tmp.length == 2){
             /*entry=this.getEntry(tmp[0]);
