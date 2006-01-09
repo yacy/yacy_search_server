@@ -14,6 +14,7 @@ import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
 import de.anomic.server.logging.serverLog;
@@ -170,6 +171,12 @@ public class urlRedirectord implements serverHandler {
                                 reqURL,
                                 header.mime())
                         ) {
+                            // first delete old entry, if exists
+                            String urlhash = plasmaURL.urlHash(this.nextURL);
+                            switchboard.urlPool.loadedURL.remove(urlhash);
+                            switchboard.urlPool.noticeURL.remove(urlhash);
+                            switchboard.urlPool.errorURL.remove(urlhash);                            
+                            
                             // enqueuing URL for crawling
                             reasonString = switchboard.sbStackCrawlThread.stackCrawl(
                                     this.nextURL, 
