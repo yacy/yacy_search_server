@@ -143,11 +143,20 @@ public class urlRedirectord implements serverHandler {
                     int pos = line.indexOf(" ");
                     if (pos != -1) {
                         String newDepth = line.substring(pos).trim();
-                        this.theLogger.logFine("Changing crawling depth to '" + newDepth);
+                        this.theLogger.logFine("Changing crawling depth to '" + newDepth + "'.");
                         profile.changeEntry("generalDepth",newDepth);
                     }
                     outputWriter.print("\r\n");
                     outputWriter.flush();
+                } else if (line.startsWith("CRAWLDYNAMIC")) {
+                    int pos = line.indexOf(" ");
+                    if (pos != -1) {
+                        String newValue = line.substring(pos).trim();
+                        this.theLogger.logFine("Changing crawl dynamic setting to '" + newValue + "'");
+                        profile.changeEntry("crawlingQ",newValue);
+                    }
+                    outputWriter.print("\r\n");
+                    outputWriter.flush();                    
                 } else {
                     if (!authenticated) {
                         return Boolean.FALSE;

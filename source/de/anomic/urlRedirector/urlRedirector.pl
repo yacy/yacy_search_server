@@ -18,6 +18,9 @@ my $pwd  = "";
 my $host = "localhost";
 my $port = "8080";
 
+my $allowCgi = 0;
+my $allowPost = 0;
+
 my @mediaExt;
 my @requestData;
 
@@ -96,14 +99,14 @@ while (defined($msg_out = <>)) {
     @requestData =  split(/\s+/, $msg_out);
     
     # testing if the URL is CGI
-    if (isCGI($requestData[0])) { 
+    if (!$allowCgi && isCGI($requestData[0])) { 
      print STDOUT CRLF;
      print STDERR "URL is cgi: ".$msg_out.CRLF;
      next; 
     }
     
     # testing if the URL is a POST request
-    if (isPOST($requestData[0])){ 
+    if (!$allowPost && isPOST($requestData[0])){ 
      print STDOUT CRLF;
      print STDERR "URL is post: ".$msg_out.CRLF;
      next; 
