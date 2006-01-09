@@ -117,6 +117,8 @@ public class urlRedirectord implements serverHandler {
                 if (line.equals("EXIT")) {
                     break;
                 } else if (line.startsWith("#")) {
+                    outputWriter.print("\r\n");
+                    outputWriter.flush();
                     continue;
                 } else if (line.startsWith("USER")) {
                     userName = line.substring(line.indexOf(" ")).trim();
