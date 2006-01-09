@@ -530,8 +530,8 @@ public final class plasmaHTCache {
             remotePath = matcher.replaceAll("/!!/");
             matcher.reset(remotePath);
         }
-
-        remotePath = remotePath.replaceAll("[\"\\/:*?<>|]", "_"); // yes this is not reversible, but that is not needed
+        remotePath = remotePath.replaceAll("[?&:!]", "_"); // yes this is not reversible, but that is not needed
+//      remotePath = remotePath.replaceAll("[\"\\/:*?<>|]", "_"); // yes this is not reversible, but that is not needed
 
         // only set NO default ports
         int port = url.getPort();
