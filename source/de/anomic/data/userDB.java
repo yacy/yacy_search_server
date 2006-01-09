@@ -161,16 +161,6 @@ public final class userDB {
         }catch(RuntimeException e){} //no valid Base64
         String[] tmp=auth.split(":");
         if(tmp.length == 2){
-            /*entry=this.getEntry(tmp[0]);
-            if( entry != null && entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(auth)) ){
-            		if(entry.isLoggedOut()){
-            			try{
-            				entry.setProperty(Entry.LOGGED_OUT, "false");
-            			}catch(IOException e){}
-            			return null;
-            		}
-				return entry;
-             */
             entry=this.passwordAuth(tmp[0], tmp[1]);
             if(entry != null){
                 //return entry;
