@@ -13,6 +13,7 @@ import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroIndex;
+import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.ymage.ymageChart;
 import de.anomic.ymage.ymagePNGEncoderAWT;
@@ -153,8 +154,8 @@ public class dbtest {
         String dbe = args[0];       // the database engine
         String command = args[1];   // test command
         String tablename = args[2]; // name of test-table
-        
         long startup = System.currentTimeMillis();
+        
         try {
             kelondroIndex table = null;
             // create a memory profiler
@@ -162,7 +163,7 @@ public class dbtest {
             profiler.start();
             
             // create the database access
-            if (dbe.equals("kelondro")) {
+            if (dbe.equals("kelondroold")) {
                 File tablefile = new File(tablename + ".kelondro.db");
                 if (tablefile.exists()) {
                     table = new kelondroTree(tablefile, buffer);
@@ -171,6 +172,14 @@ public class dbtest {
                 }
             }
             
+            if (dbe.equals("kelondro")) {
+                File tablepath = new File(tablename).getParentFile();
+                table = kelondroSplittedTree.open(tablepath, tablename, kelondroBase64Order.enhancedCoder,
+                                buffer,
+                                8,
+                                new int[]{keylength, valuelength, valuelength}, 1, 80,
+                                true);
+            }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql");
             }
@@ -370,6 +379,16 @@ final class dbTable implements kelondroIndex {
     public Iterator rows(boolean up, boolean rotating) throws IOException {
         // Objects are of type byte[][]
         return null;
+    }
+
+    public int columns() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public int columnSize(int column) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 }
 

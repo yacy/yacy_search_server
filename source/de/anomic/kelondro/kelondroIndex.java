@@ -55,6 +55,9 @@ import java.util.Iterator;
 
 public interface kelondroIndex {
 
+    public int columns();
+    public int columnSize(int column);
+    
     public byte[][] get(byte[] key) throws IOException;
     public byte[][] put(byte[][] row) throws IOException;
     public byte[][] remove(byte[] key) throws IOException;

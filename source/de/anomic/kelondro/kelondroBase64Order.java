@@ -50,24 +50,22 @@ import java.util.Comparator;
 
 public class kelondroBase64Order extends kelondroAbstractOrder implements kelondroOrder, kelondroCoding, Comparator {
 
+    private static final char[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+    private static final char[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
+    
     public static final kelondroBase64Order standardCoder = new kelondroBase64Order(true);
     public static final kelondroBase64Order enhancedCoder = new kelondroBase64Order(false);
 
     final boolean rfc1113compliant;
 
-    public final char[] alpha;
-    public final byte[] ahpla;
+    private final char[] alpha;
+    private final byte[] ahpla = new byte[256];
 
     public kelondroBase64Order(boolean rfc1113compliant) {
         // if we choose not to be rfc1113compliant,
         // then we get shorter base64 results which are also filename-compatible
         this.rfc1113compliant = rfc1113compliant;
-        alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
-        if (!(rfc1113compliant)) {
-            alpha[62] = '-';
-            alpha[63] = '_';
-        }
-        ahpla = new byte[256];
+        alpha = (rfc1113compliant) ? alpha_standard : alpha_enhanced;
         for (int i = 0; i < 256; i++) ahpla[i] = -1;
         for (int i = 0; i < alpha.length; i++) ahpla[alpha[i]] = (byte) i;
     }
