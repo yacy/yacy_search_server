@@ -153,8 +153,7 @@ public class kelondroSplittedTree implements kelondroIndex {
     }
 
     public Iterator rows(boolean up, boolean rotating) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        return new ktfsIterator(up, rotating);
     }
     
     public class ktfsIterator implements Iterator {
