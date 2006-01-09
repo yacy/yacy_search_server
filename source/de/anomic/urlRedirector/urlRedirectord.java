@@ -136,6 +136,15 @@ public class urlRedirectord implements serverHandler {
                     outputWriter.print(transferIgnoreList);
                     outputWriter.print("\r\n");
                     outputWriter.flush();
+                } else if (line.startsWith("DEPTH")) {
+                    int pos = line.indexOf(" ");
+                    if (pos != -1) {
+                        String newDepth = line.substring(pos).trim();
+                        this.theLogger.logFine("Changing crawling depth to '" + newDepth);
+                        profile.changeEntry("generalDepth",newDepth);
+                    }
+                    outputWriter.print("\r\n");
+                    outputWriter.flush();
                 } else {
                     if (!authenticated) {
                         return Boolean.FALSE;
