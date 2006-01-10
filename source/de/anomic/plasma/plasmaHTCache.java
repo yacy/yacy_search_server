@@ -521,7 +521,7 @@ public final class plasmaHTCache {
     public File getCachePath(URL url) {
 //      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
         String path = url.getPath();
-        String query = url.getQuery().replaceAll("[\"\\/:*?<>|]", "_"); // yes this is not reversible, but that is not needed (really?)
+        String query = url.getQuery();
         if (!path.startsWith("/")) { path = "/" + path; }
         if (path.endsWith("/") && query == null) { path = path + "ndx"; }
 
@@ -531,8 +531,9 @@ public final class plasmaHTCache {
             path = matcher.replaceAll("/!!/");
             matcher.reset(path);
         }
-        if (query != null) { path = path.concat("_").concat(query); }
-        
+        if (query != null) {
+            path = path.concat("_").concat(query.replaceAll("[\"\\/:*?<>|]", "_")); // yes this is not reversible, but that is not needed
+        }
         // only set NO default ports
         int port = url.getPort();
         String protocol = url.getProtocol();
