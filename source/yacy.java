@@ -77,6 +77,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
 import de.anomic.plasma.plasmaWordIndexCache;
 import de.anomic.plasma.plasmaWordIndexClassicDB;
 import de.anomic.plasma.plasmaWordIndexEntity;
@@ -1262,7 +1263,7 @@ public final class yacy {
         }
     }
     
-    private static void RWIHashList(String homePath, String targetName) {
+    private static void RWIHashList(String homePath, String targetName, String resource) {
         serverLog log = new serverLog("HASHLIST");
         File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
         String wordChunkStartHash = "------------";
@@ -1272,8 +1273,19 @@ public final class yacy {
         File file = new File(root, targetName + ".txt");
         try {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-            plasmaWordIndex WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, log);
-            Iterator WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, true, true);
+            Iterator WordHashIterator = null;
+            if (resource.equals("all")) {
+                plasmaWordIndex WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, log);
+                WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, true, false);
+            }
+            if (resource.equals("assortments")) {
+                plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, log);
+                WordHashIterator = assortmentCluster.hashConjunction(wordChunkStartHash, true);
+            }
+            if (resource.equals("words")) {
+                plasmaWordIndexClassicDB fileDB = new plasmaWordIndexClassicDB(homeDBroot, log);
+                WordHashIterator = fileDB.wordHashes(wordChunkStartHash, true);
+            }
             int counter = 0;
             while (WordHashIterator.hasNext()) {
                 counter++;
@@ -1285,10 +1297,11 @@ public final class yacy {
                 }
             }
         } catch (IOException e) {
-        e.printStackTrace();
+            e.printStackTrace();
+        }
     }
-    }
-    
+
+ 
     /**
      * Main-method which is started by java. Checks for special arguments or
      * starts up the application.
@@ -1393,9 +1406,11 @@ public final class yacy {
             urldbcleanup(applicationRoot);
         } else if ((args.length >= 1) && (args[0].equals("-rwihashlist"))) {
             // generate a url list and save it in a file
-            if (args.length == 2) applicationRoot= args[1];
+            String domain = "all";
+            if (args.length >= 2) domain= args[1];
+            if (args.length == 3) applicationRoot= args[2];
             String outfile = "rwihashlist_" + System.currentTimeMillis();
-            RWIHashList(applicationRoot, outfile);
+            RWIHashList(applicationRoot, outfile, domain);
         } else {
             if (args.length == 1) applicationRoot= args[0];
             startup(applicationRoot, startupMemFree, startupMemTotal);
