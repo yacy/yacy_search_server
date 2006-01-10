@@ -1165,7 +1165,7 @@ public final class yacy {
                 entry = (plasmaCrawlLURL.Entry) eiter.next();
                 if ((entry != null) && (entry.url() != null)) {
                     if (html) {
-                        bos.write(("<a href=\"" + entry.url() + "\">" + entry.descr() + "</a><br>").getBytes());
+                        bos.write(("<a href=\"" + entry.url() + "\">" + entry.descr() + "</a><br>").getBytes("UTF-8"));
                         bos.write(serverCore.crlf);
                     } else {
                         bos.write(entry.url().toString().getBytes());

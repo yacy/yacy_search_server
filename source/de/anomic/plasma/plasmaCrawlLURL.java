@@ -475,18 +475,18 @@ public final class plasmaCrawlLURL extends plasmaURL {
             if (entry == null) throw new IOException("url hash " + urlHash + " not found in LURL");
             try {
                 if (entry != null) {
-                    this.url = new URL(new String(entry[1]).trim());
-                    this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2]).trim();
-                    this.moddate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[3])));
-                    this.loaddate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[4])));
-                    this.referrerHash = (entry[5] == null) ? dummyHash : new String(entry[5]);
-                    this.copyCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[6]));
-                    this.flags = new String(entry[7]);
-                    this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8]));
-                    this.language = new String(entry[9]);
+                    this.url = new URL(new String(entry[1], "UTF-8").trim());
+                    this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2], "UTF-8").trim();
+                    this.moddate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[3], "UTF-8")));
+                    this.loaddate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[4], "UTF-8")));
+                    this.referrerHash = (entry[5] == null) ? dummyHash : new String(entry[5], "UTF-8");
+                    this.copyCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[6], "UTF-8"));
+                    this.flags = new String(entry[7], "UTF-8");
+                    this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8], "UTF-8"));
+                    this.language = new String(entry[9], "UTF-8");
                     this.doctype = (char) entry[10][0];
-                    this.size = kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[11]));
-                    this.wordCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[12]));
+                    this.size = kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[11], "UTF-8"));
+                    this.wordCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[12], "UTF-8"));
                     this.snippet = null;
                     return;
                 }

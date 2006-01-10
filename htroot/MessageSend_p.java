@@ -44,6 +44,7 @@
 // javac -classpath .:../Classes MessageSend_p.java
 // if the shell's current path is HTROOT
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -128,7 +129,13 @@ public class MessageSend_p {
                 if (messagesize < 1000) messagesize = 1000; // debug
                 if (subject.length() > 100) subject = subject.substring(0, 100);
                 if (message.length() > messagesize) message = message.substring(0, messagesize);
-                HashMap result = yacyClient.postMessage(hash, subject, message.getBytes());
+                byte[] mb;
+                try {
+                    mb = message.getBytes("UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    mb = message.getBytes();
+                }
+                HashMap result = yacyClient.postMessage(hash, subject, mb);
                 body += "<p>Your message has been sent. The target peer responded:</p>";
                 body += "<p><i>" + result.get("response") + "</i></p>";
             } catch (NumberFormatException e) {

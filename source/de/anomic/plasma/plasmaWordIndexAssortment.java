@@ -200,8 +200,7 @@ public final class plasmaWordIndexAssortment {
         for (int i = 0; i < assortmentLength; i++) {
             container.add(
                     new plasmaWordIndexEntry[] { new plasmaWordIndexEntry(
-                            new String(row[3 + 2 * i]), new String(
-                                    row[4 + 2 * i])) }, updateTime);
+                            new String(row[3 + 2 * i]), new String(row[4 + 2 * i])) }, updateTime);
         }
         return container;
     }

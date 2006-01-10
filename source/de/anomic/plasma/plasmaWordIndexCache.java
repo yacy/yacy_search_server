@@ -193,9 +193,9 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     // get out one entry
                     row = dumpArray.get(i);
                     if ((row[0] == null) || (row[1] == null) || (row[2] == null) || (row[3] == null) || (row[4] == null)) continue;
-                    wordHash = new String(row[0]);
+                    wordHash = new String(row[0], "UTF-8");
                     creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new plasmaWordIndexEntry(new String(row[3]), new String(row[4]));
+                    wordEntry = new plasmaWordIndexEntry(new String(row[3], "UTF-8"), new String(row[4], "UTF-8"));
                     // store to cache
                     addEntry(wordHash, wordEntry, creationTime);
                     urlCount++;

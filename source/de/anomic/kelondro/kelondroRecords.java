@@ -790,7 +790,7 @@ public class kelondroRecords {
                     if (h == null) s = s + ":hNULL"; else s = s + ":h" + h.toString();
                 }
                 byte[][] content = getValues();
-                for (int i = 0; i < content.length; i++) s = s + ":" + ((content[i] == null) ? "NULL" : (new String(content[i])).trim());
+                for (int i = 0; i < content.length; i++) s = s + ":" + ((content[i] == null) ? "NULL" : (new String(content[i], "UTF-8")).trim());
             } catch (IOException e) {
                 s = s + ":***LOAD ERROR***:" + e.getMessage();
             }

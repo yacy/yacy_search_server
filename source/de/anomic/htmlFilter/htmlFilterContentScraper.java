@@ -230,7 +230,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public byte[] getText() {
-        return content.getBytes();
+       return content.getBytes();
     }
 
     public Map getAnchors() {

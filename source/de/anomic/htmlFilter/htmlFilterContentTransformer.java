@@ -46,6 +46,7 @@ package de.anomic.htmlFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.UnsupportedEncodingException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -117,7 +118,12 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
 
     private boolean hit(byte[] text) {
         if (text == null || bluelist == null) return false;
-        String lc = new String(text).toLowerCase();
+        String lc;
+        try {
+            lc = new String(text, "UTF-8").toLowerCase();
+        } catch (UnsupportedEncodingException e) {
+            lc = new String(text).toLowerCase();
+        }
         for (int i = 0; i < bluelist.size(); i++) {
             if (lc.indexOf((String) bluelist.get(i)) >= 0) return true;
         }

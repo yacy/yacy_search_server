@@ -710,7 +710,7 @@ public final class httpd implements serverHandler {
             bout.close(); bout = null;
         }
         
-        int argc = parseArgs(args, new String(buffer));
+        int argc = parseArgs(args, new String(buffer, "UTF-8"));
         buffer = null;
         return argc;
     }

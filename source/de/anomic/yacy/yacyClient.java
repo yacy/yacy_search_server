@@ -44,6 +44,7 @@
 package de.anomic.yacy;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -550,8 +551,11 @@ public final class yacyClient {
             post.put("youare", targetHash);
             post.put("subject", subject);
             post.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
-            post.put("message", new String(message));
-            
+            try {
+                post.put("message", new String(message, "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                post.put("message", new String(message));
+            }
         // get target address    
         String address = targetAddress(targetHash);
         

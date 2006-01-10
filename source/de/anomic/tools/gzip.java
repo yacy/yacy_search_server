@@ -105,7 +105,7 @@ public class gzip {
 	    copy(fout, fin, 128);
 	    fin.close();
 	    fout.close();
-	    return new String(fout.toByteArray(), "UTF8");
+	    return new String(fout.toByteArray(), "UTF-8");
 	} catch (IOException e) {
 	    System.err.println("ERROR: IO trouble");
 	    return null;

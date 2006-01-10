@@ -401,17 +401,17 @@ public final class plasmaCrawlStacker {
 
             try {
                 this.urlHash       = urlHash;
-                this.initiator     = new String(entryBytes[1]);
-                this.url           = new String(entryBytes[2]).trim();
-                this.referrerHash      = (entryBytes[3]==null) ? plasmaURL.dummyHash : new String(entryBytes[3]);
-                this.name          = (entryBytes[4] == null) ? "" : new String(entryBytes[4]).trim();
-                this.loaddate      = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[5])));
-                this.profileHandle = (entryBytes[6] == null) ? null : new String(entryBytes[6]).trim();
-                this.depth         = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[7]));
-                this.anchors       = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[8]));
-                this.forkfactor    = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[9]));
+                this.initiator     = new String(entryBytes[1], "UTF-8");
+                this.url           = new String(entryBytes[2], "UTF-8").trim();
+                this.referrerHash      = (entryBytes[3]==null) ? plasmaURL.dummyHash : new String(entryBytes[3], "UTF-8");
+                this.name          = (entryBytes[4] == null) ? "" : new String(entryBytes[4], "UTF-8").trim();
+                this.loaddate      = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[5], "UTF-8")));
+                this.profileHandle = (entryBytes[6] == null) ? null : new String(entryBytes[6], "UTF-8").trim();
+                this.depth         = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[7], "UTF-8"));
+                this.anchors       = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[8], "UTF-8"));
+                this.forkfactor    = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[9], "UTF-8"));
                 this.flags         = new bitfield(entryBytes[10]);
-                this.handle        = Integer.parseInt(new String(entryBytes[11]));
+                this.handle        = Integer.parseInt(new String(entryBytes[11], "UTF-8"));
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new IllegalStateException();

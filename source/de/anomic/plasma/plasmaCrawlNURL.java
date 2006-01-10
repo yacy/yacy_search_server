@@ -189,43 +189,43 @@ public class plasmaCrawlNURL extends plasmaURL {
             Iterator i;
             try {
                 i = coreStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));
+                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next(), "UTF-8"));
             } catch (Exception e) {
                 coreStack.reset();
             }
             try {
                 i = limitStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));
+                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next(), "UTF-8"));
             } catch (Exception e) {
                 limitStack.reset();
             }
             try {
                 i = overhangStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));
+                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next(), "UTF-8"));
             } catch (Exception e) {
                 overhangStack.reset();
             }
             try {
                 i = remoteStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next()));
+                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next(), "UTF-8"));
             } catch (Exception e) {
                 remoteStack.reset();
             }
             try {
                 i = imageStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
             } catch (Exception e) {
                 imageStack = kelondroStack.reset(imageStack);
             }
             try {
                 i = movieStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
             } catch (Exception e) {
                 movieStack = kelondroStack.reset(movieStack);
             }
             try {
                 i = musicStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey()));
+                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
             } catch (Exception e) {
                 musicStack = kelondroStack.reset(musicStack);
             }

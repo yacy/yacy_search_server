@@ -73,7 +73,7 @@ public class plasmaWordConnotation {
         //reference = reference.toLowerCase();
         byte[][] record = refDB.get(word, reference.getBytes());
         long c;
-        if (record == null) c = 0; else c = kelondroBase64Order.enhancedCoder.decodeLong(new String(record[1]));
+        if (record == null) c = 0; else c = kelondroBase64Order.enhancedCoder.decodeLong(new String(record[1], "UTF-8"));
         record[1] = kelondroBase64Order.enhancedCoder.encodeLong(c++, countlength).getBytes();
         refDB.put(word, record);
     }

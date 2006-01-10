@@ -230,7 +230,7 @@ public class kelondroHashtable {
             rowNumber = hash.node();
             if (rowNumber >= hashArray.size()) return new Object[]{new Integer(rowNumber), null};
             row = hashArray.get(rowNumber);
-            rowKey = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(row[0]));
+            rowKey = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(row[0], "UTF-8"));
             if (rowKey == 0) return new Object[]{new Integer(rowNumber), null};
             hash.rehash();
         } while (rowKey != hash.key());

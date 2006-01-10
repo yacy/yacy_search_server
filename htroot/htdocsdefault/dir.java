@@ -173,7 +173,7 @@ public class dir {
             try {
                 serverFileUtils.write(binary, newfile);
                 String md5s = serverCodings.encodeMD5Hex(newfile);
-                serverFileUtils.write((md5s + "\n" + description).getBytes(), newfilemd5); // generate md5
+                serverFileUtils.write((md5s + "\n" + description).getBytes("UTF-8"), newfilemd5); // generate md5
 
                 // index file info
                 if (post.get("indexing", "").equals("on")) {
@@ -262,7 +262,7 @@ public class dir {
                                 // generate md5 on-the-fly
                                 md5s = serverCodings.encodeMD5Hex(f);
                                 description = "";
-                                serverFileUtils.write((md5s + "\n" + description).getBytes(), fmd5);
+                                serverFileUtils.write((md5s + "\n" + description).getBytes("UTF-8"), fmd5);
                             }
                         } catch (IOException e) {
                             md5s = "";
@@ -478,7 +478,7 @@ public class dir {
     public static void deletePhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr) {
         try {
             final String urlhash = plasmaURL.urlHash(new URL(urlstring));
-            final Set words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes());
+            final Set words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"));
             switchboard.removeReferences(urlhash, words);
             switchboard.urlPool.loadedURL.remove(urlhash);
         } catch (Exception e) {

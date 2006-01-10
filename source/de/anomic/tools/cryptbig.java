@@ -164,7 +164,7 @@ public class cryptbig {
 	    if (b64dec == null) return null; // error in input string (inconsistency)
 	    byte[] dec = decryptArray(b64dec);
 	    if (dec == null) return null;
-	    return new String(dec, "UTF8");
+	    return new String(dec, "UTF-8");
 	} catch (UnsupportedEncodingException e) {
 	}
 	return null;

@@ -171,15 +171,15 @@ public class plasmaCrawlEURL extends plasmaURL {
             this.hash = hash;
             byte[][] entry = urlHashCache.get(hash.getBytes());
             if (entry != null) {
-                this.referrer = new String(entry[1]);
-                this.initiator = new String(entry[2]);
-                this.executor = new String(entry[3]);
-                this.url = new URL(new String(entry[4]).trim());
-                this.name = new String(entry[5]).trim();
-                this.initdate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[6])));
-                this.trydate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[7])));
-                this.trycount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8]));
-                this.failreason = new String(entry[9]);
+                this.referrer = new String(entry[1], "UTF-8");
+                this.initiator = new String(entry[2], "UTF-8");
+                this.executor = new String(entry[3], "UTF-8");
+                this.url = new URL(new String(entry[4], "UTF-8").trim());
+                this.name = new String(entry[5], "UTF-8").trim();
+                this.initdate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[6], "UTF-8")));
+                this.trydate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[7], "UTF-8")));
+                this.trycount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8], "UTF-8"));
+                this.failreason = new String(entry[9], "UTF-8");
                 this.flags = new bitfield(entry[10]);
                 return;
             }

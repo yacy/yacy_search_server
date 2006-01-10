@@ -232,7 +232,7 @@ public class httpdSoapService
             
             // convert it into a byte array and send it back as result
             byte[] result = o.toByteArray();            
-            return new String(result); 
+            return new String(result, "UTF-8"); 
         } catch (Exception e) {
             throw new AxisFault(e.getMessage());
         }

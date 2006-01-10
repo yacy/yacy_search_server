@@ -152,7 +152,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
                 return new String(bb, 0, bbsize);
             }
             if (c == cr) continue;
-            if (c == lf) return new String(bb, 0, bbsize);
+            if (c == lf) return new String(bb, 0, bbsize, "UTF-8");
 
             // append to bb
             if (bbsize == bb.length) {

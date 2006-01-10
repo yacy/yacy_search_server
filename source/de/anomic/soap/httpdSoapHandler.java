@@ -468,7 +468,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
             if (templates[i].endsWith(".template")) try {
             //System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
             result.put(templates[i].substring(0, templates[i].length() - 9),
-                               new String(serverFileUtils.read(new File(path, templates[i]))));
+                               new String(serverFileUtils.read(new File(path, templates[i])), "UTF-8"));
             } catch (Exception e) {}
         }
         return result;

@@ -50,6 +50,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -73,7 +74,11 @@ public class wikiCode {
     }
 
     public String transform(String content){
-        return transform(content.getBytes(), sb);
+        try {
+            return transform(content.getBytes("UTF-8"), sb);
+        } catch (UnsupportedEncodingException e) {
+            return transform(content.getBytes(), sb);
+        }
     }
     public String transform(byte[] content){
         return transform(content, sb);

@@ -24,6 +24,7 @@ public class dbtest {
 
     public final static int keylength = 12;
     public final static int valuelength = 223; // sum of all data length as defined in plasmaURL
+    //public final static long buffer = 0;
     public final static long buffer = 8192 * 1024; // 8 MB buffer
     public static byte[] dummyvalue1 = new byte[valuelength];
     public static byte[] dummyvalue2 = new byte[valuelength];

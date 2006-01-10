@@ -98,7 +98,6 @@ public class kelondroArray extends kelondroRecords {
         return getNode(new Handle(index)).getValues();
     }
 
-    
     public synchronized int seti(int index, int value) throws IOException {
         int before = getHandle(index).hashCode();
         setHandle(index, new Handle(value));
@@ -109,13 +108,28 @@ public class kelondroArray extends kelondroRecords {
         return getHandle(index).hashCode();
     }
     
+    public synchronized int add(byte[][] row) throws IOException {
+        if (row.length != columns())
+            throw new IllegalArgumentException("add: wrong row length " + row.length + "; must be " + columns());
+
+        Node n = newNode();
+        n.commit(CP_LOW);
+        int index = n.handle().hashCode();
+        set(index, row);
+        return index;
+    }
+
+    public synchronized void remove(int index) throws IOException {
+        deleteNode(new Handle(index));
+    }
+    
     public void print() throws IOException {
         System.out.println("PRINTOUT of table, length=" + size());
         byte[][] row;
         for (int i = 0; i < size(); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
-            for (int j = 0; j < columns(); j++) System.out.print(((row[j] == null) ? "NULL" : new String(row[j])) + ", ");
+            for (int j = 0; j < columns(); j++) System.out.print(((row[j] == null) ? "NULL" : new String(row[j], "UTF-8")) + ", ");
             System.out.println();
         }
         System.out.println("EndOfTable");
@@ -158,6 +172,20 @@ public class kelondroArray extends kelondroRecords {
                 kelondroArray fm = new kelondroArray(new File(args[1]));
                 byte[][] row = new byte[][]{args[3].getBytes()};
                 fm.set(Integer.parseInt(args[2]), row);
+                fm.close();
+            } else
+            if ((args.length == 3) && (args[0].equals("-a"))) {
+                // add <filename> <value>
+                kelondroArray fm = new kelondroArray(new File(args[1]));
+                byte[][] row = new byte[][] { args[2].getBytes() };
+                int index = fm.add(row);
+                System.out.println("Added to row " + index);
+                fm.close();
+            } else
+            if ((args.length == 3) && (args[0].equals("-d"))) {
+                // delete <filename> <index>
+                kelondroArray fm = new kelondroArray(new File(args[1]));
+                fm.remove(Integer.parseInt(args[2]));
                 fm.close();
             } else
             if ((args.length == 1) && (args[0].equals("-test"))) {

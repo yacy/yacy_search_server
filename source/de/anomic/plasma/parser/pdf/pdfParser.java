@@ -127,7 +127,7 @@ public class pdfParser extends AbstractParser implements Parser {
             out = null;
 			
             if ((docTitle == null) || (docTitle.length() == 0)) {
-                docTitle = ((contents.length > 80)? new String(contents, 0, 80):new String(contents)).
+                docTitle = ((contents.length > 80)? new String(contents, 0, 80, "UTF-8"):new String(contents, "UTF-8")).
                 replaceAll("\r\n"," ").
                 replaceAll("\n"," ").
                 replaceAll("\r"," ").

@@ -68,6 +68,10 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
     // two arrays are also equal if one array is a subset of the other's array
     // with filled-up char(0)-values
     public int compare(byte[] a, byte[] b) {
+        return compares(a, b);
+    }
+
+    public static final int compares(byte[] a, byte[] b) {
         int i = 0;
         final int al = a.length;
         final int bl = b.length;

@@ -241,7 +241,7 @@ public final class serverFileUtils {
     public static Set loadSet(File file, String sep, boolean tree) throws IOException {
         Set set = (tree) ? (Set) new TreeSet() : (Set) new HashSet();
         byte[] b = read(file);
-        StringTokenizer st = new StringTokenizer(new String(b), sep);
+        StringTokenizer st = new StringTokenizer(new String(b, "UTF-8"), sep);
         while (st.hasMoreTokens()) {
             set.add(st.nextToken());
         }

@@ -52,6 +52,19 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
 
     private static final char[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     private static final char[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
+    private static final byte[] ahpla_standard = new byte[256];
+    private static final byte[] ahpla_enhanced = new byte[256];
+    
+    static {
+        for (int i = 0; i < 256; i++) {
+            ahpla_standard[i] = -1;
+            ahpla_enhanced[i] = -1;
+        }
+        for (int i = 0; i < alpha_standard.length; i++) {
+            ahpla_standard[alpha_standard[i]] = (byte) i;
+            ahpla_enhanced[alpha_enhanced[i]] = (byte) i;
+        }
+    }
     
     public static final kelondroBase64Order standardCoder = new kelondroBase64Order(true);
     public static final kelondroBase64Order enhancedCoder = new kelondroBase64Order(false);
@@ -59,15 +72,14 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
     final boolean rfc1113compliant;
 
     private final char[] alpha;
-    private final byte[] ahpla = new byte[256];
+    private final byte[] ahpla;
 
     public kelondroBase64Order(boolean rfc1113compliant) {
         // if we choose not to be rfc1113compliant,
         // then we get shorter base64 results which are also filename-compatible
         this.rfc1113compliant = rfc1113compliant;
         alpha = (rfc1113compliant) ? alpha_standard : alpha_enhanced;
-        for (int i = 0; i < 256; i++) ahpla[i] = -1;
-        for (int i = 0; i < alpha.length; i++) ahpla[alpha[i]] = (byte) i;
+        ahpla = (rfc1113compliant) ? ahpla_standard : ahpla_enhanced;
     }
 
     public char encodeByte(byte b) {
@@ -143,7 +155,8 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
 
     public String decodeString(String in) {
         try {
-            return new String(decode(in), "ISO-8859-1");
+            //return new String(decode(in), "ISO-8859-1");
+            return new String(decode(in), "UTF-8");
         } catch (java.io.UnsupportedEncodingException e) {
             System.out.println("internal error in base64: " + e.getMessage());
             return null;

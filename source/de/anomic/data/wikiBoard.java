@@ -149,7 +149,7 @@ public class wikiBoard {
         return author;
     }
 
-    public entry newEntry(String subject, String author, String ip, String reason, byte[] page) {
+    public entry newEntry(String subject, String author, String ip, String reason, byte[] page) throws IOException {
 	return new entry(normalize(subject), author, ip, reason, page);
     }
 
@@ -158,17 +158,17 @@ public class wikiBoard {
 	String key;
         Map record;
 
-	public entry(String subject, String author, String ip, String reason, byte[] page) {
+	public entry(String subject, String author, String ip, String reason, byte[] page) throws IOException {
 	    record = new HashMap();
 	    key = subject;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
 	    record.put("date", dateString());
 	    if ((author == null) || (author.length() == 0)) author = "anonymous";
-	    record.put("author", kelondroBase64Order.enhancedCoder.encode(author.getBytes()));
+	    record.put("author", kelondroBase64Order.enhancedCoder.encode(author.getBytes("UTF-8")));
 	    if ((ip == null) || (ip.length() == 0)) ip = "";
 	    record.put("ip", ip);
 	    if ((reason == null) || (reason.length() == 0)) reason = "";
-	    record.put("reason", kelondroBase64Order.enhancedCoder.encode(reason.getBytes()));
+	    record.put("reason", kelondroBase64Order.enhancedCoder.encode(reason.getBytes("UTF-8")));
 	    if (page == null)
 		record.put("page", "");
 	    else

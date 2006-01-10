@@ -201,21 +201,21 @@ public class plasmaSwitchboardQueue {
             this.referrerURL = null;
         }
 
-        public Entry(byte[][] row) {
-            long ims = (row[2] == null) ? 0 : kelondroBase64Order.enhancedCoder.decodeLong(new String(row[2]));
+        public Entry(byte[][] row) throws IOException {
+            long ims = (row[2] == null) ? 0 : kelondroBase64Order.enhancedCoder.decodeLong(new String(row[2], "UTF-8"));
             byte flags = (row[3] == null) ? 0 : row[3][0];
             try {
-                this.url = new URL(new String(row[0]));
+                this.url = new URL(new String(row[0], "UTF-8"));
             } catch (MalformedURLException e) {
                 this.url = null;
             }
-            this.referrerHash = (row[1] == null) ? null : new String(row[1]);
+            this.referrerHash = (row[1] == null) ? null : new String(row[1], "UTF-8");
             this.ifModifiedSince = (ims == 0) ? null : new Date(ims);
             this.flags = ((flags & 1) == 1) ? (byte) 1 : (byte) 0;
-            this.initiator = (row[4] == null) ? null : new String(row[4]);
-            this.depth = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(row[5]));
-            this.profileHandle = new String(row[6]);
-            this.anchorName = (row[7] == null) ? null : (new String(row[7])).trim();
+            this.initiator = (row[4] == null) ? null : new String(row[4], "UTF-8");
+            this.depth = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(row[5], "UTF-8"));
+            this.profileHandle = new String(row[6], "UTF-8");
+            this.anchorName = (row[7] == null) ? null : (new String(row[7], "UTF-8")).trim();
 
             this.profileEntry = null;
             this.responseHeader = null;

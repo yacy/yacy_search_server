@@ -130,11 +130,11 @@ public class odtParser extends AbstractParser implements Parser {
                         if (docShortTitle != null) {
                             docLongTitle = docShortTitle;
                         } else if (docContent.length <= 80) {
-                            docLongTitle = new String(docContent);
+                            docLongTitle = new String(docContent, "UTF-8");
                         } else {
                             byte[] title = new byte[80];
                             System.arraycopy(docContent, 0, title, 0, 80);
-                            docLongTitle = new String(title);
+                            docLongTitle = new String(title, "UTF-8");
                         }
                         docLongTitle.
                         replaceAll("\r\n"," ").

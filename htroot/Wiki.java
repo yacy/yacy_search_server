@@ -73,7 +73,7 @@ public class Wiki {
     }
 
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws IOException {
 	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
 	serverObjects prop = new serverObjects();
 	if (post == null) {
@@ -94,11 +94,15 @@ public class Wiki {
             }
         }
         
-	if (post.containsKey("submit")) {
-	    // store a new page
-            switchboard.wikiDB.write(switchboard.wikiDB.newEntry(pagename, author, ip,
-								 post.get("reason", "edit"),
-								 post.get("content", "").getBytes()));
+	    if (post.containsKey("submit")) {
+	        // store a new page
+	        byte[] content;
+	        try {
+	            content = post.get("content", "").getBytes("UTF-8");
+	        } catch (UnsupportedEncodingException e) {
+	            content = post.get("content", "").getBytes();
+	        }
+            switchboard.wikiDB.write(switchboard.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content));
             // create a news message
             HashMap map = new HashMap();
             map.put("page", pagename);
