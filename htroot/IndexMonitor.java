@@ -79,12 +79,14 @@ public class IndexMonitor {
             (post.containsKey("clearlist")) ||
             (post.containsKey("deleteentry"))) {
             String authorization = ((String) header.get("Authorization", "xxxxxx")).trim().substring(6);
-            if (authorization.length() == 0) {
+            if (authorization.length() != 0) {
+                if (! switchboard.userDB.hasAdminRight(authorization)){
+                    // force log-in (again, because wrong password was given)
+                    prop.put("AUTHENTICATE", "admin log-in");
+                    return prop;
+                }
+            }else{
                 // force log-in
-                prop.put("AUTHENTICATE", "admin log-in");
-                return prop;
-            }else if (switchboard.userDB.hasAdminRight(authorization)) {
-                // force log-in (again, because wrong password was given)
                 prop.put("AUTHENTICATE", "admin log-in");
                 return prop;
             }
