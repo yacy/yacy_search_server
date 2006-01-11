@@ -59,6 +59,8 @@ public abstract class kelondroAbstractOrder implements kelondroOrder {
             return compare((byte[]) a, (byte[]) b);
         } else if ((a instanceof Node) && (b instanceof Node)) {
             return compare(((Node) a).getKey(), ((Node) b).getKey());
+        } else if ((a instanceof String) && (b instanceof String)) {
+            return compare(((String) a).getBytes(), ((String) b).getBytes());
         } else
             throw new IllegalArgumentException("Object type or Object type combination not supported");
     }

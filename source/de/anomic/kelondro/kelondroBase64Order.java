@@ -66,18 +66,19 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         }
     }
     
-    public static final kelondroBase64Order standardCoder = new kelondroBase64Order(true);
-    public static final kelondroBase64Order enhancedCoder = new kelondroBase64Order(false);
+    public static final kelondroBase64Order standardCoder = new kelondroBase64Order(true, true);
+    public static final kelondroBase64Order enhancedCoder = new kelondroBase64Order(true, false);
 
-    final boolean rfc1113compliant;
-
+    private boolean rfc1113compliant;
+    private boolean asc;
     private final char[] alpha;
     private final byte[] ahpla;
 
-    public kelondroBase64Order(boolean rfc1113compliant) {
+    public kelondroBase64Order(boolean up, boolean rfc1113compliant) {
         // if we choose not to be rfc1113compliant,
         // then we get shorter base64 results which are also filename-compatible
         this.rfc1113compliant = rfc1113compliant;
+        this.asc = up;
         alpha = (rfc1113compliant) ? alpha_standard : alpha_enhanced;
         ahpla = (rfc1113compliant) ? ahpla_standard : ahpla_enhanced;
     }
@@ -221,10 +222,8 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         final int bl = b.length;
         final int len = (al > bl) ? bl : al;
         while (i < len) {
-            if (ahpla[a[i]] > ahpla[b[i]])
-                return 1;
-            if (ahpla[a[i]] < ahpla[b[i]])
-                return -1;
+            if (ahpla[a[i]] > ahpla[b[i]]) return (asc) ? 1 : -1;
+            if (ahpla[a[i]] < ahpla[b[i]]) return (asc) ? -1 : 1;
             // else the bytes are equal and it may go on yet undecided
             i++;
         }
@@ -232,14 +231,14 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         if ((i == al) && (i < bl) && (b[i] == 0)) return 0;
         if ((i == bl) && (i < al) && (a[i] == 0)) return 0;
         // no, decide by length
-        if (al > bl) return 1;
-        if (al < bl) return -1;
+        if (al > bl) return (asc) ? 1 : -1;
+        if (al < bl) return (asc) ? -1 : 1;
         // no, they are equal
         return 0;
     }
 
     public static void main(String[] s) {
-        kelondroBase64Order b64 = new kelondroBase64Order(true);
+        kelondroBase64Order b64 = new kelondroBase64Order(true, true);
         if (s.length == 0) {
             System.out.println("usage: -[ec|dc|es|ds|s2m] <arg>");
             System.exit(0);

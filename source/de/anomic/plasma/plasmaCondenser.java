@@ -64,6 +64,7 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroNaturalOrder;
 
 public final class plasmaCondenser {
 
@@ -142,7 +143,7 @@ public final class plasmaCondenser {
 
     private void createCondensement(InputStream is) {
 
-	words = new TreeMap(kelondroMSetTools.fastStringComparator);
+	words = new TreeMap(kelondroNaturalOrder.naturalOrder);
 	sentences = new HashMap();
 	HashSet currsentwords = new HashSet();
 	StringBuffer sentence = new StringBuffer(100);
@@ -405,7 +406,7 @@ public final class plasmaCondenser {
 	// we reconstruct the word hashtable
 	// and sort the entries by the number of occurrences
 	// this structure is needed to print out a sorted list of words
-	TreeMap sortedWords = new TreeMap(kelondroMSetTools.fastStringComparator);
+	TreeMap sortedWords = new TreeMap(kelondroNaturalOrder.naturalOrder);
 	it = words.entrySet().iterator(); // enumerates the keys in ascending order
 	while (it.hasNext()) {
 	    entry = (Map.Entry) it.next();

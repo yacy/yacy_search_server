@@ -53,7 +53,7 @@ import java.util.TreeSet;
 public class kelondroMSetTools {
 
     
-    public static Comparator fastStringComparator = fastStringComparator(true);
+    //public static Comparator fastStringComparator = fastStringComparator(true);
 
     // ------------------------------------------------------------------------------------------------
     // helper methods
@@ -324,38 +324,6 @@ public class kelondroMSetTools {
     
     // ------------------------------------------------------------------------------------------------
 
-    public static Comparator fastStringComparator(boolean ascending) {
-        return new stringComparator(ascending);
-    }
-    
-    private static class stringComparator implements Comparator {
-        // fast ordering
-	boolean asc = true;
-	public stringComparator(boolean ascending) {
-	    asc = ascending;
-	}
-	public int compare(Object o1, Object o2) {
-	    // returns o1<o2:-1 , o1=p2:0 , o1>o2:1
-	    int l1 = ((String) o1).length();
-	    int l2 = ((String) o2).length();
-	    if (l1 == l2) {
-		for (int i = 0; i < l1; i++) {
-		    if (((byte) ((String) o1).charAt(i)) < ((byte) ((String) o2).charAt(i))) return (asc) ? -1 :  1;
-		    if (((byte) ((String) o1).charAt(i)) > ((byte) ((String) o2).charAt(i))) return (asc) ?  1 : -1;
-		}
-		return 0;
-		//return ((String) o1).compareTo((String) o2);
-	    } else {
-		return l1 < l2 ? ((asc) ? -1 : 1) : ((asc) ? 1 : -1);
-	    }
-	}
-	public boolean equals(Object obj) {
-	    return false;
-	}
-    }
-    
-    // ------------------------------------------------------------------------------------------------
-
     public static TreeMap loadMap(String filename, String sep) {
         TreeMap map = new TreeMap();
         BufferedReader br = null;
@@ -375,8 +343,8 @@ public class kelondroMSetTools {
         return map;
     }
     
-    public static TreeSet loadList(File file) {
-        TreeSet list = new TreeSet(kelondroMSetTools.fastStringComparator);
+    public static TreeSet loadList(File file, Comparator c) {
+        TreeSet list = new TreeSet(c);
         if (!(file.exists())) return list;
         
         BufferedReader br = null;

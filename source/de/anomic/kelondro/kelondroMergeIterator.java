@@ -53,12 +53,12 @@ public class kelondroMergeIterator implements Iterator {
     String na, nb;
     boolean up;
     
-    public kelondroMergeIterator(Iterator a, Iterator b, boolean up) {
+    public kelondroMergeIterator(Iterator a, Iterator b, Comparator c, boolean up) {
         // this works currently only for String-type key iterations
         this.a = a;
         this.b = b;
         this.up = up;
-        this.comp = kelondroMSetTools.fastStringComparator(up);
+        this.comp = c;
         nexta();
         nextb();
     }
@@ -125,19 +125,19 @@ public class kelondroMergeIterator implements Iterator {
         throw new java.lang.UnsupportedOperationException("merge does not support remove");
     }
     
-    public static Iterator cascade(Set /*of*/ iterators, boolean up) {
+    public static Iterator cascade(Set /*of*/ iterators, Comparator c,boolean up) {
         // this extends the ability to combine two iterators
         // to the abiliy of combining a set of iterators
         if (iterators == null) return null;
         if (iterators.size() == 0) return null;
-        return cascade(iterators.iterator(), up);
+        return cascade(iterators.iterator(), c, up);
     }
     
-    private static Iterator cascade(Iterator /*of*/ iiterators, boolean up) {
+    private static Iterator cascade(Iterator /*of*/ iiterators, Comparator c, boolean up) {
         if (iiterators == null) return null;
         if (!(iiterators.hasNext())) return null;
         Iterator one = (Iterator) iiterators.next();
         if (!(iiterators.hasNext())) return one;
-        return new kelondroMergeIterator(one, cascade(iiterators, up), up);
+        return new kelondroMergeIterator(one, cascade(iiterators, c, up), c, up);
     }
 }

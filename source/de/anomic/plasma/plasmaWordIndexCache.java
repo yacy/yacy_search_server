@@ -53,6 +53,7 @@ import de.anomic.kelondro.kelondroArray;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMergeIterator;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -267,8 +268,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                         new kelondroMergeIterator(
                                  cache.tailMap(startWordHash).keySet().iterator(),
                                  assortmentCluster.hashConjunction(startWordHash, true),
+                                 kelondroNaturalOrder.naturalOrder,
                                  true),
                         backend.wordHashes(startWordHash, true),
+                        kelondroNaturalOrder.naturalOrder,
                         true);
     }
 

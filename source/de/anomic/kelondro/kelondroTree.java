@@ -75,7 +75,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     private static int root       = 0; // pointer for FHandles-array: pointer to root node
 
     private Search writeSearchObj = new Search();
-    private kelondroOrder objectOrder = new kelondroNaturalOrder();
+    private kelondroOrder objectOrder = new kelondroNaturalOrder(true);
     
     public kelondroTree(File file, long buffersize, int key, int value, boolean exitOnFail) {
         this(file, buffersize, new int[] { key, value }, 1, 8, exitOnFail);

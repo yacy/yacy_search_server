@@ -77,6 +77,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
 import de.anomic.plasma.plasmaWordIndexCache;
 import de.anomic.plasma.plasmaWordIndexClassicDB;
@@ -1281,6 +1282,11 @@ public final class yacy {
             if (resource.equals("assortments")) {
                 plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, log);
                 WordHashIterator = assortmentCluster.hashConjunction(wordChunkStartHash, true);
+            }
+            if (resource.startsWith("assortment")) {
+                int a = Integer.parseInt(resource.substring(10));
+                plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 8*1024*1024, null);
+                WordHashIterator = assortment.hashes(wordChunkStartHash, true, false);
             }
             if (resource.equals("words")) {
                 plasmaWordIndexClassicDB fileDB = new plasmaWordIndexClassicDB(homeDBroot, log);

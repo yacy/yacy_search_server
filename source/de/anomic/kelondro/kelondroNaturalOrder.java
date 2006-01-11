@@ -49,7 +49,12 @@ import java.util.Comparator;
 
 public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelondroOrder, Comparator {
     
-    public kelondroNaturalOrder() {
+    boolean asc;
+    
+    public static final Comparator naturalOrder = new kelondroNaturalOrder(true);
+    
+    public kelondroNaturalOrder(boolean ascending) {
+        this.asc = ascending;
     }
     
     public long cardinal(byte[] key) {
@@ -68,7 +73,7 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
     // two arrays are also equal if one array is a subset of the other's array
     // with filled-up char(0)-values
     public int compare(byte[] a, byte[] b) {
-        return compares(a, b);
+        return (asc) ? compares(a, b) : compares(b, a);
     }
 
     public static final int compares(byte[] a, byte[] b) {
@@ -98,7 +103,7 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         byte[] t = new byte[12];
         for (int i = 0; i < 12; i++) t[i] = (byte) 255;
         t[0] = (byte) 127;
-        kelondroOrder o = new kelondroNaturalOrder();
+        kelondroOrder o = new kelondroNaturalOrder(true);
         System.out.println(o.partition(t, 16));
     }
     

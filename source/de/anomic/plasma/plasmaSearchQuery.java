@@ -48,6 +48,7 @@ import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverByteBuffer;
 
 public final class plasmaSearchQuery {
@@ -132,7 +133,7 @@ public final class plasmaSearchQuery {
         }
         
         // the string is clean now, but we must generate a set out of it
-        final TreeSet query = new TreeSet(kelondroMSetTools.fastStringComparator);
+        final TreeSet query = new TreeSet(kelondroNaturalOrder.naturalOrder);
         if (words.length() == 0) return query; // split returns always one element
         final String[] a = words.split(" ");
         for (int i = 0; i < a.length; i++) { query.add(a[i]); }

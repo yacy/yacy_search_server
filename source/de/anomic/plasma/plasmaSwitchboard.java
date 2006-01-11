@@ -130,6 +130,7 @@ import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroTables;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
@@ -260,7 +261,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // read only once upon first instantiation of this class
             String f = getConfig("plasmaBlueList", null);
             File plasmaBlueListFile = new File(f);
-            if (f != null) blueList = kelondroMSetTools.loadList(plasmaBlueListFile); else blueList= new TreeSet();
+            if (f != null) blueList = kelondroMSetTools.loadList(plasmaBlueListFile, kelondroNaturalOrder.naturalOrder); else blueList= new TreeSet();
             this.log.logConfig("loaded blue-list from file " + plasmaBlueListFile.getName() + ", " +
             blueList.size() + " entries, " +
             ppRamString(plasmaBlueListFile.length()/1024));
@@ -280,7 +281,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // load stopwords
         if (stopwords == null) {
             File stopwordsFile = new File(rootPath, "yacy.stopwords");
-            stopwords = kelondroMSetTools.loadList(stopwordsFile);
+            stopwords = kelondroMSetTools.loadList(stopwordsFile, kelondroNaturalOrder.naturalOrder);
             this.log.logConfig("loaded stopwords from file " + stopwordsFile.getName() + ", " +
             stopwords.size() + " entries, " +
             ppRamString(stopwordsFile.length()/1024));

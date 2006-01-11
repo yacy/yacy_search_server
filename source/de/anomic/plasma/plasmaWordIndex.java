@@ -59,6 +59,7 @@ import java.net.URL;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -279,7 +280,8 @@ public final class plasmaWordIndex {
 
         public iterateFiles(String startHash, boolean up, boolean deleteEmpty) {
             this.hierarchy = new ArrayList();
-            this.comp = kelondroMSetTools.fastStringComparator(up);
+            this.comp = kelondroNaturalOrder.naturalOrder; // this is the wrong ordering but mut be used as long as the assortments uses the same ordering
+            //this.comp = new kelondroBase64Order(up, false);
             this.delete = deleteEmpty;
 
             // the we initially fill the hierarchy with the content of the root folder

@@ -50,6 +50,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.server.logging.serverLog;
@@ -216,7 +217,7 @@ public final class plasmaWordIndexAssortmentCluster {
     public Iterator hashConjunction(String startWordHash, boolean up) {
         HashSet iterators = new HashSet();
         for (int i = 0; i < clusterCount; i++) iterators.add(assortments[i].hashes(startWordHash, up, true));
-        return kelondroMergeIterator.cascade(iterators, up);
+        return kelondroMergeIterator.cascade(iterators, kelondroNaturalOrder.naturalOrder, up);
     }
 
     public int sizeTotal() {

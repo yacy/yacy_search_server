@@ -50,6 +50,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -83,7 +84,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         
         public iterateFiles(String startHash, boolean up) {
             this.hierarchy = new ArrayList();
-            this.comp = kelondroMSetTools.fastStringComparator(up);
+            this.comp = new kelondroNaturalOrder(up);
             
             // the we initially fill the hierarchy with the content of the root folder
             String path = "WORDS";
