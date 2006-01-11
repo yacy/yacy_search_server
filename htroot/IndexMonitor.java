@@ -78,7 +78,7 @@ public class IndexMonitor {
         if (((process > 0) && (process < 6)) ||
             (post.containsKey("clearlist")) ||
             (post.containsKey("deleteentry"))) {
-            String authorization = ((String) header.get("Authorization", "xxxxxx")).trim().substring(6);
+            String authorization = ((String) header.get("Authorization", "xxxxxx"));
             if (authorization.length() != 0) {
                 if (! switchboard.userDB.hasAdminRight(authorization)){
                     // force log-in (again, because wrong password was given)
