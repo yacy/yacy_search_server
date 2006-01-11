@@ -815,8 +815,10 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	
         Iterator ii;
         Node nextNode;
+        boolean asc;
         
         public correctedNodeIterator(boolean up, boolean rotating, Node start, byte[] firstKey) throws IOException {
+            asc = up;
             ii = new nodeIterator(up, rotating, start);
             nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
             if (nextNode != null) {
@@ -837,13 +839,14 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             nextNode = null;
         }
             
-	public boolean hasNext() {
+        public boolean hasNext() {
             return nextNode != null;
-	}
+        }
 
         public Object next() {
             Node r = nextNode;
             nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
+            if ((nextNode != null) && (asc == (objectOrder.compare(r, nextNode) == 1))) nextNode = null; // correct wrong order (this should not happen)
             return r;
         }
         
