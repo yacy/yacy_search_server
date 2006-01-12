@@ -103,7 +103,7 @@ For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in de
 YaCy \'\#\[clientname\]\#\': Connection Tracking==YaCy '#[clientname]#': Verbindungsstatus
 Connection Tracking==Verbindungsstatus
 Incoming Connections==Eingehende Verbindungen
-Showing \#\[numActiveRunning\]\# active connections, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive Verbindungen, #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt..
+Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt..
 Protocol==Protokoll
 Duration==Dauer
 Source IP\[:Port\]==Quell IP[:Port]
@@ -556,7 +556,7 @@ above which also will show you a table with indexing results so far. The informa
 so you need to log-in with your administration password.==also m&uuml;ssen Sie sich mit Ihrem Administrator Passwort einloggen, um sie zu sehen.
 Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==Fall (6) ist ein Monitor des lokalen Empfangs-Generator, der Gegensatz zu (1). Er enth&auml;lt ausserdem einen Index Resulate Monitor, ist aber nicht privat,
 since it shows crawl requests from other peers.==da er Crawl Anfragen von anderen Peers zeigt.
-The image above illustrates the data flow initiated by web index acquisition.==Das obige Bild zeigt den Daten Fluss, der durch Internet Index Erwerbung entsteht.
+The image above illustrates the data flow initiated by web index acquisition.==Das obige Bild zeigt den Datenfluss, der durch die Index Erwerbung &uuml;ber das Internet entsteht.
 Some processes occur double to document the complex index migration structure.==Einige Prozesse erscheinen doppelt, um die Komplexizit&auml;t der Index Verteilungs Struktur zu erkl&auml;ren.
 \(1\) Index Monitor of Remote Crawl Receipts==(1) Index Monitor f&uuml;r Remote Crawl R&uuml;ckmeldungen
 This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
