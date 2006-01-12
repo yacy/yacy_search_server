@@ -52,6 +52,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Hashtable;
 
@@ -397,18 +398,26 @@ public final class httpTemplate {
         }
     }
 
-    public static byte[] replacePattern(String key, Hashtable pattern, byte dflt[]){
-	byte[] replacement;
+    public static byte[] replacePattern(String key, Hashtable pattern, byte dflt[]) {
+        byte[] replacement;
         Object value;
-	if (pattern.containsKey(key)) {
-	    value = pattern.get(key);
-	    if (value instanceof byte[]) replacement = (byte[]) value;
-	    else if (value instanceof String) replacement = ((String) value).getBytes();
-    	    else replacement = value.toString().getBytes();
+        if (pattern.containsKey(key)) {
+            value = pattern.get(key);
+            try {
+                if (value instanceof byte[]) {
+                    replacement = (byte[]) value;
+                } else if (value instanceof String) {
+                    replacement = ((String) value).getBytes("UTF-8");
+                } else {
+                    replacement = value.toString().getBytes("UTF-8");
+                }
+            } catch (UnsupportedEncodingException e) {
+                replacement = dflt;
+            }
         } else {
-	    replacement = dflt;
+            replacement = dflt;
         }
-	return replacement;
+        return replacement;
     }
 
     public static void main(String[] args) {
