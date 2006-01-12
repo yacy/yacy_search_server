@@ -316,7 +316,7 @@ public final class plasmaCrawlStacker {
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
-            this.log.logFine("Crawling of URL '" + nexturlString + "' disallowed by robots.txt." +
+            this.log.logFine("Crawling of URL '" + nexturlString + "' disallowed by robots.txt. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;            
         }

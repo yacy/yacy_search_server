@@ -44,8 +44,8 @@
   <status>#[comment]#</status>
   <!--
   0 - nothing
-  1 - online Mode, but no Internet availible
-  2 - not in online Mode
+  1 - online mode, but no Internet available
+  2 - not in online mode
   -->
 </peers>
 #(/table)#

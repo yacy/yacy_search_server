@@ -418,7 +418,7 @@ public final class plasmaCrawlWorker extends Thread {
                         redirectionUrlString = redirectionUrlString.trim();
 
                         if (redirectionUrlString.length() == 0) {
-                            log.logWarning("CRAWLER Recirection of URL=" + url.toString() + " aborted. Location header is empty.");
+                            log.logWarning("CRAWLER Redirection of URL=" + url.toString() + " aborted. Location header is empty.");
                             return;
                         }
                         

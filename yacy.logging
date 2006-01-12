@@ -5,7 +5,7 @@
 # setting logging levels vor individual classes
 # possible values are:
 # OFF     no output at all
-# SEVERE  system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
+# SEVERE  system-level error, internal cause, critical and not fixable (i.e. inconsistency)
 # WARNING uncritical service failure, may require user activity (i.e. input required, wrong authorization)
 # INFO    regular action information (i.e. any httpd request URL)
 # CONFIG  regular system status information (i.e. start-up messages)
