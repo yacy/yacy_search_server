@@ -222,6 +222,7 @@ public final class httpHeader extends TreeMap implements Map {
 
     private final HashMap reverseMappingCache;
 
+    
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
     static {
 	insensitiveCollator.setStrength(Collator.SECONDARY);
@@ -238,14 +239,14 @@ public final class httpHeader extends TreeMap implements Map {
 	// 'proper' appearance, a translation cache is needed.
 	// upon instantiation, such a mapping cache can be handed over
 	// If the reverseMappingCache is null, none is used
-	super(insensitiveCollator);
+	super((Collator) insensitiveCollator.clone());
 	this.reverseMappingCache = reverseMappingCache;
     }
 
     public httpHeader(HashMap reverseMappingCache, File f) throws IOException {
 	// creates also a case insensitive map and loads it initially
 	// with some values
-	super(insensitiveCollator);
+	super((Collator) insensitiveCollator.clone());
 	this.reverseMappingCache = reverseMappingCache;
 
 	// load with data
@@ -261,7 +262,7 @@ public final class httpHeader extends TreeMap implements Map {
 
     public httpHeader(HashMap reverseMappingCache, Map othermap)  {
 	// creates a case insensitive map from another map
-	super(insensitiveCollator);
+	super((Collator) insensitiveCollator.clone());
 	this.reverseMappingCache = reverseMappingCache;
 
 	// load with data
