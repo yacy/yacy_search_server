@@ -152,7 +152,7 @@ public class rssParser extends AbstractParser implements Parser {
                         OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                         serverFileUtils.copy(new ByteArrayInputStream(itemContent.getBytes()), os);
                         
-                        String itemHeadline = scraper.getHeadline();     
+                        String itemHeadline = scraper.getTitle();     
                         if ((itemHeadline != null) && (itemHeadline.length() > 0)) {
                             feedSections.add(itemHeadline);
                         }

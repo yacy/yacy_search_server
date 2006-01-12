@@ -543,9 +543,12 @@ public final class plasmaParser {
     
     public plasmaParserDocument transformScraper(URL location, String mimeType, htmlFilterContentScraper scraper) {
         try {
+            String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
+            int p = 0;
+            for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
             plasmaParserDocument ppd =  new plasmaParserDocument(new URL(htmlFilterContentScraper.urlNormalform(location)),
-                                mimeType, null, null, scraper.getHeadline(),
-                                null, null,
+                                mimeType, null, null, scraper.getTitle(),
+                                sections, null,
                                 scraper.getText(), scraper.getAnchors(), scraper.getImages());
             //scraper.close();
             return ppd;

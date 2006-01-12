@@ -115,7 +115,8 @@ public class CacheAdmin_p {
                     final OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                     serverFileUtils.copy(file, os);
                     final plasmaParserDocument document = switchboard.parser.transformScraper(url, "text/html", scraper);
-                    info.append("<b>HEADLINE:</b><br>").append(scraper.getHeadline()).append("<br>").append("<br>")
+                    info.append("<b>TITLE:</b><br>").append(scraper.getTitle()).append("<br>").append("<br>")
+                        .append("<b>SECTION HEADLINES:</b><br>").append(formatTitles(document.getSectionTitles())).append("<br>")
                         .append("<b>HREF:</b><br>").append(formatAnchor(document.getHyperlinks())).append("<br>")
                         .append("<b>MEDIA:</b><br>").append(formatAnchor(document.getMedialinks())).append("<br>")
                         .append("<b>EMAIL:</b><br>").append(formatAnchor(document.getEmaillinks())).append("<br>")
@@ -187,10 +188,20 @@ public class CacheAdmin_p {
         return prop;
     }
 
+    private static String formatTitles(String[] titles) {
+        StringBuffer s = new StringBuffer();
+        s.append("<ul>");
+        for (int i = 0; i < titles.length; i++) {
+            s.append("<li>").append(titles[i]).append("</li>");
+        }
+        s.append("</ul>");
+        return new String(s);
+    }
+    
     private static String formatHeader(httpHeader header) {
         final StringBuffer result = new StringBuffer(2048);
         if (header == null) {
-            result.append("- no header in header cache -");
+            result.append("- no header in header cache -<br>");
         } else {
             result.append("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">");
             final Iterator iter = header.entrySet().iterator();

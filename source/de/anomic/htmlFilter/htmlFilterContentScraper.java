@@ -46,7 +46,9 @@ package de.anomic.htmlFilter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -77,6 +79,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         linkTags1 = new TreeSet(insensitiveCollator);
         linkTags1.add("a");
         linkTags1.add("h1");
+        linkTags1.add("h2");
+        linkTags1.add("h3");
+        linkTags1.add("h4");
         linkTags1.add("title");
     }
 
@@ -84,7 +89,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     private HashMap anchors;
     private HashMap images;
     private String title;
-    private String headline;
+    //private String headline;
+    private List[] headlines;
     private serverByteBuffer content;
     private URL root;
 
@@ -96,7 +102,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         this.anchors = new HashMap();
         this.images = new HashMap();
         this.title = "";
-        this.headline = "";
+        this.headlines = new ArrayList[4];
+        for (int i = 0; i < 4; i++) headlines[i] = new ArrayList();
         this.content = new serverByteBuffer(1024);
     }
 
@@ -204,29 +211,61 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
 //      System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
         if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) anchors.put(absolutePath(tagopts.getProperty("href", "")), super.stripAll(new serverByteBuffer(text)).trim().toString());
-        if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) headline = super.stripAll(new serverByteBuffer(text)).toString();
-        if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) title = super.stripAll(new serverByteBuffer(text)).toString();        
+        String h;
+        if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            if (h.length() > 0) headlines[0].add(h);
+        }
+        if ((tagname.equalsIgnoreCase("h2")) && (text.length < 1024)) {
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            if (h.length() > 0) headlines[1].add(h);
+        }
+        if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            if (h.length() > 0) headlines[2].add(h);
+        }
+        if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            if (h.length() > 0) headlines[3].add(h);
+        }
+        if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) title = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());        
     }
 
-    public String getHeadline() {
-        String hl = "";
+    private static String cleanLine(String s) {
+        // may contain too many funny symbols
+        for (int i = 0; i < s.length(); i++)
+            if (s.charAt(i) < ' ') s = s.substring(0, i) + " " + s.substring(i + 1);
 
-        // extract headline from content
-        if (title.length() > 0) hl = title.trim();
-        else if (headline.length() > 0) hl = headline.trim();
-        else if (content.length() > 80) hl = new String(content.getBytes(), 0, 80).trim();
-        else hl = content.trim().toString();
-
-        // clean the line: may contain too many funny symbols
-        for (int i = 0; i < hl.length(); i++)
-            if (hl.charAt(i) < ' ') hl = hl.substring(0, i) + " " + hl.substring(i + 1);
-
-        // clean the line: remove double-spaces
+        // remove double-spaces
         int p;
-        while ((p = hl.indexOf("  ")) >= 0) hl = hl.substring(0, p) + hl.substring(p + 1);        
+        while ((p = s.indexOf("  ")) >= 0) s = s.substring(0, p) + s.substring(p + 1);        
 
+        // we don't accept headlines that are too short
+        s = s.trim();
+        if (s.length() < 4) s = "";
+        
         // return result
-        return hl.trim();
+        return s;
+    }
+    
+    public String getTitle() {
+        // construct a title string, even if the document has no title
+        // if there is one, return it
+        if (title.length() > 0) return title;
+        // othervise take any headline
+        for (int i = 0; i < 4; i++) {
+            if (headlines[i].size() > 0) return (String) headlines[i].get(0);
+        }
+        // extract headline from content
+        if (content.length() > 80) return cleanLine(new String(content.getBytes(), 0, 80));
+        return cleanLine(content.trim().toString());
+    }
+    
+    public String[] getHeadlines(int i) {
+        assert ((i >= 1) && (i <= 4));
+        String[] s = new String[headlines[i - 1].size()];
+        for (int j = 0; j < headlines[i - 1].size(); j++) s[j] = (String) headlines[i - 1].get(j);
+        return s;
     }
 
     public byte[] getText() {
@@ -247,17 +286,19 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         anchors = null;
         images = null;
         title = null;
-        headline = null;
+        headlines = null;
         content = null;
         root = null;
     }
 
     public void print() {
-    System.out.println("TITLE   :" + title);
-    System.out.println("HEADLINE:" + headline);
-    System.out.println("ANCHORS :" + anchors.toString());
-    System.out.println("IMAGES  :" + images.toString());
-    System.out.println("TEXT    :" + new String(content.getBytes()));
+        System.out.println("TITLE    :" + title);
+        for (int i = 0; i < 4; i++) {
+            System.out.println("HEADLINE" + i + ":" + headlines[i].toString());
+        }
+        System.out.println("ANCHORS  :" + anchors.toString());
+        System.out.println("IMAGES   :" + images.toString());
+        System.out.println("TEXT     :" + new String(content.getBytes()));
     }
 
 /*
