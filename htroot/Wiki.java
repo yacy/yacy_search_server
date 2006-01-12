@@ -123,7 +123,7 @@ public class Wiki {
 			 "<form action=\"Wiki.html\" method=\"post\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\">" +
 			 //"<form action=\"Wiki.html\" method=\"post\" enctype=\"application/x-www-form-urlencoded\">" +
 			 "<p>Author:<br><input name=\"author\" type=\"text\" size=\"80\" maxlength=\"80\" value=\"" + author + "\"></p>" +
-			 "<p>Text:<br><textarea name=\"content\" cols=\"80\" rows=\"24\">" + new String(page.page(), "ISO-8859-1") + "</textarea></p>" +
+			 "<p>Text:<br><textarea name=\"content\" cols=\"80\" rows=\"24\">" + new String(page.page(), "UTF-8") + "</textarea></p>" +
 			 "<input type=\"hidden\" name=\"page\" value=\"" + pagename + "\">" +
 			 "<input type=\"hidden\" name=\"reason\" value=\"edit\">" +
 			 "<input type=\"submit\" name=\"submit\" value=\"Submit\">" +
