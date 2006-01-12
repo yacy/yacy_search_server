@@ -80,7 +80,7 @@ public class IndexMonitor {
             (post.containsKey("deleteentry"))) {
             String authorization = ((String) header.get("Authorization", "xxxxxx"));
             if (authorization.length() != 0) {
-                if (! switchboard.userDB.hasAdminRight(authorization)){
+                if (! switchboard.verifyAuthentication(header, true)){
                     // force log-in (again, because wrong password was given)
                     prop.put("AUTHENTICATE", "admin log-in");
                     return prop;
