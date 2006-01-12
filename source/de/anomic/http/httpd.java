@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -745,19 +746,25 @@ public final class httpd implements serverHandler {
         // we replace all "+" by spaces
         // and resolve %-escapes with two-digit hex attributes
         int pos = 0;
-        StringBuffer result = new StringBuffer(s.length());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(s.length());
         while (pos < s.length()) {
             if (s.charAt(pos) == '+') {
-                result.append(" "); 
+                baos.write(' ');
                 pos++;
             } else if (s.charAt(pos) == '%') {
-                result.append((char) Integer.parseInt(s.substring(pos + 1, pos + 3), 16));
+                baos.write(Integer.parseInt(s.substring(pos + 1, pos + 3), 16));
                 pos += 3;
             } else {
-                result.append(s.charAt(pos++));
+                baos.write(s.charAt(pos++));
             }
         }
-        return result.toString();
+        String result;
+        try {
+            result = new String(baos.toByteArray(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+        return result;
     }
     
     
@@ -807,7 +814,7 @@ public final class httpd implements serverHandler {
         byte[] line = readLine(0, buffer);
         int pos = nextPos;
         if ((line == null) || (!(equals(line, 0, boundary, 0, boundary.length))))
-            throw new IOException("boundary not recognized: " + ((line == null) ? "NULL" : new String(line)) + ", boundary = " + new String(boundary));
+            throw new IOException("boundary not recognized: " + ((line == null) ? "NULL" : new String(line, "UTF-8")) + ", boundary = " + new String(boundary));
         
         // we need some constants
         byte[] namec = (new String("name=")).getBytes();
@@ -828,10 +835,10 @@ public final class httpd implements serverHandler {
             if (line.length == 0) break;
             // find name tag in line
             p = indexOf(0, line, namec);
-            if (p < 0) throw new IOException("tag name in marker section not found: '" + new String(line) + "'"); // a name tag must always occur
+            if (p < 0) throw new IOException("tag name in marker section not found: '" + new String(line, "UTF-8") + "'"); // a name tag must always occur
             p += namec.length + 1; // first position of name value
             q = indexOf(p, line, quotec);
-            if (q < 0) throw new IOException("missing quote in name tag: '" + new String(line) + "'");
+            if (q < 0) throw new IOException("missing quote in name tag: '" + new String(line, "UTF-8") + "'");
             name = new byte[q - p];
             java.lang.System.arraycopy(line, p, name, 0, q - p);
             // if this line has also a filename attribute, read it
@@ -873,13 +880,13 @@ public final class httpd implements serverHandler {
             java.lang.System.arraycopy(buffer, pos, line, 0, q - pos);
             // in the 'line' variable we have now either a normal value or an uploadef file
             if (filename == null) {
-                args.put(new String(name), new String(line, "ISO-8859-1"));
+                args.put(new String(name, "UTF-8"), new String(line, "UTF-8"));
             } else {
                 // we store the file in a hashtable.
                 // we use the same key to address the file in the hashtable as we
                 // use to address the filename in the properties, but without leading '&'
-                args.put(new String(name), new String(filename));
-                files.put(new String(name), line);
+                args.put(new String(name, "UTF-8"), new String(filename, "UTF-8"));
+                files.put(new String(name, "UTF-8"), line);
             }
             argc++;
             // finally, read the next boundary line
