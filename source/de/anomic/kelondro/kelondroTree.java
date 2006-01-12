@@ -816,18 +816,10 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         Iterator ii;
         Node nextNode;
         boolean asc, rot;
-        Node start;
-        byte[] firstKey;
-        
+
         public correctedNodeIterator(boolean up, boolean rotating, Node start, byte[] firstKey) throws IOException {
-            asc = up;
-            rot = rotating;
-            this.start = start;
-            this.firstKey = firstKey;
-            init();
-        }
-        
-        private void init() throws IOException {
+            this.asc = up;
+            this.rot = rotating;
             ii = new nodeIterator(asc, rot, start);
             nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
             if (nextNode != null) {
@@ -859,7 +851,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 // correct wrong order (this should not happen)
                 if (rot) {
                     try {
-                        init();
+                        ii = new nodeIterator(asc, rot);
                     } catch (IOException e) {
                         nextNode = null;
                     }
@@ -872,7 +864,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         
         public void remove() {
             throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro Tables not yet supported");
-	}
+        }
     }
     
     private class nodeIterator implements Iterator {
