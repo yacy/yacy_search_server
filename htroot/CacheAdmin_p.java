@@ -49,8 +49,6 @@
 import java.io.File;
 import java.io.OutputStream;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -68,85 +66,54 @@ import de.anomic.server.serverSwitch;
 
 public class CacheAdmin_p {
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        public static String dateString(final Date date) {
-        return SimpleFormatter.format(date);
-    }
-
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
 
         final String action = ((post == null) ? "info" : post.get("action", "info"));
         String pathString = ((post == null) ? "" : post.get("path", "/"));
-        while (pathString.startsWith("//")) { // where is the BUG ?
-            pathString = pathString.substring(1);
-        }
-        final String fileString = pathString;
+//      String pathString = ((post == null) ? "" : post.get("path", "/").replaceAll("//", "/")); // where is the BUG ?
 
-        File       dir;
-        final File file = new File(switchboard.htCachePath, pathString);
-        final URL  url  = plasmaHTCache.getURL(switchboard.htCachePath, file);
-
-        if (file.isDirectory()) {
-            dir = file;
-        } else {
-            dir = file.getParentFile();
-            pathString = (new File(pathString)).getParent().replace('\\','/');
-        }
-
-        // generate sorted dir/file listing
-        final String[] list = dir.list();
-        final StringBuffer tree  = new StringBuffer((list == null) ? 70 : (list.length + 2) * 256);
-        tree.append("Directory of<br>").append((pathString.length() == 0) ? "domain list" : linkPathString(pathString)).append("<br><br>");
-        if (list == null) {
-            tree.append("[empty]");
-        } else {
-            final TreeSet dList = new TreeSet();
-            final TreeSet fList = new TreeSet();
-            File object;
-            int size = list.length - 1;
-            for (int i = size; i >= 0 ; i--) { // Rueckwaerts ist schneller
-                object = new File(dir, list[i]);
-                if (!object.getName().equalsIgnoreCase("responseHeader.db")) {
-                    if (object.isDirectory()) {
-                        dList.add(list[i]);
-                    } else {
-                        fList.add(list[i]);
-                    }
-                }
+        // don't left the htCachePath
+        File file = new File(switchboard.htCachePath, pathString);
+        try {
+            if (!file.getCanonicalPath().startsWith(switchboard.htCachePath.getCanonicalPath())) {
+                pathString = "/";
+                file = new File(switchboard.htCachePath, pathString);
             }
-            Iterator iter = dList.iterator();
-            String str;
-            while (iter.hasNext()) {
-                str = iter.next().toString();
-                tree.append("<img src=\"/env/grafics/folderIconSmall.gif\" align=\"top\" alt=\"Folder\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=").append(pathString).append("/").append(str).append("\" class=\"tt\">").append(str).append("</a><br>").append(serverCore.crlfString);
-            } 
-            iter = fList.iterator();
-            while (iter.hasNext()) {
-                str = iter.next().toString();
-                tree.append("<img src=\"/env/grafics/fileIconSmall.gif\" align=\"top\" alt=\"File\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=").append(pathString).append("/").append(str).append("\" class=\"tt\">").append(str).append("</a><br>").append(serverCore.crlfString);
-            }
+        } catch (Exception e) {
+            pathString = "/";
+            file = new File(switchboard.htCachePath, pathString);
         }
 
+        final StringBuffer path = new StringBuffer(256);
+        final StringBuffer tree = new StringBuffer();
         final StringBuffer info = new StringBuffer();
+
+        final URL  url  = plasmaHTCache.getURL(switchboard.htCachePath, file);
+        
+        String urlstr = "";
         if (action.equals("info") && !file.isDirectory()) {
+            prop.put("info", 0);
+            path.append((pathString.length() == 0) ? linkPathString("/", true) : linkPathString(pathString, false));
+
+            urlstr = htmlFilterContentScraper.urlNormalform(url);
+            prop.put("info_url", urlstr);
+
             info.ensureCapacity(40000);
-            final String urls = htmlFilterContentScraper.urlNormalform(url);
-            info.append("<b>Info for URL <a href=\"").append(urls).append("\">").append(urls).append("</a></b><br><br>");
             try {
                 final httpHeader fileheader = switchboard.cacheManager.getCachedResponse(plasmaURL.urlHash(url));
                 info.append("<b>HTTP Header:</b><br>").append(formatHeader(fileheader)).append("<br>");
                 final String ff = file.toString();
                 final int dotpos = ff.lastIndexOf('.');
                 final String ext = (dotpos >= 0) ? ff.substring(dotpos + 1).toLowerCase() : "";
-                if (ext.equals("gif") || ext.equals("jpg") || ext.equals("jpeg") || ext.equals("png")) {
-                    info.append("<img src=\"" + "CacheResource_p.html?path=").append(fileString).append("\">");
+                if (ext.equals("gif") || ext.equals("jpg") ||
+                    ext.equals("png") || ext.equals("jpeg")) {
+                    info.append("<img src=\"" + "CacheResource_p.html?path=").append(pathString).append("\">");
                 } else {
                     final htmlFilterContentScraper scraper = new htmlFilterContentScraper(url);
                     final OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                     serverFileUtils.copy(file, os);
-//                  os.flush();
                     final plasmaParserDocument document = switchboard.parser.transformScraper(url, "text/html", scraper);
                     info.append("<b>HEADLINE:</b><br>").append(scraper.getHeadline()).append("<br>").append("<br>")
                         .append("<b>HREF:</b><br>").append(formatAnchor(document.getHyperlinks())).append("<br>")
@@ -161,16 +128,61 @@ public class CacheAdmin_p {
                     info.append("</span><br>");
                 }
             } catch (Exception e) {
-                info.append("- This file is not cached -");
+                info.append("- This file is not cached -<br><br>");
                 info.append(e.toString());
                 e.printStackTrace();
-            }           
+            }
+        } else {
+            prop.put("info", 1);
+
+            File dir;
+            if (file.isDirectory()) {
+                dir = file;
+            } else {
+                dir = file.getParentFile();
+                pathString = (new File(pathString)).getParent().replace('\\','/');
+            }
+
+            // generate sorted dir/file listing
+            final String[] list = dir.list();
+            tree.ensureCapacity((list == null) ? 70 : (list.length + 1) * 256);
+            path.append((pathString.length() == 0) ? linkPathString("/", true) : linkPathString(pathString, true));
+            if (list == null) {
+                tree.append("[empty]");
+            } else {
+                final TreeSet dList = new TreeSet();
+                final TreeSet fList = new TreeSet();
+                File object;
+                int size = list.length - 1;
+                for (int i = size; i >= 0 ; i--) { // Rueckwaerts ist schneller
+                    object = new File(dir, list[i]);
+                    if (!object.getName().equalsIgnoreCase("responseHeader.db")) {
+                        if (object.isDirectory()) {
+                            dList.add(list[i]);
+                        } else {
+                            fList.add(list[i]);
+                        }
+                    }
+                }
+                Iterator iter = dList.iterator();
+                String str;
+                while (iter.hasNext()) {
+                    str = iter.next().toString();
+                    tree.append("<img src=\"/env/grafics/folderIconSmall.gif\" align=\"top\" alt=\"Folder\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=").append(pathString).append("/").append(str).append("\" class=\"tt\"><bobr>").append(str).append("</bobr></a><br>").append(serverCore.crlfString);
+                } 
+                iter = fList.iterator();
+                while (iter.hasNext()) {
+                    str = iter.next().toString();
+                    tree.append("<img src=\"/env/grafics/fileIconSmall.gif\" align=\"top\" alt=\"File\">&nbsp;<a href=\"CacheAdmin_p.html?action=info&path=").append(pathString).append("/").append(str).append("\" class=\"tt\"><bobr>").append(str).append("</bobr></a><br>").append(serverCore.crlfString);
+                }
+            }
         }
 
         prop.put("cachesize", Long.toString(switchboard.cacheManager.currCacheSize/1024));
         prop.put("cachemax", Long.toString(switchboard.cacheManager.maxCacheSize/1024));
-        prop.put("tree", tree.toString());
-        prop.put("info", info.toString());
+        prop.put("path", path.toString());
+        prop.put("info_info", info.toString());
+        prop.put("info_tree", tree.toString());
         // return rewrite properties
         return prop;
     }
@@ -194,7 +206,7 @@ public class CacheAdmin_p {
 
     private static String formatAnchor(Map anchor) {
         final StringBuffer result = new StringBuffer((anchor.entrySet().size() + 1) * 256);
-        result.append("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">");        
+        result.append("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">");
         final Iterator iter = anchor.entrySet().iterator();
         String url, descr;
         Map.Entry entry;
@@ -203,22 +215,22 @@ public class CacheAdmin_p {
             url = (String) entry.getKey();
             descr = ((String) entry.getValue()).trim();
             if (descr.length() == 0) { descr = "-"; }
-            result.append("<tr valign=\"top\"><td><span class=\"small\">").append(descr).append("&nbsp;</span></td><td class=\"tt\">").append(url).append("</td></tr>");            
+            result.append("<tr valign=\"top\"><td><span class=\"small\">").append(descr).append("&nbsp;</span></td><td class=\"tt\">").append(url).append("</td></tr>");
         }
         return result.append("</table>").toString();
     }
 
-    private static String linkPathString(String Path){ // contributed by Alexander Schier
-        final String[] Elements = Path.split("/");
-        final StringBuffer result = new StringBuffer(Elements.length * 256);
-        final StringBuffer tmpPath = new StringBuffer(256);
-        for(int i=0;i<(Elements.length-1);i++){
-            tmpPath.append(Elements[i]).append("/");
-            result.append("<a href=\"CacheAdmin_p.html?action=info&path=").append(tmpPath).append("\" class=\"tt\">").append(Elements[i]).append("/</a>");
-        }
-        if (Elements.length > 0) {
-            tmpPath.append(Elements[Elements.length - 1]).append("/");
-            result.append("<span class=\"tt\">").append(Elements[Elements.length - 1]).append("/</span>");
+    private static String linkPathString(String path, boolean dir){
+        final String[] elements = path.split("/");
+        final StringBuffer tmpstr = new StringBuffer(256);
+        final StringBuffer result = new StringBuffer(elements.length + 1 * 128);
+        int i, e;
+        if (dir) { e = elements.length; } else { e = elements.length - 1; }
+        for(i = 0; i < e; i++) {
+            if (!elements[i].equals("")) {
+                tmpstr.append(elements[i]).append("/");
+                result.append("<a href=\"CacheAdmin_p.html?action=info&path=").append(tmpstr).append("\" class=\"tt\">").append(elements[i]).append("/</a>");
+            }
         }
         return result.toString();
     }

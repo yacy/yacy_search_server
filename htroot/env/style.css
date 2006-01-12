@@ -81,7 +81,8 @@ font-size:11px;
 *.tt {
 font-family:Courier,Terminal,sans-serif;
 font-size:8pt;
-line-height:9px;
+line-height:10px;
+vertical-align:top;
 }
 .Menu {
 width: 140;
