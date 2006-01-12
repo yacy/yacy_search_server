@@ -815,20 +815,29 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	
         Iterator ii;
         Node nextNode;
-        boolean asc;
+        boolean asc, rot;
+        Node start;
+        byte[] firstKey;
         
         public correctedNodeIterator(boolean up, boolean rotating, Node start, byte[] firstKey) throws IOException {
             asc = up;
-            ii = new nodeIterator(up, rotating, start);
+            rot = rotating;
+            this.start = start;
+            this.firstKey = firstKey;
+            init();
+        }
+        
+        private void init() throws IOException {
+            ii = new nodeIterator(asc, rot, start);
             nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
             if (nextNode != null) {
                 int c = objectOrder.compare(firstKey, nextNode.getKey());
-                if ((c > 0) && (up)) {
+                if ((c > 0) && (asc)) {
                     // firstKey > nextNode.getKey()
                     logWarning("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
                     nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
                 }
-                if ((c < 0) && (!(up))) {
+                if ((c < 0) && (!(asc))) {
                     nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
                 }
             }
@@ -846,7 +855,18 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         public Object next() {
             Node r = nextNode;
             nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
-            if ((nextNode != null) && (asc == (objectOrder.compare(r, nextNode) == 1))) nextNode = null; // correct wrong order (this should not happen)
+            if ((nextNode != null) && (asc == (objectOrder.compare(r, nextNode) == 1))) {
+                // correct wrong order (this should not happen)
+                if (rot) {
+                    try {
+                        init();
+                    } catch (IOException e) {
+                        nextNode = null;
+                    }
+                } else {
+                    nextNode = null;
+                }
+            }
             return r;
         }
         
