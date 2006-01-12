@@ -86,14 +86,21 @@ public class wikiCode {
 
     public String transform(byte[] content, plasmaSwitchboard switchboard) {
         ByteArrayInputStream bais = new ByteArrayInputStream(content);
-        BufferedReader br = new BufferedReader(new InputStreamReader(bais));
-        String line;
-        String out = "";
         try {
-        while ((line = br.readLine()) != null) {
-            out += transformLine(new String(line), switchboard) + serverCore.crlfString;
-        }
-	return out;
+            BufferedReader br = new BufferedReader(new InputStreamReader(bais,
+                    "UTF-8"));
+            String line;
+            StringBuffer out = new StringBuffer(content.length);
+            try {
+                while ((line = br.readLine()) != null) {
+                    out.append(transformLine(line, switchboard)).append(
+                            serverCore.crlfString);
+                }
+                return out.toString();
+            } catch (UnsupportedEncodingException e1) {
+                // can not happen
+                return null;
+            }
         } catch (IOException e) {
             return "internal error: " + e.getMessage();
         }
