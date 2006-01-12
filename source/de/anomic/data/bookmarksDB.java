@@ -320,16 +320,16 @@ public class bookmarksDB {
         private String tagName;
         private Map mem;
         public Tag(String name, Map map){
-            tagName=name;
+            tagName=name.toLowerCase();
             mem=map;
         }
         public Tag(String name, Vector entries){
-            tagName=name;
+            tagName=name.toLowerCase();
             mem=new HashMap();
             mem.put(URL_HASHES, listManager.vector2string(entries));
         }
         public Tag(String name){
-            tagName=name;
+            tagName=name.toLowerCase();
             mem=new HashMap();
             mem.put(URL_HASHES, "");
         }
