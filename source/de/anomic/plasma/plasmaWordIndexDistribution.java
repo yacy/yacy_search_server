@@ -129,39 +129,39 @@ public final class plasmaWordIndexDistribution {
     public boolean job() {
 
         if (this.closed) {
-            log.logFine("no word distribution: closed");
+            log.logFine("no DHT distribution: closed");
             return false;
         }
         if (yacyCore.seedDB == null) {
-            log.logFine("no word distribution: seedDB == null");
+            log.logFine("no DHT distribution: seedDB == null");
             return false;
         }
         if (yacyCore.seedDB.mySeed == null) {
-            log.logFine("no word distribution: mySeed == null");
+            log.logFine("no DHT distribution: mySeed == null");
             return false;
         }
         if (yacyCore.seedDB.mySeed.isVirgin()) {
-            log.logFine("no word distribution: status is virgin");
+            log.logFine("no DHT distribution: status is virgin");
             return false;
         }
         if (!(enabled)) {
-            log.logFine("no word distribution: not enabled");
+            log.logFine("no DHT distribution: not enabled");
             return false;
         }
         if (paused) {
-            log.logFine("no word distribution: paused");
+            log.logFine("no DHT distribution: paused");
             return false;            
         }
         if (urlPool.loadedURL.size() < 10) {
-            log.logFine("no word distribution: loadedURL.size() = " + urlPool.loadedURL.size());
+            log.logFine("no DHT distribution: loadedURL.size() = " + urlPool.loadedURL.size());
             return false;
         }
         if (wordIndex.size() < 100) {
-            log.logFine("no word distribution: not enough words - wordIndex.size() = " + wordIndex.size());
+            log.logFine("no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size());
             return false;
         }
         if ((!enabledWhileCrawling) && (urlPool.noticeURL.stackSize() > 0)) {
-            log.logFine("no word distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize());
+            log.logFine("no DHT distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize());
             return false;
         }
 
@@ -218,37 +218,53 @@ public final class plasmaWordIndexDistribution {
         // find start point for DHT-selection
         String keyhash = indexEntities[indexEntities.length - 1].wordHash(); // DHT targets must have greater hashes
 
-        // iterate over DHT-peers and send away the indexes
-        yacySeed seed;
+        // find a list of DHT-peers
+        yacySeed[] seeds = new yacySeed[peerCount];
         int hc = 0;
-        Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(keyhash);
+        synchronized (yacyCore.dhtAgent) {
+            double avdist;
+            Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(keyhash);
+            while ((e.hasMoreElements()) && (hc < peerCount)) {
+                if (closed) {
+                    log.logSevere("Index distribution interrupted by close, nothing deleted locally.");
+                    return -1; // interrupted
+                }
+                seeds[hc] = (yacySeed) e.nextElement();
+                if ((seeds[hc] != null) &&
+                    ((avdist = (yacyDHTAction.dhtDistance(seeds[hc].hash, indexEntities[0].wordHash()) + yacyDHTAction.dhtDistance(seeds[hc].hash, indexEntities[indexEntities.length - 1].wordHash())) / 2.0) < 0.3)) {
+                    log.logInfo("Selected DHT target peer " + seeds[hc].getName() + ":" + seeds[hc].hash + ", distance = " + avdist);
+                    hc++;
+                }
+            }
+            e = null; // finish enumeration
+        }
+        
+        if (hc < peerCount) {
+            log.logWarning("found not enough (" + hc + ") peers for distribution");
+            return -1; // failed
+        }
+        
+        // send away the indexes to all these indexes
         String error;
         String peerNames = "";
-        double avdist;
         long start;
-        while ((e.hasMoreElements()) && (hc < peerCount)) {
+        for (int i = 0; i < peerCount; i++) {
             if (closed) {
                 log.logSevere("Index distribution interrupted by close, nothing deleted locally.");
                 return -1; // interrupted
             }
-            seed = (yacySeed) e.nextElement();
-            if ((seed != null) &&
-                    ((avdist = (yacyDHTAction.dhtDistance(seed.hash, indexEntities[0].wordHash()) +
-                            yacyDHTAction.dhtDistance(seed.hash, indexEntities[indexEntities.length-1].wordHash())) / 2.0) < 0.3)) {
-                start = System.currentTimeMillis();
-                error = yacyClient.transferIndex(seed, indexEntities, urlCache, this.gzipBody4Distribution, this.timeout4Distribution);
-                if (error == null) {
-                    log.logInfo("Index transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length-1].wordHash() + "]/" +
-                            avdist + " to peer " + seed.getName() + ":" + seed.hash + " in " +
-                            ((System.currentTimeMillis() - start) / 1000) + " seconds successfull (" +
-                            (1000 * indexCount / (System.currentTimeMillis() - start + 1)) + " words/s)");
-                    peerNames += ", " + seed.getName();
-                    hc++;
-                } else {
-                    log.logWarning("Index transfer to peer " + seed.getName() + ":" + seed.hash + " failed:'" + error + "', disconnecting peer");
-                    yacyCore.peerActions.peerDeparture(seed);
-                }
+            start = System.currentTimeMillis();
+            error = yacyClient.transferIndex(seeds[i], indexEntities, urlCache, this.gzipBody4Distribution, this.timeout4Distribution);
+            if (error == null) {
+                log.logInfo("Index transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length - 1].wordHash() + "] to peer " + seeds[i].getName() + ":" + seeds[i].hash + " in " + ((System.currentTimeMillis() - start) / 1000)
+                                + " seconds successfull (" + (1000 * indexCount / (System.currentTimeMillis() - start + 1)) + " words/s)");
+                peerNames += ", " + seeds[i].getName();
+                hc++;
+            } else {
+                log.logWarning("Index transfer to peer " + seeds[i].getName() + ":" + seeds[i].hash + " failed:'" + error + "', disconnecting peer");
+                yacyCore.peerActions.peerDeparture(seeds[i]);
             }
+
         }
         if (peerNames.length() > 0) peerNames = peerNames.substring(2); // remove comma
 
