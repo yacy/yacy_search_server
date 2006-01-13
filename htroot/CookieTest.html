@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy '#[clientname]#': Coockie - Test Page</title>
+#%env/templates/metas.template%#
+<link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="index.rss?search=#[former]#">
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#%env/templates/header.template%#
+
+</script>
+Here is a cookie test page.
+
+<hr />
+<br />
+<form action="">
+<input type="hidden" name="act" value="set_cookie" />
+Name: <input type=text name="cookie_name" /><br />
+Value: <input type=text name="cookie_value" /><br />
+<input type="submit" name="set_action" value="Dear server, set this coockie for me!" />
+</form>
+
+<br />
+<hr />
+Cookies at this browser:<br />
+<script type="text/javascript">
+document.write(document.cookie.split(';').join(';<br />'))
+</script>
+<br />
+<hr />
+#(cookiesin)#
+Cookies coming to server:
+::
+#(/cookiesin)#
+#{cookiesin}#
+#[name]# = #[value]#
+#{/cookiesin}#
+<br />
+<hr />
+#(cookiesout)#
+Cookies server sent:
+::
+#(/cookiesout)#
+#{cookiesout}#
+#[name]# = #[value]#
+#{/cookiesout}#
+
+<br>
+<hr>
+<center><i>YaCy is a GPL'ed project
+with the target of implementing a P2P-based global search engine.<br>
+Architecture (C) by Michael Peter Christen,
+<img src="/env/grafics/mcemailh.gif"></i></center>
+
+#%env/templates/footer.template%#
+</body>
+</html>
