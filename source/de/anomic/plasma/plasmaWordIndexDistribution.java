@@ -219,28 +219,28 @@ public final class plasmaWordIndexDistribution {
         String keyhash = indexEntities[indexEntities.length - 1].wordHash(); // DHT targets must have greater hashes
 
         // find a list of DHT-peers
-        yacySeed[] seeds = new yacySeed[peerCount];
-        int hc = 0;
+        yacySeed[] seeds = new yacySeed[peerCount + 10];
+        int hc0 = 0;
         synchronized (yacyCore.dhtAgent) {
             double avdist;
             Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(keyhash);
-            while ((e.hasMoreElements()) && (hc < peerCount)) {
+            while ((e.hasMoreElements()) && (hc0 < seeds.length)) {
                 if (closed) {
                     log.logSevere("Index distribution interrupted by close, nothing deleted locally.");
                     return -1; // interrupted
                 }
-                seeds[hc] = (yacySeed) e.nextElement();
-                if ((seeds[hc] != null) &&
-                    ((avdist = (yacyDHTAction.dhtDistance(seeds[hc].hash, indexEntities[0].wordHash()) + yacyDHTAction.dhtDistance(seeds[hc].hash, indexEntities[indexEntities.length - 1].wordHash())) / 2.0) < 0.3)) {
-                    log.logInfo("Selected DHT target peer " + seeds[hc].getName() + ":" + seeds[hc].hash + ", distance = " + avdist);
-                    hc++;
+                seeds[hc0] = (yacySeed) e.nextElement();
+                if ((seeds[hc0] != null) &&
+                    ((avdist = (yacyDHTAction.dhtDistance(seeds[hc0].hash, indexEntities[0].wordHash()) + yacyDHTAction.dhtDistance(seeds[hc0].hash, indexEntities[indexEntities.length - 1].wordHash())) / 2.0) < 0.4)) {
+                    log.logInfo("Selected " + ((hc0 < peerCount) ? "primary" : "reserve") + " DHT target peer " + seeds[hc0].getName() + ":" + seeds[hc0].hash + ", distance = " + avdist);
+                    hc0++;
                 }
             }
             e = null; // finish enumeration
         }
         
-        if (hc < peerCount) {
-            log.logWarning("found not enough (" + hc + ") peers for distribution");
+        if (hc0 < peerCount) {
+            log.logWarning("found not enough (" + hc0 + ") peers for distribution");
             return -1; // failed
         }
         
@@ -248,7 +248,8 @@ public final class plasmaWordIndexDistribution {
         String error;
         String peerNames = "";
         long start;
-        for (int i = 0; i < peerCount; i++) {
+        int hc1 = 0;
+        for (int i = 0; i < hc0; i++) {
             if (closed) {
                 log.logSevere("Index distribution interrupted by close, nothing deleted locally.");
                 return -1; // interrupted
@@ -259,17 +260,17 @@ public final class plasmaWordIndexDistribution {
                 log.logInfo("Index transfer of " + indexCount + " words [" + indexEntities[0].wordHash() + " .. " + indexEntities[indexEntities.length - 1].wordHash() + "] to peer " + seeds[i].getName() + ":" + seeds[i].hash + " in " + ((System.currentTimeMillis() - start) / 1000)
                                 + " seconds successfull (" + (1000 * indexCount / (System.currentTimeMillis() - start + 1)) + " words/s)");
                 peerNames += ", " + seeds[i].getName();
-                hc++;
+                hc1++;
             } else {
                 log.logWarning("Index transfer to peer " + seeds[i].getName() + ":" + seeds[i].hash + " failed:'" + error + "', disconnecting peer");
                 yacyCore.peerActions.peerDeparture(seeds[i]);
             }
-
+            if (hc1 >= peerCount) break;
         }
         if (peerNames.length() > 0) peerNames = peerNames.substring(2); // remove comma
 
         // clean up and finish with deletion of indexes
-        if (hc >= peerCount) {
+        if (hc1 >= peerCount) {
             // success
             if (delete) {
                 try {
@@ -292,7 +293,7 @@ public final class plasmaWordIndexDistribution {
             }
             return indexCount;
         } else {
-            log.logSevere("Index distribution failed. Too few peers (" + hc + ") received the index, not deleted locally.");
+            log.logSevere("Index distribution failed. Too few peers (" + hc1 + ") received the index, not deleted locally.");
             // simply close the indexEntities
             for (int i = 0; i < indexEntities.length; i++) try {
                 indexEntities[i].close();

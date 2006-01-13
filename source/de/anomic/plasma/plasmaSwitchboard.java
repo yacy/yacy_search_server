@@ -560,7 +560,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         );
         indexDistribution.setCounts(150, 1, 3, 10000);
         deployThread("20_dhtdistribution", "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-        new serverInstantThread(indexDistribution, "job", null), 600000);
+        new serverInstantThread(indexDistribution, "job", null), 60000);
         
         // test routine for snippet fetch
         //Set query = new HashSet();
