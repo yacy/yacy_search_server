@@ -157,13 +157,15 @@ public final class plasmaHTCache {
 
     private void deleteOldHTCache(File directory) {
         String[] list = directory.list();
-        File object;
-        for (int i = list.length - 1; i >= 0 ; i--) {
-            object = new File(directory, list[i]);
-            if (object.isFile()) {
-                object.delete();
-            } else {
-                deleteOldHTCache(object);
+        if (list != null) {
+            File object;
+            for (int i = list.length - 1; i >= 0 ; i--) {
+                object = new File(directory, list[i]);
+                if (object.isFile()) {
+                    object.delete();
+                } else {
+                    deleteOldHTCache(object);
+                }
             }
         }
         directory.delete();
