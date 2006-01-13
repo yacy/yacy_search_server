@@ -49,6 +49,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import de.anomic.data.bookmarksDB;
+import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -59,7 +60,7 @@ public class Bookmarks_p {
     serverObjects prop = new serverObjects();
     plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
     int MAX_COUNT=10; //TODO: Changeable per Interface
-    String tag="";
+    String tagName="";
     int start=0;
     
     //defaultvalues
@@ -114,7 +115,7 @@ public class Bookmarks_p {
             switchboard.bookmarksDB.removeBookmark(urlHash);
         }
         if(post.containsKey("tag")){
-            tag=(String) post.get("tag");
+            tagName=(String) post.get("tag");
         }
         if(post.containsKey("start")){
             start=Integer.parseInt((String) post.get("start"));
@@ -122,14 +123,17 @@ public class Bookmarks_p {
     }
     Iterator it=switchboard.bookmarksDB.tagIterator(true);
     int count=0;
+    bookmarksDB.Tag tag;
     while(it.hasNext()){
-        prop.put("taglist_"+count+"_name", ((bookmarksDB.Tag)it.next()).getTagName());
+        tag=(Tag) it.next();
+        prop.put("taglist_"+count+"_name", tag.getFriendlyName());
+        prop.put("taglist_"+count+"_tag", tag.getTagName());
         count++;
     }
     prop.put("taglist", count);
     count=0;
-    if(!tag.equals("")){
-        it=switchboard.bookmarksDB.getBookmarksIterator(tag);
+    if(!tagName.equals("")){
+        it=switchboard.bookmarksDB.getBookmarksIterator(tagName);
     }else{
         it=switchboard.bookmarksDB.getBookmarksIterator();
     }
@@ -155,7 +159,7 @@ public class Bookmarks_p {
     if(it.hasNext()){
         prop.put("next-page", 1);
         prop.put("next-page_start", start+10);
-        prop.put("next-page_tag", tag);
+        prop.put("next-page_tag", tagName);
     }
     prop.put("bookmarks", count);
     return prop;

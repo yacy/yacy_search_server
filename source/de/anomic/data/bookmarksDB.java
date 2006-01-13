@@ -192,7 +192,7 @@ public class bookmarksDB {
     public Tag getTag(String tagName){
         Map map;
         try {
-            map = tagsTable.get(tagName);
+            map = tagsTable.get(tagName.toLowerCase());
             if(map==null) return null;
             return new Tag(tagName, map);
         } catch (IOException e) {
@@ -268,9 +268,13 @@ public class bookmarksDB {
         }
         return set.iterator();
     }
-    public Iterator getBookmarksIterator(String tag){
+    public Iterator getBookmarksIterator(String tagName){
         TreeSet set=new TreeSet(new bookmarkComparator());
-        Vector hashes=getTag(tag).getUrlHashes();
+        Tag tag=getTag(tagName);
+        Vector hashes=new Vector();
+        if(tag != null){
+            hashes=getTag(tagName).getUrlHashes();
+        }
         set.addAll(hashes);
         return set.iterator();
     }
@@ -317,24 +321,40 @@ public class bookmarksDB {
      */
     public class Tag{
         public static final String URL_HASHES="urlHashes";
+        public static final String TAG_FRIENDLY_NAME="friendlyName";
         private String tagName;
         private Map mem;
         public Tag(String name, Map map){
-            tagName=name.toLowerCase();
+            tagName=name.toLowerCase();   
             mem=map;
+            if(!name.equals(tagName)){
+                mem.put(TAG_FRIENDLY_NAME, name);
+            }
         }
         public Tag(String name, Vector entries){
             tagName=name.toLowerCase();
             mem=new HashMap();
             mem.put(URL_HASHES, listManager.vector2string(entries));
+            if(!name.equals(tagName)){
+                mem.put(TAG_FRIENDLY_NAME, name);
+            }
         }
         public Tag(String name){
             tagName=name.toLowerCase();
             mem=new HashMap();
             mem.put(URL_HASHES, "");
+            if(!name.equals(tagName)){
+                mem.put(TAG_FRIENDLY_NAME, name);
+            }
         }
         public String getTagName(){
             return tagName;
+        }
+        public String getFriendlyName(){
+            if(this.mem.containsKey(TAG_FRIENDLY_NAME)){
+                return (String) this.mem.get(TAG_FRIENDLY_NAME);
+            }
+            return this.tagName;
         }
         public Vector getUrlHashes(){
             return listManager.string2vector((String)this.mem.get(URL_HASHES));
@@ -379,7 +399,7 @@ public class bookmarksDB {
             return listManager.string2vector(((String)this.mem.get(URL_HASHES))).size();
         }
     }
-    class bookmarksDate{
+    public class bookmarksDate{
         public static final String URL_HASHES="urlHashes";
         private Map mem;
         String date;
