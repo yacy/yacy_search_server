@@ -203,7 +203,7 @@ public class bookmarksDB {
         Map map;
         try {
             map=datesTable.get(date);
-            if(map==null) return null;
+            if(map==null) return new bookmarksDate(date);
             return new bookmarksDate(date, map);
         } catch (IOException e) {
             return null;
@@ -491,6 +491,10 @@ public class bookmarksDB {
                 }else{
                     mem.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
                 }
+                bookmarksDate bmDate=getDate((String) mem.get(BOOKMARK_TIMESTAMP));
+                bmDate.add(this.urlHash);
+                bmDate.setDatesTable();
+                
                 removeBookmark(this.urlHash); //prevent empty tags
             } catch (IOException e) {
                 //entry not yet present (normal case)
