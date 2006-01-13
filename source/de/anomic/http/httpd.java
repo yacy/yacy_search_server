@@ -1174,11 +1174,11 @@ public final class httpd implements serverHandler {
             long contentLength,
             Date moddate, 
             Date expires,
-            String cookie,
+            serverObjects requestProperties,
             String contentEnc,
             String transferEnc
     ) throws IOException {    
-        sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,contentType,contentLength,moddate,expires,cookie,contentEnc,transferEnc,true);
+        sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,contentType,contentLength,moddate,expires,requestProperties,contentEnc,transferEnc,true);
     }
 
     public static final void sendRespondHeader(
@@ -1191,7 +1191,7 @@ public final class httpd implements serverHandler {
             long contentLength,
             Date moddate,
             Date expires,
-            String cookie,
+            serverObjects requestProperties,
             String contentEnc,
             String transferEnc,
             boolean nocache
@@ -1211,12 +1211,12 @@ public final class httpd implements serverHandler {
         }
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_TYPE,  (contentType == null)? "text/html" : contentType);  
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_LENGTH, Long.toString(contentLength));
-        if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
+        //if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
         if (expires != null)     headers.put(httpHeader.EXPIRES, httpc.dateString(expires));
         if (contentEnc != null)  headers.put(httpHeader.CONTENT_ENCODING, contentEnc);
         if (transferEnc != null) headers.put(httpHeader.TRANSFER_ENCODING, transferEnc);
         
-        sendRespondHeader(conProp, respond, httpVersion, httpStatusCode, httpStatusText, headers);
+        sendRespondHeader(conProp, respond, httpVersion, httpStatusCode, httpStatusText, headers,requestProperties);
     }
     
     public static final void sendRespondHeader(
@@ -1228,14 +1228,25 @@ public final class httpd implements serverHandler {
     ) throws IOException {
         sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,null,header);
     }
-    
+    /*This we need because the interface has changed*/
+    public static final void sendRespondHeader(
+    		Properties conProp,
+            OutputStream respond,
+            String httpVersion,
+            int httpStatusCode, 
+            String httpStatusText, 
+            httpHeader header
+    ) throws IOException {
+        sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,null,header,null);
+    }
     public static final void sendRespondHeader(
             Properties conProp,
             OutputStream respond,
             String httpVersion,
             int httpStatusCode, 
             String httpStatusText, 
-            httpHeader header
+            httpHeader header,
+            serverObjects requestProperties
     ) throws IOException {
         
         if (respond == null) throw new NullPointerException("The outputstream must not be null.");
@@ -1282,6 +1293,18 @@ public final class httpd implements serverHandler {
                 headerStringBuffer.append(httpVersion).append(" ")
                 .append(Integer.toString(httpStatusCode)).append(" ")
                 .append(httpStatusText).append("\r\n");
+                //read custom headers
+                if (requestProperties != null)     
+                {
+                	Iterator it=requestProperties.getRequestProperties();
+                	while(it.hasNext())
+                	{
+                		//Append user properties to the main String
+                		//TODO: Should we check for user properites. What if they intersect properties that are already in header?
+                		java.util.Map.Entry e=(java.util.Map.Entry)it.next();
+                        headerStringBuffer.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");   
+                	}
+                }
                 
                 // write header
                 Iterator i = header.keySet().iterator();

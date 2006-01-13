@@ -61,10 +61,13 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Vector;
 
 public final class serverObjects extends Hashtable implements Cloneable {
 
@@ -208,4 +211,158 @@ public final class serverObjects extends Hashtable implements Cloneable {
 	return super.clone();
     }
 
+    /*
+     * Patch BEGIN:
+     * Name: Header Property Patch
+     * Date: Fri. 13.01.2006
+     * Description: Makes possible to send header properties such as coockies back to the client.
+     * Part 1 of 5
+     * Questions: sergej.z@list.ru
+     */
+    /**
+     * Holds header properties
+     */
+    //Since properties such as coockies can be multiple, we cannot use HashMap here. We have to use Vector.
+    private Vector requestProperty=new Vector();
+    /**
+     *
+     * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
+     */
+    class Entry implements Map.Entry
+    {
+        private Object Key;
+        private Object Value;
+        Entry(Object Key,String Value){this.Key=Key;this.Value=Value;}
+        public Object getKey() {return Key;}
+        public Object getValue() {return Value;}
+        public Object setValue(Object Value) {return(this.Value=Value);}
+    }
+    /**
+     * Set a header property <b>name</b> with <b>value</b>
+     * @param name : name of the property. Ex. Location
+     * @param value : value of the property
+     *
+     * We can achieve redirection using property Location
+     * setRequestProperty("Location", "http://www.yacy.net");
+     * Coockies can be convinently defined with setCookie method
+     */
+    public void setRequestProperty(String name, String value)
+    {
+         /*
+         * TODO: Maybe we should check here if the property name is in RFC2616
+         * And check for the validity of the value as well...
+         * */ 
+        requestProperty.add(new Entry(name,value));
+       
+    }
+    /**
+     * Sets Cookie on the client machine.
+     *
+     * @param name: Coockie name
+     * @param value: Coockie value
+     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
+     * @param path: Path the coockie belongs to. Default - "/". Can be <b>null</b>.
+     * @param domain: Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
+     * @param secure: If true coockie will be send only over safe connection such as https
+     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     */
+    public void setCoockie(String name, String value, String expires, String path, String domain, boolean secure)
+    {
+         /*
+         * TODO:Here every value can be validated for correctness if needed
+         * For example semicolon should be not in any of the values
+         * However an exception in this case would be an overhead IMHO.
+         */
+        String coockieString=name+"="+value+";";
+        if(expires!=null)
+            coockieString+=" expires="+expires+";";
+        if(path!=null)
+            coockieString+=" path="+path+";";
+        if(domain!=null)
+            coockieString+=" domain="+domain+";";
+        if(secure)
+            coockieString+=" secure;";
+        requestProperty.add(new Entry("Set-Cookie",coockieString));
+    }
+    /**
+     * Sets Cookie on the client machine.
+     *
+     * @param name: Coockie name
+     * @param value: Coockie value
+     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
+     * @param path: Path the coockie belongs to. Default - "/". Can be <b>null</b>.
+     * @param domain: Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
+     *
+     * Note: this coockie will be sent over each connection independend if it is safe connection or not.
+     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     */
+    public void setCoockie(String name, String value, String expires, String path, String domain)
+    {
+        setCoockie( name,  value,  expires,  path,  domain, false);
+    }
+    /**
+     * Sets Cookie on the client machine.
+     *
+     * @param name: Coockie name
+     * @param value: Coockie value
+     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
+     * @param path: Path the coockie belongs to. Default - "/". Can be <b>null</b>.
+     *
+     * Note: this coockie will be sent over each connection independend if it is safe connection or not.
+     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     */
+    public void setCoockie(String name, String value, String expires, String path)
+    {
+        setCoockie( name,  value,  expires,  path,  null, false);
+    }
+    /**
+     * Sets Cookie on the client machine.
+     *
+     * @param name: Coockie name
+     * @param value: Coockie value
+     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
+     *
+     * Note: this coockie will be sent over each connection independend if it is safe connection or not.
+     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     */
+    public void setCoockie(String name, String value, String expires)
+    {
+        setCoockie( name,  value,  expires,  null,  null, false);
+    }
+    /**
+     * Sets Cookie on the client machine.
+     *
+     * @param name: Coockie name
+     * @param value: Coockie value
+     *
+     * Note: this coockie will be sent over each connection independend if it is safe connection or not. This coockie never expires
+     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     */
+    public void setCoockie(String name, String value )
+    {
+        setCoockie( name,  value,  null,  null,  null, false);
+    }
+    /**
+     * Returns an iterator within all properties can be reached.
+     * Is used mainly by httpd.
+     * @return iterator to read all request properties.
+     *
+     * Example:
+     *
+     * Iterator it=serverObjects.getRequestProperties();
+     * while(it.hasNext())
+     * {
+     *  java.util.Map.Entry e=(java.util.Map.Entry)it.next();
+     *  String propertyName=e.getKey();
+     *  String propertyValue=e.getValue();
+     * }
+     */
+    public Iterator getRequestProperties()
+    {
+        return requestProperty.iterator();
+    }
+    /*
+     * Patch END:
+     * Name: Header Property Patch
+     */ 
 }

@@ -447,6 +447,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             }
             
             //File targetClass = rewriteClassFile(targetFile);
+            //We need tp here
+            serverObjects tp = new serverObjects();
             Date targetDate;
             boolean nocache = false;
             
@@ -527,7 +529,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
                     
                     // call rewrite-class
-                    serverObjects tp = new serverObjects();
+                   
                     if (targetClass == null) {
                         targetDate = new Date(targetFile.lastModified());
                     } else {
@@ -669,7 +671,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
                 
                 // write the array to the client
-                httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, (zipContent)?"gzip":null, null, nocache);
+                httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, tp, (zipContent)?"gzip":null, null, nocache);
                 if (! method.equals(httpHeader.METHOD_HEAD)) {
                     Thread.sleep(200); // this solved the message problem (!!)
                     serverFileUtils.write(result, out);
