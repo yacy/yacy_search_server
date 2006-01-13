@@ -118,18 +118,10 @@ public class Wiki {
 	if (post.containsKey("edit")) {
 	    // edit the page
 	    try {
-		prop.put("pagecontent", "");
-		prop.put("pageedit",
-			 "<form action=\"Wiki.html\" method=\"post\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\">" +
-			 //"<form action=\"Wiki.html\" method=\"post\" enctype=\"application/x-www-form-urlencoded\">" +
-			 "<p>Author:<br><input name=\"author\" type=\"text\" size=\"80\" maxlength=\"80\" value=\"" + author + "\"></p>" +
-			 "<p>Text:<br><textarea name=\"content\" cols=\"80\" rows=\"24\">" + new String(page.page(), "UTF-8") + "</textarea></p>" +
-			 "<input type=\"hidden\" name=\"page\" value=\"" + pagename + "\">" +
-			 "<input type=\"hidden\" name=\"reason\" value=\"edit\">" +
-			 "<input type=\"submit\" name=\"submit\" value=\"Submit\">" +
-			 "<input type=\"submit\" name=\"preview\" value=\"Preview\">" +
-			 "<input type=\"submit\" name=\"view\" value=\"Discard\">" +
-			 "</form>");
+	        prop.put("mode", 1); //edit
+	        prop.put("mode_author", author);
+	        prop.put("mode_page-code", new String(page.page(), "UTF-8"));
+	        prop.put("mode_pagename", pagename);
 	    } catch (UnsupportedEncodingException e) {}
 	} 
 
@@ -138,87 +130,51 @@ public class Wiki {
 		// preview the page
 		wikiCode wikiTransformer=new wikiCode(switchboard);
 		
-		prop.put("pagecontent",
-		     "<h2>Preview</h2><p>No changes have been submitted so far!</p>" +
-		     "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">" +
-		     "<tr class=\"TableHeader\" width=\"100%\" ><td height=\"10\" class=\"TableHeader\" class=\"black\"><font size=\"1\">&nbsp;<b>" +
-                     "yacyWiki page: " + pagename + ",&nbsp;&nbsp;&nbsp;last edited by " + author + 
-		     ",&nbsp;&nbsp;&nbsp;change date " + dateString(new Date()) +
-                     "</b></font></td></tr>" +
-		     "<tr class=\"WikiBackground\"><td>" + 
-		     "<table width=\"100%\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\"><tr><td>" +
-                     wikiTransformer.transform((post.get("content", ""))) +
-                     "</td></tr></table>" +
-		     "</td></tr></table>");
-		     
-		prop.put("pageedit",
-			 "<form action=\"Wiki.html\" method=\"post\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\">" +
-			 //"<form action=\"Wiki.html\" method=\"post\" enctype=\"application/x-www-form-urlencoded\">" +
-			 "<input type=\"submit\" name=\"submit\" value=\"Submit\">" +
-			 "<input type=\"submit\" name=\"view\" value=\"Discard\"><br><br><br>" +
-			 "<h2>Edit</h2>"+
-			 "<p>Author:<br><input name=\"author\" type=\"text\" size=\"80\" maxlength=\"80\" value=\"" + author + "\"></p>" +
-			 "<p>Text:<br><textarea name=\"content\" cols=\"80\" rows=\"24\">" + (post.get("content", "")) + "</textarea></p>" +
-			 "<input type=\"hidden\" name=\"page\" value=\"" + pagename + "\">" +
-			 "<input type=\"hidden\" name=\"reason\" value=\"edit\">" +
-			 "<input type=\"submit\" name=\"submit\" value=\"Submit\">" +
-			 "<input type=\"submit\" name=\"preview\" value=\"Preview\">" +
-			 "<input type=\"submit\" name=\"view\" value=\"Discard\">" +
-			 "</form>");
+        prop.put("mode", 2);//preview
+        prop.put("mode_pagename", pagename);
+        prop.put("mode_author", author);
+        prop.put("mode_date", dateString(new Date()));
+        prop.put("mode_page", wikiTransformer.transform(post.get("content", "")));
+        prop.put("mode_page-code", post.get("content", ""));
 	} 
 	//end contrib of [MN]
 			
 	else if (post.containsKey("index")) {
 	    // view an index
-	    String index = "<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\">" +
-                "<tr class=\"TableHeader\"><td>Subject</td><td>Change Date</td><td>Author</td></tr>";
-
-            String subject;
-            try {
-	    Iterator i = switchboard.wikiDB.keys(true);
+        prop.put("mode", 3); //Index
+        String subject;
+        try {
+            Iterator i = switchboard.wikiDB.keys(true);
             wikiBoard.entry entry;
+            int count=0;
             while (i.hasNext()) {
-		subject = (String) i.next();
+                subject = (String) i.next();
                 entry = switchboard.wikiDB.read(subject);
-                index += "<tr class=\"TableCellLight\">";
-		index += "<td><a href=\"Wiki.html?page=" + wikiBoard.webalize(subject) + "\">" + subject + "</a></td>";
-		index += "<td>" + dateString(entry.date()) + "</td>";
-		index += "<td>" + entry.author() + "</td>";
-                index += "</tr>";
-	    }
-            } catch (IOException e) {
-                index += "IO Error reading wiki database: " + e.getMessage();
+                prop.put("mode_pages_"+count+"_name",wikiBoard.webalize(subject));
+                prop.put("mode_pages_"+count+"_subject", subject);
+                prop.put("mode_pages_"+count+"_date", dateString(entry.date()));
+                prop.put("mode_pages_"+count+"_author", entry.author());
+                count++;
             }
-            index += "</table>";
-	    prop.put("pagecontent", index);
-	    prop.put("pageedit",
-		     "<form action=\"Wiki.html\" method=\"post\" enctype=\"multipart/form-data\">" +
-		     "<input type=\"hidden\" name=\"page\" value=\"" + pagename + "\">" +
-		     "<input type=\"button\" name=\"demo\" value=\"Start Page\" onClick=\"self.location.href='Wiki.html'\">" + 
-		     "</form>");
+            prop.put("mode_pages", count);
+        } catch (IOException e) {
+            prop.put("mode_error", 1); //IO Error reading Wiki
+            prop.put("mode_error_message", e.getMessage());
+        }
+        prop.put("mode_pagename", pagename);
 	} 
 	
 	else {
         wikiCode wikiTransformer=new wikiCode(switchboard);
 	    // show page
-	    prop.put("pagecontent",
-		     "<table width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">" +
-		     "<tr class=\"TableHeader\" width=\"100%\" ><td height=\"10\" class=\"TableHeader\" class=\"black\"><font size=\"1\">&nbsp;<b>" +
-                     "yacyWiki page: " + pagename + ",&nbsp;&nbsp;&nbsp;last edited by " + page.author() + ",&nbsp;&nbsp;&nbsp;change date " + dateString(page.date()) +
-                     "</b></font></td></tr>" +
-		     "<tr class=\"WikiBackground\"><td>" + 
-		     "<table width=\"100%\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\"><tr><td>" +
-                     wikiTransformer.transform(page.page()) +
-                     "</td></tr></table>" +
-		     "</td></tr></table>");
-
-	    prop.put("pageedit",
-		     "<form action=\"Wiki.html\" method=\"get\">" +
-		     "<input type=\"hidden\" name=\"page\" value=\"" + pagename + "\">" +
-		     "<input type=\"button\" name=\"demo\" value=\"Start Page\" onClick=\"self.location.href='Wiki.html'\">" + 
-		     "<input type=\"submit\" name=\"index\" value=\"Index\">" +
-		     "<input type=\"submit\" name=\"edit\" value=\"Edit\">" +
-		     "</form>");
+        prop.put("mode", 0); //viewing
+        prop.put("mode_pagename", pagename);
+        prop.put("mode_author", page.author());
+        prop.put("mode_date", dateString(page.date()));
+        prop.put("mode_page", wikiTransformer.transform(page.page()));
+        
+        prop.put("controls", 0);
+        prop.put("controls_pagename", pagename);
 	}
 
 	// return rewrite properties

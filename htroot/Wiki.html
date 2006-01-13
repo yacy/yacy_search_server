@@ -6,8 +6,104 @@
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
-<p>#[pagecontent]#</p>
-<p>#[pageedit]# Changes will be published as announcement on YaCyNews</p>
+<p>
+#(mode)#
+<!-- 0: viewing -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr class="TableHeader" width="100%">
+    <td height="10" class="TableHeader" class="black">
+    <font size="1">&nbsp;<b>yacyWiki page: #[pagename]# &nbsp;&nbsp;&nbsp;
+    last edited by #[author]# &nbsp;&nbsp;&nbsp;change date #[date]#</b></font>
+    </td>
+  </tr>
+  <tr class="WikiBackground">
+    <td> 
+    <table width="100%" border="0" cellpadding="5" cellspacing="0">
+      <tr>
+        <td>
+          #[page]#
+        </td>
+      </tr>
+    </table>
+    </td>
+  </tr>
+</table>
+<p/>
+<form action="Wiki.html" method="GET">
+<input type="hidden" name="page" value="#[pagename]#">
+<input type="button" name="demo" value="Start Page" onClick="self.location.href='Wiki.html'">
+<input type="submit" name="index" value="Index">
+<input type="submit" name="edit" value="Edit">
+</form>
+::
+<!-- 1: edit -->
+<form action="Wiki.html" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+<p>Author:<br><input name="author" type="text" size="80" maxlength="80" value="#[author]#"></p>
+<p>Text:<br><textarea name="content" cols="80" rows="24">#[page-code]#</textarea></p>
+<input type="hidden" name="page" value="#[pagename]#">
+<input type="hidden" name="reason" value="edit">
+<input type="submit" name="submit" value="Submit">
+<input type="submit" name="preview" value="Preview">
+<input type="submit" name="view" value="Discard">
+</form>
+::
+<!-- 2: preview -->
+<h2>Preview</h2>
+<p>No changes have been submitted so far!</p>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr class="TableHeader" width="100%">
+    <td height="10" class="TableHeader" class="black">
+    <font size="1">&nbsp;
+    <b>yacyWiki page: #[pagename]# &nbsp;&nbsp;&nbsp;last edited by #[author]#,&nbsp;&nbsp;&nbsp;change date #[date]#</b>
+    </font>
+    </td>
+  </tr>
+  <tr class="WikiBackground">
+    <td> 
+    <table width="100%" border="0" cellpadding="5" cellspacing="0">
+      <tr>
+        <td>#[page]#</td>
+      </tr>
+    </table>
+    </td>
+  </tr>
+</table>
+<form action="Wiki.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+  <input type="submit" name="submit" value="Submit">
+  <input type="submit" name="view" value="Discard"><br><br><br>
+  <h2>Edit</h2>
+  <p>Author:<br><input name="author" type="text" size="80" maxlength="80" value="#[author]#"></p>
+  <p>Text:<br><textarea name="content" cols="80" rows="24">#[page-code]#</textarea></p>
+  <input type="hidden" name="page" value="#[pagename]#">
+  <input type="hidden" name="reason" value="edit">
+  <input type="submit" name="submit" value="Submit">
+  <input type="submit" name="preview" value="Preview">
+  <input type="submit" name="view" value="Discard">
+</form>
+::
+<!-- 3: Index -->
+<table border="0" cellpadding="2" cellspacing="0">
+  <tr class="TableHeader">
+    <td>Subject</td>
+    <td>Change Date</td>
+    <td>Last Author</td>
+  </tr>
+#{pages}#
+  <tr class="TableCellLight">
+    <td><a href="Wiki.html?page="#[name]#">#[subject]#</a></td>
+    <td>#[date]#</td>
+    <td>#[author]#</td>
+  </tr>
+#{/pages}#
+</table>
+#(error)#::IO Error reading wiki database: #[message]##(/error)#
+<form action="Wiki.html" method="POST" enctype="multipart/form-data">
+<input type="hidden" name="page" value="#[pagename]#">
+<input type="button" name="demo" value="Start Page" onClick="self.location.href='Wiki.html'"> 
+</form>
+#(/mode)#
+</p>
+Changes will be published as announcement on YaCyNews</p>
 #%env/templates/footer.template%#
 </body>
 </html>
