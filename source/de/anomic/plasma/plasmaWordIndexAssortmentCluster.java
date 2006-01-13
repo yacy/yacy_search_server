@@ -215,8 +215,14 @@ public final class plasmaWordIndexAssortmentCluster {
     }
 
     public Iterator hashConjunction(String startWordHash, boolean up) {
+        // Old convention implies rot = true
+        return hashConjunction(startWordHash, up, true);
+    }
+
+    public Iterator hashConjunction(String startWordHash, boolean up, boolean rot) {
         HashSet iterators = new HashSet();
-        for (int i = 0; i < clusterCount; i++) iterators.add(assortments[i].hashes(startWordHash, up, true));
+        //if (rot) System.out.println("WARNING: kelondroMergeIterator does not work correctly when individual iterators rotate on their own!");
+        for (int i = 0; i < clusterCount; i++) iterators.add(assortments[i].hashes(startWordHash, up, rot));
         return kelondroMergeIterator.cascade(iterators, kelondroNaturalOrder.naturalOrder, up);
     }
 

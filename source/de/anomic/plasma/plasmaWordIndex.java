@@ -216,7 +216,8 @@ public final class plasmaWordIndex {
 
     public Iterator wordHashes(String startHash, boolean up, boolean rot) {
         //return ramCache.wordHashes(startHash, up);
-        return new correctedWordIterator(up, rot, startHash); // use correction until bug is found
+        if (rot) return new rotatingWordIterator(up, startHash);
+        else return new correctedWordIterator(up, rot, startHash); // use correction until bug is found
     }
 
     private final class correctedWordIterator implements Iterator {    
@@ -224,7 +225,7 @@ public final class plasmaWordIndex {
         String nextWord;
 
         public correctedWordIterator(boolean up, boolean rotating, String firstWord) {
-            iter = ramCache.wordHashes(firstWord, up);
+            iter = ramCache.wordHashes(firstWord, up, rotating);
             nextWord = (iter.hasNext()) ? (String) iter.next() : null;
             boolean corrected = true;
             int cc = 0; // to avoid rotation loops
@@ -262,9 +263,39 @@ public final class plasmaWordIndex {
         }
 
         public void remove() {
-            throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro Tables not yet supported");
+            throw new java.lang.UnsupportedOperationException("correctedWordIterator  does not support remove");
         }
     } // correctedWordIterator
+
+    private class rotatingWordIterator implements Iterator {
+        Iterator i;
+        boolean up;
+
+        public rotatingWordIterator(boolean up, String startWordHash) {
+            this.up = up;
+            i = new correctedWordIterator(up, false, startWordHash);
+        }
+
+        public void finalize() {
+            i = null;
+        }
+
+        public boolean hasNext() {
+            if (i.hasNext()) return true;
+            else {
+                i = new correctedWordIterator(up, false, (up)?"------------":"zzzzzzzzzzzz");
+                return i.hasNext();
+            }
+        }
+
+        public Object next() {
+            return i.next();
+        }
+
+        public void remove() {
+            throw new java.lang.UnsupportedOperationException("rotatingWordIterator does not support remove");
+        }
+    } // class rotatingWordIterator
 
     public Iterator fileIterator(String startHash, boolean up, boolean deleteEmpty) {
         return new iterateFiles(startHash, up, deleteEmpty);

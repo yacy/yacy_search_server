@@ -259,15 +259,23 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
 
     public Iterator wordHashes(String startWordHash, boolean up) {
+        // Old convention implies rot = true
+        //return new rotatingWordHashes(startWordHash, up);
+        return wordHashes(startWordHash, up, true);
+    }
+
+    public Iterator wordHashes(String startWordHash, boolean up, boolean rot) {
         // here we merge 3 databases into one view:
         // - the RAM Cache
         // - the assortmentCluster File Cache
         // - the backend
         if (!(up)) throw new RuntimeException("plasmaWordIndexCache.wordHashes can only count up");
+        //if (rot) System.out.println("WARNING: wordHashes does not work correctly when individual Assotments rotate on their own!");
+        //return new rotatingWordHashes(startWordHash, up);
         return new kelondroMergeIterator(
                         new kelondroMergeIterator(
                                  cache.tailMap(startWordHash).keySet().iterator(),
-                                 assortmentCluster.hashConjunction(startWordHash, true),
+                                 assortmentCluster.hashConjunction(startWordHash, true, rot),
                                  kelondroNaturalOrder.naturalOrder,
                                  true),
                         backend.wordHashes(startWordHash, true),

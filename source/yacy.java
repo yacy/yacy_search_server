@@ -1265,6 +1265,7 @@ public final class yacy {
     }
     
     private static void RWIHashList(String homePath, String targetName, String resource) {
+        plasmaWordIndex WordIndex = null;
         serverLog log = new serverLog("HASHLIST");
         File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
         String wordChunkStartHash = "------------";
@@ -1276,11 +1277,11 @@ public final class yacy {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
             Iterator WordHashIterator = null;
             if (resource.equals("all")) {
-                plasmaWordIndex WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, log);
+                WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, log);
                 WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, true, false);
             } else if (resource.equals("assortments")) {
                 plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, log);
-                WordHashIterator = assortmentCluster.hashConjunction(wordChunkStartHash, true);
+                WordHashIterator = assortmentCluster.hashConjunction(wordChunkStartHash, true, false);
             } else if (resource.startsWith("assortment")) {
                 int a = Integer.parseInt(resource.substring(10));
                 plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 8*1024*1024, null);
@@ -1299,8 +1300,13 @@ public final class yacy {
                     log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + wordHash);
                 }
             }
+            bos.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (WordIndex != null) {
+            WordIndex.close(60);
+            WordIndex = null;
         }
     }
 
