@@ -70,9 +70,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import de.anomic.server.serverCore;
 import de.anomic.server.logging.serverLog;
+
 
 public final class httpHeader extends TreeMap implements Map {
 
@@ -718,4 +720,141 @@ public final class httpHeader extends TreeMap implements Map {
         String dstHostSocket = (String) header.get(httpHeader.HOST);
         prop.setProperty(CONNECTION_PROP_HOST,(httpd.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
     }
+    /*
+     * Patch BEGIN:
+     * Name: Header Property Patch
+     * Date: Fri. 13.01.2006
+     * Description: Makes possible to send header properties such as coockies back to the client.
+     * Part 1 of 5
+     * Questions: sergej.z@list.ru
+     */
+    /**
+     * Holds header properties
+     */
+    //Since properties such as coockies can be multiple, we cannot use HashMap here. We have to use Vector.
+    private Vector coockies=new Vector();
+    /**
+     *
+     * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
+     */
+    class Entry implements Map.Entry
+    {
+        private Object Key;
+        private Object Value;
+        Entry(Object Key,String Value){this.Key=Key;this.Value=Value;}
+        public Object getKey() {return Key;}
+        public Object getValue() {return Value;}
+        public Object setValue(Object Value) {return(this.Value=Value);}
+    }
+
+    /**
+     * Sets Cookie on the client machine.
+     *
+     * @param name: Coockie name
+     * @param value: Coockie value
+     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
+     * @param path: Path the coockie belongs to. Default - "/". Can be <b>null</b>.
+     * @param domain: Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
+     * @param secure: If true coockie will be send only over safe connection such as https
+     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     */
+    public void setCoockie(String name, String value, String expires, String path, String domain, boolean secure)
+    {
+         /*
+         * TODO:Here every value can be validated for correctness if needed
+         * For example semicolon should be not in any of the values
+         * However an exception in this case would be an overhead IMHO.
+         */
+        String coockieString=name+"="+value+";";
+        if(expires!=null)
+            coockieString+=" expires="+expires+";";
+        if(path!=null)
+            coockieString+=" path="+path+";";
+        if(domain!=null)
+            coockieString+=" domain="+domain+";";
+        if(secure)
+            coockieString+=" secure;";
+        coockies.add(new Entry("Set-Cookie",coockieString));
+    }
+    /**
+     * Sets Cookie on the client machine.
+     *
+     * @param name: Coockie name
+     * @param value: Coockie value
+     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
+     * @param path: Path the coockie belongs to. Default - "/". Can be <b>null</b>.
+     * @param domain: Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
+     *
+     * Note: this coockie will be sent over each connection independend if it is safe connection or not.
+     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     */
+    public void setCoockie(String name, String value, String expires, String path, String domain)
+    {
+        setCoockie( name,  value,  expires,  path,  domain, false);
+    }
+    /**
+     * Sets Cookie on the client machine.
+     *
+     * @param name: Coockie name
+     * @param value: Coockie value
+     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
+     * @param path: Path the coockie belongs to. Default - "/". Can be <b>null</b>.
+     *
+     * Note: this coockie will be sent over each connection independend if it is safe connection or not.
+     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     */
+    public void setCoockie(String name, String value, String expires, String path)
+    {
+        setCoockie( name,  value,  expires,  path,  null, false);
+    }
+    /**
+     * Sets Cookie on the client machine.
+     *
+     * @param name: Coockie name
+     * @param value: Coockie value
+     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
+     *
+     * Note: this coockie will be sent over each connection independend if it is safe connection or not.
+     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     */
+    public void setCoockie(String name, String value, String expires)
+    {
+        setCoockie( name,  value,  expires,  null,  null, false);
+    }
+    /**
+     * Sets Cookie on the client machine.
+     *
+     * @param name: Coockie name
+     * @param value: Coockie value
+     *
+     * Note: this coockie will be sent over each connection independend if it is safe connection or not. This coockie never expires
+     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     */
+    public void setCoockie(String name, String value )
+    {
+        setCoockie( name,  value,  null,  null,  null, false);
+    }
+    /**
+     * Returns an iterator within all properties can be reached.
+     * Is used mainly by httpd.
+     * @return iterator to read all request properties.
+     *
+     * Example:
+     *
+     * Iterator it=serverObjects.getRequestProperties();
+     * while(it.hasNext())
+     * {
+     *  java.util.Map.Entry e=(java.util.Map.Entry)it.next();
+     *  String propertyName=e.getKey();
+     *  String propertyValue=e.getValue();
+     * }
+     */
+    public Iterator getCookies()
+    {
+        return coockies.iterator();
+    }
+    /*
+     * Patch END:
+     * Name: Header Property Patch
+     */ 
 }

@@ -10,6 +10,12 @@
 
 </script>
 Here is a cookie test page.
+<hr />
+<br />
+<form action="">
+<input type="hidden" name="act" value="clear_cookie" />
+<input type="submit" name="set_action" value="Just clean it" />
+</form>
 
 <hr />
 <br />
@@ -26,24 +32,28 @@ Cookies at this browser:<br />
 <script type="text/javascript">
 document.write(document.cookie.split(';').join(';<br />'))
 </script>
+
+
+
+#(cookiesout)#
+::
 <br />
 <hr />
+Cookies coming to server:<br />
+#(/cookiesout)#
+#{cookiesout}#
+#[string]#
+#{/cookiesout}#
+
 #(cookiesin)#
-Cookies coming to server:
 ::
+<br />
+<hr />
+Cookies server sent:<br />
 #(/cookiesin)#
 #{cookiesin}#
 #[name]# = #[value]#
 #{/cookiesin}#
-<br />
-<hr />
-#(cookiesout)#
-Cookies server sent:
-::
-#(/cookiesout)#
-#{cookiesout}#
-#[name]# = #[value]#
-#{/cookiesout}#
 
 <br>
 <hr>

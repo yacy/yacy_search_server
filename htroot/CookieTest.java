@@ -82,21 +82,26 @@ public class CookieTest {
         final serverObjects prop = new serverObjects();
         if(post.containsKey("act")&&post.get("act").equals("clear_cookie"))
         {
-         
+         httpHeader outgoingHeader=new httpHeader();
         	Iterator it = header.entrySet().iterator();
         	while(it.hasNext())
         	{
         		java.util.Map.Entry e = (Entry) it.next();
-        		if(e.getKey().equals("Cookie"));
-        		prop.setCoockie(
-        				(String)e.getKey(),
-        				(String)e.getValue(),
-        				"expires=Thu, 01-Jan-99 00:00:01 GMT"
-        				);
+        		if(e.getKey().equals("Cookie"))
+        		{
+        			String coockie[]=e.getValue().toString().split(";");
+        			for(int i=0;i<coockie.length;i++)
+        			{
+        				String nameValue[]=coockie[i].split("=");
+        				outgoingHeader.setCoockie(nameValue[0].trim(),nameValue.length>1?(nameValue[1].trim()):"","Thu, 01-Jan-99 00:00:01 GMT");	
+        			}
+        		}
+
+        		
         		
         	}
         	
-         
+         prop.setOutgoingHeader(outgoingHeader);
          prop.put("coockiesout",0);
          //header.
          
@@ -105,18 +110,29 @@ public class CookieTest {
        {
         String CoockieName = post.get("cookie_name").toString().trim();
         String CoockieValue = post.get("cookie_value").toString().trim();
-        prop.setCoockie(CoockieName,CoockieValue);
-        prop.put("cookiesout",1);
-        prop.put("cookiesout_0_name",CoockieName);
-        prop.put("cookiesout_0_value",CoockieValue);
+        httpHeader outgoingHeader=new httpHeader();
+        
+        outgoingHeader.setCoockie(CoockieName,CoockieValue);
+        prop.setOutgoingHeader(outgoingHeader);
+        prop.put("cookiesin",1);
+        prop.put("cookiesin_0_name",CoockieName);
+        prop.put("cookiesin_0_value",CoockieValue);
         //header.
         
        }
 Iterator it = header.entrySet().iterator();
+
 while(it.hasNext())
 {
 	java.util.Map.Entry e = (Entry) it.next();
 	System.out.println(""+e.getKey()+" : "+e.getValue());
+	if(e.getKey().equals("Cookie"))
+	{
+		String a;
+		
+		prop.put("cookiesout",1);
+        prop.put("cookiesout_0_string",e.getValue().toString().replaceAll(";",";<br />"));
+	}
 }
        
         return prop;
