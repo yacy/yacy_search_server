@@ -103,7 +103,7 @@ public final class message {
         prop.put("attachmentsize", Integer.toString(attachmentsize));
 
         if (process.equals("permission")) {
-            // permission: respond with accceptabeale message and attachment size
+            // permission: respond with acceptable message and attachment size
 //          String iam = (String) post.get("iam", "");    // seed hash of requester
             prop.put("response", "Welcome to my peer!");
             // that's it!

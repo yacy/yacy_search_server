@@ -2,3 +2,4 @@ http://www.yacy.net/yacy/seed.txt
 http://www.suma-lab.de/yacy/seed.txt
 http://www.lulabad.de/seed.txt
 http://yacy.naggel.info/seed.txt
+http://www.roland-ramthun.de/seed.txt

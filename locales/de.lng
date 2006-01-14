@@ -992,8 +992,6 @@ Welcome to YaCy!==Willkommen bei YaCy!
 "Shutdown"=="Herunterfahren"
 Public System Properties==Allgemeine Systemangaben
 Protection==Sicherheit
-<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html#admin">settings</a> page <b>immediately</b> and set an administration password.==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der <a href="Settings_p.html#admin">Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
-Your settings are protected by a password.==Ihre Einstellungen sind mit einem Kennwort gesch&uuml;tzt.
 System version==Systemversion
 the latest public version is==Die neueste stabile Version ist
 Click here to <a href="http://www.yacy.net/yacy/Download.html">download</a> it.==Klicken Sie <a href="http://www.yacy.net/yacy/Download.html">hier</a>, um sie herunterzuladen.
@@ -1033,8 +1031,6 @@ Seed server==Seed Server
 Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html#seed">Settings page</a>.==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten f&uuml;r den FTP-Account k&ouml;nnen Sie in den <a href="Settings_p.html#seed">Einstellungen</a> konfigurieren.
 Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
 Last upload:==Letzter Upload:
-Auto-popup on start-up==Popup bei YaCy-Start
-Disabled. To enable this again please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page==Deaktiviert. Um diese Funktion wieder zu aktivieren benutzen Sie bitte die <a href="Settings_p.html#SystemBehaviour">Einstellungen-Seite</a>.
 Enabled ==Aktiviert
 Online-mode==Onlinemodus
 You are in <i>Cache-browsing</i> mode.==Sie sind im <i>Cache</i> Modus.
@@ -1051,18 +1047,35 @@ Use this only if you have a flatrate or you have an always-on connection.==Benut
 You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <i>permanenten</i> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein m&ouml;chten, m&uuml;ssen Sie den Proxy abschalten um offline zu gehen.
 Last Refresh:==Letzte Aktualisierung:
 
-#alte Übersetzung. vielleicht später noch zu gebrauchen!
+#--------------------------------------------------------
+#File: Status_p.inc
 
-#Memory Usage==Speicherverbrauch
-#free:==Frei:
-#total:==Gesamt:
-#max:==Maximal:
-#Do Garbage-Collect now==Garbage-Collect durchf&uuml;hren
-#Traffic==Netzwerkverkehr
-#Out:==Ausgehend:
-#In:==Eingehend:
-#System Resources==Systemressourcen
-#Processors:==Prozessoren:
+Private System Properties==Private Systemeigenschaften
+System Resources==Systemressourcen
+Processors:==Prozessoren
+Protection==Sicherheit
+<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html#admin">settings</a> page <b>immediately</b> and set an administration password.==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der <a href="Settings_p.html#admin">Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
+Your settings are protected by a password.==Ihre Einstellungen sind mit einem Kennwort gesch&uuml;tzt.
+Peer host==Peer Host
+Port forwarding host==Port forwarding Host
+not used==nicht benutzt
+broken==unterbrochen
+connected==verbunden
+Remote proxy==Remote Proxy
+not used==nicht benutzt
+Used for YaCy -> YaCy communication:==Benutzt zur YaCy -> YaCy Kommunikation:
+Yes==Ja
+No==Nein
+Auto-popup on start-up==Auto-Popup beim Starten
+Disabled. To enable this again please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page==Deaktiviert. Um diese Funktion wieder zu aktivieren benutzen Sie bitte die <a href="Settings_p.html#SystemBehaviour">Einstellungen-Seite</a>.
+Enabled. To disable this please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page==Aktiviert. Um diese Funktion zu deaktivieren benutzen Sie bitte die <a href="Settings_p.html#SystemBehaviour">Einstellungen-Seite</a>.
+Memory Usage==Speicherverbrauch
+free:==Frei:
+total:==Total:
+max:==Maximal:
+Connections Incoming==Eingehende Verbindungen
+Active:==Aktiv:
+
 
 #-------------------------------------------------------
 #File: Steering.html
