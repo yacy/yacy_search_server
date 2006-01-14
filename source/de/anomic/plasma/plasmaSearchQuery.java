@@ -47,7 +47,6 @@ import java.util.TreeSet;
 import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
-import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverByteBuffer;
 

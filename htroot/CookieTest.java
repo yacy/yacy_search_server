@@ -46,25 +46,12 @@
 // javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.TreeSet;
 import java.util.Map.Entry;
 
 import de.anomic.http.httpHeader;
-import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSearchQuery;
-import de.anomic.plasma.plasmaSearchPreOrder;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
 
 public class CookieTest {
 
@@ -128,8 +115,6 @@ while(it.hasNext())
 	System.out.println(""+e.getKey()+" : "+e.getValue());
 	if(e.getKey().equals("Cookie"))
 	{
-		String a;
-		
 		prop.put("cookiesout",1);
         prop.put("cookiesout_0_string",e.getValue().toString().replaceAll(";",";<br />"));
 	}
