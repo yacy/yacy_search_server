@@ -39,13 +39,13 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-
 // You must compile this file with
 // javac -classpath .:../Classes Message.java
 // if the shell's current path is HTROOT
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -61,84 +61,89 @@ import de.anomic.data.wikiCode;
 public class Messages_p {
 
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
     public static String dateString(Date date) {
-	return SimpleFormatter.format(date);
+        return SimpleFormatter.format(date);
     }
 
-
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
-	wikiCode wikiTransformer = new wikiCode(switchboard);
+        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        serverObjects prop = new serverObjects();
+        wikiCode wikiTransformer = new wikiCode(switchboard);
 
         String action = ((post == null) ? "list" : post.get("action", "list"));
-        String messages = "";
+        StringBuffer messages = new StringBuffer();
         messageBoard.entry message;
-        
+
         // first reset notification
-        File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/empty.gif");
-        File notifierDest   = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/notifier.gif");
-        try {serverFileUtils.copy(notifierSource, notifierDest);} catch (IOException e) {};
+        File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
+        File notifierDest = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath", "htroot") + "/env/grafics/notifier.gif");
+        try {
+            serverFileUtils.copy(notifierSource, notifierDest);
+        } catch (IOException e) {
+        }
 
         if (action.equals("delete")) {
-            String key = post.get("object","");
+            String key = post.get("object", "");
             switchboard.messageDB.remove(key);
             action = "list";
         }
 
         if (action.equals("list")) {
-            messages +=
-                "<table border=\"0\" cellpadding=\"2\" cellspacing=\"1\">" +
-                "<tr class=\"MenuHeader\"><td>Date</td><td>From</td><td>To</td><td>Subject</td><td>Action</td></tr>";
+            messages.append("<table border=\"0\" cellpadding=\"2\" cellspacing=\"1\">");
+            messages.append("<tr class=\"MenuHeader\"><td>Date</td><td>From</td><td>To</td><td>Subject</td><td>Action</td></tr>");
             try {
-            Iterator i = switchboard.messageDB.keys("remote", true);
-            String key;
-            
-            boolean dark = true;
-            while (i.hasNext()) {
-                key = (String) i.next();
-                message = switchboard.messageDB.read(key);
-                messages += "<tr class=\"TableCell" + ((dark) ? "Dark" : "Light") + "\">"; dark = !dark;
-                messages += "<td>" + dateString(message.date()) + "</td>";
-                messages += "<td>" + message.author() + "</td>";
-                messages += "<td>" + message.recipient() + "</td>";
-                messages += "<td>" + wikiTransformer.transform(message.subject()) + "</td>";
-                messages += "<td>" +
-                            "<a href=\"Messages_p.html?action=view&object=" + key + "\">view</a>&nbsp;/&nbsp;" +
-                            "<a href=\"MessageSend_p.html?hash=" + message.authorHash() + "&subject=Re: " + message.subject() + "\">reply</a>&nbsp;/&nbsp;" +
-                            "<a href=\"Messages_p.html?action=delete&object=" + key + "\">delete</a>" +
-                            "</td>";
-                messages += "</tr>";
-            }
-            messages += "</table>";
+                Iterator i = switchboard.messageDB.keys("remote", true);
+                String key;
+
+                boolean dark = true;
+                while (i.hasNext()) {
+                    key = (String) i.next();
+                    message = switchboard.messageDB.read(key);
+                    messages.append("<tr class=\"TableCell").append((dark) ? "Dark" : "Light").append("\">");
+                    messages.append("<td>").append(dateString(message.date())).append("</td>");
+                    messages.append("<td>").append(message.author()).append("</td>");
+                    messages.append("<td>").append(message.recipient()).append("</td>");
+                    messages.append("<td>").append(wikiTransformer.transform(message.subject())).append("</td>");
+                    messages.append("<td>");
+                    messages.append("<a href=\"Messages_p.html?action=view&object=").append(key).append("\">view</a>&nbsp;/&nbsp;");
+                    messages.append("<a href=\"MessageSend_p.html?hash=").append(message.authorHash()).append("&subject=Re: ").append(message.subject()).append("\">reply</a>&nbsp;/&nbsp;");
+                    messages.append("<a href=\"Messages_p.html?action=delete&object=").append(key).append("\">delete</a></td></tr>");
+                    dark = !dark;
+                }
+                messages.append("</table>");
             } catch (IOException e) {
-                messages += "I/O error reading message table: " + e.getMessage();
+                messages.append("I/O error reading message table: ").append(e.getMessage());
             }
         }
-        
+
         if (action.equals("view")) {
-            String key = post.get("object","");
+            String key = post.get("object", "");
             message = switchboard.messageDB.read(key);
-            messages += "<table border=\"0\" cellpadding=\"2\" cellspacing=\"1\">";
-            messages += "<tr><td class=\"MenuHeader\">From:</td><td class=\"MessageBackground\">" + message.author() + "</td></tr>";
-            messages += "<tr><td class=\"MenuHeader\">To:</td><td class=\"MessageBackground\">" + message.recipient() + "</td></tr>";
-            messages += "<tr><td class=\"MenuHeader\">Send Date:</td><td class=\"MessageBackground\">" + dateString(message.date()) + "</td></tr>";
-            messages += "<tr><td class=\"MenuHeader\">Subject:</td><td class=\"MessageBackground\">" + wikiTransformer.transform(message.subject()) + "</td></tr>";
-            messages += "<tr><td class=\"MessageBackground\" colspan=\"2\">" + wikiTransformer.transform(new String(message.message())) + "</td></tr>";
-	    messages += "<tr><td class=\"MenuHeader\">Action:</td>" +	    
-	    		"<td class=\"MessageBackground\">" +
-			"<a href=\"Messages_p.html\">inbox</a>&nbsp;/&nbsp;" +
-	    		"<a href=\"MessageSend_p.html?hash=" + message.authorHash() + 
-	    		"&subject=Re: " + message.subject() + "\">reply</a>&nbsp;/&nbsp;" +
-                        "<a href=\"Messages_p.html?action=delete&object=" + key + "\">delete</a>" +
-			"</td></tr>";
-            messages += "</table>";
+            messages.append("<table border=\"0\" cellpadding=\"2\" cellspacing=\"1\">");
+            messages.append("<tr><td class=\"MenuHeader\">From:</td><td class=\"MessageBackground\">").append(message.author()).append("</td></tr>");
+            messages.append("<tr><td class=\"MenuHeader\">To:</td><td class=\"MessageBackground\">").append(message.recipient()).append("</td></tr>");
+            messages.append("<tr><td class=\"MenuHeader\">Send Date:</td><td class=\"MessageBackground\">").append(dateString(message.date())).append("</td></tr>");
+            messages.append("<tr><td class=\"MenuHeader\">Subject:</td><td class=\"MessageBackground\">").append(wikiTransformer.transform(message.subject())).append("</td></tr>");
+            String theMessage = null;
+            try {
+                theMessage = new String(message.message(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                // can not happen, because UTF-8 must be supported by every JVM
+            }
+            messages.append("<tr><td class=\"MessageBackground\" colspan=\"2\">").append(wikiTransformer.transform(theMessage)).append("</td></tr>");
+            messages.append("<tr><td class=\"MenuHeader\">Action:</td>");
+            messages.append("<td class=\"MessageBackground\">");
+            messages.append("<a href=\"Messages_p.html\">inbox</a>&nbsp;/&nbsp;");
+            messages.append("<a href=\"MessageSend_p.html?hash=").append(message.authorHash());
+            messages.append("&subject=Re: ").append(message.subject()).append("\">reply</a>&nbsp;/&nbsp;");
+            messages.append("<a href=\"Messages_p.html?action=delete&object=").append(key).append("\">delete</a>");
+            messages.append("</td></tr></table>");
         }
-        
-        prop.put("messages", messages);
 
-	// return rewrite properties
-	return prop;
+        prop.put("messages", messages.toString());
+
+        // return rewrite properties
+        return prop;
     }
-
 }
