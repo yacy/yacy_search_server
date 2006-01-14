@@ -1,3 +1,4 @@
+// w
 // translator.java 
 // -------------------------------------
 // part of YACY
@@ -56,6 +57,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
+import java.lang.IndexOutOfBoundsException;
 
 import de.anomic.server.logging.serverLog;
 import de.anomic.data.listManager;
@@ -155,17 +157,18 @@ public class translator {
 		return true;
 	}
 
-	public static boolean translateFiles(File sourceDir, File destDir, File translationFile, String extensions){
+	public static boolean translateFiles(File sourceDir, File destDir, File baseDir, File translationFile, String extensions){
 			Hashtable translationLists = loadTranslationsLists(translationFile);
-			return translateFiles(sourceDir, destDir, translationLists, extensions);
+			return translateFiles(sourceDir, destDir, baseDir, translationLists, extensions);
 	}
 
-	public static boolean translateFiles(File sourceDir, File destDir, Hashtable translationLists, String extensions){
+	public static boolean translateFiles(File sourceDir, File destDir, File baseDir, Hashtable translationLists, String extensions){
 		destDir.mkdirs();
 		File[] sourceFiles = sourceDir.listFiles();
         Vector exts=listManager.string2vector(extensions);
         boolean rightExtension;
         Iterator it;
+        String relativePath;
 		for(int i=0;i<sourceFiles.length;i++){
              it=exts.iterator();
              rightExtension=false;
@@ -176,14 +179,20 @@ public class translator {
                  }
              }
 			if(rightExtension){
-				if(translationLists.containsKey(sourceFiles[i].getName())){ //TODO: relative Path to htroot
-					if(translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), (Hashtable)translationLists.get(sourceFiles[i].getName()))){
+                try{
+                    relativePath=sourceFiles[i].getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1, sourceFiles[i].getAbsolutePath().length()); //+1 to get the "/"
+                }catch(IndexOutOfBoundsException e){
+					serverLog.logSevere("Translator", "Error creating relative Path for "+sourceFiles[i].getAbsolutePath());
+                    relativePath="wrong path"; //not in translationLists
+                }
+				if(translationLists.containsKey(relativePath)){ 
+					if( translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), (Hashtable)translationLists.get(relativePath))){
 						serverLog.logInfo("Translator", "Translated file: "+ sourceFiles[i].getName());
 					}else{
 						serverLog.logSevere("Translator", "File error while translating file "+sourceFiles[i].getPath());
 					}
 				}else{
-						serverLog.logInfo("Translator", "No translation for file: "+sourceFiles[i].getPath());
+						//serverLog.logInfo("Translator", "No translation for file: "+relativePath);
 				}
 			}
 
@@ -204,7 +213,7 @@ public class translator {
             //file2=new File(file.getPath().replaceFirst(sourceName.replaceAll("\\\\", "\\\\"), destName));
             if(file.isDirectory() && !file.getName().equals(notdir)){
                 //file2.mkdirs();
-                translateFiles(file, file2, translationFile, extensions);
+                translateFiles(file, file2, sourceDir, translationFile, extensions);
                 //translateFilesRecursive(file, file2, translationFile, extension, notdir);
             }/*else{
                 translateFiles(file, file2, translationFile, extension);

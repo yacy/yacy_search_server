@@ -1148,7 +1148,7 @@ yacyWiki==YaCyWiki
 Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &uuml;ber den YaCy News Service bekannt gegeben.
 
 #--------------------------------------------------------
-#File: header.template
+#File: env/templates/header.template
 
 Global Index==Globaler Index
 Distributed Crawler==Verteilter Crawler
