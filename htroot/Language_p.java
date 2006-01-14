@@ -89,9 +89,9 @@ public class Language_p {
         // .lng
         File translationFile = new File(langPath, lang);
 
-        if (translator.translateFiles(sourceDir, destDir, translationFile, "html")) {
-            // if(translator.translateFilesRecursive(sourceDir, destDir,
-            // translationFile, "html")){
+        //if (translator.translateFiles(sourceDir, destDir, translationFile, "html")) {
+        if(translator.translateFilesRecursive(sourceDir, destDir,
+        translationFile, "html,template", "locale")){
             env.setConfig("htLocaleSelection", lang.substring(0, lang.length() - 4));
             try {
                 BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));

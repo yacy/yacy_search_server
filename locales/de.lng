@@ -1176,7 +1176,7 @@ Network==Netzwerk
 #Log==Log
 Settings==Einstellungen
 #Performance==Performance
-Language==Sprache
+>Language==>Sprache
 #Skins==Skins
 Project Home==Pojektseite
 Project News==Neuigkeiten

@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Vector;
 
 import de.anomic.server.logging.serverLog;
 import de.anomic.data.listManager;
@@ -154,18 +155,28 @@ public class translator {
 		return true;
 	}
 
-	public static boolean translateFiles(File sourceDir, File destDir, File translationFile, String extension){
+	public static boolean translateFiles(File sourceDir, File destDir, File translationFile, String extensions){
 			Hashtable translationLists = loadTranslationsLists(translationFile);
-			return translateFiles(sourceDir, destDir, translationLists, extension);
+			return translateFiles(sourceDir, destDir, translationLists, extensions);
 	}
 
-	public static boolean translateFiles(File sourceDir, File destDir, Hashtable translationLists, String extension){
+	public static boolean translateFiles(File sourceDir, File destDir, Hashtable translationLists, String extensions){
 		destDir.mkdirs();
 		File[] sourceFiles = sourceDir.listFiles();
+        Vector exts=listManager.string2vector(extensions);
+        boolean rightExtension;
+        Iterator it;
 		for(int i=0;i<sourceFiles.length;i++){
-			
-			if(sourceFiles[i].getName().endsWith(extension)){
-				if(translationLists.containsKey(sourceFiles[i].getName())){
+             it=exts.iterator();
+             rightExtension=false;
+             while(it.hasNext()){
+                 if(sourceFiles[i].getName().endsWith((String) it.next())){
+                     rightExtension=true;
+                     break;
+                 }
+             }
+			if(rightExtension){
+				if(translationLists.containsKey(sourceFiles[i].getName())){ //TODO: relative Path to htroot
 					if(translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), (Hashtable)translationLists.get(sourceFiles[i].getName()))){
 						serverLog.logInfo("Translator", "Translated file: "+ sourceFiles[i].getName());
 					}else{
@@ -180,17 +191,24 @@ public class translator {
 		return true;
 	}
 
-    public static boolean translateFilesRecursive(File sourceDir, File destDir, File translationFile, String extension){
+    public static boolean translateFilesRecursive(File sourceDir, File destDir, File translationFile, String extensions, String notdir){
         ArrayList dirList=listManager.getDirsRecursive(sourceDir);
+        dirList.add(sourceDir);
         Iterator it=dirList.iterator();
-        String sourceName=sourceDir.getPath();
-        String destName=destDir.getPath();
-        File dir=null;
-        File dir2=null;
+        File file=null;
+        File file2=null;
         while(it.hasNext()){
-            dir=(File)it.next();
-            dir2=new File(dir.getPath().replaceFirst(sourceName.replaceAll("\\\\", "\\\\"), destName));
-            translateFiles(dir, dir2, translationFile, extension);
+            file=(File)it.next();
+            //cuts the sourcePath and prepends the destPath
+            file2=new File(destDir, file.getPath().substring(sourceDir.getPath().length(), file.getPath().length()));
+            //file2=new File(file.getPath().replaceFirst(sourceName.replaceAll("\\\\", "\\\\"), destName));
+            if(file.isDirectory() && !file.getName().equals(notdir)){
+                //file2.mkdirs();
+                translateFiles(file, file2, translationFile, extensions);
+                //translateFilesRecursive(file, file2, translationFile, extension, notdir);
+            }/*else{
+                translateFiles(file, file2, translationFile, extension);
+            }*/
         }
         return true;
     }
