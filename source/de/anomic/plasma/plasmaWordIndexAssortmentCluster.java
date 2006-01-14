@@ -206,17 +206,12 @@ public final class plasmaWordIndexAssortmentCluster {
         // collect all records from all the assortments and return them
         plasmaWordIndexEntryContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
-	for (int i = 0; i < clusterCount; i++) {
-	    buffer = assortments[i].remove(wordHash);
-	    if (buffer != null) record.add(buffer);
+        for (int i = 0; i < clusterCount; i++) {
+            buffer = assortments[i].remove(wordHash);
+            if (buffer != null) record.add(buffer);
             if (System.currentTimeMillis() > limitTime) break;
-	}
+        }
         return record;
-    }
-
-    public Iterator hashConjunction(String startWordHash, boolean up) {
-        // Old convention implies rot = true
-        return hashConjunction(startWordHash, up, true);
     }
 
     public Iterator hashConjunction(String startWordHash, boolean up, boolean rot) {
