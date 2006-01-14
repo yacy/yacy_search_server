@@ -187,9 +187,9 @@ public class translator {
                 }
 				if(translationLists.containsKey(relativePath)){ 
 					if( translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), (Hashtable)translationLists.get(relativePath))){
-						serverLog.logInfo("Translator", "Translated file: "+ sourceFiles[i].getName());
+						serverLog.logInfo("Translator", "Translated file: "+ relativePath);
 					}else{
-						serverLog.logSevere("Translator", "File error while translating file "+sourceFiles[i].getPath());
+						serverLog.logSevere("Translator", "File error while translating file "+relativePath);
 					}
 				}else{
 						//serverLog.logInfo("Translator", "No translation for file: "+relativePath);
