@@ -440,7 +440,7 @@ public final class yacy {
                                 final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
                                 final File destDir = new File(sourceDir, "locale/"+lang);
                                 
-                              if(translator.translateFilesRecursive(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html,template", "locale")){ //translate it
+                              if(translator.translateFilesRecursive(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html,template,inc", "locale")){ //translate it
                                     //write the new Versionnumber
                                     final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
                                     bw.write(sb.getConfig("svnRevision", "Error getting Version"));
