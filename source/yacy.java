@@ -1264,7 +1264,7 @@ public final class yacy {
         }
     }
     
-    private static void RWIHashList(String homePath, String targetName, String resource) {
+    private static void RWIHashList(String homePath, String targetName, String resource, String format) {
         plasmaWordIndex WordIndex = null;
         serverLog log = new serverLog("HASHLIST");
         File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
@@ -1272,9 +1272,7 @@ public final class yacy {
         try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
         File root = new File(homePath);
-        File file = new File(root, targetName + ".txt");
         try {
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
             Iterator WordHashIterator = null;
             if (resource.equals("all")) {
                 WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, log);
@@ -1291,16 +1289,40 @@ public final class yacy {
                 WordHashIterator = fileDB.wordHashes(wordChunkStartHash, true);
             }
             int counter = 0;
-            while (WordHashIterator.hasNext()) {
-                counter++;
-                String wordHash = (String) WordHashIterator.next();
-                bos.write((wordHash).getBytes());
-                bos.write(serverCore.crlf);
-                if (counter % 500 == 0) {
-                    log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + wordHash);
+            String wordHash = "";
+            if (format.equals("zip")) {
+                log.logInfo("Writing Hashlist to ZIP-file: " + targetName + ".zip");
+                ZipEntry zipEntry = new ZipEntry(targetName + ".txt");
+                File file = new File(root, targetName + ".zip");
+                ZipOutputStream bos = new ZipOutputStream(new FileOutputStream(file));
+                bos.putNextEntry(zipEntry);
+                while (WordHashIterator.hasNext()) {
+                    counter++;
+                    wordHash = (String) WordHashIterator.next();
+                    bos.write((wordHash).getBytes());
+                    bos.write(serverCore.crlf);
+                    if (counter % 500 == 0) {
+                        log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + wordHash);
+                    }
                 }
+                bos.close();
             }
-            bos.close();
+            else {
+                log.logInfo("Writing Hashlist to TXT-file: " + targetName + ".txt");
+                File file = new File(root, targetName + ".txt");
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                while (WordHashIterator.hasNext()) {
+                    counter++;
+                    wordHash = (String) WordHashIterator.next();
+                    bos.write((wordHash).getBytes());
+                    bos.write(serverCore.crlf);
+                    if (counter % 500 == 0) {
+                        log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + wordHash);
+                    }
+                }
+                bos.close();
+            }
+            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + wordHash);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1416,10 +1438,12 @@ public final class yacy {
         } else if ((args.length >= 1) && (args[0].equals("-rwihashlist"))) {
             // generate a url list and save it in a file
             String domain = "all";
+            String format = "txt";
             if (args.length >= 2) domain= args[1];
-            if (args.length == 3) applicationRoot= args[2];
+            if (args.length >= 3) format= args[2];
+            if (args.length == 4) applicationRoot= args[3];
             String outfile = "rwihashlist_" + System.currentTimeMillis();
-            RWIHashList(applicationRoot, outfile, domain);
+            RWIHashList(applicationRoot, outfile, domain, format);
         } else {
             if (args.length == 1) applicationRoot= args[0];
             startup(applicationRoot, startupMemFree, startupMemTotal);
