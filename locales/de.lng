@@ -1170,7 +1170,7 @@ Communication / Publication==Kommunikation / Publikation
 Peer Control==Peer Verwaltung
 The Project==Das Projekt
 Search Page==Sucheite
-Help==Hilfe
+>Help==>Hilfe
 Index Create==Index erzeugen
 Index Control==Index kontrollieren
 #Index Monitor==Index Monitor
@@ -1181,13 +1181,13 @@ Index Control==Index kontrollieren
 #Home Page==Homepage
 File Share==Dateifreigabe
 #Wiki==Wiki
-Messages==Nachrichten
+>Messages==>Nachrichten
 Personal Profile==Pers&ouml;nliches Profil
 #Status==Status
-Network==Netzwerk
+>Network==>Netzwerk
 #News==News
 #Log==Log
-Settings==Einstellungen
+>Settings==>Einstellungen
 #Performance==Performance
 >Language==>Sprache
 #Skins==Skins
@@ -1196,4 +1196,5 @@ Project News==Neuigkeiten
 English Forum==Englisches Forum
 #Deutsches Forum==Deutsches Forum
 Download YaCy==YaCy herunterladen
+#YaCy Wiki==YaCy Wiki
 Contact==Kontakt
