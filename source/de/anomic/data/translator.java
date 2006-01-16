@@ -181,12 +181,13 @@ public class translator {
 			if(rightExtension){
                 try{
                     relativePath=sourceFiles[i].getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1, sourceFiles[i].getAbsolutePath().length()); //+1 to get the "/"
+                    relativePath = relativePath.replace(File.separatorChar, '/');
                 }catch(IndexOutOfBoundsException e){
 					serverLog.logSevere("Translator", "Error creating relative Path for "+sourceFiles[i].getAbsolutePath());
                     relativePath="wrong path"; //not in translationLists
-                }
-				if(translationLists.containsKey(relativePath)){ 
-					if( translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName()), (Hashtable)translationLists.get(relativePath))){
+                } 
+				if(translationLists.containsKey(relativePath)){
+					if( translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName().replace('/', File.separatorChar)), (Hashtable)translationLists.get(relativePath))){
 						serverLog.logInfo("Translator", "Translated file: "+ relativePath);
 					}else{
 						serverLog.logSevere("Translator", "File error while translating file "+relativePath);
