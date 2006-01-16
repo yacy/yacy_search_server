@@ -1,4 +1,4 @@
-﻿# de.lng
+# de.lng
 # -----------------------
 # part of YaCy
 # (C) by Michael Peter Christen; mc@anomic.de
@@ -110,6 +110,7 @@ Source IP\[:Port\]==Quell IP[:Port]
 Dest. IP\[:Port\]==Ziel IP[:Port]
 Command==Kommando
 Used==Benutzt
+Close==Schliessen
 Waiting for new request nr.==Warte auf neue Anfrage Nr.
 
 #-------------------------------------------------------
@@ -501,7 +502,7 @@ Depth==Tiefe
 Modified Date==&Auml;nderungsdatum
 Anchor Name==Anker Name
 URL==URL
-Delete</th>==L&ouml;schen</th>
+\[Delete\]==[L&ouml;schen]
 Delete Entries:==L&ouml;sche Eintr&auml;ge:
 "Delete"=="L&ouml;schen"
 This may take a quite long time.==Dies wird vielleicht einige Zeit dauern.
@@ -595,7 +596,7 @@ Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt d
 "clear list"=="Liste leeren"
 #Initiator==Initiator
 Executor==Ausf&uuml;hrender
-Modified Date==&Auml;nderungsdatum Datum
+Modified Date==&Auml;nderungsdatum
 Words==W&ouml;rter
 Title==Titel
 #URL==URL
@@ -933,6 +934,26 @@ You are now in <b>Cache Mode</b>. Only Proxy-cache ist available in this mode. A
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie k&ouml;nnen nun zur&uuml;ck auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, um weitere &Auml;nderungen vorzunehmen.
 
 #-------------------------------------------------------
+#File: Settings_Admin.inc
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+Administration Account Settings==Administrator Konto Einstellungen
+This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:==Dies ist das Konto, das Zugriff auf diese sonst gesch&uuml;tzten "Einstellungen" Seite hat. Wenn Sie es noch nicht eingerichtet haben, sollten Sie es nun tun:
+Account Name:==Konto Name:
+Password:==Passwort:
+Password \(repeat same as above\):==Passwort (bitte zur Sicherheit erneut eingeben):
+value="submit">==value="Speichern">
+
+#-------------------------------------------------------
+#File: Settings_SystemBehaviour.inc
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+System Behaviour Settings==System Einstellungen
+Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite beim Start von YaCy:
+"enable"=="Aktivieren"
+"disable"=="Deaktivieren"
+
+#-------------------------------------------------------
 #File: simple_search.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
@@ -1049,12 +1070,13 @@ Last Refresh:==Letzte Aktualisierung:
 
 #--------------------------------------------------------
 #File: Status_p.inc
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Private System Properties==Private Systemeigenschaften
 System Resources==Systemressourcen
 Processors:==Prozessoren
 Protection==Sicherheit
-<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html#admin">settings</a> page <b>immediately</b> and set an administration password.==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der <a href="Settings_p.html#admin">Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
+<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html?page=admin">settings</a> page <b>immediately</b> and set an administration password.==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der <a href="Settings_p.html?page=admin">Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
 Your settings are protected by a password.==Ihre Einstellungen sind mit einem Kennwort gesch&uuml;tzt.
 Peer host==Peer Host
 Port forwarding host==Port forwarding Host
@@ -1067,15 +1089,25 @@ Used for YaCy -> YaCy communication:==Benutzt zur YaCy -> YaCy Kommunikation:
 Yes==Ja
 No==Nein
 Auto-popup on start-up==Auto-Popup beim Starten
-Disabled. To enable this again please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page==Deaktiviert. Um diese Funktion wieder zu aktivieren benutzen Sie bitte die <a href="Settings_p.html#SystemBehaviour">Einstellungen-Seite</a>.
-Enabled. To disable this please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page==Aktiviert. Um diese Funktion zu deaktivieren benutzen Sie bitte die <a href="Settings_p.html#SystemBehaviour">Einstellungen-Seite</a>.
+Disabled. To enable this again please use the==Deaktiviert. Um diese Funktion wieder zu aktivieren, benutzen Sie bitte die
+Settings</a> page.==Einstellungen-Seite</a>.
+Enabled. To disable this please use the==Aktiviert. Um diese Funktion zu deaktivieren, benutzen Sie bitte die
 Memory Usage==Speicherverbrauch
 free:==Frei:
 total:==Total:
 max:==Maximal:
 Connections Incoming==Eingehende Verbindungen
 Active:==Aktiv:
-
+Idle:==Wartend:
+#Max:Max:
+Indexing Queue==Indexier Warteschlange
+Loader Queue==Lade Warteschlange
+paused==angehalten
+pause crawling::continue crawling==crawling anhalten::crawling fortsetzen
+Local Crawler Queue==Lokale Crawler Warteschlange
+Enqueued:==Eingef&uuml;gt:
+Pending:==Wartend:
+Remote Crawler Queue==Remote Crawler Warteschlange
 
 #-------------------------------------------------------
 #File: Steering.html
@@ -1123,7 +1155,6 @@ Original Resource Content==Original Quellen Inhalt
 
 #-------------------------------------------------------
 #File: ViewLog_p.html
-
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy Log:==YaCy Log:
@@ -1162,17 +1193,19 @@ Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &u
 
 #--------------------------------------------------------
 #File: env/templates/header.template
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
+YaCy&nbsp;-&nbsp;Distributed&nbsp;Web&nbsp;Indexing&nbsp;-&nbsp;Administration==YaCy - Verteiltes Internet Indexieren - Administration
 Global Index==Globaler Index
 Distributed Crawler==Verteilter Crawler
 Local Proxy==Lokaler Proxy
 Communication / Publication==Kommunikation / Publikation
-Peer Control==Peer Verwaltung
+Peer&nbsp;Control==Peer Verwaltung
 The Project==Das Projekt
 Search Page==Sucheite
 >Help==>Hilfe
 Index Create==Index erzeugen
-Index Control==Index kontrollieren
+Index Control==Index verwalten
 #Index Monitor==Index Monitor
 #Blacklist==Blacklist
 #Proxy Indexing==Proxy Indexing
@@ -1198,3 +1231,47 @@ English Forum==Englisches Forum
 Download YaCy==YaCy herunterladen
 #YaCy Wiki==YaCy Wiki
 Contact==Kontakt
+
+#--------------------------------------------------------
+#File: env/templates/submenuCookie.template
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+Cookie Menu==Cookie Men&uuml;
+Incoming&nbsp;Cookies==Eingehende Cookies
+Outgoing&nbsp;Cookies==Ausgehende Cookies
+
+#--------------------------------------------------------
+#File: env/templates/submenuIndexControl.template
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+Index Control Menu==Index Verwalten Men&uuml;
+#Index Administration==Index Administration
+#Index Import==Index Import
+#Index Transfer==Index Transfer
+
+#--------------------------------------------------------
+#File: env/templates/submenuIndexCreate.template
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+Index Creation Menu==Index erzeugen Men&uuml;
+Control Queues==Kontrolle der Warteschlangen
+WWW Crawl Queues==WWW Crawl Warteschlangen
+Media Crawl Queues==Medien Crawl Warteschlangen
+#Crawl Start==Crawl Start
+>Indexing==>Indexieren
+>Loader==>Lader
+>Local==>Lokal
+#Global==Global
+>Overhang==>Overhang
+>Images==>Bilder
+>Movies==>Filme
+>Music==>Musik
+
+#--------------------------------------------------------
+#File: env/templates/submenuPerformance.template
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+Performance Menu==Performance Men&uuml;
+Queues Performance Settings==Warteschlangen Performance Einstellungen
+Memory Settings for Database Caches==Speicher Einstellungen des Datenbank Caches
+Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequenz

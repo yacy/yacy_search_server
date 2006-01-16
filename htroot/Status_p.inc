@@ -11,7 +11,7 @@
 	<td width="150">Protection</td>
 	<td>
 		#(protection)#
-		<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html#admin">settings</a> page <b>immediately</b> and set an administration password.
+		<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html?page=admin">settings</a> page <b>immediately</b> and set an administration password.
 		::
 		Your settings are protected by a password.
 		#(/protection)#
@@ -37,9 +37,9 @@
 	<td>Auto-popup on start-up</td>
 	<td>
 		#(popup)#
-		Disabled. To enable this again please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page
+		Disabled. To enable this again please use the <a href="Settings_p.html?page=SystemBehaviour">Settings</a> page.
 		::
-		Enabled. To disable this please use the <a href="Settings_p.html#SystemBehaviour">Settings</a> page
+		Enabled. To disable this please use the <a href="Settings_p.html?page=SystemBehaviour">Settings</a> page.
 		#(/popup)#
 	</td>
 	<td>&nbsp;</td>
