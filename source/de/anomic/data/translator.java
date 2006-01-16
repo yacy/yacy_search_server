@@ -201,7 +201,7 @@ public class translator {
 	}
 
     public static boolean translateFilesRecursive(File sourceDir, File destDir, File translationFile, String extensions, String notdir){
-        ArrayList dirList=listManager.getDirsRecursive(sourceDir);
+        ArrayList dirList=listManager.getDirsRecursive(sourceDir, notdir);
         dirList.add(sourceDir);
         Iterator it=dirList.iterator();
         File file=null;

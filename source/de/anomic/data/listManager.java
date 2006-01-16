@@ -211,23 +211,23 @@ public class listManager {
         return null;
     }
 
-    public static ArrayList getDirsRecursive(File dir){
-        return getDirsRecursive(dir, true);
+    public static ArrayList getDirsRecursive(File dir, String notdir){
+        return getDirsRecursive(dir, notdir, true);
     }
     /**
      * Returns a List of all dirs and subdirs as File Objects
      *
      * Warning: untested
      */
-    public static ArrayList getDirsRecursive(File dir, boolean excludeDotfiles){
+    public static ArrayList getDirsRecursive(File dir, String notdir, boolean excludeDotfiles){
         final File[] dirList = dir.listFiles();
         final ArrayList resultList = new ArrayList();
         ArrayList recursive;
         Iterator iter;
         for (int i=0;i<dirList.length;i++) {
-            if (dirList[i].isDirectory() && (!excludeDotfiles || !dirList[i].getName().startsWith("."))) {
+            if (dirList[i].isDirectory() && (!excludeDotfiles || !dirList[i].getName().startsWith(".")) && !dirList[i].getName().equals(notdir)) {
                 resultList.add(dirList[i]);
-                recursive = getDirsRecursive(dirList[i], excludeDotfiles);
+                recursive = getDirsRecursive(dirList[i], notdir, excludeDotfiles);
                 iter=recursive.iterator();
                 while (iter.hasNext()) {
                     resultList.add(iter.next());
