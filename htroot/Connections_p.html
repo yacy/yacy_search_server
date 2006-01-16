@@ -20,6 +20,7 @@ Showing #[numActiveRunning]# active, #[numActivePending]# pending connections fr
 	<td class="small">Dest. IP[:Port]</td>
 	<td class="small">Command</td>
 	<td class="small">Used</td>
+	<td class="small">Close</td>
 </tr>
 #{list}#
 <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" title="#[sessionName]#">
@@ -29,6 +30,7 @@ Showing #[numActiveRunning]# active, #[numActivePending]# pending connections fr
 	<td class="small">#[dest]#</td>
 	<td class="small">#(running)#Waiting for new request nr. # #[reqNr]#::#[command]##(/running)#</td>
 	<td class="small">#[used]#</td>
+	<td class="small"><a href="Connections_p.html?closeSession=#[sessionID]#"><font class="small">[Close]</font></a></td>
 </tr>
 #{/list}#
 </table>

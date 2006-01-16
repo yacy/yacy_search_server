@@ -949,6 +949,13 @@ public final class serverCore extends serverAbstractThread implements serverThre
                                 // e1.printStackTrace();
                                 this.stopped = true;
                             }
+                        } else if (!serverCore.this.theSessionPool.isClosed) {
+                            try {
+                                serverCore.this.theSessionPool.invalidateObject(this);
+                            } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }

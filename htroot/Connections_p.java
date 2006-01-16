@@ -46,7 +46,9 @@
 //javac -classpath .:../classes Network.java
 //if the shell's current path is HTROOT
 
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URLEncoder;
 import java.util.Properties;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
@@ -65,18 +67,13 @@ import de.anomic.urlRedirector.urlRedirectord;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public final class Connections_p {
+public final class Connections_p {    
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         serverObjects prop = new serverObjects();
-                 
-        // determines if name lookup should be done or not
-        boolean doNameLookup = false;
-        if ((post != null) && post.containsKey("nameLookup") && post.get("nameLookup","true").equals("true")) {
-            doNameLookup = true;
-        }
+         
         
         // getting the virtualHost string
         String virtualHost = switchboard.getConfig("fileHost","localhost");
@@ -93,7 +90,55 @@ public final class Connections_p {
         /* waiting for all threads to finish */
         int threadCount  = httpSessions.activeCount();    
         Thread[] threadList = new Thread[httpdPoolConfig.maxActive];     
-        threadCount = httpSessions.enumerate(threadList);        
+        threadCount = httpSessions.enumerate(threadList);              
+        
+        // determines if name lookup should be done or not 
+        boolean doNameLookup = false;
+        if (post != null) {  
+            if (post.containsKey("nameLookup") && post.get("nameLookup","true").equals("true")) {
+                doNameLookup = true;
+            }
+            if (post.containsKey("closeSession")) {
+                String sessionName = post.get("closeSession",null);
+                if (sessionName != null) {
+                    for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {                        
+                        Thread currentThread = threadList[currentThreadIdx];
+                        if (
+                                (currentThread != null) && 
+                                (currentThread instanceof serverCore.Session) && 
+                                (currentThread.isAlive()) &&
+                                (currentThread.getName().equals(sessionName))
+                        ){
+                            // trying to gracefull stop session
+                            ((Session)currentThread).setStopped(true);
+                            try { Thread.sleep(100); } catch (InterruptedException ex) {}
+                            
+                            // trying to interrupt session
+                            if (currentThread.isAlive()) {
+                                currentThread.interrupt();
+                                try { Thread.sleep(100); } catch (InterruptedException ex) {}
+                            } 
+                            
+                            // trying to close socket
+                            if (currentThread.isAlive()) {
+                                ((Session)currentThread).close();
+                            }
+                            
+                            // waiting for session to finish
+                            if (currentThread.isAlive()) {
+                                try { currentThread.join(500); } catch (InterruptedException ex) {}
+                            }
+                            
+
+                        }
+                    }
+                    
+                }
+                
+                prop.put("LOCATION","");
+                return prop;                
+            }
+        }  
         
         int idx = 0, numActiveRunning = 0, numActivePending = 0, numMax = ((serverCore)httpd).getMaxSessionCount();
         boolean dark = true;
@@ -155,6 +200,12 @@ public final class Connections_p {
                 }
                 
                 prop.put("list_" + idx + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
+                try {
+                    prop.put("list_" + idx + "_sessionID",URLEncoder.encode(currentSession.getName(),"UTF8"));
+                } catch (UnsupportedEncodingException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 prop.put("list_" + idx + "_sessionName",currentSession.getName());
                 prop.put("list_" + idx + "_proto",prot);             
                 if (sessionTime > 1000*60) {
