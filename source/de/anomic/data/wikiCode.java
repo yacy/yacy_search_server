@@ -109,130 +109,21 @@ public class wikiCode {
         }
     }
 
-    //The following method has been submitted by Kane (added and a few changes by MN)
-    /** Replaces special characters from a string. Otherwise they might cause ugly output on some systems.
-      * This code is also important to avoid XSS attacks.
-      *
-      * @param text a string that possibly contains special characters
-      * @return the string with all special characters encoded so they will look right on every system
-      */
-    public static String replaceHTML(String text) {
-        if (text==null) { return null; }
-        for (int x=0;x<=htmlentities.length-1;x=x+2) {
-            int p=0;
-            while ((p=text.indexOf(htmlentities[x],p))>=0) {
-                text=text.substring(0,p)+htmlentities[x+1]+text.substring(p+htmlentities[x].length());
-                p+=htmlentities[x+1].length();
-            }
-        }
-        return text;
-    }
+    public static String replaceHTML(String result) {
+        if (result == null) return null;
+        int p0;
 
-    public static String[] htmlentities={
-        "&","&amp;",    // Ampersands _have_ to be replaced first. If they were replaced later,
-                        // other replaced characters containing ampersands would get messed up.
-        //" ","&nbsp;",
-        "¡","&iexcl;",
-        "¢","&cent;",
-        "£","&pound;",
-        //"?","&curren;",
-        "¥","&yen;",
-        //"?","&brvbar;",
-        "§","&sect;",
-        //"?","&uml;",
-        "©","&copy;",
-        "ª","&ordf;",
-        "«","&laquo;",
-        "¬","&not;",
-        //"","&shy;",
-        "®","&reg;",
-        "¯","&macr;",
-        "°","&deg;",
-        "±","&plusmn;",
-        "²","&sup2;",
-        "³","&sup3;",
-        //"?","&acute;",
-        "µ","&micro;",
-        "¶","&para;",
-        "·","&middot;",
-        //"?","&cedil;",
-        "¹","&sup1;",
-        "º","&ordm;",
-        "»","&raquo;",
-        //"?","&frac14;",
-        //"?","&frac12;",
-        //"?","&frac34;",
-        "¿","&iquest;",
-        "À","&Agrave;",
-        "Á","&Aacute;",
-        "Â","&Acirc;",
-        "Ã","&Atilde;",
-        "Ä","&Auml;",
-        "Å","&Aring;",
-        "Æ","&AElig;",
-        "Ç","&Ccedil;",
-        "È","&Egrave;",
-        "É","&Eacute;",
-        "Ê","&Ecirc;",
-        "Ë","&Euml;",
-        "Ì","&Igrave;",
-        "Í","&Iacute;",
-        "Î","&Icirc;",
-        "Ï","&Iuml;",
-        "Ð","&ETH;",
-        "Ñ","&Ntilde;",
-        "Ò","&Ograve;",
-        "Ó","&Oacute;",
-        "Ô","&Ocirc;",
-        "Õ","&Otilde;",
-        "Ö","&Ouml;",
-        "×","&times;",
-        "Ø","&Oslash;",
-        "Ù","&Ugrave;",
-        "Ú","&Uacute;",
-        "Û","&Ucirc;",
-        "Ü","&Uuml;",
-        "Ý","&Yacute;",
-        "Þ","&THORN;",
-        "ß","&szlig;",
-        "à","&agrave;",
-        "á","&aacute;",
-        "â","&acirc;",
-        "ã","&atilde;",
-        "ä","&auml;",
-        "å","&aring;",
-        "æ","&aelig;",
-        "ç","&ccedil;",
-        "è","&egrave;",
-        "é","&eacute;",
-        "ê","&ecirc;",
-        "ë","&euml;",
-        "ì","&igrave;",
-        "í","&iacute;",
-        "î","&icirc;",
-        "ï","&iuml;",
-        "ð","&eth;",
-        "ñ","&ntilde;",
-        "ò","&ograve;",
-        "ó","&oacute;",
-        "ô","&ocirc;",
-        "õ","&otilde;",
-        "ö","&ouml;",
-        "÷","&divide;",
-        "ø","&oslash;",
-        "ù","&ugrave;",
-        "ú","&uacute;",
-        "û","&ucirc;",
-        "ü","&uuml;",
-        "ý","&yacute;",
-        "þ","&thorn;",
-        "ÿ","&yuml;",
-        "\"","&quot;",
-        "<","&lt;",
-        ">","&gt;",
-        "(C)","&copy;"
-    };
-    //end of Kane's code
+        // Ampersands have to be replaced first. If they were replaced later,
+        // other replaced characters containing ampersands would get messed up.
+        p0 = 0; while ((p0 = result.indexOf("&", p0)) >= 0) {result = result.substring(0, p0) + "&amp;" + result.substring(p0 + 1); p0++;}
+        p0 = 0; while ((p0 = result.indexOf('"', p0)) >= 0) result = result.substring(0, p0) + "&quot;" + result.substring(p0 + 1);
+        p0 = 0; while ((p0 = result.indexOf("<", p0)) >= 0) result = result.substring(0, p0) + "&lt;" + result.substring(p0 + 1);
+        p0 = 0; while ((p0 = result.indexOf(">", p0)) >= 0) result = result.substring(0, p0) + "&gt;" + result.substring(p0 + 1);
+        //p0 = 0; while ((p0 = result.indexOf("*", p0)) >= 0) result = result.substring(0, p0) + "&#149;" + result.substring(p0 + 1);
+        p0 = 0; while ((p0 = result.indexOf("(C)", p0)) >= 0) result = result.substring(0, p0) + "&copy;" + result.substring(p0 + 3);
+
+    return result;
+    }
 
     /** Replaces wiki tags with HTML tags.
       *
