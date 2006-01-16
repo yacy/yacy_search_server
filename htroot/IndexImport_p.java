@@ -49,12 +49,14 @@
 //if the shell's current path is HTROOT
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.Date;
 import java.util.Vector;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaDbImporter;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -93,10 +95,17 @@ public final class IndexImport_p {
                         
                         prop.put("LOCATION","");
                         return prop;
-                    }
-                } catch (Exception e) {
-                    prop.put("error",1);
+                    } 
+                } catch (Exception e) { 
+                    serverByteBuffer errorMsg = new serverByteBuffer(100);
+                    PrintStream errorOut = new PrintStream(errorMsg);
+                    e.printStackTrace(errorOut);
+                    
+                    prop.put("error",3);
                     prop.put("error_error_msg",e.toString());
+                    prop.put("error_error_stackTrace",errorMsg.toString().replaceAll("\n","<br>"));
+                    
+                    errorOut.close();
                 }
             } else if (post.containsKey("clearFinishedJobList")) {
                 plasmaDbImporter.finishedJobs.clear();
