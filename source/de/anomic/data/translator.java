@@ -180,7 +180,7 @@ public class translator {
              }
 			if(rightExtension){
                 try{
-                    relativePath=sourceFiles[i].getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1, sourceFiles[i].getAbsolutePath().length()); //+1 to get the "/"
+                    relativePath=sourceFiles[i].getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1); //+1 to get the "/"
                     relativePath = relativePath.replace(File.separatorChar, '/');
                 }catch(IndexOutOfBoundsException e){
 					serverLog.logSevere("Translator", "Error creating relative Path for "+sourceFiles[i].getAbsolutePath());
@@ -210,7 +210,7 @@ public class translator {
         while(it.hasNext()){
             file=(File)it.next();
             //cuts the sourcePath and prepends the destPath
-            file2=new File(destDir, file.getPath().substring(sourceDir.getPath().length(), file.getPath().length()));
+            file2=new File(destDir, file.getPath().substring(sourceDir.getPath().length()));
             //file2=new File(file.getPath().replaceFirst(sourceName.replaceAll("\\\\", "\\\\"), destName));
             if(file.isDirectory() && !file.getName().equals(notdir)){
                 //file2.mkdirs();
