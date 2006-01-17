@@ -72,19 +72,20 @@ public final class transfer {
         String filename  = post.get("filename", ""); // a name of a file without path
         //long   filesize  = Long.parseLong((String) post.get("filesize", "")); // the size of the file
         
+        prop.put("process", 0);
+        prop.put("response", "denied"); // reject is default and is overwritten if ok
+        prop.put("process_access", "");
+        prop.put("process_address", "");
+        prop.put("process_protocol", "");
+        prop.put("process_path", "");
+        prop.put("process_maxsize", "0");
+        
         yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
         if ((otherseed == null) || (filename.indexOf("..") >= 0)) {
-            // reject unknown peers
-            // this does not appear fair, but anonymous senders are dangerous
-            prop.put("process", 0);
-            prop.put("response", "denied");
-            prop.put("process_access", "");
-            prop.put("process_address", "");
-            prop.put("process_protocol", "");
-            prop.put("process_path", "");
-            prop.put("process_maxsize", "0");
-            if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "'");
-            if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "'");
+            // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
+            // reject paths that contain '..' because they are dangerous
+            if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get("CLIENTIP", "unknown"));
+            if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + otherseed.getName() + "/" + otherseed.getAddress()+ ", current IP " + header.get("CLIENTIP", "unknown"));
             return prop;
         }
         
@@ -92,7 +93,7 @@ public final class transfer {
         
         if (process.equals("permission")) {
             prop.put("process", 0);
-            if (purpose.equals("crcon")) {
+            if ((purpose.equals("crcon")) && (filename.startsWith("CRG")) && (filename.endsWith(".cr.gz"))) {
                 // consolidation of cr files
                 //System.out.println("yacy/transfer:post=" + post.toString());
                 //String cansendprotocol = (String) post.get("can-send-protocol", "http");
@@ -137,7 +138,7 @@ public final class transfer {
                                 sb.getLog().logFine("RankingTransmission: received from peer " + otherpeerName + " CR file " + filename);
                             } else {
                                 prop.put("response", "transfer failure");
-                                sb.getLog().logFine("RankingTransmission: transfer failunre from peer " + otherpeerName + " for CR file " + filename);
+                                sb.getLog().logFine("RankingTransmission: transfer failure from peer " + otherpeerName + " for CR file " + filename);
                             }
                         }else{
                             //exploit?
@@ -153,13 +154,6 @@ public final class transfer {
         }
         
         // wrong access
-        prop.put("process", 0);
-        prop.put("response", "denied");
-        prop.put("process_access", "");
-        prop.put("process_address", "");
-        prop.put("process_protocol", "");
-        prop.put("process_path", "");
-        prop.put("process_maxsize", "0");
         sb.getLog().logFine("RankingTransmission: rejected unknown process " + process + ":" + purpose + " from peer " + otherpeerName);
         return prop;
     }
