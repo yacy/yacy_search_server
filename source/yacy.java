@@ -70,7 +70,6 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.http.httpc.response;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -171,53 +170,6 @@ public final class yacy {
         return (float) (((double) v * 100000000.0 + ((double) svn)) / 100000000.0);
     }
 
-    public static void presetPasswords(plasmaSwitchboard sb) {
-        // set preset accounts/passwords
-        String acc;
-        if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
-            sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(acc)));
-            sb.setConfig("serverAccount", "");
-        }
-        if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
-            sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(acc)));
-            sb.setConfig("adminAccount", "");
-        }
-
-        // fix unsafe old passwords
-        if ((acc = sb.getConfig("proxyAccountBase64", "")).length() > 0) {
-            sb.setConfig("proxyAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
-            sb.setConfig("proxyAccountBase64", "");
-        }
-        if ((acc = sb.getConfig("serverAccountBase64", "")).length() > 0) {
-            sb.setConfig("serverAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
-            sb.setConfig("serverAccountBase64", "");
-        }
-        if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
-            sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
-            sb.setConfig("adminAccountBase64", "");
-        }
-        if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {
-            sb.setConfig("uploadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
-            sb.setConfig("uploadAccountBase64", "");
-        }
-        if ((acc = sb.getConfig("downloadAccountBase64", "")).length() > 0) {
-            sb.setConfig("downloadAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
-            sb.setConfig("downloadAccountBase64", "");
-        }
-    }
-    
-    
-    public static void migrateSwitchConfigSettings(plasmaSwitchboard sb) {
-        String value = "";
-        if ((value = sb.getConfig("parseableMimeTypes","")).length() > 0) {
-            sb.setConfig("parseableMimeTypes.CRAWLER", value);
-            sb.setConfig("parseableMimeTypes.PROXY", value);
-            sb.setConfig("parseableMimeTypes.URLREDIRECTOR", value);
-            sb.setConfig("parseableMimeTypes.ICAP", value);
-        }
-    }
-    
-    
     /**
     * Starts up the whole application. Sets up all datastructures and starts
     * the main threads.
@@ -377,8 +329,7 @@ public final class yacy {
             serverFileUtils.copy(new File(htRootPath, "htdocsdefault/dir.html"), new File(shareDefaultPath, "dir.html"));
             //} catch (IOException e) {}
 
-            presetPasswords(sb);
-            migrateSwitchConfigSettings(sb);
+            migration.migrate(sb);
             
             // start main threads
             try {
