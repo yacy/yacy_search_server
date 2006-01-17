@@ -380,7 +380,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     private boolean flushFromAssortmentCluster(String key, long maxTime) {
         // this should only be called if the assortment shall be deleted or returned in an index entity
-        maxTime = 8 * maxTime / 10; // reserve time for later adding to backend
+        if (maxTime > 0) maxTime = 8 * maxTime / 10; // reserve time for later adding to backend
         plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(key, maxTime);
         if (container == null) {
             return false;
