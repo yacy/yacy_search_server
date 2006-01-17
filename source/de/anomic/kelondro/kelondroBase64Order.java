@@ -87,7 +87,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         if (signature.equals("Bd")) return new kelondroBase64Order(false, false);
         if (signature.equals("bd")) return new kelondroBase64Order(false, true);
         if (signature.equals("Bu")) return new kelondroBase64Order(true, false);
-        if (signature.equals("du")) return new kelondroBase64Order(true, true);
+        if (signature.equals("bu")) return new kelondroBase64Order(true, true);
         return null;
     }
     
