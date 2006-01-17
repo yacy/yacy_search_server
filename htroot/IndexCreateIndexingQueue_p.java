@@ -75,7 +75,14 @@ public class IndexCreateIndexingQueue_p {
         prop.put("rejected", 0);
         int showRejectedCount = 10;
         
+        int showLimit = 100;
         if (post != null) {
+            if (post.containsKey("limit")) {
+                try {
+                    showLimit = Integer.valueOf((String)post.get("limit")).intValue();
+                } catch (NumberFormatException e) {}
+            }    
+            
             if (post.containsKey("clearRejected")) {
                 switchboard.urlPool.errorURL.clearStack();
             } 
@@ -143,8 +150,7 @@ public class IndexCreateIndexingQueue_p {
                                 
                 int count=entryList.size();
                 totalCount = count;
-                if(count>100)count=100;
-                for (int i = 0; i < count; i++) {
+                for (int i = 0; (i < count) && (entryCount < showLimit); i++) {
 
                     boolean inProcess = i < inProcessCount;
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);

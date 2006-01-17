@@ -76,7 +76,14 @@ public class IndexCreateWWWLocalQueue_p {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
  
+        int showLimit = 100;
         if (post != null) {
+            if (post.containsKey("limit")) {
+                try {
+                    showLimit = Integer.valueOf((String)post.get("limit")).intValue();
+                } catch (NumberFormatException e) {}
+            }
+            
             if (post.containsKey("deleteEntries")) {
                 int c = 0;
                 
@@ -163,7 +170,7 @@ public class IndexCreateWWWLocalQueue_p {
             String profileHandle;
             plasmaCrawlProfile.entry profileEntry;
             int i;
-            for (i = 0; (i < crawlerList.length) && (showNum < 100); i++) {
+            for (i = 0; (i < crawlerList.length) && (showNum < showLimit); i++) {
                 urle = crawlerList[i];
                 if ((urle != null)&&(urle.url()!=null)) {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());

@@ -70,7 +70,14 @@ public class IndexCreateWWWGlobalQueue_p {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
  
+        int showLimit = 100;
         if (post != null) {
+            if (post.containsKey("limit")) {
+                try {
+                    showLimit = Integer.valueOf((String)post.get("limit")).intValue();
+                } catch (NumberFormatException e) {}
+            }            
+            
             if (post.containsKey("clearcrawlqueue")) {
                 int c = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
                 switchboard.urlPool.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
@@ -92,16 +99,15 @@ public class IndexCreateWWWGlobalQueue_p {
             prop.put("crawler-queue", 0);
         } else {
             prop.put("crawler-queue", 1);
-            plasmaCrawlNURL.Entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, 100);
+            plasmaCrawlNURL.Entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, showLimit);
             prop.put("crawler-queue_num", stackSize);//num Entries
-            prop.put("crawler-queue_show-num", crawlerList.length); //showin sjow-num most recent
             plasmaCrawlNURL.Entry urle;
             boolean dark = true;
             yacySeed initiator;
             String profileHandle;
             plasmaCrawlProfile.entry profileEntry;
             int i, showNum = 0;
-            for (i = 0; i < crawlerList.length; i++) {
+            for (i = 0; (i < crawlerList.length) && (showNum < showLimit); i++) {
                 urle = crawlerList[i];
                 if ((urle != null)&&(urle.url()!=null)) {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());
@@ -118,6 +124,7 @@ public class IndexCreateWWWGlobalQueue_p {
                     showNum++;
                 }
             }
+            prop.put("crawler-queue_show-num", showNum); //showin sjow-num most recent
             prop.put("crawler-queue_list", showNum);
         }
 
