@@ -110,7 +110,7 @@ public class kelondroMergeIterator implements Iterator {
             nexta();
             nextb();
             return s;
-        } else if ((up) && (c < 0)) {
+        } else if (((up) && (c < 0)) || ((!(up)) && (c > 0))) {
             s = na;
             nexta();
             return s;
