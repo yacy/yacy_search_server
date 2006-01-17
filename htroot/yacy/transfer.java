@@ -128,14 +128,20 @@ public final class transfer {
                     path.mkdirs();
                     File file = new File(path, filename);
                     try {
-                        serverFileUtils.write(filebytes, file);
-                        String md5t = serverCodings.encodeMD5Hex(file);
-                        if (md5t.equals(md5)) {
-                            prop.put("response", "ok");
-                            sb.getLog().logFine("RankingTransmission: received from peer " + otherpeerName + " CR file " + filename);
-                        } else {
-                            prop.put("response", "transfer failure");
-                            sb.getLog().logFine("RankingTransmission: transfer failunre from peer " + otherpeerName + " for CR file " + filename);
+                        if (file.getCanonicalPath().toString().startsWith(path.getCanonicalPath().toString())){
+                            serverFileUtils.write(filebytes, file);
+                            String md5t = serverCodings.encodeMD5Hex(file);
+                            if (md5t.equals(md5)) {
+                                prop.put("response", "ok");
+                                sb.getLog().logFine("RankingTransmission: received from peer " + otherpeerName + " CR file " + filename);
+                            } else {
+                                prop.put("response", "transfer failure");
+                                sb.getLog().logFine("RankingTransmission: transfer failunre from peer " + otherpeerName + " for CR file " + filename);
+                            }
+                        }else{
+                            //exploit?
+                            prop.put("response", "io error");
+                            return prop;
                         }
                     } catch (IOException e) {
                         prop.put("response", "io error");
