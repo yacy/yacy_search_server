@@ -73,7 +73,7 @@ public final class transfer {
         //long   filesize  = Long.parseLong((String) post.get("filesize", "")); // the size of the file
         
         yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
-        if (otherseed == null) {
+        if ((otherseed == null) || (filename.indexOf("..") >= 0)) {
             // reject unknown peers
             // this does not appear fair, but anonymous senders are dangerous
             prop.put("process", 0);
@@ -83,7 +83,8 @@ public final class transfer {
             prop.put("process_protocol", "");
             prop.put("process_path", "");
             prop.put("process_maxsize", "0");
-            sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "'");
+            if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "'");
+            if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "'");
             return prop;
         }
         
