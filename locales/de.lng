@@ -439,15 +439,17 @@ YaCy '\#\[clientname\]\# ': Index Creation/Indexing Queue==YaCy '#[clientname]#'
 Index Creation: Indexing Queue==Index Erzeugung: Indexier Warteschlange
 The indexing queue is empty==Die Indexier Warteschlange ist leer.
 "clear indexing queue"=="Warteschlange l&ouml;schen"
-There are \#\[num\]\# entries with a total size of \#\[totalSize\]\# in the indexing queue:==Es befinden sich #[num]# Eintr&auml;ge mit einer Gr&ouml;sse von #[totalSize]# in der Indexier Warteschlange:
+There are <b>\#\[num\]\#</b> entries in the indexing queue. Showing <b>\#\[show\]\#</b> entries with a total size of <b>\#\[totalSize\]\#</b>.==Es befinden sich <b>#[num]#</b> Eintr&auml;ge in der Indexier Warteschlange. <b>#[show]#</b> Eintr&auml;ge mit einer Gr&ouml;sse von <b>#[totalSize]#</b> werden angezeigt.
+Show last==Zeige die letzten
+</a> entries.==</a> Eintr&auml;ge.
 Initiator==Initiator
 Depth==Tiefe
 Modified Date==&Auml;nderungsdatum
 Anchor Name==Anker Name
-URL==URL
+#URL==URL
 Size</th>==Gr&ouml;sse</th>
 Delete==L&ouml;schen
-Rejected URL List:</b>&nbsp;There are \#\[num\]\# entries in the rejected-urls list.==Ausschluss URL Liste:</b>&nbsp;Es befinden sich #[num]# Eintr&auml;ge in der ausgeschlossene-urls Liste.
+Rejected URL List:</b>&nbsp;There are \#\[num\]\# entries in the rejected-urls list.==Ausschluss URL Liste:</b>&nbsp;Es befinden sich #[num]# Eintr&auml;ge in der ausgeschlossene-URL Liste.
 Showing latest \#\[num\]\# entries.==Es werden die letzten #[num]# Eintr&auml;ge gezeigt.
 "show more"=="Mehr zeigen"
 "clear list"=="Liste l&ouml;schen"
@@ -465,7 +467,7 @@ The loader set is empty==Die Lade Warteschlange ist leer.
 There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Eintr&auml;ge in der Lade Warteschlange:
 Initiator==Initiator
 Depth==Tiefe
-URL==URL
+#URL==URL
 
 #-------------------------------------------------------
 #File: IndexCreateWWWGlobalQueue_p.html
@@ -477,13 +479,15 @@ This queue stores the urls that shall be sent to other peers to perform a remote
 If there is no peer for remote crawling available, the links are crawled locally.==Wenn kein Peer zum Remote Crawl vorhanden ist, werden die Links lokal gecrawlt.
 The global crawler queue is empty==Die globale Crawler Warteschlange ist leer.
 "clear global crawl queue"=="L&ouml;sche globale Crawler Warteschlange"
-There are \#\[num\]\# entries in the global crawler queue. Showing \#\[show-num\]\# most recent entries:==Es befinden sich #[num]# Eintr&auml;ge in der globalen Crawler Warteschlange. Gezeigt werden die #[show-num]# neusten Eintr&auml;ge:
+There are <b>\#\[num\]\#</b> entries in the global crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==Es befinden sich <b>#[num]#</b> Eintr&auml;ge in der globalen Crawler Warteschlange. Gezeigt werden die <b>#[show-num]#</b> neusten Eintr&auml;ge.
+Show last==Zeige die letzten
+</a> entries.==</a> Eintr&auml;ge.
 Initiator==Initiator
 Profile==Profil
 Depth==Tiefe
 Modified Date==&Auml;nderungsdatum
 Anchor Name==Anker Name
-URL==URL
+#URL==URL
 
 #-------------------------------------------------------
 #File: IndexCreateWWWLocalQueue_p.html
@@ -495,7 +499,9 @@ This queue stores the urls that shall be crawled localy by this peer.==Diese War
 It may also contain urls that are computed by the proxy-prefetch.==Sie enth&auml;t auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
 The local crawler queue is empty==Die lokale Crawler Warteschlange ist leer.
 "clear local crawl queue"=="L&ouml;sche lokale Crawler Warteschlange"
-There are \#\[num\]\# entries in the local crawler queue. Showing \#\[show-num\]\# most recent entries:==Es befinden sich #[num]# Eintr&auml;ge in der lokalen Crawler Warteschlange. Gezeigt werden die #[show-num]# neusten Eintr&auml;ge:
+There are <b>\#\[num\]\#</b> entries in the local crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==Es befinden sich <b>#[num]#</b> Eintr&auml;ge in der globalen Crawler Warteschlange. Gezeigt werden die <b>#[show-num]#</b> neusten Eintr&auml;ge.
+Show last==Zeige die letzten
+</a> entries.==</a> Eintr&auml;ge.
 Initiator==Initiator
 Profile==Profil
 Depth==Tiefe
@@ -938,7 +944,7 @@ You can now go back to the <a href="Settings_p.html">Settings</a> page if you wa
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Administration Account Settings==Administrator Konto Einstellungen
-This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:==Dies ist das Konto, das Zugriff auf diese sonst gesch&uuml;tzten "Einstellungen" Seite hat. Wenn Sie es noch nicht eingerichtet haben, sollten Sie es nun tun:
+This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:==Dies ist das Konto, das Zugriff auf diese sonst gesch&uuml;tzte "Einstellungen" Seite hat. Wenn Sie es noch nicht eingerichtet haben, sollten Sie es nun tun:
 Account Name:==Konto Name:
 Password:==Passwort:
 Password \(repeat same as above\):==Passwort (bitte zur Sicherheit erneut eingeben):
@@ -1208,7 +1214,7 @@ Index Create==Index erzeugen
 Index Control==Index verwalten
 #Index Monitor==Index Monitor
 #Blacklist==Blacklist
-#Proxy Indexing==Proxy Indexing
+Proxy Indexing==Proxy Indexierung
 #Cache Monitor==Cache Monitor
 #Cookie Monitor==Cookie Monitor
 #Home Page==Homepage
@@ -1222,6 +1228,7 @@ Personal Profile==Pers&ouml;nliches Profil
 #Log==Log
 >Settings==>Einstellungen
 #Performance==Performance
+>Connections==>Verbindungen
 >Language==>Sprache
 #Skins==Skins
 Project Home==Pojektseite
@@ -1275,3 +1282,11 @@ Performance Menu==Performance Men&uuml;
 Queues Performance Settings==Warteschlangen Performance Einstellungen
 Memory Settings for Database Caches==Speicher Einstellungen des Datenbank Caches
 Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequenz
+
+#--------------------------------------------------------
+#File: htdocsdefault/dir.html
+
+YACY: Public Files==YaCy: &Ouml;ffentliche Dateien
+Public&nbsp;File&nbsp;Directory==&Ouml;ffentliches Datei Verzeichnis
+value="\#\[peername\]\#'s Console"==value="#[peername]#'s Konsole"
+Welcome! You are identified and authorized as==Willkommen! Sie sind identifiziert und authorisiert als
