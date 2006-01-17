@@ -162,7 +162,7 @@ public class IndexCreateWWWLocalQueue_p {
             prop.put("crawler-queue", 0);
         } else {
             prop.put("crawler-queue", 1);
-            plasmaCrawlNURL.Entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, 120);
+            plasmaCrawlNURL.Entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
 
             plasmaCrawlNURL.Entry urle;
             boolean dark = true;
