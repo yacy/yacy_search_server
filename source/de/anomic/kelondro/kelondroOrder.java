@@ -49,6 +49,8 @@ import java.util.Comparator;
 
 public interface kelondroOrder extends Comparator {
 
+    public String signature(); // returns a signature String so that different orderings have different signatures
+    
     public long partition(byte[] key, int forkes);
 
     public long cardinal(byte[] key); // returns a cardinal number in the range of 0 .. Long.MAX_VALUE

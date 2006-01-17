@@ -83,6 +83,22 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         ahpla = (rfc1113compliant) ? ahpla_standard : ahpla_enhanced;
     }
 
+    public static kelondroOrder bySignature(String signature) {
+        if (signature.equals("Bd")) return new kelondroBase64Order(false, false);
+        if (signature.equals("bd")) return new kelondroBase64Order(false, true);
+        if (signature.equals("Bu")) return new kelondroBase64Order(true, false);
+        if (signature.equals("du")) return new kelondroBase64Order(true, true);
+        return null;
+    }
+    
+    public String signature() {
+        if ((!asc) && (!rfc1113compliant)) return "Bd";
+        if ((!asc) && ( rfc1113compliant)) return "bd";
+        if (( asc) && (!rfc1113compliant)) return "Bu";
+        if (( asc) && ( rfc1113compliant)) return "bu";
+        return null;
+    }
+    
     public char encodeByte(byte b) {
         return (char) alpha[b];
     }
@@ -260,5 +276,6 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
             System.out.println(b64.decodeString(s[1]));
         }
     }
+
     
 }

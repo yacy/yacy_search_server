@@ -70,8 +70,12 @@ public class kelondroDyn extends kelondroTree {
     private int segmentCount;
 
     public kelondroDyn(File file, long buffersize /*bytes*/, int key, int nodesize, boolean exitOnFail) {
+        this(file, buffersize, key, nodesize, new kelondroNaturalOrder(true), exitOnFail);
+    }
+    
+    public kelondroDyn(File file, long buffersize /*bytes*/, int key, int nodesize, kelondroOrder objectOrder, boolean exitOnFail) {
 	// creates a new dynamic tree
-	super(file, buffersize, new int[] {key + counterlen, nodesize}, 1, 8, exitOnFail);
+	super(file, buffersize, new int[] {key + counterlen, nodesize}, objectOrder, 1, 8, exitOnFail);
 	this.keylen = columnSize(0) - counterlen;
 	this.reclen = columnSize(1);
 	this.segmentCacheKey = null;

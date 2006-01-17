@@ -61,7 +61,7 @@ public class kelondroFScoreCluster {
     private kelondroTree refcountDB;
     private kelondroTree countrefDB;
 
-    public kelondroFScoreCluster(File refcountDBfile, File countrefDBfile, boolean exitOnFail) {
+    public kelondroFScoreCluster(File refcountDBfile, File countrefDBfile, kelondroOrder objectOrder, boolean exitOnFail) {
         if ((refcountDBfile.exists()) && (countrefDBfile.exists())) try {
             refcountDB = new kelondroTree(refcountDBfile, 0x100000L);
             refcountDB.setText(0, kelondroBase64Order.enhancedCoder.encodeLong(0, countlength).getBytes()); // counter of all occurrences
@@ -70,11 +70,11 @@ public class kelondroFScoreCluster {
         } catch (IOException e) {
             refcountDBfile.delete();
             countrefDBfile.delete();
-            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, new int[] {wordlength, countlength}, 1, countlength, exitOnFail);
-            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, new int[] {countlength + wordlength, 4}, 1, countlength, exitOnFail);
+            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, new int[] {wordlength, countlength}, objectOrder, 1, countlength, exitOnFail);
+            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, new int[] {countlength + wordlength, 4}, objectOrder, 1, countlength, exitOnFail);
         } else if ((!(refcountDBfile.exists())) && (!(countrefDBfile.exists()))) {
-            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, new int[] {wordlength, countlength}, 1, countlength, exitOnFail);
-            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, new int[] {countlength + wordlength, 4}, 1, countlength, exitOnFail);
+            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, new int[] {wordlength, countlength}, objectOrder, 1, countlength, exitOnFail);
+            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, new int[] {countlength + wordlength, 4}, objectOrder, 1, countlength, exitOnFail);
         } else {
             if (exitOnFail) {
                 System.exit(-1);

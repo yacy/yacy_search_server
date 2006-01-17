@@ -57,6 +57,18 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         this.asc = ascending;
     }
     
+    public static kelondroOrder bySignature(String signature) {
+        if (signature.equals("nd")) return new kelondroNaturalOrder(false);
+        if (signature.equals("nu")) return new kelondroNaturalOrder(true);
+        return null;
+    }
+    
+    public String signature() {
+        if (!asc) return "nd";
+        if ( asc) return "nu";
+        return null;
+    }
+    
     public long cardinal(byte[] key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;

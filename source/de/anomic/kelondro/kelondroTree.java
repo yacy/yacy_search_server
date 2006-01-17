@@ -78,19 +78,19 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     private kelondroOrder objectOrder = new kelondroNaturalOrder(true);
     
     public kelondroTree(File file, long buffersize, int key, int value, boolean exitOnFail) {
-        this(file, buffersize, new int[] { key, value }, 1, 8, exitOnFail);
+        this(file, buffersize, new int[] { key, value }, new kelondroNaturalOrder(true), 1, 8, exitOnFail);
     }
 
     public kelondroTree(kelondroRA ra, long buffersize, int key, int value, boolean exitOnFail) {
-        this(ra, buffersize, new int[] { key, value }, 1, 8, exitOnFail);
+        this(ra, buffersize, new int[] { key, value }, new kelondroNaturalOrder(true), 1, 8, exitOnFail);
     }
 
     public kelondroTree(File file, long buffersize, int[] columns, boolean exitOnFail) {
         // this creates a new tree file
-        this(file, buffersize, columns, columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
+        this(file, buffersize, columns, new kelondroNaturalOrder(true), columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
     }
 
-    public kelondroTree(File file, long buffersize, int[] columns, int txtProps, int txtPropsWidth, boolean exitOnFail) {
+    public kelondroTree(File file, long buffersize, int[] columns, kelondroOrder objectOrder, int txtProps, int txtPropsWidth, boolean exitOnFail) {
         // this creates a new tree file
         super(file, buffersize, thisOHBytes, thisOHHandles, columns, thisFHandles, txtProps, txtPropsWidth, exitOnFail);
         try {
@@ -100,14 +100,16 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             if (exitOnFail) System.exit(-1);
             throw new RuntimeException("cannot set root handle / " + e.getMessage());
         }
+        this.objectOrder = objectOrder;
+        writeOrderType();
     }
     
     public kelondroTree(kelondroRA ra, long buffersize, int[] columns, boolean exitOnFail) {
         // this creates a new tree within a kelondroRA
-        this(ra, buffersize, columns, columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
+        this(ra, buffersize, columns, new kelondroNaturalOrder(true), columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
     }
 
-    public kelondroTree(kelondroRA ra, long buffersize, int[] columns, int txtProps, int txtPropsWidth, boolean exitOnFail) {
+    public kelondroTree(kelondroRA ra, long buffersize, int[] columns, kelondroOrder objectOrder, int txtProps, int txtPropsWidth, boolean exitOnFail) {
         // this creates a new tree within a kelondroRA
         super(ra, buffersize, thisOHBytes, thisOHHandles, columns,
                 thisFHandles, txtProps, txtPropsWidth, exitOnFail);
@@ -118,18 +120,44 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             if (exitOnFail) System.exit(-1);
             throw new RuntimeException("cannot set root handle / " + e.getMessage());
         }
+        this.objectOrder = objectOrder;
+        writeOrderType();
     }
 
     public kelondroTree(File file, long buffersize) throws IOException {
         // this opens a file with an existing tree file
         super(file, buffersize);
+        readOrderType();
     }
 
     public kelondroTree(kelondroRA ra, long buffersize) throws IOException {
         // this opens a file with an existing tree in a kelondroRA
         super(ra, buffersize);
+        readOrderType();
     }
 
+    private void writeOrderType() {
+        try {
+            super.setDescription(objectOrder.signature().getBytes());
+        } catch (IOException e) {};
+    }
+    
+    private void readOrderType() {
+        try {
+            byte[] d = super.getDescription();
+            String s = new String(d).substring(0, 2);
+            this.objectOrder = orderBySignature(s);
+        } catch (IOException e) {};
+    }
+    
+    public static kelondroOrder orderBySignature(String signature) {
+        kelondroOrder oo = null;
+        if (oo == null) oo = kelondroNaturalOrder.bySignature(signature);
+        if (oo == null) oo = kelondroBase64Order.bySignature(signature);
+        if (oo == null) oo = new kelondroNaturalOrder(true);
+        return oo;
+    }
+    
     public void clear() throws IOException {
         super.clear();
         setHandle(root, null); // reset the root value

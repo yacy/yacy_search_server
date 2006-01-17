@@ -72,10 +72,11 @@ public class kelondroSplittedTree implements kelondroIndex {
         return true;
     }
     
-    public kelondroSplittedTree(File pathToFiles, String filenameStub, kelondroOrder order,
+    public kelondroSplittedTree(File pathToFiles, String filenameStub, kelondroOrder objectOrder,
                             long buffersize,
                             int forkfactor,
-                            int[] columns, int txtProps, int txtPropsWidth,
+                            int[] columns,
+                            int txtProps, int txtPropsWidth,
                             boolean exitOnFail) {
         ktfs = new kelondroTree[forkfactor];
         File f;
@@ -84,31 +85,32 @@ public class kelondroSplittedTree implements kelondroIndex {
             if (f.exists()) {
                 try {
                     ktfs[i] = new kelondroTree(f, buffersize/forkfactor);
+                    this.order = ktfs[i].order();
                 } catch (IOException e) {
                     ktfs[i] = new kelondroTree(f, buffersize/forkfactor,
-                                               columns, txtProps, txtPropsWidth, exitOnFail);
+                                               columns, objectOrder, txtProps, txtPropsWidth, exitOnFail);
+                    this.order = objectOrder;
                 }
             } else {
                 ktfs[i] = new kelondroTree(f, buffersize/forkfactor,
-                                           columns, txtProps, txtPropsWidth, exitOnFail);
+                                           columns, objectOrder, txtProps, txtPropsWidth, exitOnFail);
+                this.order = objectOrder;
             }
         }
         ff = forkfactor;
-        this.order = order;
     }
 
-    public kelondroSplittedTree(File pathToFiles, String filenameStub, kelondroOrder order,
+    public kelondroSplittedTree(File pathToFiles, String filenameStub, kelondroOrder objectOrder,
                             long buffersize, int forkfactor, int columns) throws IOException {
         ktfs = new kelondroTree[forkfactor];
         for (int i = 0; i < forkfactor; i++) {
-            ktfs[i] = new kelondroTree(dbFile(pathToFiles, filenameStub, forkfactor, columns, i),
-                                       buffersize/forkfactor);
+            ktfs[i] = new kelondroTree(dbFile(pathToFiles, filenameStub, forkfactor, columns, i), buffersize/forkfactor);
         }
         ff = forkfactor;
-        this.order = order;
+        this.order = objectOrder;
     }
     
-    public static kelondroSplittedTree open(File pathToFiles, String filenameStub, kelondroOrder order,
+    public static kelondroSplittedTree open(File pathToFiles, String filenameStub, kelondroOrder objectOrder,
                     long buffersize,
                     int forkfactor,
                     int[] columns, int txtProps, int txtPropsWidth,
@@ -116,9 +118,9 @@ public class kelondroSplittedTree implements kelondroIndex {
         // generated a new splittet tree if it not exists or
         // opens an existing one
         if (existsAll(pathToFiles, filenameStub, forkfactor, columns.length)) {
-            return new kelondroSplittedTree(pathToFiles, filenameStub, order, buffersize, forkfactor, columns.length);
+            return new kelondroSplittedTree(pathToFiles, filenameStub, objectOrder, buffersize, forkfactor, columns.length);
         } else {
-            return new kelondroSplittedTree(pathToFiles, filenameStub, order,
+            return new kelondroSplittedTree(pathToFiles, filenameStub, objectOrder,
                             buffersize,
                             forkfactor,
                             columns, txtProps, txtPropsWidth,
@@ -126,7 +128,6 @@ public class kelondroSplittedTree implements kelondroIndex {
         }
     }
     
-
     public int columns() {
         return ktfs[0].columns();
     }
