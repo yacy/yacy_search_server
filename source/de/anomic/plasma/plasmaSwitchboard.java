@@ -186,6 +186,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
     public  plasmaCrawlProfile.entry    defaultRemoteProfile;
     public  plasmaWordIndexDistribution indexDistribution;
+    public  boolean                     rankingOn;
     public  plasmaRankingDistribution   rankingOwnDistribution;
     public  plasmaRankingDistribution   rankingOtherDistribution;
     public  HashMap                     outgoingCookies, incomingCookies;
@@ -224,7 +225,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private Object  crawlingPausedSync = new Object();
     private boolean crawlingIsPaused = false;
     private static plasmaSwitchboard sb;
-    
+
     public plasmaSwitchboard(String rootPath, String initPath, String configPath) {
         super(rootPath, initPath, configPath);
         
@@ -454,6 +455,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // init ranking transmission
         /*
+        CRDistOn       = true/false
         CRDist0Path    = GLOBAL/010_owncr
         CRDist0Method  = 1
         CRDist0Percent = 0
@@ -463,6 +465,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         CRDist1Percent = 30
         CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080
          **/
+        rankingOn = getConfig("CRDistOn", "true").equals("true");
         rankingOwnDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN)), (int) getConfigLong("CRDist0Method", plasmaRankingDistribution.METHOD_ANYSENIOR), (int) getConfigLong("CRDist0Percent", 0), getConfig("CRDist0Target", ""));
         rankingOtherDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig("CRDist1Path", plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong("CRDist1Method", plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong("CRDist1Percent", 30), getConfig("CRDist1Target", "kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080"));
         
@@ -522,6 +525,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         new serverInstantThread(this, "cleanupJob", "cleanupJobSize"), 10000); // all 5 Minutes
         deployThread("82_crawlstack", "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
         new serverInstantThread(sbStackCrawlThread, "job", "size"), 8000);
+
         deployThread("80_indexing", "Parsing/Indexing", "thread that performes document parsing and indexing", "/IndexCreateIndexingQueue_p.html",
         new serverInstantThread(this, "deQueue", "queueSize"), 10000);
         for (int i = 1; i < indexing_cluster; i++) {
@@ -533,6 +537,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             Long.parseLong(getConfig("80_indexing_busysleep" , "0")),
             Long.parseLong(getConfig("80_indexing_memprereq" , "1000000")));
         }
+
         deployThread("70_cachemanager", "Proxy Cache Enqueue", "job takes new proxy files from RAM stack, stores them, and hands over to the Indexing Stack", null,
         new serverInstantThread(this, "htEntryStoreJob", "htEntrySize"), 10000);
         deployThread("62_remotetriggeredcrawl", "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
@@ -569,7 +574,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/mobil/newsticker/meldung/mail/54980"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
-        
+
         sb=this;
         log.logConfig("Finished Switchboard Initialization");
     }
@@ -604,7 +609,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (bytes < 1024) return bytes + " GByte";
         return (bytes / 1024) + "TByte";
     }
-    
+
     private void initProfiles() {
         if ((profiles.size() == 0) ||
             (getConfig(STR_PROXYPROFILE, "").length() == 0) ||
@@ -616,16 +621,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             defaultProxyProfile = profiles.getEntry(getConfig(STR_PROXYPROFILE, ""));
         }
         if ((profiles.size() == 1) ||
-        (getConfig(STR_REMOTEPROFILE, "").length() == 0) ||
-        (profiles.getEntry(getConfig(STR_REMOTEPROFILE, "")) == null)) {
+            (getConfig(STR_REMOTEPROFILE, "").length() == 0) ||
+            (profiles.getEntry(getConfig(STR_REMOTEPROFILE, "")) == null)) {
             // generate new default entry for remote crawling
             defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, false, true, true, false, true, true, false);
+//          defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, true, true, true, true, true, true, false);
             setConfig(STR_REMOTEPROFILE, defaultRemoteProfile.handle());
         } else {
             defaultRemoteProfile = profiles.getEntry(getConfig(STR_REMOTEPROFILE, ""));
         }
     }
-    
+
     private void resetProfiles() {
         final File pdb = new File(plasmaPath, "crawlProfiles0.db");
         if (pdb.exists()) pdb.delete();

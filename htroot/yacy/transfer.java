@@ -64,14 +64,13 @@ public final class transfer {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
 
-        
         String process   = post.get("process", "");  // permission or store
         //String key       = post.get("key", "");      // a transmission key from the client
         String otherpeer = post.get("iam", "");      // identification of the client (a peer-hash)
         String purpose   = post.get("purpose", "");  // declares how the file shall be treated
         String filename  = post.get("filename", ""); // a name of a file without path
         //long   filesize  = Long.parseLong((String) post.get("filesize", "")); // the size of the file
-        
+
         prop.put("process", 0);
         prop.put("response", "denied"); // reject is default and is overwritten if ok
         prop.put("process_access", "");
@@ -79,7 +78,9 @@ public final class transfer {
         prop.put("process_protocol", "");
         prop.put("process_path", "");
         prop.put("process_maxsize", "0");
-        
+
+        if (!sb.rankingOn) { return prop; }
+
         yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
         if ((otherseed == null) || (filename.indexOf("..") >= 0)) {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
@@ -152,11 +153,10 @@ public final class transfer {
             }
             return prop;
         }
-        
+
         // wrong access
         sb.getLog().logFine("RankingTransmission: rejected unknown process " + process + ":" + purpose + " from peer " + otherpeerName);
         return prop;
     }
-
 
 }
