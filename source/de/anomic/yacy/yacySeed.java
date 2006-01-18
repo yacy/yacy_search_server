@@ -173,6 +173,7 @@ public class yacySeed {
         setFlagDirectConnect(false);
         setFlagAcceptRemoteCrawl(true);
         setFlagAcceptRemoteIndex(true);
+        setFlagAcceptCitationReference(true);
         setUnusedFlags();
         
         // index transfer
@@ -380,6 +381,7 @@ public class yacySeed {
     public void setFlagDirectConnect(boolean value) {setFlag(0, value);}
     public void setFlagAcceptRemoteCrawl(boolean value) {setFlag(1, value);}
     public void setFlagAcceptRemoteIndex(boolean value) {setFlag(2, value);}
+    public void setFlagAcceptCitationReference(boolean value) {setFlag(3, value);}
     public boolean getFlagDirectConnect() {return getFlag(0);}
     public boolean getFlagAcceptRemoteCrawl() {
         //if (getVersion() < 0.300) return false;
@@ -390,8 +392,11 @@ public class yacySeed {
         //if (getVersion() < 0.335) return false;
         return getFlag(2);
     }
+    public boolean getFlagAcceptCitationReference() {
+        return getFlag(3);
+    }
     public void setUnusedFlags() {
-        for (int i = 3; i < 24; i++) setFlag(i, true);
+        for (int i = 4; i < 24; i++) setFlag(i, true);
     }
     public boolean isVirgin() {
         return get(PEERTYPE, "").equals(PEERTYPE_VIRGIN);
