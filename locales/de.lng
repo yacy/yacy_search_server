@@ -526,7 +526,7 @@ Starting new Job==Neuen Import starten
 Import Path:==Import Pfad:
 "Start New Import"=="Neuen Import starten"
 Currently running jobs==Gerade laufende Aufgaben
-Path==Pfad
+>Path==>Pfad
 Status==Status
 Elapsed<br>Time==Verstrichene Zeit
 Estimated<br>Time==Gesch&auml;tzte Dauer
