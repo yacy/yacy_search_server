@@ -67,6 +67,7 @@ public class wikiCode {
     private boolean escapeSpan = false;       //needed for escape symbols [= and =] spanning over several lines 
     private boolean preformatted = false;     //needed for preformatted text
     private boolean preformattedSpan = false; //needed for <pre> and </pre> spanning over several lines
+    private boolean replaced = false;         //indicates if method replaceHTML has been used with line already
     private int preindented = 0;              //needed for indented <pre>s
     private int escindented = 0;              //needed for indented [=s
 
@@ -135,104 +136,104 @@ public class wikiCode {
         // Ampersands _have_ to be replaced first. If they were replaced later,
         // other replaced characters containing ampersands would get messed up.
         "\u0026","&amp;",      //ampersand
-        "\\u0022","&quot;",    //quotation mark
-        "\u003c","&lt;",       //less than
-        "\u003e","&gt;",       //greater than
-        "\u00a1","&iexcl;",    //inverted (spanish) exclamation mark
-        "\u00a2","&cent;",     //cent
-        "\u00a3","&pound;",    //pound
-        "\u00a4","&curren;",   //currency
-        "\u00a5","&yen;",      //yen
-        "\u00a6","&brvbar;",   //broken vertical bar
-        "\u00a7","&sect;",     //section sign
-        "\u00a8","&uml;",      //diaeresis (umlaut)
-        "\u00a9","&copy;",     //copyright sign
-        "\u00aa","&ordf;",     //feminine ordinal indicator
-        "\u00ab","&laquo;",    //left-pointing double angle quotation mark
-        "\u00ac","&not;",      //not sign
-        "\u00ad","&shy;",      //soft hyphen
-        "\u00ae","&reg;",      //registered sign
-        "\u00af","&macr;",     //macron
-        "\u00b0","&deg;",      //degree sign
-        "\u00b1","&plusmn;",   //plus-minus sign
-        "\u00b2","&sup2;",     //superscript two
-        "\u00b3","&sup3;",     //superscript three
-        "\u00b4","&acute;",    //acute accent
-        "\u00b5","&micro;",    //micro sign
-        "\u00b6","&para;",     //paragraph sign
-        "\u00b7","&middot;",   //middle dot
-        "\u00b8","&cedil;",    //cedilla
-        "\u00b9","&sup1;",     //superscript one
-        "\u00ba","&ordm;",     //masculine ordinal indicator
-        "\u00bb","&raquo;",    //right-pointing double angle quotation mark
-        "\u00bc","&frac14;",   //fraction 1/4
-        "\u00bd","&frac12;",   //fraction 1/2
-        "\u00be","&frac34;",   //fraction 3/4
-        "\u00bf","&iquest;",   //inverted (spanisch) questionmark
-        "\u00c0","&Agrave;",
-        "\u00c1","&Aacute;",
-        "\u00c2","&Acirc;",
-        "\u00c3","&Atilde;",
-        "\u00c4","&Auml;",
-        "\u00c5","&Aring;",
-        "\u00c6","&AElig;",
-        "\u00c7","&Ccedil;",
-        "\u00c8","&Egrave;",
-        "\u00c9","&Eacute;",
-        "\u00ca","&Ecirc;",
-        "\u00cb","&Euml;",
-        "\u00cc","&Igrave;",
-        "\u00cd","&Iacute;",
-        "\u00ce","&Icirc;",
-        "\u00cf","&Iuml;",
-        "\u00d0","&ETH;",
-        "\u00d1","&Ntilde;",
-        "\u00d2","&Ograve;",
-        "\u00d3","&Oacute;",
-        "\u00d4","&Ocirc;",
-        "\u00d5","&Otilde;",
-        "\u00d6","&Ouml;",
-        "\u00d7","&times;",
-        "\u00d8","&Oslash;",
-        "\u00d9","&Ugrave;",
-        "\u00da","&Uacute;",
-        "\u00db","&Ucirc;",
-        "\u00dc","&Uuml;",
-        "\u00dd","&Yacute;",
-        "\u00de","&THORN;",
-        "\u00df","&szlig;",
-        "\u00e0","&agrave;",
-        "\u00e1","&aacute;",
-        "\u00e2","&acirc;",
-        "\u00e3","&atilde;",
-        "\u00e4","&auml;",
-        "\u00e5","&aring;",
-        "\u00e6","&aelig;",
-        "\u00e7","&ccedil;",
-        "\u00e8","&egrave;",
-        "\u00e9","&eacute;",
-        "\u00ea","&ecirc;",
-        "\u00eb","&euml;",
-        "\u00ec","&igrave;",
-        "\u00ed","&iacute;",
-        "\u00ee","&icirc;",
-        "\u00ef","&iuml;",
-        "\u00f0","&eth;",
-        "\u00e1","&ntilde;",
-        "\u00e2","&ograve;",
-        "\u00e3","&oacute;",
-        "\u00e4","&ocirc;",
-        "\u00e5","&otilde;",
-        "\u00e6","&ouml;",
-        "\u00e7","&divide;",
-        "\u00e8","&oslash;",
-        "\u00e9","&ugrave;",
-        "\u00ea","&uacute;",
-        "\u00eb","&ucirc;",
-        "\u00ec","&uuml;",
-        "\u00ed","&yacute;",
-        "\u00ee","&thorn;",
-        "\u00ef","&yuml;",
+        "\"","&quot;",         //quotation mark
+        "\u003C","&lt;",       //less than
+        "\u003E","&gt;",       //greater than
+        "\u00A1","&iexcl;",    //inverted (spanish) exclamation mark
+        "\u00A2","&cent;",     //cent
+        "\u00A3","&pound;",    //pound
+        "\u00A4","&curren;",   //currency
+        "\u00A5","&yen;",      //yen
+        "\u00A6","&brvbar;",   //broken vertical bar
+        "\u00A7","&sect;",     //section sign
+        "\u00A8","&uml;",      //diaeresis (umlaut)
+        "\u00A9","&copy;",     //copyright sign
+        "\u00AA","&ordf;",     //feminine ordinal indicator
+        "\u00AB","&laquo;",    //left-pointing double angle quotation mark
+        "\u00AC","&not;",      //not sign
+        "\u00AD","&shy;",      //soft hyphen
+        "\u00AE","&reg;",      //registered sign
+        "\u00AF","&macr;",     //macron
+        "\u00B0","&deg;",      //degree sign
+        "\u00B1","&plusmn;",   //plus-minus sign
+        "\u00B2","&sup2;",     //superscript two
+        "\u00B3","&sup3;",     //superscript three
+        "\u00B4","&acute;",    //acute accent
+        "\u00B5","&micro;",    //micro sign
+        "\u00B6","&para;",     //paragraph sign
+        "\u00B7","&middot;",   //middle dot
+        "\u00B8","&cedil;",    //cedilla
+        "\u00B9","&sup1;",     //superscript one
+        "\u00BA","&ordm;",     //masculine ordinal indicator
+        "\u00BB","&raquo;",    //right-pointing double angle quotation mark
+        "\u00BC","&frac14;",   //fraction 1/4
+        "\u00BD","&frac12;",   //fraction 1/2
+        "\u00BE","&frac34;",   //fraction 3/4
+        "\u00BF","&iquest;",   //inverted (spanisch) questionmark
+        "\u00C0","&Agrave;",
+        "\u00C1","&Aacute;",
+        "\u00C2","&Acirc;",
+        "\u00C3","&Atilde;",
+        "\u00C4","&Auml;",
+        "\u00C5","&Aring;",
+        "\u00C6","&AElig;",
+        "\u00C7","&Ccedil;",
+        "\u00C8","&Egrave;",
+        "\u00C9","&Eacute;",
+        "\u00CA","&Ecirc;",
+        "\u00CB","&Euml;",
+        "\u00CC","&Igrave;",
+        "\u00CD","&Iacute;",
+        "\u00CE","&Icirc;",
+        "\u00CF","&Iuml;",
+        "\u00D0","&ETH;",
+        "\u00D1","&Ntilde;",
+        "\u00D2","&Ograve;",
+        "\u00D3","&Oacute;",
+        "\u00D4","&Ocirc;",
+        "\u00D5","&Otilde;",
+        "\u00D6","&Ouml;",
+        "\u00D7","&times;",
+        "\u00D8","&Oslash;",
+        "\u00D9","&Ugrave;",
+        "\u00DA","&Uacute;",
+        "\u00DB","&Ucirc;",
+        "\u00DC","&Uuml;",
+        "\u00DD","&Yacute;",
+        "\u00DE","&THORN;",
+        "\u00DF","&szlig;",
+        "\u00E0","&agrave;",
+        "\u00E1","&aacute;",
+        "\u00E2","&acirc;",
+        "\u00E3","&atilde;",
+        "\u00E4","&auml;",
+        "\u00E5","&aring;",
+        "\u00E6","&aelig;",
+        "\u00E7","&ccedil;",
+        "\u00E8","&egrave;",
+        "\u00E9","&eacute;",
+        "\u00EA","&ecirc;",
+        "\u00EB","&euml;",
+        "\u00EC","&igrave;",
+        "\u00ED","&iacute;",
+        "\u00EE","&icirc;",
+        "\u00EF","&iuml;",
+        "\u00F0","&eth;",
+        "\u00F1","&ntilde;",
+        "\u00F2","&ograve;",
+        "\u00F3","&oacute;",
+        "\u00F4","&ocirc;",
+        "\u00F5","&otilde;",
+        "\u00F6","&ouml;",
+        "\u00F7","&divide;",
+        "\u00F8","&oslash;",
+        "\u00F9","&ugrave;",
+        "\u00FA","&uacute;",
+        "\u00FB","&ucirc;",
+        "\u00FC","&uuml;",
+        "\u00FD","&yacute;",
+        "\u00FE","&thorn;",
+        "\u00FF","&yuml;",
         "(C)","&copy;"
     };
     //end contrib [FB] and [MN]
@@ -250,7 +251,10 @@ public class wikiCode {
         int p0, p1;
         boolean defList = false;    //needed for definition lists
 
-        result = replaceHTML(result);
+        if (!replaced) {
+            result = replaceHTML(result);
+            replaced = true;
+        }
 
         //check if line contains any escape symbol or tag for preformatted text 
         //or if we are in an esacpe sequence already or if we are in a preformated text
@@ -633,6 +637,7 @@ public class wikiCode {
     }
     //end contrib [MN]	
 
+    replaced = false;
     if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)) return result;
     return result + "<br>";
     }
