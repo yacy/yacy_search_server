@@ -247,6 +247,9 @@ public final class plasmaWordIndexDistribution {
         
         if (hc0 < peerCount) {
             log.logWarning("found not enough (" + hc0 + ") peers for distribution");
+            for (int i = 0; i < indexEntities.length; i++) try {
+                indexEntities[i].close();
+            } catch (IOException ee) {}
             return -1; // failed
         }
         
