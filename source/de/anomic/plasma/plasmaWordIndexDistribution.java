@@ -221,6 +221,9 @@ public final class plasmaWordIndexDistribution {
         // find a list of DHT-peers
         yacySeed[] seeds = new yacySeed[peerCount + 10];
         int hc0 = 0;
+        double ownDistance = Math.min(yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, indexEntities[0].wordHash()),
+                                      yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, indexEntities[indexEntities.length - 1].wordHash()));
+        double maxDistance = Math.min(ownDistance, 0.4);
         synchronized (yacyCore.dhtAgent) {
             double avdist;
             Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(keyhash);
@@ -230,10 +233,13 @@ public final class plasmaWordIndexDistribution {
                     return -1; // interrupted
                 }
                 seeds[hc0] = (yacySeed) e.nextElement();
-                if ((seeds[hc0] != null) &&
-                    ((avdist = (yacyDHTAction.dhtDistance(seeds[hc0].hash, indexEntities[0].wordHash()) + yacyDHTAction.dhtDistance(seeds[hc0].hash, indexEntities[indexEntities.length - 1].wordHash())) / 2.0) < 0.4)) {
-                    log.logInfo("Selected " + ((hc0 < peerCount) ? "primary" : "reserve") + " DHT target peer " + seeds[hc0].getName() + ":" + seeds[hc0].hash + ", distance = " + avdist);
-                    hc0++;
+                if (seeds[hc0] != null) {
+                    avdist = Math.max(yacyDHTAction.dhtDistance(seeds[hc0].hash, indexEntities[0].wordHash()),
+                                      yacyDHTAction.dhtDistance(seeds[hc0].hash, indexEntities[indexEntities.length - 1].wordHash()));
+                    if (avdist < maxDistance) {
+                        log.logInfo("Selected " + ((hc0 < peerCount) ? "primary" : "reserve") + " DHT target peer " + seeds[hc0].getName() + ":" + seeds[hc0].hash + ", distance = " + avdist);
+                        hc0++;
+                    }
                 }
             }
             e = null; // finish enumeration
