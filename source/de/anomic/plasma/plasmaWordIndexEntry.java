@@ -78,7 +78,7 @@ public final class plasmaWordIndexEntry {
     private int    posintext;   // first position of the word in text as number of word; 0=unknown or irrelevant position
     private int    posinphrase; // position within a phrase of the word
     private int    posofphrase; // position of the phrase in the text as count of sentences; 0=unknown; 1=path; 2=keywords; 3=headline; >4: in text
-    private int    age;         // calculated by using last-modified
+    private long   lastModified;// calculated by using last-modified
     private int    quality;     // result of a heuristic on the source file
     private byte[] language;    // essentially the country code (the TLD as heuristic), two letters lowercase only
     private char   doctype;     // type of source
@@ -186,17 +186,36 @@ public final class plasmaWordIndexEntry {
 
     // the class instantiation can only be done by a plasmaStore method
     // therefore they are all public
-    public plasmaWordIndexEntry(String urlHash, int count, int posintext, int posinphrase, int posofphrase, int virtualage, int quality, String language, char doctype, boolean local) {
+    public plasmaWordIndexEntry(String urlHash,
+                                int count,        // how often appears this word in the text
+                                int posintext,
+                                int posinphrase,
+                                int posofphrase,
+                                long time,
+                                int quality,
+                                String language,
+                                char doctype, 
+                                boolean local) {
 
-    // ** hier fehlt noch als Attribut: <Wortposition im Text>, damit 'nearby' getrackt werden kann **
-
+        // more needed attributes:
+        // - int: length of text / total number of words
+        // - int: length of text / total number of sentences
+        // - long: update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
+        // - int: word distance; this is 0 by default, and set to the difference of posintext from two indexes if these are combined (simultanous search). If stored, this shows that the result was obtained by remote search
+        // - char: category of appearance (header, title, section, text, anchor-descr, image-tag etc)
+        // - boolean: appears in title, appears in header, appears in ....
+        // - int: url-length (shorter are better)
+        // - int: url-number of components / length of path
+        // - int: length of description tag / title tag (longer are better)
+        // - int: number of chapters
+        
     if ((language == null) || (language.length() != plasmaURL.urlLanguageLength)) language = "uk";
         this.urlHash = urlHash;
         this.count = count;
         this.posintext = posintext;
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
-        this.age = virtualage;
+        this.lastModified = time;
         this.quality = quality;
         this.language = language.getBytes();
         this.doctype = doctype;
@@ -210,7 +229,7 @@ public final class plasmaWordIndexEntry {
         this.posintext = (code.length() >= 14) ? (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(12, 14)) : 0;
         this.posinphrase = (code.length() >= 15) ? (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(14, 16)) : 0;
         this.posofphrase = (code.length() >= 16) ? (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(16, 18)) : 0;
-        this.age = (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(3, 6));
+        this.lastModified = plasmaWordIndex.reverseMicroDateDays((int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(3, 6)));
         this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(0, 3));
         this.language = code.substring(8, 10).getBytes();
         this.doctype = code.charAt(10);
@@ -231,57 +250,31 @@ public final class plasmaWordIndexEntry {
        this.posintext = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("t", "__"));
        this.posinphrase = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("r", "__"));
        this.posofphrase = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("o", "__"));
-       this.age = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("a", "A"));
+       this.lastModified = plasmaWordIndex.reverseMicroDateDays((int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("a", "A")));
        this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("q", "__"));
        this.language = pr.getProperty("l", "uk").getBytes();
        this.doctype = pr.getProperty("d", "u").charAt(0);
        this.localflag = pr.getProperty("f", ""+LT_LOCAL).charAt(0);
     }
-
-    private String b64save(long x, int l) {
-        try {
-            return kelondroBase64Order.enhancedCoder.encodeLong(x, l);
-        } catch (Exception e) {
-            // if x does not fit into l
-            return "________".substring(0, l);
-        }
-    }
     
-    public String toEncodedForm(boolean longAttr) {
+    public String toEncodedForm(int outputFormat) {
        // attention: this integrates NOT the URL into the encoding
        // if you need a complete dump, use toExternalForm()
-       StringBuffer buf = new StringBuffer(longAttr?18:12);
+       StringBuffer buf = new StringBuffer((outputFormat >= 1) ? 18 : 12);
        
-       buf.append(b64save(this.quality, plasmaURL.urlQualityLength))
-          .append(b64save(this.age, 3))
-          .append(b64save(this.count, 2))
+       buf.append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.quality, plasmaURL.urlQualityLength))
+          .append(kelondroBase64Order.enhancedCoder.encodeLongSmart(plasmaWordIndex.microDateDays(this.lastModified), 3))
+          .append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.count, 2))
           .append(new String(this.language))
           .append(this.doctype)
           .append(this.localflag); // 3 + 3 + 2 + 2 + 1 + 1 = 12 bytes
            
-       if (longAttr)
-           buf.append(b64save(this.posintext, 2))
-              .append(b64save(this.posinphrase, 2))
-              .append(b64save(this.posofphrase, 2));
+       if (outputFormat >= 1)
+           buf.append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.posintext, 2))
+              .append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.posinphrase, 2))
+              .append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.posofphrase, 2));
        
        return buf.toString();
-       
-//       String shortAttr =
-//               b64save(quality, plasmaCrawlLURL.urlQualityLength) +
-//               b64save(age, 3) +
-//               b64save(count, 2) +
-//               new String(language) +
-//               doctype +
-//               localflag; // 3 + 3 + 2 + 2 + 1 + 1 = 12 bytes
-//       if (longAttr) 
-//           return
-//               shortAttr +
-//                   b64save(posintext, 2) +
-//                   b64save(posinphrase, 2) +
-//                   b64save(posofphrase, 2);
-//       // 12 + 3 + 2 + 2 + 1 + 1 = 12 bytes
-//       else
-//           return shortAttr;
    }
     
    public String toExternalForm() {
@@ -289,15 +282,15 @@ public final class plasmaWordIndexEntry {
        
        str.append("{")
            .append("h=").append(this.urlHash)
-           .append(",q=").append(b64save(this.quality, plasmaURL.urlQualityLength))
-           .append(",a=").append(b64save(this.age, 3))
-           .append(",c=").append(b64save(this.count, 2))
+           .append(",q=").append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.quality, plasmaURL.urlQualityLength))
+           .append(",a=").append(kelondroBase64Order.enhancedCoder.encodeLongSmart(plasmaWordIndex.microDateDays(this.lastModified), 3))
+           .append(",c=").append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.count, 2))
            .append(",l=").append(new String(this.language))
            .append(",d=").append(this.doctype)
            .append(",f=").append(this.localflag)
-           .append(",t=").append(b64save(this.posintext, 2))
-           .append(",r=").append(b64save(this.posinphrase, 2))
-           .append(",o=").append(b64save(this.posofphrase, 2))
+           .append(",t=").append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.posintext, 2))
+           .append(",r=").append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.posinphrase, 2))
+           .append(",o=").append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.posofphrase, 2))
        .append("}");
        
        return str.toString();
@@ -312,7 +305,11 @@ public final class plasmaWordIndexEntry {
     }
 
     public int getVirtualAge() {
-        return age;
+        return plasmaWordIndex.microDateDays(lastModified);
+    }
+    
+    public long getLastModified() {
+        return lastModified;
     }
     
     public int getCount() {

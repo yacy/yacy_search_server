@@ -51,7 +51,7 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
     
     boolean asc;
     
-    public static final Comparator naturalOrder = new kelondroNaturalOrder(true);
+    public static final kelondroOrder naturalOrder = new kelondroNaturalOrder(true);
     
     public kelondroNaturalOrder(boolean ascending) {
         this.asc = ascending;
@@ -78,6 +78,23 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         c = c >>> 1;
         return c;
     }
+
+    public static byte[] encodeLong(long c, int length) {
+        byte[] b = new byte[length];
+        while (length > 0) {
+            b[--length] = (byte) (c & 0xFF);
+            c >>= 8;
+        }
+        return b;
+    }
+
+    public static long decodeLong(byte[] s) {
+        long c = 0;
+        int p = 0;
+        while ((p < 8) && (p < s.length)) c = (c << 8) | ((long) s[p++] & 0xFF);
+        return c;
+    }
+
 
     // Compares its two arguments for order.
     // Returns -1, 0, or 1 as the first argument

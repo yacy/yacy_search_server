@@ -168,7 +168,7 @@ public final class plasmaWordIndexEntity {
     public boolean addEntry(plasmaWordIndexEntry entry) throws IOException {
         if (entry == null) return false;
     if (theTmpMap == null) {
-        return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm(false).getBytes()) == null);
+        return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm(0).getBytes()) == null);
     } else {
         return (theTmpMap.put(entry.getUrlHash(), entry) == null);
     }

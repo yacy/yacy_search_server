@@ -58,11 +58,11 @@ public class kelondroSplittedTree implements kelondroIndex {
     private static File dbFile(File path, String filenameStub, int forkfactor, int columns, int number) {
         String ns = Integer.toHexString(number).toUpperCase();
         while (ns.length() < 2) ns = "0" + ns;
-        String fs = Integer.toHexString(forkfactor).toUpperCase();
-        while (fs.length() < 2) fs = "0" + fs;
-        String cs = Integer.toHexString(columns).toUpperCase();
-        while (cs.length() < 2) cs = "0" + cs;
-        return new File(path, filenameStub + "_" + ns + "." + fs + cs + ".ktf");
+        String ff = Integer.toHexString(forkfactor).toUpperCase();
+        while (ff.length() < 2) ff = "0" + ff;
+        String co = Integer.toHexString(columns).toUpperCase();
+        while (co.length() < 2) co = "0" + co;
+        return new File(path, filenameStub + "." + ff + "." + co + "." + ns + ".ktc");
     }
 
     private static boolean existsAll(File pathToFiles, String filenameStub, int forkfactor, int columns){

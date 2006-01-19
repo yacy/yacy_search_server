@@ -1316,14 +1316,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             
                             // iterate over all words
                             Iterator i = condenser.getWords().iterator();
-                            int p = 0;
                             while (i.hasNext()) {
                                 String word = (String) i.next();
-                                int count = condenser.wordCount(word);
                                 String wordHash = plasmaWordIndexEntry.word2hash(word);
                                 plasmaWordIndexEntity wordIdxEntity = new plasmaWordIndexEntity(wordHash);
-                                plasmaWordIndexEntry wordIdxEntry = new plasmaWordIndexEntry(urlHash, count, p++, 0, 0,
-                                        plasmaWordIndex.microDateDays(docDate), quality, language, doctype, true);
+                                plasmaWordIndexEntry wordIdxEntry = new plasmaWordIndexEntry(urlHash,
+                                                                                             condenser.wordCount(word),
+                                                                                             condenser.wordPositionInText(word),
+                                                                                             condenser.wordPositionInPhrase(word),
+                                                                                             condenser.wordNumberOfPhrase(word),
+                                                                                             docDate.getTime(),
+                                                                                             quality, language, doctype, true);
                                 wordIdxEntity.addEntry(wordIdxEntry);
                                 tmpEntities.add(wordIdxEntity);
                                 // wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry));

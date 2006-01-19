@@ -442,17 +442,20 @@ public class IndexControl_p {
                 final Iterator en = index.elements(true);
                 result.append("URL entries related to this word hash <span class=\"tt\">").append(keyhash).append("</span><br><br>");
                 result.append("<form action=\"IndexControl_p.html\" method=\"post\" enctype=\"multipart/form-data\">");
-                String us, uh;
+                String us;
+                String uh[] = new String[2];
                 int i = 0;
 
                 final TreeMap tm = new TreeMap();
+                plasmaWordIndexEntry xi;
                 while (en.hasNext()) {
-                    uh = ((plasmaWordIndexEntry)en.next()).getUrlHash();
+                    xi = (plasmaWordIndexEntry) en.next();
+                    uh = new String[]{xi.getUrlHash(), Integer.toString(xi.posintext())};
                     try {
-                        us = switchboard.urlPool.loadedURL.getEntry(uh).url().toString();
+                        us = switchboard.urlPool.loadedURL.getEntry(uh[0]).url().toString();
                         tm.put(us, uh);
                     } catch (IOException e) {
-                        tm.put(uh, uh);
+                        tm.put(uh[0], uh);
                     }
                 }
 
@@ -460,15 +463,15 @@ public class IndexControl_p {
                 result.ensureCapacity((tm.size() + 2) * 384);
                 while (iter.hasNext()) {
                     us = iter.next().toString();
-                    uh = (String)tm.get(us);
-                    result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" value=\"").append(uh).append("\" align=\"top\">");
-                    if (us.equals(uh)) {
-                        result.append("<span class=\"tt\">").append(uh).append("&nbsp;&lt;unresolved URL Hash&gt;</span><br>");
+                    uh = (String[]) tm.get(us);
+                    result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" value=\"").append(uh[0]).append("\" align=\"top\">");
+                    if (us.equals(uh[0])) {
+                        result.append("<span class=\"tt\">").append(uh[0]).append("&nbsp;&lt;unresolved URL Hash&gt;</span><br>");
                     } else {
                         result.append("<a href=\"/IndexControl_p.html?").append("keystring=").append(keystring)
-                              .append("&keyhash=").append(keyhash).append("&urlhash=").append(uh)
+                              .append("&keyhash=").append(keyhash).append("&urlhash=").append(uh[0])
                               .append("&urlstringsearch=").append("&urlstring=").append(us).append("\" class=\"tt\">")
-                              .append(uh).append("</a><span class=\"tt\">&nbsp;").append(us).append("</span><br>");
+                              .append(uh[0]).append("</a><span class=\"tt\">&nbsp;").append(us).append(", pos=").append(uh[1]).append("</span><br>");
                     }
                 }
                 result.append("<input type=\"hidden\" name=\"keystring\" value=\"").append(keystring).append("\">")

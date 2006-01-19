@@ -138,7 +138,7 @@ public final class plasmaWordIndexAssortment {
         for (int i = 0; i < assortmentLength; i++) {
             entry = (plasmaWordIndexEntry) entries.next();
             row[3 + 2 * i] = entry.getUrlHash().getBytes();
-	        row[4 + 2 * i] = entry.toEncodedForm(true).getBytes();
+	        row[4 + 2 * i] = entry.toEncodedForm(1).getBytes();
         }
         byte[][] oldrow = null;
         try {

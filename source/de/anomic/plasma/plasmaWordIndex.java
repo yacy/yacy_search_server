@@ -109,55 +109,65 @@ public final class plasmaWordIndex {
     private static final int day  = 86400000;
     
     public static int microDateDays(Date modified) {
-	// this calculates a virtual age from a given date
-	// the purpose is to have an age in days of a given modified date
-	// from a fixed standpoint in the past
-	// one day has 60*60*24 seconds = 86400 seconds
-	// we take mod 64**3 = 262144, this is the mask of the storage
-	return (int) ((modified.getTime() / day) % 262144);
+        return microDateDays(modified.getTime());
     }
     
+    public static int microDateDays(long modified) {
+        // this calculates a virtual age from a given date
+        // the purpose is to have an age in days of a given modified date
+        // from a fixed standpoint in the past
+        // one day has 60*60*24 seconds = 86400 seconds
+        // we take mod 64**3 = 262144, this is the mask of the storage
+        return (int) ((modified / day) % 262144);
+    }
+        
     public static String microDateHoursStr(long time) {
-	return kelondroBase64Order.enhancedCoder.encodeLong(microDateHoursInt(time), 3);
+        return kelondroBase64Order.enhancedCoder.encodeLong(microDateHoursInt(time), 3);
     }
     
     public static int microDateHoursInt(long time) {
-	return (int) ((time / hour) % 262144);
+        return (int) ((time / hour) % 262144);
     }
     
     public static int microDateHoursAge(String mdhs) {
         return microDateHoursInt(System.currentTimeMillis()) - (int) kelondroBase64Order.enhancedCoder.decodeLong(mdhs);
     }
     
-    public int addPageIndex(URL url, String urlHash, Date urlModified, plasmaCondenser condenser,
-                                   String language, char doctype) {
+    public static long reverseMicroDateDays(int microDateDays) {
+        return ((long) microDateDays) * ((long) day);
+    }
+    
+    public int addPageIndex(URL url, String urlHash, Date urlModified, plasmaCondenser condenser, String language, char doctype) {
         // this is called by the switchboard to put in a new page into the index
-	// use all the words in one condenser object to simultanous create index entries
-	int age = microDateDays(urlModified);
-	int quality = 0;
-	try {
-	    quality = condenser.RESULT_INFORMATION_VALUE;
-	} catch (NumberFormatException e) {
-	    System.out.println("INTERNAL ERROR WITH CONDENSER.INFORMATION_VALUE: " + e.toString() + ": in URL " + url.toString());
-	}
+        // use all the words in one condenser object to simultanous create index
+        // entries
+        // int age = microDateDays(urlModified);
+        int quality = 0;
+        try {
+            quality = condenser.RESULT_INFORMATION_VALUE;
+        } catch (NumberFormatException e) {
+            System.out.println("INTERNAL ERROR WITH CONDENSER.INFORMATION_VALUE: " + e.toString() + ": in URL " + url.toString());
+        }
 
         // iterate over all words
-	Iterator i = condenser.getWords().iterator();
-	String word;
-	int count;
-	plasmaWordIndexEntry entry;
-	String wordHash;
-	int p = 0;
-	while (i.hasNext()) {
-	    word = (String) i.next();
-	    count = condenser.wordCount(word);
-	    //if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ": " + c);
-	    wordHash = plasmaWordIndexEntry.word2hash(word);
-	    entry = new plasmaWordIndexEntry(urlHash, count, p++, 0, 0,
-                                         age, quality, language, doctype, true);
-	    addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), false);
-	}
-	//System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
+        Iterator i = condenser.getWords().iterator();
+        String word;
+        plasmaWordIndexEntry entry;
+        String wordHash;
+        while (i.hasNext()) {
+            word = (String) i.next();
+            // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
+            wordHash = plasmaWordIndexEntry.word2hash(word);
+            entry = new plasmaWordIndexEntry(urlHash,
+                                             condenser.wordCount(word),
+                                             condenser.wordPositionInText(word),
+                                             condenser.wordPositionInPhrase(word),
+                                             condenser.wordNumberOfPhrase(word),
+                                             urlModified.getTime(), quality, language, doctype, true);
+            addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), false);
+        }
+        // System.out.println("DEBUG: plasmaSearch.addPageIndex: added " +
+        // condenser.getWords().size() + " words, flushed " + c + " entries");
         return condenser.getWords().size();
     }
     
@@ -409,12 +419,15 @@ public final class plasmaWordIndex {
     }
 
     public static void main(String[] args) {
-//      System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
+        // System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
+        // System.out.println(new Date(reverseMicroDateDays(microDateDays(System.currentTimeMillis()))));
+        
         plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, new serverLog("TESTAPP"));
         Iterator iter = index.wordHashes("5A8yhZMh_Kmv", true, true);
         while (iter.hasNext()) {
             System.out.println("File: " + (String) iter.next());
         }
+        
     }
 
 }

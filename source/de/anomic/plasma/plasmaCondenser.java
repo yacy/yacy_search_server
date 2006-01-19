@@ -116,20 +116,70 @@ public final class plasmaCondenser {
     public int wordCount(String word) {
         // number of occurrences of one word
         // if the word did not occur, this simply returns 0
-        statProp sp = (statProp) words.get(word);
-        if (sp == null)
-            return 0;
+        wordStatProp sp = (wordStatProp) words.get(word);
+        if (sp == null) return 0;
         return sp.count;
     }
 
-    public static class statProp {
-        public int count;
+    public int wordPositionInText(String word) {
+        // position of word in text
+        // if unknown and word does not exist, the method returns 0
+        wordStatProp sp = (wordStatProp) words.get(word);
+        if (sp == null) return 0;
+        return sp.posInText;
+    }
 
-        public int handle;
+    public int wordPositionInPhrase(String word) {
+        // position of word in text
+        // if unknown and word does not exist, the method returns 0
+        wordStatProp sp = (wordStatProp) words.get(word);
+        if (sp == null) return 0;
+        return sp.posInPhrase;
+    }
 
-        public HashSet hash;
+    public int wordNumberOfPhrase(String word) {
+        // position of word in text
+        // if unknown and word does not exist, the method returns 0
+        wordStatProp sp = (wordStatProp) words.get(word);
+        if (sp == null) return 0;
+        return sp.numOfPhrase;
+    }
 
-        public statProp(int handle) {
+    public static class wordStatProp {
+        // object carries statistics for words and sentences
+        
+        public int count;       // number of occurrences
+        public int posInText;   // unique handle, is initialized with word position (excluding double occurring words)
+        public int posInPhrase; //
+        public int numOfPhrase;
+        public HashSet hash;    //
+
+        public wordStatProp(int handle, int pip, int nop) {
+            this.count = 1;
+            this.posInText = handle;
+            this.posInPhrase = pip;
+            this.numOfPhrase = nop;
+            this.hash = new HashSet();
+        }
+
+        public void inc() {
+            count++;
+        }
+
+        public void check(int i) {
+            hash.add(Integer.toString(i));
+        }
+
+    }
+    
+    public static class phraseStatProp {
+        // object carries statistics for words and sentences
+        
+        public int count;       // number of occurrences
+        public int handle;      // unique handle, is initialized with sentence counter
+        public HashSet hash;    //
+
+        public phraseStatProp(int handle) {
             this.count = 1;
             this.handle = handle;
             this.hash = new HashSet();
@@ -144,6 +194,7 @@ public final class plasmaCondenser {
         }
 
     }
+
 
     public String intString(int number, int length) {
         String s = Integer.toString(number);
@@ -160,13 +211,15 @@ public final class plasmaCondenser {
         String word = "";
         String k;
         int wordlen;
-        statProp sp, sp1;
+        wordStatProp wsp, wsp1;
+        phraseStatProp psp;
         int wordHandle;
         int wordHandleCount = 0;
         int sentenceHandleCount = 0;
         int allwordcounter = 0;
         int allsentencecounter = 0;
         int idx;
+        int wordInSentenceCounter = 1;
         Iterator it, it1;
 
         // read source
@@ -183,43 +236,45 @@ public final class plasmaCondenser {
                     sentence.insert(0, word); // append at beginning
                     if (sentences.containsKey(sentence)) {
                         // sentence already exists
-                        sp = (statProp) sentences.get(sentence);
-                        sp.inc();
-                        idx = sp.handle;
-                        sentences.put(sentence, sp);
+                        psp = (phraseStatProp) sentences.get(sentence);
+                        psp.inc();
+                        idx = psp.handle;
+                        sentences.put(sentence, psp);
                     } else {
                         // create new sentence
                         idx = sentenceHandleCount++;
-                        sentences.put(sentence, new statProp(idx));
+                        sentences.put(sentence, new phraseStatProp(idx));
                     }
                     // store to the words a link to this sentence
                     it = currsentwords.iterator();
                     while (it.hasNext()) {
                         k = (String) it.next();
-                        sp = (statProp) words.get(k);
-                        sp.check(idx);
-                        words.put(k, sp);
+                        wsp = (wordStatProp) words.get(k);
+                        wsp.check(idx);
+                        words.put(k, wsp);
                     }
                 }
                 sentence = new StringBuffer(100);
                 currsentwords.clear();
+                wordInSentenceCounter = 1;
             } else {
                 // store word
                 allwordcounter++;
                 currsentwords.add(word);
                 if (words.containsKey(word)) {
                     // word already exists
-                    sp = (statProp) words.get(word);
-                    wordHandle = sp.handle;
-                    sp.inc();
+                    wsp = (wordStatProp) words.get(word);
+                    wordHandle = wsp.posInText;
+                    wsp.inc();
                 } else {
                     // word does not yet exist, create new word entry
                     wordHandle = wordHandleCount++;
-                    sp = new statProp(wordHandle);
+                    wsp = new wordStatProp(wordHandle, wordInSentenceCounter, sentences.size() + 1);
                 }
-                words.put(word, sp);
+                words.put(word, wsp);
                 // we now have the unique handle of the word, put it into the sentence:
                 sentence.append(intString(wordHandle, numlength));
+                wordInSentenceCounter++;
             }
         }
         // finnish last sentence
@@ -227,11 +282,11 @@ public final class plasmaCondenser {
             allsentencecounter++;
             sentence.insert(0, "."); // append at beginning
             if (sentences.containsKey(sentence)) {
-                sp = (statProp) sentences.get(sentence);
-                sp.inc();
-                sentences.put(sentence, sp);
+                psp = (phraseStatProp) sentences.get(sentence);
+                psp.inc();
+                sentences.put(sentence, psp);
             } else {
-                sentences.put(sentence, new statProp(sentenceHandleCount++));
+                sentences.put(sentence, new phraseStatProp(sentenceHandleCount++));
             }
         }
 
@@ -251,14 +306,14 @@ public final class plasmaCondenser {
                 sentence = (StringBuffer) o;
                 wc = (sentence.length() - 1) / numlength;
                 s = new String[wc + 2];
-                sp = (statProp) sentences.get(sentence);
-                s[0] = intString(sp.count, numlength); // number of occurrences of this sentence
+                psp = (phraseStatProp) sentences.get(sentence);
+                s[0] = intString(psp.count, numlength); // number of occurrences of this sentence
                 s[1] = sentence.substring(0, 1); // the termination symbol of this sentence
                 for (int i = 0; i < wc; i++) {
                     k = sentence.substring(i * numlength + 1, (i + 1) * numlength + 1);
                     s[i + 2] = k;
                 }
-                orderedSentences[sp.handle] = s;
+                orderedSentences[psp.handle] = s;
             }
         }
 
@@ -270,7 +325,7 @@ public final class plasmaCondenser {
             entry = (Map.Entry) it.next();
             word = (String) entry.getKey();
             wordlen = word.length();
-            sp = (statProp) entry.getValue();
+            wsp = (wordStatProp) entry.getValue();
             for (int i = wordcut; i > 0; i--) {
                 if (wordlen > i) {
                     k = word.substring(0, wordlen - i);
@@ -278,20 +333,20 @@ public final class plasmaCondenser {
                         // we will delete the word 'word' and repoint the
                         // corresponding links
                         // in sentences that use this word
-                        sp1 = (statProp) words.get(k);
-                        it1 = sp.hash.iterator(); // we iterate over all sentences that refer to this word
+                        wsp1 = (wordStatProp) words.get(k);
+                        it1 = wsp.hash.iterator(); // we iterate over all sentences that refer to this word
                         while (it1.hasNext()) {
                             idx = Integer.parseInt((String) it1.next()); // number of a sentence
                             s = (String[]) orderedSentences[idx];
                             for (int j = 2; j < s.length; j++) {
-                                if (s[j].equals(intString(sp.handle, numlength)))
-                                    s[j] = intString(sp1.handle, numlength);
+                                if (s[j].equals(intString(wsp.posInText, numlength)))
+                                    s[j] = intString(wsp1.posInText, numlength);
                             }
                             orderedSentences[idx] = s;
                         }
                         // update word counter
-                        sp1.count = sp1.count + sp.count;
-                        words.put(k, sp1);
+                        wsp1.count = wsp1.count + wsp.count;
+                        words.put(k, wsp1);
                         // remove current word
                         it.remove();
                         continue wordsearch;
@@ -311,16 +366,16 @@ public final class plasmaCondenser {
                 sentence.append(((String[]) orderedSentences[i])[j]);
             if (sentences.containsKey(sentence)) {
                 // add sentence counter to counter of found sentence
-                sp = (statProp) sentences.get(sentence);
-                sp.count = sp.count + Integer.parseInt(((String[]) orderedSentences[i])[0]);
-                sentences.put(sentence, sp);
+                psp = (phraseStatProp) sentences.get(sentence);
+                psp.count = psp.count + Integer.parseInt(((String[]) orderedSentences[i])[0]);
+                sentences.put(sentence, psp);
                 // System.out.println("Found double occurring sentence " + i + "
                 // = " + sp.handle);
             } else {
                 // create new sentence entry
-                sp = new statProp(i);
-                sp.count = Integer.parseInt(((String[]) orderedSentences[i])[0]);
-                sentences.put(sentence, sp);
+                psp = new phraseStatProp(i);
+                psp.count = Integer.parseInt(((String[]) orderedSentences[i])[0]);
+                sentences.put(sentence, psp);
             }
         }
 
@@ -351,7 +406,7 @@ public final class plasmaCondenser {
         // and order the entries by the number of the sentence
         // this structure is only needed to reconstruct the text
         String word;
-        statProp sp;
+        wordStatProp wsp;
         Map.Entry entry;
         Iterator it;
         String[] orderedWords = new String[words.size() + 99]; // uuiiii, the '99' is only a quick hack...
@@ -359,8 +414,8 @@ public final class plasmaCondenser {
         while (it.hasNext()) {
             entry = (Map.Entry) it.next();
             word = (String) entry.getKey();
-            sp = (statProp) entry.getValue();
-            orderedWords[sp.handle] = word;
+            wsp = (wordStatProp) entry.getValue();
+            orderedWords[wsp.posInText] = word;
         }
 
         Object[] orderedSentences = makeOrderedSentences();
@@ -388,7 +443,7 @@ public final class plasmaCondenser {
         // this structure is needed to present the strings in the right order in a printout
         int wc;
         Iterator it;
-        statProp sp;
+        phraseStatProp psp;
         String[] s;
         StringBuffer sentence;
         Object[] orderedSentences = new Object[sentences.size()];
@@ -399,12 +454,12 @@ public final class plasmaCondenser {
             sentence = (StringBuffer) it.next();
             wc = (sentence.length() - 1) / numlength;
             s = new String[wc + 2];
-            sp = (statProp) sentences.get(sentence);
-            s[0] = intString(sp.count, numlength); // number of occurrences of this sentence
+            psp = (phraseStatProp) sentences.get(sentence);
+            s[0] = intString(psp.count, numlength); // number of occurrences of this sentence
             s[1] = sentence.substring(0, 1); // the termination symbol of this sentence
             for (int i = 0; i < wc; i++)
                 s[i + 2] = sentence.substring(i * numlength + 1, (i + 1) * numlength + 1);
-            orderedSentences[sp.handle] = s;
+            orderedSentences[psp.handle] = s;
         }
         return orderedSentences;
     }
@@ -414,7 +469,7 @@ public final class plasmaCondenser {
         String k;
         String word;
         Iterator it;
-        statProp sp;
+        wordStatProp wsp;
 
         Object[] orderedSentences = makeOrderedSentences();
 
@@ -426,8 +481,8 @@ public final class plasmaCondenser {
         while (it.hasNext()) {
             entry = (Map.Entry) it.next();
             word = (String) entry.getKey();
-            sp = (statProp) entry.getValue();
-            sortedWords.put(intString(sp.count, numlength) + intString(sp.handle, numlength), word);
+            wsp = (wordStatProp) entry.getValue();
+            sortedWords.put(intString(wsp.count, numlength) + intString(wsp.posInText, numlength), word);
         }
 
         // start writing of words and sentences
