@@ -117,124 +117,134 @@ public final class plasmaCondenser {
         // number of occurrences of one word
         // if the word did not occur, this simply returns 0
         statProp sp = (statProp) words.get(word);
-        if (sp == null) return 0;
+        if (sp == null)
+            return 0;
         return sp.count;
     }
 
     public static class statProp {
-	public int count;
-	public int handle;
-	public HashSet hash;
-	public statProp(int handle) {
-	    this.count = 1;
-	    this.handle = handle;
-	    this.hash = new HashSet();
-	}
-	public void inc() {count++;}
-	public void check(int i) {hash.add(Integer.toString(i));}
-	
+        public int count;
+
+        public int handle;
+
+        public HashSet hash;
+
+        public statProp(int handle) {
+            this.count = 1;
+            this.handle = handle;
+            this.hash = new HashSet();
+        }
+
+        public void inc() {
+            count++;
+        }
+
+        public void check(int i) {
+            hash.add(Integer.toString(i));
+        }
+
     }
 
     public String intString(int number, int length) {
-	String s = Integer.toString(number);
-	while (s.length() < length) s = "0" + s;
-	return s;
+        String s = Integer.toString(number);
+        while (s.length() < length) s = "0" + s;
+        return s;
     }
 
     private void createCondensement(InputStream is) {
 
-	words = new TreeMap(kelondroNaturalOrder.naturalOrder);
-	sentences = new HashMap();
-	HashSet currsentwords = new HashSet();
-	StringBuffer sentence = new StringBuffer(100);
-	String word = "";
-	String k;
-	int wordlen;
-	statProp sp, sp1;
-	int wordHandle;
-	int wordHandleCount = 0;
-	int sentenceHandleCount = 0;
-	int allwordcounter = 0;
-	int allsentencecounter = 0;
-	int idx;
-	Iterator it, it1;
+        words = new TreeMap(kelondroNaturalOrder.naturalOrder);
+        sentences = new HashMap();
+        HashSet currsentwords = new HashSet();
+        StringBuffer sentence = new StringBuffer(100);
+        String word = "";
+        String k;
+        int wordlen;
+        statProp sp, sp1;
+        int wordHandle;
+        int wordHandleCount = 0;
+        int sentenceHandleCount = 0;
+        int allwordcounter = 0;
+        int allsentencecounter = 0;
+        int idx;
+        Iterator it, it1;
 
-	// read source
-	sievedWordsEnum wordenum = new sievedWordsEnum(is, wordminsize);
-	while (wordenum.hasMoreElements()) {
-	    word = ((String) wordenum.nextElement()).toLowerCase();
-	    //System.out.println("PARSED-WORD " + word);
-	    wordlen = word.length();
-	    if ((wordlen == 1) && (punctuation(word.charAt(0)))) {
-		// store sentence
-		if (sentence.length() > 0) {
-		    // we store the punctuation symbol as first element of the sentence vector
-		    allsentencecounter++;
-		    sentence.insert(0, word); // append at beginning
-		    if (sentences.containsKey(sentence)) {
-			// sentence already exists
-			sp = (statProp) sentences.get(sentence);
-			sp.inc();
-			idx = sp.handle;
-			sentences.put(sentence, sp);
-		    } else {
-			// create new sentence
-			idx = sentenceHandleCount++;
-			sentences.put(sentence, new statProp(idx));
-		    }
-		    // store to the words a link to this sentence
-		    it = currsentwords.iterator();
-		    while (it.hasNext()) {
-			k = (String) it.next();
-			sp = (statProp) words.get(k);
-			sp.check(idx);
-			words.put(k,sp);
-		    }
-		}
-		sentence = new StringBuffer(100);
-		currsentwords.clear();
-	    } else {
-		// store word
-		allwordcounter++;
-		currsentwords.add(word);
-		if (words.containsKey(word)) {
-		    // word already exists
-		    sp = (statProp) words.get(word);
-		    wordHandle = sp.handle;
-		    sp.inc();
-		} else {
-		    // word does not yet exist, create new word entry
-		    wordHandle = wordHandleCount++;
-		    sp = new statProp(wordHandle);
-		}
-		words.put(word, sp);
-		// we now have the unique handle of the word, put it into the sentence:
-		sentence.append(intString(wordHandle, numlength));
-	    }
-	}
-	// finnish last sentence
-	if (sentence.length() > 0) {
-	    allsentencecounter++;
-	    sentence.insert(0, "."); // append at beginning
-	    if (sentences.containsKey(sentence)) {
-		sp = (statProp) sentences.get(sentence);
-		sp.inc();
-		sentences.put(sentence, sp);
-	    } else {
-		sentences.put(sentence, new statProp(sentenceHandleCount++));
-	    }
-	}
+        // read source
+        sievedWordsEnum wordenum = new sievedWordsEnum(is, wordminsize);
+        while (wordenum.hasMoreElements()) {
+            word = ((String) wordenum.nextElement()).toLowerCase();
+            // System.out.println("PARSED-WORD " + word);
+            wordlen = word.length();
+            if ((wordlen == 1) && (punctuation(word.charAt(0)))) {
+                // store sentence
+                if (sentence.length() > 0) {
+                    // we store the punctuation symbol as first element of the sentence vector
+                    allsentencecounter++;
+                    sentence.insert(0, word); // append at beginning
+                    if (sentences.containsKey(sentence)) {
+                        // sentence already exists
+                        sp = (statProp) sentences.get(sentence);
+                        sp.inc();
+                        idx = sp.handle;
+                        sentences.put(sentence, sp);
+                    } else {
+                        // create new sentence
+                        idx = sentenceHandleCount++;
+                        sentences.put(sentence, new statProp(idx));
+                    }
+                    // store to the words a link to this sentence
+                    it = currsentwords.iterator();
+                    while (it.hasNext()) {
+                        k = (String) it.next();
+                        sp = (statProp) words.get(k);
+                        sp.check(idx);
+                        words.put(k, sp);
+                    }
+                }
+                sentence = new StringBuffer(100);
+                currsentwords.clear();
+            } else {
+                // store word
+                allwordcounter++;
+                currsentwords.add(word);
+                if (words.containsKey(word)) {
+                    // word already exists
+                    sp = (statProp) words.get(word);
+                    wordHandle = sp.handle;
+                    sp.inc();
+                } else {
+                    // word does not yet exist, create new word entry
+                    wordHandle = wordHandleCount++;
+                    sp = new statProp(wordHandle);
+                }
+                words.put(word, sp);
+                // we now have the unique handle of the word, put it into the sentence:
+                sentence.append(intString(wordHandle, numlength));
+            }
+        }
+        // finnish last sentence
+        if (sentence.length() > 0) {
+            allsentencecounter++;
+            sentence.insert(0, "."); // append at beginning
+            if (sentences.containsKey(sentence)) {
+                sp = (statProp) sentences.get(sentence);
+                sp.inc();
+                sentences.put(sentence, sp);
+            } else {
+                sentences.put(sentence, new statProp(sentenceHandleCount++));
+            }
+        }
 
-	//-------------------
+        // -------------------
 
-	// we reconstruct the sentence hashtable
-	// and order the entries by the number of the sentence
-	// this structure is needed to replace double occurring words in sentences
-	Object[] orderedSentences = new Object[sentenceHandleCount];
-	String[] s;
-	int wc;
+        // we reconstruct the sentence hashtable
+        // and order the entries by the number of the sentence
+        // this structure is needed to replace double occurring words in sentences
+        Object[] orderedSentences = new Object[sentenceHandleCount];
+        String[] s;
+        int wc;
         Object o;
-	it = sentences.keySet().iterator();
+        it = sentences.keySet().iterator();
         while (it.hasNext()) {
             o = it.next();
             if (o != null) {
@@ -243,7 +253,7 @@ public final class plasmaCondenser {
                 s = new String[wc + 2];
                 sp = (statProp) sentences.get(sentence);
                 s[0] = intString(sp.count, numlength); // number of occurrences of this sentence
-                s[1] = sentence.substring(0,1); // the termination symbol of this sentence
+                s[1] = sentence.substring(0, 1); // the termination symbol of this sentence
                 for (int i = 0; i < wc; i++) {
                     k = sentence.substring(i * numlength + 1, (i + 1) * numlength + 1);
                     s[i + 2] = k;
@@ -252,375 +262,392 @@ public final class plasmaCondenser {
             }
         }
 
-	Map.Entry entry;
-	// we search for similar words and reorganize the corresponding sentences
-	// a word is similar, if a shortened version is equal
-	it = words.entrySet().iterator(); // enumerates the keys in descending order
-	wordsearch: while (it.hasNext()) {
-	    entry = (Map.Entry) it.next();
-	    word = (String) entry.getKey();
-	    wordlen = word.length();
-	    sp = (statProp) entry.getValue();
-	    for (int i = wordcut; i > 0; i--) {
-		if (wordlen > i) {
-		    k = word.substring(0, wordlen - i);
-		    if (words.containsKey(k)) {
-			// we will delete the word 'word' and repoint the corresponding links
-			// in sentences that use this word
-			sp1 = (statProp) words.get(k);
-			it1 = sp.hash.iterator(); // we iterate over all sentences that refer to this word
-			while (it1.hasNext()) {
-			    idx = Integer.parseInt((String) it1.next()); // number of a sentence
-			    s = (String[]) orderedSentences[idx];
-			    for (int j = 2; j < s.length; j++) {
-				if (s[j].equals(intString(sp.handle, numlength))) s[j] = intString(sp1.handle, numlength);
-			    }
-			    orderedSentences[idx] = s;
-			}
-			// update word counter
-			sp1.count = sp1.count + sp.count;
-			words.put(k, sp1);
-			// remove current word
-			it.remove();
-			continue wordsearch;
-		    }
-		}
-	    }
-	}
+        Map.Entry entry;
+        // we search for similar words and reorganize the corresponding sentences
+        // a word is similar, if a shortened version is equal
+        it = words.entrySet().iterator(); // enumerates the keys in descending order
+        wordsearch: while (it.hasNext()) {
+            entry = (Map.Entry) it.next();
+            word = (String) entry.getKey();
+            wordlen = word.length();
+            sp = (statProp) entry.getValue();
+            for (int i = wordcut; i > 0; i--) {
+                if (wordlen > i) {
+                    k = word.substring(0, wordlen - i);
+                    if (words.containsKey(k)) {
+                        // we will delete the word 'word' and repoint the
+                        // corresponding links
+                        // in sentences that use this word
+                        sp1 = (statProp) words.get(k);
+                        it1 = sp.hash.iterator(); // we iterate over all sentences that refer to this word
+                        while (it1.hasNext()) {
+                            idx = Integer.parseInt((String) it1.next()); // number of a sentence
+                            s = (String[]) orderedSentences[idx];
+                            for (int j = 2; j < s.length; j++) {
+                                if (s[j].equals(intString(sp.handle, numlength)))
+                                    s[j] = intString(sp1.handle, numlength);
+                            }
+                            orderedSentences[idx] = s;
+                        }
+                        // update word counter
+                        sp1.count = sp1.count + sp.count;
+                        words.put(k, sp1);
+                        // remove current word
+                        it.remove();
+                        continue wordsearch;
+                    }
+                }
+            }
+        }
 
-	// depending on the orderedSentences structure, we rebuild the sentence HashMap to
-	// eliminate double occuring sentences
-	sentences = new HashMap();
+        // depending on the orderedSentences structure, we rebuild the sentence
+        // HashMap to eliminate double occuring sentences
+        sentences = new HashMap();
         int le;
-	for (int i = 0; i < orderedSentences.length; i++) {
-            le = ((String[]) orderedSentences[i]).length; 
-	    sentence = new StringBuffer(le * 10);
-	    for (int j = 1; j < le; j++) sentence.append(((String[]) orderedSentences[i])[j]);
+        for (int i = 0; i < orderedSentences.length; i++) {
+            le = ((String[]) orderedSentences[i]).length;
+            sentence = new StringBuffer(le * 10);
+            for (int j = 1; j < le; j++)
+                sentence.append(((String[]) orderedSentences[i])[j]);
             if (sentences.containsKey(sentence)) {
-		// add sentence counter to counter of found sentence
-		sp = (statProp) sentences.get(sentence);
-		sp.count = sp.count + Integer.parseInt(((String[]) orderedSentences[i])[0]);
-		sentences.put(sentence, sp);
-		//System.out.println("Found double occurring sentence " + i + " = " + sp.handle);
-	    } else {
-		// create new sentence entry
-		sp = new statProp(i);
-		sp.count = Integer.parseInt(((String[]) orderedSentences[i])[0]);
-		sentences.put(sentence, sp);
-	    }
-	}
+                // add sentence counter to counter of found sentence
+                sp = (statProp) sentences.get(sentence);
+                sp.count = sp.count + Integer.parseInt(((String[]) orderedSentences[i])[0]);
+                sentences.put(sentence, sp);
+                // System.out.println("Found double occurring sentence " + i + "
+                // = " + sp.handle);
+            } else {
+                // create new sentence entry
+                sp = new statProp(i);
+                sp.count = Integer.parseInt(((String[]) orderedSentences[i])[0]);
+                sentences.put(sentence, sp);
+            }
+        }
 
-	// store result
+        // store result
         this.RESULT_NUMB_TEXT_BYTES = wordenum.count();
-	this.RESULT_NUMB_WORDS = allwordcounter;
-	this.RESULT_DIFF_WORDS = wordHandleCount;
-	this.RESULT_SIMI_WORDS = words.size();
-	this.RESULT_WORD_ENTROPHY = (allwordcounter == 0) ? 0 : (255 * words.size() / allwordcounter);
-	this.RESULT_NUMB_SENTENCES = allsentencecounter;
-	this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
-	this.RESULT_SIMI_SENTENCES = sentences.size();
-	this.RESULT_AVERAGE_WORD_OCC = (words.size() == 0) ? 0 : (allwordcounter / words.size());
-	this.RESULT_INFORMATION_VALUE = (allwordcounter == 0) ? 0 : (wordenum.count() * words.size() / allwordcounter / 16);
+        this.RESULT_NUMB_WORDS = allwordcounter;
+        this.RESULT_DIFF_WORDS = wordHandleCount;
+        this.RESULT_SIMI_WORDS = words.size();
+        this.RESULT_WORD_ENTROPHY = (allwordcounter == 0) ? 0 : (255 * words.size() / allwordcounter);
+        this.RESULT_NUMB_SENTENCES = allsentencecounter;
+        this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
+        this.RESULT_SIMI_SENTENCES = sentences.size();
+        this.RESULT_AVERAGE_WORD_OCC = (words.size() == 0) ? 0 : (allwordcounter / words.size());
+        this.RESULT_INFORMATION_VALUE = (allwordcounter == 0) ? 0 : (wordenum.count() * words.size() / allwordcounter / 16);
     }
 
-        
     public void print() {
-	String[] s = sentences();
+        String[] s = sentences();
 
-	// printout a reconstruction of the text
-	for (int i = 0; i < s.length; i++) {
-	    if (s[i] != null) System.out.print("#T " + intString(i, numlength) + " " + s[i]);
-	}
+        // printout a reconstruction of the text
+        for (int i = 0; i < s.length; i++) {
+            if (s[i] != null) System.out.print("#T " + intString(i, numlength) + " " + s[i]);
+        }
     }
 
     public String[] sentences() {
-	// we reconstruct the word hashtable
-	// and order the entries by the number of the sentence
-	// this structure is only needed to reconstruct the text
-	String word;
-	statProp sp;
-	Map.Entry entry;
-	Iterator it;
-	String[] orderedWords = new String[words.size()+99]; // uuiiii, the '99' is only a quick hack...
-	it = words.entrySet().iterator(); // enumerates the keys in ascending order
-	while (it.hasNext()) {
-	    entry = (Map.Entry) it.next();
-	    word = (String) entry.getKey();
-	    sp = (statProp) entry.getValue();
-	    orderedWords[sp.handle] = word;
-	}
+        // we reconstruct the word hashtable
+        // and order the entries by the number of the sentence
+        // this structure is only needed to reconstruct the text
+        String word;
+        statProp sp;
+        Map.Entry entry;
+        Iterator it;
+        String[] orderedWords = new String[words.size() + 99]; // uuiiii, the '99' is only a quick hack...
+        it = words.entrySet().iterator(); // enumerates the keys in ascending order
+        while (it.hasNext()) {
+            entry = (Map.Entry) it.next();
+            word = (String) entry.getKey();
+            sp = (statProp) entry.getValue();
+            orderedWords[sp.handle] = word;
+        }
 
-	Object[] orderedSentences = makeOrderedSentences();
+        Object[] orderedSentences = makeOrderedSentences();
 
-	// create a reconstruction of the text
+        // create a reconstruction of the text
         String[] result = new String[orderedSentences.length];
         String s;
-	for (int i = 0; i < orderedSentences.length; i++) {
-	    if (orderedSentences[i] != null) {
-		s = "";
-		for (int j = 2; j < ((String[]) orderedSentences[i]).length; j++) {
-		    s += " " + orderedWords[Integer.parseInt(((String[]) orderedSentences[i])[j])];
-		}
-		s += ((String[]) orderedSentences[i])[1];
+        for (int i = 0; i < orderedSentences.length; i++) {
+            if (orderedSentences[i] != null) {
+                s = "";
+                for (int j = 2; j < ((String[]) orderedSentences[i]).length; j++) {
+                    s += " " + orderedWords[Integer.parseInt(((String[]) orderedSentences[i])[j])];
+                }
+                s += ((String[]) orderedSentences[i])[1];
                 result[i] = (s.length() > 1) ? s.substring(1) : s;
-	    } else {
+            } else {
                 result[i] = "";
             }
-	}
+        }
         return result;
     }
         
     private Object[] makeOrderedSentences() {
-	// we reconstruct the sentence hashtable again and create by-handle ordered entries
-	// this structure is needed to present the strings in the right order in a printout
-	int wc;
-	Iterator it;
-	statProp sp;
-	String[] s;
-	StringBuffer sentence;
-	Object[] orderedSentences = new Object[sentences.size()];
-	for (int i = 0; i < sentences.size(); i++) orderedSentences[i] = null; // this array must be initialized
-	it = sentences.keySet().iterator();
-	while (it.hasNext()) {
-	    sentence = (StringBuffer) it.next();
-	    wc = (sentence.length() - 1) / numlength;
-	    s = new String[wc + 2];
-	    sp = (statProp) sentences.get(sentence);
-	    s[0] = intString(sp.count, numlength); // number of occurrences of this sentence
-	    s[1] = sentence.substring(0,1); // the termination symbol of this sentence
-	    for (int i = 0; i < wc; i++) s[i + 2] = sentence.substring(i * numlength + 1, (i + 1) * numlength + 1);
-	    orderedSentences[sp.handle] = s;
-	}
-	return orderedSentences;
+        // we reconstruct the sentence hashtable again and create by-handle ordered entries
+        // this structure is needed to present the strings in the right order in a printout
+        int wc;
+        Iterator it;
+        statProp sp;
+        String[] s;
+        StringBuffer sentence;
+        Object[] orderedSentences = new Object[sentences.size()];
+        for (int i = 0; i < sentences.size(); i++)
+            orderedSentences[i] = null; // this array must be initialized
+        it = sentences.keySet().iterator();
+        while (it.hasNext()) {
+            sentence = (StringBuffer) it.next();
+            wc = (sentence.length() - 1) / numlength;
+            s = new String[wc + 2];
+            sp = (statProp) sentences.get(sentence);
+            s[0] = intString(sp.count, numlength); // number of occurrences of this sentence
+            s[1] = sentence.substring(0, 1); // the termination symbol of this sentence
+            for (int i = 0; i < wc; i++)
+                s[i + 2] = sentence.substring(i * numlength + 1, (i + 1) * numlength + 1);
+            orderedSentences[sp.handle] = s;
+        }
+        return orderedSentences;
     }
 
     public void writeMapToFile(File out) throws IOException {
-	Map.Entry entry;
-	String k;
-	String word;
-	Iterator it;
-	statProp sp;
+        Map.Entry entry;
+        String k;
+        String word;
+        Iterator it;
+        statProp sp;
 
-	Object[] orderedSentences = makeOrderedSentences();
+        Object[] orderedSentences = makeOrderedSentences();
 
-	// we reconstruct the word hashtable
-	// and sort the entries by the number of occurrences
-	// this structure is needed to print out a sorted list of words
-	TreeMap sortedWords = new TreeMap(kelondroNaturalOrder.naturalOrder);
-	it = words.entrySet().iterator(); // enumerates the keys in ascending order
-	while (it.hasNext()) {
-	    entry = (Map.Entry) it.next();
-	    word = (String) entry.getKey();
-	    sp = (statProp) entry.getValue();
-	    sortedWords.put(intString(sp.count, numlength) + intString(sp.handle, numlength), word);
-	}
+        // we reconstruct the word hashtable
+        // and sort the entries by the number of occurrences
+        // this structure is needed to print out a sorted list of words
+        TreeMap sortedWords = new TreeMap(kelondroNaturalOrder.naturalOrder);
+        it = words.entrySet().iterator(); // enumerates the keys in ascending order
+        while (it.hasNext()) {
+            entry = (Map.Entry) it.next();
+            word = (String) entry.getKey();
+            sp = (statProp) entry.getValue();
+            sortedWords.put(intString(sp.count, numlength) + intString(sp.handle, numlength), word);
+        }
 
-	// start writing of words and sentences
-	FileWriter writer = new FileWriter(out);
-	writer.write("\r\n");
-	it = sortedWords.entrySet().iterator(); // enumerates the keys in descending order
-	while (it.hasNext()) {
-	    entry = (Map.Entry) it.next();
-	    k = (String) entry.getKey();
-	    writer.write("#W " + k.substring(numlength) + " " + k.substring(0, numlength) + " " +
-			       ((String) entry.getValue()) + "\r\n");
-	}
-	for (int i = 0; i < orderedSentences.length; i++) {
-	    if (orderedSentences[i] != null) {
-		writer.write("#S " + intString(i, numlength) + " ");
-		for (int j = 0; j < ((String[]) orderedSentences[i]).length; j++) {
-		    writer.write(((String[]) orderedSentences[i])[j] + " ");
-		}
-		writer.write("\r\n");
-	    }
-	}
-	writer.close();
+        // start writing of words and sentences
+        FileWriter writer = new FileWriter(out);
+        writer.write("\r\n");
+        it = sortedWords.entrySet().iterator(); // enumerates the keys in descending order
+        while (it.hasNext()) {
+            entry = (Map.Entry) it.next();
+            k = (String) entry.getKey();
+            writer.write("#W " + k.substring(numlength) + " " + k.substring(0, numlength) + " " + ((String) entry.getValue()) + "\r\n");
+        }
+        for (int i = 0; i < orderedSentences.length; i++) {
+            if (orderedSentences[i] != null) {
+                writer.write("#S " + intString(i, numlength) + " ");
+                for (int j = 0; j < ((String[]) orderedSentences[i]).length; j++) {
+                    writer.write(((String[]) orderedSentences[i])[j] + " ");
+                }
+                writer.write("\r\n");
+            }
+        }
+        writer.close();
     }
 
     private static boolean punctuation(char c) {
-	return ("!?.".indexOf(c) >= 0);
+        return ("!?.".indexOf(c) >= 0);
     }
 
     public static boolean invisible(char c) {
-	if ((c < ' ') || (c > 'z')) return true;
-	return ("$%&/()=\"$%&/()=`^+*~#'-_:;,|<>[]\\".indexOf(c) >= 0);
+        if ((c < ' ') || (c > 'z')) return true;
+        return ("$%&/()=\"$%&/()=`^+*~#'-_:;,|<>[]\\".indexOf(c) >= 0);
     }
-
 
     public static Enumeration wordTokenizer(String s, int minLength) {
-	try {
-	    return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), minLength);
-	} catch (Exception e) {
-	    return null;
-	}
+        try {
+            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), minLength);
+        } catch (Exception e) {
+            return null;
+        }
     }
 	
-
     public static class sievedWordsEnum implements Enumeration {
-	Object buffer = null;
-	unsievedWordsEnum e;
-	int ml;
+        // this enumeration removes all words that contain either wrong characters or are too short
+        
+        Object buffer = null;
+        unsievedWordsEnum e;
+        int ml;
 
-	public sievedWordsEnum(InputStream is, int minLength) {
-	    e = new unsievedWordsEnum(is);
-	    buffer = nextElement0();
-	    ml = minLength;
-	}
+        public sievedWordsEnum(InputStream is, int minLength) {
+            e = new unsievedWordsEnum(is);
+            buffer = nextElement0();
+            ml = minLength;
+        }
 
-	private Object nextElement0() {
-	    String s, r;
-	    char c;
-	    loop: while (e.hasMoreElements()) {
-		s = (String) e.nextElement();
-		r = s.toLowerCase();
-		if ((s.length() == 1) && (punctuation(s.charAt(0)))) return s;
-		if (s.length() < ml) continue loop;
-		for (int i = 0; i < r.length(); i++) {
-		    c = r.charAt(i);
-		    if (!(((c >= 'a') && (c <= 'z')) ||
-			  ((c >= '0') && (c <= '9')))) continue loop; // go to next while loop
-		}
-		return s;
-	    }
-	    return null;
-	}
+	    private Object nextElement0() {
+            String s;
+            char c;
+            loop: while (e.hasMoreElements()) {
+                s = (String) e.nextElement();
+                if ((s.length() == 1) && (punctuation(s.charAt(0)))) return s;
+                if (s.length() < ml) continue loop;
+                for (int i = 0; i < s.length(); i++) {
+                    c = s.charAt(i);
+                    if (((c < 'a') || (c > 'z')) &&
+                        ((c < 'A') || (c > 'Z')) &&
+                        ((c < '0') || (c > '9')))
+                       continue loop; // go to next while loop
+                }
+                return s;
+            }
+            return null;
+        }
 
-	
-	public boolean hasMoreElements() {
-	    return buffer != null;
-	}
-	
-	public Object nextElement() {
-	    Object r = buffer; buffer = nextElement0(); return r;
-	}
+        public boolean hasMoreElements() {
+            return buffer != null;
+        }
 
-	public int count() {
-	    return e.count();
-	}
+        public Object nextElement() {
+            Object r = buffer;
+            buffer = nextElement0();
+            return r;
+        }
+
+        public int count() {
+            return e.count();
+        }
     }
 
     private static class unsievedWordsEnum implements Enumeration {
-	Object buffer = null;
-	linesFromFileEnum e;
-	String s;
+        
+        Object buffer = null;
+        linesFromFileEnum e;
+        String s;
 
-	public unsievedWordsEnum(InputStream is) {
-	    e = new linesFromFileEnum(is);
-	    s = "";
-	    buffer = nextElement0();
-	}
+        public unsievedWordsEnum(InputStream is) {
+            e = new linesFromFileEnum(is);
+            s = "";
+            buffer = nextElement0();
+        }
 
-	private Object nextElement0() {
-	    String r;
-	    StringBuffer sb;
-	    char c;
-	    while (s.length() == 0) {
-		if (e.hasMoreElements()) {
-		    r = (String) e.nextElement();
-		    if (r == null) return null;
-		    r = r.trim();
-		    sb = new StringBuffer(r.length() * 2);
-		    for (int i = 0; i < r.length(); i++) {
-			c = r.charAt(i);
-			if (invisible(c)) sb = sb.append(' ');
-			else if (punctuation(c)) sb = sb.append(' ').append(c).append(' ');
-			else sb = sb.append(c);
-		    }
-		    s = sb.toString().trim();
-		    //System.out.println("PARSING-LINE '" + r + "'->'" + s + "'");
-		} else {
-		    return null;
-		}
-	    }
-	    int p = s.indexOf(" ");
-	    if (p < 0) {r = s; s = ""; return r;}
-	    r = s.substring(0, p);
-	    s = s.substring(p + 1).trim();
-	    return r;
-	}
+        private Object nextElement0() {
+            String r;
+            StringBuffer sb;
+            char c;
+            while (s.length() == 0) {
+                if (e.hasMoreElements()) {
+                    r = (String) e.nextElement();
+                    if (r == null) return null;
+                    r = r.trim();
+                    sb = new StringBuffer(r.length() * 2);
+                    for (int i = 0; i < r.length(); i++) {
+                        c = r.charAt(i);
+                        if (invisible(c)) sb = sb.append(' ');
+                        else if (punctuation(c)) sb = sb.append(' ').append(c).append(' ');
+                        else sb = sb.append(c);
+                    }
+                    s = sb.toString().trim();
+                    //System.out.println("PARSING-LINE '" + r + "'->'" + s + "'");
+                } else {
+                    return null;
+                }
+            }
+            int p = s.indexOf(" ");
+            if (p < 0) {
+                r = s;
+                s = "";
+                return r;
+            }
+            r = s.substring(0, p);
+            s = s.substring(p + 1).trim();
+            return r;
+        }
 
-	public boolean hasMoreElements() {
-	    return buffer != null;
-	}
-	
-	public Object nextElement() {
-	    Object r = buffer; buffer = nextElement0(); return r;
-	}
+        public boolean hasMoreElements() {
+            return buffer != null;
+        }
 
-	public int count() {
-	    return e.count();
-	}
+        public Object nextElement() {
+            Object r = buffer;
+            buffer = nextElement0();
+            return r;
+        }
+
+        public int count() {
+            return e.count();
+        }
     }
 
     private static class linesFromFileEnum implements Enumeration {
-	// read in lines from a given input stream
-	// every line starting with a '#' is treated as a comment.
+        // read in lines from a given input stream
+        // every line starting with a '#' is treated as a comment.
 
-	Object buffer = null;
-	BufferedReader raf;
-	int counter = 0;
+        Object buffer = null;
+        BufferedReader raf;
+        int counter = 0;
 
-	public linesFromFileEnum(InputStream is) {
-	    raf = new BufferedReader(new InputStreamReader(is));
-	    buffer = nextElement0();
-	    counter = 0;
-	}
+        public linesFromFileEnum(InputStream is) {
+            raf = new BufferedReader(new InputStreamReader(is));
+            buffer = nextElement0();
+            counter = 0;
+        }
 
-	private Object nextElement0() {
-	    try {
-		String s;
-		while (true) {
-		    s = raf.readLine();
-		    if (s == null) {raf.close(); return null;}
-		    if (!(s.startsWith("#"))) return s;
-		}
-	    } catch (IOException e) {
-		try {raf.close();} catch (Exception ee) {}
-		return null;
-	    }
-	}
-	
-	public boolean hasMoreElements() {
-	    return buffer != null;
-	}
-	
-	public Object nextElement() {
-	    if (buffer == null) {
-		return null;
-	    } else {
-		counter = counter + ((String) buffer).length() + 1;
-		Object r = buffer;
-		buffer = nextElement0();
-		return r;
-	    }
-	}
-	
-	public int count() {
-	    return counter;
-	}
+        private Object nextElement0() {
+            try {
+                String s;
+                while (true) {
+                    s = raf.readLine();
+                    if (s == null) {
+                        raf.close();
+                        return null;
+                    }
+                    if (!(s.startsWith("#"))) return s;
+                }
+            } catch (IOException e) {
+                try {
+                    raf.close();
+                } catch (Exception ee) {
+                }
+                return null;
+            }
+        }
+
+        public boolean hasMoreElements() {
+            return buffer != null;
+        }
+
+        public Object nextElement() {
+            if (buffer == null) {
+                return null;
+            } else {
+                counter = counter + ((String) buffer).length() + 1;
+                Object r = buffer;
+                buffer = nextElement0();
+                return r;
+            }
+        }
+
+        public int count() {
+            return counter;
+        }
     }
 
     /*
     private static void addLineSearchProp(Properties prop, String s, String[] searchwords, HashSet foundsearch) {
-	// we store lines containing a key in search vector
-	int p;
-	String r;
-	s = " " + s.toLowerCase() + " ";
-	for (int i = 0; i < searchwords.length; i++) {
-	    if (!(foundsearch.contains(searchwords[i]))) {
-		p = s.indexOf((String) searchwords[i]);
-		if (p >= 0) {
-		    // we found one key in the result text
-		    // prepare a line and put it to the property
-		    r = s.substring(0, p) + "<B>" +
-			s.substring(p, p + searchwords[i].length()) + "</B>" +
-			s.substring(p + searchwords[i].length());
-		    prop.setProperty("key-" + searchwords[i], r);
-				// remember that we found this
-		    foundsearch.add(searchwords[i]);
-		}
-	    }
-	}
+        // we store lines containing a key in search vector
+        int p;
+        String r;
+        s = " " + s.toLowerCase() + " ";
+        for (int i = 0; i < searchwords.length; i++) {
+            if (!(foundsearch.contains(searchwords[i]))) {
+                p = s.indexOf((String) searchwords[i]);
+                if (p >= 0) {
+                    // we found one key in the result text
+                    // prepare a line and put it to the property
+                    r = s.substring(0, p) + "<B>" + s.substring(p, p + searchwords[i].length()) + "</B>" + s.substring(p + searchwords[i].length());
+                    prop.setProperty("key-" + searchwords[i], r);
+                    // remember that we found this
+                    foundsearch.add(searchwords[i]);
+                }
+            }
+        }
     }
     */
     
@@ -632,43 +659,47 @@ public final class plasmaCondenser {
     }
         
     public static void main(String[] args) {
-	if ((args.length == 0) || (args.length > 3)) System.out.println("wrong number of arguments: plasmaCondenser -text|-html <infile> <outfile>"); else try {
+        if ((args.length == 0) || (args.length > 3))
+            System.out.println("wrong number of arguments: plasmaCondenser -text|-html <infile> <outfile>");
+        else
+            try {
+                plasmaCondenser pc = null;
 
-	    plasmaCondenser pc = null;
-
-	    // read and analyse file
-	    File file = new File(args[1]);
-	    InputStream textStream = null;
-	    if (args[0].equals("-text")) {
-		// read a text file
-		textStream = new FileInputStream(file);
-	    } else if (args[0].equals("-html")) {
-		// read a html file
-		htmlFilterContentScraper cs = new htmlFilterContentScraper(new java.net.URL("http://localhost/"));
-		htmlFilterOutputStream fos = new htmlFilterOutputStream(null, cs, null, false);
-		FileInputStream fis = new FileInputStream(file);
-		byte[] buffer = new byte[512];
-		int i;
-		while ((i = fis.read(buffer)) > 0) fos.write(buffer, 0, i);
-		fis.close();
-		fos.close();
-		//cs.print();
-		//System.out.println("TEXT:" + new String(cs.getText()));
-		textStream = new ByteArrayInputStream(cs.getText());
-	    } else {
-		System.out.println("first argument must be either '-text' or '-html'");
-		System.exit(-1);
-	    }
-	    // call condenser
-	    pc = new plasmaCondenser(textStream, 1, 0);
-	    textStream.close();
-	    // output result
-	    pc.writeMapToFile(new File(args[2]));
-	    pc.print();
-	    //System.out.println("ANALYSIS:" + pc.getAnalysis().toString());
-	} catch (IOException e) {
-	    System.out.println("Problem with input file: " + e.getMessage());
-	}
+                // read and analyse file
+                File file = new File(args[1]);
+                InputStream textStream = null;
+                if (args[0].equals("-text")) {
+                    // read a text file
+                    textStream = new FileInputStream(file);
+                } else if (args[0].equals("-html")) {
+                    // read a html file
+                    htmlFilterContentScraper cs = new htmlFilterContentScraper(new java.net.URL("http://localhost/"));
+                    htmlFilterOutputStream fos = new htmlFilterOutputStream(null, cs, null, false);
+                    FileInputStream fis = new FileInputStream(file);
+                    byte[] buffer = new byte[512];
+                    int i;
+                    while ((i = fis.read(buffer)) > 0) fos.write(buffer, 0, i);
+                    fis.close();
+                    fos.close();
+                    // cs.print();
+                    // System.out.println("TEXT:" + new String(cs.getText()));
+                    textStream = new ByteArrayInputStream(cs.getText());
+                } else {
+                    System.out.println("first argument must be either '-text' or '-html'");
+                    System.exit(-1);
+                }
+                
+                // call condenser
+                pc = new plasmaCondenser(textStream, 1, 0);
+                textStream.close();
+                
+                // output result
+                pc.writeMapToFile(new File(args[2]));
+                pc.print();
+                //System.out.println("ANALYSIS:" + pc.getAnalysis().toString());
+            } catch (IOException e) {
+                System.out.println("Problem with input file: " + e.getMessage());
+            }
     }
 
 }
