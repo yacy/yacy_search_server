@@ -95,10 +95,10 @@ public final class plasmaWordIndexEntity {
         kt = new kelondroTree(theLocation, cacheSize);
     } catch (IOException e) {
         theLocation.delete();
-        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceShort, false);
+        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceLong, false);
     } else {
         // create new index file
-        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceShort, false);
+        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceLong, false);
     }
     return kt; // everyone who get this should close it when finished!
     }
@@ -167,11 +167,11 @@ public final class plasmaWordIndexEntity {
     
     public boolean addEntry(plasmaWordIndexEntry entry) throws IOException {
         if (entry == null) return false;
-    if (theTmpMap == null) {
-        return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm(0).getBytes()) == null);
-    } else {
-        return (theTmpMap.put(entry.getUrlHash(), entry) == null);
-    }
+        if (theTmpMap == null) {
+            return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm().getBytes()) == null);
+        } else {
+            return (theTmpMap.put(entry.getUrlHash(), entry) == null);
+        }
     }
     
     public int addEntries(plasmaWordIndexEntryContainer container) throws IOException {

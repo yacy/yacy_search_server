@@ -153,7 +153,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                             row[1] = kelondroRecords.long2bytes(container.size(), 4);
                             row[2] = kelondroRecords.long2bytes(updateTime, 8);
                             row[3] = wordEntry.getUrlHash().getBytes();
-                            row[4] = wordEntry.toEncodedForm(1).getBytes();
+                            row[4] = wordEntry.toEncodedForm().getBytes();
                             dumpArray.set((int) urlcount++, row);
                         }
                     }

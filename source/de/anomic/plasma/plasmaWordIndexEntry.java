@@ -67,7 +67,7 @@ public final class plasmaWordIndexEntry {
     public static final int  urlHashLength   = yacySeedDB.commonHashLength; // 12
 
     // the size of the index entry attributes
-    public static final int attrSpaceShort   = 12;
+    //public static final int attrSpaceShort   = 12;
     public static final int attrSpaceLong    = 18;
 
     // the associated hash
@@ -257,10 +257,10 @@ public final class plasmaWordIndexEntry {
        this.localflag = pr.getProperty("f", ""+LT_LOCAL).charAt(0);
     }
     
-    public String toEncodedForm(int outputFormat) {
-       // attention: this integrates NOT the URL into the encoding
+    public String toEncodedForm() {
+       // attention: this integrates NOT the URL hash into the encoding
        // if you need a complete dump, use toExternalForm()
-       StringBuffer buf = new StringBuffer((outputFormat >= 1) ? 18 : 12);
+       StringBuffer buf = new StringBuffer(attrSpaceLong);
        
        buf.append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.quality, plasmaURL.urlQualityLength))
           .append(kelondroBase64Order.enhancedCoder.encodeLongSmart(plasmaWordIndex.microDateDays(this.lastModified), 3))
@@ -269,7 +269,7 @@ public final class plasmaWordIndexEntry {
           .append(this.doctype)
           .append(this.localflag); // 3 + 3 + 2 + 2 + 1 + 1 = 12 bytes
            
-       if (outputFormat >= 1)
+       
            buf.append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.posintext, 2))
               .append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.posinphrase, 2))
               .append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.posofphrase, 2));
