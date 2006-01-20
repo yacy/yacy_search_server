@@ -6,7 +6,7 @@ server where you can host a seed-list file.</p>
 <p><b>General Settings:</b></p>
 If you enable one of the available uploading methods, you will become a principal peer.
 Your peer will then upload the seed-bootstrap information periodically,
-but only if there had been changes to the seed-list.
+but only if there have been changes to the seed-list.
 </p>
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <table border="0" cellspacing="5">

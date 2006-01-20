@@ -54,6 +54,7 @@ Import blacklist items from file:==Importiere Blacklist aus Datei:
 "Load new blacklist items"==Lade neue Blacklist
 was removed from blacklist==wurde aus Blacklist entfernt
 was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
+File:==Datei:
 
 #-----------------------------------------------------------
 #File: Bookmarks_p.html
@@ -357,7 +358,7 @@ This message will appear in the 'Other Peer Crawl Start' table of other peers.==
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer f&uuml;r Ihren Crawl benutzen.
 If you need your crawling results locally, you should switch this off.==Wenn Sie die Crawling Ergebnisse lokal ben&ouml;tigen, sollten Sie diese Funktion aktivieren.
 Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl initiieren oder erhalten.
-<b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can omit starting a crawl with the same start point.==<b>Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem gloablen Crawl zu informieren,</b> damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
+<b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can omit starting a crawl with the same start point.==<b>Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren,</b> damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
 Exclude <i>static</i> Stop-Words==Stop-Words ausschlie&szlig;en:
 This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem h&auml;fig vorkommende W&ouml;rter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt class=small>yacy.stopwords</tt> enthalten sind,
 check this box.==aktivieren Sie diese Box.
@@ -408,7 +409,7 @@ Crawl Thread==Crawl Art
 Start URL==Start URL
 Depth</b>==Tiefe</b>
 Filter</b>==Maske</b>
-Accept \"?\" URLs</b>==Akzeptiere '?' URLs</b>
+Accept \'?\' URLs</b>==Akzeptiere '?' URLs</b>
 Fill Proxy Cache==F&uuml;lle Proxy Cache
 Local Indexing</b>==Lokales Indexieren</b>
 Remote Indexing</b>==Indexieren auf anderen Peers</b>
@@ -587,7 +588,7 @@ No personal or protected page is indexed==Weder pers&ouml;nliche noch gesch&uuml
 such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Solche Seiten werden durch die Benutzung von Cookies oder POST-Parametern (in der URL oder im HTTP Protokoll) identifiziert
 and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
 <i>Use Case:</i> You must use YaCy as proxy to fill up this table.==<i>Anwendung:</i> Sie m&uuml;ssen YaCy als Proxy benutzen, um diese Tabelle zu f&uuml;llen.
-Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihrese Browsers auf den selben Port, der
+Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihres Browsers auf den selben Port, der
 on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
 \(5\) Index Monitor for Local Crawling.==(5) Index Monitor f&uuml;r das lokale Crawlen
 These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen lokalen Crawl auf der 'Index erzeugen' Seite gestartet haben.
@@ -713,8 +714,8 @@ PPM==PPM
 Seeds==Seeds
 Connects<br>per hour==Verbindungen<br>pro Stunde
 Send message to peer==Sende Nachricht an Peer
-View profile of peer==Zeige Profil vom Peer
-Read and edit wiki on peer==Lese und &auml;ndere Wiki von Peer
+View profile of peer==Zeige Profil des Peers
+Read and edit wiki on peer==Lese und &auml;ndere Wiki des Peers
 All Peers:==Alle Peers:
 Branch==Typ
 Peers==Peers
@@ -1073,6 +1074,7 @@ Use this only if you have a flatrate or you have an always-on connection.==Benut
 "Go to Cache-Mode"=="In Cache-Modus gehen"
 You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <i>permanenten</i> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein m&ouml;chten, m&uuml;ssen Sie den Proxy abschalten um offline zu gehen.
 Last Refresh:==Letzte Aktualisierung:
+Click <a href="Status.html?login=">here</a> to log in as administrator and see full status.==Klicken Sie <a href="Status.html?login=">hier</a> um sich als Administrator einzuloggen und alle Informationen zu sehen.
 
 #--------------------------------------------------------
 #File: Status_p.inc
@@ -1080,7 +1082,7 @@ Last Refresh:==Letzte Aktualisierung:
 
 Private System Properties==Private Systemeigenschaften
 System Resources==Systemressourcen
-Processors:==Prozessoren
+Processors:==Prozessoren:
 Protection==Sicherheit
 <b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html?page=admin">settings</a> page <b>immediately</b> and set an administration password.==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der <a href="Settings_p.html?page=admin">Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
 Your settings are protected by a password.==Ihre Einstellungen sind mit einem Kennwort gesch&uuml;tzt.
