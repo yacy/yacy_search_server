@@ -71,15 +71,23 @@ public class Status {
         final serverObjects prop = new serverObjects();
 
         if (post != null) {
-            if (post.containsKey("pausecrawlqueue")) {
-                ((plasmaSwitchboard)env).pauseCrawling();
-            } else if (post.containsKey("continuecrawlqueue")) {
-                ((plasmaSwitchboard)env).continueCrawling();
-            } else if (post.containsKey("ResetTraffic")) {
-                httpdByteCountInputStream.resetCount();
-                httpdByteCountOutputStream.resetCount();               
+            if (post.containsKey("login")) {
+                if (((plasmaSwitchboard) env).adminAuthenticated(header) < 2) {
+                    prop.put("AUTHENTICATE","log-in");
+                } else {
+                    prop.put("LOCATION","");
+                }
+            } else {
+                if (post.containsKey("pausecrawlqueue")) {
+                    ((plasmaSwitchboard)env).pauseCrawling();
+                } else if (post.containsKey("continuecrawlqueue")) {
+                    ((plasmaSwitchboard)env).continueCrawling();
+                } else if (post.containsKey("ResetTraffic")) {
+                    httpdByteCountInputStream.resetCount();
+                    httpdByteCountOutputStream.resetCount();               
+                }
+                prop.put("LOCATION","");
             }
-            prop.put("LOCATION","");
             return prop;
         }
         
@@ -91,8 +99,10 @@ public class Status {
         yacyCore.peerActions.updateMySeed();
 
         if (((plasmaSwitchboard) env).adminAuthenticated(header) >= 2) {
+            prop.put("showPrivateTable",1);
             prop.put("privateStatusTable", "Status_p.inc");
-        } else {
+        } else { 
+            prop.put("showPrivateTable",0);
             prop.put("privateStatusTable", "");
         }
 
