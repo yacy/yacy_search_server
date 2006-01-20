@@ -1904,7 +1904,7 @@ cd ..
             }
             c.exec("binary", false);
             if (localFile.isAbsolute()) {
-                c.exec("lcd " + localFile.getParent(),false);
+                c.exec("lcd \"" + localFile.getParent() + "\"", false);
                 localFile = new File(localFile.getName());
             }
             c.exec("put " + localFile.toString() + ((remoteName.length() == 0) ? "" : (" " + remoteName)), false);
