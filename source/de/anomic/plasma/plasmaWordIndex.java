@@ -160,9 +160,12 @@ public final class plasmaWordIndex {
             wordHash = plasmaWordIndexEntry.word2hash(word);
             entry = new plasmaWordIndexEntry(urlHash,
                                              condenser.wordCount(word),
+                                             condenser.RESULT_SIMI_WORDS,
+                                             condenser.RESULT_SIMI_SENTENCES,
                                              condenser.wordPositionInText(word),
                                              condenser.wordPositionInPhrase(word),
                                              condenser.wordNumberOfPhrase(word),
+                                             0,
                                              urlModified.getTime(), quality, language, doctype, true);
             addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), false);
         }

@@ -59,7 +59,6 @@ import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.plasma.plasmaURLPattern;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaSearchProfile;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -441,8 +440,7 @@ public final class yacyClient {
             //System.out.println("yacyClient: search result = " + result.toString()); // debug
             final int results = Integer.parseInt((String) result.get("count"));
             //System.out.println("***result count " + results);
-            plasmaCrawlLURL.Entry link;
-
+            
             // create containers
             final int words = wordhashes.length() / plasmaWordIndexEntry.wordHashLength;
             plasmaWordIndexEntryContainer[] container = new plasmaWordIndexEntryContainer[words];
@@ -451,21 +449,31 @@ public final class yacyClient {
             }
 
             // insert results to containers
-            plasmaCrawlLURL.Entry lEntry;
+            plasmaCrawlLURL.Entry urlEntry;
             for (int n = 0; n < results; n++) {
                 // get one single search result
-                lEntry = urlManager.newEntry((String) result.get("resource" + n), true);
-                if (lEntry != null && blacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath())) { continue; } // block with backlist
-                link = urlManager.addEntry(lEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
+                urlEntry = urlManager.newEntry((String) result.get("resource" + n), true);
+                if (urlEntry != null && blacklist.isListed(urlEntry.url().getHost().toLowerCase(), urlEntry.url().getPath())) { continue; } // block with backlist
+                urlManager.addEntry(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
                 // save the url entry
-                final plasmaWordIndexEntry entry = new plasmaWordIndexEntry(link.hash(), link.wordCount(), 0, 0, 0,
-                                                                      plasmaWordIndex.microDateDays(link.moddate()), link.quality(),
-                                                                      link.language(), link.doctype(), false);
-                if (link.snippet() != null) {
+                final plasmaWordIndexEntry entry;
+                if (urlEntry.word() == null)
+                    entry = new plasmaWordIndexEntry(
+                                                     urlEntry.hash(),
+                                                     urlEntry.wordCount(),
+                                                     0, 0, 0, 0, 0, 0,
+                                                     urlEntry.moddate().getTime(),
+                                                     urlEntry.quality(),
+                                                     urlEntry.language(),
+                                                     urlEntry.doctype(),
+                                                     false
+                                                    );
+                else entry = urlEntry.word();
+                if (urlEntry.snippet() != null) {
                     // we don't store the snippets along the url entry, because they are search-specific.
                     // instead, they are placed in a snipped-search cache.
                     //System.out.println("--- RECEIVED SNIPPET '" + link.snippet() + "'");
-                    snippets.storeToCache(wordhashes, link.hash(), link.snippet());
+                    snippets.storeToCache(wordhashes, urlEntry.hash(), urlEntry.snippet());
                 }
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {

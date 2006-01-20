@@ -359,7 +359,7 @@ public final class plasmaWordIndexDistribution {
                         while (urlIter.hasNext()) {
                             indexEntry = (plasmaWordIndexEntry) urlIter.next();     
                             try {
-                                lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
+                                lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash(), indexEntry);
                                 if ((lurl == null) || (lurl.url() == null)) {
                                     unknownURLEntries.add(indexEntry.getUrlHash());
                                 } else {
@@ -399,7 +399,7 @@ public final class plasmaWordIndexDistribution {
                         while ((urlIter.hasNext()) && (count > 0)) {
                             indexEntry = (plasmaWordIndexEntry) urlIter.next();
                             try {
-                                lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash());
+                                lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash(), indexEntry);
                                 if ((lurl == null) || (lurl.url()==null)) {
                                     unknownURLEntries.add(indexEntry.getUrlHash());
                                 } else {

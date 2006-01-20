@@ -95,10 +95,10 @@ public final class plasmaWordIndexEntity {
         kt = new kelondroTree(theLocation, cacheSize);
     } catch (IOException e) {
         theLocation.delete();
-        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceLong, false);
+        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpace, false);
     } else {
         // create new index file
-        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpaceLong, false);
+        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpace, false);
     }
     return kt; // everyone who get this should close it when finished!
     }
@@ -157,6 +157,16 @@ public final class plasmaWordIndexEntity {
     } catch (IOException e) {}
     }
 
+    public plasmaWordIndexEntry getEntry(String urlhash) throws IOException {
+        if (theTmpMap == null) {
+            byte[][] n = theIndex.get(urlhash.getBytes());
+            if (n == null) return null;
+            return new plasmaWordIndexEntry(new String(n[0]), new String(n[1]));
+        } else {
+            return (plasmaWordIndexEntry) theTmpMap.get(urlhash);
+        }
+    }
+    
     public boolean contains(String urlhash) throws IOException {
         if (theTmpMap == null) return (theIndex.get(urlhash.getBytes()) != null); else return (theTmpMap.containsKey(urlhash));
     }
@@ -390,12 +400,17 @@ public final class plasmaWordIndexEntity {
         System.out.println("DEBUG: JOIN METHOD BY TEST");
         plasmaWordIndexEntity conj = new plasmaWordIndexEntity(null); // start with empty search result
         Iterator se = small.elements(true);
-        plasmaWordIndexEntry ie;
+        plasmaWordIndexEntry ie0, ie1;
         long stamp = System.currentTimeMillis();
         try {
             while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
-                ie = (plasmaWordIndexEntry) se.next();
-                if (large.contains(ie)) conj.addEntry(ie);
+                ie0 = (plasmaWordIndexEntry) se.next();
+                ie1 = large.getEntry(ie0.getUrlHash());
+                if (ie1 != null) {
+                    // this is a hit. Calculate word distance:
+                    ie0.combineDistance(ie1);
+                    conj.addEntry(ie0);
+                }
             }
         }  catch (kelondroException e) {
             //serverLog.logSevere("PLASMA", "joinConstructiveByTest: Database corrupt (" + e.getMessage() + "), deleting index");
@@ -449,6 +464,7 @@ public final class plasmaWordIndexEntity {
                     }
                 } else {
                     // we have found the same urls in different searches!
+                    ie1.combineDistance(ie2);
                     conj.addEntry(ie1);
                     try {
                         if (e1.hasNext()) ie1 = (plasmaWordIndexEntry) e1.next(); else break;

@@ -134,7 +134,6 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroTables;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverObjects;
@@ -1322,9 +1321,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 plasmaWordIndexEntity wordIdxEntity = new plasmaWordIndexEntity(wordHash);
                                 plasmaWordIndexEntry wordIdxEntry = new plasmaWordIndexEntry(urlHash,
                                                                                              condenser.wordCount(word),
+                                                                                             condenser.RESULT_SIMI_WORDS,
+                                                                                             condenser.RESULT_SIMI_SENTENCES,
                                                                                              condenser.wordPositionInText(word),
                                                                                              condenser.wordPositionInPhrase(word),
                                                                                              condenser.wordNumberOfPhrase(word),
+                                                                                             0,
                                                                                              docDate.getTime(),
                                                                                              quality, language, doctype, true);
                                 wordIdxEntity.addEntry(wordIdxEntry);
@@ -1575,7 +1577,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         String lurl = (String) page.get("lurl");
                         if ((lurl != null) && (lurl.length() != 0)) {
                             String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
-                            plasmaCrawlLURL.Entry entry = urlPool.loadedURL.addEntry(urlPool.loadedURL.newEntry(propStr, true), yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1);
+                            plasmaCrawlLURL.Entry entry = urlPool.loadedURL.newEntry(propStr, true);
+                            urlPool.loadedURL.addEntry(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** überflüssig/doppelt?
                             urlPool.noticeURL.remove(entry.hash());
                             log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
                             return true;
@@ -1760,84 +1763,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
     }
     
-    public serverObjects searchFromRemote(plasmaSearchQuery query) {
-        
-        // tell all threads to do nothing for a specific time
-        wordIndex.intermission(2 * query.maximumTime);
-        intermissionAllThreads(2 * query.maximumTime);
-        
-        query.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
-        
-        serverObjects prop = new serverObjects();
-        try {
-            log.logInfo("INIT HASH SEARCH: " + query.queryHashes + " - " + query.wantedResults + " links");
-            long timestamp = System.currentTimeMillis();
-            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, log, wordIndex, urlPool.loadedURL, snippetCache);
-            int idxc = theSearch.localSearch();
-            plasmaSearchResult acc = theSearch.order();
-            
-            // result is a List of urlEntry elements
-            if (acc == null) {
-                prop.put("totalcount", "0");
-                prop.put("linkcount", "0");
-                prop.put("references", "");
-            } else {
-                prop.put("totalcount", Integer.toString(acc.sizeOrdered()));
-                int i = 0;
-                StringBuffer links = new StringBuffer();
-                String resource = "";
-                //plasmaIndexEntry pie;
-                plasmaCrawlLURL.Entry urlentry;
-                plasmaSnippetCache.result snippet;
-                while ((acc.hasMoreElements()) && (i < query.wantedResults)) {
-                    urlentry = acc.nextElement();
-                    snippet = snippetCache.retrieve(urlentry.url(), query.queryHashes, false, 260);
-                    if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
-                        // suppress line: there is no match in that resource
-                    } else {
-                        if (snippet.line == null) {
-                            resource = urlentry.toString();
-                        } else {
-                            resource = urlentry.toString(snippet.line);
-                        }
-                        if (resource != null) {
-                            links.append("resource").append(i).append("=").append(resource).append(serverCore.crlfString);
-                            i++;
-                        }
-                    }
-                }
-                prop.put("links", links.toString());
-                prop.put("linkcount", Integer.toString(i));
-                
-                // prepare reference hints
-                Object[] ws = acc.getReferences(16);
-                StringBuffer refstr = new StringBuffer();
-                for (int j = 0; j < ws.length; j++) refstr.append(",").append((String) ws[j]);
-                prop.put("references", (refstr.length() > 0)?refstr.substring(1):refstr.toString());
-            }
-            
-            // add information about forward peers
-            prop.put("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
-            prop.put("fwsrc", ""); // peers that helped to construct this result
-            prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
-            
-            // log
-            log.logInfo("EXIT HASH SEARCH: " + query.queryHashes + " - " + idxc + " links found, " +
-            prop.get("linkcount", "?") + " links selected, " +
-            ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-            return prop;
-        } catch (IOException e) {
-            return null;
-        }
-    }
-    
-    
     public serverObjects action(String actionName, serverObjects actionInput) {
-        // perform an action. (not used)
-        
+        // perform an action. (not used)    
         return null;
     }
-    
     
     public String toString() {
         // it is possible to use this method in the cgi pages.
@@ -1856,7 +1785,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // determine the url string
         try {
-            plasmaCrawlLURL.Entry entry = urlPool.loadedURL.getEntry(urlhash);
+            plasmaCrawlLURL.Entry entry = urlPool.loadedURL.getEntry(urlhash, null);
             URL url = entry.url();
             if (url == null)
                 return 0;

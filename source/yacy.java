@@ -754,7 +754,7 @@ public final class yacy {
                         String urlHash = importWordIdxEntry.getUrlHash();                    
                         if ((importUrlDB.exists(urlHash)) && (!homeUrlDB.exists(urlHash))) try {
                             // importing the new url
-                            plasmaCrawlLURL.Entry urlEntry = importUrlDB.getEntry(urlHash);                       
+                            plasmaCrawlLURL.Entry urlEntry = importUrlDB.getEntry(urlHash, null);                       
                             urlCounter++;
                             homeUrlDB.newEntry(urlEntry);
                             
@@ -861,7 +861,7 @@ public final class yacy {
                         wordIdxEntry = (plasmaWordIndexEntry) wordIdxEntries.next();
                         String urlHash = wordIdxEntry.getUrlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash);                       
+                            plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash, null);                       
                             urlCounter++;
                             /*plasmaCrawlLURL.Entry newEntry =*/ minimizedUrlDB.newEntry(urlEntry);
                             if (urlCounter % 500 == 0) {

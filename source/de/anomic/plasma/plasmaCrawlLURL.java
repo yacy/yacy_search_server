@@ -151,8 +151,8 @@ public final class plasmaCrawlLURL extends plasmaURL {
         return e;
     }
 
-    public synchronized Entry addEntry(Entry e, String initiatorHash, String executorHash, int stackType) {
-        if (e == null) { return null; }
+    public synchronized void addEntry(Entry e, String initiatorHash, String executorHash, int stackType) {
+        if (e == null) { return; }
         try {
             if (initiatorHash == null) { initiatorHash = dummyHash; }
             if (executorHash == null) { executorHash = dummyHash; }
@@ -165,10 +165,10 @@ public final class plasmaCrawlLURL extends plasmaURL {
                 case 5: lcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
                 case 6: gcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
             }
-            return e;
+            return;
         } catch (Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
-            return null;
+            return;
         }
     }
 
@@ -176,27 +176,14 @@ public final class plasmaCrawlLURL extends plasmaURL {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
 
-    public synchronized Entry getEntry(String hash) throws IOException {
-        return new Entry(hash);
+    public synchronized Entry getEntry(String hash, plasmaWordIndexEntry searchedWord) throws IOException {
+        return new Entry(hash, searchedWord);
     }
 
     public synchronized Entry newEntry(Entry oldEntry) {
         if (oldEntry == null) return null;
-        /*
-         * de.anomic.plasma.plasmaCrawlLURL.Entry.Entry(URL url, String descr,
-         * Date moddate, Date loaddate,
-         * String referrerHash,
-         * int copyCount,
-         * boolean localNeed,
-         * int quality,
-         * String language,
-         * char doctype,
-         * long size,
-         * int wordCount)
-         */
         return new Entry(
                 oldEntry.url(),
-                oldEntry.hash(),
                 oldEntry.descr(),
                 oldEntry.moddate(),
                 oldEntry.loaddate(),
@@ -209,7 +196,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                 oldEntry.size(),
                 oldEntry.wordCount());
     }
-
+    
     public synchronized Entry newEntry(String propStr, boolean setGlobal) {
         if (propStr.startsWith("{") && propStr.endsWith("}")) {
             return new Entry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)), setGlobal);
@@ -356,7 +343,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             urlHash = getUrlHash(tabletype, i);
 //          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
             try {
-                urle = getEntry(urlHash);
+                urle = getEntry(urlHash, null);
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
                 initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                 executorSeed = yacyCore.seedDB.getConnected(executorHash);
@@ -397,72 +384,44 @@ public final class plasmaCrawlLURL extends plasmaURL {
 
     public class Entry {
 
-    private URL    url;
-    private String descr;
-    private Date   moddate;
-    private Date   loaddate;
-    private String urlHash;
-    private String referrerHash;
-    private int    copyCount;
-    private String flags;
-    private int    quality;
-    private String language;
-    private char   doctype;
-    private long   size;
-    private int    wordCount;
-    private String snippet;
+    private URL url;
 
-    public Entry(
-            URL url, 
-            String descr, 
-            Date moddate, 
-            Date loaddate,
-            String referrerHash, 
-            int copyCount, 
-            boolean localNeed,
-            int quality, 
-            String language, 
-            char doctype, 
-            long size, 
-            int wordCount
-    ) {
-        this(url,null,descr,moddate,loaddate,referrerHash,copyCount,localNeed,quality,language,doctype,size,wordCount);
-    }
-    
-    Entry(
-            URL url, 
-            String theUrlHash,
-            String descr, 
-            Date moddate, 
-            Date loaddate,
-            String referrerHash, 
-            int copyCount, 
-            boolean localNeed,
-            int quality, 
-            String language, 
-            char doctype, 
-            long size, 
-            int wordCount
-    ) {    
-        // create new entry and store it into database
-        this.urlHash = (theUrlHash == null) ? urlHash(url) : theUrlHash;
-        this.url = url;
-        this.descr = (descr==null)?this.url.toString():descr;
-        this.moddate = moddate;
-        this.loaddate = loaddate;
-        this.referrerHash = (referrerHash == null) ? dummyHash : referrerHash;
-        this.copyCount = copyCount; // the number of remote (global) copies of this object without this one
-        this.flags = (localNeed) ? "L " : "  ";
-        this.quality = quality;
-        this.language = (language==null)?"uk":language;
-        this.doctype = doctype;
-        this.size = size;
-        this.wordCount = wordCount;
-        this.snippet = null;
-        store();        
-    }
+        private String descr;
+        private Date moddate;
+        private Date loaddate;
+        private String urlHash;
+        private String referrerHash;
+        private int copyCount;
+        private String flags;
+        private int quality;
+        private String language;
+        private char doctype;
+        private long size;
+        private int wordCount;
+        private String snippet;
+        private plasmaWordIndexEntry word;
 
-        public Entry(String urlHash) throws IOException {
+        public Entry(URL url, String descr, Date moddate, Date loaddate, String referrerHash, int copyCount, boolean localNeed, int quality, String language, char doctype, long size, int wordCount) {
+            // create new entry and store it into database
+            this.urlHash = urlHash(url);
+            this.url = url;
+            this.descr = (descr == null) ? this.url.toString() : descr;
+            this.moddate = moddate;
+            this.loaddate = loaddate;
+            this.referrerHash = (referrerHash == null) ? dummyHash : referrerHash;
+            this.copyCount = copyCount; // the number of remote (global) copies of this object without this one
+            this.flags = (localNeed) ? "L " : "  ";
+            this.quality = quality;
+            this.language = (language == null) ? "uk" : language;
+            this.doctype = doctype;
+            this.size = size;
+            this.wordCount = wordCount;
+            this.snippet = null;
+            this.word = null;
+            store();
+        }
+
+        public Entry(String urlHash, plasmaWordIndexEntry searchedWord) throws IOException {
             // generates an plasmaLURLEntry using the url hash
             // to speed up the access, the url-hashes are buffered
             // in the hash cache.
@@ -488,6 +447,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                     this.size = kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[11], "UTF-8"));
                     this.wordCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[12], "UTF-8"));
                     this.snippet = null;
+                    this.word = searchedWord;
                     return;
                 }
             } catch (Exception e) {
@@ -519,8 +479,9 @@ public final class plasmaCrawlLURL extends plasmaURL {
             this.doctype = prop.getProperty("dt", "t").charAt(0);
             this.size = Long.parseLong(prop.getProperty("size", "0"));
             this.wordCount = Integer.parseInt(prop.getProperty("wc", "0"));
-                    this.snippet = prop.getProperty("snippet", "");
-                    if (snippet.length() == 0) snippet = null; else snippet = crypt.simpleDecode(snippet, null);
+            this.snippet = prop.getProperty("snippet", "");
+            if (snippet.length() == 0) snippet = null; else snippet = crypt.simpleDecode(snippet, null);
+            this.word = (prop.containsKey("word")) ? new plasmaWordIndexEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word",""))) : null;
             store();
             //}
         } catch (Exception e) {
@@ -623,6 +584,10 @@ public final class plasmaCrawlLURL extends plasmaURL {
         return snippet;
     }
 
+    public plasmaWordIndexEntry word() {
+        return word;
+    }
+    
     private StringBuffer corePropList() {
         // generate a parseable string; this is a simple property-list
         final StringBuffer corePropStr = new StringBuffer(300);
@@ -640,23 +605,14 @@ public final class plasmaCrawlLURL extends plasmaURL {
             .append(",dt=")      .append(doctype)
             .append(",lang=")    .append(language)
             .append(",url=")     .append(crypt.simpleEncode(url.toString()))
-            .append(",descr=")   .append(crypt.simpleEncode(descr));                
+            .append(",descr=")   .append(crypt.simpleEncode(descr));
+            
+            if (this.word != null) {
+                // append also word properties
+                corePropStr.append(",word=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toExternalForm()));
+            }
             return corePropStr;
 
-//          return
-//          "hash=" + urlHash +
-//          ",referrer=" + referrerHash +
-//          ",mod=" + shortDayFormatter.format(moddate) +
-//          ",load=" + shortDayFormatter.format(loaddate) +
-//          ",size=" + size +
-//          ",wc=" + wordCount +
-//          ",cc=" + copyCount +
-//          ",local=" + ((local()) ? "true" : "false") +
-//          ",q=" + serverCodings.enhancedCoder.encodeBase64Long(quality, urlQualityLength) +
-//          ",dt=" + doctype +
-//          ",lang=" + language +
-//          ",url=" + crypt.simpleEncode(url.toString()) +
-//          ",descr=" + crypt.simpleEncode(descr);
         } catch (Exception e) {
 //          serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
 //          if (moddate == null) serverLog.logFailure("plasmaLURL.corePropList", "moddate=null");
@@ -666,6 +622,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         }
     }
 
+    /*
     public String toString(int posintext, int posinphrase, int posofphrase) {
         // add information needed for remote transport
         final StringBuffer core = corePropList();
@@ -678,15 +635,9 @@ public final class plasmaCrawlLURL extends plasmaURL {
             .append(",posofphraseint=").append(posofphrase)
             .append("}");
         return core.toString();
-
-//      return
-//      "{" + core +
-//      ",posintext=" + posintext +
-//      ",posinphrase=" + posinphrase +
-//      ",posofphraseint=" + posofphrase +
-//      "}";
     }        
-
+    */
+    
     public String toString(String snippet) {
         // add information needed for remote transport
         final StringBuffer core = corePropList();
@@ -694,7 +645,8 @@ public final class plasmaCrawlLURL extends plasmaURL {
 
         core.ensureCapacity(core.length() + snippet.length()*2);
         core.insert(0,"{");
-        core.append(",snippet=").append(crypt.simpleEncode(snippet)).append("}");
+        core.append(",snippet=").append(crypt.simpleEncode(snippet));
+        core.append("}");
 
         return core.toString();        
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
@@ -751,7 +703,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             String hash = null;
             try {
                 hash = new String(e);
-                return new Entry(hash);
+                return new Entry(hash, null);
             } catch (IOException ex) {
                 throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + hash);
             }

@@ -236,7 +236,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 entry = preorder.next();
                 // find the url entry
                 try {
-                    page = urlStore.getEntry(entry.getUrlHash());
+                    page = urlStore.getEntry(entry.getUrlHash(), entry);
                     // add a result
                     acc.addResult(entry, page);
                 } catch (IOException e) {

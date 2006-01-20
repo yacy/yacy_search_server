@@ -253,7 +253,7 @@ public class plasmaDbImporter extends Thread {
                         String urlHash = importWordIdxEntry.getUrlHash();                    
                         if ((this.importUrlDB.exists(urlHash)) && (!this.homeUrlDB.exists(urlHash))) try {
                             // importing the new url
-                            plasmaCrawlLURL.Entry urlEntry = this.importUrlDB.getEntry(urlHash);                       
+                            plasmaCrawlLURL.Entry urlEntry = this.importUrlDB.getEntry(urlHash, importWordIdxEntry);                       
                             urlCounter++;
                             this.homeUrlDB.newEntry(urlEntry);
                             

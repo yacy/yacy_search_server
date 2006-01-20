@@ -47,11 +47,17 @@
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
+import java.io.IOException;
 import java.util.HashSet;
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaSearchEvent;
+import de.anomic.plasma.plasmaSearchResult;
+import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaSearchQuery;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -64,9 +70,7 @@ public final class search {
 
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
-        serverObjects prop = new serverObjects();
-        if (prop == null || sb == null) { return null; }
-
+        
         //System.out.println("yacy: search received request = " + post.toString());
 
         final String  oseed  = post.get("myseed", ""); // complete seed of the requesting peer
@@ -79,12 +83,20 @@ public final class search {
         final int     count  = post.getInt("count", 10); // maximum number of wanted results
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
+
+        
+        // tell all threads to do nothing for a specific time
+        sb.wordIndex.intermission(2 * duetime);
+        sb.intermissionAllThreads(2 * duetime);
+
+        // store accessing peer
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
             yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(oseed, key), true);
         }
 
+        // prepare search
         final HashSet keyhashes = new HashSet(query.length() / plasmaWordIndexEntry.wordHashLength);
         for (int i = 0; i < (query.length() / plasmaWordIndexEntry.wordHashLength); i++) {
             keyhashes.add(query.substring(i * plasmaWordIndexEntry.wordHashLength, (i + 1) * plasmaWordIndexEntry.wordHashLength));
@@ -92,9 +104,73 @@ public final class search {
         final long timestamp = System.currentTimeMillis();
         
         plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, new String[]{plasmaSearchQuery.ORDER_YBR, plasmaSearchQuery.ORDER_DATE, plasmaSearchQuery.ORDER_QUALITY},
-                                                        count, duetime, ".*");
+                                                        count, duetime, ".*");        
+        squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
+
+        serverObjects prop = new serverObjects();
+
+        yacyCore.log.logInfo("INIT HASH SEARCH: " + squery.queryHashes + " - " + squery.wantedResults + " links");
+        long timestamp1 = System.currentTimeMillis();
+        plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
+        plasmaSearchResult acc = null;
+        int idxc = 0;
+        try {
+            idxc = theSearch.localSearch();
+            acc = theSearch.order();
+        } catch (IOException e) {
+        }
+
+        // result is a List of urlEntry elements
+        if ((idxc == 0) || (acc == null)) {
+            prop.put("totalcount", "0");
+            prop.put("linkcount", "0");
+            prop.put("references", "");
+        } else {
+            prop.put("totalcount", Integer.toString(acc.sizeOrdered()));
+            int i = 0;
+            StringBuffer links = new StringBuffer();
+            String resource = "";
+            //plasmaIndexEntry pie;
+            plasmaCrawlLURL.Entry urlentry;
+            plasmaSnippetCache.result snippet;
+            while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
+                urlentry = acc.nextElement();
+                snippet = sb.snippetCache.retrieve(urlentry.url(), squery.queryHashes, false, 260);
+                if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
+                    // suppress line: there is no match in that resource
+                } else {
+                    if (snippet.line == null) {
+                        resource = urlentry.toString();
+                    } else {
+                        resource = urlentry.toString(snippet.line);
+                    }
+                    if (resource != null) {
+                        links.append("resource").append(i).append("=").append(resource).append(serverCore.crlfString);
+                        i++;
+                    }
+                }
+            }
+            prop.put("links", links.toString());
+            prop.put("linkcount", Integer.toString(i));
+
+            // prepare reference hints
+            Object[] ws = acc.getReferences(16);
+            StringBuffer refstr = new StringBuffer();
+            for (int j = 0; j < ws.length; j++)
+                refstr.append(",").append((String) ws[j]);
+            prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
+
+            // add information about forward peers
+            prop.put("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
+            prop.put("fwsrc", ""); // peers that helped to construct this result
+            prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
+
+            
+        }
         
-        prop = sb.searchFromRemote(squery);
+        // log
+        yacyCore.log.logInfo("EXIT HASH SEARCH: " + squery.queryHashes + " - " + idxc + " links found, " + prop.get("linkcount", "?") + " links selected, " + ((System.currentTimeMillis() - timestamp1) / 1000) + " seconds");
+ 
         prop.put("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
 
         final int links = Integer.parseInt(prop.get("linkcount","0"));

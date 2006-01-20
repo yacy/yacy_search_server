@@ -70,7 +70,7 @@ public final class plasmaWordIndexAssortment {
         4,                                   // occurrence counter
         8,                                   // timestamp of last access
         plasmaWordIndexEntry.urlHashLength,  // corresponding URL hash
-        plasmaWordIndexEntry.attrSpaceLong   // URL attributes
+        plasmaWordIndexEntry.attrSpace       // URL attributes
     };
     
     // class variables
