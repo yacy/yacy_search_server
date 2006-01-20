@@ -73,7 +73,7 @@ public class Status {
         if (post != null) {
             if (post.containsKey("login")) {
                 if (((plasmaSwitchboard) env).adminAuthenticated(header) < 2) {
-                    prop.put("AUTHENTICATE","log-in");
+                    prop.put("AUTHENTICATE","admin log-in");
                 } else {
                     prop.put("LOCATION","");
                 }
