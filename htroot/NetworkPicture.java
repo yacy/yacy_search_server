@@ -72,8 +72,8 @@ public class NetworkPicture {
         
         if (width > 1920) width = 1920;
         if (height > 1200) height = 1200;
-        if (passiveLimit > 500) passiveLimit = 500;
-        if (potentialLimit > 500) potentialLimit = 500;
+        if (passiveLimit > 1000000) passiveLimit = 1000000;
+        if (potentialLimit > 1000000) potentialLimit = 1000000;
         if (maxCount > 1000) maxCount = 1000;
         return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount);
     }
