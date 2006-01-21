@@ -39,16 +39,63 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
+import java.io.File;
+import java.io.IOException;
+
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.logging.serverLog;
 
 public class migration {
+    //SVN constants
+    public static final int USE_WORK_DIR=1389; //wiki & messages in DATA/WORK
     public static void main(String[] args) {
 
     }
     public static void migrate(plasmaSwitchboard sb){
         presetPasswords(sb);
         migrateSwitchConfigSettings(sb);
+        migrateWorkFiles(sb);
+    }
+
+    public static void migrateWorkFiles(plasmaSwitchboard sb){
+        File file=new File(sb.getRootPath(), "DATA/SETTINGS/wiki.db");
+        File file2;
+        if (file.exists()) {
+            serverLog.logInfo("MIGRATION", "Migrating wiki.db to "+ sb.workPath);
+            sb.wikiDB.close();
+            file2 = new File(sb.workPath, "wiki.db");
+            try {
+                serverFileUtils.copy(file, file2);
+                file.delete();
+            } catch (IOException e) {
+            }
+            
+            file = new File(sb.getRootPath(), "DATA/SETTINGS/wiki-bkp.db");
+            if (file.exists()) {
+                serverLog.logInfo("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
+                file2 = new File(sb.workPath, "wiki-bkp.db");
+                try {
+                    serverFileUtils.copy(file, file2);
+                    file.delete();
+                } catch (IOException e) {}        
+            }
+            sb.initWiki((int) sb.getConfigLong("ramCacheWiki", 1024) / 1024);
+        }
+        
+        
+        file=new File(sb.getRootPath(), "DATA/SETTINGS/message.db");
+        if(file.exists()){
+            serverLog.logInfo("MIGRATION", "Migrating message.db to "+ sb.workPath);
+            sb.messageDB.close();
+            file2=new File(sb.workPath, "message.db");
+            try {
+                serverFileUtils.copy(file, file2);
+                file.delete();
+            } catch (IOException e) {}
+            sb.initMessages((int) sb.getConfigLong("ramCacheMessage", 1024) / 1024);
+        }
     }
 
     public static void presetPasswords(plasmaSwitchboard sb) {

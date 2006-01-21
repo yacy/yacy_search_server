@@ -170,6 +170,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  File                        listsPath;
     public  File                        htDocsPath;
     public  File                        rankingPath;
+    public  File                        workPath;
     public  HashMap                     rankingPermissions;
     public  plasmaURLPool               urlPool;
     public  plasmaWordIndex             wordIndex;
@@ -241,6 +242,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.rankingPath   = new File(rootPath, getConfig("rankingPath", "DATA/RANKING"));
         this.log.logConfig("Ranking Path:    " + this.rankingPath.toString());
         this.rankingPermissions = new HashMap(); // mapping of permission - to filename.
+        this.workPath   = new File(rootPath, getConfig("workPath", "DATA/WORK"));
+        this.log.logConfig("Work Path:    " + this.workPath.toString());
         
         /* ============================================================================
          * Remote Proxy configuration
@@ -409,22 +412,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         plasmaCrawlLoader.switchboard = this;
         this.cacheLoader = new plasmaCrawlLoader(this.cacheManager, this.log);
         
-        // starting message board
-        this.log.logConfig("Starting Message Board");
-        File messageDbFile = new File(getRootPath(), "DATA/SETTINGS/message.db");
-        this.messageDB = new messageBoard(messageDbFile, ramMessage);
-        this.log.logConfig("Loaded Message Board DB from file " + messageDbFile.getName() +
-        ", " + this.messageDB.size() + " entries" +
-        ", " + ppRamString(messageDbFile.length()/1024));
+        // starting  board
+        initMessages(ramMessage);
         
         // starting wiki
-        this.log.logConfig("Starting Wiki Board");
-        File wikiDbFile = new File(getRootPath(), "DATA/SETTINGS/wiki.db");
-        this.wikiDB = new wikiBoard(wikiDbFile,
-        new File(getRootPath(), "DATA/SETTINGS/wiki-bkp.db"), ramWiki);
-        this.log.logConfig("Loaded Wiki Board DB from file " + wikiDbFile.getName() +
-        ", " + this.wikiDB.size() + " entries" +
-        ", " + ppRamString(wikiDbFile.length()/1024));
+        initWiki(ramWiki);
         
         // Init User DB
         this.log.logConfig("Loading User DB");
@@ -436,9 +428,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         //Init bookmarks DB
         this.log.logConfig("Loading Bookmarks DB");
-        File bookmarksFile = new File(getRootPath(), "DATA/WORK/bookmarks.db");
-        File tagsFile = new File(getRootPath(), "DATA/WORK/bookmarkTags.db");
-        File datesFile = new File(getRootPath(), "DATA/WORK/bookmarkDates.db");
+        File bookmarksFile = new File(workPath, "bookmarks.db");
+        File tagsFile = new File(workPath, "bookmarkTags.db");
+        File datesFile = new File(workPath, "bookmarkDates.db");
         this.bookmarksDB = new bookmarksDB(bookmarksFile, tagsFile, datesFile, 512);
         this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
         this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
@@ -576,6 +568,27 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         sb=this;
         log.logConfig("Finished Switchboard Initialization");
+    }
+
+
+    public void initMessages(int ramMessage) {
+        this.log.logConfig("Starting Message Board");
+        File messageDbFile = new File(workPath, "message.db");
+        this.messageDB = new messageBoard(messageDbFile, ramMessage);
+        this.log.logConfig("Loaded Message Board DB from file " + messageDbFile.getName() +
+        ", " + this.messageDB.size() + " entries" +
+        ", " + ppRamString(messageDbFile.length()/1024));
+    }
+
+
+    public void initWiki(int ramWiki) {
+        this.log.logConfig("Starting Wiki Board");
+        File wikiDbFile = new File(workPath, "wiki.db");
+        this.wikiDB = new wikiBoard(wikiDbFile,
+        new File(workPath, "wiki-bkp.db"), ramWiki);
+        this.log.logConfig("Loaded Wiki Board DB from file " + wikiDbFile.getName() +
+        ", " + this.wikiDB.size() + " entries" +
+        ", " + ppRamString(wikiDbFile.length()/1024));
     }
     
     
