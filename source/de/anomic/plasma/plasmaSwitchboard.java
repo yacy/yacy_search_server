@@ -1578,7 +1578,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if ((lurl != null) && (lurl.length() != 0)) {
                             String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
                             plasmaCrawlLURL.Entry entry = urlPool.loadedURL.newEntry(propStr, true);
-                            urlPool.loadedURL.addEntry(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** überflüssig/doppelt?
+                            urlPool.loadedURL.addEntry(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
                             urlPool.noticeURL.remove(entry.hash());
                             log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
                             return true;
