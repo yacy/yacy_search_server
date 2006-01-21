@@ -10,7 +10,85 @@
 <h2>Messages</h2><br>
 
 <p>
-#[messages]#
+#(mode)#
+<!-- List -->
+<table border="0" cellpadding="2" cellspacing="1">
+  <tr class="MenuHeader">
+    <td>Date</td>
+    <td>From</td>
+    <td>To</td>
+    <td>Subject</td>
+    <td>Action</td>
+  </tr>
+#{messages}#
+  <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+    <td>#[date]#</td>
+    <td>#[from]#</td>
+    <td>#[to]#</td>
+    <td>#[subject]#</td>
+    <td>
+      <a href="Messages_p.html?action=view&object=#[key]#">view</a>
+      &nbsp;/&nbsp;
+      <a href="MessageSend_p.html?hash=#[hash]#&subject=Re: #[subject]#">reply</a>
+      &nbsp;/&nbsp;
+      <a href="Messages_p.html?action=delete&object=#[key]#">delete</a>
+    </td>
+  </tr>
+#{/messages}#
+#(error)#::I/O error reading message table: #[message]##(/error)#
+::
+<!-- View -->
+<table border="0" cellpadding="2" cellspacing="1">
+  <tr>
+    <td class="MenuHeader">
+      From:
+    </td>
+    <td class="MessageBackground">
+      #[author]#
+    </td>
+  </tr>
+  <tr>
+    <td class="MenuHeader">
+      To:
+    </td>
+    <td class="MessageBackground">
+      #[to]#
+    </td>
+  </tr>
+  <tr>
+    <td class="MenuHeader">
+      Date:
+    </td>
+    <td class="MessageBackground">
+      #[date]#
+    </td>
+  </tr>
+  <tr>
+    <td class="MenuHeader">
+      Subject:
+    </td>
+    <td class="MessageBackground">
+      #[subject]#
+    </td>
+  </tr>
+  
+  <tr>
+    <td class="MessageBackground" colspan="2">
+      #[message]#
+    </td>
+  </tr>
+  <tr>
+    <td class="MenuHeader">Action:</td>
+    <td class="MessageBackground">
+      <a href="Messages_p.html">inbox</a>
+      &nbsp;/&nbsp;
+      <a href="MessageSend_p.html?hash=#[hash]#&subject=Re: #[subject]#">reply</a>
+      &nbsp;/&nbsp;
+      <a href="Messages_p.html?action=delete&object=#[key]#>delete</a>
+    </td>
+  </tr>
+</table>
+#(/mode)#
 </p>
 
 #%env/templates/footer.template%#

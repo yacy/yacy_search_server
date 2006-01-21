@@ -69,10 +69,11 @@ public class Messages_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
+        prop.put("mode", 0);
+        prop.put("mode_error", 0);
         wikiCode wikiTransformer = new wikiCode(switchboard);
 
         String action = ((post == null) ? "list" : post.get("action", "list"));
-        StringBuffer messages = new StringBuffer();
         messageBoard.entry message;
 
         // first reset notification
@@ -90,58 +91,56 @@ public class Messages_p {
         }
 
         if (action.equals("list")) {
-            messages.append("<table border=\"0\" cellpadding=\"2\" cellspacing=\"1\">");
-            messages.append("<tr class=\"MenuHeader\"><td>Date</td><td>From</td><td>To</td><td>Subject</td><td>Action</td></tr>");
+            prop.put("mode", 0); //list
             try {
                 Iterator i = switchboard.messageDB.keys("remote", true);
                 String key;
 
                 boolean dark = true;
+                int count=0;
                 while (i.hasNext()) {
                     key = (String) i.next();
                     message = switchboard.messageDB.read(key);
-                    messages.append("<tr class=\"TableCell").append((dark) ? "Dark" : "Light").append("\">");
-                    messages.append("<td>").append(dateString(message.date())).append("</td>");
-                    messages.append("<td>").append(message.author()).append("</td>");
-                    messages.append("<td>").append(message.recipient()).append("</td>");
-                    messages.append("<td>").append(wikiTransformer.transform(message.subject())).append("</td>");
-                    messages.append("<td>");
-                    messages.append("<a href=\"Messages_p.html?action=view&object=").append(key).append("\">view</a>&nbsp;/&nbsp;");
-                    messages.append("<a href=\"MessageSend_p.html?hash=").append(message.authorHash()).append("&subject=Re: ").append(message.subject()).append("\">reply</a>&nbsp;/&nbsp;");
-                    messages.append("<a href=\"Messages_p.html?action=delete&object=").append(key).append("\">delete</a></td></tr>");
+                    prop.put("mode_messages_"+count+"_dark", ((dark) ? 1 : 0) );
+                    prop.put("mode_messages_"+count+"_date", dateString(message.date()));
+                    prop.put("mode_messages_"+count+"_author", message.author());
+                    prop.put("mode_messages_"+count+"_to", message.recipient());
+                    //prop.put("mode_messages_"+count+"_subject", wikiTransformer.transform(message.subject()));
+                    //TODO: not needed, when all templates will be cleaned via replaceHTML
+                    prop.put("mode_messages_"+count+"_subject", wikiCode.replaceHTML(message.subject()));
+                    prop.put("mode_messages_"+count+"_key", key);
+                    prop.put("mode_messages_"+count+"_hash", message.authorHash());
                     dark = !dark;
+                    count++;
                 }
-                messages.append("</table>");
+                prop.put("mode_messages", count);
             } catch (IOException e) {
-                messages.append("I/O error reading message table: ").append(e.getMessage());
+                prop.put("mode_error", 1);//I/O error reading message table
+                prop.put("mode_error_message", e.getMessage());
             }
         }
 
         if (action.equals("view")) {
+            prop.put("mode", 1); //view
             String key = post.get("object", "");
             message = switchboard.messageDB.read(key);
-            messages.append("<table border=\"0\" cellpadding=\"2\" cellspacing=\"1\">");
-            messages.append("<tr><td class=\"MenuHeader\">From:</td><td class=\"MessageBackground\">").append(message.author()).append("</td></tr>");
-            messages.append("<tr><td class=\"MenuHeader\">To:</td><td class=\"MessageBackground\">").append(message.recipient()).append("</td></tr>");
-            messages.append("<tr><td class=\"MenuHeader\">Send Date:</td><td class=\"MessageBackground\">").append(dateString(message.date())).append("</td></tr>");
-            messages.append("<tr><td class=\"MenuHeader\">Subject:</td><td class=\"MessageBackground\">").append(wikiTransformer.transform(message.subject())).append("</td></tr>");
+            
+            prop.put("mode_author", message.author());
+            prop.put("mode_to", message.recipient());
+            prop.put("mode_date", dateString(message.date()));
+            //prop.put("mode_messages_subject", wikiTransformer.transform(message.subject()));
+            //TODO: not needed, when all templates will be cleaned via replaceHTML
+            prop.put("mode_subject", wikiCode.replaceHTML(message.subject()));
             String theMessage = null;
             try {
                 theMessage = new String(message.message(), "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 // can not happen, because UTF-8 must be supported by every JVM
             }
-            messages.append("<tr><td class=\"MessageBackground\" colspan=\"2\">").append(wikiTransformer.transform(theMessage)).append("</td></tr>");
-            messages.append("<tr><td class=\"MenuHeader\">Action:</td>");
-            messages.append("<td class=\"MessageBackground\">");
-            messages.append("<a href=\"Messages_p.html\">inbox</a>&nbsp;/&nbsp;");
-            messages.append("<a href=\"MessageSend_p.html?hash=").append(message.authorHash());
-            messages.append("&subject=Re: ").append(message.subject()).append("\">reply</a>&nbsp;/&nbsp;");
-            messages.append("<a href=\"Messages_p.html?action=delete&object=").append(key).append("\">delete</a>");
-            messages.append("</td></tr></table>");
+            prop.put("mode_message", wikiTransformer.transform(theMessage));
+            prop.put("mode_hash", message.authorHash());
+            prop.put("mode_key", key);
         }
-
-        prop.put("messages", messages.toString());
 
         // return rewrite properties
         return prop;
