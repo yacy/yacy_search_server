@@ -667,7 +667,7 @@ Advanced <a href="/Config_p.html">Configuration</a>==erweiterte <a href="/Config
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy: Messages==YaCy Nachrichtenverwaltung
-Messages==Nachrichten
+>Messages==>Nachrichten
 
 #-------------------------------------------------------
 #File: MessageSend_p.html
@@ -1007,7 +1007,7 @@ Install new skin from URL:==Installiere einen neuen Skin von folgender URL:
 Use this skin==Benutze diesen Skin
 "install"=="Installieren"
 Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
-Error saving the skin.==Es trat ein Fehler beim Speichern des Skin auf.
+Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
 
 #-------------------------------------------------------
 #File: Status.html
@@ -1290,5 +1290,5 @@ Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequen
 
 YACY: Public Files==YaCy: &Ouml;ffentliche Dateien
 Public&nbsp;File&nbsp;Directory==&Ouml;ffentliches Datei Verzeichnis
-value="\#\[peername\]\#'s Console"==value="#[peername]#'s Konsole"
+value="\#\[peername\]\#'s Console"==value="#[peername]#s Konsole"
 Welcome! You are identified and authorized as==Willkommen! Sie sind identifiziert und authorisiert als
