@@ -209,7 +209,7 @@ public final class plasmaWordIndexEntry {
                                 int posinphrase, // position of word in its phrase
                                 int posofphrase, // number of the phrase where word appears
                                 int distance,    // word distance; this is 0 by default, and set to the difference of posintext from two indexes if these are combined (simultanous search). If stored, this shows that the result was obtained by remote search
-                                long time,       // last-modified time of the document where word appears
+                                long lastmodified, // last-modified time of the document where word appears
                                 int quality,     // 
                                 String language, //
                                 char doctype,    //
@@ -232,7 +232,7 @@ public final class plasmaWordIndexEntry {
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
         this.worddistance = distance;
-        this.lastModified = time;
+        this.lastModified = lastmodified;
         this.quality = quality;
         this.language = language.getBytes();
         this.doctype = doctype;
@@ -325,6 +325,10 @@ public final class plasmaWordIndexEntry {
     
     public void combineDistance(plasmaWordIndexEntry oe) {
         this.worddistance = this.worddistance + oe.worddistance + Math.abs(this.posintext - oe.posintext);
+        this.posintext = Math.min(this.posintext, oe.posintext);
+        if (this.posofphrase != oe.posofphrase) this.posinphrase = 0; // (unknown)
+        this.posofphrase = Math.min(this.posofphrase, oe.posofphrase);
+        this.wordcount = (this.wordcount + oe.wordcount) / 2;
     }
     
     public String getUrlHash() { return urlHash; }

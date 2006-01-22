@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -71,7 +70,7 @@ public final class plasmaCondenser {
     private final static int numlength = 5;
 
     //private Properties analysis;
-    private TreeMap words; // a string (the words) to (statProp) - relation
+    private TreeMap words; // a string (the words) to (wordStatProp) - relation
     private HashMap sentences;
     private int wordminsize;
     private int wordcut;
@@ -109,10 +108,13 @@ public final class plasmaCondenser {
         return oldsize - words.size();
     }
 
-    public Set getWords() {
-        return words.keySet();
+    public Iterator words() {
+        // returns an entry set iterator
+        // key is a String (the word), value is a wordStatProp Object
+        return words.entrySet().iterator();
     }
 
+    /*
     public int wordCount(String word) {
         // number of occurrences of one word
         // if the word did not occur, this simply returns 0
@@ -144,7 +146,8 @@ public final class plasmaCondenser {
         if (sp == null) return 0;
         return sp.numOfPhrase;
     }
-
+    */
+    
     public static class wordStatProp {
         // object carries statistics for words and sentences
         
@@ -706,11 +709,11 @@ public final class plasmaCondenser {
     }
     */
     
-    public static Set getWords(byte[] text) {
+    public static Iterator getWords(byte[] text) {
         if (text == null) return null;
         ByteArrayInputStream buffer = new ByteArrayInputStream(text);
         plasmaCondenser condenser = new plasmaCondenser(buffer);
-        return condenser.getWords();
+        return condenser.words();
     }
         
     public static void main(String[] args) {

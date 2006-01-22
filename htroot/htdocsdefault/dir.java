@@ -53,7 +53,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Set;
+import java.util.Iterator;
+import java.util.Map;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import de.anomic.http.httpHeader;
@@ -478,8 +479,12 @@ public class dir {
     public static void deletePhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr) {
         try {
             final String urlhash = plasmaURL.urlHash(new URL(urlstring));
-            final Set words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"));
-            switchboard.removeReferences(urlhash, words);
+            final Iterator words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"));
+            Map.Entry entry;
+            while (words.hasNext()) {
+                entry = (Map.Entry) words.next();
+                switchboard.wordIndex.removeEntries(plasmaWordIndexEntry.word2hash((String) entry.getKey()), new String[] {urlhash}, true);
+            }
             switchboard.urlPool.loadedURL.remove(urlhash);
         } catch (Exception e) {
             serverLog.logSevere("DIR", "INTERNAL ERROR in dir.deletePhrase", e);

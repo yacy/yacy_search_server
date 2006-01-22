@@ -51,6 +51,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -150,28 +151,33 @@ public final class plasmaWordIndex {
         }
 
         // iterate over all words
-        Iterator i = condenser.getWords().iterator();
+        Iterator i = condenser.words();
+        Map.Entry wentry;
         String word;
-        plasmaWordIndexEntry entry;
+        plasmaWordIndexEntry ientry;
+        plasmaCondenser.wordStatProp wprop;
         String wordHash;
         while (i.hasNext()) {
-            word = (String) i.next();
+            wentry = (Map.Entry) i.next();
+            word = (String) wentry.getKey();
+            wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
             wordHash = plasmaWordIndexEntry.word2hash(word);
-            entry = new plasmaWordIndexEntry(urlHash,
-                                             condenser.wordCount(word),
+            ientry = new plasmaWordIndexEntry(urlHash,
+                                             wprop.count,
                                              condenser.RESULT_SIMI_WORDS,
                                              condenser.RESULT_SIMI_SENTENCES,
-                                             condenser.wordPositionInText(word),
-                                             condenser.wordPositionInPhrase(word),
-                                             condenser.wordNumberOfPhrase(word),
+                                             wprop.posInText,
+                                             wprop.posInPhrase,
+                                             wprop.numOfPhrase,
                                              0,
-                                             urlModified.getTime(), quality, language, doctype, true);
-            addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), false);
+                                             urlModified.getTime(),
+                                             quality, language, doctype, true);
+            addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), ientry), false);
         }
         // System.out.println("DEBUG: plasmaSearch.addPageIndex: added " +
         // condenser.getWords().size() + " words, flushed " + c + " entries");
-        return condenser.getWords().size();
+        return condenser.RESULT_SIMI_WORDS;
     }
     
     public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty, long maxTime) {

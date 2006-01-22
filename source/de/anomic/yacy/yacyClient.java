@@ -457,7 +457,8 @@ public final class yacyClient {
                 urlManager.addEntry(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
                 // save the url entry
                 final plasmaWordIndexEntry entry;
-                if (urlEntry.word() == null)
+                if (urlEntry.word() == null) {
+                    // the old way to define words
                     entry = new plasmaWordIndexEntry(
                                                      urlEntry.hash(),
                                                      urlEntry.wordCount(),
@@ -468,7 +469,10 @@ public final class yacyClient {
                                                      urlEntry.doctype(),
                                                      false
                                                     );
-                else entry = urlEntry.word();
+                } else {
+                    // the new way: the search-result-url transports all the attributes of word indexes
+                    entry = urlEntry.word();
+                }
                 if (urlEntry.snippet() != null) {
                     // we don't store the snippets along the url entry, because they are search-specific.
                     // instead, they are placed in a snipped-search cache.

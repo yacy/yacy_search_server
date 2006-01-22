@@ -1313,9 +1313,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         } else {
                             HashMap urlCache = new HashMap(1);
                             urlCache.put(newEntry.hash(),newEntry);
-                            
-                            ArrayList tmpEntities = new ArrayList(condenser.getWords().size());
-                            
+                            ArrayList tmpEntities = new ArrayList(condenser.RESULT_SIMI_WORDS);
+                            String language = plasmaWordIndexEntry.language(entry.url());
+                            char doctype = plasmaWordIndexEntry.docType(document.getMimeType());
                             int quality = 0;
                             try {
                                 quality = condenser.RESULT_INFORMATION_VALUE;
@@ -1323,22 +1323,23 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 System.out.println("INTERNAL ERROR WITH CONDENSER.INFORMATION_VALUE: " + e.toString() + ": in URL " + newEntry.url().toString());
                             }
                             
-                            String language = plasmaWordIndexEntry.language(entry.url());
-                            char doctype = plasmaWordIndexEntry.docType(document.getMimeType());
-                            
                             // iterate over all words
-                            Iterator i = condenser.getWords().iterator();
+                            Iterator i = condenser.words();
+                            Map.Entry wentry;
+                            plasmaCondenser.wordStatProp wordStat;
                             while (i.hasNext()) {
-                                String word = (String) i.next();
+                                wentry = (Map.Entry) i.next();
+                                String word = (String) wentry.getKey();
+                                wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = plasmaWordIndexEntry.word2hash(word);
                                 plasmaWordIndexEntity wordIdxEntity = new plasmaWordIndexEntity(wordHash);
                                 plasmaWordIndexEntry wordIdxEntry = new plasmaWordIndexEntry(urlHash,
-                                                                                             condenser.wordCount(word),
+                                                                                             wordStat.count,
                                                                                              condenser.RESULT_SIMI_WORDS,
                                                                                              condenser.RESULT_SIMI_SENTENCES,
-                                                                                             condenser.wordPositionInText(word),
-                                                                                             condenser.wordPositionInPhrase(word),
-                                                                                             condenser.wordNumberOfPhrase(word),
+                                                                                             wordStat.posInText,
+                                                                                             wordStat.posInPhrase,
+                                                                                             wordStat.numOfPhrase,
                                                                                              0,
                                                                                              docDate.getTime(),
                                                                                              quality, language, doctype, true);
@@ -1347,7 +1348,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 // wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry));
                             }
                             //System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
-                            words = condenser.getWords().size();
+                            words = condenser.RESULT_SIMI_WORDS;
                             
                             // transfering the index to the storage peer
                             String error = yacyClient.transferIndex(seed,(plasmaWordIndexEntity[])tmpEntities.toArray(new plasmaWordIndexEntity[tmpEntities.size()]),urlCache,true,120000);
@@ -1805,9 +1806,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // get set of words
             // Set words = plasmaCondenser.getWords(getText(getResource(url,
             // fetchOnline)));
-            Set words = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline)).getText());
+            Iterator witer = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline)).getText());
             // delete all word references
-            int count = removeReferences(urlhash, words);
+            int count = removeReferences(urlhash, witer);
             // finally delete the url entry itself
             urlPool.loadedURL.remove(urlhash);
             return count;
@@ -1834,7 +1835,23 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         return count;
     }
-    
+
+    public int removeReferences(final String urlhash, final Iterator wordStatPropIterator) {
+        // sequentially delete all word references
+        // returns number of deletions
+        Map.Entry entry;
+        String word;
+        final String[] urlEntries = new String[] {urlhash};
+        int count = 0;
+        while (wordStatPropIterator.hasNext()) {
+            entry = (Map.Entry) wordStatPropIterator.next();
+            word = (String) entry.getKey();
+            // delete the URL reference in this word index
+            count += wordIndex.removeEntries(plasmaWordIndexEntry.word2hash(word), urlEntries, true);
+        }
+        return count;
+    }
+
     public int adminAuthenticated(httpHeader header) {
         String adminAccountBase64MD5 = getConfig("adminAccountBase64MD5", "");
         if (adminAccountBase64MD5.length() == 0) return 2; // not necessary
