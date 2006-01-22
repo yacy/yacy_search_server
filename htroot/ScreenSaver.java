@@ -6,9 +6,9 @@
 // Frankfurt, Germany, 2006
 //
 // This File is contributed by Martin Thelian
-// $LastChangedDate: 2006-01-12 21:21:34 +0100 (Do, 12 Jän 2006) $
-// $LastChangedRevision: 1320 $
-// $LastChangedBy: theli $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
