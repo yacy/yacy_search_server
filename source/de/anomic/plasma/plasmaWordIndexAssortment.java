@@ -210,7 +210,19 @@ public final class plasmaWordIndexAssortment {
         if (assortments != null) try {
             assortments.close();
         } catch (IOException e) {}
-        if (!(assortmentFile.delete())) throw new RuntimeException("cannot delete assortment database");
+        
+        try {
+            // make a back-up
+            File backupPath = new File(assortmentFile.getParentFile(), "ABKP");
+            if (!(backupPath.exists())) backupPath.mkdirs();
+            File backupFile = new File(backupPath, assortmentFile.getName() + System.currentTimeMillis());
+            assortmentFile.renameTo(backupFile);
+            log.logInfo("a back-up of the deleted assortment file is in " + backupFile.toString());
+        } catch (Exception e) {
+            // if this fails, delete the file
+            if (!(assortmentFile.delete())) throw new RuntimeException("cannot delete assortment database");
+        }
+        if (assortmentFile.exists()) assortmentFile.delete();
         assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength), true);
     }
     
