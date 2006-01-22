@@ -63,51 +63,38 @@ public class migration {
         File file=new File(sb.getRootPath(), "DATA/SETTINGS/wiki.db");
         File file2;
         if (file.exists()) {
-            serverLog.logInfo("MIGRATION", "Migrating wiki.db to "
-                    + sb.workPath);
+            serverLog.logInfo("MIGRATION", "Migrating wiki.db to "+ sb.workPath);
+            sb.wikiDB.close();
             file2 = new File(sb.workPath, "wiki.db");
-            if (file2.exists()) {
-                serverLog.logWarning("MIGRATION", "wiki.db already exists in "
-                  + sb.workPath + "! Not migrating.");
-            } else {
-                sb.wikiDB.close();
+            try {
+                serverFileUtils.copy(file, file2);
+                file.delete();
+            } catch (IOException e) {
+            }
+            
+            file = new File(sb.getRootPath(), "DATA/SETTINGS/wiki-bkp.db");
+            if (file.exists()) {
+                serverLog.logInfo("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
+                file2 = new File(sb.workPath, "wiki-bkp.db");
                 try {
                     serverFileUtils.copy(file, file2);
                     file.delete();
-                } catch (IOException e) {
-                }
-
-                file = new File(sb.getRootPath(), "DATA/SETTINGS/wiki-bkp.db");
-                if (file.exists()) {
-                    serverLog.logInfo("MIGRATION", "Migrating wiki-bkp.db to " + sb.workPath);
-                    file2 = new File(sb.workPath, "wiki-bkp.db");
-                    try {
-                        serverFileUtils.copy(file, file2);
-                        file.delete();
-                    } catch (IOException e) {
-                    }
-                }
-                sb.initWiki((int) sb.getConfigLong("ramCacheWiki", 1024) / 1024);
+                } catch (IOException e) {}        
             }
+            sb.initWiki((int) sb.getConfigLong("ramCacheWiki", 1024) / 1024);
         }
         
         
         file=new File(sb.getRootPath(), "DATA/SETTINGS/message.db");
-        if (file.exists()) {
-            serverLog.logInfo("MIGRATION", "Migrating message.db to " + sb.workPath);
-            file2 = new File(sb.workPath, "message.db");
-            if (file2.exists()) {
-                serverLog.logWarning("MIGRATION", "message.db already exists in " + sb.workPath + "! Not migrating.");
-            } else {
-                sb.messageDB.close();
-
-                try {
-                    serverFileUtils.copy(file, file2);
-                    file.delete();
-                } catch (IOException e) {
-                }
-                sb.initMessages((int) sb.getConfigLong("ramCacheMessage", 1024) / 1024);
-            }
+        if(file.exists()){
+            serverLog.logInfo("MIGRATION", "Migrating message.db to "+ sb.workPath);
+            sb.messageDB.close();
+            file2=new File(sb.workPath, "message.db");
+            try {
+                serverFileUtils.copy(file, file2);
+                file.delete();
+            } catch (IOException e) {}
+            sb.initMessages((int) sb.getConfigLong("ramCacheMessage", 1024) / 1024);
         }
     }
 
