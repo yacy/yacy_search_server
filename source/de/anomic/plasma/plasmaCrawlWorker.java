@@ -278,7 +278,7 @@ public final class plasmaCrawlWorker extends Thread {
         );
     }
 
-    private static void load(
+    private static plasmaHTCache.Entry load(
             URL url,
             String name,
             String referer,
@@ -292,17 +292,17 @@ public final class plasmaCrawlWorker extends Thread {
             int crawlingRetryCount,
             boolean useContentEncodingGzip
         ) throws IOException {
-        if (url == null) return;
+        if (url == null) return null;
 
         // if the recrawling limit was exceeded we stop crawling now
-        if (crawlingRetryCount <= 0) return;
+        if (crawlingRetryCount <= 0) return null;
 
         // getting a reference to the plasmaSwitchboard
         plasmaSwitchboard sb = plasmaCrawlLoader.switchboard;
 
         Date requestDate = new Date(); // remember the time...
         String host = url.getHost();
-        String path = url.getPath();
+        String path = url.getFile();
         int port = url.getPort();
         boolean ssl = url.getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443 : 80;
@@ -321,7 +321,7 @@ public final class plasmaCrawlWorker extends Thread {
                     new bitfield(plasmaURL.urlFlagLength),
                     true
             );
-            return;
+            return null;
         }
 
         // TODO: resolve yacy and yacyh domains
@@ -333,6 +333,7 @@ public final class plasmaCrawlWorker extends Thread {
 
         // take a file from the net
         httpc remote = null;
+        plasmaHTCache.Entry htCache = null;
         try {
             // create a request header
             httpHeader requestHeader = new httpHeader();
@@ -362,14 +363,14 @@ public final class plasmaCrawlWorker extends Thread {
                 //long contentLength = res.responseHeader.contentLength();
 
                 // reserve cache entry
-                plasmaHTCache.Entry htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);
+                htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);
                 if (!htCache.cacheFile.getCanonicalPath().startsWith(cacheManager.cachePath.getCanonicalPath())) {
                     // if the response has not the right file type then reject file
                     remote.close();
                     log.logInfo("REJECTED URL " + url.toString() + " because of an invalid file path ('" +
                                 htCache.cacheFile.getCanonicalPath() + "' does not start with '" +
                                 cacheManager.cachePath.getAbsolutePath() + "').");
-                    return;                    
+                    return null;                    
                 }
                 
                 // request has been placed and result has been returned. work off response
@@ -391,15 +392,16 @@ public final class plasmaCrawlWorker extends Thread {
                         } finally {
                             if (fos!=null)try{fos.close();}catch(Exception e){}
                         }
+                        
+                        // enQueue new entry with response header
+                        if (profile != null) {
+                            cacheManager.push(htCache);
+                        }
                     } else {
                         // if the response has not the right file type then reject file
                         remote.close();
                         log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + url.toString());
-                        return;
-                    }
-                    // enQueue new entry with response header
-                    if (profile != null) {
-                        cacheManager.push(htCache);
+                        htCache = null;
                     }
                 } catch (SocketException e) {
                     // this may happen if the client suddenly closes its connection
@@ -409,6 +411,7 @@ public final class plasmaCrawlWorker extends Thread {
                     // and most possible corrupted
                     if (cacheFile.exists()) cacheFile.delete();
                     log.logSevere("CRAWLER LOADER ERROR1: with URL=" + url.toString() + ": " + e.toString());
+                    htCache = null;
                 }
             } else if (res.status.startsWith("30")) {
                 if (crawlingRetryCount > 0) {
@@ -419,7 +422,7 @@ public final class plasmaCrawlWorker extends Thread {
 
                         if (redirectionUrlString.length() == 0) {
                             log.logWarning("CRAWLER Redirection of URL=" + url.toString() + " aborted. Location header is empty.");
-                            return;
+                            return null;
                         }
                         
                         // normalizing URL
@@ -439,7 +442,7 @@ public final class plasmaCrawlWorker extends Thread {
                         // if we are already doing a shutdown we don't need to retry crawling
                         if (Thread.currentThread().isInterrupted()) {
                             log.logSevere("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
-                            return;
+                            return null;
                         }
 
                         // generating url hash
@@ -449,7 +452,7 @@ public final class plasmaCrawlWorker extends Thread {
                         plasmaCrawlLoader.switchboard.urlPool.noticeURL.remove(urlhash);
 
                         // retry crawling with new url
-                        load(redirectionUrl,
+                        plasmaHTCache.Entry redirectedEntry = load(redirectionUrl,
                              name,
                              referer,
                              initiator,
@@ -462,6 +465,22 @@ public final class plasmaCrawlWorker extends Thread {
                              --crawlingRetryCount,
                              useContentEncodingGzip
                         );
+                        
+                        if (redirectedEntry != null) {
+//                            TODO: Here we can store the content of the redirection
+//                            as content of the original URL if some criterias are met
+//                            See: http://www.yacy-forum.de/viewtopic.php?t=1719                                                                                   
+//                            
+//                            plasmaHTCache.Entry newEntry = (plasmaHTCache.Entry) redirectedEntry.clone();
+//                            newEntry.url = url;
+//                            TODO: which http header should we store here?    
+//                                                      
+//                            // enQueue new entry with response header
+//                            if (profile != null) {
+//                                cacheManager.push(newEntry);                                
+//                            }                            
+//                            htCache = newEntry;
+                        }
                     }
                 } else {
                     log.logInfo("Redirection counter exceeded for URL " + url.toString() + ". Processing aborted.");
@@ -471,7 +490,9 @@ public final class plasmaCrawlWorker extends Thread {
                 log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for URL " + url.toString());
                 // not processed any further
             }
+            
             if (remote != null) remote.close();
+            return htCache;
         } catch (Exception e) {
             boolean retryCrawling = false;
             String errorMsg = e.getMessage();
@@ -522,7 +543,7 @@ public final class plasmaCrawlWorker extends Thread {
                 // if we are already doing a shutdown we don't need to retry crawling
                 if (Thread.currentThread().isInterrupted()) {
                     log.logSevere("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
-                    return;
+                    return null;
                 }
 
                 // returning the used httpc
@@ -533,7 +554,7 @@ public final class plasmaCrawlWorker extends Thread {
                 if (crawlingRetryCount > 2) crawlingRetryCount = 2;
 
                 // retry crawling
-                load(url,
+                return load(url,
                      name,
                      referer,
                      initiator,
@@ -547,6 +568,7 @@ public final class plasmaCrawlWorker extends Thread {
                      false
                 );
             }
+            return null;
         } finally {
             if (remote != null) httpc.returnInstance(remote);
         }

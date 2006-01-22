@@ -675,6 +675,20 @@ public final class plasmaHTCache {
     public plasmaCrawlProfile.entry profile;
     private String                  initiator;
 
+    protected Object clone() throws CloneNotSupportedException {
+        return new Entry(
+                this.initDate,
+                this.depth,
+                this.url,
+                this.name,
+                this.requestHeader,
+                this.responseStatus,
+                this.responseHeader,
+                this.initiator,
+                this.profile
+        );
+    }
+    
     public Entry(Date initDate, int depth, URL url, String name,
                  httpHeader requestHeader,
                  String responseStatus, httpHeader responseHeader,
