@@ -101,7 +101,7 @@ public final class plasmaWordIndexAssortmentCluster {
         if (newContainer.size() > clusterCount) return newContainer; // it will not fit
         plasmaWordIndexEntryContainer buffer;
         while ((buffer = assortments[newContainer.size() - 1].remove(wordHash)) != null) {
-            newContainer.add(buffer);
+            if (newContainer.add(buffer) == 0) return newContainer; // security check; othervise this loop does not terminate
             if (newContainer.size() > clusterCount) return newContainer; // it will not fit
         }
         // the assortment (newContainer.size() - 1) should now be empty. put it in there

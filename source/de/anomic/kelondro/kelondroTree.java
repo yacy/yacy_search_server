@@ -206,25 +206,25 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         
     public class Search {
 
-	// a search object combines the results of a search in the tree, which are
-	// - the searched object is found, an index pointing to the node can be returned
-	// - the object was not found, an index pointing to an appropriate possible parent node can
-	//   be returned, together with the information wether the new key shall be left or right child.
-	//
+        // a search object combines the results of a search in the tree, which are
+        // - the searched object is found, an index pointing to the node can be returned
+        // - the object was not found, an index pointing to an appropriate possible parent node
+        //   can be returned, together with the information wether the new key shall
+        //   be left or right child.
 
-	private Node thenode, parentnode;
-	private boolean found; // property if node was found
-	private byte child;    // -1: left child; 0: root node; 1: right child
+        private Node thenode, parentnode;
+        private boolean found; // property if node was found
+        private byte child; // -1: left child; 0: root node; 1: right child
         private Handle thisHandle;
-        
-	protected Search() {
-	}
 
-	protected void process(byte[] key) throws IOException {    
-	    // searchs the database for the key and stores the result in the thisHandle
-	    // if the key was found, then found=true, thisHandle and leftchild is set;
-	    // else found=false and thisHandle and leftchild is undefined
-	    thisHandle = getHandle(root);
+        protected Search() {
+        }
+
+        protected void process(byte[] key) throws IOException {
+            // searchs the database for the key and stores the result in the thisHandle
+            // if the key was found, then found=true, thisHandle and leftchild is set;
+            // else found=false and thisHandle and leftchild is undefined
+            thisHandle = getHandle(root);
             parentnode = null;
             if (key == null) {
                 child = 0;
@@ -240,9 +240,9 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 child = 0;
                 found = false;
                 int c;
-		HashMap visitedNodeKeys = new HashMap(); // to detect loops
-		String otherkey;
-		//System.out.println("Starting Compare Loop in Database " + filename); // debug
+                HashSet visitedNodeKeys = new HashSet(); // to detect loops
+                String otherkey;
+                // System.out.println("Starting Compare Loop in Database " + filename); // debug
                 while (thisHandle != null) {
                     try {
                         parentnode = thenode;
@@ -258,41 +258,38 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     try {
                         otherkey = new String(thenode.getKey());
                     } catch (NullPointerException e) {
-                        throw new kelondroException(filename, "kelondroTree.Search.process: nullpointer" + e.getMessage() +
-                                                    "\nNode: " + thenode.toString());
+                        throw new kelondroException(filename, "kelondroTree.Search.process: nullpointer" + e.getMessage() + "\nNode: " + thenode.toString());
                     }
-		    if (visitedNodeKeys.containsKey(otherkey)) {
+                    if (visitedNodeKeys.contains(otherkey)) {
                         // we have loops in the database.
                         // to fix this, all affected nodes must be patched
-                        thenode.setOHByte(magic,   (byte) 1);
+                        thenode.setOHByte(magic, (byte) 1);
                         thenode.setOHByte(balance, (byte) 0);
                         thenode.setOHHandle(parent, null);
                         thenode.setOHHandle(leftchild, null);
                         thenode.setOHHandle(rightchild, null);
                         thenode.commit(CP_NONE);
                         /*
-                        Iterator fix = visitedNodeKeys.entrySet().iterator();
-                        Map.Entry entry;
-                        while (fix.hasNext()) {
-                            entry = (Map.Entry) fix.next();
-                            thenode = (Node) entry.getValue();
-                            thenode.setOHByte(magic,   (byte) 1);
-                            thenode.setOHByte(balance, (byte) 0);
-                            thenode.setOHHandle(parent, null);
-                            thenode.setOHHandle(leftchild, null);
-                            thenode.setOHHandle(rightchild, null);
-                        }
-                        */
+                         * Iterator fix = visitedNodeKeys.entrySet().iterator();
+                         * Map.Entry entry; while (fix.hasNext()) { entry =
+                         * (Map.Entry) fix.next(); thenode = (Node)
+                         * entry.getValue(); thenode.setOHByte(magic, (byte) 1);
+                         * thenode.setOHByte(balance, (byte) 0);
+                         * thenode.setOHHandle(parent, null);
+                         * thenode.setOHHandle(leftchild, null);
+                         * thenode.setOHHandle(rightchild, null); }
+                         */
                         logWarning("kelondroTree.Search.process: database contains loops; the loop-nodes have been auto-fixed");
                         found = false;
                         return;
                     }
-                    //System.out.println("Comparing key = '" + new String(key) + "' with '" + otherkey + "':"); // debug
+                    // System.out.println("Comparing key = '" + new String(key)
+                    // + "' with '" + otherkey + "':"); // debug
                     c = objectOrder.compare(key, thenode.getKey());
-                    //System.out.println(c); // debug
+                    // System.out.println(c); // debug
                     if (c == 0) {
                         found = true;
-                        //System.out.println("DEBUG: search for " + new String(key) + " ended with status=" + ((found) ? "found" : "not-found") + ", node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ", parent=" + ((parentnode == null) ? "NULL" : parentnode.toString()));
+                        // System.out.println("DEBUG: search for " + new String(key) + " ended with status=" + ((found) ? "found" : "not-found") + ", node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ", parent=" + ((parentnode == null) ? "NULL" : parentnode.toString()));
                         return;
                     } else if (c < 0) {
                         child = -1;
@@ -301,14 +298,18 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                         child = 1;
                         thisHandle = thenode.getOHHandle(rightchild);
                     }
-		    visitedNodeKeys.put(otherkey, thenode);
+                    visitedNodeKeys.add(otherkey);
                 }
             }
-            //System.out.println("DEBUG: search for " + new String(key) + " ended with status=" + ((found) ? "found" : "not-found") + ", node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ", parent=" + ((parentnode == null) ? "NULL" : parentnode.toString()));
-	    // we reached a node where we must insert the new value
+            // System.out.println("DEBUG: search for " + new String(key) + "
+            // ended with status=" + ((found) ? "found" : "not-found") + ",
+            // node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ",
+            // parent=" + ((parentnode == null) ? "NULL" :
+            // parentnode.toString()));
+            // we reached a node where we must insert the new value
             // the parent of this new value can be obtained by getParent()
-	    // all values are set, just return
-	}
+            // all values are set, just return
+        }
 
 	public boolean found() {
 	    return found;
