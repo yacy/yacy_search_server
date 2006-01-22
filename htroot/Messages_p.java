@@ -103,7 +103,7 @@ public class Messages_p {
                     message = switchboard.messageDB.read(key);
                     prop.put("mode_messages_"+count+"_dark", ((dark) ? 1 : 0) );
                     prop.put("mode_messages_"+count+"_date", dateString(message.date()));
-                    prop.put("mode_messages_"+count+"_author", message.author());
+                    prop.put("mode_messages_"+count+"_from", message.author());
                     prop.put("mode_messages_"+count+"_to", message.recipient());
                     //prop.put("mode_messages_"+count+"_subject", wikiTransformer.transform(message.subject()));
                     //TODO: not needed, when all templates will be cleaned via replaceHTML
@@ -125,7 +125,7 @@ public class Messages_p {
             String key = post.get("object", "");
             message = switchboard.messageDB.read(key);
             
-            prop.put("mode_author", message.author());
+            prop.put("mode_from", message.author());
             prop.put("mode_to", message.recipient());
             prop.put("mode_date", dateString(message.date()));
             //prop.put("mode_messages_subject", wikiTransformer.transform(message.subject()));
