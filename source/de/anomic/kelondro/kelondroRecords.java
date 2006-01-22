@@ -71,6 +71,7 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -537,22 +538,23 @@ public class kelondroRecords {
             this.tailChanged = true;
         }
     
-	/*
-	private Node(Handle handle) throws IOException {
-	    // this creates an entry with an pre-reserved entry position
-	    // values can be written using the setValues() method
-	    // but we expect that values are already there in the file ready to be read which we do not here
-	    if (handle == null) throw new IllegalArgumentException("INTERNAL ERROR: node handle is null.");
-            if (handle.index >=	USEDC + FREEC) throw new kelondroException(filename, "INTERNAL ERROR: node handle index exceeds size.");  
+        private Node(Handle handle) throws IOException {
+            // this creates an entry with an pre-reserved entry position
+            // values can be written using the setValues() method
+            // but we expect that values are already there in the file ready to
+            // be read which we do not here
+            if (handle == null)
+                throw new IllegalArgumentException("INTERNAL ERROR: node handle is null.");
+            if (handle.index >= USAGE.allCount())
+                throw new kelondroException(filename, "INTERNAL ERROR: node handle index exceeds size.");
 
             // use given handle
-	    this.handle = new Handle(handle.index);
-            
+            this.handle = new Handle(handle.index);
+
             // init the content
             initContent();
-	}
-	*/
-	
+        }
+
         private Node(Handle handle, Node parentNode, int referenceInParent) throws IOException {
             // this creates an entry with an pre-reserved entry position values can be written
             // using the setValues() method but we expect that values are already there in the file
@@ -561,8 +563,7 @@ public class kelondroRecords {
             assert (handle.index >= 0): "node handle too low: " + handle.index;
             //assert (handle.index < USAGE.allCount()) : "node handle too high: " + handle.index + ", USEDC=" + USAGE.USEDC + ", FREEC=" + USAGE.FREEC;
             
-            // the parentNode can be given if an auto-fix in the following case
-            // is wanted
+            // the parentNode can be given if an auto-fix in the following case is wanted
             if (handle.index >= USAGE.allCount()) {
                 if (parentNode == null) {
                     throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index exceeds size. No auto-fix node was submitted. This is a serious failure.");
@@ -1036,6 +1037,57 @@ public class kelondroRecords {
         }
     }
 
+    public Iterator content() {
+        try {
+            return new contentIterator();
+        } catch (IOException e) {
+            return new HashSet().iterator();
+        }
+    }
+    
+    public class contentIterator implements Iterator {
+        // iterator that iterates all byte[][]-objects in the file
+        // all records that are marked as deleted are ommitted
+        // this is probably also the fastest way to iterate all objects
+        
+        private HashSet markedDeleted;
+        private Handle pos;
+        
+        public contentIterator() throws IOException {
+            pos = new Handle(0);
+            markedDeleted = new HashSet();
+            synchronized (USAGE) {
+                if (USAGE.FREEC != 0) {
+                    Handle h = USAGE.FREEH;
+                    while (h.index != NUL) {
+                        markedDeleted.add(h);
+                        h = new Handle(entryFile.readInt(seekpos(h)));
+                    }
+                }
+            }
+            while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
+        }
+
+        public boolean hasNext() {
+            return pos.index < USAGE.allCount();
+        }
+
+        public Object next() {
+            try {
+                Node n = new Node(pos);
+                while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
+                return n.getValues();
+            } catch (IOException e) {
+                throw new kelondroException(filename, e.getMessage());
+            }
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+        
+    }
+    
     public void close() throws IOException {
         if (this.entryFile != null) this.entryFile.close();
         this.entryFile = null;

@@ -432,34 +432,38 @@ public class plasmaURL {
     }
 
     public int size() {
-	return urlHashCache.size();
+        return urlHashCache.size();
     }
 
     public void close() throws IOException {
-	if (urlHashCache != null) urlHashCache.close();
+        if (urlHashCache != null) urlHashCache.close();
     }
 
     public boolean exists(String urlHash) {
-        if (existsIndex.contains(urlHash)) return true;
-	try {
-	    if (urlHashCache.get(urlHash.getBytes()) != null) {
-                existsIndex.add(urlHash);
-                return true;
-            } else {
+        synchronized (existsIndex) {
+            if (existsIndex.contains(urlHash)) return true;
+            try {
+                if (urlHashCache.get(urlHash.getBytes()) != null) {
+                    existsIndex.add(urlHash);
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (IOException e) {
                 return false;
             }
-	} catch (IOException e) {
-	    return false;
-	}
+        }
     }
 
     public boolean remove(String urlHash) {
-        try {
-            boolean existsInIndex = this.existsIndex.remove(urlHash); 
-            boolean existsInCache = (this.urlHashCache.remove(urlHash.getBytes())!= null);
-            return existsInIndex || existsInCache;
-        } catch (IOException e) {
-            return false;
+        synchronized (existsIndex) {
+            try {
+                boolean existsInIndex = this.existsIndex.remove(urlHash);
+                boolean existsInCache = (this.urlHashCache.remove(urlHash.getBytes()) != null);
+                return existsInIndex || existsInCache;
+            } catch (IOException e) {
+                return false;
+            }
         }
     }
 
