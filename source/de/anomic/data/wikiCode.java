@@ -64,10 +64,12 @@ public class wikiCode {
     private plasmaSwitchboard sb;
     private boolean escape = false;           //needed for escape
     private boolean escaped = false;          //needed for <pre> not getting in the way
-    private boolean escapeSpan = false;       //needed for escape symbols [= and =] spanning over several lines 
+    private boolean escapeSpan = false;       //needed for escape symbols [= and =] spanning over several lines
+    private boolean newrowstart=false;      // needed for the first row not to be empty
     private boolean preformatted = false;     //needed for preformatted text
     private boolean preformattedSpan = false; //needed for <pre> and </pre> spanning over several lines
     private boolean replaced = false;         //indicates if method replaceHTML has been used with line already
+    private boolean table=false;            // needed for tables, because they reach over several lines
     private int preindented = 0;              //needed for indented <pre>s
     private int escindented = 0;              //needed for indented [=s
 
@@ -110,12 +112,12 @@ public class wikiCode {
         }
     }
 
-    //The following method has been submitted by [FB] (added and a few changes by MN)
     /** Replaces special characters from a string. Otherwise they might cause ugly output on some systems.
       * This code is also important to avoid XSS attacks.
       *
       * @param text a string that possibly contains special characters
       * @return the string with all special characters encoded so they will look right on every system
+      * @author Franz Brausse, few changes by Marc Nause, replaces code by Alexander Schier
       */
     public static String replaceHTML(String text) {
         if (text==null) { return null; }
@@ -236,8 +238,49 @@ public class wikiCode {
         "\u00FF","&yuml;",
         "(C)","&copy;"
     };
-    //end contrib [FB] and [MN]
 
+    /** This method processes tables in the wiki code.
+      * @param a string that might contain parts of a table
+      * @return a string with wiki code of parts of table replaced by HTML code for table
+      * @author Franz Brausse, slight changes by Marc Nause
+      */
+    private String processTable(String result){
+        String line="";
+        if (result.startsWith("{|") && (!table)) {                // Table begin
+            table=true;
+            newrowstart=true;
+            line+="<table";
+            if (result.trim().length()>2) {
+                line+=result.substring(2);
+            }
+            line+=">";
+        } else if (result.startsWith("|-") && (table)) {          // new row
+            if (!newrowstart) {
+                line+="\t</tr>\n";
+            } else {
+                newrowstart=false;
+            }
+            line=line+"\t<tr>";
+        } else if ((result.startsWith("| ")) && (table)) {        // new cell
+            line+="\t\t<td";
+            int propEnd=1;
+            int textEnd=(result.indexOf("||")>=0)?(result.indexOf("||")):(result.length());
+            if ((propEnd=result.indexOf(" | "))>0) {              // till result.indexOf(" | ") properties for cell
+                line+=result.substring(1,propEnd).replaceAll("&quot;","\"");
+            }
+            // finish first cell
+            line+=">"+result.substring(propEnd+2,textEnd)+"</td>";
+            if (textEnd<result.length() && textEnd>0) {           // process other cells if existent
+                line+="\n"+result.substring(textEnd+1);
+            } 
+        } else if (result.startsWith("|}") && (table)) {          // Table end
+            table=false;
+            line+="\t</tr>\n</table>"+result.substring(2);
+        } else if (table) {
+            line+=result;
+        } else { return result; }
+        return line;
+    }
 
     /** Replaces wiki tags with HTML tags.
       *
@@ -539,7 +582,7 @@ public class wikiCode {
 
         //escape code ([=...=]) contributed by [MN]
         //both [= and =] in the same line
-            else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>0)&&(!(preformatted))){
+        else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>0)&&(!(preformatted))){
             String escapeText = result.substring(p0+2,p1);
 
             //BUGS TO BE FIXED: [=[=text=]=]  does not work properly:
@@ -628,16 +671,12 @@ public class wikiCode {
             result = result.replaceAll("!pre!!", "!pre!");
             preformatted = false;
         }
-        //end contrib [MN]	
+        //end contrib [MN]
+
+        result = this.processTable(result);
 
         replaced = false;
-        if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)) return result;
+        if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)||(table)) return result;
         return result + "<br>";
     }
-
-    /*
-      nice to have:
-      || tables
-    */
-
 }
