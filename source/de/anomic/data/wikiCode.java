@@ -131,7 +131,7 @@ public class wikiCode {
 
     //This array contains codes (see http://mindprod.com/jgloss/unicode.html for details) and
     //patterns that will be replaced. To add new codes or patterns, just put them at the end
-    //of the list.
+    //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
     public static String[] htmlentities={
         // Ampersands _have_ to be replaced first. If they were replaced later,
         // other replaced characters containing ampersands would get messed up.
@@ -276,176 +276,176 @@ public class wikiCode {
                     tail = tail + "</blockquote>";
                     result = result.substring(1);
                 }
-            result = head + result + tail;
-        }
-        // end contrib [MN]	
+                result = head + result + tail;
+            }
+            // end contrib [MN]	
 
-        // format headers
-        if ((p0 = result.indexOf("====")) >= 0) {
+            // format headers
+            if ((p0 = result.indexOf("====")) >= 0) {
             p1 = result.indexOf("====", p0 + 4);
             if (p1 >= 0) result = result.substring(0, p0) + "<h4>" +
                                   result.substring(p0 + 4, p1) + "</h4>" +
                                   result.substring(p1 + 4);
-        }
-        if ((p0 = result.indexOf("===")) >= 0) {
-            p1 = result.indexOf("===", p0 + 3);
-            if (p1 >= 0) result = result.substring(0, p0) + "<h3>" +
-                                  result.substring(p0 + 3, p1) + "</h3>" +
-                                  result.substring(p1 + 3);
-        }
-        if ((p0 = result.indexOf("==")) >= 0) {
-            p1 = result.indexOf("==", p0 + 2);
-            if (p1 >= 0) result = result.substring(0, p0) + "<h2>" +
-                                  result.substring(p0 + 2, p1) + "</h2>" +
-                                  result.substring(p1 + 2);
-        }
-
-        if ((p0 = result.indexOf("'''''")) >= 0) {
-            p1 = result.indexOf("'''''", p0 + 5);
-            if (p1 >= 0) result = result.substring(0, p0) + "<b><i>" +
-                                  result.substring(p0 + 5, p1) + "</i></b>" +
-                                  result.substring(p1 + 5);
-        }
-        if ((p0 = result.indexOf("'''")) >= 0) {
-            p1 = result.indexOf("'''", p0 + 3);
-            if (p1 >= 0) result = result.substring(0, p0) + "<b>" +
-                                  result.substring(p0 + 3, p1) + "</b>" +
-                                  result.substring(p1 + 3);
-        }
-        if ((p0 = result.indexOf("''")) >= 0) {
-            p1 = result.indexOf("''", p0 + 2);
-            if (p1 >= 0) result = result.substring(0, p0) + "<i>" +
-                                  result.substring(p0 + 2, p1) + "</i>" +
-                                  result.substring(p1 + 2);
-        }
-
-        //* unorderd Lists contributed by [AS]
-        //** Sublist
-        if(result.startsWith(ListLevel + "*")){ //more stars
-            p0 = result.indexOf(ListLevel);
-            p1 = result.length();
-            result = "<ul>" + serverCore.crlfString +
-                "<li>" +
-            result.substring(ListLevel.length() + 1, p1) +
-                "</li>";
-            ListLevel += "*";
-        }else if(ListLevel.length() > 0 && result.startsWith(ListLevel)){ //equal number of stars
-            p0 = result.indexOf(ListLevel);
-            p1 = result.length();
-            result = "<li>" +
-                result.substring(ListLevel.length(), p1) +
-                "</li>";
-        }else if(ListLevel.length() > 0){ //less stars
-            int i = ListLevel.length();
-            String tmp = "";
-
-            while(! result.startsWith(ListLevel.substring(0,i)) ){
-                tmp += "</ul>";
-                i--;
             }
-            ListLevel = ListLevel.substring(0,i);
-            p0 = ListLevel.length();
-            p1 = result.length();
+            if ((p0 = result.indexOf("===")) >= 0) {
+                p1 = result.indexOf("===", p0 + 3);
+                if (p1 >= 0) result = result.substring(0, p0) + "<h3>" +
+                                      result.substring(p0 + 3, p1) + "</h3>" +
+                                      result.substring(p1 + 3);
+            }
+            if ((p0 = result.indexOf("==")) >= 0) {
+                p1 = result.indexOf("==", p0 + 2);
+                if (p1 >= 0) result = result.substring(0, p0) + "<h2>" +
+                                      result.substring(p0 + 2, p1) + "</h2>" +
+                                      result.substring(p1 + 2);
+            }
 
-            if(ListLevel.length() > 0){
-                result = tmp +
+            if ((p0 = result.indexOf("'''''")) >= 0) {
+                p1 = result.indexOf("'''''", p0 + 5);
+                if (p1 >= 0) result = result.substring(0, p0) + "<b><i>" +
+                                      result.substring(p0 + 5, p1) + "</i></b>" +
+                                      result.substring(p1 + 5);
+            }
+            if ((p0 = result.indexOf("'''")) >= 0) {
+                p1 = result.indexOf("'''", p0 + 3);
+                if (p1 >= 0) result = result.substring(0, p0) + "<b>" +
+                                      result.substring(p0 + 3, p1) + "</b>" +
+                                      result.substring(p1 + 3);
+            }
+            if ((p0 = result.indexOf("''")) >= 0) {
+                p1 = result.indexOf("''", p0 + 2);
+                if (p1 >= 0) result = result.substring(0, p0) + "<i>" +
+                                      result.substring(p0 + 2, p1) + "</i>" +
+                                      result.substring(p1 + 2);
+            }
+
+            //* unorderd Lists contributed by [AS]
+            //** Sublist
+            if(result.startsWith(ListLevel + "*")){ //more stars
+                p0 = result.indexOf(ListLevel);
+                p1 = result.length();
+                result = "<ul>" + serverCore.crlfString +
                     "<li>" +
-                    result.substring(p0, p1) +
+                result.substring(ListLevel.length() + 1, p1) +
                     "</li>";
-            }else{
-                result = tmp + result.substring(p0, p1);
+                ListLevel += "*";
+            }else if(ListLevel.length() > 0 && result.startsWith(ListLevel)){ //equal number of stars
+                p0 = result.indexOf(ListLevel);
+                p1 = result.length();
+                result = "<li>" +
+                    result.substring(ListLevel.length(), p1) +
+                    "</li>";
+            }else if(ListLevel.length() > 0){ //less stars
+                int i = ListLevel.length();
+                String tmp = "";
+
+                while(! result.startsWith(ListLevel.substring(0,i)) ){
+                    tmp += "</ul>";
+                    i--;
+                }
+                ListLevel = ListLevel.substring(0,i);
+                p0 = ListLevel.length();
+                p1 = result.length();
+
+                if(ListLevel.length() > 0){
+                    result = tmp +
+                        "<li>" +
+                        result.substring(p0, p1) +
+                        "</li>";
+                }else{
+                    result = tmp + result.substring(p0, p1);
+                }
             }
-        }
 
 
-        //# sorted Lists contributed by [AS]
-        //## Sublist
-        if(result.startsWith(numListLevel + "#")){ //more #
-            p0 = result.indexOf(numListLevel);
-            p1 = result.length();
-            result = "<ol>" + serverCore.crlfString +
-                "<li>" +
-                result.substring(numListLevel.length() + 1, p1) +
-                "</li>";
-            numListLevel += "#";
-        }else if(numListLevel.length() > 0 && result.startsWith(numListLevel)){ //equal number of #
-            p0 = result.indexOf(numListLevel);
-            p1 = result.length();
-            result = "<li>" +
-                result.substring(numListLevel.length(), p1) +
-                "</li>";
-        }else if(numListLevel.length() > 0){ //less #
-            int i = numListLevel.length();
-            String tmp = "";
+            //# sorted Lists contributed by [AS]
+            //## Sublist
+            if(result.startsWith(numListLevel + "#")){ //more #
+                p0 = result.indexOf(numListLevel);
+                p1 = result.length();
+                result = "<ol>" + serverCore.crlfString +
+                    "<li>" +
+                    result.substring(numListLevel.length() + 1, p1) +
+                    "</li>";
+                numListLevel += "#";
+            }else if(numListLevel.length() > 0 && result.startsWith(numListLevel)){ //equal number of #
+                p0 = result.indexOf(numListLevel);
+                p1 = result.length();
+                result = "<li>" +
+                    result.substring(numListLevel.length(), p1) +
+                    "</li>";
+            }else if(numListLevel.length() > 0){ //less #
+                int i = numListLevel.length();
+                String tmp = "";
 
-            while(! result.startsWith(numListLevel.substring(0,i)) ){
-                tmp += "</ol>";
-                i--;
-            }
-            numListLevel = numListLevel.substring(0,i);
-            p0 = numListLevel.length();
-            p1 = result.length();
+                while(! result.startsWith(numListLevel.substring(0,i)) ){
+                    tmp += "</ol>";
+                    i--;
+                }
+                numListLevel = numListLevel.substring(0,i);
+                p0 = numListLevel.length();
+                p1 = result.length();
 
-            if(numListLevel.length() > 0){
-                result = tmp +
-                     "<li>" +
-                     result.substring(p0, p1) +
-                     "</li>";
-            }else{
-                result = tmp + result.substring(p0, p1);
+                if(numListLevel.length() > 0){
+                    result = tmp +
+                         "<li>" +
+                         result.substring(p0, p1) +
+                         "</li>";
+                }else{
+                    result = tmp + result.substring(p0, p1);
+                }
             }
-        }
-        // end contrib [AS]
+            // end contrib [AS]
 
-        //* definition Lists contributed by [MN] based on unordered list code by [AS]
-        if(result.startsWith(defListLevel + ";")){ //more semicolons
-            String dt = ""; 
-            String dd = "";
-            p0 = result.indexOf(defListLevel);
-            p1 = result.length();
-            String resultCopy = result.substring(defListLevel.length() + 1, p1);
-            if((p0 = resultCopy.indexOf(":")) > 0){
-                dt = resultCopy.substring(0,p0);
-                dd = resultCopy.substring(p0+1);
-                result = "<dl>" + "<dt>" + dt + "</dt>" + "<dd>" + dd;
-                defList = true;
-            }
-            defListLevel += ";";
-        }else if(defListLevel.length() > 0 && result.startsWith(defListLevel)){ //equal number of semicolons
-            String dt = ""; 
-            String dd = "";
-            p0 = result.indexOf(defListLevel);
-            p1 = result.length();
-            String resultCopy = result.substring(defListLevel.length(), p1);
-            if((p0 = resultCopy.indexOf(":")) > 0){
-                dt = resultCopy.substring(0,p0);
-                dd = resultCopy.substring(p0+1);
-                result = "<dt>" + dt + "</dt>" + "<dd>" + dd;
-                defList = true;
-            }
-        }else if(defListLevel.length() > 0){ //less semicolons
-            String dt = ""; 
-            String dd = "";
-            int i = defListLevel.length();
-            String tmp = "";
-            while(! result.startsWith(defListLevel.substring(0,i)) ){
-                tmp += "</dd></dl>";
-                i--;
-            }
-            defListLevel = defListLevel.substring(0,i);
-            p0 = defListLevel.length();
-            p1 = result.length();
-            if(defListLevel.length() > 0){
-                String resultCopy = result.substring(p0, p1);
+            //* definition Lists contributed by [MN] based on unordered list code by [AS]
+            if(result.startsWith(defListLevel + ";")){ //more semicolons
+                String dt = ""; 
+                String dd = "";
+                p0 = result.indexOf(defListLevel);
+                p1 = result.length();
+                String resultCopy = result.substring(defListLevel.length() + 1, p1);
                 if((p0 = resultCopy.indexOf(":")) > 0){
                     dt = resultCopy.substring(0,p0);
                     dd = resultCopy.substring(p0+1);
-                    result = tmp + "<dt>" + dt + "</dt>" + "<dd>" + dd;
+                    result = "<dl>" + "<dt>" + dt + "</dt>" + "<dd>" + dd;
                     defList = true;
                 }
+                defListLevel += ";";
+            }else if(defListLevel.length() > 0 && result.startsWith(defListLevel)){ //equal number of semicolons
+                String dt = ""; 
+                String dd = "";
+                p0 = result.indexOf(defListLevel);
+                p1 = result.length();
+                String resultCopy = result.substring(defListLevel.length(), p1);
+                if((p0 = resultCopy.indexOf(":")) > 0){
+                    dt = resultCopy.substring(0,p0);
+                    dd = resultCopy.substring(p0+1);
+                    result = "<dt>" + dt + "</dt>" + "<dd>" + dd;
+                    defList = true;
+                }
+            }else if(defListLevel.length() > 0){ //less semicolons
+                String dt = ""; 
+                String dd = "";
+                int i = defListLevel.length();
+                String tmp = "";
+                while(! result.startsWith(defListLevel.substring(0,i)) ){
+                    tmp += "</dd></dl>";
+                    i--;
+                }
+                defListLevel = defListLevel.substring(0,i);
+                p0 = defListLevel.length();
+                p1 = result.length();
+                if(defListLevel.length() > 0){
+                    String resultCopy = result.substring(p0, p1);
+                    if((p0 = resultCopy.indexOf(":")) > 0){
+                        dt = resultCopy.substring(0,p0);
+                        dd = resultCopy.substring(p0+1);
+                        result = tmp + "<dt>" + dt + "</dt>" + "<dd>" + dd;
+                        defList = true;
+                    }
 
                 }else{
-                result = tmp + result.substring(p0, p1);
+                    result = tmp + result.substring(p0, p1);
                 }
             }
             // end contrib [MN]	
@@ -537,109 +537,102 @@ public class wikiCode {
             }
         }
 
-    //escape code ([=...=]) contributed by [MN]
-    //both [= and =] in the same line
-    else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>0)&&(!(preformatted))){
-        //if(p0 < p1){
-        String escapeText = result.substring(p0+2,p1);
+        //escape code ([=...=]) contributed by [MN]
+        //both [= and =] in the same line
+            else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>0)&&(!(preformatted))){
+            String escapeText = result.substring(p0+2,p1);
 
-        //BUGS TO BE FIXED: [=[=text=]=]  does not work properly:
-        //[=[= undx=]x=] should resolve as [= undx=]x, but resolves as [= undxx=]
-        //ALSO [=[= und =]=]   [= und =] leads to an exception
-        //
-        //handlicg cases where the text inside [= and =] also contains
-        //[= and =]. Example: [=[=...=]=]
-        //if(escapeText)
+            //BUGS TO BE FIXED: [=[=text=]=]  does not work properly:
+            //[=[= undx=]x=] should resolve as [= undx=]x, but resolves as [= undxx=]
+            //ALSO [=[= und =]=]   [= und =] leads to an exception
+            //
+            //handlicg cases where the text inside [= and =] also contains
+            //[= and =]. Example: [=[=...=]=]
 
-        //else{
             result = transformLine(result.substring(0,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!"+result.substring(p1+2).replaceAll("!esc!", "!esc!!"), switchboard);
             result = result.replaceAll("!esc!txt!", escapeText);
-        result = result.replaceAll("!esc!!", "!esc!");
-        //}
-        //}
-    }
-
-    //start [=
-    else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)&&(!preformatted)){
-        escape = true;    //prevent surplus line breaks
-        escaped = true;   //prevents <pre> being parsed
-        String bq = "";   //gets filled with <blockquote>s as needed
-        String escapeText = result.substring(p0+2);
-        //taking care of indented lines
-        while(result.substring(escindented,p0).startsWith(":")){
-            escindented++;
-            bq = bq + "<blockquote>";
+            result = result.replaceAll("!esc!!", "!esc!");
         }
-        result = transformLine(result.substring(escindented,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!", switchboard);
-        result = bq + result.replaceAll("!esc!txt!", escapeText);
-        escape = false;
-        escapeSpan = true;
-    }
 
-    //end =]
-    else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)&&(!preformatted)){
-        escapeSpan = false;
-        String bq = ""; //gets filled with </blockquote>s as neede
-        String escapeText = result.substring(0,p0);
-        //taking care of indented lines
-        while(escindented > 0){
-            bq = bq + "</blockquote>";
-            escindented--;
+        //start [=
+        else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)&&(!preformatted)){
+            escape = true;    //prevent surplus line breaks
+            escaped = true;   //prevents <pre> being parsed
+            String bq = "";   //gets filled with <blockquote>s as needed
+            String escapeText = result.substring(p0+2);
+            //taking care of indented lines
+            while(result.substring(escindented,p0).startsWith(":")){
+                escindented++;
+                bq = bq + "<blockquote>";
+            }
+            result = transformLine(result.substring(escindented,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!", switchboard);
+            result = bq + result.replaceAll("!esc!txt!", escapeText);
+            escape = false;
+            escapeSpan = true;
         }
-        result = transformLine("!esc!txt!"+result.substring(p0+2).replaceAll("!esc!", "!esc!!"), switchboard);
-        result = result.replaceAll("!esc!txt!", escapeText) + bq;
-        escaped = false;
-    }
-    //end contrib [MN]
 
-    //preformatted code (<pre>...</pre>) contributed by [MN]
-    //implementation very similar to escape code (see above)
-    //both <pre> and </pre> in the same line
-    else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&((p1 = result.indexOf("&lt;/pre&gt;"))>0)&&(!(escaped))){
-        //if(p0 < p1){
+        //end =]
+        else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)&&(!preformatted)){
+            escapeSpan = false;
+            String bq = ""; //gets filled with </blockquote>s as neede
+            String escapeText = result.substring(0,p0);
+            //taking care of indented lines
+            while(escindented > 0){
+                bq = bq + "</blockquote>";
+                escindented--;
+            }
+            result = transformLine("!esc!txt!"+result.substring(p0+2).replaceAll("!esc!", "!esc!!"), switchboard);
+            result = result.replaceAll("!esc!txt!", escapeText) + bq;
+            escaped = false;
+        }
+        //end contrib [MN]
+
+        //preformatted code (<pre>...</pre>) contributed by [MN]
+        //implementation very similar to escape code (see above)
+        //both <pre> and </pre> in the same line
+        else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&((p1 =     result.indexOf("&lt;/pre&gt;"))>0)&&(!(escaped))){
             String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11,p1)+"</pre>";
             result = transformLine(result.substring(0,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!"+result.substring(p1+12).replaceAll("!pre!", "!pre!!"), switchboard);
             result = result.replaceAll("!pre!txt!", preformattedText);
-        result = result.replaceAll("!pre!!", "!pre!");
-        //}
-    }
-
-    //start <pre>
-    else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&(!preformattedSpan)&&(!escaped)){
-        preformatted = true;    //prevent surplus line breaks
-        String bq ="";  //gets filled with <blockquote>s as needed
-        String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11);
-        //taking care of indented lines
-        while(result.substring(preindented,p0).startsWith(":")){
-            preindented++;
-            bq = bq + "<blockquote>";
+            result = result.replaceAll("!pre!!", "!pre!");
         }
-        result = transformLine(result.substring(preindented,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!", switchboard);
-        result = bq + result.replaceAll("!pre!txt!", preformattedText);
-        result = result.replaceAll("!pre!!", "!pre!");
-        preformattedSpan = true;
-    }
 
-    //end </pre>
-    else if(((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(preformattedSpan)&&(!escaped)){
-        preformattedSpan = false;
-        String bq = ""; //gets filled with </blockquote>s as needed
-        String preformattedText = result.substring(0,p0)+"</pre>";
+        //start <pre>
+        else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&(!preformattedSpan)&&(!escaped)){
+            preformatted = true;    //prevent surplus line breaks
+            String bq ="";  //gets filled with <blockquote>s as needed
+            String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11);
             //taking care of indented lines
-        while (preindented > 0){
-            bq = bq + "</blockquote>";
-            preindented--;
+            while(result.substring(preindented,p0).startsWith(":")){
+                preindented++;
+                bq = bq + "<blockquote>";
+            }
+            result = transformLine(result.substring(preindented,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!", switchboard);
+            result = bq + result.replaceAll("!pre!txt!", preformattedText);
+            result = result.replaceAll("!pre!!", "!pre!");
+            preformattedSpan = true;
         }
-        result = transformLine("!pre!txt!"+result.substring(p0+12).replaceAll("!pre!", "!pre!!"), switchboard);
-        result = result.replaceAll("!pre!txt!", preformattedText) + bq;
-        result = result.replaceAll("!pre!!", "!pre!");
-        preformatted = false;
-    }
-    //end contrib [MN]	
 
-    replaced = false;
-    if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)) return result;
-    return result + "<br>";
+        //end </pre>
+        else if(((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(preformattedSpan)&&(!escaped)){
+            preformattedSpan = false;
+            String bq = ""; //gets filled with </blockquote>s as needed
+            String preformattedText = result.substring(0,p0)+"</pre>";
+                //taking care of indented lines
+            while (preindented > 0){
+                bq = bq + "</blockquote>";
+                preindented--;
+            }
+            result = transformLine("!pre!txt!"+result.substring(p0+12).replaceAll("!pre!", "!pre!!"), switchboard);
+            result = result.replaceAll("!pre!txt!", preformattedText) + bq;
+            result = result.replaceAll("!pre!!", "!pre!");
+            preformatted = false;
+        }
+        //end contrib [MN]	
+
+        replaced = false;
+        if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)) return result;
+        return result + "<br>";
     }
 
     /*
