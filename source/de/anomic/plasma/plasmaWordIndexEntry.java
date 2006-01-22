@@ -73,13 +73,13 @@ public final class plasmaWordIndexEntry {
     private final String urlHash;
 
     // discrete values
-    private int    hitcount;       // words in file
-    private int    wordcount;
-    private int    phrasecount;
+    private int    hitcount;    // number of this words in file
+    private int    wordcount;   // number of all words in the file
+    private int    phrasecount; // number of all phrases in the file
     private int    posintext;   // first position of the word in text as number of word; 0=unknown or irrelevant position
     private int    posinphrase; // position within a phrase of the word
     private int    posofphrase; // position of the phrase in the text as count of sentences; 0=unknown; 1=path; 2=keywords; 3=headline; >4: in text
-    private int    worddistance;
+    private int    worddistance;// distance between the words, only used if the index is artificial (from a conjunction)
     private long   lastModified;// calculated by using last-modified
     private int    quality;     // result of a heuristic on the source file
     private byte[] language;    // essentially the country code (the TLD as heuristic), two letters lowercase only
@@ -100,16 +100,16 @@ public final class plasmaWordIndexEntry {
     public static final char DT_UNKNOWN = 'u';
 
     // appearance locations: (used for flags)
-    public static final int AP_TITLE  = 0; // title tag from html header
-    public static final int AP_H1     = 1; // h0-tag
-    public static final int AP_H2     = 2;
-    public static final int AP_H3     = 3;
-    public static final int AP_H4     = 4;
-    public static final int AP_H5     = 5;
-    public static final int AP_H6     = 6;
-    public static final int AP_ANCHOR = 7; // anchor description
-    public static final int AP_URL    = 8; // word inside an url
-    public static final int AP_IMG    = 9; // tag inside image references
+    public static final int AP_TITLE  =  0; // title tag from html header
+    public static final int AP_H1     =  1; // h1-tag
+    public static final int AP_H2     =  2; // h2-tag
+    public static final int AP_H3     =  3; // h3-tag
+    public static final int AP_H4     =  4; // h4-tag
+    public static final int AP_H5     =  5; // h5-tag
+    public static final int AP_H6     =  6; // h6-tag
+    public static final int AP_ANCHOR =  7; // anchor description
+    public static final int AP_URL    =  8; // word inside an url
+    public static final int AP_IMG    =  9; // tag inside image references
     public static final int AP_TAG    = 10; // for tagged indexeing (i.e. using mp3 tags)
     
     // local flag attributes
@@ -254,6 +254,9 @@ public final class plasmaWordIndexEntry {
         this.worddistance = (code.length() >= 19) ? (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(18, 20)) : 0;
         this.wordcount = (code.length() >= 21) ? (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(20, 22)) : 0;
         this.phrasecount = (code.length() >= 23) ? (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(22, 24)) : 0;
+        if (hitcount == 0) hitcount = 1;
+        if (wordcount == 0) wordcount = 1000;
+        if (phrasecount == 0) phrasecount = 100;
     }
     
     public plasmaWordIndexEntry(String external) {
@@ -335,7 +338,7 @@ public final class plasmaWordIndexEntry {
     public int getQuality() { return quality; }
     public int getVirtualAge() { return plasmaWordIndex.microDateDays(lastModified); }
     public long getLastModified() { return lastModified; }
-    public int getCount() { return hitcount; }
+    public int hitcount() { return hitcount; }
     public int posintext() { return posintext; }
     public int posinphrase() { return posinphrase; }
     public int posofphrase() { return posofphrase; }

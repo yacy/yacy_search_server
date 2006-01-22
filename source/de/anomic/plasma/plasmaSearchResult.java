@@ -157,7 +157,10 @@ public final class plasmaSearchResult {
                 else if (query.order[j].equals(plasmaSearchQuery.ORDER_YBR))  ranking += factor * plasmaSearchPreOrder.ybr_p(indexEntry.getUrlHash());
                 factor = factor / 4096L;
             }
-
+            int wordpos = indexEntry.posintext();
+            if (wordpos == 0) wordpos = 1000;
+            ranking = ranking + 1000 - wordpos + indexEntry.hitcount();
+            
             // apply 'common-sense' heuristic using references
             for (int j = 0; j < urlcomps.length; j++) if (commonSense.contains(urlcomps[j])) ranking += 10L*4096L*4096L / urlcomps.length;
             for (int j = 0; j < descrcomps.length; j++) if (commonSense.contains(descrcomps[j])) ranking += 10L*4096L*4096L / descrcomps.length;

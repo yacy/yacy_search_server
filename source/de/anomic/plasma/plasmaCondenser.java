@@ -113,40 +113,6 @@ public final class plasmaCondenser {
         // key is a String (the word), value is a wordStatProp Object
         return words.entrySet().iterator();
     }
-
-    /*
-    public int wordCount(String word) {
-        // number of occurrences of one word
-        // if the word did not occur, this simply returns 0
-        wordStatProp sp = (wordStatProp) words.get(word);
-        if (sp == null) return 0;
-        return sp.count;
-    }
-
-    public int wordPositionInText(String word) {
-        // position of word in text
-        // if unknown and word does not exist, the method returns 0
-        wordStatProp sp = (wordStatProp) words.get(word);
-        if (sp == null) return 0;
-        return sp.posInText;
-    }
-
-    public int wordPositionInPhrase(String word) {
-        // position of word in text
-        // if unknown and word does not exist, the method returns 0
-        wordStatProp sp = (wordStatProp) words.get(word);
-        if (sp == null) return 0;
-        return sp.posInPhrase;
-    }
-
-    public int wordNumberOfPhrase(String word) {
-        // position of word in text
-        // if unknown and word does not exist, the method returns 0
-        wordStatProp sp = (wordStatProp) words.get(word);
-        if (sp == null) return 0;
-        return sp.numOfPhrase;
-    }
-    */
     
     public static class wordStatProp {
         // object carries statistics for words and sentences

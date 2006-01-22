@@ -137,7 +137,9 @@ public final class plasmaSearchPreOrder {
             else if (query.order[i].equals(plasmaSearchQuery.ORDER_YBR))  ranking  = factor * ybr_p(indexEntry.getUrlHash());
             factor = factor / 4096L;
         }
-
+        int wordpos = indexEntry.posintext();
+        if (wordpos == 0) wordpos = 1000;
+        ranking = ranking + 1000 - wordpos + indexEntry.hitcount();
         pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), indexEntry);
     }
 
