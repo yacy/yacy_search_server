@@ -177,12 +177,17 @@ public final class yacyClient {
         if (!serverCore.portForwardingEnabled || otherPeerVersion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING) {
             String mytype = (String) result.get(yacySeed.YOURTYPE);
             if (mytype == null) { mytype = yacySeed.PEERTYPE_JUNIOR; }        
-            if (
-                    (yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR).equals(yacySeed.PEERTYPE_PRINCIPAL)) && 
-                    (mytype.equals(yacySeed.PEERTYPE_SENIOR))
-            ) { 
-                mytype = yacySeed.PEERTYPE_PRINCIPAL;
+            yacyAccessible accessible = new yacyAccessible();
+            if (mytype.equals(yacySeed.PEERTYPE_SENIOR)) {
+                accessible.IWasAccessed = true;
+                if (yacyCore.seedDB.mySeed.isPrincipal()) {
+                    mytype = yacySeed.PEERTYPE_PRINCIPAL;
+                }
+            } else {
+                accessible.IWasAccessed = false;
             }
+            accessible.lastUpdated = System.currentTimeMillis();
+            yacyCore.amIAccessibleDB.put(otherHash, accessible);
 
             /* 
              * If we were reported as junior we have to check if your port forwarding channel is broken
@@ -206,7 +211,8 @@ public final class yacyClient {
             } else {
                 yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ".");
             }
-            yacyCore.seedDB.mySeed.put(yacySeed.PEERTYPE, mytype);
+            if (yacyCore.seedDB.mySeed.orVirgin().equals(yacySeed.PEERTYPE_VIRGIN))
+                yacyCore.seedDB.mySeed.put(yacySeed.PEERTYPE, mytype);
         }
 
         final String error = yacyCore.seedDB.mySeed.isProper();

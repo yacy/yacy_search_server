@@ -68,8 +68,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import de.anomic.http.httpc;
 import de.anomic.net.natLib;
@@ -95,6 +97,14 @@ public class yacyCore {
     public static float latestVersion = (float) 0.1;
     public static long speedKey = 0;
     public static File yacyDBPath;
+    public static final Map amIAccessibleDB = Collections.synchronizedMap(new HashMap()); // Holds PeerHash / yacyAccessible Relations
+    // constants for PeerPing behaviour
+    private static final int peerPingInitial = 10;
+    private static final int peerPingMaxRunning = 3;
+    private static final int peerPingMinRunning = 1;
+    private static final int peerPingMinDBSize = 5;
+    private static final int peerPingMinAccessibleToForceSenior = 3;
+    private static final long peerPingMaxDBAge = 15 * 60 * 1000; // in milliseconds
 
     // public static yacyShare shareManager = null;
     // public static boolean terminate = false;
@@ -377,15 +387,42 @@ public class yacyCore {
             yacySeed[] seeds;
 
             int attempts = seedDB.sizeConnected();
-            if (attempts > 10) { attempts = 10; }
 
             // getting a list of peers to contact
             if (seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
-                seeds = seedDB.seedsByAge(true, attempts); // best for fast connection
+                if (attempts > peerPingInitial) { attempts = peerPingInitial; }
+                seeds = seedDB.seedsByAge(true, attempts + 10); // best for fast connection
             } else {
-                seeds = seedDB.seedsByAge(false, attempts); // best for seed list maintenance/cleaning
+                int diff = peerPingMinDBSize - amIAccessibleDB.size();
+                if (diff > peerPingMinRunning) {
+                    diff = Math.max(diff, peerPingMaxRunning);
+                    if (attempts > diff) { attempts = diff; }
+                } else {
+                    if (attempts > peerPingMinRunning) { attempts = peerPingMinRunning; }
+                }
+                seeds = seedDB.seedsByAge(false, attempts + 10); // best for seed list maintenance/cleaning
             }
+
             if (seeds == null) { return 0; }
+            if (seeds.length < attempts) { attempts = seeds.length; }
+
+            // This will try to get Peers that are not currently in amIAccessibleDB
+            int i = 0;
+            int j = seeds.length - 1; // attempts;
+            while (i < j) {
+                while ((i < j)&&(!amIAccessibleDB.containsKey(seeds[i].hash))) {
+                    i++;
+                }
+                while ((i < j)&&(amIAccessibleDB.containsKey(seeds[j].hash))) {
+                    j--;
+                }
+                if (i >= j) break;
+                yacySeed seed = seeds[i];
+                seeds[i] = seeds[j];
+                seeds[j] = seed;
+                i++;
+                j--;
+            }
 
             // include a YaCyNews record to my seed
             try {
@@ -403,14 +440,15 @@ public class yacyCore {
             // include current citation-rank file count
             seedDB.mySeed.put(yacySeed.CRWCNT, Integer.toString(switchboard.rankingOwnDistribution.size()));
             seedDB.mySeed.put(yacySeed.CRTCNT, Integer.toString(switchboard.rankingOtherDistribution.size()));
-            
+            int newSeeds = -1;
+            //if (seeds.length > 1) {
             // holding a reference to all started threads
             int contactedSeedCount = 0;
             final List syncList = Collections.synchronizedList(new LinkedList()); // memory for threads
             final serverSemaphore sync = new serverSemaphore(attempts);
 
             // going through the peer list and starting a new publisher thread for each peer
-            for (int i = 0; i < seeds.length; i++) {
+            for (i = 0; i < attempts; i++) {
                 if (seeds[i] == null) continue;
 
                 final String address = seeds[i].getAddress();
@@ -418,23 +456,27 @@ public class yacyCore {
                 if ((address == null) || (seeds[i].isProper() != null)) {
                     // we don't like that address, delete it
                     peerActions.peerDeparture(seeds[i]);
-                    sync.V();
+                    sync.P();
                 } else {
                     // starting a new publisher thread
                     contactedSeedCount++;
                     (new publishThread(yacyCore.publishThreadGroup,seeds[i],sync,syncList)).start();
                 }
             }
+            int reserveSeedsAt = i; // This is just a precaution
 
             // receiving the result of all started publisher threads
-            int newSeeds = -1;
-            for (int j=0; j < contactedSeedCount; j++) {
+            for (j = 0; j < contactedSeedCount; j++) {
 
                 // waiting for the next thread to finish
                 sync.P();
 
                 // if this is true something is wrong ...
-                if (syncList.isEmpty()) return 0;
+                if (syncList.isEmpty()) {
+                    log.logWarning("PeerPing: syncList.isEmpty()==true");
+                    continue;
+                    //return 0;
+                }
 
                 // getting a reference to the finished thread
                 final publishThread t = (publishThread) syncList.remove(0);
@@ -447,6 +489,79 @@ public class yacyCore {
                         newSeeds += t.added;
                     }
                 }
+            }
+
+            // Nobody contacted yet, try again until peerPingInitial attempts are through
+            i = reserveSeedsAt; // This is just a precaution
+            while ((newSeeds < 0) && (contactedSeedCount < peerPingInitial) && (i < seeds.length)) {
+                if (seeds[i] != null) {
+                    final String address = seeds[i].getAddress();
+                    log.logFine("HELLO x" + i + " to peer '" + seeds[i].get(yacySeed.NAME, "") + "' at " + address); // debug
+                    if ((address == null) || (seeds[i].isProper() != null)) {
+                        peerActions.peerDeparture(seeds[i]);
+                    } else {
+                        contactedSeedCount++;
+                        //new publishThread(yacyCore.publishThreadGroup,seeds[i],sync,syncList)).start();
+                        try {
+                            newSeeds = yacyClient.publishMySeed(seeds[i].getAddress(), seeds[i].hash);
+                            if (newSeeds < 0) {
+                                log.logInfo("publish: disconnected " + seeds[i].get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seeds[i].getName() + "' from " + seeds[i].getAddress());
+                                peerActions.peerDeparture(seeds[i]);
+                            } else {
+                                log.logInfo("publish: handshaked " + seeds[i].get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seeds[i].getName() + "' at " + seeds[i].getAddress());
+                            }
+                        } catch (Exception e) {
+                            log.logSevere("publishMySeed: error with target seed " + seeds[i].toString() + ": " + e.getMessage(), e);
+                        }
+                    }
+                }
+                i++;
+            }
+
+            int accessible = 0;
+            int notaccessible = 0;
+            final long cutofftime = System.currentTimeMillis() - peerPingMaxDBAge;
+            final int dbSize;
+            synchronized(amIAccessibleDB) {
+                dbSize = amIAccessibleDB.size();
+                Iterator ai = amIAccessibleDB.keySet().iterator();
+                while (ai.hasNext()) {
+                    yacyAccessible ya = (yacyAccessible) amIAccessibleDB.get(ai.next());
+                    if (ya.lastUpdated < cutofftime) {
+                        ai.remove(); 
+                    } else {
+                        if (ya.IWasAccessed) { accessible++; }
+                        else { notaccessible++; }
+                    }
+                }
+            }
+            log.logFine("DBSize before -> after Cleanup: " + dbSize + " -> " + amIAccessibleDB.size());
+            log.logInfo("PeerPing: I am accessible for " + accessible +
+                "peer(s), not accessible for " + notaccessible + " peer(s).");
+
+            if ((accessible + notaccessible) > 0) {
+                final String newPeerType;
+                // At least one other Peer told us our type
+                if ((accessible >= peerPingMinAccessibleToForceSenior) ||
+                    (accessible >= notaccessible)) {
+                    // We can be reached from a majority of other Peers
+                    if (yacyCore.seedDB.mySeed.isPrincipal()) {
+                        newPeerType = yacySeed.PEERTYPE_PRINCIPAL;
+                    } else {
+                        newPeerType = yacySeed.PEERTYPE_SENIOR;
+                    }
+                } else {
+                    // We cannot be reached from the outside
+                    newPeerType = yacySeed.PEERTYPE_JUNIOR;
+                }
+                if (yacyCore.seedDB.mySeed.orVirgin().equals(newPeerType)) { 
+                    log.logInfo("PeerPing: myType is " + yacyCore.seedDB.mySeed.orVirgin());
+                } else {
+                    log.logInfo("PeerPing: changing myType from '" + yacyCore.seedDB.mySeed.orVirgin() + "' to '" + newPeerType + "'");
+                    yacyCore.seedDB.mySeed.put(yacySeed.PEERTYPE, newPeerType);
+                }
+            } else {
+                log.logInfo("PeerPing: No data, staying at myType: " + yacyCore.seedDB.mySeed.orVirgin());
             }
 
             if (newSeeds >= 0) {

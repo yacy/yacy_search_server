@@ -197,6 +197,11 @@ public class yacySeed {
     public String getPeerType()  { return get(PEERTYPE, "");                 }
     /**
      * try to get the peertype<br>
+     * @return the peertype or "Virgin"
+     */
+    public String orVirgin()     { return get(PEERTYPE, PEERTYPE_VIRGIN);    }
+    /**
+     * try to get the peertype<br>
      * @return the peertype or "junior"
      */
     public String orJunior()     { return get(PEERTYPE, PEERTYPE_JUNIOR);    }
