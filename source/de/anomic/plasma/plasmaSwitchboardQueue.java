@@ -53,6 +53,7 @@ import java.util.Date;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
@@ -64,12 +65,18 @@ public class plasmaSwitchboardQueue {
     private plasmaCrawlProfile profiles;
     private plasmaHTCache htCache;
     private plasmaCrawlLURL lurls;
-
+    private File sbQueueStackPath;
+    
     public plasmaSwitchboardQueue(plasmaHTCache htCache, plasmaCrawlLURL lurls, File sbQueueStackPath, plasmaCrawlProfile profiles) {
+        this.sbQueueStackPath = sbQueueStackPath;
         this.profiles = profiles;
         this.htCache = htCache;
         this.lurls = lurls;
 
+        initQueueStack();
+    }
+
+    private void initQueueStack() {
         if (sbQueueStackPath.exists()) try {
             sbQueueStack = new kelondroStack(sbQueueStackPath, 0);
         } catch (IOException e) {
@@ -97,7 +104,13 @@ public class plasmaSwitchboardQueue {
             }, true);
         }
     }
-
+    
+    private void resetQueueStack() {
+        try {sbQueueStack.close();} catch (Exception e) {}
+        if (sbQueueStackPath.exists()) sbQueueStackPath.delete();
+        initQueueStack();
+    }
+    
     public int size() {
         return sbQueueStack.size();
     }
@@ -135,13 +148,18 @@ public class plasmaSwitchboardQueue {
     }
 
     public ArrayList list(int index) throws IOException {
-        if ((index==0) && (sbQueueStack.size()==0)) return new ArrayList(0);
+        if ((index == 0) && (sbQueueStack.size() == 0)) return new ArrayList(0);
         if ((index < 0) || (index >= sbQueueStack.size())) throw new ArrayIndexOutOfBoundsException();
-        ArrayList list = sbQueueStack.botList(index);
-        for (int i=0; i < list.size(); i++) {
-            list.set(i,new Entry((byte[][])list.get(i)));
+        try {
+            ArrayList list = sbQueueStack.botList(index);
+            for (int i = 0; i < list.size(); i++) {
+                list.set(i, new Entry((byte[][]) list.get(i)));
+            }
+            return list;
+        } catch (kelondroException e) {
+            resetQueueStack();
+            return new ArrayList();
         }
-        return list;
     }
 
     public void clear() throws IOException {

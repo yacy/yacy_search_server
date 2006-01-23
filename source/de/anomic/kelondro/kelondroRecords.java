@@ -543,10 +543,8 @@ public class kelondroRecords {
             // values can be written using the setValues() method
             // but we expect that values are already there in the file ready to
             // be read which we do not here
-            if (handle == null)
-                throw new IllegalArgumentException("INTERNAL ERROR: node handle is null.");
-            if (handle.index >= USAGE.allCount())
-                throw new kelondroException(filename, "INTERNAL ERROR: node handle index exceeds size.");
+            if (handle == null) throw new kelondroException(filename, "INTERNAL ERROR: node handle is null.");
+            if (handle.index >= USAGE.allCount()) throw new kelondroException(filename, "INTERNAL ERROR: node handle index exceeds size.");
 
             // use given handle
             this.handle = new Handle(handle.index);
@@ -564,6 +562,7 @@ public class kelondroRecords {
             //assert (handle.index < USAGE.allCount()) : "node handle too high: " + handle.index + ", USEDC=" + USAGE.USEDC + ", FREEC=" + USAGE.FREEC;
             
             // the parentNode can be given if an auto-fix in the following case is wanted
+            if (handle == null) throw new kelondroException(filename, "INTERNAL ERROR: node handle is null.");
             if (handle.index >= USAGE.allCount()) {
                 if (parentNode == null) {
                     throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index exceeds size. No auto-fix node was submitted. This is a serious failure.");
