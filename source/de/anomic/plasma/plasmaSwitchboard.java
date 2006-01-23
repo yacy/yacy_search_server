@@ -768,7 +768,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public void close() {
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         terminateAllThreads(true);
-        log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to database manager");
+        log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
         plasmaDbImporter.close();
         indexDistribution.close();
@@ -779,15 +779,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         messageDB.close();
         if (facilityDB != null) try {facilityDB.close();} catch (IOException e) {}
         sbStackCrawlThread.close();
-        urlPool.close();
         profiles.close();
         robots.close();
         parser.close();
         cacheManager.close();
         sbQueue.close();
         flushCitationReference(crg, "crg");
-        log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to threaded indexing (stand by...)");
+        log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         int waitingBoundSeconds = Integer.parseInt(getConfig("maxWaitingWordFlush", "120"));
+        urlPool.close();
         wordIndex.close(waitingBoundSeconds);
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }

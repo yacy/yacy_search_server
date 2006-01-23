@@ -498,15 +498,17 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     public void close(int waitingSeconds) {
         // stop permanent flushing
         flushThread.terminate();
-        try {flushThread.join(5000);} catch (InterruptedException e) {}
+        try {flushThread.join(6000);} catch (InterruptedException e) {}
 
-        // close cluster
-        assortmentCluster.close();
+        // dump cache
         try {
             dump(waitingSeconds);
         } catch (IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }
+        
+        // close cluster
+        assortmentCluster.close();
     }
 
     public Object migrateWords2Assortment(String wordhash) throws IOException {
