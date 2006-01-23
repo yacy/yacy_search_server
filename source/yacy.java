@@ -654,6 +654,92 @@ public final class yacy {
         log.logInfo("TERMINATED MIGRATION");
     }
     
+    public static void importAssortment(String homePath, String importAssortmentFileName) {
+        if (homePath == null) throw new NullPointerException();
+        if (importAssortmentFileName == null) throw new NullPointerException();       
+        
+        // initialize logging
+        try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
+        serverLog log = new serverLog("ASSORTMENT-IMPORT");
+        log.logInfo("STARTING ASSORTMENT-IMPORT");     
+        
+        // initializing importAssortmentFile
+        String errorMsg = null;
+        File importAssortmentFile = new File(importAssortmentFileName);
+        if (!importAssortmentFile.exists()) errorMsg = "AssortmentFile '" + importAssortmentFile + "' does not exist.";
+        else if (importAssortmentFile.isDirectory()) errorMsg = "AssortmentFile '" + importAssortmentFile + "' is a directory.";
+        else if (!importAssortmentFile.canRead()) errorMsg = "AssortmentFile '" + importAssortmentFile + "' is not readable.";
+        else if (!importAssortmentFile.canWrite()) errorMsg = "AssortmentFile '" + importAssortmentFile + "' is not writeable.";
+        if (errorMsg != null) {
+            log.logSevere(errorMsg);
+            throw new IllegalStateException(errorMsg);
+        }
+        
+        File importAssortmentPath = null;
+        int assortmentNr = -1;
+        try {
+            importAssortmentPath = new File(importAssortmentFile.getParent());
+            assortmentNr = Integer.valueOf(importAssortmentFile.getName().substring("indexAssortment".length(),importAssortmentFile.getName().length()-3)).intValue();
+        } catch (NumberFormatException e) {
+            errorMsg = "Unable to parse the assortment file number.";
+            log.logSevere(errorMsg,e);
+            throw new IllegalStateException(errorMsg);
+        }
+        
+        plasmaWordIndex homeWordIndex = null;
+        try {
+            // initializing assortment source file
+            log.logInfo("Initializing source assortment file");
+            plasmaWordIndexAssortment assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath,assortmentNr,16*1024*1024, log);
+            
+            // configure destination DB
+            log.logInfo("Initializing destination word index db.");
+            File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
+            if (!homeDBroot.exists()) errorMsg = "DB Directory '" + homeDBroot + "' does not exist.";
+            else if (!homeDBroot.isDirectory()) errorMsg = "DB Directory '" + homeDBroot + "' is not directory.";
+            else if (!homeDBroot.canRead()) errorMsg = "DB Directory '" + homeDBroot + "' is not readable.";
+            else if (!homeDBroot.canWrite()) errorMsg = "DB Directory '" + homeDBroot + "' is not writeable.";
+            if (errorMsg != null) {
+                log.logSevere(errorMsg);
+                throw new IllegalStateException(errorMsg);
+            }
+            
+            // opening the destination database
+            homeWordIndex = new plasmaWordIndex(homeDBroot, 16*1024*1024, log);        
+            
+            // iterating through the content
+            log.logInfo("Importing assortment file containing '" + assortmentFile.size() + "' entities.");
+            
+            int wordEntityCount = 0, wordEntryCount = 0;
+            Iterator contentIter = assortmentFile.content();
+            while (contentIter.hasNext()) {
+                wordEntityCount++;
+                
+                byte[][] row = (byte[][]) contentIter.next();
+                String hash = new String(row[0]);
+                plasmaWordIndexEntryContainer container = assortmentFile.row2container(hash, row);
+                wordEntryCount += container.size();
+                
+                // importing entity container to home db
+                homeWordIndex.addEntries(container, true);
+                
+                if (wordEntityCount % 500 == 0) {
+                    log.logFine(wordEntityCount + " word entities processed so far.");
+                }
+                if (wordEntryCount % 2000 == 0) {
+                    log.logFine(wordEntryCount + " word entries processed so far.");
+                }                
+            }
+        } catch (Error e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();        
+        } finally {
+            log.logInfo("ASSORTMENT-IMPORT FINISHED");
+            if (homeWordIndex != null) try { homeWordIndex.close(5000); } catch (Exception e){/* nothing todo here */}
+        }
+    }
+    
     public static void importDB(String homePath, String importPath) {
         if (homePath == null) throw new NullPointerException();
         if (importPath == null) throw new NullPointerException();
@@ -663,7 +749,6 @@ public final class yacy {
         try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
         serverLog log = new serverLog("DB-IMPORT");
         log.logInfo("STARTING DB-IMPORT");  
-        log.logInfo("Import can be aborted using <ctrl>+<c>");
         
         plasmaWordIndex homeWordIndex = null, importWordIndex = null;
         plasmaCrawlLURL homeUrlDB = null, importUrlDB = null;
@@ -1340,6 +1425,18 @@ public final class yacy {
                 System.err.println("Usage: -importDB [homeDbRoot] importDbRoot");
             }
             importDB(applicationRoot, importRoot);
+        } else if ((args.length >= 1) && (args[0].equals("-importAssortment"))) {
+            // attention: this may run long and should not be interrupted!
+            String assortmentFileName = null;
+            if (args.length == 3) {
+                applicationRoot= args[1];
+                assortmentFileName = args[2];
+            } else if (args.length == 2) {
+                assortmentFileName = args[1];
+            } else {
+                System.err.println("Usage: -importAssortment [homeDbRoot] [AssortmentFileName]");
+            }
+            importAssortment(applicationRoot, assortmentFileName);
         } else if ((args.length >= 1) && (args[0].equals("-deletestopwords"))) {
             // delete those words in the index that are listed in the stopwords file
             if (args.length == 2) applicationRoot= args[1];

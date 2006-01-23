@@ -193,7 +193,7 @@ public final class plasmaWordIndexAssortment {
         return row2container(wordHash, row);
     }
     
-    private plasmaWordIndexEntryContainer row2container(String wordHash, byte[][] row) {
+    public plasmaWordIndexEntryContainer row2container(String wordHash, byte[][] row) {
         if (row == null) return null;
         final long updateTime = kelondroRecords.bytes2long(row[2]);
         plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
@@ -234,6 +234,10 @@ public final class plasmaWordIndexAssortment {
             resetDatabase();
             return null;
         }
+    }
+    
+    public Iterator content() {
+        return this.assortments.content();
     }
 
     public int size() {
