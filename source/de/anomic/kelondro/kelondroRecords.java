@@ -1075,6 +1075,7 @@ public class kelondroRecords {
         public Object next() {
             try {
                 Node n = new Node(pos);
+                pos.index++;
                 while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
                 return n.getValues();
             } catch (IOException e) {
