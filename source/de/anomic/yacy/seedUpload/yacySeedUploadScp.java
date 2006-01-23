@@ -96,7 +96,7 @@ public class yacySeedUploadScp implements yacySeedUploader {
         return new String[] {CONFIG_SCP_SERVER,CONFIG_SCP_ACCOUNT,CONFIG_SCP_PASSWORD,CONFIG_SCP_PATH};
     }
     
-    public String[] getLibxDependences() {
+    public String[] getLibxDependencies() {
         return new String[]{"jsch-0.1.21.jar"};
     }
     

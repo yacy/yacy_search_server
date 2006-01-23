@@ -76,7 +76,7 @@ public class yacySeedUploadFile implements yacySeedUploader {
         return new String[]{CONFIG_FILE_PATH};
         }
 
-    public String[] getLibxDependences() {
+    public String[] getLibxDependencies() {
         return new String[]{};
     }
 }

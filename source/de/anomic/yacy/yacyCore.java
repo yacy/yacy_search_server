@@ -709,7 +709,7 @@ public class yacyCore {
                     final Class uploaderClass = Class.forName(fullClassName);
                     final Object theUploader = uploaderClass.newInstance();
                     if (!(theUploader instanceof yacySeedUploader)) { continue; }
-                    final String[] neededLibx = ((yacySeedUploader)theUploader).getLibxDependences();
+                    final String[] neededLibx = ((yacySeedUploader)theUploader).getLibxDependencies();
                     if (neededLibx != null) {
                         for (int libxId=0; libxId < neededLibx.length; libxId++) {
                             if (javaClassPath.indexOf(neededLibx[libxId]) == -1) {
