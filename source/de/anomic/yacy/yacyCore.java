@@ -404,25 +404,19 @@ public class yacyCore {
             }
 
             if (seeds == null) { return 0; }
-            if (seeds.length < attempts) { attempts = seeds.length; }
 
             // This will try to get Peers that are not currently in amIAccessibleDB
-            int i = 0;
-            int j = seeds.length - 1; // attempts;
-            while (i < j) {
-                while ((i < j)&&(!amIAccessibleDB.containsKey(seeds[i].hash))) {
-                    i++;
+            LinkedList seedList = new LinkedList();
+            LinkedList tmpSeedList = new LinkedList();
+            for(int i = 0; i < seeds.length; i++) {
+                if (amIAccessibleDB.containsKey(seeds[i].hash)) {
+                    tmpSeedList.add(seeds[i]);
+                } else {
+                    seedList.add(seeds[i]);
                 }
-                while ((i < j)&&(amIAccessibleDB.containsKey(seeds[j].hash))) {
-                    j--;
-                }
-                if (i >= j) break;
-                yacySeed seed = seeds[i];
-                seeds[i] = seeds[j];
-                seeds[j] = seed;
-                i++;
-                j--;
             }
+            while (!tmpSeedList.isEmpty()) { seedList.add(tmpSeedList.remove(0)); }
+            if (seedList.size() < attempts) { attempts = seedList.size(); }
 
             // include a YaCyNews record to my seed
             try {
@@ -448,25 +442,25 @@ public class yacyCore {
             final serverSemaphore sync = new serverSemaphore(attempts);
 
             // going through the peer list and starting a new publisher thread for each peer
-            for (i = 0; i < attempts; i++) {
-                if (seeds[i] == null) continue;
+            for (int i = 0; i < attempts; i++) {
+                yacySeed seed = (yacySeed) seedList.remove(0);
+                if (seed == null) continue;
 
-                final String address = seeds[i].getAddress();
-                log.logFine("HELLO #" + i + " to peer '" + seeds[i].get(yacySeed.NAME, "") + "' at " + address); // debug
-                if ((address == null) || (seeds[i].isProper() != null)) {
+                final String address = seed.getAddress();
+                log.logFine("HELLO #" + i + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
+                if ((address == null) || (seed.isProper() != null)) {
                     // we don't like that address, delete it
-                    peerActions.peerDeparture(seeds[i]);
+                    peerActions.peerDeparture(seed);
                     sync.P();
                 } else {
                     // starting a new publisher thread
                     contactedSeedCount++;
-                    (new publishThread(yacyCore.publishThreadGroup,seeds[i],sync,syncList)).start();
+                    (new publishThread(yacyCore.publishThreadGroup,seed,sync,syncList)).start();
                 }
             }
-            int reserveSeedsAt = i; // This is just a precaution
 
             // receiving the result of all started publisher threads
-            for (j = 0; j < contactedSeedCount; j++) {
+            for (int j = 0; j < contactedSeedCount; j++) {
 
                 // waiting for the next thread to finish
                 sync.P();
@@ -492,30 +486,29 @@ public class yacyCore {
             }
 
             // Nobody contacted yet, try again until peerPingInitial attempts are through
-            i = reserveSeedsAt; // This is just a precaution
-            while ((newSeeds < 0) && (contactedSeedCount < peerPingInitial) && (i < seeds.length)) {
-                if (seeds[i] != null) {
-                    final String address = seeds[i].getAddress();
-                    log.logFine("HELLO x" + i + " to peer '" + seeds[i].get(yacySeed.NAME, "") + "' at " + address); // debug
-                    if ((address == null) || (seeds[i].isProper() != null)) {
-                        peerActions.peerDeparture(seeds[i]);
+            while ((newSeeds < 0) && (contactedSeedCount < peerPingInitial) && (!seedList.isEmpty())) {
+                yacySeed seed = (yacySeed) seedList.remove(0);
+                if (seed != null) {
+                    final String address = seed.getAddress();
+                    log.logFine("HELLO x" + contactedSeedCount + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
+                    if ((address == null) || (seed.isProper() != null)) {
+                        peerActions.peerDeparture(seed);
                     } else {
                         contactedSeedCount++;
                         //new publishThread(yacyCore.publishThreadGroup,seeds[i],sync,syncList)).start();
                         try {
-                            newSeeds = yacyClient.publishMySeed(seeds[i].getAddress(), seeds[i].hash);
+                            newSeeds = yacyClient.publishMySeed(seed.getAddress(), seed.hash);
                             if (newSeeds < 0) {
-                                log.logInfo("publish: disconnected " + seeds[i].get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seeds[i].getName() + "' from " + seeds[i].getAddress());
-                                peerActions.peerDeparture(seeds[i]);
+                                log.logInfo("publish: disconnected " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seed.getName() + "' from " + seed.getAddress());
+                                peerActions.peerDeparture(seed);
                             } else {
-                                log.logInfo("publish: handshaked " + seeds[i].get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seeds[i].getName() + "' at " + seeds[i].getAddress());
+                                log.logInfo("publish: handshaked " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seed.getName() + "' at " + seed.getAddress());
                             }
                         } catch (Exception e) {
-                            log.logSevere("publishMySeed: error with target seed " + seeds[i].toString() + ": " + e.getMessage(), e);
+                            log.logSevere("publishMySeed: error with target seed " + seed.toString() + ": " + e.getMessage(), e);
                         }
                     }
                 }
-                i++;
             }
 
             int accessible = 0;
