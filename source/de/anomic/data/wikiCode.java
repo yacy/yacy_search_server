@@ -62,14 +62,16 @@ public class wikiCode {
     private String ListLevel="";
     private String defListLevel="";
     private plasmaSwitchboard sb;
+    private boolean cellprocessing=false;     // needed for prevention of double-execution of replaceHTML
     private boolean escape = false;           //needed for escape
     private boolean escaped = false;          //needed for <pre> not getting in the way
     private boolean escapeSpan = false;       //needed for escape symbols [= and =] spanning over several lines
-    private boolean newrowstart=false;      // needed for the first row not to be empty
+    private boolean newrowstart=false;        // needed for the first row not to be empty
     private boolean preformatted = false;     //needed for preformatted text
     private boolean preformattedSpan = false; //needed for <pre> and </pre> spanning over several lines
-    private boolean replaced = false;         //indicates if method replaceHTML has been used with line already
-    private boolean table=false;            // needed for tables, because they reach over several lines
+    private boolean replacedHTML = false;     //indicates if method replaceHTML has been used with line already
+    private boolean replacedCharacters = false; //indicates if method replaceCharachters has been used with line
+    private boolean table=false;              // needed for tables, because they reach over several lines
     private int preindented = 0;              //needed for indented <pre>s
     private int escindented = 0;              //needed for indented [=s
 
@@ -112,35 +114,73 @@ public class wikiCode {
         }
     }
 
-    /** Replaces special characters from a string. Otherwise they might cause ugly output on some systems.
-      * This code is also important to avoid XSS attacks.
-      *
-      * @param text a string that possibly contains special characters
-      * @return the string with all special characters encoded so they will look right on every system
-      * @author Franz Brausse, few changes by Marc Nause, replaces code by Alexander Schier
+    /** Replaces special characters from a string. Avoids XSS attacks and ensures correct display of
+      * special characters in non UTF-8 capable browsers.
+      * @param text a string that possibly contains HTML
+      * @return the string with all special characters encoded
+      * @author Marc Nause, replaces code by Alexander Schier
       */
     public static String replaceHTML(String text) {
+        text = replace(text, characters);
+        text = replace(text, htmlentities);
+        return text;
+    }
+
+    /** Replaces special characters from a string. Ensures correct display of
+      * special characters in non UTF-8 capable browsers.
+      * @param text a string that possibly contains special characters
+      * @return the string with all special characters encoded
+      * @author Marc Nause, replaces code by Alexander Schier
+      */
+    public static String replaceCharacters(String text) {
+        text = replace(text, characters);
+        return text;
+    }
+
+    /** Replaces special characters from a string. Avoids XSS attacks.
+      * @param text a string that possibly contains HTML
+      * @return the string without any HTML-tags that can be used for XSS
+      * @author Marc Nause, replaces code by Alexander Schier
+      */
+    public static String replaceHTMLonly(String text) {
+        text = replace(text, htmlentities);
+        return text;
+    }
+
+    /** Replaces characters in a string with other characters defined in an array.
+      * @param text a string that possibly contains special characters
+      * @param entities array that contains characters to be replaced and characters it will be replaced by
+      * @return the string with all characters replaced by the corresponding character from array
+      * @author Franz Brausse, few changes by Marc Nause, replaces code by Alexander Schier
+      */
+    public static String replace(String text, String[] entities) {
         if (text==null) { return null; }
-        for (int x=0;x<=htmlentities.length-1;x=x+2) {
+        for (int x=0;x<=entities.length-1;x=x+2) {
             int p=0;
-            while ((p=text.indexOf(htmlentities[x],p))>=0) {
-                text=text.substring(0,p)+htmlentities[x+1]+text.substring(p+htmlentities[x].length());
-                p+=htmlentities[x+1].length();
+            while ((p=text.indexOf(entities[x],p))>=0) {
+                text=text.substring(0,p)+entities[x+1]+text.substring(p+entities[x].length());
+                p+=entities[x+1].length();
             }
         }
         return text;
     }
 
-    //This array contains codes (see http://mindprod.com/jgloss/unicode.html for details) and
-    //patterns that will be replaced. To add new codes or patterns, just put them at the end
+    //This array contains codes (see http://mindprod.com/jgloss/unicode.html for details) 
+    //that will be replaced. To add new codes or patterns, just put them at the end
     //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
     public static String[] htmlentities={
         // Ampersands _have_ to be replaced first. If they were replaced later,
         // other replaced characters containing ampersands would get messed up.
-        "\u0026","&amp;",      //ampersand
         "\"","&quot;",         //quotation mark
         "\u003C","&lt;",       //less than
         "\u003E","&gt;",       //greater than
+    };
+
+    //This array contains codes (see http://mindprod.com/jgloss/unicode.html for details) and
+    //patterns that will be replaced. To add new codes or patterns, just put them at the end
+    //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
+    public static String[] characters={
+        "\u0026","&amp;",      //ampersand
         "\u00A1","&iexcl;",    //inverted (spanish) exclamation mark
         "\u00A2","&cent;",     //cent
         "\u00A3","&pound;",    //pound
@@ -242,61 +282,74 @@ public class wikiCode {
     /** This method processes tables in the wiki code.
       * @param a string that might contain parts of a table
       * @return a string with wiki code of parts of table replaced by HTML code for table
-      * @author Franz Brausse, slight changes by Marc Nause
+      * @author Franz Brausse, changes by Marc Nause
       */
-    private String processTable(String result){
+    private String processTable(String result, plasmaSwitchboard switchboard){
         String line="";
-        if (result.startsWith("{|") && (!table)) {                // Table begin
+        if ((result.startsWith("{|")) && (!table)) {
             table=true;
             newrowstart=true;
-            line+="<table";
+            line="<table";
             if (result.trim().length()>2) {
-                line+=result.substring(2);
+                line+=result.substring(2).replaceAll("&quot;","\"");
             }
             line+=">";
-        } else if (result.startsWith("|-") && (table)) {          // new row
+            result=line;
+        }
+        else if (result.startsWith("|-") && (table)) {          // new row
             if (!newrowstart) {
                 line+="\t</tr>\n";
             } else {
                 newrowstart=false;
             }
             line=line+"\t<tr>";
-        } else if ((result.startsWith("| ")) && (table)) {        // new cell
+            result=line;
+        }
+        else if ((result.startsWith("||")) && (table)) {
+            result = replaceHTMLonly(result);
             line+="\t\t<td";
-            int propEnd=1;
-            int textEnd=(result.indexOf("||")>=0)?(result.indexOf("||")):(result.length());
-            if ((propEnd=result.indexOf(" | "))>0) {              // till result.indexOf(" | ") properties for cell
-                line+=result.substring(1,propEnd).replaceAll("&quot;","\"");
+            int cellEnd=(result.indexOf("||",2)>0)?(result.indexOf("||",2)):(result.length());
+            int propEnd=(result.indexOf("|",2)>0)?(result.indexOf("|",2)):(cellEnd);
+            // both point at same place => new line
+            if (propEnd==cellEnd) {
+                propEnd=1;
+            } else {
+                line+=" "+result.substring(2,propEnd).trim().replaceAll("&quot;","\"");
             }
-            // finish first cell
-            line+=">"+result.substring(propEnd+2,textEnd)+"</td>";
-            if (textEnd<result.length() && textEnd>0) {           // process other cells if existent
-                line+="\n"+result.substring(textEnd+1);
-            } 
-        } else if (result.startsWith("|}") && (table)) {          // Table end
+            table=false; cellprocessing=true;
+            line+=">"+processTable(result.substring(propEnd+1,cellEnd).trim(), switchboard)+"</td>";
+            table=true; cellprocessing=false;
+            if (cellEnd<result.length()) {
+                line+="\n"+processTable(result.substring(cellEnd), switchboard);
+            }
+            result=line;
+        }
+        else if (result.startsWith("|}") && (table)) {          // Table end
             table=false;
             line+="\t</tr>\n</table>"+result.substring(2);
-        } else if (table) {
-            line+=result;
-        } else { return result; }
-        return line;
+            result=line;
+        }
+        else result = replaceHTMLonly(result);
+        return result;
     }
 
     /** Replaces wiki tags with HTML tags.
-      *
       * @param result a line of text
       * @param switchboard
-      *
-      * @result the line of text with HTML tags instead of wiki tags
+      * @return the line of text with HTML tags instead of wiki tags
       */
     public String transformLine(String result, plasmaSwitchboard switchboard) {
         // transform page
         int p0, p1;
         boolean defList = false;    //needed for definition lists
 
-        if (!replaced) {
-            result = replaceHTML(result);
-            replaced = true;
+        if ((!cellprocessing)&&(!replacedCharacters)){
+            result = replaceCharacters(result);
+            replacedCharacters = true;
+        }
+        if ((!replacedHTML)&&(!cellprocessing)&&(!table)){
+            result = replaceHTMLonly(result);
+            replacedHTML = true;
         }
 
         //check if line contains any escape symbol or tag for preformatted text 
@@ -305,6 +358,9 @@ public class wikiCode {
         //(see code for [= and =] and <pre> and </pre>) [MN]
         if((result.indexOf("[=")<0)&&(result.indexOf("=]")<0)&&(!escapeSpan)&&
            (result.indexOf("&lt;pre&gt;")<0)&&(result.indexOf("&lt;/pre&gt;")<0)&&(!preformattedSpan)){
+
+            //tables first -> wiki-tags in cells can be treated after that
+            result = this.processTable(result, switchboard);
 
             // format lines
             if (result.startsWith(" ")) result = "<tt>" + result + "</tt>";
@@ -673,10 +729,9 @@ public class wikiCode {
         }
         //end contrib [MN]
 
-        result = this.processTable(result);
-
-        replaced = false;
-        if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)||(table)) return result;
+        replacedHTML = false;
+        replacedCharacters = false;
+        if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)||(table)||(cellprocessing)) return result;
         return result + "<br>";
     }
 }
