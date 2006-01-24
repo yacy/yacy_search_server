@@ -395,7 +395,7 @@ public class yacyCore {
             } else {
                 int diff = peerPingMinDBSize - amIAccessibleDB.size();
                 if (diff > peerPingMinRunning) {
-                    diff = Math.max(diff, peerPingMaxRunning);
+                    diff = Math.min(diff, peerPingMaxRunning);
                     if (attempts > diff) { attempts = diff; }
                 } else {
                     if (attempts > peerPingMinRunning) { attempts = peerPingMinRunning; }
@@ -530,7 +530,7 @@ public class yacyCore {
             }
             log.logFine("DBSize before -> after Cleanup: " + dbSize + " -> " + amIAccessibleDB.size());
             log.logInfo("PeerPing: I am accessible for " + accessible +
-                "peer(s), not accessible for " + notaccessible + " peer(s).");
+                " peer(s), not accessible for " + notaccessible + " peer(s).");
 
             if ((accessible + notaccessible) > 0) {
                 final String newPeerType;
