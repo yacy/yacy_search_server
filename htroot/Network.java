@@ -270,26 +270,28 @@ public class Network {
                     String startURL;
                     String wikiPage;
                     String userAgent, location;
-                    final StringBuffer alert = new StringBuffer();
                     int PPM;
                     while (e.hasMoreElements() && conCount < maxCount) {
                         seed = (yacySeed) e.nextElement();
                         if (seed != null) {
+                            prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 0);
+                            prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 0);
+                            prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 0);
                             if (conCount >= maxCount) { break; }
                             if (seed.hash.equals(yacyCore.seedDB.mySeed.hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", 2);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
                             }
-                            alert.setLength(0);
                             if (updatedProfile.contains(seed.hash)) {
-                                alert.append("<a href=\"ViewProfile.html?hash=").append(seed.hash).append("\"><img border=\"0\" src=\"/env/grafics/profile.gif\" align=\"bottom\"></a>");
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 1);
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedProfile_hash", seed.hash);
                             }
                             if ((wikiPage = (String) updatedWiki.get(seed.hash)) == null) {
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", "");
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 0);
                             } else {
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", "?page=" + wikiPage);
-                                alert.append("<a href=\"http://").append(seed.get(yacySeed.NAME, "deadlink")).append(".yacy/Wiki.html?page=").append(wikiPage).append("\"><img border=\"0\" src=\"/env/grafics/wiki.gif\" align=\"bottom\"></a>");
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage_page", wikiPage);
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage_name", seed.get(yacySeed.NAME, "deadlink"));
                             }
                             try {
                                 PPM = Integer.parseInt(seed.get(yacySeed.ISPEED, "-"));
@@ -297,9 +299,9 @@ public class Network {
                                 PPM = 0;
                             }
                             if (((startURL = (String) isCrawling.get(seed.hash)) != null) && (PPM >= 10)) {
-                                alert.append("<a href=\"").append(startURL).append("\"><img border=\"0\" src=\"/env/grafics/crawl.gif\" align=\"bottom\"></a>");
+                                prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 1);
+                                prop.put(STR_TABLE_LIST + conCount + "_isCrawling_page", startURL);;
                             }
-                            prop.put(STR_TABLE_LIST + conCount + "_alert", alert.toString());
                             prop.put(STR_TABLE_LIST + conCount + "_hash", seed.hash);
                             String shortname = seed.get(yacySeed.NAME, "deadlink");
                             if (shortname.length() > 20) {
