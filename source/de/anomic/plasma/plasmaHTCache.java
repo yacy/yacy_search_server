@@ -290,7 +290,7 @@ public final class plasmaHTCache {
             // If the has been emptied, remove it
             // Loop as long as we produce empty driectoriers, but stop at HTCACHE
             while ((!(obj.equals(this.cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
-                if (obj.delete()) this.log.logInfo("DELETED EMPTY DIRECTORY : " + obj.toString());
+                if (obj.delete()) this.log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
                 obj = obj.getParentFile();
             }
             return true;
@@ -319,6 +319,7 @@ public final class plasmaHTCache {
                     }
                 }
             }
+            iter.remove();
         }
     }
 
