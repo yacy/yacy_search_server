@@ -293,7 +293,7 @@ public final class robotsParser{
                 if (modDate != null) reqHeaders.put(httpHeader.IF_MODIFIED_SINCE,httpc.dateString(entry.getModDate()));
             }
             
-            httpc.response res = con.GET(robotsURL.getPath(), reqHeaders);
+            httpc.response res = con.GET(robotsURL.getFile(), reqHeaders);
             if (res.status.startsWith("2")) {
                 if (!res.responseHeader.mime().startsWith("text/plain")) {
                     robotsTxt = null;
@@ -336,7 +336,7 @@ public final class robotsParser{
                         "\nRedirecting request to: " + redirectionUrl);
                 return downloadRobotsTxt(redirectionUrl,redirectionCount,entry);
                 
-            } else if (res.status.startsWith("401") || res.status.startsWith("403")) {
+            } else if (res.status.startsWith("401")/* || res.status.startsWith("403") */) {
                 accessCompletelyRestricted = true;
                 serverLog.logFinest("ROBOTS","Access to Robots.txt not allowed on URL '" + robotsURL + "'.");
             } else {
