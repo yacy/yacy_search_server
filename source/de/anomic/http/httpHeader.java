@@ -501,8 +501,8 @@ public final class httpHeader extends TreeMap implements Map {
         }
         
         // store the version propery "HTTP" and cut the query at both ends
-        int sep = args.indexOf(" ");
-        if (sep >= 0) {
+        int sep = args.lastIndexOf(" ");
+        if ((sep >= 0)&&(args.substring(sep + 1).toLowerCase().startsWith("http/"))) {
             // HTTP version is given
             prop.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, args.substring(sep + 1).trim());
             args = args.substring(0, sep).trim(); // cut off HTTP version mark
@@ -510,6 +510,10 @@ public final class httpHeader extends TreeMap implements Map {
             // HTTP version is not given, it will be treated as ver 0.9
             prop.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
         }
+        
+        // replacing spaces in the url string correctly
+        args = args.replaceAll(" ","%20");
+        
         
         // properties of the query are stored with the prefix "&"
         // additionally, the values URL and ARGC are computed
