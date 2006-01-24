@@ -222,6 +222,25 @@ public final class yacy {
             final File dataFolder = new File(homePath, "DATA");
             if (!(dataFolder.exists())) dataFolder.mkdir();
 
+            // Testing if the yacy archive file were unzipped correctly.
+            // This test is needed because of classfile-names longer than 100 chars
+            // which could cause problems with incompatible unzip software.
+            // See:
+            // - http://www.yacy-forum.de/viewtopic.php?t=1763
+            // - http://www.yacy-forum.de/viewtopic.php?t=715
+            // - http://www.yacy-forum.de/viewtopic.php?t=1674
+            File unzipTest = new File(homePath,"classes/de/anomic/kelondro/kelondroMScoreCluster$reverseScoreIterator.class");
+            if (!unzipTest.exists()) {
+                String errorMsg = "The archive file containing YaCy was not unpacked correctly. " +
+                                  "Please use 'GNU-Tar' or upgrade to a newer version of your unzip software.\n" +
+                                  "For detailed informations on this bug see: " + 
+                                  "http://www.yacy-forum.de/viewtopic.php?t=715";
+                System.err.println(errorMsg);
+                serverLog.logSevere("STARTUP", errorMsg);
+                System.exit(1); 
+            }
+                    
+            
             final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
             
             // save information about available memory at startup time
