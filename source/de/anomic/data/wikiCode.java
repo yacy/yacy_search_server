@@ -291,7 +291,7 @@ public class wikiCode {
             newrowstart=true;
             line="<table";
             if (result.trim().length()>2) {
-                line+=result.substring(2).replaceAll("&quot;","\"");
+                line+=" "+result.substring(2).replaceAll("&quot;","\"").trim();
             }
             line+=">";
             result=line;
