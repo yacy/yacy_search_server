@@ -243,7 +243,7 @@ public final class kelondroMScoreCluster {
         return (int) ((((Long) keyrefDB.lastKey()).longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
-    public int getMinScore() {
+    public synchronized int getMinScore() {
         if (refkeyDB.size() == 0) return -1;
         return (int) ((((Long) keyrefDB.firstKey()).longValue() & 0xFFFFFFFF00000000L) >> 32);
     }

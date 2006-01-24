@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.Vector;
 
 public class kelondroTree extends kelondroRecords implements kelondroIndex {
@@ -75,6 +76,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 
     private Search writeSearchObj = new Search();
     private kelondroOrder objectOrder = new kelondroNaturalOrder(true);
+    private final kelondroOrder loopDetectionOrder = new kelondroNaturalOrder(true);
     
     public kelondroTree(File file, long buffersize, int key, int value, boolean exitOnFail) {
         this(file, buffersize, new int[] { key, value }, new kelondroNaturalOrder(true), 1, 8, exitOnFail);
@@ -239,8 +241,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 child = 0;
                 found = false;
                 int c;
-                HashSet visitedNodeKeys = new HashSet(); // to detect loops
-                String otherkey;
+                TreeSet visitedNodeKeys = new TreeSet(loopDetectionOrder); // to detect loops
                 // System.out.println("Starting Compare Loop in Database " + filename); // debug
                 while (thisHandle != null) {
                     try {
@@ -254,12 +255,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     if (thenode == null) {
                         throw new kelondroException(filename, "kelondroTree.Search.process: thenode==null");
                     }
-                    try {
-                        otherkey = new String(thenode.getKey());
-                    } catch (NullPointerException e) {
-                        throw new kelondroException(filename, "kelondroTree.Search.process: nullpointer" + e.getMessage() + "\nNode: " + thenode.toString());
-                    }
-                    if (visitedNodeKeys.contains(otherkey)) {
+                    if (visitedNodeKeys.contains(thenode.getKey())) {
                         // we have loops in the database.
                         // to fix this, all affected nodes must be patched
                         thenode.setOHByte(magic, (byte) 1);
@@ -297,7 +293,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                         child = 1;
                         thisHandle = thenode.getOHHandle(rightchild);
                     }
-                    visitedNodeKeys.add(otherkey);
+                    visitedNodeKeys.add(thenode.getKey());
                 }
             }
             // System.out.println("DEBUG: search for " + new String(key) + "
