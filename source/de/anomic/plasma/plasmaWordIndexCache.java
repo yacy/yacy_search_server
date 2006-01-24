@@ -476,6 +476,11 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             
             // force flush (sometimes)
             if (System.currentTimeMillis() % 7 == 4) flushFromMem();
+            if (highPriority) {
+                while (cache.size() > maxWordsHigh) flushFromMem();
+            } else {
+                while (cache.size() > maxWordsLow) flushFromMem();
+            }
         }
         return added;
     }
