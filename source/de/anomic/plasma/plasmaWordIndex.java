@@ -48,6 +48,7 @@
 package de.anomic.plasma;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -315,6 +316,10 @@ public final class plasmaWordIndex {
         }
     } // class rotatingWordIterator
 
+    public Object migrateWords2Assortment(String wordHash) throws IOException {
+        return ramCache.migrateWords2Assortment(wordHash);
+    }
+/*
     public Iterator fileIterator(String startHash, boolean up, boolean deleteEmpty) {
         return new iterateFiles(startHash, up, deleteEmpty);
     }
@@ -426,7 +431,7 @@ public final class plasmaWordIndex {
         public void remove() {
         }
     }
-
+*/
     public static void main(String[] args) {
         // System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
         // System.out.println(new Date(reverseMicroDateDays(microDateDays(System.currentTimeMillis()))));

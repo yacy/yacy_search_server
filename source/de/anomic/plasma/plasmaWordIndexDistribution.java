@@ -214,6 +214,11 @@ public final class plasmaWordIndexDistribution {
         for (int i = 0; i < indexEntities.length; i++) {
             indexCount += indexEntities[i].size();
         }
+        if (indexCount < 50) {
+            log.logFine("Too few (" + indexCount + ") indexes selected for transfer.");
+            closeTransferIndexes (indexEntities);
+            return -1; // failed
+        }
 
         // find start point for DHT-selection
         String keyhash = indexEntities[indexEntities.length - 1].wordHash(); // DHT targets must have greater hashes
@@ -247,9 +252,7 @@ public final class plasmaWordIndexDistribution {
         
         if (hc0 < peerCount) {
             log.logWarning("found not enough (" + hc0 + ") peers for distribution");
-            for (int i = 0; i < indexEntities.length; i++) try {
-                indexEntities[i].close();
-            } catch (IOException ee) {}
+            closeTransferIndexes (indexEntities);
             return -1; // failed
         }
         
@@ -296,18 +299,13 @@ public final class plasmaWordIndexDistribution {
                 }
             } else {
                 // simply close the indexEntities
-                for (int i = 0; i < indexEntities.length; i++) try {
-                    indexEntities[i].close();
-                } catch (IOException ee) {}
+                closeTransferIndexes (indexEntities);
             }
             return indexCount;
         } else {
             log.logSevere("Index distribution failed. Too few peers (" + hc1 + ") received the index, not deleted locally.");
             // simply close the indexEntities
-            for (int i = 0; i < indexEntities.length; i++) try {
-                indexEntities[i].close();
-            } catch (IOException ee) {}            
-
+            closeTransferIndexes (indexEntities);
             return -1;
         }
     }
@@ -344,7 +342,9 @@ public final class plasmaWordIndexDistribution {
                     (currOpenFiles < maxOpenFiles) &&
                     (wordHashIterator.hasNext()) &&
                     ((nexthash = (String) wordHashIterator.next()) != null) && 
-                    (nexthash.trim().length() > 0)
+                    (nexthash.trim().length() > 0) &&
+                    ((currOpenFiles == 0) || (yacyDHTAction.dhtDistance(nexthash,
+                    ((plasmaWordIndexEntity)tmpEntities.get(0)).wordHash()) < 0.2))
             ) {
                 indexEntity = this.wordIndex.getEntity(nexthash, true, -1);
                 if (indexEntity.size() == 0) {
@@ -449,6 +449,34 @@ public final class plasmaWordIndexDistribution {
         }
     }
 
+    void closeTransferIndex(plasmaWordIndexEntity indexEntity) throws IOException {
+        Object migrationStatus;
+        indexEntity.close();
+        try {
+            String wordhash = indexEntity.wordHash();
+            migrationStatus = wordIndex.migrateWords2Assortment(wordhash);
+            if (migrationStatus instanceof Integer) {
+                int migrationCount = ((Integer) migrationStatus).intValue();
+                if (migrationCount == 0)
+                    log.logFine("SKIPPED  " + wordhash + ": empty");
+                else if (migrationCount > 0)
+                    log.logFine("MIGRATED " + wordhash + ": " + migrationCount + " entries");
+                else
+                    log.logFine("REVERSED " + wordhash + ": " + (-migrationCount) + " entries");
+            } else if (migrationStatus instanceof String) {
+                log.logFine("SKIPPED  " + wordhash + ": " + migrationStatus);
+            }
+        } catch (Exception e) {
+            log.logWarning("EXCEPTION: ", e);
+        }
+    }
+
+    void closeTransferIndexes(plasmaWordIndexEntity[] indexEntities) {
+        for (int i = 0; i < indexEntities.length; i++) try {
+            closeTransferIndex(indexEntities[i]);
+        } catch (IOException ee) {}
+    }
+
     boolean deleteTransferIndexes(plasmaWordIndexEntity[] indexEntities) throws IOException {
         Iterator urlIter;
         plasmaWordIndexEntry indexEntry;
@@ -469,7 +497,8 @@ public final class plasmaWordIndexDistribution {
                 wordIndex.removeEntries(indexEntities[i].wordHash(), urlHashes, true);
                 indexEntity = wordIndex.getEntity(indexEntities[i].wordHash(), true, -1);
                 sz = indexEntity.size();
-                indexEntity.close();
+                // indexEntity.close();
+                closeTransferIndex(indexEntity);
                 log.logFine("Deleted partial index (" + c + " URLs) for word " + indexEntities[i].wordHash() + "; " + sz + " entries left");
                 // DEBUG: now try to delete the remaining index. If this works, this routine is fine
                 /*
