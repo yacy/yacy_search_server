@@ -459,16 +459,23 @@ public class IndexControl_p {
                     }
                 }
 
+                URL url;
                 final Iterator iter = tm.keySet().iterator();
                 result.ensureCapacity((tm.size() + 2) * 384);
                 while (iter.hasNext()) {
                     us = iter.next().toString();
                     uh = (String[]) tm.get(us);
                     if (us.equals(uh[0])) {
-                        result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" checked value=\"").append(uh[0]).append("\" align=\"top\">");
-                        result.append("<span class=\"tt\">").append(uh[0]).append("&nbsp;&lt;unresolved URL Hash&gt;</span><br>");
+                        result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" checked value=\"").append(uh[0]).append("\" align=\"top\">")
+                              .append("<span class=\"tt\">").append(uh[0]).append("&nbsp;&lt;unresolved URL Hash&gt;</span><br>");
+
                     } else {
-                        result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" value=\"").append(uh[0]).append("\" align=\"top\">");
+                        url = new URL(us);
+                        if (plasmaSwitchboard.urlBlacklist.isListed(url.getHost().toLowerCase(), url.getPath())) {
+                            result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" checked value=\"").append(uh[0]).append("\" align=\"top\">");
+                        } else {
+                            result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" value=\"").append(uh[0]).append("\" align=\"top\">");
+                        }
                         result.append("<a href=\"/IndexControl_p.html?").append("keystring=").append(keystring)
                               .append("&keyhash=").append(keyhash).append("&urlhash=").append(uh[0])
                               .append("&urlstringsearch=").append("&urlstring=").append(us).append("\" class=\"tt\">")
