@@ -689,8 +689,7 @@ public final class yacySeedDB {
         // TODO: should we check the useProxy4Yacy option here???
         httpHeader reqHeader = new httpHeader();
         reqHeader.put(httpHeader.PRAGMA, "no-cache");
-        reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessa
-ry?
+        reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
         ArrayList check  = httpc.wget(
                 seedURL, 
                 10000, 
