@@ -1078,7 +1078,7 @@ do upload
                 con = httpc.getInstance(host, port, timeout, ssl, theRemoteProxyConfig);
             }
 
-            httpc.response res = con.GET(path, null);
+            httpc.response res = con.GET(path, requestHeader);
             if (res.status.startsWith("2")) {
                 return res.writeContent();
             }

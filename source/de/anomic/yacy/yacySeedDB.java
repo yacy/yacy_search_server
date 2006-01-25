@@ -687,12 +687,17 @@ public final class yacySeedDB {
     private boolean checkCache(ArrayList uv, URL seedURL) throws IOException {        
         // check if the result can be retrieved again
         // TODO: should we check the useProxy4Yacy option here???
+        httpHeader reqHeader = new httpHeader();
+        reqHeader.put(httpHeader.PRAGMA, "no-cache");
+        reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessa
+ry?
         ArrayList check  = httpc.wget(
                 seedURL, 
                 10000, 
                 null, 
                 null, 
-                sb.remoteProxyConfig
+                sb.remoteProxyConfig,
+                reqHeader
         );
         
         if (check == null) {
