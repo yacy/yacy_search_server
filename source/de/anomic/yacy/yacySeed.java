@@ -312,7 +312,7 @@ public class yacySeed {
 
     public long getUTCDiff() {
         String utc = (String) this.dna.get(UTC);
-        if (utc == null) { utc = "+0200"; }
+        if (utc == null) { utc = "+0130"; }
         try {
         return serverDate.UTCDiff(utc);
         } catch (RuntimeException e) {

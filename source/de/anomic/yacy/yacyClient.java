@@ -178,7 +178,7 @@ public final class yacyClient {
             String mytype = (String) result.get(yacySeed.YOURTYPE);
             if (mytype == null) { mytype = yacySeed.PEERTYPE_JUNIOR; }        
             yacyAccessible accessible = new yacyAccessible();
-            if (mytype.equals(yacySeed.PEERTYPE_SENIOR)) {
+            if (mytype.equals(yacySeed.PEERTYPE_SENIOR)||mytype.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
                 accessible.IWasAccessed = true;
                 if (yacyCore.seedDB.mySeed.isPrincipal()) {
                     mytype = yacySeed.PEERTYPE_PRINCIPAL;
