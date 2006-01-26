@@ -375,7 +375,7 @@ public final class plasmaHTCache {
         cleanup();
 
         log.logConfig("STARTING DNS PREFETCH");
-        // start to prefetch ip's from dns                       
+        // start to prefetch IPs from DNS                       
         String dom;
         long start = System.currentTimeMillis();
         String result = "";

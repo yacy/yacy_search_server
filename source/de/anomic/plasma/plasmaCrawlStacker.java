@@ -240,17 +240,17 @@ public final class plasmaCrawlStacker {
         InetAddress hostAddress = httpc.dnsResolve(nexturl.getHost());
         if (hostAddress == null) {
             reason = "denied_(unknown_host)";
-            this.log.logFine("Unknown host in URL '" + nexturlString + "'." +
+            this.log.logFine("Unknown host in URL '" + nexturlString + "'. " +
                     "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;                
         } else if (hostAddress.isSiteLocalAddress()) {
             reason = "denied_(private_ip_address)";
-            this.log.logFine("Host in URL '" + nexturlString + "' has private ip address." +
+            this.log.logFine("Host in URL '" + nexturlString + "' has private IP address. " +
                     "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;                
         } else if (hostAddress.isLoopbackAddress()) {
             reason = "denied_(loopback_ip_address)";
-            this.log.logFine("Host in URL '" + nexturlString + "' has loopback ip address." + 
+            this.log.logFine("Host in URL '" + nexturlString + "' has loopback IP address. " + 
                     "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;                  
         }
@@ -259,7 +259,7 @@ public final class plasmaCrawlStacker {
         String hostlow = nexturl.getHost().toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, nexturl.getPath())) {
             reason = "denied_(url_in_blacklist)";
-            this.log.logFine("URL '" + nexturlString + "' is in blacklist." +
+            this.log.logFine("URL '" + nexturlString + "' is in blacklist. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;
         }        
@@ -270,7 +270,7 @@ public final class plasmaCrawlStacker {
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
-            this.log.logFine("URL '" + nexturlString + "' does not match crawling filter '" + profile.generalFilter() + "'." +
+            this.log.logFine("URL '" + nexturlString + "' does not match crawling filter '" + profile.generalFilter() + "'. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;
         }
@@ -281,7 +281,7 @@ public final class plasmaCrawlStacker {
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
-            this.log.logFine("URL '" + nexturlString + "' is cgi URL." + 
+            this.log.logFine("URL '" + nexturlString + "' is CGI URL. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;
         }
@@ -305,7 +305,7 @@ public final class plasmaCrawlStacker {
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
-            this.log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'." +
+            this.log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;
         }
