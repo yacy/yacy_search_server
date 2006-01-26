@@ -159,7 +159,14 @@ public final class robotsParser{
                         String path = line.substring(pos).trim();
                         
                         // unencoding all special charsx
-                        path = URLDecoder.decode(path,"UTF-8");
+                        try {
+                            path = URLDecoder.decode(path,"UTF-8");
+                        } catch (Exception e) {
+                            /* 
+                             * url decoding failed. E.g. because of
+                             * "Incomplete trailing escape (%) pattern"
+                             */
+                        }
                         
                         // escaping all occurences of ; because this char is used as special char in the Robots DB
                         path = path.replaceAll(";","%3B");                    
