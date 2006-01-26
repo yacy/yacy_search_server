@@ -149,7 +149,7 @@ public class index {
         // prepare search order
         final String order = post.get("order", "");
         final int count = Integer.parseInt(post.get("count", "10"));
-        final long searchtime = 1000 * Long.parseLong(post.get("time", "1"));
+        final long searchtime = 1000 * Long.parseLong(post.get("time", "10"));
         final boolean yacyonline = ((yacyCore.seedDB != null) &&
                                     (yacyCore.seedDB.mySeed != null) &&
                                     (yacyCore.seedDB.mySeed.getAddress() != null));
