@@ -48,9 +48,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
+import org.apache.commons.pool.impl.GenericObjectPool;
+
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
-import org.apache.commons.pool.impl.GenericObjectPool;
 
 public final class plasmaCrawlLoader extends Thread {
 
@@ -291,8 +293,33 @@ final class CrawlerPool extends GenericObjectPool {
        return super.borrowObject();
     }
 
-    public void returnObject(Object obj) throws Exception  {
-        super.returnObject(obj);
+    public void returnObject(Object obj) {
+        if (obj == null) return;
+        if (obj instanceof plasmaCrawlWorker) {
+            try {
+                ((plasmaCrawlWorker)obj).setName(plasmaCrawlWorker.threadBaseName + "_inPool");
+                super.returnObject(obj);
+            } catch (Exception e) {
+                ((plasmaCrawlWorker)obj).setStopped(true);
+                serverLog.logSevere("CRAWLER-POOL","Unable to return crawler thread to pool.",e);                
+            }
+        } else {
+            serverLog.logSevere("CRAWLER-POOL","Object of wront type '" + obj.getClass().getName() +
+            "' returned to pool.");            
+        }        
+    }        
+    
+    public void invalidateObject(Object obj) {
+        if (obj == null) return;
+        if (this.isClosed) return;
+        if (obj instanceof plasmaCrawlWorker) {
+            try {
+                ((plasmaCrawlWorker)obj).setStopped(true);
+                super.invalidateObject(obj);
+            } catch (Exception e) {
+                serverLog.logSevere("CRAWLER-POOL","Unable to invalidate crawling thread.",e); 
+            }
+        }
     }        
     
     public synchronized void close() throws Exception {
@@ -395,6 +422,7 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
      * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
      */
     public void destroyObject(Object obj) {
+        if (obj == null) return;
         if (obj instanceof plasmaCrawlWorker) {
             plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;
             theWorker.setStopped(true);
@@ -405,8 +433,8 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
      * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
      */
     public boolean validateObject(Object obj) {
-        if (obj instanceof plasmaCrawlWorker) 
-        {
+        if (obj == null) return false;
+        if (obj instanceof plasmaCrawlWorker) {
             plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;
             if (!theWorker.isAlive() || theWorker.isInterrupted()) return false;
             if (theWorker.isRunning()) return true;

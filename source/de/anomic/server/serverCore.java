@@ -65,26 +65,16 @@ import java.nio.channels.ClosedByInterruptException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-/*
-import java.io.File;
-import java.io.FileInputStream;
-import java.security.KeyStore;
-import javax.net.ServerSocketFactory;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocketFactory;
-*/
-
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
 import de.anomic.http.httpc;
 import de.anomic.icap.icapd;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 import de.anomic.urlRedirector.urlRedirectord;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
-import de.anomic.plasma.plasmaSwitchboard;
 
 public final class serverCore extends serverAbstractThread implements serverThread {
 
@@ -604,12 +594,32 @@ public final class serverCore extends serverAbstractThread implements serverThre
         /**
          * @see org.apache.commons.pool.impl.GenericObjectPool#returnObject(java.lang.Object)
          */
-        public void returnObject(Object obj) throws Exception  {
+        public void returnObject(Object obj) {
+            if (obj == null) return;
             if (obj instanceof Session) {
-                super.returnObject(obj);
+                try {
+                    ((Session)obj).setName("Session_inPool");
+                    super.returnObject(obj);
+                } catch (Exception e) {
+                    ((Session)obj).setStopped(true);
+                    serverLog.logSevere("SESSION-POOL","Unable to return session thread to pool.",e);
+                }
             } else {
                 serverLog.logSevere("SESSION-POOL","Object of wront type '" + obj.getClass().getName() +
-                                    "'returned to pool.");
+                                    "' returned to pool.");
+            }
+        }        
+        
+        public void invalidateObject(Object obj) {
+            if (obj == null) return;
+            if (this.isClosed) return;
+            if (obj instanceof Session) {
+                try {
+                    ((Session)obj).setStopped(true);
+                    super.invalidateObject(obj);
+                } catch (Exception e) {
+                    serverLog.logSevere("SESSION-POOL","Unable to invalidate session thread.",e); 
+                }
             }
         }        
         
@@ -914,51 +924,35 @@ public final class serverCore extends serverAbstractThread implements serverThre
         public void run()  {
             this.running = true;
             
-            // The thread keeps running.
-            while (!this.stopped && !this.isInterrupted()) {
-                if (this.done)  {
-                    // We are waiting for a task now.
-                    synchronized (this)  {
-                        try  {
-                            this.wait(); //Wait until we get a request to process.
-                        } catch (InterruptedException e) {
-                            this.stopped = true;
-                            // log.error("", e);
-                        }
-                    }
-                } else {
-                    //There is a task....let us execute it.
-                    try  {
-                        execute();
-                        if (this.syncObject != null) {
-                            synchronized (this.syncObject) {
-                                //Notify the completion.
-                                this.syncObject.notifyAll();
-                            }
-                        }
-                    }  catch (Exception e) {
-                        // log.error("", e);
-                    } finally  {
-                        reset();
+            try {
+                // The thread keeps running.
+                while (!this.stopped && !this.isInterrupted() && !serverCore.this.theSessionPool.isClosed) {
+                    if (this.done)  {
+                        // return thread back into pool
+                        serverCore.this.theSessionPool.returnObject(this);
                         
-                        if (!this.stopped && !this.isInterrupted() && !serverCore.this.theSessionPool.isClosed) {
-                            try {
-                                this.setName("Session_inPool");
-                                serverCore.this.theSessionPool.returnObject(this);
-                            } catch (Exception e1) {
-                                // e1.printStackTrace();
-                                this.stopped = true;
+                        // We are waiting for a new task now.
+                        synchronized (this) {this.wait();}
+                    } else {
+                        try  {
+                            // executing the new task
+                            execute();
+                        } finally  {
+                            // Notify the completion.
+                            if (this.syncObject != null) {
+                                synchronized (this.syncObject) { this.syncObject.notifyAll(); }
                             }
-                        } else if (!serverCore.this.theSessionPool.isClosed) {
-                            try {
-                                serverCore.this.theSessionPool.invalidateObject(this);
-                            } catch (Exception e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
+                            
+                            // reset thread
+                            reset();
                         }
                     }
                 }
+            } catch (InterruptedException ex) {
+                serverLog.logInfo("SESSION-POOL","Interruption of thread '" + this.getName() + "' detected."); 
+            } finally {
+                if (serverCore.this.theSessionPool != null) 
+                    serverCore.this.theSessionPool.invalidateObject(this);
             }
         }  
         

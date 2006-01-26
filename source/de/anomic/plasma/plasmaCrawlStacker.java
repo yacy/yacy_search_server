@@ -414,7 +414,7 @@ public final class plasmaCrawlStacker {
                 this.handle        = Integer.parseInt(new String(entryBytes[11], "UTF-8"));
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new IllegalStateException();
+                throw new IllegalStateException(e);
             }
         }
         
@@ -596,12 +596,14 @@ public final class plasmaCrawlStacker {
             String urlHash = null;
             byte[][] entryBytes = null;
             stackCrawlMessage newMessage = null;
-            synchronized(this.urlEntryHashCache) {               
-                 urlHash = (String) this.urlEntryHashCache.removeFirst();
-                 entryBytes = this.urlEntryCache.remove(urlHash.getBytes());                 
+            try {
+                synchronized(this.urlEntryHashCache) {               
+                    urlHash = (String) this.urlEntryHashCache.removeFirst();
+                    entryBytes = this.urlEntryCache.remove(urlHash.getBytes());                 
+                }
+            } finally {
+                this.writeSync.V();
             }
-            
-            this.writeSync.V();
             
             newMessage = new stackCrawlMessage(urlHash,entryBytes);
             return newMessage;
@@ -693,10 +695,35 @@ public final class plasmaCrawlStacker {
         public Object borrowObject() throws Exception  {
            return super.borrowObject();
         }
-
-        public void returnObject(Object obj) throws Exception  {
-            super.returnObject(obj);
+        
+        public void returnObject(Object obj) {
+            if (obj == null) return;
+            if (obj instanceof  Worker) {
+                try {
+                    ((Worker)obj).setName("stackCrawlThread_inPool");
+                    super.returnObject(obj);
+                } catch (Exception e) {
+                    ((Worker)obj).setStopped(true);
+                    serverLog.logSevere("STACKCRAWL-POOL","Unable to return stackcrawl thread to pool.",e);
+                }
+            } else {
+                serverLog.logSevere("STACKCRAWL-POOL","Object of wront type '" + obj.getClass().getName() +
+                                    "' returned to pool.");                
+            }
         }        
+        
+        public void invalidateObject(Object obj) {
+            if (obj == null) return;
+            if (this.isClosed) return;
+            if (obj instanceof Worker) {
+                try {
+                    ((Worker)obj).setStopped(true);
+                    super.invalidateObject(obj);
+                } catch (Exception e) {
+                    serverLog.logSevere("STACKCRAWL-POOL","Unable to invalidate stackcrawl thread.",e);
+                }
+            }
+        }
         
         public synchronized void close() throws Exception {
 
@@ -807,38 +834,30 @@ public final class plasmaCrawlStacker {
             public void run()  {
                 this.running = true;
                 
-                // The thread keeps running.
-                while (!this.stopped && !Thread.interrupted()) {
-                    if (this.done)  {
-                        // We are waiting for a task now.
-                        synchronized (this)  {
-                            try  {
-                                this.wait(); //Wait until we get a request to process.
-                            } catch (InterruptedException e) {
-                                this.stopped = true;
-                                // log.error("", e);
-                            }
-                        }
-                    } else {
-                        //There is a task....let us execute it.
-                        try  {
-                            execute();
-                        }  catch (Exception e) {
-                            // log.error("", e);
-                        } finally  {
-                            reset();
+                try {
+                    // The thread keeps running.
+                    while (!this.stopped && !this.isInterrupted() && !plasmaCrawlStacker.this.theWorkerPool.isClosed) {
+                        if (this.done)  {
+                            // return thread back into pool
+                            plasmaCrawlStacker.this.theWorkerPool.returnObject(this);
                             
-                            if (!this.stopped && !this.isInterrupted() && !plasmaCrawlStacker.this.theWorkerPool.isClosed) {
-                                try {
-                                    this.setName("stackCrawlThread_inPool");
-                                    plasmaCrawlStacker.this.theWorkerPool.returnObject(this);
-                                } catch (Exception e1) {
-                                    // e1.printStackTrace();
-                                    this.stopped = true;
-                                }
+                            // We are waiting for a new task now.
+                            synchronized (this) { this.wait(); }
+                        } else {
+                            try  {
+                                // executing the new task
+                                execute();
+                            } finally  {
+                                // reset thread
+                                reset();
                             }
                         }
                     }
+                } catch (InterruptedException ex) {
+                    serverLog.logInfo("STACKCRAWL-POOL","Interruption of thread '" + this.getName() + "' detected.");
+                } finally {
+                    if (plasmaCrawlStacker.this.theWorkerPool != null) 
+                        plasmaCrawlStacker.this.theWorkerPool.invalidateObject(this);
                 }
             }
                 

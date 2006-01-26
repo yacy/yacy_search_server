@@ -65,7 +65,7 @@ import de.anomic.yacy.yacyCore;
 public final class plasmaCrawlWorker extends Thread {
 
     private static final int DEFAULT_CRAWLING_RETRY_COUNT = 5;   
-    private static final String threadBaseName = "CrawlerWorker";
+    static final String threadBaseName = "CrawlerWorker";
 
     private final CrawlerPool     myPool;
     private final plasmaSwitchboard sb;
@@ -165,40 +165,29 @@ public final class plasmaCrawlWorker extends Thread {
     public void run() {
         this.running = true;
 
-        // The thread keeps running.
-        while (!this.stopped && !Thread.interrupted()) {
-            if (this.done) {
-                 // We are waiting for a task now.
-                synchronized (this) {
+        try {
+            // The thread keeps running.
+            while (!this.stopped && !this.isInterrupted() && !this.myPool.isClosed) {
+                if (this.done) {                    
+                    // return thread back into pool
+                    this.myPool.returnObject(this);
+                    
+                    // We are waiting for a new task now.
+                    synchronized (this) { this.wait(); }
+                } else {
                     try {
-                        this.wait(); //Wait until we get a request to process.
-                    }
-                    catch (InterruptedException e) {
-                        this.stopped = true;
-                        // log.error("", e);
-                    }
-                }
-            } else {
-                //There is a task....let us execute it.
-                try {
-                    execute();
-                }  catch (Exception e) {
-                    // log.error("", e);
-                }
-                finally {
-                    reset();
-
-                    if (!this.stopped && !this.isInterrupted()) {
-                        try {
-                            this.myPool.returnObject(this);
-                            this.setName(plasmaCrawlWorker.threadBaseName + "_inPool");
-                        }
-                        catch (Exception e1) {
-                            log.logSevere("pool error", e1);
-                        }
+                        // executing the new task
+                        execute();
+                    } finally {
+                        reset();
                     }
                 }
             }
+        } catch (InterruptedException ex) {
+            serverLog.logInfo("CRAWLER-POOL","Interruption of thread '" + this.getName() + "' detected."); 
+        } finally {
+            if (this.myPool != null) 
+                this.myPool.invalidateObject(this);
         }
     }
 
