@@ -48,8 +48,10 @@
 //if the shell's current path is HTROOT
 
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Date;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -99,6 +101,12 @@ public class QuickCrawlLink_p {
         
         // getting the URL
         String crawlingStart = post.get("url",null);
+        try {
+            crawlingStart = URLDecoder.decode(crawlingStart, "UTF-8");
+        } catch (UnsupportedEncodingException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         
         // getting the browser title
         String title = post.get("title",null);
