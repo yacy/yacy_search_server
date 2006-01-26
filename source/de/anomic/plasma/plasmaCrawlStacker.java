@@ -459,7 +459,8 @@ public final class plasmaCrawlStacker {
                .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")
                .append("depth: ").append(Integer.toString(depth)).append(" | ")
                .append("forkfactor: ").append(Integer.toString(forkfactor)).append(" | ")
-               .append("flags: ").append((flags==null) ? "null" : flags.toString());
+               //.append("flags: ").append((flags==null) ? "null" : flags.toString())
+               ;
                return str.toString();
         }                      
         
@@ -878,7 +879,9 @@ public final class plasmaCrawlStacker {
                         );
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    plasmaCrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + 
+                                   "Entry: " + this.theMsg.toString() + 
+                                   "Error: " + e.toString(),e);
                 } finally {
                     this.done = true;
                 }
