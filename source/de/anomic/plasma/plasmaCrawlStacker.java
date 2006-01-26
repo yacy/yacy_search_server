@@ -414,7 +414,7 @@ public final class plasmaCrawlStacker {
                 this.handle        = Integer.parseInt(new String(entryBytes[11], "UTF-8"));
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new IllegalStateException(e);
+                throw new IllegalStateException(e.toString());
             }
         }
         
