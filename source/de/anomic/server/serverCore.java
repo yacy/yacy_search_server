@@ -112,7 +112,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
      */
     SessionPool theSessionPool;
     final ThreadGroup theSessionThreadGroup = new ThreadGroup("sessionThreadGroup");
-    private Config cralwerPoolConfig = null;
+    private Config sessionPoolConfig = null;
 
     public ThreadGroup getSessionThreadGroup() {
         return this.theSessionThreadGroup;
@@ -224,27 +224,28 @@ public final class serverCore extends serverAbstractThread implements serverThre
         this.log.logInfo("Initializing session pool ...");
         
         // implementation of session thread pool
-        this.cralwerPoolConfig = new GenericObjectPool.Config();
+        this.sessionPoolConfig = new GenericObjectPool.Config();
         
         // The maximum number of active connections that can be allocated from pool at the same time,
         // 0 for no limit
-        this.cralwerPoolConfig.maxActive = Integer.valueOf(switchboard.getConfig("httpdMaxActiveSessions","150")).intValue();
+        this.sessionPoolConfig.maxActive = Integer.valueOf(switchboard.getConfig("httpdMaxActiveSessions","150")).intValue();
         
         // The maximum number of idle connections connections in the pool
         // 0 = no limit.        
-        this.cralwerPoolConfig.maxIdle = Integer.valueOf(switchboard.getConfig("httpdMaxIdleSessions","75")).intValue();
-        this.cralwerPoolConfig.minIdle = Integer.valueOf(switchboard.getConfig("httpdMinIdleSessions","5")).intValue();    
+        this.sessionPoolConfig.maxIdle = Integer.valueOf(switchboard.getConfig("httpdMaxIdleSessions","75")).intValue();
+        this.sessionPoolConfig.minIdle = Integer.valueOf(switchboard.getConfig("httpdMinIdleSessions","5")).intValue();    
         
         // block undefinitely 
-        this.cralwerPoolConfig.maxWait = timeout; 
+        this.sessionPoolConfig.maxWait = timeout; 
         
         // Action to take in case of an exhausted DBCP statement pool
         // 0 = fail, 1 = block, 2= grow        
-        this.cralwerPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
-        this.cralwerPoolConfig.minEvictableIdleTimeMillis = this.thresholdSleep; 
-        this.cralwerPoolConfig.testOnReturn = true;
+        this.sessionPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
+        this.sessionPoolConfig.minEvictableIdleTimeMillis = this.thresholdSleep; 
+        this.sessionPoolConfig.timeBetweenEvictionRunsMillis = 30000;
+        this.sessionPoolConfig.testOnReturn = true;
         
-        this.theSessionPool = new SessionPool(new SessionFactory(this.theSessionThreadGroup),this.cralwerPoolConfig);        
+        this.theSessionPool = new SessionPool(new SessionFactory(this.theSessionThreadGroup),this.sessionPoolConfig);        
     }
     
     public void initPort(String thePort) throws IOException {
@@ -348,7 +349,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     }
 
     public GenericObjectPool.Config getPoolConfig() {
-        return this.cralwerPoolConfig ;
+        return this.sessionPoolConfig ;
     }
     
     public void setPoolConfig(GenericObjectPool.Config newConfig) {

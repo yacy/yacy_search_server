@@ -63,7 +63,7 @@ public final class plasmaCrawlLoader extends Thread {
 
     private final CrawlerMessageQueue theQueue;
     private final CrawlerPool crawlwerPool;
-    private GenericObjectPool.Config cralwerPoolConfig = null; 
+    private GenericObjectPool.Config crawlerPoolConfig = null; 
     private final ThreadGroup theThreadGroup = new ThreadGroup("CrawlerThreads");
     private boolean stopped = false;
 
@@ -81,24 +81,25 @@ public final class plasmaCrawlLoader extends Thread {
 
         // configuring the crawler thread pool
         // implementation of session thread pool
-        this.cralwerPoolConfig = new GenericObjectPool.Config();
+        this.crawlerPoolConfig = new GenericObjectPool.Config();
 
         // The maximum number of active connections that can be allocated from pool at the same time,
         // 0 for no limit
-        this.cralwerPoolConfig.maxActive = Integer.parseInt(switchboard.getConfig("crawler.MaxActiveThreads","10"));
+        this.crawlerPoolConfig.maxActive = Integer.parseInt(switchboard.getConfig("crawler.MaxActiveThreads","10"));
 
         // The maximum number of idle connections connections in the pool
         // 0 = no limit.        
-        this.cralwerPoolConfig.maxIdle = Integer.parseInt(switchboard.getConfig("crawler.MaxIdleThreads","7"));
-        this.cralwerPoolConfig.minIdle = Integer.parseInt(switchboard.getConfig("crawler.MinIdleThreads","5"));    
+        this.crawlerPoolConfig.maxIdle = Integer.parseInt(switchboard.getConfig("crawler.MaxIdleThreads","7"));
+        this.crawlerPoolConfig.minIdle = Integer.parseInt(switchboard.getConfig("crawler.MinIdleThreads","5"));    
 
         // block undefinitely 
-        this.cralwerPoolConfig.maxWait = -1; 
+        this.crawlerPoolConfig.maxWait = -1; 
 
         // Action to take in case of an exhausted DBCP statement pool
         // 0 = fail, 1 = block, 2= grow        
-        this.cralwerPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
-        this.cralwerPoolConfig.minEvictableIdleTimeMillis = 30000; 
+        this.crawlerPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
+        this.crawlerPoolConfig.minEvictableIdleTimeMillis = 30000; 
+        this.crawlerPoolConfig.timeBetweenEvictionRunsMillis = 30000;
 //        config.testOnReturn = true;
 
         CrawlerFactory theFactory = new CrawlerFactory(
@@ -107,14 +108,14 @@ public final class plasmaCrawlLoader extends Thread {
                 cacheManager,
                 log);
 
-        this.crawlwerPool = new CrawlerPool(theFactory,this.cralwerPoolConfig,this.theThreadGroup);        
+        this.crawlwerPool = new CrawlerPool(theFactory,this.crawlerPoolConfig,this.theThreadGroup);        
         
         // start the crawl loader
         this.start();
     }
 
     public GenericObjectPool.Config getPoolConfig() {
-        return this.cralwerPoolConfig;
+        return this.crawlerPoolConfig;
     }
 
     public void setPoolConfig(GenericObjectPool.Config newConfig) {

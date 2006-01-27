@@ -105,6 +105,7 @@ public final class plasmaCrawlStacker {
         // 0 = fail, 1 = block, 2= grow        
         this.theWorkerPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
         this.theWorkerPoolConfig.minEvictableIdleTimeMillis = 30000; 
+        this.theWorkerPoolConfig.timeBetweenEvictionRunsMillis = 30000;
         
         // creating worker pool
         this.theWorkerPool = new WorkerPool(new WorkterFactory(this.theWorkerThreadGroup),this.theWorkerPoolConfig);  
