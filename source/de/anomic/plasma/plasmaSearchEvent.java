@@ -163,6 +163,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // retrieve entities that belong to the hashes
         profileLocal.startTimer();
         Set entities = wordIndex.getEntities(query.queryHashes, true, true, profileLocal.getTargetTime(plasmaSearchProfile.PROCESS_COLLECTION));
+        if (entities.size() < query.size()) entities = null; // prevent that only a subset is returned
         profileLocal.setYieldTime(plasmaSearchProfile.PROCESS_COLLECTION);
         profileLocal.setYieldCount(plasmaSearchProfile.PROCESS_COLLECTION, (entities == null) ? 0 : entities.size());
         
