@@ -159,7 +159,7 @@ public final class plasmaSearchResult {
             }
             int wordpos = indexEntry.posintext();
             if (wordpos == 0) wordpos = 1000;
-            ranking = ranking + 1000 - wordpos + indexEntry.hitcount();
+            ranking = ranking + 4096L*4096L * (1000 - wordpos + indexEntry.hitcount() - 2 * indexEntry.worddistance());
             
             // apply 'common-sense' heuristic using references
             for (int j = 0; j < urlcomps.length; j++) if (commonSense.contains(urlcomps[j])) ranking += 10L*4096L*4096L / urlcomps.length;

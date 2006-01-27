@@ -132,14 +132,14 @@ public final class plasmaSearchPreOrder {
         long factor = 4096L*4096L;
         
         for (int i = 0; i < 3; i++) {
-            if (query.order[i].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking  = factor * indexEntry.getQuality() / 64L;
-            else if (query.order[i].equals(plasmaSearchQuery.ORDER_DATE)) ranking  = factor * indexEntry.getVirtualAge() / 64L;
-            else if (query.order[i].equals(plasmaSearchQuery.ORDER_YBR))  ranking  = factor * ybr_p(indexEntry.getUrlHash());
+            if (query.order[i].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking  += factor * indexEntry.getQuality() / 64L;
+            else if (query.order[i].equals(plasmaSearchQuery.ORDER_DATE)) ranking  += factor * indexEntry.getVirtualAge() / 64L;
+            else if (query.order[i].equals(plasmaSearchQuery.ORDER_YBR))  ranking  += factor * ybr_p(indexEntry.getUrlHash());
             factor = factor / 4096L;
         }
         int wordpos = indexEntry.posintext();
         if (wordpos == 0) wordpos = 1000;
-        ranking = ranking + 1000 - wordpos + indexEntry.hitcount();
+        ranking = ranking + 4096L*4096L * (1000 - wordpos + indexEntry.hitcount() - 2 * indexEntry.worddistance());
         pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), indexEntry);
     }
 

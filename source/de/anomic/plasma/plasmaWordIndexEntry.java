@@ -107,10 +107,16 @@ public final class plasmaWordIndexEntry {
     public static final int AP_H4     =  4; // h4-tag
     public static final int AP_H5     =  5; // h5-tag
     public static final int AP_H6     =  6; // h6-tag
-    public static final int AP_ANCHOR =  7; // anchor description
+    public static final int AP_TEXT   =  7; // word appears in text (used to check validation of other appearances against spam)
     public static final int AP_URL    =  8; // word inside an url
     public static final int AP_IMG    =  9; // tag inside image references
     public static final int AP_TAG    = 10; // for tagged indexeing (i.e. using mp3 tags)
+    public static final int AP_ANCHOR = 11; // anchor description
+    
+    // URL attributes
+    public static final int UA_LOCAL    =  0; // URL was crawled locally
+    public static final int UA_TILDE    =  1; // tilde appears in URL
+    public static final int UA_REDIRECT =  2; // The URL is a redirection
     
     // local flag attributes
     public static final char LT_LOCAL   = 'L';
@@ -201,27 +207,35 @@ public final class plasmaWordIndexEntry {
 
     // the class instantiation can only be done by a plasmaStore method
     // therefore they are all public
-    public plasmaWordIndexEntry(String urlHash,
-                                int hitcount,    // how often appears this word in the text
-                                int wordcount,   // total number of words
-                                int phrasecount, // total number of phrases
-                                int posintext,   // position of word in all words
-                                int posinphrase, // position of word in its phrase
-                                int posofphrase, // number of the phrase where word appears
-                                int distance,    // word distance; this is 0 by default, and set to the difference of posintext from two indexes if these are combined (simultanous search). If stored, this shows that the result was obtained by remote search
-                                long lastmodified, // last-modified time of the document where word appears
-                                int quality,     // 
-                                String language, //
-                                char doctype,    //
-                                boolean local) {
+    public plasmaWordIndexEntry(String  urlHash,
+                                int     hitcount,     //*how often appears this word in the text
+                                int     wordcount,    //*total number of words
+                                int     phrasecount,  //*total number of phrases
+                                int     posintext,    //*position of word in all words
+                                int     posinphrase,  //*position of word in its phrase
+                                int     posofphrase,  //*number of the phrase where word appears
+                                int     distance,     //*word distance; this is 0 by default, and set to the difference of posintext from two indexes if these are combined (simultanous search). If stored, this shows that the result was obtained by remote search
+                                int     sizeOfPage,   // # of bytes of the page
+                                long    lastmodified, //*last-modified time of the document where word appears
+                                long    updatetime,   // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
+                                int     quality,      //*the entropy value
+                                String  language,     //*(guessed) language of document
+                                char    doctype,      //*type of document
+                                boolean local         //*flag shows that this index was generated locally; othervise its from a remote peer
+                               ) {
 
         // more needed attributes:
-        // - long: update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
-        // - boolean: appears in title, appears in header, anchor-descr, image-tag etc
+        // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag etc
+        // - boolean: URL attributes
         // - int: url-length (shorter are better)
         // - int: url-number of components / length of path
         // - int: length of description tag / title tag (longer are better)
         // - int: number of chapters
+        // - int: # of outlinks to same domain
+        // - int: # of outlinks to outside domain
+        // - int: length of description
+        // - int: length of title
+        // - int: # of keywords
         
     if ((language == null) || (language.length() != plasmaURL.urlLanguageLength)) language = "uk";
         this.urlHash = urlHash;

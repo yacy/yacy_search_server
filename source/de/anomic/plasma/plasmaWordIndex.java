@@ -49,20 +49,15 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Date;
 import java.net.URL;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaWordIndex {
 
@@ -139,7 +134,7 @@ public final class plasmaWordIndex {
         return ((long) microDateDays) * ((long) day);
     }
     
-    public int addPageIndex(URL url, String urlHash, Date urlModified, plasmaCondenser condenser, String language, char doctype) {
+    public int addPageIndex(URL url, String urlHash, Date urlModified, int size, plasmaCondenser condenser, String language, char doctype) {
         // this is called by the switchboard to put in a new page into the index
         // use all the words in one condenser object to simultanous create index
         // entries
@@ -172,7 +167,9 @@ public final class plasmaWordIndex {
                                              wprop.posInPhrase,
                                              wprop.numOfPhrase,
                                              0,
+                                             size,
                                              urlModified.getTime(),
+                                             System.currentTimeMillis(),
                                              quality, language, doctype, true);
             addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), ientry), false);
         }

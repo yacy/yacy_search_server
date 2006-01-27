@@ -820,25 +820,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
         
-        if (wordIndex.wordCacheRAMSize() + 1000 > (int) getConfigLong("wordCacheMaxLow", 8000)) {
-            log.logFine("deQueue: word index ram cache too full (" + ((int) getConfigLong("wordCacheMaxLow", 8000) - wordIndex.wordCacheRAMSize()) +
-            " slots left); dismissed to omit ram flush lock");
-            return false;
-        }
-        
-        int stackCrawlQueueSize;
-        if ((stackCrawlQueueSize = sbStackCrawlThread.size()) >= stackCrawlSlots) {
-            log.logFine("deQueue: too many processes in stack crawl thread queue, dismissed to protect emergency case (" +
-            "stackCrawlQueue=" + stackCrawlQueueSize + ")");
-            return false;
-        }
-        
-        plasmaSwitchboardQueue.Entry nextentry;
         synchronized (sbQueue) {
+
             if (sbQueue.size() == 0) {
-                //log.logDebug("DEQUEUE: queue is empty");
+                // log.logDebug("DEQUEUE: queue is empty");
                 return false; // nothing to do
             }
+
+            if (wordIndex.wordCacheRAMSize() + 1000 > (int) getConfigLong("wordCacheMaxLow", 8000)) {
+                log.logFine("deQueue: word index ram cache too full (" + ((int) getConfigLong("wordCacheMaxLow", 8000) - wordIndex.wordCacheRAMSize()) + " slots left); dismissed to omit ram flush lock");
+                return false;
+            }
+
+            int stackCrawlQueueSize;
+            if ((stackCrawlQueueSize = sbStackCrawlThread.size()) >= stackCrawlSlots) {
+                log.logFine("deQueue: too many processes in stack crawl thread queue, dismissed to protect emergency case (" + "stackCrawlQueue=" + stackCrawlQueueSize + ")");
+                return false;
+            }
+
+            plasmaSwitchboardQueue.Entry nextentry;
             
             // if we were interrupted we should return now
             if (Thread.currentThread().isInterrupted()) return false;
@@ -856,13 +856,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logSevere("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
                 return false;
             }
-        }
         
-        synchronized (this.indexingTasksInProcess) {
-            this.indexingTasksInProcess.put(nextentry.urlHash(),nextentry);
+            synchronized (this.indexingTasksInProcess) {
+                this.indexingTasksInProcess.put(nextentry.urlHash(), nextentry);
+            }
+
+            processResourceStack(nextentry);
         }
-        
-        processResourceStack(nextentry);
         return true;
     }
     
@@ -1288,7 +1288,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             condenser.RESULT_INFORMATION_VALUE,
                             plasmaWordIndexEntry.language(entry.url()),
                             plasmaWordIndexEntry.docType(document.getMimeType()),
-                            entry.size(),
+                            (int) entry.size(),
                             condenser.RESULT_NUMB_WORDS,
                             processCase
                     );
@@ -1309,7 +1309,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if (((storagePeerHash = getConfig("storagePeerHash",null))== null) ||
                                 (storagePeerHash.trim().length() == 0) ||
                                 ((seed = yacyCore.seedDB.getConnected(storagePeerHash))==null)){
-                            words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
+                            words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(), condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
                         } else {
                             HashMap urlCache = new HashMap(1);
                             urlCache.put(newEntry.hash(),newEntry);
@@ -1341,7 +1341,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                                                                              wordStat.posInPhrase,
                                                                                              wordStat.numOfPhrase,
                                                                                              0,
+                                                                                             newEntry.size(),
                                                                                              docDate.getTime(),
+                                                                                             System.currentTimeMillis(),
                                                                                              quality, language, doctype, true);
                                 wordIdxEntity.addEntry(wordIdxEntry);
                                 tmpEntities.add(wordIdxEntity);
@@ -1354,7 +1356,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             String error = yacyClient.transferIndex(seed,(plasmaWordIndexEntity[])tmpEntities.toArray(new plasmaWordIndexEntity[tmpEntities.size()]),urlCache,true,120000);
                             
                             if (error != null) {
-                                words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
+                                words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(), condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
                             }
                             
                             // cleanup

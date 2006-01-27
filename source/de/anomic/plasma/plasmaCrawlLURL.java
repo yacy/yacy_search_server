@@ -135,7 +135,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                                        String initiatorHash, String executorHash,
                                        String referrerHash, int copyCount, boolean localNeed,
                                        int quality, String language, char doctype,
-                                       long size, int wordCount, int stackType) {
+                                       int size, int wordCount, int stackType) {
         Entry e = new Entry(url, descr, moddate, loaddate, referrerHash, copyCount, localNeed, quality, language, doctype, size, wordCount);
         if (initiatorHash == null) { initiatorHash = dummyHash; }
         if (executorHash == null) { executorHash = dummyHash; }
@@ -396,12 +396,12 @@ public final class plasmaCrawlLURL extends plasmaURL {
         private int quality;
         private String language;
         private char doctype;
-        private long size;
+        private int size;
         private int wordCount;
         private String snippet;
         private plasmaWordIndexEntry word;
 
-        public Entry(URL url, String descr, Date moddate, Date loaddate, String referrerHash, int copyCount, boolean localNeed, int quality, String language, char doctype, long size, int wordCount) {
+        public Entry(URL url, String descr, Date moddate, Date loaddate, String referrerHash, int copyCount, boolean localNeed, int quality, String language, char doctype, int size, int wordCount) {
             // create new entry and store it into database
             this.urlHash = urlHash(url);
             this.url = url;
@@ -444,7 +444,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                     this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8], "UTF-8"));
                     this.language = new String(entry[9], "UTF-8");
                     this.doctype = (char) entry[10][0];
-                    this.size = kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[11], "UTF-8"));
+                    this.size = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[11], "UTF-8"));
                     this.wordCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[12], "UTF-8"));
                     this.snippet = null;
                     this.word = searchedWord;
@@ -477,7 +477,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(prop.getProperty("q", ""));
             this.language = prop.getProperty("lang", "uk");
             this.doctype = prop.getProperty("dt", "t").charAt(0);
-            this.size = Long.parseLong(prop.getProperty("size", "0"));
+            this.size = Integer.parseInt(prop.getProperty("size", "0"));
             this.wordCount = Integer.parseInt(prop.getProperty("wc", "0"));
             this.snippet = prop.getProperty("snippet", "");
             if (snippet.length() == 0) snippet = null; else snippet = crypt.simpleDecode(snippet, null);
@@ -570,7 +570,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         return language;
     }
 
-    public long size() {
+    public int size() {
         return size;
     }
 
