@@ -109,8 +109,14 @@ public class yacyPeerActions {
             seedDB.mySeed.put(yacySeed.PORT, sb.getConfig("port", "8080"));
         }
         long uptime = ((System.currentTimeMillis() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000) / 60;
+		long uptimediff = uptime - Long.parseLong(sb.getConfig("lastseedcheckUptime", "0")); //TODO: Do not use the switchboard?
         long indexedc = sb.getThread("80_indexing").getBusyCycles();
-        seedDB.mySeed.put(yacySeed.ISPEED, ((indexedc == 0) || (uptime == 0)) ? "unknown" : Long.toString(indexedc / uptime)); // the speed of indexing (pages/minute) of the peer
+		long indexedcdiff = indexedc - Long.parseLong(sb.getConfig("lastseedcheckIndexedc", "0"));
+		if(uptimediff > 5){
+			sb.setConfig("lastseedcheckUptime", uptime);
+			sb.setConfig("lastseedcheckIndexedc", indexedc);
+		}
+        seedDB.mySeed.put(yacySeed.ISPEED, ((indexedcdiff == 0) || (uptimediff == 0)) ? "unknown" : Long.toString(indexedcdiff / uptimediff)); // the speed of indexing (pages/minute) of the peer
         seedDB.mySeed.put(yacySeed.UPTIME, Long.toString(uptime)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
         seedDB.mySeed.put(yacySeed.LCOUNT, Integer.toString(sb.urlPool.loadedURL.size())); // the number of links that the peer has stored (LURL's)
         seedDB.mySeed.put(yacySeed.NCOUNT, Integer.toString(sb.urlPool.noticeURL.stackSize())); // the number of links that the peer has noticed, but not loaded (NURL's)
