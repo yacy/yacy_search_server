@@ -135,6 +135,7 @@ public class QuickCrawlLink_p {
                 crawlingStartURL = new URL(crawlingStart);
             } catch (MalformedURLException e) {
                 prop.put("mode_status", 1);
+                prop.put("mode_code", "1");
                 return prop;
             }
                     
@@ -165,6 +166,7 @@ public class QuickCrawlLink_p {
             } catch (Exception e) {
                 // mist
                 prop.put("mode_status", 2);//Error with url
+                prop.put("mode_code","2");
                 prop.put("mode_status_error", e.getMessage());
                 return prop;
             }
@@ -183,8 +185,10 @@ public class QuickCrawlLink_p {
             // validate rejection reason
             if (reasonString == null) {
                 prop.put("mode_status", 0);//start msg
+                prop.put("mode_code","0");
             } else {
                 prop.put("mode_status", 3);//start msg
+                prop.put("mode_code","3");
                 prop.put("mode_status_error", reasonString);
             }
             
