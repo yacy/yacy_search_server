@@ -338,17 +338,35 @@ public final class yacySeedDB {
     public long countPotentialURL() { return seedPotentialDB.getAcc(yacySeed.LCOUNT); }
     public long countPotentialRWI() { return seedPotentialDB.getAcc(yacySeed.ICOUNT); }
 
+    /* FIXME: This is an extremely ugly workaround
+     * kelondroDyn (Backend to the used kelondroMap) removes trailing underscores from keys when
+     * iterating the database. To get an exact element count it is mandatory to set and remove
+     * elements with the same key. Failure to do so might result in removed entries staying in the
+     * ramCache suggesting the entries are still there, thus preventing the element count to be
+     * raised when the peer returns.
+     * To avoid duplicates arising from the sortClusters, only add/remove/get trimmed Elements,
+     * as these shortened hashes are loaded into the clusters during kelondroMap initialization.
+     * see: http://www.yacy-forum.de/viewtopic.php?p=15955#15955
+     */
+    private String trimHashForKelondroDyn (String hash) {
+        while ((hash.length() > 1) && (hash.charAt(hash.length() - 1) == '_')) {
+            hash = hash.substring(0, hash.length() - 1);
+        }
+        return hash;
+    }
+
     public synchronized void addConnected(yacySeed seed) {
         if ((seed == null) || (seed.isProper() != null)) return;
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
+        String key = trimHashForKelondroDyn(seed.hash);
         try {
             nameLookupCache.put(seed.getName(), seed);
             Map seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
-                seedActiveDB.set(seed.hash, seedPropMap);
+                seedActiveDB.set(key, seedPropMap);
             }
-            seedPassiveDB.remove(seed.hash);
-            seedPotentialDB.remove(seed.hash);
+            seedPassiveDB.remove(key);
+            seedPotentialDB.remove(key);
         } catch (IOException e){
             yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
             seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);            
@@ -363,16 +381,17 @@ public final class yacySeedDB {
     
     public synchronized void addDisconnected(yacySeed seed) {
         if (seed == null) return;
+        String key = trimHashForKelondroDyn(seed.hash);
         try {
             nameLookupCache.remove(seed.getName());
-            seedActiveDB.remove(seed.hash);
-            seedPotentialDB.remove(seed.hash);
+            seedActiveDB.remove(key);
+            seedPotentialDB.remove(key);
         } catch (Exception e) {}
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             Map seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
-                seedPassiveDB.set(seed.hash, seedPropMap);
+                seedPassiveDB.set(key, seedPropMap);
             }
         } catch (IOException e) {
             yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
@@ -388,17 +407,18 @@ public final class yacySeedDB {
     
     public synchronized void addPotential(yacySeed seed) {
         if (seed == null) return;
+        String key = trimHashForKelondroDyn(seed.hash);
         try {
             nameLookupCache.remove(seed.getName());
-            seedActiveDB.remove(seed.hash);
-            seedPassiveDB.remove(seed.hash);
+            seedActiveDB.remove(key);
+            seedPassiveDB.remove(key);
         } catch (Exception e) {}
     if (seed.isProper() != null) return;
     //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             Map seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
-                seedPotentialDB.set(seed.hash, seedPropMap);
+                seedPotentialDB.set(key, seedPropMap);
             }
     } catch (IOException e) {
         yacyCore.log.logFine("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
@@ -414,7 +434,7 @@ public final class yacySeedDB {
         
     public boolean hasConnected(String hash) {
     try {
-        return (seedActiveDB.get(hash) != null);
+        return (seedActiveDB.get(trimHashForKelondroDyn(hash)) != null);
     } catch (IOException e) {
         return false;
     }
@@ -422,7 +442,7 @@ public final class yacySeedDB {
 
     public boolean hasDisconnected(String hash) {
     try {
-        return (seedPassiveDB.get(hash) != null);
+        return (seedPassiveDB.get(trimHashForKelondroDyn(hash)) != null);
     } catch (IOException e) {
         return false;
     }
@@ -430,7 +450,7 @@ public final class yacySeedDB {
  
     public boolean hasPotential(String hash) {
     try {
-        return (seedPotentialDB.get(hash) != null);
+        return (seedPotentialDB.get(trimHashForKelondroDyn(hash)) != null);
     } catch (IOException e) {
         return false;
     }
@@ -440,7 +460,7 @@ public final class yacySeedDB {
         if (hash == null) return null;
         if ((mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
     try {
-        Map entry = database.get(hash);
+        Map entry = database.get(trimHashForKelondroDyn(hash));
         if (entry == null) return null;
         return new yacySeed(hash, entry);
     } catch (IOException e) {
@@ -809,6 +829,13 @@ public final class yacySeedDB {
             if ((it == null) || (!(it.hasNext()))) return null;
             Map dna = (Map) it.next();
             String hash = (String) dna.remove("key");
+            /* FIXME: This is an extremely ugly workaround
+             * kelondroDyn (backend to the used kelondroMap) removes trailing underscores from
+             * keys when iterating the database. To get correct peer hahes, we have to put them
+             * back.
+             * see: http://www.yacy-forum.de/viewtopic.php?p=15955#15955
+             */
+            while (hash.length() < commonHashLength) { hash = hash + "_"; }
             return new yacySeed(hash, dna);
         }
         
