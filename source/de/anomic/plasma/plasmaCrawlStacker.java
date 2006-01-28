@@ -858,8 +858,12 @@ public final class plasmaCrawlStacker {
                             // return thread back into pool
                             plasmaCrawlStacker.this.theWorkerPool.returnObject(this);
                             
-                            // We are waiting for a new task now.
-                            synchronized (this) { this.wait(); }
+                            // We are waiting for a new task now.                            
+                            synchronized (this) { 
+                                if (!this.stopped && !this.destroyed && !this.isInterrupted()) { 
+                                    this.wait(); 
+                                }
+                            }
                         } else {
                             try  {
                                 // executing the new task
