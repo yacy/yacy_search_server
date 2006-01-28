@@ -877,7 +877,7 @@ public final class plasmaCrawlStacker {
                 
             private void execute() {
                 try {
-                    this.setName(plasmaCrawlWorker.threadBaseName + "_" + this.theMsg.url);
+                    this.setName("stackCrawlThread_" + this.theMsg.url);
                     String rejectReason = dequeue(this.theMsg);
 
                     if (rejectReason != null) {
