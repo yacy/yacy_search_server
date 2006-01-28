@@ -200,6 +200,14 @@ public final class plasmaCrawlLoader extends Thread {
         }
     }
 
+    public int getNumIdleWorker() {
+        return crawlwerPool.getNumIdle();
+    }
+    
+    public int getNumActiveWorker() {
+        return size();
+    }
+    
     public int size() {
         return crawlwerPool.getNumActive();
     }

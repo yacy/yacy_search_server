@@ -118,6 +118,8 @@ Changes take effect immediately</td>
 <td class="small" width="80">maximum Active</td>
 <td class="small" width="80">maximum Idle</td>
 <td class="small" width="80">minimum Idle</td>
+<td class="small" width="80">current Active</td>
+<td class="small" width="80">current Idle</td>
 <td class="small">Full Description</td>
 </tr>
 #{pool}#
@@ -126,11 +128,13 @@ Changes take effect immediately</td>
 <td class="small" align="right"><input name="#[name]#_maxActive" type="text" size="8" maxlength="8" value="#[maxActive]#"></td>
 <td class="small" align="right"><input name="#[name]#_maxIdle" type="text" size="8" maxlength="8" value="#[maxIdle]#"></td>
 <td class="small" align="right"><input name="#[name]#_minIdle" type="text" size="8" maxlength="8" value="#[minIdle]#"></td>
+<td class="small" align="right">#[numActive]#</td>
+<td class="small" align="right">#[numIdle]#</td>
 <td class="small" align="left"></td>
 </tr>
 #{/pool}#
 <tr class="TableCellLight">
-<td class="small" align="left" colspan="5">
+<td class="small" align="left" colspan="7">
 <input type="submit" name="poolConfig" value="Enter new Threadpool Configuration">
 Changes take effect immediately</td>
 </tr>

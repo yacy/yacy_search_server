@@ -279,19 +279,25 @@ public class PerformanceQueues_p {
         prop.put("pool_0_maxActive",crawlerPoolConfig.maxActive);
         prop.put("pool_0_maxIdle",crawlerPoolConfig.maxIdle);
         prop.put("pool_0_minIdle",crawlerPoolConfig.minIdle);
+        prop.put("pool_0_numActive",switchboard.cacheLoader.getNumActiveWorker());
+        prop.put("pool_0_numIdle",switchboard.cacheLoader.getNumIdleWorker());
         
         serverThread httpd = switchboard.getThread("10_httpd");
         GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();
         prop.put("pool_1_name","httpd Session Pool");
         prop.put("pool_1_maxActive",httpdPoolConfig.maxActive);
         prop.put("pool_1_maxIdle",httpdPoolConfig.maxIdle);
-        prop.put("pool_1_minIdle",httpdPoolConfig.minIdle);     
+        prop.put("pool_1_minIdle",httpdPoolConfig.minIdle);  
+        prop.put("pool_1_numActive",((serverCore)httpd).getActiveSessionCount());
+        prop.put("pool_1_numIdle",((serverCore)httpd).getIdleSessionCount());
         
         GenericObjectPool.Config stackerPoolConfig = switchboard.sbStackCrawlThread.getPoolConfig();
         prop.put("pool_2_name","CrawlStacker Session Pool");
         prop.put("pool_2_maxActive",stackerPoolConfig.maxActive);
         prop.put("pool_2_maxIdle",stackerPoolConfig.maxIdle);
-        prop.put("pool_2_minIdle",stackerPoolConfig.minIdle);                
+        prop.put("pool_2_minIdle",stackerPoolConfig.minIdle);   
+        prop.put("pool_2_numActive",switchboard.sbStackCrawlThread.getNumActiveWorker());
+        prop.put("pool_2_numIdle",switchboard.sbStackCrawlThread.getNumIdleWorker());
         prop.put("pool",3);        
         
         // return rewrite values for templates

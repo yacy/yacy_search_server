@@ -137,6 +137,14 @@ public final class plasmaCrawlStacker {
         }
     }
     
+    public int getNumActiveWorker() {
+        return this.theWorkerPool.getNumActive();
+    }
+    
+    public int getNumIdleWorker() {
+        return this.theWorkerPool.getNumIdle();
+    }
+    
     public int size() {
         return this.queue.size();
     }
@@ -636,7 +644,9 @@ public final class plasmaCrawlStacker {
         public void destroyObject(Object obj) {
             if (obj instanceof Worker) {
                 Worker theWorker = (Worker) obj;
+                ((Worker)obj).setName("stackCrawlThread_destroyed");
                 theWorker.setStopped(true);
+                theWorker.interrupt();
             }
         }
         
@@ -719,6 +729,7 @@ public final class plasmaCrawlStacker {
             if (this.isClosed) return;
             if (obj instanceof Worker) {
                 try {
+                    ((Worker)obj).setName("stackCrawlThread_invalidated");
                     ((Worker)obj).setStopped(true);
                     super.invalidateObject(obj);
                 } catch (Exception e) {
@@ -834,6 +845,7 @@ public final class plasmaCrawlStacker {
             }
             
             public void run()  {
+                boolean interrupted = false;
                 this.running = true;
                 
                 try {
@@ -856,9 +868,10 @@ public final class plasmaCrawlStacker {
                         }
                     }
                 } catch (InterruptedException ex) {
+                    interrupted = true;
                     serverLog.logInfo("STACKCRAWL-POOL","Interruption of thread '" + this.getName() + "' detected.");
                 } finally {
-                    if (plasmaCrawlStacker.this.theWorkerPool != null) 
+                    if (plasmaCrawlStacker.this.theWorkerPool != null && !interrupted) 
                         plasmaCrawlStacker.this.theWorkerPool.invalidateObject(this);
                 }
             }
