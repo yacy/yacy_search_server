@@ -323,6 +323,7 @@ final class CrawlerPool extends GenericObjectPool {
         if (this.isClosed) return;
         if (obj instanceof plasmaCrawlWorker) {
             try {
+                ((plasmaCrawlWorker)obj).setName(plasmaCrawlWorker.threadBaseName + "_invalidated");
                 ((plasmaCrawlWorker)obj).setStopped(true);
                 super.invalidateObject(obj);
             } catch (Exception e) {
@@ -434,7 +435,10 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
         if (obj == null) return;
         if (obj instanceof plasmaCrawlWorker) {
             plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;
+            theWorker.destroyed = true;
+            theWorker.setName(plasmaCrawlWorker.threadBaseName + "_destroyed");
             theWorker.setStopped(true);
+            theWorker.interrupt();
         }
     }
 

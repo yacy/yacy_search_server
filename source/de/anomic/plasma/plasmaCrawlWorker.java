@@ -83,6 +83,7 @@ public final class plasmaCrawlWorker extends Thread {
     private plasmaCrawlProfile.entry profile;
 //  private String error;
 
+    boolean destroyed = false;
     private boolean running = false;
     private boolean stopped = false;
     private boolean done = false;   
@@ -113,7 +114,7 @@ public final class plasmaCrawlWorker extends Thread {
             plasmaSwitchboard theSb,
             plasmaHTCache theCacheManager,
             serverLog theLog) {
-        super(theTG,threadBaseName + "_inPool");
+        super(theTG,threadBaseName + "_created");
 
         this.myPool = thePool;
         this.sb = theSb;
@@ -186,7 +187,7 @@ public final class plasmaCrawlWorker extends Thread {
         } catch (InterruptedException ex) {
             serverLog.logInfo("CRAWLER-POOL","Interruption of thread '" + this.getName() + "' detected."); 
         } finally {
-            if (this.myPool != null) 
+            if (this.myPool != null && !this.destroyed) 
                 this.myPool.invalidateObject(this);
         }
     }
@@ -486,7 +487,13 @@ public final class plasmaCrawlWorker extends Thread {
             boolean retryCrawling = false;
             String errorMsg = e.getMessage();
 
-            if (e instanceof MalformedURLException) {
+            if ((e instanceof IOException) && 
+                (errorMsg != null) && 
+                (errorMsg.indexOf("socket closed") >= 0) &&
+                (Thread.currentThread().isInterrupted())
+            ) {
+                log.logInfo("CRAWLER Interruption detected because of server shutdown.");
+            } else if (e instanceof MalformedURLException) {
                 log.logWarning("CRAWLER Malformed URL '" + url.toString() + "' detected. ");
             } else if (e instanceof NoRouteToHostException) {
                 log.logWarning("CRAWLER No route to host found while trying to crawl URL  '" + url.toString() + "'.");
@@ -523,7 +530,7 @@ public final class plasmaCrawlWorker extends Thread {
             } else if ((errorMsg != null) && (errorMsg.indexOf("Network is unreachable") >=0)) {
                 log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + url.toString() + "'. ");
             } else if ((errorMsg != null) && (errorMsg.indexOf("No trusted certificate found")>= 0)) {
-                log.logSevere("CRAWLER No trusted certificate found for URL '" + url.toString() + "'. ");
+                log.logSevere("CRAWLER No trusted certificate found for URL '" + url.toString() + "'. ");            
             } else {
                 log.logSevere("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
             }

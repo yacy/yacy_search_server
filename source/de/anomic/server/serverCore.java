@@ -616,6 +616,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             if (this.isClosed) return;
             if (obj instanceof Session) {
                 try {
+                    ((Session)obj).setName("Session_invalidated");
                     ((Session)obj).setStopped(true);
                     super.invalidateObject(obj);
                 } catch (Exception e) {
@@ -715,7 +716,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
         public void destroyObject(Object obj) {
             if (obj instanceof Session) {
                 Session theSession = (Session) obj;
+                theSession.destroyed = true;
+                theSession.setName("Session_destroyed");
                 theSession.setStopped(true);
+                theSession.interrupt();
             }
         }
         
@@ -760,6 +764,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         // synchronization object needed for the threadpool implementation
         private Object syncObject;        
         
+        boolean destroyed = false;
         private boolean running = false;
         private boolean stopped = false;
         private boolean done = false;        
@@ -785,7 +790,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
     	
     	public Session(ThreadGroup theThreadGroup) {
-            super(theThreadGroup,"Session");
+            super(theThreadGroup,"Session_created");
     	}
         
         public int getCommandCount() {
@@ -952,7 +957,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             } catch (InterruptedException ex) {
                 serverLog.logInfo("SESSION-POOL","Interruption of thread '" + this.getName() + "' detected."); 
             } finally {
-                if (serverCore.this.theSessionPool != null) 
+                if (serverCore.this.theSessionPool != null && !this.destroyed) 
                     serverCore.this.theSessionPool.invalidateObject(this);
             }
         }  
