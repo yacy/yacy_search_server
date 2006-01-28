@@ -435,10 +435,12 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
         if (obj == null) return;
         if (obj instanceof plasmaCrawlWorker) {
             plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;
-            theWorker.destroyed = true;
-            theWorker.setName(plasmaCrawlWorker.threadBaseName + "_destroyed");
-            theWorker.setStopped(true);
-            theWorker.interrupt();
+            synchronized(theWorker) {
+                theWorker.destroyed = true;
+                theWorker.setName(plasmaCrawlWorker.threadBaseName + "_destroyed");
+                theWorker.setStopped(true);
+                theWorker.interrupt();
+            }
         }
     }
 
@@ -446,13 +448,6 @@ final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFact
      * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
      */
     public boolean validateObject(Object obj) {
-        if (obj == null) return false;
-        if (obj instanceof plasmaCrawlWorker) {
-            plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;
-            if (!theWorker.isAlive() || theWorker.isInterrupted()) return false;
-            if (theWorker.isRunning()) return true;
-            return false;
-        }
         return true;
     }
 

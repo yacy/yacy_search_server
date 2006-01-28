@@ -716,10 +716,12 @@ public final class serverCore extends serverAbstractThread implements serverThre
         public void destroyObject(Object obj) {
             if (obj instanceof Session) {
                 Session theSession = (Session) obj;
-                theSession.destroyed = true;
-                theSession.setName("Session_destroyed");
-                theSession.setStopped(true);
-                theSession.interrupt();
+                synchronized(theSession) {
+                    theSession.destroyed = true;
+                    theSession.setName("Session_destroyed");
+                    theSession.setStopped(true);
+                    theSession.interrupt();
+                }
             }
         }
         
@@ -727,12 +729,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
          * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
          */
         public boolean validateObject(Object obj) {
-            if (obj instanceof Session) {
-                Session theSession = (Session) obj;
-                if (!theSession.isAlive() || theSession.isInterrupted()) return false;
-                if (theSession.isRunning()) return true;
-                return false;
-            }
             return true;
         }
         
@@ -934,11 +930,15 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 // The thread keeps running.
                 while (!this.stopped && !this.isInterrupted() && !serverCore.this.theSessionPool.isClosed) {
                     if (this.done)  {
-                        // return thread back into pool
-                        serverCore.this.theSessionPool.returnObject(this);
-                        
-                        // We are waiting for a new task now.
-                        synchronized (this) {this.wait();}
+                        synchronized (this) {
+                            // return thread back into pool
+                            serverCore.this.theSessionPool.returnObject(this);
+                            
+                            // We are waiting for a new task now.
+                            if (!this.stopped && !this.destroyed && !this.isInterrupted()) { 
+                                this.wait();
+                            }
+                        }
                     } else {
                         try  {
                             // executing the new task

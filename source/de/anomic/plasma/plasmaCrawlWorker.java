@@ -169,12 +169,16 @@ public final class plasmaCrawlWorker extends Thread {
         try {
             // The thread keeps running.
             while (!this.stopped && !this.isInterrupted() && !this.myPool.isClosed) {
-                if (this.done) {                    
-                    // return thread back into pool
-                    this.myPool.returnObject(this);
-                    
-                    // We are waiting for a new task now.
-                    synchronized (this) { this.wait(); }
+                if (this.done) {       
+                    synchronized (this) { 
+                        // return thread back into pool
+                        this.myPool.returnObject(this);
+                        
+                        // We are waiting for a new task now.
+                        if (!this.stopped && !this.destroyed && !this.isInterrupted()) { 
+                            this.wait(); 
+                        }
+                    }
                 } else {
                     try {
                         // executing the new task
