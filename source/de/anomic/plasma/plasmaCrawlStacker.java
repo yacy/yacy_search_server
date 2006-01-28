@@ -657,13 +657,6 @@ public final class plasmaCrawlStacker {
          * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
          */
         public boolean validateObject(Object obj) {
-            if (obj instanceof Worker) 
-            {
-                Worker theWorker = (Worker) obj;
-                if (!theWorker.isAlive() || theWorker.isInterrupted()) return false;
-                if (theWorker.isRunning()) return true;
-                return false;
-            }
             return true;
         }
         
