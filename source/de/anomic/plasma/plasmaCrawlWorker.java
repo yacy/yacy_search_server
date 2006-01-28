@@ -189,7 +189,7 @@ public final class plasmaCrawlWorker extends Thread {
                 }
             }
         } catch (InterruptedException ex) {
-            serverLog.logInfo("CRAWLER-POOL","Interruption of thread '" + this.getName() + "' detected."); 
+            serverLog.logFiner("CRAWLER-POOL","Interruption of thread '" + this.getName() + "' detected."); 
         } finally {
             if (this.myPool != null && !this.destroyed) 
                 this.myPool.invalidateObject(this);

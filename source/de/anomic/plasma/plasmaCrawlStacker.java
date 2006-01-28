@@ -868,7 +868,7 @@ public final class plasmaCrawlStacker {
                         }
                     }
                 } catch (InterruptedException ex) {
-                    serverLog.logInfo("STACKCRAWL-POOL","Interruption of thread '" + this.getName() + "' detected.");
+                    serverLog.logFiner("STACKCRAWL-POOL","Interruption of thread '" + this.getName() + "' detected.");
                 } finally {
                     if (plasmaCrawlStacker.this.theWorkerPool != null && !this.destroyed) 
                         plasmaCrawlStacker.this.theWorkerPool.invalidateObject(this);

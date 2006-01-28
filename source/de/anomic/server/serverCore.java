@@ -955,7 +955,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     }
                 }
             } catch (InterruptedException ex) {
-                serverLog.logInfo("SESSION-POOL","Interruption of thread '" + this.getName() + "' detected."); 
+                serverLog.logFiner("SESSION-POOL","Interruption of thread '" + this.getName() + "' detected."); 
             } finally {
                 if (serverCore.this.theSessionPool != null && !this.destroyed) 
                     serverCore.this.theSessionPool.invalidateObject(this);
