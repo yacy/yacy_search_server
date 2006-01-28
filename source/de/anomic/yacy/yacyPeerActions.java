@@ -112,7 +112,7 @@ public class yacyPeerActions {
 		long uptimediff = uptime - Long.parseLong(sb.getConfig("lastseedcheckUptime", "0")); //TODO: Do not use the switchboard?
         long indexedc = sb.getThread("80_indexing").getBusyCycles();
 		long indexedcdiff = indexedc - Long.parseLong(sb.getConfig("lastseedcheckIndexedc", "0"));
-		if(uptimediff > 5){
+		if( uptimediff > 5 || ((String)sb.getConfig("lastseedcheckUptime", "-1")).equals("-1") ){
 			sb.setConfig("lastseedcheckUptime", uptime);
 			sb.setConfig("lastseedcheckIndexedc", indexedc);
 		}
