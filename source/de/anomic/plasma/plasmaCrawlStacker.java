@@ -804,7 +804,7 @@ public final class plasmaCrawlStacker {
             private stackCrawlMessage theMsg;        
             
             public Worker(ThreadGroup theThreadGroup) {
-                super(theThreadGroup,"stackCrawlThread");
+                super(theThreadGroup,"stackCrawlThread_created");
             }
             
             public void setStopped(boolean stopped) {
@@ -878,6 +878,7 @@ public final class plasmaCrawlStacker {
                 
             private void execute() {
                 try {
+                    this.setName(plasmaCrawlWorker.threadBaseName + "_" + this.theMsg.url);
                     String rejectReason = dequeue(this.theMsg);
 
                     if (rejectReason != null) {
