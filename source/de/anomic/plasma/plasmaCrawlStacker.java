@@ -644,10 +644,12 @@ public final class plasmaCrawlStacker {
         public void destroyObject(Object obj) {
             if (obj instanceof Worker) {
                 Worker theWorker = (Worker) obj;
-                theWorker.setName("stackCrawlThread_destroyed");
-                theWorker.destroyed = true;
-                theWorker.setStopped(true);
-                theWorker.interrupt();
+                synchronized(theWorker) {
+                    theWorker.setName("stackCrawlThread_destroyed");
+                    theWorker.destroyed = true;
+                    theWorker.setStopped(true);
+                    theWorker.interrupt();
+                }
             }
         }
         
