@@ -834,7 +834,7 @@ public final class plasmaCrawlStacker {
                 if (!this.running)  {
                    // this.setDaemon(true);
                    this.start();
-                }  else { 
+                }  else {                     
                    this.notifyAll();
                 }          
             }
@@ -855,11 +855,11 @@ public final class plasmaCrawlStacker {
                     // The thread keeps running.
                     while (!this.stopped && !this.isInterrupted() && !plasmaCrawlStacker.this.theWorkerPool.isClosed) {
                         if (this.done)  {
-                            // return thread back into pool
-                            plasmaCrawlStacker.this.theWorkerPool.returnObject(this);
-                            
-                            // We are waiting for a new task now.                            
                             synchronized (this) { 
+                                // return thread back into pool
+                                plasmaCrawlStacker.this.theWorkerPool.returnObject(this);
+                                
+                                // We are waiting for a new task now.                            
                                 if (!this.stopped && !this.destroyed && !this.isInterrupted()) { 
                                     this.wait(); 
                                 }
