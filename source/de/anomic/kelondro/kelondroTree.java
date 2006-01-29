@@ -56,8 +56,12 @@ import java.util.LinkedList;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.Vector;
+import de.anomic.server.logging.serverLog;
 
 public class kelondroTree extends kelondroRecords implements kelondroIndex {
+	
+	//logging [Should be replaced to be able to split DB|YaCy - delete this, delete import, delete before "correcting iterator" message]
+	public static serverLog log;
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 2; // our record definition of two bytes
@@ -850,7 +854,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 int c = objectOrder.compare(firstKey, nextNode.getKey());
                 if ((c > 0) && (asc)) {
                     // firstKey > nextNode.getKey()
-                    logWarning("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
+                    log.logWarning("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
                     nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
                 }
                 if ((c < 0) && (!(asc))) {
