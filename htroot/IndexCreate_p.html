@@ -12,29 +12,30 @@
 
 <p>
 <div class=small id="startCrawling"><b>Start Crawling Job:</b>&nbsp;
-You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".
+You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".</p>
 </div>
-<table border="0" cellpadding="5" cellspacing="0" width="100%">
+
+<table border="0" cellpadding="5" cellspacing="1" width="100%">
 <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
   <tr valign="top" class="TableCellDark">
-    <td width="120"></td>
-    <td width="120" colspan="2"></td>
-    <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Crawling Depth:</td>
     <td class=small><input name="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#"></td>
-    <td class=small colspan="2">
+    <td class=small>
     This defines how often the Crawler will follow links embedded in websites.<br>
 	A minimum of 1 is recommended and means that the page you enter under "Starting Point" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.
     Be careful with the depth. Consider a branching factor of average 20;
     A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.
     </td>
   </tr>
-  <tr valign="top" class="TableCellDark">
+  <tr valign="top" class="TableCellLight">
     <td class=small>Crawling Filter:</td>
     <td class=small><input name="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#"></td>
-    <td class=small colspan="2">
+    <td class=small >
     This is an emacs-like regular expression that must match with the URLs which are used to be crawled.
     Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase
     the crawling depth.
@@ -43,15 +44,15 @@ You can define URLs as start points for Web page crawling and start crawling her
   <tr valign="top" class="TableCellDark">
     <td class=small>Accept URLs with '?' / dynamic URLs:</td>
     <td class=small><input type="checkbox" name="crawlingQ" align="top" #(crawlingQChecked)#::checked#(/crawlingQChecked)#></td>
-    <td class=small colspan="2">
+    <td class=small>
     A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
     is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
     </td>
   </tr>
-  <tr valign="top" class="TableCellDark">
+  <tr valign="top" class="TableCellLight">
     <td class=small>Store to Proxy Cache:</td>
     <td class=small><input type="checkbox" name="storeHTCache" align="top" #(storeHTCacheChecked)#::checked#(/storeHTCacheChecked)#></td>
-    <td class=small colspan="2">
+    <td class=small>
     This option is used by default for proxy prefetch, but is not needed for explicit crawling.
     We recommend to leave this switched off unless you want to control the crawl results with the
     <a href="CacheAdmin_p.html" class=small>Cache Monitor</a>.
@@ -60,19 +61,27 @@ You can define URLs as start points for Web page crawling and start crawling her
   <tr valign="top" class="TableCellDark">
     <td class=small>Do Local Indexing:</td>
     <td class=small><input type="checkbox" name="localIndexing" align="top" #(localIndexingChecked)#::checked#(/localIndexingChecked)#></td>
-    <td class=small colspan="2">
+    <td class=small>
     This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
     <a href="CacheAdmin_p.html" class=small>Proxy Cache</a> without indexing.
     </td>
   </tr>
-  <tr valign="top" class="TableCellDark">
+  <tr valign="top" class="TableCellLight">
     <td class=small>Do Remote Indexing:</td>
-    <td class=small><input type="checkbox" name="crawlOrder" align="top" #(crawlOrderChecked)#::checked#(/crawlOrderChecked)#><br>
-                    Describe your intention to start this global crawl (optional):<br>
-                    <input name="intention" type="text" size="40" maxlength="100" value=""><br>
-                    This message will appear in the 'Other Peer Crawl Start' table of other peers.
-    </td>
-    <td class=small colspan="2">
+	<td>
+      <table border="0" cellpadding="2" cellspacing="0">
+	   <tr>
+	    <td>
+		 <input type="checkbox" name="crawlOrder" align="top" #(crawlOrderChecked)#::checked#(/crawlOrderChecked)#>
+		</td>
+		<td class=small>
+	  Describe your intention to start this global crawl (optional):<p>
+      <input name="intention" type="text" size="40" maxlength="100" value=""></p>
+      This message will appear in the 'Other Peer Crawl Start' table of other peers.
+	  </td>
+	 </table>
+	</td>
+    <td class=small >
     If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
     If you need your crawling results locally, you should switch this off.
     Only senior and principal peers can initiate or receive remote crawls.
@@ -82,7 +91,7 @@ You can define URLs as start points for Web page crawling and start crawling her
   <tr valign="top" class="TableCellDark">
     <td class=small>Exclude <i>static</i> Stop-Words</td>
     <td class=small><input type="checkbox" name="xsstopw" align="top" #(xsstopwChecked)#::checked#(/xsstopwChecked)#></td>
-    <td class=small colspan="2">
+    <td class=small>
     This can be useful to circumvent that extremely common words are added to the database, i.e. "the", "he", "she", "it"... To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,
     check this box.
     </td>
@@ -107,7 +116,7 @@ You can define URLs as start points for Web page crawling and start crawling her
   -->
   <tr valign="top" class="TableCellLight">
     <td class="small">Starting Point:</td>
-    <td class="small" colspan="2">
+    <td class="small">
     	<table cellpadding="0" cellspacing="0">
     	<tr><td class="small">From&nbsp;File:</td>
     	    <td class="small"><input type="radio" name="crawlingMode" value="file"></td>
@@ -119,12 +128,12 @@ You can define URLs as start points for Web page crawling and start crawling her
     	</tr>
     	</table>
     </td>
-    <td class=small colspan="3" rowspan="2">Existing start URLs are re-crawled.
+    <td class=small colspan="3">Existing start URLs are re-crawled.
     Other already visited URLs are sorted out as "double".
     A complete re-crawl will be available soon.
     </td>
   </tr>
-  <tr valign="top" class="TableCellLight">
+  <tr valign="top" class="TableCellDark">
   	<td class=small colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl"></td>
   </tr>
 </form>
@@ -132,17 +141,19 @@ You can define URLs as start points for Web page crawling and start crawling her
 </p>
 
 <p><form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-<div class=small id="distributedIndexing"><b>Distributed Indexing: </b>
+<div class=small id="distributedIndexing">
+<b>Distributed Indexing: </b>
 Crawling and indexing can be done by remote peers.
-Your peer can search and index for other peers and they can search for you.</div>
-<table border="0" cellpadding="5" cellspacing="0" width="100%">
+Your peer can search and index for other peers and they can search for you.</div></p>
+
+<table border="0" cellpadding="5" cellspacing="1" width="100%">
   <tr valign="top" class="TableCellDark">
     <td class=small width="10%">
         <input type="radio" name="dcr" value="acceptCrawlMax" align="top" #(acceptCrawlMaxChecked)#::checked#(/acceptCrawlMaxChecked)#>
     </td><td class=small>
         Accept remote crawling requests and perform crawl at maximum load
     </td>
-  </tr><tr valign="top" class="TableCellDark">
+  </tr><tr valign="top" class="TableCelllight">
     <td class=small width="10%">
         <input type="radio" name="dcr" value="acceptCrawlLimited" align="top" #(acceptCrawlLimitedChecked)#::checked#(/acceptCrawlLimitedChecked)#>
     </td><td class=small>
@@ -155,9 +166,13 @@ Your peer can search and index for other peers and they can search for you.</div
     </td><td class=small>
         Do not accept remote crawling requests (please set this only if you cannot accept to crawl only one page per minute; see option above)</td>
     </td>
-  </tr><tr valign="top" class="TableCellLight">
-    <td width="10%"></td><td>
-        <input type="submit" name="distributedcrawling" value="set"></td>
+  </tr>
+  <tr valign="top" class="TableCellLight">
+    <td width="10%">
+        <input type="submit" name="distributedcrawling" value="set">
+	</td>
+	<td>
+	</td>
     </tr>
 </table>
 </form></p>

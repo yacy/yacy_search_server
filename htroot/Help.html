@@ -1,54 +1,86 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
-<head>
-<title>YaCy: Help</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>Help</h2>
+ <head>
+  <title>YaCy: Help</title>
+   #%env/templates/metas.template%#
+  </head>
+  <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+   #%env/templates/header.template%#
+   <br>
+   <br>
+  <h2>Help</h2>
 
-<p>
+  <p>
 This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.
-</p>
+  </p>
 
-<p>
+  <p>
 For more detailed information, visit the <a href="http://www.yacy.net/yacy">YaCy homepage</a>.
-</p>
+  </p>
 
-<h3>Local and Global Search: Options and Functions</h3>
+  <h3>Local and Global Search: Options and Functions</h3>
 The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.
 The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results:
+  <p>
+  <table border="0" cellspacing="1" cellpadding="3" width="100%">
 
-<table border="0" cellspacing="1" cellpadding="3" width="100%">
-
-<tr><td width="30%" valign="top"><b>Search Word List</b></td><td width="70%">
+   <tr>
+    <td width="30%" valign="top">
+	 <b>Search Word List</b>
+	</td>
+	<td width="70%">
 You can search for several words simultanous. Words must be separated by a single space.
 The words are treated conjunctive, that means every must occur in the result, not any.
 If you do a global search (see below) you may get different results each time you do a search.
 
-</td></tr><tr><td valign="top"><b>Maximum Number of Results</b></td><td>
+	</td>
+   </tr>
+   <tr>
+    <td valign="top">
+     <b>Maximum Number of Results</b>
+    </td>
+    <td>
 You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.
 Instead we encourage you to enhance the search result by submitting more search words.
 
-</td></tr><tr><td valign="top"><b>Result Order Options</b></td><td>
+	 </td>
+	</tr>
+	<tr>
+	 <td valign="top">
+	  <b>Result Order Options</b>
+	 </td>
+	 <td>
 The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also
 a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.
 For pages that have the same date the second order, 'Quality' is applied.
 
-</td></tr><tr><td valign="top"><b>Resource Domain</b></td><td>
+	 </td>
+	</tr>
+	<tr>
+	 <td valign="top">
+	  <b>Resource Domain</b>
+	 </td>
+	 <td>
 This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,
 so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will
 automatically distribute index information <i>before</i> a search happends to form a performant distributed hash table -- a very fast global search.
 
-</td></tr><tr><td valign="top"><b>Maximum Search Time</b></td><td>
+     </td>
+	</tr>
+	<tr>
+ 	 <td valign="top">
+	  <b>Maximum Search Time</b>
+	 </td>
+	 <td>
 Searching the local index is extremely fast, it happends within milliseconds, even for a large number (millions) of pages. But searching the
 global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the
 distributed index is in test mode. Search results get more stable (repeated global search produce more similar results) the longer
 the search time is.
 
-</td></tr></table>
+     </td>
+	</tr>
+   </table>
+  </p>
 <hr>
 You may want to use accesskeys to navigate through the YaCy webinterface:<p>
 

@@ -1,40 +1,70 @@
 <!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
-<head>
-<title>YaCy '#[clientname]#': Language selection</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>Language selection</h2>
-<p>
-You can change the language of the YaCy-webinterface with translation files. 
-<br>
-<br>
-<b>Current language:</b> <!-- lang -->default(english)<br>
-<b>Languagefile Author:</b> <!-- author --><br>
-<i>Send additions to maintainer:</i> <!-- maintainer --><br>
-<p>
-
+	<head>
+		<title>YaCy '#[clientname]#': Language selection</title>
+		#%env/templates/metas.template%#
+	</head>
+	<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+	#%env/templates/header.template%#
+	<br><br>
+		<h2>Language selection</h2>
+	<p>
+	You can change the language of the YaCy-webinterface with translation files. 
+	<p>
+		<table border="0" cellpadding="5" cellspacing="1">
+			<tr>
+				<td valign="top" class="TableHeader" colspan="2">&nbsp;</td>
+			</tr>
+			<tr>
+				<td valign="top" class="TableCellDark">
+			Current language:
+				</td>
+				<td  valign="top" class="TableCellLight"> <!-- lang -->default(english)
+				</td>
+			</tr>
+			<tr>
+				<td valign="top" class="TableCellDark">
+			Languagefile Author:
+				</td>
+				<td valign="top" class="TableCellLight"> <!-- author -->
+				</td>
+			</tr>
+			<tr>
+				<td valign="top" class="TableCellDark">
+				<i>Send additions to maintainer:</i>
+				</td>
+				<td valign="top" class="TableCellLight"> <!-- maintainer -->
+				</td>
+			</tr>
+			<tr>
+				<td valign="top" class="TableCellDark">
+				Languages:
+				</td>
+				<td valign="top" class="TableCellLight">
 <form action="Language_p.html">
-Languages:<br>
 <select size="10" name="lang">
 #{langlist}#
 <option value="#[file]#">#[name]#</option>
 #{/langlist}#
-</select>
-<br>
+</select><br>
 <input type="submit" name="use_button" value="Use">
 <input type="submit" name="delete" value="Delete"><br>
 </form>
-
+</td>
+</tr>
+<tr>
+<td valign="top" class="TableCellDark">
 <form action="Language_p.html">
-Install new language from URL:<br>
+Install new language from URL:
+</td>
+<td valign="top" class="TableCellLight">
 <input type="text" name="url" size="30"><br>
 <input type="checkbox" name="use_lang" value="on" checked="true">Use this language<br>
 <input type="submit" value="Install">
 </form>
+</td>
+<tr>
+</table>
 
 <b>#(status)#
 ::

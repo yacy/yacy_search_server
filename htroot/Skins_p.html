@@ -10,12 +10,25 @@
 <h2>Skin selection</h2>
 <p>
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.</p>
-
-<b>Current skin: #[currentskin]#</b>
 <p>
+		<table border="0" cellpadding="5" cellspacing="1">
+			<tr>
+				<td valign="top" class="TableHeader" colspan="2">&nbsp;</td>
+			</tr>
+			<tr>
+				<td valign="top" class="TableCellDark">
+Current skin: 
+</td>
+				<td  valign="top" class="TableCellLight"> #[currentskin]#
+				</td>
+			</tr>
+			<tr>
+				<td valign="top" class="TableCellDark">
+Skins:
+				</td>
+				<td valign="top" class="TableCellLight">
 
 <form action="Skins_p.html">
-Skins:<br>
 <select size="10" name="skin">
 #{skinlist}#
 <option value="#[file]#">#[name]#</option>
@@ -25,20 +38,27 @@ Skins:<br>
 <input type="submit" name="use_button" value="Use">
 <input type="submit" name="delete" value="Delete"><br>
 </form>
-
+</td>
+</tr>
+<tr>
+<td valign="top" class="TableCellDark">
 <form action="Skins_p.html">
-Install new skin from URL:<br>
+Install new skin from URL:
+</td>
+<td valign="top" class="TableCellLight">
 <input type="text" name="url" size="30"><br><input type="checkbox" name="use_skin" value="on" checked="true">Use this skin<br><br>
 <input type="submit" value="install">
 </form>
-
+<br>
 <b>#(status)#
 ::
 Unable to get URL: #[url]#
 ::
 Error saving the skin.
 #(status)#</b>
-
+</td>
+<tr>
+</table>
 #%env/templates/footer.template%#
 </body>
 </html>

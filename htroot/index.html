@@ -1,78 +1,113 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
-<head>
-<title>YaCy '#[clientname]#': Search Page</title>
-#%env/templates/metas.template%#
-<link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="index.rss?search=#[former]#">
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+ <head>
+  <title>YaCy '#[clientname]#': Search Page</title>
+         #%env/templates/metas.template%#
+   <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="index.rss?search=#[former]#">
+ </head>
+ <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
 
-<SCRIPT LANGUAGE="JavaScript">
+  <SCRIPT LANGUAGE="JavaScript">
 picEmpty = new Image(11, 11);
 picEmpty.src = "/env/grafics/empty.gif";
 picMinus = new Image(11, 11);
 picMinus.src = "/env/grafics/minus.gif";
-</SCRIPT>
+  </SCRIPT>
 
-<br>
-<center><h2><font size="2" face="Helvetica, Arial" color="#212942"><img src="/env/grafics/kaskelix.png" align="middle" alt="YaCy logo Kaskelix"><br>P2P WEB SEARCH</font></h2></center><br>
-<center>#[promoteSearchPageGreeting]#</center><br>
+  <br>
+  <center><h2><font size="2" face="Helvetica, Arial" color="#212942"><img src="/env/grafics/kaskelix.png" align="middle" alt="YaCy logo Kaskelix"><br>P2P WEB SEARCH</font></h2></center><br>
+  <center>#[promoteSearchPageGreeting]#</center><br>
 
 <!-- <form action="yacy/search.html" method="get"> -->
-<form action="index.html" method="get">
-<center><table border="0" cellspacing="0" cellpadding="0"><tr><td>
-<input name="search" type="text" size="52" maxlength="80" value="#[former]#">
+  <form action="index.html" method="get">
+  <center>
+  
+  <table border="0" cellspacing="0" cellpadding="0">
+   <tr>
+    <td colspan=2>
+	<center>
+     <input name="search" type="text" size="52" maxlength="80" value="#[former]#">
 
-<input type="submit" name="Enter" value="Search">
-
+     <input type="submit" name="Enter" value="Search"><p>
+    </center>
 <!-- Below is Ronald's code which is not working with Opera, Konqueror and Safari
 <input type="submit" name="Enter" value="Search" onClick="with (this) { value = 'Searching...'; disabled = true; }">
 -->
 
-</td></tr><tr><td>
-Max. number of results:
-<select NAME="count">
-<option #(count-10)#::selected#(/count-10)#>10</option>
-<option #(count-50)#::selected#(/count-50)#>50</option>
-<option #(count-100)#::selected#(/count-100)#>100</option>
-<option #(count-1000)#::selected#(/count-1000)#>1000</option>
-</select>
-&nbsp;&nbsp;order by:
-<select NAME="order">
-<option value="YBR-Date-Quality" #(order-ybr-date-quality)#::selected#(/order-ybr-date-quality)#>YBR-Date-Quality</option>
-<option value="YBR-Quality-Date" #(order-ybr-quality-date)#::selected#(/order-ybr-quality-date)#>YBR-Quality-Date</option>
-<option value="Date-YBR-Quality" #(order-date-ybr-quality)#::selected#(/order-date-ybr-quality)#>Date-YBR-Quality</option>
-<option value="Quality-YBR-Date" #(order-quality-ybr-date)#::selected#(/order-quality-ybr-date)#>Quality-YBR-Date</option>
-<option value="Date-Quality-YBR" #(order-date-quality-ybr)#::selected#(/order-date-quality-ybr)#>Date-Quality-YBR</option>
-<option value="Quality-Date-YBR" #(order-quality-date-ybr)#::selected#(/order-quality-date-ybr)#>Quality-Date-YBR</option>
-</select>
-</td></tr><tr><td>
-Resource:
-<select NAME="resource">
-<option value="global" #(resource-global)#::selected#(/resource-global)#>global</option>
-<option value="local" #(resource-local)#::selected#(/resource-local)#>local</option>
-</select>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max. search time (seconds):
-<select NAME="time">
-<option #(time-1)#::selected#(/time-1)#>1</option>
-<option #(time-3)#::selected#(/time-3)#>3</option>
-<option #(time-6)#::selected#(/time-6)#>6</option>
-<option #(time-10)#::selected#(/time-10)#>10</option>
-<option #(time-30)#::selected#(/time-30)#>30</option>
-<option #(time-60)#::selected#(/time-60)#>60</option>
-</select>
-</td></tr><tr><td>
-URL mask:
-#(urlmaskoptions)#
-<input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#">
-::
-<input type="radio" name="urlmask" value="yes" checked> restrict on <input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#">
-<input type="radio" name="urlmask" value="no"> show all
-#(/urlmaskoptions)#
-</td></tr></table></center>
-</form>
-<p>
+    </td>
+   </tr>
+   <tr>
+    <td>
+     Max. number of results:
+	</td>
+	<td>
+     <select NAME="count">
+     <option #(count-10)#::selected#(/count-10)#>10</option>
+     <option #(count-50)#::selected#(/count-50)#>50</option>
+     <option #(count-100)#::selected#(/count-100)#>100</option>
+     <option #(count-1000)#::selected#(/count-1000)#>1000</option>
+     </select>
+	</td>
+   </tr>
+   <tr>
+    <td>
+     order by:
+    </td>
+	<td>
+    <select NAME="order">
+    <option value="YBR-Date-Quality" #(order-ybr-date-quality)#::selected#(/order-ybr-date-quality)#>YBR-Date-Quality</option>
+    <option value="YBR-Quality-Date" #(order-ybr-quality-date)#::selected#(/order-ybr-quality-date)#>YBR-Quality-Date</option>
+    <option value="Date-YBR-Quality" #(order-date-ybr-quality)#::selected#(/order-date-ybr-quality)#>Date-YBR-Quality</option>
+    <option value="Quality-YBR-Date" #(order-quality-ybr-date)#::selected#(/order-quality-ybr-date)#>Quality-YBR-Date</option>
+    <option value="Date-Quality-YBR" #(order-date-quality-ybr)#::selected#(/order-date-quality-ybr)#>Date-Quality-YBR</option>
+    <option value="Quality-Date-YBR" #(order-quality-date-ybr)#::selected#(/order-quality-date-ybr)#>Quality-Date-YBR</option>
+    </select>
+   </td>
+    </tr>
+    <tr>
+     <td>
+      Resource:
+	 </td>
+	 <td>
+	  <select NAME="resource">
+	  <option value="global" #(resource-global)#::selected#(/resource-global)#>global</option>
+	  <option value="local" #(resource-local)#::selected#(/resource-local)#>local</option>
+	  </select>
+    </td>
+   </tr>
+   <tr>
+    <td>
+	Max. search time (seconds):
+	</td>
+	<td>
+    <select NAME="time">
+	<option #(time-1)#::selected#(/time-1)#>1</option>
+	<option #(time-3)#::selected#(/time-3)#>3</option>
+	<option #(time-6)#::selected#(/time-6)#>6</option>
+	<option #(time-10)#::selected#(/time-10)#>10</option>
+	<option #(time-30)#::selected#(/time-30)#>30</option>
+	<option #(time-60)#::selected#(/time-60)#>60</option>
+	</select>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    URL mask:
+   </td>
+   <td>
+	#(urlmaskoptions)#
+	<input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#">
+	::
+	<input type="radio" name="urlmask" value="yes" checked> restrict on <input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#">
+	<input type="radio" name="urlmask" value="no"> show all
+	#(/urlmaskoptions)#
+   </td>
+  </tr>
+ </table>
+ </center>
+ </form>
+ <p>
 #(excluded)#
 ::
 <b>The following words are stop-words and had been excluded from the search: #[stopwords]#.</b>

@@ -19,14 +19,14 @@ and automatically excluded from indexing.
 
 <p><form action="ProxyIndexingMonitor_p.html" method="post" enctype="multipart/form-data">
 
-<table border="0" cellpadding="5" cellspacing="0" width="100%">
-  <tr class="TableCellLight">
+<table border="0" cellpadding="5" cellspacing="1" width="100%">
+  <tr class="TableCellDark">
   <td colspan="3"><div class=small><b>Proxy pre-fetch setting:</b>
 this is an automated html page loading procedure that takes actual proxy-requested
 URLs as crawling start points for crawling.</div></td> 
   </tr>
 
-  <tr valign="top" class="TableCellDark">
+  <tr valign="top" class="TableCellLight">
     <td class=small>Prefetch Depth</td>
     <td class=small><input name="proxyPrefetchDepth" type="text" size="2" maxlength="2" value="#[proxyPrefetchDepth]#"></td>
     <td class=small>
@@ -34,28 +34,28 @@ URLs as crawling start points for crawling.</div></td>
         embedded URLs, but since embedded image links are loaded by the browser
         this means that only embedded href-anchors are prefetched additionally.</td>
   </tr>
-  <tr valign="top" class="TableCellDark">
+  <tr valign="top" class="TableCellLight">
     <td class=small>Store to Cache</td>
     <td class=small><input type="checkbox" name="proxyStoreHTCache" align="top" #(proxyStoreHTCacheChecked)#::checked#(/proxyStoreHTCacheChecked)#></td>
     <td class=small>It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.</td>
   </tr>
 
-  <tr class="TableCellLight">
+  <tr class="TableCellDark">
   <td colspan="3"><div class=small><b>Proxy generally</b></div></td> 
   </tr>
 
-  <tr valign="top" class="TableCellDark">
+  <tr valign="top" class="TableCellLight">
     <td class=small>Path</td>
     <td class=small><input name="proxyCache" type="text" size="20" maxlength="300" value="#[proxyCache]#"></td>
     <td class=small>The path where the pages are stored (max. length 300)</td>
   </tr>
-  <tr valign="top" class="TableCellDark">
+  <tr valign="top" class="TableCellLight">
     <td class=small>Size</td>
     <td class=small><input name="proxyCacheSize" type="text" size="8" maxlength="24" value="#[proxyCacheSize]#"></td>
     <td class=small>The size in MB of the cache.</td>
   </tr>
 
-  <tr valign="top" class="TableCellLight">
+  <tr valign="top" class="TableCellDark">
     <td class=small colspan="1">&nbsp;</td>
     <td class=small colspan="2"><input type="submit" name="proxyprofileset" value="Set proxy profile"></td>
   </tr>
