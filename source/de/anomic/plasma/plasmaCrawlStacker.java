@@ -152,19 +152,26 @@ public final class plasmaCrawlStacker {
     public void job() {
         try {
             // getting a new message from the crawler queue
+            if (Thread.currentThread().isInterrupted()) return;
             stackCrawlMessage theMsg = this.queue.waitForMessage();
             
             // getting a free session thread from the pool
+            if (Thread.currentThread().isInterrupted()) return;
             Worker worker = (Worker) this.theWorkerPool.borrowObject();
             
             // processing the new request
             worker.execute(theMsg);
-        } catch (InterruptedException e) {
-            Thread.interrupted();
-            //this.stopped = true;
-        }
-        catch (Exception e) {
-            this.log.logSevere("plasmaStackCrawlThread.run/loop", e);
+        } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                this.log.logFine("Interruption detected.");
+            } else if ((e instanceof IllegalStateException) && 
+                       (e.getMessage() != null) && 
+                       (e.getMessage().indexOf("Pool not open") >= -1)) {
+                this.log.logFine("Pool was closed.");
+                
+            } else {
+                this.log.logSevere("plasmaStackCrawlThread.run/loop", e);
+            }
         }
     }
     
