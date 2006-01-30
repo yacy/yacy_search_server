@@ -616,7 +616,7 @@ Title==Titel
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==Der lokale Index besteht zur Zeit aus (ungef&auml;hr) #[wcount]# W&ouml;rtern und #[ucount]# URLs.
 Chunk Size<br>\(Word Entries\)==Chunk-Gr&ouml;sse<br>(Wort Eintr&auml;ge)
 Words Range==Worte-Bereich
-Transfered Words==Übertragene W&ouml;rter
+Transfered Words==Ãœbertragene W&ouml;rter
 Delete<br>Index==Index<br>l&ouml;schen
 true==ja
 false==nein
@@ -876,6 +876,137 @@ Content Parser Settings==Inhalt Parser Einstellungen
 Port Forwarding \(optional\)==Port Weiterleitung (optional)
 
 #-------------------------------------------------------
+#File: Settings_General.inc
+General Settings==Generelle Einstellungen
+<b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.</b>==<b>Ihr Peer Name erzeugt auch eine '.yacy'-domain die von jedem Nutzer dieses Proxys erreicht werden kann.</b>
+Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.==Mittels Ihrer 'Home Page' und 'File Share'-Zonen haben Sie auch eine Plattform, um Inhalte f&uuml;r Ihre neue Domain bereit zu stellen.
+staticIP ==statische IP 
+<b>The staticIP can help that your peer can be reached by other peers in case that your==<b>Die statische IP kann helfen Ihren Peer f&uuml;r andere Peers erreichbar zu machen, falls Sie
+peer is behind a firewall or proxy.</b>==hinter einer Firewall oder einem Proxy sind.</b>
+
+#-------------------------------------------------------
+#File: Settings_ProxyAccess.inc
+Server Access Settings==Server Zugangs Einstellungen
+These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP Proxy und Server.
+All traffic is routed throug one single port, for both proxy and server.==Der gesamte Traffic f&uuml;r Proxy und Server wird durch einen einzigen Port geleitet.
+Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
+The socket addresses where YaCy should listen for incomming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
+You have four possibilities to specify the address:==Sie haben vier M&ouml;glichkeiten die Adresse anzugeben:
+defining a port only==nur einen Port angeben
+<i>e.g. 8080</i>==<i>z.B. 8080</i>
+defining IP address and port==eine IP-Adresse und Port angeben
+<i>e.g. 192.168.0.1:8080</i>==<i>z.B. 192.168.0.1:8080</i>
+defining host name and port==einen Hostnamen und Port angeben
+<i>e.g. home:8080</i>==<i>z.B. home:8080</i>
+defining interface name and port==einen Interface-namen und Port angeben
+<i>e.g. #eth0:8080</i>==<i>z.B. #eth0:8080</i>
+Hint: Dont forget to change your firewall configuration after you have changed the port.==Hinweis: Denken Sie daran Ihre Firewalleinstellungen zu &auml;ndern nachdem Sie den Port ge&auml;ndert haben.
+Proxy and http-Server Administration Port:==Proxy und HTTP-Server Administrations Port:
+Changes will take effect in 5-10 seconds==Die &Auml;nderungen werden in 5-10 Sekunden wirksam
+Server Access Restrictions==Server Zugangsbeschr&auml;nkungen
+You can restrict the access to this proxy/server using a two-stage security barrier:==Sie k&ouml;nnen den Zugang zu diesem Proxy/Server mit einer 2-stufigen Sicherheitsbarriere einschr&auml;nken:
+define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards==geben Sie einen <i>Netzwerkadressraum</i> mithilfe einer Liste zugelassener Client-IP-Adressen oder mit Platzhaltern an
+define an <i>user account</i> with an user:password - pair==geben Sie einen <i>Nutzeraccount</i> mit einem nutzer:passwort-Paar an
+This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gew&auml;hrt wird.
+You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet.==Sie wollen den Proxy vermutlich nicht im Internet zur Verf&uuml;gung stellen, deshalb sollten Sie den IP-Adressraum so einstellen, dass er auf Ihr lokales Intranet zutrifft.
+The default setting should be right in most cases.==Die Standardwerte sollten in den meisten F&auml;llen richtig sein.
+If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.==Wenn Sie wollen k&ouml;nnen Sie auch Proxyaccounts erstellen, sodass sich jeder Proxynutzer zuerst anmelden muss, aber das ist eher un&uuml;blich.
+IP-Number filter:==IP-Adressen Filter:
+Use <a href="User_p.html">Proxy Accounts</a>==Nutze <a href="User_p.html">Proxy Accounts</a>
+
+#-------------------------------------------------------
+#File: Settings_Http.inc
+HTTP Networking==HTTP Netzwerk
+Transparent&nbsp;Proxy:==Transparenter Proxy:
+With this you can specify if YaCy can be used as transparent proxy.==Hiermit k&ouml;nnen Sie festlegen ob YaCy als transparenter Proxy genutzt werden kann.
+Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:==Hinweis: Unter Linux k&ouml;nnen Sie Ihre Firewall darauf einstellen alle HTTP-Verbindungen transparent an YaCy weiterzuleiten indem Sie diese iptables-Regel verwenden:
+With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Hiermit k&ouml;nnen Sie festlegen ob YaCy die HTTP connection keep-alive Funktionalit&auml;t unterst&uuml;tzen soll.
+Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
+
+#-------------------------------------------------------
+#File: Settings_Proxy.inc
+YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy kann einen anderen Proxy nutzen um sich zum Internet zu verbinden. Sie k&ouml;nnen die Adresse f&uuml;r den Remote Proxy hier eingeben.
+Use remote proxy:==Nutze Remote Proxy:
+Enables the usage of the remote proxy by yacy==Aktiviert die Nutzung des Remote Proxies durch YaCy
+Use remote proxy for yacy <-> yacy communication==Nutze Remote Proxy f&uuml;r YaCy <-> YaCy Kommunikation
+Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==Gibt an, ob der Remote Proxy f&uuml;r Kommunikation zwischen diesem und anderen YaCy-Peers genutzt werden soll.
+<i>Hint:</i> Enabling this option could cause this peer to remain in junior status.==<i>Hinweis:</i> Dies k&ouml;nnte dazu f&uuml;hren, dass dieser Peer im Junior-Status verbleibt.
+Use remote proxy for https==Nutze Remote Proxy f&uuml;r HTTPS
+Specifies if YaCy should forward ssl connections to the remote proxy.==Gibt an, ob YaCy SSL-Verbindungen zum Remote Proxy weiterleiten soll.
+The ip address or domain name of the remote proxy==Die IP-Adresse oder der Domainname des Remote Proxy
+the port of the remote proxy==Der Port des Remote Proxy
+no-proxy adresses:==proxylose Adressen:
+IP addresses for which the remote proxy should not be used==IP-Adressen f&uuml;r die der Remote Proxy nicht genutzt werden soll
+Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
+
+#-------------------------------------------------------
+#File: Settings_PortForwarding.inc
+#check for logical mistakes, unsure about some translations
+Port Forwarding==Port Weiterleitung
+You can use a remote server running a ssh demon to forward your server/proxy port.==Sie k&ouml;nnen einen Remote Server mit einem ssh demon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
+This is useful if you want to tunnel throug a NAT/router.==Dies ist n&uuml;tzlich, wenn Sie durch einen NAT/Router tunneln wollen.
+Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativ k&ouml;nnen Sie einfach einen virtuellen Server in Ihrem NAT/Router einstellen, um Verbindungen von Au&szlig;erhalb zu erm&ouml;glichen.
+Enable&nbsp;port&nbsp;forwarding:==Aktiviere Port Weiterleitung:
+Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung &uuml;ber sicheren Kanal.
+Forwarding&nbsp;via&nbsp;proxy:==Weiterleitung &uuml;ber Proxy:
+Function not available at the moment.==Funktion im Moment nicht verf&uuml;gbar.
+Forwarding&nbsp;port:==Weiterleitender Port
+The port on the remote server that should be forwarded via the secure channel to the local host.==Der Port des Remote Servers der mittels sicherem Kanal auf den lokalen Host weitergeleitet werden soll.
+Forwarding&nbsp;host:==Weiterleitender Host
+Forwarding&nbsp;host&nbsp;port:==Weiterleitender Host Port
+Forwarding&nbsp;host&nbsp;user:==Weiterleitender Host Nutzer
+Forwarding&nbsp;host&nbsp;password:==Weiterleitender Host Passwort
+Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
+
+#-------------------------------------------------------
+#File: Settings_ServerAccess.inc
+Server Access Settings==Server Zugangs Einstellungen
+Here you can restrict access to the server.==Hier k&ouml;nnen Sie den Zugang zum Server beschr&auml;nken.
+By default, the access is not limited, because this function is needed to spawn the p2p index-sharing function.==Standardm&auml;&szlig;ig ist der Zugang unbeschr&auml;nkt, da dies notwendig ist um den p2p-indextausch zu erm&ouml;glichen.
+If you block access to your server==Wenn Sie den Zugang zu Ihrem Server blockieren
+setting anything else than==Einstellen von irgendetwas anderem als
+then you will also be blocked from using other peers' indexes for search service.==dann werden Sie auch davon ausgeschlossen den Index anderer Peers zur Suche zu verwenden.
+However, blocking access may be correct in enterprise environments where you only want to index your company's own web pages.==Wie auch immer, in Unternehmensumgebungen kann ein Blockieren richtig sein, wenn Sie nur die Unternehmenseigenen Websites indexieren wollen.
+ATTENTION: Your current IP is recognized as==ACHTUNG: Ihre aktuelle IP wird als
+. If the value you enter here does not match with this IP, you will not be able to access the server pages anymore== erkannt. Falls der Wert den Sie hier eingeben nicht auf diese IP zutrifft, werden Sie nicht mehr in der Lage sein diese Seite zu erreichen.
+IP-Number filter:==IP-Addressfilter:
+
+#-------------------------------------------------------
+#File: Settings_Seed.inc
+Seed Upload Settings==Seed Upload Einstellungen
+With these settings you can configure if you have an account on a public accessible==Mit diesen Einstellungen k&ouml;nnen Sie bestimmen ob Sie einen Account auf einem &ouml;ffentlich zug&auml;nglichen
+server where you can host a seed-list file.==Server haben, wo Sie eine Seed-Liste bereitstellen k&ouml;nnen.
+General Settings:==Allgemeine Einstellungen:
+If you enable one of the available uploading methods, you will become a principal peer.==Wenn Sie eine der verf&uuml;gbaren Uploadmethoden aktivieren, werden Sie ein Principal-Peer.
+Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
+but only if there have been changes to the seed-list.==jedoch nur wenn &Auml;nderungen an der Seed-Liste vorgenommen wurden.
+Upload Method:==Uploadmethode:
+Retry Uploading==erneuter Upload
+Here you can specify which upload method should be used.==Hier k&ouml;nnen Sie ausw&auml;hlen welche Uploadmethode verwendet werden soll.
+Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu deaktivieren.
+The URL that can be used to retrieve the uploaded seed file, like==Die URL die genutzt werden kann um die hochgeladene Seed-Liste zu erhalten, wie
+
+#-------------------------------------------------------
+#File: Settings_MessageForwarding.inc
+Message Forwarding==Nachrichten Weiterleitung
+With this settings you can activate or deactivate forwarding of yacy-messages via email.==Mit diesen Einstellungen k&ouml;nnen Sie die Weiterleitung von YaCy-Nachrichten per E-Mail aktivieren oder deaktivieren.
+Enable message forwarding:==Aktiviere Nachrichten Weiterleitung:
+Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
+Forwarding Command:==Weiterleitungskommando:
+The command-line program that should be used to forward the message.<br>e.g.:==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br>z.B.:
+Forwarding To:==Weiterleiten An:
+The recipient email-address.<br> e.g.:==Die E-Mail Adresse des Empf&auml;ngers.<br>z.B.:
+Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
+
+#-------------------------------------------------------
+#File: Settings_Parser.inc
+Content Parser Settings==Inhalt Parser Einstellungen
+With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen k&ouml;nnen Sie das Parsen zus&auml;tzlicher Dateitypen basierend auf ihren MIME-Typen erm&ouml;glichen.
+For a detailed description of the various MIME-types take a look at==F&uuml;r eine detailierte Beschreibung der verschiedenen MIME-Typen k&ouml;nnen Sie einen Blick auf
+http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
+Changes take effect immediately==&Auml;nderungen sind sofort wirksam
+
+#-------------------------------------------------------
 #File: SettingsAck_p.html
 
 YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Einstellung Verarbeitung
@@ -892,13 +1023,12 @@ Your administration account setting has been made.==Ihre Administrator Account E
 Your new administration account name is \#\[user\]\#. The password has been accepted.<br>If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br>Wenn Sie zur&uuml;ck auf die Einstellungen Seite gehen wollen, m&uuml;ssen Sie sich neu einloggen.
 Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden ge&auml;ndert.
 Your proxy account check has been disabled, since you did not supply a password.==
-The new proxy IP filter is set to
+The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
 The proxy port is:==Der Proxy Port ist:
 if you changed the Port or Port Forwarding Settings, you need to restart YaCy.==Wenn Sie den Port oder die Post Weiterleitungs ge&auml;ndert haben, m&uuml;ssen Sie YaCy neu starten.
 Your proxy access setting has been changed.==Ihre Proxy Zugangs Einstellung wurden ge&auml;ndert.
 Your new proxy account name is \#\[user\]\#. The password has been accepted.==Ihr neuer Proxy Account Name ist #[user]#. Ihr Passwort wurde akzeptiert.
 If you open any public web page through the proxy, you must log-in then.==
-The new proxy IP filter is set to #[filter]#.
 Your server access filter is now set to #[filter]#
 Auto pop-up of the Status page is now <b>disabled</b>==Automatisches Pop-Up auf der Status Seite ist nun <b>deaktiviert.</b>
 Auto pop-up of the Status page is now <b>enabled</b>==Automatisches Pop-Up auf der Status Seite ist nun <b>aktiviert.</b>
@@ -1058,6 +1188,7 @@ not online==nicht online
 Seed server==Seed Server
 Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html#seed">Settings page</a>.==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten f&uuml;r den FTP-Account k&ouml;nnen Sie in den <a href="Settings_p.html#seed">Einstellungen</a> konfigurieren.
 Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
+Enabled: Updating periodically to file==Aktiv: Periodisches Update in Datei
 Last upload:==Letzter Upload:
 Enabled ==Aktiviert
 Online-mode==Onlinemodus
@@ -1135,6 +1266,27 @@ Then YaCy will restart.==Dann wird YaCy neu gestartet.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie k&ouml;nnen nun zur&uuml;ck auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie &Auml;nderungen vornehmen wollen.
 
 #-------------------------------------------------------
+#File: User_p.html
+new User==neuer Benutzer
+Edit User==Benutzer bearbeiten
+Delete User==Benutzer l&ouml;schen
+Current User:==aktueller Benutzer:
+Password:==Passwort:
+Password(repeat):==Passwort(wiederholen):
+First Name:==Vorname:
+Last Name:==Nachname:
+Address:==Adresse:
+Rights==Rechte
+Timelimit:==Zeitlimit:
+Time used:==verbrauchte Zeit:
+Save User==Benutzer speichern
+User created:==Benutzer erstellt:
+User changed:==Benutzer ge&auml;ndert:
+Passwords do not match.==Passw&ouml;rter stimmen nicht &uuml;berein.
+If you want to manage more Users, return to the==Wenn Sie mehr Benutzer verwalten wollen kehren Sie zur
+user</a> page.==Benutzerseite</a> zur&uuml;ck.
+
+#-------------------------------------------------------
 #File: ViewFile.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
@@ -1210,7 +1362,7 @@ Local Proxy==Lokaler Proxy
 Communication / Publication==Kommunikation / Publikation
 Peer&nbsp;Control==Peer Verwaltung
 The Project==Das Projekt
-Search Page==Sucheite
+Search Page==Suchseite
 >Help==>Hilfe
 Index Create==Index erzeugen
 Index Control==Index verwalten
