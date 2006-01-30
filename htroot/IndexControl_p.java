@@ -62,6 +62,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -255,12 +256,12 @@ public class IndexControl_p {
             }
             prop.put("urlstring", "");
             prop.put("urlhash", "");
-            plasmaWordIndexEntity[] indexes = new plasmaWordIndexEntity[1];
+            plasmaWordIndexEntryContainer[] indexes = new plasmaWordIndexEntryContainer[1];
             String result;
             long starttime = System.currentTimeMillis();
-            indexes[0] = switchboard.wordIndex.getEntity(keyhash, true, -1);
+            indexes[0] = switchboard.wordIndex.getContainer(keyhash, true, -1);
             // built urlCache
-            Iterator urlIter = indexes[0].elements(true);
+            Iterator urlIter = indexes[0].entries();
             HashMap knownURLs = new HashMap();
             HashSet unknownURLEntries = new HashSet();
             plasmaWordIndexEntry indexEntry;
@@ -282,9 +283,7 @@ public class IndexControl_p {
             // now delete all entries that have no url entry
             Iterator hashIter = unknownURLEntries.iterator();
             while (hashIter.hasNext()) {
-                try {
-                    indexes[0].removeEntry((String) hashIter.next(), false);
-                } catch (IOException e) {}
+                indexes[0].remove((String) hashIter.next());
             }
             // use whats remaining           
             String gzipBody = switchboard.getConfig("indexControl.gzipBody","false");
@@ -296,7 +295,8 @@ public class IndexControl_p {
                          "true".equalsIgnoreCase(gzipBody),
                          timeout);
             prop.put("result", (result == null) ? ("Successfully transferred " + indexes[0].size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds") : result);
-            try {indexes[0].close();} catch (IOException e) {}
+            indexes[0] = null;
+            indexes = null;
         }
 
         // generate list
@@ -431,15 +431,15 @@ public class IndexControl_p {
 
     public static String genUrlList(plasmaSwitchboard switchboard, String keyhash, String keystring) {
         // search for a word hash and generate a list of url links
-        plasmaWordIndexEntity index = null;
+        plasmaWordIndexEntryContainer index = null;
         try {
-            index = switchboard.wordIndex.getEntity(keyhash, true, -1);
+            index = switchboard.wordIndex.getContainer(keyhash, true, -1);
 
             final StringBuffer result = new StringBuffer(1024);
             if (index.size() == 0) {
                 result.append("No URL entries related to this word hash <span class=\"tt\">").append(keyhash).append("</span>.");
             } else {
-                final Iterator en = index.elements(true);
+                final Iterator en = index.entries();
                 result.append("URL entries related to this word hash <span class=\"tt\">").append(keyhash).append("</span><br><br>");
                 result.append("<form action=\"IndexControl_p.html\" method=\"post\" enctype=\"multipart/form-data\">");
                 String us;
@@ -497,13 +497,12 @@ public class IndexControl_p {
                       .append("<span class=\"small\">for every resolveable and deleted URL reference, delete the same reference at every other word where the reference exists (very extensive, but prevents further unresolved references)</span>")
                       .append("</td></tr></table></fieldset></form><br>");
             }
-            index.close();
             index = null;
             return result.toString();
         }  catch (IOException e) {
             return "";
         } finally {
-            if (index != null) try { index.close(); index = null; } catch (Exception e) {};
+            if (index != null) index = null;
         }
     }
 

@@ -203,11 +203,23 @@ public final class plasmaWordIndexAssortmentCluster {
     }
     
     public plasmaWordIndexEntryContainer removeFromAll(String wordHash, long maxTime) {
-        // collect all records from all the assortments and return them
+        // removes all records from all the assortments and return them
         plasmaWordIndexEntryContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         for (int i = 0; i < clusterCount; i++) {
             buffer = assortments[i].remove(wordHash);
+            if (buffer != null) record.add(buffer);
+            if (System.currentTimeMillis() > limitTime) break;
+        }
+        return record;
+    }
+
+    public plasmaWordIndexEntryContainer getFromAll(String wordHash, long maxTime) {
+        // collect all records from all the assortments and return them
+        plasmaWordIndexEntryContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
+        long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
+        for (int i = 0; i < clusterCount; i++) {
+            buffer = assortments[i].get(wordHash);
             if (buffer != null) record.add(buffer);
             if (System.currentTimeMillis() > limitTime) break;
         }

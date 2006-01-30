@@ -116,8 +116,8 @@ public final class plasmaSearchPreOrder {
         return (plasmaWordIndexEntry) pageAcc.remove(top);
     }
     
-    public void addEntity(plasmaWordIndexEntity entity, long maxTime) {
-        Iterator i = entity.elements(true);
+    public void addContainer(plasmaWordIndexEntryContainer container, long maxTime) {
+        Iterator i = container.entries();
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         plasmaWordIndexEntry entry;
         while (i.hasNext()) {

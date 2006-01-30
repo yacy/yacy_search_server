@@ -463,7 +463,7 @@ public class dir {
                 "AAAAAAAAAAAA", /*referrer*/
                 0, /*copycount*/
                 false, /*localneed*/
-                condenser.RESULT_INFORMATION_VALUE,
+                condenser.RESULT_WORD_ENTROPHY,
                 "**", /*language*/
                 plasmaWordIndexEntry.DT_SHARE, /*doctype*/
                 phrase.length(), /*size*/

@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.Date;
 import java.net.URL;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.server.logging.serverLog;
 
@@ -136,16 +137,8 @@ public final class plasmaWordIndex {
     
     public int addPageIndex(URL url, String urlHash, Date urlModified, int size, plasmaCondenser condenser, String language, char doctype) {
         // this is called by the switchboard to put in a new page into the index
-        // use all the words in one condenser object to simultanous create index
-        // entries
-        // int age = microDateDays(urlModified);
-        int quality = 0;
-        try {
-            quality = condenser.RESULT_INFORMATION_VALUE;
-        } catch (NumberFormatException e) {
-            System.out.println("INTERNAL ERROR WITH CONDENSER.INFORMATION_VALUE: " + e.toString() + ": in URL " + url.toString());
-        }
-
+        // use all the words in one condenser object to simultanous create index entries
+        
         // iterate over all words
         Iterator i = condenser.words();
         Map.Entry wentry;
@@ -153,6 +146,9 @@ public final class plasmaWordIndex {
         plasmaWordIndexEntry ientry;
         plasmaCondenser.wordStatProp wprop;
         String wordHash;
+        int urlLength = url.toString().length();
+        int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
+        
         while (i.hasNext()) {
             wentry = (Map.Entry) i.next();
             word = (String) wentry.getKey();
@@ -160,6 +156,7 @@ public final class plasmaWordIndex {
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
             wordHash = plasmaWordIndexEntry.word2hash(word);
             ientry = new plasmaWordIndexEntry(urlHash,
+                                              urlLength, urlComps,
                                              wprop.count,
                                              condenser.RESULT_SIMI_WORDS,
                                              condenser.RESULT_SIMI_SENTENCES,
@@ -170,18 +167,54 @@ public final class plasmaWordIndex {
                                              size,
                                              urlModified.getTime(),
                                              System.currentTimeMillis(),
-                                             quality, language, doctype, true);
+                                             condenser.RESULT_WORD_ENTROPHY,
+                                             language,
+                                             doctype,
+                                             true);
             addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), ientry), false);
         }
         // System.out.println("DEBUG: plasmaSearch.addPageIndex: added " +
         // condenser.getWords().size() + " words, flushed " + c + " entries");
         return condenser.RESULT_SIMI_WORDS;
     }
+
+    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
+        return ramCache.getContainer(wordHash, deleteIfEmpty, maxTime);
+    }
     
     public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty, long maxTime) {
-        return ramCache.getIndex(wordHash, deleteIfEmpty, maxTime);
+        return ramCache.getEntity(wordHash, deleteIfEmpty, maxTime);
     }
 
+    public Set getContainers(Set wordHashes, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
+        
+        // retrieve entities that belong to the hashes
+        HashSet containers = new HashSet();
+        String singleHash;
+        plasmaWordIndexEntryContainer singleContainer;
+        Iterator i = wordHashes.iterator();
+        long start = System.currentTimeMillis();
+        long remaining;
+        while (i.hasNext()) {
+            // check time
+            remaining = maxTime - (System.currentTimeMillis() - start);
+            //if ((maxTime > 0) && (remaining <= 0)) break;
+            
+            // get next hash:
+            singleHash = (String) i.next();
+            
+            // retrieve index
+            singleContainer = getContainer(singleHash, deleteIfEmpty, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
+            
+            // check result
+            if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashSet();
+            
+            containers.add(singleContainer);
+        }
+        return containers;
+    }
+
+    /*
     public Set getEntities(Set wordHashes, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
         
         // retrieve entities that belong to the hashes
@@ -203,13 +236,14 @@ public final class plasmaWordIndex {
             singleEntity = getEntity(singleHash, deleteIfEmpty, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - entities.size()));
             
             // check result
-            if (((singleEntity == null) || (singleEntity.size() == 0)) && (interruptIfEmpty)) return null;
+            if (((singleEntity == null) || (singleEntity.size() == 0)) && (interruptIfEmpty)) return new HashSet();
             
             entities.add(singleEntity);
         }
         return entities;
     }
-
+    */
+    
     public int size() {
         return ramCache.size();
     }

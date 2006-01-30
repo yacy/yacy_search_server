@@ -391,7 +391,18 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
     }
 
-    public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty, long maxTime) {
+    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
+        long start = System.currentTimeMillis();
+        if (maxTime > 0) maxTime = 8 * maxTime / 10; // reserve time for later adding to backend
+        plasmaWordIndexEntryContainer container = assortmentCluster.getFromAll(wordHash, maxTime);
+        if (container == null) {
+            container = new plasmaWordIndexEntryContainer(wordHash);
+        }
+        container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : System.currentTimeMillis() - start));
+        return container;
+    }
+
+    public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty, long maxTime) {
         // this possibly creates an index file in the back-end
         // the index file is opened and returned as entity object
         long start = System.currentTimeMillis();
@@ -406,7 +417,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             }
         }
         long r = maxTime - (System.currentTimeMillis() - start);
-        return backend.getIndex(wordHash, deleteIfEmpty, (r < 0) ? 0 : r);
+        return backend.getEntity(wordHash, deleteIfEmpty, (r < 0) ? 0 : r);
     }
 
     public long getUpdateTime(String wordHash) {

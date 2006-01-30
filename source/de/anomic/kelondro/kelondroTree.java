@@ -850,11 +850,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             this.rot = rotating;
             ii = new nodeIterator(asc, rot, start);
             nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
-            if (nextNode != null) {
+            if ((nextNode != null) && (nextNode.getKey() != null)) {
                 int c = objectOrder.compare(firstKey, nextNode.getKey());
                 if ((c > 0) && (asc)) {
                     // firstKey > nextNode.getKey()
-                    log.logWarning("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
+                    if (log != null) log.logWarning("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
                     nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
                 }
                 if ((c < 0) && (!(asc))) {

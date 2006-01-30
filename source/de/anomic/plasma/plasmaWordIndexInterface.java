@@ -50,7 +50,8 @@ public interface plasmaWordIndexInterface {
     
     public Iterator wordHashes(String startWordHash, boolean up);
 
-    public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty, long maxTime);
+    public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty, long maxTime);
+    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime);
     public long getUpdateTime(String wordHash);
     public void deleteIndex(String wordHash);
 

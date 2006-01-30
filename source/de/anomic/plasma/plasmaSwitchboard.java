@@ -1285,7 +1285,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             yacyCore.seedDB.mySeed.hash,
                             referrerHash,
                             0, true,
-                            condenser.RESULT_INFORMATION_VALUE,
+                            condenser.RESULT_WORD_ENTROPHY,
                             plasmaWordIndexEntry.language(entry.url()),
                             plasmaWordIndexEntry.docType(document.getMimeType()),
                             (int) entry.size(),
@@ -1313,15 +1313,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         } else {
                             HashMap urlCache = new HashMap(1);
                             urlCache.put(newEntry.hash(),newEntry);
-                            ArrayList tmpEntities = new ArrayList(condenser.RESULT_SIMI_WORDS);
+                            ArrayList tmpContainers = new ArrayList(condenser.RESULT_SIMI_WORDS);
                             String language = plasmaWordIndexEntry.language(entry.url());
                             char doctype = plasmaWordIndexEntry.docType(document.getMimeType());
-                            int quality = 0;
-                            try {
-                                quality = condenser.RESULT_INFORMATION_VALUE;
-                            } catch (NumberFormatException e) {
-                                System.out.println("INTERNAL ERROR WITH CONDENSER.INFORMATION_VALUE: " + e.toString() + ": in URL " + newEntry.url().toString());
-                            }
+                            int urlLength = newEntry.url().toString().length();
+                            int urlComps = htmlFilterContentScraper.urlComps(newEntry.url().toString()).length;
                             
                             // iterate over all words
                             Iterator i = condenser.words();
@@ -1332,8 +1328,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = plasmaWordIndexEntry.word2hash(word);
-                                plasmaWordIndexEntity wordIdxEntity = new plasmaWordIndexEntity(wordHash);
+                                plasmaWordIndexEntryContainer wordIdxContainer = new plasmaWordIndexEntryContainer(wordHash);
                                 plasmaWordIndexEntry wordIdxEntry = new plasmaWordIndexEntry(urlHash,
+                                                                                             urlLength, urlComps,
                                                                                              wordStat.count,
                                                                                              condenser.RESULT_SIMI_WORDS,
                                                                                              condenser.RESULT_SIMI_SENTENCES,
@@ -1344,26 +1341,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                                                                              newEntry.size(),
                                                                                              docDate.getTime(),
                                                                                              System.currentTimeMillis(),
-                                                                                             quality, language, doctype, true);
-                                wordIdxEntity.addEntry(wordIdxEntry);
-                                tmpEntities.add(wordIdxEntity);
+                                                                                             condenser.RESULT_WORD_ENTROPHY,
+                                                                                             language,
+                                                                                             doctype,
+                                                                                             true);
+                                wordIdxContainer.add(wordIdxEntry);
+                                tmpContainers.add(wordIdxContainer);
                                 // wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry));
                             }
                             //System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
                             words = condenser.RESULT_SIMI_WORDS;
                             
                             // transfering the index to the storage peer
-                            String error = yacyClient.transferIndex(seed,(plasmaWordIndexEntity[])tmpEntities.toArray(new plasmaWordIndexEntity[tmpEntities.size()]),urlCache,true,120000);
+                            String error = yacyClient.transferIndex(seed,(plasmaWordIndexEntryContainer[])tmpContainers.toArray(new plasmaWordIndexEntity[tmpContainers.size()]),urlCache,true,120000);
                             
                             if (error != null) {
                                 words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(), condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
                             }
                             
-                            // cleanup
-                            for (int j=0; j < tmpEntities.size(); j++) {
-                                plasmaWordIndexEntity tmpEntity = (plasmaWordIndexEntity) tmpEntities.get(j);
-                                try { tmpEntity.close(); } catch (Exception e) {}
-                            }
+                            tmpContainers = null;
                         }
                         storageEndTime = System.currentTimeMillis();
                         

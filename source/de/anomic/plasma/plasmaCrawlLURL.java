@@ -176,7 +176,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
 
-    public synchronized Entry getEntry(String hash, plasmaWordIndexEntry searchedWord) throws IOException {
+    public Entry getEntry(String hash, plasmaWordIndexEntry searchedWord) throws IOException {
         return new Entry(hash, searchedWord);
     }
 
@@ -399,8 +399,16 @@ public final class plasmaCrawlLURL extends plasmaURL {
         private int size;
         private int wordCount;
         private String snippet;
-        private plasmaWordIndexEntry word;
+        private plasmaWordIndexEntry word; // this is only used if the url is transported via remote search requests
 
+        // more needed attributes:
+        // - author / copyright owner
+        // - keywords
+        // - phrasecount, total number of phrases
+        // - boolean: URL attributes
+        // - int: # of outlinks to same domain
+        // - int: # of outlinks to outside domain
+        
         public Entry(URL url, String descr, Date moddate, Date loaddate, String referrerHash, int copyCount, boolean localNeed, int quality, String language, char doctype, int size, int wordCount) {
             // create new entry and store it into database
             this.urlHash = urlHash(url);

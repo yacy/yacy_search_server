@@ -50,12 +50,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.plasma.plasmaURLPattern;
@@ -348,14 +349,15 @@ public final class yacyClient {
     }
 
     public static int search(
-            String wordhashes, 
+            String wordhashes,
+            int maxDistance,
             boolean global, 
             yacySeed targetPeer,
-           plasmaCrawlLURL urlManager, 
-           plasmaWordIndexEntity entityCache,
-           plasmaURLPattern blacklist, 
-           plasmaSnippetCache snippets, 
-           plasmaSearchProfile profile
+            plasmaCrawlLURL urlManager, 
+            plasmaWordIndexEntryContainer containerCache,
+            plasmaURLPattern blacklist, 
+            plasmaSnippetCache snippets, 
+            plasmaSearchProfile profile
     ) {
         // send a search request to peer with remote Hash
         // this mainly converts the words into word hashes
@@ -403,6 +405,7 @@ public final class yacyClient {
             obj.put("ttl", "0");
             obj.put("duetime", Long.toString(duetime));
             obj.put("profile", profile.targetToString()); // new duetimes splitted by specific search tasks
+            obj.put("maxdist", maxDistance);
             obj.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
 
             //yacyCore.log.logDebug("yacyClient.search url=" + url);
@@ -460,6 +463,9 @@ public final class yacyClient {
                 // get one single search result
                 urlEntry = urlManager.newEntry((String) result.get("resource" + n), true);
                 if (urlEntry != null && blacklist.isListed(urlEntry.url().getHost().toLowerCase(), urlEntry.url().getPath())) { continue; } // block with backlist
+                int urlLength = urlEntry.url().toString().length();
+                int urlComps = htmlFilterContentScraper.urlComps(urlEntry.url().toString()).length;
+                
                 urlManager.addEntry(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
                 // save the url entry
                 final plasmaWordIndexEntry entry;
@@ -467,6 +473,7 @@ public final class yacyClient {
                     // the old way to define words
                     entry = new plasmaWordIndexEntry(
                                                      urlEntry.hash(),
+                                                     urlLength, urlComps,
                                                      urlEntry.wordCount(),
                                                      0, 0, 0, 0, 0, 0,
                                                      urlEntry.size(),
@@ -494,7 +501,7 @@ public final class yacyClient {
             }
 
             // finally insert the containers to the index
-            for (int m = 0; m < words; m++) { entityCache.addEntries(container[m]); }
+            for (int m = 0; m < words; m++) { containerCache.add(container[m]); }
 
             // generate statistics
             long searchtime;
@@ -841,7 +848,7 @@ public final class yacyClient {
                                    httpHeader requestHeader) throws IOException {
      */
 
-    public static String transferIndex(yacySeed targetSeed, plasmaWordIndexEntity[] indexes, HashMap urlCache, boolean gzipBody, int timeout) {
+    public static String transferIndex(yacySeed targetSeed, plasmaWordIndexEntryContainer[] indexes, HashMap urlCache, boolean gzipBody, int timeout) {
         
         HashMap in = transferRWI(targetSeed, indexes, gzipBody, timeout);
         if (in == null) { return "no_connection_1"; }
@@ -875,7 +882,7 @@ public final class yacyClient {
         return null;
     }
 
-    private static HashMap transferRWI(yacySeed targetSeed, plasmaWordIndexEntity[] indexes, boolean gzipBody, int timeout) {
+    private static HashMap transferRWI(yacySeed targetSeed, plasmaWordIndexEntryContainer[] indexes, boolean gzipBody, int timeout) {
         final String address = targetSeed.getAddress();
         if (address == null) { return null; }
         
@@ -903,7 +910,7 @@ public final class yacyClient {
         Iterator eenum;
         plasmaWordIndexEntry entry;
         for (int i = 0; i < indexes.length; i++) {
-            eenum = indexes[i].elements(true);
+            eenum = indexes[i].entries();
             while (eenum.hasNext()) {
                 entry = (plasmaWordIndexEntry) eenum.next();
                 entrypost.append(indexes[i].wordHash()) 

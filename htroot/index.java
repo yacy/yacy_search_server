@@ -126,7 +126,12 @@ public class index {
 
         // SEARCH
         // process search words
-        final String querystring = post.get("search", "");
+        int maxDistance = Integer.MAX_VALUE;
+        String querystring = post.get("search", "").trim();
+        if ((querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
+            querystring = querystring.substring(1, querystring.length() - 1).trim();
+            maxDistance = 1;
+        }
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
         final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
         // filter out stopwords
@@ -172,7 +177,7 @@ public class index {
         }
 
         // do the search
-        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, new String[]{order1, order2, order3}, count, searchtime, urlmask, referer,
+        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, maxDistance, new String[]{order1, order2, order3}, count, searchtime, urlmask, referer,
                                                              ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
                                                              "", 20);
         final serverObjects prop = sb.searchFromLocal(thisSearch);

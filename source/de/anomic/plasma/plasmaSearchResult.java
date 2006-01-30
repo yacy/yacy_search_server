@@ -54,10 +54,9 @@ import java.net.MalformedURLException;
 
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.serverCodings;
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 
 public final class plasmaSearchResult {
-    
-    public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
     
     private TreeMap pageAcc;            // key = order hash; value = plasmaLURL.entry
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
@@ -111,8 +110,8 @@ public final class plasmaSearchResult {
         URL url = page.url();
         String descr = page.descr();
         if ((url == null) || (descr == null)) return;
-        String[] urlcomps = url.toString().toLowerCase().split(splitrex); // word components of the url
-        String[] descrcomps = descr.toLowerCase().split(splitrex); // words in the description
+        String[] urlcomps = htmlFilterContentScraper.urlComps(url.toString()); // word components of the url
+        String[] descrcomps = descr.toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
         
         // store everything
         Object[] resultVector = new Object[] {indexEntry, page, urlcomps, descrcomps};

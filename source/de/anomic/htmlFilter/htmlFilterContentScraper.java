@@ -75,6 +75,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         linkTags0.add("img");
         linkTags0.add("base");
         linkTags0.add("frame");
+        linkTags0.add("meta");
 
         linkTags1 = new TreeSet(insensitiveCollator);
         linkTags1.add("a");
@@ -88,6 +89,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     // class variables: collectors for links
     private HashMap anchors;
     private HashMap images;
+    private HashMap metas;
     private String title;
     //private String headline;
     private List[] headlines;
@@ -101,6 +103,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         this.root = root;
         this.anchors = new HashMap();
         this.images = new HashMap();
+        this.metas = new HashMap();
         this.title = "";
         this.headlines = new ArrayList[4];
         for (int i = 0; i < 4; i++) headlines[i] = new ArrayList();
@@ -193,7 +196,12 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             return null;
         }
     }
-
+    
+    public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
+    public static String[] urlComps(String normalizedURL) {
+        return normalizedURL.toLowerCase().split(splitrex); // word components of the url
+    }
+    
     private String absolutePath(String relativePath) {
         try {
             return urlNormalform(new URL(root, relativePath));
@@ -206,6 +214,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (tagname.equalsIgnoreCase("img")) images.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("alt",""));
         if (tagname.equalsIgnoreCase("base")) try {root = new URL(tagopts.getProperty("href", ""));} catch (MalformedURLException e) {}
         if (tagname.equalsIgnoreCase("frame")) anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
+        if (tagname.equalsIgnoreCase("meta")) metas.put((tagopts.getProperty("name", "")).toLowerCase(), tagopts.getProperty("content",""));
     }
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
@@ -252,10 +261,16 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // construct a title string, even if the document has no title
         // if there is one, return it
         if (title.length() > 0) return title;
+        
         // othervise take any headline
         for (int i = 0; i < 4; i++) {
             if (headlines[i].size() > 0) return (String) headlines[i].get(0);
         }
+        
+        // take description tag
+        String s = getDescription();
+        if (s.length() > 0) return s;
+        
         // extract headline from content
         if (content.length() > 80) return cleanLine(new String(content.getBytes(), 0, 80));
         return cleanLine(content.trim().toString());
@@ -280,6 +295,45 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return images;
     }
 
+    public Map getMetas() {
+        return metas;
+    }
+
+    public String getDescription() {
+        String s = (String) metas.get("description");
+        if (s == null) return ""; else return s;
+    }
+    
+    public String getContentType() {
+        String s = (String) metas.get("content-type");
+        if (s == null) return ""; else return s;
+    }
+    
+    public String getCopyright() {
+        String s = (String) metas.get("copyright");
+        if (s == null) return ""; else return s;
+    }
+    
+    public String[] getContentLanguages() {
+        String s = (String) metas.get("content-language");
+        if (s == null) s = "";
+        return s.split(" |,");
+    }
+    
+    public String[] getKeywords() {
+        String s = (String) metas.get("keywords");
+        if (s == null) s = "";
+        if (s.length() == 0) {
+            return getTitle().toLowerCase().split(splitrex);
+        } else {
+        return s.split(" |,");
+        }
+    }
+    
+    /*
+     *  (non-Javadoc)
+     * @see de.anomic.htmlFilter.htmlFilterScraper#close()
+     */
     public void close() {
         // free resources
         super.close();
@@ -298,6 +352,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
         System.out.println("ANCHORS  :" + anchors.toString());
         System.out.println("IMAGES   :" + images.toString());
+        System.out.println("METAS    :" + metas.toString());
         System.out.println("TEXT     :" + new String(content.getBytes()));
     }
 

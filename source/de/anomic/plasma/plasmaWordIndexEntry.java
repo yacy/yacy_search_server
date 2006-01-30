@@ -100,18 +100,21 @@ public final class plasmaWordIndexEntry {
     public static final char DT_UNKNOWN = 'u';
 
     // appearance locations: (used for flags)
-    public static final int AP_TITLE  =  0; // title tag from html header
-    public static final int AP_H1     =  1; // h1-tag
-    public static final int AP_H2     =  2; // h2-tag
-    public static final int AP_H3     =  3; // h3-tag
-    public static final int AP_H4     =  4; // h4-tag
-    public static final int AP_H5     =  5; // h5-tag
-    public static final int AP_H6     =  6; // h6-tag
-    public static final int AP_TEXT   =  7; // word appears in text (used to check validation of other appearances against spam)
-    public static final int AP_URL    =  8; // word inside an url
-    public static final int AP_IMG    =  9; // tag inside image references
-    public static final int AP_TAG    = 10; // for tagged indexeing (i.e. using mp3 tags)
-    public static final int AP_ANCHOR = 11; // anchor description
+    public static final int AP_TITLE     =  0; // title tag from html header
+    public static final int AP_H1        =  1; // h1-tag
+    public static final int AP_H2        =  2; // h2-tag
+    public static final int AP_H3        =  3; // h3-tag
+    public static final int AP_H4        =  4; // h4-tag
+    public static final int AP_H5        =  5; // h5-tag
+    public static final int AP_H6        =  6; // h6-tag
+    public static final int AP_TEXT      =  7; // word appears in text (used to check validation of other appearances against spam)
+    public static final int AP_URL       =  8; // word inside an url
+    public static final int AP_IMG       =  9; // tag inside image references
+    public static final int AP_TAG       = 10; // for tagged indexeing (i.e. using mp3 tags)
+    public static final int AP_ANCHOR    = 11; // anchor description
+    public static final int AP_BOLD      = 12;
+    public static final int AP_ITALICS   = 13;
+    public static final int AP_INVISIBLE = 14; // good for spam detection
     
     // URL attributes
     public static final int UA_LOCAL    =  0; // URL was crawled locally
@@ -208,6 +211,8 @@ public final class plasmaWordIndexEntry {
     // the class instantiation can only be done by a plasmaStore method
     // therefore they are all public
     public plasmaWordIndexEntry(String  urlHash,
+                                int     urlLength,    // byte-length of complete URL
+                                int     urlComps,     // number of path components
                                 int     hitcount,     //*how often appears this word in the text
                                 int     wordcount,    //*total number of words
                                 int     phrasecount,  //*total number of phrases
@@ -227,14 +232,9 @@ public final class plasmaWordIndexEntry {
         // more needed attributes:
         // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag etc
         // - boolean: URL attributes
-        // - int: url-length (shorter are better)
-        // - int: url-number of components / length of path
         // - int: length of description tag / title tag (longer are better)
-        // - int: number of chapters
         // - int: # of outlinks to same domain
         // - int: # of outlinks to outside domain
-        // - int: length of description
-        // - int: length of title
         // - int: # of keywords
         
     if ((language == null) || (language.length() != plasmaURL.urlLanguageLength)) language = "uk";

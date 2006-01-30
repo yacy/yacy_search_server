@@ -47,7 +47,6 @@
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
-import java.io.IOException;
 import java.util.HashSet;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -81,6 +80,7 @@ public final class search {
 //      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
         final long    duetime= post.getLong("duetime", 3000);
         final int     count  = post.getInt("count", 10); // maximum number of wanted results
+        final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
@@ -103,8 +103,8 @@ public final class search {
         }
         final long timestamp = System.currentTimeMillis();
         
-        plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, new String[]{plasmaSearchQuery.ORDER_YBR, plasmaSearchQuery.ORDER_DATE, plasmaSearchQuery.ORDER_QUALITY},
-                                                        count, duetime, ".*");        
+        plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, maxdist, new String[]{plasmaSearchQuery.ORDER_YBR, plasmaSearchQuery.ORDER_DATE, plasmaSearchQuery.ORDER_QUALITY},
+                                                        count, duetime, ".*");
         squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
 
         serverObjects prop = new serverObjects();
@@ -114,11 +114,8 @@ public final class search {
         plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
         plasmaSearchResult acc = null;
         int idxc = 0;
-        try {
-            idxc = theSearch.localSearch();
-            acc = theSearch.order();
-        } catch (IOException e) {
-        }
+        idxc = theSearch.localSearch();
+        acc = theSearch.order();
 
         // result is a List of urlEntry elements
         if ((idxc == 0) || (acc == null)) {

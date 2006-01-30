@@ -181,7 +181,24 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         }
     }
 
-    public plasmaWordIndexEntity getIndex(String wordHash, boolean deleteIfEmpty, long maxTime) {
+    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
+        long start = System.currentTimeMillis();
+        if (plasmaWordIndexEntity.wordHash2path(databaseRoot, wordHash).exists()) {
+            plasmaWordIndexEntity entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
+            plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
+            plasmaWordIndexEntry entry;
+            Iterator i = entity.elements(true);
+            while ((i.hasNext()) && ((maxTime < 0) || (System.currentTimeMillis() < start + maxTime))) {
+                entry = (plasmaWordIndexEntry) i.next();
+                container.add(entry);
+            }
+            return container;
+        } else {
+            return new plasmaWordIndexEntryContainer(wordHash, 0);
+        }
+    }
+    
+    public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty, long maxTime) {
         return new plasmaWordIndexEntity(databaseRoot, wordHash, deleteIfEmpty);
     }
     
@@ -189,7 +206,6 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         File f = plasmaWordIndexEntity.wordHash2path(databaseRoot, wordHash);
         if (f.exists()) return f.lastModified(); else return -1;
     }
-    
     
     public void deleteIndex(String wordHash) {
         plasmaWordIndexEntity.removePlasmaIndex(databaseRoot, wordHash);
@@ -200,7 +216,7 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         plasmaWordIndexEntity pi = null;
         int count = 0;
         try {
-            pi = getIndex(wordHash, true, -1);
+            pi = getEntity(wordHash, true, -1);
             for (int i = 0; i < urlHashes.length; i++)
                 if (pi.removeEntry(urlHashes[i], deleteComplete)) count++;
             int size = pi.size();

@@ -83,9 +83,6 @@ public final class plasmaCondenser {
     public int RESULT_NUMB_SENTENCES = -1;
     public int RESULT_DIFF_SENTENCES = -1;
     public int RESULT_SIMI_SENTENCES = -1;
-    public int RESULT_AVERAGE_WORD_OCC = -1;
-    public int RESULT_INFORMATION_VALUE = -1;
-
     
     public plasmaCondenser(InputStream text) {
         this(text, 3, 2);
@@ -357,8 +354,7 @@ public final class plasmaCondenser {
         this.RESULT_NUMB_SENTENCES = allsentencecounter;
         this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
         this.RESULT_SIMI_SENTENCES = sentences.size();
-        this.RESULT_AVERAGE_WORD_OCC = (words.size() == 0) ? 0 : (allwordcounter / words.size());
-        this.RESULT_INFORMATION_VALUE = (allwordcounter == 0) ? 0 : (wordenum.count() * words.size() / allwordcounter / 16);
+        //this.RESULT_INFORMATION_VALUE = (allwordcounter == 0) ? 0 : (wordenum.count() * words.size() / allwordcounter / 16);
     }
 
     public void print() {

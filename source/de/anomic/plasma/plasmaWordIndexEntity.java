@@ -48,7 +48,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeMap;
-import java.util.Set;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
@@ -111,6 +110,7 @@ public final class plasmaWordIndexEntity {
              hash.substring(4,6) + "/" + hash + ".db");
     }
 
+    /*
     public plasmaWordIndexEntity(String wordHash) {
         // this creates a nameless temporary index. It is needed for combined search
         // and used to hold the intersection of two indexes
@@ -121,7 +121,7 @@ public final class plasmaWordIndexEntity {
         theLocation = null;
         theTmpMap   = new TreeMap();
     }
-
+*/
     public boolean isTMPEntity() {
         return theTmpMap != null;
     }
@@ -302,12 +302,6 @@ public final class plasmaWordIndexEntity {
         else return "EMPTY";
     }
 
-    // join methods
-    private static int log2(int x) {
-        int l = 0;
-        while (x > 0) {x = x >> 1; l++;}
-        return l;
-    }
     
     public void merge(plasmaWordIndexEntity otherEntity, long time) throws IOException {
         // this is a merge of another entity to this entity
@@ -322,6 +316,14 @@ public final class plasmaWordIndexEntity {
         } catch (kelondroException e) {
             serverLog.logSevere("PLASMA", "plasmaWordIndexEntity.merge: " + e.getMessage());
         }
+    }
+    
+    /*
+    // join methods
+    private static int log2(int x) {
+        int l = 0;
+        while (x > 0) {x = x >> 1; l++;}
+        return l;
     }
     
     public static plasmaWordIndexEntity joinEntities(Set entities, long time) throws IOException {
@@ -485,5 +487,5 @@ public final class plasmaWordIndexEntity {
         }
         return conj;
     }
-
+*/
 }
