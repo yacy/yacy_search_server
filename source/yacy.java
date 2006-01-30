@@ -433,13 +433,13 @@ public final class yacy {
                     run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
 
                     // save information about available memory after all initializations
-                    try {
+                    //try {
                         sb.setConfig("memoryFreeAfterInitBGC", Runtime.getRuntime().freeMemory());
                         sb.setConfig("memoryTotalAfterInitBGC", Runtime.getRuntime().totalMemory());
                         System.gc();
                         sb.setConfig("memoryFreeAfterInitAGC", Runtime.getRuntime().freeMemory());
                         sb.setConfig("memoryTotalAfterInitAGC", Runtime.getRuntime().totalMemory());
-                    } catch (ConcurrentModificationException e) {}
+                    //} catch (ConcurrentModificationException e) {}
                     
                     // wait for server shutdown
                     try {

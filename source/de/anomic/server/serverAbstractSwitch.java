@@ -53,6 +53,8 @@ import de.anomic.server.serverAbstractSwitch;
 
 public abstract class serverAbstractSwitch implements serverSwitch {
 
+    private static final long delayBetweenSave = 2000;
+    
     // configuration management
     private final File      configFile;
     private Map             configProps;
@@ -64,6 +66,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     private final TreeMap   switchActions;
     protected serverLog     log;
     protected int           serverJobs;
+    private long            lastTimeSaved;
     
     public serverAbstractSwitch(String rootPath, String initPath, String configPath) {
         // we initialize the switchboard with a property file,
@@ -130,6 +133,9 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
         // init busy state control
         serverJobs = 0;
+        
+        // save control
+        lastTimeSaved = System.currentTimeMillis();
     }
     
     // a logger for this switchboard
@@ -146,57 +152,62 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     }
 
     public void setConfig(String key, String value) {
-	// perform action before setting new value
-	Map.Entry entry;
-	serverSwitchAction action;
-	Iterator i = switchActions.entrySet().iterator();
-	while (i.hasNext()) {
-	    entry = (Map.Entry) i.next();
-	    action = (serverSwitchAction) entry.getValue();
-	    try {
-		action.doBevoreSetConfig(key, value);
-	    } catch (Exception e) {
-		log.logSevere("serverAction bevoreSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
-	    }
-	}
+        // perform action before setting new value
+        synchronized (configProps) {
+            Map.Entry entry;
+            serverSwitchAction action;
+            Iterator i = switchActions.entrySet().iterator();
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                action = (serverSwitchAction) entry.getValue();
+                try {
+                    action.doBevoreSetConfig(key, value);
+                } catch (Exception e) {
+                    log.logSevere("serverAction bevoreSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
+                }
+            }
 
-	// set the value
-	Object oldValue = configProps.put(key, value);
-	saveConfig();
+            // set the value
+            Object oldValue = configProps.put(key, value);
+            saveConfig();
 
-	// perform actions afterwards
-	i = switchActions.entrySet().iterator();
-	while (i.hasNext()) {
-	    entry = (Map.Entry) i.next();
-	    action = (serverSwitchAction) entry.getValue();
-	    try {
-		action.doAfterSetConfig(key, value, (oldValue==null)?null:(String)oldValue);
-	    } catch (Exception e) {
-		log.logSevere("serverAction afterSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
-	    }
-	}
+            // perform actions afterwards
+            i = switchActions.entrySet().iterator();
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                action = (serverSwitchAction) entry.getValue();
+                try {
+                    action.doAfterSetConfig(key, value, (oldValue == null) ? null : (String) oldValue);
+                } catch (Exception e) {
+                    log.logSevere("serverAction afterSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
+                }
+            }
+        }
     }
 
     public String getConfig(String key, String dflt) {
-	// get the value
-	Object s = configProps.get(key);
+        synchronized (configProps) {
+            // get the value
+            Object s = configProps.get(key);
 
-	// do action
-	Map.Entry entry;
-	serverSwitchAction action;
-	Iterator i = switchActions.entrySet().iterator();
-	while (i.hasNext()) {
-	    entry = (Map.Entry) i.next();
-	    action = (serverSwitchAction) entry.getValue();
-	    try {
-		action.doWhenGetConfig(key, (s==null)?null:(String)s, dflt);
-	    } catch (Exception e) {
-		log.logSevere("serverAction whenGetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
-	    }
-	}
+            // do action
+            Map.Entry entry;
+            serverSwitchAction action;
+            Iterator i = switchActions.entrySet().iterator();
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                action = (serverSwitchAction) entry.getValue();
+                try {
+                    action.doWhenGetConfig(key, (s == null) ? null : (String) s, dflt);
+                } catch (Exception e) {
+                    log.logSevere("serverAction whenGetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
+                }
+            }
 
-	// return value
-	if (s == null) return dflt; else return (String)s;
+            // return value
+            if (s == null) return dflt;
+            else return (String) s;
+        }
     }
     
     public long getConfigLong(String key, long dflt) {
@@ -212,11 +223,16 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     }
 
     private void saveConfig() {
-	try {
-	    serverFileUtils.saveMap(configFile, configProps, configComment);
-	} catch (IOException e) {
-	    System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
-	}
+        if (System.currentTimeMillis() > this.lastTimeSaved + delayBetweenSave) {
+            try {
+                synchronized (configProps) {
+                    serverFileUtils.saveMap(configFile, configProps, configComment);
+                }
+            } catch (IOException e) {
+                System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
+            }
+            this.lastTimeSaved = System.currentTimeMillis();
+        }
     }
 
     public Map getRemoved() {
