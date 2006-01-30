@@ -616,7 +616,7 @@ Title==Titel
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==Der lokale Index besteht zur Zeit aus (ungef&auml;hr) #[wcount]# W&ouml;rtern und #[ucount]# URLs.
 Chunk Size<br>\(Word Entries\)==Chunk-Gr&ouml;sse<br>(Wort Eintr&auml;ge)
 Words Range==Worte-Bereich
-Transfered Words==Ãœbertragene W&ouml;rter
+Transfered Words==&Uuml;bertragene W&ouml;rter
 Delete<br>Index==Index<br>l&ouml;schen
 true==ja
 false==nein
