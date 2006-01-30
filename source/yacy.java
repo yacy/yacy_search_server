@@ -1417,7 +1417,7 @@ public final class yacy {
                         String peerPort = (String) dna.get("Port");
                         
                         while (peerHash.length() < yacySeedDB.commonHashLength) { peerHash = peerHash + "_"; }                        
-                        System.err.println("Invalid Peer found in '" + dbFileNames[i] + "': " + peerName + ":" +  peerHash + ", http://" + peerIP + ":" + peerPort);
+                        System.err.println("Invalid Peer-Hash found in '" + dbFileNames[i] + "': " + peerName + ":" +  peerHash + ", http://" + peerIP + ":" + peerPort);
                     }
                 }
                 db.close();
