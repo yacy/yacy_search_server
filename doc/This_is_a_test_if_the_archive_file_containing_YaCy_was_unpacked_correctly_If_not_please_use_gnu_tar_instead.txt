@@ -1,0 +1,7 @@
+            // Testing if the yacy archive file were unzipped correctly.
+            // This test is needed because of classfile-names longer than 100 chars
+            // which could cause problems with incompatible unzip software.
+            // See:
+            // - http://www.yacy-forum.de/viewtopic.php?t=1763
+            // - http://www.yacy-forum.de/viewtopic.php?t=715
+            // - http://www.yacy-forum.de/viewtopic.php?t=1674

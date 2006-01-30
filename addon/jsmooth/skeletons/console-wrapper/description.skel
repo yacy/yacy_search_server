@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<jsmoothskeleton>
+<debug>false</debug>
+<description>This skeleton wraps console applications. 
+- Standard Input/Output and Error streams are available
+- If no Java VM is found, it displays a default message.
+
+Although it is designed for console application (i.e. launched from the command.com shell prompt), it can launch standard GUI application. In such a case, any output of the java application (from System.out or System.err) is displayed in the a DOS Console.
+</description>
+<executableName>consolewrapper.exe</executableName>
+<resourceCategory>JAVA</resourceCategory>
+<resourceJarId>102</resourceJarId>
+<resourcePropsId>103</resourcePropsId>
+<shortName>Console Wrapper</shortName>
+<skeletonProperties>
+<description>When no JVM is found in the target computer, the following message is displayed on the console.</description>
+<idName>Message</idName>
+<label>Message</label>
+<type>textarea</type>
+<value>This program needs Java to run.
+Please download it at http://www.java.com</value>
+</skeletonProperties>
+<skeletonProperties>
+<description>The wrapper waits a keypress on the console when the application exits.</description>
+<idName>PressKey</idName>
+<label>PressKey</label>
+<type>boolean</type>
+<value>0</value>
+</skeletonProperties>
+<skeletonProperties>
+<description>Enable the jsmooth debug traces</description>
+<idName>Debug</idName>
+<label>Debug traces</label>
+<type>boolean</type>
+<value>0</value>
+</skeletonProperties>
+</jsmoothskeleton>

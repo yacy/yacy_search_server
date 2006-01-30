@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<jsmoothskeleton>
+<debug>false</debug>
+<description>This skeleton wraps GUI applications. 
+- No console I/O is displayed
+- If no Java VM is found, it is able to display a configurable URL (typically to a java download page).
+</description>
+<executableName>jwrap.exe</executableName>
+<resourceCategory>JAVA</resourceCategory>
+<resourceJarId>102</resourceJarId>
+<resourcePropsId>103</resourcePropsId>
+<shortName>Windowed Wrapper</shortName>
+<skeletonProperties>
+<description>When no JVM is found in the target computer, the user is prompted with the message defined below. Then, the default browser is launched with the URL defined here.</description>
+<idName>Message</idName>
+<label>Message</label>
+<type>textarea</type>
+<value>Java has not been found on your computer. Do you want to download it?</value>
+</skeletonProperties>
+<skeletonProperties>
+<description>If the user selects YES to the message prompted above, the default web browser is launched with this URL.</description>
+<idName>URL</idName>
+<label>URL</label>
+<type>string</type>
+<value>http://www.java.com</value>
+</skeletonProperties>
+<skeletonProperties>
+<description>The default behaviour is to launch the java application in a different (detached)  process. If you want to force the wrapper to launch the Java application in the same process than the exe, than select this option.</description>
+<idName>SingleProcess</idName>
+<label>Launch java app in the exe process</label>
+<type>boolean</type>
+<value>0</value>
+</skeletonProperties>
+<skeletonProperties>
+<description>Enable the jsmooth debug console.</description>
+<idName>Debug</idName>
+<label>Debug console</label>
+<type>boolean</type>
+<value>0</value>
+</skeletonProperties>
+</jsmoothskeleton>

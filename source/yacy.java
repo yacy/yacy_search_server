@@ -234,7 +234,7 @@ public final class yacy {
             // - http://www.yacy-forum.de/viewtopic.php?t=1763
             // - http://www.yacy-forum.de/viewtopic.php?t=715
             // - http://www.yacy-forum.de/viewtopic.php?t=1674
-            File unzipTest = new File(homePath,"classes/de/anomic/kelondro/kelondroMScoreCluster$reverseScoreIterator.class");
+            File unzipTest = new File(homePath,"doc/This_is_a_test_if_the_archive_file_containing_YaCy_was_unpacked_correctly_If_not_please_use_gnu_tar_instead.txt");
             if (!unzipTest.exists()) {
                 String errorMsg = "The archive file containing YaCy was not unpacked correctly. " +
                                   "Please use 'GNU-Tar' or upgrade to a newer version of your unzip software.\n" +

@@ -379,6 +379,7 @@
 	    <include name="stopYACY_Win9x.bat"/>
 	  </fileset>	
 	</copy>
+	<copy todir="${release_main}" file="yacy.exe" failonerror="false"/>
 	
 	<!-- copy locales  -->
 	<copy todir="${release_main}/locales">
@@ -616,7 +617,7 @@
   </jar>	
 </target>
 	
-<target name="win-exe" depends="build-jar">
+<target name="makeWinExe" depends="build-jar,compileExtensions">
   <!-- Creates a Windows Executable using JSmooth (http://jsmooth.sf.net) -->
   <taskdef name="jsmoothgen"
            classname="net.charabia.jsmoothgen.ant.JSmoothGen"
@@ -628,5 +629,8 @@
 	    <fileset dir="${build}" includes="**/*.class" />
 	  </delete>	
 </target>	
+
+<target name="distWinExe" depends="makeWinExe,distAllInOne">	
+</target>
 
 </project>
