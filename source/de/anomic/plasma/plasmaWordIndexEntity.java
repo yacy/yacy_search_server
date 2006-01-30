@@ -47,7 +47,6 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.TreeMap;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
@@ -57,14 +56,12 @@ public final class plasmaWordIndexEntity {
 
     private final String theWordHash;
     private kelondroTree theIndex;
-    private TreeMap      theTmpMap;
     private File         theLocation;
     private boolean      delete;
 
     public plasmaWordIndexEntity(File databaseRoot, String wordHash, boolean deleteIfEmpty) {
         theWordHash = wordHash;
         theIndex    = indexFile(databaseRoot, wordHash);
-        theTmpMap   = null;
         delete      = deleteIfEmpty;
     }
 
@@ -110,45 +107,23 @@ public final class plasmaWordIndexEntity {
              hash.substring(4,6) + "/" + hash + ".db");
     }
 
-    /*
-    public plasmaWordIndexEntity(String wordHash) {
-        // this creates a nameless temporary index. It is needed for combined search
-        // and used to hold the intersection of two indexes
-        // if the nameless intity is suppose to hold indexes for a specific word,
-        // it can be given here; othervise set wordhash to null
-        theWordHash = wordHash;
-        theIndex    = null;
-        theLocation = null;
-        theTmpMap   = new TreeMap();
-    }
-*/
-    public boolean isTMPEntity() {
-        return theTmpMap != null;
-    }
-    
     public String wordHash() {
         return theWordHash;
     }
     
     public int size() {
-    if (theTmpMap == null) {
-            int size = theIndex.size(); 
-            if ((size == 0) && (delete)) {
-                deleteComplete();
-                return 0;
-            } else {
-                return size;
-            }
+        int size = theIndex.size();
+        if ((size == 0) && (delete)) {
+            deleteComplete();
+            return 0;
         } else {
-            return theTmpMap.size();
+            return size;
         }
     }
 
     public void close() throws IOException {
-    if (theTmpMap == null) {
-            if (theIndex != null) theIndex.close(); 
-            theIndex = null;
-        } else theTmpMap = null;
+        if (theIndex != null) theIndex.close();
+        theIndex = null;
     }
 
     public void finalize() {
@@ -158,30 +133,22 @@ public final class plasmaWordIndexEntity {
     }
 
     public plasmaWordIndexEntry getEntry(String urlhash) throws IOException {
-        if (theTmpMap == null) {
-            byte[][] n = theIndex.get(urlhash.getBytes());
-            if (n == null) return null;
-            return new plasmaWordIndexEntry(new String(n[0]), new String(n[1]));
-        } else {
-            return (plasmaWordIndexEntry) theTmpMap.get(urlhash);
-        }
+        byte[][] n = theIndex.get(urlhash.getBytes());
+        if (n == null) return null;
+        return new plasmaWordIndexEntry(new String(n[0]), new String(n[1]));
     }
     
     public boolean contains(String urlhash) throws IOException {
-        if (theTmpMap == null) return (theIndex.get(urlhash.getBytes()) != null); else return (theTmpMap.containsKey(urlhash));
+        return (theIndex.get(urlhash.getBytes()) != null);
     }
     
     public boolean contains(plasmaWordIndexEntry entry) throws IOException {
-        if (theTmpMap == null) return (theIndex.get(entry.getUrlHash().getBytes()) != null); else return (theTmpMap.containsKey(entry.getUrlHash()));
+        return (theIndex.get(entry.getUrlHash().getBytes()) != null);
     }
     
     public boolean addEntry(plasmaWordIndexEntry entry) throws IOException {
         if (entry == null) return false;
-        if (theTmpMap == null) {
-            return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm().getBytes()) == null);
-        } else {
-            return (theTmpMap.put(entry.getUrlHash(), entry) == null);
-        }
+        return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm().getBytes()) == null);
     }
     
     public int addEntries(plasmaWordIndexEntryContainer container) throws IOException {
@@ -205,47 +172,35 @@ public final class plasmaWordIndexEntity {
     }
     
     public boolean deleteComplete() {
-        if (theTmpMap == null) {
-            try {theIndex.close();} catch (IOException e) {}
-            // remove file
-            boolean success = theLocation.delete();
-            // and also the paren directory if that is empty
-            if (success) {
-                File f = theLocation.getParentFile();
-                while ((f.isDirectory()) && (f.list().length == 0)) {
-                    if (!(f.delete())) break;
-                    f = f.getParentFile();
-                }
+        try { theIndex.close(); } catch (IOException e) {}
+        // remove file
+        boolean success = theLocation.delete();
+        // and also the paren directory if that is empty
+        if (success) {
+            File f = theLocation.getParentFile();
+            while ((f.isDirectory()) && (f.list().length == 0)) {
+                if (!(f.delete())) break;
+                f = f.getParentFile();
             }
-            // reset all values
-            theIndex = null;
-            theLocation = null;
-            // switch to temporary more
-            theTmpMap = new TreeMap();
-            //theIndex.removeAll();
-            return success;
-        } else {
-            theTmpMap = new TreeMap();
-            return true;
-    }
+        }
+        // reset all values
+        theIndex = null;
+        theLocation = null;
+        return success;
     }
     
     public boolean removeEntry(String urlHash, boolean deleteComplete) throws IOException {
         // returns true if there was an entry before, false if the key did not exist
         // if after the removal the file is empty, then the file can be deleted if
         // the flag deleteComplete is set.
-        if (theTmpMap == null) {
-            boolean wasEntry = (theIndex.remove(urlHash.getBytes()) != null);
-            if ((theIndex.size() == 0) && (deleteComplete)) deleteComplete();
-            return wasEntry;
-    } else {
-            return (theTmpMap.remove(urlHash) != null);
-    }
+       boolean wasEntry = (theIndex.remove(urlHash.getBytes()) != null);
+        if ((theIndex.size() == 0) && (deleteComplete)) deleteComplete();
+        return wasEntry;
     }
     
     public Iterator elements(boolean up) {
     // returns an enumeration of plasmaWordIndexEntry objects
-    if (theTmpMap == null) return new dbenum(up); else return new tmpenum(up);
+        return new dbenum(up);
     }
 
     public final class dbenum implements Iterator {
@@ -276,30 +231,9 @@ public final class plasmaWordIndexEntity {
             throw new UnsupportedOperationException();
         }
     }
-    public final class tmpenum implements Iterator {
-        final TreeMap searchTree;
-        boolean up;
-        public tmpenum(boolean up) {
-            this.up = up;
-            searchTree = (TreeMap) theTmpMap.clone(); // a shallow clone that is destroyed during search
-        }
-        public boolean hasNext() {
-            return searchTree.size() > 0;
-        }
-        public Object next() {
-            Object urlHash = (up) ? searchTree.firstKey() : searchTree.lastKey();
-            plasmaWordIndexEntry entry = (plasmaWordIndexEntry) searchTree.remove(urlHash);
-            return entry;
-        }
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
 
     public String toString() {
-        if (theTmpMap == null) return "DB:" + theIndex.toString();
-        else if (theTmpMap != null) return "MAP:" + theTmpMap.size() + " RECORDS IN " + theTmpMap.toString();
-        else return "EMPTY";
+        return "DB:" + theIndex.toString();
     }
 
     
