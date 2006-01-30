@@ -225,22 +225,16 @@ public class plasmaDbImporter extends Thread {
             Iterator importWordHashIterator = this.importWordIndex.wordHashes(wordChunkStartHash, true, true);
             while (!isAborted() && importWordHashIterator.hasNext()) {
                 
-                plasmaWordIndexEntity importWordIdxEntity = null;
+                plasmaWordIndexEntryContainer newContainer;
                 try {
                     wordCounter++;
                     wordHash = (String) importWordHashIterator.next();
-                    importWordIdxEntity = importWordIndex.getEntity(wordHash, true, -1);
+                    newContainer = importWordIndex.getContainer(wordHash, true, -1);
                     
-                    if (importWordIdxEntity.size() == 0) {
-                        importWordIdxEntity.deleteComplete();
-                        continue;
-                    }
-                    
-                    // creating a container used to hold the imported entries
-                    plasmaWordIndexEntryContainer newContainer = new plasmaWordIndexEntryContainer(wordHash,importWordIdxEntity.size());
+                    if (newContainer.size() == 0) continue;
                     
                     // the combined container will fit, read the container
-                    Iterator importWordIdxEntries = importWordIdxEntity.elements(true);
+                    Iterator importWordIdxEntries = newContainer.entries();
                     plasmaWordIndexEntry importWordIdxEntry;
                     while (importWordIdxEntries.hasNext()) {
                         
@@ -262,9 +256,6 @@ public class plasmaDbImporter extends Thread {
                             }
                         } catch (IOException e) {}
                         
-                        // adding word index entity to container
-                        newContainer.add(importWordIdxEntry,System.currentTimeMillis());
-                        
                         if (entryCounter % 500 == 0) {
                             this.log.logFine(entryCounter + " word entries and " + wordCounter + " word entities processed so far.");
                         }
@@ -277,7 +268,6 @@ public class plasmaDbImporter extends Thread {
                     homeWordIndex.addEntries(newContainer, true);
                                         
                     // delete complete index entity file
-                    importWordIdxEntity.close();
                     importWordIndex.deleteIndex(wordHash);                 
                     
                     // print out some statistical information
@@ -300,7 +290,6 @@ public class plasmaDbImporter extends Thread {
                 } catch (Exception e) {
                     log.logSevere("Import of word entity '" + wordHash + "' failed.",e);
                 } finally {
-                    if (importWordIdxEntity != null) try { importWordIdxEntity.close(); } catch (Exception e) {}
                 }
             }
             

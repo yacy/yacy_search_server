@@ -258,6 +258,21 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return java.lang.Math.max(assortmentCluster.sizeTotal(), java.lang.Math.max(backend.size(), cache.size()));
     }
 
+    public int indexSize(String wordHash) {
+        int size = 0;
+        try {
+            plasmaWordIndexEntity entity = backend.getEntity(wordHash, true, -1);
+            if (entity != null) {
+                size += entity.size();
+                entity.close();
+            }
+        } catch (IOException e) {}
+        size += assortmentCluster.indexSize(wordHash);
+        TreeMap cacheIndex = (TreeMap) cache.get(wordHash);
+        if (cacheIndex != null) size += cacheIndex.size();
+        return size;
+    }
+    
     public Iterator wordHashes(String startWordHash, boolean up) {
         // Old convention implies rot = true
         //return new rotatingWordHashes(startWordHash, up);

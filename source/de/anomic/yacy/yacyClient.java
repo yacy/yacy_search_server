@@ -842,14 +842,23 @@ public final class yacyClient {
             return null;
         }
     }
-    /*
-         public static byte[] singleGET(String host, int port, String path, int timeout,
-                                   String user, String password,
-                                   httpHeader requestHeader) throws IOException {
-     */
 
     public static String transferIndex(yacySeed targetSeed, plasmaWordIndexEntryContainer[] indexes, HashMap urlCache, boolean gzipBody, int timeout) {
         
+        // check if we got all necessary urls in the urlCache (only for debugging)
+        Iterator eenum;
+        plasmaWordIndexEntry entry;
+        for (int i = 0; i < indexes.length; i++) {
+            eenum = indexes[i].entries();
+            while (eenum.hasNext()) {
+                entry = (plasmaWordIndexEntry) eenum.next();
+                if (urlCache.get(entry.getUrlHash()) == null) {
+                    System.out.println("DEBUG transferIndex: to-send url hash '" + entry.getUrlHash() + "' is not contained in urlCache");
+                }
+            }
+        }        
+        
+        // transfer the RWI without the URLs
         HashMap in = transferRWI(targetSeed, indexes, gzipBody, timeout);
         if (in == null) { return "no_connection_1"; }
         String result = (String) in.get("result");
@@ -868,7 +877,9 @@ public final class yacyClient {
         plasmaCrawlLURL.Entry[] urls = new plasmaCrawlLURL.Entry[uhs.length];
         for (int i = 0; i < uhs.length; i++) {
             urls[i] = (plasmaCrawlLURL.Entry) urlCache.get(uhs[i]);
-            if (urls[i] == null) System.out.println("DEBUG transferIndex: error with requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
+            if (urls[i] == null) {
+                System.out.println("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
+            }
         }
         
         in = transferURL(targetSeed, urls, gzipBody, timeout);

@@ -551,8 +551,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         getConfig("allowDistributeIndex", "false").equalsIgnoreCase("true"),
         getConfig("allowDistributeIndexWhileCrawling","false").equalsIgnoreCase("true"),
         getConfig("indexDistribution.gzipBody","false").equalsIgnoreCase("true"),
-        (int)getConfigLong("indexDistribution.timeout",60000),
-        (int)getConfigLong("indexDistribution.maxOpenFiles",800)
+        (int)getConfigLong("indexDistribution.timeout",60000) /*,
+        (int)getConfigLong("indexDistribution.maxOpenFiles",800)*/
         );
         indexDistribution.setCounts(150, 1, 3, 10000);
         deployThread("20_dhtdistribution", "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
@@ -1353,7 +1353,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             words = condenser.RESULT_SIMI_WORDS;
                             
                             // transfering the index to the storage peer
-                            String error = yacyClient.transferIndex(seed,(plasmaWordIndexEntryContainer[])tmpContainers.toArray(new plasmaWordIndexEntity[tmpContainers.size()]),urlCache,true,120000);
+                            String error = yacyClient.transferIndex(
+                                            seed,
+                                            (plasmaWordIndexEntryContainer[])tmpContainers.toArray(new plasmaWordIndexEntryContainer[tmpContainers.size()]),
+                                            urlCache,
+                                            true,
+                                            120000);
                             
                             if (error != null) {
                                 words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(), condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));

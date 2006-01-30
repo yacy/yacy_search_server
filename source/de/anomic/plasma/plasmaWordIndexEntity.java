@@ -112,6 +112,7 @@ public final class plasmaWordIndexEntity {
     }
     
     public int size() {
+        if (theIndex == null) return 0;
         int size = theIndex.size();
         if ((size == 0) && (delete)) {
             deleteComplete();

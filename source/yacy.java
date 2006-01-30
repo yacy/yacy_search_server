@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -432,11 +433,13 @@ public final class yacy {
                     run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
 
                     // save information about available memory after all initializations
-                    sb.setConfig("memoryFreeAfterInitBGC", Runtime.getRuntime().freeMemory());
-                    sb.setConfig("memoryTotalAfterInitBGC", Runtime.getRuntime().totalMemory());
-                    System.gc();
-                    sb.setConfig("memoryFreeAfterInitAGC", Runtime.getRuntime().freeMemory());
-                    sb.setConfig("memoryTotalAfterInitAGC", Runtime.getRuntime().totalMemory());
+                    try {
+                        sb.setConfig("memoryFreeAfterInitBGC", Runtime.getRuntime().freeMemory());
+                        sb.setConfig("memoryTotalAfterInitBGC", Runtime.getRuntime().totalMemory());
+                        System.gc();
+                        sb.setConfig("memoryFreeAfterInitAGC", Runtime.getRuntime().freeMemory());
+                        sb.setConfig("memoryTotalAfterInitAGC", Runtime.getRuntime().totalMemory());
+                    } catch (ConcurrentModificationException e) {}
                     
                     // wait for server shutdown
                     try {
@@ -834,22 +837,16 @@ public final class yacy {
                 // testing if import process was aborted
                 if (Thread.interrupted()) break;
                 
-                plasmaWordIndexEntity importWordIdxEntity = null;
+                plasmaWordIndexEntryContainer newContainer;
                 try {
                     wordCounter++;
                     wordHash = (String) importWordHashIterator.next();
-                    importWordIdxEntity = importWordIndex.getEntity(wordHash, true, -1);
+                    newContainer = importWordIndex.getContainer(wordHash, true, -1);
                     
-                    if (importWordIdxEntity.size() == 0) {
-                        importWordIdxEntity.deleteComplete();
-                        continue;
-                    }
-                    
-                    // creating a container used to hold the imported entries
-                    plasmaWordIndexEntryContainer newContainer = new plasmaWordIndexEntryContainer(wordHash,importWordIdxEntity.size());
+                    if (newContainer.size() == 0) continue;
                     
                     // the combined container will fit, read the container
-                    Iterator importWordIdxEntries = importWordIdxEntity.elements(true);
+                    Iterator importWordIdxEntries = newContainer.entries();
                     plasmaWordIndexEntry importWordIdxEntry;
                     while (importWordIdxEntries.hasNext()) {
                         
@@ -871,9 +868,6 @@ public final class yacy {
                             }
                         } catch (IOException e) {}
                         
-                        // adding word index entity to container
-                        newContainer.add(importWordIdxEntry,System.currentTimeMillis());
-                        
                         if (entryCounter % 500 == 0) {
                             log.logFine(entryCounter + " word entries and " + wordCounter + " word entries processed so far.");
                         }
@@ -886,7 +880,6 @@ public final class yacy {
                     homeWordIndex.addEntries(newContainer, true);
                                         
                     // delete complete index entity file
-                    importWordIdxEntity.close();
                     importWordIndex.deleteIndex(wordHash);                 
                     
                     // print out some statistical information
@@ -912,7 +905,6 @@ public final class yacy {
                 } catch (Exception e) {
                     log.logSevere("Import of word entity '" + wordHash + "' failed.",e);
                 } finally {
-                    if (importWordIdxEntity != null) try { importWordIdxEntity.close(); } catch (Exception e) {}
                 }
             }
             

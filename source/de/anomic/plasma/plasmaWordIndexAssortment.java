@@ -172,6 +172,23 @@ public final class plasmaWordIndexAssortment {
 		}
         return row2container(wordHash, row);
 	}
+
+    public boolean contains(String wordHash) {
+        // gets a word index from assortment database
+        // and returns the content record
+        byte[][] row = null;
+        try {
+            row = assortments.get(wordHash.getBytes());
+            return (row != null);
+        } catch (IOException e) {
+            return false;
+        } catch (kelondroException e) {
+            log.logSevere("removeAssortment/kelondro-error: " + e.getMessage()
+                    + " - reset assortment-DB " + assortments.file(), e);
+            resetDatabase();
+            return false;
+        }
+    }
     
     public plasmaWordIndexEntryContainer get(String wordHash) {
         // gets a word index from assortment database

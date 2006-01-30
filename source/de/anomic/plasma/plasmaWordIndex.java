@@ -178,10 +178,14 @@ public final class plasmaWordIndex {
         return condenser.RESULT_SIMI_WORDS;
     }
 
+    public int indexSize(String wordHash) {
+        return ramCache.indexSize(wordHash);
+    }
+    
     public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         return ramCache.getContainer(wordHash, deleteIfEmpty, maxTime);
     }
-    
+
     public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty, long maxTime) {
         return ramCache.getEntity(wordHash, deleteIfEmpty, maxTime);
     }

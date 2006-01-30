@@ -226,6 +226,14 @@ public final class plasmaWordIndexAssortmentCluster {
         return record;
     }
 
+    public int indexSize(String wordHash) {
+        int size = 0;
+        for (int i = 0; i < clusterCount; i++) {
+            if (assortments[i].contains(wordHash)) size += i + 1;
+        }
+        return size;
+    }
+    
     public Iterator hashConjunction(String startWordHash, boolean up, boolean rot) {
         HashSet iterators = new HashSet();
         //if (rot) System.out.println("WARNING: kelondroMergeIterator does not work correctly when individual iterators rotate on their own!");

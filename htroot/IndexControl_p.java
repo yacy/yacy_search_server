@@ -60,7 +60,6 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverObjects;
@@ -150,22 +149,15 @@ public class IndexControl_p {
         if (post.containsKey("keyhashdeleteall")) {
             if (delurl || delurlref) {
                 // generate an urlx array
-                plasmaWordIndexEntity index = null;
-                try {
-                    index = switchboard.wordIndex.getEntity(keyhash, true, -1);
-                    Iterator en = index.elements(true);
-                    int i = 0;
-                    urlx = new String[index.size()];
-                    while (en.hasNext()) {
-                        urlx[i++] = ((plasmaWordIndexEntry) en.next()).getUrlHash();
-                    }
-                    index.close();
-                    index = null;
-                } catch (IOException e) {
-                    urlx = new String[0];
-                } finally {
-                    if (index != null) try { index.close(); } catch (Exception e) {}
+                plasmaWordIndexEntryContainer index = null;
+                index = switchboard.wordIndex.getContainer(keyhash, true, -1);
+                Iterator en = index.entries();
+                int i = 0;
+                urlx = new String[index.size()];
+                while (en.hasNext()) {
+                    urlx[i++] = ((plasmaWordIndexEntry) en.next()).getUrlHash();
                 }
+                index = null;
             }
             if (delurlref) {
                 for (int i = 0; i < urlx.length; i++) switchboard.removeAllUrlReferences(urlx[i], true);
@@ -256,12 +248,12 @@ public class IndexControl_p {
             }
             prop.put("urlstring", "");
             prop.put("urlhash", "");
-            plasmaWordIndexEntryContainer[] indexes = new plasmaWordIndexEntryContainer[1];
+            plasmaWordIndexEntryContainer index;
             String result;
             long starttime = System.currentTimeMillis();
-            indexes[0] = switchboard.wordIndex.getContainer(keyhash, true, -1);
+            index = switchboard.wordIndex.getContainer(keyhash, true, -1);
             // built urlCache
-            Iterator urlIter = indexes[0].entries();
+            Iterator urlIter = index.entries();
             HashMap knownURLs = new HashMap();
             HashSet unknownURLEntries = new HashSet();
             plasmaWordIndexEntry indexEntry;
@@ -271,8 +263,8 @@ public class IndexControl_p {
                 try {
                     lurl = switchboard.urlPool.loadedURL.getEntry(indexEntry.getUrlHash(), null);
                     if (lurl.toString() == null) {
-                        switchboard.urlPool.loadedURL.remove(indexEntry.getUrlHash());
                         unknownURLEntries.add(indexEntry.getUrlHash());
+                        urlIter.remove();
                     } else {
                         knownURLs.put(indexEntry.getUrlHash(), lurl);
                     }
@@ -280,23 +272,17 @@ public class IndexControl_p {
                     unknownURLEntries.add(indexEntry.getUrlHash());
                 }
             }
-            // now delete all entries that have no url entry
-            Iterator hashIter = unknownURLEntries.iterator();
-            while (hashIter.hasNext()) {
-                indexes[0].remove((String) hashIter.next());
-            }
             // use whats remaining           
             String gzipBody = switchboard.getConfig("indexControl.gzipBody","false");
             int timeout = (int) switchboard.getConfigLong("indexControl.timeout",60000);
-            result = yacyClient.transferIndex (
+            result = yacyClient.transferIndex(
                          yacyCore.seedDB.getConnected(post.get("hostHash", "")),
-                         indexes,
+                         new plasmaWordIndexEntryContainer[]{index},
                          knownURLs,
                          "true".equalsIgnoreCase(gzipBody),
                          timeout);
-            prop.put("result", (result == null) ? ("Successfully transferred " + indexes[0].size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds") : result);
-            indexes[0] = null;
-            indexes = null;
+            prop.put("result", (result == null) ? ("Successfully transferred " + index.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds") : result);
+            index = null;
         }
 
         // generate list

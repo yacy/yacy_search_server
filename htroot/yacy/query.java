@@ -47,7 +47,6 @@
 // if the shell's current path is HTROOT
 
 import java.util.Date;
-import java.io.IOException;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -86,16 +85,7 @@ public final class query {
         if (obj.equals("rwiurlcount")) {
             // the total number of different urls in the rwi is returned
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
-            de.anomic.plasma.plasmaWordIndexEntity entity = null;
-            try {
-                entity = sb.wordIndex.getEntity(env, true, -1);
-                prop.put("response", entity.size());
-                entity.close();
-            } catch (IOException e) {
-                prop.put("response", -1);
-            } finally {
-              if (entity != null) try { entity.close(); } catch (Exception e) {}
-            }
+            prop.put("response", sb.wordIndex.indexSize(env));
             return prop;
         }
 
