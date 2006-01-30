@@ -116,7 +116,7 @@ public class yacyPeerActions {
 			sb.setConfig("lastseedcheckUptime", uptime);
 			sb.setConfig("lastseedcheckIndexedc", indexedc);
 		}
-		if(! (indexedcdiff == 0 || (uptimediff == 0) ){ //keep old one, if the diff is 0
+		if(! (indexedcdiff == 0 || uptimediff == 0) ){ //keep old one, if the diff is 0
 	        seedDB.mySeed.put(yacySeed.ISPEED, Long.toString(indexedcdiff / uptimediff)); // the speed of indexing (pages/minute) of the peer
 		}
         seedDB.mySeed.put(yacySeed.UPTIME, Long.toString(uptime)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
