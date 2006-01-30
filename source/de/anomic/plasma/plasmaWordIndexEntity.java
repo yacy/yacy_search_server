@@ -207,7 +207,9 @@ public final class plasmaWordIndexEntity {
     public final class dbenum implements Iterator {
         Iterator i;
         public dbenum(boolean up) {
-            try {
+            if (theIndex == null) {
+                i = null;
+            } else try {
                 i = theIndex.nodeIterator(up, false);
             } catch (kelondroException e) {
                 e.printStackTrace();
