@@ -56,6 +56,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -70,7 +71,9 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.http.httpc.response;
+import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.kelondroMap;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
@@ -91,6 +94,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeedDB;
 
 /**
 * This is the main class of YaCy. Several threads are started from here:
@@ -1386,6 +1390,42 @@ public final class yacy {
             WordIndex = null;
         }
     }
+    
+    /**
+     * Searching for peers affected by Bug http://www.yacy-forum.de/viewtopic.php?p=16056
+     * @param homePath
+     * @see http://www.yacy-forum.de/viewtopic.php?p=16056
+     */
+    public static void testPeerDB(String homePath) {
+        
+        try {
+            File yacyDBPath = new File(new File(homePath), "DATA/YACYDB");
+            
+            String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
+            for (int i=0; i < dbFileNames.length; i++) {
+                File dbFile = new File(yacyDBPath,dbFileNames[i]);
+                kelondroMap db = new kelondroMap(new kelondroDyn(dbFile, (1024 * 0x400) / 3), yacySeedDB.sortFields, yacySeedDB.accFields);
+                
+                kelondroMap.mapIterator it;
+                it = db.maps(true, false);
+                while (it.hasNext()) {
+                    Map dna = (Map) it.next();
+                    String peerHash = (String) dna.get("key");
+                    if (peerHash.length() < yacySeedDB.commonHashLength) {
+                        String peerName = (String) dna.get("Name");
+                        String peerIP = (String) dna.get("IP");
+                        String peerPort = (String) dna.get("Port");
+                        
+                        while (peerHash.length() < yacySeedDB.commonHashLength) { peerHash = peerHash + "_"; }                        
+                        System.err.println("Invalid Peer found in '" + dbFileNames[i] + "': " + peerName + ":" +  peerHash + ", http://" + peerIP + ":" + peerPort);
+                    }
+                }
+                db.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
  
     /**
@@ -1442,6 +1482,7 @@ public final class yacy {
                 importRoot = args[1];
             } else {
                 System.err.println("Usage: -importDB [homeDbRoot] importDbRoot");
+                return;
             }
             importDB(applicationRoot, importRoot);
         } else if ((args.length >= 1) && (args[0].equals("-importAssortment"))) {
@@ -1454,8 +1495,16 @@ public final class yacy {
                 assortmentFileName = args[1];
             } else {
                 System.err.println("Usage: -importAssortment [homeDbRoot] [AssortmentFileName]");
+                return;
             }
             importAssortment(applicationRoot, assortmentFileName);
+        } else if ((args.length >= 1) && (args[0].equals("-testPeerDB"))) {
+            if (args.length == 2) {
+                applicationRoot= args[1];
+            } else if (args.length > 2) {
+                System.err.println("Usage: -testPeerDB [homeDbRoot]");
+            }
+            testPeerDB(applicationRoot);
         } else if ((args.length >= 1) && (args[0].equals("-deletestopwords"))) {
             // delete those words in the index that are listed in the stopwords file
             if (args.length == 2) applicationRoot= args[1];
