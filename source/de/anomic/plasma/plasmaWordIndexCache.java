@@ -268,7 +268,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             }
         } catch (IOException e) {}
         size += assortmentCluster.indexSize(wordHash);
-        TreeMap cacheIndex = (TreeMap) cache.get(wordHash);
+        plasmaWordIndexEntryContainer cacheIndex = (plasmaWordIndexEntryContainer) cache.get(wordHash);
         if (cacheIndex != null) size += cacheIndex.size();
         return size;
     }
