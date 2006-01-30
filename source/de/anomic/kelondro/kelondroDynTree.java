@@ -69,7 +69,7 @@ public class kelondroDynTree {
     private Hashtable buffer, cache;
     private long cycleBuffer;
     
-    public kelondroDynTree(File file, long buffersize, int keylength, int nodesize, int[] columns, boolean exitOnFail) {
+    public kelondroDynTree(File file, long buffersize, int keylength, int nodesize, int[] columns, char fillChar, boolean exitOnFail) {
         // creates a new DynTree
         this.file = file;
         this.columns = columns;
@@ -78,11 +78,11 @@ public class kelondroDynTree {
         //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
         if (file.exists()) file.delete();
-        this.table = new kelondroDyn(file, buffersize, keylength, nodesize, exitOnFail);
+        this.table = new kelondroDyn(file, buffersize, keylength, nodesize, fillChar, exitOnFail);
         this.treeRAHandles = new Hashtable();
     }
 
-    public kelondroDynTree(File file, long buffersize) throws IOException {
+    public kelondroDynTree(File file, long buffersize, char fillChar) throws IOException {
         // opens an existing DynTree
         this.file = file;
         this.buffer = new Hashtable();
@@ -90,7 +90,7 @@ public class kelondroDynTree {
         //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
         if (!(file.exists())) throw new IOException("DynTree " + file.toString() + " does not exist");
-        this.table = new kelondroDyn(file, buffersize);
+        this.table = new kelondroDyn(file, buffersize, fillChar);
         // read one element to measure the size of columns
         if (table.size() == 0) throw new IOException("DynTree " + file.toString() + " is empty. Should not.");
         this.treeRAHandles = new Hashtable();
@@ -349,10 +349,10 @@ public class kelondroDynTree {
             System.out.println("start");
             File file = new File("D:\\bin\\testDyn.db");
             if (file.exists()) {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L);
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, '_');
                 System.out.println("opened: table keylength=" + dt.table.columnSize(0) + ", sectorsize=" + dt.table.columnSize(1) + ", " + dt.table.size() + " entries.");
             } else {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 16, 512, new int[] {10,20,30}, true);
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 16, 512, new int[] {10,20,30}, '_', true);
                 String name;
                 kelondroTree t;
                 byte[][] line = new byte[][] {"".getBytes(), "abc".getBytes(), "def".getBytes()};

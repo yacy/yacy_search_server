@@ -73,21 +73,21 @@ public class wikiBoard {
     		new File(actpath.getParent()).mkdir();
         if (datbase == null) {
             if (actpath.exists()) try {
-                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x40));
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x40, '_'));
             } catch (IOException e) {
-                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, true));
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, '_', true));
             } else {
-                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, true));
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, '_', true));
             }
         }
         new File(bkppath.getParent()).mkdir();
         if (bkpbase == null) {
             if (bkppath.exists()) try {
-                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400));
+                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, '_'));
             } catch (IOException e) {
-                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, keyLength + dateFormat.length(), recordSize, true));
+                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, keyLength + dateFormat.length(), recordSize, '_', true));
             } else {
-                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, keyLength + dateFormat.length(), recordSize, true));
+                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, keyLength + dateFormat.length(), recordSize, '_', true));
             }
         }
     }

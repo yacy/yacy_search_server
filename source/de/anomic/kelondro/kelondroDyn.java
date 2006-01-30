@@ -68,16 +68,18 @@ public class kelondroDyn extends kelondroTree {
     private int keylen;
     private int reclen;
     private int segmentCount;
+    private char fillChar;
 
-    public kelondroDyn(File file, long buffersize /*bytes*/, int key, int nodesize, boolean exitOnFail) {
-        this(file, buffersize, key, nodesize, new kelondroNaturalOrder(true), exitOnFail);
+    public kelondroDyn(File file, long buffersize /*bytes*/, int key, int nodesize, char fillChar, boolean exitOnFail) {
+        this(file, buffersize, key, nodesize, fillChar, new kelondroNaturalOrder(true), exitOnFail);
     }
     
-    public kelondroDyn(File file, long buffersize /*bytes*/, int key, int nodesize, kelondroOrder objectOrder, boolean exitOnFail) {
+    public kelondroDyn(File file, long buffersize /*bytes*/, int key, int nodesize, char fillChar, kelondroOrder objectOrder, boolean exitOnFail) {
 	// creates a new dynamic tree
 	super(file, buffersize, new int[] {key + counterlen, nodesize}, objectOrder, 1, 8, exitOnFail);
 	this.keylen = columnSize(0) - counterlen;
 	this.reclen = columnSize(1);
+    this.fillChar = fillChar;
 	this.segmentCacheKey = null;
         this.segmentCacheContent = null;
         // init counter: write into text field
@@ -85,11 +87,12 @@ public class kelondroDyn extends kelondroTree {
         writeSegmentCount();
     }
 
-    public kelondroDyn(File file, long buffersize) throws IOException {
+    public kelondroDyn(File file, long buffersize, char fillChar) throws IOException {
 	// this opens a file with an existing dynamic tree
 	super(file, buffersize);
 	this.keylen = columnSize(0) - counterlen;
 	this.reclen = columnSize(1);
+    this.fillChar = fillChar;
 	this.segmentCacheKey = null;
         this.segmentCacheContent = null;
         this.segmentCount = 0;
@@ -132,7 +135,7 @@ public class kelondroDyn extends kelondroTree {
 
     private byte[] dynKey(String key, int record) {
 	if (key.length() > keylen) throw new RuntimeException("key len (" + key.length() + ") out of limit (" + keylen + "): '" + key + "'");
-	while (key.length() < keylen) key = key + "_";
+	while (key.length() < keylen) key = key + fillChar;
 	key = key + counter(record);
 	return key.getBytes();
     }
@@ -140,7 +143,7 @@ public class kelondroDyn extends kelondroTree {
     private String origKey(byte[] rawKey) {
 	int n = keylen - 1;
 	if (n >= rawKey.length) n = rawKey.length - 1;
-	while ((n > 0) && (rawKey[n] == (byte) '_')) n--;
+	while ((n > 0) && (rawKey[n] == (byte) fillChar)) n--;
 	return new String(rawKey, 0, n + 1);
     }
 
@@ -429,7 +432,7 @@ public class kelondroDyn extends kelondroTree {
         } else if (args.length == 1) {
 	    // open a db and list keys
 	    try {
-		kelondroDyn kd = new kelondroDyn(new File(args[0]), 0x100000);
+		kelondroDyn kd = new kelondroDyn(new File(args[0]), 0x100000, '_');
 		System.out.println(kd.size() + " elements in DB");
 		Iterator i = kd.dynKeys(true, false);
 		while (i.hasNext()) System.out.println((String) i.next());
@@ -445,7 +448,7 @@ public class kelondroDyn extends kelondroTree {
 	    File f = new File(args[3]);
 	    kelondroDyn kd;
 	    try {
-		if (db.exists()) kd = new kelondroDyn(db, 0x100000); else kd = new kelondroDyn(db, 0x100000, 80, 200, true);
+		if (db.exists()) kd = new kelondroDyn(db, 0x100000, '_'); else kd = new kelondroDyn(db, 0x100000, 80, 200, '_', true);
 		if (writeFile) kd.readFile(key, f); else kd.writeFile(key, f);
 	    } catch (IOException e) {
 		System.out.println("ERROR: " + e.toString());
@@ -466,7 +469,7 @@ public class kelondroDyn extends kelondroTree {
             int steps = 0;
             while (true) {
                 if (testFile.exists()) testFile.delete();
-                tt = new kelondroDyn(testFile, 0, 4 ,100, true);
+                tt = new kelondroDyn(testFile, 0, 4 ,100, '_', true);
                 steps = ((int) System.currentTimeMillis() % 7) * (((int) System.currentTimeMillis() + 17) % 11);
                 t = s;
                 d = "";

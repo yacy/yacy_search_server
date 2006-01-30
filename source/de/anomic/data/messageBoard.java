@@ -71,12 +71,12 @@ public class messageBoard {
         new File(path.getParent()).mkdir();
         if (database == null) {
             if (path.exists()) try {
-                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400));
+                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, '_'));
             } catch (IOException e) {
                 path.delete();
-                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, categoryLength + dateFormat.length() + 2, recordSize, true));
+                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, categoryLength + dateFormat.length() + 2, recordSize, '_', true));
             } else {
-                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, categoryLength + dateFormat.length() + 2, recordSize, true));
+                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, categoryLength + dateFormat.length() + 2, recordSize, '_', true));
             }
         }
         sn = 0;

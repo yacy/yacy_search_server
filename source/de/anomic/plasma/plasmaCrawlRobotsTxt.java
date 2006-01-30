@@ -68,17 +68,17 @@ public class plasmaCrawlRobotsTxt {
         this.bufferkb = bufferkb;
         if (robotsTableFile.exists()) {
             try {
-                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024));
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, '_'));
             } catch (kelondroException e) {
                 robotsTableFile.delete();
-                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, true));
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, '_', true));
             } catch (IOException e) {
                 robotsTableFile.delete();
-                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, true));
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, '_', true));
             }
         } else {
             robotsTableFile.getParentFile().mkdirs();
-            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, true));
+            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, '_', true));
         }
     }
     
@@ -97,7 +97,7 @@ public class plasmaCrawlRobotsTxt {
         } catch (IOException e) {}
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, this.bufferkb, 256, 512, true));
+        robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, this.bufferkb, 256, 512, '_', true));
     }
     
     public void close() {

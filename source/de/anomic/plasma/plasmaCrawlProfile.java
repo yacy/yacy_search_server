@@ -64,13 +64,13 @@ public class plasmaCrawlProfile {
         this.profileTableFile = file;
         kelondroDyn dyn = null;
         if (profileTableFile.exists()) try {
-            dyn = new kelondroDyn(file, bufferkb * 1024);
+            dyn = new kelondroDyn(file, bufferkb * 1024, '#');
         } catch (IOException e) {
             profileTableFile.delete();
-            dyn = new kelondroDyn(file, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000, true);
+            dyn = new kelondroDyn(file, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000, '#', true);
         } else {
             profileTableFile.getParentFile().mkdirs();
-            dyn = new kelondroDyn(file, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000, true);
+            dyn = new kelondroDyn(file, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000, '#', true);
         }
         profileTable = new kelondroMap(dyn);
     }
@@ -88,7 +88,7 @@ public class plasmaCrawlProfile {
         if (profileTable != null) try { profileTable.close(); } catch (IOException e) {}
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
-        profileTable = new kelondroMap(new kelondroDyn(profileTableFile, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000, true));
+        profileTable = new kelondroMap(new kelondroDyn(profileTableFile, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000, '#', true));
     }
     
     public void close() {

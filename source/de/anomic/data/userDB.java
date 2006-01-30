@@ -76,19 +76,19 @@ public final class userDB {
         this.bufferkb = bufferkb;
         if (userTableFile.exists()) {
             try {
-                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024));
+                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, '_'));
             } catch (kelondroException e) {
                 userTableFile.delete();
                 userTableFile.getParentFile().mkdirs();
-                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256, true));
+                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256, '_', true));
             } catch (IOException e) {
                 userTableFile.delete();
                 userTableFile.getParentFile().mkdirs();
-                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256, true));
+                this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256, '_', true));
             }
         } else {
             userTableFile.getParentFile().mkdirs();
-            this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256, true));
+            this.userTable = new kelondroMap(new kelondroDyn(userTableFile, bufferkb * 1024, 128, 256, '_', true));
         }
     }
     
@@ -107,7 +107,7 @@ public final class userDB {
         } catch (IOException e) {}
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
-        userTable = new kelondroMap(new kelondroDyn(userTableFile, this.bufferkb, 256, 512, true));
+        userTable = new kelondroMap(new kelondroDyn(userTableFile, this.bufferkb, 256, 512, '_', true));
     }
     
     public void close() {
