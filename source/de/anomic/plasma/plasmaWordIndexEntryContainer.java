@@ -114,6 +114,7 @@ public final class plasmaWordIndexEntryContainer implements Comparable {
     
     public int add(plasmaWordIndexEntryContainer c) {
         // returns the number of new elements
+        if (c == null) return 0;
         Iterator i = c.entries();
         int x = 0;
         while (i.hasNext()) {

@@ -323,7 +323,7 @@ public final class plasmaWordIndexDistribution {
             Iterator urlIter;
             plasmaWordIndexEntry indexEntry;
             plasmaCrawlLURL.Entry lurl;
-            int notBoundCounter = 0;
+            
             final HashMap knownURLs = new HashMap();
             while (
                     (count > 0) &&
@@ -335,6 +335,7 @@ public final class plasmaWordIndexDistribution {
             ) {
                 // make an on-the-fly entity and insert values
                     indexContainer = this.wordIndex.getContainer(nexthash, true, 10000);
+                    int notBoundCounter = 0;
                     try {
                         urlIter = indexContainer.entries();
                         // iterate over indexes to fetch url entries and store them in the urlCache

@@ -118,6 +118,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             plasmaSearchResult result = order();
             result.globalContributions = globalContributions;
             result.localContributions = rcLocal.size();
+            flushResults();
             
             // flush results in a separate thread
             this.start(); // start to flush results
@@ -256,35 +257,18 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     
     public void run() {
         flushThreads.add(this); // this will care that the search event object is referenced from somewhere while it is still alive
-        flushResults();
-        flushThreads.remove(this);
-    }
-    
-    public void flushResults() {
+
         // put all new results into wordIndex
         // this must be called after search results had been computed
-        // it is wise to call this within a separate thread because this method waits untill all
-        if (searchThreads == null) return;
+        // it is wise to call this within a separate thread because
+        // this method waits until all threads are finished
 
-        // wait until all threads are finished
         int remaining;
-        int count = 0;
-        String wordHash;
+        int allcount = 0;
         long starttime = System.currentTimeMillis();
-        while ((remaining = yacySearch.remainingWaiting(searchThreads)) > 0) {
-            // flush the rcGlobal as much as is there so far
-            if (rcGlobal.size() > 0) synchronized (rcGlobal) {
-                Iterator hashi = query.queryHashes.iterator();
-                while (hashi.hasNext()) {
-                    wordHash = (String) hashi.next();
-                    rcGlobal.setWordHash(wordHash);
-                    wordIndex.addEntries(rcGlobal, true);
-                    log.logFine("FLUSHED " + wordHash + ": " + rcGlobal.size() + " url entries");
-                }
-                // the rcGlobal was flushed, empty it
-                count += rcGlobal.size();
-                rcGlobal.clear();
-            }    
+        while ((searchThreads != null) && ((remaining = yacySearch.remainingWaiting(searchThreads)) > 0)) {
+            allcount += flushResults();
+  
             // wait a little bit before trying again
             try {Thread.sleep(3000);} catch (InterruptedException e) {}
             if (System.currentTimeMillis() - starttime > 90000) {
@@ -295,10 +279,34 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             log.logFine("FINISHED FLUSH RESULTS PROCESS for query " + query.hashes(","));
         }
         
-        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + count + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
-	        
+        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + allcount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
+            
         // finally delete the temporary index
         rcGlobal = null;
+        
+        flushThreads.remove(this);
+    }
+    
+    public int flushResults() {
+        // flush the rcGlobal as much as is there so far
+        // this must be called sometime after search results had been computed
+        int count = 0;
+        if ((rcGlobal != null) && (rcGlobal.size() > 0)) {
+            synchronized (rcGlobal) {
+                String wordHash;
+                Iterator hashi = query.queryHashes.iterator();
+                while (hashi.hasNext()) {
+                    wordHash = (String) hashi.next();
+                    rcGlobal.setWordHash(wordHash);
+                    wordIndex.addEntries(rcGlobal, true);
+                    log.logFine("FLUSHED " + wordHash + ": " + rcGlobal.size() + " url entries");
+                }
+                // the rcGlobal was flushed, empty it
+                count += rcGlobal.size();
+                rcGlobal.clear();
+            }
+        }
+        return count;
     }
     
 }
