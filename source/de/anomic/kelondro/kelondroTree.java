@@ -56,12 +56,12 @@ import java.util.LinkedList;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.Vector;
-import de.anomic.server.logging.serverLog;
+import java.util.logging.Logger;
 
 public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	
-	//logging [Should be replaced to be able to split DB|YaCy - delete this, delete import, delete before "correcting iterator" message]
-	public static serverLog log;
+    // logging (This probably needs someone to initialize the java.util.logging.* facilities);
+    public static Logger log = Logger.getLogger("KELONDRO");
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 2; // our record definition of two bytes
@@ -107,6 +107,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
         this.objectOrder = objectOrder;
         writeOrderType();
+        super.setLogger(log);
     }
     
     public kelondroTree(kelondroRA ra, long buffersize, int[] columns, boolean exitOnFail) {
@@ -127,18 +128,21 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
         this.objectOrder = objectOrder;
         writeOrderType();
+        super.setLogger(log);
     }
 
     public kelondroTree(File file, long buffersize) throws IOException {
         // this opens a file with an existing tree file
         super(file, buffersize);
         readOrderType();
+        super.setLogger(log);
     }
 
     public kelondroTree(kelondroRA ra, long buffersize) throws IOException {
         // this opens a file with an existing tree in a kelondroRA
         super(ra, buffersize);
         readOrderType();
+        super.setLogger(log);
     }
 
     private void writeOrderType() {
@@ -854,10 +858,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 int c = objectOrder.compare(firstKey, nextNode.getKey());
                 if ((c > 0) && (asc)) {
                     // firstKey > nextNode.getKey()
-                    if (log != null) log.logWarning("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
+                    logFine("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
                     nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
                 }
                 if ((c < 0) && (!(asc))) {
+                    logFine("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
                     nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
                 }
             }
@@ -877,6 +882,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
             if ((nextNode != null) && (asc == (objectOrder.compare(r, nextNode) == 1))) {
                 // correct wrong order (this should not happen)
+                logWarning("STOPPING ITERATOR: currentNode=" + new String(r.getKey()) + ", nextNode=" + new String(nextNode.getKey()));
                 if (rot) {
                     try {
                         ii = new nodeIterator(asc, rot);

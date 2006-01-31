@@ -330,6 +330,13 @@ public class kelondroRecords {
             this.theLogger.severe("KELONDRO FAILURE for file " + this.filename + ": " + message);
     }
 
+    public void logFine(String message) {
+        if (this.theLogger == null)
+            System.out.println("KELONDRO DEBUG for file " + this.filename + ": " + message);
+        else
+            this.theLogger.fine("KELONDRO DEBUG for file " + this.filename + ": " + message);
+    }
+
     public void clear() throws IOException {
         // Removes all mappings from this map
         // throw new UnsupportedOperationException("clear not supported");
