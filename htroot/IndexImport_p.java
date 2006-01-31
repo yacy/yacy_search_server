@@ -183,7 +183,7 @@ public final class IndexImport_p {
             prop.put("running.jobs_" + i + "_percent",         Integer.toString(currThread.getProcessingStatusPercent()));
             prop.put("running.jobs_" + i + "_elapsed",         serverDate.intervalToString(currThread.getElapsedTime()));
             prop.put("running.jobs_" + i + "_estimated",       serverDate.intervalToString(currThread.getEstimatedTime()));
-            prop.put("running.jobs_" + i + "_status",          currThread.getStatus().replace("\n", "<br>"));
+            prop.put("running.jobs_" + i + "_status",          currThread.getStatus().replaceAll("\n", "<br>"));
             
             // job number of the importer thread
             prop.put("running.jobs_" + i + "_job_nr", Integer.toString(currThread.getJobID()));
@@ -210,7 +210,7 @@ public final class IndexImport_p {
             }
             prop.put("finished.jobs_" + i + "_percent", Integer.toString(currThread.getProcessingStatusPercent()));
             prop.put("finished.jobs_" + i + "_elapsed", serverDate.intervalToString(currThread.getElapsedTime()));         
-            prop.put("finished.jobs_" + i + "_status", currThread.getStatus().replace("\n", "<br>"));
+            prop.put("finished.jobs_" + i + "_status", currThread.getStatus().replaceAll("\n", "<br>"));
         }
         prop.put("finished.jobs",finishedJobs.length);
         

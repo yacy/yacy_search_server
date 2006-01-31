@@ -46,7 +46,7 @@ public class dbImportManager {
         
         for (int i=0; i < activeCount; i++) {
             dbImporter currThread = (dbImporter) importThreads[i];
-            if (currThread.getJobID() == Integer.valueOf(jobID).intValue()) {
+            if (currThread.getJobID() == jobID) {
                 return currThread;
             }                    
         }        
