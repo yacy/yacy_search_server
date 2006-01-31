@@ -10,7 +10,6 @@
 #%env/templates/submenuIndexControl.template%#
 <br><br>
 <h2>Index DB Import</h2>
-
 <p>The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.</p>
 <hr>
 #(error)#<!-- 0 -->
@@ -22,13 +21,40 @@
 		<p><font color="red"><b>#[error_msg]#</b></font></p>
 		<p><font color="red"><code>#[error_stackTrace]#</code></font></p>	
 #(/error)#
-<h3>Starting new Job</h3>
 <form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
+<h3>Starting new Job</h3>
+<table>
+<tr><td>
 <table border="0" cellpadding="2" cellspacing="1">
-<tr>
-	<td title="Path to the PLASMADB directory of the foreign peer">Import Path:</td>
-	<td><input name="importPath" type="text" size="50" value=""></td>
-	<td><input type="submit" name="startIndexDbImport" value="Start New Import"></td>
+<tr class="TableCellLight">
+	<td>Import&nbsp;Type:</td>
+	<td title="the path to the database that should be imported"><select name="importType" size="1">
+    		<option value="plasmaDB">PLASMA DB Import</option>
+    		<option value="assortment">Assortment File Import</option>
+  		</select>
+  	</td>
+  	<td title="the cache size that should be used for the import db">Cache Size</td>
+  	<td><select name="cacheSize" size="1">
+    		<option value="2097152">2 MB</option>
+    		<option value="4194304">4 MB</option>
+    		<option value="8388608" selected="selected">8 MB</option>
+    		<option value="16777216">16 MB</option>
+    		<option value="33554432">32 MB</option>
+    		<option value="67108864">64 MB</option>
+    		<option value="134217728">128 MB</option>
+  		</select>
+  	</td>
+  	<td><a href="#usage">Usage Examples</a></td>
+</tr>
+<tr class="TableCellLight">
+	<td title="Path to the PLASMADB directory of the foreign peer">Import&nbsp;Path:</td>
+	<td colspan="3"><input name="importPath" type="text" size="50" value=""></td>
+	<td><input type="submit" name="startIndexDbImport" value="Start Import"></td>
+</tr>
+</table>
+</td>
+<td><font color="red"><b>Attention:</b><br>Always do a backup of your source and destination database before starting to use this import function.</font>
+</td>
 </tr>
 </table>
 </form>
@@ -38,15 +64,13 @@
 <p>
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader" valign="bottom">
-<td class="small" width="150">Path</td>
+<td class="small">Job Type</td>
+<td class="small" width="150">Job Name</td>
 <td class="small" >Status</td>
 <td class="small" >%</td>
 <td class="small" >Elapsed<br>Time</td>
 <td class="small" >Estimated<br>Time</td>
-<td class="small" >Word Hash</td>
-<td class="small" ># URLs</td>
-<td class="small" ># Word<br>Entities</td>
-<td class="small" ># Word<br>Entries</td>
+<td class="small" >Import Status</td>
 <td class="small" >Abort Import</td>
 <td class="small" >Pause Import</td>
 </tr>
@@ -54,25 +78,23 @@
 <form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
 	<input type="hidden" name="jobNr" value="#[job_nr]#">
     <tr class="TableCellLight">
-      <td class="small">#[path]#</td>
-      <td class="small"><font color="#(status)#red::green::blue#(/status)#">#(status)#Finished::Running::Paused#(/status)#</font></td>
+      <td class="small">#[type]#</td>
+      <td class="small" title="#[fullName]#">#[shortName]#</td>
+      <td class="small"><font color="#(runningStatus)#red::green::blue#(/runningStatus)#">#(runningStatus)#Finished::Running::Paused#(/runningStatus)#</font></td>
       <td class="small" align="right">#[percent]#</td>
       <td class="small" align="right">#[elapsed]#</td>
       <td class="small" align="right">#[estimated]#</td>
-      <td class="small" align="right"><tt>#[wordHash]#</tt></td>
-      <td class="small" align="rigth">#[url_num]#</td>
-      <td class="small" align="rigth">#[word_entity_num]#</td>
-      <td class="small" align="rigth">#[word_entry_num]#</td>
+      <td class="small" align="left"><tt>#[status]#</tt></td>
       <td class="small">
       	#(stopped)#::
-      		<input type="submit" name="stopIndexDbImport" value="Abort Import">
+      		<input type="submit" name="stopIndexDbImport" value="Abort">
       	#(/stopped)#
 	  </td>
       <td class="small">
       	#(paused)#
-      	<input type="submit" name="pauseIndexDbImport" value="Pause Import">
+      	<input type="submit" name="pauseIndexDbImport" value="Pause">
       	::
-      	<input type="submit" name="continueIndexDbImport" value="Continue Import">
+      	<input type="submit" name="continueIndexDbImport" value="Continue">
       	#(/paused)#
 	  </td>
     </tr>
@@ -87,32 +109,138 @@
 <p>
 <table border="0" cellpadding="2" cellspacing="1">
 <tr class="TableHeader" valign="bottom">
+<td class="small">Job Type</td>
 <td class="small" width="150">Path</td>
 <td class="small" >Status</td>
 <td class="small" >%</td>
 <td class="small" >Elapsed<br>Time</td>
-<td class="small" >Word Hash</td>
-<td class="small" ># URLs</td>
-<td class="small" ># Word<br>Entities</td>
-<td class="small" ># Word<br>Entries</td>
+<td class="small" >Import Status</td>
 </tr>
 #{finished.jobs}#
     <tr class="TableCellLight">
-      <td class="small">#[path]#</td>
-      <td class="small"><font color="#(status)#red::green::red#(/status)#">#(status)#Finished::<b>Error:</b> #[errorMsg]#::Paused#(/status)#</font></td>
+      <td class="small">#[type]#</td>
+      <td class="small" title="#[fullName]#">#[shortName]#</td>
+      <td class="small"><font color="#(runningStatus)#red::green::red#(/runningStatus)#">#(runningStatus)#Finished::<b>Error:</b> #[errorMsg]#::Paused#(/runningStatus)#</font></td>
 	  <td class="small" align="right">#[percent]#</td>
       <td class="small" align="right">#[elapsed]#</td>
-      <td class="small" align="right"><tt>#[wordHash]#</tt></td>
-      <td class="small" align="rigth">#[url_num]#</td>
-      <td class="small" align="rigth">#[word_entity_num]#</td>
-      <td class="small" align="rigth">#[word_entry_num]#</td>
+      <td class="small" align="right"><tt>#[status]#</tt></td>
     </tr>
 #{/finished.jobs}#
   </table>
   <input type="submit" name="clearFinishedJobList" value="Clear List">
 </form>
 <p><font size="-3"><i>Last Refresh:</i> #[date]#</font></p>
+<hr>
+<p><div id="usage"><h2>Usage Examples:</h2></div></p>
 
+<p><h3>Plasma DB Import:</h3></p>
+<p>
+	<b>Example Path:</b> <tt>E:\PLASMADB\</tt><br>
+</p>
+<p>
+<b>Requirements:</b><br>
+You need to have at least the following directories and files in this path:
+<table border="1" cellpadding="2" cellspacing="1">
+	<tr style="background-color: lightgrey">
+		<td>Name</td>
+		<td>Type</td>
+		<td>Witeable</td>
+		<td>Description</td>
+	</tr>
+	<tr>
+		<td><tt>urlHash.db</tt></td>
+		<td>File</td>
+		<td>No</td>
+		<td>The LoadedURL Database containing all loaded and indexed URLs</td>
+	</tr>
+	<tr>
+		<td><tt>ACLUSTER</tt></td>
+		<td>Directory</td>
+		<td>Yes</td>
+		<td>The assortment directory containing parts of the word index.</td>
+	</tr>
+	<tr>
+		<td><tt>WORDS</tt></td>
+		<td>Directory</td>
+		<td>Yes</td>
+		<td>The words directory containing parts of the word index.</td>
+	</tr>			
+</table>
+</p>
+
+
+<p><h3>Assortment Import:</h3></p>
+<p>
+	<b>Example Path:</b> <tt>E:\PLASMADB\ACLUSTER\indexAssortment001.db</tt>
+</p>
+<p>
+<b>Requirements:</b><br>
+You need to have at least the following directories and files in this path:
+<table border="1" cellpadding="2" cellspacing="1">
+	<tr style="background-color: lightgrey">
+		<td>Name</td>
+		<td>Type</td>
+		<td>Witeable</td>
+		<td>Description</td>
+	</tr>
+	<tr>
+		<td><tt>indexAssortment001.db</tt></td>
+		<td>File</td>
+		<td>No</td>
+		<td>The assortment file that should be imported.<br>
+			<b>Attention:</b> The assortment file must have the postfix "[0-9]{3}\.db".
+			If you would like to import an assortment file from the <tt>PLASMADB\ACLUSTER\ABKP</tt></td>
+	</tr>
+</table>
+</p>
+<p>
+<b>Notes:</b><br>
+Please note that the imported words are useless if the destination peer doesn't know 
+the URLs the imported words belongs to.
+</p>
+
+<!--
+<p><h3>Crawling Queue Import:</h3></p>
+<p>
+	<b>Example Path:</b> <tt>E:\PLASMADB\</tt>
+</p>
+<b>Requirements:</b><br>
+You need to have at least the following directories and files in this path:
+<table border="1" cellpadding="2" cellspacing="1">
+	<tr style="background-color: lightgrey">
+		<td>Name</td>
+		<td>Type</td>
+		<td>Witeable</td>
+		<td>Description</td>
+	</tr>
+	<tr>
+		<td><tt>crawlProfiles0.db</tt></td>
+		<td>File</td>
+		<td>No</td>
+		<td>Contains data about the crawljob an URL belongs to</td>
+	</tr>
+	<tr>
+		<td><tt>urlNotice1.db</tt></td>
+		<td>File</td>
+		<td>Yes</td>
+		<td>The crawling queue</td>
+	</tr>	
+	<tr>
+		<td><tt>urlNoticeImage0.stack</tt></td>
+		<td rowspan="8">File</td>
+		<td rowspan="8">Yes</td>
+		<td rowspan="8">Various stack files that belong to the crawling queue</td>
+	</tr>	
+	<tr><td><tt>urlNoticeImage0.stack</tt></td></tr>
+	<tr><td><tt>urlNoticeLimit0.stack</tt></td></tr>
+	<tr><td><tt>urlNoticeLocal0.stack</tt></td></tr>
+	<tr><td><tt>urlNoticeMovie0.stack</tt></td></tr>
+	<tr><td><tt>urlNoticeMusic0.stack</tt></td></tr>
+	<tr><td><tt>urlNoticeOverhang0.stack</tt></td></tr>
+	<tr><td><tt>urlNoticeRemote0.stack</tt></td></tr>		
+</table>
+</p>
+-->
 #%env/templates/footer.template%#
 </body>
 </html>

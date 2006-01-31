@@ -1,186 +1,81 @@
-package de.anomic.plasma;
+package de.anomic.plasma.dbImport;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
+import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverDate;
-import de.anomic.server.logging.serverLog;
 
-public class plasmaDbImporter extends Thread {
+public class plasmaDbImporter extends AbstractImporter implements dbImporter {
 
-    public static final Vector finishedJobs = new Vector();
-    public static final ThreadGroup runningJobs = new ThreadGroup("DbImport");
-    public static int currMaxJobNr = 0;
+    private plasmaCrawlLURL homeUrlDB;
+    private plasmaWordIndex homeWordIndex;
     
-    private final int jobNr;
-    private final plasmaCrawlLURL homeUrlDB;
-    private final plasmaWordIndex homeWordIndex;
+    private plasmaCrawlLURL importUrlDB;
+    private plasmaWordIndex importWordIndex;
+    private int importStartSize;
     
-    private final plasmaCrawlLURL importUrlDB;
-    private final plasmaWordIndex importWordIndex;
-    //private final String importPath;
-    private final File importRoot;
-    private final int importStartSize;
-    
-    private final serverLog log;
-    private boolean stopped = false;
-    private boolean paused = false;
+
     private String wordHash = "------------";
     
     long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = this.wordChunkStart;
     String wordChunkStartHash = "------------", wordChunkEndHash;
     private long urlCounter = 0, wordCounter = 0, entryCounter = 0;
     
-    private long globalStart = System.currentTimeMillis();
-    private long globalEnd;
-    
-    private String error;
-    
-    public void stoppIt() {
-        this.stopped = true;
-        this.continueIt();
+
+    public plasmaDbImporter(plasmaSwitchboard sb) {
+        super(sb);
+        this.jobType = "PLASMADB";
     }
     
-    public void pauseIt() {
-        synchronized(this) {
-            this.paused = true;
-        }
+    public String getJobName() {
+        return this.importPath.toString();
     }
-    
-    public void continueIt() {
-        synchronized(this) {
-            if (this.paused) {
-                this.paused = false;
-                this.notifyAll();
-            }
-        }
-    }
-    
-    public boolean isPaused() {
-        synchronized(this) {
-            return this.paused;
-        }
-    }
-    
-    /**
-     * Can be used to close all still running importer threads
-     * e.g. on server shutdown
-     */
-    public static void close() {
-        /* waiting for all threads to finish */
-        int threadCount  = runningJobs.activeCount();    
-        Thread[] threadList = new Thread[threadCount];     
-        threadCount = plasmaDbImporter.runningJobs.enumerate(threadList);
+
+    public String getStatus() {
+        StringBuffer theStatus = new StringBuffer();
         
-        if (threadCount == 0) return;
+        theStatus.append("Hash=").append(this.wordHash).append("\n");
+        theStatus.append("#URL=").append(this.urlCounter).append("\n");
+        theStatus.append("#Word Entities=").append(this.wordCounter).append("\n");
+        theStatus.append("#Word Entries=").append(this.entryCounter);
         
-        serverLog log = new serverLog("DB-IMPORT");
-        try {
-            // trying to gracefull stop all still running sessions ...
-            log.logInfo("Signaling shutdown to " + threadCount + " remaining dbImporter threads ...");
-            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                Thread currentThread = threadList[currentThreadIdx];
-                if (currentThread.isAlive()) {
-                    ((plasmaDbImporter)currentThread).stoppIt();
-                }
-            }      
+        return theStatus.toString();
+    }
+    
+    public void init(File theImportPath, int cacheSize) {
+        super.init(theImportPath);
             
-            // waiting a few ms for the session objects to continue processing
-            try { Thread.sleep(500); } catch (InterruptedException ex) {}    
-            
-            // interrupting all still running or pooled threads ...
-            log.logInfo("Sending interruption signal to " + runningJobs.activeCount() + " remaining dbImporter threads ...");
-            plasmaDbImporter.runningJobs.interrupt();  
-            
-            // we need to use a timeout here because of missing interruptable session threads ...
-            log.logFine("Waiting for " + runningJobs.activeCount() + " remaining dbImporter threads to finish shutdown ...");
-            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                Thread currentThread = threadList[currentThreadIdx];
-                if (currentThread.isAlive()) {
-                    log.logFine("Waiting for dbImporter thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
-                    try { currentThread.join(500); } catch (InterruptedException ex) {}
-                }
-            }
-            
-            log.logInfo("Shutdown of remaining dbImporter threads finished.");
-        } catch (Exception e) {
-            log.logSevere("Unexpected error while trying to shutdown all remaining dbImporter threads.",e);
-        }
-    }
-    
-    public String getError() {
-        return this.error;
-    }
-    
-    public int getJobNr() {
-        return this.jobNr;
-    }
-    
-    public String getCurrentWordhash() {
-        return this.wordHash;
-    }
-    
-    public long getUrlCounter() {
-        return this.urlCounter;
-    }
-    
-    public long getWordEntityCounter() {
-        return this.wordCounter;
-    }
-    
-    public long getWordEntryCounter() {
-        return this.entryCounter;
-    }
-    
-    public File getImportRoot() {
-        return this.importRoot;
-    }
-    
-    public int getImportWordDbSize() {
-        return this.importWordIndex.size();
-    }
-    
-    public plasmaDbImporter(plasmaWordIndex theHomeIndexDB, plasmaCrawlLURL theHomeUrlDB, String theImportPath) {
-        super(runningJobs,"DB-Import_" + theImportPath);
+        this.homeWordIndex = this.sb.wordIndex;
+        this.homeUrlDB = this.sb.urlPool.loadedURL;
+        this.cacheSize = cacheSize;
+        if (this.cacheSize < 2*1024*1024) this.cacheSize = 8*1024*1024;
         
-        this.log = new serverLog("DB-IMPORT");
-        
-        synchronized(runningJobs) {
-            this.jobNr = currMaxJobNr;
-            currMaxJobNr++;
-        }
-        
-        if (theImportPath == null) throw new NullPointerException();
-        //this.importPath = theImportPath;
-        this.importRoot = new File(theImportPath);
-        
-        if (theHomeIndexDB == null) throw new NullPointerException();
-        this.homeWordIndex = theHomeIndexDB;
-        
-        if (theHomeUrlDB == null) throw new NullPointerException();
-        this.homeUrlDB = theHomeUrlDB;
-        
-        if (this.homeWordIndex.getRoot().equals(this.importRoot)) {
+        if (this.homeWordIndex.getRoot().equals(this.importPath)) {
             throw new IllegalArgumentException("Import and home DB directory must not be equal");
         }
         
         // configure import DB
         String errorMsg = null;
-        if (!this.importRoot.exists()) errorMsg = "Import directory does not exist.";
-        if (!this.importRoot.canRead()) errorMsg = "Import directory is not readable.";
-        if (!this.importRoot.canWrite()) errorMsg = "Import directory is not writeable";
-        if (!this.importRoot.isDirectory()) errorMsg = "ImportDirectory is not a directory.";
+        if (!this.importPath.exists()) errorMsg = "Import directory does not exist.";
+        if (!this.importPath.canRead()) errorMsg = "Import directory is not readable.";
+        if (!this.importPath.canWrite()) errorMsg = "Import directory is not writeable";
+        if (!this.importPath.isDirectory()) errorMsg = "ImportDirectory is not a directory.";
         if (errorMsg != null) {
-            this.log.logSevere(errorMsg + "\nName: " + this.importRoot.getAbsolutePath());
+            this.log.logSevere(errorMsg + "\nName: " + this.importPath.getAbsolutePath());
             throw new IllegalArgumentException(errorMsg);
         }         
         
         this.log.logFine("Initializing source word index db.");
-        this.importWordIndex = new plasmaWordIndex(this.importRoot, 8*1024*1024, this.log);
+        this.importWordIndex = new plasmaWordIndex(this.importPath, this.cacheSize/2, this.log);
         this.log.logFine("Initializing import URL db.");
-        this.importUrlDB = new plasmaCrawlLURL(new File(this.importRoot, "urlHash.db"), 4*1024*1024);
+        this.importUrlDB = new plasmaCrawlLURL(new File(this.importPath, "urlHash.db"), this.cacheSize/2);
         this.importStartSize = this.importWordIndex.size();
     }
     
@@ -189,24 +84,19 @@ public class plasmaDbImporter extends Thread {
             importWordsDB();
         } finally {
             this.globalEnd = System.currentTimeMillis();
-            finishedJobs.add(this);
+            this.sb.dbImportManager.finishedJobs.add(this);
         }
     }
     
-    public long getTotalRuntime() {
-        return (this.globalEnd == 0)?System.currentTimeMillis()-this.globalStart:this.globalEnd-this.globalStart;
-    }
+
     
-    public int getProcessingStatus() {
+    public int getProcessingStatusPercent() {
         // thid seems to be better:
         // (this.importStartSize-this.importWordIndex.size())*100/((this.importStartSize==0)?1:this.importStartSize);
         // but maxint (2,147,483,647) could be exceeded when WordIndexes reach 20M entries
         return (this.importStartSize-this.importWordIndex.size())/((this.importStartSize<100)?1:(this.importStartSize)/100);
     }
-    
-    public long getElapsedTime() {
-        return System.currentTimeMillis()-this.globalStart;
-    }
+
     
     public long getEstimatedTime() {
         return (this.wordCounter==0)?0:this.importWordIndex.size()*((System.currentTimeMillis()-this.globalStart)/this.wordCounter);
@@ -216,7 +106,7 @@ public class plasmaDbImporter extends Thread {
         this.log.logInfo("STARTING DB-IMPORT");  
         
         try {                                                
-            this.log.logInfo("Importing DB from '" + this.importRoot.getAbsolutePath() + "' to '" + this.homeWordIndex.getRoot().getAbsolutePath() + "'.");
+            this.log.logInfo("Importing DB from '" + this.importPath.getAbsolutePath() + "' to '" + this.homeWordIndex.getRoot().getAbsolutePath() + "'.");
             this.log.logInfo("Home word index contains " + this.homeWordIndex.size() + " words and " + this.homeUrlDB.size() + " URLs.");
             this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importUrlDB.size() + " URLs.");                        
             
@@ -277,7 +167,7 @@ public class plasmaDbImporter extends Thread {
                         long duration = wordChunkEnd - wordChunkStart;
                         log.logInfo(wordCounter + " word entities imported " +
                                 "[" + wordChunkStartHash + " .. " + wordChunkEndHash + "] " +
-                                this.getProcessingStatus() + "%\n" + 
+                                this.getProcessingStatusPercent() + "%\n" + 
                                 "Speed: "+ 500*1000/duration + " word entities/s" +
                                 " | Elapsed time: " + serverDate.intervalToString(getElapsedTime()) +
                                 " | Estimated time: " + serverDate.intervalToString(getEstimatedTime()) + "\n" + 
@@ -307,17 +197,6 @@ public class plasmaDbImporter extends Thread {
         }
     }    
     
-    private boolean isAborted() {
-        synchronized(this) {
-            if (this.paused) {
-                try {
-                    this.wait();
-                }
-                catch (InterruptedException e){}
-            }
-        }
-        
-        return (this.stopped) || Thread.currentThread().isInterrupted();
-    }
+
     
 }

@@ -132,6 +132,7 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroTables;
+import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
@@ -199,6 +200,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  bookmarksDB                 bookmarksDB;
     //public  StringBuffer                crl; // local citation references
     public  StringBuffer                crg; // global citation references
+    public  dbImportManager             dbImportManager;
     
     /*
      * Remote Proxy configuration
@@ -566,6 +568,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
+        this.dbImportManager = new dbImportManager(this);
+        
         sb=this;
         log.logConfig("Finished Switchboard Initialization");
     }
@@ -770,7 +774,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         terminateAllThreads(true);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
-        plasmaDbImporter.close();
+        this.dbImportManager.close();
         indexDistribution.close();
         cacheLoader.close();
         wikiDB.close();

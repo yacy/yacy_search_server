@@ -54,8 +54,10 @@ import java.util.Date;
 import java.util.Vector;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaDbImporter;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.dbImport.dbImportManager;
+import de.anomic.plasma.dbImport.dbImporter;
+import de.anomic.plasma.dbImport.plasmaDbImporter;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -75,24 +77,33 @@ public final class IndexImport_p {
                 try {
                     // getting the import path
                     String importPath = (String) post.get("importPath");
+                    String importType = (String) post.get("importType");
+                    String cacheSizeStr = (String) post.get("cacheSize");
+                    int cacheSize = 8*1024*1024;
+                    try {
+                        cacheSize = Integer.valueOf(cacheSizeStr).intValue();
+                    } catch (NumberFormatException e) {}
                     boolean startImport = true;
                     
-                    // check if there is an already running thread with the same import path
-                    Thread[] importThreads = new Thread[plasmaDbImporter.runningJobs.activeCount()*2];
-                    activeCount = plasmaDbImporter.runningJobs.enumerate(importThreads);
-                    
-                    for (int i=0; i < activeCount; i++) {
-                        plasmaDbImporter currThread = (plasmaDbImporter) importThreads[i];
-                        if (currThread.getImportRoot().equals(new File(importPath))) {
-                            prop.put("error",2);
-                            startImport = false;
-                        }
-                    }                    
+//                    // check if there is an already running thread with the same import path
+//                    Thread[] importThreads = new Thread[plasmaDbImporter.runningJobs.activeCount()*2];
+//                    activeCount = plasmaDbImporter.runningJobs.enumerate(importThreads);
+//                    
+//                    for (int i=0; i < activeCount; i++) {
+//                        plasmaDbImporter currThread = (plasmaDbImporter) importThreads[i];
+//                        if (currThread.getJobName().equals(new File(importPath))) {
+//                            prop.put("error",2);
+//                            startImport = false;
+//                        }
+//                    }                    
+//                    
                     
                     if (startImport) {
-                        plasmaDbImporter newImporter = new plasmaDbImporter(switchboard.wordIndex,switchboard.urlPool.loadedURL,importPath);
-                        newImporter.start();
-                        
+                        dbImporter importerThread = switchboard.dbImportManager.getNewImporter(importType);
+                        if (importerThread != null) {
+                            importerThread.init(new File(importPath),cacheSize);
+                            importerThread.startIt();                            
+                        }
                         prop.put("LOCATION","");
                         return prop;
                     } 
@@ -108,7 +119,7 @@ public final class IndexImport_p {
                     errorOut.close();
                 }
             } else if (post.containsKey("clearFinishedJobList")) {
-                plasmaDbImporter.finishedJobs.clear();
+                switchboard.dbImportManager.finishedJobs.clear();
                 prop.put("LOCATION","");
                 return prop;
             } else if (
@@ -117,25 +128,22 @@ public final class IndexImport_p {
                     (post.containsKey("continueIndexDbImport"))
             ) {
                 // getting the job nr of the thread
-                String jobNr = (String) post.get("jobNr");
-                
-                Thread[] importThreads = new Thread[plasmaDbImporter.runningJobs.activeCount()*2];
-                activeCount = plasmaDbImporter.runningJobs.enumerate(importThreads);
-                
-                for (int i=0; i < activeCount; i++) {
-                    plasmaDbImporter currThread = (plasmaDbImporter) importThreads[i];
-                    if (currThread.getJobNr() == Integer.valueOf(jobNr).intValue()) {
-                        if (post.containsKey("stopIndexDbImport")) {
-                            currThread.stoppIt();
-                            try { currThread.join(); } catch (InterruptedException e) {e.printStackTrace();}                            
-                        } else if (post.containsKey("pauseIndexDbImport")) {
-                            currThread.pauseIt();
-                        } else if (post.containsKey("continueIndexDbImport")) {
-                            currThread.continueIt();
-                        }
-                        break;
-                    }                    
-                }
+                String jobID = (String) post.get("jobNr");
+                dbImporter importer = switchboard.dbImportManager.getImporterByID(Integer.valueOf(jobID).intValue());
+                if (importer != null) {
+                    if (post.containsKey("stopIndexDbImport")) {
+                        try {
+                            importer.stopIt();
+                        } catch (InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }                        
+                    } else if (post.containsKey("pauseIndexDbImport")) {
+                        importer.pauseIt();
+                    } else if (post.containsKey("continueIndexDbImport")) {
+                        importer.continueIt();
+                    }
+                }                    
                 prop.put("LOCATION","");
                 return prop;
             }
@@ -147,60 +155,64 @@ public final class IndexImport_p {
         /*
          * Loop over all currently running jobs
          */
-        Thread[] importThreads = new Thread[plasmaDbImporter.runningJobs.activeCount()*2];
-        activeCount = plasmaDbImporter.runningJobs.enumerate(importThreads);
+        dbImporter[] importThreads = switchboard.dbImportManager.getRunningImporter();
+        activeCount = importThreads.length;
         
         for (int i=0; i < activeCount; i++) {
-            plasmaDbImporter currThread = (plasmaDbImporter) importThreads[i];
+            dbImporter currThread = importThreads[i];
 
+            // get import type
+            prop.put("running.jobs_" + i + "_type",            currThread.getJobType());
+            
             // root path of the source db
-            prop.put("running.jobs_" + i + "_path",            currThread.getImportRoot().toString());
+            String fullName = currThread.getJobName().toString();
+            String shortName = (fullName.length()>30)?fullName.substring(0,12) + "..." + fullName.substring(fullName.length()-22,fullName.length()):fullName;
+            prop.put("running.jobs_" + i + "_fullName",fullName);
+            prop.put("running.jobs_" + i + "_shortName",shortName);
             
             // specifies if the importer is still running
-            prop.put("running.jobs_" + i + "_stopped",         currThread.isAlive() ? 1:0);
+            prop.put("running.jobs_" + i + "_stopped",         currThread.isStopped() ? 1:0);
             
             // specifies if the importer was paused
             prop.put("running.jobs_" + i + "_paused",          currThread.isPaused() ? 1:0);
             
             // setting the status
-            prop.put("running.jobs_" + i + "_status",          currThread.isPaused() ? 2 : currThread.isAlive() ? 1 : 0);
+            prop.put("running.jobs_" + i + "_runningStatus",          currThread.isPaused() ? 2 : currThread.isStopped() ? 1 : 0);
             
             // other information
-            prop.put("running.jobs_" + i + "_percent",         Integer.toString(currThread.getProcessingStatus()));
+            prop.put("running.jobs_" + i + "_percent",         Integer.toString(currThread.getProcessingStatusPercent()));
             prop.put("running.jobs_" + i + "_elapsed",         serverDate.intervalToString(currThread.getElapsedTime()));
             prop.put("running.jobs_" + i + "_estimated",       serverDate.intervalToString(currThread.getEstimatedTime()));
-            prop.put("running.jobs_" + i + "_wordHash",        currThread.getCurrentWordhash());
-            prop.put("running.jobs_" + i + "_url_num",         Long.toString(currThread.getUrlCounter()));
-            prop.put("running.jobs_" + i + "_word_entity_num", Long.toString(currThread.getWordEntityCounter()));
-            prop.put("running.jobs_" + i + "_word_entry_num",  Long.toString(currThread.getWordEntryCounter()));
+            prop.put("running.jobs_" + i + "_status",          currThread.getStatus().replace("\n", "<br>"));
             
             // job number of the importer thread
-            prop.put("running.jobs_" + i + "_job_nr", Integer.toString(currThread.getJobNr()));
+            prop.put("running.jobs_" + i + "_job_nr", Integer.toString(currThread.getJobID()));
         }
         prop.put("running.jobs",activeCount);
         
         /*
          * Loop over all finished jobs 
          */
-        Vector finishedJobs = (Vector) plasmaDbImporter.finishedJobs.clone();
-        for (int i=0; i<finishedJobs.size(); i++) {
-            plasmaDbImporter currThread = (plasmaDbImporter) finishedJobs.get(i);
+        dbImporter[] finishedJobs = switchboard.dbImportManager.getFinishedImporter();
+        for (int i=0; i<finishedJobs.length; i++) {
+            dbImporter currThread = finishedJobs[i];
             String error = currThread.getError();
-            prop.put("finished.jobs_" + i + "_path", currThread.getImportRoot().toString());
+            String fullName = currThread.getJobName().toString();
+            String shortName = (fullName.length()>30)?fullName.substring(0,12) + "..." + fullName.substring(fullName.length()-22,fullName.length()):fullName;            
+            prop.put("finished.jobs_" + i + "_type", currThread.getJobType());
+            prop.put("finished.jobs_" + i + "_fullName", fullName);
+            prop.put("finished.jobs_" + i + "_shortName", shortName);
             if (error != null) {
-                prop.put("finished.jobs_" + i + "_status", 2);
-                prop.put("finished.jobs_" + i + "_status_errorMsg", error);
+                prop.put("finished.jobs_" + i + "_runningStatus", 2);
+                prop.put("finished.jobs_" + i + "_runningStatus_errorMsg", error);
             } else {
-                prop.put("finished.jobs_" + i + "_status", 0);
+                prop.put("finished.jobs_" + i + "_runningStatus", 0);
             }
-            prop.put("finished.jobs_" + i + "_percent", Integer.toString(currThread.getProcessingStatus()));
+            prop.put("finished.jobs_" + i + "_percent", Integer.toString(currThread.getProcessingStatusPercent()));
             prop.put("finished.jobs_" + i + "_elapsed", serverDate.intervalToString(currThread.getElapsedTime()));         
-            prop.put("finished.jobs_" + i + "_wordHash", currThread.getCurrentWordhash());
-            prop.put("finished.jobs_" + i + "_url_num", Long.toString(currThread.getUrlCounter()));
-            prop.put("finished.jobs_" + i + "_word_entity_num", Long.toString(currThread.getWordEntityCounter()));
-            prop.put("finished.jobs_" + i + "_word_entry_num", Long.toString(currThread.getWordEntryCounter()));           
+            prop.put("finished.jobs_" + i + "_status", currThread.getStatus().replace("\n", "<br>"));
         }
-        prop.put("finished.jobs",finishedJobs.size());
+        prop.put("finished.jobs",finishedJobs.length);
         
         prop.put("date",(new Date()).toString());
         return prop;
