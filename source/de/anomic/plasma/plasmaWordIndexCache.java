@@ -408,12 +408,16 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
-        if (maxTime > 0) maxTime = 8 * maxTime / 10; // reserve time for later adding to backend
-        plasmaWordIndexEntryContainer container = assortmentCluster.getFromAll(wordHash, maxTime);
+        plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) cache.get(wordHash);
         if (container == null) {
             container = new plasmaWordIndexEntryContainer(wordHash);
         }
-        container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : System.currentTimeMillis() - start));
+        container.add(assortmentCluster.getFromAll(wordHash, (maxTime < 1) ? -1 : 8 * maxTime / 10));
+        if (maxTime > 0) {
+            maxTime -= System.currentTimeMillis() - start;
+            if (maxTime < 0) maxTime = 0;
+        }
+        container.add(backend.getContainer(wordHash, deleteIfEmpty, maxTime));
         return container;
     }
 
