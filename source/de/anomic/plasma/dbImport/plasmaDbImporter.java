@@ -112,7 +112,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
             
             // iterate over all words from import db
 
-            Iterator importWordHashIterator = this.importWordIndex.wordHashes(wordChunkStartHash, true, true);
+            Iterator importWordHashIterator = this.importWordIndex.wordHashes(wordChunkStartHash, true, false);
             while (!isAborted() && importWordHashIterator.hasNext()) {
                 
                 plasmaWordIndexEntryContainer newContainer;
