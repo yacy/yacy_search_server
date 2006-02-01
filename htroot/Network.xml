@@ -1,6 +1,19 @@
 <?xml version="1.0"?>
 #(table)#
 ::
+<peers>
+#{list}#
+  <peer>
+    <hash>#[hash]#</hash>
+    <fullname>#[fullname]#</fullname>
+    <version>#[version]#</version>
+    <ppm>#[ppm]#</ppm>
+    <uptime>#[uptime]#</uptime>
+    <links>#[links]#</links>
+    <words>#[words]#</words>
+  </peer>
+#{/list}#
+</peers>
 ::
 <peers>
   <active>

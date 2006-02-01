@@ -213,7 +213,7 @@ public class Network {
         } else {
             // generate table
             final int page = Integer.parseInt(post.get("page", "1"));
-            final int maxCount = 300;
+            final int maxCount = Integer.parseInt(post.get("maxCount", "300"));
             int conCount = 0;            
             if (yacyCore.seedDB == null) {
                 prop.put("table", 0);//no remote senior/principal proxies known"
