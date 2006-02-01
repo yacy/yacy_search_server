@@ -167,13 +167,13 @@ public class Language_p {
 	HashMap langNames = langMap(env);
         String langKey, langName;
         
-        //virtuell entry
+        //virtual entry
 	prop.put("langlist_0_file", "default");
 	prop.put("langlist_0_name", ((langNames.get("default") == null) ? "default" : (String) langNames.get("default")));
         
 	for(i=0;i<= langFiles.length-1 ;i++){
 		if(langFiles[i].endsWith(".lng")){
-			//+1 because of the virtuall entry "default" at top
+			//+1 because of the virtual entry "default" at top
                         langKey = langFiles[i].substring(0, langFiles[i].length() -4);
                         langName = (String) langNames.get(langKey);
 			prop.put("langlist_"+(i+1)+"_file", langFiles[i]);

@@ -6,14 +6,20 @@
 # Frankfurt, Germany, 2005
 #
 # This file is maintained by Roland Ramthun <admin@yacy-forum.de>
-# This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>
+# This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink
 
 # If you find any mistakes in this file please don't hesitate to email them to me.
 # If you find any untranslated string in the webinterface do so, too.
 
 #English=German
+
+#-------------------------------------------------------
+#File: Language_p.html
+#Only part 1.
+#Contributors are in chronological ordern, not how much they did absolutely.
+#Thank you for your help!
 <!-- lang -->default\(english\)==Deutsch
-<!-- author -->==Roland Ramthun, Oliver Wunder
+<!-- author -->==Roland Ramthun, Oliver Wunder, Jan Sandbrink
 <!-- maintainer -->==<admin@yacy-forum.de>
 
 #-----------------------------------------------------------
@@ -638,11 +644,9 @@ Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
 Current language:==Aktuelle Sprache
 default\(english\)==Deutsch
-Languagefile Author:==Autor der Sprachdatei:
-<!-- author -->==Roland Ramthun, Oliver Wunder
+Languagefile Author(s) (chronological):==Autor(en) der Sprachdatei (chronologisch):
 Send additions to maintainer:==Schicken Sie Erg&auml;nzungen bitte an:
-<!-- maintainer -->==admin@yacy-forum.de
-Languages:==Sprachen:
+Available Languages:==Verf&uuml;gbare Sprachen:
 Install new language from URL:==Neue Sprachdatei herunterladen:
 Use this language==Diese Sprachdatei sofort benutzen
 "Use"==Benutzen
@@ -668,6 +672,17 @@ Advanced <a href="/Config_p.html">Configuration</a>==erweiterte <a href="/Config
 
 YaCy: Messages==YaCy Nachrichtenverwaltung
 >Messages==>Nachrichten
+>Date==>Datum
+>From==>Von
+>To==>An
+>Subject==>Betreff
+>Action==>Aktion
+From:==Von:
+To:==An:
+Date:==Datum:
+Subject:==Betreff:
+reply==antworten
+>delete==>l&ouml;schen
 
 #-------------------------------------------------------
 #File: MessageSend_p.html
@@ -794,6 +809,63 @@ Distributed==Verteilt
 Attributes==Attribute
 "\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Gew&auml;hlte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Gew&auml;hlte&nbsp;News&nbsp;l&ouml;schen::Verbreitung&nbsp;gew&auml;hlter&nbsp;News&nbsp;abbrechen::Gew&auml;hlte&nbsp;News&nbsp;l&ouml;schen#(/page)#
 "\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Alle&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Alle&nbsp;News&nbsp;l&ouml;schen::Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;abbrechen::Alle&nbsp;News&nbsp;l&ouml;schen#(/page)#
+
+#-------------------------------------------------------
+#File: PerformanceQueues_p.html
+Performance Settings of Queues and Processes==Performanceeinstellungen f&uuml;r Warteschlangen und Prozesse
+Scheduled tasks overview and waiting time settings:==&Uuml;bersicht geplanter Aufgaben und Wartezeiteinstellungen:
+Queue Size==Warteschl.-<br>l&auml;nge
+>Total==>gesamte
+#Block Time==
+#Sleep Time==
+#Exec Time==
+>Cycles==>Durchl.
+>Idle==>unt&auml;t.
+>Busy==>besch&auml;ft.
+Short Mem<br>Cycles==Durchl. ohne ausr. Speicher
+>per Cycle==>pro Durchlauf
+>per Busy-Cycle==>pro besch&auml;ft. Durchl.
+>Memoy Use==>Speicher-<br>nutzung
+>Delay between==>Verz&ouml;gerung zwischen
+>idle loops==>unt&auml;t. Durchl.
+>busy loops==>besch&auml;ft. Durchl.
+Minimum of<br>Required Memory==Mindestens ben&ouml;tigter Speicher
+Full Description==vollst&auml;ndige Beschreibung
+Submit New Delay Values==Neue Verz&ouml;gerungswerte speichern
+Reset To Default Values==Standardwerte wiederherstellen
+Changes take effect immediately==&Auml;nderungen werden sofort wirksam
+Indexing Cache Settings:==Indexier Cache Einstellungen:
+Words in RAM Cache:==W&ouml;rter im RAM-Cache
+This is the current size of the word cache.==Dies ist die momentane Gr&ouml;&szlig;e des Wort-Caches.
+The smaller this number, the faster the shut-down procedure will be.==Je kleiner diese Zahl ist, desto schneller wird das Herunterfahren von YaCy gehen.
+The maximum of this cache can be set below.==Die Maximalgr&ouml;&szlig;e dieses Cache kann nachfolgend eingestellt werden.
+Maximum URLs currently assigned<br>to one cached word:==h&ouml;chste Anzahl URLs die derzeit einem Wort im Zwischenspeicher zugewiesen wurde:
+This is the maximum size of URLs assigned to a single word cache entry.==Dies ist die maximale Menge an URLs, die einem einzelnen Wort-Cache Eintrag zugewiesen wurden.
+If this is a big number, it shows that the caching works efficiently.==Wenn diese Zahl hoch ist, hei&szlig;t das, dass der Wort-Cache effizient arbeitet.
+Maximum number of Word Caches, low limit:==Maximale Wortzahl im Cache, niedrige Grenze
+Maximum number of Word Caches, high limit:==Maximale Wortzahl im Cache, hohe Grenze
+This is is the number of word indexes that shall be held in the==Dies ist die Anzahl der Wort-indexe die w&auml;hrend des Indexierens im
+ram cache during indexing. When YaCy is shut down, this cache must be==RAM-Cache gehalten werden sollen. Sobald YaCy herunterf&auml;hrt muss dieser Cache
+flushed to disc; this may last some minutes.==auf die Festplatte gesichert werden; dies kann einige Minuten dauern.
+The low limit is valid for crawling tasks, the high limit is valid==Die niedrige Grenze gilt f&uuml;r Crawling-Aufgaben, die hohe Grenze gilt f&uuml;r
+for search and DHT transmission tasks.==Such- und DHT-&Uuml;bertragungsaufgaben.
+Enter New Cache Size==Neue Cachegr&ouml;&szlig;e eintragen
+Thread pool settings:==Threadpool Einstellungen:
+maximum Active==max. aktiv
+maximum Idle==max. inaktiv
+minimum Idle==min. inaktiv
+current Active==derzeit aktiv
+current Idle==derzeit inaktiv
+Enter new Threadpool Configuration==neue Threadpoolkonfiguration eintragen
+Proxy Performance Settings:==Proxy Performance Einstellungen
+#Online Caution Delay==
+milliseconds==Millisekunden
+This is the time that the crawler idles when the proxy is accessed.==Dies ist die Zeit die der Crawler pausiert wenn auf den Proxy zugegriffen wird.
+The delay is extended by this time==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert,
+each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.==wenn auf den Proxy zugegriffen wird. Dies soll die Performance des Proxydurchsatzes erh&ouml;hen.
+current delta is==Seit dem letzten Zugriff auf den Proxy sind
+milliseconds since last proxy access.==Millisekunden vergangen.
+Enter New Parameters==Neue Parameter eintragen
 
 #-------------------------------------------------------
 #File: ProxyIndexingMonitor_p.html
@@ -986,6 +1058,28 @@ Here you can specify which upload method should be used.==Hier k&ouml;nnen Sie a
 Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu deaktivieren.
 The URL that can be used to retrieve the uploaded seed file, like==Die URL die genutzt werden kann um die hochgeladene Seed-Liste zu erhalten, wie
 
+#--------------------------------------------------------
+#File: yacy/seedUpload/yacySeedUploadFtp.html
+Uploading via FTP:==Upload per FTP:
+This is the account for a FTP server where you can host a seed-list file.==Dies ist der Account f&uuml;r einen FTP-Server, auf dem Sie eine Seed-Liste bereitstellen k&ouml;nnen.
+If you set this, you will become a principal peer.==Wenn Sie das tun, werden Sie zum Principal-Peer.
+Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
+but only if there had been changes to the seed-list.==jedoch nur wenn &Auml;nderungen an der Seed-Liste vorgenommen wurden.
+The host where you have a FTP account, like==Der Host zu Ihrem FTP-Account, wie
+Path:==Pfad:
+The remote path on the FTP server, like==Der Remote-Pfad auf dem FTP-Server, wie
+Missing sub-directories are NOT created automatically.==Fehlende Unterverzeichnisse werden NICHT automatisch erstellt.
+Your log-in at the FTP server==Ihr Log-in auf dem FTP-Server
+Password:==Passwort:
+The password==Das Passwort
+
+#--------------------------------------------------------
+#File: yacy/seedUpload/yacySeedUploadFile.html
+Store into filesystem:==Ablegen im Dateisystem:
+You must configure this if you want to store the seed-list file onto the file system.==Sie m&uuml;ssen diese Einstellungen vornehmen, wenn Sie die Seed-Liste im Dateisystem ablegen wollen.
+File&nbsp;Location:==Speicherort:
+Here you can specify the path within the filesystem where the seed-list file should be stored.==Hier k&ouml;nnen Sie den Pfad im Dateisystem festlegen, in dem die Seed-Liste abgelegt werden soll.
+
 #-------------------------------------------------------
 #File: Settings_MessageForwarding.inc
 Message Forwarding==Nachrichten Weiterleitung
@@ -1130,7 +1224,7 @@ YaCy: Skins==YaCy: Skins
 Skin selection==Skinauswahl
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie k&ouml;nnen hier das Aussehen von YaCy mit Skins &auml;ndern. W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
 Current skin:==Verwendeter Skin:
-Skins:==Skins:
+Available Skins:==Verf&uuml;gbare Skins:
 "Use"=="Benutzen"
 "Delete"=="L&ouml;schen"
 Install new skin from URL:==Installiere einen neuen Skin von folgender URL:
@@ -1388,6 +1482,7 @@ Personal Profile==Pers&ouml;nliches Profil
 Project Home==Pojektseite
 Project News==Neuigkeiten
 English Forum==Englisches Forum
+
 #Deutsches Forum==Deutsches Forum
 Download YaCy==YaCy herunterladen
 #YaCy Wiki==YaCy Wiki
@@ -1444,3 +1539,12 @@ YACY: Public Files==YaCy: &Ouml;ffentliche Dateien
 Public&nbsp;File&nbsp;Directory==&Ouml;ffentliches Datei Verzeichnis
 value="\#\[peername\]\#'s Console"==value="#[peername]#s Konsole"
 Welcome! You are identified and authorized as==Willkommen! Sie sind identifiziert und authorisiert als
+
+#--------------------------------------------------------
+#File: htdocsdefault/welcome.html
+YACY: Default Page for Individual Peer Content==YACY: Standardseite f&uuml;r eigene Peer-Inhalte
+Individual&nbsp;Web&nbsp;Page==eigene Webseite
+Welcome to your own web page<br>in the <b>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br>im <b>YaCy-Netzwerk
+THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE F&Uuml;R IHREN EIGENEN WEB SERVER!
+PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
+&lt;YaCy-application-home&gt;<b>#[wwwpath]#</b>==&lt;YaCy-Programmpfad&gt;<b>#[wwwpath]#</b> ABLEGEN.
