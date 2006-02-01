@@ -528,14 +528,21 @@ public final class plasmaHTCache {
         if (!path.startsWith("/")) { path = "/" + path; }
         if (path.endsWith("/") && query == null) { path = path + "ndx"; }
 
-        Pattern pathPattern = Pattern.compile("/\\.\\./");
-        Matcher matcher = pathPattern.matcher(path);
+        Pattern searchPattern = Pattern.compile("/\\.\\./");
+        Matcher matcher = searchPattern.matcher(path);
         while (matcher.find()) {
             path = matcher.replaceAll("/!!/");
             matcher.reset(path);
         }
         if (query != null) {
-            path = path.concat("_").concat(query.replaceAll("[\"\\/:*?<>|]", "_")); // yes this is not reversible, but that is not needed
+            // yes this is not reversible, but that is not needed
+            searchPattern = Pattern.compile("(\"|\\\\|\\*|\\?|/|:|<|>|\\|)");
+            matcher = searchPattern.matcher(query);
+            while (matcher.find()) {
+                query = matcher.replaceAll("_");
+                matcher.reset(query);
+            }            
+            path = path.concat("_").concat(query);
         }
         // only set NO default ports
         int port = url.getPort();
