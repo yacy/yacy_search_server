@@ -538,6 +538,11 @@ public final class yacy {
         return config;
     }
 
+    static void shutdown() {
+        String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
+        shutdown(applicationRoot);
+    }
+    
     /**
     * Call the shutdown-page from yacy to tell it to shut down. This method is
     * called if you start yacy with the argument -shutdown.
@@ -1579,9 +1584,11 @@ class shutdownHookThread extends Thread {
                 serverLog.logConfig("SHUTDOWN","Shutdown via shutdown hook.");
 
                 // sending the yacy main thread a shutdown signal
+                serverLog.logFine("SHUTDOWN","Signaling shutdown to the switchboard.");
                 this.sb.terminate();
 
                 // waiting for the yacy thread to finish execution
+                serverLog.logFine("SHUTDOWN","Waiting for main thread to finish.");
                 this.mainThread.join();
             }
         } catch (Exception e) {
