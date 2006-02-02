@@ -9,14 +9,17 @@ else
 	
 	#get javastart args
 	java_args=""
-	for i in $(grep javastart DATA/SETTINGS/httpProxy.conf);
-	do  i="${i#javastart_*=}";java_args=-$i" "$java_args;
-	done
+	if [ -f DATA/SETTINGS/httpProxy.conf ]
+	then
+		for i in $(grep javastart DATA/SETTINGS/httpProxy.conf);
+		do  i="${i#javastart_*=}";java_args=-$i" "$java_args;
+		done
+	fi
 	
 	# generating the proper classpath
 	CLASSPATH=""
-	for N in `ls -1 lib/*.jar`; do CLASSPATH="$CLASSPATH$N:"; done	
-	for N in `ls -1 libx/*.jar`; do CLASSPATH="$CLASSPATH$N:"; done
+	for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
+	for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 	
 	if [ x$1 == x-d ] #debug
 	then
