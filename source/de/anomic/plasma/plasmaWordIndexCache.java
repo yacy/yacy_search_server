@@ -364,11 +364,13 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         plasmaWordIndexEntryContainer container = null;
         long time;
         synchronized (cache) {
-            // get the container and remove it from the cache
-            container = (plasmaWordIndexEntryContainer) this.cache.remove(key);
+            // get the container
+            container = (plasmaWordIndexEntryContainer) this.cache.get(key);
             if (container == null) return 0; // flushing of nonexisting key
             time = getUpdateTime(key);
 
+            // remove it from the cache
+            cache.remove(key);
             hashScore.deleteScore(key);
             hashDate.deleteScore(key);
         }
