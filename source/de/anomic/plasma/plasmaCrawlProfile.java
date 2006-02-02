@@ -150,6 +150,30 @@ public class plasmaCrawlProfile {
         } catch (IOException e) {}
     }
     
+    public entry newEntry(Map mem) {
+        entry ne = new entry(mem);
+        try {
+            profileTable.set(ne.handle(), ne.map());
+        } catch (kelondroException e) {
+            resetDatabase();
+            try {
+                profileTable.set(ne.handle(), ne.map());
+            } catch (IOException ee) {
+                e.printStackTrace();
+                System.exit(0);
+            }
+        } catch (IOException e) {
+            resetDatabase();
+            try {
+                profileTable.set(ne.handle(), ne.map());
+            } catch (IOException ee) {
+                e.printStackTrace();
+                System.exit(0);
+            }
+        }
+        return ne;        
+    }
+    
     public entry newEntry(String name, String startURL, String generalFilter, String specificFilter,
                            int generalDepth, int specificDepth,
                            boolean crawlingQ,

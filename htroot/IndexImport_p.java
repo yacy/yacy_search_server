@@ -171,13 +171,13 @@ public final class IndexImport_p {
             prop.put("running.jobs_" + i + "_shortName",shortName);
             
             // specifies if the importer is still running
-            prop.put("running.jobs_" + i + "_stopped",         currThread.isStopped() ? 1:0);
+            prop.put("running.jobs_" + i + "_stopped",         currThread.isStopped() ? 0:1);
             
             // specifies if the importer was paused
             prop.put("running.jobs_" + i + "_paused",          currThread.isPaused() ? 1:0);
             
             // setting the status
-            prop.put("running.jobs_" + i + "_runningStatus",          currThread.isPaused() ? 2 : currThread.isStopped() ? 1 : 0);
+            prop.put("running.jobs_" + i + "_runningStatus",          currThread.isPaused() ? 2 : currThread.isStopped() ? 0 : 1);
             
             // other information
             prop.put("running.jobs_" + i + "_percent",         Integer.toString(currThread.getProcessingStatusPercent()));
@@ -202,9 +202,9 @@ public final class IndexImport_p {
             prop.put("finished.jobs_" + i + "_type", currThread.getJobType());
             prop.put("finished.jobs_" + i + "_fullName", fullName);
             prop.put("finished.jobs_" + i + "_shortName", shortName);
-            if (error != null) {
-                prop.put("finished.jobs_" + i + "_runningStatus", 2);
-                prop.put("finished.jobs_" + i + "_runningStatus_errorMsg", error);
+            if (error != null) { 
+                prop.put("finished.jobs_" + i + "_runningStatus", 1);
+                prop.put("finished.jobs_" + i + "_runningStatus_errorMsg", error.replaceAll("\n", "<br>"));
             } else {
                 prop.put("finished.jobs_" + i + "_runningStatus", 0);
             }

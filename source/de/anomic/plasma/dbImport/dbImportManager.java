@@ -62,6 +62,8 @@ public class dbImportManager {
             newImporter = new plasmaDbImporter(this.sb);
         } else if (type.equalsIgnoreCase("ASSORTMENT")) {
             newImporter = new plasmaWordIndexAssortmentImporter(this.sb);
+        } else if (type.equalsIgnoreCase("NURL")) {
+            newImporter = new plasmaCrawlNURLImporter(this.sb);
         }
         return newImporter;
     }
@@ -71,10 +73,13 @@ public class dbImportManager {
      * e.g. on server shutdown
      */
     public void close() {
+        /* clear the finished thread list */
+        this.finishedJobs.clear();
+        
         /* waiting for all threads to finish */
-        int threadCount  = runningJobs.activeCount();    
+        int threadCount  = this.runningJobs.activeCount();    
         Thread[] threadList = new Thread[threadCount];     
-        threadCount = runningJobs.enumerate(threadList);
+        threadCount = this.runningJobs.enumerate(threadList);
         
         if (threadCount == 0) return;
         

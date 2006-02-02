@@ -31,9 +31,13 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     }    
     
     public void init(File theImportPath) {
+        if (theImportPath == null) throw new NullPointerException("The Import path must not be null.");
         this.importPath = theImportPath;      
         
+        // getting a job id from the import manager
         this.jobID = this.sb.dbImportManager.getJobID();
+        
+        // initializing the logger and setting a more verbose thread name
         this.log = new serverLog("IMPORT_" + this.jobType + "_" + this.jobID);
         this.setName("IMPORT_" + this.jobType + "_" + this.sb.dbImportManager.getJobID());
     }
@@ -83,7 +87,7 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     }    
     
     public boolean isStopped() {
-        return this.isAlive();
+        return !this.isAlive();
     }
     
     public int getJobID() {
@@ -95,7 +99,7 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     }    
     
     public long getElapsedTime() {
-        return System.currentTimeMillis()-this.globalStart;
+        return isStopped()?this.globalEnd-this.globalStart:System.currentTimeMillis()-this.globalStart;
     }
 
     public String getJobType() {

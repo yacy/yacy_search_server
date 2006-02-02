@@ -31,6 +31,7 @@
 	<td title="the path to the database that should be imported"><select name="importType" size="1">
     		<option value="plasmaDB">PLASMA DB Import</option>
     		<option value="assortment">Assortment File Import</option>
+    		<option value="NURL">Crawling Queue Import</option>
   		</select>
   	</td>
   	<td title="the cache size that should be used for the import db">Cache Size</td>
@@ -69,7 +70,7 @@
 <td class="small" >Status</td>
 <td class="small" >%</td>
 <td class="small" >Elapsed<br>Time</td>
-<td class="small" >Estimated<br>Time</td>
+<td class="small" >Time<br>Left</td>
 <td class="small" >Import Status</td>
 <td class="small" >Abort Import</td>
 <td class="small" >Pause Import</td>
@@ -120,7 +121,7 @@
     <tr class="TableCellLight">
       <td class="small">#[type]#</td>
       <td class="small" title="#[fullName]#">#[shortName]#</td>
-      <td class="small"><font color="#(runningStatus)#red::green::red#(/runningStatus)#">#(runningStatus)#Finished::<b>Error:</b> #[errorMsg]#::Paused#(/runningStatus)#</font></td>
+      <td class="small"><font color="#(runningStatus)#green::red::blue#(/runningStatus)#">#(runningStatus)#Finished::<b>Error:</b> #[errorMsg]#::Paused#(/runningStatus)#</font></td>
 	  <td class="small" align="right">#[percent]#</td>
       <td class="small" align="right">#[elapsed]#</td>
       <td class="small" align="right"><tt>#[status]#</tt></td>
@@ -189,7 +190,8 @@ You need to have at least the following directories and files in this path:
 		<td>No</td>
 		<td>The assortment file that should be imported.<br>
 			<b>Attention:</b> The assortment file must have the postfix "[0-9]{3}\.db".
-			If you would like to import an assortment file from the <tt>PLASMADB\ACLUSTER\ABKP</tt></td>
+			If you would like to import an assortment file from the <tt>PLASMADB\ACLUSTER\ABKP</tt>
+			you have to rename it first.</td>
 	</tr>
 </table>
 </p>
@@ -199,7 +201,6 @@ Please note that the imported words are useless if the destination peer doesn't 
 the URLs the imported words belongs to.
 </p>
 
-<!--
 <p><h3>Crawling Queue Import:</h3></p>
 <p>
 	<b>Example Path:</b> <tt>E:\PLASMADB\</tt>
@@ -240,7 +241,7 @@ You need to have at least the following directories and files in this path:
 	<tr><td><tt>urlNoticeRemote0.stack</tt></td></tr>		
 </table>
 </p>
--->
+
 #%env/templates/footer.template%#
 </body>
 </html>

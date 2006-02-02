@@ -99,6 +99,7 @@ public class plasmaCrawlNURL extends plasmaURL {
     private final HashSet stackIndex;           // to find out if a specific link is already on any stack
     private File cacheStacksPath;
     private int bufferkb;
+    initStackIndex initThead;
     
     public plasmaCrawlNURL(File cacheStacksPath, int bufferkb) {
         super();
@@ -145,7 +146,17 @@ public class plasmaCrawlNURL extends plasmaURL {
 
         // init stack Index
         stackIndex = new HashSet();
-        new initStackIndex().start();
+        (initThead = new initStackIndex()).start();
+    }
+    
+    public void waitOnInitThread() {
+        try {
+            if (this.initThead != null) {
+                this.initThead.join();
+            }
+        } catch (NullPointerException e) {            
+        } catch (InterruptedException e) {}
+        
     }
     
     private void openHashCache() {
@@ -229,6 +240,7 @@ public class plasmaCrawlNURL extends plasmaURL {
             } catch (Exception e) {
                 musicStack = kelondroStack.reset(musicStack);
             }
+            plasmaCrawlNURL.this.initThead = null;
         }
     }
 
@@ -276,6 +288,22 @@ public class plasmaCrawlNURL extends plasmaURL {
                             profile, depth, anchors, forkfactor);
         push(stackMode, url.getHost(), e.hash);
         return e;
+    }
+    
+    public synchronized Entry newEntry(Entry oldEntry, int stackMode) {
+        if (oldEntry == null) return null;
+        return newEntry(
+                oldEntry.initiator(),
+                oldEntry.url(),
+                oldEntry.loaddate(),
+                oldEntry.referrerHash(),
+                oldEntry.name(),
+                oldEntry.profileHandle(),
+                oldEntry.depth(),
+                oldEntry.anchors,
+                oldEntry.forkfactor,
+                stackMode
+        );
     }
 
     private void push(int stackType, String domain, String hash) {

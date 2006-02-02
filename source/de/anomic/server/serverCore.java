@@ -853,6 +853,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
             }          
         }
         
+        public long getRequestStartTime() {
+            return this.start;
+        }
+        
         public long getTime() {
             return System.currentTimeMillis() - this.start;
         }
