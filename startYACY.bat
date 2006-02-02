@@ -1,5 +1,4 @@
 @Echo Off
-
 title YaCy
 
 If %1.==CPGEN. GoTo :CPGEN
