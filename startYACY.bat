@@ -9,6 +9,8 @@ Set CLASSPATH=classes;htroot
 For %%X in (lib/*.jar) Do Call %0 CPGEN lib\%%X
 For %%X in (libx/*.jar) Do Call %0 CPGEN libx\%%X
 
+set jmx=
+set jms=
 set javacmd=-Xmx64m -Xms10m
 if exist DATA\SETTINGS\httpProxy.conf GoTo :GETJAVACMD
 
