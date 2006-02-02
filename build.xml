@@ -452,9 +452,15 @@
 	<tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">  	
   	 
 		<!-- packing all files into a gzipped tar -->
-  		<tarfileset dir="${release_main}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
-    		<include name="**/*.*"/>
+  		<tarfileset dir="${release_main}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
+  		    <include name="**/*.sh"/>
+  		    <include name="**/*.command"/>  			
 		</tarfileset>
+  		<tarfileset dir="${release_main}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+    		<include name="**/*.*"/>			
+   		    <exclude name="**/*.sh"/>
+   		    <exclude name="**/*.command"/>  			    			
+		</tarfileset> 			
 	</tar>
 	
   <!-- deleting unneeded files -->
