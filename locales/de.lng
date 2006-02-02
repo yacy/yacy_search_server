@@ -207,6 +207,7 @@ Status==Status
 YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy benutzt regul&auml;re Ausdr&uuml;cke f&uuml;r einige Funktionen, z.B. die Blacklist.
 There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Es gibt einige Standards f&uuml;r diese Ausdr&uuml;cke, YaCy orientiert sich an der Syntax von Perl 5.
 Here ist a short overview about the functions, which should fir for most cases\:<==Hier finden Sie einen kurzen &Uuml;berblick &uuml;ber die Funktionen, der die meisten Anwenungsf&auml;lle abdecken sollte:<
+
 arbitrary character==beliebiges Zeichen
 character x==Zeichen x
 not x==nicht x
@@ -864,8 +865,94 @@ This is the time that the crawler idles when the proxy is accessed.==Dies ist di
 The delay is extended by this time==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert,
 each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.==wenn auf den Proxy zugegriffen wird. Dies soll die Performance des Proxydurchsatzes erh&ouml;hen.
 current delta is==Seit dem letzten Zugriff auf den Proxy sind
-milliseconds since last proxy access.==Millisekunden vergangen.
+since last proxy access.==vergangen.
 Enter New Parameters==Neue Parameter eintragen
+
+#-------------------------------------------------------
+#File: PerformanceMemory_p.html
+Performance Settings for Memory==Performanceeinstellungen f&uuml;r Speicher
+Memory Usage:==Speichernutzung:
+After Startup==Nach Start
+After Initializations==Nach Initialisierungen
+before GC==vor GC
+after GC==nach GC
+>Now==>Jetzt
+before <==vor <
+Next<br>Startup==N&auml;chster<br>Start
+Description==Beschreibung
+maximum memory that the JVM will attempt to use==maximaler Speicher den die JVM nutzen wird
+>Available<==>Verf&uuml;gbar<
+total available memory including free for the JVM within maximum==gesamter verf&uuml;gbarer Speicher f&uuml;r die JVM innerhalb des Maximums.
+>Total<==>Gesamt<
+total memory taken from the OS==gesamter vom Betriebssystem zugewiesener Speicher
+>Free<==>Frei<
+free memory in the JVM within total amount==freier Speicher in der JVM innerhalb des Gesamten Speichers
+>Used<==>Belegt<
+used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
+Re-Configuration of Startup Paramenters:==Neukonfiguration der Startparameter:
+Changes take effect after <b>re-start</b> of YaCy==&Auml;nderungen werden erst nach <b>Neustart</b> von YaCy wirksam
+this works only on linux/unix systems==dies funktioniert nur unter linux/unix-systemen
+RAM Cache for Database Files:==RAM-Cache f&uuml;r Datenbank-Dateien:
+Chunk Sizes==Chunk Gr&ouml;&szlig;en
+Chunk Size==Chunk Gr&ouml;&szlig;e
+#Slots==
+Memory Occupation==Speicherbeanspruchung
+Needed<br>==Ben&ouml;tigt<br>
+&nbsp;DB&nbsp;Size==&nbsp;DB&nbsp;Gr&ouml;&szlig;e
+>Empty==>Frei
+High Prio==hohe Prio
+Medium Prio==mittlere Prio
+Low Prio==niedr. Prio
+Used Now==jetzt Belegt
+Assigned Max==zugewiesenes Max.
+Default Max==standard Max.
+Good Max==gutes Max.
+Best Max==bestes Max.
+The Assortment Cluster stores most of the page indexes.==Der Assortment Cluster speichert die meisten Seitenindexe.
+Flushing speed of the temporary RWI cache depends on the size of this file cache. Increasing the space of this==Die Entleerungsgeschwindigkeit des tempor&auml;ren RWI Caches h&auml;ngt von der Gr&ouml;&szlig;e dieses Datei-Caches ab. Ein Vergr&ouml;&szlig;ern des Speichers dieses
+cache will speed up crawls with a depth > 3.==Caches wird Crawls mit einer Tiefe >3 beschleunigen.
+#HTTP Response Header==
+The Response Header database stores the HTTP heades that other servers send when YaCy retrieves web pages==Die Response-Header Datenbank speichert die HTTP-Heads, die andere Server schicken, wenn YaCy
+during proxy mode, when performing crawls or if it fetches pages for snippet generation.==durch den Proxymodus, beim Durchf&uuml;hren von Crawls oder zur Snippeterstellung Webseiten empf&auml;ngt.
+Increasing this cache will be most important for a fast proxy mode.==Erh&ouml;hen dieses Caches ist f&uuml;r einen schnellen Proxybetrieb am wichtigsten.
+'loaded' URLs=='geladene' URLs
+This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.==Dies ist die Datenbank, die die Hash/URL-Beziehung und Eigenschaften der URL, wie Ladedatum und Serverdatum, speichert.
+This cache is very important for a fast search process.==Dieser Cache ist sehr wichtig f&uuml;r einen schnellen Suchprozess.
+Increasing the cache size will result in more search results and less IO during DHT transfer.==Vergr&ouml;&szlig;ern dieses Caches wird mehr Suchergebnisse und weniger IO-Last w&auml;hrend eines DHT-Transfers hervorbringen.
+'noticed' URLs=='bekannte' URLs
+A noticed URL is one that was discovered during crawling but was not loaded yet.==Eine bekannte URL wurde beim Crawlen entdeckt, aber noch nicht geladen.
+Increasing the cache size will result in faster double-check during URL recognition when doing crawls.==Erh&ouml;hen der Cachegr&ouml;&szlig;e resultiert in schnellerer R&uuml;ck&uuml;berpr&uuml;fung beim Durchf&uuml;hren von Crawls.
+'error' URLs=='fehlerhafte' URLs
+URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.==URLs die nicht geladen werden k&ouml;nnen werden in dieser Datenbank gespeichert.
+Increasing the cache size will most probably speed up crawling slightly, but not significantly.==Erh&ouml;hen der Cachegr&ouml;&szlig;e wird h&ouml;chstwahrscheinlich das Crawlen etwas, aber nicht sehr, beschleunigen.
+DHT Control==DHT Kontrolle
+This is simply the cache for the seed-dbs==Dies ist der Cache f&uuml;r die Seed-dbs
+active, passive, potential==Aktiv, Passiv, Potenziell
+This cache is divided into three equal parts.==Dieser Cache ist in 3 gleich gro&szlig;e Teile zerlegt.
+Increasing this cache may speed up many functions, but we need to test this to see the effects.==Vergr&ouml;&szlig;ern dieses Caches k&ouml;nnte viele Funktionen beschleunigen, aber wir m&uuml;ssen es testen um die Effekte zu sehen.
+>Messages==>Nachrichten
+The Message cache for peer-to-peer messages. Less important.==Der Nachrichtencache f&uuml;r Peer-to-Peer Nachrichten. Unwichtig.
+The YaCy-Wiki uses a database to store its pages.==Das YaCy-Wiki nutzt eine Datenbank um ihre Seiten zu sichern.
+This cache is divided in two parts, one for the wiki database and one for its backup.==Dieser Cache ist in 2 Teile getrennt, einer f&uuml;r die Wiki-Datenbank und einer f&uuml;r ihr Backup.
+Increasing this cache may speed up access to the wiki pages.==Vergr&ouml;&szlig;ern dieses Caches kann den Zugriff auf die Wikiseiten beschleunigen.
+The News-DB stores property-lists for news that are included in seeds.==Die News-DB speichert Eigenschaftslisten f&uuml;r News die in Seeds enthalten sind.
+Increasing this cache may speed up the peer-ping.==Erh&ouml;hen dieses Caches kann den Peer-Ping beschleunigen.
+The robots.txt DB stores downloaded records from robots.txt files.==Die robots.txt-DB speichert heruntergeladene Eintr&auml;ge aus robots.txt-Dateien.
+Increasing this cache may speed up validation if crawling of the URL is allowed.==Vergr&ouml;&szlig;ern dieses Caches kann die &Uuml;berpr&uuml;fung ob eine URL gecrawled werden darf beschleunigen.
+Crawl Profiles==Crawl Profile
+The profile database stores properties for each crawl that is started on the local peer.==Die Profil-Datenbank speichert Eigenschaften f&uuml;r jeden Crawl der auf dem lokalen Peer gestartet wurde.
+Increasing this cache may speed up crawling, but not much space is needed, so the effect may be low.==Vergr&ouml;&szlig;ern dieses Caches kann das Crawlen beschleunigen, aber es wird nicht viel Platz gebraucht, der Effekt k&ouml;nnte also gering sein.
+>Totals==>Gesamt
+Sum of memory amounts==Summe der Speichermengen
+Re-Configuration:==Neukonfiguration:
+"Set"=="Setzen"
+these<br>custom<br>values==dieser<br>nutzerdef.<br>Werte
+all<br>default<br>values==aller<br>Standard-<br>werte
+all<br>recom-<br>mended values==aller<br>empfohlenen<br>Werte
+all<br>optimum<br>values==aller<br>Optimal-<br>werte
+#Write Cache Object Allocation:==
+#now alive in write cache==
+#currently held in write buffer heap==
 
 #-------------------------------------------------------
 #File: ProxyIndexingMonitor_p.html
