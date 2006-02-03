@@ -15,7 +15,7 @@
 
 #-------------------------------------------------------
 #File: Language_p.html
-#Only part 1 of Language_p.html
+#Only part 1.
 #Contributors are in chronological ordern, not how much they did absolutely.
 #Thank you for your help!
 <!-- lang -->default\(english\)==Deutsch
@@ -717,6 +717,7 @@ Type==Typ
 Release/<br>SVN==YaCy Version/<br>SVN
 Contact==Kontakt
 Last<br>Seen==Zuletzt<br>online
+Location==Ort
 Offset==Versatz
 Uptime==Uptime
 Links==Links
@@ -768,6 +769,7 @@ red point==roter Punkt
 this peer==Ihr Peer
 You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
 You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online Modus oder Sie benutzen nicht die Proxy Option.
+
 To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy Netzwerk zu verbinden, m&uuml;ssen Sie den Proxy benutzen, indem Sie die Browser Einstellungen auf
 \('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>==('on-demand - Modus', siehe <a href="http://www.yacy.net/yacy/Installation.html#wininst">hier</a>
 for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den Permanent Online Modus aktivieren.
@@ -891,7 +893,6 @@ free memory in the JVM within total amount==freier Speicher in der JVM innerhalb
 used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
 Re-Configuration of Startup Paramenters:==Neukonfiguration der Startparameter:
 Changes take effect after <b>re-start</b> of YaCy==&Auml;nderungen werden erst nach <b>Neustart</b> von YaCy wirksam
-this works only on linux/unix systems==dies funktioniert nur unter linux/unix-systemen
 RAM Cache for Database Files:==RAM-Cache f&uuml;r Datenbank-Dateien:
 Chunk Sizes==Chunk Gr&ouml;&szlig;en
 Chunk Size==Chunk Gr&ouml;&szlig;e
@@ -953,6 +954,33 @@ all<br>optimum<br>values==aller<br>Optimal-<br>werte
 #Write Cache Object Allocation:==
 #now alive in write cache==
 #currently held in write buffer heap==
+
+#-------------------------------------------------------
+#File: PerformanceSearch_p.html
+Performance Settings of Search Sequence==Performanceeinstellungen des Suchablaufs
+Timing Settings of Search Sequence==Timing-Einstellungen des Suchablaufs
+Settings for local search profile:==Einstellungen des lokalen Suchprofils:
+#Entity==
+#Collection==
+#Join==
+#Pre-Sort==
+#URL Fetch==
+#Post-Sort==
+#Filter==
+#Snippet-Fetch==
+execution Time==Ausf&uuml;hrungszeit
+percentage; sum of this must be 100==prozentual; Summe muss 100 sein
+#result count==
+#percentage of requested amount==
+Submit New Profile Values==neue Profilwerte &uuml;bertragen
+Reset To Default Values==Auf Standardwerte zur&uuml;cksetzen
+Your settings are valid and will be used for next search.==Ihre Einstellungen sind g&uuml;ltig und werden f&uuml;r die n&auml;chste Suche genutzt.
+Reset to default settings done.==Standardwerte wurden wiederhergestellt.
+Your settings cannot be accepted: sum of execution time percentage is not 100==Ihre Einstellungen k&ouml;nnen nicht &uuml;bernommen werden: Summe der prozentualen Ausf&uuml;hrungszeit ist nicht 100.
+Timing results of latest search request:==Timing-Ergebnisse der letzten Suchanfrage:
+absolute milliseconds==absolut, Millisekunden
+absolute amount==absoluter Wert
+The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Das Netzwerkbild zeigt wie die letzte Suche durch Anfragen bei zust&auml;ndigen Peers im DHT gel&ouml;st wurde.
 
 #-------------------------------------------------------
 #File: ProxyIndexingMonitor_p.html
