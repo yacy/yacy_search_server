@@ -58,6 +58,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -142,11 +143,12 @@ public final class message {
 
             // finally write notification
             File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
-            File notifierDest   = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/notifier.gif");
+            File notifierDest   = new File(sb.getConfig("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
             try {
                 serverFileUtils.copy(notifierSource, notifierDest);
             } catch (IOException e) {
-                System.out.println("NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
+            	serverLog.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
+              
             };
         }
 //      System.out.println("respond = " + prop.toString());

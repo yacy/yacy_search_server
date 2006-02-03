@@ -10,6 +10,8 @@ version 0.424svn
 	* FIXED: some Filemodes were set wrong (theli)
 	* FIXED: minor bug-fix in Cache for some rare URLs (borg-0300)
 	* ADDED: The YaCy-Bookmarkssystem (allo)
+	* UPDATED: New Searchstyle
+	* FIXED: notifier.gif works even when only DATA is writable
 
 version 0.40 (8/21/2005):
 	* The Server now provides the virtuel Header IS_ADMIN (Alexander Schier)

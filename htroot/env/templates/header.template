@@ -54,7 +54,7 @@
   <tr><td class="MenuItem">&nbsp;<a href="/www/" class="MenuItemLink">Home&nbsp;Page</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/share/" class="MenuItemLink">File&nbsp;Share</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/Wiki.html" class="MenuItemLink">Wiki</a></td></tr>
-  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Messages_p.html" class="MenuItemLink">Messages</a>&nbsp;<img border="0" src="/env/grafics/notifier.gif" align="center"></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Messages_p.html" class="MenuItemLink">Messages</a>&nbsp;<img border="0" src="notifier.gif" align="center"></td></tr>
   <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/EditProfile_p.html" class="MenuItemLink">Personal Profile</a></td></tr>
   <tr><td class="MenuSpacer"></td></tr>
 

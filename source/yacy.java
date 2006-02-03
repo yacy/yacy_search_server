@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -308,9 +307,10 @@ public final class yacy {
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
             // create default notifier picture
+            //TODO: Use templates instead of copying images ...
             if (!((new File(htRootPath, "env/grafics/notifier.gif")).exists())) try {
                 serverFileUtils.copy(new File(htRootPath, "env/grafics/empty.gif"),
-                                     new File(htRootPath, "env/grafics/notifier.gif"));
+                                     new File(htDocsPath, "notifier.gif"));
             } catch (IOException e) {}
 
             if (!(htDocsPath.exists())) htDocsPath.mkdir();
