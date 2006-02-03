@@ -499,9 +499,9 @@
 	
 <!-- make clean -->   
 <target name="clean" description="make clean"> 
-  <delete dir="${release_main}"/>
-  <delete dir="${release_ext}"/>
-  <delete>    
+  <delete dir="${release_main}" failonerror="false"/>
+  <delete dir="${release_ext}" failonerror="false"/>
+  <delete failonerror="false">    
     <fileset dir="${src}" includes="**/*.class" />
     <fileset dir="${build}" includes="**/*.class" />
     <fileset dir="${htroot}" includes="**/*.class" />
