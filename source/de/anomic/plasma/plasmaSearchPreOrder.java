@@ -56,6 +56,7 @@ public final class plasmaSearchPreOrder {
     public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
     private static boolean useYBR = true;
     
+    private plasmaWordIndexEntry entryMin, entryMax;
     private TreeMap pageAcc; // key = order hash; value = plasmaLURL.entry
     private plasmaSearchQuery query;
     
@@ -96,6 +97,8 @@ public final class plasmaSearchPreOrder {
     }
     
     public plasmaSearchPreOrder(plasmaSearchQuery query) {
+        entryMin = null;
+        entryMax = null;
         this.pageAcc = new TreeMap();
         this.query = query;
     }
@@ -116,6 +119,7 @@ public final class plasmaSearchPreOrder {
         return (plasmaWordIndexEntry) pageAcc.remove(top);
     }
     
+    /*
     public void addContainer(plasmaWordIndexEntryContainer container, long maxTime) {
         Iterator i = container.entries();
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
@@ -142,9 +146,48 @@ public final class plasmaSearchPreOrder {
         ranking = ranking + 4096L*4096L * (1000 - wordpos + indexEntry.hitcount() - 2 * indexEntry.worddistance());
         pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), indexEntry);
     }
+    */
+    
+    public void addContainer(plasmaWordIndexEntryContainer container, long maxTime) {
+        long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
+        plasmaWordIndexEntry entry;
+
+        // first pass: find min/max to obtain limits for normalization
+        Iterator i = container.entries();
+        int count = 0;
+        while (i.hasNext()) {
+            if (System.currentTimeMillis() > limitTime) break;
+            entry = (plasmaWordIndexEntry) i.next();
+            if (entryMin == null) entryMin = (plasmaWordIndexEntry) entry.clone(); else entryMin.min(entry);
+            if (entryMax == null) entryMax = (plasmaWordIndexEntry) entry.clone(); else entryMax.max(entry);
+            count++;
+        }
+        
+        // second pass: normalize entries
+        i = container.entries();
+        for (int j = 0; j < count; j++) {
+            entry = (plasmaWordIndexEntry) i.next();
+            entry.normalize(entryMin, entryMax);
+            addEntry(entry);
+        }
+    }
+    
+    public void addEntry(plasmaWordIndexEntry indexEntry) {
+        long ranking = 0;
+        
+        for (int i = 0; i < 3; i++) {
+            if (query.order[i].equals(plasmaSearchQuery.ORDER_QUALITY))   ranking  += indexEntry.getQuality() << (4 * (3 - i));
+            else if (query.order[i].equals(plasmaSearchQuery.ORDER_DATE)) ranking  += indexEntry.getVirtualAge() << (4 * (3 - i));
+            else if (query.order[i].equals(plasmaSearchQuery.ORDER_YBR))  ranking  += ybr_p(indexEntry.getUrlHash()) << (4 * (3 - i));
+        }
+        ranking += (indexEntry.posintext()    == 0) ? 0 : (255 - indexEntry.posintext()) << 11;
+        ranking += (indexEntry.worddistance() == 0) ? 0 : (255 - indexEntry.worddistance()) << 10;
+        ranking += (indexEntry.hitcount()     == 0) ? 0 : indexEntry.hitcount() << 9;
+        pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), indexEntry);
+    }
 
     public static int ybr_p(String urlHash) {
-        return 16 - ybr(urlHash);
+        return 16 * (16 - ybr(urlHash));
     }
     
     public static int ybr(String urlHash) {

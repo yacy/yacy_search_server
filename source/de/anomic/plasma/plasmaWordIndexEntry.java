@@ -56,7 +56,7 @@ import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 // import de.anomic.server.logging.serverLog;
 
-public final class plasmaWordIndexEntry {
+public final class plasmaWordIndexEntry implements Cloneable {
 
     // an wordEntry can be filled in either of two ways:
     // by the discrete values of the entry
@@ -297,6 +297,10 @@ public final class plasmaWordIndexEntry {
        this.localflag = pr.getProperty("f", ""+LT_LOCAL).charAt(0);
     }
     
+    public Object clone() {
+        return new plasmaWordIndexEntry(this.toExternalForm());
+    }
+    
     public String toEncodedForm() {
        // attention: this integrates NOT the URL hash into the encoding
        // if you need a complete dump, use toExternalForm()
@@ -346,6 +350,42 @@ public final class plasmaWordIndexEntry {
         if (this.posofphrase != oe.posofphrase) this.posinphrase = 0; // (unknown)
         this.posofphrase = Math.min(this.posofphrase, oe.posofphrase);
         this.wordcount = (this.wordcount + oe.wordcount) / 2;
+    }
+    
+    public void min(plasmaWordIndexEntry other) {
+        if (this.hitcount > other.hitcount) this.hitcount = other.hitcount;
+        if (this.wordcount > other.wordcount) this.wordcount = other.wordcount;
+        if (this.phrasecount > other.phrasecount) this.phrasecount = other.phrasecount;
+        if (this.posintext > other.posintext) this.posintext = other.posintext;
+        if (this.posinphrase > other.posinphrase) this.posinphrase = other.posinphrase;
+        if (this.posofphrase > other.posofphrase) this.posofphrase = other.posofphrase;
+        if (this.worddistance > other.worddistance) this.worddistance = other.worddistance;
+        if (this.lastModified > other.lastModified) this.lastModified = other.lastModified;
+        if (this.quality > other.quality) this.quality = other.quality;
+    }
+    
+    public void max(plasmaWordIndexEntry other) {
+        if (this.hitcount < other.hitcount) this.hitcount = other.hitcount;
+        if (this.wordcount < other.wordcount) this.wordcount = other.wordcount;
+        if (this.phrasecount < other.phrasecount) this.phrasecount = other.phrasecount;
+        if (this.posintext < other.posintext) this.posintext = other.posintext;
+        if (this.posinphrase < other.posinphrase) this.posinphrase = other.posinphrase;
+        if (this.posofphrase < other.posofphrase) this.posofphrase = other.posofphrase;
+        if (this.worddistance < other.worddistance) this.worddistance = other.worddistance;
+        if (this.lastModified < other.lastModified) this.lastModified = other.lastModified;
+        if (this.quality < other.quality) this.quality = other.quality;
+    }
+    
+    public void normalize(plasmaWordIndexEntry min, plasmaWordIndexEntry max) {
+        this.hitcount     = (this.hitcount     == 0) ? 0 : 1 + 255 * (this.hitcount     - min.hitcount    ) / (1 + max.hitcount     - min.hitcount);
+        this.wordcount    = (this.wordcount    == 0) ? 0 : 1 + 255 * (this.wordcount    - min.wordcount   ) / (1 + max.wordcount    - min.wordcount);
+        this.phrasecount  = (this.phrasecount  == 0) ? 0 : 1 + 255 * (this.phrasecount  - min.phrasecount ) / (1 + max.phrasecount  - min.phrasecount);
+        this.posintext    = (this.posintext    == 0) ? 0 : 1 + 255 * (this.posintext    - min.posintext   ) / (1 + max.posintext    - min.posintext);
+        this.posinphrase  = (this.posinphrase  == 0) ? 0 : 1 + 255 * (this.posinphrase  - min.posinphrase ) / (1 + max.posinphrase  - min.posinphrase);
+        this.posofphrase  = (this.posofphrase  == 0) ? 0 : 1 + 255 * (this.posofphrase  - min.posofphrase ) / (1 + max.posofphrase  - min.posofphrase);
+        this.worddistance = (this.worddistance == 0) ? 0 : 1 + 255 * (this.worddistance - min.worddistance) / (1 + max.worddistance - min.worddistance);
+        this.lastModified = (this.lastModified == 0) ? 0 : 1 + 255 * (this.lastModified - min.lastModified) / (1 + max.lastModified - min.lastModified);
+        this.quality      = (this.quality      == 0) ? 0 : 1 + 255 * (this.quality      - min.quality     ) / (1 + max.quality      - min.quality);
     }
     
     public String getUrlHash() { return urlHash; }

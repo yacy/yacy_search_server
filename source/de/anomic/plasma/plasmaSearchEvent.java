@@ -64,6 +64,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private plasmaCrawlLURL urlStore;
     private plasmaSnippetCache snippetCache;
     private plasmaWordIndexEntryContainer rcLocal, rcGlobal; // caches for results
+    private int rcGlobalCount;
     private plasmaSearchProfile profileLocal, profileGlobal;
     private yacySearch[] searchThreads;
     
@@ -75,6 +76,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.snippetCache = snippetCache;
         this.rcLocal = new plasmaWordIndexEntryContainer(null);
         this.rcGlobal = new plasmaWordIndexEntryContainer(null);
+        this.rcGlobalCount = 0;
         if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
             this.profileLocal  = new plasmaSearchProfile(4 * query.maximumTime / 10, query.wantedResults);
             this.profileGlobal = new plasmaSearchProfile(6 * query.maximumTime / 10, query.wantedResults);
@@ -118,7 +120,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             plasmaSearchResult result = order();
             result.globalContributions = globalContributions;
             result.localContributions = rcLocal.size();
-            flushResults();
+            flushGlobalResults(); // make these values available for immediate next search
             
             // flush results in a separate thread
             this.start(); // start to flush results
@@ -184,7 +186,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // wait until wanted delay passed or wanted result appeared
         while (System.currentTimeMillis() < timeout) {
             // check if all threads have been finished or results so far are enough
-            if (rcGlobal.size() >= profileGlobal.getTargetCount(plasmaSearchProfile.PROCESS_POSTSORT) * 3) break; // we have enough
+            if (rcGlobal.size() >= profileGlobal.getTargetCount(plasmaSearchProfile.PROCESS_POSTSORT) * 5) break; // we have enough
             if (yacySearch.remainingWaiting(searchThreads) == 0) break; // we cannot expect more
             // wait a little time ..
             try {Thread.sleep(100);} catch (InterruptedException e) {}
@@ -264,10 +266,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // this method waits until all threads are finished
 
         int remaining;
-        int allcount = 0;
         long starttime = System.currentTimeMillis();
         while ((searchThreads != null) && ((remaining = yacySearch.remainingWaiting(searchThreads)) > 0)) {
-            allcount += flushResults();
+            flushGlobalResults();
   
             // wait a little bit before trying again
             try {Thread.sleep(3000);} catch (InterruptedException e) {}
@@ -279,7 +280,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             log.logFine("FINISHED FLUSH RESULTS PROCESS for query " + query.hashes(","));
         }
         
-        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + allcount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
+        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + rcGlobalCount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
             
         // finally delete the temporary index
         rcGlobal = null;
@@ -287,7 +288,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         flushThreads.remove(this);
     }
     
-    public int flushResults() {
+    public void flushGlobalResults() {
         // flush the rcGlobal as much as is there so far
         // this must be called sometime after search results had been computed
         int count = 0;
@@ -306,7 +307,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 rcGlobal.clear();
             }
         }
-        return count;
+        rcGlobalCount += count;
     }
     
 }
