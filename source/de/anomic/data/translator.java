@@ -116,7 +116,7 @@ public class translator {
 				}else{ //Invalid line
 				}
 			}else if(line.startsWith("#File: ")){
-				if(forFile != ""){
+				if(!forFile.equals("")){
 						lists.put(forFile, translationList);
 				}
 				if(line.charAt(6)==' '){
@@ -124,7 +124,11 @@ public class translator {
 				}else{
 					forFile=line.substring(6);
 				}
-				translationList=new Hashtable();
+				if(lists.containsKey(forFile)){
+					translationList=(Hashtable) lists.get(forFile);
+				}else{
+					translationList=new Hashtable();
+				}
 			}
 		}
 		lists.put(forFile, translationList);

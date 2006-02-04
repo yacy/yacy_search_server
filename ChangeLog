@@ -13,6 +13,8 @@ version 0.43svn
 	* UPDATED: New Searchstyle
 	* FIXED: notifier.gif works even when only DATA is writable (allo)
 	* FIXED: Translations work with readonly htroot now. (allo)
+	* ADDED: Log for unused Translationstrings & Support for multiple
+	         #File: Sektions for the same file (Allo)
 
 version 0.40 (8/21/2005):
 	* The Server now provides the virtuel Header IS_ADMIN (Alexander Schier)
