@@ -7,7 +7,7 @@ then
 	exit 2
 elif ! [-x "`which java`"]
 	echo "The java command is not executable."
-	echo "Either you have not installed java or it is not in your $PATH"
+	echo "Either you have not installed java or it is not in your PATH"
 	echo "Has this script been invoked by CRON? Then use the -c option."
 	exit 2
 	
