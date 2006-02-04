@@ -535,6 +535,19 @@ public class plasmaURL {
         return hash3 + hash2 + hash1 + hash0;
     }
     
+    public static final int domLengthEstimation(String urlHash) {
+        // generates an estimation of the original domain length
+        int flagbyte = kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
+        int domLengthKey = flagbyte & 4;
+        switch (domLengthKey) {
+            case 0: return 4;
+            case 1: return 10;
+            case 2: return 14;
+            case 3: return 20;
+        }
+        return 20;
+    }
+    
     public static final String oldurlHash(URL url) {
 	if (url == null) return null;
         String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(htmlFilterContentScraper.urlNormalform(url))).substring(0, urlHashLength);

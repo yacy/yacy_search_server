@@ -58,6 +58,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 
 public final class plasmaSearchResult {
     
+    private plasmaWordIndexEntry entryMin, entryMax;
     private TreeMap pageAcc;            // key = order hash; value = plasmaLURL.entry
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
     private ArrayList results;          // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
@@ -72,6 +73,8 @@ public final class plasmaSearchResult {
         this.query = query;
         this.globalContributions = 0;
         this.localContributions = 0;
+        this.entryMin = null;
+        this.entryMax = null;
     }
     
     public plasmaSearchResult cloneSmart() {
@@ -101,10 +104,10 @@ public final class plasmaSearchResult {
     }
     
     protected void addResult(plasmaWordIndexEntry indexEntry, plasmaCrawlLURL.Entry page) {
-        // this does 3 things:
-        // 1. simply store indexEntry and page to a cache
-        // 2. calculate references and store them to cache
-        // 2. add reference to reference sorting table
+        
+        // make min/max for normalization
+        if (entryMin == null) entryMin = (plasmaWordIndexEntry) indexEntry.clone(); else entryMin.min(indexEntry);
+        if (entryMax == null) entryMax = (plasmaWordIndexEntry) indexEntry.clone(); else entryMax.max(indexEntry);
         
         // take out relevant information for reference computation
         URL url = page.url();
@@ -136,33 +139,25 @@ public final class plasmaSearchResult {
         plasmaCrawlLURL.Entry page;
         String[] urlcomps;
         String[] descrcomps;
-        long ranking, factor;
+        long ranking;
         String queryhash;
         for (int i = 0; i < results.size(); i++) {
             // take out values from result array
             resultVector = (Object[]) results.get(i);
             indexEntry = (plasmaWordIndexEntry) resultVector[0];
-            page = (plasmaCrawlLURL.Entry) resultVector[1];
-            urlcomps = (String[]) resultVector[2];
-            descrcomps = (String[]) resultVector[3];
             
             // apply pre-calculated order attributes
-            ranking = 0;
-            factor = 4096L*4096L;
-            
-            for (int j = 0; j < 3; j++) {
-                if (query.order[j].equals(plasmaSearchQuery.ORDER_QUALITY))  ranking += factor * indexEntry.getQuality() / 64L;
-                else if (query.order[j].equals(plasmaSearchQuery.ORDER_DATE)) ranking += factor * indexEntry.getVirtualAge() / 64L;
-                else if (query.order[j].equals(plasmaSearchQuery.ORDER_YBR))  ranking += factor * plasmaSearchPreOrder.ybr_p(indexEntry.getUrlHash());
-                factor = factor / 4096L;
-            }
-            int wordpos = indexEntry.posintext();
-            if (wordpos == 0) wordpos = 1000;
-            ranking = ranking + 4096L*4096L * (1000 - wordpos + indexEntry.hitcount() - 2 * indexEntry.worddistance());
+            ranking = query.ranking(indexEntry.generateNormalized(entryMin, entryMax));
             
             // apply 'common-sense' heuristic using references
-            for (int j = 0; j < urlcomps.length; j++) if (commonSense.contains(urlcomps[j])) ranking += 10L*4096L*4096L / urlcomps.length;
-            for (int j = 0; j < descrcomps.length; j++) if (commonSense.contains(descrcomps[j])) ranking += 10L*4096L*4096L / descrcomps.length;
+            urlcomps = (String[]) resultVector[2];
+            for (int j = 0; j < urlcomps.length; j++) {
+                if (commonSense.contains(urlcomps[j])) ranking += 1 << 12;
+            }
+            descrcomps = (String[]) resultVector[3];
+            for (int j = 0; j < descrcomps.length; j++) {
+                if (commonSense.contains(descrcomps[j])) ranking += 1 << 11;
+            }
             
             // apply query-in-result matching
             Set urlcomph = plasmaSearchQuery.words2hashes(urlcomps);
@@ -170,17 +165,18 @@ public final class plasmaSearchResult {
             Iterator shi = query.queryHashes.iterator();
             while (shi.hasNext()) {
                 queryhash = (String) shi.next();
-                if (urlcomph.contains(queryhash)) ranking += 90L*4096L*4096L / urlcomps.length / query.queryHashes.size();
-                if (descrcomph.contains(queryhash)) ranking += 40L*4096L*4096L / descrcomps.length / query.queryHashes.size();
+                if (urlcomph.contains(queryhash)) ranking += 1 << 13;
+                if (descrcomph.contains(queryhash)) ranking += 1 << 14;
             }
             
             // prefer short urls
-            ranking -= 64L * page.url().toString().length();
-            ranking -= 64L * urlcomps.length;
+            page = (plasmaCrawlLURL.Entry) resultVector[1];
+            ranking += (255 - page.url().toString().length()) << 10;
+            ranking += (24 - urlcomps.length) << 10;
             
             // prefer long descriptions
-            ranking += 64L * (40 - Math.abs(40 - Math.min(40, page.descr().length())));
-            ranking += 64L * ( 8 - Math.abs( 8 - Math.min( 8, descrcomps.length)));
+            ranking += (40 - Math.abs(40 - Math.min(40, page.descr().length()))) << 10;
+            ranking += ( 8 - Math.abs( 8 - Math.min( 8, descrcomps.length))) << 10;
             
             // insert value
             //System.out.println("Ranking " + ranking + ", YBR-" + plasmaSearchPreOrder.ybr(indexEntry.getUrlHash()) + " for URL " + page.url());

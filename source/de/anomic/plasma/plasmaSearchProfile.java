@@ -278,5 +278,5 @@ public class plasmaSearchProfile implements Cloneable {
             }
         }
     }
-    
+
 }

@@ -388,6 +388,12 @@ public final class plasmaWordIndexEntry implements Cloneable {
         this.quality      = (this.quality      == 0) ? 0 : 1 + 255 * (this.quality      - min.quality     ) / (1 + max.quality      - min.quality);
     }
     
+    public plasmaWordIndexEntry generateNormalized(plasmaWordIndexEntry min, plasmaWordIndexEntry max) {
+        plasmaWordIndexEntry e = (plasmaWordIndexEntry) this.clone();
+        e.normalize(min, max);
+        return e;
+    }
+    
     public String getUrlHash() { return urlHash; }
     public int getQuality() { return quality; }
     public int getVirtualAge() { return plasmaWordIndex.microDateDays(lastModified); }
@@ -402,6 +408,10 @@ public final class plasmaWordIndexEntry implements Cloneable {
     public String getLanguage() { return new String(language); }
     public char getType() { return doctype; }
     public boolean isLocal() { return localflag == LT_LOCAL; }
+    
+    public int domlengthNormalized() {
+        return 255 * plasmaURL.domLengthEstimation(this.urlHash) / 20;
+    }
 
     public static void main(String[] args) {
         // outputs the word hash to a given word

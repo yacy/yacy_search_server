@@ -177,4 +177,19 @@ public final class plasmaSearchQuery {
             if (blueList.contains(word)) it.remove();
         }
     }
+    
+    public long ranking(plasmaWordIndexEntry normalizedEntry) {
+        long ranking = 0;
+        
+        for (int i = 0; i < 3; i++) {
+            if (this.order[i].equals(plasmaSearchQuery.ORDER_QUALITY))   ranking  += normalizedEntry.getQuality() << (4 * (3 - i));
+            else if (this.order[i].equals(plasmaSearchQuery.ORDER_DATE)) ranking  += normalizedEntry.getVirtualAge() << (4 * (3 - i));
+            else if (this.order[i].equals(plasmaSearchQuery.ORDER_YBR))  ranking  += plasmaSearchPreOrder.ybr_p(normalizedEntry.getUrlHash()) << (4 * (3 - i));
+        }
+        ranking += (normalizedEntry.posintext()    == 0) ? 0 : (255 - normalizedEntry.posintext()) << 11;
+        ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << 10;
+        ranking += (normalizedEntry.hitcount()     == 0) ? 0 : normalizedEntry.hitcount() << 9;
+        ranking += (255 - normalizedEntry.domlengthNormalized()) << 8;
+        return ranking;
+    }
 }
