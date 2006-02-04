@@ -53,7 +53,7 @@ defaultFiles = index.html,default.html,search.html,console.html,control.html,wel
 # the <dir> must exist as sub-path to htLocalePath
 # the htLocaleSelection selects from the given locales, value=one-of-<dir>
 htDefaultPath=htroot
-htLocalePath=htroot/locale
+htLocalePath=DATA/HTROOT/locale
 htLocaleLang=default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk,gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;
 htLocaleSelection=default
 

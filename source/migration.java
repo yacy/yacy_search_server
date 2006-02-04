@@ -141,6 +141,10 @@ public class migration {
             sb.setConfig("parseableMimeTypes.URLREDIRECTOR", value);
             sb.setConfig("parseableMimeTypes.ICAP", value);
         }
+        //Locales in DATA, because DATA must be writable, htroot not.
+        if(sb.getConfig("htLocalePath", "htroot/locale").equals("htroot/locale")){
+        	sb.setConfig("htLocalePath", "DATA/HTDOCS/locale");
+        }
     }
 
 }

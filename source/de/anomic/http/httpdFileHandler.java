@@ -200,7 +200,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
             // create htLocaleDefault, htLocalePath
             if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
-            if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("htLocalePath","htroot/locale"));
+            if (htLocalePath == null) htLocalePath = new File(switchboard.getConfig("htLocalePath","DATA/HTDOCS/locale"));
             //htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
         }
         

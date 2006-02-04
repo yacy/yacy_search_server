@@ -308,7 +308,7 @@ public final class yacy {
 
             // create default notifier picture
             //TODO: Use templates instead of copying images ...
-            if (!((new File(htRootPath, "env/grafics/notifier.gif")).exists())) try {
+            if (!((new File(htDocsPath, "notifier.gif")).exists())) try {
                 serverFileUtils.copy(new File(htRootPath, "env/grafics/empty.gif"),
                                      new File(htDocsPath, "notifier.gif"));
             } catch (IOException e) {}
@@ -413,7 +413,7 @@ public final class yacy {
                         try{ //seperate try, because we want this, even when the File "version2 does not exist.
                             if(! currentRev.equals(sb.getConfig("svnRevision", "")) ){ //is this another version?!
                                 final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
-                                final File destDir = new File(sourceDir, "locale/"+lang);
+                                final File destDir = new File(sb.getConfig("htLocalePath", "DATA/HTDOCS/locale"), lang);
                                 
                               if(translator.translateFilesRecursive(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html,template,inc", "locale")){ //translate it
                                     //write the new Versionnumber
