@@ -60,7 +60,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.plasma.plasmaURLPattern;
-import de.anomic.plasma.plasmaSearchProfile;
+import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverCodings;
@@ -357,7 +357,7 @@ public final class yacyClient {
             plasmaWordIndexEntryContainer containerCache,
             plasmaURLPattern blacklist, 
             plasmaSnippetCache snippets, 
-            plasmaSearchProfile profile
+            plasmaSearchTimingProfile profile
     ) {
         // send a search request to peer with remote Hash
         // this mainly converts the words into word hashes
@@ -399,7 +399,7 @@ public final class yacyClient {
             obj.put("myseed", yacyCore.seedDB.mySeed.genSeedStr(key));
             obj.put("youare", targetPeer.hash);
             obj.put("key", key);
-            obj.put("count", profile.getTargetCount(plasmaSearchProfile.PROCESS_POSTSORT));
+            obj.put("count", profile.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT));
             obj.put("resource", ((global) ? "global" : "local"));
             obj.put("query", wordhashes);
             obj.put("ttl", "0");

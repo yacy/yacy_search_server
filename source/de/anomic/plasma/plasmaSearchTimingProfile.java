@@ -52,7 +52,7 @@ import java.lang.Cloneable;
  * the real obtained timings after a search is performed
  */
 
-public class plasmaSearchProfile implements Cloneable {
+public class plasmaSearchTimingProfile implements Cloneable {
     
     // collection:
     // time = time to get a RWI out of RAM cache, assortments and WORDS files
@@ -102,7 +102,7 @@ public class plasmaSearchProfile implements Cloneable {
     private HashMap yieldCount;
     private long timer;
     
-    private plasmaSearchProfile() {
+    private plasmaSearchTimingProfile() {
         targetTime = new HashMap();
         targetCount = new HashMap();
         yieldTime = new HashMap();
@@ -110,7 +110,7 @@ public class plasmaSearchProfile implements Cloneable {
         timer = 0;
     }
     
-    public plasmaSearchProfile(long time, int count) {
+    public plasmaSearchTimingProfile(long time, int count) {
         this(
           3 * time / 12, 10 * count, 
           1 * time / 12, 10 * count, 
@@ -122,7 +122,7 @@ public class plasmaSearchProfile implements Cloneable {
         );
     }
     
-    public plasmaSearchProfile(
+    public plasmaSearchTimingProfile(
             long time_collection,   int count_collection,
             long time_join,         int count_join,
             long time_presort,      int count_presort,
@@ -150,7 +150,7 @@ public class plasmaSearchProfile implements Cloneable {
     }
 
     public Object clone() {
-        plasmaSearchProfile p = new plasmaSearchProfile();
+        plasmaSearchTimingProfile p = new plasmaSearchTimingProfile();
         p.targetTime = (HashMap) this.targetTime.clone();
         p.targetCount = (HashMap) this.targetCount.clone();
         p.yieldTime = (HashMap) this.yieldTime.clone();
@@ -158,7 +158,7 @@ public class plasmaSearchProfile implements Cloneable {
         return p;
     }
     
-    public plasmaSearchProfile(String s) {
+    public plasmaSearchTimingProfile(String s) {
         targetTime = new HashMap();
         targetCount = new HashMap();
         yieldTime = new HashMap();

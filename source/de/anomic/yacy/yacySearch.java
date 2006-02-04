@@ -52,7 +52,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.plasma.plasmaSnippetCache;
-import de.anomic.plasma.plasmaSearchProfile;
+import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.logging.serverLog;
 
@@ -67,10 +67,10 @@ public class yacySearch extends Thread {
     final private yacySeed targetPeer;
     private int links;
     private int maxDistance;
-    final private plasmaSearchProfile profile;
+    final private plasmaSearchTimingProfile profile;
 
     public yacySearch(Set wordhashes, int maxDistance, boolean global, yacySeed targetPeer,
-                      plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, plasmaSearchProfile profile) {
+                      plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, plasmaSearchTimingProfile profile) {
         super("yacySearch_" + targetPeer.getName());
         this.wordhashes = wordhashes;
         this.global = global;
@@ -81,7 +81,7 @@ public class yacySearch extends Thread {
         this.targetPeer = targetPeer;
         this.links = -1;
         this.maxDistance = maxDistance;
-        this.profile = (plasmaSearchProfile) profile.clone();
+        this.profile = (plasmaSearchTimingProfile) profile.clone();
     }
 
     public void run() {
@@ -104,7 +104,7 @@ public class yacySearch extends Thread {
         return this.links;
     }
     
-    public plasmaSearchProfile profile() {
+    public plasmaSearchTimingProfile profile() {
         return this.profile;
     }
     
@@ -175,7 +175,7 @@ public class yacySearch extends Thread {
     }
 
     public static yacySearch[] searchHashes(Set wordhashes, int maxDist, plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache,
-                           int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, plasmaSearchProfile profile) {
+                           int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, plasmaSearchTimingProfile profile) {
         // check own peer status
         if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
 
