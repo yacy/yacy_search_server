@@ -2,8 +2,6 @@ package de.anomic.plasma.dbImport;
 
 import java.io.File;
 
-import de.anomic.plasma.plasmaSwitchboard;
-
 public interface dbImporter {
 
     // functions to pause and continue importing

@@ -51,13 +51,9 @@
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Date;
-import java.util.Vector;
-
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.dbImport.dbImporter;
-import de.anomic.plasma.dbImport.plasmaDbImporter;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;

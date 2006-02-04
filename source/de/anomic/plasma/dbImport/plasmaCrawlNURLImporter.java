@@ -91,7 +91,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements
         this.log.logInfo("Initializing the source noticeUrlDB");
         this.importNurlDB =  new plasmaCrawlNURL(this.importPath, this.cacheSize*(3/4));
         this.importStartSize = this.importNurlDB.size();
-        int stackSize = this.importNurlDB.stackSize();
+        //int stackSize = this.importNurlDB.stackSize();
         
         // init profile DB
         this.log.logInfo("Initializing the source profileDB");
@@ -192,8 +192,8 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements
                 this.log.logInfo("Finished to import stacktype '" + stackTypes[i] + "'");
             }
             
-            int size = this.importNurlDB.size();
-            int stackSize = this.importNurlDB.stackSize();
+            //int size = this.importNurlDB.size();
+            //int stackSize = this.importNurlDB.stackSize();
             
             // TODO: what todo with nurlDB entries that do not exist in any stack?
             
