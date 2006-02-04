@@ -2,9 +2,31 @@
 if [ $UID -eq 0 ]
 then
 	echo
-	echo "For security reasons, you should not run this as root!"
+	echo "For security reasons, you should not run this script as root!"
 	echo
-else
+	exit 2
+elif ! [-x "`which java`"]
+	echo "The java command is not executable."
+	echo "Either you have not installed java or it is not in your $PATH"
+	echo "Has this script been invoked by CRON? Then use the -c option."
+	exit 2
+	
+	#-c to be imlemented.
+	#Possible locations for setting of PATH
+	
+	#sh, ksh, bash, zsh
+	#. ~/.profile
+	#bash
+	#. ~/.bash_profile
+	#csh, tcsh
+	#. ~/.login
+	#sh, ksh, bash, zsh
+	#. /etc/profile
+	#csh, tcsh
+	#. /etc/csh.login
+	
+elif [-x "`which java`"]
+	#startup YaCy
 	cd `dirname $0`
 	
 	#get javastart args
