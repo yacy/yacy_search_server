@@ -4,12 +4,13 @@ then
 	echo
 	echo "For security reasons, you should not run this script as root!"
 	echo
-	exit 2
-elif ! [-x "`which java`"]
+	exit 1
+elif [ ! -x "`which java`" ]
+then
 	echo "The java command is not executable."
 	echo "Either you have not installed java or it is not in your PATH"
 	echo "Has this script been invoked by CRON? Then use the -c option."
-	exit 2
+	exit 1
 	
 	#-c to be imlemented.
 	#Possible locations for setting of PATH
@@ -25,7 +26,7 @@ elif ! [-x "`which java`"]
 	#csh, tcsh
 	#. /etc/csh.login
 	
-elif [-x "`which java`"]
+else
 	#startup YaCy
 	cd `dirname $0`
 	
@@ -43,11 +44,11 @@ elif [-x "`which java`"]
 	for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
 	for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 	
-	if [ x$1 == x-d ] #debug
+	if [ "x$1" == "x-d" ] #debug
 	then
 		java $java_args -classpath classes:$CLASSPATH yacy
 		exit 0
-	elif [ x$1 == x-l ] #logging
+	elif [ "x$1" == "x-l" ] #logging
 	then
 		nohup java $java_args -classpath classes:htroot:$CLASSPATH yacy >> yacy.log &
 	else
