@@ -56,6 +56,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.lang.IndexOutOfBoundsException;
 
 import de.anomic.server.logging.serverLog;
@@ -73,8 +75,17 @@ public class translator {
 		String key = "";
 		while(keys.hasMoreElements()){
 			key = (String)keys.nextElement();
-			result = result.replaceAll(key, (String)translationList.get(key));
-			//System.out.println("Replaced \""+key+"\" by \""+translationList.getProperty(key)+"\""); //DEBUG
+			Pattern pattern = Pattern.compile(key);
+			Matcher matcher = pattern.matcher(result);
+			if(matcher.find()){
+				result = matcher.replaceAll((String)translationList.get(key));
+				//result = result.replaceAll(key, (String)translationList.get(key));
+				//System.out.println("Replaced \""+key+"\" by \""+translationList.getProperty(key)+"\""); //DEBUG
+			}else{
+				//Filename not availible, but it will be printed in Log 
+				//after all untranslated Strings as "File Translated
+				serverLog.logFine("TRANSLATOR", "Unused String: "+key); 
+			}
 		}
 		return result;
 	}
