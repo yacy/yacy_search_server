@@ -63,14 +63,16 @@ public final class plasmaSearchResult {
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
     private ArrayList results;          // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
     private plasmaSearchQuery query;
+    private plasmaSearchRankingProfile ranking;
     public  int globalContributions;
     public  int localContributions;
     
-    public plasmaSearchResult(plasmaSearchQuery query) {
+    public plasmaSearchResult(plasmaSearchQuery query, plasmaSearchRankingProfile ranking) {
         this.pageAcc = new TreeMap();
         this.ref = new kelondroMScoreCluster();
         this.results = new ArrayList();
         this.query = query;
+        this.ranking = ranking;
         this.globalContributions = 0;
         this.localContributions = 0;
         this.entryMin = null;
@@ -79,7 +81,7 @@ public final class plasmaSearchResult {
     
     public plasmaSearchResult cloneSmart() {
         // clones only the top structure
-        plasmaSearchResult theClone = new plasmaSearchResult(query);
+        plasmaSearchResult theClone = new plasmaSearchResult(this.query, this.ranking);
         theClone.pageAcc = (TreeMap) this.pageAcc.clone();
         theClone.ref = this.ref;
         theClone.results = this.results;
@@ -147,7 +149,7 @@ public final class plasmaSearchResult {
             indexEntry = (plasmaWordIndexEntry) resultVector[0];
             
             // apply pre-calculated order attributes
-            ranking = query.ranking(indexEntry.generateNormalized(entryMin, entryMax));
+            ranking = this.ranking.ranking(indexEntry.generateNormalized(entryMin, entryMax));
             
             // apply 'common-sense' heuristic using references
             urlcomps = (String[]) resultVector[2];

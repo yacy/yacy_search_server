@@ -51,7 +51,9 @@ import java.util.HashSet;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchEvent;
+import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchResult;
+import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
@@ -103,15 +105,17 @@ public final class search {
         }
         final long timestamp = System.currentTimeMillis();
         
-        plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, maxdist, new String[]{plasmaSearchQuery.ORDER_YBR, plasmaSearchQuery.ORDER_DATE, plasmaSearchQuery.ORDER_QUALITY},
-                                                        count, duetime, ".*");
+        plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, maxdist, count, duetime, ".*");
         squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
 
         serverObjects prop = new serverObjects();
 
         yacyCore.log.logInfo("INIT HASH SEARCH: " + squery.queryHashes + " - " + squery.wantedResults + " links");
         long timestamp1 = System.currentTimeMillis();
-        plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
+        plasmaSearchRankingProfile rankingProfile = new plasmaSearchRankingProfile(new String[]{plasmaSearchQuery.ORDER_YBR, plasmaSearchQuery.ORDER_DATE, plasmaSearchQuery.ORDER_QUALITY});
+        plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
+        plasmaSearchTimingProfile remoteTiming = null;
+        plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
         plasmaSearchResult acc = null;
         int idxc = 0;
         idxc = theSearch.localSearch();

@@ -60,6 +60,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     
     private serverLog log;
     private plasmaSearchQuery query;
+    private plasmaSearchRankingProfile ranking;
     private plasmaWordIndex wordIndex;
     private plasmaCrawlLURL urlStore;
     private plasmaSnippetCache snippetCache;
@@ -68,22 +69,25 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private plasmaSearchTimingProfile profileLocal, profileGlobal;
     private yacySearch[] searchThreads;
     
-    public plasmaSearchEvent(plasmaSearchQuery query, serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL urlStore, plasmaSnippetCache snippetCache) {
+    public plasmaSearchEvent(plasmaSearchQuery query,
+                             plasmaSearchRankingProfile ranking,
+                             plasmaSearchTimingProfile localTiming,
+                             plasmaSearchTimingProfile remoteTiming,
+                             serverLog log,
+                             plasmaWordIndex wordIndex,
+                             plasmaCrawlLURL urlStore,
+                             plasmaSnippetCache snippetCache) {
         this.log = log;
         this.wordIndex = wordIndex;
         this.query = query;
+        this.ranking = ranking;
         this.urlStore = urlStore;
         this.snippetCache = snippetCache;
         this.rcLocal = new plasmaWordIndexEntryContainer(null);
         this.rcGlobal = new plasmaWordIndexEntryContainer(null);
         this.rcGlobalCount = 0;
-        if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
-            this.profileLocal  = new plasmaSearchTimingProfile(4 * query.maximumTime / 10, query.wantedResults);
-            this.profileGlobal = new plasmaSearchTimingProfile(6 * query.maximumTime / 10, query.wantedResults);
-        } else {
-            this.profileLocal = new plasmaSearchTimingProfile(query.maximumTime, query.wantedResults);
-            this.profileGlobal = null;
-        }
+        this.profileLocal = localTiming;
+        this.profileGlobal = remoteTiming;
         this.searchThreads = null;
     }
     
@@ -91,7 +95,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         return query;
     }
     
-    public plasmaSearchTimingProfile getLocalProfile() {
+    public plasmaSearchTimingProfile getLocalTiming() {
         return profileLocal;
     }
     
@@ -207,13 +211,13 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         long postorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         
         profileLocal.startTimer();
-        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query);
+        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking);
         preorder.addContainer(searchResult, preorderTime);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_PRESORT, rcLocal.size());
         
         profileLocal.startTimer();
-        plasmaSearchResult acc = new plasmaSearchResult(query);
+        plasmaSearchResult acc = new plasmaSearchResult(query, ranking);
         if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
         if (searchResult.size() == 0) return acc; // case that we have nothing to do
         

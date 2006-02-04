@@ -65,7 +65,6 @@ public final class plasmaSearchQuery {
     public Set queryWords;
     public Set queryHashes;
     public String referrer;
-    public String[] order;
     public int wantedResults;
     public long maximumTime;
     public String urlMask;
@@ -75,13 +74,11 @@ public final class plasmaSearchQuery {
     public int maxDistance;
 
     public plasmaSearchQuery(Set queryWords, int maxDistance,
-                             String[] order, int wantedResults, long maximumTime, String urlMask,
-                             String referrer,
+                             int wantedResults, long maximumTime, String urlMask, String referrer,
                              int domType, String domGroupName, int domMaxTargets) {
         this.queryWords = queryWords;
         this.maxDistance = maxDistance;
         this.queryHashes = words2hashes(queryWords);
-        this.order = order;
         this.wantedResults = wantedResults;
         this.maximumTime = maximumTime;
         this.urlMask = urlMask;
@@ -92,11 +89,10 @@ public final class plasmaSearchQuery {
     }
     
     public plasmaSearchQuery(Set queryHashes, int maxDistance,
-                             String[] order, int wantedResults, long maximumTime, String urlMask) {
+                             int wantedResults, long maximumTime, String urlMask) {
         this.queryWords = null;
         this.maxDistance = maxDistance;
         this.queryHashes = queryHashes;
-        this.order = order;
         this.wantedResults = wantedResults;
         this.maximumTime = maximumTime;
         this.urlMask = urlMask;
@@ -105,20 +101,16 @@ public final class plasmaSearchQuery {
         this.domMaxTargets = -1;
     }
 
-    public String orderString() {
-    		return order[0] + "-" + order[1] + "-" + order[2];
-    }
-    
     public static Set words2hashes(String[] words) {
-	TreeSet hashes = new TreeSet();
+        TreeSet hashes = new TreeSet();
         for (int i = 0; i < words.length; i++) hashes.add(plasmaWordIndexEntry.word2hash(words[i]));
         return hashes;
     }
 
     public static Set words2hashes(Set words) {
-	Iterator i = words.iterator();
-	TreeSet hashes = new TreeSet();
-	while (i.hasNext()) hashes.add(plasmaWordIndexEntry.word2hash((String) i.next()));
+        Iterator i = words.iterator();
+        TreeSet hashes = new TreeSet();
+        while (i.hasNext()) hashes.add(plasmaWordIndexEntry.word2hash((String) i.next()));
         return hashes;
     }
     
@@ -177,19 +169,5 @@ public final class plasmaSearchQuery {
             if (blueList.contains(word)) it.remove();
         }
     }
-    
-    public long ranking(plasmaWordIndexEntry normalizedEntry) {
-        long ranking = 0;
-        
-        for (int i = 0; i < 3; i++) {
-            if (this.order[i].equals(plasmaSearchQuery.ORDER_QUALITY))   ranking  += normalizedEntry.getQuality() << (4 * (3 - i));
-            else if (this.order[i].equals(plasmaSearchQuery.ORDER_DATE)) ranking  += normalizedEntry.getVirtualAge() << (4 * (3 - i));
-            else if (this.order[i].equals(plasmaSearchQuery.ORDER_YBR))  ranking  += plasmaSearchPreOrder.ybr_p(normalizedEntry.getUrlHash()) << (4 * (3 - i));
-        }
-        ranking += (normalizedEntry.posintext()    == 0) ? 0 : (255 - normalizedEntry.posintext()) << 11;
-        ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << 10;
-        ranking += (normalizedEntry.hitcount()     == 0) ? 0 : normalizedEntry.hitcount() << 9;
-        ranking += (255 - normalizedEntry.domlengthNormalized()) << 8;
-        return ranking;
-    }
+
 }

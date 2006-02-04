@@ -1,4 +1,4 @@
-// plasmaSearchPreOder.java 
+// plasmaSearchPreOrder.java 
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -59,6 +59,7 @@ public final class plasmaSearchPreOrder {
     private plasmaWordIndexEntry entryMin, entryMax;
     private TreeMap pageAcc; // key = order hash; value = plasmaLURL.entry
     private plasmaSearchQuery query;
+    private plasmaSearchRankingProfile ranking;
     
     public static void loadYBR(File rankingPath, int count) {
         // load ranking tables
@@ -96,16 +97,17 @@ public final class plasmaSearchPreOrder {
         useYBR = usage;
     }
     
-    public plasmaSearchPreOrder(plasmaSearchQuery query) {
+    public plasmaSearchPreOrder(plasmaSearchQuery query, plasmaSearchRankingProfile ranking) {
         entryMin = null;
         entryMax = null;
         this.pageAcc = new TreeMap();
         this.query = query;
+        this.ranking = ranking;
     }
     
     public plasmaSearchPreOrder cloneSmart() {
         // clones only the top structure
-        plasmaSearchPreOrder theClone = new plasmaSearchPreOrder(query);
+        plasmaSearchPreOrder theClone = new plasmaSearchPreOrder(query, ranking);
         theClone.pageAcc = (TreeMap) this.pageAcc.clone();
         return theClone;
     }
@@ -138,7 +140,7 @@ public final class plasmaSearchPreOrder {
         i = container.entries();
         for (int j = 0; j < count; j++) {
             indexEntry = (plasmaWordIndexEntry) i.next();
-            pageAcc.put(serverCodings.encodeHex(query.ranking(indexEntry.generateNormalized(entryMin, entryMax)), 16) + indexEntry.getUrlHash(), indexEntry);
+            pageAcc.put(serverCodings.encodeHex(this.ranking.ranking(indexEntry.generateNormalized(entryMin, entryMax)), 16) + indexEntry.getUrlHash(), indexEntry);
         }
     }
     

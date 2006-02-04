@@ -1627,7 +1627,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (date == null) return ""; else return DateFormatter.format(date);
     }
     
-    public serverObjects searchFromLocal(plasmaSearchQuery query) {
+    public serverObjects searchFromLocal(plasmaSearchQuery query,
+                                         plasmaSearchRankingProfile ranking,
+                                         plasmaSearchTimingProfile  localTiming,
+                                         plasmaSearchTimingProfile  remoteTiming) {
         
         // tell all threads to do nothing for a specific time
         wordIndex.intermission(2 * query.maximumTime);
@@ -1651,7 +1654,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //}
             
             // create a new search event
-            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, log, wordIndex, urlPool.loadedURL, snippetCache);
+            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, log, wordIndex, urlPool.loadedURL, snippetCache);
             plasmaSearchResult acc = theSearch.search();
             
             // fetch snippets
@@ -1721,7 +1724,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
                             // suppress line: there is no match in that resource
                         } else {
-                            prop.put("results_" + i + "_delete", "/index.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + query.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
+                            prop.put("results_" + i + "_delete", "/index.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
                             prop.put("results_" + i + "_description", descr);
                             prop.put("results_" + i + "_url", urlstring);
                             prop.put("results_" + i + "_urlhash", urlhash);

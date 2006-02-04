@@ -54,6 +54,8 @@ import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.plasma.plasmaSearchRankingProfile;
+import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchPreOrder;
@@ -177,10 +179,14 @@ public class index {
         }
 
         // do the search
-        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, maxDistance, new String[]{order1, order2, order3}, count, searchtime, urlmask, referer,
+        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, maxDistance, count, searchtime, urlmask, referer,
                                                              ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
                                                              "", 20);
-        final serverObjects prop = sb.searchFromLocal(thisSearch);
+        plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(new String[]{order1, order2, order3});
+        plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
+        plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
+        final serverObjects prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming);
+
         /*
         final serverObjects prop = sb.searchFromLocal(query, order1, order2, count,
                                    ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))),

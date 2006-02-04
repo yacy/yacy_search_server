@@ -101,7 +101,7 @@ public class PerformanceSearch_p {
         int c;
         char sequence;
         if (se != null) for (int i = 0; i < plasmaSearchTimingProfile.sequence.length; i++) {
-            t = se.getLocalProfile().getYieldTime(plasmaSearchTimingProfile.sequence[i]);
+            t = se.getLocalTiming().getYieldTime(plasmaSearchTimingProfile.sequence[i]);
             if (t > 0) time += t;
         }
         for (int i = 0; i < plasmaSearchTimingProfile.sequence.length; i++) {
@@ -113,10 +113,10 @@ public class PerformanceSearch_p {
                 prop.put("latestLocalTimeRel_" + sequence, "-");
                 prop.put("latestLocalCountAbs_" + sequence, "-");
             } else {
-                t = se.getLocalProfile().getYieldTime(sequence);
+                t = se.getLocalTiming().getYieldTime(sequence);
                 prop.put("latestLocalTimeAbs_" + sequence, (t < 0) ? "-" : Long.toString(t));
                 prop.put("latestLocalTimeRel_" + sequence, ((t < 0) ? 0 : (t * 100 / time)) + "%");
-                c = se.getLocalProfile().getYieldCount(sequence);
+                c = se.getLocalTiming().getYieldCount(sequence);
                 prop.put("latestLocalCountAbs_" + sequence, (c < 0) ? "-" : Integer.toString(c));
             }
         }
