@@ -130,7 +130,7 @@ public class index {
         // process search words
         int maxDistance = Integer.MAX_VALUE;
         String querystring = post.get("search", "").trim();
-        if ((querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
+        if ((querystring.length() > 2) && (querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
             querystring = querystring.substring(1, querystring.length() - 1).trim();
             maxDistance = 1;
         }
