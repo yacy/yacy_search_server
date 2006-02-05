@@ -33,9 +33,10 @@ Public: <select name="public">
 <tr height="100%">
 <td width="100%">
 #{bookmarks}#
+#(public)#[priv]::[pub]#(/public)#
 <a href="#[link]#" target="_blank">#[title]#</a><br />
 #[description]#<br />
-Tagged with <span class="bookmarkTags">#[tags]#</span>. <br />
+Tagged with <span class="bookmarkTags">#{tags}#<a href="Bookmarks_p.html?tag=#[tag]#">#[tag]#</a> #{/tags}#</span><br />
 <a href="Bookmarks_p.html?edit=#[hash]#">Edit</a> /
 <a href="Bookmarks_p.html?delete=#[hash]#">Delete</a>
 <p />

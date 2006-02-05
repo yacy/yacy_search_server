@@ -523,6 +523,9 @@ public class bookmarksDB {
             }
             return "";
         }
+        public Vector getTagsVector(){
+        	return listManager.string2vector(this.getTags());
+        }
         public String getDescription(){
             if(this.mem.containsKey(BOOKMARK_DESCRIPTION)){
                 return (String) this.mem.get(BOOKMARK_DESCRIPTION);

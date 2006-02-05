@@ -145,13 +145,27 @@ public class Bookmarks_p {
         count++;
     }
     count=0;
+    Vector tags;
+    Iterator tagsIt;
+    int tagCount;
     while(count<MAX_COUNT && it.hasNext()){
         bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
         if(bookmark!=null){
             prop.put("bookmarks_"+count+"_link", bookmark.getUrl());
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
-            prop.put("bookmarks_"+count+"_tags", bookmark.getTags());
+            prop.put("bookmarks_"+count+"_public", (bookmark.getPublic()? 1:0));
+            
+            //List Tags.
+            tags=bookmark.getTagsVector();
+            tagsIt=tags.iterator();
+            tagCount=0;
+            while(tagsIt.hasNext()){
+            	prop.put("bookmarks_"+count+"_tags_"+tagCount+"_tag", tagsIt.next());
+            	tagCount++;
+            }
+            prop.put("bookmarks_"+count+"_tags", tagCount);
+            
             prop.put("bookmarks_"+count+"_hash", bookmark.getUrlHash());
             count++;
         }
