@@ -98,13 +98,15 @@ public class plasmaSearchRankingProfile {
         coeff.put(DESCRCOMPINTOPLIST, new Integer(11));
     }
     
-    public plasmaSearchRankingProfile(String profile) {
+    public plasmaSearchRankingProfile(String prefix, String profile) {
         this(); // set defaults
         //parse external form
         String[] elts = profile.substring(1, profile.length() - 1).split(",");
         int p;
+        int s = prefix.length();
         for (int i = 0; i < elts.length; i++) {
-            coeff.put(elts[i].substring(0, (p = elts[i].indexOf("="))), elts[i].substring(p + 1));
+            if ((s == 0) || (elts[i].startsWith(prefix)))
+                coeff.put(elts[i].substring(s, (p = elts[i].indexOf("="))), elts[i].substring(p + 1));
         }
     }
     
@@ -120,15 +122,38 @@ public class plasmaSearchRankingProfile {
     }
     
     public String orderString() {
+        if (order == null) return "YBR-Date-Quality";
         return order[0] + "-" + order[1] + "-" + order[2];
     }
 
-    public String toExternalForm() {
+    public String toExternalString() {
         return coeff.toString();
     }
     
-    public Map coeff() {
-        return this.coeff;
+    public Map toExternalMap(String prefix) {
+        Iterator i = this.coeff.entrySet().iterator();
+        Map.Entry entry;
+        Map ext = new HashMap();
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            ext.put(prefix + (String) entry.getKey(), entry.getValue());
+        }
+        return ext;
+    }
+    
+    public String toExternalURLGet(String prefix) {
+        Iterator i = this.coeff.entrySet().iterator();
+        Map.Entry entry;
+        StringBuffer ext = new StringBuffer();
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            ext.append("&");
+            ext.append(prefix);
+            ext.append((String) entry.getKey());
+            ext.append("=");
+            ext.append(entry.getValue());
+        }
+        return new String(ext);
     }
     
     public long preRanking(plasmaWordIndexEntry normalizedEntry) {

@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+ <head>
+  <title>YaCy '#[clientname]#': Search Page</title>
+         #%env/templates/metas.template%#
+   <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="index.rss?search=#[former]#">
+ </head>
+ <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#%env/templates/header.template%#
+  <SCRIPT LANGUAGE="JavaScript">
+picEmpty = new Image(11, 11);
+picEmpty.src = "/env/grafics/empty.gif";
+picMinus = new Image(11, 11);
+picMinus.src = "/env/grafics/minus.gif";
+  </SCRIPT>
+<form action="DetailedSearch.html" method="get" enctype="multipart/form-data">
+<table border="0" cellpadding="5" cellspacing="0">
+  <tr heigth="1"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  <tr valign="center" class="TableCellLight">
+    <td><h2>Detailed&nbsp;Search</h2></td>
+    <td colspan="2"><input type="text" name="search" value="#[search]#" size="50" maxlength="250"></td>
+    <td><input type="submit" name="Enter" value="Search"></td>
+  </tr>
+  <tr valign="top" class="TableCellLight">
+  <td colspan="2">
+  <table border="0" cellpadding="0" cellspacing="1">
+  <tr valign="center" class="TableHeader"><td class="small" colspan="2">Local Query</td></tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Max. number of results:</td>
+    <td class=small>
+      <input type="text" name="localCount" value="#[localCount]#" size="4" maxlength="5">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Max. search time (seconds):</td>
+    <td class=small>
+      <input type="text" name="localTime" value="#[localTime]#" size="2" maxlength="3">
+	</td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Max. word distance:</td>
+    <td class=small>
+      <input type="text" name="localWDist" value="#[localWDist]#" size="3" maxlength="4">
+	</td>
+  </tr>
+
+  <tr valign="center"><td class="small" colspan="2">&nbsp;</td></tr>
+  <tr valign="center" class="TableHeader"><td class="small" colspan="2">Local Ranking</td></tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Entropy</td>
+    <td class=small>
+      <input type="text" name="localentropy" value="#[localentropy]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Date</td>
+    <td class=small>
+      <input type="text" name="localdate" value="#[localdate]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>YBR</td>
+    <td class=small>
+      <input type="text" name="localybr" value="#[localybr]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Position in Text</td>
+    <td class=small>
+      <input type="text" name="localposintext" value="#[localposintext]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Word Sistance</td>
+    <td class=small>
+      <input type="text" name="localworddistance" value="#[localworddistance]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Word Hit Count</td>
+    <td class=small>
+      <input type="text" name="localhitcount" value="#[localhitcount]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Domain Length</td>
+    <td class=small>
+      <input type="text" name="localdomlength" value="#[localdomlength]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>URL Length</td>
+    <td class=small>
+      <input type="text" name="localurllength" value="#[localurllength]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>URL Components</td>
+    <td class=small>
+      <input type="text" name="localurlcomps" value="#[localurlcomps]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Description Length</td>
+    <td class=small>
+      <input type="text" name="localdescrlength" value="#[localdescrlength]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Description Components</td>
+    <td class=small>
+      <input type="text" name="localdescrcomps" value="#[localdescrcomps]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Query appears in URL</td>
+    <td class=small>
+      <input type="text" name="localqueryinurl" value="#[localqueryinurl]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Query appears in Description</td>
+    <td class=small>
+      <input type="text" name="localqueryindescr" value="#[localqueryindescr]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>URL Component appears in Toplist</td>
+    <td class=small>
+      <input type="text" name="localurlcompintoplist" value="#[localurlcompintoplist]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small>Description Component appears in Toplist</td>
+    <td class=small>
+      <input type="text" name="localdescrcompintoplist" value="#[localdescrcompintoplist]#" size="2" maxlength="2">
+    </td>
+  </tr>
+  </table>
+  </td>
+  <td colspan="2">
+  <table border="0" cellpadding="0" cellspacing="1">
+  <tr valign="center" class="TableHeader"><td class="small" colspan="2">Global Query</td></tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small colspan="2">Global:
+      <input type="checkbox" name="global" align="top" #[globalChecked]#>
+	</td>
+  </tr>
+  <tr valign="top" class="TableCellDark"><td class=small colspan="2"><i>(to be filled with more global options)</i></td></tr>
+  </table></td>
+  </tr>
+</table>
+</form>
+
+<p>
+#(excluded)#
+::
+<b>The following words are stop-words and had been excluded from the search: #[stopwords]#.</b>
+#(/excluded)#
+#(num-results)#
+::
+<b>#[linkcount]#</b> results from <b>#[orderedcount]#</b> ordered links of a total number of <b>#[totalcount]#</b> known.
+&rarr; <a href="/DetailedSearch.html?search=#[former]#&Enter=Search&count=#[count]#&resource=#[resource]#&time=#[time]#&urlmaskfilter=.*#[ranking]#">Catch up more links</a>
+from 'late' peers.
+#(/num-results)#
+#(combine)#
+::
+<br><br><b>Topwords</b> (to refine search):
+#{words}#
+<a href="DetailedSearch.html?search=#[newsearch]#&Enter=Search&count=#[count]#&resource=#[resource]#&time=#[time]##[ranking]#">#[word]#</a>
+#{/words}#
+#(/combine)#
+</p>
+<!-- linklist begin -->
+
+#{results}#
+<!-- link begin -->
+<p style="border-bottom:1px #000 dashed; padding-bottom: 1em;">
+<a href="#[delete]#" onMouseover="document.minus_#[urlhexhash]#.src=picMinus.src" onMouseout="document.minus_#[urlhexhash]#.src=picEmpty.src">
+<img src="/env/grafics/empty.gif" title="delete" alt="delete" name="minus_#[urlhexhash]#" border="0"></a>&nbsp;<b><font color="#4070a0">#[description]#</font></b><br>
+#(snippet)#::<img src="/env/grafics/empty.gif">&nbsp;<i>#[text]#</i><br>#(/snippet)#
+<img src="/env/grafics/empty.gif">&nbsp;<a href="#[url]#">#[urlname]#</a><br>
+<img src="/env/grafics/empty.gif"><font color="#007050">&nbsp;#[date]#</font> | <font color="#007050">YBR-#[ybr]#</font> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
+</p>
+<!-- link end -->
+#{/results}#
+
+<!-- linklist end -->
+<p>
+</p><br>
+  
+#%env/templates/footer.template%#
+</body>
+</html>
