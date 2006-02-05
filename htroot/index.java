@@ -181,7 +181,7 @@ public class index {
         }
 
         // do the search
-        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, maxDistance, count, searchtime, urlmask, referer,
+        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, maxDistance, count, searchtime, urlmask,
                                                              ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
                                                              "", 20);
         plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(new String[]{order1, order2, order3});

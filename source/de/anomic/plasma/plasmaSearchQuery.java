@@ -60,7 +60,6 @@ public final class plasmaSearchQuery {
     
     public Set queryWords;
     public Set queryHashes;
-    public String referrer;
     public int wantedResults;
     public long maximumTime;
     public String urlMask;
@@ -70,7 +69,7 @@ public final class plasmaSearchQuery {
     public int maxDistance;
 
     public plasmaSearchQuery(Set queryWords, int maxDistance,
-                             int wantedResults, long maximumTime, String urlMask, String referrer,
+                             int wantedResults, long maximumTime, String urlMask,
                              int domType, String domGroupName, int domMaxTargets) {
         this.queryWords = queryWords;
         this.maxDistance = maxDistance;
@@ -78,7 +77,6 @@ public final class plasmaSearchQuery {
         this.wantedResults = wantedResults;
         this.maximumTime = maximumTime;
         this.urlMask = urlMask;
-        this.referrer = referrer;
         this.domType = domType;
         this.domGroupName = domGroupName;
         this.domMaxTargets = domMaxTargets;

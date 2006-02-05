@@ -43,6 +43,7 @@ package de.anomic.plasma;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 public class plasmaSearchRankingProfile {
@@ -97,6 +98,16 @@ public class plasmaSearchRankingProfile {
         coeff.put(DESCRCOMPINTOPLIST, new Integer(11));
     }
     
+    public plasmaSearchRankingProfile(String profile) {
+        this(); // set defaults
+        //parse external form
+        String[] elts = profile.substring(1, profile.length() - 1).split(",");
+        int p;
+        for (int i = 0; i < elts.length; i++) {
+            coeff.put(elts[i].substring(0, (p = elts[i].indexOf("="))), elts[i].substring(p + 1));
+        }
+    }
+    
     public plasmaSearchRankingProfile(String[] order) {
         this(); // set defaults
         this.order = order;
@@ -112,6 +123,14 @@ public class plasmaSearchRankingProfile {
         return order[0] + "-" + order[1] + "-" + order[2];
     }
 
+    public String toExternalForm() {
+        return coeff.toString();
+    }
+    
+    public Map coeff() {
+        return this.coeff;
+    }
+    
     public long preRanking(plasmaWordIndexEntry normalizedEntry) {
         long ranking = 0;
         
