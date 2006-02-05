@@ -278,9 +278,9 @@ public class bookmarksDB {
         set.addAll(hashes);
         return set.iterator();
     }
-    public void removeBookmark(String urlHash){
+    public boolean removeBookmark(String urlHash){
         Bookmark bookmark = getBookmark(urlHash);
-        if(bookmark == null) return; //does not exist
+        if(bookmark == null) return false; //does not exist
         String[] tags = bookmark.getTags().split(",");
         bookmarksDB.Tag tag=null;
         for(int i=0;i<tags.length;i++){
@@ -292,7 +292,10 @@ public class bookmarksDB {
         }
         try {
             bookmarksTable.remove(urlHash);
-        } catch (IOException e) {}
+            return true;
+        } catch (IOException e) {
+        	return false;
+        }
     }
     public Bookmark createBookmark(String url){
         return new Bookmark(url);
