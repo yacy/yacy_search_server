@@ -76,14 +76,13 @@ public class plasmaSearchRankingProfile {
     public String[] order;
     private HashMap coeff;
     
-    public plasmaSearchRankingProfile(String[] order) {
-        this.order = order;
+    public plasmaSearchRankingProfile() {
+        // set some default-values
+        this.order = null;
         this.coeff = new HashMap();
-        for (int i = 0; i < 3; i++) {
-            if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_QUALITY))   coeff.put(ENTROPY, new Integer((4 * (3 - i))));
-            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_DATE)) coeff.put(DATE, new Integer((4 * (3 - i))));
-            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_YBR))  coeff.put(YBR, new Integer((4 * (3 - i))));
-        }
+        coeff.put(ENTROPY, new Integer(4));
+        coeff.put(DATE, new Integer(8));
+        coeff.put(YBR, new Integer(12));
         coeff.put(POSINTEXT, new Integer(11));
         coeff.put(WORDDISTANCE, new Integer(10));
         coeff.put(HITCOUNT, new Integer(9));
@@ -96,6 +95,17 @@ public class plasmaSearchRankingProfile {
         coeff.put(QUERYINDESCR, new Integer(14));
         coeff.put(URLCOMPINTOPLIST, new Integer(12));
         coeff.put(DESCRCOMPINTOPLIST, new Integer(11));
+    }
+    
+    public plasmaSearchRankingProfile(String[] order) {
+        this(); // set defaults
+        this.order = order;
+        // overwrite defaults with order attributes
+        for (int i = 0; i < 3; i++) {
+            if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_QUALITY))   coeff.put(ENTROPY, new Integer((4 * (3 - i))));
+            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_DATE)) coeff.put(DATE, new Integer((4 * (3 - i))));
+            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_YBR))  coeff.put(YBR, new Integer((4 * (3 - i))));
+        }
     }
     
     public String orderString() {
