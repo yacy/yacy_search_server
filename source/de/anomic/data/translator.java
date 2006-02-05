@@ -79,17 +79,19 @@ public class translator {
 			Matcher matcher = pattern.matcher(result);
 			if(matcher.find()){
 				result = matcher.replaceAll((String)translationList.get(key));
-				//result = result.replaceAll(key, (String)translationList.get(key));
-				//System.out.println("Replaced \""+key+"\" by \""+translationList.getProperty(key)+"\""); //DEBUG
 			}else{
 				//Filename not availible, but it will be printed in Log 
-				//after all untranslated Strings as "File Translated
+				//after all untranslated Strings as "Translated file: "
 				serverLog.logFine("TRANSLATOR", "Unused String: "+key); 
 			}
 		}
 		return result;
 	}
-	
+	/**
+	 * Load multiple translationLists from one File. Each List starts with #File: relative/path/to/file
+	 * @param translationFile the File, which contains the Lists
+	 * @return a Hashtable, which contains for each File a Hashtable with translations.
+	 */
 	public static Hashtable loadTranslationsLists(File translationFile){
 		Hashtable lists = new Hashtable(); //list of translationLists for different files.
 		Hashtable translationList = new Hashtable(); //current Translation Table
@@ -97,22 +99,15 @@ public class translator {
 		ArrayList list = listManager.getListArray(translationFile);
 		Iterator it = list.iterator();
 		String line = "";
-		String value = "";
 		String[] splitted;
 		String forFile="";
 
 		while(it.hasNext()){
 			line = (String)it.next();
 			if(! line.startsWith("#")){
-				splitted = line.split("==");
+				splitted = line.split("==", 2);
 				if(splitted.length == 2){
 					translationList.put(splitted[0], splitted[1]);
-				}else if(splitted.length > 2){
-					value = "";
-					for(int i = splitted.length-1;i>=1;i--){
-						value += splitted[i];
-					}
-					translationList.put(splitted[0], value);
 				}else{ //Invalid line
 				}
 			}else if(line.startsWith("#File: ")){
@@ -134,6 +129,7 @@ public class translator {
 		lists.put(forFile, translationList);
 		return lists;
 	}
+
 	public static boolean translateFile(File sourceFile, File destFile, File translationFile){
 		Hashtable translationList = (Hashtable)loadTranslationsLists(translationFile).get(sourceFile.getName());
 		return translateFile(sourceFile, destFile, translationList);
@@ -225,14 +221,9 @@ public class translator {
             file=(File)it.next();
             //cuts the sourcePath and prepends the destPath
             file2=new File(destDir, file.getPath().substring(sourceDir.getPath().length()));
-            //file2=new File(file.getPath().replaceFirst(sourceName.replaceAll("\\\\", "\\\\"), destName));
             if(file.isDirectory() && !file.getName().equals(notdir)){
-                //file2.mkdirs();
                 translateFiles(file, file2, sourceDir, translationFile, extensions);
-                //translateFilesRecursive(file, file2, translationFile, extension, notdir);
-            }/*else{
-                translateFiles(file, file2, translationFile, extension);
-            }*/
+            }
         }
         return true;
     }
