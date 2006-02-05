@@ -853,7 +853,7 @@ public final class yacyClient {
             while (eenum.hasNext()) {
                 entry = (plasmaWordIndexEntry) eenum.next();
                 if (urlCache.get(entry.getUrlHash()) == null) {
-                    System.out.println("DEBUG transferIndex: to-send url hash '" + entry.getUrlHash() + "' is not contained in urlCache");
+                    yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.getUrlHash() + "' is not contained in urlCache");
                 }
             }
         }        
@@ -878,7 +878,7 @@ public final class yacyClient {
         for (int i = 0; i < uhs.length; i++) {
             urls[i] = (plasmaCrawlLURL.Entry) urlCache.get(uhs[i]);
             if (urls[i] == null) {
-                System.out.println("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
+                yacyCore.log.logWarning("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
             }
         }
         
