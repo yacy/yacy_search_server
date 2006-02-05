@@ -26,7 +26,7 @@
 #File: Blacklist_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Blacklist Manager==YaCy: Blacklist Manager
+Blacklist Manager==Blacklist Manager
 Blacklist==Blacklist
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion  stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
 from being loaded. You can define several blacklists and activate them separately.==Sie k&ouml;nnen mehrere Blacklists anlegen und getrennt aktivieren.
@@ -48,7 +48,7 @@ These are the domain name / path patterns in this blacklist:==Dies sind die Doma
 You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
 Delete URL pattern==URL aus der Liste l&ouml;schen
 Enter new domain name / path pattern in the form:==Geben Sie eine neue Domain/einen neuen Pfad in dieser Form ein:
-"&lt;domain&gt;/&lt;path-regexpr&gt;":=="&lt;Domain&gt;/&lt;Pfad&gt;"
+path-regexpr==Pfad
 Add URL pattern==F&uuml;ge URL hinzu
 Import blacklist items from other YaCy peers:==Importiere Blacklist von anderen YaCy Peers:
 Host:==Host:
@@ -87,7 +87,7 @@ All==Alle
 #-----------------------------------------------------------
 #File: CacheAdmin_p.html
 
-YaCy: Local Cache Management==YaCy: Lokale Cache Verwaltung
+Local Cache Management==Lokale Cache Verwaltung
 Local Cache==Lokaler Cache
 The current cache size is==Die aktuelle Gr&ouml;&szlig;e des Caches betr&auml;gt
 The maximum cache size is==Die maximale Gr&ouml;&szlig;e betr&auml;gt
@@ -96,7 +96,6 @@ The maximum cache size is==Die maximale Gr&ouml;&szlig;e betr&auml;gt
 #File: Config_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy advanced Config==YaCy: Erweiterte Einstellungen
 Advanced Config==Erweiterte Einstellungen
 Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie k&ouml;nnen alles &auml;ndern, bedenken Sie aber, dass einige &Auml;nderungen einen Neustart von YaCy erfordern und andere &Auml;nderungen YaCy ganz zum Absturz bringen k&ouml;nnen.
@@ -124,7 +123,7 @@ Waiting for new request nr.==Warte auf neue Anfrage Nr.
 #File: CookieMonitorIncoming_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Incoming Cookies Monitor==YaCy: &Uuml;berwachung eingehender Cookies
+Incoming Cookies Monitor==&Uuml;berwachung eingehender Cookies
 Cookie Monitor: Incoming Cookies==Cookie &Uuml;berwachung: Eingehende Cookies
 This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Auflistung aller Cookies, die ein Web Server an diesen YaCy Proxy geschickt hat:
 Showing==Angezeigt werden
@@ -135,7 +134,7 @@ Cookies==Cookies
 #File: CookieMonitorOutgoing_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Outgoing Cookies Monitor==YaCy: &Uuml;berwachung ausgehender Cookies
+Outgoing Cookies Monitor==&Uuml;berwachung ausgehender Cookies
 Cookie Monitor: Outgoing Cookies==Cookie &Uuml;berwachung: Ausgehende Cookies
 This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Dies ist eine Auflistung aller Cookies, die Ihr Browser an einen Webserver geschickt hat:
 Showing==Angezeigt werden
@@ -295,7 +294,7 @@ Alternatively, you can run the proxy in permanent online mode, which also grants
 To do this, press this button:==Um dies zu tun, klicken Sie bitte auf folgenden Button:
 "go online"=="gehe online"
 you must also switch to online mode==Sie m&uuml;ssen aber erst in den online Modus wechseln
-(by using the proxy) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
+\(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
 The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;t #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
@@ -307,11 +306,11 @@ Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter 
 Index Control==Index Kontrolle
 Index Administration==Index Administration
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Der lokale Index besteht im Moment aus #[wcount]# W&ouml;rtern und #[ucount]# URL-Links.
-To transfer the whole index to an other peer, click <a href="IndexTransfer_p.html">here</a>.==Um den kompletten Index an einen anderen Peer zu &uuml;bertragen, klicken Sie <a href="IndexTransfer_p.html">hier</a>.
-To import an index from a file or a foreign peer click <a href="IndexImport_p.html">here</a>.==Um einen Index aus einer Datei oder von einem fremden Peer zu importieren, klicken Sie <a href="IndexImport_p.html">hier</a>.
-Word==Wort:
+To transfer the whole index to an other peer, click==Um den kompletten Index an einen anderen Peer zu &uuml;bertragen, klicken Sie
+>here<==>hier<
+To import an index from a file or a foreign peer click==Um einen Index aus einer Datei oder von einem fremden Peer zu importieren, klicken Sie
+Word==Wort
 value="Show URL Entries for Wort:">==value="URL Eintr&auml;ge f&uuml;r Wort zeigen">
-Word-Hash:==Wort-Hash:
 "Generate List"=="Liste erstellen"
 value="Show URL Entries for Wort:-Hash">==value="Eintr&auml;ge f&uuml;r Wort-Hash zeigen">
 "Transfer to other peer"=="An anderen Peer senden"
@@ -443,7 +442,7 @@ Busy Peers==Besch&auml;tigte Peers
 #File: IndexCreateIndexingQueue_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy '\#\[clientname\]\# ': Index Creation/Indexing Queue==YaCy '#[clientname]#': Index Erzeugung/Indexier Warteschlange
+Index Creation/Indexing Queue==Index Erzeugung/Indexier Warteschlange
 Index Creation: Indexing Queue==Index Erzeugung: Indexier Warteschlange
 The indexing queue is empty==Die Indexier Warteschlange ist leer.
 "clear indexing queue"=="Warteschlange l&ouml;schen"
@@ -469,7 +468,7 @@ Fail-Reason==Fehler Grund
 #File: IndexCreateLoaderQueue_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy '\#\[clientname\]\#': Index Creation / Loader Queue==YaCy '#[clientname]#': Index Erzeugung / Lade Warteschlange
+Index Creation / Loader Queue==Index Erzeugung / Lade Warteschlange
 Index Creation: Loader Queue==Index Erzeugung: Lade Warteschlange
 The loader set is empty==Die Lade Warteschlange ist leer.
 There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Eintr&auml;ge in der Lade Warteschlange:
@@ -671,7 +670,7 @@ Start/Stop Transfer==Starte/Stoppe Transfer
 #File: Language_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Language selection==YaCy: Sprachauswahl
+Language selection==Sprachauswahl
 Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
 Current language:==Aktuelle Sprache
@@ -720,14 +719,13 @@ reply==antworten
 #File: MessageSend_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Send message==YaCy: Nachrichten Versand
 Send message==Nachrichten Versand
 
 #-------------------------------------------------------
 #File: Network.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Network Overview==YaCy: Netzwerk &Uuml;berblick
+Network Overview==Netzwerk &Uuml;berblick
 Network Menu==Netzwerk Men&uuml;
 Network&nbsp;Overview==Netzwerk &Uuml;berblick
 Active&nbsp;Peers==Aktive Peers
@@ -778,8 +776,7 @@ Pages Per Minute \(Accumulated PPM over Active Peers\).==Seiten pro Minute (PPM 
 Your Peer:==Ihr Peer:
 Version==Version
 Own/Other==Eigene/Andere
-Accept<br>Crawl==Akzeptiert<br>Crawl
-Accept<br>Index==Akzeptiert<br>Index
+Accept Crawl==Akzeptiert Crawl
 Sent<br>Words==Gesendete<br>W&ouml;rter
 Sent<br>URLs==Gesendete<br>URLs
 Received<br>Words==Empfangene<br>W&ouml;rter
@@ -787,8 +784,6 @@ Received<br>URLs==Empfangene<br>URLs
 PPM==PPM
 Seeds==Seeds
 Connects<br>per hour==Verbindungen<br>pro Stunde
-"no"==nein
-"yes"==ja
 Network legend:==Netzwerk Legende:
 dark font==schwarze Schrift
 senior/principal peers==Senior/Principal Peers
@@ -805,13 +800,12 @@ To get connection to the YACY network, you must use the proxy by setting your br
 \('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>==('on-demand - Modus', siehe <a href="http://www.yacy.net/yacy/Installation.html#wininst">hier</a>
 for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den Permanent Online Modus aktivieren.
 To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Knopf:
-"go online"==Geh online
+"go online"=="online gehen"
 
 #-------------------------------------------------------
 #File: News.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: News==YaCy: News
 Network Menu==Netzwerk Men&uuml;
 News&nbsp;Overview==News &Uuml;berblick
 Incoming&nbsp;News==eingehende News
@@ -926,7 +920,6 @@ used memory in the JVM within total amount==genutzter Speicher in der JVM innerh
 Re-Configuration of Startup Paramenters:==Neukonfiguration der Startparameter:
 Changes take effect after <b>re-start</b> of YaCy==&Auml;nderungen werden erst nach <b>Neustart</b> von YaCy wirksam
 RAM Cache for Database Files:==RAM-Cache f&uuml;r Datenbank-Dateien:
-Chunk Sizes==Chunk Gr&ouml;&szlig;en
 Chunk Size==Chunk Gr&ouml;&szlig;e
 #Slots==
 Memory Occupation==Speicherbeanspruchung
@@ -1342,8 +1335,8 @@ P2P WEB SEARCH==P2P Internet Suche
 "Search"==Suchen
 Max. number of results:==Max. Anzahl Ergebnisse:
 No Results.==Keine Ergebnisse.
-No Results. (length of search words must be at least 3 characters)==Keine Ergebnisse. (Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen)
-No Results. If you think this is unsatisfactory then you may consider to support==Keine Ergebnisse. Wenn Sie das unbefriedigend finden, sollten Sie &uuml;berlegen,
+length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
+If you think this is unsatisfactory then you may consider to support==Wenn Sie das unbefriedigend finden, sollten Sie &uuml;berlegen,
 the global index by running your own proxy/peer.==den globalen Index durch das Betreiben  eines eigenen Proxies/Peers zu unterst&uuml;tzen.
 If everybody contributes, the results will get better.==Wenn jeder etwas beitr&auml;gt, werden die Ergebnisse besser.
 Other possible reasons for no result:==Andere m&ouml;gliche Gr&uuml;nde daf&uuml;r, dass Sie keine Ergebnisse erhalten haben:
@@ -1368,7 +1361,6 @@ from 'late' peers to enrich this search result.==um mehr Treffer zu erzielen.
 #File: Skins_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Skins==YaCy: Skins
 Skin selection==Skinauswahl
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie k&ouml;nnen hier das Aussehen von YaCy mit Skins &auml;ndern. W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
 Current skin:==Verwendeter Skin:
@@ -1385,23 +1377,15 @@ Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
 #File: Status.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Status==YaCy: Status
 System-, Index- and Peer-Status==System-, Index- und Peer-Status
 Welcome to YaCy!==Willkommen bei YaCy!
 "Restart"=="Neustarten"
 "Shutdown"=="Herunterfahren"
 Public System Properties==Allgemeine Systemangaben
-Protection==Sicherheit
 System version==Systemversion
 the latest public version is==Die neueste stabile Version ist
 Click here to <a href="http://www.yacy.net/yacy/Download.html">download</a> it.==Klicken Sie <a href="http://www.yacy.net/yacy/Download.html">hier</a>, um sie herunterzuladen.
-Proxy host==Proxy Host
-Port forwarding host==Port-forwarding-Host
-broken==gest&ouml;rt
-connected==verbunden
-Remote proxy==Zweiter Proxy
 This&nbsp;peer's&nbsp;address==Adresse dieses Peers
-not used==wird nicht benutzt
 #Not assigned==nicht zugewiesen
 Not assigned. The peer must go online to get an address.==Nicht zugewiesen. Ihr Peer muss online gehen, um eine Adresse zu bekommen.
 #---
@@ -1432,7 +1416,6 @@ Disabled. To enable this you need a FTP account where you can upload files to a 
 Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
 Enabled: Updating periodically to file==Aktiv: Periodisches Update in Datei
 Last upload:==Letzter Upload:
-Enabled ==Aktiviert
 Online-mode==Onlinemodus
 You are in <i>Cache-browsing</i> mode.==Sie sind im <i>Cache</i> Modus.
 Only Website from the Proxycache are accessable.==Nur Webseiten aus dem Proxycache sind aufrufbar.
@@ -1447,7 +1430,9 @@ Use this only if you have a flatrate or you have an always-on connection.==Benut
 "Go to Cache-Mode"=="In Cache-Modus gehen"
 You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <i>permanenten</i> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein m&ouml;chten, m&uuml;ssen Sie den Proxy abschalten um offline zu gehen.
 Last Refresh:==Letzte Aktualisierung:
-Click <a href="Status.html?login=">here</a> to log in as administrator and see full status.==Klicken Sie <a href="Status.html?login=">hier</a> um sich als Administrator einzuloggen und alle Informationen zu sehen.
+Click <==Klicken Sie <
+>here<==>hier<
+to log in as administrator and see full status.==um sich als Administrator einzuloggen und alle Informationen zu sehen.
 
 #--------------------------------------------------------
 #File: Status_p.inc
@@ -1457,7 +1442,8 @@ Private System Properties==Private Systemeigenschaften
 System Resources==Systemressourcen
 Processors:==Prozessoren:
 Protection==Sicherheit
-<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html?page=admin">settings</a> page <b>immediately</b> and set an administration password.==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der <a href="Settings_p.html?page=admin">Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
+<b>Your settings are _not_ protected!</b> Please go to the==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der
+settings</a> page <b>immediately</b> and set an administration password.==Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
 Your settings are protected by a password.==Ihre Einstellungen sind mit einem Kennwort gesch&uuml;tzt.
 Peer host==Peer Host
 Port forwarding host==Port forwarding Host
@@ -1514,7 +1500,7 @@ Edit User==Benutzer bearbeiten
 Delete User==Benutzer l&ouml;schen
 Current User:==aktueller Benutzer:
 Password:==Passwort:
-Password(repeat):==Passwort(wiederholen):
+Password\(repeat\):==Passwort(wiederholen):
 First Name:==Vorname:
 Last Name:==Nachname:
 Address:==Adresse:
@@ -1559,8 +1545,6 @@ Original Resource Content==Original Quellen Inhalt
 #File: ViewLog_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy Log:==YaCy Log:
-Log==Log
 Lines==Zeilen
 reversed order==in umgekehrter Reihenfolge
 "refresh"=="Aktualisieren"
@@ -1569,7 +1553,7 @@ reversed order==in umgekehrter Reihenfolge
 #File: ViewProfile.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Remote Peer Profile==YaCy: Remote Peer Profil
+Remote Peer Profile==Remote Peer Profil
 Remote Peer Profile:==Remote Peer Profil:
 Wrong access of this page==Falscher Zugriff auf diese Seite
 The requested peer is not known or a potential peer, what means the peer's profile can't be fetched, because he is behind a firewall.==Der gew&uuml;nschte Peer ist nicht bekannt oder ein potenzieller Peer, das bedeutet, das Profil kann nicht geladen werden, da der Peer hinter einer Firewall ist.
@@ -1598,7 +1582,7 @@ Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &u
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy&nbsp;-&nbsp;Distributed&nbsp;Web&nbsp;Indexing&nbsp;-&nbsp;Administration==YaCy - Verteilte Internet-Indexierung - Administration
-Global Index==Globaler Index
+Global&nbsp;Index==Globaler Index
 Distributed Crawler==Verteilter Crawler
 Local Proxy==Lokaler Proxy
 Communication / Publication==Kommunikation / Publikation
@@ -1614,7 +1598,7 @@ Proxy Indexing==Proxy Indexierung
 #Cache Monitor==Cache Monitor
 #Cookie Monitor==Cookie Monitor
 #Home Page==Homepage
-File Share==Dateifreigabe
+File&nbsp;Share==Dateifreigabe
 #Wiki==Wiki
 >Messages==>Nachrichten
 Personal Profile==Pers&ouml;nliches Profil
@@ -1695,4 +1679,4 @@ Individual&nbsp;Web&nbsp;Page==eigene Webseite
 Welcome to your own web page<br>in the <b>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br>im <b>YaCy-Netzwerk
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE F&Uuml;R IHREN EIGENEN WEB SERVER!
 PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
-&lt;YaCy-application-home&gt;<b>#[wwwpath]#</b>==&lt;YaCy-Programmpfad&gt;<b>#[wwwpath]#</b> ABLEGEN.
+&lt;YaCy-application-home&gt;<b>\#\[wwwpath\]\#</b>==&lt;YaCy-Programmpfad&gt;<b>#[wwwpath]#</b> ABLEGEN.
