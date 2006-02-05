@@ -52,10 +52,6 @@ import de.anomic.server.serverByteBuffer;
 
 public final class plasmaSearchQuery {
     
-    public static final String ORDER_QUALITY = "Quality";
-    public static final String ORDER_DATE    = "Date";
-    public static final String ORDER_YBR     = "YBR";
-    
     public static final int SEARCHDOM_LOCAL = 0;
     public static final int SEARCHDOM_GROUPDHT = 1;
     public static final int SEARCHDOM_GROUPALL = 2;

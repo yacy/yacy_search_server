@@ -139,47 +139,23 @@ public final class plasmaSearchResult {
         Object[] resultVector;
         plasmaWordIndexEntry indexEntry;
         plasmaCrawlLURL.Entry page;
-        String[] urlcomps;
-        String[] descrcomps;
         long ranking;
-        String queryhash;
         for (int i = 0; i < results.size(); i++) {
             // take out values from result array
             resultVector = (Object[]) results.get(i);
             indexEntry = (plasmaWordIndexEntry) resultVector[0];
-            
-            // apply pre-calculated order attributes
-            ranking = this.ranking.ranking(indexEntry.generateNormalized(entryMin, entryMax));
-            
-            // apply 'common-sense' heuristic using references
-            urlcomps = (String[]) resultVector[2];
-            for (int j = 0; j < urlcomps.length; j++) {
-                if (commonSense.contains(urlcomps[j])) ranking += 1 << 12;
-            }
-            descrcomps = (String[]) resultVector[3];
-            for (int j = 0; j < descrcomps.length; j++) {
-                if (commonSense.contains(descrcomps[j])) ranking += 1 << 11;
-            }
-            
-            // apply query-in-result matching
-            Set urlcomph = plasmaSearchQuery.words2hashes(urlcomps);
-            Set descrcomph = plasmaSearchQuery.words2hashes(descrcomps);
-            Iterator shi = query.queryHashes.iterator();
-            while (shi.hasNext()) {
-                queryhash = (String) shi.next();
-                if (urlcomph.contains(queryhash)) ranking += 1 << 13;
-                if (descrcomph.contains(queryhash)) ranking += 1 << 14;
-            }
-            
-            // prefer short urls
             page = (plasmaCrawlLURL.Entry) resultVector[1];
-            ranking += (255 - page.url().toString().length()) << 10;
-            ranking += (24 - urlcomps.length) << 10;
             
-            // prefer long descriptions
-            ranking += (40 - Math.abs(40 - Math.min(40, page.descr().length()))) << 10;
-            ranking += ( 8 - Math.abs( 8 - Math.min( 8, descrcomps.length))) << 10;
-            
+            // calculate ranking
+            ranking = this.ranking.postRanking(
+                            indexEntry,
+                            query,
+                            commonSense,
+                            (String[]) resultVector[2],
+                            (String[]) resultVector[3],
+                            page
+                            );
+
             // insert value
             //System.out.println("Ranking " + ranking + ", YBR-" + plasmaSearchPreOrder.ybr(indexEntry.getUrlHash()) + " for URL " + page.url());
             pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), page);

@@ -41,30 +41,119 @@
 
 package de.anomic.plasma;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+
 public class plasmaSearchRankingProfile {
 
+    // old parameters for ordering
+    public static final String ORDER_QUALITY = "Quality";
+    public static final String ORDER_DATE    = "Date";
+    public static final String ORDER_YBR     = "YBR";
+    
+    // pre-sort attributes
+    public static final String ENTROPY = "entropy";
+    public static final String DATE = "date";
+    public static final String YBR = "ybr";
+    public static final String POSINTEXT = "posintext";
+    public static final String WORDDISTANCE = "worddistance";
+    public static final String HITCOUNT = "hitcount";
+    public static final String DOMLENGTH = "domlength";
+    
+    // post-sort attributes
+    public static final String URLLENGTH = "urllength";
+    public static final String URLCOMPS = "urlcomps";
+    public static final String DESCRLENGTH = "descrlength";
+    public static final String DESCRCOMPS = "descrcomps";
+
+    // post-sort predicates
+    public static final String QUERYINURL = "queryinurl";
+    public static final String QUERYINDESCR = "queryindescr";
+    public static final String URLCOMPINTOPLIST = "urlcompintoplist";
+    public static final String DESCRCOMPINTOPLIST = "descrcompintoplist";
+    
     public String[] order;
+    private HashMap coeff;
     
     public plasmaSearchRankingProfile(String[] order) {
         this.order = order;
+        this.coeff = new HashMap();
+        for (int i = 0; i < 3; i++) {
+            if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_QUALITY))   coeff.put(ENTROPY, new Integer((4 * (3 - i))));
+            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_DATE)) coeff.put(DATE, new Integer((4 * (3 - i))));
+            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_YBR))  coeff.put(YBR, new Integer((4 * (3 - i))));
+        }
+        coeff.put(POSINTEXT, new Integer(11));
+        coeff.put(WORDDISTANCE, new Integer(10));
+        coeff.put(HITCOUNT, new Integer(9));
+        coeff.put(DOMLENGTH, new Integer(8));
+        coeff.put(URLLENGTH, new Integer(10));
+        coeff.put(URLCOMPS, new Integer(10));
+        coeff.put(DESCRLENGTH, new Integer(10));
+        coeff.put(DESCRCOMPS, new Integer(10));
+        coeff.put(QUERYINURL, new Integer(13));
+        coeff.put(QUERYINDESCR, new Integer(14));
+        coeff.put(URLCOMPINTOPLIST, new Integer(12));
+        coeff.put(DESCRCOMPINTOPLIST, new Integer(11));
     }
     
     public String orderString() {
         return order[0] + "-" + order[1] + "-" + order[2];
     }
 
-    public long ranking(plasmaWordIndexEntry normalizedEntry) {
+    public long preRanking(plasmaWordIndexEntry normalizedEntry) {
         long ranking = 0;
         
-        for (int i = 0; i < 3; i++) {
-            if (this.order[i].equals(plasmaSearchQuery.ORDER_QUALITY))   ranking  += normalizedEntry.getQuality() << (4 * (3 - i));
-            else if (this.order[i].equals(plasmaSearchQuery.ORDER_DATE)) ranking  += normalizedEntry.getVirtualAge() << (4 * (3 - i));
-            else if (this.order[i].equals(plasmaSearchQuery.ORDER_YBR))  ranking  += plasmaSearchPreOrder.ybr_p(normalizedEntry.getUrlHash()) << (4 * (3 - i));
-        }
-        ranking += (normalizedEntry.posintext()    == 0) ? 0 : (255 - normalizedEntry.posintext()) << 11;
-        ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << 10;
-        ranking += (normalizedEntry.hitcount()     == 0) ? 0 : normalizedEntry.hitcount() << 9;
-        ranking += (255 - normalizedEntry.domlengthNormalized()) << 8;
+        ranking += normalizedEntry.getQuality() << ((Integer) coeff.get(ENTROPY)).intValue();
+        ranking += normalizedEntry.getVirtualAge() << ((Integer) coeff.get(DATE)).intValue();
+        ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.getUrlHash()) << ((Integer) coeff.get(YBR)).intValue();
+        ranking += (normalizedEntry.posintext()    == 0) ? 0 : (255 - normalizedEntry.posintext()) << ((Integer) coeff.get(POSINTEXT)).intValue();
+        ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << ((Integer) coeff.get(WORDDISTANCE)).intValue();
+        ranking += (normalizedEntry.hitcount()     == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();
+        ranking += (255 - normalizedEntry.domlengthNormalized()) << ((Integer) coeff.get(DOMLENGTH)).intValue();
         return ranking;
     }
+    
+    public long postRanking(
+                    plasmaWordIndexEntry normalizedEntry,
+                    plasmaSearchQuery query,
+                    Set topwords,
+                    String[] urlcomps,
+                    String[] descrcomps,
+                    plasmaCrawlLURL.Entry page) {
+
+        // apply pre-calculated order attributes
+        long ranking = this.preRanking(normalizedEntry);
+
+        // apply 'common-sense' heuristic using references
+        for (int j = 0; j < urlcomps.length; j++) {
+            if (topwords.contains(urlcomps[j])) ranking += 1 << ((Integer) coeff.get(URLCOMPINTOPLIST)).intValue();
+        }
+        for (int j = 0; j < descrcomps.length; j++) {
+            if (topwords.contains(descrcomps[j])) ranking += 1 << ((Integer) coeff.get(DESCRCOMPINTOPLIST)).intValue();
+        }
+
+        // apply query-in-result matching
+        Set urlcomph = plasmaSearchQuery.words2hashes(urlcomps);
+        Set descrcomph = plasmaSearchQuery.words2hashes(descrcomps);
+        Iterator shi = query.queryHashes.iterator();
+        String queryhash;
+        while (shi.hasNext()) {
+            queryhash = (String) shi.next();
+            if (urlcomph.contains(queryhash)) ranking += 1 << ((Integer) coeff.get(QUERYINURL)).intValue();
+            if (descrcomph.contains(queryhash)) ranking += 1 << ((Integer) coeff.get(QUERYINDESCR)).intValue();
+        }
+
+        // prefer short urls
+        ranking += (255 - page.url().toString().length()) << ((Integer) coeff.get(URLLENGTH)).intValue();
+        ranking += (24 - urlcomps.length) << ((Integer) coeff.get(URLCOMPS)).intValue();
+
+        // prefer long descriptions
+        ranking += (40 - Math.abs(40 - Math.min(40, page.descr().length()))) << ((Integer) coeff.get(DESCRLENGTH)).intValue();
+        ranking += (8 - Math.abs(8 - Math.min(8, descrcomps.length))) << ((Integer) coeff.get(DESCRCOMPS)).intValue();
+
+        return ranking;
+    }
+    
 }

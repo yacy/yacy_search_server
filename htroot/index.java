@@ -161,16 +161,18 @@ public class index {
                                     (yacyCore.seedDB.mySeed != null) &&
                                     (yacyCore.seedDB.mySeed.getAddress() != null));
 
-        String order1="", order2="", order3="";
-        if (order.startsWith("YBR"))        order1 = plasmaSearchQuery.ORDER_YBR;
-        if (order.startsWith("Date"))       order1 = plasmaSearchQuery.ORDER_DATE;
-        if (order.startsWith("Quality"))    order1 = plasmaSearchQuery.ORDER_QUALITY;
-        if (order.indexOf("-YBR-") > 0)     order2 = plasmaSearchQuery.ORDER_YBR;
-        if (order.indexOf("-Date-") > 0)    order2 = plasmaSearchQuery.ORDER_DATE;
-        if (order.indexOf("-Quality-") > 0) order2 = plasmaSearchQuery.ORDER_QUALITY;
-        if (order.endsWith("YBR"))          order3 = plasmaSearchQuery.ORDER_YBR;
-        if (order.endsWith("Date"))         order3 = plasmaSearchQuery.ORDER_DATE;
-        if (order.endsWith("Quality"))      order3 = plasmaSearchQuery.ORDER_QUALITY;
+        String order1=plasmaSearchRankingProfile.ORDER_DATE;
+        String order2=plasmaSearchRankingProfile.ORDER_YBR;
+        String order3=plasmaSearchRankingProfile.ORDER_QUALITY;
+        if (order.startsWith("YBR"))        order1 = plasmaSearchRankingProfile.ORDER_YBR;
+        if (order.startsWith("Date"))       order1 = plasmaSearchRankingProfile.ORDER_DATE;
+        if (order.startsWith("Quality"))    order1 = plasmaSearchRankingProfile.ORDER_QUALITY;
+        if (order.indexOf("-YBR-") > 0)     order2 = plasmaSearchRankingProfile.ORDER_YBR;
+        if (order.indexOf("-Date-") > 0)    order2 = plasmaSearchRankingProfile.ORDER_DATE;
+        if (order.indexOf("-Quality-") > 0) order2 = plasmaSearchRankingProfile.ORDER_QUALITY;
+        if (order.endsWith("YBR"))          order3 = plasmaSearchRankingProfile.ORDER_YBR;
+        if (order.endsWith("Date"))         order3 = plasmaSearchRankingProfile.ORDER_DATE;
+        if (order.endsWith("Quality"))      order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
         String urlmask = "";
         if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
             urlmask = ".*";

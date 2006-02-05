@@ -112,7 +112,7 @@ public final class search {
 
         yacyCore.log.logInfo("INIT HASH SEARCH: " + squery.queryHashes + " - " + squery.wantedResults + " links");
         long timestamp1 = System.currentTimeMillis();
-        plasmaSearchRankingProfile rankingProfile = new plasmaSearchRankingProfile(new String[]{plasmaSearchQuery.ORDER_YBR, plasmaSearchQuery.ORDER_DATE, plasmaSearchQuery.ORDER_QUALITY});
+        plasmaSearchRankingProfile rankingProfile = new plasmaSearchRankingProfile(new String[]{plasmaSearchRankingProfile.ORDER_YBR, plasmaSearchRankingProfile.ORDER_DATE, plasmaSearchRankingProfile.ORDER_QUALITY});
         plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
         plasmaSearchTimingProfile remoteTiming = null;
         plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
