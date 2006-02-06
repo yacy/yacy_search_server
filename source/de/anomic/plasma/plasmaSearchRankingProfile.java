@@ -104,9 +104,12 @@ public class plasmaSearchRankingProfile {
         String[] elts = profile.substring(1, profile.length() - 1).split(",");
         int p;
         int s = prefix.length();
+        String e;
         for (int i = 0; i < elts.length; i++) {
-            if ((s == 0) || (elts[i].startsWith(prefix)))
-                coeff.put(elts[i].substring(s, (p = elts[i].indexOf("="))), elts[i].substring(p + 1));
+            e = elts[i].trim();
+            if ((s == 0) || (e.startsWith(prefix))) {
+                coeff.put(e.substring(s, (p = e.indexOf("="))), new Integer(Integer.parseInt(e.substring(p + 1))));
+            }
         }
     }
     

@@ -12,6 +12,19 @@ picEmpty = new Image(11, 11);
 picEmpty.src = "/env/grafics/empty.gif";
 picMinus = new Image(11, 11);
 picMinus.src = "/env/grafics/minus.gif";
+function checker(name, z1, z2) {
+  if (z1 == z2) {
+    document.write("<input type=\"radio\" name=\"" + name + "\" value=\"" + z2 + "\" checked>");
+  } else {
+    document.write("<input type=\"radio\" name=\"" + name + "\" value=\"" + z2 + "\">");
+  }
+}
+function checkers(name, n) {
+  for (i = 0; i < 16; i++) {
+    checker(name, n, i);
+  }
+  document.write(n);
+}
   </SCRIPT>
 <form action="DetailedSearch.html" method="get" enctype="multipart/form-data">
 <table border="0" cellpadding="5" cellspacing="0">
@@ -45,95 +58,95 @@ picMinus.src = "/env/grafics/minus.gif";
   </tr>
 
   <tr valign="center"><td class="small" colspan="2">&nbsp;</td></tr>
-  <tr valign="center" class="TableHeader"><td class="small" colspan="2">Local Ranking</td></tr>
+  <tr valign="center" class="TableHeader" width="600"><td class="small" colspan="2">Local Ranking</td></tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Entropy</td>
     <td class=small>
-      <input type="text" name="localentropy" value="#[localentropy]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localentropy", #[localentropy]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Date</td>
     <td class=small>
-      <input type="text" name="localdate" value="#[localdate]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localdate", #[localdate]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>YBR</td>
     <td class=small>
-      <input type="text" name="localybr" value="#[localybr]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localybr", #[localybr]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Position in Text</td>
     <td class=small>
-      <input type="text" name="localposintext" value="#[localposintext]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localposintext", #[localposintext]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
-    <td class=small>Word Sistance</td>
+    <td class=small>Word Distance</td>
     <td class=small>
-      <input type="text" name="localworddistance" value="#[localworddistance]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localworddistance", #[localworddistance]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Word Hit Count</td>
     <td class=small>
-      <input type="text" name="localhitcount" value="#[localhitcount]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localhitcount", #[localhitcount]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Domain Length</td>
     <td class=small>
-      <input type="text" name="localdomlength" value="#[localdomlength]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localdomlength", #[localdomlength]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>URL Length</td>
     <td class=small>
-      <input type="text" name="localurllength" value="#[localurllength]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localurllength", #[localurllength]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>URL Components</td>
     <td class=small>
-      <input type="text" name="localurlcomps" value="#[localurlcomps]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localurlcomps", #[localurlcomps]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Description Length</td>
     <td class=small>
-      <input type="text" name="localdescrlength" value="#[localdescrlength]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localdescrlength", #[localdescrlength]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Description Components</td>
     <td class=small>
-      <input type="text" name="localdescrcomps" value="#[localdescrcomps]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localdescrcomps", #[localdescrcomps]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Query appears in URL</td>
     <td class=small>
-      <input type="text" name="localqueryinurl" value="#[localqueryinurl]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localqueryinurl", #[localqueryinurl]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Query appears in Description</td>
     <td class=small>
-      <input type="text" name="localqueryindescr" value="#[localqueryindescr]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localqueryindescr", #[localqueryindescr]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>URL Component appears in Toplist</td>
     <td class=small>
-      <input type="text" name="localurlcompintoplist" value="#[localurlcompintoplist]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localurlcompintoplist", #[localurlcompintoplist]#)</script>
     </td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Description Component appears in Toplist</td>
     <td class=small>
-      <input type="text" name="localdescrcompintoplist" value="#[localdescrcompintoplist]#" size="2" maxlength="2">
+      <script type="text/javascript">checkers("localdescrcompintoplist", #[localdescrcompintoplist]#)</script>
     </td>
   </tr>
   </table>
@@ -160,8 +173,6 @@ picMinus.src = "/env/grafics/minus.gif";
 #(num-results)#
 ::
 <b>#[linkcount]#</b> results from <b>#[orderedcount]#</b> ordered links of a total number of <b>#[totalcount]#</b> known.
-&rarr; <a href="/DetailedSearch.html?search=#[former]#&Enter=Search&count=#[count]#&resource=#[resource]#&time=#[time]#&urlmaskfilter=.*#[ranking]#">Catch up more links</a>
-from 'late' peers.
 #(/num-results)#
 #(combine)#
 ::
