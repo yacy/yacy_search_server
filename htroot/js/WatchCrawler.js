@@ -2,40 +2,100 @@ function handleResponse(){
     if(http.readyState == 4){
         var response = http.responseXML;
         indexingTable=document.getElementById("indexingTable");
-        entries=response.getElementsByTagName("entry");
+		if(response != null){
+	        entries=response.getElementsByTagName("entry");
+		}
     
         //skip the Tableheade
-        row=indexingTable.firstChild.nextSibling.nextSibling;
+        row=indexingTable.firstChild.nextSibling.firstChild.nextSibling.nextSibling;
 
         while(row != null){ //delete old entries
-            indexingTable.removeChild(row);
-            row=indexingTable.firstChild.nextSibling.nextSibling;
+            indexingTable.firstChild.nextSibling.removeChild(row);
+            row=indexingTable.firstChild.nextSibling.firstChild.nextSibling.nextSibling;
         }
         
         dark=false;
         for(i=0;i<entries.length;i++){
-            row=document.createElement("tr");
+			initiator="";
+			depth="";
+			modified="";
+			anchor="";
+			url="";
+			size="";
+			hash="";
+			inProcess=false;
             
             //simply add all fields chronologically
             //TODO: add them by Name
             field=entries[i].firstChild;
             while(field != null){
-                if(field.nodeType == 1 && field.firstChild!=null && field.nodeName != "inProcess"){//Element
-                    col=document.createElement("td");
-                    text=document.createTextNode(field.firstChild.nodeValue);
-                    col.appendChild(text);
-                    row.appendChild(col);
+                if(field.nodeType == 1 && field.firstChild!=null){//Element
+					if(field.nodeName=="initiator"){
+						initiator=field.firstChild.nodeValue;
+					}else if(field.nodeName=="depth"){
+						depth=field.firstChild.nodeValue;
+					}else if(field.nodeName=="modified"){
+						modified=field.firstChild.nodeValue;
+					}else if(field.nodeName=="anchor"){
+						anchor=field.firstChild.nodeValue;
+					}else if(field.nodeName=="url"){
+						url=field.firstChild.nodeValue;
+					}else if(field.nodeName=="size"){
+						size=field.firstChild.nodeValue;
+					}else if(field.nodeName=="hash"){
+						hash=field.firstChild.nodeValue;
+					}else if(field.nodeName=="inProcess"){
+						if(field.firstChild.nodeValue=="true"){
+							inProcess=true;
+						}
+					}
                 }
                 field=field.nextSibling;
             }
-            if(dark){
+			row=createRow(initiator, depth, modified, anchor, url, size, hash);
+			//create row
+            /*col=document.createElement("td");
+            text=document.createTextNode(initiator);
+            col.appendChild(text);
+            row.appendChild(col);*/
+
+			if(inProcess){
+                row.setAttribute("class", "TableCellSummary");
+            }else if(dark){
                 row.setAttribute("class", "TableCellDark");
             }else{
                 row.setAttribute("class", "TableCellLight");
             }
-            indexingTable.appendChild(row);
+            indexingTable.firstChild.nextSibling.appendChild(row);
             dark=!dark;
         }
     }
 }
 window.setInterval("sndReq('/xml/queues/indexing_p.xml')", 5000);
+
+function createCol(content){
+	col=document.createElement("td");
+	text=document.createTextNode(content);
+	col.appendChild(text);
+	return col;
+}
+function createRow(initiator, depth, modified, anchor, url, size, hash){
+    row=document.createElement("tr");
+	row.appendChild(createCol(initiator));
+	row.appendChild(createCol(depth));
+	row.appendChild(createCol(modified));
+	row.appendChild(createCol(anchor));
+	row.appendChild(createCol(url));
+	row.appendChild(createCol(size));
+	//'<a href="IndexCreateIndexingQueue_p.html?deleteEntry='+hash+'">Delete</a>'
+
+	//create delete link
+	col=document.createElement("td");
+	link=document.createElement("a");
+	link.setAttribute("href", "IndexCreateIndexingQueue_p.html?deleteEntry="+hash);
+	text=document.createTextNode("Delete");
+	link.appendChild(text);
+	col.appendChild(link)
+	row.appendChild(col);
+	return row;
+}
