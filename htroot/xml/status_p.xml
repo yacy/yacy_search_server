@@ -1,0 +1,9 @@
+<xml version="1.0">
+<status>
+  <ppm>#[ppm]#</ppm>
+  <indexingqueue>
+    <size>#[indexingQueueSize]#</size>
+    <max>#[indexingQueueMax]#</max>
+  </indexingqueue>
+</status>
+</xml>

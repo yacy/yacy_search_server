@@ -160,6 +160,9 @@ background-color: #bbcccc;
 .TableCellLight {
 background-color: #ddeeee;
 }
+.TableCellActive {
+background-color: #ffbbaa;
+}
 .TableCellSummary {
 background-color: #ffbbaa;
 }

@@ -1,5 +1,5 @@
 <xml version="1.0">
-<indexingQueue>
+<indexingqueue>
 #{list}#
   <entry>
     <initiator>#[initiator]#</initiator>
@@ -12,5 +12,5 @@
     <inProcess>#(inProcess)#false::true#(/inProcess)#</inProcess>
   </entry>
 #{/list}#
-</indexingQueue>
+</indexingqueue>
 </xml>
