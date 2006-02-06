@@ -5,7 +5,7 @@ if [ -x `which wget` ]
 then
 	port=`cat DATA/SETTINGS/httpProxy.conf |grep "^port="|sed "s/.*=//"`
 	pw=`cat DATA/SETTINGS/httpProxy.conf |grep "^adminAccountBase64MD5="|sed "s/.*=//"`
-	wget -q -t 1 --header "Authorization: realm=$pw" http://localhost:$port/Steering.html?shutdown=true -O /dev/null
+	wget -q -t 1 --timeout=5 --header "Authorization: realm=$pw" http://localhost:$port/Steering.html?shutdown=true -O /dev/null
 
 echo "Please wait until the YaCy daemon process terminates"
 echo "You can monitor this with 'tail -f DATA/LOG/yacy00.log' and 'fuser log/yacy00.log'"
