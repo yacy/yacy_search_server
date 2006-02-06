@@ -23,6 +23,7 @@ then
 	echo "You can monitor this with 'tail -f DATA/LOG/yacy00.log' and 'fuser log/yacy00.log'"
 
 else
-	echo "Neither wget nor java could be found."
-	echo "visit http://localhost:8080/Steering.html?shutdown=true to stop YaCy or use ./killYACY.sh"
+	port=`cat DATA/SETTINGS/httpProxy.conf |grep "^port="|sed "s/.*=//"`
+	echo "Neither wget nor java could be found or are not executable."
+	echo "Visit http://localhost:$port/Steering.html?shutdown=true to stop YaCy or (in emergency case) use ./killYACY.sh"
 fi
