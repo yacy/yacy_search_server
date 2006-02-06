@@ -1,3 +1,4 @@
+DELETE_STRING="delete"
 function handleResponse(){
     if(http.readyState == 4){
         var response = http.responseXML;
@@ -87,13 +88,12 @@ function createRow(initiator, depth, modified, anchor, url, size, hash){
 	row.appendChild(createCol(anchor));
 	row.appendChild(createCol(url));
 	row.appendChild(createCol(size));
-	//'<a href="IndexCreateIndexingQueue_p.html?deleteEntry='+hash+'">Delete</a>'
 
 	//create delete link
 	col=document.createElement("td");
 	link=document.createElement("a");
 	link.setAttribute("href", "IndexCreateIndexingQueue_p.html?deleteEntry="+hash);
-	text=document.createTextNode("Delete");
+	text=document.createTextNode(DELETE_STRING);
 	link.appendChild(text);
 	col.appendChild(link)
 	row.appendChild(col);
