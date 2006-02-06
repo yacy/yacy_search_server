@@ -1,0 +1,33 @@
+# Mozilla/YACY plug-in
+
+<search 
+   name="YACY"
+   description="Anomic YACY Search"
+   method="GET"
+   action="http://#[host]#:#[port]#/index.html"
+   queryEncoding="utf-8"
+   queryCharset="utf-8"   
+>
+
+<input name="search" user>
+<input name="Enter" value="Search">
+
+<input name="count" value="10">
+<input name="order" value="YBR-Date-Quality">
+<input name="resource" value="global">
+<input name="time" value="6">
+<input name="urlmaskfilter" value=".*">
+
+
+<interpret 
+    browserResultType="result" 
+    resultListStart="<!-- resultlist start -->" 
+    resultListEnd="<!-- resultlist end -->" 
+    resultItemStart="<!-- result start -->" 
+    resultItemEnd="<!-- result end -->"
+>
+</search>
+<browser
+	update="http://#[host]#:#[port]#/YaCySearchPluginFF.src" 
+	updateIcon="http://#[host]#:#[port]#/YaCySearchPluginFF.gif" 
+	updateCheckDays="7">

@@ -1,0 +1,61 @@
+<html>
+<head>
+	<title>YaCy '#[clientname]#': Quick Crawl Link</title>
+	#%env/templates/metas.template%#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr><td>
+  <table class="Heading" border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr height="36">
+    <td width="240">
+	<a href="http://www.yacy.net">
+	<img width="52" height="33" border="0" src="/env/grafics/yacy.gif" align="top">
+	</a>
+    </td>
+    <td width="50%" align="center">
+		<div class="Headline">#[clientname]#: Firefox Search Plugin</div>
+    </td>
+    <td width="240" align="right">
+    </td>
+  </tr>
+  </table>
+</td></tr>
+</table>
+<br><br>
+
+<script type="text/javascript">
+<!--
+	function addEngine() {
+	  if ((typeof window.sidebar == "object") && (typeof window.sidebar.addSearchEngine == "function")) {
+	    window.sidebar.addSearchEngine(
+	      "http://#[host]#:#[port]#/YaCySearchPluginFF.src",
+	      "http://#[host]#:#[port]#/YaCySearchPluginFF.gif",
+	      "YaCy",
+	      "General");
+	  } else {
+	    alert("Unable to install the firefox search plugin.");
+	  }	  
+	}  
+//-->
+</script>
+
+<table style="margin-left: auto; margin-right: auto;">
+<tr>
+	<td>
+		<b>YaCy Firefox Search-Plugin Installation:</b>
+		<p>Simply click on the link shown below to integrate the YaCy Firefox Search-Plugin into your browser.</p>
+		<p>In Mozilla Firefox, you can the Search-Plugin via the search box on the toolbar.<br>In Mozilla (Seamonkey) you can access the Search-Plugin via the Sidebar or the Location Bar.</p>
+	</td>
+</tr>
+<tr>
+	<td><a href="javascript: addEngine();"><b>Install the YaCy search plugin.</b></a></td>
+</tr>
+</table>
+
+<!--
+	TODO: add a search parameter configuration dialog here ....
+//-->
+</body>
+</html>
