@@ -410,7 +410,7 @@ public final class plasmaWordIndexEntry implements Cloneable {
     public boolean isLocal() { return localflag == LT_LOCAL; }
     
     public int domlengthNormalized() {
-        return 255 * plasmaURL.domLengthEstimation(this.urlHash) / 20;
+        return 255 * plasmaURL.domLengthEstimation(this.urlHash) / 30;
     }
 
     public static void main(String[] args) {

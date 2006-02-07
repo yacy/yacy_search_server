@@ -538,7 +538,7 @@ public class plasmaURL {
     public static final int domLengthEstimation(String urlHash) {
         // generates an estimation of the original domain length
         int flagbyte = kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
-        int domLengthKey = flagbyte & 4;
+        int domLengthKey = flagbyte & 3;
         switch (domLengthKey) {
             case 0: return 4;
             case 1: return 10;

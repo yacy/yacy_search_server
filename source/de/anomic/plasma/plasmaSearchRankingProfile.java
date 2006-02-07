@@ -185,10 +185,10 @@ public class plasmaSearchRankingProfile {
 
         // apply 'common-sense' heuristic using references
         for (int j = 0; j < urlcomps.length; j++) {
-            if (topwords.contains(urlcomps[j])) ranking += 1 << ((Integer) coeff.get(URLCOMPINTOPLIST)).intValue();
+            if (topwords.contains(urlcomps[j])) ranking += 256 << ((Integer) coeff.get(URLCOMPINTOPLIST)).intValue();
         }
         for (int j = 0; j < descrcomps.length; j++) {
-            if (topwords.contains(descrcomps[j])) ranking += 1 << ((Integer) coeff.get(DESCRCOMPINTOPLIST)).intValue();
+            if (topwords.contains(descrcomps[j])) ranking += 256 << ((Integer) coeff.get(DESCRCOMPINTOPLIST)).intValue();
         }
 
         // apply query-in-result matching
@@ -198,17 +198,17 @@ public class plasmaSearchRankingProfile {
         String queryhash;
         while (shi.hasNext()) {
             queryhash = (String) shi.next();
-            if (urlcomph.contains(queryhash)) ranking += 1 << ((Integer) coeff.get(QUERYINURL)).intValue();
-            if (descrcomph.contains(queryhash)) ranking += 1 << ((Integer) coeff.get(QUERYINDESCR)).intValue();
+            if (urlcomph.contains(queryhash)) ranking += 256 << ((Integer) coeff.get(QUERYINURL)).intValue();
+            if (descrcomph.contains(queryhash)) ranking += 256 << ((Integer) coeff.get(QUERYINDESCR)).intValue();
         }
 
         // prefer short urls
-        ranking += (255 - page.url().toString().length()) << ((Integer) coeff.get(URLLENGTH)).intValue();
-        ranking += (24 - urlcomps.length) << ((Integer) coeff.get(URLCOMPS)).intValue();
+        ranking += (256 - page.url().toString().length()) << ((Integer) coeff.get(URLLENGTH)).intValue();
+        ranking += (32 - urlcomps.length) << ((Integer) coeff.get(URLCOMPS)).intValue();
 
         // prefer long descriptions
-        ranking += (40 - Math.abs(40 - Math.min(40, page.descr().length()))) << ((Integer) coeff.get(DESCRLENGTH)).intValue();
-        ranking += (8 - Math.abs(8 - Math.min(8, descrcomps.length))) << ((Integer) coeff.get(DESCRCOMPS)).intValue();
+        ranking += (255 * page.descr().length() / 80) << ((Integer) coeff.get(DESCRLENGTH)).intValue();
+        ranking += (255 * (12 - Math.abs(12 - Math.min(12, descrcomps.length))) / 12) << ((Integer) coeff.get(DESCRCOMPS)).intValue();
 
         return ranking;
     }
