@@ -7,16 +7,10 @@
 	<img width="52" height="33" border="0" src="/env/grafics/yacy.gif" align="top">
         </a>
     </td>
-    <td width="100%" align="center">
-      <table border="0" cellspacing="0" cellpadding="0" width="100%">
-         <tr><td height="4"></td></tr>
-         <tr><td valign="top">
-             <div align="center" class="Headline">
+    <td width="100%" align="center" class="Headline">
+      <h1>
 		YaCy&nbsp;-&nbsp;Distributed&nbsp;Web&nbsp;Indexing&nbsp;-&nbsp;Administration
-             </div>
-             </center>
-         </td></tr>
-      </table>
+      </h1>      
     </td>
     <td width="60" align="right">
     &nbsp;
