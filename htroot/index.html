@@ -13,6 +13,8 @@ picEmpty = new Image(11, 11);
 picEmpty.src = "/env/grafics/empty.gif";
 picMinus = new Image(11, 11);
 picMinus.src = "/env/grafics/minus.gif";
+picPlus = new Image(11, 11);
+picPlus.src = "/env/grafics/plus.gif";
   </SCRIPT>
 
   <br>
@@ -150,11 +152,13 @@ from 'late' peers.
 #{results}#
 <!-- link begin -->
 <p style="border-bottom:1px #000 dashed; padding-bottom: 1em;">
+<a href="/Bookmarks_p.html?edit=&title=#[description]#&description=&url=#[url]#&tags=" onMouseover="document.plus_#[urlhexhash]#.src=picPlus.src" onMouseout="document.plus_#[urlhexhash]#.src=picEmpty.src">
+<img src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" name="plus_#[urlhexhash]#" border="0"></a>&nbsp;
+<b><font color="#4070a0">#[description]#</font></b><br>
 <a href="#[delete]#" onMouseover="document.minus_#[urlhexhash]#.src=picMinus.src" onMouseout="document.minus_#[urlhexhash]#.src=picEmpty.src">
-<img src="/env/grafics/empty.gif" title="delete" alt="delete" name="minus_#[urlhexhash]#" border="0"></a>&nbsp;<b><font color="#4070a0">#[description]#</font></b><br>
-#(snippet)#::<img src="/env/grafics/empty.gif">&nbsp;<i>#[text]#</i><br>#(/snippet)#
-<img src="/env/grafics/empty.gif">&nbsp;<a href="#[url]#">#[urlname]#</a><br>
-<img src="/env/grafics/empty.gif"><font color="#007050">&nbsp;#[date]#</font> | <font color="#007050">YBR-#[ybr]#</font> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
+<img src="/env/grafics/empty.gif" title="delete" alt="delete" name="minus_#[urlhexhash]#" border="0"></a>&nbsp;
+#(snippet)#::<i>#[text]#</i><br>#(/snippet)#<a href="#[url]#">#[urlname]#</a><br>
+<img src="/env/grafics/empty.gif">&nbsp;<font color="#007050">&nbsp;#[date]#</font> | <font color="#007050">YBR-#[ybr]#</font> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
 </p>
 <!-- link end -->
 #{/results}#

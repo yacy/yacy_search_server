@@ -98,16 +98,25 @@ public class Bookmarks_p {
         }
         if(post.containsKey("edit")){
             String urlHash=(String) post.get("edit");
-            bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
-            prop.put("edit", 1); //edit mode
-            prop.put("title", bookmark.getTitle());
-            prop.put("description", bookmark.getDescription());
-            prop.put("url", bookmark.getUrl());
-            prop.put("tags", bookmark.getTags());
-            if(bookmark.getPublic()){
-                prop.put("public", 1);
-            }else{
+            if (urlHash.length() == 0) {
+                prop.put("edit", 0); // create mode
+                prop.put("title", (String) post.get("title"));
+                prop.put("description", (String) post.get("description"));
+                prop.put("url", (String) post.get("url"));
+                prop.put("tags", (String) post.get("tags"));
                 prop.put("public", 0);
+            } else {
+                    bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
+                    prop.put("edit", 1); // edit mode
+                    prop.put("title", bookmark.getTitle());
+                    prop.put("description", bookmark.getDescription());
+                    prop.put("url", bookmark.getUrl());
+                    prop.put("tags", bookmark.getTags());
+                    if (bookmark.getPublic()) {
+                        prop.put("public", 1);
+                    } else {
+                        prop.put("public", 0);
+                    }
             }
         }
         if(post.containsKey("delete")){

@@ -28,6 +28,7 @@
   <tr><td class="MenuHeader">&nbsp;Global&nbsp;Index</td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/index.html" accesskey="s" class="MenuItemLink">Search Page</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/DetailedSearch.html" class="MenuItemLink">Detailed Search</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Bookmarks_p.html" class="MenuItemLink">Bookmarks</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/Help.html" class="MenuItemLink">Help</a></td></tr>
 <!--<tr><td class="MenuItem">&nbsp;<a href="/Statistics.html" class="MenuItemLink">Statistics</a></td></tr>-->
   <tr><td class="MenuSpacer"></td></tr>
