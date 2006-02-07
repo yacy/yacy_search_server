@@ -301,7 +301,9 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         // check permission/granted access
         String authorization = (String) requestHeader.get(httpHeader.AUTHORIZATION);
         String adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "");
-        if ((path.endsWith("_p.html")) && (adminAccountBase64MD5.length() != 0)) {
+        int pos = path.lastIndexOf(".");
+        
+        if ((path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") && (adminAccountBase64MD5.length() != 0)) {
             // authentication required
 
             if (authorization == null) {
