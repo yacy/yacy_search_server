@@ -62,7 +62,7 @@ public abstract class kelondroAbstractOrder implements kelondroOrder {
         } else if ((a instanceof String) && (b instanceof String)) {
             return compare(((String) a).getBytes(), ((String) b).getBytes());
         } else
-            throw new IllegalArgumentException("Object type or Object type combination not supported");
+            throw new IllegalArgumentException("Object type or Object type combination not supported: a=" + a + ", b=" + b);
     }
 
 }
