@@ -403,7 +403,7 @@ public final class yacy {
                     if(! lang.equals("") && ! lang.equals("default") ){ //locale is used
                         String currentRev = "";
                         try{
-                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File( sb.getConfig("htRootPath", "htroot"), "locale/"+lang+"/version" ))));
+                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File( sb.getConfig("htLocalePath", "DATA/HTDOCS/locale"), lang+"/version" ))));
                             currentRev = br.readLine();
                             br.close();
                         }catch(IOException e){
