@@ -142,9 +142,9 @@ public class Bookmarks_p {
     prop.put("taglist", count);
     count=0;
     if(!tagName.equals("")){
-        it=switchboard.bookmarksDB.getBookmarksIterator(tagName);
+        it=switchboard.bookmarksDB.getBookmarksIterator(tagName, true);
     }else{
-        it=switchboard.bookmarksDB.getBookmarksIterator();
+        it=switchboard.bookmarksDB.getBookmarksIterator(true);
     }
     bookmarksDB.Bookmark bookmark;
     //skip the first entries (display next page)

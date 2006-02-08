@@ -258,25 +258,38 @@ public class bookmarksDB {
             return null;
         }
     }
-    public Iterator getBookmarksIterator(){
+    public Iterator getBookmarksIterator(boolean priv){
         TreeSet set=new TreeSet(new bookmarkComparator());
         Iterator it=bookmarkIterator(true);
         Bookmark bm;
         while(it.hasNext()){
             bm=(Bookmark)it.next();
-            set.add(bm.getUrlHash());
+            if(priv || bm.getPublic()){
+            	set.add(bm.getUrlHash());
+            }
         }
         return set.iterator();
     }
-    public Iterator getBookmarksIterator(String tagName){
+    public Iterator getBookmarksIterator(String tagName, boolean priv){
         TreeSet set=new TreeSet(new bookmarkComparator());
         Tag tag=getTag(tagName);
         Vector hashes=new Vector();
         if(tag != null){
             hashes=getTag(tagName).getUrlHashes();
         }
-        set.addAll(hashes);
-        return set.iterator();
+        if(priv){
+        	set.addAll(hashes);
+        }else{
+        	Iterator it=hashes.iterator();
+        	Bookmark bm;
+        	while(it.hasNext()){
+        		bm=new Bookmark((String) it.next());
+        		if(bm.getPublic()){
+        			set.add(bm.getUrlHash());
+        		}
+        	}
+        }
+    	return set.iterator();
     }
     public boolean removeBookmark(String urlHash){
         Bookmark bookmark = getBookmark(urlHash);
