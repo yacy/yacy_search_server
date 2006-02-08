@@ -20,7 +20,7 @@
 #Thank you for your help!
 <!-- lang -->default\(english\)==Deutsch
 <!-- author -->==Roland Ramthun, Oliver Wunder, Jan Sandbrink
-<!-- maintainer -->==<admin@yacy-forum.de>
+<!-- maintainer -->==&lt;admin@yacy-forum.de&gt;
 
 #-----------------------------------------------------------
 #File: Blacklist_p.html
@@ -427,7 +427,7 @@ Intention/Description==Absicht/Beschreibung
 Recently started remote crawls, finished:==Gerade gestartetes Indexieren auf anderen Peers, beendet:
 Remote Crawling Peers:==Remote-Crawl Peers:
 No remote crawl peers availible.==Kein Peer zum Remote-Crawl erreichbar.
-peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.==
+peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
 Idle Peers==unt&auml;tige Peers
 Busy Peers==Besch&auml;tigte Peers
 \#\(withQuery\)\#no::yes\#\(/withQuery\)\#==#(withQuery)#nein::ja#(/withQuery)#
