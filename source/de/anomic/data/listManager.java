@@ -257,7 +257,9 @@ public class listManager {
             }
         }else{
             ret = new Vector();
-            ret.add(string);
+            if(!string.equals("")){
+            	ret.add(string);
+            }
         }
         return ret;
     }
