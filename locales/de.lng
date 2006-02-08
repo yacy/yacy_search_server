@@ -1092,7 +1092,7 @@ Port Forwarding \(optional\)==Port Weiterleitung (optional)
 General Settings==Generelle Einstellungen
 <b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.</b>==<b>Ihr Peer Name erzeugt auch eine '.yacy'-domain die von jedem Nutzer dieses Proxys erreicht werden kann.</b>
 Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.==Mittels Ihrer 'Home Page' und 'File Share'-Zonen haben Sie auch eine Plattform, um Inhalte f&uuml;r Ihre neue Domain bereit zu stellen.
-staticIP ==statische IP 
+staticIP ==statische IP
 <b>The staticIP can help that your peer can be reached by other peers in case that your==<b>Die statische IP kann helfen Ihren Peer f&uuml;r andere Peers erreichbar zu machen, falls Sie
 peer is behind a firewall or proxy.</b>==hinter einer Firewall oder einem Proxy sind.</b>
 
@@ -1589,6 +1589,8 @@ Communication / Publication==Kommunikation / Publikation
 Peer&nbsp;Control==Peer Verwaltung
 The Project==Das Projekt
 Search Page==Suchseite
+Detailed Search==Detailsuche
+>Bookmarks==>Lesezeichen
 >Help==>Hilfe
 Index Create==Index erzeugen
 Index Control==Index verwalten
