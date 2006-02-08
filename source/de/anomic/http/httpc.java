@@ -1679,6 +1679,9 @@ do upload
             while ((b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false)) != null) {
                 if (b.length == 0) break;
                 buffer = new String(b);
+                if(buffer.charAt(0)==' '){ //fix for " pragma: no-cache" (IIS specific?)
+                	buffer=buffer.substring(1, buffer.length());
+                }
                 //System.out.println("#H#" + buffer); // debug
                 if (buffer.charAt(0) <= 32) {
                     // use old entry
