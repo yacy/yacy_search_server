@@ -59,6 +59,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public final class crawlReceipt {
 
@@ -110,6 +111,10 @@ public final class crawlReceipt {
 
         */
         
+        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
+        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
+                
+        
         if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
             // no yacy connection / unknown peers
             prop.put("delay", "3600");
@@ -134,7 +139,7 @@ public final class crawlReceipt {
                 switchboard.urlPool.noticeURL.remove(newUrlHash);
                 switchboard.urlPool.noticeURL.remove(oldUrlHash); 
                 
-                log.logInfo("crawlReceipt: RECEIVED RECEIPT for URL " + receivedUrlhash + ":" + entry.url());
+                log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + receivedUrlhash + ":" + entry.url());
             }
             
             // ready for more

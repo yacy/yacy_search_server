@@ -173,5 +173,22 @@ background-color: #eeeeee;
 background-color: #eeeeee;
 }
 .bookmarkTags{
-color: blue;
+color: #007050;
+font-weight:bold;
+text-decoration:none;
+white-space:nowrap;
+}
+.bookmarkTitle{
+line-height: 120%;
+color: #4070a0;
+font-size:17px;
+font-weight:bold;
+text-decoration:none;
+}
+.bookmarkDescription{
+font-style:normal;
+}
+.bookmarkAction{
+color: #999999;
+text-decoration:none;
 }

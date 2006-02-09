@@ -9,37 +9,66 @@
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
 <br><br>
-<h2>Bookmarks</h2>
+<h2>Bookmarks</h2></p>
 <!-- todo: div layout? -->
-<table border="1" width="100%" height="100%">
-<tr><td colspan="2">
-#(edit)#<h3>Add Bookmark</h3>::<h3>Edit Bookmark</h3>#(/edit)#
+
 <form action="Bookmarks_p.html" method="GET">
-Url: <input type="text" name="url" value="#[url]#" onblur="loadTitle()"><br />
-Title: <input type="text" name="title" value="#[title]#"><br />
-Description: <input type="text" name="description" value="#[description]#"><br />
-Tags (comma separated): <input type="text" name="tags" value="#[tags]#"><br />
-Public: <select name="public">
-<option value="public" #(public)#::selected#(/public)#>yes</option>
-<option value="private" #(public)#selected::#(/public)#>no</option>
-</select>
-#(edit)#
-<input type="submit" name="add" value="create">
-::
-<input type="submit" name="add" value="edit">
-#(/edit)#
+<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2">#(edit)#<h3>Add Bookmark</h3>::<h3>Edit Bookmark</h3>#(/edit)#</td>
+	</tr>
+	<tr>
+		<td>Url:</td>
+		<td width="100%"><input type="text" name="url" value="#[url]#" onblur="loadTitle()" size="80"></td>
+	</tr>
+	<tr>
+		<td>Title:</td>
+		<td><input type="text" name="title" value="#[title]#" size="80"></td>
+	</tr>
+	<tr>
+		<td>Description:</td>
+		<td><input type="text" name="description" value="#[description]#" size="80"></td>
+	</tr>
+	<tr>
+		<td><nobr>Tags (comma separated):</nobr></td>
+		<td><input type="text" name="tags" value="#[tags]#" size="80"></td>
+	</tr>
+	<tr>
+		<td>Public:</td>
+		<td><select name="public">
+			<option value="public" #(public)#::selected#(/public)#>yes</option>
+			<option value="private" #(public)#selected::#(/public)#>no</option>
+			</select>
+		</td>
+	<tr>
+		<td colspan="1">
+		#(edit)#
+		<input type="submit" name="add" value="create">
+		::
+		<input type="submit" name="add" value="edit">
+		#(/edit)#
+		</td>
+	</tr>
+</table>
 </form>
-</td></tr>
-<tr height="100%">
-<td width="100%">
+<hr>
+
+<table width="100%" height="100%">
+	<tr>
+		<td style="padding-bottom: 10px;"><h3>Bookmark List</h3></td>
+		<td><h3>Tags</h3></td>
+	</tr>
+<tr>
+	<td width="100%">
 #{bookmarks}#
+<p style="border-bottom:1px #000 dashed; padding-bottom: 1em;">
 #(public)#<img src="env/grafics/bookmarkpriv.gif" width="16" height="16" alt="private">::<img src="env/grafics/bookmarkpub.gif" width="16" height="16" alt="public">#(/public)#
-<a href="#[link]#" target="_blank">#[title]#</a><br />
-#[description]#<br />
-Tagged with <span class="bookmarkTags">#{tags}#<a href="Bookmarks_p.html?tag=#[tag]#">#[tag]#</a> #{/tags}#</span><br />
-<a href="Bookmarks_p.html?edit=#[hash]#">Edit</a> /
-<a href="Bookmarks_p.html?delete=#[hash]#">Delete</a>
-<p />
+<a href="#[link]#" target="_blank" class="bookmarkTitle">#[title]#</a><br />
+<span class="bookmarkDescription">#[description]#</span><br />
+Tagged with |&nbsp;#{tags}#<a href="Bookmarks_p.html?tag=#[tag]#" class="bookmarkTags">#[tag]#</a> | #{/tags}#<br />
+<a href="Bookmarks_p.html?edit=#[hash]#" class="bookmarkAction">Edit</a> /
+<a href="Bookmarks_p.html?delete=#[hash]#" class="bookmarkAction">Delete</a>
+</p>
 #{/bookmarks}#
 <p />
 #(next-page)#
@@ -47,13 +76,11 @@ Tagged with <span class="bookmarkTags">#{tags}#<a href="Bookmarks_p.html?tag=#[t
 #(/next-page)#
 &nbsp;
 </td>
-<td valign="top">
-<a href="Bookmarks_p.html">All</a><br />
+<td valign="top" style="padding-left: 5px; border-left-style: solid; border-left-width: 1px; border-left-color: black;">
+<a href="Bookmarks_p.html" class="bookmarkTags">All</a><br />
 #{taglist}#
-<a href="Bookmarks_p.html?tag=#[tag]#">#[name]#</a><br />
+<a href="Bookmarks_p.html?tag=#[tag]#" class="bookmarkTags">#[name]#</a><br />
 #{/taglist}#
-
-&nbsp;
 </td>
 </tr>
 </table>
