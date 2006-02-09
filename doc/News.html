@@ -54,24 +54,43 @@ globalheader();
 
 <p>Release list in reverse order:
 
-<!--
-<br><p>
+<br><p>v0.43_20060210_xxxx
 <ul>
-<li></li>
+<li>New Features</li>
   <ul>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
+  <li>Better result ranking due to many new ranking attributes</li>
+  <li>nearby-search in general and nearby-1 for queries enclosed in doublequotes</li>
+  <li>new DetailedSearch page for ranking testing</li>
+  <li>new Bookmark manager; search results can easily be added to bookmark collection</li>
+  <li>UTF-8 encoded charachters can now be used in built-in wiki and messages</li>
+  <li>new import for external crawling queues</li>
+  <li>additional Shutdownmethod to run YaCy as Windows Service</li>
   </ul>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
+<li>Feature Enhancements</li>
+  <ul>
+  <li>more templates in yacy wiki</li>
+  <li>the yacy httpd is now able to set cookies using custom http headers</li>
+  <li>beautification of many pages</li>
+  <li>added majority voting for peer type decision, reduced the number of peer pings sent out</li>
+  <li>new database handling of index entries, less io overhead</li>
+  <li>re-organization of HTCACHE files, better file structure</li>
+  <li>many architecture changes to enhance database speed, stability and capacity to hold new ranking parameters</li>
+  <li>backup-option for lost assortment files and import interface for these files</li>
+  <li>enhancements for index distribution (better selection, less blocking, bugfixes)</li>
+  <li>security bugfixes: UserDB Passwordcheck, YBR transmission protocol path selection</li>
+  <li>enhanced German translations</li>
+  </ul>
+<li>Important Bugfixes</li>
+  <ul>
+  <li>database bugfixes (iteration, peer-listing)</li>
+  <li>several thread-lockings solved</li>
+  <li>enhanced html cleaner for better security in wiki and messages</li>
+  <li>Memorysettings now also working for Windows</li>
+  <li>some Filemodes were set wrong, fixed</li>
+  <li>minor bug-fix in Cache for some rare URLs</li>
+  <li>Translations work now with readonly htroot</li>
+  </ul>
 </ul>
--->
 
 <br><p>v0.42_20051216_1219
 <ul>

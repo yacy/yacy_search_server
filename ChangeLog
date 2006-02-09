@@ -1,6 +1,11 @@
 YaCy: The Search Engine with the friendly whale
 
-version 0.43svn
+version 0.43
+	* UPDATED: new database handling of index entry objects, less IO overhead (Orbiter)
+	* ADDED: many new ranking attributes and handling routines (Orbiter)
+	* ADDED: new DetailedSearch page for ranking testing (Orbiter)
+	* ADDED: nearby-search in general and nearby-1 for queries enclosed in doublequotes (Orbiter)
+	* FIXED: YBR transmission protocol path selection security bug (Orbiter)
 	* ADDED: additional Shutdownmethod to run YaCy as Windows Service (theli)
 	* ADDED: possibility to import the crawling queue (theli)
 	* UPDATED: German translations (NN, rramthun)
