@@ -1,9 +1,10 @@
-// /xml.bookmarks/tags/get_p.java
+// /xml.bookmarks/tags/get.java
 // -------------------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
+//
 // last major change: 27.12.2005
 // this file is contributed by Alexander Schier
 //
@@ -54,13 +55,13 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class get_p {
+public class get {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
 
-        Iterator it=switchboard.bookmarksDB.getTagIterator(true);
+        Iterator it=switchboard.bookmarksDB.getTagIterator(false);
         int count=0;
         bookmarksDB.Tag tag;
         while(it.hasNext()){

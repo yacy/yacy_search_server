@@ -148,7 +148,7 @@ public class Bookmarks_p {
             start=Integer.parseInt((String) post.get("start"));
         }
     }
-    Iterator it=switchboard.bookmarksDB.tagIterator(true);
+    Iterator it=switchboard.bookmarksDB.getTagIterator(true);
     int count=0;
     bookmarksDB.Tag tag;
     while(it.hasNext()){

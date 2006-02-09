@@ -283,13 +283,30 @@ public class bookmarksDB {
         	Iterator it=hashes.iterator();
         	Bookmark bm;
         	while(it.hasNext()){
-        		bm=new Bookmark((String) it.next());
+        		bm=getBookmark((String) it.next());
         		if(bm.getPublic()){
         			set.add(bm.getUrlHash());
         		}
         	}
         }
     	return set.iterator();
+    }
+    public Iterator getTagIterator(boolean priv){
+    	if(priv){
+    		return tagIterator(true);
+    	}else{
+    		Vector publicTags=new Vector();
+    		Iterator it=tagIterator(true);
+    		Tag tag;
+    		while(it.hasNext()){
+    			tag=(Tag)it.next();
+    			//this may be slow...
+    			if(tag.hasPublicItems()){
+    				publicTags.add(tag);
+    			}
+    		}
+    		return publicTags.iterator();
+    	}
     }
     public boolean removeBookmark(String urlHash){
         Bookmark bookmark = getBookmark(urlHash);
@@ -374,6 +391,13 @@ public class bookmarksDB {
         }
         public Vector getUrlHashes(){
             return listManager.string2vector((String)this.mem.get(URL_HASHES));
+        }
+        public boolean hasPublicItems(){
+        	Iterator it=getBookmarksIterator(this.getTagName(), false);
+        	if(it.hasNext()){
+        		return true;
+        	}
+        	return false;
         }
         public void add(String urlHash){
             String urlHashes = (String)mem.get(URL_HASHES);
