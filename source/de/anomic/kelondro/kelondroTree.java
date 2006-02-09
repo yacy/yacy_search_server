@@ -249,6 +249,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 child = 0;
                 found = false;
                 int c;
+                byte[] k;
                 TreeSet visitedNodeKeys = new TreeSet(loopDetectionOrder); // to detect loops
                 // System.out.println("Starting Compare Loop in Database " + filename); // debug
                 while (thisHandle != null) {
@@ -263,7 +264,8 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     if (thenode == null) {
                         throw new kelondroException(filename, "kelondroTree.Search.process: thenode==null");
                     }
-                    if (visitedNodeKeys.contains(thenode.getKey())) {
+                    k = thenode.getKey();
+                    if ((k != null) & (visitedNodeKeys.contains(k))) {
                         // we have loops in the database.
                         // to fix this, all affected nodes must be patched
                         thenode.setOHByte(magic, (byte) 1);
