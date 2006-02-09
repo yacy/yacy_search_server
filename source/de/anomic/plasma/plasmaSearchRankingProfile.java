@@ -81,21 +81,21 @@ public class plasmaSearchRankingProfile {
         // set some default-values
         this.order = null;
         this.coeff = new HashMap();
-        coeff.put(ENTROPY, new Integer(4));
-        coeff.put(DATE, new Integer(8));
-        coeff.put(YBR, new Integer(12));
-        coeff.put(POSINTEXT, new Integer(11));
-        coeff.put(WORDDISTANCE, new Integer(10));
-        coeff.put(HITCOUNT, new Integer(9));
+        coeff.put(ENTROPY, new Integer(0));
+        coeff.put(DATE, new Integer(4));
+        coeff.put(YBR, new Integer(8));
+        coeff.put(POSINTEXT, new Integer(7));
+        coeff.put(WORDDISTANCE, new Integer(6));
+        coeff.put(HITCOUNT, new Integer(5));
         coeff.put(DOMLENGTH, new Integer(8));
-        coeff.put(URLLENGTH, new Integer(10));
-        coeff.put(URLCOMPS, new Integer(10));
-        coeff.put(DESCRLENGTH, new Integer(10));
-        coeff.put(DESCRCOMPS, new Integer(10));
+        coeff.put(URLLENGTH, new Integer(15));
+        coeff.put(URLCOMPS, new Integer(15));
+        coeff.put(DESCRLENGTH, new Integer(4));
+        coeff.put(DESCRCOMPS, new Integer(4));
         coeff.put(QUERYINURL, new Integer(13));
-        coeff.put(QUERYINDESCR, new Integer(14));
-        coeff.put(URLCOMPINTOPLIST, new Integer(12));
-        coeff.put(DESCRCOMPINTOPLIST, new Integer(11));
+        coeff.put(QUERYINDESCR, new Integer(8));
+        coeff.put(URLCOMPINTOPLIST, new Integer(3));
+        coeff.put(DESCRCOMPINTOPLIST, new Integer(2));
     }
     
     public plasmaSearchRankingProfile(String prefix, String profile) {
