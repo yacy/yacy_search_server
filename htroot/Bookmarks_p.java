@@ -45,6 +45,7 @@
 // javac -classpath .:../Classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -52,6 +53,7 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -107,17 +109,33 @@ public class Bookmarks_p {
                 prop.put("public", 0);
             } else {
                     bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
-                    prop.put("edit", 1); // edit mode
-                    prop.put("title", bookmark.getTitle());
-                    prop.put("description", bookmark.getDescription());
-                    prop.put("url", bookmark.getUrl());
-                    prop.put("tags", bookmark.getTags());
-                    if (bookmark.getPublic()) {
-                        prop.put("public", 1);
+                    if (bookmark == null) {
+                        // try to get the bookmark from the LURL database
+                        try {
+                            plasmaCrawlLURL.Entry urlentry = switchboard.urlPool.loadedURL.getEntry(urlHash, null);
+                            prop.put("edit", 0); // create mode
+                            prop.put("title", urlentry.descr());
+                            prop.put("description", urlentry.descr());
+                            prop.put("url", urlentry.url());
+                            prop.put("tags", "");
+                            prop.put("public", 0);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     } else {
-                        prop.put("public", 0);
+                        // get from the bookmark database
+                        prop.put("edit", 1); // edit mode
+                        prop.put("title", bookmark.getTitle());
+                        prop.put("description", bookmark.getDescription());
+                        prop.put("url", bookmark.getUrl());
+                        prop.put("tags", bookmark.getTags());
+                        if (bookmark.getPublic()) {
+                            prop.put("public", 1);
+                        } else {
+                            prop.put("public", 0);
+                        }
                     }
-            }
+                }
         }
         if(post.containsKey("delete")){
             String urlHash=(String) post.get("delete");
