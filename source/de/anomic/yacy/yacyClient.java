@@ -878,7 +878,7 @@ public final class yacyClient {
         for (int i = 0; i < uhs.length; i++) {
             urls[i] = (plasmaCrawlLURL.Entry) urlCache.get(uhs[i]);
             if (urls[i] == null) {
-                yacyCore.log.logWarning("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
+                yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
             }
         }
         
