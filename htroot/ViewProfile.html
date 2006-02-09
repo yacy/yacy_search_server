@@ -17,59 +17,67 @@ The requested peer is not known or a potential peer, what means the peer's profi
 The peer #[peername]# is not online.
 ::
 <br><h3>This is #[peername]#'s Profile:</h3>
-<table border="1">
+<table border="0" cellpadding="5" cellspacing="1">
+
 <tr>
-<td>Name</td>
-<td>#(name)#&nbsp;::#[value]##(/name)#</td>
+<td colspan="2" valign="top" class="TableHeader">&nbsp;</td>
 </tr>
 <tr>
-<td>Nick Name</td>
-<td>#(nickname)#&nbsp;::#[value]##(/nickname)#</td>
+<td valign="top" class="TableCellDark">Name</td>
+<td valign="top" class="TableCellLight">#(name)#&nbsp;::#[value]##(/name)#</td>
 </tr>
 <tr>
-<td>Homepage</td>
-<td>#(homepage)#&nbsp;::<a href="#[value]#">#[value]#</a>#(/homepage)#</td>
+<td valign="top" class="TableCellDark">Nick Name</td>
+<td valign="top" class="TableCellLight">#(nickname)#&nbsp;::#[value]##(/nickname)#</td>
 </tr>
 <tr>
-<td>eMail</td>
-<td>#(email)#&nbsp;::<a href="mailto:#[value]#">#[value]#</a>#(/email)#</td>
+<td valign="top" class="TableCellDark">Homepage</td>
+<td valign="top" class="TableCellLight">#(homepage)#&nbsp;::<a href="#[value]#">#[value]#</a>#(/homepage)#</td>
+</tr>
+<tr>
+<td valign="top" class="TableCellDark">eMail</td>
+<td valign="top" class="TableCellLight">#(email)#&nbsp;::<a href="mailto:#[value]#">#[value]#</a>#(/email)#</td>
 </tr>
 
 <tr>
-<td colspan="2">&nbsp;</td>
+<td colspan="2"  valign="top" class="TableHeader">&nbsp;</td>
 </tr>
 
 <tr>
-<td>ICQ</td>
-<td>#(icq)#&nbsp;::<img src=http://web.icq.com/whitepages/online?icq=#[value]#&img=5"><a href="http://wwp.icq.com/scripts/search.dll?to=#[value]#">#[value]#</a>#(/icq)#</td>
+<td valign="top" class="TableCellDark">ICQ</td>
+<td valign="top" class="TableCellLight">#(icq)#&nbsp;::<img src=http://web.icq.com/whitepages/online?icq=#[value]#&img=5"><a href="http://wwp.icq.com/scripts/search.dll?to=#[value]#">#[value]#</a>#(/icq)#</td>
 </tr>
 <tr>
-<td>Jabber</td>
-<td>#(jabber)#&nbsp;::#[value]##(/jabber)#</td>
+<td valign="top" class="TableCellDark">Jabber</td>
+<td valign="top" class="TableCellLight">#(jabber)#&nbsp;::#[value]##(/jabber)#</td>
 </tr>
 <tr>
-<td>Yahoo!</td>
-<td>#(yahoo)#&nbsp;::#[value]##(/yahoo)#</td>
+<td valign="top" class="TableCellDark">Yahoo!</td>
+<td valign="top" class="TableCellLight">#(yahoo)#&nbsp;::#[value]##(/yahoo)#</td>
 </tr>
 <tr>
-<td>MSN</td>
-<td>#(msn)#&nbsp;::#[value]##(/msn)#</td>
-</tr>
-
-<tr>
-<td colspan="2">&nbsp;</td>
+<td valign="top" class="TableCellDark">MSN</td>
+<td valign="top" class="TableCellLight">#(msn)#&nbsp;::#[value]##(/msn)#</td>
 </tr>
 
 <tr>
-<td>Comment</td>
-<td>#(comment)#&nbsp;::#[value]##(/comment)#</td>
+<td colspan="2"  valign="top" class="TableHeader">&nbsp;</td>
+</tr>
+
+<tr>
+<td valign="top" class="TableCellDark">Comment</td>
+<td valign="top" class="TableCellLight">#(comment)#&nbsp;::#[value]##(/comment)#</td>
 </tr>
 #{other}#
 <tr>
-<td>#[key]#</td>
-<td>#[value]#</td>
+<td valign="top" class="TableCellDark">#[key]#</td>
+<td valign="top" class="TableCellLight">#[value]#</td>
 </tr>
 #{/other}#
+<tr>
+<td colspan="2" valign="top" class="TableHeader">&nbsp;</td>
+</tr>
+
 </table>
 #(/success)#
 #%env/templates/footer.template%#

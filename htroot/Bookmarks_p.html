@@ -15,33 +15,34 @@
 <form action="Bookmarks_p.html" method="GET">
 <table border="0" width="100%" height="100%">
 	<tr>
-		<td colspan="2">#(edit)#<h3>Add Bookmark</h3>::<h3>Edit Bookmark</h3>#(/edit)#</td>
+		<td colspan="2" colspan="2" valign="top" class="TableHeader">#(edit)#<h3>Add Bookmark</h3>::<h3>Edit Bookmark</h3>#(/edit)#</td>
 	</tr>
 	<tr>
-		<td>Url:</td>
-		<td width="100%"><input type="text" name="url" value="#[url]#" onblur="loadTitle()" size="80"></td>
+		<td valign="top" class="TableCellDark">Url:</td>
+		<td valign="top" class="TableCellLight" width="100%"><input type="text" name="url" value="#[url]#" onblur="loadTitle()" size="80"></td>
 	</tr>
 	<tr>
-		<td>Title:</td>
-		<td><input type="text" name="title" value="#[title]#" size="80"></td>
+		<td valign="top" class="TableCellDark">Title:</td>
+		<td valign="top" class="TableCellLight"><input type="text" name="title" value="#[title]#" size="80"></td>
 	</tr>
 	<tr>
-		<td>Description:</td>
-		<td><input type="text" name="description" value="#[description]#" size="80"></td>
+		<td valign="top" class="TableCellDark">Description:</td>
+		<td valign="top" class="TableCellLight"><input type="text" name="description" value="#[description]#" size="80"></td>
 	</tr>
 	<tr>
-		<td><nobr>Tags (comma separated):</nobr></td>
-		<td><input type="text" name="tags" value="#[tags]#" size="80"></td>
+		<td valign="top" class="TableCellDark"><nobr>Tags (comma separated):</nobr></td>
+		<td class="TableCellLight"><input type="text" name="tags" value="#[tags]#" size="80"></td>
 	</tr>
 	<tr>
-		<td>Public:</td>
-		<td><select name="public">
+		<td valign="top" class="TableCellDark">Public:</td>
+		<td valign="top" class="TableCellLight"><select name="public">
 			<option value="public" #(public)#::selected#(/public)#>yes</option>
 			<option value="private" #(public)#selected::#(/public)#>no</option>
 			</select>
 		</td>
-	<tr>
-		<td colspan="1">
+         </tr>
+         <tr>
+		<td colspan="2" colspan="2" valign="top" class="TableHeader" width="100%">
 		#(edit)#
 		<input type="submit" name="add" value="create">
 		::
