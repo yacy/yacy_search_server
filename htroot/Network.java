@@ -94,6 +94,9 @@ public class Network {
             // create own peer info
             yacySeed seed = yacyCore.seedDB.mySeed;
             if (yacyCore.seedDB.mySeed != null){ //our Peer
+                // update seed info
+                yacyCore.peerActions.updateMySeed();
+                
                 long links;
                 long words;
                 try {
