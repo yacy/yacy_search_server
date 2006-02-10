@@ -91,7 +91,12 @@ public class ViewProfile {
                 // read profile from other peer
                 HashMap profile = yacyClient.getProfile(seed);
                 yacyCore.log.logInfo("fetched profile:" + profile);
-                Iterator i = profile.entrySet().iterator();
+                Iterator i;
+                if(profile != null){
+                	i = profile.entrySet().iterator();
+                }else{
+                	i = (new ArrayList()).iterator();
+                }
                 Map.Entry entry;
 		//all known keys which should be set as they are
 		ArrayList knownKeys = new ArrayList();
