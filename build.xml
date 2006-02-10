@@ -393,6 +393,7 @@
 		<fileset dir=".">
 	    	<include name="readme.txt"/>
 		    <include name="gpl.txt"/>
+		    <include name="ChangeLog"/>
 	  	</fileset>	
   	</copy>
 	<copy todir="${release_main}/doc">

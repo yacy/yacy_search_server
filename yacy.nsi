@@ -6,7 +6,7 @@
 ;last major change: 22.07.2005
 Name "YaCy"
 
-OutFile "yacy_v0.42_20051216_1219.exe"
+OutFile "yacy_v0.43_20060210_1593.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -19,7 +19,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.42(Build 20051216) on your computer. Select which optional things you want to be installed."
+ComponentText "This will install YaCy v0.43(Build 20060210) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old Version was installed into another locAtion(eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install in to:"
@@ -50,6 +50,7 @@ Section "Binaries (required)"
 	File "superseed.txt"
 	File "yacy.stopwords"
 	File "yacy.logging"
+	File "ChangeLog"
 	
 	#lib
 	SetOutPath "$INSTDIR\lib"
@@ -110,8 +111,11 @@ Section "Binaries (required)"
 	File "htroot\htdocsdefault\*.html"
 	File "htroot\htdocsdefault\*.class"
 
-    SetOutPath "$INSTDIR\ranking"
-    File /r "ranking\*"
+	SetOutPath "$INSTDIR\ranking"
+	File /r "ranking\*"
+
+	SetOutPath "$INSTDIR\doc"
+	File "doc\This_is_a_test_if_the_archive_file_containing_YaCy_was_unpacked_correctly_If_not_please_use_gnu_tar_instead.txt"
 
 	SetOutPath $INSTDIR
 
