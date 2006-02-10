@@ -110,16 +110,18 @@ function createRow(initiator, depth, modified, anchor, url, size, hash){
 	row.appendChild(createCol(depth));
 	row.appendChild(createCol(modified));
 	row.appendChild(createCol(anchor));
-	row.appendChild(createCol(url));
+	row.appendChild(createLinkCol(url, url));
 	row.appendChild(createCol(size));
-
-	//create delete link
+	row.appendChild(createLinkCol("IndexCreateIndexingQueue_p.html?deleteEntry="+hash, DELETE_STRING));
+	return row;
+}
+function createLinkCol(url, linktext){
 	col=document.createElement("td");
 	link=document.createElement("a");
-	link.setAttribute("href", "IndexCreateIndexingQueue_p.html?deleteEntry="+hash);
-	text=document.createTextNode(DELETE_STRING);
+	link.setAttribute("href", url);
+	link.setAttribute("target", "_blank");
+	text=document.createTextNode(linktext);
 	link.appendChild(text);
 	col.appendChild(link)
-	row.appendChild(col);
-	return row;
+	return col
 }
