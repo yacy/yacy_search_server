@@ -84,6 +84,7 @@ public class kelondroRecords {
     // constants
     private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
     private static final long memBlock = 500000; // do not fill cache further if the amount of available memory is less that this
+    public final static boolean useWriteBuffer = false;
     
     // memory calculation
     private static final int element_in_cache = 52;
@@ -238,8 +239,11 @@ public class kelondroRecords {
                       int[] columns, int FHandles, int txtProps, int txtPropWidth, long writeBufferSize) throws IOException {
 
         // create new Chunked IO
-        this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), writeBufferSize, 30000 + random.nextLong() % 30000);
-        //this.entryFile = new kelondroRAIOChunks(ra, ra.name());
+        if (useWriteBuffer) {
+            this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), writeBufferSize, 30000 + random.nextLong() % 30000);
+        } else {
+            this.entryFile = new kelondroRAIOChunks(ra, ra.name());
+        }
         
         // store dynamic run-time data
         this.overhead = ohbytec + 4 * ohhandlec;
@@ -368,8 +372,11 @@ public class kelondroRecords {
 
     private void init(kelondroRA ra, long writeBufferSize) throws IOException {
         // read from Chunked IO
-        this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), writeBufferSize, 30000 + random.nextLong() % 30000);
-        //this.entryFile = new kelondroRAIOChunks(ra, ra.name());
+        if (useWriteBuffer) {
+            this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), writeBufferSize, 30000 + random.nextLong() % 30000);
+        } else {
+            this.entryFile = new kelondroRAIOChunks(ra, ra.name());
+        }
 
         // read dynamic variables that are back-ups of stored values in file;
         // read/defined on instantiation
