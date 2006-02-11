@@ -364,13 +364,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         plasmaWordIndexEntryContainer container = null;
         long time;
         synchronized (cache) {
-            // get the container
-            container = (plasmaWordIndexEntryContainer) this.cache.get(key);
+            // get the container and remove it from cache
+            container = (plasmaWordIndexEntryContainer) this.cache.remove(key);
             if (container == null) return 0; // flushing of nonexisting key
-            time = getUpdateTime(key);
+            time = container.updated();
 
-            // remove it from the cache
-            cache.remove(key);
+            // remove it from the MScoreClusters
             hashScore.deleteScore(key);
             hashDate.deleteScore(key);
         }
@@ -411,9 +410,15 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         
         plasmaWordIndexEntryContainer container;
         synchronized (cache) {
+            container = new plasmaWordIndexEntryContainer(wordHash);
             // get from cache
-            container = (plasmaWordIndexEntryContainer) cache.get(wordHash);
-            if (container == null) container = new plasmaWordIndexEntryContainer(wordHash);
+            // We must not use the container from cache to store everything we find, as that
+            // container remains linked to in the cache and might be changed later while the
+            // returned container is still in use.
+            // e.g. indexTransfer might keep this container for minutes while several new pages
+            // could be added to the index, possibly with the same words that have been selected
+            // for transfer
+            container.add((plasmaWordIndexEntryContainer) cache.get(wordHash));
 
             // get from assortments
             container.add(assortmentCluster.getFromAll(wordHash, (maxTime < 0) ? -1 : maxTime / 2));
