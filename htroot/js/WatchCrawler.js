@@ -19,23 +19,28 @@ window.setInterval("requestStatus()", 5000);
 window.setInterval("requestIndexingQueue()", 5000);
 
 
-
-//window.setInterval("sndReq('/xml/queues/indexing_p.xml')", 5000);
-
-
 function handleStatus(){
     if(statusRPC.readyState != 4){
 		return;
 	}
 	var statusResponse = statusRPC.responseXML;
-	indexingqueue=statusResponse.getElementsByTagName("indexingqueue")[0];
+	/*indexingqueue=statusResponse.getElementsByTagName("indexingqueue")[0];
 	indexingqueue_size=indexingqueue.firstChild.nextSibling;
 	indexingqueue_max=indexingqueue_size.nextSibling.nextSibling;
-	ppm=statusResponse.getElementsByTagName("ppm")[0];
-	document.getElementById("indexingqueuesize").firstChild.nodeValue=indexingqueue_size.firstChild.nodeValue;
-	document.getElementById("indexingqueuemax").firstChild.nodeValue=indexingqueue_max.firstChild.nodeValue;
-	document.getElementById("ppm").firstChild.nodeValue=ppm.firstChild.nodeValue;
+	ppm=statusResponse.getElementsByTagName("ppm")[0];*/
+	status=getFirstChild(statusResponse.firstChild, "status")
+	indexingqueue=getFirstChild(status, "indexingqueue");
+
+	indexingqueue_size=getValue(getFirstChild(indexingqueue, "size"));
+	indexingqueue_max=getValue(getFirstChild(indexingqueue, "max"));
+	ppm=getValue(getFirstChild(status, "ppm"));
+	
+	document.getElementById("indexingqueuesize").firstChild.nodeValue=indexingqueue_size;
+	document.getElementById("indexingqueuemax").firstChild.nodeValue=indexingqueue_max;
+	document.getElementById("ppm").firstChild.nodeValue=ppm;
 }
+
+
 function handleIndexingQueue(){
     if(indexingQueueRPC.readyState != 4){
 		return;
@@ -56,46 +61,17 @@ function handleIndexingQueue(){
         
     dark=false;
     for(i=0;i<entries.length;i++){
-		initiator="";
-		depth="";
-		modified="";
-		anchor="";
-		url="";
-		size="";
-		hash="";
+		initiator=getValue(getFirstChild(entries[i], "initiator"));
+		depth=getValue(getFirstChild(entries[i], "depth"));
+		modified=getValue(getFirstChild(entries[i], "modified"));
+		anchor=getValue(getFirstChild(entries[i], "anchor"));
+		url=getValue(getFirstChild(entries[i], "url"));
+		size=getValue(getFirstChild(entries[i], "size"));
+		hash=getValue(getFirstChild(entries[i], "hash"));
 		inProcess=false;
-           
-        field=entries[i].firstChild;
-        while(field != null){
-            if(field.nodeType == 1 && field.firstChild!=null){//Element
-				if(field.nodeName=="initiator"){
-					initiator=field.firstChild.nodeValue;
-				}else if(field.nodeName=="depth"){
-					depth=field.firstChild.nodeValue;
-				}else if(field.nodeName=="modified"){
-					modified=field.firstChild.nodeValue;
-				}else if(field.nodeName=="anchor"){
-					anchor=field.firstChild.nodeValue;
-				}else if(field.nodeName=="url"){
-					url=field.firstChild.nodeValue;
-				}else if(field.nodeName=="size"){
-					size=field.firstChild.nodeValue;
-				}else if(field.nodeName=="hash"){
-					hash=field.firstChild.nodeValue;
-				}else if(field.nodeName=="inProcess"){
-					if(field.firstChild.nodeValue=="true"){
-						inProcess=true;
-					}
-				}
-            }
-            field=field.nextSibling;
-        }
-		/*field=getChild(entries[i], "initiator");
-		if(field!=null){
-			initiator=field.firstChild.nodeValue;
+		if(getValue(getFirstChild(entries[i], "inProcess"))=="true"){
+			inProcess=true;
 		}
-		//...
-		*/
 		
 		row=createIndexingRow(initiator, depth, modified, anchor, url, size, hash);
 		//create row
@@ -110,10 +86,30 @@ function handleIndexingQueue(){
         dark=!dark;
     }
 }
-function getChild(element, childname){
+function getValue(element){
+	if(element == null){
+		return "";
+	}else if(element.nodeType == 3){ //Textnode
+		return element.nodeValue;
+	}else if(element.firstChild != null && element.firstChild.nodeType == 3){
+		return element.firstChild.nodeValue;
+	}
+	return "";
+}
+function getFirstChild(element, childname){
 	child=element.firstChild;
 	while(child != null){
-		if(child.nodeName==childname){
+		if(child.nodeType!=3 && (child.nodeName==childname || childname=="")){
+			return child;
+		}
+		child=child.nextSibling;
+	}
+	return null;
+}
+function getNextSibling(element, childname){
+	child=element.nextSibling;
+	while(child != null){
+		if(child.nodeType==1 && (child.nodeName==childname || childname=="")){
 			return child;
 		}
 		child=child.nextSibling;
