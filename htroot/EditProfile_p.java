@@ -94,8 +94,10 @@ public class EditProfile_p {
                 profile.store(fileOut , null );
 
                 // generate a news message
-//              HashMap map = new HashMap();
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("prfleupd", profile));
+                Properties news = profile;
+                news.remove("comment");
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("prfleupd", news));
+                //yacyCore.newsPool.publishMyNews(new yacyNewsRecord("prfleupd", profile));
             } catch(IOException e) {
             } finally {
                 if (fileOut != null) try { fileOut.close(); } catch (Exception e) {}
