@@ -1244,16 +1244,23 @@ public final class httpd implements serverHandler {
         if (header == null) header = new httpHeader();
         
         try {                        
+            if ((httpStatusText == null)||(httpStatusText.length()==0)) {
+                if (httpVersion.equals(httpHeader.HTTP_VERSION_1_0) && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
+                    httpStatusText = (String) httpHeader.http1_0.get(Integer.toString(httpStatusCode));
+                else if (httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
+                    httpStatusText = (String) httpHeader.http1_1.get(Integer.toString(httpStatusCode));
+                else httpStatusText = "Unknown";
+            }
+            
+            StringBuffer headerStringBuffer = new StringBuffer(560);
+            
+            // write status line
+            headerStringBuffer.append(httpVersion).append(" ")
+                              .append(Integer.toString(httpStatusCode)).append(" ")
+                              .append(httpStatusText).append("\r\n");            
+            
             // "HTTP/0.9" does not have a header in the response
-            if (! httpVersion.toUpperCase().equals("HTTP/0.9")) {
-                if ((httpStatusText == null)||(httpStatusText.length()==0)) {
-                    if (httpVersion.equals(httpHeader.HTTP_VERSION_1_0) && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
-                        httpStatusText = (String) httpHeader.http1_0.get(Integer.toString(httpStatusCode));
-                    else if (httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
-                        httpStatusText = (String) httpHeader.http1_1.get(Integer.toString(httpStatusCode));
-                    else httpStatusText = "Unknown";
-                }
-                
+            if (! httpVersion.toUpperCase().equals("HTTP/0.9")) {                
                 // prepare header
                 if (!header.containsKey(httpHeader.DATE)) 
                     header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
@@ -1274,14 +1281,7 @@ public final class httpd implements serverHandler {
                 header.put(httpHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT,conProp.getProperty(httpHeader.CONNECTION_PROP_KEEP_ALIVE_COUNT));
                 header.put(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE));
                 header.put(httpHeader.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(httpHeader.CONNECTION_PROP_PREV_REQUESTLINE));
-                
-                
-                StringBuffer headerStringBuffer = new StringBuffer(560);
-                
-                // write status line
-                headerStringBuffer.append(httpVersion).append(" ")
-                .append(Integer.toString(httpStatusCode)).append(" ")
-                .append(httpStatusText).append("\r\n");
+                  
                 //read custom headers
                 /*
                 if (requestProperties != null)     
@@ -1319,12 +1319,14 @@ public final class httpd implements serverHandler {
                         //System.out.println("#" + key + ": " + value);
                     }            
                 }
-                // end header
-                headerStringBuffer.append("\r\n");
-                
-                // sending headers to the client
-                respond.write(headerStringBuffer.toString().getBytes());
             }
+            // end header
+            headerStringBuffer.append("\r\n");
+            
+            // sending headers to the client
+            respond.write(headerStringBuffer.toString().getBytes());            
+            
+            // flush stream
             respond.flush();
             
             conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_HEADER,header);
