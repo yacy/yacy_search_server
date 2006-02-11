@@ -52,11 +52,12 @@ function handleIndexingQueue(){
 	}
     
     //skip the Tableheade
-    row=indexingTable.firstChild.nextSibling.firstChild.nextSibling.nextSibling;
+	row=getNextSibling(getFirstChild(getFirstChild(indexingTable, "tbody"), "tr"), "tr")
+    //row=indexingTable.firstChild.nextSibling.firstChild.nextSibling.nextSibling;
 
     while(row != null){ //delete old entries
-        indexingTable.firstChild.nextSibling.removeChild(row);
-        row=indexingTable.firstChild.nextSibling.firstChild.nextSibling.nextSibling;
+        getFirstChild(indexingTable, "").removeChild(row);
+		row=getNextSibling(getFirstChild(getFirstChild(indexingTable, "tbody"), "tr"), "tr")
     }
         
     dark=false;
@@ -82,7 +83,7 @@ function handleIndexingQueue(){
         }else{
             row.setAttribute("class", "TableCellLight");
         }
-        indexingTable.firstChild.nextSibling.appendChild(row);
+        getFirstChild(indexingTable, "tbody").appendChild(row);
         dark=!dark;
     }
 }
@@ -97,9 +98,12 @@ function getValue(element){
 	return "";
 }
 function getFirstChild(element, childname){
+	if(element == null){
+		return null;
+	}
 	child=element.firstChild;
 	while(child != null){
-		if(child.nodeType!=3 && (child.nodeName==childname || childname=="")){
+		if(child.nodeType!=3 && (child.nodeName.toLowerCase()==childname.toLowerCase() || childname=="")){
 			return child;
 		}
 		child=child.nextSibling;
@@ -107,9 +111,12 @@ function getFirstChild(element, childname){
 	return null;
 }
 function getNextSibling(element, childname){
+	if(element == null){
+		return null;
+	}
 	child=element.nextSibling;
 	while(child != null){
-		if(child.nodeType==1 && (child.nodeName==childname || childname=="")){
+		if(child.nodeType==1 && (child.nodeName.toLowerCase()==childname.toLowerCase() || childname=="")){
 			return child;
 		}
 		child=child.nextSibling;
