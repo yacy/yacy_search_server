@@ -1,6 +1,7 @@
 DELETE_STRING="delete"
 
 var statusRPC;
+var indexingQueueRPC;
 function requestStatus(){
 	statusRPC=createRequestObject()
 	statusRPC.open('get', '/xml/status_p.xml');
@@ -23,6 +24,9 @@ window.setInterval("requestIndexingQueue()", 5000);
 
 
 function handleStatus(){
+    if(statusRPC.readyState != 4){
+		return;
+	}
 	var statusResponse = statusRPC.responseXML;
 	indexingqueue=statusResponse.getElementsByTagName("indexingqueue")[0];
 	indexingqueue_size=indexingqueue.firstChild.nextSibling;
@@ -33,10 +37,13 @@ function handleStatus(){
 	document.getElementById("ppm").firstChild.nodeValue=ppm.firstChild.nodeValue;
 }
 function handleIndexingQueue(){
+    if(indexingQueueRPC.readyState != 4){
+		return;
+	}
 	var indexingQueueResponse = indexingQueueRPC.responseXML;
-    indexingTable=document.getElementById("indexingTable");
+	indexingTable=document.getElementById("indexingTable");
 	if(indexingQueueResponse != null){
-	    entries=indexingQueueResponse.getElementsByTagName("entry");
+		entries=indexingQueueResponse.getElementsByTagName("entry");
 	}
     
     //skip the Tableheade
@@ -83,7 +90,14 @@ function handleIndexingQueue(){
             }
             field=field.nextSibling;
         }
-		row=createRow(initiator, depth, modified, anchor, url, size, hash);
+		/*field=getChild(entries[i], "initiator");
+		if(field!=null){
+			initiator=field.firstChild.nodeValue;
+		}
+		//...
+		*/
+		
+		row=createIndexingRow(initiator, depth, modified, anchor, url, size, hash);
 		//create row
 		if(inProcess){
             row.setAttribute("class", "TableCellActive");
@@ -96,6 +110,16 @@ function handleIndexingQueue(){
         dark=!dark;
     }
 }
+function getChild(element, childname){
+	child=element.firstChild;
+	while(child != null){
+		if(child.nodeName==childname){
+			return child;
+		}
+		child=child.nextSibling;
+	}
+	return null;
+}
 
 
 function createCol(content){
@@ -104,7 +128,7 @@ function createCol(content){
 	col.appendChild(text);
 	return col;
 }
-function createRow(initiator, depth, modified, anchor, url, size, hash){
+function createIndexingRow(initiator, depth, modified, anchor, url, size, hash){
     row=document.createElement("tr");
 	row.appendChild(createCol(initiator));
 	row.appendChild(createCol(depth));
