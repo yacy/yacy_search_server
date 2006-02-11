@@ -121,9 +121,19 @@ public class QuickCrawlLink_p {
         boolean xsstopw        = post.get("xsstopw", "").equals("on");
         boolean xdstopw        = post.get("xdstopw", "").equals("on");
         boolean xpstopw        = post.get("xpstopw", "").equals("on");
+  
+        String escapedTitle = (title==null)?"unknown":title.replaceAll("&","&amp;")
+                                   .replaceAll("<", "&lt;")
+                                   .replaceAll(">", "&gt;")
+                                   .replaceAll("\"", "&quot;");
         
-        prop.put("mode_url",(crawlingStart==null)?"unknown":crawlingStart);
-        prop.put("mode_title",(title==null)?"unknown":title);
+        String escapedURL = (crawlingStart==null)?"unknown":crawlingStart.replaceAll("&","&amp;")
+                                         .replaceAll("<", "&lt;")
+                                         .replaceAll(">", "&gt;")
+                                         .replaceAll("\"", "&quot;");        
+
+        prop.put("mode_url",escapedURL);
+        prop.put("mode_title",escapedTitle);
         
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
