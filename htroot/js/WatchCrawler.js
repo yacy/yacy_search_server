@@ -28,12 +28,12 @@ function handleStatus(){
 	indexingqueue_size=indexingqueue.firstChild.nextSibling;
 	indexingqueue_max=indexingqueue_size.nextSibling.nextSibling;
 	ppm=statusResponse.getElementsByTagName("ppm")[0];*/
-	status=getFirstChild(statusResponse.firstChild, "status")
-	indexingqueue=getFirstChild(status, "indexingqueue");
+	statusTag=getFirstChild(getFirstChild(statusResponse, ""), "status")
+	indexingqueue=getFirstChild(statusTag, "indexingqueue");
 
 	indexingqueue_size=getValue(getFirstChild(indexingqueue, "size"));
 	indexingqueue_max=getValue(getFirstChild(indexingqueue, "max"));
-	ppm=getValue(getFirstChild(status, "ppm"));
+	ppm=getValue(getFirstChild(statusTag, "ppm"))
 	
 	document.getElementById("indexingqueuesize").firstChild.nodeValue=indexingqueue_size;
 	document.getElementById("indexingqueuemax").firstChild.nodeValue=indexingqueue_max;
