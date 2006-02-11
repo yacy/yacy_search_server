@@ -77,7 +77,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     private final serverLog log;
     private final plasmaWordIndexAssortmentCluster assortmentCluster;
     private int assortmentBufferSize; //kb
-    private final flush flushThread;
+    //private final flush flushThread;
 
     // calculated constants
     private static String maxKey;
@@ -93,7 +93,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         if (!(assortmentClusterPath.exists())) assortmentClusterPath.mkdirs();
 
         // create flushing thread
-        flushThread = new flush();
+        //flushThread = new flush();
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
@@ -117,7 +117,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
 
         // start permanent flushing
-        flushThread.start();
+        //flushThread.start();
     }
 
     private void dump(int waitingSeconds) throws IOException {
@@ -223,10 +223,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return urlCount;
     }
 
+    /*
     public void intermission(long pause) {
         flushThread.intermission(pause);
     }
-
+    */
+    
     // cache settings
 
     public int maxURLinWordCache() {
@@ -272,13 +274,45 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         if (cacheIndex != null) size += cacheIndex.size();
         return size;
     }
+
+    public Iterator wordHashes(String startWordHash, boolean up, boolean rot) {
+        return wordHashes(startWordHash, plasmaWordIndex.RL_WORDFILES, up, rot);
+    }
     
-    public Iterator wordHashes(String startWordHash, boolean up) {
-        // Old convention implies rot = true
-        //return new rotatingWordHashes(startWordHash, up);
-        return wordHashes(startWordHash, up, true);
+    public Iterator wordHashes(String startWordHash, int resourceLevel, boolean up, boolean rot) {
+        synchronized (cache) {
+        if (!(up)) throw new RuntimeException("plasmaWordIndexCache.wordHashes can only count up");
+        if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) {
+            return cache.tailMap(startWordHash).keySet().iterator();
+        }
+        /*
+        if (resourceLevel == plasmaWordIndex.RL_FILECACHE) {
+            
+        }
+        */
+        if (resourceLevel == plasmaWordIndex.RL_ASSORTMENTS) {
+            return new kelondroMergeIterator(
+                            cache.tailMap(startWordHash).keySet().iterator(),
+                            assortmentCluster.hashConjunction(startWordHash, true, rot),
+                            kelondroNaturalOrder.naturalOrder,
+                            true);
+        }
+        if (resourceLevel == plasmaWordIndex.RL_WORDFILES) {
+            return new kelondroMergeIterator(
+                            new kelondroMergeIterator(
+                                     cache.tailMap(startWordHash).keySet().iterator(),
+                                     assortmentCluster.hashConjunction(startWordHash, true, rot),
+                                     kelondroNaturalOrder.naturalOrder,
+                                     true),
+                            backend.wordHashes(startWordHash, true, false),
+                            kelondroNaturalOrder.naturalOrder,
+                            true);
+        }
+        return null;
+        }
     }
 
+    /*
     public Iterator wordHashes(String startWordHash, boolean up, boolean rot) {
         // here we merge 3 databases into one view:
         // - the RAM Cache
@@ -293,11 +327,13 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                                  assortmentCluster.hashConjunction(startWordHash, true, rot),
                                  kelondroNaturalOrder.naturalOrder,
                                  true),
-                        backend.wordHashes(startWordHash, true),
+                        backend.wordHashes(startWordHash, true, false),
                         kelondroNaturalOrder.naturalOrder,
                         true);
     }
-
+    */
+    
+    /*
     private final class flush extends Thread {
         boolean terminate;
         long intermission;
@@ -332,7 +368,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             terminate = true;
         }
     }
-
+    */
+    
     private void flushFromMem() {
         // select appropriate hash
         // we have 2 different methods to find a good hash:
@@ -484,22 +521,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
         int added = 0;
         // check cache space
-        /*
-        if (cache.size() > 0) try {
-            // pause to get space in the cache (while it is flushed)
-            long pausetime;
-            if (highPriority) {
-                if (cache.size() + 1000 >= this.maxWordsHigh) Thread.sleep(java.lang.Math.min(1000, cache.size() - this.maxWordsHigh + 1000));
-                pausetime = java.lang.Math.min(10, 2 * cache.size() / (maxWordsHigh + 1));
-            } else {
-                if (cache.size() + 1000 >= this.maxWordsLow) Thread.sleep(java.lang.Math.min(1000, cache.size() - this.maxWordsLow + 1000));
-                pausetime = java.lang.Math.min(10, 2 * cache.size() / (maxWordsLow + 1));
-            }
 
-            // slow down if we reach cache limit
-            Thread.sleep(pausetime);
-        } catch (InterruptedException e) {}
-        */
         //serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
 
         // put new words into cache
@@ -516,12 +538,19 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             }
             entries = null;
             
-            // force flush (sometimes)
-            if (System.currentTimeMillis() % 7 == 4) flushFromMem();
+            // force flush
             if (highPriority) {
-                while (cache.size() > maxWordsHigh) flushFromMem();
+                if (cache.size() > maxWordsHigh) {
+                while (cache.size() + 500 > maxWordsHigh) {
+                    try { Thread.sleep(10); } catch (InterruptedException e) { }
+                    flushFromMem();
+                }}
             } else {
-                while (cache.size() > maxWordsLow) flushFromMem();
+                if (cache.size() > maxWordsLow) {
+                while (cache.size() + 500 > maxWordsLow) {
+                    try { Thread.sleep(10); } catch (InterruptedException e) { }
+                    flushFromMem();
+                }}
             }
         }
         return added;
@@ -544,8 +573,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     public void close(int waitingSeconds) {
         // stop permanent flushing
-        flushThread.terminate();
-        try {flushThread.join(6000);} catch (InterruptedException e) {}
+        //flushThread.terminate();
+        //try {flushThread.join(6000);} catch (InterruptedException e) {}
 
         // dump cache
         try {

@@ -203,9 +203,10 @@ public final class plasmaWordIndexDistribution {
             String startPointHash = selectTransferStart();
             this.log.logFine("Selected hash " + startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash));
             
-            Object[] selectResult = selectTransferContainers(startPointHash, indexCount);
+            Object[] selectResult = selectTransferContainers(startPointHash, indexCount/3, indexCount);
             indexContainers = (plasmaWordIndexEntryContainer[]) selectResult[0];
             HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry
+            //int refcount = ((Integer) selectResult[2]).intValue();
             
             if ((indexContainers == null) || (indexContainers.length == 0)) {
                 this.log.logFine("No index available for index transfer, hash start-point " + startPointHash);
@@ -319,21 +320,37 @@ public final class plasmaWordIndexDistribution {
         return startPointHash;
     }
 
-    Object[] /* of {plasmaWordIndexEntryContainer[], HashMap(String, plasmaCrawlLURL.Entry)}*/
-           selectTransferContainers(String hash, int count) {
+    public Object[] /* of {plasmaWordIndexEntryContainer[], HashMap(String, plasmaCrawlLURL.Entry)}*/
+           selectTransferContainers(String hash, int mincount, int maxcount) {
+
+        Object[] selectResult = selectTransferContainersResource(hash, plasmaWordIndex.RL_RAMCACHE, maxcount);
+        int refcount = ((Integer) selectResult[2]).intValue();
+        if (refcount >= mincount) {
+            log.logFine("DHT selection from RAM: " + refcount + " entries");
+            return selectResult;
+        }
+        selectResult = selectTransferContainersResource(hash, plasmaWordIndex.RL_WORDFILES, maxcount);
+        refcount = ((Integer) selectResult[2]).intValue();
+        log.logFine("DHT selection from FILE: " + refcount + " entries");
+        return selectResult;
+    }
+    
+    private Object[] /* of {plasmaWordIndexEntryContainer[], HashMap(String, plasmaCrawlLURL.Entry)}*/
+           selectTransferContainersResource(String hash, int resourceLevel, int maxcount) {
         // the hash is a start hash from where the indexes are picked
-        ArrayList tmpContainers = new ArrayList(count);
+        ArrayList tmpContainers = new ArrayList(maxcount);
         String nexthash = "";
-        try {
-            Iterator wordHashIterator = this.wordIndex.wordHashes(hash, true, true);
+        synchronized (this.wordIndex) {try {
+            Iterator wordHashIterator = this.wordIndex.wordHashes(hash, resourceLevel, true, true);
             plasmaWordIndexEntryContainer indexContainer;
             Iterator urlIter;
             plasmaWordIndexEntry indexEntry;
             plasmaCrawlLURL.Entry lurl;
+            int refcount = 0;
             
             final HashMap knownURLs = new HashMap();
             while (
-                    (count > 0) &&
+                    (maxcount > refcount) &&
                     (wordHashIterator.hasNext()) &&
                     ((nexthash = (String) wordHashIterator.next()) != null) && 
                     (nexthash.trim().length() > 0) &&
@@ -346,7 +363,7 @@ public final class plasmaWordIndexDistribution {
                     try {
                         urlIter = indexContainer.entries();
                         // iterate over indexes to fetch url entries and store them in the urlCache
-                        while ((urlIter.hasNext()) && (count > 0)) {
+                        while ((urlIter.hasNext()) && (maxcount > refcount)) {
                             indexEntry = (plasmaWordIndexEntry) urlIter.next();
                             try {
                                 lurl = this.urlPool.loadedURL.getEntry(indexEntry.getUrlHash(), indexEntry);
@@ -356,7 +373,7 @@ public final class plasmaWordIndexDistribution {
                                     this.wordIndex.removeEntries(nexthash, new String[]{indexEntry.getUrlHash()}, true);
                                 } else {
                                     knownURLs.put(indexEntry.getUrlHash(), lurl);
-                                    count--;
+                                    refcount++;
                                 }
                             } catch (IOException e) {
                                 notBoundCounter++;
@@ -381,10 +398,11 @@ public final class plasmaWordIndexDistribution {
             }
             // transfer to array
             plasmaWordIndexEntryContainer[] entryContainers = (plasmaWordIndexEntryContainer[]) tmpContainers.toArray(new plasmaWordIndexEntryContainer[tmpContainers.size()]);
-            return new Object[]{entryContainers, knownURLs};
+            return new Object[]{entryContainers, knownURLs, new Integer(refcount)};
         } catch (kelondroException e) {
             this.log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
             return new Object[]{new plasmaWordIndexEntity[0], new HashMap(0)};
+        }
         }
     }
 
@@ -800,9 +818,10 @@ public final class plasmaWordIndexDistribution {
                     
                     // selecting 500 words to transfer
                     this.status = "Running: Selecting chunk " + iteration;
-                    Object[] selectResult = selectTransferContainers(this.startPointHash, this.chunkSize);
+                    Object[] selectResult = selectTransferContainers(this.startPointHash, this.chunkSize/3, this.chunkSize);
                     newIndexContainers = (plasmaWordIndexEntryContainer[]) selectResult[0];                                        
                     HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry
+                    //int refcount = ((Integer) selectResult[2]).intValue();
                     
                     /* If we havn't selected a word chunk this could be because of
                      * a) no words are left in the index

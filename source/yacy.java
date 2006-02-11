@@ -836,7 +836,7 @@ public final class yacy {
             long globalStart = System.currentTimeMillis(), wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
             String wordChunkStartHash = "------------", wordChunkEndHash;
             
-            Iterator importWordHashIterator = importWordIndex.wordHashes(wordChunkStartHash, true, true);
+            Iterator importWordHashIterator = importWordIndex.wordHashes(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, true, true);
             while (importWordHashIterator.hasNext()) {
                 
                 // testing if import process was aborted
@@ -945,7 +945,7 @@ public final class yacy {
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)(rt.maxMemory()-rt.totalMemory())-5*1024*1024;
             plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, cacheMem, log);
-            Iterator wordHashIterator = wordIndex.wordHashes("------------", true, true);
+            Iterator wordHashIterator = wordIndex.wordHashes("------------", plasmaWordIndex.RL_WORDFILES, true, true);
             
             String wordhash;
             long urlCounter = 0, wordCounter = 0;
@@ -1332,7 +1332,7 @@ public final class yacy {
             Iterator WordHashIterator = null;
             if (resource.equals("all")) {
                 WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, log);
-                WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, true, false);
+                WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, true, false);
             } else if (resource.equals("assortments")) {
                 plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, log);
                 WordHashIterator = assortmentCluster.hashConjunction(wordChunkStartHash, true, false);
@@ -1342,7 +1342,7 @@ public final class yacy {
                 WordHashIterator = assortment.hashes(wordChunkStartHash, true, false);
             } else if (resource.equals("words")) {
                 plasmaWordIndexClassicDB fileDB = new plasmaWordIndexClassicDB(homeDBroot, log);
-                WordHashIterator = fileDB.wordHashes(wordChunkStartHash, true);
+                WordHashIterator = fileDB.wordHashes(wordChunkStartHash, true, false);
             }
             int counter = 0;
             String wordHash = "";

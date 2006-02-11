@@ -831,11 +831,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 return false; // nothing to do
             }
 
+            /*
             if (wordIndex.wordCacheRAMSize() + 1000 > (int) getConfigLong("wordCacheMaxLow", 8000)) {
                 log.logFine("deQueue: word index ram cache too full (" + ((int) getConfigLong("wordCacheMaxLow", 8000) - wordIndex.wordCacheRAMSize()) + " slots left); dismissed to omit ram flush lock");
                 return false;
             }
-
+            */
+            
             int stackCrawlQueueSize;
             if ((stackCrawlQueueSize = sbStackCrawlThread.size()) >= stackCrawlSlots) {
                 log.logFine("deQueue: too many processes in stack crawl thread queue, dismissed to protect emergency case (" + "stackCrawlQueue=" + stackCrawlQueueSize + ")");

@@ -60,6 +60,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverObjects;
@@ -287,7 +288,7 @@ public class IndexControl_p {
 
         // generate list
         if (post.containsKey("keyhashsimilar")) {
-            final Iterator hashIt = switchboard.wordIndex.wordHashes(keyhash, true, true);
+            final Iterator hashIt = switchboard.wordIndex.wordHashes(keyhash, plasmaWordIndex.RL_WORDFILES, true, true);
             StringBuffer result = new StringBuffer("Sequential List of Word-Hashes:<br>");
             String hash;
             int i = 0;

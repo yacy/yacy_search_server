@@ -257,7 +257,7 @@ public final class plasmaWordIndex {
     }
 
     public void intermission(long pause) {
-        this.ramCache.intermission(pause);
+        //this.ramCache.intermission(pause);
     }
 
     public void close(int waitingBoundSeconds) {
@@ -268,18 +268,23 @@ public final class plasmaWordIndex {
         ramCache.deleteIndex(wordHash);
     }
 
-    public Iterator wordHashes(String startHash, boolean up, boolean rot) {
-        //return ramCache.wordHashes(startHash, up);
-        if (rot) return new rotatingWordIterator(up, startHash);
-        else return new correctedWordIterator(up, rot, startHash); // use correction until bug is found
+    public static final int RL_RAMCACHE    = 0;
+    public static final int RL_FILECACHE   = 1;
+    public static final int RL_ASSORTMENTS = 2;
+    public static final int RL_WORDFILES   = 3;
+    
+    public Iterator wordHashes(String startHash, int resourceLevel, boolean up, boolean rot) {
+        if (rot) return new rotatingWordIterator(startHash, resourceLevel, up);
+        else return new correctedWordIterator(startHash, resourceLevel, up, rot); // use correction until bug is found
     }
-
+    
     private final class correctedWordIterator implements Iterator {    
         Iterator iter;
         String nextWord;
 
-        public correctedWordIterator(boolean up, boolean rotating, String firstWord) {
-            iter = ramCache.wordHashes(firstWord, up, rotating);
+        public correctedWordIterator(String firstWord, int resourceLevel, boolean up, boolean rotating) {
+            iter = ramCache.wordHashes(firstWord, resourceLevel, up, rotating);
+            try {
             nextWord = (iter.hasNext()) ? (String) iter.next() : null;
             boolean corrected = true;
             int cc = 0; // to avoid rotation loops
@@ -299,6 +304,9 @@ public final class plasmaWordIndex {
                     cc++;
                 }
             }
+            } catch (java.util.ConcurrentModificationException e) {
+                nextWord = null;
+            }
         }
 
         public void finalize() {
@@ -312,7 +320,11 @@ public final class plasmaWordIndex {
 
         public Object next() {
             String r = nextWord;
-            nextWord = (iter.hasNext()) ? (String) iter.next() : null;                        
+            try {
+                nextWord = (iter.hasNext()) ? (String) iter.next() : null;                        
+            } catch (java.util.ConcurrentModificationException e) {
+                nextWord = null;
+            }
             return r;
         }
 
@@ -323,11 +335,13 @@ public final class plasmaWordIndex {
 
     private class rotatingWordIterator implements Iterator {
         Iterator i;
+        int resourceLevel;
         boolean up;
 
-        public rotatingWordIterator(boolean up, String startWordHash) {
+        public rotatingWordIterator(String startWordHash, int resourceLevel, boolean up) {
             this.up = up;
-            i = new correctedWordIterator(up, false, startWordHash);
+            this.resourceLevel = resourceLevel;
+            i = new correctedWordIterator(startWordHash, resourceLevel, up, false);
         }
 
         public void finalize() {
@@ -337,7 +351,7 @@ public final class plasmaWordIndex {
         public boolean hasNext() {
             if (i.hasNext()) return true;
             else {
-                i = new correctedWordIterator(up, false, (up)?"------------":"zzzzzzzzzzzz");
+                i = new correctedWordIterator((up)?"------------":"zzzzzzzzzzzz", resourceLevel, up, false);
                 return i.hasNext();
             }
         }
@@ -472,7 +486,7 @@ public final class plasmaWordIndex {
         // System.out.println(new Date(reverseMicroDateDays(microDateDays(System.currentTimeMillis()))));
         
         plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, new serverLog("TESTAPP"));
-        Iterator iter = index.wordHashes("5A8yhZMh_Kmv", true, true);
+        Iterator iter = index.wordHashes("5A8yhZMh_Kmv", plasmaWordIndex.RL_WORDFILES, true, true);
         while (iter.hasNext()) {
             System.out.println("File: " + (String) iter.next());
         }

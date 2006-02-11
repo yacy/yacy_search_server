@@ -71,7 +71,8 @@ public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
         return size;
     }
     
-    public Iterator wordHashes(String startHash, boolean up) {
+    public Iterator wordHashes(String startHash, boolean up, boolean rot) {
+        if (rot) throw new UnsupportedOperationException("no rot allowed");
         return new iterateFiles(startHash, up);
     }
     
