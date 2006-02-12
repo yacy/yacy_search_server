@@ -61,7 +61,7 @@ public class Bookmarks_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
     serverObjects prop = new serverObjects();
     plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-    int MAX_COUNT=10; //TODO: Changeable per Interface
+    int max_count=10;
     String tagName="";
     int start=0;
     
@@ -167,6 +167,9 @@ public class Bookmarks_p {
         if(post.containsKey("start")){
             start=Integer.parseInt((String) post.get("start"));
         }
+        if(post.containsKey("num")){
+            max_count=Integer.parseInt((String) post.get("num"));
+        }
     }
     Iterator it=switchboard.bookmarksDB.getTagIterator(true);
     int count=0;
@@ -195,7 +198,7 @@ public class Bookmarks_p {
     Vector tags;
     Iterator tagsIt;
     int tagCount;
-    while(count<MAX_COUNT && it.hasNext()){
+    while(count<max_count && it.hasNext()){
         bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
         if(bookmark!=null){
             prop.put("bookmarks_"+count+"_link", bookmark.getUrl());
@@ -217,10 +220,23 @@ public class Bookmarks_p {
             count++;
         }
     }
+    prop.put("tag", tagName);
+    prop.put("start", start);
     if(it.hasNext()){
         prop.put("next-page", 1);
-        prop.put("next-page_start", start+10);
+        prop.put("next-page_start", start+max_count);
         prop.put("next-page_tag", tagName);
+        prop.put("next-page_num", max_count);
+    }
+    if(start >= max_count){
+    	start=start-max_count;
+    	if(start <0){
+    		start=0;
+    	}
+    	prop.put("prev-page", 1);
+    	prop.put("prev-page_start", start);
+    	prop.put("prev-page_tag", tagName);
+    	prop.put("next-page_num", max_count);
     }
     prop.put("bookmarks", count);
     return prop;
