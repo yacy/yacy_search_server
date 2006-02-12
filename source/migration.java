@@ -58,6 +58,12 @@ public class migration {
         migrateSwitchConfigSettings(sb);
         migrateWorkFiles(sb);
     }
+    public static void migrate(plasmaSwitchboard sb, int fromRev, int toRev){
+    	if(fromRev < toRev){
+    		serverLog.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
+    		migrate(sb);
+    	}
+    }
 
     public static void migrateWorkFiles(plasmaSwitchboard sb){
         File file=new File(sb.getRootPath(), "DATA/SETTINGS/wiki.db");

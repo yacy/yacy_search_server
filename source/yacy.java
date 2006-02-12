@@ -184,6 +184,8 @@ public final class yacy {
     private static void startup(String homePath, long startupMemFree, long startupMemTotal) {
         long startup = System.currentTimeMillis();
         String restart = "false";
+        int oldRev=0;
+        int newRev=0;
         
         try {
             // start up
@@ -267,7 +269,8 @@ public final class yacy {
             } catch (Exception e) {
                 serverLog.logWarning("STARTUP", buildPropFile.toString() + " not found in settings path");
             }
-
+            
+            oldRev=Integer.parseInt(sb.getConfig("svnRevision", "0"));
             try {
                 if (buildProp.containsKey("releaseNr")) {
                     // this normally looks like this: $Revision$
@@ -283,6 +286,7 @@ public final class yacy {
                         sb.setConfig("svnRevision", svrReleaseNr);
                     }
                 }
+                newRev=Integer.parseInt(sb.getConfig("svnRevision", "0"));
             } catch (Exception e) {
                 System.err.println("Unable to determine the currently used SVN revision number.");
             }
@@ -353,7 +357,7 @@ public final class yacy {
             serverFileUtils.copy(new File(htRootPath, "htdocsdefault/dir.html"), new File(shareDefaultPath, "dir.html"));
             //} catch (IOException e) {}
 
-            migration.migrate(sb);
+            migration.migrate(sb, oldRev, newRev);
             
             // start main threads
             try {

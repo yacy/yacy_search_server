@@ -697,3 +697,5 @@ httpc.nameCacheNoCachingPatterns = .*.dyndns.org, .*.dynalias.org
 #externalRedirectors
 #squid Redirector compatible
 externalRedirector=
+
+svnRevision=0
