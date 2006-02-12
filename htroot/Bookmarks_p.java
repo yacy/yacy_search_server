@@ -100,7 +100,11 @@ public class Bookmarks_p {
             if(bookmark != null){
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
-                bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_PUBLIC, (String) post.get("public"));
+                if(((String) post.get("public")).equals("public")){
+                	bookmark.setPublic(true);
+                }else{
+                	bookmark.setPublic(false);
+                }
                 bookmark.setTags(tags);
                 bookmark.setBookmarksTable();
             }else{
@@ -145,9 +149,12 @@ public class Bookmarks_p {
                         }
                     }
                 }
-        }
-        if(post.containsKey("xmlfile")){
-        	switchboard.bookmarksDB.importFromXML(new String((byte[])post.get("xmlfile$file")));
+        }else if(post.containsKey("xmlfile")){
+        	boolean isPublic=false;
+        	if(((String) post.get("public")).equals("public")){
+            	isPublic=true;
+            }
+        	switchboard.bookmarksDB.importFromXML(new String((byte[])post.get("xmlfile$file")), isPublic);
         }
 
         if(post.containsKey("delete")){

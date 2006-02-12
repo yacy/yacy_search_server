@@ -388,13 +388,13 @@ public class bookmarksDB {
         
     }
 
-    public void importFromXML(String input){
+    public void importFromXML(String input, boolean isPublic){
 
 		SAXParser parser;
 		try {
 			ByteArrayInputStream is=new ByteArrayInputStream(input.getBytes());
 			parser = SAXParserFactory.newInstance().newSAXParser();
-			xmlImportHandler handler=new xmlImportHandler();
+			xmlImportHandler handler=new xmlImportHandler(isPublic);
 			parser.parse(is, handler);
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
@@ -411,17 +411,38 @@ public class bookmarksDB {
 		}
     }
     public class xmlImportHandler extends DefaultHandler{
+    	boolean importPublic;
+    	public xmlImportHandler(boolean isPublic){
+    		importPublic=isPublic;
+    	}
 		public void startElement(String uri, String localName, String qName, Attributes attributes) {
-			System.out.println(qName);
 			if (qName.equals("post")) {
-				Bookmark bm = new Bookmark(attributes.getValue("href"));
-				Vector tags = listManager.string2vector(attributes.getValue("tag").replace(' ', ','));
+				String url=attributes.getValue("href");
+				if(url.equals("")){
+					return;
+				}
+				Bookmark bm = new Bookmark(url);
+				String tagsString=attributes.getValue("tag").replace(' ', ',');
+				String title=attributes.getValue("description");
+				String description=attributes.getValue("extended");
+				String time=attributes.getValue("time");
+				Vector tags=new Vector();
+				
+				if(title != null){
+					bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
+				}
+				if(tagsString!=null){
+					tags = listManager.string2vector(tagsString);
+				}
 				bm.setTags(tags);
-				bm.setTimeStamp(iso8601ToDate(attributes.getValue("time")).getTime());
-				bm.setProperty(Bookmark.BOOKMARK_TITLE, attributes.getValue("description"));
-				bm.setProperty(Bookmark.BOOKMARK_DESCRIPTION, attributes.getValue("extended"));
+				if(time != null){
+					bm.setTimeStamp(iso8601ToDate(time).getTime());
+				}
+				if(description!=null){
+					bm.setProperty(Bookmark.BOOKMARK_DESCRIPTION, description);
+				}
+				bm.setPublic(importPublic);
 				bm.setBookmarksTable();
-				System.out.println(bm.getUrl());
 			}
 		}
     }
@@ -663,6 +684,13 @@ public class bookmarksDB {
                 return false;
             }
         }
+        public void setPublic(boolean isPublic){
+        	if(isPublic){
+        		this.mem.put(BOOKMARK_PUBLIC, "public");
+        	}else{
+        		this.mem.put(BOOKMARK_PUBLIC, "private");
+        	}
+        }
         public void setProperty(String name, String value){
             mem.put(name, value);
             //setBookmarksTable();
@@ -692,7 +720,7 @@ public class bookmarksDB {
         }
         public void setBookmarksTable(){
             try {
-                bookmarksDB.this.bookmarksTable.set(getUrlHash(), mem);
+            	bookmarksDB.this.bookmarksTable.set(urlHash, mem);
             } catch (IOException e) {}
         }
         public long getTimeStamp(){

@@ -44,7 +44,7 @@
 			<option value="private" #(public)#selected::#(/public)#>no</option>
 			</select>
 		</td>
-         </tr>
+	</tr>
          <tr>
 		<td colspan="2" colspan="2" valign="top" class="TableHeader" width="100%">
 		#(edit)#
@@ -67,6 +67,14 @@
 		<td valign="top" class="TableCellLight" width="100%"><input type="file" name="xmlfile"></td>
 	</tr>
 	<tr>
+		<td valign="top" class="TableCellDark">import as Public:</td>
+		<td valign="top" class="TableCellLight"><select name="public">
+			<option value="public">yes</option>
+			<option value="private">no</option>
+			</select>
+		</td>
+         </tr>
+	<tr>
 		<td colspan="2" colspan="2" valign="top" class="TableHeader" width="100%">
 		<input type="submit" name="importxml" value="import">
 		</td>
@@ -82,7 +90,7 @@
 		<td><h3>Tags</h3></td>
 	</tr>
 <tr>
-	<td width="100%">
+	<td width="100%" valign="top">
 #{bookmarks}#
 <p style="border-bottom:1px #000 dashed; padding-bottom: 1em;">
 #(public)#<img class="bookmarkIcon" src="env/grafics/bookmarkpriv.gif" alt="private">::<img class="bookmarkIcon" src="env/grafics/bookmarkpub.gif" alt="public">#(/public)#
