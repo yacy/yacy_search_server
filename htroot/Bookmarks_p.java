@@ -66,13 +66,22 @@ public class Bookmarks_p {
     int start=0;
     
     //defaultvalues
-    prop.put("edit", 0);
-    prop.put("title", "");
-    prop.put("description", "");
-    prop.put("url", "");
-    prop.put("tags", "");
-    prop.put("public", 1); //1=is public
+    prop.put("mode", 0);
+    prop.put("mode_edit", 0);
+    prop.put("mode_title", "");
+    prop.put("mode_description", "");
+    prop.put("mode_url", "");
+    prop.put("mode_tags", "");
+    prop.put("mode_public", 1); //1=is public
     if(post != null){
+        if(post.containsKey("mode")){
+            String mode=(String) post.get("mode");
+            if(mode.equals("add")){
+            	prop.put("mode", 1);
+            }else if(mode.equals("importxml")){
+            	prop.put("mode", 2);
+            }
+        }
         if(post.containsKey("add")){ //add an Entry
             String url=(String) post.get("url");
             String title=(String) post.get("title");
@@ -97,46 +106,50 @@ public class Bookmarks_p {
             }else{
                 //ERROR
             }
-        }
-        if(post.containsKey("edit")){
+        }else if(post.containsKey("edit")){
             String urlHash=(String) post.get("edit");
+            prop.put("mode", 1);
             if (urlHash.length() == 0) {
-                prop.put("edit", 0); // create mode
-                prop.put("title", (String) post.get("title"));
-                prop.put("description", (String) post.get("description"));
-                prop.put("url", (String) post.get("url"));
-                prop.put("tags", (String) post.get("tags"));
-                prop.put("public", 0);
+                prop.put("mode_edit", 0); // create mode
+                prop.put("mode_title", (String) post.get("title"));
+                prop.put("mode_description", (String) post.get("description"));
+                prop.put("mode_url", (String) post.get("url"));
+                prop.put("mode_tags", (String) post.get("tags"));
+                prop.put("mode_public", 0);
             } else {
                     bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
                         try {
                             plasmaCrawlLURL.Entry urlentry = switchboard.urlPool.loadedURL.getEntry(urlHash, null);
-                            prop.put("edit", 0); // create mode
-                            prop.put("title", urlentry.descr());
-                            prop.put("description", urlentry.descr());
-                            prop.put("url", urlentry.url());
-                            prop.put("tags", "");
-                            prop.put("public", 0);
+                            prop.put("mode_edit", 0); // create mode
+                            prop.put("mode_title", urlentry.descr());
+                            prop.put("mode_description", urlentry.descr());
+                            prop.put("mode_url", urlentry.url());
+                            prop.put("mode_tags", "");
+                            prop.put("mode_public", 0);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     } else {
                         // get from the bookmark database
-                        prop.put("edit", 1); // edit mode
-                        prop.put("title", bookmark.getTitle());
-                        prop.put("description", bookmark.getDescription());
-                        prop.put("url", bookmark.getUrl());
-                        prop.put("tags", bookmark.getTags());
+                        prop.put("mode_edit", 1); // edit mode
+                        prop.put("mode_title", bookmark.getTitle());
+                        prop.put("mode_description", bookmark.getDescription());
+                        prop.put("mode_url", bookmark.getUrl());
+                        prop.put("mode_tags", bookmark.getTags());
                         if (bookmark.getPublic()) {
-                            prop.put("public", 1);
+                            prop.put("mode_public", 1);
                         } else {
-                            prop.put("public", 0);
+                            prop.put("mode_public", 0);
                         }
                     }
                 }
         }
+        if(post.containsKey("xmlfile")){
+        	switchboard.bookmarksDB.importFromXML(new String((byte[])post.get("xmlfile$file")));
+        }
+
         if(post.containsKey("delete")){
             String urlHash=(String) post.get("delete");
             switchboard.bookmarksDB.removeBookmark(urlHash);

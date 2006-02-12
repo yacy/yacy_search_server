@@ -45,7 +45,6 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 package xml.bookmarks.posts;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -77,7 +76,7 @@ public class all {
             prop.put("posts_"+count+"_description", bookmark.getDescription());
             prop.put("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
             date=new Date(bookmark.getTimeStamp());
-            prop.put("posts_"+count+"_time", (new SimpleDateFormat("yyyy-MM-dd")).format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z");
+            prop.put("posts_"+count+"_time", bookmarksDB.dateToiso8601(date));
             prop.put("posts_"+count+"_tags", bookmark.getTags().replaceAll(","," "));
             count++;
         }

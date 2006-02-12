@@ -12,6 +12,10 @@
 <h2>Bookmarks</h2></p>
 <!-- todo: div layout? -->
 
+#(mode)#
+<a href="Bookmarks_p.html?mode=add">Add Bookmark</a>
+<a href="Bookmarks_p.html?mode=importxml">Import XML Bookmarks</a>
+::
 <form action="Bookmarks_p.html" method="GET">
 <table border="0" width="100%" height="100%">
 	<tr>
@@ -52,6 +56,24 @@
 	</tr>
 </table>
 </form>
+::
+<form action="Bookmarks_p.html" method="POST"  enctype="multipart/form-data">
+<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" colspan="2" valign="top" class="TableHeader"><h3>Import XML Bookmarks</h3></td>
+	</tr>
+	<tr>
+		<td valign="top" class="TableCellDark">File:</td>
+		<td valign="top" class="TableCellLight" width="100%"><input type="file" name="xmlfile"></td>
+	</tr>
+	<tr>
+		<td colspan="2" colspan="2" valign="top" class="TableHeader" width="100%">
+		<input type="submit" name="importxml" value="import">
+		</td>
+	</tr>
+</table>
+</form>
+#(/mode)#
 <hr>
 
 <table width="100%" height="100%">

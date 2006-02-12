@@ -41,10 +41,13 @@
 //Contributions and changes to the program code must be marked as such.
 package de.anomic.data;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,6 +56,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.Vector;
+
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
@@ -64,6 +76,34 @@ public class bookmarksDB {
     kelondroMap tagsTable;
     kelondroMap bookmarksTable;
     kelondroMap datesTable;
+    
+    public static String dateToiso8601(Date date){
+    	return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";
+    }
+    public static Date iso8601ToDate(String iso8601){
+    	String[] tmp=iso8601.split("T");
+    	String day=tmp[0];
+    	String time=tmp[1];
+    	if(time.length()>8){
+    		time=time.substring(0,8);
+    	}
+    	try {
+			Calendar date=Calendar.getInstance();
+			Calendar date2=Calendar.getInstance();
+			date.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(day));
+			date2.setTime(new SimpleDateFormat("HH:mm:ss").parse(time));
+			
+			date.set(Calendar.HOUR_OF_DAY, date2.get(Calendar.HOUR_OF_DAY));
+			date.set(Calendar.MINUTE, date2.get(Calendar.MINUTE));
+			date.set(Calendar.SECOND, date2.get(Calendar.SECOND));
+			
+			return date.getTime();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return new Date();
+    }
     
     public bookmarksDB(File bookmarksFile, File tagsFile, File datesFile, int bufferkb){
         //bookmarks
@@ -348,6 +388,44 @@ public class bookmarksDB {
         
     }
 
+    public void importFromXML(String input){
+
+		SAXParser parser;
+		try {
+			ByteArrayInputStream is=new ByteArrayInputStream(input.getBytes());
+			parser = SAXParserFactory.newInstance().newSAXParser();
+			xmlImportHandler handler=new xmlImportHandler();
+			parser.parse(is, handler);
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FactoryConfigurationError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    public class xmlImportHandler extends DefaultHandler{
+		public void startElement(String uri, String localName, String qName, Attributes attributes) {
+			System.out.println(qName);
+			if (qName.equals("post")) {
+				Bookmark bm = new Bookmark(attributes.getValue("href"));
+				Vector tags = listManager.string2vector(attributes.getValue("tag").replace(' ', ','));
+				bm.setTags(tags);
+				bm.setTimeStamp(iso8601ToDate(attributes.getValue("time")).getTime());
+				bm.setProperty(Bookmark.BOOKMARK_TITLE, attributes.getValue("description"));
+				bm.setProperty(Bookmark.BOOKMARK_DESCRIPTION, attributes.getValue("extended"));
+				bm.setBookmarksTable();
+				System.out.println(bm.getUrl());
+			}
+		}
+    }
+    
     /**
      * Subclass, which stores an Tag
      *
@@ -623,6 +701,9 @@ public class bookmarksDB {
             }else{
                 return 0;
             }
+        }
+        public void setTimeStamp(long timestamp){
+        	this.mem.put(BOOKMARK_TIMESTAMP, String.valueOf(timestamp));
         }
     }
     public class tagIterator implements Iterator{
