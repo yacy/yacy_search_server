@@ -457,7 +457,10 @@ public class bookmarksDB {
         private String tagName;
         private Map mem;
         public Tag(String name, Map map){
-            tagName=name.toLowerCase();   
+            tagName=name.toLowerCase();
+//          TODO: This is only a workaround. with many other special chars, this will not work
+            tagName=tagName.replaceAll("ä", "ae").replaceAll("ö", "oe").replaceAll("ü", "ue")
+            .replaceAll("Ä", "Ae").replaceAll("Ö", "Oe").replaceAll("Ü", "Ue").replaceAll("ß", "ss");
             mem=map;
             if(!name.equals(tagName)){
                 mem.put(TAG_FRIENDLY_NAME, name);
@@ -465,6 +468,9 @@ public class bookmarksDB {
         }
         public Tag(String name, Vector entries){
             tagName=name.toLowerCase();
+            //TODO: This is only a workaround. with many other special chars, this will not work
+            tagName=tagName.replaceAll("ä", "ae").replaceAll("ö", "oe").replaceAll("ü", "ue")
+            .replaceAll("Ä", "Ae").replaceAll("Ö", "Oe").replaceAll("Ü", "Ue").replaceAll("ß", "ss");
             mem=new HashMap();
             mem.put(URL_HASHES, listManager.vector2string(entries));
             if(!name.equals(tagName)){
@@ -473,6 +479,9 @@ public class bookmarksDB {
         }
         public Tag(String name){
             tagName=name.toLowerCase();
+//          TODO: This is only a workaround. with many other special chars, this will not work
+            tagName=tagName.replaceAll("ä", "ae").replaceAll("ö", "oe").replaceAll("ü", "ue")
+            .replaceAll("Ä", "Ae").replaceAll("Ö", "Oe").replaceAll("Ü", "Ue").replaceAll("ß", "ss");
             mem=new HashMap();
             mem.put(URL_HASHES, "");
             if(!name.equals(tagName)){
