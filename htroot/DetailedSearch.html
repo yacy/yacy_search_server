@@ -159,7 +159,7 @@ function checkers(name, n) {
       <input type="checkbox" name="global" align="top" #[globalChecked]#>
 	</td>
   </tr>
-  <tr valign="top" class="TableCellDark"><td class=small colspan="2"><i>(to be filled with more global options)</i></td></tr>
+  <tr valign="top" class="TableCellDark"><td class="small" colspan="2"><i>(to be filled with more global options)</i></td></tr>
   </table></td>
   </tr>
 </table>
@@ -188,10 +188,10 @@ function checkers(name, n) {
 <!-- link begin -->
 <p style="border-bottom:1px #000 dashed; padding-bottom: 1em;">
 <a href="#[delete]#" onMouseover="document.minus_#[urlhexhash]#.src=picMinus.src" onMouseout="document.minus_#[urlhexhash]#.src=picEmpty.src">
-<img src="/env/grafics/empty.gif" title="delete" alt="delete" name="minus_#[urlhexhash]#" border="0"></a>&nbsp;<b><font color="#4070a0">#[description]#</font></b><br>
+<img src="/env/grafics/empty.gif" title="delete" alt="delete" name="minus_#[urlhexhash]#" border="0"></a>&nbsp;<b><span class="ResultDescription">#[description]#</span></b><br>
 #(snippet)#::<img src="/env/grafics/empty.gif">&nbsp;<i>#[text]#</i><br>#(/snippet)#
 <img src="/env/grafics/empty.gif">&nbsp;<a href="#[url]#">#[urlname]#</a><br>
-<img src="/env/grafics/empty.gif"><font color="#007050">&nbsp;#[date]#</font> | <font color="#007050">YBR-#[ybr]#</font> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
+<img src="/env/grafics/empty.gif"><span class="ResultDateYBR">&nbsp;#[date]#</span> | <span class="ResultDateYBR">YBR-#[ybr]#</span> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
 </p>
 <!-- link end -->
 #{/results}#
@@ -199,7 +199,7 @@ function checkers(name, n) {
 <!-- linklist end -->
 <p>
 </p><br>
-  
+
 #%env/templates/footer.template%#
 </body>
 </html>

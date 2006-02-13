@@ -18,12 +18,12 @@ picPlus.src = "/env/grafics/plus.gif";
   </SCRIPT>
 
   <br>
-  <center><h2><font size="2" face="Helvetica, Arial" color="#212942"><img src="/env/grafics/kaskelix.png" align="middle" alt="YaCy logo Kaskelix"><br>P2P WEB SEARCH</font></h2></center><br>
+  <center><span style="font-size=12pt; font-family:Helvetica, Arial; color:#212942"><img src="/env/grafics/kaskelix.png" align="middle" alt="YaCy logo Kaskelix"><br>P2P WEB SEARCH</span></center><br>
   <center>#[promoteSearchPageGreeting]#</center><br>
 
   <form action="index.html" method="get">
   <center>
-  
+
   <table border="0" cellspacing="0" cellpadding="0">
    <tr>
     <td colspan=2>
@@ -105,7 +105,7 @@ picPlus.src = "/env/grafics/plus.gif";
  </table>
  </center>
  </form>
-  
+
    <p>
 #(excluded)#
 ::
@@ -154,11 +154,11 @@ from 'late' peers.
 <p style="border-bottom:1px #000 dashed; padding-bottom: 1em;">
 <a href="/Bookmarks_p.html?edit=#[urlhash]#" onMouseover="document.plus_#[urlhexhash]#.src=picPlus.src" onMouseout="document.plus_#[urlhexhash]#.src=picEmpty.src">
 <img src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" name="plus_#[urlhexhash]#" border="0"></a>&nbsp;
-<b><font color="#4070a0">#[description]#</font></b><br>
+<span class="ResultDescription">#[description]#</span><br>
 <a href="#[delete]#" onMouseover="document.minus_#[urlhexhash]#.src=picMinus.src" onMouseout="document.minus_#[urlhexhash]#.src=picEmpty.src">
 <img src="/env/grafics/empty.gif" title="delete" alt="delete" name="minus_#[urlhexhash]#" border="0"></a>&nbsp;
 #(snippet)#::<i>#[text]#</i><br>#(/snippet)#<a href="#[url]#">#[urlname]#</a><br>
-<img src="/env/grafics/empty.gif">&nbsp;<font color="#007050">&nbsp;#[date]#</font> | <font color="#007050">YBR-#[ybr]#</font> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
+<img src="/env/grafics/empty.gif">&nbsp;<span class="ResultDateYBR">&nbsp;#[date]#</span> | <span class="ResultDateYBR">YBR-#[ybr]#</span> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
 </p>
 <!-- link end -->
 #{/results}#
@@ -189,7 +189,7 @@ You can enrich the search results by using the 'global' option; you must also sw
 with the target of implementing a P2P-based global search engine.<br>
 Architecture (C) by Michael Peter Christen,
 <img src="/env/grafics/mcemailh.gif"></i></center>
-  
+
 #%env/templates/footer.template%#
 </body>
 </html>
