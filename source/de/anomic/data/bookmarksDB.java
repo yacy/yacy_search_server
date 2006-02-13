@@ -455,7 +455,6 @@ public class bookmarksDB {
      */
     public class Tag{
         public static final String URL_HASHES="urlHashes";
-        public static final String TAG_FRIENDLY_NAME="friendlyName";
         public static final String TAG_NAME="tagName";
         private String tagHash;
         private Map mem;
@@ -465,39 +464,43 @@ public class bookmarksDB {
             mem=map;
         }
         public Tag(String name, Vector entries){
-            String tagName=name.toLowerCase();
-            tagHash=plasmaWordIndexEntry.word2hash(tagName);
+            tagHash=tagHash(name);
             mem=new HashMap();
             mem.put(URL_HASHES, listManager.vector2string(entries));
-            mem.put(TAG_NAME, tagName);
-            if(!name.equals(tagName)){
-                mem.put(TAG_FRIENDLY_NAME, name);
-            }
+            mem.put(TAG_NAME, name);
         }
         public Tag(String name){
-            String tagName=name.toLowerCase();
-            tagHash=plasmaWordIndexEntry.word2hash(tagName);
+            tagHash=tagHash(name);
             mem=new HashMap();
             mem.put(URL_HASHES, "");
-            mem.put(TAG_NAME, tagName);
-            if(!name.equals(tagName)){
-                mem.put(TAG_FRIENDLY_NAME, name);
-            }
+            mem.put(TAG_NAME, name);
         }
+        /**
+         * get the lowercase Tagname
+         */
         public String getTagName(){
-        	if(this.mem.containsKey(TAG_NAME)){
+            /*if(this.mem.containsKey(TAG_NAME)){
                 return (String) this.mem.get(TAG_NAME);
             }
-            return "";
+            return "";*/
+            return getFriendlyName().toLowerCase();
         }
         public String getTagHash(){
             return tagHash;
         }
+        /**
+         * get tag name, with all uppercase chars.
+         * @return
+         */
         public String getFriendlyName(){
-            if(this.mem.containsKey(TAG_FRIENDLY_NAME)){
+            /*if(this.mem.containsKey(TAG_FRIENDLY_NAME)){
                 return (String) this.mem.get(TAG_FRIENDLY_NAME);
             }
-            return getTagName();
+            return getTagName();*/
+            if(this.mem.containsKey(TAG_NAME)){
+                return (String) this.mem.get(TAG_NAME);
+            }
+            return "notagname";
         }
         public Vector getUrlHashes(){
             return listManager.string2vector((String)this.mem.get(URL_HASHES));
