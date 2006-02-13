@@ -70,6 +70,7 @@ import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.server.logging.serverLog;
 
 public class bookmarksDB {
@@ -79,6 +80,9 @@ public class bookmarksDB {
     
     public static String dateToiso8601(Date date){
     	return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";
+    }
+    public static String tagHash(String tagName){
+    	return plasmaWordIndexEntry.word2hash(tagName.toLowerCase());
     }
     public static Date iso8601ToDate(String iso8601){
     	String[] tmp=iso8601.split("T");
@@ -201,7 +205,7 @@ public class bookmarksDB {
             tags = bookmark.getTags().split(",");
             tag=null;
             for(int i=0;i<tags.length;i++){
-                tag=getTag(tags[i]);
+                tag=getTag(tagHash(tags[i]));
                 if(tag==null){
                     tag=new Tag(tags[i]);
                 }
@@ -229,12 +233,12 @@ public class bookmarksDB {
         }
         serverLog.logInfo("BOOKMARKS", "Rebuilt "+datesTable.size()+" dates using your "+bookmarksTable.size()+" bookmarks.");
     }
-    public Tag getTag(String tagName){
+    public Tag getTag(String hash){
         Map map;
         try {
-            map = tagsTable.get(tagName.toLowerCase());
+            map = tagsTable.get(hash);
             if(map==null) return null;
-            return new Tag(tagName, map);
+            return new Tag(hash, map);
         } catch (IOException e) {
             return null;
         }
@@ -251,14 +255,16 @@ public class bookmarksDB {
         
     }
     public boolean renameTag(String oldName, String newName){
-        Tag tag=getTag(oldName);
+    	String tagHash=tagHash(oldName);
+        Tag tag=getTag(tagHash);
             if (tag != null) {
             Vector urlHashes = tag.getUrlHashes();
             try {
-                tagsTable.remove(oldName);
+                tagsTable.remove(tagHash(oldName));
             } catch (IOException e) {
             }
-            tag.tagName = newName;
+            tag=new Tag(tagHash(newName), tag.mem);
+            tag.tagHash = tagHash(newName);
             tag.setTagsTable();
             Iterator it = urlHashes.iterator();
             Bookmark bookmark;
@@ -312,10 +318,11 @@ public class bookmarksDB {
     }
     public Iterator getBookmarksIterator(String tagName, boolean priv){
         TreeSet set=new TreeSet(new bookmarkComparator());
-        Tag tag=getTag(tagName);
+        String tagHash=tagHash(tagName);
+        Tag tag=getTag(tagHash);
         Vector hashes=new Vector();
         if(tag != null){
-            hashes=getTag(tagName).getUrlHashes();
+            hashes=getTag(tagHash).getUrlHashes();
         }
         if(priv){
         	set.addAll(hashes);
@@ -354,7 +361,7 @@ public class bookmarksDB {
         String[] tags = bookmark.getTags().split(",");
         bookmarksDB.Tag tag=null;
         for(int i=0;i<tags.length;i++){
-            tag=getTag(tags[i]);
+            tag=getTag(tagHash(tags[i]));
             if(tag !=null){
                 tag.delete(urlHash);
                 tag.setTagsTable();
@@ -454,48 +461,48 @@ public class bookmarksDB {
     public class Tag{
         public static final String URL_HASHES="urlHashes";
         public static final String TAG_FRIENDLY_NAME="friendlyName";
-        private String tagName;
+        public static final String TAG_NAME="tagName";
+        private String tagHash;
         private Map mem;
-        public Tag(String name, Map map){
-            tagName=name.toLowerCase();
-//          TODO: This is only a workaround. with many other special chars, this will not work
-            tagName=tagName.replaceAll("ä", "ae").replaceAll("ö", "oe").replaceAll("ü", "ue")
-            .replaceAll("Ä", "Ae").replaceAll("Ö", "Oe").replaceAll("Ü", "Ue").replaceAll("ß", "ss");
+
+        public Tag(String hash, Map map){
+        	tagHash=hash;
             mem=map;
-            if(!name.equals(tagName)){
-                mem.put(TAG_FRIENDLY_NAME, name);
-            }
         }
         public Tag(String name, Vector entries){
-            tagName=name.toLowerCase();
-            //TODO: This is only a workaround. with many other special chars, this will not work
-            tagName=tagName.replaceAll("ä", "ae").replaceAll("ö", "oe").replaceAll("ü", "ue")
-            .replaceAll("Ä", "Ae").replaceAll("Ö", "Oe").replaceAll("Ü", "Ue").replaceAll("ß", "ss");
+            String tagName=name.toLowerCase();
+            tagHash=plasmaWordIndexEntry.word2hash(tagName);
             mem=new HashMap();
             mem.put(URL_HASHES, listManager.vector2string(entries));
+            mem.put(TAG_NAME, tagName);
             if(!name.equals(tagName)){
                 mem.put(TAG_FRIENDLY_NAME, name);
             }
         }
         public Tag(String name){
-            tagName=name.toLowerCase();
-//          TODO: This is only a workaround. with many other special chars, this will not work
-            tagName=tagName.replaceAll("ä", "ae").replaceAll("ö", "oe").replaceAll("ü", "ue")
-            .replaceAll("Ä", "Ae").replaceAll("Ö", "Oe").replaceAll("Ü", "Ue").replaceAll("ß", "ss");
+            String tagName=name.toLowerCase();
+            tagHash=plasmaWordIndexEntry.word2hash(tagName);
             mem=new HashMap();
             mem.put(URL_HASHES, "");
+            mem.put(TAG_NAME, tagName);
             if(!name.equals(tagName)){
                 mem.put(TAG_FRIENDLY_NAME, name);
             }
         }
         public String getTagName(){
-            return tagName;
+        	if(this.mem.containsKey(TAG_NAME)){
+                return (String) this.mem.get(TAG_NAME);
+            }
+            return "";
+        }
+        public String getTagHash(){
+            return tagHash;
         }
         public String getFriendlyName(){
             if(this.mem.containsKey(TAG_FRIENDLY_NAME)){
                 return (String) this.mem.get(TAG_FRIENDLY_NAME);
             }
-            return this.tagName;
+            return getTagName();
         }
         public Vector getUrlHashes(){
             return listManager.string2vector((String)this.mem.get(URL_HASHES));
@@ -537,9 +544,9 @@ public class bookmarksDB {
         public void setTagsTable(){
             try {
                 if(this.size() >0){
-                    bookmarksDB.this.tagsTable.set(getTagName(), mem);
+                    bookmarksDB.this.tagsTable.set(getTagHash(), mem);
                 }else{
-                    bookmarksDB.this.tagsTable.remove(getTagName());
+                    bookmarksDB.this.tagsTable.remove(getTagHash());
                 }
             } catch (IOException e) {}
         }
