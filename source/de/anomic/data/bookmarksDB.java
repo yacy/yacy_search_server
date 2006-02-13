@@ -339,21 +339,16 @@ public class bookmarksDB {
     	return set.iterator();
     }
     public Iterator getTagIterator(boolean priv){
-    	if(priv){
-    		return tagIterator(true);
-    	}else{
-    		Vector publicTags=new Vector();
-    		Iterator it=tagIterator(true);
-    		Tag tag;
-    		while(it.hasNext()){
-    			tag=(Tag)it.next();
-    			//this may be slow...
-    			if(tag.hasPublicItems()){
-    				publicTags.add(tag);
-    			}
+    	TreeSet set=new TreeSet(new tagComparator());
+    	Iterator it=tagIterator(true);
+    	Tag tag;
+    	while(it.hasNext()){
+    		tag=(Tag) it.next();
+    		if(!priv ||tag.hasPublicItems()){
+    			set.add(tag);
     		}
-    		return publicTags.iterator();
     	}
+    	return set.iterator();
     }
     public boolean removeBookmark(String urlHash){
         Bookmark bookmark = getBookmark(urlHash);
@@ -828,5 +823,13 @@ public class bookmarksDB {
             //TODO: what happens, if there is a big difference? (to much for int)
             return (new Long(bm1.getTimeStamp() - bm2.getTimeStamp())).intValue();
         }
+    }
+    /**
+     * sorts the tag for name
+     */
+    public class tagComparator implements Comparator{
+    	public int compare(Object obj1, Object obj2){
+    		return ((Tag)obj1).getTagName().compareTo(((Tag)obj2).getTagName());
+    	}
     }
 }

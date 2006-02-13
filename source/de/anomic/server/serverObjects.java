@@ -66,6 +66,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 
+import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 
 public final class serverObjects extends Hashtable implements Cloneable {
@@ -94,6 +95,13 @@ public final class serverObjects extends Hashtable implements Cloneable {
 	super(input);
     }
 
+    /**
+     * like put, but it replaces any HTML special chars.
+     */
+    public Object putNoHTML(Object key, String value){
+    	return put(key, wikiCode.replaceHTMLonly(value));
+    }
+    
     // new put takes also null values
     public Object put(Object key, Object value) {
 	if (key == null) {
