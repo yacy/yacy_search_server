@@ -335,8 +335,11 @@ public final class plasmaWordIndex {
         int removed = 0;
         removed += ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
         plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordHash, -1);
-        if (container != null) this.addEntries(container, System.currentTimeMillis(), false);
-        removed = backend.removeEntries(wordHash, urlHashes, deleteComplete);
+        if (container != null) {
+            removed += container.removeEntries(wordHash, urlHashes, deleteComplete);
+            if (container.size() != 0) this.addEntries(container, System.currentTimeMillis(), false);
+        }
+        removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
         return removed;
     }
     

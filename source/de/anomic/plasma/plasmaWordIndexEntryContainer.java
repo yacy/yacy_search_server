@@ -144,7 +144,14 @@ public final class plasmaWordIndexEntryContainer implements Comparable {
     public plasmaWordIndexEntry remove(String urlHash) {
         return (plasmaWordIndexEntry) container.remove(urlHash);
     }
-    
+
+    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
+        if (!wordHash.equals(this.wordHash)) return 0;
+        int count = 0;
+        for (int i = 0; i < urlHashes.length; i++) count += (remove(urlHashes[i]) == null) ? 0 : 1;
+        return count;
+    }
+
     public Iterator entries() {
         // returns an iterator of plasmaWordIndexEntry objects
         return container.values().iterator();

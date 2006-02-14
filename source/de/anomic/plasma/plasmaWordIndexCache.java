@@ -309,7 +309,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         synchronized (cache) {
             plasmaWordIndexEntryContainer c = (plasmaWordIndexEntryContainer) deleteContainer(wordHash);
             if (c != null) {
-                for (int i = 0; i < urlHashes.length; i++) count += (c.remove(urlHashes[i]) == null) ? 0 : 1;
+                count = c.removeEntries(wordHash, urlHashes, deleteComplete);
                 if (c.size() != 0) this.addEntries(c, System.currentTimeMillis(), false);
             }
         }
