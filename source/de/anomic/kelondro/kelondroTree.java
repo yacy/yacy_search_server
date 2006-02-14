@@ -265,7 +265,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                         throw new kelondroException(filename, "kelondroTree.Search.process: thenode==null");
                     }
                     k = thenode.getKey();
-                    if ((k != null) & (visitedNodeKeys.contains(k))) {
+                    if ((k != null) && (visitedNodeKeys.contains(k))) {
                         // we have loops in the database.
                         // to fix this, all affected nodes must be patched
                         thenode.setOHByte(magic, (byte) 1);
