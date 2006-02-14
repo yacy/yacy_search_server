@@ -22,7 +22,7 @@
 		<td colspan="2" colspan="2" valign="top" class="TableHeader">#(edit)#<h3>Add Bookmark</h3>::<h3>Edit Bookmark</h3>#(/edit)#</td>
 	</tr>
 	<tr>
-		<td valign="top" class="TableCellDark">Url:</td>
+		<td valign="top" class="TableCellDark">URL:</td>
 		<td valign="top" class="TableCellLight" width="100%"><input type="text" name="url" value="#[url]#" onblur="loadTitle()" size="80"></td>
 	</tr>
 	<tr>
@@ -93,7 +93,7 @@
 	<td width="100%" valign="top">
 #{bookmarks}#
 <p style="border-bottom:1px #000 dashed; padding-bottom: 1em;">
-#(public)#<img class="bookmarkIcon" src="env/grafics/bookmarkpriv.gif" alt="private">::<img class="bookmarkIcon" src="env/grafics/bookmarkpub.gif" alt="public">#(/public)#
+#(public)#<img class="bookmarkIcon" src="env/grafics/bookmarkpriv.gif" alt="private bookmark" title="private bookmark">::<img class="bookmarkIcon" src="env/grafics/bookmarkpub.gif" alt="public bookmark" title="public bookmark">#(/public)#
 <a href="#[link]#" target="_blank" class="bookmarkTitle">#[title]#</a><br />
 <span class="bookmarkDescription">#[description]#</span><br />
 Tagged with |&nbsp;#{tags}#<a href="Bookmarks_p.html?tag=#[tag]#" class="bookmarkTags">#[tag]#</a> | #{/tags}#<br />

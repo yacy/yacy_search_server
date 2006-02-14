@@ -69,7 +69,7 @@ YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
 <h2>Bookmarks==<h2>Lesezeichen
 Add Bookmark==Lesezeichen hinzuf&uuml;gen
 Edit Bookmark==Lesezeichen bearbeiten
-Url:==URL:
+#URL:==URL:
 Title:==Titel:
 Description:==Beschreibung:
 Tags \(comma separated\):==Tags (durch Komma trennen):
@@ -78,7 +78,7 @@ yes==ja
 no==nein
 "create"=="erzeugen"
 "edit"=="bearbeiten"
-Tagged with==Tagged mit
+Tagged with==Stichworte:
 Edit==Bearbeiten
 Delete==L&ouml;schen
 next page==n&auml;chste Seite
