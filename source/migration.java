@@ -50,6 +50,7 @@ import de.anomic.server.logging.serverLog;
 public class migration {
     //SVN constants
     public static final int USE_WORK_DIR=1389; //wiki & messages in DATA/WORK
+    public static final int TAGDB_WITH_TAGHASH=1635; //tagDB keys are tagHashes instead of plain tagname.
     public static void main(String[] args) {
 
     }
@@ -60,11 +61,22 @@ public class migration {
     }
     public static void migrate(plasmaSwitchboard sb, int fromRev, int toRev){
     	if(fromRev < toRev){
+            if(fromRev < TAGDB_WITH_TAGHASH){
+                migrateBookmarkTagsDB(sb);
+            }
     		serverLog.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
     		migrate(sb);
     	}
     }
-
+    public static void migrateBookmarkTagsDB(plasmaSwitchboard sb){
+        sb.bookmarksDB.close();
+        File tagsDBFile=new File(sb.workPath, "bookmarkTags.db");
+        if(tagsDBFile.exists()){
+            tagsDBFile.delete();
+            serverLog.logInfo("MIGRATION", "Migrating bookmarkTags.db to use wordhashs as keys.");
+        }
+        sb.initBookmarks();
+    }
     public static void migrateWorkFiles(plasmaSwitchboard sb){
         File file=new File(sb.getRootPath(), "DATA/SETTINGS/wiki.db");
         File file2;

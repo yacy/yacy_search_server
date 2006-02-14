@@ -139,13 +139,13 @@ public class bookmarksDB {
                 tagsFile.delete();
                 tagsFile.getParentFile().mkdirs();
                 // max. 128 byte long tags
-                this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, 128, 256, '_', true));
+                this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, 12, 256, '_', true));
                 rebuildTags();
             }
         }else{
             //new database
             tagsFile.getParentFile().mkdirs();
-            this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, 128, 256, '_', true));
+            this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, 12, 256, '_', true));
             rebuildTags();
         }
         // dates
@@ -272,7 +272,7 @@ public class bookmarksDB {
             while (it.hasNext()) {
                 bookmark = getBookmark((String) it.next());
                 tags = listManager.string2vector(bookmark.getTags());
-                tags.remove(oldName);
+                tags.remove(oldName); //this will fail, if upper/lowercase is not matching
                 tags.add(newName);
                 bookmark.setTags(tags);
                 bookmark.setBookmarksTable();

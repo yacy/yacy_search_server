@@ -305,10 +305,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int ramRWI     = (int) getConfigLong("ramCacheRWI",  1024) / 1024;
         int ramHTTP    = (int) getConfigLong("ramCacheHTTP", 1024) / 1024;
         int ramMessage = (int) getConfigLong("ramCacheMessage", 1024) / 1024;
-        int ramWiki    = (int) getConfigLong("ramCacheWiki", 1024) / 1024;
         int ramRobots  = (int) getConfigLong("ramCacheRobots",1024) / 1024;
         int ramProfiles= (int) getConfigLong("ramCacheProfiles",1024) / 1024;
         int ramPreNURL = (int) getConfigLong("ramCachePreNURL", 1024) / 1024;
+        int ramWiki    = (int) getConfigLong("ramCacheWiki", 1024) / 1024;
         this.log.logConfig("LURL     Cache memory = " + ppRamString(ramLURL));
         this.log.logConfig("NURL     Cache memory = " + ppRamString(ramNURL));
         this.log.logConfig("EURL     Cache memory = " + ppRamString(ramEURL));
@@ -429,13 +429,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         ", " + ppRamString(userDbFile.length()/1024));
         
         //Init bookmarks DB
-        this.log.logConfig("Loading Bookmarks DB");
-        File bookmarksFile = new File(workPath, "bookmarks.db");
-        File tagsFile = new File(workPath, "bookmarkTags.db");
-        File datesFile = new File(workPath, "bookmarkDates.db");
-        this.bookmarksDB = new bookmarksDB(bookmarksFile, tagsFile, datesFile, 512);
-        this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
-        this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
+        initBookmarks();
         
         // init cookie-Monitor
         this.log.logConfig("Starting Cookie Monitor");
@@ -593,6 +587,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("Loaded Wiki Board DB from file " + wikiDbFile.getName() +
         ", " + this.wikiDB.size() + " entries" +
         ", " + ppRamString(wikiDbFile.length()/1024));
+    }
+    public void initBookmarks(){
+        this.log.logConfig("Loading Bookmarks DB");
+        File bookmarksFile = new File(workPath, "bookmarks.db");
+        File tagsFile = new File(workPath, "bookmarkTags.db");
+        File datesFile = new File(workPath, "bookmarkDates.db");
+        this.bookmarksDB = new bookmarksDB(bookmarksFile, tagsFile, datesFile, 512);
+        this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
+        this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
     }
     
     
