@@ -111,7 +111,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
             
             // iterate over all words from import db
 
-            Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, true, false);
+            Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             while (!isAborted() && importWordHashIterator.hasNext()) {
                 
                 plasmaWordIndexEntryContainer newContainer = null;
@@ -154,7 +154,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     if (isAborted()) break;
                     
                     // importing entity container to home db
-                    this.homeWordIndex.addEntries(newContainer, false);
+                    this.homeWordIndex.addEntries(newContainer, System.currentTimeMillis(), false);
                                         
                     // delete complete index entity file
                     this.importWordIndex.deleteIndex(this.wordHash);                 

@@ -259,7 +259,7 @@ public class PerformanceQueues_p {
         prop.put("onlineCautionDelay", switchboard.getConfig("onlineCautionDelay", "30000"));
         prop.put("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
         
-        int[] asizes = switchboard.wordIndex.assortmentSizes();
+        int[] asizes = switchboard.wordIndex.assortmentsSizes();
         for (int i = 0; i < asizes.length; i += 8) {
             prop.put("assortmentCluster_" + (i/8) + "_assortmentSlots", (i + 1) + "-" + (i + 8));
             prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeA", asizes[i]);

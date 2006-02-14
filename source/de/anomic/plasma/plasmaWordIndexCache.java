@@ -52,8 +52,6 @@ import java.util.TreeMap;
 import de.anomic.kelondro.kelondroArray;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroMergeIterator;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -62,22 +60,16 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
-    private static final String indexAssortmentClusterPath = "ACLUSTER";
-    private static final int assortmentCount = 64;
-    private static final int ramCacheLimit = 200;
+    private static final int ramCacheLimit = 60;
 
     // class variables
     private final File databaseRoot;
-    private final plasmaWordIndexInterface backend;
     private final TreeMap cache;
     private final kelondroMScoreCluster hashScore;
     private final kelondroMScoreCluster hashDate;
     private long  startTime;
     private int   maxWordsLow, maxWordsHigh; // we have 2 cache limits for different priorities
     private final serverLog log;
-    private final plasmaWordIndexAssortmentCluster assortmentCluster;
-    private int assortmentBufferSize; //kb
-    //private final flush flushThread;
 
     // calculated constants
     private static String maxKey;
@@ -86,38 +78,25 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
 
-    public plasmaWordIndexCache(File databaseRoot, plasmaWordIndexInterface backend, int assortmentbufferkb, serverLog log) {
-
-        // create new assortment cluster path
-        File assortmentClusterPath = new File(databaseRoot, indexAssortmentClusterPath);
-        if (!(assortmentClusterPath.exists())) assortmentClusterPath.mkdirs();
-
-        // create flushing thread
-        //flushThread = new flush();
+    public plasmaWordIndexCache(File databaseRoot, serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
         this.databaseRoot = databaseRoot;
-        this.assortmentBufferSize = assortmentbufferkb;
         this.cache = new TreeMap();
         this.hashScore = new kelondroMScoreCluster();
         this.hashDate  = new kelondroMScoreCluster();
         this.startTime = System.currentTimeMillis();
         this.maxWordsLow  =  8000;
         this.maxWordsHigh = 10000;
-        this.backend = backend;
         this.log = log;
-        this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, log);
-
+        
         // read in dump of last session
         try {
             restore();
         } catch (IOException e){
             log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
         }
-
-        // start permanent flushing
-        //flushThread.start();
     }
 
     private void dump(int waitingSeconds) throws IOException {
@@ -189,7 +168,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 long creationTime;
                 plasmaWordIndexEntry wordEntry;
                 byte[][] row;
-                Runtime rt = Runtime.getRuntime();
+                //Runtime rt = Runtime.getRuntime();
                 while (i-- > 0) {
                     // get out one entry
                     row = dumpArray.get(i);
@@ -201,7 +180,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     addEntry(wordHash, wordEntry, creationTime);
                     urlCount++;
                     // protect against memory shortage
-                    while (rt.freeMemory() < 1000000) {flushFromMem(); java.lang.System.gc();}
+                    //while (rt.freeMemory() < 1000000) {flushFromMem(); java.lang.System.gc();}
                     // write a log
                     if (System.currentTimeMillis() > messageTime) {
                         System.gc(); // for better statistic
@@ -223,12 +202,6 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return urlCount;
     }
 
-    /*
-    public void intermission(long pause) {
-        flushThread.intermission(pause);
-    }
-    */
-    
     // cache settings
 
     public int maxURLinWordCache() {
@@ -243,249 +216,70 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         this.maxWordsLow = maxWordsLow;
         this.maxWordsHigh = maxWordsHigh;
     }
-
-    public int[] assortmentsSizes() {
-        return assortmentCluster.sizes();
+    
+    public int getMaxWordsLow() {
+        return this.maxWordsLow;
     }
 
-    public int[] assortmentsCacheChunkSizeAvg() {
-        return assortmentCluster.cacheChunkSizeAvg();
+    public int getMaxWordsHigh() {
+        return this.maxWordsHigh;
     }
-
-    public int[] assortmentsCacheFillStatusCml() {
-        return assortmentCluster.cacheFillStatusCml();
-    }
-
+    
     public int size() {
-        return java.lang.Math.max(assortmentCluster.sizeTotal(), java.lang.Math.max(backend.size(), cache.size()));
+        return cache.size();
     }
 
     public int indexSize(String wordHash) {
         int size = 0;
-        try {
-            plasmaWordIndexEntity entity = backend.getEntity(wordHash, true, -1);
-            if (entity != null) {
-                size += entity.size();
-                entity.close();
-            }
-        } catch (IOException e) {}
-        size += assortmentCluster.indexSize(wordHash);
         plasmaWordIndexEntryContainer cacheIndex = (plasmaWordIndexEntryContainer) cache.get(wordHash);
         if (cacheIndex != null) size += cacheIndex.size();
         return size;
     }
-
-    public Iterator wordHashes(String startWordHash, boolean up, boolean rot) {
-        return wordHashes(startWordHash, plasmaWordIndex.RL_WORDFILES, up, rot);
-    }
     
-    public Iterator wordHashes(String startWordHash, int resourceLevel, boolean up, boolean rot) {
-        synchronized (cache) {
-        if (!(up)) throw new RuntimeException("plasmaWordIndexCache.wordHashes can only count up");
-        if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) {
-            return cache.tailMap(startWordHash).keySet().iterator();
-        }
-        /*
-        if (resourceLevel == plasmaWordIndex.RL_FILECACHE) {
-            
-        }
-        */
-        if (resourceLevel == plasmaWordIndex.RL_ASSORTMENTS) {
-            return new kelondroMergeIterator(
-                            cache.tailMap(startWordHash).keySet().iterator(),
-                            assortmentCluster.hashConjunction(startWordHash, true, rot),
-                            kelondroNaturalOrder.naturalOrder,
-                            true);
-        }
-        if (resourceLevel == plasmaWordIndex.RL_WORDFILES) {
-            return new kelondroMergeIterator(
-                            new kelondroMergeIterator(
-                                     cache.tailMap(startWordHash).keySet().iterator(),
-                                     assortmentCluster.hashConjunction(startWordHash, true, rot),
-                                     kelondroNaturalOrder.naturalOrder,
-                                     true),
-                            backend.wordHashes(startWordHash, true, false),
-                            kelondroNaturalOrder.naturalOrder,
-                            true);
-        }
-        return null;
-        }
+    public Iterator wordHashes(String startWordHash, boolean rot) {
+        if (rot) throw new UnsupportedOperationException("plasmaWordIndexCache cannot rotate");
+        return cache.tailMap(startWordHash).keySet().iterator();
     }
 
-    /*
-    public Iterator wordHashes(String startWordHash, boolean up, boolean rot) {
-        // here we merge 3 databases into one view:
-        // - the RAM Cache
-        // - the assortmentCluster File Cache
-        // - the backend
-        if (!(up)) throw new RuntimeException("plasmaWordIndexCache.wordHashes can only count up");
-        //if (rot) System.out.println("WARNING: wordHashes does not work correctly when individual Assotments rotate on their own!");
-        //return new rotatingWordHashes(startWordHash, up);
-        return new kelondroMergeIterator(
-                        new kelondroMergeIterator(
-                                 cache.tailMap(startWordHash).keySet().iterator(),
-                                 assortmentCluster.hashConjunction(startWordHash, true, rot),
-                                 kelondroNaturalOrder.naturalOrder,
-                                 true),
-                        backend.wordHashes(startWordHash, true, false),
-                        kelondroNaturalOrder.naturalOrder,
-                        true);
-    }
-    */
-    
-    /*
-    private final class flush extends Thread {
-        boolean terminate;
-        long intermission;
-
-        public flush() {
-            terminate = false;
-            intermission = 0;
-            this.setName(this.getClass().getName());
-        }
-
-        public void intermission(long pause) {
-            this.intermission = System.currentTimeMillis() + pause;
-        }
-
-        public void run() {
-            long pausetime;
-            while (!terminate) {
-                if (intermission > 0) {
-                    if (this.intermission > System.currentTimeMillis()) {
-                        try {sleep(this.intermission - System.currentTimeMillis());} catch (InterruptedException e) {}
-                    }
-                    this.intermission = 0;
-                }
-                flushFromMem();
-                pausetime = 1 + java.lang.Math.min(1000, 5 * maxWordsHigh / (cache.size() + 1));
-                if (cache.size() == 0) pausetime = 2000;
-                try { sleep(pausetime); } catch (InterruptedException e) { }
-            }
-        }
-
-        public void terminate() {
-            terminate = true;
-        }
-    }
-    */
-    
-    private void flushFromMem() {
+    public String bestFlushWordHash() {
         // select appropriate hash
         // we have 2 different methods to find a good hash:
         // - the oldest entry in the cache
         // - the entry with maximum count
-        if (cache.size() == 0) return;
+        if (cache.size() == 0) return null;
         try {
             synchronized (cache) {
                 String hash = (String) hashScore.getMaxObject();
-                if (hash == null) return;
+                if (hash == null) return null;
                 int count = hashScore.getMaxScore();
-                long time = longTime(hashDate.getScore(hash));
-                if ((count > ramCacheLimit) || ((count > assortmentCount) && (System.currentTimeMillis() - time > 10000))) {
+                //long time = longTime(hashDate.getScore(hash));
+                if (count > ramCacheLimit) {
                     // flush high-score entries
-                    flushFromMem(hash);
+                    return hash;
                 } else {
                     // flush oldest entries
                     hash = (String) hashDate.getMinObject();
-                    flushFromMem(hash);
+                    return hash;
                 }
             }
         } catch (Exception e) {
             log.logSevere("flushFromMem: " + e.getMessage(), e);
         }
-    }
-
-    private int flushFromMem(String key) {
-        // this method flushes indexes out from the ram to the disc.
-        plasmaWordIndexEntryContainer container = null;
-        long time;
-        synchronized (cache) {
-            // get the container and remove it from cache
-            container = (plasmaWordIndexEntryContainer) this.cache.remove(key);
-            if (container == null) return 0; // flushing of nonexisting key
-            time = container.updated();
-
-            // remove it from the MScoreClusters
-            hashScore.deleteScore(key);
-            hashDate.deleteScore(key);
-        }
-        
-        // now decide where to flush that container
-        plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(key, container);
-        if (feedback == null) {
-            return container.size();
-        } else {
-            // *** should care about another option here ***
-            return backend.addEntries(feedback, time, true);
-        }
+        return null;
     }
 
     private int intTime(long longTime) {
         return (int) ((longTime - startTime) / 1000);
     }
 
+    /*
     private long longTime(int intTime) {
         return ((long) intTime) * ((long) 1000) + startTime;
     }
-
-    private boolean flushFromAssortmentCluster(String key, long maxTime) {
-        // this should only be called if the assortment shall be deleted or returned in an index entity
-        if (maxTime > 0) maxTime = 8 * maxTime / 10; // reserve time for later adding to backend
-        plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(key, maxTime);
-        if (container == null) {
-            return false;
-        } else {
-            // we have a non-empty entry-container
-            // integrate it to the backend
-            return backend.addEntries(container, container.updated(), true) > 0;
-        }
-    }
-
-    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
-        long start = System.currentTimeMillis();
-        
-        plasmaWordIndexEntryContainer container;
-        synchronized (cache) {
-            container = new plasmaWordIndexEntryContainer(wordHash);
-            // get from cache
-            // We must not use the container from cache to store everything we find, as that
-            // container remains linked to in the cache and might be changed later while the
-            // returned container is still in use.
-            // e.g. indexTransfer might keep this container for minutes while several new pages
-            // could be added to the index, possibly with the same words that have been selected
-            // for transfer
-            container.add((plasmaWordIndexEntryContainer) cache.get(wordHash));
-
-            // get from assortments
-            container.add(assortmentCluster.getFromAll(wordHash, (maxTime < 0) ? -1 : maxTime / 2));
-
-            // get from backend
-            if (maxTime > 0) {
-                maxTime = maxTime - (System.currentTimeMillis() - start);
-                if (maxTime < 0) maxTime = 100;
-            }
-            container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime));
-        }
-        return container;
-    }
-
-    public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty, long maxTime) {
-        // this possibly creates an index file in the back-end
-        // the index file is opened and returned as entity object
-        long start = System.currentTimeMillis();
-        synchronized (cache) {
-            flushFromMem(wordHash);
-            if (maxTime < 0) {
-                flushFromAssortmentCluster(wordHash, -1);
-            } else {
-                long remaining = maxTime - (System.currentTimeMillis() - start);
-                if (remaining > 0)
-                    flushFromAssortmentCluster(wordHash, remaining);
-            }
-        }
-        long r = maxTime - (System.currentTimeMillis() - start);
-        return backend.getEntity(wordHash, deleteIfEmpty, (r < 0) ? 0 : r);
+    */
+    
+    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty) {
+        return (plasmaWordIndexEntryContainer) cache.get(wordHash);
     }
 
     public long getUpdateTime(String wordHash) {
@@ -499,21 +293,27 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         */
     }
 
-    public void deleteIndex(String wordHash) {
+    public plasmaWordIndexEntryContainer deleteContainer(String wordHash) {
+        // returns the index that had been deleted
         synchronized (cache) {
-            cache.remove(wordHash);
+            plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) cache.remove(wordHash);
             hashScore.deleteScore(wordHash);
             hashDate.deleteScore(wordHash);
+            return container;
         }
-        assortmentCluster.removeFromAll(wordHash, -1);
-        backend.deleteIndex(wordHash);
     }
 
-    public synchronized int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
-        flushFromMem(wordHash);
-        flushFromAssortmentCluster(wordHash, -1);
-        int removed = backend.removeEntries(wordHash, urlHashes, deleteComplete);
-        return removed;
+    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
+        if (urlHashes.length == 0) return 0;
+        int count = 0;
+        synchronized (cache) {
+            plasmaWordIndexEntryContainer c = (plasmaWordIndexEntryContainer) deleteContainer(wordHash);
+            if (c != null) {
+                for (int i = 0; i < urlHashes.length; i++) count += (c.remove(urlHashes[i]) == null) ? 0 : 1;
+                if (c.size() != 0) this.addEntries(c, System.currentTimeMillis(), false);
+            }
+        }
+        return count;
     }
 
     public int addEntries(plasmaWordIndexEntryContainer container, long updateTime, boolean highPriority) {
@@ -537,21 +337,6 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 hashDate.setScore(wordHash, intTime(updateTime));
             }
             entries = null;
-            
-            // force flush
-            if (highPriority) {
-                if (cache.size() > maxWordsHigh) {
-                while (cache.size() + 500 > maxWordsHigh) {
-                    try { Thread.sleep(10); } catch (InterruptedException e) { }
-                    flushFromMem();
-                }}
-            } else {
-                if (cache.size() > maxWordsLow) {
-                while (cache.size() + 500 > maxWordsLow) {
-                    try { Thread.sleep(10); } catch (InterruptedException e) { }
-                    flushFromMem();
-                }}
-            }
         }
         return added;
     }
@@ -572,70 +357,11 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
 
     public void close(int waitingSeconds) {
-        // stop permanent flushing
-        //flushThread.terminate();
-        //try {flushThread.join(6000);} catch (InterruptedException e) {}
-
         // dump cache
         try {
             dump(waitingSeconds);
         } catch (IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }
-        
-        // close cluster
-        assortmentCluster.close();
     }
-
-    public Object migrateWords2Assortment(String wordhash) throws IOException {
-        // returns the number of entries that had been added to the assortments
-        // can be negative if some assortments have been moved to the backend
-        File db = plasmaWordIndexEntity.wordHash2path(databaseRoot, wordhash);
-        if (!(db.exists())) return "not available";
-        plasmaWordIndexEntity entity = null;
-        try {
-            entity =  new plasmaWordIndexEntity(databaseRoot, wordhash, true);
-            int size = entity.size();
-            if (size > assortmentCluster.clusterCapacity) {
-                // this will be too big to integrate it
-                entity.close(); entity = null;
-                return "too big";
-            } else {
-                // take out all words from the assortment to see if it fits
-                // together with the extracted assortment
-                plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordhash, -1);
-                if (size + container.size() > assortmentCluster.clusterCapacity) {
-                    // this will also be too big to integrate, add to entity
-                    entity.addEntries(container);
-                    entity.close(); entity = null;
-                    return new Integer(-container.size());
-                } else {
-                    // the combined container will fit, read the container
-                    try {
-                        Iterator entries = entity.elements(true);
-                        plasmaWordIndexEntry entry;
-                        while (entries.hasNext()) {
-                            entry = (plasmaWordIndexEntry) entries.next();
-                            // System.out.println("ENTRY = " + entry.getUrlHash());
-                            container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
-                        }
-                        // we have read all elements, now delete the entity
-                        entity.deleteComplete();
-                        entity.close(); entity = null;
-                        // integrate the container into the assortments; this will work
-                        assortmentCluster.storeTry(wordhash, container);
-                        return new Integer(size);
-                    } catch (kelondroException e) {
-                        // database corrupted, we simply give up the database and delete it
-                        try {entity.close();} catch (Exception ee) {} entity = null;
-                        try {db.delete();} catch (Exception ee) {}
-                        return "database corrupted; deleted";                        
-                    }
-                }
-            }
-        } finally {
-            if (entity != null) try {entity.close();}catch(Exception e){}
-        }
-    }
-
 }

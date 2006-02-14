@@ -324,14 +324,14 @@ public final class plasmaWordIndexDistribution {
            selectTransferContainers(String hash, int mincount, int maxcount) {
 
         Object[] selectResult = selectTransferContainersResource(hash, plasmaWordIndex.RL_RAMCACHE, maxcount);
-        int refcount = ((Integer) selectResult[2]).intValue();
-        if (refcount >= mincount) {
-            log.logFine("DHT selection from RAM: " + refcount + " entries");
+        int refcountRAM = ((Integer) selectResult[2]).intValue();
+        if (refcountRAM >= mincount) {
+            log.logFine("DHT selection from RAM: " + refcountRAM + " entries");
             return selectResult;
         }
         selectResult = selectTransferContainersResource(hash, plasmaWordIndex.RL_WORDFILES, maxcount);
-        refcount = ((Integer) selectResult[2]).intValue();
-        log.logFine("DHT selection from FILE: " + refcount + " entries");
+        int refcountFile = ((Integer) selectResult[2]).intValue();
+        log.logFine("DHT selection from FILE: " + refcountFile + " entries, RAM provided only " + refcountRAM + " entries");
         return selectResult;
     }
     
@@ -341,7 +341,7 @@ public final class plasmaWordIndexDistribution {
         ArrayList tmpContainers = new ArrayList(maxcount);
         String nexthash = "";
         synchronized (this.wordIndex) {try {
-            Iterator wordHashIterator = this.wordIndex.wordHashes(hash, resourceLevel, true, true);
+            Iterator wordHashIterator = this.wordIndex.wordHashes(hash, resourceLevel, true);
             plasmaWordIndexEntryContainer indexContainer;
             Iterator urlIter;
             plasmaWordIndexEntry indexEntry;

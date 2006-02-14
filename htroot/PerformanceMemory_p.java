@@ -218,10 +218,12 @@ public class PerformanceMemory_p {
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
 
         // create statistics about write cache object space
-        int chunksizes = Math.max(
+        int chunksizes = ((kelondroObjectSpace.statAlive().size() > 0) &&
+                          (kelondroObjectSpace.statHeap().size() > 0)) ?
+                          Math.max(
                            ((Integer) kelondroObjectSpace.statAlive().lastKey()).intValue(),
                            ((Integer) kelondroObjectSpace.statHeap().lastKey()).intValue()
-                         );
+                          ) : 0;
         int[] statAlive = new int[chunksizes];
         int[] statHeap  = new int[chunksizes];
         for (int i = 0; i < chunksizes; i++) { statAlive[i] = 0; statHeap[i] = 0; }

@@ -303,7 +303,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 while (hashi.hasNext()) {
                     wordHash = (String) hashi.next();
                     rcGlobal.setWordHash(wordHash);
-                    wordIndex.addEntries(rcGlobal, true);
+                    wordIndex.addEntries(rcGlobal, System.currentTimeMillis(), true);
                     log.logFine("FLUSHED " + wordHash + ": " + rcGlobal.size() + " url entries");
                 }
                 // the rcGlobal was flushed, empty it

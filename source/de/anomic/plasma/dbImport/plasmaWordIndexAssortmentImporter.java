@@ -110,7 +110,7 @@ public class plasmaWordIndexAssortmentImporter extends AbstractImporter implemen
                 this.wordEntryCount += container.size();
                 
                 // importing entity container to home db
-                this.sb.wordIndex.addEntries(container, false);
+                this.sb.wordIndex.addEntries(container, System.currentTimeMillis(), false);
                 
                 if (this.wordEntityCount % 500 == 0) {
                     this.log.logFine(this.wordEntityCount + " word entities processed so far.");

@@ -126,7 +126,7 @@ public final class transferRWI {
                     wordHash = estring.substring(0, p);
                     wordhashes[received] = wordHash;
                     entry = new plasmaWordIndexEntry(estring.substring(p));
-                    sb.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), true);
+                    sb.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), System.currentTimeMillis(), true);
                     serverCore.checkInterruption();
                     
                     urlHash = entry.getUrlHash();

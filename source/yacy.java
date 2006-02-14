@@ -81,7 +81,6 @@ import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
-import de.anomic.plasma.plasmaWordIndexCache;
 import de.anomic.plasma.plasmaWordIndexClassicDB;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntry;
@@ -659,7 +658,7 @@ public final class yacy {
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
         serverLog log = new serverLog("WORDMIGRATION");
         log.logInfo("STARTING MIGRATION");
-        plasmaWordIndexCache wordIndexCache = new plasmaWordIndexCache(dbroot, new plasmaWordIndexClassicDB(dbroot, log), 20000, log);
+        plasmaWordIndex wordIndexCache = new plasmaWordIndex(dbroot, 20000, log);
         enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
         String wordhash;
         File wordfile;
@@ -756,7 +755,7 @@ public final class yacy {
                 wordEntryCount += container.size();
                 
                 // importing entity container to home db
-                homeWordIndex.addEntries(container, true);
+                homeWordIndex.addEntries(container, System.currentTimeMillis(), true);
                 
                 if (wordEntityCount % 500 == 0) {
                     log.logFine(wordEntityCount + " word entities processed so far.");
@@ -840,7 +839,7 @@ public final class yacy {
             long globalStart = System.currentTimeMillis(), wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
             String wordChunkStartHash = "------------", wordChunkEndHash;
             
-            Iterator importWordHashIterator = importWordIndex.wordHashes(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, true, true);
+            Iterator importWordHashIterator = importWordIndex.wordHashes(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, true);
             while (importWordHashIterator.hasNext()) {
                 
                 // testing if import process was aborted
@@ -886,7 +885,7 @@ public final class yacy {
                     if (Thread.interrupted()) break;
                     
                     // importing entity container to home db
-                    homeWordIndex.addEntries(newContainer, true);
+                    homeWordIndex.addEntries(newContainer, System.currentTimeMillis(), true);
                                         
                     // delete complete index entity file
                     importWordIndex.deleteIndex(wordHash);                 
@@ -949,7 +948,7 @@ public final class yacy {
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)(rt.maxMemory()-rt.totalMemory())-5*1024*1024;
             plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, cacheMem, log);
-            Iterator wordHashIterator = wordIndex.wordHashes("------------", plasmaWordIndex.RL_WORDFILES, true, true);
+            Iterator wordHashIterator = wordIndex.wordHashes("------------", plasmaWordIndex.RL_WORDFILES, true);
             
             String wordhash;
             long urlCounter = 0, wordCounter = 0;
@@ -1336,7 +1335,7 @@ public final class yacy {
             Iterator WordHashIterator = null;
             if (resource.equals("all")) {
                 WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, log);
-                WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, true, false);
+                WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             } else if (resource.equals("assortments")) {
                 plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, log);
                 WordHashIterator = assortmentCluster.hashConjunction(wordChunkStartHash, true, false);

@@ -53,9 +53,8 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public class plasmaWordIndexClassicDB implements plasmaWordIndexInterface {
+public class plasmaWordIndexClassicDB {
     
-
     // class variables
     private final File      databaseRoot;
     private final serverLog log;
