@@ -127,6 +127,9 @@ public final class userDB {
     }        
     
     public Entry getEntry(String userName) {
+        if(userName.length()>128){
+            userName=userName.substring(128);
+        }
         try {
             Map record = userTable.get(userName);
             if (record == null) return null;
@@ -269,7 +272,10 @@ public final class userDB {
         
         public Entry(String userName, Map mem) {
             if ((userName == null) || (userName.length() == 0)) 
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Username needed.");
+            if(userName.length()>128){
+                throw new IllegalArgumentException("Username too long!");
+            }
             
             this.userName = userName.trim(); 
             if (this.userName.length() < USERNAME_MIN_LENGTH) 
