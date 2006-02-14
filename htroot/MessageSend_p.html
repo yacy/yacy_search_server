@@ -9,7 +9,68 @@
 <br><br>
 <h2>Send message</h2><br>
 
+#(mode)#
+<!-- =========================== write message =========================== -->
+	#(permission)#
+	<!-- we have no permission to send the message -->
+		<p>You cannot send a message to <b>#[peerName]#</b>.<br>
+		   The peer does not respond. It was now removed from the peer-list.
+		</p>
+	::
+	<!-- we have the permission to send the message -->
+        <p>The peer <b>#[peerName]#</b> is alive and responded:</p>
+        <p><tt>#[response]#
+           You are allowed to send me a message &le; #[messagesize]# kb and an 
+           attachment &le; #[attachmentsize]#.</tt>
+        </p>
+           
+           <form action="MessageSend_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+           	<br>
+           	<br>
+            	<p><h3>Your Message</h3></p>
+                <p>Subject:<br>
+                   <input name="subject" type="text" size="80" maxlength="80" value="#[subject]#">
+                </p>
+                <p>Text:<br>
+                   <textarea name="message" cols="80" rows="8">#[message]#</textarea>
+                </p>
+                <input type="hidden" name="hash" value="#[hash]#">
+                <input type="hidden" name="messagesize" value="#[messagesize]#">
+                <input type="hidden" name="attachmentsize" value="#[attachmentsize]#">
+                <input name="new" type="submit" value="Enter">
+			</form>	
+	:: 
+	<!-- peer cannot respond -->
+		<p>You cannot send a message to <b>#[peerName]#</b>.<br>
+		   The peer is alive but cannot respond. Sorry.
+		</p>	
+	#(/permission)#
+
+::
+<!-- =========================== send message =========================== -->
+	#(status)#
+	   <!-- Message send successfully -->
+	
+		<p>Your message has been sent. The target peer responded:</p>
+		<p><tt>#[response]#</tt></p>
+		
+	:: <!-- Message could not be send -->
+	
+	        <p>The target peer is alive but did not receive your message. Sorry.</p>
+	        <p>
+	        	Here is a copy of your message, so you can copy it to save it for further attempts:<br>
+	          	<tt>#[message]#</tt>
+	        </p>	
+	#(/status)#
+
+:: 
+<!-- illegal usage of this page -->
+	<p>You cannot call this page directly. Instead, use a link on the <a href="Network.html">Network</a> page.</p>
+#(/mode)#
+
+<!--
 #[body]#
+-->
 
 #%env/templates/footer.template%#
 </body>

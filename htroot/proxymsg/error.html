@@ -43,32 +43,33 @@
 			<br>
 			<br>
 			<tt>#[httpStatus]#</tt>
-			<p>
-				<b>
-					#(errorMessageType)#<!-- 0 -->
-						unspecified error
-						::<!-- 1 -->
-						not-yet-assigned error
-						::<!-- 2 -->
-						You don't have an active internet connection. Please go online.
-						::<!-- 3 -->
-						Could not load resource. The file is not available.
-						::<!-- 4 -->
-						#[detailedErrorMsg]#
-						::<!-- 5 -->
-						#%[file]%#
-					#(/errorMessageType)#
-				</b>
+			<p>				
+				#(errorMessageType)#<!-- 0 -->
+					<b>unspecified error</b>
+					::<!-- 1 -->
+					<b>not-yet-assigned error</b>
+					::<!-- 2 -->
+					<b>You don't have an active internet connection. Please go online.</b>
+					::<!-- 3 -->
+					<b>Could not load resource. The file is not available.</b>
+					::<!-- 4 -->
+					<b>#[detailedErrorMsg]#</b>
+					::<!-- 5 -->
+					#%[file]%#
+				#(/errorMessageType)#				
 			</p>
 		</p>
 	</td>
 </tr>
-<tr><td><hr></td></tr>
 #(printStackTrace)#
+<!--
+<tr><td><hr></td></tr>
 <tr>
 	<td>No stacktrace available</td>
-</tr>	
+</tr>
+-->	
 ::
+<tr><td><hr></td></tr>
 <tr>
 	<td>
 		<font color="red"><code>#[stacktrace]#</code></font>
