@@ -194,7 +194,8 @@ public final class plasmaWordIndexEntity {
         // returns true if there was an entry before, false if the key did not exist
         // if after the removal the file is empty, then the file can be deleted if
         // the flag deleteComplete is set.
-       boolean wasEntry = (theIndex.remove(urlHash.getBytes()) != null);
+        if (urlHash == null || theIndex == null) return false;
+        boolean wasEntry = (theIndex.remove(urlHash.getBytes()) != null);
         if ((theIndex.size() == 0) && (deleteComplete)) deleteComplete();
         return wasEntry;
     }
