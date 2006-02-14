@@ -202,8 +202,8 @@ public final class plasmaWordIndexDistribution {
         try {
             String startPointHash = selectTransferStart();
             this.log.logFine("Selected hash " + startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash));
-            
-            Object[] selectResult = selectTransferContainers(startPointHash, indexCount/3, indexCount);
+            final int minCount = indexCount/3;
+            Object[] selectResult = selectTransferContainers(startPointHash, minCount, indexCount);
             indexContainers = (plasmaWordIndexEntryContainer[]) selectResult[0];
             HashMap urlCache = (HashMap) selectResult[1]; // String (url-hash) / plasmaCrawlLURL.Entry
             //int refcount = ((Integer) selectResult[2]).intValue();
@@ -217,7 +217,7 @@ public final class plasmaWordIndexDistribution {
             for (int i = 0; i < indexContainers.length; i++) {
                 indexCount += indexContainers[i].size();
             }
-            if (indexCount < 50) {
+            if (indexCount < minCount) {
                 this.log.logFine("Too few (" + indexCount + ") indexes selected for transfer.");
                 return -1; // failed
             }
