@@ -329,6 +329,11 @@ public final class robotsParser{
             } else if (res.status.startsWith("3")) {
                 // getting redirection URL
                 String redirectionUrlString = (String) res.responseHeader.get(httpHeader.LOCATION);
+                if (redirectionUrlString==null) {
+                    serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.status + "].");
+                    robotsTxt = null;                    
+                }
+                
                 redirectionUrlString = redirectionUrlString.trim();
                 
                 // generating the new URL object

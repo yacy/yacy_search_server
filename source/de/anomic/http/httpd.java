@@ -322,7 +322,7 @@ public final class httpd implements serverHandler {
 			    if(entry.canSurf()){
 				    return true;
 				}
-                HashMap tp=new HashMap();
+                serverObjects tp=new serverObjects();
                 tp.put("limit", "0");//time per day
                 tp.put("limit_timelimit", entry.getTimeLimit());
                 sendRespondError(this.prop, this.session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
@@ -993,7 +993,7 @@ public final class httpd implements serverHandler {
             int httpStatusCode,            
             String httpStatusText,
             File detailedErrorMsgFile,
-            HashMap detailedErrorMsgValues,
+            serverObjects detailedErrorMsgValues,
             Exception stackTrace
     ) throws IOException {
         sendRespondError(
@@ -1017,7 +1017,7 @@ public final class httpd implements serverHandler {
             String httpStatusText,
             String detailedErrorMsgText,
             Object detailedErrorMsgFile,
-            HashMap detailedErrorMsgValues,
+            serverObjects detailedErrorMsgValues,
             Exception stackTrace
     ) throws IOException {
         

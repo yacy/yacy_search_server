@@ -71,14 +71,18 @@ import java.io.PrintWriter;
 import java.io.PushbackInputStream;
 import java.net.BindException;
 import java.net.ConnectException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -94,6 +98,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.logging.serverMiniLogFormatter;
@@ -1287,6 +1292,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             Exception errorExc = null;
             boolean unknownError = false;
             
+            // for customized error messages
+            boolean detailedErrorMsg = false;
+            String  detailedErrorMsgFile = null;
+            serverObjects detailedErrorMsgMap = null;
+            
             if (e instanceof ConnectException) {
                 httpStatusCode = 403; httpStatusText = "Connection refused"; 
                 errorMessage = "Connection refused by destination host";
@@ -1295,7 +1305,15 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             } else if (e instanceof NoRouteToHostException) {
                 errorMessage = "No route to destination host";                    
             } else if (e instanceof UnknownHostException) {
-                errorMessage = "IP address of the destination host could not be determined";
+                //errorMessage = "IP address of the destination host could not be determined";
+                try {
+                    detailedErrorMsgMap = unknownHostHandling(conProp);
+                    httpStatusText = "Unknown Host";
+                    detailedErrorMsg = true;
+                    detailedErrorMsgFile = "proxymsg/unknownHost.inc";                    
+                } catch (Exception e1) {
+                    errorMessage = "IP address of the destination host could not be determined";
+                }
             } else if (e instanceof SocketTimeoutException) {
                 errorMessage = "Unable to establish a connection to the destination host. Connect timed out.";
             } else {
@@ -1306,13 +1324,21 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     this.forceConnectionClose();
                 } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("Connection reset")>= 0)) {
                     errorMessage = "Connection reset";
+                } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("unknown host")>=0)) {
+                    try {
+                        detailedErrorMsgMap = unknownHostHandling(conProp);
+                        httpStatusText = "Unknown Host";
+                        detailedErrorMsg = true;
+                        detailedErrorMsgFile = "proxymsg/unknownHost.inc";
+                    } catch (Exception e1) {
+                        errorMessage = "IP address of the destination host could not be determined";
+                    }
                 } else if ((exceptionMsg != null) && 
                   (
-                     (exceptionMsg.indexOf("unknown host")>=0) ||
                      (exceptionMsg.indexOf("socket write error")>=0) ||
                      (exceptionMsg.indexOf("Read timed out") >= 0) || 
                      (exceptionMsg.indexOf("Broken pipe") >= 0)
-                  )) {
+                  )) { 
                     errorMessage = exceptionMsg;
                 } else if ((remote != null)&&(remote.isClosed())) { 
                     // TODO: query for broken pipe
@@ -1326,7 +1352,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // sending back an error message to the client
             if (!conProp.containsKey(httpHeader.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                httpd.sendRespondError(conProp,respond,4,httpStatusCode,httpStatusText,errorMessage,errorExc);
+                if (detailedErrorMsg) {
+                    httpd.sendRespondError(conProp,respond, httpStatusCode, httpStatusText, new File(detailedErrorMsgFile), detailedErrorMsgMap, errorExc);
+                } else {
+                    httpd.sendRespondError(conProp,respond,4,httpStatusCode,httpStatusText,errorMessage,errorExc);
+                }
             } else {
                 if (unknownError) {
                     this.theLogger.logFine("Error while processing request '" + 
@@ -1345,6 +1375,95 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             this.forceConnectionClose();
         }
         
+    }
+    
+    private serverObjects unknownHostHandling(Properties conProp) throws Exception {
+        serverObjects detailedErrorMsgMap = new serverObjects();
+        
+        // generic toplevel domains        
+        HashSet topLevelDomains = new HashSet(Arrays.asList(new String[]{
+                "aero", // Fluggesellschaften/Luftfahrt
+                "arpa", // Einrichtung des ARPANet
+                "biz",  // Business
+                "com",  // Commercial
+                "coop", // genossenschaftliche Unternehmen
+                "edu",  // Education
+                "gov",  // Government
+                "info", // Informationsangebote
+                "int",  // International
+                "jobs", // Jobangebote von Unternemen
+                "mil",  // Military (US-Militär)
+                // "museum", // Museen
+                "name",   // Privatpersonen
+                "nato",   // NATO (veraltet)
+                "net",    // Net (Netzwerkbetreiber)
+                "org",    // Organization (Nichtkommerzielle Organisation)
+                "pro",    // Professionals
+                "travel",  // Touristikindustrie
+                
+                // some country tlds
+                "de",
+                "at",
+                "ch",
+                "it",
+                "uk"
+        }));
+        
+        // getting some connection properties
+        String orgHostPort = "80";
+        String orgHostName = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST,"unknown").toLowerCase();
+        int pos = orgHostName.indexOf(":");
+        if (pos != -1) {
+            orgHostPort = orgHostName.substring(pos+1);
+            orgHostName = orgHostName.substring(0,pos);                        
+        }                  
+        String orgHostPath = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH,"");
+        String orgHostArgs = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS,"");
+        if (orgHostArgs.length() > 0) orgHostArgs = "?" + orgHostArgs;
+        detailedErrorMsgMap.put("hostName", orgHostName);
+        
+        // guessing hostnames
+        HashSet testHostNames = new HashSet();
+        String testHostName = null;
+        if (!orgHostName.startsWith("www.")) {
+            testHostName = "www." + orgHostName;
+            InetAddress addr = httpc.dnsResolve(testHostName);
+            if (addr != null) testHostNames.add(testHostName);
+        } else if (orgHostName.startsWith("www.")) {
+            testHostName = orgHostName.substring(4);
+            InetAddress addr = httpc.dnsResolve(testHostName);
+            if (addr != null) if (addr != null) testHostNames.add(testHostName);                      
+        } 
+        if (orgHostName.length()>4 && orgHostName.startsWith("www") && (orgHostName.charAt(3) != '.')) {
+            testHostName = orgHostName.substring(0,3) + "." + orgHostName.substring(3);
+            InetAddress addr = httpc.dnsResolve(testHostName);
+            if (addr != null) if (addr != null) testHostNames.add(testHostName);                             
+        }
+        
+        pos = orgHostName.lastIndexOf(".");
+        if (pos != -1) {
+            Iterator iter = topLevelDomains.iterator();
+            while (iter.hasNext()) {
+                String topLevelDomain = (String) iter.next();
+                testHostName = orgHostName.substring(0,pos) + "." + topLevelDomain;
+                InetAddress addr = httpc.dnsResolve(testHostName);
+                if (addr != null) if (addr != null) testHostNames.add(testHostName);                        
+            }
+        }
+        
+        int hostNameCount = 0;
+        Iterator iter = testHostNames.iterator();
+        while (iter.hasNext()) {
+            testHostName = (String) iter.next();
+            detailedErrorMsgMap.put("list_" + hostNameCount + "_hostName",testHostName);
+            detailedErrorMsgMap.put("list_" + hostNameCount + "_hostPort",orgHostPort);
+            detailedErrorMsgMap.put("list_" + hostNameCount + "_hostPath",orgHostPath);
+            detailedErrorMsgMap.put("list_" + hostNameCount + "_hostArgs",orgHostArgs);
+            hostNameCount++;     
+        }
+        
+        detailedErrorMsgMap.put("list", hostNameCount);  
+        return detailedErrorMsgMap;
     }
     
     private String generateUserAgent(httpHeader requestHeaders) {
