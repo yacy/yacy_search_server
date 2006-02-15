@@ -214,7 +214,18 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (tagname.equalsIgnoreCase("img")) images.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("alt",""));
         if (tagname.equalsIgnoreCase("base")) try {root = new URL(tagopts.getProperty("href", ""));} catch (MalformedURLException e) {}
         if (tagname.equalsIgnoreCase("frame")) anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
-        if (tagname.equalsIgnoreCase("meta")) metas.put((tagopts.getProperty("name", "")).toLowerCase(), tagopts.getProperty("content",""));
+        if (tagname.equalsIgnoreCase("meta")) {
+            String name = tagopts.getProperty("name", "");
+            if (name.length() > 0) {
+                metas.put(name.toLowerCase(), tagopts.getProperty("content",""));
+                return;
+            }
+            name = tagopts.getProperty("http-equiv", "");
+            if (name.length() > 0) {
+                metas.put(name.toLowerCase(), tagopts.getProperty("content",""));
+                return;
+            }
+        }
     }
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
@@ -330,6 +341,28 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
     }
     
+    public int getRefreshSeconds() {
+        String s = (String) metas.get("refresh");
+        if (s == null) return 9999; else try {
+            int pos = s.indexOf(';');
+            if (pos < 0) return 9999;
+            int i = Integer.parseInt(s.substring(0, pos));
+            return i;
+        } catch (NumberFormatException e) {
+            return 9999;
+        }
+    }
+
+    public String getRefreshPath() {
+        String s = (String) metas.get("refresh");
+        if (s == null) return ""; else {
+            int pos = s.indexOf(';');
+            if (pos < 0) return "";
+            s = s.substring(pos + 1);
+            if (s.toLowerCase().startsWith("url=")) return s.substring(4).trim(); else return "";
+        }
+    }
+
     /*
      *  (non-Javadoc)
      * @see de.anomic.htmlFilter.htmlFilterScraper#close()
