@@ -175,10 +175,12 @@ public class Bookmarks_p {
     Iterator it=switchboard.bookmarksDB.getTagIterator(true);
     int count=0;
     bookmarksDB.Tag tag;
+    prop.put("num-bookmarks", switchboard.bookmarksDB.bookmarksSize());
     while(it.hasNext()){
         tag=(Tag) it.next();
         prop.put("taglist_"+count+"_name", tag.getFriendlyName());
         prop.put("taglist_"+count+"_tag", tag.getTagName());
+        prop.put("taglist_"+count+"_num", tag.size());
         count++;
     }
     prop.put("taglist", count);
