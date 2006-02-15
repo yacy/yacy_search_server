@@ -1197,19 +1197,40 @@ public final class httpd implements serverHandler {
             boolean nocache
     ) throws IOException {
         
-        if(headers==null)headers = new httpHeader();
+        String reqMethod = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
+        
+        if ((transferEnc != null) && !httpVersion.equals(httpHeader.HTTP_VERSION_1_1)) { 
+            throw new IllegalArgumentException("Transfer encoding is only supported for http/1.1 connections.");
+        }
+        if (reqMethod.equals(httpHeader.METHOD_HEAD)) {
+            if (contentLength >= 0) {
+                throw new IllegalArgumentException("Http HEAD response messages MUST NOT contain a content-length.");
+            }
+        }
+        if (!reqMethod.equals(httpHeader.METHOD_HEAD)){
+            if (!conProp.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close").equals("close")) {
+                if (transferEnc == null && contentLength < 0) {
+                    throw new IllegalArgumentException("Message MUST contain a Content-Length or a non-identity transfer-coding heder field.");
+                }
+            }
+            if (transferEnc != null && contentLength >= 0) {
+                throw new IllegalArgumentException("Messages MUST NOT include both a Content-Length header field and a non-identity transfer-coding.");
+            }            
+        }
+        
+        if(headers==null) headers = new httpHeader();
         Date now = new Date(System.currentTimeMillis());
         
         headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(httpHeader.DATE, httpc.dateString(now));
-	if (moddate.after(now)) moddate = now;
+        if (moddate.after(now)) moddate = now;
         headers.put(httpHeader.LAST_MODIFIED, httpc.dateString(moddate));
         
         if (nocache) {
             if (httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_1_1)) headers.put(httpHeader.CACHE_CONTROL, "no-cache");
             else headers.put(httpHeader.PRAGMA, "no-cache");
         }
-        if (contentLength > 0)   headers.put(httpHeader.CONTENT_TYPE,  (contentType == null)? "text/html" : contentType);  
+        headers.put(httpHeader.CONTENT_TYPE,  (contentType == null)? "text/html" : contentType);  
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_LENGTH, Long.toString(contentLength));
         //if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
         if (expires != null)     headers.put(httpHeader.EXPIRES, httpc.dateString(expires));

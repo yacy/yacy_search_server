@@ -661,23 +661,53 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         if (fis != null) try {fis.close(); fis=null;} catch(Exception e) {}
                     }
                     
+                    // write the array to the client
+                    httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, tp.getOutgoingHeader(), (zipContent)?"gzip":null, null, nocache);
+                    if (! method.equals(httpHeader.METHOD_HEAD)) {
+                        Thread.sleep(200); // this solved the message problem (!!)
+                        serverFileUtils.write(result, out);
+                    }                    
+                    
                 } else { // no html                    
                     // write the file to the client
                     targetDate = new Date(targetFile.lastModified());
-                    result = (zipContent) ? serverFileUtils.readAndZip(targetFile) : serverFileUtils.read(targetFile);
+                    long   contentLength    = method.equals(httpHeader.METHOD_HEAD)?-1:(zipContent)?-1:targetFile.length();
+                    String contentEncoding  = method.equals(httpHeader.METHOD_HEAD)?null:(zipContent)?"gzip":null;
+                    String transferEncoding = (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1))?null:(zipContent)?"chunked":null;
+                    if (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && zipContent) forceConnectionClose();
+                    
+                    httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, contentLength, targetDate, null, tp.getOutgoingHeader(), contentEncoding, transferEncoding, nocache);
+                
+                    if (!method.equals(httpHeader.METHOD_HEAD)) {                        
+                        httpChunkedOutputStream chunkedOut = null;
+                        GZIPOutputStream zipped = null;
+                        OutputStream newOut = out;
+                        
+                        if (transferEncoding != null) {
+                            chunkedOut = new httpChunkedOutputStream(newOut);
+                            newOut = chunkedOut;
+                        }
+                        if (contentEncoding != null) {
+                            zipped = new GZIPOutputStream(newOut);
+                            newOut = zipped;
+                        }
+                        
+                        serverFileUtils.copy(targetFile,newOut);
+                        
+                        if (zipped != null) {
+                            zipped.flush();
+                            zipped.finish();
+                        }
+                        if (chunkedOut != null) {
+                            chunkedOut.finish();
+                        }
+                    }   
                     
                     // check mime type again using the result array: these are 'magics'
 //                    if (serverByteBuffer.equals(result, 1, "PNG".getBytes())) mimeType = mimeTable.getProperty("png","text/html");
 //                    else if (serverByteBuffer.equals(result, 0, "GIF89".getBytes())) mimeType = mimeTable.getProperty("gif","text/html");
 //                    else if (serverByteBuffer.equals(result, 6, "JFIF".getBytes())) mimeType = mimeTable.getProperty("jpg","text/html");
-                    //System.out.print("MAGIC:"); for (int i = 0; i < 10; i++) System.out.print(Integer.toHexString((int) result[i]) + ","); System.out.println();            
-                }
-                
-                // write the array to the client
-                httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, tp.getOutgoingHeader(), (zipContent)?"gzip":null, null, nocache);
-                if (! method.equals(httpHeader.METHOD_HEAD)) {
-                    Thread.sleep(200); // this solved the message problem (!!)
-                    serverFileUtils.write(result, out);
+                    //System.out.print("MAGIC:"); for (int i = 0; i < 10; i++) System.out.print(Integer.toHexString((int) result[i]) + ","); System.out.println();
                 }
             } else {
                 httpd.sendRespondError(conProp,out,3,404,"File not Found",null,null);
