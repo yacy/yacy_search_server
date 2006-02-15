@@ -70,7 +70,10 @@ public class NetworkPicture {
             maxCount = post.getInt("max", 1000);
         }
         
+        //too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
+        if (width < 320 ) width = 320;
         if (width > 1920) width = 1920;
+        if (height < 240) height = 240;
         if (height > 1200) height = 1200;
         if (passiveLimit > 1000000) passiveLimit = 1000000;
         if (potentialLimit > 1000000) potentialLimit = 1000000;

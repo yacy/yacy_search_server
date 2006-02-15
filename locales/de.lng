@@ -1200,9 +1200,9 @@ Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 #File: Settings_PortForwarding.inc
 #check for logical mistakes, unsure about some translations
 Port Forwarding==Port Weiterleitung
-You can use a remote server running a ssh demon to forward your server/proxy port.==Sie k&ouml;nnen einen Remote Server mit einem ssh demon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
-This is useful if you want to tunnel throug a NAT/router.==Dies ist n&uuml;tzlich, wenn Sie durch einen NAT/Router tunneln wollen.
-Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativ k&ouml;nnen Sie einfach einen virtuellen Server in Ihrem NAT/Router einstellen, um Verbindungen von Au&szlig;erhalb zu erm&ouml;glichen.
+You can use a remote server running a ssh demon to forward your server/proxy port.==Sie k&ouml;nnen einen Remote Server mit einem SSH-Daemon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
+This is useful if you want to tunnel throug a NAT/router.==Dies ist n&uuml;tzlich, wenn Sie durch einen Router/NAT tunneln wollen.
+Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativ k&ouml;nnen Sie einfach einen virtuellen Server in Ihrem Router/NAT einstellen, um Verbindungen von au&szlig;en zu erm&ouml;glichen.
 Enable&nbsp;port&nbsp;forwarding:==Aktiviere Port Weiterleitung:
 Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung &uuml;ber sicheren Kanal.
 Forwarding&nbsp;via&nbsp;proxy:==Weiterleitung &uuml;ber Proxy:
