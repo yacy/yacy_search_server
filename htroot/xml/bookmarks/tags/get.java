@@ -59,9 +59,10 @@ public class get {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        boolean isAdmin=switchboard.verifyAuthentication(header, true);
         serverObjects prop = new serverObjects();
 
-        Iterator it=switchboard.bookmarksDB.getTagIterator(false);
+        Iterator it=switchboard.bookmarksDB.getTagIterator(isAdmin);
         int count=0;
         bookmarksDB.Tag tag;
         while(it.hasNext()){

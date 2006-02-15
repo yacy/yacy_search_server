@@ -1,5 +1,0 @@
-<?xml version='1.0' standalone='yes'?>
-<posts>
-#{posts}#<post href="#[url]#" description="#[title]#" extended="#[description]#" hash="#[md5]#" tag="#[tags]#" time="#[time]#"/>
-#{/posts}#
-</posts>

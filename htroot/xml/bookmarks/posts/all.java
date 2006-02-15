@@ -59,12 +59,13 @@ public class all {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        boolean isAdmin=switchboard.verifyAuthentication(header, true);
         serverObjects prop = new serverObjects();
         Iterator it;
         if(post != null && post.containsKey("tag")){
-            it=switchboard.bookmarksDB.getBookmarksIterator((String) post.get("tag"), false);
+            it=switchboard.bookmarksDB.getBookmarksIterator((String) post.get("tag"), isAdmin);
         }else{
-            it=switchboard.bookmarksDB.getBookmarksIterator(false);
+            it=switchboard.bookmarksDB.getBookmarksIterator(isAdmin);
         }
         int count=0;
         bookmarksDB.Bookmark bookmark;
