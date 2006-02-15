@@ -13,10 +13,12 @@
 <!-- todo: div layout? -->
 
 #(mode)#
-<a href="Bookmarks_p.html?mode=add">Add Bookmark</a>
-<a href="Bookmarks_p.html?mode=importxml">Import XML Bookmarks</a>
+<a href="Bookmarks.html?login=true">Login</a>
 ::
-<form action="Bookmarks_p.html" method="GET">
+<a href="Bookmarks.html?mode=add">Add Bookmark</a>
+<a href="Bookmarks.html?mode=importxml">Import XML Bookmarks</a>
+::
+<form action="Bookmarks.html" method="GET">
 <table border="0" width="100%" height="100%">
 	<tr>
 		<td colspan="2" colspan="2" valign="top" class="TableHeader">#(edit)#<h3>Add Bookmark</h3>::<h3>Edit Bookmark</h3>#(/edit)#</td>
@@ -57,7 +59,7 @@
 </table>
 </form>
 ::
-<form action="Bookmarks_p.html" method="POST"  enctype="multipart/form-data">
+<form action="Bookmarks.html" method="POST"  enctype="multipart/form-data">
 <table border="0" width="100%" height="100%">
 	<tr>
 		<td colspan="2" colspan="2" valign="top" class="TableHeader"><h3>Import XML Bookmarks</h3></td>
@@ -96,30 +98,30 @@
 #(public)#<img class="bookmarkIcon" src="env/grafics/bookmarkpriv.gif" alt="private bookmark" title="private bookmark">::<img class="bookmarkIcon" src="env/grafics/bookmarkpub.gif" alt="public bookmark" title="public bookmark">#(/public)#
 <a href="#[link]#" target="_blank" class="bookmarkTitle">#[title]#</a><br />
 <span class="bookmarkDescription">#[description]#</span><br />
-Tagged with |&nbsp;#{tags}#<a href="Bookmarks_p.html?tag=#[tag]#" class="bookmarkTags">#[tag]#</a> | #{/tags}#<br />
-<a href="Bookmarks_p.html?edit=#[hash]#" class="bookmarkAction">Edit</a> /
-<a href="Bookmarks_p.html?delete=#[hash]#" class="bookmarkAction">Delete</a>
+Tagged with |&nbsp;#{tags}#<a href="Bookmarks.html?tag=#[tag]#" class="bookmarkTags">#[tag]#</a> | #{/tags}#<br />
+<a href="Bookmarks.html?edit=#[hash]#" class="bookmarkAction">Edit</a> /
+<a href="Bookmarks.html?delete=#[hash]#" class="bookmarkAction">Delete</a>
 </p>
 #{/bookmarks}#
 <p />
 #(prev-page)#
-::<a href="Bookmarks_p.html?tag=#[tag]#&start=#[start]#&num=#[num]#">previous page</a>
+::<a href="Bookmarks.html?tag=#[tag]#&start=#[start]#&num=#[num]#">previous page</a>
 #(/prev-page)#
 #(next-page)#
-::<a href="Bookmarks_p.html?tag=#[tag]#&start=#[start]#&num=#[num]#">next page</a>
+::<a href="Bookmarks.html?tag=#[tag]#&start=#[start]#&num=#[num]#">next page</a>
 #(/next-page)#
 <br />
 Show
-<a href="Bookmarks_p.html?tag=#[tag]#&start=#[start]#&num=10">10</a>
-<a href="Bookmarks_p.html?tag=#[tag]#&start=#[start]#&num=50">50</a>
-<a href="Bookmarks_p.html?tag=#[tag]#&start=#[start]#&num=100">100</a>
+<a href="Bookmarks.html?tag=#[tag]#&start=#[start]#&num=10">10</a>
+<a href="Bookmarks.html?tag=#[tag]#&start=#[start]#&num=50">50</a>
+<a href="Bookmarks.html?tag=#[tag]#&start=#[start]#&num=100">100</a>
 Bookmarks per page.
 </td>
 <td valign="top" style="padding-left: 5px; border-left-style: solid; border-left-width: 1px; border-left-color: black;">
 <div style="text-align: right">
-<a href="Bookmarks_p.html" class="bookmarkTags">All</a> (#[num-bookmarks]#)<br />
+<a href="Bookmarks.html" class="bookmarkTags">All</a> (#[num-bookmarks]#)<br />
 #{taglist}#
-<a href="Bookmarks_p.html?tag=#[tag]#" class="bookmarkTags">#[name]#</a> (#[num]#)<br />
+<a href="Bookmarks.html?tag=#[tag]#" class="bookmarkTags">#[name]#</a> (#[num]#)<br />
 #{/taglist}#
 </div>
 </td>

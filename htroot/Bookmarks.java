@@ -50,6 +50,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import de.anomic.data.bookmarksDB;
+import de.anomic.data.listManager;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -57,16 +58,20 @@ import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class Bookmarks_p {
+public class Bookmarks {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
     serverObjects prop = new serverObjects();
     plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
     int max_count=10;
     String tagName="";
     int start=0;
+    boolean isAdmin=switchboard.verifyAuthentication(header, true);
     
     //defaultvalues
     prop.put("mode", 0);
+    if(isAdmin){
+        prop.put("mode", 1);
+    }
     prop.put("mode_edit", 0);
     prop.put("mode_title", "");
     prop.put("mode_description", "");
@@ -74,15 +79,19 @@ public class Bookmarks_p {
     prop.put("mode_tags", "");
     prop.put("mode_public", 1); //1=is public
     if(post != null){
-        if(post.containsKey("mode")){
+        
+        if(!isAdmin){
+            if(post.containsKey("login")){
+                prop.put("AUTHENTICATE","admin log-in");
+            }
+        }else if(post.containsKey("mode")){
             String mode=(String) post.get("mode");
             if(mode.equals("add")){
-            	prop.put("mode", 1);
-            }else if(mode.equals("importxml")){
             	prop.put("mode", 2);
+            }else if(mode.equals("importxml")){
+            	prop.put("mode", 3);
             }
-        }
-        if(post.containsKey("add")){ //add an Entry
+        }else if(post.containsKey("add")){ //add an Entry
             String url=(String) post.get("url");
             String title=(String) post.get("title");
             String description=(String) post.get("description");
@@ -90,11 +99,7 @@ public class Bookmarks_p {
             if(tagsString.equals("")){
                 tagsString="unsorted"; //defaulttag
             }
-            Vector tags=new Vector();
-            String[] tagsArray=tagsString.split(",");
-            for(int i=0;i<tagsArray.length; i++){
-                tags.add(tagsArray[i].trim());
-            }
+            Vector tags=listManager.string2vector(tagsString);
         
             bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url);
             if(bookmark != null){
@@ -113,7 +118,7 @@ public class Bookmarks_p {
             }
         }else if(post.containsKey("edit")){
             String urlHash=(String) post.get("edit");
-            prop.put("mode", 1);
+            prop.put("mode", 2);
             if (urlHash.length() == 0) {
                 prop.put("mode_edit", 0); // create mode
                 prop.put("mode_title", (String) post.get("title"));
@@ -156,12 +161,11 @@ public class Bookmarks_p {
             	isPublic=true;
             }
         	switchboard.bookmarksDB.importFromXML(new String((byte[])post.get("xmlfile$file")), isPublic);
-        }
-
-        if(post.containsKey("delete")){
+        }else if(post.containsKey("delete")){
             String urlHash=(String) post.get("delete");
             switchboard.bookmarksDB.removeBookmark(urlHash);
         }
+        
         if(post.containsKey("tag")){
             tagName=(String) post.get("tag");
         }
@@ -172,7 +176,7 @@ public class Bookmarks_p {
             max_count=Integer.parseInt((String) post.get("num"));
         }
     }
-    Iterator it=switchboard.bookmarksDB.getTagIterator(true);
+    Iterator it=switchboard.bookmarksDB.getTagIterator(isAdmin);
     int count=0;
     bookmarksDB.Tag tag;
     prop.put("num-bookmarks", switchboard.bookmarksDB.bookmarksSize());
@@ -186,9 +190,9 @@ public class Bookmarks_p {
     prop.put("taglist", count);
     count=0;
     if(!tagName.equals("")){
-        it=switchboard.bookmarksDB.getBookmarksIterator(tagName, true);
+        it=switchboard.bookmarksDB.getBookmarksIterator(tagName, isAdmin);
     }else{
-        it=switchboard.bookmarksDB.getBookmarksIterator(true);
+        it=switchboard.bookmarksDB.getBookmarksIterator(isAdmin);
     }
     bookmarksDB.Bookmark bookmark;
     //skip the first entries (display next page)

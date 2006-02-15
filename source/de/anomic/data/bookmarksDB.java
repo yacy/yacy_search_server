@@ -745,7 +745,7 @@ public class bookmarksDB {
             Iterator it=tags.iterator();
             while(it.hasNext()){
                 String tagName=(String) it.next();
-                Tag tag=getTag(tagName);
+                Tag tag=getTag(tagHash(tagName));
                 if(tag == null){
                     tag=new Tag(tagName);
                 }
