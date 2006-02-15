@@ -78,11 +78,11 @@ public class bookmarksDB {
     kelondroMap bookmarksTable;
     kelondroMap datesTable;
     
+    public static String tagHash(String tagName){
+        return plasmaWordIndexEntry.word2hash(tagName.toLowerCase());
+    }
     public static String dateToiso8601(Date date){
     	return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";
-    }
-    public static String tagHash(String tagName){
-    	return plasmaWordIndexEntry.word2hash(tagName.toLowerCase());
     }
     public static Date iso8601ToDate(String iso8601){
     	String[] tmp=iso8601.split("T");
@@ -186,6 +186,28 @@ public class bookmarksDB {
     public int tagsSize(){
         return tagsTable.size();
     }
+    /**
+     * Store a Bookmark in the Bookmarkstable
+     * @param bookmark the bookmark to store/update in the bookmarksTable
+     */
+    public void setBookmarksTable(Bookmark bookmark){
+        try {
+            bookmarksDB.this.bookmarksTable.set(bookmark.getUrlHash(), bookmark.mem);
+        } catch (IOException e) {}
+    }
+    /**
+     * store a Tag in the tagsDB or remove an empty tag
+     * @param tag the tagobject to be stored/removed
+     */
+    public void setTagsTable(Tag tag){
+        try {
+            if(tag.size() >0){
+                bookmarksDB.this.tagsTable.set(tag.getTagHash(), tag.mem);
+            }else{
+                bookmarksDB.this.tagsTable.remove(tag.getTagHash());
+            }
+        } catch (IOException e) {}
+    }
     public String addTag(Tag tag){
         try {
             tagsTable.set(tag.getTagName(), tag.mem);
@@ -210,7 +232,7 @@ public class bookmarksDB {
                     tag=new Tag(tags[i]);
                 }
                 tag.add(bookmark.getUrlHash());
-                tag.setTagsTable();
+                setTagsTable(tag);
             }
         }
         serverLog.logInfo("BOOKMARKS", "Rebuilt "+tagsTable.size()+" tags using your "+bookmarksTable.size()+" bookmarks.");
@@ -265,7 +287,7 @@ public class bookmarksDB {
             }
             tag=new Tag(tagHash(newName), tag.mem);
             tag.tagHash = tagHash(newName);
-            tag.setTagsTable();
+            setTagsTable(tag);
             Iterator it = urlHashes.iterator();
             Bookmark bookmark;
             Vector tags;
@@ -274,8 +296,8 @@ public class bookmarksDB {
                 tags = listManager.string2vector(bookmark.getTags());
                 tags.remove(oldName); //this will fail, if upper/lowercase is not matching
                 tags.add(newName);
-                bookmark.setTags(tags);
-                bookmark.setBookmarksTable();
+                bookmark.setTags(tags, true);
+                setBookmarksTable(bookmark);
             }
             return true;
         }
@@ -359,7 +381,7 @@ public class bookmarksDB {
             tag=getTag(tagHash(tags[i]));
             if(tag !=null){
                 tag.delete(urlHash);
-                tag.setTagsTable();
+                setTagsTable(tag);
             }
         }
         try {
@@ -436,7 +458,7 @@ public class bookmarksDB {
 				if(tagsString!=null){
 					tags = listManager.string2vector(tagsString);
 				}
-				bm.setTags(tags);
+				bm.setTags(tags, true);
 				if(time != null){
 					bm.setTimeStamp(iso8601ToDate(time).getTime());
 				}
@@ -444,7 +466,7 @@ public class bookmarksDB {
 					bm.setProperty(Bookmark.BOOKMARK_DESCRIPTION, description);
 				}
 				bm.setPublic(importPublic);
-				bm.setBookmarksTable();
+                setBookmarksTable(bm);
 			}
 		}
     }
@@ -538,15 +560,6 @@ public class bookmarksDB {
                 list.remove(urlHash);
             }
             this.mem.put(URL_HASHES, listManager.vector2string(list));
-        }
-        public void setTagsTable(){
-            try {
-                if(this.size() >0){
-                    bookmarksDB.this.tagsTable.set(getTagHash(), mem);
-                }else{
-                    bookmarksDB.this.tagsTable.remove(getTagHash());
-                }
-            } catch (IOException e) {}
         }
         public int size(){
             return listManager.string2vector(((String)this.mem.get(URL_HASHES))).size();
@@ -717,9 +730,17 @@ public class bookmarksDB {
                 tags=(Vector)mem.get(BOOKMARK_TAGS);
             }
             tags.add(tag);
-            this.setTags(tags);
+            this.setTags(tags, true);
         }
         public void setTags(Vector tags){
+            setTags(tags, true);
+        }
+        /**
+         * set the Tags of the bookmark
+         * @param tags Vector with the tagnames
+         * @param local sets, whether the updated tags should be stored to tagsDB
+         */
+        public void setTags(Vector tags, boolean local){
             mem.put(BOOKMARK_TAGS, listManager.vector2string(tags));
             Iterator it=tags.iterator();
             while(it.hasNext()){
@@ -729,7 +750,9 @@ public class bookmarksDB {
                     tag=new Tag(tagName);
                 }
                 tag.add(getUrlHash());
-                tag.setTagsTable();
+                if(local){
+                    setTagsTable(tag);
+                }
             }
         }
         public void setBookmarksTable(){

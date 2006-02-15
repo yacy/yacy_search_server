@@ -105,8 +105,9 @@ public class Bookmarks_p {
                 }else{
                 	bookmark.setPublic(false);
                 }
-                bookmark.setTags(tags);
-                bookmark.setBookmarksTable();
+                bookmark.setTags(tags, true);
+                switchboard.bookmarksDB.setBookmarksTable(bookmark);
+                
             }else{
                 //ERROR
             }
