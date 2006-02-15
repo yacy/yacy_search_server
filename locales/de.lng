@@ -68,6 +68,7 @@ File:==Datei:
 YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
 <h2>Bookmarks==<h2>Lesezeichen
 Add Bookmark==Lesezeichen hinzuf&uuml;gen
+Import XML Bookmarks==Importiere XML Lesezeichen
 Edit Bookmark==Lesezeichen bearbeiten
 #URL:==URL:
 Title:==Titel:
@@ -78,11 +79,16 @@ yes==ja
 no==nein
 "create"=="erzeugen"
 "edit"=="bearbeiten"
+"private bookmark"=="Privates Lesezeichen"
+"public bookmark"=="&Ouml;ffentliches Lesezeichen"
 Tagged with==Stichworte:
 Edit==Bearbeiten
 Delete==L&ouml;schen
+previous page==vorherige Seite
 next page==n&auml;chste Seite
 All==Alle
+Show==Zeige
+Bookmarks per page.==Lesezeichen pro Seite.
 
 #-----------------------------------------------------------
 #File: CacheAdmin_p.html
@@ -254,6 +260,44 @@ Max. search time==Max. Suchdauer
 URL mask:==URL-Filter:
 restrict on==beschr&auml;nken auf
 show all==alle zeigen
+The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
+No Results.==Keine Ergebnisse.
+length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
+If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Wenn Sie das f&uuml;r unzureichend halten, sollten Sie &uuml;berlegen, den globalen Index durch das Betreiben eines eigenen Proxies/Peers zu unterst&uuml;tzen.
+If everybody contributes, the results will get better.==Wenn jeder etwas beitr&auml;gt, werden die Ergebnisse besser.
+Other possible reasons for no result:==Andere m&ouml;gliche Gr&uuml;nde daf&uuml;r, dass Sie keine Ergebnisse erhalten haben:
+The search time was too short. Search again with same query to catch up 'late peers'==Die Zeit zum suchen war zu kurz. Suchen Sie erneut mit erh&ouml;hter max. Suchdauer nach dem gleichen Begriff, um so auch Ergebnisse von langsameren Peers zu erhalten.
+There is currently no support for german umlaute. Please use ae/oe/ue instead==Zur Zeit gibt es keine Unterst&uuml;tzung der deutschen Umlaute. Bitte benutzen Sie stattdessen ae/oe/ue.
+Words of length < 3 are not indexed. Please omit such words==W&ouml;rter mit weniger als drei Buchstaben werden nicht indiziert.
+YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indiziert nur den Singular eines Wortes. Bitte suchen Sie daher auch nur nach dem Singular.
+Only complete words are indexed, not parts of words==Nur komplette W&ouml;rter sind indiziert, keine Teile eines Wortes.
+Don't use stopwords as search words==Benutzen Sie bitte keine Stopwords in der Suche.
+During this test phase the reaction time of remote peers is unknown.==W&auml;hrend dieser Testphase ist die Reaktionszeit von anderen Peers unbekannt.
+Please repeat your search to see if there are late-responses from remote peers==Bitte wiederholen Sie Ihre Suche, um zu sehen ob es Antworten von sp&auml;t reagierenden Peers gibt
+If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
+then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen Crawl nach der gesuchten Information, um sie
+available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um Crawls von anderen Peers zu erlauben. Danke!
+results from==Resultate aus
+ordered links of a total number of==gefunden Links von insgesamt
+known.==bekannten Links.
+Catch up more links==Sammel mehr Links
+from 'late' peers.==von sp&auml;t antwortenden Peers.
+<b>Topwords</b> \(to refine search\):==<b>Topw&ouml;rter</b> (um Suche zu verfeinern):
+You can enrich the search results by using the 'global' option==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen
+This will search also other YaCy peers==So werden auch andere YaCy Peers zum Suchen benutzt.
+You cannot get global search results because you are not connected to another YaCy peer.==Sie k&ouml;nnen keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
+To connect you must first use the proxy.==Um sich zu verbinden, m&uuml;ssen Sie erst den Proxy benutzen.
+See here for an==Sehen Sie hier
+installation guide==f&uuml;r eine Installations-Anleitung
+Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativ k&ouml;nnen Sie auch den Proxy im permanent online Modus laufen lassen. Dies garantiert eine globale Suche.
+To do this, press this button:==Um dies zu tun, klicken Sie bitte auf folgenden Button:
+"go online"=="gehe online"
+you must also switch to online mode==Sie m&uuml;ssen aber erst in den online Modus wechseln
+\(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
+The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;t #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
+YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
+with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
+Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
 
 #-----------------------------------------------------------
 #File: websearch.html
@@ -506,7 +550,7 @@ This queue stores the urls that shall be crawled localy by this peer.==Diese War
 It may also contain urls that are computed by the proxy-prefetch.==Sie enth&auml;t auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
 The local crawler queue is empty==Die lokale Crawler Warteschlange ist leer.
 "clear local crawl queue"=="L&ouml;sche lokale Crawler Warteschlange"
-There are <b>\#\[num\]\#</b> entries in the local crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==Es befinden sich <b>#[num]#</b> Eintr&auml;ge in der globalen Crawler Warteschlange. Gezeigt werden die <b>#[show-num]#</b> neusten Eintr&auml;ge.
+There are <b>\#\[num\]\#</b> entries in the local crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==Es befinden sich <b>#[num]#</b> Eintr&auml;ge in der lokalen Crawler Warteschlange. Gezeigt werden die <b>#[show-num]#</b> neusten Eintr&auml;ge.
 Show last==Zeige die letzten
 </a> entries.==</a> Eintr&auml;ge.
 Initiator==Initiator
