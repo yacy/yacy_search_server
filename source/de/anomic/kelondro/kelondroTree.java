@@ -265,45 +265,39 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                         throw new kelondroException(filename, "kelondroTree.Search.process: thenode==null");
                     }
                     k = thenode.getKey();
-                    if ((k != null) && (visitedNodeKeys.contains(k))) {
-                        // we have loops in the database.
-                        // to fix this, all affected nodes must be patched
-                        thenode.setOHByte(magic, (byte) 1);
-                        thenode.setOHByte(balance, (byte) 0);
-                        thenode.setOHHandle(parent, null);
-                        thenode.setOHHandle(leftchild, null);
-                        thenode.setOHHandle(rightchild, null);
-                        thenode.commit(CP_NONE);
-                        /*
-                         * Iterator fix = visitedNodeKeys.entrySet().iterator();
-                         * Map.Entry entry; while (fix.hasNext()) { entry =
-                         * (Map.Entry) fix.next(); thenode = (Node)
-                         * entry.getValue(); thenode.setOHByte(magic, (byte) 1);
-                         * thenode.setOHByte(balance, (byte) 0);
-                         * thenode.setOHHandle(parent, null);
-                         * thenode.setOHHandle(leftchild, null);
-                         * thenode.setOHHandle(rightchild, null); }
-                         */
-                        logWarning("kelondroTree.Search.process: database contains loops; the loop-nodes have been auto-fixed");
+                    if (k == null) {
                         found = false;
                         return;
-                    }
-                    // System.out.println("Comparing key = '" + new String(key)
-                    // + "' with '" + otherkey + "':"); // debug
-                    c = objectOrder.compare(key, thenode.getKey());
-                    // System.out.println(c); // debug
-                    if (c == 0) {
-                        found = true;
-                        // System.out.println("DEBUG: search for " + new String(key) + " ended with status=" + ((found) ? "found" : "not-found") + ", node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ", parent=" + ((parentnode == null) ? "NULL" : parentnode.toString()));
-                        return;
-                    } else if (c < 0) {
-                        child = -1;
-                        thisHandle = thenode.getOHHandle(leftchild);
                     } else {
-                        child = 1;
-                        thisHandle = thenode.getOHHandle(rightchild);
+                        if (visitedNodeKeys.contains(k)) {
+                            // we have loops in the database.
+                            // to fix this, all affected nodes must be patched
+                            thenode.setOHByte(magic, (byte) 1);
+                            thenode.setOHByte(balance, (byte) 0);
+                            thenode.setOHHandle(parent, null);
+                            thenode.setOHHandle(leftchild, null);
+                            thenode.setOHHandle(rightchild, null);
+                            thenode.commit(CP_NONE);
+                            logWarning("kelondroTree.Search.process: database contains loops; the loop-nodes have been auto-fixed");
+                            found = false;
+                            return;
+                        }
+                        // System.out.println("Comparing key = '" + new String(key) + "' with '" + otherkey + "':"); // debug
+                        c = objectOrder.compare(key, k);
+                        // System.out.println(c); // debug
+                        if (c == 0) {
+                            found = true;
+                            // System.out.println("DEBUG: search for " + new String(key) + " ended with status=" + ((found) ? "found" : "not-found") + ", node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ", parent=" + ((parentnode == null) ? "NULL" : parentnode.toString()));
+                            return;
+                        } else if (c < 0) {
+                            child = -1;
+                            thisHandle = thenode.getOHHandle(leftchild);
+                        } else {
+                            child = 1;
+                            thisHandle = thenode.getOHHandle(rightchild);
+                        }
+                        visitedNodeKeys.add(k);
                     }
-                    visitedNodeKeys.add(thenode.getKey());
                 }
             }
             // System.out.println("DEBUG: search for " + new String(key) + "
