@@ -733,11 +733,17 @@ public final class yacySeedDB {
                 subdom = host.substring(0, p);
                 host = host.substring(p + 1);
             }
+            // check if we have a b64-hash or a hex-hash
+            String hash = host.substring(0, host.length() - 6);
+            if (hash.length() > commonHashLength) {
+                // this is probably a hex-hash
+                hash = yacySeed.hexHash2b64Hash(hash);
+            }
             // check remote seeds
-            seed = getConnected(host.substring(0, host.length() - 6)); // checks only remote, not local
+            seed = getConnected(hash); // checks only remote, not local
             // check local seed
             if (seed == null) {
-                if (host.substring(0, host.length() - 6).equals(mySeed.hash))
+                if (hash.equals(mySeed.hash))
                     seed = mySeed;
                 else return null;
             }
