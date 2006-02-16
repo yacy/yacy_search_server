@@ -670,15 +670,62 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         serverFileUtils.write(result, out);
                     }                    
                     
-                } else { // no html                    
+                } else { // no html
+                    
+                    int statusCode = 200;
+                    int rangeStartOffset = 0;
+                    httpHeader header = new httpHeader();
+                    
+                    // adding the accept ranges header
+                    header.put(httpHeader.ACCEPT_RANGES, "bytes");
+                    
+                    // reading the files md5 hash if availabe and use it as ETAG of the resource
+                    String targetMD5 = null;
+                    File targetMd5File = new File(targetFile + ".md5");
+                    try {
+                        if (targetMd5File.exists()) {
+                            String description = null;
+                            targetMD5 = new String(serverFileUtils.read(targetMd5File));
+                            pos = targetMD5.indexOf('\n');
+                           if (pos >= 0) {
+                               description = targetMD5.substring(pos + 1);
+                               targetMD5 = targetMD5.substring(0, pos);
+                           }         
+                           
+                           // using the checksum as ETAG header
+                           header.put(httpHeader.ETAG, targetMD5);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }                        
+                    
+                    if (requestHeader.containsKey(httpHeader.RANGE)) {
+                        Object ifRange = requestHeader.ifRange();
+                        if ((ifRange == null)||
+                            (ifRange instanceof Date && targetFile.lastModified() == ((Date)ifRange).getTime()) ||
+                            (ifRange instanceof String && ifRange.equals(targetMD5))) {
+                            String rangeHeaderVal = ((String) requestHeader.get(httpHeader.RANGE)).trim();
+                            if (rangeHeaderVal.startsWith("bytes=")) {
+                                String rangesVal = rangeHeaderVal.substring("bytes=".length());
+                                String[] ranges = rangesVal.split(",");
+                                if ((ranges.length == 1)&&(ranges[0].endsWith("-"))) {
+                                    rangeStartOffset = Integer.valueOf(ranges[0].substring(0,ranges[0].length()-1)).intValue();
+                                    statusCode = 206;
+                                    if (header == null) header = new httpHeader();
+                                    header.put(httpHeader.CONTENT_RANGE, "bytes " + rangeStartOffset + "-" + (targetFile.length()-1) + "/" + targetFile.length());
+                                }
+                            }
+                        }
+                    }
+                    
                     // write the file to the client
                     targetDate = new Date(targetFile.lastModified());
-                    long   contentLength    = method.equals(httpHeader.METHOD_HEAD)?-1:(zipContent)?-1:targetFile.length();
+                    long   contentLength    = method.equals(httpHeader.METHOD_HEAD)?-1:(zipContent)?-1:targetFile.length()-rangeStartOffset;
                     String contentEncoding  = method.equals(httpHeader.METHOD_HEAD)?null:(zipContent)?"gzip":null;
                     String transferEncoding = (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1))?null:(zipContent)?"chunked":null;
                     if (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && zipContent) forceConnectionClose();
                     
-                    httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, contentLength, targetDate, null, tp.getOutgoingHeader(), contentEncoding, transferEncoding, nocache);
+                    httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, statusCode, null, mimeType, contentLength, targetDate, null, header, contentEncoding, transferEncoding, nocache);
                 
                     if (!method.equals(httpHeader.METHOD_HEAD)) {                        
                         httpChunkedOutputStream chunkedOut = null;
@@ -694,7 +741,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             newOut = zipped;
                         }
                         
-                        serverFileUtils.copy(targetFile,newOut);
+                        serverFileUtils.copyRange(targetFile,newOut,rangeStartOffset);
                         
                         if (zipped != null) {
                             zipped.flush();

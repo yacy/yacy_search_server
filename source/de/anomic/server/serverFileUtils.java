@@ -89,6 +89,18 @@ public final class serverFileUtils {
         }
     }
     
+    public static void copyRange(File source, OutputStream dest, int start) throws IOException {
+        InputStream fis = null;
+        try {
+            fis = new FileInputStream(source);
+            long skipped = fis.skip(start);
+            if (skipped != start) throw new IllegalStateException("Unable to skip '" + start + "' bytes. Only '" + skipped + "' bytes skipped.");
+            copy(fis, dest);
+        } finally {
+            if (fis != null) try { fis.close(); } catch (Exception e) {}
+        }
+    }    
+    
     public static void copy(File source, OutputStream dest) throws IOException {
 		InputStream fis = null;
         try {
