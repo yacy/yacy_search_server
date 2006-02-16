@@ -419,6 +419,7 @@ xpstopw=true
 20_dhtdistribution_idlesleep=20000
 20_dhtdistribution_busysleep=5000
 20_dhtdistribution_memprereq=8388608
+20_dhtdistribution_threads=1
 30_peerping_idlesleep=120000
 30_peerping_busysleep=120000
 30_peerping_memprereq=1048576

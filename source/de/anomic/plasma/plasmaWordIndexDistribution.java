@@ -440,7 +440,7 @@ public final class plasmaWordIndexDistribution {
         }
     }
 
-    int deleteTransferIndexes(plasmaWordIndexEntryContainer[] indexContainers) {
+    synchronized int deleteTransferIndexes(plasmaWordIndexEntryContainer[] indexContainers) {
         Iterator urlIter;
         plasmaWordIndexEntry indexEntry;
         String[] urlHashes;

@@ -551,8 +551,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         (int)getConfigLong("indexDistribution.maxOpenFiles",800)*/
         );
         indexDistribution.setCounts(150, 1, 3, 10000);
-        deployThread("20_dhtdistribution", "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-        new serverInstantThread(indexDistribution, "job", null), 60000);
+        getConfig("20_dhtdistribution_threads","1");
+        for(int i=0; i<(int)getConfigLong("20_dhtdistribution_threads",1);i++) {
+            deployThread("20_dhtdistribution_"+i, "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
+            new serverInstantThread(indexDistribution, "job", null), 60000 + i*5000);
+        }
         
         // test routine for snippet fetch
         //Set query = new HashSet();
