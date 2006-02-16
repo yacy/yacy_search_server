@@ -1141,9 +1141,11 @@ public final class httpd implements serverHandler {
             header.put(httpHeader.CONTENT_LENGTH, Integer.toString(result.length));
             header.put(httpHeader.PRAGMA, "no-cache");
             sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,header);
-            
-            // write the array to the client
-            serverFileUtils.write(result, respond);
+
+            if (! method.equals(httpHeader.METHOD_HEAD)) {
+                // write the array to the client
+                serverFileUtils.write(result, respond);
+            }
             respond.flush();
         } catch (Exception e) { 
             throw new IOException(e.getMessage());
