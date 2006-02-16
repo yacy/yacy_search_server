@@ -205,6 +205,10 @@ public class SettingsAck_p {
             env.setConfig("connectionKeepAliveSupport", httpd.keepAliveSupport ? "true" : "false");
             prop.put("info_connectionKeepAliveSupport", httpd.keepAliveSupport ? "on" : "off"); 
             
+            // setting via header property
+            env.setConfig("proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader")?"true":"false");
+            prop.put("info_proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader")? "on" : "off");
+            
             prop.put("info", 20);             
             return prop;
         }

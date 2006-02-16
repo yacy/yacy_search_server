@@ -534,6 +534,9 @@ isTransparentProxy=false
 # Specifies if yacy should use the http connection keep-alive feature
 connectionKeepAliveSupport=true
 
+# Specifies if the proxy should send the via header according to RFC
+proxy.sendViaHeader=true
+
 # Configuration options needed to configure server port forwarding
 portForwardingEnabled=false
 portForwardingUseProxy=false

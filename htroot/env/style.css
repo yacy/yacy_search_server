@@ -198,8 +198,15 @@ width: 16px;
 }
 
 .ResultDescription {
-color:#4070a0; 
-font-style:bold;}
+	color:#4070a0; 
+	font-weight:bold;
+}
 
 .ResultDateYBR {
-color:#007050}
+	color:#007050
+}
+
+.settingsValue {
+	color:#556699; 
+	font-weight:bold;
+}

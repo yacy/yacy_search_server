@@ -15,6 +15,11 @@
     <td>With this you can specify if YaCy should support the HTTP connection keep-alive feature.</td>
   </tr>  
   <tr valign="top">
+    <td>Send&nbsp;Via&nbsp;Header:</td>
+    <td><input type="checkbox" name="proxy.sendViaHeader" align="top" #(proxy.sendViaHeader)#::checked#(/proxy.sendViaHeader)#></td>
+    <td>Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via</a> http header according to RFC 2616 Sect 14.45.</td>
+  </tr>   
+  <tr valign="top">
     <td colspan="3"><input type="submit" name="httpNetworking" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
   </tr>  
 </table>

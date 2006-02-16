@@ -217,6 +217,10 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             return dflt;
         }
     }
+    
+    public boolean getConfigBool(String key, boolean dflt) {
+        return Boolean.valueOf(getConfig(key, Boolean.toString(dflt))).booleanValue();
+    }
 
     public Iterator configKeys() {
 	return configProps.keySet().iterator();

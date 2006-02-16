@@ -529,6 +529,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // removing hop by hop headers
             this.removeHopByHopHeaders(requestHeader);
             
+            // adding additional headers
+            setViaHeader(requestHeader, httpVer);        
+            
             // send request
             res = remote.GET(remotePath, requestHeader);
             conProp.put(httpHeader.CONNECTION_PROP_CLIENT_REQUEST_HEADER,requestHeader);
@@ -555,7 +558,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     }
                     res.responseHeader.remove(httpHeader.CONTENT_LENGTH);
                 }
-            }            
+            }        
             
 //          if (((String)requestHeader.get(httpHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
 //          zipped = new GZIPOutputStream((chunked != null) ? chunked : respond);
@@ -605,6 +608,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // remove hop by hop headers
             this.removeHopByHopHeaders(res.responseHeader);
+            
+            // adding additional headers
+            setViaHeader(res.responseHeader, res.httpVer);               
             
             // sending the respond header back to the client
             if (chunkedOut != null) {
@@ -730,6 +736,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         try {
             // remove hop by hop headers
             this.removeHopByHopHeaders(cachedResponseHeader);
+            
+            // adding additional headers
+            setViaHeader(cachedResponseHeader, httpVer);
             
             // replace date field in old header by actual date, this is according to RFC
             cachedResponseHeader.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
@@ -909,6 +918,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // removing hop by hop headers
             this.removeHopByHopHeaders(requestHeader);            
+
+            // adding outgoing headers
+            setViaHeader(requestHeader, httpVer);            
             
             // open the connection: second is needed for [AS] patch
             remote = (yAddress == null) ? newhttpc(host, port, timeout): newhttpc(yAddress, timeout);
@@ -923,6 +935,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // removing hop by hop headers
             this.removeHopByHopHeaders(res.responseHeader);
+            
+            // adding outgoing headers
+            setViaHeader(res.responseHeader, res.httpVer);
             
             // sending the server respond back to the client
             httpd.sendRespondHeader(conProp,respond,httpVer,res.statusCode,res.statusText,res.responseHeader);
@@ -995,6 +1010,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // removing hop by hop headers
             this.removeHopByHopHeaders(requestHeader);
             
+            // adding additional headers
+            setViaHeader(requestHeader, httpVer); 
+            
             // sending the request
             remote = (yAddress == null) ? newhttpc(host, port, timeout) : newhttpc(yAddress, timeout);                
             httpc.response res = remote.POST(remotePath, requestHeader, body);
@@ -1026,6 +1044,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // remove hop by hop headers
             this.removeHopByHopHeaders(res.responseHeader);
+            
+            // adding additional headers
+            setViaHeader(res.responseHeader, res.httpVer); 
             
             // sending the respond header back to the client
             if (chunked != null) {
@@ -1483,6 +1504,24 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         }
         
         return this.userAgentStr.toString();
+    }
+    
+    private void setViaHeader(httpHeader header, String httpVer) {
+        if (!switchboard.getConfigBool("proxy.sendViaHeader", true)) return;
+        
+        // getting header set by other proxies in the chain
+        StringBuffer viaValue = new StringBuffer();
+        if (header.containsKey(httpHeader.VIA)) viaValue.append((String)header.get(httpHeader.VIA));
+        if (viaValue.length() > 0) viaValue.append(", ");
+        
+        // appending info about this peer
+        viaValue
+        .append(httpVer).append(" ")
+        .append(yacyCore.seedDB.mySeed.getName()).append(".yacy ")
+        .append("(YaCy ").append(switchboard.getConfig("vString", "0.0")).append(")");
+        
+        // storing header back
+        header.put(httpHeader.VIA, viaValue.toString());                 
     }
     
     /**
