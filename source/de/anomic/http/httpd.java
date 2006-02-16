@@ -1202,11 +1202,7 @@ public final class httpd implements serverHandler {
         if ((transferEnc != null) && !httpVersion.equals(httpHeader.HTTP_VERSION_1_1)) { 
             throw new IllegalArgumentException("Transfer encoding is only supported for http/1.1 connections.");
         }
-        if (reqMethod.equals(httpHeader.METHOD_HEAD)) {
-            if (contentLength >= 0) {
-                throw new IllegalArgumentException("Http HEAD response messages MUST NOT contain a content-length.");
-            }
-        }
+
         if (!reqMethod.equals(httpHeader.METHOD_HEAD)){
             if (!conProp.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close").equals("close")) {
                 if (transferEnc == null && contentLength < 0) {
