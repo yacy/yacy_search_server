@@ -274,8 +274,8 @@ public class Status {
 
         prop.put("localCrawlQueueSize", Integer.toString(sb.getThread("50_localcrawl").getJobCount()));
         prop.put("stackCrawlQueueSize", Integer.toString(sb.sbStackCrawlThread.size()));       
-        prop.put("remoteCrawlQueueSize", Integer.toString(sb.getThread("61_globalcrawltrigger").getJobCount()));
-        
+        prop.put("remoteCrawlQueueSize", Integer.toString(sb.getThread("62_remotetriggeredcrawl").getJobCount()));
+        prop.put("remoteCrawlTriggerQueueSize", Integer.toString(sb.getThread("61_globalcrawltrigger").getJobCount()));
 
         // return rewrite properties
         prop.put("date",(new Date()).toString());

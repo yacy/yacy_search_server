@@ -8,7 +8,7 @@
 	<td width="50">&nbsp;</td>
 </tr>
 <tr class="TableCellDark">
-	<td width="150">Protection</td>
+	<td>Protection</td>
 	<td>
 		#(protection)#
 		<b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html?page=admin">settings</a> page <b>immediately</b> and set an administration password.
@@ -45,7 +45,8 @@
 	<td>&nbsp;</td>
 </tr>
 <tr class="TableCellLight">
-	<td>Memory Usage</td><td>
+	<td>Memory Usage</td>
+	<td>
 		<!--
 		<form action="Status.html" method="get">free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]# | <input type="submit" name="gc" value="Do Garbage-Collect now"></form>
 		-->
@@ -74,15 +75,13 @@
 	<td>[<a href="IndexCreateLoaderQueue_p.html">Details</a>]</td>
 </tr>
 <tr class="TableCellDark">
-	<td>Local Crawler Queue</td>
-	<td>Enqueued: #[localCrawlQueueSize]# | Pending: #[stackCrawlQueueSize]#</td>
+	<td>Crawler Queue</td>
+	<td>Enqueued from: local=#[localCrawlQueueSize]# remote=#[remoteCrawlQueueSize]# | Pending: #[stackCrawlQueueSize]#</td>
 	<td>[<a href="IndexCreateWWWLocalQueue_p.html">Details</a>]</td>
 </tr>
 <tr class="TableCellLight">
-	<td>Remote Crawler Queue</td>
-	<td>#[remoteCrawlQueueSize]#</td>
+	<td>Remote Crawl Trigger Queue</td>
+	<td>#[remoteCrawlTriggerQueueSize]#</td>
 	<td>[<a href="IndexCreateWWWGlobalQueue_p.html">Details</a>]</td>
 </tr>
-
-
 </table>
