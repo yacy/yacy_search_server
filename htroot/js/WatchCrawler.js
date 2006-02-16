@@ -1,22 +1,22 @@
 DELETE_STRING="delete"
 
 var statusRPC;
-var indexingQueueRPC;
+var queuesRPC;
 function requestStatus(){
 	statusRPC=createRequestObject()
 	statusRPC.open('get', '/xml/status_p.xml');
 	statusRPC.onreadystatechange = handleStatus;
 	statusRPC.send(null)
 }
-function requestIndexingQueue(){
-	indexingQueueRPC=createRequestObject()
-	indexingQueueRPC.open('get', '/xml/queues/indexing_p.xml');
-	indexingQueueRPC.onreadystatechange = handleIndexingQueue;
-	indexingQueueRPC.send(null);
+function requestQueues(){
+	queuesRPC=createRequestObject()
+	queuesRPC.open('get', '/xml/queues_p.xml');
+	queuesRPC.onreadystatechange = handleQueues;
+	queuesRPC.send(null);
 
 }
 window.setInterval("requestStatus()", 5000);
-window.setInterval("requestIndexingQueue()", 5000);
+window.setInterval("requestQueues()", 5000);
 
 
 function handleStatus(){
@@ -41,14 +41,15 @@ function handleStatus(){
 }
 
 
-function handleIndexingQueue(){
-    if(indexingQueueRPC.readyState != 4){
+function handleQueues(){
+    if(queuesRPC.readyState != 4){
 		return;
 	}
-	var indexingQueueResponse = indexingQueueRPC.responseXML;
+	var queuesResponse = queuesRPC.responseXML;
 	indexingTable=document.getElementById("indexingTable");
-	if(indexingQueueResponse != null){
-		entries=indexingQueueResponse.getElementsByTagName("entry");
+	xml=getFirstChild(queuesResponse);
+	if(queuesResponse != null){
+		entries=getFirstChild(xml, "indexingqueue").getElementsByTagName("entry");
 	}
     
     //skip the Tableheade
@@ -98,6 +99,9 @@ function getValue(element){
 	return "";
 }
 function getFirstChild(element, childname){
+	if(childname==null){
+		childname="";
+	}
 	if(element == null){
 		return null;
 	}
@@ -111,6 +115,9 @@ function getFirstChild(element, childname){
 	return null;
 }
 function getNextSibling(element, childname){
+	if(childname==null){
+		childname="";
+	}
 	if(element == null){
 		return null;
 	}

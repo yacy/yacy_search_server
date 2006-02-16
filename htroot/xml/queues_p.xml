@@ -1,0 +1,50 @@
+<xml version="1.0">
+<indexingqueue>
+#{list-indexing}#
+  <entry>
+    <initiator>#[initiator]#</initiator>
+    <depth>#[depth]#</depth>
+    <modified>#[modified]#</modified>
+    <anchor>#[anchor]#</anchor>
+    <url>#[url]#</url>
+    <size>#[size]#</size>
+    <hash>#[hash]#</hash>
+    <inProcess>#(inProcess)#false::true#(/inProcess)#</inProcess>
+  </entry>
+#{/list-indexing}#
+</indexingqueue>
+<loaderqueue>
+#{list-loader}#
+  <entry>
+    <initiator>#[initiator]#</initiator>
+    <depth>#[depth]#</depth>
+    <url>#[url]#</url>
+  </entry>
+#{/list-loader}#
+</loaderqueue>
+<localcrawlerqueue>
+#{list-local}#
+  <entry>
+    <initiator>#[initiator]#</initiator>
+    <depth>#[depth]#</depth>
+    <modified>#[modified]#</modified>
+    <anchor>#[anchor]#</anchor>
+    <url>#[url]#</url>
+    <hash>#[hash]#</hash>
+    <inProcess>#(inProcess)#false::true#(/inProcess)#</inProcess>
+  </entry>
+#{/list-local}#
+</localcrawlerqueue>
+<remotecrawlerqueue>
+#{list-remote}#
+  <entry>
+    <profile>#[profile]#</profile>
+    <depth>#[depth]#</depth>
+    <modified>#[modified]#</modified>
+    <anchor>#[anchor]#</anchor>
+    <url>#[url]#</url>
+    <inProcess>#(inProcess)#false::true#(/inProcess)#</inProcess>
+  </entry>
+#{/list-remote}#
+</remotecrawlerqueue>
+</xml>
