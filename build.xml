@@ -66,8 +66,9 @@
 <property name="htroot" location="htroot"/>
 <property name="locales" location="locales"/>
 <property name="release" location="RELEASE"/>
+<property name="htdocsWWW" location="${data}/HTDOCS/www"/>
 <property name="release_main" location="${release}/MAIN"/>
-<property name="release_ext" location="${release}/EXT"/>
+<property name="release_ext" location="${release}/EXT"/>	
     
 <condition property="singleExtFile">
     <equals arg1="${extensionTarget}" arg2="copy"/>
@@ -218,6 +219,28 @@
          debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}"/>
 </target>
+	
+<target name="compileHtdocsWWW" depends="compileMain" description="Compiling and zipping userspecific servlets">	
+	  <!-- defining the classpath that should be used for compiling -->   
+	  <path id="htdocsWWW.class.path">
+	    <pathelement location="${build}"/>
+	    <pathelement location="${htroot}"/>
+	    
+	    <!-- libs needed for the yacy thread/object-pools -->
+	    <pathelement location="${lib}/commons-collections.jar" />
+	    <pathelement location="${lib}/commons-pool-1.2.jar" />  
+	  	
+	  	<!-- userspecific libs -->
+		<pathelement location="${htdocsWWW}/lib/*.jar" />
+	  </path>
+	
+	  <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
+	  <javac srcdir="${htdocsWWW}/" 
+	         classpathref="htdocsWWW.class.path"
+	         debug="true" debuglevel="lines,vars,source" 
+	         source="${javacSource}" target="${javacTarget}"/>	
+	
+</target>	    	
 	
 <!-- compiling optional content parsers and building install packages -->
 <target name="compileParsers" depends="compileMain" description="Compiling and zipping all additional parsers">
