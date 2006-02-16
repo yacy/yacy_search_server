@@ -2,7 +2,11 @@ package de.anomic.plasma.dbImport;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.TreeSet;
+
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
@@ -17,14 +21,13 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
     
     private plasmaCrawlLURL importUrlDB;
     private plasmaWordIndex importWordIndex;
-    private int importStartSize;
-    
+    private int importStartSize;   
 
     private String wordHash = "------------";
     
     long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = this.wordChunkStart;
     String wordChunkStartHash = "------------", wordChunkEndHash;
-    private long urlCounter = 0, wordCounter = 0, entryCounter = 0;
+    private long urlCounter = 0, wordCounter = 0, entryCounter = 0, notBoundEntryCounter = 0;
     
 
     public plasmaDbImporter(plasmaSwitchboard theSb) {
@@ -41,8 +44,9 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         
         theStatus.append("Hash=").append(this.wordHash).append("\n");
         theStatus.append("#URL=").append(this.urlCounter).append("\n");
-        theStatus.append("#Word Entities=").append(this.wordCounter).append("\n");
-        theStatus.append("#Word Entries=").append(this.entryCounter);
+        theStatus.append("#Word Entity=").append(this.wordCounter).append("\n");
+        theStatus.append("#Word Entry={").append(this.entryCounter);
+		theStatus.append(" ,NotBound=").append(this.notBoundEntryCounter).append("}");
         
         return theStatus.toString();
     }
@@ -109,11 +113,14 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
             this.log.logInfo("Home word index contains " + this.homeWordIndex.size() + " words and " + this.homeUrlDB.size() + " URLs.");
             this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importUrlDB.size() + " URLs.");                        
             
+			HashSet unknownUrlBuffer = new HashSet();
+			HashSet importedUrlBuffer = new HashSet();
+			
             // iterate over all words from import db
-
             Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             while (!isAborted() && importWordHashIterator.hasNext()) {
                 
+				TreeSet entityUrls = new TreeSet(new kelondroNaturalOrder(true));
                 plasmaWordIndexEntryContainer newContainer = null;
                 try {
                     this.wordCounter++;
@@ -122,44 +129,72 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     
                     if (newContainer.size() == 0) continue;
                     
-                    // the combined container will fit, read the container
+                    // loop throug the entities of the container and get the
+					// urlhash
                     Iterator importWordIdxEntries = newContainer.entries();
                     plasmaWordIndexEntry importWordIdxEntry;
                     while (importWordIdxEntries.hasNext()) {
-                        
                         // testing if import process was aborted
                         if (isAborted()) break;
 
                         // getting next word index entry
-                        this.entryCounter++;
                         importWordIdxEntry = (plasmaWordIndexEntry) importWordIdxEntries.next();
-                        String urlHash = importWordIdxEntry.getUrlHash();                    
-                        if ((this.importUrlDB.exists(urlHash)) && (!this.homeUrlDB.exists(urlHash))) try {
-                            // importing the new url
-                            plasmaCrawlLURL.Entry urlEntry = this.importUrlDB.getEntry(urlHash, importWordIdxEntry);                       
-                            this.urlCounter++;
-                            this.homeUrlDB.newEntry(urlEntry);
-                            
-                            if (this.urlCounter % 500 == 0) {
-                                this.log.logFine(this.urlCounter + " URLs processed so far.");
-                            }
-                        } catch (IOException e) {}
-                        
-                        if (this.entryCounter % 500 == 0) {
-                            this.log.logFine(this.entryCounter + " word entries and " + this.wordCounter + " word entities processed so far.");
-                        }
+                        String urlHash = importWordIdxEntry.getUrlHash();
+						entityUrls.add(urlHash);
                     }
-                    
+					
+					Iterator urlIter = entityUrls.iterator();
+					while (urlIter.hasNext()) {	
+						if (isAborted()) break;
+						String urlHash = (String) urlIter.next();
+					
+						if (importedUrlBuffer.contains(urlHash)) {
+							// already known url
+						} else if (unknownUrlBuffer.contains(urlHash)) {
+							// url known as unknown
+							unknownUrlBuffer.add(urlHash);
+							notBoundEntryCounter++;
+							newContainer.remove(urlHash);
+							continue;
+						} else {
+							// we need to import the url
+							try {	
+								// getting the url entry
+								plasmaCrawlLURL.Entry urlEntry = this.importUrlDB.getEntry(urlHash, null);
+
+								/* write it into the home url db */
+								this.homeUrlDB.newEntry(urlEntry);
+								importedUrlBuffer.add(urlHash);
+								this.urlCounter++;
+								
+								if (this.urlCounter % 500 == 0) {
+									this.log.logFine(this.urlCounter + " URLs processed so far.");
+								}
+							} catch (IOException e) {
+								unknownUrlBuffer.add(urlHash);
+								notBoundEntryCounter++;
+								newContainer.remove(urlHash);
+								continue;
+							}
+						}
+						this.entryCounter++;
+                    }
+					
                     // testing if import process was aborted
                     if (isAborted()) break;
                     
                     // importing entity container to home db
+					if (newContainer.size() == 0) continue;
                     this.homeWordIndex.addEntries(newContainer, System.currentTimeMillis(), false);
                                         
                     // delete complete index entity file
                     this.importWordIndex.deleteIndex(this.wordHash);                 
                     
                     // print out some statistical information
+                    if (this.entryCounter % 500 == 0) {
+                        this.log.logFine(this.entryCounter + " word entries and " + this.wordCounter + " word entities processed so far.");
+                    }
+					
                     if (this.wordCounter%500 == 0) {
                         this.wordChunkEndHash = this.wordHash;
                         this.wordChunkEnd = System.currentTimeMillis();
