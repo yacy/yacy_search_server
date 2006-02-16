@@ -122,7 +122,7 @@ public class queues_p {
                         prop.put("list-indexing_"+i+"_depth", pcentry.depth());
                         prop.put("list-indexing_"+i+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
                         prop.put("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":wikiCode.replaceHTML(pcentry.anchorName()));
-                        prop.put("list-indexing_"+i+"_url", wikiCode.replaceHTML(pcentry.normalizedURLString()));
+                        prop.putNoHTML("list-indexing_"+i+"_url", pcentry.normalizedURLString());
                         prop.put("list-indexing_"+i+"_size", entrySize);
                         prop.put("list-indexing_"+i+"_inProcess", (inProcess)?1:0);
                         prop.put("list-indexing_"+i+"_hash", pcentry.urlHash());
@@ -175,8 +175,8 @@ public class queues_p {
                 initiator = yacyCore.seedDB.getConnected(urle.initiator());
                 profileHandle = urle.profileHandle();
                 profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
-                prop.put("list-local_"+showNum+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())) );
-                prop.put("list-local_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
+                prop.put("list-local_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
+                prop.putNoHTML("list-local_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
                 prop.put("list-local_"+showNum+"_depth", urle.depth());
                 prop.put("list-local_"+showNum+"_modified", daydate(urle.loaddate()) );
                 prop.putNoHTML("list-local_"+showNum+"_anchor", urle.name());
