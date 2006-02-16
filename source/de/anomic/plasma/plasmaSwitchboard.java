@@ -997,32 +997,34 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
         }
         
-        // do a local crawl
-        String stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+        // do a local crawl        
         plasmaCrawlNURL.Entry urlEntry = null;
-        try {
-            urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
-            String profileHandle = urlEntry.profileHandle();
-            // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
-            // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
-            if (profileHandle == null) {
-                log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
-                return true;
-            }
-            plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
-            if (profile == null) {
-                log.logSevere(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
-                return true;
-            }
-            log.logFine("LOCALCRAWL: URL=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter()
+        while (urlEntry == null && urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) > 0) {
+            String stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+            try {
+                urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
+                String profileHandle = urlEntry.profileHandle();
+                // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
+                // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
+                if (profileHandle == null) {
+                    log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
+                    return true;
+                }
+                plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
+                if (profile == null) {
+                    log.logSevere(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' (must be internal error) for URL " + urlEntry.url());
+                    return true;
+                }
+                log.logFine("LOCALCRAWL: URL=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter()
                         + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
-
-            processLocalCrawling(urlEntry, profile, stats);
-            return true;
-        } catch (IOException e) {
-            log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage());
-            return true;
+                
+                processLocalCrawling(urlEntry, profile, stats);
+                return true;
+            } catch (IOException e) {
+                log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage());
+            }
         }
+        return true;
     }
     
     public int limitCrawlTriggerJobSize() {
