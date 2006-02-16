@@ -347,7 +347,7 @@ public final class plasmaCrawlStacker {
             ((yacyCore.seedDB.mySeed.isSenior()) ||
                     (yacyCore.seedDB.mySeed.isPrincipal())) /* qualified */;
         
-        if ((!local)&&(!global)) {
+        if ((!local)&&(!global)&&(!profile.handle().equals(this.sb.defaultProxyProfile.handle()))) {
             this.log.logSevere("URL '" + nexturlString + "' can neither be crawled local nor global.");
         }
         
