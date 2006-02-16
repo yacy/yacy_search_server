@@ -662,8 +662,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     }
                     
                     // write the array to the client
-                    long contentLength     = method.equals(httpHeader.METHOD_HEAD)?-1:result.length;
-                    String contentEncoding = method.equals(httpHeader.METHOD_HEAD)?null:(zipContent)?"gzip":null;
+                    long contentLength     = result.length;
+                    String contentEncoding = (zipContent)?"gzip":null;
                     httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, contentLength, targetDate, null, tp.getOutgoingHeader(), contentEncoding, null, nocache);
                     if (! method.equals(httpHeader.METHOD_HEAD)) {
                         Thread.sleep(200); // this solved the message problem (!!)
@@ -720,8 +720,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     
                     // write the file to the client
                     targetDate = new Date(targetFile.lastModified());
-                    long   contentLength    = method.equals(httpHeader.METHOD_HEAD)?-1:(zipContent)?-1:targetFile.length()-rangeStartOffset;
-                    String contentEncoding  = method.equals(httpHeader.METHOD_HEAD)?null:(zipContent)?"gzip":null;
+                    long   contentLength    = (zipContent)?-1:targetFile.length()-rangeStartOffset;
+                    String contentEncoding  = (zipContent)?"gzip":null;
                     String transferEncoding = (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1))?null:(zipContent)?"chunked":null;
                     if (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && zipContent) forceConnectionClose();
                     

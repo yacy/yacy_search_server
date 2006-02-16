@@ -1275,13 +1275,13 @@ public final class httpd implements serverHandler {
             
             StringBuffer headerStringBuffer = new StringBuffer(560);
             
-            // write status line
-            headerStringBuffer.append(httpVersion).append(" ")
-                              .append(Integer.toString(httpStatusCode)).append(" ")
-                              .append(httpStatusText).append("\r\n");            
-            
-            // "HTTP/0.9" does not have a header in the response
+            // "HTTP/0.9" does not have a status line or header in the response
             if (! httpVersion.toUpperCase().equals("HTTP/0.9")) {                
+                // write status line
+                headerStringBuffer.append(httpVersion).append(" ")
+                                  .append(Integer.toString(httpStatusCode)).append(" ")
+                                  .append(httpStatusText).append("\r\n");
+
                 // prepare header
                 if (!header.containsKey(httpHeader.DATE)) 
                     header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
