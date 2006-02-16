@@ -1336,15 +1336,16 @@ public final class httpd implements serverHandler {
                         //System.out.println("#" + key + ": " + value);
                     }            
                 }
+                
+                // end header
+                headerStringBuffer.append("\r\n");
+                
+                // sending headers to the client
+                respond.write(headerStringBuffer.toString().getBytes());            
+                
+                // flush stream
+                respond.flush();
             }
-            // end header
-            headerStringBuffer.append("\r\n");
-            
-            // sending headers to the client
-            respond.write(headerStringBuffer.toString().getBytes());            
-            
-            // flush stream
-            respond.flush();
             
             conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_HEADER,header);
             conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_STATUS,Integer.toString(httpStatusCode));
