@@ -1228,7 +1228,7 @@ public final class httpd implements serverHandler {
             if (httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_1_1)) headers.put(httpHeader.CACHE_CONTROL, "no-cache");
             else headers.put(httpHeader.PRAGMA, "no-cache");
         }
-        headers.put(httpHeader.CONTENT_TYPE,  (contentType == null)? "text/html" : contentType);  
+        headers.put(httpHeader.CONTENT_TYPE,  (contentType == null)? "text/html; charset=UTF-8" : contentType+"; charset=UTF-8");  
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_LENGTH, Long.toString(contentLength));
         //if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
         if (expires != null)     headers.put(httpHeader.EXPIRES, httpc.dateString(expires));
@@ -1284,7 +1284,7 @@ public final class httpd implements serverHandler {
                 if (!header.containsKey(httpHeader.DATE)) 
                     header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
                 if (!header.containsKey(httpHeader.CONTENT_TYPE)) 
-                    header.put(httpHeader.CONTENT_TYPE, "text/html"); // fix this
+                    header.put(httpHeader.CONTENT_TYPE, "text/html; charset=UTF-8"); // fix this
                 if (!header.containsKey(httpHeader.CONNECTION) && conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT))
                     header.put(httpHeader.CONNECTION, conProp.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT));
                 if (!header.containsKey(httpHeader.PROXY_CONNECTION) && conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT))
