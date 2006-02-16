@@ -46,20 +46,60 @@ function handleQueues(){
 		return;
 	}
 	var queuesResponse = queuesRPC.responseXML;
-	indexingTable=document.getElementById("indexingTable");
 	xml=getFirstChild(queuesResponse);
 	if(queuesResponse != null){
-		entries=getFirstChild(xml, "indexingqueue").getElementsByTagName("entry");
+		createIndexingTable(getFirstChild(xml, "indexingqueue"));
+		createLoaderTable(getFirstChild(xml, "loaderqueue"));
+		createLocalCrawlerTable(getFirstChild(xml, "localcrawlerqueue"));
+		createRemoteCrawlerTable(getFirstChild(xml, "remotecrawlerqueue"));
 	}
-    
-    //skip the Tableheade
-	row=getNextSibling(getFirstChild(getFirstChild(indexingTable, "tbody"), "tr"), "tr")
-    //row=indexingTable.firstChild.nextSibling.firstChild.nextSibling.nextSibling;
-
+}
+function clearTable(table, numSkip){
+	if(numSkip==null){
+		numSkip=0;
+	}
+	row=getFirstChild(getFirstChild(table, "tbody"), "tr");
+	//skip numSkip rows
+	for(i=0;i<numSkip;i++){
+		row=getNextSibling(row, "tr");
+	}
     while(row != null){ //delete old entries
-        getFirstChild(indexingTable, "").removeChild(row);
-		row=getNextSibling(getFirstChild(getFirstChild(indexingTable, "tbody"), "tr"), "tr")
+        getFirstChild(table, "tbody").removeChild(row);
+   		row=getFirstChild(getFirstChild(table, "tbody"), "tr");
+		//skip numSkip rows
+		for(i=0;i<numSkip;i++){
+			row=getNextSibling(row, "tr");
+		}
     }
+}
+function createLoaderTable(loaderqueue){
+	entries=loaderqueue.getElementsByTagName("entry");
+	loaderTable=document.getElementById("loaderTable");
+	clearTable(loaderTable, 1);
+	dark=false;
+    for(i=0;i<entries.length;i++){
+		initiator=getValue(getFirstChild(entries[i], "initiator"));
+		depth=getValue(getFirstChild(entries[i], "depth"));
+		modified=getValue(getFirstChild(entries[i], "modified"));
+		anchor=getValue(getFirstChild(entries[i], "anchor"));
+		url=getValue(getFirstChild(entries[i], "url"));
+		
+		row=createLoaderRow(initiator, depth, modified, anchor, url);
+		
+		//create row
+		if(dark){
+            row.setAttribute("class", "TableCellDark");
+        }else{
+            row.setAttribute("class", "TableCellLight");
+        }
+        getFirstChild(loaderTable, "tbody").appendChild(row);
+        dark=!dark;
+    }	
+}
+function createIndexingTable(indexingqueue){
+	indexingTable=document.getElementById("indexingTable");
+	entries=indexingqueue.getElementsByTagName("entry");
+    clearTable(indexingTable, 1);
         
     dark=false;
     for(i=0;i<entries.length;i++){
@@ -76,6 +116,7 @@ function handleQueues(){
 		}
 		
 		row=createIndexingRow(initiator, depth, modified, anchor, url, size, hash);
+		
 		//create row
 		if(inProcess){
             row.setAttribute("class", "TableCellActive");
@@ -85,6 +126,70 @@ function handleQueues(){
             row.setAttribute("class", "TableCellLight");
         }
         getFirstChild(indexingTable, "tbody").appendChild(row);
+        dark=!dark;
+    }
+}
+function createLocalCrawlerTable(localcrawlerqueue){
+	localCrawlerTable=document.getElementById("localCrawlerTable");
+	entries=localcrawlerqueue.getElementsByTagName("entry");
+    clearTable(localCrawlerTable, 1);
+        
+    dark=false;
+    for(i=0;i<entries.length;i++){
+		initiator=getValue(getFirstChild(entries[i], "initiator"));
+		depth=getValue(getFirstChild(entries[i], "depth"));
+		modified=getValue(getFirstChild(entries[i], "modified"));
+		anchor=getValue(getFirstChild(entries[i], "anchor"));
+		url=getValue(getFirstChild(entries[i], "url"));
+		//hash=getValue(getFirstChild(entries[i], "hash"));
+		inProcess=false;
+		if(getValue(getFirstChild(entries[i], "inProcess"))=="true"){
+			inProcess=true;
+		}
+		
+		row=createLocalCrawlerRow(initiator, depth, modified, anchor, url);
+		
+		//create row
+		if(inProcess){
+            row.setAttribute("class", "TableCellActive");
+        }else if(dark){
+            row.setAttribute("class", "TableCellDark");
+        }else{
+            row.setAttribute("class", "TableCellLight");
+        }
+        getFirstChild(localCrawlerTable, "tbody").appendChild(row);
+        dark=!dark;
+    }
+}
+function createRemoteCrawlerTable(remotecrawlerqueue){
+	remoteCrawlerTable=document.getElementById("remoteCrawlerTable");
+	entries=remotecrawlerqueue.getElementsByTagName("entry");
+    clearTable(remoteCrawlerTable, 1);
+        
+    dark=false;
+    for(i=0;i<entries.length;i++){
+		profile=getValue(getFirstChild(entries[i], "profile"));
+		depth=getValue(getFirstChild(entries[i], "depth"));
+		modified=getValue(getFirstChild(entries[i], "modified"));
+		anchor=getValue(getFirstChild(entries[i], "anchor"));
+		url=getValue(getFirstChild(entries[i], "url"));
+		//hash=getValue(getFirstChild(entries[i], "hash"));
+		inProcess=false;
+		if(getValue(getFirstChild(entries[i], "inProcess"))=="true"){
+			inProcess=true;
+		}
+		
+		row=createRemoteCrawlerRow(profile, depth, modified, anchor, url);
+		
+		//create row
+		if(inProcess){
+            row.setAttribute("class", "TableCellActive");
+        }else if(dark){
+            row.setAttribute("class", "TableCellDark");
+        }else{
+            row.setAttribute("class", "TableCellLight");
+        }
+        getFirstChild(remoteCrawlerTable, "tbody").appendChild(row);
         dark=!dark;
     }
 }
@@ -147,6 +252,33 @@ function createIndexingRow(initiator, depth, modified, anchor, url, size, hash){
 	row.appendChild(createLinkCol(url, url));
 	row.appendChild(createCol(size));
 	row.appendChild(createLinkCol("IndexCreateIndexingQueue_p.html?deleteEntry="+hash, DELETE_STRING));
+	return row;
+}
+function createLoaderRow(initiator, depth, modified, anchor, url){
+    row=document.createElement("tr");
+	row.appendChild(createCol(initiator));
+	row.appendChild(createCol(depth));
+	row.appendChild(createCol(modified));
+	row.appendChild(createCol(anchor));
+	row.appendChild(createLinkCol(url, url));
+	return row;
+}
+function createLocalCrawlerRow(initiator, depth, modified, anchor, url){
+    row=document.createElement("tr");
+	row.appendChild(createCol(initiator));
+	row.appendChild(createCol(depth));
+	row.appendChild(createCol(modified));
+	row.appendChild(createCol(anchor));
+	row.appendChild(createLinkCol(url, url));
+	return row;
+}
+function createRemoteCrawlerRow(profile, depth, modified, anchor, url){
+    row=document.createElement("tr");
+	row.appendChild(createCol(profile));
+	row.appendChild(createCol(depth));
+	row.appendChild(createCol(modified));
+	row.appendChild(createCol(anchor));
+	row.appendChild(createLinkCol(url, url));
 	return row;
 }
 function createLinkCol(url, linktext){

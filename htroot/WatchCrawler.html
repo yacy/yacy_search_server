@@ -13,22 +13,61 @@
 <p />
 Indexing Queue:<br />
 <div>
-Queue Size: <span id="indexingqueuesize">&nbsp;&nbsp;&nbsp;</span>
-Queue Max: <span id="indexingqueuemax">&nbsp;&nbsp;&nbsp;</span>
+Loader: 
 PPM: <span id="ppm">&nbsp;&nbsp;&nbsp;</span>
 </div>
+<table border="0" cellpadding="2" cellspacing="1" id="loaderTable" width="100%">
+  <tbody>
+  <tr class="TableHeader">
+    <th class="small">Initiator</th>
+    <th class="small">Depth</th>
+    <th class="small">Modified Date</th>
+    <th class="small">Anchor Name</th>
+    <th class="small" width="100%">URL</th>
+  </tr>
+  </tbody>
+</table>
+<div>
+Indexing Queue: 
+Queue Size: <span id="indexingqueuesize">&nbsp;&nbsp;&nbsp;</span>
+Queue Max: <span id="indexingqueuemax">&nbsp;&nbsp;&nbsp;</span>
+</div>
 <table border="0" cellpadding="2" cellspacing="1" id="indexingTable" width="100%">
-<tbody>
-<tr class="TableHeader">
-<th class="small">Initiator</th>
-<th class="small">Depth</th>
-<th class="small">Modified Date</th>
-<th class="small">Anchor Name</th>
-<th class="small" width="100%">URL</th>
-<th class="small">Size</th>
-<th class="small">Delete</th>
-</tr>
-</tbody>
+  <tbody>
+  <tr class="TableHeader">
+    <th class="small">Initiator</th>
+    <th class="small">Depth</th>
+    <th class="small">Modified Date</th>
+    <th class="small">Anchor Name</th>
+    <th class="small" width="100%">URL</th>
+    <th class="small">Size</th>
+    <th class="small">Delete</th>
+  </tr>
+  </tbody>
+</table>
+<div>Local Crawler</div>
+<table border="0" cellpadding="2" cellspacing="1" id="localCrawlerTable" width="100%">
+  <tbody>
+  <tr class="TableHeader">
+    <th class="small">Initiator</th>
+    <th class="small">Depth</th>
+    <th class="small">Modified Date</th>
+    <th class="small">Anchor Name</th>
+    <th class="small" width="100%">URL</th>
+  </tr>
+  </tbody>
+</table>
+<div>Remote Crawler</div>
+<table border="0" cellpadding="2" cellspacing="1" id="remoteCrawlerTable" width="100%">
+  <tbody>
+  <tr class="TableHeader">
+    <th class="small">Profile</th>
+    <th class="small">Depth</th>
+    <th class="small">Modified Date</th>
+    <th class="small">Anchor Name</th>
+    <th class="small" width="100%">URL</th>
+  </tr>
+  </tbody>
 </table>
 
 #%env/templates/footer.template%#
