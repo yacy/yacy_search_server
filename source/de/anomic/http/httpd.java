@@ -1448,7 +1448,7 @@ public final class httpd implements serverHandler {
              * If the port number is equal to the yacy port and the IP address is an address of this host ...
              * Please note that yacy is listening to all interfaces of this host
              */
-            } else if (dstPort.equals(Integer.valueOf(serverCore.getPortNr(switchboard.getConfig("port", "8080")))) &&
+            } else if (dstPort.equals(new Integer(serverCore.getPortNr(switchboard.getConfig("port", "8080")))) &&
                         isThisHostIP(dstHost)) {
                  return true;                
             } else if ((serverCore.portForwardingEnabled) && 
