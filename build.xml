@@ -232,6 +232,7 @@
 	  	
 	  	<!-- userspecific libs -->
 		<pathelement location="${htdocsWWW}/lib/*.jar" />
+	  	<pathelement location="${htdocsWWW}/" />
 	  </path>
 	
 	  <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
