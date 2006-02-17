@@ -540,7 +540,7 @@ public class yacySeed {
     if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
         newSeed.dna.put(PORT,Integer.toString(serverCore.portForwarding.getPort()));
     } else {
-        newSeed.dna.put(PORT, sb.getConfig("port", "8080"));
+        newSeed.dna.put(PORT,Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
     }
     newSeed.dna.put(BDATE, yacyCore.universalDateShortString(new Date()));
     newSeed.dna.put(LASTSEEN, newSeed.dna.get(BDATE)); // just as initial setting

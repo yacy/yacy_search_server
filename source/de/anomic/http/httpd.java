@@ -1065,15 +1065,15 @@ public final class httpd implements serverHandler {
             InetAddress hostAddress = httpc.dnsResolve(clientIP);
             if (hostAddress == null) {
                 tp.put("host", serverCore.publicLocalIP().getHostAddress());
-                tp.put("port", switchboard.getConfig("port", "8080"));                    
+                tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));                    
             } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
                 tp.put("host", serverCore.publicLocalIP().getHostAddress());
-                tp.put("port", switchboard.getConfig("port", "8080"));
+                tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
             } else {
                 tp.put("host", serverCore.publicIP());
                 tp.put("port", (serverCore.portForwardingEnabled && (serverCore.portForwarding != null)) 
                         ? Integer.toString(serverCore.portForwarding.getPort()) 
-                                : switchboard.getConfig("port", "8080"));
+                        : Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8080"))));
             }                   
 
             tp.put("peerName", yacyCore.seedDB.mySeed.getName());
@@ -1448,7 +1448,7 @@ public final class httpd implements serverHandler {
              * If the port number is equal to the yacy port and the IP address is an address of this host ...
              * Please note that yacy is listening to all interfaces of this host
              */
-            } else if (dstPort.equals(Integer.valueOf(switchboard.getConfig("port", "8080"))) &&
+            } else if (dstPort.equals(Integer.valueOf(serverCore.getPortNr(switchboard.getConfig("port", "8080")))) &&
                         isThisHostIP(dstHost)) {
                  return true;                
             } else if ((serverCore.portForwardingEnabled) && 

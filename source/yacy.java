@@ -382,7 +382,7 @@ public final class yacy {
                     if (browserPopUpTrigger) {
                         final String  browserPopUpPage        = sb.getConfig("browserPopUpPage", "Status.html");
                         final String  browserPopUpApplication = sb.getConfig("browserPopUpApplication", "netscape");
-                        serverSystem.openBrowser("http://localhost:" + port + "/" + browserPopUpPage, browserPopUpApplication);
+                        serverSystem.openBrowser("http://localhost:" + server.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
                     }
 
                     //Copy the shipped locales into DATA
@@ -457,7 +457,7 @@ public final class yacy {
                     server.terminate(false);
                     server.interrupt();
                     if (server.isAlive()) try {
-                        httpc.wget(new URL("http://localhost:" + port), 1000, null, null, null); // kick server
+                        httpc.wget(new URL("http://localhost:" + serverCore.getPortNr(port)), 1000, null, null, null); // kick server
                         serverLog.logConfig("SHUTDOWN", "sent termination signal to server socket");
                     } catch (IOException ee) {
                         serverLog.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");

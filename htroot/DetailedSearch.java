@@ -55,6 +55,7 @@ import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSearchQuery;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -209,7 +210,7 @@ public class DetailedSearch {
 
         // adding some additional properties needed for the rss feed
         String hostName = (String) header.get("Host","localhost");
-        if (hostName.indexOf(":") == -1) hostName += ":" + env.getConfig("port","8080");
+        if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port","8080"));
         prop.put("rssYacyImageURL","http://" + hostName + "/env/grafics/yacy.gif");
 
         return prop;

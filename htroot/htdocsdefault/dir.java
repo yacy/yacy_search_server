@@ -106,8 +106,8 @@ public class dir {
             prop.put("hostip", InetAddress.getByName(serverCore.publicIP()).getHostAddress());
         }catch(UnknownHostException e){
             prop.put("hostip", "Unknown Host Exception");
-        }
-        prop.put("port", env.getConfig("port", "8080"));
+        }      
+        prop.put("port", serverCore.getPortNr(env.getConfig("port","8080")));
 
         // generate upload/download authorizations
         final String adminAccountBase64MD5    = switchboard.getConfig("adminAccountBase64MD5", "");

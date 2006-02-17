@@ -76,6 +76,7 @@ import java.util.TimeZone;
 import de.anomic.http.httpc;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverDate;
@@ -218,7 +219,7 @@ public class yacyCore {
             log.logConfig("YOU ARE OFFLINE! ---");
             log.logConfig("--- TO START BOOTSTRAPING, YOU MUST USE THE PROXY,");
             log.logConfig("--- OR HIT THE BUTTON 'go online'");
-            log.logConfig("--- ON THE STATUS PAGE http://localhost:" + switchboard.getConfig("port", "8080") + "/Status.html");
+            log.logConfig("--- ON THE STATUS PAGE http://localhost:" + serverCore.getPortNr(switchboard.getConfig("port", "8080")) + "/Status.html");
         }
     }
 

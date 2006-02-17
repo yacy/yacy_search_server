@@ -72,8 +72,8 @@ public class welcome {
             prop.put("hostip", InetAddress.getByName(serverCore.publicIP()).getHostAddress());
         }catch(UnknownHostException e){
             prop.put("hostip", "Unknown Host Exception");
-        }
-        prop.put("port", env.getConfig("port", "8080"));
+        }       
+        prop.put("port", serverCore.getPortNr(env.getConfig("port","8080")));
         prop.put("clientip", header.get("CLIENTIP", ""));
 
         final String peertype = (yacyCore.seedDB.mySeed == null) ? yacySeed.PEERTYPE_JUNIOR : yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);

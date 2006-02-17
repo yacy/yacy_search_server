@@ -106,7 +106,7 @@ public class yacyPeerActions {
         if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
             seedDB.mySeed.put(yacySeed.PORT, Integer.toString(serverCore.portForwarding.getPort()));
         } else {
-            seedDB.mySeed.put(yacySeed.PORT, sb.getConfig("port", "8080"));
+            seedDB.mySeed.put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
         }
         long uptime = ((System.currentTimeMillis() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000) / 60;
 		long uptimediff = uptime - Long.parseLong(sb.getConfig("lastseedcheckUptime", "0")); //TODO: Do not use the switchboard?

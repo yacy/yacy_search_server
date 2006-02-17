@@ -90,7 +90,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static Hashtable bfHost = new Hashtable(); // for brute-force prevention
     
     // class variables
-    private String port;                      // the listening port
+    private String extendedPort;                      // the listening port
     public boolean forceRestart = false;     // specifies if the server should try to do a restart
     
     public static boolean portForwardingEnabled = false;
@@ -193,11 +193,11 @@ public final class serverCore extends serverAbstractThread implements serverThre
         this.log.logInfo("Initializing serverCore ...");
         
         // read some config values
-        this.port = this.switchboard.getConfig("port", "8080").trim();
+        this.extendedPort = this.switchboard.getConfig("port", "8080").trim();
         
         // Open a new server-socket channel
         try {
-            this.initPort(this.port);
+            this.initPort(this.extendedPort);
         } catch (Exception e) {
             String errorMsg = "FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number";
             this.log.logSevere(errorMsg);
@@ -260,16 +260,24 @@ public final class serverCore extends serverAbstractThread implements serverThre
         yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(bindAddress.getPort()));    
     }
     
-    public InetSocketAddress generateSocketAddress(String thePort) throws SocketException {
+    public static int getPortNr(String extendedPortString) {
+        int pos = -1;
+        if ((pos = extendedPortString.indexOf(":"))!= -1) {
+            extendedPortString = extendedPortString.substring(pos+1);
+        }
+        return Integer.parseInt(extendedPortString);         
+    }
+    
+    public InetSocketAddress generateSocketAddress(String extendedPortString) throws SocketException {
         
         // parsing the port configuration
         String bindIP = null;
         int bindPort;
         
         int pos = -1;
-        if ((pos = thePort.indexOf(":"))!= -1) {
-            bindIP = thePort.substring(0,pos).trim();
-            thePort = thePort.substring(pos+1); 
+        if ((pos = extendedPortString.indexOf(":"))!= -1) {
+            bindIP = extendedPortString.substring(0,pos).trim();
+            extendedPortString = extendedPortString.substring(pos+1); 
             
             if (bindIP.startsWith("#")) {
                 String interfaceName = bindIP.substring(1);
@@ -303,7 +311,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 }
             } 
         }
-        bindPort = Integer.parseInt(thePort);    
+        bindPort = Integer.parseInt(extendedPortString);    
         
         return (bindIP == null) 
         ? new InetSocketAddress(bindPort)
@@ -448,7 +456,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     }
 
     public void open() {
-        this.log.logConfig("* server started on " + publicLocalIP() + ":" + this.port);
+        this.log.logConfig("* server started on " + publicLocalIP() + ":" + this.extendedPort);
     }
     
     // class body

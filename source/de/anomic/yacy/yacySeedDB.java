@@ -144,7 +144,7 @@ public final class yacySeedDB {
             mySeed.put(yacySeed.IP, sb.getConfig("portForwardingHost","localhost"));
         } else {
             mySeed.put(yacySeed.IP, "");       // we delete the old information to see what we have now
-            mySeed.put(yacySeed.PORT, sb.getConfig("port", "8080")); // set my seed's correct port number
+            mySeed.put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080")))); // set my seed's correct port number
         }
         mySeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // markup startup condition
         
@@ -761,7 +761,7 @@ public final class yacySeedDB {
             if (seed == null) return null;
             if ((seed == mySeed) && (!(seed.isOnline()))) {
                 // take local ip instead of external
-                return serverCore.publicIP() + ":" + sb.getConfig("port", "8080") + ((subdom == null) ? "" : ("/" + subdom));
+                return serverCore.publicIP() + ":" + serverCore.getPortNr(sb.getConfig("port", "8080")) + ((subdom == null) ? "" : ("/" + subdom));
             }
             return seed.getAddress() + ((subdom == null) ? "" : ("/" + subdom));
         } else {

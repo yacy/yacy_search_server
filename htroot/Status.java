@@ -126,8 +126,17 @@ public class Status {
         }
         prop.put("versioncomment_latestVersion", Float.toString(yacyCore.latestVersion));
 
+        // hostname and port
+        String extendedPortString = env.getConfig("port", "8080");
+        int pos = extendedPortString.indexOf(":"); 
+        prop.put("port",serverCore.getPortNr(extendedPortString));
+        if (pos!=-1) {
+            prop.put("extPortFormat",1);
+            prop.put("extPortFormat_extPort",extendedPortString);
+        } else {
+            prop.put("extPortFormat",0);
+        }
         prop.put("host", serverCore.publicLocalIP());
-        prop.put("port", env.getConfig("port", "<unknown>"));
 
         // port forwarding: hostname and port
         if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
