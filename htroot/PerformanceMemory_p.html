@@ -336,6 +336,32 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 </table>
 </p>
 
+<!-- other cache sizes -->
+<div class=small><b>Other caching structures:</b></div>
+	<table border="0" cellpadding="2" cellspacing="1">
+		<tr class="TableHeader" valign="bottom">
+			<td class="small">Type</td>
+			<td class="small">Amount</td>
+			<td class="small">Size</td>
+		</tr>
+		<tr class="TableCellDark">
+			<td class="small">EURL existsIndex</td>
+			<td class="small">#[eurl.existsIndexAmount]#</td>
+			<td class="small">#[eurl.existsIndexSize]#</td>	
+		</tr>
+		<tr class="TableCellLight">
+			<td class="small">NURL existsIndex</td>
+			<td class="small">#[nurl.existsIndexAmount]#</td>
+			<td class="small">#[nurl.existsIndexSize]#</td>		
+		</tr>
+		<tr class="TableCellDark">
+			<td class="small">LURL existsIndex</td>
+			<td class="small">#[lurl.existsIndexAmount]#</td>
+			<td class="small">#[lurl.existsIndexSize]#</td>	
+		</tr>		
+	</table>
+</p>
+
 #%env/templates/footer.template%#
 </body>
 </html>

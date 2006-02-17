@@ -45,6 +45,8 @@
 
 package de.anomic.server;
 
+import java.text.DecimalFormat;
+
 public class serverMemory {
 
     public static final long max = Runtime.getRuntime().maxMemory();
@@ -65,4 +67,28 @@ public class serverMemory {
         return runtime.totalMemory() - runtime.freeMemory();
     }
     
+    public static String bytesToString(long byteCount) {
+        try {
+            final StringBuffer byteString = new StringBuffer();
+
+            final DecimalFormat df = new DecimalFormat( "0.00" );
+            if (byteCount > 1073741824) {
+                byteString.append(df.format((double)byteCount / (double)1073741824 ))
+                          .append(" GB");
+            } else if (byteCount > 1048576) {
+                byteString.append(df.format((double)byteCount / (double)1048576))
+                          .append(" MB");
+            } else if (byteCount > 1024) {
+                byteString.append(df.format((double)byteCount / (double)1024))
+                          .append(" KB");
+            } else {
+                byteString.append(Long.toString(byteCount))
+                .append(" Bytes");
+            }
+
+            return byteString.toString();
+        } catch (Exception e) {
+            return "unknown";
+        }
+    }        
 }

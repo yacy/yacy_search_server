@@ -49,6 +49,8 @@ import java.io.File;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverFileUtils;
@@ -250,6 +252,17 @@ public class PerformanceMemory_p {
         prop.put("sizes", Integer.toString(c));
         prop.put("alive", Integer.toString(c));
         prop.put("heap" , Integer.toString(c));
+        
+        // other caching structures
+        long amount = sb.urlPool.errorURL.existsIndexSize();
+        prop.put("eurl.existsIndexAmount",Long.toString(amount));
+        prop.put("eurl.existsIndexSize",serverMemory.bytesToString(amount*plasmaURL.urlHashLength));
+        amount = sb.urlPool.noticeURL.existsIndexSize();
+        prop.put("nurl.existsIndexAmount",Long.toString(amount));
+        prop.put("nurl.existsIndexSize",serverMemory.bytesToString(amount*plasmaURL.urlHashLength));
+        amount = sb.urlPool.loadedURL.existsIndexSize();
+        prop.put("lurl.existsIndexAmount",Long.toString(amount));
+        prop.put("lurl.existsIndexSize",serverMemory.bytesToString(amount*plasmaURL.urlHashLength));
         
         // return rewrite values for templates
         return prop;

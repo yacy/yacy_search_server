@@ -424,7 +424,7 @@ public class plasmaURL {
     
     // the class object
     public kelondroTree urlHashCache;
-    private HashSet existsIndex;
+    private final HashSet existsIndex;
 
     public plasmaURL() {
         urlHashCache = null;
@@ -453,6 +453,10 @@ public class plasmaURL {
                 return false;
             }
         }
+    }
+    
+    public long existsIndexSize() {
+        return this.existsIndex.size();
     }
 
     public boolean remove(String urlHash) {
