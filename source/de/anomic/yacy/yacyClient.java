@@ -724,6 +724,10 @@ public final class yacyClient {
     }
     
     public static HashMap crawlOrder(yacySeed targetSeed, URL url, URL referrer) {
+        return crawlOrder(targetSeed,new URL[]{url},new URL[]{referrer}); 
+    }
+    
+    public static HashMap crawlOrder(yacySeed targetSeed, URL[] url, URL[] referrer) {
         // this post a message to the remote message board
         if (targetSeed == null) { return null; }
         if (yacyCore.seedDB.mySeed == null) { return null; }
@@ -742,8 +746,15 @@ public final class yacyClient {
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);
         post.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
-        post.put("url", crypt.simpleEncode(url.toString()));
-        post.put("referrer", crypt.simpleEncode((referrer == null) ? "" : referrer.toString()));
+        if (url.length == 1) {
+            post.put("url", crypt.simpleEncode(url.toString()));
+            post.put("referrer", crypt.simpleEncode((referrer == null) ? "" : referrer.toString()));
+        } else {
+            for (int i=0; i< url.length; i++) {
+                post.put("url" + i, crypt.simpleEncode(url[i].toString()));
+                post.put("ref" + i, crypt.simpleEncode((referrer[i] == null) ? "" : referrer[i].toString()));
+            }
+        }
         post.put("depth", "0");
         post.put("ttl", "0");
 
@@ -756,7 +767,7 @@ public final class yacyClient {
             return nxTools.table(
                     httpc.wput(
                             new URL("http://" + address + "/yacy/crawlOrder.html"),
-                            10000, 
+                            60000, 
                             null, 
                             null, 
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null, 
