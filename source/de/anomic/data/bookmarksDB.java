@@ -327,7 +327,7 @@ public class bookmarksDB {
         }
     }
     public Iterator getBookmarksIterator(boolean priv){
-        TreeSet set=new TreeSet(new bookmarkComparator());
+        TreeSet set=new TreeSet(new bookmarkComparator(true));
         Iterator it=bookmarkIterator(true);
         Bookmark bm;
         while(it.hasNext()){
@@ -339,7 +339,7 @@ public class bookmarksDB {
         return set.iterator();
     }
     public Iterator getBookmarksIterator(String tagName, boolean priv){
-        TreeSet set=new TreeSet(new bookmarkComparator());
+        TreeSet set=new TreeSet(new bookmarkComparator(true));
         String tagHash=tagHash(tagName);
         Tag tag=getTag(tagHash);
         Vector hashes=new Vector();
@@ -843,11 +843,23 @@ public class bookmarksDB {
      * Comparator to sort the Bookmarks with Timestamps
      */
     public class bookmarkComparator implements Comparator{
+        
+        private boolean newestFirst;
+        /**
+         * @param newestFirst newest first, or oldest first?
+         */
+        public bookmarkComparator(boolean newestFirst){
+            this.newestFirst=newestFirst;
+        }
         public int compare(Object obj1, Object obj2){
             Bookmark bm1=getBookmark((String)obj1);
             Bookmark bm2=getBookmark((String)obj2);
-            //TODO: what happens, if there is a big difference? (to much for int)
-            return (new Long(bm1.getTimeStamp() - bm2.getTimeStamp())).intValue();
+            //XXX: what happens, if there is a big difference? (to much for int)
+            if(this.newestFirst){
+                return (new Long(bm2.getTimeStamp() - bm1.getTimeStamp())).intValue();
+            }else{
+                return (new Long(bm1.getTimeStamp() - bm2.getTimeStamp())).intValue();
+            }
         }
     }
     /**
