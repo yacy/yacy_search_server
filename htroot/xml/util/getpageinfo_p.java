@@ -51,36 +51,58 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import de.anomic.data.robotsParser;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class gettitle_p {
+public class getpageinfo_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
         prop.put("title", "");
+        prop.put("robots-allowed", 3); //unknown
+        String actions="title";
         if(post!=null && post.containsKey("url")){
+            if(post.containsKey("actions"))
+                actions=(String)post.get("actions");
             ArrayList content;
-            String url;
-            try {
-                url=(String) post.get("url");
-                if(!url.toLowerCase().startsWith("http://")){
-                    url="http://"+url;
+            String url=(String) post.get("url");
+            if (!url.toLowerCase().startsWith("http://")) {
+                url = "http://" + url;
+            }
+            if (actions.indexOf("title")>=0) {
+                try {
+                    content = httpc.wget(new URL(url));
+
+                    Iterator it = content.iterator();
+                    String line;
+                    String title;
+                    while (it.hasNext()) {
+                        line = (String) it.next();
+                        try {
+                            title = line.substring(line.toLowerCase().indexOf(
+                                    "<title>") + 7, line.toLowerCase().indexOf(
+                                    "</title>"));
+                            prop.put("title", title);
+                        } catch (IndexOutOfBoundsException e) {
+                        }
+                    }
+
+                } catch (MalformedURLException e) {
+                } catch (IOException e) {
                 }
-                content = httpc.wget(new URL(url));
-                Iterator it=content.iterator();
-                String line;
-                String title;
-                while(it.hasNext()){
-                    line=(String) it.next();
-                    try{
-                        title=line.substring(line.toLowerCase().indexOf("<title>")+7, line.toLowerCase().indexOf("</title>"));
-                        prop.put("title", title);
-                        return prop;
-                    }catch(IndexOutOfBoundsException e){}
-                }
-            } catch (MalformedURLException e) {} catch (IOException e) {}
+            }
+            if(actions.indexOf("robots")>=0){
+                try {
+                    if(robotsParser.isDisallowed(new URL(url))){
+                        prop.put("robots-allowed", 0);
+                    }else{
+                        prop.put("robots-allowed", 1);
+                    }
+                } catch (MalformedURLException e) {}
+            }
+            
         }
         // return rewrite properties
         return prop;

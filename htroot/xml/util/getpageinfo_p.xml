@@ -1,0 +1,5 @@
+<?xml version='1.0' standalone='yes'?>
+<pageinfo>
+  <title>#[title]#</title>
+  <robots>#(robots-allowed)#0::1::#(/robots-allowed)#</robots>
+</pageinfo>

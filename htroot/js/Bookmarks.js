@@ -8,6 +8,6 @@ function handleResponse(){
 function loadTitle(){
 	url=document.getElementsByName("url")[0].value;
 	if(document.getElementsByName("title")[0].value==""){
-		sndReq('/xml/util/gettitle_p.xml?url='+url);
+		sndReq('/xml/util/getpageinfo_p.xml?actions=title&url='+url);
 	}
 }

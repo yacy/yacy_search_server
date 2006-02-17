@@ -3,6 +3,8 @@
 <head>
 <title>YaCy '#[clientname]#': Index Creation</title>
 #%env/templates/metas.template%#
+<script src="/js/ajax.js"></script>
+<script src="/js/IndexCreate.js"></script>
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
@@ -124,7 +126,13 @@ You can define URLs as start points for Web page crawling and start crawling her
     	</tr>
     	<tr><td class="small">From&nbsp;URL:</td>
     		<td class="small"><input type="radio" name="crawlingMode" value="url" checked="checked"></td>
-    	    <td class="small"><input name="crawlingURL" type="text" size="41" maxlength="256" value="http://"></td>
+    	    <td class="small">
+    	    	<input name="crawlingURL" type="text" size="41" maxlength="256" value="http://" onkeypress="changed()">
+    	      	<span id="robotsOK"></span>
+    	    </td>
+    	</tr>
+    	<tr>
+    		<td colspan="2"><span id="title"></span></td>
     	</tr>
     	</table>
     </td>
