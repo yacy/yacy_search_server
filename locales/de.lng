@@ -28,7 +28,7 @@
 
 Blacklist Manager==Blacklist Manager
 Blacklist==Blacklist
-This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion  stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
 from being loaded. You can define several blacklists and activate them separately.==Sie k&ouml;nnen mehrere Blacklists anlegen und getrennt aktivieren.
 You may also provide your blacklist to other peers by sharing them; in return you may==Sie k&ouml;nnen ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
 collect blacklist entries from other peers.==Im Gegenzug k&ouml;nnen Sie sich selber von anderen Peers Blacklists runterladen.
@@ -38,13 +38,13 @@ Edit list:==Liste bearbeiten:
 New list:==Neue Liste:
 "create"=="anlegen"
 Enable/disable this list==Liste an/ausschalten
-Share/don't share this list==Liste teilen/nicht teilen
+Share/don't share this list==Liste freigeben/nicht freigeben
 Change==&Auml;ndern
 Delete this list==Liste l&ouml;schen
 />active==/>aktiv
 />shared==/>freigegeben
 Active list:==Aktivierte Liste:
-These are the domain name / path patterns in this blacklist:==Dies sind die Domainnamen / -pfade die in der Blackliste sind:
+These are the domain name / path patterns in this blacklist:==Dies sind die Domainnamen / -pfade die in der Blacklist sind:
 You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
 Delete URL pattern==URL aus der Liste l&ouml;schen
 Enter new domain name / path pattern in the form:==Geben Sie eine neue Domain/einen neuen Pfad in dieser Form ein:
@@ -68,7 +68,7 @@ File:==Datei:
 YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
 <h2>Bookmarks==<h2>Lesezeichen
 Add Bookmark==Lesezeichen hinzuf&uuml;gen
-Import XML Bookmarks==Importiere XML Lesezeichen
+Import XML Bookmarks==Importiere XML-Lesezeichen
 Edit Bookmark==Lesezeichen bearbeiten
 #URL:==URL:
 Title:==Titel:
@@ -79,11 +79,15 @@ yes==ja
 no==nein
 "create"=="erzeugen"
 "edit"=="bearbeiten"
+File:==Datei:
+import as Public==als &ouml;ffentlich importieren
 "private bookmark"=="Privates Lesezeichen"
 "public bookmark"=="&Ouml;ffentliches Lesezeichen"
 Tagged with==Stichworte:
 Edit==Bearbeiten
 Delete==L&ouml;schen
+
+Bookmark List==Lesezeichenliste
 previous page==vorherige Seite
 next page==n&auml;chste Seite
 All==Alle
@@ -118,8 +122,8 @@ Incoming Connections==Eingehende Verbindungen
 Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt..
 Protocol==Protokoll
 Duration==Dauer
-Source IP\[:Port\]==Quell IP[:Port]
-Dest. IP\[:Port\]==Ziel IP[:Port]
+Source IP\[:Port\]==Quell-IP[:Port]
+Dest. IP\[:Port\]==Ziel-IP[:Port]
 Command==Kommando
 Used==Benutzt
 Close==Schliessen
@@ -131,7 +135,7 @@ Waiting for new request nr.==Warte auf neue Anfrage Nr.
 
 Incoming Cookies Monitor==&Uuml;berwachung eingehender Cookies
 Cookie Monitor: Incoming Cookies==Cookie &Uuml;berwachung: Eingehende Cookies
-This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Auflistung aller Cookies, die ein Web Server an diesen YaCy Proxy geschickt hat:
+This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Auflistung aller Cookies, die ein Webserver an diesen YaCy Proxy geschickt hat:
 Showing==Angezeigt werden
 entries from a total of==Eintr&auml;ge von insgesamt
 Cookies==Cookies
@@ -763,15 +767,15 @@ reply==antworten
 #File: MessageSend_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Send message==Nachrichten Versand
+Send message==Nachricht versenden
 
 #-------------------------------------------------------
 #File: Network.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Network Overview==Netzwerk &Uuml;berblick
-Network Menu==Netzwerk Men&uuml;
-Network&nbsp;Overview==Netzwerk &Uuml;berblick
+Network Overview==Netzwerk&uuml;bersicht
+Network Menu==Netzwerkmen&uuml;
+Network&nbsp;Overview==Netzwerk&uuml;bersicht
 Active&nbsp;Peers==Aktive Peers
 Passive&nbsp;Peers==Passive Peers
 Potential&nbsp;Peers==Potenzielle Peers
@@ -797,6 +801,7 @@ Links==Links
 RWIs==RWIs
 accept<br><b>Crawl</b>/<br><b>Index==Akzeptiert<br><b>Crawl</b>/<br><b>Index</b>
 Sent<br>Words==Gesendete<br>W&ouml;rter
+
 Sent<br>URLs==Gesendete<br>URLs
 Received<br>Words==Empfangene<br>W&ouml;rter
 Received<br>URLs==Empfangene<br>URLs
@@ -828,7 +833,7 @@ Received<br>URLs==Empfangene<br>URLs
 PPM==PPM
 Seeds==Seeds
 Connects<br>per hour==Verbindungen<br>pro Stunde
-Network legend:==Netzwerk Legende:
+Network legend:==Netzwerklegende:
 dark font==schwarze Schrift
 senior/principal peers==Senior/Principal Peers
 lightred font==hellrote Schrift
@@ -837,12 +842,12 @@ turquoise font==t&uuml;rkise Schrift
 junior peers==Junior Peers
 red point==roter Punkt
 this peer==Ihr Peer
-You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
-You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online Modus oder Sie benutzen nicht die Proxy Option.
+You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
+You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online-Modus oder Sie benutzen nicht die Proxy-Option.
 
-To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy Netzwerk zu verbinden, m&uuml;ssen Sie den Proxy benutzen, indem Sie die Browser Einstellungen auf
+To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy-Netzwerk zu verbinden, m&uuml;ssen Sie den Proxy benutzen, indem Sie die Browser-Einstellungen auf
 \('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>==('on-demand - Modus', siehe <a href="http://www.yacy.net/yacy/Installation.html#wininst">hier</a>
-for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den Permanent Online Modus aktivieren.
+for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den \"Permanent Online\" Modus aktivieren.
 To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Knopf:
 "go online"=="online gehen"
 
@@ -850,14 +855,14 @@ To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Kn
 #File: News.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Network Menu==Netzwerk Men&uuml;
-News&nbsp;Overview==News &Uuml;berblick
+Network Menu==Netzwerkmen&uuml;
+News&nbsp;Overview==News-&Uuml;berblick
 Incoming&nbsp;News==eingehende News
 Processed&nbsp;News==gelesene News
 Outgoing&nbsp;News==ausgehende News
 Published&nbsp;News==ver&ouml;ffentlichte News
-News Overview==News &Uuml;berblick
-This is the YaCyNews system \(currently under testing\).==Dies ist das YaCy News System (zur Zeit noch im Test).
+News Overview==News&uuml;berblick
+This is the YaCyNews system \(currently under testing\).==Dies ist das YaCy News-System (zur Zeit noch im Test).
 The news service is controlled by several entry points:==Dieser News Service wird von folgenden Punkten initiert:
 A crawl start with remote indexing will automatically create a news entry.==Wird ein Crawl von einem anderen Peer initiert, dann wird automatisch ein News-Eintrag erstellt.
 Other peers may use this information to prevent double-crawls from the same start point.==Andere Peers k&ouml;nnen diese Informationen benutzen, um einen doppelten Crawl vom selben Startpunkt zu vermeiden.
@@ -1094,7 +1099,7 @@ Page.==Seite ansehen.
 #File: QuickCrawlLink_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Schnell Crawl Link
+YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Schnell-Crawl-Link
 Quick Crawl Link==Schnell Crawl Link
 Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
 Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
@@ -1120,7 +1125,7 @@ If you want to restore all settings to the default values,==Wenn Sie alle Einste
 but <b>forgot your administration password</b>, you must stop the proxy,==aber Ihr <b>Administatorpasswort vergessen haben</b>, m&uuml;ssen Sie YaCy stoppen,
 delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/httpProxy.conf' im YaCy Hauptordner l&ouml;schen und YaCy neu starten.
 Administration Account Settings==Administrations Konto Einstellungen
-Server Access Settings==Server Zugangs Einstellungen
+Server Access Settings==Server Zugangs-Einstellungen
 General Settings==Generelle Einstellungen
 System Behaviour Settings==System Einstellungen
 Server Access Settings==Server Zugangs Einstellungen
@@ -1135,18 +1140,18 @@ Port Forwarding \(optional\)==Port Weiterleitung (optional)
 #File: Settings_General.inc
 General Settings==Generelle Einstellungen
 <b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.</b>==<b>Ihr Peer Name erzeugt auch eine '.yacy'-domain die von jedem Nutzer dieses Proxys erreicht werden kann.</b>
-Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.==Mittels Ihrer 'Home Page' und 'File Share'-Zonen haben Sie auch eine Plattform, um Inhalte f&uuml;r Ihre neue Domain bereit zu stellen.
+Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.==Mittels Ihrer 'Homepage' und 'File Share'-Zonen haben Sie auch eine Plattform, um Inhalte f&uuml;r Ihre neue Domain bereit zu stellen.
 staticIP ==statische IP
 <b>The staticIP can help that your peer can be reached by other peers in case that your==<b>Die statische IP kann helfen Ihren Peer f&uuml;r andere Peers erreichbar zu machen, falls Sie
 peer is behind a firewall or proxy.</b>==hinter einer Firewall oder einem Proxy sind.</b>
 
 #-------------------------------------------------------
 #File: Settings_ProxyAccess.inc
-Server Access Settings==Server Zugangs Einstellungen
-These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP Proxy und Server.
-All traffic is routed throug one single port, for both proxy and server.==Der gesamte Traffic f&uuml;r Proxy und Server wird durch einen einzigen Port geleitet.
+Server Access Settings==Serverzugangseinstellungen
+These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP-Proxy und -Server.
+All traffic is routed through one single port, for both proxy and server.==Der gesamte Traffic f&uuml;r Proxy und Server wird durch einen einzigen Port geleitet.
 Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
-The socket addresses where YaCy should listen for incomming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
+The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
 You have four possibilities to specify the address:==Sie haben vier M&ouml;glichkeiten die Adresse anzugeben:
 defining a port only==nur einen Port angeben
 <i>e.g. 8080</i>==<i>z.B. 8080</i>
@@ -1200,9 +1205,9 @@ Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 #File: Settings_PortForwarding.inc
 #check for logical mistakes, unsure about some translations
 Port Forwarding==Port Weiterleitung
-You can use a remote server running a ssh demon to forward your server/proxy port.==Sie k&ouml;nnen einen Remote Server mit einem SSH-Daemon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
-This is useful if you want to tunnel throug a NAT/router.==Dies ist n&uuml;tzlich, wenn Sie durch einen Router/NAT tunneln wollen.
-Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativ k&ouml;nnen Sie einfach einen virtuellen Server in Ihrem Router/NAT einstellen, um Verbindungen von au&szlig;en zu erm&ouml;glichen.
+You can use a remote server running a ssh demon to forward your server/proxy port.==Sie k&ouml;nnen einen Remote Server mit einem ssh demon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
+This is useful if you want to tunnel throug a NAT/router.==Dies ist n&uuml;tzlich, wenn Sie durch einen NAT/Router tunneln wollen.
+Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativ k&ouml;nnen Sie einfach einen virtuellen Server in Ihrem NAT/Router einstellen, um Verbindungen von Au&szlig;erhalb zu erm&ouml;glichen.
 Enable&nbsp;port&nbsp;forwarding:==Aktiviere Port Weiterleitung:
 Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung &uuml;ber sicheren Kanal.
 Forwarding&nbsp;via&nbsp;proxy:==Weiterleitung &uuml;ber Proxy:
@@ -1238,7 +1243,7 @@ If you enable one of the available uploading methods, you will become a principa
 Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
 but only if there have been changes to the seed-list.==jedoch nur wenn &Auml;nderungen an der Seed-Liste vorgenommen wurden.
 Upload Method:==Uploadmethode:
-Retry Uploading==erneuter Upload
+Retry Uploading==Upload versuchen
 Here you can specify which upload method should be used.==Hier k&ouml;nnen Sie ausw&auml;hlen welche Uploadmethode verwendet werden soll.
 Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu deaktivieren.
 The URL that can be used to retrieve the uploaded seed file, like==Die URL die genutzt werden kann um die hochgeladene Seed-Liste zu erhalten, wie
@@ -1249,7 +1254,7 @@ Uploading via FTP:==Upload per FTP:
 This is the account for a FTP server where you can host a seed-list file.==Dies ist der Account f&uuml;r einen FTP-Server, auf dem Sie eine Seed-Liste bereitstellen k&ouml;nnen.
 If you set this, you will become a principal peer.==Wenn Sie das tun, werden Sie zum Principal-Peer.
 Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
-but only if there had been changes to the seed-list.==jedoch nur wenn &Auml;nderungen an der Seed-Liste vorgenommen wurden.
+but only if there had been changes to the seed-list.==jedoch nur wenn &Auml;nderungen an der Seed-Liste existieren.
 The host where you have a FTP account, like==Der Host zu Ihrem FTP-Account, wie
 Path:==Pfad:
 The remote path on the FTP server, like==Der Remote-Pfad auf dem FTP-Server, wie
@@ -1515,10 +1520,11 @@ Indexing Queue==Indexier Warteschlange
 Loader Queue==Lade Warteschlange
 paused==angehalten
 pause crawling::continue crawling==crawling anhalten::crawling fortsetzen
-Local Crawler Queue==Lokale Crawler Warteschlange
-Enqueued:==Eingef&uuml;gt:
+Crawler Queue==Crawler Warteschlange
+Enqueued from:==Eingef&uuml;gt von:
+ local== lokal
 Pending:==Wartend:
-Remote Crawler Queue==Remote Crawler Warteschlange
+Remote Crawl Trigger Queue==Remote-Crawl-Trigger Warteschlange
 
 #-------------------------------------------------------
 #File: Steering.html
@@ -1630,7 +1636,7 @@ Global&nbsp;Index==Globaler Index
 Distributed Crawler==Verteilter Crawler
 Local Proxy==Lokaler Proxy
 Communication / Publication==Kommunikation / Publikation
-Peer&nbsp;Control==Peer Verwaltung
+Peer&nbsp;Control==Peer-Verwaltung
 The Project==Das Projekt
 Search Page==Suchseite
 Detailed Search==Detailsuche
@@ -1657,7 +1663,7 @@ Personal Profile==Pers&ouml;nliches Profil
 >Connections==>Verbindungen
 >Language==>Sprache
 #Skins==Skins
-Project Home==Pojektseite
+Project Home==Projektseite
 Project News==Neuigkeiten
 English Forum==Englisches Forum
 
@@ -1687,7 +1693,7 @@ Index Control Menu==Index Verwalten Men&uuml;
 #File: env/templates/submenuIndexCreate.template
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Index Creation Menu==Index erzeugen Men&uuml;
+Index Creation Menu==Index-erzeugen Men&uuml;
 Control Queues==Kontrolle der Warteschlangen
 WWW Crawl Queues==WWW Crawl Warteschlangen
 Media Crawl Queues==Medien Crawl Warteschlangen

@@ -1413,7 +1413,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 "info", // Informationsangebote
                 "int",  // International
                 "jobs", // Jobangebote von Unternemen
-                "mil",  // Military (US-Militär)
+                "mil",  // Military (US-Militaer)
                 // "museum", // Museen
                 "name",   // Privatpersonen
                 "nato",   // NATO (veraltet)

@@ -3,7 +3,7 @@
 These settings configure the access method to your own http proxy and server.
 All traffic is routed throug one single port, for both proxy and server.<br>
 <br><b>Server/Proxy Port Configuration</b><br>
-<p>The socket addresses where YaCy should listen for incomming connections from other YaCy peers or http clients.<br>
+<p>The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.<br>
 You have four possibilities to specify the address:<ul>
 <li>defining a port only (<i>e.g. 8080</i>)</li>
 <li>defining IP address and port (<i>e.g. 192.168.0.1:8080</i>)</li>
