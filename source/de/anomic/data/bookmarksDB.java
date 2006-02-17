@@ -86,6 +86,10 @@ public class bookmarksDB {
     }
     public static Date iso8601ToDate(String iso8601){
     	String[] tmp=iso8601.split("T");
+        if(tmp.length!=2){
+            //Error parsing Date
+            return new Date();
+        }
     	String day=tmp[0];
     	String time=tmp[1];
     	if(time.length()>8){
