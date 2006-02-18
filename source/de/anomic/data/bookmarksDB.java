@@ -57,12 +57,16 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -416,27 +420,75 @@ public class bookmarksDB {
         
     }
 
-    public void importFromXML(String input, boolean isPublic){
-
-		SAXParser parser;
-		try {
-			ByteArrayInputStream is=new ByteArrayInputStream(input.getBytes());
-			parser = SAXParserFactory.newInstance().newSAXParser();
-			xmlImportHandler handler=new xmlImportHandler(isPublic);
-			parser.parse(is, handler);
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    public void importFromXML(String input, boolean importPublic){
+        DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+        factory.setValidating(false);
+        factory.setNamespaceAware(false);
+        DocumentBuilder builder;
+        try {
+            builder = factory.newDocumentBuilder();
+            Document doc=builder.parse(new ByteArrayInputStream(input.getBytes()));
+            parseXMLimport(doc, importPublic);
+        } catch (ParserConfigurationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SAXException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+    }
+    public void parseXMLimport(Node doc, boolean importPublic){
+        if(doc.getNodeName()=="post"){
+            NamedNodeMap attributes = doc.getAttributes();
+            String url=attributes.getNamedItem("href").getNodeValue();
+            if(url.equals("")){
+                return;
+            }
+            Bookmark bm=new Bookmark(url);
+            String tagsString="";
+            String title="";
+            String description="";
+            String time="";
+            if(attributes.getNamedItem("tag")!=null){
+                tagsString=attributes.getNamedItem("tag").getNodeValue();
+            }
+            if(attributes.getNamedItem("description")!=null){
+                title=attributes.getNamedItem("description").getNodeValue();
+            }
+            if(attributes.getNamedItem("extended")!=null){
+                description=attributes.getNamedItem("extended").getNodeValue();
+            }
+            if(attributes.getNamedItem("time")!=null){
+                time=attributes.getNamedItem("time").getNodeValue();
+            }
+            Vector tags=new Vector();
+            
+            if(title != null){
+                bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
+            }
+            if(tagsString!=null){
+                tags = listManager.string2vector(tagsString.replace(' ', ','));
+            }
+            bm.setTags(tags, true);
+            if(time != null){
+                bm.setTimeStamp(iso8601ToDate(time).getTime());
+            }
+            if(description!=null){
+                bm.setProperty(Bookmark.BOOKMARK_DESCRIPTION, description);
+            }
+            bm.setPublic(importPublic);
+            setBookmarksTable(bm);
+        }
+        NodeList children=doc.getChildNodes();
+        if(children != null){
+            for (int i=0; i<children.getLength(); i++) {
+                parseXMLimport(children.item(i), importPublic);
+            }
+        }
     }
     public class xmlImportHandler extends DefaultHandler{
     	boolean importPublic;
