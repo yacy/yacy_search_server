@@ -171,6 +171,7 @@ public class wikiCode {
     public static String[] htmlentities={
         // Ampersands _have_ to be replaced first. If they were replaced later,
         // other replaced characters containing ampersands would get messed up.
+        "\u0026","&amp;",      //ampersand
         "\"","&quot;",         //quotation mark
         "\u003C","&lt;",       //less than
         "\u003E","&gt;",       //greater than
