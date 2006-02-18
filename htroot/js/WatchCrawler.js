@@ -2,6 +2,42 @@ DELETE_STRING="delete"
 
 var statusRPC;
 var queuesRPC;
+var refreshInterval=5;
+var wait=0;
+var changing=false; //change the interval
+
+refresh();
+//loadInterval=window.setInterval("refresh()", refreshInterval*1000);
+countInterval=window.setInterval("countdown()", 1000);
+
+function changeInterval(){
+	if(!changing){
+		window.clearInterval(countInterval);
+		counter=document.getElementById("nextUpdate");
+		counter.innerHTML='<input type="text" id="newInterval" onblur="newInterval()" size="2" />';
+		document.getElementById("newInterval").focus();
+		changing=true;
+	}
+}
+function newInterval(){
+	refreshInterval=document.getElementById("newInterval").value;
+	refresh();
+	countInterval=window.setInterval("countdown()", 1000);
+	changing=false;
+}
+function countdown(){
+	document.getElementById("nextUpdate").innerHTML=wait;
+	wait--;
+	if(wait==0){
+		refresh()
+	}
+}
+function refresh(){
+	wait=refreshInterval;
+	requestStatus();
+	requestQueues();
+}
+
 function requestStatus(){
 	statusRPC=createRequestObject()
 	statusRPC.open('get', '/xml/status_p.xml');
@@ -15,8 +51,7 @@ function requestQueues(){
 	queuesRPC.send(null);
 
 }
-window.setInterval("requestStatus()", 5000);
-window.setInterval("requestQueues()", 5000);
+
 
 
 function handleStatus(){
