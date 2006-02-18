@@ -554,7 +554,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         getConfig("20_dhtdistribution_threads","1");
         for(int i=0; i<(int)getConfigLong("20_dhtdistribution_threads",1);i++) {
             deployThread("20_dhtdistribution_"+i, "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-            new serverInstantThread(indexDistribution, "job", null), 60000 + i*5000);
+            new serverInstantThread(indexDistribution, "job", null), 60000 + i*5000,
+            Long.parseLong(getConfig("20_dhtdistribution_idlesleep" , "5000")),
+            Long.parseLong(getConfig("20_dhtdistribution_busysleep" , "0")),
+            Long.parseLong(getConfig("20_dhtdistribution_memprereq" , "1000000")));
         }
         
         // test routine for snippet fetch
