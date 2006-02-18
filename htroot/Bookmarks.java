@@ -45,7 +45,9 @@
 // javac -classpath .:../Classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -90,6 +92,8 @@ public class Bookmarks {
             	prop.put("mode", 2);
             }else if(mode.equals("importxml")){
             	prop.put("mode", 3);
+            }else if(mode.equals("importbookmarks")){
+                prop.put("mode", 4);
             }
         }else if(post.containsKey("add")){ //add an Entry
             String url=(String) post.get("url");
@@ -155,6 +159,20 @@ public class Bookmarks {
                         }
                     }
                 }
+        }else if(post.containsKey("bookmarksfile")){
+            boolean isPublic=false;
+            if(((String) post.get("public")).equals("public")){
+                isPublic=true;
+            }
+            String tags=(String) post.get("tags");
+            if(tags.equals("")){
+                tags="unsorted";
+            }
+            try {
+                File file=new File((String)post.get("bookmarksfile"));
+                switchboard.bookmarksDB.importFromBookmarks(file.toURL() , new String((byte[])post.get("bookmarksfile$file")), tags, isPublic);
+            } catch (MalformedURLException e) {}
+            
         }else if(post.containsKey("xmlfile")){
         	boolean isPublic=false;
         	if(((String) post.get("public")).equals("public")){
@@ -243,7 +261,7 @@ public class Bookmarks {
     	prop.put("prev-page", 1);
     	prop.put("prev-page_start", start);
     	prop.put("prev-page_tag", tagName);
-    	prop.put("next-page_num", max_count);
+    	prop.put("prev-page_num", max_count);
     }
     prop.put("bookmarks", count);
     return prop;

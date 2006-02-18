@@ -44,6 +44,7 @@ package de.anomic.data;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -70,11 +71,14 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
 public class bookmarksDB {
@@ -419,7 +423,35 @@ public class bookmarksDB {
     public void addBookmark(String url, String title, Vector tags){
         
     }
+    public void importFromBookmarks(URL baseURL, String input, String tag, boolean importPublic){
+        HashMap links=new HashMap();
+        Iterator it;
+        String url,title;
+        Bookmark bm;
+        Vector tags=listManager.string2vector(tag); //this allow multiple default tags
+        try {
+            //load the links
+            htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);
+            OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
+            serverFileUtils.write(input.getBytes(),os);
+            os.close();
+            links = (HashMap) scraper.getAnchors();
+        } catch (IOException e) {}
+        it=links.keySet().iterator();
+        while(it.hasNext()){
+            url=(String) it.next();
+            title=(String) links.get(url);
+            if(title.equals("")){//cannot be displayed
+                title=url;
+            }
+            bm=new Bookmark(url);
+            bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
+            bm.setTags(tags);
+            bm.setPublic(importPublic);
+            setBookmarksTable(bm);
+        }
 
+    }
     public void importFromXML(String input, boolean importPublic){
         DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
         factory.setValidating(false);
@@ -429,15 +461,9 @@ public class bookmarksDB {
             builder = factory.newDocumentBuilder();
             Document doc=builder.parse(new ByteArrayInputStream(input.getBytes()));
             parseXMLimport(doc, importPublic);
-        } catch (ParserConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (ParserConfigurationException e) {  
         } catch (SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
         
     }
@@ -490,43 +516,6 @@ public class bookmarksDB {
             }
         }
     }
-    public class xmlImportHandler extends DefaultHandler{
-    	boolean importPublic;
-    	public xmlImportHandler(boolean isPublic){
-    		importPublic=isPublic;
-    	}
-		public void startElement(String uri, String localName, String qName, Attributes attributes) {
-			if (qName.equals("post")) {
-				String url=attributes.getValue("href");
-				if(url.equals("")){
-					return;
-				}
-				Bookmark bm = new Bookmark(url);
-				String tagsString=attributes.getValue("tag").replace(' ', ',');
-				String title=attributes.getValue("description");
-				String description=attributes.getValue("extended");
-				String time=attributes.getValue("time");
-				Vector tags=new Vector();
-				
-				if(title != null){
-					bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
-				}
-				if(tagsString!=null){
-					tags = listManager.string2vector(tagsString);
-				}
-				bm.setTags(tags, true);
-				if(time != null){
-					bm.setTimeStamp(iso8601ToDate(time).getTime());
-				}
-				if(description!=null){
-					bm.setProperty(Bookmark.BOOKMARK_DESCRIPTION, description);
-				}
-				bm.setPublic(importPublic);
-                setBookmarksTable(bm);
-			}
-		}
-    }
-    
     /**
      * Subclass, which stores an Tag
      *
@@ -788,6 +777,10 @@ public class bookmarksDB {
             tags.add(tag);
             this.setTags(tags, true);
         }
+        /**
+         * set the Tags of the bookmark, and write them into the tags table.
+         * @param tags a vector with the tags
+         */
         public void setTags(Vector tags){
             setTags(tags, true);
         }

@@ -17,6 +17,7 @@
 ::
 <a href="Bookmarks.html?mode=add">Add Bookmark</a>
 <a href="Bookmarks.html?mode=importxml">Import XML Bookmarks</a>
+<!-- <a href="Bookmarks.html?mode=importbookmarks">Import Bookmarks.html</a> -->
 ::
 <form action="Bookmarks.html" method="GET">
 <table border="0" width="100%" height="100%">
@@ -59,6 +60,7 @@
 </table>
 </form>
 ::
+<!-- import XML Bookmarks -->
 <form action="Bookmarks.html" method="POST"  enctype="multipart/form-data">
 <table border="0" width="100%" height="100%">
 	<tr>
@@ -79,6 +81,36 @@
 	<tr>
 		<td colspan="2" colspan="2" valign="top" class="TableHeader" width="100%">
 		<input type="submit" name="importxml" value="import">
+		</td>
+	</tr>
+</table>
+</form>
+::
+<!-- import Netscape Bookmarks -->
+<form action="Bookmarks.html" method="POST"  enctype="multipart/form-data">
+<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" colspan="2" valign="top" class="TableHeader"><h3>Import Bookmarks</h3></td>
+	</tr>
+	<tr>
+		<td valign="top" class="TableCellDark">File:</td>
+		<td valign="top" class="TableCellLight" width="100%"><input type="file" name="bookmarksfile"></td>
+	</tr>
+		<tr>
+		<td valign="top" class="TableCellDark">Default Tags:</td>
+		<td valign="top" class="TableCellLight" width="100%"><input type="text" name="tags" value="imported"></td>
+	</tr>
+	<tr>
+		<td valign="top" class="TableCellDark">import as Public:</td>
+		<td valign="top" class="TableCellLight"><select name="public">
+			<option value="public">yes</option>
+			<option value="private">no</option>
+			</select>
+		</td>
+         </tr>
+	<tr>
+		<td colspan="2" colspan="2" valign="top" class="TableHeader" width="100%">
+		<input type="submit" name="importbookmarks" value="import">
 		</td>
 	</tr>
 </table>
