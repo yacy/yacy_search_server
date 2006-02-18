@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.io.IOException;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverDate;
@@ -312,7 +313,12 @@ public class Network {
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_shortname", shortname);
                             prop.put(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
-                            userAgent = yacyCore.peerActions.getUserAgent(seed.getIP());
+                            userAgent = null;
+                            if (seed.hash.equals(yacyCore.seedDB.mySeed.hash)) {
+                               userAgent = httpc.userAgent;
+                            } else {
+                               userAgent = yacyCore.peerActions.getUserAgent(seed.getIP());
+                            }
                             p = userAgent.lastIndexOf(';');
                             location = (p > 0) ? userAgent.substring(p + 1, userAgent.length() - 1).trim(): "";
                             prop.put(STR_TABLE_LIST + conCount + "_location", location);

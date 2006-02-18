@@ -104,7 +104,7 @@ public final class httpc {
     
     // statics
     private static final String vDATE = "20040602";
-    private static String userAgent;
+    public static String userAgent;
     private static final int terminalMaxLength = 30000;
     private static final TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
     /**
