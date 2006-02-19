@@ -43,9 +43,7 @@
 
 package de.anomic.plasma;
 
-import java.io.IOException;
 import java.util.Enumeration;
-import java.util.HashMap;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyClient;
@@ -192,10 +190,9 @@ public final class plasmaWordIndexDistribution {
         if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return -1;
         
         // collect index
-        
         plasmaDHTChunk dhtChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, 30, indexCount);
+
         try {
-            
             // find start point for DHT-selection
             String keyhash = dhtChunk.lastContainer().wordHash(); // DHT targets must have greater hashes
 
@@ -275,34 +272,6 @@ public final class plasmaWordIndexDistribution {
         }
     }
 
-    void closeTransferIndex(plasmaWordIndexEntity indexEntity) throws IOException {
-        Object migrationStatus;
-        indexEntity.close();
-        try {
-            String wordhash = indexEntity.wordHash();
-            migrationStatus = wordIndex.migrateWords2Assortment(wordhash);
-            if (migrationStatus instanceof Integer) {
-                int migrationCount = ((Integer) migrationStatus).intValue();
-                if (migrationCount == 0)
-                    log.logFine("SKIPPED  " + wordhash + ": empty");
-                else if (migrationCount > 0)
-                    log.logFine("MIGRATED " + wordhash + ": " + migrationCount + " entries");
-                else
-                    log.logFine("REVERSED " + wordhash + ": " + (-migrationCount) + " entries");
-            } else if (migrationStatus instanceof String) {
-                log.logFine("SKIPPED  " + wordhash + ": " + migrationStatus);
-            }
-        } catch (Exception e) {
-            log.logWarning("EXCEPTION: ", e);
-        }
-    }
-
-    void closeTransferIndexes(plasmaWordIndexEntity[] indexEntities) {
-        for (int i = 0; i < indexEntities.length; i++) try {
-            closeTransferIndex(indexEntities[i]);
-        } catch (IOException ee) {}
-    }
-
     void closeTransferIndexes(plasmaWordIndexEntryContainer[] indexContainers) {
         for (int i = 0; i < indexContainers.length; i++) {
             indexContainers[i] = null;
@@ -334,174 +303,6 @@ public final class plasmaWordIndexDistribution {
         }
     } 
 
-    private class transferIndexWorkerThread extends Thread{
-        // connection properties
-        private boolean gzipBody4Transfer = false;
-        private int timeout4Transfer = 60000;
-
-        
-        // status fields
-        private boolean finished = false;
-        boolean success = false;
-        private String status = "running";
-        private long iteration = 0;
-        private long transferTime = 0;
-        private int idxCount = 0;
-        private int chunkSize = 0;
-        
-        // delivery destination
-        yacySeed seed = null;
-        
-        // word chunk
-        private String endPointHash;
-        private String startPointHash;
-        plasmaWordIndexEntryContainer[] indexContainers;
-        
-        // other fields
-        HashMap urlCache;
-        
-        public transferIndexWorkerThread(
-                yacySeed seed, 
-                plasmaWordIndexEntryContainer[] indexContainers, 
-                HashMap urlCache, 
-                boolean gzipBody, 
-                int timeout,
-                long iteration, 
-                int idxCount, 
-                int chunkSize,
-                String endPointHash,
-                String startPointHash) {
-            super(new ThreadGroup("TransferIndexThreadGroup"),"TransferIndexWorker_" + seed.getName());
-            this.gzipBody4Transfer = gzipBody;
-            this.timeout4Transfer = timeout;
-            this.iteration = iteration;
-            this.seed = seed;
-            this.indexContainers = indexContainers;
-            this.urlCache = urlCache;
-            this.idxCount = idxCount;
-            this.chunkSize = chunkSize;
-            this.startPointHash = startPointHash;
-            this.endPointHash = endPointHash;
-        }
-        
-        public void run() {
-            try {
-                uploadIndex();
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } finally {
-                
-            }
-        }
-        
-        public boolean success() {
-            return this.success;
-        }
-        
-        public int getChunkSize() {
-            return this.chunkSize;            
-        }
-        
-        public String getStatus() {
-            return this.status;
-        }
-        
-        private boolean isAborted() {
-            if (finished  || Thread.currentThread().isInterrupted()) {
-                return true;
-            } 
-            return false;
-        }        
-        
-        public void stopIt() {
-            this.finished = true;
-        }
-        
-        public String getRange() {
-            return "[" + startPointHash + ".." + endPointHash + "]";
-        }
-        
-        public long getTransferTime() {
-            return this.transferTime;
-        }
-        
-        private void uploadIndex() throws InterruptedException {
-            
-            /* loop until we 
-             * - have successfully transfered the words list or 
-             * - the retry counter limit was exceeded
-             */
-            long retryCount = 0, start = System.currentTimeMillis();
-            while (true) {
-                // testing if we wer aborted
-                if (isAborted()) return;
-                
-                // transfering seleted words to remote peer
-                this.status = "Running: Transfering chunk " + iteration;
-                String error = yacyClient.transferIndex(seed, indexContainers, urlCache, gzipBody4Transfer, timeout4Transfer);
-                if (error == null) {
-                    // words successfully transfered
-                    transferTime = System.currentTimeMillis() - start;
-                    plasmaWordIndexDistribution.this.log.logInfo("Index transfer of " + idxCount + " words [" + indexContainers[0].wordHash() + " .. " + indexContainers[indexContainers.length-1].wordHash() + "]" +
-                            " to peer " + seed.getName() + ":" + seed.hash + " in " + (transferTime/1000) + " seconds successfull (" +
-                            (1000 * idxCount / (transferTime + 1)) + " words/s)");
-                    retryCount = 0;
-                    
-//                    if (transferTime > 30000) {
-//                        if (chunkSize>100) chunkSize-=50;
-//                    } else {
-//                        chunkSize+=50;
-//                    }
-                    this.success = true;
-                    this.status = "Finished: Transfer of chunk " + iteration;
-                    break;
-                } else {
-                    // worts transfer failed
-                    
-                    // inc retry counter
-                    retryCount++; 
-                    
-                    // testing if we were aborted ...
-                    if (isAborted()) return;
-                    
-                    // we have lost the connection to the remote peer. Adding peer to disconnected list
-                    plasmaWordIndexDistribution.this.log.logWarning("Index transfer to peer " + seed.getName() + ":" + seed.hash + " failed:'" + error + "', disconnecting peer");
-                    yacyCore.peerActions.peerDeparture(seed);
-                    
-                    // if the retry counter limit was not exceeded we'll retry it in a few seconds
-                    this.status = "Disconnected peer: " + ((retryCount > 5)? error + ". Transfer aborted":"Retry " + retryCount);
-                    if (retryCount > 5) return;
-                    Thread.sleep(retryCount*5000);
-                    
-                    /* loop until 
-                     * - we have successfully done a peer ping or 
-                     * - the retry counter limit was exceeded
-                     */
-                    while (true) {                                
-                        // testing if we were aborted ...
-                        if (isAborted()) return;
-                        
-                        // doing a peer ping to the remote seed
-                        int added = yacyClient.publishMySeed(seed.getAddress(), seed.hash);                            
-                        if (added < 0) {
-                            // inc. retry counter
-                            retryCount++; 
-                            this.status = "Disconnected peer: Peer ping failed. " + ((retryCount > 5)?"Transfer aborted.":"Retry " + retryCount);
-                            if (retryCount > 5) return;
-                            Thread.sleep(retryCount*5000);
-                            continue;
-                        } else {
-                            yacyCore.seedDB.getConnected(seed.hash);
-                            this.status = "running";
-                            break;
-                        }             
-                    }
-                }          
-            }
-        }
-    }
-    
     public class transferIndexThread extends Thread {
         private yacySeed seed = null;
         private boolean delete = false;
@@ -509,14 +310,14 @@ public final class plasmaWordIndexDistribution {
         private boolean gzipBody4Transfer = false;
         private int timeout4Transfer = 60000;
         private int transferedEntryCount = 0;
-        private int transferedEntityCount = 0;
+        private int transferedContainerCount = 0;
         private String status = "Running";
         private String oldStartingPointHash = "------------", startPointHash = "------------";
         private int initialWordsDBSize = 0;
         private int chunkSize = 500;   
         private final long startingTime = System.currentTimeMillis();
         private final plasmaSwitchboard sb;
-        private transferIndexWorkerThread worker = null;
+        private plasmaDHTTransfer worker = null;
         
         public transferIndexThread(yacySeed seed, boolean delete) {
             super(new ThreadGroup("TransferIndexThreadGroup"),"TransferIndex_" + seed.getName());
@@ -546,28 +347,28 @@ public final class plasmaWordIndexDistribution {
             return this.delete;
         }
         
-        public int[] getChunkSize() {
-            transferIndexWorkerThread workerThread = this.worker;
+        public int[] getIndexCount() {
+            plasmaDHTTransfer workerThread = this.worker;
             if (workerThread != null) {
-                return new int[]{this.chunkSize,workerThread.getChunkSize()};
+                return new int[]{this.chunkSize, workerThread.getIndexCount()};
             }
-            return new int[]{this.chunkSize,500};
+            return new int[]{this.chunkSize, 500};
         }
         
         public int getTransferedEntryCount() {
             return this.transferedEntryCount;
         }
         
-        public int getTransferedEntityCount() {
-            return this.transferedEntityCount;
+        public int getTransferedContainerCount() {
+            return this.transferedContainerCount;
         }
         
-        public float getTransferedEntityPercent() {
+        public float getTransferedContainerPercent() {
             long currentWordsDBSize = sb.wordIndex.size(); 
             if (initialWordsDBSize == 0) return 100;
             else if (currentWordsDBSize >= initialWordsDBSize) return 0;
             //else return (float) ((initialWordsDBSize-currentWordsDBSize)/(initialWordsDBSize/100));
-            else return (float)(this.transferedEntityCount*100/initialWordsDBSize);
+            else return (float)(this.transferedContainerCount*100/initialWordsDBSize);
         }
         
         public int getTransferedEntitySpeed() {
@@ -581,15 +382,15 @@ public final class plasmaWordIndexDistribution {
         }
         
         public String[] getStatus() {
-            transferIndexWorkerThread workerThread = this.worker;
+            plasmaDHTTransfer workerThread = this.worker;
             if (workerThread != null) {
-                return new String[]{this.status,workerThread.getStatus()};
+                return new String[]{this.status,workerThread.getStatusMessage()};
             }
             return new String[]{this.status,"Not running"};
         }
         
         public String[] getRange() {
-            transferIndexWorkerThread workerThread = this.worker;
+            plasmaDHTTransfer workerThread = this.worker;
             if (workerThread != null) {
                 return new String[]{"[" + oldStartingPointHash + ".." + startPointHash + "]",workerThread.getRange()};
             }
@@ -670,7 +471,7 @@ public final class plasmaWordIndexDistribution {
                              * Addintionally we recalculate the chunk size to optimize performance
                              */
                             
-                            this.chunkSize = worker.getChunkSize();
+                            this.chunkSize = worker.getIndexCount();
                             long transferTime = worker.getTransferTime();
                             //TODO: only increase chunk Size if there is free memory left on the server
                             
@@ -691,12 +492,12 @@ public final class plasmaWordIndexDistribution {
                             if (delete) {
                                 this.status = "Running: Deleting chunk " + iteration;
                                 transferedEntryCount += oldDHTChunk.indexCount();
-                                transferedEntityCount += oldDHTChunk.containerSize();
+                                transferedContainerCount += oldDHTChunk.containerSize();
                                 int urlReferences = oldDHTChunk.deleteTransferIndexes();
                                 plasmaWordIndexDistribution.this.log.logFine("Deleted from " + oldDHTChunk.containerSize() + " transferred RWIs locally " + urlReferences + " URL references");
                             } else {
                                 transferedEntryCount += oldDHTChunk.indexCount();
-                                transferedEntityCount += oldDHTChunk.containerSize();
+                                transferedContainerCount += oldDHTChunk.containerSize();
                             }
                             oldDHTChunk = null;
                         }
@@ -707,10 +508,9 @@ public final class plasmaWordIndexDistribution {
                     if ((newDHTChunk != null) &&
                         (newDHTChunk.containerSize() > 0) ||
                         (newDHTChunk.getStatus() == plasmaDHTChunk.chunkStatus_FILLED)) {
-                        worker = new transferIndexWorkerThread(seed, newDHTChunk.containers(), newDHTChunk.urlCacheMap(),
-                                                               gzipBody4Transfer, timeout4Transfer, iteration,
-                                                               newDHTChunk.indexCount(), newDHTChunk.indexCount(),
-                                                               startPointHash, oldStartingPointHash);
+                        worker = new plasmaDHTTransfer(log, seed, newDHTChunk,
+                                                       gzipBody4Transfer, timeout4Transfer, iteration,
+                                                       startPointHash, oldStartingPointHash);
                         worker.start();
                     }
                 }

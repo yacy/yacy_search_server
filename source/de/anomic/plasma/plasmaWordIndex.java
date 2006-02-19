@@ -118,6 +118,11 @@ public final class plasmaWordIndex {
         int added = ramCache.addEntries(entries, updateTime, highPriority);
 
         // force flush
+        while (ramCache.maxURLinWordCache() > 150) {
+            try { Thread.sleep(10); } catch (InterruptedException e) { }
+            flushCacheToBackend(ramCache.bestFlushWordHash());
+        }
+        
         if (highPriority) {
             if (ramCache.size() > ramCache.getMaxWordsHigh()) {
             while (ramCache.size() + 500 > ramCache.getMaxWordsHigh()) {

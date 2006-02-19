@@ -100,7 +100,7 @@ public final class IndexTransfer_p {
         if (transfThread != null) {
             String[] status = transfThread.getStatus();
             String[] range  = transfThread.getRange();
-            int[] chunk     = transfThread.getChunkSize();
+            int[] chunk     = transfThread.getIndexCount();
             
             prop.put("running_selection.status",status[0]);
             prop.put("running_selection.twrange", range[0]);
@@ -111,9 +111,9 @@ public final class IndexTransfer_p {
             prop.put("running_transfer.twchunk", Integer.toString(chunk[1]));
 
             
-            prop.put("running_twEntityCount",transfThread.getTransferedEntityCount());
+            //prop.put("running_twEntityCount",transfThread.getTransferedEntityCount());
             prop.put("running_twEntryCount",transfThread.getTransferedEntryCount());
-            prop.put("running_twEntityPercent",Float.toString(transfThread.getTransferedEntityPercent()));
+            //prop.put("running_twEntityPercent",Float.toString(transfThread.getTransferedEntityPercent()));
             prop.put("running_twEntitySpeed",Integer.toString(transfThread.getTransferedEntitySpeed()));
             
             prop.put("running_deleteIndex", transfThread.deleteIndex()?1:0);
