@@ -382,7 +382,7 @@ public final class yacy {
                     if (browserPopUpTrigger) {
                         final String  browserPopUpPage        = sb.getConfig("browserPopUpPage", "Status.html");
                         final String  browserPopUpApplication = sb.getConfig("browserPopUpApplication", "netscape");
-                        serverSystem.openBrowser("http://localhost:" + server.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
+                        serverSystem.openBrowser("http://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
                     }
 
                     //Copy the shipped locales into DATA

@@ -684,11 +684,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     File targetMd5File = new File(targetFile + ".md5");
                     try {
                         if (targetMd5File.exists()) {
-                            String description = null;
+                            //String description = null;
                             targetMD5 = new String(serverFileUtils.read(targetMd5File));
                             pos = targetMD5.indexOf('\n');
                            if (pos >= 0) {
-                               description = targetMD5.substring(pos + 1);
+                               //description = targetMD5.substring(pos + 1);
                                targetMD5 = targetMD5.substring(0, pos);
                            }         
                            
