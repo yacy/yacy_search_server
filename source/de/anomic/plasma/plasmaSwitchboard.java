@@ -1909,7 +1909,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public void startTransferWholeIndex(yacySeed seed, boolean delete) {
         if (transferIdxThread == null) {
-            this.transferIdxThread = new plasmaDHTFlush(this.log, this.wordIndex, seed, delete);
+            this.transferIdxThread = new plasmaDHTFlush(this.log, this.wordIndex, seed, delete,
+                                                        "true".equalsIgnoreCase(getConfig("indexTransfer.gzipBody","false")),
+                                                        (int) getConfigLong("indexTransfer.timeout",60000));
             this.transferIdxThread.start();
         }
     }    

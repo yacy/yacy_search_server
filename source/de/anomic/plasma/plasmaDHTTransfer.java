@@ -3,8 +3,9 @@
 // part of YaCy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
-// Frankfurt, Germany, 2006
-// created: 19.02.2006
+// Frankfurt, Germany, 2005, 2006
+// 
+// This class was provided by Martin Thelian
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,8 +42,6 @@
 
 package de.anomic.plasma;
 
-import java.util.HashMap;
-
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
@@ -55,34 +54,27 @@ public class plasmaDHTTransfer extends Thread {
     private int timeout4Transfer = 60000;
 
     // status fields
-    private boolean finished = false;
-    boolean success = false;
-    private long iteration = 0;
+    private boolean stopped = false;
     private long transferTime = 0;
 
     // delivery destination
     yacySeed seed = null;
 
     // word chunk
-    private String endPointHash;
-    private String startPointHash;
     plasmaDHTChunk dhtChunk;
 
     // other fields
-    HashMap urlCache;
+    private int maxRetry;
     serverLog log;
 
-    public plasmaDHTTransfer(serverLog log, yacySeed seed, plasmaDHTChunk dhtChunk,
-                             boolean gzipBody, int timeout, long iteration, String endPointHash, String startPointHash) {
+    public plasmaDHTTransfer(serverLog log, yacySeed seed, plasmaDHTChunk dhtChunk, boolean gzipBody, int timeout, int retries) {
         super(new ThreadGroup("TransferIndexThreadGroup"), "TransferIndexWorker_" + seed.getName());
         this.log = log;
         this.gzipBody4Transfer = gzipBody;
         this.timeout4Transfer = timeout;
-        this.iteration = iteration;
         this.seed = seed;
         this.dhtChunk = dhtChunk;
-        this.startPointHash = startPointHash;
-        this.endPointHash = endPointHash;
+        this.maxRetry = retries;
     }
 
     public void run() {
@@ -96,42 +88,22 @@ public class plasmaDHTTransfer extends Thread {
         }
     }
 
-    public int getStatus() {
-        return dhtChunk.getStatus();
-    }
-    
-    public String getStatusMessage() {
-        return dhtChunk.getStatusMessage();
-    }
-    
-    public boolean success() {
-        return this.success;
-    }
-
-    public int getIndexCount() {
-        return this.dhtChunk.indexCount();
-    }
-
     private boolean isAborted() {
-        if (finished || Thread.currentThread().isInterrupted()) {
+        if (stopped || Thread.currentThread().isInterrupted()) {
             return true;
         }
         return false;
     }
 
     public void stopIt() {
-        this.finished = true;
-    }
-
-    public String getRange() {
-        return "[" + startPointHash + ".." + endPointHash + "]";
+        this.stopped = true;
     }
 
     public long getTransferTime() {
         return this.transferTime;
     }
 
-    private void uploadIndex() throws InterruptedException {
+    public void uploadIndex() throws InterruptedException {
 
         /* loop until we 
          * - have successfully transfered the words list or 
@@ -139,33 +111,30 @@ public class plasmaDHTTransfer extends Thread {
          */
         long retryCount = 0, start = System.currentTimeMillis();
         while (true) {
-            // testing if we wer aborted
+            // testing if we were aborted
             if (isAborted()) return;
 
             // transfering seleted words to remote peer
-            dhtChunk.setStatusMessage("Running: Transfering chunk " + iteration);
+            dhtChunk.setStatusMessage("Running: Transfering chunk to target " + seed.hash + "/" + seed.getName());
             dhtChunk.setStatus(plasmaDHTChunk.chunkStatus_RUNNING);
-            String error = yacyClient.transferIndex(seed, dhtChunk.containers(), urlCache, gzipBody4Transfer, timeout4Transfer);
+            String error = yacyClient.transferIndex(seed, dhtChunk.containers(), dhtChunk.urlCacheMap(), gzipBody4Transfer, timeout4Transfer);
             if (error == null) {
                 // words successfully transfered
                 transferTime = System.currentTimeMillis() - start;
                 this.log.logInfo("Index transfer of " + dhtChunk.indexCount() + " words [" + dhtChunk.firstContainer().wordHash() + " .. " + dhtChunk.lastContainer().wordHash() + "]" + " to peer " + seed.getName() + ":" + seed.hash + " in " + (transferTime / 1000) + " seconds successfull ("
                                 + (1000 * dhtChunk.indexCount() / (transferTime + 1)) + " words/s)");
                 retryCount = 0;
-
-                this.success = true;
-                dhtChunk.setStatusMessage("Finished: Transfer of chunk " + iteration);
+                dhtChunk.setStatusMessage("Finished: Transfer of chunk to target " + seed.hash + "/" + seed.getName());
                 dhtChunk.setStatus(plasmaDHTChunk.chunkStatus_COMPLETE);
                 break;
             } else {
-                // worts transfer failed
+                // words transfer failed
 
                 // inc retry counter
                 retryCount++;
 
                 // testing if we were aborted ...
-                if (isAborted())
-                    return;
+                if (isAborted()) return;
 
                 // we have lost the connection to the remote peer. Adding peer to disconnected list
                 this.log.logWarning("Index transfer to peer " + seed.getName() + ":" + seed.hash + " failed:'" + error + "', disconnecting peer");
@@ -173,7 +142,7 @@ public class plasmaDHTTransfer extends Thread {
 
                 // if the retry counter limit was not exceeded we'll retry it in a few seconds
                 dhtChunk.setStatusMessage("Disconnected peer: " + ((retryCount > 5) ? error + ". Transfer aborted" : "Retry " + retryCount));
-                if (retryCount > 5) {
+                if (retryCount > maxRetry) {
                     dhtChunk.setStatus(plasmaDHTChunk.chunkStatus_FAILED);
                     return;
                 }
@@ -194,7 +163,7 @@ public class plasmaDHTTransfer extends Thread {
                         // inc. retry counter
                         retryCount++;
                         dhtChunk.setStatusMessage("Disconnected peer: Peer ping failed. " + ((retryCount > 5) ? "Transfer aborted." : "Retry " + retryCount));
-                        if (retryCount > 5) return;
+                        if (retryCount > maxRetry) return;
                         Thread.sleep(retryCount * 5000);
                         continue;
                     } else {

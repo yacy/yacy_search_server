@@ -44,6 +44,7 @@ import java.util.Enumeration;
 
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.server.logging.serverLog;
 
 public class yacyDHTAction implements yacyPeerAction {
    
@@ -259,5 +260,35 @@ public class yacyDHTAction implements yacyPeerAction {
             return -hashDistance(to, from);
         else
             return ((double) (((byte) from) - ((byte) to))) / maxAtomarDistance;
+    }
+    
+    public synchronized yacySeed[] getDHTTargets(serverLog log, int primaryPeerCount, int reservePeerCount, String firstKey, String lastKey, double maxDist) {
+        // find a list of DHT-peers
+        yacySeed[] seeds = new yacySeed[primaryPeerCount + reservePeerCount];
+        int hc0 = 0;
+        double ownDistance = Math.min(yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, firstKey), yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, lastKey));
+        double maxDistance = Math.min(ownDistance, maxDist);
+
+        double avdist;
+        Enumeration e = this.getAcceptRemoteIndexSeeds(lastKey);
+        while ((e.hasMoreElements()) && (hc0 < seeds.length)) {
+            seeds[hc0] = (yacySeed) e.nextElement();
+            if (seeds[hc0] != null) {
+                avdist = Math.max(yacyDHTAction.dhtDistance(seeds[hc0].hash, firstKey), yacyDHTAction.dhtDistance(seeds[hc0].hash, lastKey));
+                if (avdist < maxDistance) {
+                    if (log != null) log.logInfo("Selected " + ((hc0 < primaryPeerCount) ? "primary" : "reserve") + " DHT target peer " + seeds[hc0].getName() + ":" + seeds[hc0].hash + ", distance = " + avdist);
+                    hc0++;
+                }
+            }
+        }
+        e = null; // finish enumeration
+        
+        if (hc0 == seeds.length) {
+            return seeds;
+        } else {
+            yacySeed[] s = new yacySeed[hc0];
+            System.arraycopy(seeds, 0, s, 0, hc0);
+            return s;
+        }
     }
 }

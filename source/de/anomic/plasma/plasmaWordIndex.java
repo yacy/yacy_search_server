@@ -337,13 +337,14 @@ public final class plasmaWordIndex {
     }
     
     public synchronized int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
-        int removed = 0;
-        removed += ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
+        int removed = ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
+        if (removed == urlHashes.length) return removed;
         plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordHash, -1);
         if (container != null) {
             removed += container.removeEntries(wordHash, urlHashes, deleteComplete);
             if (container.size() != 0) this.addEntries(container, System.currentTimeMillis(), false);
         }
+        if (removed == urlHashes.length) return removed;
         removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
         return removed;
     }

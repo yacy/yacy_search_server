@@ -43,11 +43,8 @@
 
 package de.anomic.plasma;
 
-import java.util.Enumeration;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyDHTAction;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexDistribution {
@@ -190,60 +187,29 @@ public final class plasmaWordIndexDistribution {
         plasmaDHTChunk dhtChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, 30, indexCount);
 
         try {
-            // find start point for DHT-selection
-            String keyhash = dhtChunk.lastContainer().wordHash(); // DHT targets must have greater hashes
-
             // find a list of DHT-peers
-            yacySeed[] seeds = new yacySeed[peerCount + 10];
-            int hc0 = 0;
-            double ownDistance = Math.min(yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, dhtChunk.firstContainer().wordHash()), yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, dhtChunk.lastContainer().wordHash()));
-            double maxDistance = Math.min(ownDistance, 0.4);
-            synchronized (yacyCore.dhtAgent) {
-                double avdist;
-                Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(keyhash);
-                while ((e.hasMoreElements()) && (hc0 < seeds.length)) {
-                    seeds[hc0] = (yacySeed) e.nextElement();
-                    if (seeds[hc0] != null) {
-                        avdist = Math.max(yacyDHTAction.dhtDistance(seeds[hc0].hash, dhtChunk.firstContainer().wordHash()), yacyDHTAction.dhtDistance(seeds[hc0].hash, dhtChunk.lastContainer().wordHash()));
-                        if (avdist < maxDistance) {
-                            log.logInfo("Selected " + ((hc0 < peerCount) ? "primary" : "reserve") + " DHT target peer " + seeds[hc0].getName() + ":" + seeds[hc0].hash + ", distance = " + avdist);
-                            hc0++;
-                        }
-                    }
-                }
-                e = null; // finish enumeration
-            }
-
-            if (hc0 < peerCount) {
-                log.logWarning("found not enough (" + hc0 + ") peers for distribution");
+            yacySeed[] seeds = yacyCore.dhtAgent.getDHTTargets(log, peerCount, 10, dhtChunk.firstContainer().wordHash(), dhtChunk.lastContainer().wordHash(), 0.4);
+            
+            if (seeds.length < peerCount) {
+                log.logWarning("found not enough (" + seeds.length + ") peers for distribution");
                 return -1;
             }
             
             // send away the indexes to all these indexes
-            String error;
             String peerNames = "";
-            long start;
             int hc1 = 0;
-            for (int i = 0; i < hc0; i++) {
+            plasmaDHTTransfer transfer = null;
+            for (int i = 0; i < seeds.length; i++) {
                 if (this.isClosed()) {
                     this.log.logSevere("Index distribution interrupted by close, nothing deleted locally.");
                     return -1; // interrupted
                 }
-                start = System.currentTimeMillis();
-                error = yacyClient.transferIndex(
-                        seeds[i],
-                        dhtChunk.containers(),
-                        dhtChunk.urlCacheMap(),
-                        this.gzipBody4Distribution,
-                        this.timeout4Distribution);
-                if (error == null) {
-                    this.log.logInfo("Index transfer of " + indexCount + " words [" + dhtChunk.firstContainer().wordHash() + " .. " + dhtChunk.lastContainer().wordHash() + "] to peer " + seeds[i].getName() + ":" + seeds[i].hash + " in " + ((System.currentTimeMillis() - start) / 1000)
-                            + " seconds successfull (" + (1000 * indexCount / (System.currentTimeMillis() - start + 1)) + " words/s)");
+                transfer = new plasmaDHTTransfer(log, seeds[i], dhtChunk, this.gzipBody4Distribution, this.timeout4Distribution, 0);
+                try {transfer.uploadIndex();} catch (InterruptedException e) {}
+                
+                if (transfer.dhtChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) {
                     peerNames += ", " + seeds[i].getName();
                     hc1++;
-                } else {
-                    this.log.logWarning("Index transfer to peer " + seeds[i].getName() + ":" + seeds[i].hash + " failed:'" + error + "', disconnecting peer");
-                    yacyCore.peerActions.peerDeparture(seeds[i]);
                 }
                 if (hc1 >= peerCount) break;
             }
