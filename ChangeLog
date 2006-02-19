@@ -4,6 +4,8 @@ version 0.44svn
 	* FIXED: special chars(like german umlauts) in tagNames allowed. (Allo)
 	* ADDED: Show public Bookmarks in Bookmarks.html, private ones, if the user is logged in. (Allo)
 	* FIXED: /xml/bookmarks/* now uses one file for private/public entries. private only with password.
+	* ADDED: possibility to get the ranking for a url. (Allo)
+	
 version 0.43
 	* UPDATED: new database handling of index entry objects, less IO overhead (Orbiter)
 	* ADDED: many new ranking attributes and handling routines (Orbiter)
