@@ -55,7 +55,6 @@ import java.util.TreeMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndexDistribution;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -75,32 +74,30 @@ public final class IndexTransfer_p {
                     prop.put("running_status","Disconnected peer");
                 } else {                    
                     boolean deleteIndex = post.get("deleteIndex", "0").equals("1");                    
-                    switchboard.indexDistribution.startTransferWholeIndex(seed,deleteIndex);
+                    switchboard.startTransferWholeIndex(seed,deleteIndex);
                     prop.put("LOCATION","");
                     return prop;
                 }
             } else if (post.containsKey("stopIndexTransfer")) {
-                switchboard.indexDistribution.stopTransferWholeIndex(true);
+                switchboard.stopTransferWholeIndex(true);
                 prop.put("LOCATION","");
                 return prop;
                 
             } else if (post.containsKey("newIndexTransfer")) {
-                switchboard.indexDistribution.abortTransferWholeIndex(true);
+                switchboard.abortTransferWholeIndex(true);
                 prop.put("LOCATION","");
                 return prop;
             }
         }
         
-        
         // insert constants
-        plasmaWordIndexDistribution.transferIndexThread transfThread = switchboard.indexDistribution.transferIdxThread;
         prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
         prop.put("ucount", Integer.toString(switchboard.urlPool.loadedURL.size()));
-        prop.put("running",(transfThread==null)?0:1);
-        if (transfThread != null) {
-            String[] status = transfThread.getStatus();
-            String[] range  = transfThread.getRange();
-            int[] chunk     = transfThread.getIndexCount();
+        prop.put("running",(switchboard.transferIdxThread==null)?0:1);
+        if (switchboard.transferIdxThread != null) {
+            String[] status = switchboard.transferIdxThread.getStatus();
+            String[] range  = switchboard.transferIdxThread.getRange();
+            int[] chunk     = switchboard.transferIdxThread.getIndexCount();
             
             prop.put("running_selection.status",status[0]);
             prop.put("running_selection.twrange", range[0]);
@@ -112,13 +109,13 @@ public final class IndexTransfer_p {
 
             
             //prop.put("running_twEntityCount",transfThread.getTransferedEntityCount());
-            prop.put("running_twEntryCount",transfThread.getTransferedEntryCount());
+            prop.put("running_twEntryCount",switchboard.transferIdxThread.getTransferedEntryCount());
             //prop.put("running_twEntityPercent",Float.toString(transfThread.getTransferedEntityPercent()));
-            prop.put("running_twEntitySpeed",Integer.toString(transfThread.getTransferedEntitySpeed()));
+            prop.put("running_twEntitySpeed",Integer.toString(switchboard.transferIdxThread.getTransferedEntitySpeed()));
             
-            prop.put("running_deleteIndex", transfThread.deleteIndex()?1:0);
-            prop.put("running_peerName",transfThread.getSeed().getName());
-            prop.put("running_stopped",(transfThread.isFinished()) || (!transfThread.isAlive())?1:0);
+            prop.put("running_deleteIndex", switchboard.transferIdxThread.deleteIndex()?1:0);
+            prop.put("running_peerName",switchboard.transferIdxThread.getSeed().getName());
+            prop.put("running_stopped",(switchboard.transferIdxThread.isFinished()) || (!switchboard.transferIdxThread.isAlive())?1:0);
         } else {
             if (!prop.containsKey("running_status")) prop.put("running_status","Not running");
         }

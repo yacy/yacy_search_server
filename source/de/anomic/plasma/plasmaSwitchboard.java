@@ -201,6 +201,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     //public  StringBuffer                crl; // local citation references
     public  StringBuffer                crg; // global citation references
     public  dbImportManager             dbImportManager;
+    public  plasmaDHTFlush              transferIdxThread = null;
     
     /*
      * Remote Proxy configuration
@@ -781,6 +782,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public void close() {
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         terminateAllThreads(true);
+        if (transferIdxThread != null) stopTransferWholeIndex(false);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
         this.dbImportManager.close();
@@ -1904,6 +1906,32 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         return false;
     }
+    
+    public void startTransferWholeIndex(yacySeed seed, boolean delete) {
+        if (transferIdxThread == null) {
+            this.transferIdxThread = new plasmaDHTFlush(this.log, this.wordIndex, seed, delete);
+            this.transferIdxThread.start();
+        }
+    }    
+
+    public void stopTransferWholeIndex(boolean wait) {
+        if ((transferIdxThread != null) && (transferIdxThread.isAlive()) && (!transferIdxThread.isFinished())) {
+            try {
+                this.transferIdxThread.stopIt(wait);
+            } catch (InterruptedException e) { }
+        }
+    }    
+
+    public void abortTransferWholeIndex(boolean wait) {
+        if (transferIdxThread != null) {
+            if (!transferIdxThread.isFinished())
+                try {
+                    this.transferIdxThread.stopIt(wait);
+                } catch (InterruptedException e) { }
+                transferIdxThread = null;
+        }
+    } 
+    
     
     public void terminate() {
         this.terminate = true;
