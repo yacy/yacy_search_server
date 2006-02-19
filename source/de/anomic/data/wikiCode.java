@@ -121,8 +121,8 @@ public class wikiCode {
       * @author Marc Nause, replaces code by Alexander Schier
       */
     public static String replaceHTML(String text) {
-        text = replace(text, characters);
         text = replace(text, htmlentities);
+        text = replace(text, characters);
         return text;
     }
 
@@ -181,7 +181,6 @@ public class wikiCode {
     //patterns that will be replaced. To add new codes or patterns, just put them at the end
     //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
     public static String[] characters={
-        "\u0026","&amp;",      //ampersand
         "\u00A1","&iexcl;",    //inverted (spanish) exclamation mark
         "\u00A2","&cent;",     //cent
         "\u00A3","&pound;",    //pound
@@ -330,7 +329,6 @@ public class wikiCode {
             line+="\t</tr>\n</table>"+result.substring(2);
             result=line;
         }
-        else result = replaceHTMLonly(result);
         return result;
     }
 
@@ -344,14 +342,15 @@ public class wikiCode {
         int p0, p1;
         boolean defList = false;    //needed for definition lists
 
-        if ((!cellprocessing)&&(!replacedCharacters)){
-            result = replaceCharacters(result);
-            replacedCharacters = true;
-        }
         if ((!replacedHTML)&&(!cellprocessing)&&(!table)){
             result = replaceHTMLonly(result);
             replacedHTML = true;
         }
+        if ((!cellprocessing)&&(!replacedCharacters)){
+            result = replaceCharacters(result);
+            replacedCharacters = true;
+        }
+ 
 
         //check if line contains any escape symbol or tag for preformatted text 
         //or if we are in an esacpe sequence already or if we are in a preformated text
