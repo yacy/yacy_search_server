@@ -193,7 +193,7 @@ public final class plasmaWordIndexDistribution {
         
         // collect index
         
-        plasmaDHTChunk dhtChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, indexCount, peerCount);
+        plasmaDHTChunk dhtChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, 30, indexCount);
         try {
             
             // find start point for DHT-selection
