@@ -159,87 +159,19 @@ public class plasmaSearchRankingProfile {
         return new String(ext);
     }
     
-    public HashMap getPreRanking(plasmaWordIndexEntry normalizedEntry){
-        HashMap map=new HashMap();
-        map.put(ENTROPY, new Integer(normalizedEntry.getQuality()));
-        map.put(DATE, new Integer(normalizedEntry.getVirtualAge()));
-        map.put(YBR, new Integer(plasmaSearchPreOrder.ybr_p(normalizedEntry.getUrlHash())));
-        map.put(POSINTEXT, new Integer((normalizedEntry.posintext() == 0) ? 0 : (255 - normalizedEntry.posintext())));
-        map.put(WORDDISTANCE, new Integer((normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance())));
-        map.put(HITCOUNT, new Integer((normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount()));
-        map.put(DOMLENGTH, new Integer((255 - normalizedEntry.domlengthNormalized())));
-        return map;
-    }
     public long preRanking(plasmaWordIndexEntry normalizedEntry) {
         long ranking = 0;
-        HashMap map=getPreRanking(normalizedEntry);
-        ranking += ((Integer)map.get(ENTROPY)).intValue() << ((Integer) coeff.get(ENTROPY)).intValue();
-        ranking += ((Integer)map.get(DATE)).intValue() << ((Integer) coeff.get(DATE)).intValue();
-        ranking += ((Integer)map.get(YBR)).intValue() << ((Integer) coeff.get(YBR)).intValue();
-        ranking += ((Integer)map.get(POSINTEXT)).intValue() << ((Integer) coeff.get(POSINTEXT)).intValue();
-        ranking += ((Integer)map.get(WORDDISTANCE)).intValue() << ((Integer) coeff.get(WORDDISTANCE)).intValue();
-        ranking += ((Integer)map.get(HITCOUNT)).intValue() << ((Integer) coeff.get(HITCOUNT)).intValue();
-        ranking += ((Integer)map.get(DOMLENGTH)).intValue() << ((Integer) coeff.get(DOMLENGTH)).intValue();
+        
+        ranking += normalizedEntry.getQuality() << ((Integer) coeff.get(ENTROPY)).intValue();
+        ranking += normalizedEntry.getVirtualAge() << ((Integer) coeff.get(DATE)).intValue();
+        ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.getUrlHash()) << ((Integer) coeff.get(YBR)).intValue();
+        ranking += (normalizedEntry.posintext()    == 0) ? 0 : (255 - normalizedEntry.posintext()) << ((Integer) coeff.get(POSINTEXT)).intValue();
+        ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << ((Integer) coeff.get(WORDDISTANCE)).intValue();
+        ranking += (normalizedEntry.hitcount()     == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();
+        ranking += (255 - normalizedEntry.domlengthNormalized()) << ((Integer) coeff.get(DOMLENGTH)).intValue();
         return ranking;
     }
     
-    public HashMap getPostRanking(plasmaWordIndexEntry normalizedEntry,
-            plasmaSearchQuery query,
-            Set topwords,
-            String[] urlcomps,
-            String[] descrcomps,
-            plasmaCrawlLURL.Entry page){
-        HashMap map=new HashMap();
-        HashMap tmp, tmp2;
-
-        //apply 'common-sense' heuristic using references
-        tmp=new HashMap();
-        for (int j = 0; j < urlcomps.length; j++) {
-            if (topwords.contains(urlcomps[j]))
-                tmp.put(urlcomps[j], new Integer(256));
-            else
-                tmp.put(urlcomps[j], new Integer(0));
-        }
-        map.put(URLCOMPINTOPLIST, tmp);
-        tmp=new HashMap();
-        for (int j = 0; j < descrcomps.length; j++) {
-            if (topwords.contains(descrcomps[j]))
-                tmp.put(descrcomps[j], new Integer(256));
-            else
-                tmp.put(descrcomps[j], new Integer(0));
-        }
-        map.put(DESCRCOMPINTOPLIST, tmp);
-        
-        // apply query-in-result matching
-        Set urlcomph = plasmaSearchQuery.words2hashes(urlcomps);
-        Set descrcomph = plasmaSearchQuery.words2hashes(descrcomps);
-        Iterator shi = query.queryHashes.iterator();
-        String queryhash;
-        tmp=new HashMap();
-        tmp2=new HashMap();
-        while (shi.hasNext()) {
-            queryhash = (String) shi.next();
-            if (urlcomph.contains(queryhash))
-                tmp.put(queryhash, new Integer(256));
-            else
-                tmp.put(queryhash, new Integer(0));
-            if (descrcomph.contains(queryhash))
-                tmp2.put(queryhash, new Integer(256));
-            else
-                tmp2.put(queryhash, new Integer(0));
-        }
-        map.put(QUERYINURL, tmp);
-        map.put(QUERYINDESCR, tmp2);
-
-        // prefer short urls
-        map.put(URLLENGTH, new Integer((256 - page.url().toString().length())));
-        map.put(URLCOMPS, new Integer((32 - urlcomps.length)));
-
-        // prefer long descriptions
-        map.put(DESCRLENGTH, new Integer((255 * page.descr().length() / 80)));
-        map.put(DESCRCOMPS, new Integer((255 * (12 - Math.abs(12 - Math.min(12, descrcomps.length))) / 12)));
-        return map;
-    }
     public long postRanking(
                     plasmaWordIndexEntry normalizedEntry,
                     plasmaSearchQuery query,
@@ -250,41 +182,33 @@ public class plasmaSearchRankingProfile {
 
         // apply pre-calculated order attributes
         long ranking = this.preRanking(normalizedEntry);
-        HashMap map=getPostRanking(normalizedEntry, query, topwords, urlcomps, descrcomps, page);
-        Iterator it;
-        HashMap tmp;
 
         // apply 'common-sense' heuristic using references
-        tmp=(HashMap) map.get(URLCOMPINTOPLIST);
-        it=tmp.keySet().iterator();
-        while(it.hasNext()){
-            ranking+= ((Integer)tmp.get((String)it.next())).intValue() << ((Integer)coeff.get(URLCOMPINTOPLIST)).intValue();
+        for (int j = 0; j < urlcomps.length; j++) {
+            if (topwords.contains(urlcomps[j])) ranking += 256 << ((Integer) coeff.get(URLCOMPINTOPLIST)).intValue();
         }
-        tmp=(HashMap) map.get(DESCRCOMPINTOPLIST);
-        it=tmp.keySet().iterator();
-        while(it.hasNext()){
-            ranking+= ((Integer)tmp.get((String)it.next())).intValue() << ((Integer)coeff.get(DESCRCOMPINTOPLIST)).intValue();
+        for (int j = 0; j < descrcomps.length; j++) {
+            if (topwords.contains(descrcomps[j])) ranking += 256 << ((Integer) coeff.get(DESCRCOMPINTOPLIST)).intValue();
         }
 
         // apply query-in-result matching
-        tmp=(HashMap) map.get(QUERYINURL);
-        it=tmp.keySet().iterator();
-        while(it.hasNext()){
-            ranking+= ((Integer)tmp.get((String)it.next())).intValue() << ((Integer)coeff.get(QUERYINURL)).intValue();
-        }
-        tmp=(HashMap) map.get(QUERYINDESCR);
-        it=tmp.keySet().iterator();
-        while(it.hasNext()){
-            ranking+= ((Integer)tmp.get((String)it.next())).intValue() << ((Integer)coeff.get(QUERYINDESCR)).intValue();
+        Set urlcomph = plasmaSearchQuery.words2hashes(urlcomps);
+        Set descrcomph = plasmaSearchQuery.words2hashes(descrcomps);
+        Iterator shi = query.queryHashes.iterator();
+        String queryhash;
+        while (shi.hasNext()) {
+            queryhash = (String) shi.next();
+            if (urlcomph.contains(queryhash)) ranking += 256 << ((Integer) coeff.get(QUERYINURL)).intValue();
+            if (descrcomph.contains(queryhash)) ranking += 256 << ((Integer) coeff.get(QUERYINDESCR)).intValue();
         }
 
         // prefer short urls
-        ranking += ((Integer)map.get(URLLENGTH)).intValue() << ((Integer) coeff.get(URLLENGTH)).intValue();
-        ranking += ((Integer)map.get(URLCOMPS)).intValue() << ((Integer) coeff.get(URLCOMPS)).intValue();
+        ranking += (256 - page.url().toString().length()) << ((Integer) coeff.get(URLLENGTH)).intValue();
+        ranking += (32 - urlcomps.length) << ((Integer) coeff.get(URLCOMPS)).intValue();
 
         // prefer long descriptions
-        ranking += ((Integer)map.get(DESCRLENGTH)).intValue() << ((Integer) coeff.get(DESCRLENGTH)).intValue();
-        ranking += ((Integer)map.get(DESCRCOMPS)).intValue() << ((Integer) coeff.get(DESCRCOMPS)).intValue();
+        ranking += (255 * page.descr().length() / 80) << ((Integer) coeff.get(DESCRLENGTH)).intValue();
+        ranking += (255 * (12 - Math.abs(12 - Math.min(12, descrcomps.length))) / 12) << ((Integer) coeff.get(DESCRCOMPS)).intValue();
 
         return ranking;
     }
