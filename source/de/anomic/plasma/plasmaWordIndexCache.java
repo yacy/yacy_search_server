@@ -60,7 +60,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
-    private static final int ramCacheLimit = 60;
+    public static final int ramCacheLimit = 50;
 
     // class variables
     private final File databaseRoot;
