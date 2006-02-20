@@ -59,19 +59,15 @@ function handleStatus(){
 		return;
 	}
 	var statusResponse = statusRPC.responseXML;
-	/*indexingqueue=statusResponse.getElementsByTagName("indexingqueue")[0];
-	indexingqueue_size=indexingqueue.firstChild.nextSibling;
-	indexingqueue_max=indexingqueue_size.nextSibling.nextSibling;
-	ppm=statusResponse.getElementsByTagName("ppm")[0];*/
 	statusTag=getFirstChild(getFirstChild(statusResponse, ""), "status")
-	indexingqueue=getFirstChild(statusTag, "indexingqueue");
+	/*indexingqueue=getFirstChild(statusTag, "indexingqueue");
 
 	indexingqueue_size=getValue(getFirstChild(indexingqueue, "size"));
-	indexingqueue_max=getValue(getFirstChild(indexingqueue, "max"));
+	indexingqueue_max=getValue(getFirstChild(indexingqueue, "max"));*/
 	ppm=getValue(getFirstChild(statusTag, "ppm"))
 	
-	document.getElementById("indexingqueuesize").firstChild.nodeValue=indexingqueue_size;
-	document.getElementById("indexingqueuemax").firstChild.nodeValue=indexingqueue_max;
+/*	document.getElementById("indexingqueuesize").firstChild.nodeValue=indexingqueue_size;
+	document.getElementById("indexingqueuemax").firstChild.nodeValue=indexingqueue_max;*/
 	document.getElementById("ppm").firstChild.nodeValue=ppm;
 }
 
@@ -83,10 +79,30 @@ function handleQueues(){
 	var queuesResponse = queuesRPC.responseXML;
 	xml=getFirstChild(queuesResponse);
 	if(queuesResponse != null){
-		createIndexingTable(getFirstChild(xml, "indexingqueue"));
+		indexingqueue=getFirstChild(xml, "indexingqueue");
+		createIndexingTable(indexingqueue);
+		indexingqueue_size=getValue(getFirstChild(indexingqueue, "size"));
+		indexingqueue_max=getValue(getFirstChild(indexingqueue, "max"));
+		document.getElementById("indexingqueuesize").firstChild.nodeValue=indexingqueue_size;
+		document.getElementById("indexingqueuemax").firstChild.nodeValue=indexingqueue_max;
+		
+		loaderqueue=getFirstChild(xml, "loaderqueue");
 		createLoaderTable(getFirstChild(xml, "loaderqueue"));
-		createLocalCrawlerTable(getFirstChild(xml, "localcrawlerqueue"));
-		createRemoteCrawlerTable(getFirstChild(xml, "remotecrawlerqueue"));
+		loaderqueue_size=getValue(getFirstChild(loaderqueue, "size"));
+		loaderqueue_max=getValue(getFirstChild(loaderqueue, "max"));
+		document.getElementById("loaderqueuesize").firstChild.nodeValue=loaderqueue_size;
+		document.getElementById("loaderqueuemax").firstChild.nodeValue=loaderqueue_max;
+		
+		localcrawlerqueue=getFirstChild(xml, "localcrawlerqueue");
+		localcrawlerqueue_size=getValue(getFirstChild(localcrawlerqueue, "size"));
+		document.getElementById("localcrawlerqueuesize").firstChild.nodeValue=localcrawlerqueue_size;
+		createLocalCrawlerTable(localcrawlerqueue);
+		
+		remotecrawlerqueue=getFirstChild(xml, "remotecrawlerqueue");
+		createRemoteCrawlerTable(remotecrawlerqueue);
+		remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
+		document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
+		createremoteCrawlerTable(remotecrawlerqueue);
 	}
 }
 function clearTable(table, numSkip){

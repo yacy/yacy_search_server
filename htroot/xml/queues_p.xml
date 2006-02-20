@@ -1,5 +1,7 @@
 <xml version="1.0">
 <indexingqueue>
+  <size>#[indexingSize]#</size>
+  <max>#[indexingMax]#</max>
 #{list-indexing}#
   <entry>
     <initiator>#[initiator]#</initiator>
@@ -14,6 +16,8 @@
 #{/list-indexing}#
 </indexingqueue>
 <loaderqueue>
+  <size>#[loaderSize]#</size>
+  <max>#[loaderMax]#</max>
 #{list-loader}#
   <entry>
     <initiator>#[initiator]#</initiator>
@@ -23,6 +27,7 @@
 #{/list-loader}#
 </loaderqueue>
 <localcrawlerqueue>
+  <size>#[localCrawlSize]#</size>
 #{list-local}#
   <entry>
     <initiator>#[initiator]#</initiator>
@@ -36,6 +41,7 @@
 #{/list-local}#
 </localcrawlerqueue>
 <remotecrawlerqueue>
+  <size>#[remoteCrawlSize]#</size>
 #{list-remote}#
   <entry>
     <profile>#[profile]#</profile>

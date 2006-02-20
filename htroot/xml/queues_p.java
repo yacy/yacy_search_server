@@ -84,6 +84,8 @@ public class queues_p {
         yacySeed initiator;
         
         //indexing queue
+        prop.put("indexingSize", Integer.toString(switchboard.getThread("80_indexing").getJobCount()+switchboard.indexingTasksInProcess.size()));
+        prop.put("indexingMax", Integer.toString(plasmaSwitchboard.indexingSlots));
         if ((switchboard.sbQueue.size() == 0) && (switchboard.indexingTasksInProcess.size() == 0)) {
             prop.put("list", 0); //is empty
         } else {
@@ -133,6 +135,8 @@ public class queues_p {
         }
         
         //loader queue
+        prop.put("loaderSize", Integer.toString(switchboard.cacheLoader.size()));        
+        prop.put("loaderMax", Integer.toString(plasmaSwitchboard.crawlSlots));
         if (switchboard.cacheLoader.size() == 0) {
             prop.put("list-loader", 0);
         } else {
@@ -160,6 +164,7 @@ public class queues_p {
         }
         
         //local crawl queue
+        prop.put("localCrawlSize", Integer.toString(switchboard.getThread("50_localcrawl").getJobCount()));       
         
         plasmaCrawlNURL.Entry urle;
         String profileHandle;
@@ -190,6 +195,8 @@ public class queues_p {
         prop.put("list-local", showNum);
         
         //global crawl queue
+        prop.put("remoteCrawlSize", Integer.toString(switchboard.getThread("61_globalcrawltrigger").getJobCount()));
+        //prop.put("remoteCrawlSize", Integer.toString(switchboard.getThread("62_remotetriggeredcrawl").getJobCount()));
         size=10;
         stackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
         if (stackSize == 0) {
