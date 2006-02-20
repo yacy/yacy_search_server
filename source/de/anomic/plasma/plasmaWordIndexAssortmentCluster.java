@@ -160,6 +160,7 @@ public final class plasmaWordIndexAssortmentCluster {
         // it returnes NULL if the storage was successful
         // it returnes a new container if the given container cannot be stored
         // containers that are returned will be stored in a WORDS file
+        if (newContainer == null) return null;
         if (newContainer.size() > clusterCapacity) return newContainer; // it will not fit
         
         // split the container into several smaller containers that will take the whole thing

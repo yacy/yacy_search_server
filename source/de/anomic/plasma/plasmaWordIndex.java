@@ -141,9 +141,11 @@ public final class plasmaWordIndex {
 
     private synchronized void flushCacheToBackend(String wordHash) {
         plasmaWordIndexEntryContainer c = ramCache.deleteContainer(wordHash);
-        plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(wordHash, c);
-        if (feedback != null) {
-            backend.addEntries(feedback, System.currentTimeMillis(), true);
+        if (c != null) {
+            plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(wordHash, c);
+            if (feedback != null) {
+                backend.addEntries(feedback, System.currentTimeMillis(), true);
+            }
         }
     }
     

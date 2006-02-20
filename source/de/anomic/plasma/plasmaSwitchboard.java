@@ -204,6 +204,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  StringBuffer                crg; // global citation references
     public  dbImportManager             dbImportManager;
     public  plasmaDHTFlush              transferIdxThread = null;
+    private plasmaDHTChunk              dhtTransferChunk = null;
     
     /*
      * Remote Proxy configuration
@@ -514,6 +515,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.sbStackCrawlThread = new plasmaCrawlStacker(this,this.plasmaPath,ramPreNURL);
         //this.sbStackCrawlThread = new plasmaStackCrawlThread(this,this.plasmaPath,ramPreNURL);
         //this.sbStackCrawlThread.start();
+        
+        // initializing dht chunk generation
+        this.dhtTransferChunk = null;
         
         // deploy threads
         log.logConfig("Starting Threads");
@@ -834,11 +838,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
         
+        boolean doneSomething = false;
+        
+        // generate a dht chunk
+        if ((this.dhtTransferChunk == null) ||
+            (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_UNDEFINED) ||
+            (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) ||
+            (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED)) {
+            // generate new chunk
+            dhtTransferChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, 30, dhtTransferIndexCount);
+            doneSomething = true;
+        }
+        
+        
         synchronized (sbQueue) {
 
             if (sbQueue.size() == 0) {
                 // log.logDebug("DEQUEUE: queue is empty");
-                return false; // nothing to do
+                return doneSomething; // nothing to do
             }
 
             /*
@@ -851,7 +868,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             int stackCrawlQueueSize;
             if ((stackCrawlQueueSize = sbStackCrawlThread.size()) >= stackCrawlSlots) {
                 log.logFine("deQueue: too many processes in stack crawl thread queue, dismissed to protect emergency case (" + "stackCrawlQueue=" + stackCrawlQueueSize + ")");
-                return false;
+                return doneSomething;
             }
 
             plasmaSwitchboardQueue.Entry nextentry;
@@ -870,7 +887,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (nextentry == null) return false;
             } catch (IOException e) {
                 log.logSevere("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
-                return false;
+                return doneSomething;
             }
         
             synchronized (this.indexingTasksInProcess) {
@@ -1963,12 +1980,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logFine("no DHT distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize());
             return false;
         }
-
+        if (this.dhtTransferChunk == null) {
+            log.logFine("no DHT distribution: no transfer chunk defined");
+            return false;
+        }
+        if ((this.dhtTransferChunk != null) && (this.dhtTransferChunk.getStatus() != plasmaDHTChunk.chunkStatus_FILLED)) {
+            log.logFine("no DHT distribution: index distribution is in progress");
+            return false;
+        }
+        
         // do the transfer
         int peerCount = (yacyCore.seedDB.mySeed.isJunior()) ? 1 : 3;
         long starttime = System.currentTimeMillis();
-        plasmaDHTChunk dhtChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, 30, dhtTransferIndexCount);
-        boolean ok = dhtTransferProcess(dhtChunk, peerCount, true);
+        
+        boolean ok = dhtTransferProcess(dhtTransferChunk, peerCount, true);
 
         if (!ok) {
             log.logFine("no word distribution: transfer failed");
