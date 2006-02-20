@@ -117,18 +117,14 @@ public class IndexControl_p {
         if (post.containsKey("setIndexTransmission")) {
             if (post.get("indexDistribute", "").equals("on")) {
                 switchboard.setConfig("allowDistributeIndex", "true");
-                switchboard.indexDistribution.enable();
             } else {
                 switchboard.setConfig("allowDistributeIndex", "false");
-                switchboard.indexDistribution.disable();
             }
 
             if (post.containsKey("indexDistributeWhileCrawling")) {
                 switchboard.setConfig("allowDistributeIndexWhileCrawling", "true");
-                switchboard.indexDistribution.enableWhileCrawling();
             } else {
                 switchboard.setConfig("allowDistributeIndexWhileCrawling", "false");
-                switchboard.indexDistribution.disableWhileCrawling();
             }
 
             if (post.get("indexReceive", "").equals("on")) {

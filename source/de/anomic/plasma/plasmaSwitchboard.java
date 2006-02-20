@@ -153,12 +153,14 @@ import de.anomic.yacy.yacyNewsPool;
 public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
     
     // load slots
-    public static int crawlSlots = 10;
-    public static int indexingSlots = 100;
-    public static int stackCrawlSlots = 10000;
+    public static int crawlSlots            = 10;
+    public static int indexingSlots         = 100;
+    public static int stackCrawlSlots       = 10000;
     
-    public static int maxCRLDump = 500000;
-    public static int maxCRGDump = 200000;
+    public static int maxCRLDump            = 500000;
+    public static int maxCRGDump            = 200000;
+    private int       dhtTransferIndexCount = 150;
+    
     
     // couloured list management
     public static TreeSet badwords = null;
@@ -187,7 +189,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
     public  plasmaCrawlProfile.entry    defaultRemoteProfile;
-    public  plasmaWordIndexDistribution indexDistribution;
     public  boolean                     rankingOn;
     public  plasmaRankingDistribution   rankingOwnDistribution;
     public  plasmaRankingDistribution   rankingOtherDistribution;
@@ -551,21 +552,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         peerPing = new serverInstantThread(yc, "peerPing", null), 2000);
         peerPing.setSyncObject(new Object());
         
-        this.indexDistribution = new plasmaWordIndexDistribution(
-        this.urlPool,
-        this.wordIndex,
-        this.log,
-        getConfig("allowDistributeIndex", "false").equalsIgnoreCase("true"),
-        getConfig("allowDistributeIndexWhileCrawling","false").equalsIgnoreCase("true"),
-        getConfig("indexDistribution.gzipBody","false").equalsIgnoreCase("true"),
-        (int)getConfigLong("indexDistribution.timeout",60000) /*,
-        (int)getConfigLong("indexDistribution.maxOpenFiles",800)*/
-        );
-        indexDistribution.setCounts(150, 1, 3, 10000);
         getConfig("20_dhtdistribution_threads","1");
         for(int i=0; i<(int)getConfigLong("20_dhtdistribution_threads",1);i++) {
             deployThread("20_dhtdistribution_"+i, "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-            new serverInstantThread(indexDistribution, "job", null), 60000 + i*5000,
+            new serverInstantThread(this, "dhtTransferJob", null), 60000 + i*5000,
             Long.parseLong(getConfig("20_dhtdistribution_idlesleep" , "5000")),
             Long.parseLong(getConfig("20_dhtdistribution_busysleep" , "0")),
             Long.parseLong(getConfig("20_dhtdistribution_memprereq" , "1000000")));
@@ -796,7 +786,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
         this.dbImportManager.close();
-        indexDistribution.close();
         cacheLoader.close();
         wikiDB.close();
         userDB.close();
@@ -1942,9 +1931,105 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 } catch (InterruptedException e) { }
                 transferIdxThread = null;
         }
-    } 
+    }
     
-    
+    public boolean dhtTransferJob() {
+
+        if (yacyCore.seedDB == null) {
+            log.logFine("no DHT distribution: seedDB == null");
+            return false;
+        }
+        if (yacyCore.seedDB.mySeed == null) {
+            log.logFine("no DHT distribution: mySeed == null");
+            return false;
+        }
+        if (yacyCore.seedDB.mySeed.isVirgin()) {
+            log.logFine("no DHT distribution: status is virgin");
+            return false;
+        }
+        if (getConfig("allowDistributeIndex","false").equalsIgnoreCase("false")) {
+            log.logFine("no DHT distribution: not enabled");
+            return false;
+        }
+        if (urlPool.loadedURL.size() < 10) {
+            log.logFine("no DHT distribution: loadedURL.size() = " + urlPool.loadedURL.size());
+            return false;
+        }
+        if (wordIndex.size() < 100) {
+            log.logFine("no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size());
+            return false;
+        }
+        if ((getConfig("allowDistributeIndexWhileCrawling","false").equalsIgnoreCase("false")) && (urlPool.noticeURL.stackSize() > 0)) {
+            log.logFine("no DHT distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize());
+            return false;
+        }
+
+        // do the transfer
+        int peerCount = (yacyCore.seedDB.mySeed.isJunior()) ? 1 : 3;
+        long starttime = System.currentTimeMillis();
+        plasmaDHTChunk dhtChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, 30, dhtTransferIndexCount);
+        boolean ok = dhtTransferProcess(dhtChunk, peerCount, true);
+
+        if (!ok) {
+            log.logFine("no word distribution: transfer failed");
+            return false;
+        }
+
+        // adopt transfer count
+        if ((System.currentTimeMillis() - starttime) > (10000 * peerCount))
+            dhtTransferIndexCount--;
+        else
+            dhtTransferIndexCount++;
+        if (dhtTransferIndexCount < 50) dhtTransferIndexCount = 50;
+        
+        // show success
+        return true;
+
+    }
+
+    public boolean dhtTransferProcess(plasmaDHTChunk dhtChunk, int peerCount, boolean delete) {
+        if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return false;
+
+        // find a list of DHT-peers
+        yacySeed[] seeds = yacyCore.dhtAgent.getDHTTargets(log, peerCount, 10, dhtChunk.firstContainer().wordHash(), dhtChunk.lastContainer().wordHash(), 0.4);
+
+        if (seeds.length < peerCount) {
+            log.logWarning("found not enough (" + seeds.length + ") peers for distribution");
+            return false;
+        }
+
+        // send away the indexes to all these peers
+        String peerNames = "";
+        int hc1 = 0;
+        plasmaDHTTransfer transfer = null;
+        for (int i = 0; i < seeds.length; i++) {
+            transfer = new plasmaDHTTransfer(log, seeds[i], dhtChunk,
+                            getConfig("indexDistribution.gzipBody","false").equalsIgnoreCase("true"),
+                            (int)getConfigLong("indexDistribution.timeout",60000), 0);
+            try {transfer.uploadIndex();} catch (InterruptedException e) {}
+
+            if (transfer.dhtChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) {
+                peerNames += ", " + seeds[i].getName();
+                hc1++;
+            }
+            if (hc1 >= peerCount) break;
+        }
+        if (peerNames.length() > 0) peerNames = peerNames.substring(2); // remove comma
+
+        // clean up and finish with deletion of indexes
+        if (hc1 >= peerCount) {
+            // success
+            if (delete) {
+                int deletedURLs = dhtChunk.deleteTransferIndexes();
+                this.log.logFine("Deleted from " + dhtChunk.containers().length + " transferred RWIs locally, removed " + deletedURLs + " URL references");
+            }
+            dhtChunk.setStatus(plasmaDHTChunk.chunkStatus_COMPLETE);
+            return true;
+        }
+        this.log.logSevere("Index distribution failed. Too few peers (" + hc1 + ") received the index, not deleted locally.");
+        return false;
+    }
+
     public void terminate() {
         this.terminate = true;
         this.shutdownSync.V();
