@@ -48,6 +48,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -56,7 +57,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
-import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -288,7 +288,7 @@ public class bookmarksDB {
     	String tagHash=tagHash(oldName);
         Tag tag=getTag(tagHash);
             if (tag != null) {
-            Vector urlHashes = tag.getUrlHashes();
+            ArrayList urlHashes = tag.getUrlHashes();
             try {
                 tagsTable.remove(tagHash(oldName));
             } catch (IOException e) {
@@ -298,10 +298,10 @@ public class bookmarksDB {
             setTagsTable(tag);
             Iterator it = urlHashes.iterator();
             Bookmark bookmark;
-            Vector tags;
+            ArrayList tags;
             while (it.hasNext()) {
                 bookmark = getBookmark((String) it.next());
-                tags = listManager.string2vector(bookmark.getTags());
+                tags = listManager.string2arraylist(bookmark.getTags());
                 tags.remove(oldName); //this will fail, if upper/lowercase is not matching
                 tags.add(newName);
                 bookmark.setTags(tags, true);
@@ -350,7 +350,7 @@ public class bookmarksDB {
         TreeSet set=new TreeSet(new bookmarkComparator(true));
         String tagHash=tagHash(tagName);
         Tag tag=getTag(tagHash);
-        Vector hashes=new Vector();
+        ArrayList hashes=new ArrayList();
         if(tag != null){
             hashes=getTag(tagHash).getUrlHashes();
         }
@@ -416,7 +416,7 @@ public class bookmarksDB {
             return new HashSet().iterator();
         }
     }
-    public void addBookmark(String url, String title, Vector tags){
+    public void addBookmark(String url, String title, ArrayList tags){
         
     }
     public void importFromBookmarks(URL baseURL, String input, String tag, boolean importPublic){
@@ -424,7 +424,7 @@ public class bookmarksDB {
         Iterator it;
         String url,title;
         Bookmark bm;
-        Vector tags=listManager.string2vector(tag); //this allow multiple default tags
+        ArrayList tags=listManager.string2arraylist(tag); //this allow multiple default tags
         try {
             //load the links
             htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);
@@ -487,13 +487,13 @@ public class bookmarksDB {
             if(attributes.getNamedItem("time")!=null){
                 time=attributes.getNamedItem("time").getNodeValue();
             }
-            Vector tags=new Vector();
+            ArrayList tags=new ArrayList();
             
             if(title != null){
                 bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
             }
             if(tagsString!=null){
-                tags = listManager.string2vector(tagsString.replace(' ', ','));
+                tags = listManager.string2arraylist(tagsString.replace(' ', ','));
             }
             bm.setTags(tags, true);
             if(time != null){
@@ -526,10 +526,10 @@ public class bookmarksDB {
         	tagHash=hash;
             mem=map;
         }
-        public Tag(String name, Vector entries){
+        public Tag(String name, ArrayList entries){
             tagHash=tagHash(name);
             mem=new HashMap();
-            mem.put(URL_HASHES, listManager.vector2string(entries));
+            mem.put(URL_HASHES, listManager.arraylist2string(entries));
             mem.put(TAG_NAME, name);
         }
         public Tag(String name){
@@ -565,8 +565,8 @@ public class bookmarksDB {
             }
             return "notagname";
         }
-        public Vector getUrlHashes(){
-            return listManager.string2vector((String)this.mem.get(URL_HASHES));
+        public ArrayList getUrlHashes(){
+            return listManager.string2arraylist((String)this.mem.get(URL_HASHES));
         }
         public boolean hasPublicItems(){
         	Iterator it=getBookmarksIterator(this.getTagName(), false);
@@ -577,16 +577,16 @@ public class bookmarksDB {
         }
         public void add(String urlHash){
             String urlHashes = (String)mem.get(URL_HASHES);
-            Vector list;
+            ArrayList list;
             if(urlHashes != null && !urlHashes.equals("")){
-                list=listManager.string2vector(urlHashes);
+                list=listManager.string2arraylist(urlHashes);
             }else{
-                list=new Vector();
+                list=new ArrayList();
             }
             if(!list.contains(urlHash) && !urlHash.equals("")){
                 list.add(urlHash);
             }
-            this.mem.put(URL_HASHES, listManager.vector2string(list));
+            this.mem.put(URL_HASHES, listManager.arraylist2string(list));
             /*if(urlHashes!=null && !urlHashes.equals("") ){
                 if(urlHashes.indexOf(urlHash) <0){
                     this.mem.put(URL_HASHES, urlHashes+","+urlHash);
@@ -596,14 +596,14 @@ public class bookmarksDB {
             }*/
         }
         public void delete(String urlHash){
-            Vector list=listManager.string2vector((String) this.mem.get(URL_HASHES));
+            ArrayList list=listManager.string2arraylist((String) this.mem.get(URL_HASHES));
             if(list.contains(urlHash)){
                 list.remove(urlHash);
             }
-            this.mem.put(URL_HASHES, listManager.vector2string(list));
+            this.mem.put(URL_HASHES, listManager.arraylist2string(list));
         }
         public int size(){
-            return listManager.string2vector(((String)this.mem.get(URL_HASHES))).size();
+            return listManager.string2arraylist(((String)this.mem.get(URL_HASHES))).size();
         }
     }
     public class bookmarksDate{
@@ -619,23 +619,23 @@ public class bookmarksDB {
             date=mydate;
             mem=map;
         }
-        public bookmarksDate(String mydate, Vector entries){
+        public bookmarksDate(String mydate, ArrayList entries){
             date=mydate;
             mem=new HashMap();
-            mem.put(URL_HASHES, listManager.vector2string(entries));
+            mem.put(URL_HASHES, listManager.arraylist2string(entries));
         }
         public void add(String urlHash){
             String urlHashes = (String)mem.get(URL_HASHES);
-            Vector list;
+            ArrayList list;
             if(urlHashes != null && !urlHashes.equals("")){
-                list=listManager.string2vector(urlHashes);
+                list=listManager.string2arraylist(urlHashes);
             }else{
-                list=new Vector();
+                list=new ArrayList();
             }
             if(!list.contains(urlHash) && !urlHash.equals("")){
                 list.add(urlHash);
             }
-            this.mem.put(URL_HASHES, listManager.vector2string(list));
+            this.mem.put(URL_HASHES, listManager.arraylist2string(list));
             /*if(urlHashes!=null && !urlHashes.equals("") ){
                 if(urlHashes.indexOf(urlHash) <0){
                     this.mem.put(URL_HASHES, urlHashes+","+urlHash);
@@ -645,11 +645,11 @@ public class bookmarksDB {
             }*/
         }
         public void delete(String urlHash){
-            Vector list=listManager.string2vector((String) this.mem.get(URL_HASHES));
+            ArrayList list=listManager.string2arraylist((String) this.mem.get(URL_HASHES));
             if(list.contains(urlHash)){
                 list.remove(urlHash);
             }
-            this.mem.put(URL_HASHES, listManager.vector2string(list));
+            this.mem.put(URL_HASHES, listManager.arraylist2string(list));
         }
         public void setDatesTable(){
             try {
@@ -664,7 +664,7 @@ public class bookmarksDB {
             return date;
         }
         public int size(){
-            return listManager.string2vector(((String)this.mem.get(URL_HASHES))).size();
+            return listManager.string2arraylist(((String)this.mem.get(URL_HASHES))).size();
         }
     }
     /**
@@ -730,8 +730,8 @@ public class bookmarksDB {
             }
             return "";
         }
-        public Vector getTagsVector(){
-        	return listManager.string2vector(this.getTags());
+        public ArrayList getTagsList(){
+        	return listManager.string2arraylist(this.getTags());
         }
         public String getDescription(){
             if(this.mem.containsKey(BOOKMARK_DESCRIPTION)){
@@ -764,29 +764,29 @@ public class bookmarksDB {
             //setBookmarksTable();
         }
         public void addTag(String tag){
-            Vector tags;
+            ArrayList tags;
             if(!mem.containsKey(BOOKMARK_TAGS)){
-                tags=new Vector();
+                tags=new ArrayList();
             }else{
-                tags=(Vector)mem.get(BOOKMARK_TAGS);
+                tags=listManager.string2arraylist((String) mem.get(BOOKMARK_TAGS));
             }
             tags.add(tag);
             this.setTags(tags, true);
         }
         /**
          * set the Tags of the bookmark, and write them into the tags table.
-         * @param tags a vector with the tags
+         * @param tags a ArrayList with the tags
          */
-        public void setTags(Vector tags){
+        public void setTags(ArrayList tags){
             setTags(tags, true);
         }
         /**
          * set the Tags of the bookmark
-         * @param tags Vector with the tagnames
+         * @param tags ArrayList with the tagnames
          * @param local sets, whether the updated tags should be stored to tagsDB
          */
-        public void setTags(Vector tags, boolean local){
-            mem.put(BOOKMARK_TAGS, listManager.vector2string(tags));
+        public void setTags(ArrayList tags, boolean local){
+            mem.put(BOOKMARK_TAGS, listManager.arraylist2string(tags));
             Iterator it=tags.iterator();
             while(it.hasNext()){
                 String tagName=(String) it.next();

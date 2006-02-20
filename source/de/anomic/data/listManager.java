@@ -236,6 +236,32 @@ public class listManager {
         }
         return resultList;
     }
+    public static String arraylist2string(ArrayList list){
+        Iterator it=list.iterator();
+        String ret="";
+        if(it.hasNext()){
+            ret=(String) it.next();
+            while(it.hasNext()){
+                ret+=","+(String)it.next();
+            }
+        }
+        return ret;
+    }
+    public static ArrayList string2arraylist(String string){
+        ArrayList ret=new ArrayList();
+        String[] hashes=string.split(",");
+        if(string.indexOf(",") > -1){
+            for(int i=0;i<hashes.length;i++){
+                ret.add(hashes[i]);
+            }
+        }else{
+            ret = new ArrayList();
+            if(!string.equals("")){
+                ret.add(string);
+            }
+        }
+        return ret;
+    }
     public static String vector2string(Vector vector){
         Iterator it=vector.iterator();
         String ret="";

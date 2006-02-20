@@ -48,8 +48,8 @@
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
@@ -103,7 +103,7 @@ public class Bookmarks {
             if(tagsString.equals("")){
                 tagsString="unsorted"; //defaulttag
             }
-            Vector tags=listManager.string2vector(tagsString);
+            ArrayList tags=listManager.string2arraylist(tagsString);
         
             bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url);
             if(bookmark != null){
@@ -220,7 +220,7 @@ public class Bookmarks {
         count++;
     }
     count=0;
-    Vector tags;
+    ArrayList tags;
     Iterator tagsIt;
     int tagCount;
     while(count<max_count && it.hasNext()){
@@ -232,7 +232,7 @@ public class Bookmarks {
             prop.put("bookmarks_"+count+"_public", (bookmark.getPublic()? 1:0));
             
             //List Tags.
-            tags=bookmark.getTagsVector();
+            tags=bookmark.getTagsList();
             tagsIt=tags.iterator();
             tagCount=0;
             while(tagsIt.hasNext()){
