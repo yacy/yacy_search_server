@@ -161,8 +161,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static int maxCRGDump = 200000;
     
     // couloured list management
+    public static TreeSet badwords = null;
     public static TreeSet blueList = null;
-    public static TreeSet stopwords = null;
+    public static TreeSet stopwords = null;    
     public static plasmaURLPattern urlBlacklist;
     
     // storage management
@@ -283,7 +284,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             urlBlacklist.size() + " entries, " +
             ppRamString(ulrBlackListFile.length()/1024));
         }
-        
+
+        // load badwords (to filter the topwords)
+        if (badwords == null) {
+            File badwordsFile = new File(rootPath, "yacy.badwords");
+            badwords = kelondroMSetTools.loadList(badwordsFile, kelondroNaturalOrder.naturalOrder);
+            this.log.logConfig("loaded badwords from file " + badwordsFile.getName() +
+                               ", " + badwords.size() + " entries, " +
+                               ppRamString(badwordsFile.length()/1024));
+        }
+
         // load stopwords
         if (stopwords == null) {
             File stopwordsFile = new File(rootPath, "yacy.stopwords");
@@ -292,7 +302,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             stopwords.size() + " entries, " +
             ppRamString(stopwordsFile.length()/1024));
         }
-        
+
         // load ranking tables
         File YBRPath = new File(rootPath, "ranking/YBR");
         if (YBRPath.exists()) {

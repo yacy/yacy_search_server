@@ -5,6 +5,7 @@ version 0.44svn
 	* ADDED: Show public Bookmarks in Bookmarks.html, private ones, if the user is logged in. (Allo)
 	* FIXED: /xml/bookmarks/* now uses one file for private/public entries. private only with password.
 	* ADDED: possibility to get the ranking for a url. (Allo)
+	* ADDED: yacy.badwords list to filter the topwords. (Borg-0300)
 	
 version 0.43
 	* UPDATED: new database handling of index entry objects, less IO overhead (Orbiter)
@@ -19,7 +20,7 @@ version 0.43
 	* UPDATED: Memorysettings now also working for Windows (Galaxis, VT100)
 	* UPDATED: added more informations to network.xml, added possibility to limit number of results (hendi)
 	* FIXED: some Filemodes were set wrong (theli)
-	* FIXED: minor bug-fix in Cache for some rare URLs (borg-0300)
+	* FIXED: minor bug-fix in Cache for some rare URLs (Borg-0300)
 	* ADDED: The YaCy-Bookmarkssystem (allo)
 	* UPDATED: New Searchstyle
 	* FIXED: notifier.gif works even when only DATA is writable (allo)

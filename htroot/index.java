@@ -50,10 +50,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -66,6 +68,8 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 
 public class index {
+
+    public static final int MAX_TOPWORDS = 16;
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -223,20 +227,35 @@ public class index {
                 prop.put("num-results_totalcount", totalcount);
                 int hintcount = references.length;
                 if (hintcount > 0) {
-                    if (hintcount > 16) { hintcount = 16; }
+
                     prop.put("combine", 1);
-                    String word;
+
+                    final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
                     for (int i = 0; i < hintcount; i++) {
-                        word = (String) references[i];
+                        topwords.add(references[i]);
+                    }
+
+                    // filter out the badwords
+                    final TreeSet filteredtopwords = kelondroMSetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
+                    if (filteredtopwords.size() > 0) {
+                        kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
+                    }
+
+                    String word;
+                    hintcount = 0;
+                    final Iterator iter = topwords.iterator();
+                    while (iter.hasNext()) {
+                        word = (String) iter.next();
                         if (word != null) {
-                            prop.put("combine_words_" + i + "_word", word);
-                            prop.put("combine_words_" + i + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
-                            prop.put("combine_words_" + i + "_count", count);
-                            prop.put("combine_words_" + i + "_order", order);
-                            prop.put("combine_words_" + i + "_resource", ((global) ? "global" : "local"));
-                            prop.put("combine_words_" + i + "_time", (searchtime / 1000));
+                            prop.put("combine_words_" + hintcount + "_word", word);
+                            prop.put("combine_words_" + hintcount + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
+                            prop.put("combine_words_" + hintcount + "_count", count);
+                            prop.put("combine_words_" + hintcount + "_order", order);
+                            prop.put("combine_words_" + hintcount + "_resource", ((global) ? "global" : "local"));
+                            prop.put("combine_words_" + hintcount + "_time", (searchtime / 1000));
                         }
-                        prop.put("combine_words", i);
+                        prop.put("combine_words", hintcount);
+                        if (hintcount++ > MAX_TOPWORDS) { break; }
                     }
                 }
             } else {
@@ -311,7 +330,5 @@ public class index {
 
         return prop;
     }
-
-
 
 }
