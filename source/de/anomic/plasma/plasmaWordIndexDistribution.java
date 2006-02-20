@@ -195,7 +195,7 @@ public final class plasmaWordIndexDistribution {
                 return -1;
             }
             
-            // send away the indexes to all these indexes
+            // send away the indexes to all these peers
             String peerNames = "";
             int hc1 = 0;
             plasmaDHTTransfer transfer = null;

@@ -139,7 +139,7 @@ public final class plasmaWordIndex {
         return added;
     }
 
-    private void flushCacheToBackend(String wordHash) {
+    private synchronized void flushCacheToBackend(String wordHash) {
         plasmaWordIndexEntryContainer c = ramCache.deleteContainer(wordHash);
         plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(wordHash, c);
         if (feedback != null) {
@@ -188,7 +188,7 @@ public final class plasmaWordIndex {
         return ((long) microDateDays) * ((long) day);
     }
     
-    public int addPageIndex(URL url, String urlHash, Date urlModified, int size, plasmaCondenser condenser, String language, char doctype) {
+    public synchronized int addPageIndex(URL url, String urlHash, Date urlModified, int size, plasmaCondenser condenser, String language, char doctype) {
         // this is called by the switchboard to put in a new page into the index
         // use all the words in one condenser object to simultanous create index entries
         
@@ -330,7 +330,7 @@ public final class plasmaWordIndex {
         backend.close(10);
     }
 
-    public void deleteIndex(String wordHash) {
+    public synchronized void deleteIndex(String wordHash) {
         ramCache.deleteContainer(wordHash);
         assortmentCluster.removeFromAll(wordHash, -1);
         backend.deleteIndex(wordHash);
