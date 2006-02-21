@@ -316,18 +316,22 @@ public final class userDB {
             }
             try {
                 this.setProperty(TIME_USED,"0");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (IOException e) {}
             return 0;
         }
         
-        public Long getTimeLimit() {
-            try{
-                return (this.mem.containsKey(TIME_LIMIT)?Long.valueOf((String)this.mem.get(TIME_LIMIT)):null);
-            }catch(NumberFormatException e){
-                return new Long(0);
+        public long getTimeLimit() {
+            if (this.mem.containsKey(TIME_LIMIT)) {
+                try{
+                    return Long.valueOf((String)this.mem.get(TIME_LIMIT)).longValue();
+                }catch(NumberFormatException e){
+                    return 0;
+                }
             }
+            try {
+                this.setProperty(TIME_LIMIT,"0");
+            } catch (IOException e) {}
+            return 0;
         }
         
         public long getTrafficSize() {
@@ -370,9 +374,9 @@ public final class userDB {
             if(this.hasProxyRight() == false)
                 return false;
 
-			return ( this.getTimeLimit() == null ||
-                      this.getTimeLimit().longValue() <= 0 ||
-                      ( timeUsed < this.getTimeLimit().longValue())
+			return ( this.getTimeLimit() == 0 ||
+                      this.getTimeLimit() <= 0 ||
+                      ( timeUsed < this.getTimeLimit() )
                     ); //no timelimit or timelimit not reached
 
 		}

@@ -79,11 +79,20 @@ public class User{
         if(entry != null){
         		prop.put("logged-in", 1);
         		prop.put("logged-in_username", entry.getUserName());
-        		if(entry.getTimeLimit().intValue() > 0){
+        		if(entry.getTimeLimit() > 0){
         			prop.put("logged-in_limit", 1);
-        			prop.put("logged-in_limit_timelimit", entry.getTimeLimit());
-        			prop.put("logged-in_limit_timeused", entry.getTimeUsed());
+                    long limit=entry.getTimeLimit();
+                    long used=entry.getTimeUsed();
+        			prop.put("logged-in_limit_timelimit", limit);
+        			prop.put("logged-in_limit_timeused", used);
+                    int percent=0;
+                    if(limit!=0 && used != 0)
+                        percent=(int)((float)used/(float)limit*100);
+                    prop.put("logged-in_limit_percent", percent/3);
+                    prop.put("logged-in_limit_percent2", (100-percent)/3);
         		}
+        }else if(sb.verifyAuthentication(header, true)){
+            prop.put("logged-in", 2);
         }
         if(post!= null && entry != null){
         		if(post.containsKey("logout")){
@@ -108,6 +117,11 @@ public class User{
         				prop.put("status_password", 1); //old pw wrong
         			}
         		}
+        }else if(post!=null && post.containsKey("logout")){
+            prop.put("logged-in",0);
+            if(sb.verifyAuthentication(header, true)){
+                prop.put("AUTHENTICATE","admin log-in");
+            }
         }
         // return rewrite properties
         return prop;
