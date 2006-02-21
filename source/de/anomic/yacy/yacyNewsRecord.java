@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// last major change: 13.07.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,17 +51,17 @@ import java.util.Date;
 import java.util.Map;
 
 public class yacyNewsRecord {
-    
+
     public static final int maxNewsRecordLength  = 512;
     public static final int categoryStringLength = 8;
-    
+
     private String originator;  // hash of originating peer
     private Date   created;     // Date when news was created by originator
     private Date   received;    // Date when news was received here at this peer
     private String category;    // keyword that adresses possible actions
     private int    distributed; // counter that counts number of distributions of this news record
     private Map    attributes;  // elemets of the news for a special category
-    
+
     public yacyNewsRecord(String newsString) {
         this.attributes = serverCodings.string2map(newsString);
         this.received = (attributes.containsKey("rec")) ? yacyCore.parseUniversalDate((String) attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
@@ -79,7 +82,7 @@ public class yacyNewsRecord {
         this.originator = yacyCore.seedDB.mySeed.hash;
         removeStandards();
     }
-    
+
     protected yacyNewsRecord(String id, String category, Date received, int distributed, Map attributes) {
         this.attributes = attributes;
         this.received = received;
@@ -97,7 +100,7 @@ public class yacyNewsRecord {
         attributes.remove("rec");
         attributes.remove("dis");
     }
-    
+
     public String toString() {
         // this creates the string that shall be distributed
         // attention: this has no additional encoding
@@ -110,27 +113,27 @@ public class yacyNewsRecord {
         removeStandards();
         return theString;
     }
-    
+
     public String id() {
         return yacyCore.universalDateShortString(created) + originator;
     }
-    
+
     public static int idLength() {
         return yacyCore.universalDateShortPattern.length() + yacySeedDB.commonHashLength;
     }
-    
+
     public String originator() {
         return originator;
     }
-    
+
     public Date created() {
         return created;
     }
-    
+
     public Date received() {
         return received;
     }
-    
+
     public String category() {
         return category;
     }
@@ -138,15 +141,15 @@ public class yacyNewsRecord {
     public int distributed() {
         return distributed;
     }
-    
+
     public void incDistribution() {
         distributed++;
     }
-    
+
     public Map attributes() {
         return attributes;
     }
-    
+
     public static void main(String[] args) {
         System.out.println((new yacyNewsRecord(args[0])).toString());
     }

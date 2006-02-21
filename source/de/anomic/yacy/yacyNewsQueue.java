@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// last major change: 13.07.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,15 +52,15 @@ import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroException;
 
 public class yacyNewsQueue {
-    
+
     private File path;
     private kelondroStack queueStack;
     private yacyNewsDB newsDB;
-    
+
     public yacyNewsQueue(File path, yacyNewsDB newsDB) {
         this.path = path;
         this.newsDB = newsDB;
-        
+
         if (path.exists()) try {
             queueStack = new kelondroStack(path, 0);
         } catch (kelondroException e) {
@@ -70,24 +73,24 @@ public class yacyNewsQueue {
             queueStack = createStack(path);
         }
     }
-    
+
     private static kelondroStack createStack(File path) {
         return new kelondroStack(path, 0, new int[] {
                 yacyNewsRecord.idLength(), // id = created + originator
                 yacyCore.universalDateShortPattern.length() // last touched
             }, true);
     }
-    
+
     private void resetDB() {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
         queueStack = createStack(path);
     }
-    
+
     public void clear() {
         resetDB();
     }
-    
+
     public void close() {
         if (queueStack != null) try {queueStack.close();} catch (IOException e) {}
         queueStack = null;
@@ -96,15 +99,15 @@ public class yacyNewsQueue {
     public void finalize() {
         close();
     }
-    
+
     public int size() {
         return queueStack.size();
     }
-    
+
     public synchronized void push(yacyNewsRecord entry) throws IOException {
         queueStack.push(r2b(entry, true));
     }
-    
+
     public synchronized yacyNewsRecord pop(int dist) throws IOException {
         if (queueStack.size() == 0) return null;
         return b2r(queueStack.pop(dist));
@@ -114,7 +117,7 @@ public class yacyNewsQueue {
         if (queueStack.size() == 0) return null;
         return b2r(queueStack.top(dist));
     }
-    
+
     public synchronized yacyNewsRecord topInc() throws IOException {
         if (queueStack.size() == 0) return null;
         yacyNewsRecord entry = pop(0);
@@ -124,7 +127,7 @@ public class yacyNewsQueue {
         }
         return entry;
     }
-    
+
     public synchronized yacyNewsRecord remove(String id) throws IOException {
         yacyNewsRecord record;
         for (int i = 0; i < size(); i++) {
@@ -136,8 +139,8 @@ public class yacyNewsQueue {
         }
         return null;
     }
-    
-    
+
+
     /*
     public synchronized void incDistributedCounter(yacyNewsRecord entry) throws IOException {
         // this works only if the entry element lies ontop of the stack
@@ -148,7 +151,7 @@ public class yacyNewsQueue {
         push(entry);
     }
     */
-    
+
     private yacyNewsRecord b2r(byte[][] b) throws IOException {
         if (b == null) return null;
         String id = new String(b[0]);
@@ -169,5 +172,5 @@ public class yacyNewsQueue {
         b[1] = yacyCore.universalDateShortString(new Date()).getBytes();
         return b;
     }
-    
+
 }

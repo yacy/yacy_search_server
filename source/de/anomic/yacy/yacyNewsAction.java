@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// last major change: 29.07.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,13 +50,13 @@ import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
 
 public class yacyNewsAction implements yacyPeerAction {
-    
+
     yacyNewsPool pool;
-    
+
     public yacyNewsAction(yacyNewsPool pool) {
         this.pool = pool;
     }
-    
+
     public void processPeerArrival(yacySeed peer, boolean direct) {
         String recordString = peer.get("news", null);
         //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
@@ -73,12 +76,12 @@ public class yacyNewsAction implements yacyPeerAction {
             serverLog.logSevere("YACY", "processPeerArrival", e);
         }
     }
-    
+
     public void processPeerDeparture(yacySeed peer) {
     }
-    
+
     public void processPeerPing(yacySeed peer) {
         processPeerArrival(peer, true);
     }
-    
+
 }

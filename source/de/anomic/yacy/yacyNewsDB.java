@@ -4,7 +4,10 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// last major change: 13.07.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,21 +56,21 @@ import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 
 public class yacyNewsDB {
-    
+
     private File path;
     private int bufferkb;
     private kelondroTree news;
-    
+
     public static final int attributesMaxLength = yacyNewsRecord.maxNewsRecordLength
                  - yacyNewsRecord.idLength()
                  - yacyNewsRecord.categoryStringLength
                  - yacyCore.universalDateShortPattern.length()
                  - 2;
-    
+
     public yacyNewsDB(File path, int bufferkb) {
         this.path = path;
         this.bufferkb = bufferkb;
-        
+
         if (path.exists()) try {
             news = new kelondroTree(path, bufferkb * 0x400);
         } catch (IOException e) {
@@ -76,7 +79,7 @@ public class yacyNewsDB {
             news = createDB(path, bufferkb);
         }
     }
-    
+
     private static kelondroTree createDB(File path, int bufferkb) {
         return new kelondroTree(path, bufferkb * 0x400, new int[] {
                 yacyNewsRecord.idLength(), // id = created + originator
@@ -92,15 +95,15 @@ public class yacyNewsDB {
         if (path.exists()) path.delete();
         news = createDB(path, bufferkb);
     }
-    
+
     public int[] dbCacheChunkSize() {
         return news.cacheChunkSize();
     }
-    
+
     public int[] dbCacheFillStatus() {
         return news.cacheFillStatus();
     }
-    
+
     public void close() {
         if (news != null) try {news.close();} catch (IOException e) {}
         news = null;
@@ -109,11 +112,11 @@ public class yacyNewsDB {
     public void finalize() {
         close();
     }
-    
+
     public int size() {
         return news.size();
     }
-    
+
     public void remove(String id) throws IOException {
         news.remove(id.getBytes());
     }
@@ -126,33 +129,33 @@ public class yacyNewsDB {
             return b2r(news.put(r2b(record)));
         }
     }
-    
+
     public synchronized Iterator news() throws IOException {
         // the iteration iterates yacyNewsRecord - type objects
         return new recordIterator();
     }
-    
+
     public class recordIterator implements Iterator {
-        
+
         Iterator nodeIterator;
-        
+
         public recordIterator() throws IOException {
             nodeIterator = news.rows(true, false);
         }
-        
+
         public boolean hasNext() {
             return nodeIterator.hasNext();
         }
-        
+
         public Object next() {
             return b2r((byte[][]) nodeIterator.next());
         }
-        
+
         public void remove() {
         }
-        
+
     }
-    
+
     public synchronized yacyNewsRecord get(String id) throws IOException {
         try {
             return b2r(news.get(id.getBytes()));
@@ -185,5 +188,5 @@ public class yacyNewsDB {
         b[4] = attributes.getBytes();
         return b;
     }
-    
+
 }

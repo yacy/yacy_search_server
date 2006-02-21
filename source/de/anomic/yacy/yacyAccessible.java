@@ -5,6 +5,7 @@
 // Frankfurt, Germany, 2004
 //
 // this file is contributed by Stephan Hermens
+//
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
