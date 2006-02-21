@@ -130,7 +130,7 @@ public class plasmaDHTFlush extends Thread {
         public String[] getStatus() {
             plasmaDHTTransfer workerThread = this.worker;
             if (workerThread != null) {
-                return new String[]{this.status,workerThread.dhtChunk.getStatusMessage()};
+                return new String[]{this.status,workerThread.getStatusMessage()};
             }
             return new String[]{this.status,"Not running"};
         }

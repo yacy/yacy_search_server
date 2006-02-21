@@ -68,7 +68,6 @@ public class plasmaDHTChunk {
     private plasmaCrawlLURL lurls;
     
     private int status = chunkStatus_UNDEFINED;
-    private String statusMessage = "";
     private String startPointHash;
     private plasmaWordIndexEntryContainer[] indexContainers = null;
     private HashMap urlCache; // String (url-hash) / plasmaCrawlLURL.Entry
@@ -112,14 +111,6 @@ public class plasmaDHTChunk {
     
     public int getStatus() {
         return this.status;
-    }
-    
-    public void setStatusMessage(String message) {
-        this.statusMessage = message;
-    }
-    
-    public String getStatusMessage() {
-        return statusMessage;
     }
     
     public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL lurls, int minCount, int maxCount) {

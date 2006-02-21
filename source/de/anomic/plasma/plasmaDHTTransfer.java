@@ -56,6 +56,8 @@ public class plasmaDHTTransfer extends Thread {
     // status fields
     private boolean stopped = false;
     private long transferTime = 0;
+    private int transferStatus = plasmaDHTChunk.chunkStatus_UNDEFINED;
+    private String transferStatusMessage = "";
 
     // delivery destination
     yacySeed seed = null;
@@ -102,21 +104,29 @@ public class plasmaDHTTransfer extends Thread {
     public long getTransferTime() {
         return this.transferTime;
     }
+    
+    public int getStatus() {
+        return transferStatus;
+    }
 
+    public String getStatusMessage() {
+        return transferStatusMessage;
+    }
+    
     public void uploadIndex() throws InterruptedException {
 
         /* loop until we 
          * - have successfully transfered the words list or 
          * - the retry counter limit was exceeded
          */
+        transferStatus = plasmaDHTChunk.chunkStatus_RUNNING;
         long retryCount = 0, start = System.currentTimeMillis();
         while (true) {
             // testing if we were aborted
             if (isAborted()) return;
 
             // transfering seleted words to remote peer
-            dhtChunk.setStatusMessage("Running: Transfering chunk to target " + seed.hash + "/" + seed.getName());
-            dhtChunk.setStatus(plasmaDHTChunk.chunkStatus_RUNNING);
+            transferStatusMessage = "Running: Transfering chunk to target " + seed.hash + "/" + seed.getName();
             String error = yacyClient.transferIndex(seed, dhtChunk.containers(), dhtChunk.urlCacheMap(), gzipBody4Transfer, timeout4Transfer);
             if (error == null) {
                 // words successfully transfered
@@ -124,8 +134,8 @@ public class plasmaDHTTransfer extends Thread {
                 this.log.logInfo("Index transfer of " + dhtChunk.indexCount() + " words [" + dhtChunk.firstContainer().wordHash() + " .. " + dhtChunk.lastContainer().wordHash() + "]" + " to peer " + seed.getName() + ":" + seed.hash + " in " + (transferTime / 1000) + " seconds successfull ("
                                 + (1000 * dhtChunk.indexCount() / (transferTime + 1)) + " words/s)");
                 retryCount = 0;
-                dhtChunk.setStatusMessage("Finished: Transfer of chunk to target " + seed.hash + "/" + seed.getName());
-                dhtChunk.setStatus(plasmaDHTChunk.chunkStatus_COMPLETE);
+                transferStatusMessage = "Finished: Transfer of chunk to target " + seed.hash + "/" + seed.getName();
+                transferStatus = plasmaDHTChunk.chunkStatus_COMPLETE;
                 break;
             } else {
                 // words transfer failed
@@ -141,9 +151,9 @@ public class plasmaDHTTransfer extends Thread {
                 yacyCore.peerActions.peerDeparture(seed);
 
                 // if the retry counter limit was not exceeded we'll retry it in a few seconds
-                dhtChunk.setStatusMessage("Disconnected peer: " + ((retryCount > 5) ? error + ". Transfer aborted" : "Retry " + retryCount));
+                transferStatusMessage = "Disconnected peer: " + ((retryCount > 5) ? error + ". Transfer aborted" : "Retry " + retryCount);
                 if (retryCount > maxRetry) {
-                    dhtChunk.setStatus(plasmaDHTChunk.chunkStatus_FAILED);
+                    transferStatus = plasmaDHTChunk.chunkStatus_FAILED;
                     return;
                 }
                 Thread.sleep(retryCount * 5000);
@@ -162,13 +172,13 @@ public class plasmaDHTTransfer extends Thread {
                     if (added < 0) {
                         // inc. retry counter
                         retryCount++;
-                        dhtChunk.setStatusMessage("Disconnected peer: Peer ping failed. " + ((retryCount > 5) ? "Transfer aborted." : "Retry " + retryCount));
+                        transferStatusMessage = "Disconnected peer: Peer ping failed. " + ((retryCount > 5) ? "Transfer aborted." : "Retry " + retryCount);
                         if (retryCount > maxRetry) return;
                         Thread.sleep(retryCount * 5000);
                         continue;
                     } else {
                         yacyCore.seedDB.getConnected(seed.hash);
-                        dhtChunk.setStatusMessage("running");
+                        transferStatusMessage = "running";
                         break;
                     }
                 }

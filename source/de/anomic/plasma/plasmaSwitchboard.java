@@ -864,11 +864,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         boolean doneSomething = false;
         
+        // possibly delete entries from last chunk
+        if ((this.dhtTransferChunk != null) &&
+            (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE)) {
+            int deletedURLs = this.dhtTransferChunk.deleteTransferIndexes();
+            this.log.logFine("Deleted from " + this.dhtTransferChunk.containers().length + " transferred RWIs locally, removed " + deletedURLs + " URL references");
+            this.dhtTransferChunk = null;
+        }
+
         // generate a dht chunk
-        if ((this.dhtTransferChunk == null) ||
-            (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_UNDEFINED) ||
-            (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) ||
-            (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED)) {
+        if ((dhtShallTransfer() == null) &&
+            ((this.dhtTransferChunk == null) ||
+             (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_UNDEFINED) ||
+             (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) ||
+             (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED))) {
             // generate new chunk
             dhtTransferChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, 30, dhtTransferIndexCount);
             doneSomething = true;
@@ -1980,34 +1989,35 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
     }
     
-    public boolean dhtTransferJob() {
-
+    public String dhtShallTransfer() {
         if (yacyCore.seedDB == null) {
-            log.logFine("no DHT distribution: seedDB == null");
-            return false;
+            return "no DHT distribution: seedDB == null";
         }
         if (yacyCore.seedDB.mySeed == null) {
-            log.logFine("no DHT distribution: mySeed == null");
-            return false;
+            return "no DHT distribution: mySeed == null";
         }
         if (yacyCore.seedDB.mySeed.isVirgin()) {
-            log.logFine("no DHT distribution: status is virgin");
-            return false;
+            return "no DHT distribution: status is virgin";
         }
         if (getConfig("allowDistributeIndex","false").equalsIgnoreCase("false")) {
-            log.logFine("no DHT distribution: not enabled");
-            return false;
+            return "no DHT distribution: not enabled";
         }
         if (urlPool.loadedURL.size() < 10) {
-            log.logFine("no DHT distribution: loadedURL.size() = " + urlPool.loadedURL.size());
-            return false;
+            return "no DHT distribution: loadedURL.size() = " + urlPool.loadedURL.size();
         }
         if (wordIndex.size() < 100) {
-            log.logFine("no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size());
-            return false;
+            return "no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size();
         }
         if ((getConfig("allowDistributeIndexWhileCrawling","false").equalsIgnoreCase("false")) && (urlPool.noticeURL.stackSize() > 0)) {
-            log.logFine("no DHT distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize());
+            return "no DHT distribution: crawl in progress - noticeURL.stackSize() = " + urlPool.noticeURL.stackSize();
+        }
+        return null;
+    }
+    
+    public boolean dhtTransferJob() {
+        String rejectReason = dhtShallTransfer();
+        if (rejectReason != null) {
+            log.logFine(rejectReason);
             return false;
         }
         if (this.dhtTransferChunk == null) {
@@ -2015,7 +2025,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
         if ((this.dhtTransferChunk != null) && (this.dhtTransferChunk.getStatus() != plasmaDHTChunk.chunkStatus_FILLED)) {
-            log.logFine("no DHT distribution: index distribution is in progress");
+            log.logFine("no DHT distribution: index distribution is in progress, status=" + this.dhtTransferChunk.getStatus());
             return false;
         }
         
@@ -2023,26 +2033,29 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int peerCount = (yacyCore.seedDB.mySeed.isJunior()) ? 1 : 3;
         long starttime = System.currentTimeMillis();
         
-        boolean ok = dhtTransferProcess(dhtTransferChunk, peerCount, true);
+        boolean ok = dhtTransferProcess(dhtTransferChunk, peerCount);
 
-        if (!ok) {
-            log.logFine("no word distribution: transfer failed");
+        if (ok) {
+            dhtTransferChunk.setStatus(plasmaDHTChunk.chunkStatus_COMPLETE);
+            log.logFine("DHT distribution: transfer COMPLETE");
+            // adopt transfer count
+            if ((System.currentTimeMillis() - starttime) > (10000 * peerCount)) {
+                dhtTransferIndexCount--;
+            } else {
+                dhtTransferIndexCount++;
+            }
+            if (dhtTransferIndexCount < 50) dhtTransferIndexCount = 50;
+            
+            // show success
+            return true;
+        } else {
+            dhtTransferChunk.setStatus(plasmaDHTChunk.chunkStatus_FAILED);
+            log.logFine("DHT distribution: transfer FAILED");
             return false;
         }
-
-        // adopt transfer count
-        if ((System.currentTimeMillis() - starttime) > (10000 * peerCount))
-            dhtTransferIndexCount--;
-        else
-            dhtTransferIndexCount++;
-        if (dhtTransferIndexCount < 50) dhtTransferIndexCount = 50;
-        
-        // show success
-        return true;
-
     }
 
-    public boolean dhtTransferProcess(plasmaDHTChunk dhtChunk, int peerCount, boolean delete) {
+    public boolean dhtTransferProcess(plasmaDHTChunk dhtChunk, int peerCount) {
         if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return false;
 
         // find a list of DHT-peers
@@ -2063,7 +2076,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             (int)getConfigLong("indexDistribution.timeout",60000), 0);
             try {transfer.uploadIndex();} catch (InterruptedException e) {}
 
-            if (transfer.dhtChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) {
+            if (transfer.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) {
                 peerNames += ", " + seeds[i].getName();
                 hc1++;
             }
@@ -2074,11 +2087,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // clean up and finish with deletion of indexes
         if (hc1 >= peerCount) {
             // success
-            if (delete) {
-                int deletedURLs = dhtChunk.deleteTransferIndexes();
-                this.log.logFine("Deleted from " + dhtChunk.containers().length + " transferred RWIs locally, removed " + deletedURLs + " URL references");
-            }
-            dhtChunk.setStatus(plasmaDHTChunk.chunkStatus_COMPLETE);
             return true;
         }
         this.log.logSevere("Index distribution failed. Too few peers (" + hc1 + ") received the index, not deleted locally.");

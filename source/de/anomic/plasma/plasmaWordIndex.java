@@ -149,7 +149,7 @@ public final class plasmaWordIndex {
         }
     }
     
-    public int addEntriesBackend(plasmaWordIndexEntryContainer entries) {
+    private int addEntriesBackend(plasmaWordIndexEntryContainer entries) {
         plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(entries.wordHash(), entries);
         if (feedback == null) {
             return entries.size();
