@@ -107,6 +107,7 @@ public class User_p {
                 prop.put("page_uploadRight", (entry.hasUploadRight()?1:0));
                 prop.put("page_downloadRight", (entry.hasDownloadRight()?1:0));
                 prop.put("page_adminRight", (entry.hasAdminRight()?1:0));
+                prop.put("page_blogRight", (entry.hasBlogRight()?1:0));
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
 			}
@@ -132,6 +133,7 @@ public class User_p {
             String uploadRight=( post.containsKey("uploadRight")&&((String)post.get("uploadRight")).equals("on") ? "true" : "false");
             String downloadRight=( post.containsKey("downloadRight")&&((String)post.get("downloadRight")).equals("on") ? "true" : "false");
             String adminRight=( post.containsKey("adminRight")&&((String)post.get("adminRight")).equals("on") ? "true" : "false");
+            String blogRight=( post.containsKey("blogRight")&&((String)post.get("blogRight")).equals("on") ? "true" : "false");
             HashMap mem=new HashMap();
             if( post.get("current_user").equals("newuser")){ //new user
                 
@@ -146,7 +148,7 @@ public class User_p {
                 mem.put(userDB.Entry.PROXY_RIGHT, proxyRight);
                 mem.put(userDB.Entry.UPLOAD_RIGHT, uploadRight);
                 mem.put(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
-                mem.put(userDB.Entry.ADMIN_RIGHT, adminRight);
+                mem.put(userDB.Entry.BLOG_RIGHT, blogRight);
 
                 entry=sb.userDB.createEntry(username, mem);
                 sb.userDB.addEntry(entry);
@@ -170,6 +172,7 @@ public class User_p {
                         entry.setProperty(userDB.Entry.UPLOAD_RIGHT, uploadRight);
                         entry.setProperty(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
                         entry.setProperty(userDB.Entry.ADMIN_RIGHT, adminRight);
+                        entry.setProperty(userDB.Entry.BLOG_RIGHT, blogRight);
 		            }catch (IOException e){
 					}
                 }else{

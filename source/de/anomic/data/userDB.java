@@ -264,6 +264,7 @@ public final class userDB {
         public static final String DOWNLOAD_RIGHT = "downloadRight";
         public static final String ADMIN_RIGHT = "adminRight";
         public static final String PROXY_RIGHT = "proxyRight";
+        public static final String BLOG_RIGHT = "blogRight";
         
         // this is a simple record structure that hold all properties of a user
         private Map mem;
@@ -444,6 +445,9 @@ public final class userDB {
         }
         public boolean hasAdminRight() {
             return (this.mem.containsKey(ADMIN_RIGHT)?((String)this.mem.get(ADMIN_RIGHT)).equals("true"):false);
+        }
+        public boolean hasBlogRight() {
+            return (this.mem.containsKey(BLOG_RIGHT)?((String)this.mem.get(BLOG_RIGHT)).equals("true"):false);
         }
         public boolean isLoggedOut(){
         	   return (this.mem.containsKey(LOGGED_OUT)?((String)this.mem.get(LOGGED_OUT)).equals("true"):false);
