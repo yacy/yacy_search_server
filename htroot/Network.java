@@ -428,7 +428,7 @@ public class Network {
                             prop.put("table_timemessage", 2);
                         }else{
                             prop.put("table_timemessage", 1);
-                            prop.put("table_time", serverDate.intervalToString( (int)((float)indexdiff/(float)ppmdiff)*1000 ));
+                            prop.put("table_timemessage_time", serverDate.intervalToString( (int)((float)indexdiff/(float)ppmdiff)*1000 ));
                         }
                     else
                         prop.put("table_timemessage", 0);
