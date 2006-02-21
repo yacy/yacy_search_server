@@ -97,7 +97,7 @@
 			<td>#(globalCrawlTriggerPaused)#&nbsp;::(paused)#(/globalCrawlTriggerPaused)#</td>
 		</tr>		
 		<tr>
-			<td>Pending Crawl</td>
+			<td>Pre-Queueing</td>
 			<td>#[stackCrawlQueueSize]#</td>
 			<td>&nbsp;</td>
 			<td>&nbsp;</td>

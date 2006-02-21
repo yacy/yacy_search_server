@@ -1520,7 +1520,11 @@ Indexing Queue==Indexier Warteschlange
 Loader Queue==Lade Warteschlange
 paused==angehalten
 pause crawling::continue crawling==crawling anhalten::crawling fortsetzen
-Crawler Queue==Crawler Warteschlange
+Crawler Queues==Crawler Warteschlangen
+Local Crawl==Lokales Crawlen
+Remote triggered Crawl==eingehende Remote-Crawls
+Global Crawl Trigger==ausgehende Remote-Crawls
+#Pre-Queueing==
 Enqueued from:==Eingef&uuml;gt von:
  local== lokal
 Pending:==Wartend:
@@ -1670,7 +1674,7 @@ English Forum==Englisches Forum
 #Deutsches Forum==Deutsches Forum
 Download YaCy==YaCy herunterladen
 #YaCy Wiki==YaCy Wiki
-Contact==Kontakt
+>Contact==>Kontakt
 
 #--------------------------------------------------------
 #File: env/templates/submenuCookie.template

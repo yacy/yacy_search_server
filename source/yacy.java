@@ -932,7 +932,7 @@ public final class yacy {
     }
     
     public static void minimizeUrlDB(String homePath) {
-        // run with "java -classpath classes yacy -migratewords"
+        // run with "java -classpath classes yacy -minimizeUrlDB"
         try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
         try {
