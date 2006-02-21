@@ -331,7 +331,26 @@ public class wikiCode {
         }
         return result;
     }
-
+    
+    /** replaces two occurences of a substring in a string by a pair strings if occurence of that substring is an even number. This method is not greedy!
+      * @param input the string that something is to be replaced in
+      * @param pat substring to be replaced
+      * @param repl1 string substring gets replaced by on uneven occurences
+      * @param repl2 string substring gets replaced by on even occurences
+      */
+    public String pairReplace(String input, String pat, String repl1, String repl2){
+        int p0 = 0;
+        int p1 = 0;
+        int l = pat.length();
+        if ((p0 = input.indexOf(pat)) >= 0) {
+            p1 = input.indexOf(pat, p0 + l);
+            if (p1 >= 0) input = input.substring(0, p0) + repl1 +
+                                 input.substring(p0 + l, p1) + repl2 +
+                                 input.substring(p1 + l);
+            }
+        return input;
+    }
+    
     /** Replaces wiki tags with HTML tags.
       * @param result a line of text
       * @param switchboard
@@ -380,43 +399,13 @@ public class wikiCode {
             // end contrib [MN]	
 
             // format headers
-            if ((p0 = result.indexOf("====")) >= 0) {
-            p1 = result.indexOf("====", p0 + 4);
-            if (p1 >= 0) result = result.substring(0, p0) + "<h4>" +
-                                  result.substring(p0 + 4, p1) + "</h4>" +
-                                  result.substring(p1 + 4);
-            }
-            if ((p0 = result.indexOf("===")) >= 0) {
-                p1 = result.indexOf("===", p0 + 3);
-                if (p1 >= 0) result = result.substring(0, p0) + "<h3>" +
-                                      result.substring(p0 + 3, p1) + "</h3>" +
-                                      result.substring(p1 + 3);
-            }
-            if ((p0 = result.indexOf("==")) >= 0) {
-                p1 = result.indexOf("==", p0 + 2);
-                if (p1 >= 0) result = result.substring(0, p0) + "<h2>" +
-                                      result.substring(p0 + 2, p1) + "</h2>" +
-                                      result.substring(p1 + 2);
-            }
+            result = pairReplace(result,"====","<h4>","</h4>");
+            result = pairReplace(result,"===","<h3>","</h3>");
+            result = pairReplace(result,"==","<h2>","</h2>");
 
-            if ((p0 = result.indexOf("'''''")) >= 0) {
-                p1 = result.indexOf("'''''", p0 + 5);
-                if (p1 >= 0) result = result.substring(0, p0) + "<b><i>" +
-                                      result.substring(p0 + 5, p1) + "</i></b>" +
-                                      result.substring(p1 + 5);
-            }
-            if ((p0 = result.indexOf("'''")) >= 0) {
-                p1 = result.indexOf("'''", p0 + 3);
-                if (p1 >= 0) result = result.substring(0, p0) + "<b>" +
-                                      result.substring(p0 + 3, p1) + "</b>" +
-                                      result.substring(p1 + 3);
-            }
-            if ((p0 = result.indexOf("''")) >= 0) {
-                p1 = result.indexOf("''", p0 + 2);
-                if (p1 >= 0) result = result.substring(0, p0) + "<i>" +
-                                      result.substring(p0 + 2, p1) + "</i>" +
-                                      result.substring(p1 + 2);
-            }
+            result = pairReplace(result,"'''''","<b><i>","</i></b>");
+            result = pairReplace(result,"'''","<b>","</b>");
+            result = pairReplace(result,"''","<i>","</i>");
 
             //* unorderd Lists contributed by [AS]
             //** Sublist
