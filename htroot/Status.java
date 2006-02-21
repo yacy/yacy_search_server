@@ -78,10 +78,22 @@ public class Status {
                     prop.put("LOCATION","");
                 }
             } else {
-                if (post.containsKey("pausecrawlqueue")) {
-                    ((plasmaSwitchboard)env).pauseCrawling();
-                } else if (post.containsKey("continuecrawlqueue")) {
-                    ((plasmaSwitchboard)env).continueCrawling();
+                if (post.containsKey("pauseCrawlJob")) {
+                    String jobType = (String) post.get("jobType");
+                    if (jobType.equals("localCrawl")) 
+                        ((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                    else if (jobType.equals("remoteTriggeredCrawl")) 
+                        ((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    else if (jobType.equals("globalCrawlTrigger")) 
+                        ((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);                    
+                } else if (post.containsKey("continueCrawlJob")) {
+                    String jobType = (String) post.get("jobType");
+                    if (jobType.equals("localCrawl")) 
+                        ((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                    else if (jobType.equals("remoteTriggeredCrawl")) 
+                        ((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    else if (jobType.equals("globalCrawlTrigger")) 
+                        ((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);                      
                 } else if (post.containsKey("ResetTraffic")) {
                     httpdByteCountInputStream.resetCount();
                     httpdByteCountOutputStream.resetCount();               
@@ -278,13 +290,18 @@ public class Status {
         prop.put("indexingQueueMax", Integer.toString(plasmaSwitchboard.indexingSlots));
 
         prop.put("loaderQueueSize", Integer.toString(sb.cacheLoader.size()));        
-        prop.put("loaderQueueMax", Integer.toString(plasmaSwitchboard.crawlSlots));
-        prop.put("loaderPaused",sb.crawlingIsPaused()?1:0);
+        prop.put("loaderQueueMax", Integer.toString(plasmaSwitchboard.crawlSlots));        
 
-        prop.put("localCrawlQueueSize", Integer.toString(sb.getThread("50_localcrawl").getJobCount()));
+        prop.put("localCrawlQueueSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
+        prop.put("localCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL)?1:0);
+
+        prop.put("remoteTriggeredCrawlQueueSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount()));
+        prop.put("remoteTriggeredCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)?1:0);        
+
+        prop.put("globalCrawlTriggerQueueSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount()));
+        prop.put("globalCrawlTriggerPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER)?1:0);                
+        
         prop.put("stackCrawlQueueSize", Integer.toString(sb.sbStackCrawlThread.size()));       
-        prop.put("remoteCrawlQueueSize", Integer.toString(sb.getThread("62_remotetriggeredcrawl").getJobCount()));
-        prop.put("remoteCrawlTriggerQueueSize", Integer.toString(sb.getThread("61_globalcrawltrigger").getJobCount()));
 
         // return rewrite properties
         prop.put("date",(new Date()).toString());

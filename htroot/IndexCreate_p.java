@@ -281,12 +281,12 @@ public class IndexCreate_p {
 
             
             if (post.containsKey("pausecrawlqueue")) {
-                switchboard.pauseCrawling();
+                switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 prop.put("info", 4);//crawling paused
             }           
             
             if (post.containsKey("continuecrawlqueue")) {
-                switchboard.continueCrawling();
+                switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 prop.put("info", 5);//crawling continued
             }                
         }
@@ -454,7 +454,7 @@ public class IndexCreate_p {
         }
         
         
-        prop.put("crawler-paused",(switchboard.crawlingIsPaused())?0:1);
+        prop.put("crawler-paused",(switchboard.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL))?0:1);
         
         // return rewrite properties
         return prop;

@@ -530,7 +530,8 @@ public final class plasmaCrawlWorker extends Thread {
             } else if ((errorMsg != null) && (errorMsg.indexOf("There is not enough space on the disk") >= 0)) {
                 log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + url.toString() + "'. " +
                 "Pausing crawlers. ");
-                plasmaCrawlLoader.switchboard.pauseCrawling();
+                plasmaCrawlLoader.switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                plasmaCrawlLoader.switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             } else if ((errorMsg != null) && (errorMsg.indexOf("Network is unreachable") >=0)) {
                 log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + url.toString() + "'. ");
             } else if ((errorMsg != null) && (errorMsg.indexOf("No trusted certificate found")>= 0)) {

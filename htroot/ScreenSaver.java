@@ -74,7 +74,9 @@ public class ScreenSaver {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 
         plasmaSwitchboard sb = (plasmaSwitchboard)env;
-        boolean crawlingStarted = false;
+        boolean localCrawlStarted = false;
+        boolean remoteTriggeredCrawlStarted = false;
+        boolean globalCrawlTriggerStarted = false;
         try {
             InputStream input = (InputStream) header.get("INPUTSTREAM");
             OutputStream output = (OutputStream) header.get("OUTPUTSTREAM");
@@ -110,10 +112,18 @@ public class ScreenSaver {
                     
                     outputWriter.println(currentURL);
                 } else if (line.equals("CONTINUECRAWLING")) {
-                    if (sb.crawlingIsPaused()) {
-                        crawlingStarted = true;
-                        sb.continueCrawling();
+                    if (sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL)) {
+                        localCrawlStarted = true;
+                        sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                     }
+                    if (sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
+                        remoteTriggeredCrawlStarted = true;
+                        sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    }
+                    if (sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER)) {
+                        globalCrawlTriggerStarted = true;
+                        sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+                    }                                     
                 } else if (line.equals("EXIT")) {
                     outputWriter.println("OK");
                     outputWriter.flush();
@@ -128,9 +138,15 @@ public class ScreenSaver {
         } catch (Exception e) {
             return null;
         } finally {
-            if (crawlingStarted) {
-                sb.pauseCrawling();
+            if (localCrawlStarted) {
+                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
             }
+            if (remoteTriggeredCrawlStarted) {
+                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+            }
+            if (globalCrawlTriggerStarted) {
+                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+            }            
         }
     }
     

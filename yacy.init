@@ -429,12 +429,15 @@ xpstopw=true
 50_localcrawl_idlesleep=10000
 50_localcrawl_busysleep=200
 50_localcrawl_memprereq=1048576
+50_localcrawl_isPaused=false
 61_globalcrawltrigger_idlesleep=10000
 61_globalcrawltrigger_busysleep=200
 61_globalcrawltrigger_memprereq=1048576
+61_globalcrawltrigger_isPaused=false
 62_remotetriggeredcrawl_idlesleep=10000
 62_remotetriggeredcrawl_busysleep=200
 62_remotetriggeredcrawl_memprereq=1048576
+62_remotetriggeredcrawl_isPaused=false
 70_cachemanager_idlesleep=5000
 70_cachemanager_busysleep=0
 70_cachemanager_memprereq=1048576
@@ -561,7 +564,6 @@ onlineCautionDelay=30000
 crawler.acceptLanguage=en-us,en;q=0.5
 crawler.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
 crawler.clientTimeout=9000
-crawler.isPaused=false
 
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 10

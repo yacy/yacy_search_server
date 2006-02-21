@@ -1,4 +1,4 @@
-<table border="0" cellpadding="2" cellspacing="1" width="100%">
+<table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr class="TableHeader">
 	<td colspan="3"><b>Private System Properties</b></td>
 </tr>
@@ -71,17 +71,42 @@
 </tr>
 <tr class="TableCellLight">
 	<td>Loader Queue</td>
-	<td>#[loaderQueueSize]# | #[loaderQueueMax]# #(loaderPaused)#::(paused)#(/loaderPaused)#&nbsp;<a href="Status.html?#(loaderPaused)#pausecrawlqueue::continuecrawlqueue#(/loaderPaused)#=" title="#(loaderPaused)#pause crawling::continue crawling#(/loaderPaused)#"><img src="env/grafics/#(loaderPaused)#stop.gif::start.gif#(/loaderPaused)#" border="0" width="12" height="12"></a></td>
+	<td>#[loaderQueueSize]# | #[loaderQueueMax]# </td>
 	<td>[<a href="IndexCreateLoaderQueue_p.html">Details</a>]</td>
 </tr>
 <tr class="TableCellDark">
-	<td>Crawler Queue</td>
-	<td>Enqueued from: local=#[localCrawlQueueSize]# remote=#[remoteCrawlQueueSize]# | Pending: #[stackCrawlQueueSize]#</td>
-	<td>[<a href="IndexCreateWWWLocalQueue_p.html">Details</a>]</td>
-</tr>
-<tr class="TableCellLight">
-	<td>Remote Crawl Trigger Queue</td>
-	<td>#[remoteCrawlTriggerQueueSize]#</td>
-	<td>[<a href="IndexCreateWWWGlobalQueue_p.html">Details</a>]</td>
+	<td>Crawler Queues</td>
+	<td>
+		<table>
+		<tr>
+			<td>Local Crawl</td>
+			<td>#[localCrawlQueueSize]#</td>
+			<td><a href="Status.html?#(localCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/localCrawlPaused)#=&jobType=localCrawl" title="#(localCrawlPaused)#pause local crawl::continue local crawl#(/localCrawlPaused)#"><img src="env/grafics/#(localCrawlPaused)#stop.gif::start.gif#(/localCrawlPaused)#" border="0" width="12" height="12"></a></td>
+			<td>#(localCrawlPaused)#&nbsp;::(paused)#(/localCrawlPaused)#</td>
+		</tr>
+		<tr>
+			<td>Remote triggered Crawl</td>
+			<td>#[remoteTriggeredCrawlQueueSize]#</td>
+			<td><a href="Status.html?#(remoteTriggeredCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/remoteTriggeredCrawlPaused)#=&jobType=remoteTriggeredCrawl" title="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#"><img src="env/grafics/#(remoteTriggeredCrawlPaused)#stop.gif::start.gif#(/remoteTriggeredCrawlPaused)#" border="0" width="12" height="12"></a></td>
+			<td>#(remoteTriggeredCrawlPaused)#&nbsp;::(paused)#(/remoteTriggeredCrawlPaused)#</td>
+		</tr>
+		<tr>
+			<td>Global Crawl Trigger</td>
+			<td>#[globalCrawlTriggerQueueSize]#</td>
+			<td><a href="Status.html?#(globalCrawlTriggerPaused)#pauseCrawlJob::continueCrawlJob#(/globalCrawlTriggerPaused)#=&jobType=globalCrawlTrigger" title="#(globalCrawlTriggerPaused)#pause global crawl trigger::continue global crawl trigger#(/globalCrawlTriggerPaused)#"><img src="env/grafics/#(globalCrawlTriggerPaused)#stop.gif::start.gif#(/globalCrawlTriggerPaused)#" border="0" width="12" height="12"></a></td>
+			<td>#(globalCrawlTriggerPaused)#&nbsp;::(paused)#(/globalCrawlTriggerPaused)#</td>
+		</tr>		
+		<tr>
+			<td>Pending Crawl</td>
+			<td>#[stackCrawlQueueSize]#</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+		</tr>	
+		</table>
+	</td>
+	<td valign="top">[<a href="IndexCreateWWWLocalQueue_p.html">Details</a>]<br>
+	    &nbsp;<br>
+	   	[<a href="IndexCreateWWWGlobalQueue_p.html">Details</a>]
+	</td>
 </tr>
 </table>

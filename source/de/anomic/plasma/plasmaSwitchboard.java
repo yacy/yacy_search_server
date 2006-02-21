@@ -113,6 +113,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -228,8 +229,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
     
-    private Object  crawlingPausedSync = new Object();
-    private boolean crawlingIsPaused = false;
+    //private Object  crawlingPausedSync = new Object();
+    //private boolean crawlingIsPaused = false;    
+    
+    public static final String CRAWLJOB_LOCAL_CRAWL = "50_localcrawl";
+    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL = "62_remotetriggeredcrawl";
+    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER = "61_globalcrawltrigger";
+    private static final int   CRAWLJOB_SYNC = 0;
+    private static final int   CRAWLJOB_STATUS = 1;
+    
+    private Hashtable crawlJobsStatus = new Hashtable(); 
+    
     private static plasmaSwitchboard sb;
 
     public plasmaSwitchboard(String rootPath, String initPath, String configPath) {
@@ -421,11 +431,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
-        
         crawlSlots = Integer.parseInt(getConfig("crawler.MaxActiveThreads", "10"));
-        this.crawlingIsPaused = Boolean.valueOf(getConfig("crawler.isPaused", "false")).booleanValue();
         plasmaCrawlLoader.switchboard = this;
         this.cacheLoader = new plasmaCrawlLoader(this.cacheManager, this.log);
+                
+        /*
+         * Creating sync objects and loading status for the crawl jobs
+         * a) local crawl
+         * b) remote triggered crawl
+         * c) global crawl trigger
+         */
+        this.crawlJobsStatus.put(CRAWLJOB_LOCAL_CRAWL, new Object[]{
+                new Object(),
+                Boolean.valueOf(getConfig(CRAWLJOB_LOCAL_CRAWL + "_isPaused", "false"))});
+        this.crawlJobsStatus.put(CRAWLJOB_REMOTE_TRIGGERED_CRAWL, new Object[]{
+                new Object(),
+                Boolean.valueOf(getConfig(CRAWLJOB_REMOTE_TRIGGERED_CRAWL + "_isPaused", "false"))});
+        this.crawlJobsStatus.put(CRAWLJOB_GLOBAL_CRAWL_TRIGGER, new Object[]{
+                new Object(),
+                Boolean.valueOf(getConfig(CRAWLJOB_GLOBAL_CRAWL_TRIGGER + "_isPaused", "false"))});
         
         // starting  board
         initMessages(ramMessage);
@@ -956,32 +980,35 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     /**
      * With this function the crawling process can be paused
      */
-    public void pauseCrawling() {
-        synchronized(this.crawlingPausedSync) {
-            this.crawlingIsPaused = true;
+    public void pauseCrawlJob(String jobType) {
+        Object[] status = (Object[])this.crawlJobsStatus.get(jobType);
+        synchronized(status[CRAWLJOB_SYNC]) {
+            status[CRAWLJOB_STATUS] = Boolean.TRUE;
         }
-        setConfig("crawler.isPaused", "true");
-    }
+        setConfig(jobType + "_isPaused", "true");
+    }  
     
     /**
      * Continue the previously paused crawling
      */
-    public void continueCrawling() {
-        synchronized(this.crawlingPausedSync) {
-            if (this.crawlingIsPaused) {
-                this.crawlingIsPaused = false;
-                this.crawlingPausedSync.notifyAll();
+    public void continueCrawlJob(String jobType) {
+        Object[] status = (Object[])this.crawlJobsStatus.get(jobType);
+        synchronized(status[CRAWLJOB_SYNC]) {
+            if (((Boolean)status[CRAWLJOB_STATUS]).booleanValue()) {
+                status[CRAWLJOB_STATUS] = Boolean.FALSE;
+                status[CRAWLJOB_SYNC].notifyAll();
             }
         }
-        setConfig("crawler.isPaused", "false");
-    }
+        setConfig(jobType + "_isPaused", "false");
+    } 
     
     /**
      * @return <code>true</code> if crawling was paused or <code>false</code> otherwise
      */
-    public boolean crawlingIsPaused() {
-        synchronized(this.crawlingPausedSync) {
-            return this.crawlingIsPaused;
+    public boolean crawlJobIsPaused(String jobType) {
+        Object[] status = (Object[])this.crawlJobsStatus.get(jobType);
+        synchronized(status[CRAWLJOB_SYNC]) {
+            return ((Boolean)status[CRAWLJOB_STATUS]).booleanValue();
         }
     }
     
@@ -1012,10 +1039,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         
         // if crawling was paused we have to wait until we wer notified to continue
-        synchronized(this.crawlingPausedSync) {
-            if (this.crawlingIsPaused) {
+        Object[] status = (Object[])this.crawlJobsStatus.get(CRAWLJOB_LOCAL_CRAWL);
+        synchronized(status[CRAWLJOB_SYNC]) {
+            if (((Boolean)status[CRAWLJOB_STATUS]).booleanValue()) {
                 try {
-                    this.crawlingPausedSync.wait();
+                    status[CRAWLJOB_SYNC].wait();
                 }
                 catch (InterruptedException e){ return false;}
             }
@@ -1090,10 +1118,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         
         // if crawling was paused we have to wait until we wer notified to continue
-        synchronized(this.crawlingPausedSync) {
-            if (this.crawlingIsPaused) {
+        Object[] status = (Object[])this.crawlJobsStatus.get(CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+        synchronized(status[CRAWLJOB_SYNC]) {
+            if (((Boolean)status[CRAWLJOB_STATUS]).booleanValue()) {
                 try {
-                    this.crawlingPausedSync.wait();
+                    status[CRAWLJOB_SYNC].wait();
                 }
                 catch (InterruptedException e){ return false;}
             }
@@ -1152,12 +1181,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // if crawling was paused we have to wait until we wer notified to continue
-        synchronized(this.crawlingPausedSync) {
-            if (this.crawlingIsPaused) {
+        Object[] status = (Object[])this.crawlJobsStatus.get(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        synchronized(status[CRAWLJOB_SYNC]) {
+            if (((Boolean)status[CRAWLJOB_STATUS]).booleanValue()) {
                 try {
-                    this.crawlingPausedSync.wait();
+                    status[CRAWLJOB_SYNC].wait();
                 }
-                catch (InterruptedException e){ return false; }
+                catch (InterruptedException e){ return false;}
             }
         }
         
