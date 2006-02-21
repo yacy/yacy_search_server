@@ -275,7 +275,7 @@ public class Network {
                     String wikiPage;
                     String userAgent, location;
                     int PPM;
-                    long myValue=0, nextValue=0, prevValue=0;
+                    long myValue=0, nextValue=0, prevValue=0, nextPPM=0, myPPM=0;
                     while (e.hasMoreElements() && conCount < maxCount) {
                         seed = (yacySeed) e.nextElement();
                         if (seed != null) {
@@ -286,15 +286,25 @@ public class Network {
                             if (seed.hash.equals(yacyCore.seedDB.mySeed.hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", 2);
                                 myValue=Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
+                                try{
+                                    myPPM=Long.parseLong(seed.get(yacySeed.ISPEED, "0"));
+                                }catch(NumberFormatException exception){
+                                    myPPM=0;
+                                }
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
-                                if(myValue==0)
+                                if(myValue==0){
                                     //before myself: better
                                     nextValue=Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
-                                else if(nextValue==0)
+                                    try{
+                                        nextPPM=Long.parseLong(seed.get(yacySeed.ISPEED, "0"));
+                                    }catch(NumberFormatException exception){
+                                        nextPPM=0;
+                                    }
+                                }else if(nextValue==0){
                                     //after myself: worse
                                     prevValue=Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
-                                    
+                                }    
                             }
                             if (updatedProfile.contains(seed.hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 1);
@@ -409,8 +419,19 @@ public class Network {
                     prop.put("table_complete", ((complete)? 1 : 0) );
                     
                     int percent=(int)((float)(myValue-prevValue)/(float)(nextValue-prevValue)*100);
+                    long indexdiff=nextValue-myValue;
+                    long ppmdiff=myPPM-nextPPM;
                     prop.put("table_percent", percent);
                     prop.put("table_percent2", 100-percent);
+                    if(indexdiff!=0 && ppmdiff!=0)
+                        if(ppmdiff<0){
+                            prop.put("table_timemessage", 2);
+                        }else{
+                            prop.put("table_timemessage", 1);
+                            prop.put("table_time", serverDate.intervalToString( (int)((float)indexdiff/(float)ppmdiff)*1000 ));
+                        }
+                    else
+                        prop.put("table_timemessage", 0);
                 }
             }
             prop.put("page", page);
