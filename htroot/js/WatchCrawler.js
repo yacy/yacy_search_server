@@ -60,15 +60,16 @@ function handleStatus(){
 	}
 	var statusResponse = statusRPC.responseXML;
 	statusTag=getFirstChild(getFirstChild(statusResponse, ""), "status")
-	/*indexingqueue=getFirstChild(statusTag, "indexingqueue");
-
-	indexingqueue_size=getValue(getFirstChild(indexingqueue, "size"));
-	indexingqueue_max=getValue(getFirstChild(indexingqueue, "max"));*/
 	ppm=getValue(getFirstChild(statusTag, "ppm"))
-	
-/*	document.getElementById("indexingqueuesize").firstChild.nodeValue=indexingqueue_size;
-	document.getElementById("indexingqueuemax").firstChild.nodeValue=indexingqueue_max;*/
-	document.getElementById("ppm").firstChild.nodeValue=ppm;
+	var ppmSpan = document.getElementById("ppm");
+	removeAllChildren(ppmSpan);
+	ppmSpan.appendChild(document.createTextNode(ppm));
+	ppmSpan.appendChild(document.createElement("br"));
+	for(i=0;i<ppm;i++){
+		img=document.createElement("img");
+		img.setAttribute("src", "/env/grafics/green-bar.png");
+		ppmSpan.appendChild(img);
+	}
 }
 
 
@@ -103,6 +104,13 @@ function handleQueues(){
 		remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
 		document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
 		createremoteCrawlerTable(remotecrawlerqueue);
+	}
+}
+function removeAllChildren(element){
+	child=element.firstChild;
+	while(child!=null){
+		element.removeChild(child);
+		child=element.firstChild;
 	}
 }
 function clearTable(table, numSkip){
