@@ -43,6 +43,7 @@ Section "Binaries (required)"
 	#File "httpProxy.sh"      ##UNIX
 	File "yacy.yellow"
 	File "yacy.stopwords"
+	File "yacy.badwords"
 	
 	#texts
 	File "readme.txt"
