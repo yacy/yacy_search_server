@@ -69,7 +69,7 @@ public class Wiki {
 
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     public static String dateString(Date date) {
-    return SimpleFormatter.format(date);
+        return SimpleFormatter.format(date);
     }
 
 
