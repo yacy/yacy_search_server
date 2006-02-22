@@ -51,6 +51,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -74,6 +75,8 @@ public class wikiCode {
     private boolean table=false;              // needed for tables, because they reach over several lines
     private int preindented = 0;              //needed for indented <pre>s
     private int escindented = 0;              //needed for indented [=s
+    private int headlines = 0;                //number of headlines in page
+    private ArrayList dirElements = new ArrayList();    //List of headlines used to create diectory of page
 
     /** Constructor of the class wikiCode */
     public wikiCode(plasmaSwitchboard switchboard){
@@ -104,7 +107,7 @@ public class wikiCode {
                     out.append(transformLine(line, switchboard)).append(
                             serverCore.crlfString);
                 }
-                return out.toString();
+                return directory()+out.toString();
             } catch (UnsupportedEncodingException e1) {
                 // can not happen
                 return null;
@@ -331,7 +334,106 @@ public class wikiCode {
         }
         return result;
     }
-    
+
+    /** processes ordered lists
+      */
+    private String orderedList(String result){
+        int p0 = 0;
+        int p1 = 0;
+        //# sorted Lists contributed by [AS]
+        //## Sublist
+        if(result.startsWith(numListLevel + "#")){ //more #
+            p0 = result.indexOf(numListLevel);
+            p1 = result.length();
+             result = "<ol>" + serverCore.crlfString +
+                "<li>" +
+                result.substring(numListLevel.length() + 1, p1) +
+                "</li>";
+            numListLevel += "#";
+        }else if(numListLevel.length() > 0 && result.startsWith(numListLevel)){ //equal number of #
+            p0 = result.indexOf(numListLevel);
+            p1 = result.length();
+            result = "<li>" +
+                result.substring(numListLevel.length(), p1) +
+                "</li>";
+        }else if(numListLevel.length() > 0){ //less #
+            int i = numListLevel.length();
+            String tmp = "";
+
+            while(! result.startsWith(numListLevel.substring(0,i)) ){
+                tmp += "</ol>";
+                i--;
+            }
+            numListLevel = numListLevel.substring(0,i);
+            p0 = numListLevel.length();
+            p1 = result.length();
+
+            if(numListLevel.length() > 0){
+                result = tmp +
+                     "<li>" +
+                     result.substring(p0, p1) +
+                     "</li>";
+            }else{
+                result = tmp + result.substring(p0, p1);
+            }
+        }
+        // end contrib [AS]
+        return result;
+    }
+
+    /** creates a directory for the wiki page
+      * @return directory of the wiki
+      *
+      */
+    //method contributed by [MN]
+    private String directory(){
+        String directory = "";
+        String element;
+        int s = 0;
+        int level = 1;
+        int level1 = 0;
+        int level2 = 0;
+        int level3 = 0;
+        if((s=dirElements.size())>2){
+            for(int i=0;i<s;i++){
+                element = dirElements.get(i).toString();
+                if (element.startsWith("###")){
+                    if(level<3){
+                        level = 3;
+                        level3 = 0;
+                    }
+                    level3++;
+                    element=level1+"."+level2+"."+level3+" "+element.substring(3);
+                    directory = directory + "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#"+i+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                }
+                else if (element.startsWith("##")){
+                    if(level==1){
+                        level2 = 0;
+                        level = 2;
+                    }
+                    if(level==3){
+                        level = 2;
+                    }
+                    level2++;
+                    element=level1+"."+level2+" "+element.substring(2);
+                    directory = directory + "&nbsp;&nbsp;<a href=\"#"+i+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                }
+                else if (element.startsWith("#")) {
+                    if (level>1) {
+                        level = 1;
+                        level2 = 0;
+                        level3 = 0;
+                    }
+                    level1++;
+                    element=level1+" "+element.substring(1);
+                    directory = directory + "<a href=\"#"+i+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                }
+            }
+            directory = "<table><tr><td><div class=\"WikiTOCBox\">\n" + directory + "</div></td></tr></table>\n";
+        }
+        return directory;
+    }
+
     /** replaces two occurences of a substring in a string by a pair strings if occurence of that substring is an even number. This method is not greedy!
       * @param input the string that something is to be replaced in
       * @param pat substring to be replaced
@@ -339,18 +441,33 @@ public class wikiCode {
       * @param repl2 string substring gets replaced by on even occurences
       */
     public String pairReplace(String input, String pat, String repl1, String repl2){
+        String direlem = "";    //string to keep headlines until they get added to List dirElements
         int p0 = 0;
         int p1 = 0;
         int l = pat.length();
         if ((p0 = input.indexOf(pat)) >= 0) {
             p1 = input.indexOf(pat, p0 + l);
-            if (p1 >= 0) input = input.substring(0, p0) + repl1 +
-                                 input.substring(p0 + l, p1) + repl2 +
-                                 input.substring(p1 + l);
+            if (p1 >= 0) {
+                if((pat.equals("===="))||(pat.equals("==="))||(pat.equals("=="))){
+                    input = input.substring(0, p0) + "<a name=\""+headlines+"\">" + repl1 +
+                    (direlem = input.substring(p0 + l, p1)) + repl2 + "</a>" +
+                    input.substring(p1 + l);
+
+                    if(pat.equals("===="))     dirElements.add("###"+direlem);
+                    else if(pat.equals("===")) dirElements.add("##"+direlem);
+                    else if(pat.equals("=="))  dirElements.add("#"+direlem);
+                    headlines++;
+                }
+                else{
+                    input = input.substring(0, p0) +  repl1 +
+                    (direlem = input.substring(p0 + l, p1)) + repl2 +
+                    input.substring(p1 + l);
+                }
             }
+        }
         return input;
     }
-    
+
     /** Replaces wiki tags with HTML tags.
       * @param result a line of text
       * @param switchboard
@@ -369,7 +486,6 @@ public class wikiCode {
             result = replaceCharacters(result);
             replacedCharacters = true;
         }
- 
 
         //check if line contains any escape symbol or tag for preformatted text 
         //or if we are in an esacpe sequence already or if we are in a preformated text
@@ -445,45 +561,7 @@ public class wikiCode {
                 }
             }
 
-
-            //# sorted Lists contributed by [AS]
-            //## Sublist
-            if(result.startsWith(numListLevel + "#")){ //more #
-                p0 = result.indexOf(numListLevel);
-                p1 = result.length();
-                result = "<ol>" + serverCore.crlfString +
-                    "<li>" +
-                    result.substring(numListLevel.length() + 1, p1) +
-                    "</li>";
-                numListLevel += "#";
-            }else if(numListLevel.length() > 0 && result.startsWith(numListLevel)){ //equal number of #
-                p0 = result.indexOf(numListLevel);
-                p1 = result.length();
-                result = "<li>" +
-                    result.substring(numListLevel.length(), p1) +
-                    "</li>";
-            }else if(numListLevel.length() > 0){ //less #
-                int i = numListLevel.length();
-                String tmp = "";
-
-                while(! result.startsWith(numListLevel.substring(0,i)) ){
-                    tmp += "</ol>";
-                    i--;
-                }
-                numListLevel = numListLevel.substring(0,i);
-                p0 = numListLevel.length();
-                p1 = result.length();
-
-                if(numListLevel.length() > 0){
-                    result = tmp +
-                         "<li>" +
-                         result.substring(p0, p1) +
-                         "</li>";
-                }else{
-                    result = tmp + result.substring(p0, p1);
-                }
-            }
-            // end contrib [AS]
+            result = orderedList(result);
 
             //* definition Lists contributed by [MN] based on unordered list code by [AS]
             if(result.startsWith(defListLevel + ";")){ //more semicolons

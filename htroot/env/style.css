@@ -169,6 +169,16 @@ background-color: #ffbbaa;
 .WikiBackground {
 background-color: #eeeeee;
 }
+.WikiTOCBox {
+border: 1px solid #aaa;
+background-color: #F8F8FF;
+padding: 8px;
+}
+.WikiTOC {
+color:#0000FF;
+font-size: 10px;
+text-decoration:underline;
+}
 .MessageBackground {
 background-color: #eeeeee;
 }
