@@ -103,7 +103,7 @@ function handleQueues(){
 		createRemoteCrawlerTable(remotecrawlerqueue);
 		remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
 		document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
-		createremoteCrawlerTable(remotecrawlerqueue);
+		createRemoteCrawlerTable(remotecrawlerqueue);
 	}
 }
 function removeAllChildren(element){
