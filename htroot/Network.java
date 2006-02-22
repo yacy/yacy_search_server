@@ -418,20 +418,26 @@ public class Network {
                     prop.put("table_total", (maxCount > conCount) ? conCount : maxCount);
                     prop.put("table_complete", ((complete)? 1 : 0) );
                     
-                    int percent=(int)((float)(myValue-prevValue)/(float)(nextValue-prevValue)*100);
-                    long indexdiff=nextValue-myValue;
-                    long ppmdiff=myPPM-nextPPM;
-                    prop.put("table_percent", percent);
-                    prop.put("table_percent2", 100-percent);
-                    if(indexdiff!=0 && ppmdiff!=0)
-                        if(ppmdiff<0){
-                            prop.put("table_timemessage", 2);
-                        }else{
-                            prop.put("table_timemessage", 1);
-                            prop.put("table_timemessage_time", serverDate.intervalToString( (int)((float)indexdiff/(float)ppmdiff)*1000 ));
-                        }
-                    else
-                        prop.put("table_timemessage", 0);
+                    if( (!post.containsKey("order") && !post.containsKey("sort")) && page==1){
+                        int percent=(int)((float)(myValue-prevValue)/(float)(nextValue-prevValue)*100);
+                        long indexdiff=nextValue-myValue;
+                        long ppmdiff=myPPM-nextPPM;
+                        prop.put("table_progressbar", 1); //display the bar
+                        prop.put("table_progressbar_percent", percent);
+                        prop.put("table_progressbar_percent2", 100-percent);
+                        if(indexdiff!=0 && ppmdiff!=0)
+                            if(ppmdiff<0){
+                                prop.put("table_progressbar_timemessage", 2);
+                            }else{
+                                prop.put("table_progressbar_timemessage", 1);
+                                prop.put("table_progressbar_timemessage_time", serverDate.intervalToString( (int)((float)indexdiff/(float)ppmdiff)*1000 ));
+                            }
+                        else
+                            prop.put("table_progressbar_timemessage", 0);
+                    }else{
+                        prop.put("table_progressbar", 0); //no display
+                    }
+                    
                 }
             }
             prop.put("page", page);
