@@ -1,4 +1,8 @@
-DELETE_STRING="delete"
+DELETE_STRING="delete";
+BAR_IMG1="/env/grafics/green-bar.png";
+BAR_IMG2="/env/grafics/red-bar.png";
+WORDCACHEBAR_LENGTH=1/4;
+
 
 var statusRPC;
 var queuesRPC;
@@ -60,6 +64,7 @@ function handleStatus(){
 	}
 	var statusResponse = statusRPC.responseXML;
 	statusTag=getFirstChild(getFirstChild(statusResponse, ""), "status")
+	
 	ppm=getValue(getFirstChild(statusTag, "ppm"))
 	var ppmSpan = document.getElementById("ppm");
 	removeAllChildren(ppmSpan);
@@ -67,8 +72,36 @@ function handleStatus(){
 	ppmSpan.appendChild(document.createElement("br"));
 	for(i=0;i<ppm;i++){
 		img=document.createElement("img");
-		img.setAttribute("src", "/env/grafics/green-bar.png");
+		img.setAttribute("src", BAR_IMG1);
 		ppmSpan.appendChild(img);
+	}
+	
+	var wordCache=getValue(getFirstChild(statusTag, "wordCacheSize"));
+	var wordCacheMaxLow=getValue(getFirstChild(statusTag, "wordCacheMaxLow"));
+	var wordCacheMaxHigh=getValue(getFirstChild(statusTag, "wordCacheMaxHigh"));
+	//use Low as default, but High if there are more wordcaches
+	var wordCacheMax=wordCacheMaxLow;
+	if(wordCache>wordCacheMax){
+		wordCacheMax=wordCacheMaxHigh;
+	}
+	var percent=Math.round(wordCache/wordCacheMax*100);
+
+	
+	wordCacheSpan=document.getElementById("wordcache");
+
+	removeAllChildren(wordCacheSpan);
+	wordCacheSpan.appendChild(document.createTextNode(wordCache+"/"+wordCacheMax));
+	wordCacheSpan.appendChild(document.createElement("br"));
+	var img;
+	for(i=0;i<percent*WORDCACHEBAR_LENGTH;i++){
+		img=document.createElement("img");
+		img.setAttribute("src", BAR_IMG2);
+		wordCacheSpan.appendChild(img);
+	}
+	for(i=0;i<(100-percent)*WORDCACHEBAR_LENGTH;i++){
+		img=document.createElement("img");
+		img.setAttribute("src", BAR_IMG1);
+		wordCacheSpan.appendChild(img);
 	}
 }
 

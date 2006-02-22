@@ -1,9 +1,8 @@
 <xml version="1.0">
 <status>
   <ppm>#[ppm]#</ppm>
-  <indexingqueue>
-    <size>#[indexingQueueSize]#</size>
-    <max>#[indexingQueueMax]#</max>
-  </indexingqueue>
+  <wordCacheSize>#[wordCacheSize]#</wordCacheSize>
+  <wordCacheMaxLow>#[wordCacheMaxLow]#</wordCacheMaxLow>
+  <wordCacheMaxHigh>#[wordCacheMaxHigh]#</wordCacheMaxHigh>
 </status>
 </xml>

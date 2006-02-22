@@ -64,8 +64,9 @@ public class status_p {
         prop.put("rejected", 0);
         yacyCore.peerActions.updateMySeed();
         prop.put("ppm", yacyCore.seedDB.mySeed.get(yacySeed.ISPEED, "unknown"));
-        prop.put("indexingQueueSize", Integer.toString(switchboard.getThread("80_indexing").getJobCount()+switchboard.indexingTasksInProcess.size()));
-        prop.put("indexingQueueMax", Integer.toString(plasmaSwitchboard.indexingSlots));
+        prop.put("wordCacheSize", switchboard.wordIndex.wordCacheRAMSize());
+        prop.put("wordCacheMaxLow", switchboard.getConfig("wordCacheMaxLow", "10000"));
+        prop.put("wordCacheMaxHigh", switchboard.getConfig("wordCacheMaxHigh", "10000"));
 
         // return rewrite properties
         return prop;
