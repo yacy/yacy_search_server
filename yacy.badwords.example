@@ -1,3 +1,16 @@
+# Wenn man diese Liste benutzen moechte muss diese zuerst in "yacy.badwords"
+# unbenannt werden !
+#
+# Alles was hier gelistet ist wir dann bei den "Topwoerter" die nach einer
+# Suche angezeigt werden gefiltert.
+#
+# Änderungen werden aber erst nach einen Neustart aktiv.
+#
+# Fehlt hier was, wird zu viel gefiltert, dann bitte ändern.
+# Wenn was entfernt wird bitte auch schreiben warum das hier raus muss.
+#
+# Jeder darf/sollte jetzt mitmachen ;)
+#
 enc
 all
 app
