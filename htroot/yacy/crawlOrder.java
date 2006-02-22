@@ -213,8 +213,8 @@ public final class crawlOrder {
             }
         } catch (Exception e) {
             // mist
-            e.printStackTrace();
             reason = "ERROR: " + e.getMessage();
+            env.getLog().logSevere("crawlOrder: " + reason, e);
             delay = "600";
         }
 
