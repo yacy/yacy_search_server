@@ -69,39 +69,37 @@ public class Wiki {
 
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     public static String dateString(Date date) {
-	return SimpleFormatter.format(date);
+    return SimpleFormatter.format(date);
     }
 
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws IOException {
-	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
-	if (post == null) {
-	    post = new serverObjects();
-	    post.put("page", "start");
-	}
+        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        serverObjects prop = new serverObjects();
+        if (post == null) {
+            post = new serverObjects();
+            post.put("page", "start");
+        }
 
-	String pagename = post.get("page", "start");
+        String pagename = post.get("page", "start");
         String ip = post.get("CLIENTIP", "127.0.0.1");
         String author = post.get("author", "anonymous");
-	if (author.equals("anonymous")) {
+        if (author.equals("anonymous")) {
             author = switchboard.wikiDB.guessAuthor(ip);
             if (author == null) {
-		if (de.anomic.yacy.yacyCore.seedDB.mySeed == null)
-                    author = "anonymous";
-                else
-                    author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous");
+                if (de.anomic.yacy.yacyCore.seedDB.mySeed == null) author = "anonymous";
+                else author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous");
             }
         }
-        
-	    if (post.containsKey("submit")) {
-	        // store a new page
-	        byte[] content;
-	        try {
-	            content = post.get("content", "").getBytes("UTF-8");
-	        } catch (UnsupportedEncodingException e) {
-	            content = post.get("content", "").getBytes();
-	        }
+
+        if (post.containsKey("submit")) {
+            // store a new page
+            byte[] content;
+            try {
+                content = post.get("content", "").getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                content = post.get("content", "").getBytes();
+            }
             switchboard.wikiDB.write(switchboard.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content));
             // create a news message
             HashMap map = new HashMap();
@@ -111,74 +109,73 @@ public class Wiki {
             try {
                 yacyCore.newsPool.publishMyNews(new yacyNewsRecord("wiki_upd", map));
             } catch (IOException e) {}
-	}
-
-	wikiBoard.entry page = switchboard.wikiDB.read(pagename);
-
-	if (post.containsKey("edit")) {
-	    // edit the page
-	    try {
-	        prop.put("mode", 1); //edit
-	        prop.put("mode_author", author);
-	        prop.put("mode_page-code", new String(page.page(), "UTF-8"));
-	        prop.put("mode_pagename", pagename);
-	    } catch (UnsupportedEncodingException e) {}
-	} 
-
-	//contributed by [MN]
-	else if (post.containsKey("preview")) {
-		// preview the page
-		wikiCode wikiTransformer=new wikiCode(switchboard);
-		
-        prop.put("mode", 2);//preview
-        prop.put("mode_pagename", pagename);
-        prop.put("mode_author", author);
-        prop.put("mode_date", dateString(new Date()));
-        prop.put("mode_page", wikiTransformer.transform(post.get("content", "")));
-        prop.put("mode_page-code", post.get("content", ""));
-	} 
-	//end contrib of [MN]
-			
-	else if (post.containsKey("index")) {
-	    // view an index
-        prop.put("mode", 3); //Index
-        String subject;
-        try {
-            Iterator i = switchboard.wikiDB.keys(true);
-            wikiBoard.entry entry;
-            int count=0;
-            while (i.hasNext()) {
-                subject = (String) i.next();
-                entry = switchboard.wikiDB.read(subject);
-                prop.put("mode_pages_"+count+"_name",wikiBoard.webalize(subject));
-                prop.put("mode_pages_"+count+"_subject", subject);
-                prop.put("mode_pages_"+count+"_date", dateString(entry.date()));
-                prop.put("mode_pages_"+count+"_author", entry.author());
-                count++;
-            }
-            prop.put("mode_pages", count);
-        } catch (IOException e) {
-            prop.put("mode_error", 1); //IO Error reading Wiki
-            prop.put("mode_error_message", e.getMessage());
         }
-        prop.put("mode_pagename", pagename);
-	} 
-	
-	else {
-        wikiCode wikiTransformer=new wikiCode(switchboard);
-	    // show page
-        prop.put("mode", 0); //viewing
-        prop.put("mode_pagename", pagename);
-        prop.put("mode_author", page.author());
-        prop.put("mode_date", dateString(page.date()));
-        prop.put("mode_page", wikiTransformer.transform(page.page()));
-        
-        prop.put("controls", 0);
-        prop.put("controls_pagename", pagename);
-	}
 
-	// return rewrite properties
-	return prop;
+        wikiBoard.entry page = switchboard.wikiDB.read(pagename);
+
+        if (post.containsKey("edit")) {
+            // edit the page
+            try {
+                prop.put("mode", 1); //edit
+                prop.put("mode_author", author);
+                prop.put("mode_page-code", new String(page.page(), "UTF-8"));
+                prop.put("mode_pagename", pagename);
+            } catch (UnsupportedEncodingException e) {}
+        }
+
+        //contributed by [MN]
+        else if (post.containsKey("preview")) {
+            // preview the page
+            wikiCode wikiTransformer=new wikiCode(switchboard);
+            prop.put("mode", 2);//preview
+            prop.put("mode_pagename", pagename);
+            prop.put("mode_author", author);
+            prop.put("mode_date", dateString(new Date()));
+            prop.put("mode_page", wikiTransformer.transform(post.get("content", "")));
+            prop.put("mode_page-code", post.get("content", ""));
+        }
+        //end contrib of [MN]
+
+        else if (post.containsKey("index")) {
+            // view an index
+            prop.put("mode", 3); //Index
+            String subject;
+            try {
+                Iterator i = switchboard.wikiDB.keys(true);
+                wikiBoard.entry entry;
+                int count=0;
+                while (i.hasNext()) {
+                    subject = (String) i.next();
+                    entry = switchboard.wikiDB.read(subject);
+                    prop.put("mode_pages_"+count+"_name",wikiBoard.webalize(subject));
+                    prop.put("mode_pages_"+count+"_subject", subject);
+                    prop.put("mode_pages_"+count+"_date", dateString(entry.date()));
+                    prop.put("mode_pages_"+count+"_author", entry.author());
+                    count++;
+                }
+                prop.put("mode_pages", count);
+            } catch (IOException e) {
+                prop.put("mode_error", 1); //IO Error reading Wiki
+                prop.put("mode_error_message", e.getMessage());
+            }
+            prop.put("mode_pagename", pagename);
+        }
+
+        else {
+            wikiCode wikiTransformer=new wikiCode(switchboard);
+            // show page
+            prop.put("mode", 0); //viewing
+            prop.put("mode_pagename", pagename);
+            prop.put("mode_author", page.author());
+            prop.put("mode_date", dateString(page.date()));
+            prop.put("mode_page", wikiTransformer.transform(page.page()));
+
+            prop.put("controls", 0);
+            prop.put("controls_pagename", pagename);
+        }
+
+        // return rewrite properties
+        return prop;
     }
 
 
