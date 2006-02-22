@@ -747,8 +747,8 @@ public final class yacyClient {
         post.put("youare", targetSeed.hash);
         post.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
         if (url.length == 1) {
-            post.put("url", crypt.simpleEncode(url.toString()));
-            post.put("referrer", crypt.simpleEncode((referrer == null) ? "" : referrer.toString()));
+            post.put("url", crypt.simpleEncode(url[0].toString()));
+            post.put("referrer", crypt.simpleEncode((referrer[0] == null) ? "" : referrer[0].toString()));
         } else {
             for (int i=0; i< url.length; i++) {
                 post.put("url" + i, crypt.simpleEncode(url[i].toString()));
