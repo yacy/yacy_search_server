@@ -374,7 +374,7 @@
 	    <include name="yacy.logging"/>
 	    <include name="yacy.init"/>
 	    <include name="yacy.yellow"/>
-	    <include name="yacy.badwords"/>
+	    <include name="yacy.badwords.example"/>
 	    <include name="yacy.stopwords"/>
 	    <include name="yacy.parser"/>
 	    <include name="httpd.mime"/>
