@@ -245,7 +245,7 @@ public final class plasmaCrawlWorker extends Thread {
         }
     }
 
-    public static void load(
+    public static plasmaHTCache.Entry load(
             URL url,
             String name,
             String referer,
@@ -257,7 +257,7 @@ public final class plasmaCrawlWorker extends Thread {
             plasmaHTCache cacheManager,
             serverLog log
         ) throws IOException {
-        load(url,
+        return load(url,
              name,
              referer,
              initiator,

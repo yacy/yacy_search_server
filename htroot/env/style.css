@@ -166,6 +166,9 @@ background-color: #ffbbaa;
 .TableCellSummary {
 background-color: #ffbbaa;
 }
+.TableCellPassive {
+background-color: lightgrey;
+}
 .WikiBackground {
 background-color: #eeeeee;
 }
@@ -213,7 +216,21 @@ width: 16px;
 }
 
 .ResultDateYBR {
-	color:#007050
+	color:#007050;
+}
+
+.snippetLoading {
+	color:#999999;
+}
+
+.snippetLoaded {
+	color:black;
+	font-style:italic;
+}
+
+.snippetError {
+	color:red;
+	font-style:italic;
 }
 
 .settingsValue {

@@ -132,10 +132,14 @@ public class plasmaSnippetCache {
         
         // if the snippet is not in the cache, we can try to get it from the htcache
         byte[] resource = null;
+        httpHeader header = null;
         try {
             resource = cacheManager.loadResource(url);
             if ((fetchOnline) && (resource == null)) {
-                loadResourceFromWeb(url, 5000);
+                plasmaHTCache.Entry entry = loadResourceFromWeb(url, 5000);
+                if (entry != null) {
+                    header = entry.responseHeader;
+                }
                 resource = cacheManager.loadResource(url);
                 source = SOURCE_WEB;
             }
@@ -146,7 +150,7 @@ public class plasmaSnippetCache {
             //System.out.println("cannot load document for URL " + url);
             return new result(null, ERROR_RESOURCE_LOADING, "error loading resource from web, cacheManager returned NULL");
         }
-        plasmaParserDocument document = parseDocument(url, resource);
+        plasmaParserDocument document = parseDocument(url, resource, header);
         
         if (document == null) return new result(null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
         //System.out.println("loaded document for URL " + url);
@@ -318,11 +322,17 @@ public class plasmaSnippetCache {
     }
      
     public plasmaParserDocument parseDocument(URL url, byte[] resource) {
+        return parseDocument(url, resource, null);
+    }
+    
+    public plasmaParserDocument parseDocument(URL url, byte[] resource, httpHeader header) {
         if (resource == null) return null;
-        httpHeader header = null;
-        try {
-            header = this.cacheManager.getCachedResponse(plasmaURL.urlHash(url));
-        } catch (IOException e) {}
+        
+        if (header == null) {
+            try {
+                header = this.cacheManager.getCachedResponse(plasmaURL.urlHash(url));
+            } catch (IOException e) {}
+        }
         
         if (header == null) {
             String filename = this.cacheManager.getCachePath(url).getName();
@@ -371,8 +381,8 @@ public class plasmaSnippetCache {
         }
     }
     
-    public void loadResourceFromWeb(URL url, int socketTimeout) throws IOException {
-        plasmaCrawlWorker.load(
+    public plasmaHTCache.Entry loadResourceFromWeb(URL url, int socketTimeout) throws IOException {
+        return plasmaCrawlWorker.load(
             url,
             "",
             null, 

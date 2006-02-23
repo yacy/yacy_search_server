@@ -4,6 +4,10 @@
   <title>YaCy '#[clientname]#': Search Page</title>
          #%env/templates/metas.template%#
    <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="index.rss?search=#[former]#">
+   
+ <script src="/js/ajax.js"></script>
+ <script src="/js/Index.js"></script>   
+   
  </head>
  <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
@@ -29,8 +33,8 @@ picPlus.src = "/env/grafics/plus.gif";
     <td colspan=2>
 	<center>
      <input name="search" type="text" size="52" maxlength="80" value="#[former]#">
-
      <input type="submit" name="Enter" value="Search"><p>
+     <input type="submit" name="former" value="#[former]#">
     </center>
 
     </td>
@@ -153,12 +157,13 @@ from 'late' peers.
 <!-- link begin -->
 <p style="border-bottom:1px #000 dashed; padding-bottom: 1em;">
 <a href="/Bookmarks_p.html?edit=#[urlhash]#" onMouseover="document.plus_#[urlhexhash]#.src=picPlus.src" onMouseout="document.plus_#[urlhexhash]#.src=picEmpty.src">
-<img src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" name="plus_#[urlhexhash]#" border="0"></a>&nbsp;
+<img src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" name="plus_#[urlhexhash]#" border="0"></a>
 <span class="ResultDescription">#[description]#</span><br>
 <a href="#[delete]#" onMouseover="document.minus_#[urlhexhash]#.src=picMinus.src" onMouseout="document.minus_#[urlhexhash]#.src=picEmpty.src">
-<img src="/env/grafics/empty.gif" title="delete" alt="delete" name="minus_#[urlhexhash]#" border="0"></a>&nbsp;
-#(snippet)#::<i>#[text]#</i><br>#(/snippet)#<a href="#[url]#">#[urlname]#</a><br>
-<img src="/env/grafics/empty.gif">&nbsp;<span class="ResultDateYBR">&nbsp;#[date]#</span> | <span class="ResultDateYBR">YBR-#[ybr]#</span> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
+<img src="/env/grafics/empty.gif" title="delete" alt="delete" name="minus_#[urlhexhash]#" border="0"></a>
+<span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span><br>
+<img src="/env/grafics/empty.gif" border="0">&nbsp;<a id="url#[urlhash]#" href="#[url]#">#[urlname]#</a><br>
+<img src="/env/grafics/empty.gif"><span class="ResultDateYBR">&nbsp;#[date]#</span> | <span class="ResultDateYBR">YBR-#[ybr]#</span> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
 </p>
 <!-- link end -->
 #{/results}#
@@ -191,5 +196,12 @@ Architecture (C) by Michael Peter Christen,
 <img src="/env/grafics/mcemailh.gif"></i></center>
 
 #%env/templates/footer.template%#
+
+<script language="JavaScript">
+
+AllSnippets();
+
+</script> 
+
 </body>
 </html>

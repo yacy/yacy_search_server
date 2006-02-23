@@ -52,6 +52,7 @@ import java.net.URLEncoder;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaCrawlLURL.Entry;
@@ -126,7 +127,11 @@ public class ViewFile {
             try {
                 resource = sb.cacheManager.loadResource(url);
                 if (resource == null) {
-                    sb.snippetCache.loadResourceFromWeb(url, 5000);                 
+                    plasmaHTCache.Entry entry = sb.snippetCache.loadResourceFromWeb(url, 5000);                 
+                    
+                    if (entry != null) {
+                        resHeader = entry.responseHeader;
+                    }                    
                     
                     resource = sb.cacheManager.loadResource(url);
                     if (resource == null) {
@@ -135,15 +140,17 @@ public class ViewFile {
                         return prop;
                     } 
                 }
-                resHeader = sb.cacheManager.getCachedResponse(urlEntry.hash());
                 if (resHeader == null) {
-                    resHeader = httpc.whead(url,5000,null,null,sb.remoteProxyConfig);
-                    if (resource == null) {
-                        prop.put("error",4);
-                        prop.put("viewMode",VIEW_MODE_NO_TEXT);
-                        return prop;
-                    } 
-                    resMime = resHeader.mime();
+                    resHeader = sb.cacheManager.getCachedResponse(urlEntry.hash());
+                    if (resHeader == null) {
+                        resHeader = httpc.whead(url,5000,null,null,sb.remoteProxyConfig);
+                        if (resource == null) {
+                            prop.put("error",4);
+                            prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                            return prop;
+                        } 
+                        resMime = resHeader.mime();
+                    }
                 }
             } catch (IOException e) {
                 if (url == null) {
@@ -165,7 +172,7 @@ public class ViewFile {
                 prop.put("viewMode_plainText",content);                     
             } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("iframe")) {
                 // parsing the resource content
-                plasmaParserDocument document = sb.snippetCache.parseDocument(url, resource);
+                plasmaParserDocument document = sb.snippetCache.parseDocument(url, resource,header);
                 if (document == null) {
                     prop.put("error",5);
                     prop.put("viewMode",VIEW_MODE_NO_TEXT);
