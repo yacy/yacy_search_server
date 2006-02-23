@@ -31,7 +31,8 @@ function handleState(req) {
 	var status = response.getElementsByTagName("status")[0].firstChild.data;
 	
 	var span = document.getElementById(urlHash)
-	if (span.hasChildNodes()) span.removeChild(span.firstChild);
+	removeAllChildren(span);
+	//span.removeChild(span.firstChild);
 	
 	if (status < 11) {
 		span.className = "snippetLoaded";
