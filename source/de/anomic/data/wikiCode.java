@@ -294,7 +294,7 @@ public class wikiCode {
             newrowstart=true;
             line="<table";
             if (result.trim().length()>2) {
-                line+=" "+result.substring(2).replaceAll("&quot;","\"").trim();
+                line+=parseTableProperties(result.substring(2).trim());
             }
             line+=">";
             result=line;
@@ -309,7 +309,6 @@ public class wikiCode {
             result=line;
         }
         else if ((result.startsWith("||")) && (table)) {
-            result = replaceHTMLonly(result);
             line+="\t\t<td";
             int cellEnd=(result.indexOf("||",2)>0)?(result.indexOf("||",2)):(result.length());
             int propEnd=(result.indexOf("|",2)>0)?(result.indexOf("|",2)):(cellEnd);
@@ -317,7 +316,7 @@ public class wikiCode {
             if (propEnd==cellEnd) {
                 propEnd=1;
             } else {
-                line+=" "+result.substring(2,propEnd).trim().replaceAll("&quot;","\"");
+                line+=parseTableProperties(result.substring(2,propEnd).trim());
             }
             table=false; cellprocessing=true;
             line+=">"+processTable(result.substring(propEnd+1,cellEnd).trim(), switchboard)+"</td>";
@@ -335,7 +334,113 @@ public class wikiCode {
         return result;
     }
 
-    /** processes ordered lists
+    //contributed by [MN]
+    /** This method takes possible table properties and tests if they are valid.
+      * Valid in this case means if they are a property for the table, tr or td
+      * tag as stated in the HTML Pocket Reference by Jennifer Niederst (1st edition)
+      * The method is important to avoid XSS attacks on the wiki via table properties.
+      * @param str A string that may contain several table properties and/or junk.
+      * @return A string that only contains table properties.
+      */
+    private String parseTableProperties(String str){
+        str = str.replaceAll("&quot;", "");      //killing all quotationmarks
+        String[] values = str.split("[= ]");     //splitting the string at = and blanks
+        str="";                                  //recycling... ;-)
+        int numberofvalues = values.length;
+        for(int i=0;i<numberofvalues;i++){
+            if((values[i].equals("rowspan")) ||
+               (values[i].equals("colspan")) ||
+               (values[i].equals("vspace")) ||
+               (values[i].equals("hspace")) ||
+               (values[i].equals("cellspacing")) ||
+               (values[i].equals("cellpadding")) ||
+               (values[i].equals("border"))){
+                if(i+1<numberofvalues){
+                    if(values[i+1].matches("\\d+")){
+                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
+                        i++;
+                    }
+                }
+            }
+            else if((values[i].equals("width"))||(values[i].equals("height"))){
+                if(i+1<numberofvalues){
+                    if(values[i+1].matches("\\d+%{0,1}")){
+                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
+                        i++;
+                    }
+                }
+            }
+            else if(values[i].equals("align")){
+                if(i+1<numberofvalues) {
+                    if((values[i+1].equals("left")) ||
+                       (values[i+1].equals("right")) ||
+                       (values[i+1].equals("center"))) {
+                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
+                        i++;
+                    }
+                }
+            }
+            else if(values[i].equals("valign")){
+                if(i+1<numberofvalues) {
+                    if((values[i+1].equals("top")) ||
+                       (values[i+1].equals("middle")) ||
+                       (values[i+1].equals("bottom")) ||
+                       (values[i+1].equals("baseline"))) {
+                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
+                        i++;
+                    }
+                }
+            }
+            else if(values[i].equals("bgcolor")){
+                if(i+1<numberofvalues){
+                    if(values[i+1].matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}")){
+                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
+                        i++;
+                    }
+                }
+            }
+            else if(values[i].equals("rules")){
+                if(i+1<numberofvalues) {
+                    if((values[i+1].equals("none")) ||
+                       (values[i+1].equals("groups")) ||
+                       (values[i+1].equals("rows")) ||
+                       (values[i+1].equals("cols")) ||
+                       (values[i+1].equals("all"))) {
+                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
+                        i++;
+                    }
+                }
+            }
+            else if(values[i].equals("frame")){
+                if(i+1<numberofvalues) {
+                    if((values[i+1].equals("void")) ||
+                       (values[i+1].equals("above")) ||
+                       (values[i+1].equals("below")) ||
+                       (values[i+1].equals("hsides")) ||
+                       (values[i+1].equals("lhs")) ||
+                       (values[i+1].equals("rhs")) ||
+                       (values[i+1].equals("vsides")) ||
+                       (values[i+1].equals("box")) ||
+                       (values[i+1].equals("border"))) {
+                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
+                        i++;
+                    }
+                }
+            }
+            else if(values[i].equals("summary")){
+                if(i+1<numberofvalues){
+                    str = str + " "+values[i]+"=\""+values[i+1]+"\"";
+                    i++;
+                }
+            }
+            else if(values[i].equals("nowrap")){
+                str = str + "nowrap";
+            }
+        }
+        return str;
+    } //end contrib [MN]
+
+    /** This method processes ordered lists.
       */
     private String orderedList(String result){
         int p0 = 0;
@@ -381,9 +486,8 @@ public class wikiCode {
         return result;
     }
 
-    /** creates a directory for the wiki page
+    /** This method creates a directory for a wiki page.
       * @return directory of the wiki
-      *
       */
     //method contributed by [MN]
     private String directory(){
@@ -434,7 +538,9 @@ public class wikiCode {
         return directory;
     }
 
-    /** replaces two occurences of a substring in a string by a pair strings if occurence of that substring is an even number. This method is not greedy!
+    /** Replaces two occurences of a substring in a string by a pair of strings if 
+      * that substring occurs twice in the string. This method is not greedy! You'll
+      * have to run it in a loop if you want to replace all occurences of the substring.
       * @param input the string that something is to be replaced in
       * @param pat substring to be replaced
       * @param repl1 string substring gets replaced by on uneven occurences
@@ -478,11 +584,11 @@ public class wikiCode {
         int p0, p1;
         boolean defList = false;    //needed for definition lists
 
-        if ((!replacedHTML)&&(!cellprocessing)&&(!table)){
+        if (!replacedHTML){
             result = replaceHTMLonly(result);
             replacedHTML = true;
         }
-        if ((!cellprocessing)&&(!replacedCharacters)){
+        if (!replacedCharacters){
             result = replaceCharacters(result);
             replacedCharacters = true;
         }
