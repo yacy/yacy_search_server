@@ -118,7 +118,7 @@ public class Wiki {
             try {
                 prop.put("mode", 1); //edit
                 prop.put("mode_author", author);
-                prop.put("mode_page-code", new String(page.page(), "UTF-8"));
+                prop.put("mode_page-code", new String(page.page(), "UTF-8").replaceAll("</textarea>","<&#047;textarea>"));
                 prop.put("mode_pagename", pagename);
             } catch (UnsupportedEncodingException e) {}
         }
@@ -132,7 +132,7 @@ public class Wiki {
             prop.put("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
             prop.put("mode_page", wikiTransformer.transform(post.get("content", "")));
-            prop.put("mode_page-code", post.get("content", ""));
+            prop.put("mode_page-code", post.get("content", "").replaceAll("</textarea>","<&#047;textarea>"));
         }
         //end contrib of [MN]
 
