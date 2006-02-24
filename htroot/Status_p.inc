@@ -66,12 +66,38 @@
 </tr>
 <tr class="TableCellDark">
 	<td>Indexing Queue</td>
-	<td>#[indexingQueueSize]# | #[indexingQueueMax]#</td>
+	<td>
+		<table border="0" cellpadding="0" cellspacing="0" width="200" >
+		<tr>
+			<td width="70">#[indexingQueueSize]#&nbsp;|&nbsp;#[indexingQueueMax]#&nbsp;</td>
+			<td>
+				<table border="0" cellpadding="0" cellspacing="0" width="150" height="10" bgcolor="#FFFFFF" style="border-style:solid; border-width:1px; border-color:#CAD5E3">
+				<tr>
+					<td align="left"><img src="env/grafics/green_bar.gif" width="#[indexingQueuePercent]#%" height="10" alt=""></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>	
+	</td>
 	<td>[<a href="IndexCreateIndexingQueue_p.html">Details</a>]</td>
 </tr>
 <tr class="TableCellLight">
 	<td>Loader Queue</td>
-	<td>#[loaderQueueSize]# | #[loaderQueueMax]# </td>
+	<td>		
+		<table border="0" cellpadding="0" cellspacing="0" width="200" >
+		<tr>
+			<td width="70">#[loaderQueueSize]#&nbsp;|&nbsp;#[loaderQueueMax]#&nbsp;</td>
+			<td>
+				<table border="0" cellpadding="0" cellspacing="0" width="150" height="10" bgcolor="#FFFFFF" style="border-style:solid; border-width:1px; border-color:#CAD5E3">
+				<tr>
+					<td align="left"><img src="env/grafics/green_bar.gif" width="#[loaderQueuePercent]#%" height="10" alt=""></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>		 
+	</td>
 	<td>[<a href="IndexCreateLoaderQueue_p.html">Details</a>]</td>
 </tr>
 <tr class="TableCellDark">

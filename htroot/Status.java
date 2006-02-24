@@ -286,12 +286,20 @@ public class Status {
         
         // Queue information
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
-        prop.put("indexingQueueSize", Integer.toString(sb.getThread("80_indexing").getJobCount()+sb.indexingTasksInProcess.size()));
-        prop.put("indexingQueueMax", Integer.toString(plasmaSwitchboard.indexingSlots));
-
-        prop.put("loaderQueueSize", Integer.toString(sb.cacheLoader.size()));        
-        prop.put("loaderQueueMax", Integer.toString(plasmaSwitchboard.crawlSlots));        
-
+        int indexingJobCount = sb.getThread("80_indexing").getJobCount()+sb.indexingTasksInProcess.size();
+        int indexingMaxCount = plasmaSwitchboard.indexingSlots;
+        int indexingPercent = indexingJobCount*100/indexingMaxCount;
+        prop.put("indexingQueueSize", Integer.toString(indexingJobCount));
+        prop.put("indexingQueueMax", Integer.toString(indexingMaxCount));
+        prop.put("indexingQueuePercent",(indexingPercent>100)?"100":Integer.toString(indexingPercent));
+        
+        int loaderJobCount = sb.cacheLoader.size();
+        int loaderMaxCount = plasmaSwitchboard.crawlSlots;
+        int loaderPercent = loaderJobCount*100/loaderMaxCount;
+        prop.put("loaderQueueSize", Integer.toString(loaderJobCount));        
+        prop.put("loaderQueueMax", Integer.toString(loaderMaxCount));        
+        prop.put("loaderQueuePercent", (loaderPercent>100)?"100":Integer.toString(loaderPercent));
+        
         prop.put("localCrawlQueueSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
         prop.put("localCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL)?1:0);
 
