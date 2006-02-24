@@ -90,7 +90,9 @@ public class ProxyIndexingMonitor_p {
                 env.setConfig("proxyPrefetchDepth", Integer.toString(newProxyPrefetchDepth));
                 boolean proxyStoreHTCache = (post.get("proxyStoreHTCache", "")).equals("on");
                 env.setConfig("proxyStoreHTCache", (proxyStoreHTCache) ? "true" : "false");
-
+                boolean proxyCrawlOrder = post.containsKey("proxyCrawlOrder");
+                env.setConfig("proxyCrawlOrder", proxyCrawlOrder ? "true" : "false");
+                
                 // added proxyCache, proxyCacheSize - Borg-0300
                 // proxyCache - check and create the directory
                 oldProxyCachePath = env.getConfig("proxyCache", "DATA/HTCACHE");
@@ -118,9 +120,12 @@ public class ProxyIndexingMonitor_p {
                     try {
                         profile.changeEntry("generalDepth", Integer.toString(newProxyPrefetchDepth));
                         profile.changeEntry("storeHTCache", (proxyStoreHTCache) ? "true": "false");
+                        profile.changeEntry("remoteIndexing",proxyCrawlOrder ? "true":"false");
+                        
                         prop.put("info", 2);//new proxyPrefetchdepth
                         prop.put("info_message", newProxyPrefetchDepth);
                         prop.put("info_caching", (proxyStoreHTCache) ? 1 : 0);
+                        prop.put("info_crawlOrder", (proxyCrawlOrder) ? 1 : 0);
 
                         // proxyCache - only display on change
                         if (oldProxyCachePath.equals(newProxyCachePath)) {
@@ -159,6 +164,7 @@ public class ProxyIndexingMonitor_p {
 
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("proxyStoreHTCacheChecked", env.getConfig("proxyStoreHTCache", "").equals("true") ? 1 : 0);
+        prop.put("proxyCrawlOrder", env.getConfig("proxyCrawlOrder", "").equals("true") ? 1 : 0);
         prop.put("proxyCache", env.getConfig("proxyCache", "DATA/HTCACHE"));
         prop.put("proxyCacheSize", env.getConfig("proxyCacheSize", "64"));
         // return rewrite properties

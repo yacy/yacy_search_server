@@ -665,14 +665,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
 
     private void initProfiles() {
-        if ((profiles.size() == 0) ||
+        if ((this.profiles.size() == 0) ||
             (getConfig(STR_PROXYPROFILE, "").length() == 0) ||
-            (profiles.getEntry(getConfig(STR_PROXYPROFILE, "")) == null)) {
+            (this.profiles.getEntry(getConfig(STR_PROXYPROFILE, "")) == null)) {
             // generate new default entry for proxy crawling
-            defaultProxyProfile = profiles.newEntry("proxy", "", ".*", ".*", Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), false, true, true, true, false, true, true, true);
-            setConfig(STR_PROXYPROFILE, defaultProxyProfile.handle());
+            this.defaultProxyProfile = this.profiles.newEntry("proxy", "", ".*", ".*", Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), false, true, true, true, getConfigBool("proxyCrawlOrder", false), true, true, true);
+            setConfig(STR_PROXYPROFILE, this.defaultProxyProfile.handle());
         } else {
-            defaultProxyProfile = profiles.getEntry(getConfig(STR_PROXYPROFILE, ""));
+            this.defaultProxyProfile = this.profiles.getEntry(getConfig(STR_PROXYPROFILE, ""));
         }
         if ((profiles.size() == 1) ||
             (getConfig(STR_REMOTEPROFILE, "").length() == 0) ||
@@ -1156,7 +1156,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             boolean tryRemote = ((urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) != 0) || (sbQueue.size() != 0)) &&
                                  (profile.remoteIndexing()) &&
                                  (urlEntry.initiator() != null) &&
-                                 (!(urlEntry.initiator().equals(plasmaURL.dummyHash))) &&
+                                // (!(urlEntry.initiator().equals(plasmaURL.dummyHash))) &&
                                  ((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal()));
             if (tryRemote) {
                 boolean success = processRemoteCrawlTrigger(urlEntry);

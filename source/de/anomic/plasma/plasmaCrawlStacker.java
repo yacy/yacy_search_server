@@ -343,9 +343,11 @@ public final class plasmaCrawlStacker {
             (profile != null) &&
             (profile.remoteIndexing()) /* granted */ &&
             (currentdepth == profile.generalDepth()) /* leaf node */ && 
-            (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
-            ((yacyCore.seedDB.mySeed.isSenior()) ||
-                    (yacyCore.seedDB.mySeed.isPrincipal())) /* qualified */;
+            //(initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
+            (
+                    (yacyCore.seedDB.mySeed.isSenior()) ||
+                    (yacyCore.seedDB.mySeed.isPrincipal())
+            ) /* qualified */;
         
         if ((!local)&&(!global)&&(!profile.handle().equals(this.sb.defaultRemoteProfile.handle()))) {
             this.log.logSevere("URL '" + nexturlString + "' can neither be crawled local nor global.");

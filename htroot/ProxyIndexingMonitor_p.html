@@ -39,6 +39,14 @@ URLs as crawling start points for crawling.</div></td>
     <td class=small><input type="checkbox" name="proxyStoreHTCache" align="top" #(proxyStoreHTCacheChecked)#::checked#(/proxyStoreHTCacheChecked)#></td>
     <td class=small>It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.</td>
   </tr>
+  <tr valign="top" class="TableCellLight">
+    <td class=small>Do Remote Indexing</td>
+    <td class=small><input type="checkbox" name="proxyCrawlOrder" align="top" #(proxyCrawlOrder)#::checked#(/proxyCrawlOrder)#></td>
+    <td class=small>If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
+    If you need your crawling results locally, you should switch this off.
+    Only senior and principal peers can initiate or receive remote crawls.
+    Please note that this setting only take effect for a prefetch depth greater than 0.</td>
+  </tr>
 
   <tr class="TableCellDark">
   <td colspan="3"><div class=small><b>Proxy generally</b></div></td> 
@@ -73,6 +81,7 @@ Please delete that file and restart.</b><br>
 <!-- info 2 -->
 <b>Pre-fetch is now set to depth-#[message]#.</b><br>
 <b>Caching is now #(caching)#off::on#(/caching)#.</b><br>
+<b>Remote Indexing is now #(crawlOrder)#off::on#(/crawlOrder)#.</b><br>
 #(path)#::<b>Cachepath is now set to '#[return]#'.</b> Please move the old data in the new directory.<br>#(/path)#
 #(size)#::<b>Cachesize is now set to #[return]#MB.</b><br>#(/size)#
 #(restart)#::<br><font color="red"><b>Changes will take effect after restart only.</b></font><br>#(/restart)#
