@@ -765,7 +765,7 @@ public class wikiCode {
                         kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
                     }
 
-                    result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align.trim() + alt.trim() + ">" + result.substring(p1 + 2);
+                    result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt + ">" + result.substring(p1 + 2);
                 }
                 // end contrib [MN]
 
