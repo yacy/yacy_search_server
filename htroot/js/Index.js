@@ -1,5 +1,4 @@
-
-function AllSnippets() {		
+function AllSnippets() {
     var query = document.getElementsByName("former")[0].value;
     
 	var span = document.getElementsByTagName("span");
@@ -14,7 +13,7 @@ function AllSnippets() {
 
 function requestSnippet(url, query){
 	var req=createRequestObject();
-	req.open('get', '/xml/snippet.xml?url=' + escape(url) + '&search=' + escape(query),true);
+	req.open('get', '/xml/snippet.xml?url=' + escape(url) + '&search=' + escape(query),false);
 	req.onreadystatechange = function () {handleState(req)};
 	req.send(null);
 }
