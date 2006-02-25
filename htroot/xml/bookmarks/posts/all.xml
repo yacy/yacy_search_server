@@ -1,4 +1,4 @@
-<?xml version='1.0' standalone='yes'?>
+<?xml version='1.0' standalone='yes' encoding='UTF-8'?>
 <posts>
 #{posts}#<post href="#[url]#" description="#[title]#" extended="#[description]#" hash="#[md5]#" tag="#[tags]#" time="#[time]#"/>
 #{/posts}#
