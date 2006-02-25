@@ -94,6 +94,10 @@ public final class plasmaWordIndex {
         return ramCache.maxURLinWordCache();
     }
 
+    public long maxAgeOfWordCache() {
+        return ramCache.maxAgeOfWordCache();
+    }
+
     public int wordCacheRAMSize() {
         return ramCache.wordCacheRAMSize();
     }
@@ -123,7 +127,7 @@ public final class plasmaWordIndex {
                 }
             }
         } else {
-            while (ramCache.maxURLinWordCache() > plasmaWordIndexCache.ramCacheLimit) {
+            while (ramCache.maxURLinWordCache() > plasmaWordIndexCache.ramCacheReferenceLimit) {
                 flushCache(1);
             }
             if (ramCache.size() > ramCache.getMaxWordsLow()) {

@@ -60,7 +60,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
-    public static final int ramCacheLimit = 50;
+    public static final int  ramCacheReferenceLimit = 50;
+    public static final long ramCacheAgeLimit       = 60 * 60 * 2 * 1000; // milliseconds; 2 Hours
 
     // class variables
     private final File databaseRoot;
@@ -205,7 +206,11 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     // cache settings
 
     public int maxURLinWordCache() {
-        return hashScore.getScore(hashScore.getMaxObject());
+        return hashScore.getMaxScore();
+    }
+
+    public long maxAgeOfWordCache() {
+        return System.currentTimeMillis() - longEmit(hashDate.getMinScore());
     }
 
     public int wordCacheRAMSize() {
@@ -249,18 +254,28 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         if (cache.size() == 0) return null;
         try {
             synchronized (cache) {
-                String hash = (String) hashScore.getMaxObject();
-                if (hash == null) return null;
+                String hash = null;
                 int count = hashScore.getMaxScore();
-                //long time = longTime(hashDate.getScore(hash));
-                if (count > ramCacheLimit) {
+                if ((count > ramCacheReferenceLimit) &&
+                    ((hash = (String) hashScore.getMaxObject()) != null)) {
                     // flush high-score entries
                     return hash;
-                } else {
-                    // flush oldest entries
-                    hash = (String) hashDate.getMinObject();
+                }
+                long oldestTime = longEmit(hashDate.getMinScore());
+                if (((System.currentTimeMillis() - oldestTime) > ramCacheAgeLimit) &&
+                    ((hash = (String) hashDate.getMinObject()) != null)) {
+                    // flush out-dated entries
                     return hash;
                 }
+                // not an urgent case
+                if (Runtime.getRuntime().freeMemory() < 10000000) {
+                    // low-memory case
+                    hash = (String) hashScore.getMaxObject(); // flush high-score entries (saves RAM)
+                } else {
+                    // not-efficient-so-far case
+                    hash = (String) hashDate.getMinObject(); // flush oldest entries (makes indexing faster)
+                }
+                return hash;
             }
         } catch (Exception e) {
             log.logSevere("flushFromMem: " + e.getMessage(), e);
@@ -272,6 +287,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return (int) ((longTime - startTime) / 1000);
     }
 
+    private long longEmit(int intTime) {
+        return (((long) intTime) * (long) 1000) + startTime;
+    }
+    
     /*
     private long longTime(int intTime) {
         return ((long) intTime) * ((long) 1000) + startTime;
