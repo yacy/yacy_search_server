@@ -60,11 +60,12 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
 
-public final class plasmaWordIndexEntryContainer implements Comparable {
+public final class plasmaWordIndexEntryContainer {
 
     private String wordHash;
     private final TreeMap container; // urlHash/plasmaWordIndexEntry - Mapping
     private long updateTime;
+    private kelondroOrder ordering;
     
     public plasmaWordIndexEntryContainer(String wordHash) {
         this(wordHash, new kelondroNaturalOrder(true));
@@ -73,6 +74,7 @@ public final class plasmaWordIndexEntryContainer implements Comparable {
     public plasmaWordIndexEntryContainer(String wordHash, kelondroOrder ordering) {
         this.wordHash = wordHash;
         this.updateTime = 0;
+        this.ordering = ordering;
         container = new TreeMap(ordering); // a urlhash/plasmaWordIndexEntry - relation
     }
     
@@ -158,22 +160,10 @@ public final class plasmaWordIndexEntryContainer implements Comparable {
         return container.values().iterator();
     }
 
-    public static plasmaWordIndexEntryContainer instantContainer(String wordHash, long creationTime, plasmaWordIndexEntry entry) {
-        plasmaWordIndexEntryContainer c = new plasmaWordIndexEntryContainer(wordHash);
-        c.add(entry);
-        c.updateTime = creationTime;
-        return c;
-    }
-
     public String toString() {
         return "C[" + wordHash + "] has " + container.size() + " entries";
     }
     
-    public int compareTo(Object obj) {
-        plasmaWordIndexEntryContainer other = (plasmaWordIndexEntryContainer) obj;
-        return this.wordHash.compareTo(other.wordHash);
-    }
-
     public int hashCode() {
         return (int) kelondroBase64Order.enhancedCoder.decodeLong(this.wordHash.substring(0, 4));
     }
@@ -272,6 +262,7 @@ public final class plasmaWordIndexEntryContainer implements Comparable {
     private static plasmaWordIndexEntryContainer joinConstructiveByEnumeration(plasmaWordIndexEntryContainer i1, plasmaWordIndexEntryContainer i2, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
         plasmaWordIndexEntryContainer conj = new plasmaWordIndexEntryContainer(null); // start with empty search result
+        if (!(i1.ordering.signature().equals(i2.ordering.signature()))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();
         Iterator e2 = i2.entries();
         int c;
@@ -283,7 +274,7 @@ public final class plasmaWordIndexEntryContainer implements Comparable {
 
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
-                c = ie1.getUrlHash().compareTo(ie2.getUrlHash());
+                c = i1.ordering.compare(ie1.getUrlHash(), ie2.getUrlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = (plasmaWordIndexEntry) e1.next(); else break;

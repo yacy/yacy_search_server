@@ -326,9 +326,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
         // put new words into cache
         String wordHash = container.wordHash();
+        plasmaWordIndexEntryContainer entries = null;
         synchronized (cache) {
             // put container into cache
-            plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+            entries = (plasmaWordIndexEntryContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
             if (entries == null) entries = new plasmaWordIndexEntryContainer(wordHash);
             added = entries.add(container);
             if (added > 0) {
@@ -336,24 +337,28 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 hashScore.addScore(wordHash, added);
                 hashDate.setScore(wordHash, intTime(updateTime));
             }
-            entries = null;
         }
+        entries = null;
         return added;
     }
 
-    private void addEntry(String wordHash, plasmaWordIndexEntry newEntry, long updateTime) {
+    public boolean addEntry(String wordHash, plasmaWordIndexEntry newEntry, long updateTime) {
+        plasmaWordIndexEntryContainer container = null;
+        plasmaWordIndexEntry[] entries = null;
         synchronized (cache) {
-            plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) cache.get(wordHash);
+            container = (plasmaWordIndexEntryContainer) cache.get(wordHash);
             if (container == null) container = new plasmaWordIndexEntryContainer(wordHash);
-            plasmaWordIndexEntry[] entries = new plasmaWordIndexEntry[] { newEntry };
+            entries = new plasmaWordIndexEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
                 cache.put(wordHash, container);
                 hashScore.incScore(wordHash);
                 hashDate.setScore(wordHash, intTime(updateTime));
+                return true;
             }
-            entries = null;
-            container = null;
         }
+        container = null;
+        entries = null;
+        return false;
     }
 
     public void close(int waitingSeconds) {

@@ -114,10 +114,8 @@ public final class plasmaWordIndex {
         ramCache.setMaxWords(maxWordsLow, maxWordsHigh);
     }
 
-    public int addEntries(plasmaWordIndexEntryContainer entries, long updateTime, boolean highPriority) {
-        int added = ramCache.addEntries(entries, updateTime, highPriority);
-
-        // force flush
+    public void flushControl(boolean highPriority) {
+        // check for forced flush
         if (highPriority) {
             if (ramCache.size() > ramCache.getMaxWordsHigh()) {
                 while (ramCache.size() + 500 > ramCache.getMaxWordsHigh()) {
@@ -134,13 +132,28 @@ public final class plasmaWordIndex {
                 }
             }
         }
+    }
+
+    public boolean addEntry(String wordHash, plasmaWordIndexEntry entry, long updateTime, boolean highPriority) {
+        if (ramCache.addEntry(wordHash, entry, updateTime)) {
+            flushControl(highPriority);
+            return true;
+        }
+        return false;
+    }
+    
+    public int addEntries(plasmaWordIndexEntryContainer entries, long updateTime, boolean highPriority) {
+        int added = ramCache.addEntries(entries, updateTime, highPriority);
+
+        // force flush
+        flushControl(highPriority);
         return added;
     }
 
     public synchronized void flushCacheSome() {
-        int flushCount = ramCache.size() / 500;
+        int flushCount = ramCache.size() / 1000;
         if (flushCount > 50) flushCount = 50;
-        if (flushCount < 5) flushCount = 5;
+        if (flushCount < 3) flushCount = 3;
         flushCache(flushCount);
     }
     
@@ -230,7 +243,8 @@ public final class plasmaWordIndex {
                                              language,
                                              doctype,
                                              true);
-            addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), ientry), System.currentTimeMillis(), false);
+            addEntry(wordHash, ientry, System.currentTimeMillis(), false);
+            //addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), ientry), System.currentTimeMillis(), false);
         }
         // System.out.println("DEBUG: plasmaSearch.addPageIndex: added " +
         // condenser.getWords().size() + " words, flushed " + c + " entries");

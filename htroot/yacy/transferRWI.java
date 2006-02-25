@@ -53,7 +53,6 @@ import java.util.LinkedList;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
-import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -126,7 +125,8 @@ public final class transferRWI {
                     wordHash = estring.substring(0, p);
                     wordhashes[received] = wordHash;
                     entry = new plasmaWordIndexEntry(estring.substring(p));
-                    sb.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), System.currentTimeMillis(), true);
+                    sb.wordIndex.addEntry(wordHash, entry, System.currentTimeMillis(), true);
+                    //sb.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), System.currentTimeMillis(), true);
                     serverCore.checkInterruption();
                     
                     urlHash = entry.getUrlHash();
