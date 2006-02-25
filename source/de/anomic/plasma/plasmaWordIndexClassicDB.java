@@ -194,7 +194,7 @@ public class plasmaWordIndexClassicDB {
             }
             return container;
         } else {
-            return new plasmaWordIndexEntryContainer(wordHash, 0);
+            return new plasmaWordIndexEntryContainer(wordHash);
         }
     }
     

@@ -52,27 +52,28 @@
 
 package de.anomic.plasma;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroOrder;
 
 public final class plasmaWordIndexEntryContainer implements Comparable {
 
     private String wordHash;
-    private final HashMap container; // urlHash/plasmaWordIndexEntry - Mapping
+    private final TreeMap container; // urlHash/plasmaWordIndexEntry - Mapping
     private long updateTime;
     
     public plasmaWordIndexEntryContainer(String wordHash) {
-        this(wordHash,16);
+        this(wordHash, new kelondroNaturalOrder(true));
     }
     
-    public plasmaWordIndexEntryContainer(String wordHash, int initContainerSize) {
+    public plasmaWordIndexEntryContainer(String wordHash, kelondroOrder ordering) {
         this.wordHash = wordHash;
         this.updateTime = 0;
-        container = new HashMap(initContainerSize); // a urlhash/plasmaWordIndexEntry - relation
+        container = new TreeMap(ordering); // a urlhash/plasmaWordIndexEntry - relation
     }
     
     public void setWordHash(String newWordHash) {
@@ -158,7 +159,7 @@ public final class plasmaWordIndexEntryContainer implements Comparable {
     }
 
     public static plasmaWordIndexEntryContainer instantContainer(String wordHash, long creationTime, plasmaWordIndexEntry entry) {
-        plasmaWordIndexEntryContainer c = new plasmaWordIndexEntryContainer(wordHash,1);
+        plasmaWordIndexEntryContainer c = new plasmaWordIndexEntryContainer(wordHash);
         c.add(entry);
         c.updateTime = creationTime;
         return c;
@@ -283,6 +284,7 @@ public final class plasmaWordIndexEntryContainer implements Comparable {
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
                 c = ie1.getUrlHash().compareTo(ie2.getUrlHash());
+                //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = (plasmaWordIndexEntry) e1.next(); else break;
                 } else if (c > 0) {

@@ -118,43 +118,47 @@ public final class plasmaWordIndex {
         int added = ramCache.addEntries(entries, updateTime, highPriority);
 
         // force flush
-        while (ramCache.maxURLinWordCache() > plasmaWordIndexCache.ramCacheLimit) {
-            try { Thread.sleep(10); } catch (InterruptedException e) { }
-            flushCacheToBackend(ramCache.bestFlushWordHash());
-        }
-        
         if (highPriority) {
             if (ramCache.size() > ramCache.getMaxWordsHigh()) {
-            while (ramCache.size() + 500 > ramCache.getMaxWordsHigh()) {
-                try { Thread.sleep(10); } catch (InterruptedException e) { }
-                flushCacheToBackend(ramCache.bestFlushWordHash());
-            }}
+                while (ramCache.size() + 500 > ramCache.getMaxWordsHigh()) {
+                    flushCache(1);
+                }
+            }
         } else {
+            while (ramCache.maxURLinWordCache() > plasmaWordIndexCache.ramCacheLimit) {
+                flushCache(1);
+            }
             if (ramCache.size() > ramCache.getMaxWordsLow()) {
-            while (ramCache.size() + 500 > ramCache.getMaxWordsLow()) {
-                try { Thread.sleep(10); } catch (InterruptedException e) { }
-                flushCacheToBackend(ramCache.bestFlushWordHash());
-            }}
+                while (ramCache.size() + 500 > ramCache.getMaxWordsLow()) {
+                    flushCache(1);
+                }
+            }
         }
         return added;
     }
 
-    private synchronized void flushCacheToBackend(String wordHash) {
+    public synchronized void flushCacheSome() {
+        int flushCount = ramCache.size() / 500;
+        if (flushCount > 50) flushCount = 50;
+        if (flushCount < 5) flushCount = 5;
+        flushCache(flushCount);
+    }
+    
+    public synchronized void flushCache(int count) {
+        for (int i = 0; i < count; i++) {
+            if (ramCache.size() == 0) break;
+            flushCache(ramCache.bestFlushWordHash());
+            try {Thread.sleep(10);} catch (InterruptedException e) {}
+        }
+    }
+    
+    private synchronized void flushCache(String wordHash) {
         plasmaWordIndexEntryContainer c = ramCache.deleteContainer(wordHash);
         if (c != null) {
             plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(wordHash, c);
             if (feedback != null) {
                 backend.addEntries(feedback, System.currentTimeMillis(), true);
             }
-        }
-    }
-    
-    private int addEntriesBackend(plasmaWordIndexEntryContainer entries) {
-        plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(entries.wordHash(), entries);
-        if (feedback == null) {
-            return entries.size();
-        } else {
-            return backend.addEntries(feedback, -1, true);
         }
     }
     
@@ -259,22 +263,6 @@ public final class plasmaWordIndex {
         return container;
     }
 
-    public plasmaWordIndexEntity getEntity(String wordHash, boolean deleteIfEmpty, long maxTime) {
-        // this possibly creates an index file in the back-end
-        // the index file is opened and returned as entity object
-        long start = System.currentTimeMillis();
-        flushCacheToBackend(wordHash);
-        if (maxTime < 0) {
-            flushFromAssortmentCluster(wordHash, -1);
-        } else {
-            long remaining = maxTime - (System.currentTimeMillis() - start);
-            if (remaining > 0)
-                flushFromAssortmentCluster(wordHash, remaining);
-        }
-        long r = maxTime - (System.currentTimeMillis() - start);
-        return backend.getEntity(wordHash, deleteIfEmpty, (r < 0) ? 0 : r);
-    }
-    
     public Set getContainers(Set wordHashes, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
         
         // retrieve entities that belong to the hashes
@@ -349,19 +337,6 @@ public final class plasmaWordIndex {
         if (removed == urlHashes.length) return removed;
         removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
         return removed;
-    }
-    
-    private boolean flushFromAssortmentCluster(String key, long maxTime) {
-        // this should only be called if the assortment shall be deleted or returned in an index entity
-        if (maxTime > 0) maxTime = 8 * maxTime / 10; // reserve time for later adding to backend
-        plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(key, maxTime);
-        if (container == null) {
-            return false;
-        } else {
-            // we have a non-empty entry-container
-            // integrate it to the backend
-            return backend.addEntries(container, container.updated(), true) > 0;
-        }
     }
     
     public static final int RL_RAMCACHE    = 0;
@@ -484,121 +459,6 @@ public final class plasmaWordIndex {
             throw new java.lang.UnsupportedOperationException("rotatingWordIterator does not support remove");
         }
     } // class rotatingWordIterator
-
-/*
-    public Iterator fileIterator(String startHash, boolean up, boolean deleteEmpty) {
-        return new iterateFiles(startHash, up, deleteEmpty);
-    }
-
-    public final class iterateFiles implements Iterator {
-        // Iterator of hash-strings in WORDS path
-
-        private final ArrayList hierarchy; // contains TreeSet elements, earch TreeSet contains File Entries
-        private final Comparator comp;     // for string-compare
-        private String buffer;       // the prefetch-buffer
-        private final boolean delete;
-
-        public iterateFiles(String startHash, boolean up, boolean deleteEmpty) {
-            this.hierarchy = new ArrayList();
-            this.comp = kelondroNaturalOrder.naturalOrder; // this is the wrong ordering but mut be used as long as the assortments uses the same ordering
-            //this.comp = new kelondroBase64Order(up, false);
-            this.delete = deleteEmpty;
-
-            // the we initially fill the hierarchy with the content of the root folder
-            String path = "WORDS";
-            TreeSet list = list(new File(databaseRoot, path));
-
-            // if we have a start hash then we find the appropriate subdirectory to start
-            if ((startHash != null) && (startHash.length() == yacySeedDB.commonHashLength)) {
-                delete(startHash.substring(0, 1), list);
-                if (list.size() > 0) {
-                    hierarchy.add(list);
-                    String[] paths = new String[]{startHash.substring(0, 1), startHash.substring(1, 2), startHash.substring(2, 4), startHash.substring(4, 6)};
-                    int pathc = 0;
-                    while ((pathc < paths.length) &&
-                    (comp.compare((String) list.first(), paths[pathc]) == 0)) {
-                        path = path + "/" + paths[pathc];
-                        list = list(new File(databaseRoot, path));
-                        delete(paths[pathc], list);
-                        if (list.size() == 0) break;
-                        hierarchy.add(list);
-                        pathc++;
-                    }
-                }
-                while (((buffer = next0()) != null) && (comp.compare(buffer, startHash) < 0)) {};
-            } else {
-                hierarchy.add(list);
-                buffer = next0();
-            }
-        }
-
-        private synchronized void delete(String pattern, TreeSet names) {
-            String name;
-            while ((names.size() > 0) && (comp.compare((new File(name = (String) names.first())).getName(), pattern) < 0)) names.remove(name);
-        }
-
-        private TreeSet list(File path) {
-//          System.out.println("PATH: " + path);
-            TreeSet t = new TreeSet(comp);
-            String[] l = path.list();
-            if (l != null) for (int i = 0; i < l.length; i++) t.add(path + "/" + l[i]);
-//          else System.out.println("DEBUG: wrong path " + path);
-//          System.out.println(t);
-            return t;
-        }
-
-        private synchronized String next0() {
-            // the object is a File pointing to the corresponding file
-            File f;
-            String n;
-            TreeSet t;
-            do {
-                t = null;
-                while ((t == null) && (hierarchy.size() > 0)) {
-                    t = (TreeSet) hierarchy.get(hierarchy.size() - 1);
-                    if (t.size() == 0) {
-                        hierarchy.remove(hierarchy.size() - 1); // we step up one hierarchy
-                        t = null;
-                    }
-                }
-                if ((hierarchy.size() == 0) || (t.size() == 0)) return null; // this is the end
-                // fetch value
-                f = new File(n = (String) t.first());
-                t.remove(n);
-                // if the value represents another folder, we step into the next hierarchy
-                if (f.isDirectory()) {
-                    t = list(f);
-                    if (t.size() == 0) {
-                        if (delete) f.delete();
-                    } else {
-                        hierarchy.add(t);
-                    }
-                    f = null;
-                }
-            } while (f == null);
-            // thats it
-            if ((f == null) || ((n = f.getName()) == null) || (n.length() < yacySeedDB.commonHashLength)) {
-                return null;
-            } else {
-                return n.substring(0, yacySeedDB.commonHashLength);
-            }
-        }
-
-        public boolean hasNext() {
-            return buffer != null;
-        }
-
-        public Object next() {
-            String r = buffer;
-            while (((buffer = next0()) != null) && (comp.compare(buffer, r) < 0)) {};
-            return r;
-        }
-
-        public void remove() {
-        }
-    }
-*/
-    
 
     public Object migrateWords2Assortment(String wordhash) throws IOException {
         // returns the number of entries that had been added to the assortments

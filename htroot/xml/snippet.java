@@ -13,8 +13,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
 
 public class snippet {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws MalformedURLException {

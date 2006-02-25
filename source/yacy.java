@@ -956,14 +956,14 @@ public final class yacy {
             String wordChunkStartHash = "------------", wordChunkEndHash;
             
             while (wordHashIterator.hasNext()) {
-                plasmaWordIndexEntity wordIdxEntity = null;
+                plasmaWordIndexEntryContainer wordIdxContainer = null;
                 try {
                     wordCounter++;
                     wordhash = (String) wordHashIterator.next();
-                    wordIdxEntity = wordIndex.getEntity(wordhash, true, -1);
+                    wordIdxContainer = wordIndex.getContainer(wordhash, true, -1);
                     
                     // the combined container will fit, read the container
-                    Iterator wordIdxEntries = wordIdxEntity.elements(true);
+                    Iterator wordIdxEntries = wordIdxContainer.entries();
                     plasmaWordIndexEntry wordIdxEntry;
                     while (wordIdxEntries.hasNext()) {
                         wordIdxEntry = (plasmaWordIndexEntry) wordIdxEntries.next();
@@ -978,7 +978,7 @@ public final class yacy {
                         } catch (IOException e) {}
                     }
                     // we have read all elements, now we can close it
-                    wordIdxEntity.close(); wordIdxEntity = null;
+                    wordIdxContainer = null;
                     
                     if (wordCounter%500 == 0) {
                         wordChunkEndHash = wordhash;
@@ -997,7 +997,7 @@ public final class yacy {
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    if (wordIdxEntity != null) try { wordIdxEntity.close(); } catch (Exception e) {}
+                    if (wordIdxContainer != null) try { wordIdxContainer = null; } catch (Exception e) {}
                 }
             }
             currentUrlDB.close();

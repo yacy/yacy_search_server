@@ -862,6 +862,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
         
+        // flush some entries from the RAM cache
+        // (new permanent cache flushing)
+        wordIndex.flushCacheSome();
+        
         boolean doneSomething = false;
         
         // possibly delete entries from last chunk
@@ -882,7 +886,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             dhtTransferChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, 30, dhtTransferIndexCount);
             doneSomething = true;
         }
-        
         
         synchronized (sbQueue) {
 
@@ -929,6 +932,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
             processResourceStack(nextentry);
         }
+        
+        // ready & finished
         return true;
     }
     
