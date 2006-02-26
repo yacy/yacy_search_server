@@ -118,9 +118,9 @@ public class plasmaSearchRankingProfile {
         this.order = order;
         // overwrite defaults with order attributes
         for (int i = 0; i < 3; i++) {
-            if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_QUALITY))   coeff.put(ENTROPY, new Integer((4 * (3 - i))));
-            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_DATE)) coeff.put(DATE, new Integer((4 * (3 - i))));
-            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_YBR))  coeff.put(YBR, new Integer((4 * (3 - i))));
+            if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_QUALITY))   coeff.put(ENTROPY, new Integer((3 * (3 - i))));
+            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_DATE)) coeff.put(DATE, new Integer((3 * (3 - i))));
+            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_YBR))  coeff.put(YBR, new Integer((3 * (3 - i))));
         }
     }
     

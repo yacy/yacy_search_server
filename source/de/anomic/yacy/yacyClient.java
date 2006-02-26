@@ -55,6 +55,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexEntry;
@@ -357,7 +358,8 @@ public final class yacyClient {
             plasmaWordIndexEntryContainer containerCache,
             plasmaURLPattern blacklist, 
             plasmaSnippetCache snippets, 
-            plasmaSearchTimingProfile profile
+            plasmaSearchTimingProfile timingProfile,
+            plasmaSearchRankingProfile rankingProfile
     ) {
         // send a search request to peer with remote Hash
         // this mainly converts the words into word hashes
@@ -395,17 +397,18 @@ public final class yacyClient {
                 "&query=" + wordhashes;
              */
             final serverObjects obj = new serverObjects(9);
-            long duetime = profile.duetime();
+            long duetime = timingProfile.duetime();
             obj.put("myseed", yacyCore.seedDB.mySeed.genSeedStr(key));
             obj.put("youare", targetPeer.hash);
             obj.put("key", key);
-            obj.put("count", profile.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT));
+            obj.put("count", timingProfile.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT));
             obj.put("resource", ((global) ? "global" : "local"));
             obj.put("query", wordhashes);
             obj.put("ttl", "0");
             obj.put("duetime", Long.toString(duetime));
-            obj.put("profile", profile.targetToString()); // new duetimes splitted by specific search tasks
+            obj.put("profile", timingProfile.targetToString()); // new duetimes splitted by specific search tasks
             obj.put("maxdist", maxDistance);
+            obj.put("rankingProfile", rankingProfile.toExternalString());
             obj.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
 
             //yacyCore.log.logDebug("yacyClient.search url=" + url);
@@ -427,7 +430,7 @@ public final class yacyClient {
             // compute all computation times
             final long totalrequesttime = System.currentTimeMillis() - timestamp;
             String returnProfile = (String) result.get("profile");
-            if (returnProfile != null) profile.putYield(returnProfile);
+            if (returnProfile != null) timingProfile.putYield(returnProfile);
             
             /*
             HashMap result = nxTools.table(httpc.wget(new URL(url),
@@ -474,6 +477,7 @@ public final class yacyClient {
                     entry = new plasmaWordIndexEntry(
                                                      urlEntry.hash(),
                                                      urlLength, urlComps,
+                                                     urlEntry.descr().length(),
                                                      urlEntry.wordCount(),
                                                      0, 0, 0, 0, 0, 0,
                                                      urlEntry.size(),
@@ -482,6 +486,7 @@ public final class yacyClient {
                                                      urlEntry.quality(),
                                                      urlEntry.language(),
                                                      urlEntry.doctype(),
+                                                     0,0,
                                                      false
                                                     );
                 } else {

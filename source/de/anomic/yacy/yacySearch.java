@@ -50,6 +50,7 @@ import java.util.HashMap;
 
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSearchTimingProfile;
@@ -67,10 +68,12 @@ public class yacySearch extends Thread {
     final private yacySeed targetPeer;
     private int links;
     private int maxDistance;
-    final private plasmaSearchTimingProfile profile;
-
+    final private plasmaSearchTimingProfile timingProfile;
+    final private plasmaSearchRankingProfile rankingProfile;
+    
     public yacySearch(Set wordhashes, int maxDistance, boolean global, yacySeed targetPeer,
-                      plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, plasmaSearchTimingProfile profile) {
+                      plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
+                      plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile) {
         super("yacySearch_" + targetPeer.getName());
         this.wordhashes = wordhashes;
         this.global = global;
@@ -81,11 +84,12 @@ public class yacySearch extends Thread {
         this.targetPeer = targetPeer;
         this.links = -1;
         this.maxDistance = maxDistance;
-        this.profile = (plasmaSearchTimingProfile) profile.clone();
+        this.timingProfile = (plasmaSearchTimingProfile) timingProfile.clone();
+        this.rankingProfile = rankingProfile;
     }
 
     public void run() {
-        this.links = yacyClient.search(set2string(wordhashes), maxDistance, global, targetPeer, urlManager, containerCache, blacklist, snippetCache, profile);
+        this.links = yacyClient.search(set2string(wordhashes), maxDistance, global, targetPeer, urlManager, containerCache, blacklist, snippetCache, timingProfile, rankingProfile);
         if (links != 0) {
             //yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + links + " links for word hash " + wordhashes);
             yacyCore.seedDB.mySeed.incRI(links);
@@ -104,8 +108,8 @@ public class yacySearch extends Thread {
         return this.links;
     }
     
-    public plasmaSearchTimingProfile profile() {
-        return this.profile;
+    public plasmaSearchTimingProfile timingProfile() {
+        return this.timingProfile;
     }
     
     public yacySeed target() {
@@ -175,7 +179,8 @@ public class yacySearch extends Thread {
     }
 
     public static yacySearch[] searchHashes(Set wordhashes, int maxDist, plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache,
-                           int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache, plasmaSearchTimingProfile profile) {
+                           int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
+                           plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile) {
         // check own peer status
         if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
 
@@ -186,9 +191,9 @@ public class yacySearch extends Thread {
         targets = targetPeers.length;
         if (targets == 0) return null;
         yacySearch[] searchThreads = new yacySearch[targets];
-        for (int i = 0; i < targets; i++) {           
+        for (int i = 0; i < targets; i++) {
             searchThreads[i]= new yacySearch(wordhashes, maxDist, true, targetPeers[i],
-                    urlManager, containerCache, blacklist, snippetCache, profile);
+                    urlManager, containerCache, blacklist, snippetCache, timingProfile, rankingProfile);
             searchThreads[i].start();
             try {Thread.sleep(20);} catch (InterruptedException e) {}
 

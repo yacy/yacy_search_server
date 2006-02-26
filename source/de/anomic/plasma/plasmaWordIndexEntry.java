@@ -101,12 +101,12 @@ public final class plasmaWordIndexEntry implements Cloneable {
 
     // appearance locations: (used for flags)
     public static final int AP_TITLE     =  0; // title tag from html header
-    public static final int AP_H1        =  1; // h1-tag
-    public static final int AP_H2        =  2; // h2-tag
-    public static final int AP_H3        =  3; // h3-tag
-    public static final int AP_H4        =  4; // h4-tag
-    public static final int AP_H5        =  5; // h5-tag
-    public static final int AP_H6        =  6; // h6-tag
+    public static final int AP_H1        =  1; // headline - top level
+    public static final int AP_H2        =  2; // headline, second level
+    public static final int AP_H3        =  3; // headline, 3rd level
+    public static final int AP_H4        =  4; // headline, 4th level
+    public static final int AP_H5        =  5; // headline, 5th level
+    public static final int AP_H6        =  6; // headline, 6th level
     public static final int AP_TEXT      =  7; // word appears in text (used to check validation of other appearances against spam)
     public static final int AP_DOM       =  8; // word inside an url: in Domain
     public static final int AP_PATH      =  9; // word inside an url: in path
@@ -218,6 +218,7 @@ public final class plasmaWordIndexEntry implements Cloneable {
     public plasmaWordIndexEntry(String  urlHash,
                                 int     urlLength,    // byte-length of complete URL
                                 int     urlComps,     // number of path components
+                                int     titleLength,  // length of description/length (longer are better?)
                                 int     hitcount,     //*how often appears this word in the text
                                 int     wordcount,    //*total number of words
                                 int     phrasecount,  //*total number of phrases
@@ -231,15 +232,14 @@ public final class plasmaWordIndexEntry implements Cloneable {
                                 int     quality,      //*the entropy value
                                 String  language,     //*(guessed) language of document
                                 char    doctype,      //*type of document
+                                int     outlinksSame, // outlinks to same domain
+                                int     outlinksOther,// outlinks to other domain
                                 boolean local         //*flag shows that this index was generated locally; othervise its from a remote peer
                                ) {
 
         // more needed attributes:
         // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag etc
         // - boolean: URL attributes
-        // - int: length of description tag / title tag (longer are better)
-        // - int: # of outlinks to same domain
-        // - int: # of outlinks to outside domain
         // - int: # of keywords
         
     if ((language == null) || (language.length() != plasmaURL.urlLanguageLength)) language = "uk";

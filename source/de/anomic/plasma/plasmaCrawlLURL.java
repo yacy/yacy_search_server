@@ -406,6 +406,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         // - keywords
         // - phrasecount, total number of phrases
         // - boolean: URL attributes
+        // - boolean: appearance of bold and/or italics
         // - int: # of outlinks to same domain
         // - int: # of outlinks to outside domain
         

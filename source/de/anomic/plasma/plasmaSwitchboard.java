@@ -1351,7 +1351,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(document.getText()));
                 
                 // generate citation reference
-                generateCitationReference(entry.urlHash(), docDate, document, condenser);
+                Integer[] ioLinks = generateCitationReference(entry.urlHash(), docDate, document, condenser);
                 
                 //log.logInfo("INDEXING HEADLINE:" + descr);
                 try {
@@ -1388,7 +1388,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if (((storagePeerHash = getConfig("storagePeerHash",null))== null) ||
                                 (storagePeerHash.trim().length() == 0) ||
                                 ((seed = yacyCore.seedDB.getConnected(storagePeerHash))==null)){
-                            words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(), condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
+                            words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(), document, condenser,
+                                                           plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()),
+                                                           ioLinks[0].intValue(), ioLinks[1].intValue());
                         } else {
                             HashMap urlCache = new HashMap(1);
                             urlCache.put(newEntry.hash(),newEntry);
@@ -1397,7 +1399,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             char doctype = plasmaWordIndexEntry.docType(document.getMimeType());
                             int urlLength = newEntry.url().toString().length();
                             int urlComps = htmlFilterContentScraper.urlComps(newEntry.url().toString()).length;
-                            
+
                             // iterate over all words
                             Iterator i = condenser.words();
                             Map.Entry wentry;
@@ -1411,6 +1413,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 plasmaWordIndexEntry wordIdxEntry = new plasmaWordIndexEntry(urlHash,
                                                                                              urlLength, urlComps,
                                                                                              wordStat.count,
+                                                                                             document.longTitle.length(),
                                                                                              condenser.RESULT_SIMI_WORDS,
                                                                                              condenser.RESULT_SIMI_SENTENCES,
                                                                                              wordStat.posInText,
@@ -1423,6 +1426,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                                                                              condenser.RESULT_WORD_ENTROPHY,
                                                                                              language,
                                                                                              doctype,
+                                                                                             ioLinks[0].intValue(),
+                                                                                             ioLinks[1].intValue(),
                                                                                              true);
                                 wordIdxContainer.add(wordIdxEntry);
                                 tmpContainers.add(wordIdxContainer);
@@ -1440,7 +1445,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                             120000);
                             
                             if (error != null) {
-                                words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(), condenser, plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()));
+                                words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(),
+                                                               document, condenser,
+                                                               plasmaWordIndexEntry.language(entry.url()),
+                                                               plasmaWordIndexEntry.docType(document.getMimeType()),
+                                                               ioLinks[0].intValue(), ioLinks[1].intValue());
                             }
                             
                             tmpContainers = null;
@@ -1510,7 +1519,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
     }
     
-    private void generateCitationReference(String baseurlhash, Date docDate, plasmaParserDocument document, plasmaCondenser condenser) {
+    private Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(String baseurlhash, Date docDate, plasmaParserDocument document, plasmaCondenser condenser) {
         // generate citation reference
         Map hl = document.getHyperlinks();
         Iterator it = hl.entrySet().iterator();
@@ -1561,6 +1570,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             flushCitationReference(crg, "crg");
             crg = new StringBuffer(maxCRGDump);
         }
+        
+        return new Integer[] {new Integer(LCount), new Integer(GCount)};
     }
     
     private void flushCitationReference(StringBuffer cr, String type) {

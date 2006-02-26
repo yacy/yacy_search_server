@@ -211,7 +211,7 @@ public final class plasmaWordIndex {
         return ((long) microDateDays) * ((long) day);
     }
     
-    public synchronized int addPageIndex(URL url, String urlHash, Date urlModified, int size, plasmaCondenser condenser, String language, char doctype) {
+    public synchronized int addPageIndex(URL url, String urlHash, Date urlModified, int size, plasmaParserDocument document, plasmaCondenser condenser, String language, char doctype, int outlinksSame, int outlinksOther) {
         // this is called by the switchboard to put in a new page into the index
         // use all the words in one condenser object to simultanous create index entries
         
@@ -232,7 +232,7 @@ public final class plasmaWordIndex {
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
             wordHash = plasmaWordIndexEntry.word2hash(word);
             ientry = new plasmaWordIndexEntry(urlHash,
-                                              urlLength, urlComps,
+                                              urlLength, urlComps, (document == null) ? urlLength : document.longTitle.length(),
                                              wprop.count,
                                              condenser.RESULT_SIMI_WORDS,
                                              condenser.RESULT_SIMI_SENTENCES,
@@ -246,6 +246,7 @@ public final class plasmaWordIndex {
                                              condenser.RESULT_WORD_ENTROPHY,
                                              language,
                                              doctype,
+                                             outlinksSame, outlinksOther,
                                              true);
             addEntry(wordHash, ientry, System.currentTimeMillis(), false);
             //addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), ientry), System.currentTimeMillis(), false);

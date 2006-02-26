@@ -183,10 +183,10 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         if (fetchpeers < 10) fetchpeers = 10;
 
         log.logFine("STARTING " + fetchpeers + " THREADS TO CATCH EACH " + profileGlobal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT) + " URLs WITHIN " + (profileGlobal.duetime() / 1000) + " SECONDS");
-        
+
         long timeout = System.currentTimeMillis() + profileGlobal.duetime() + 4000;
-        searchThreads = yacySearch.searchHashes(query.queryHashes, query.maxDistance, urlStore, rcGlobal, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal);
-        
+        searchThreads = yacySearch.searchHashes(query.queryHashes, query.maxDistance, urlStore, rcGlobal, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
+
         // wait until wanted delay passed or wanted result appeared
         while (System.currentTimeMillis() < timeout) {
             // check if all threads have been finished or results so far are enough
