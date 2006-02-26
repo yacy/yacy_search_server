@@ -1,57 +1,52 @@
 body {
-  background-color:#F8F8FF;
+background-color:#F8F8FF;
+margin:0;
+}
+* {
+font-family:Helvetica, Arial, sans-serif;
+}
+img {
+border:0;
 }
 h1 {
-font-family:Helvetica, sans-serif;
-font-size:16pt;
+font-size:2em;
 font-style:normal;
-line-height:14pt;
 margin-top:0pt;
-    margin-bottom:0pt;
+margin-bottom:0pt;
 }
 h2 {
-font-family:Helvetica, sans-serif;
-font-size:14pt;
+font-size:1.6em;
 font-style:normal;
-line-height:14pt;
 margin-top:0pt;
-    margin-bottom:0pt;
+margin-bottom:0pt;
 }
 h3 {
-font-family:Helvetica, sans-serif;
-font-size:12pt;
+font-size:1.4em;
 font-style:normal;
-line-height:14pt;
 margin-top:0pt;
-    margin-bottom:0pt;
+margin-bottom:0pt;
 }
 h4 {
-font-family:Helvetica, sans-serif;
-font-size:10pt;
+font-size:1.2em;
 font-style:normal;
-line-height:14pt;
 margin-top:0pt;
-    margin-bottom:0pt;
+margin-bottom:0pt;
 }
 a, body, div, li, ol, span, table, td, tr, ul {
 color:#000000;
-font-family:Helvetica, sans-serif;
-font-size:10pt;
 font-style:normal;
-line-height:14px;
 margin-top:0px;
 margin-bottom:0px;
 }
+
 *.small {
-font-family:Helvetica, sans-serif;
-font-size:8pt;
+font-size:1em;
 font-style:normal;
-line-height:9px;
 margin-top:0px;
 margin-bottom:0px;
 }
 body, div, li, ol, span, table, td, tr, ul {
-      
+
 text-decoration:none;
 }
 a:hover {
@@ -63,92 +58,90 @@ color:#990000;
 a.known {
 color:#009900;
 }
-a.extern {
+a, a.extern {
 color:#000099;
 }
 *.xxxyellow {
 color:#0000FF;
 font-weight:bold;
 text-decoration:none;
-font-size:11px;
+font-size:1.2em;
 }
 *.xxxblue {
 color:#556699;
 font-weight:bold;
 text-decoration:none;
-font-size:11px;
+font-size:1.2em;
 }
 *.tt {
 font-family:Courier,Terminal,sans-serif;
-font-size:8pt;
-line-height:9px;
+font-size:1em;
 }
-.Menu {
-width: 140;
-}
-.SubMenu {
 
-}
-.MenuHeader {
+div.menugroup h3, .MenuHeader {
 background-color: #4070a0;
 color:white;
-font-size: 9px;
+font-size:1em;
 font-weight:bold;
+margin-top:10px;
+padding:1px 10px;
 }
-.MenuItem {
+ul.menu li a {
+display:block;
 background-color: #bdcdd4;
-font-weight:bold;
 text-decoration:none;
-font-size:11px;
-padding-top: 2;
-padding-bottom: 2;
+margin-top:1px;
+margin-bottom:1px;
+padding:2px 10px;
+font-size:1em;
+}
+ul.menu li a:hover {
+color:#0088BB;
+}
+ul.menu li a.lock {
+background:#bdcdd4 url(/env/grafics/lock.gif) 2px center no-repeat;
+padding-left:15px;
 }
 .MenuTopItem {
 background-color: #bdcdd4;
 font-weight:bold;
 text-decoration:none;
-font-size:11px;
 padding-top: 3;
+font-size:1em;
 padding-bottom: 3;
 }
 .MenuSubItem {
 background-color: #bdcdd4;
 font-weight:bold;
 text-decoration:none;
-font-size:11px;
+font-size:1em;
 padding-top: 3;
 padding-bottom: 3;
 }
-.MenuItemLink {
+a.MenuItemLink {
 color: black;
 font-weight:bold;
+font-size:1em;
 text-decoration:none;
-font-size:11px;
 }
 a.MenuItemLink:hover {
 color:#0088BB;
 font-weight:bold;
 text-decoration:none;
 }
-.MenuSpacer {
-height: 4;
-background-color: #ffffff;
-}
 .MenuSubSpacer {
 padding-left: 2;
 padding-right: 2;
 background-color: #ffffff;
 }
-.Headline {
+div.head h1 {
+padding:4px;
+background:#4070a0 url(/env/grafics/yacy.gif) 10px center no-repeat;
 color: white;
 font-weight: bold;
-font-size: 160%;
-font-family: Helvetica, Arial;
+font-size: 1.6em;
 text-align: center;
-}
-.Heading {
-background-color: #4070a0;
-height: 36px;
+margin:0;
 }
 .TableHeader {
 background-color: #88aaaa;
@@ -162,15 +155,183 @@ background-color: #ddeeee;
 .TableCellSummary {
 background-color: #ffbbaa;
 }
-.WikiBackground {
+.TableCellPassive {
+background-color: lightgrey;
+}
+.WikiBackground, .MessageBackground {
 background-color: #eeeeee;
 }
-.MessageBackground {
-background-color: #eeeeee;
+.WikiTOCBox {
+border: 1px solid #aaa;
+background-color: #F8F8FF;
+padding: 8px;
 }
-.menu {
-	float: left;
+.WikiTOC {
+color:#0000FF;
+font-size: 10px;
+text-decoration:underline;
 }
-.content {
-	margin-left: 11em;
+form.search {
+width:35em;
+text-align:center;
+margin:0 auto;
+}
+.bookmarkTags{
+color: #007050;
+font-weight:bold;
+text-decoration:none;
+white-space:nowrap;
+}
+.bookmarkTitle{
+line-height: 120%;
+color: #4070a0;
+font-size:17px;
+font-weight:bold;
+text-decoration:none;
+}
+.bookmarkDescription{
+font-style:normal;
+}
+.bookmarkAction{
+color: #999999;
+text-decoration:none;
+}
+img.bookmarkIcon, img.deleteIcon {
+height: 16px;
+width: 16px;
+}
+form.search fieldset {
+border:0;
+padding:0;
+margin:2px;
+}
+
+form.search table {
+margin:0 auto;
+text-align:left;
+}
+
+div.menu {
+padding:0;
+margin:0;
+position:absolute;
+top:3em;
+left:0;
+width:11em;
+}
+
+ul.menu {
+padding:0;
+margin:0;
+}
+
+ul.menu li {
+list-style:none;
+margin:0;
+padding:0;
+background-color: #bdcdd4;
+border:1px solid white;
+}
+
+div.content {
+position:absolute;
+top:3em;
+left:12em;
+right:10px;
+margin:0;
+}
+
+h2.yacy {
+margin:10px auto;
+text-align:center;
+padding-top:130px;
+width:256px;
+min-width:256px;
+background:url(/env/grafics/kaskelix.png) top center no-repeat;
+}
+
+div.urlactions {
+float:left;
+}
+
+div.urlactions a {
+display:block;
+}
+
+a.deletelink:hover {
+background:url(/env/grafics/minus.gif) center center no-repeat;
+}
+
+a.bookmarklink:hover {
+background:url(/env/grafics/plus.gif) center center no-repeat;
+}
+
+p.info {
+margin-top:5em;
+border-top:1px solid gray;
+padding-top:5px;
+text-align:center;
+}
+
+div.searchresults p.url a {
+color:#008000;
+}
+
+div.searchresults p, div.searchresults h4 {
+margin:2px 2px 2px 22px;
+}
+
+.snippetLoading {
+color:#999999;
+}
+
+.snippetLoaded {
+color:black;
+font-style:italic;
+}
+
+.snippetError {
+color:red;
+font-style:italic;
+}
+
+.settingsValue {
+color:#556699;
+font-weight:bold;
+}
+
+div.searchresults {
+padding-top:1em;
+margin-bottom:1em;
+border-top:1px #000 dashed;
+}
+
+div.searchresults a {
+color:#000099;
+text-decoration:none;
+}
+
+div.searchresults a:hover {
+color:#0000FF;
+text-decoration:underline;
+}
+div.menugroup {
+margin-left:5px;
+margin-bottom:10px;
+clear:left;
+}
+
+.Headline {
+color: white;
+font-weight: bold;
+font-size: 160%;
+text-align: center;
+background-color: #4070a0;
+height: 36px;
+width:100%;
+}
+
+.Heading {
+background-color: #4070a0;
+height: 36px;
 }
