@@ -60,7 +60,7 @@ public class plasmaWordIndexAssortmentImporter extends AbstractImporter implemen
 
         // initializing the import assortment db
         this.log.logInfo("Initializing source assortment file");
-        this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath,assortmentNr,8*1024*1024, this.log);
+        this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath,assortmentNr, this.cacheSize/1024, this.log);
         this.importStartSize = this.assortmentFile.size();
     }
     
