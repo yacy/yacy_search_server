@@ -1,2 +1,2 @@
-<?xml version='1.0' standalone='yes' encoding='UTF-8'?>
+<?xml version='1.0' standalone='yes'?>
 <result code="#(result)#something went wrong::done#(/result)#" />
