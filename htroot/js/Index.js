@@ -12,10 +12,10 @@ function AllSnippets() {
 
 
 function requestSnippet(url, query){
-	var req=createRequestObject();
-	req.open('get', '/xml/snippet.xml?url=' + escape(url) + '&search=' + escape(query),false);
-	req.onreadystatechange = function () {handleState(req)};
-	req.send(null);
+	var request=createRequestObject();
+	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&search=' + escape(query),true);
+	request.onreadystatechange = function () {handleState(request)};
+	request.send(null);
 }
 
 function handleState(req) {
