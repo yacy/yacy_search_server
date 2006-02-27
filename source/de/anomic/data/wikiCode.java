@@ -311,7 +311,16 @@ public class wikiCode {
         else if ((result.startsWith("||")) && (table)) {
             line+="\t\t<td";
             int cellEnd=(result.indexOf("||",2)>0)?(result.indexOf("||",2)):(result.length());
-            int propEnd=(result.indexOf("|",2)>0)?(result.indexOf("|",2)):(cellEnd);
+            int propEnd = 0;
+            //If resultOf("[[Image:") is less than propEnd, that means that there is no
+            //property for this cell, only an image. Without this, YaCy could get confused
+            //by a | in [[Image:picture.png|alt-text]] or [[Image:picture.png|alt-text]]
+            if(((propEnd = result.indexOf("|",2)) > 0)&&(!(result.indexOf("[[Image:",2) < propEnd))){
+                propEnd = result.indexOf("|",2);
+            }
+            else {
+                propEnd = cellEnd;
+            }
             // both point at same place => new line
             if (propEnd==cellEnd) {
                 propEnd=1;
@@ -747,7 +756,19 @@ public class wikiCode {
 
                         // if there are 2 arguments, write them into ALIGN and ALT
                         if ((p = kv.indexOf("|")) > 0) {
-                            align = " align=\"" + kv.substring(0, p) + "\"";
+                            align = kv.substring(0, p);
+                            //checking validity of value for align. Only non browser specific
+                            //values get supported. Not supported: absmiddle, baseline, texttop
+                            if ((align.equals("bottom"))||
+                                (align.equals("center"))||
+                                (align.equals("left"))||
+                                (align.equals("middle"))||
+                                (align.equals("right"))||
+                                (align.equals("top")))
+                            {
+                                align = " align=\"" + align + "\"";
+                            }
+                            else align = "";
                             alt = " alt=\"" + kv.substring(p + 1) + "\"";
                         }
 
