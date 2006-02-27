@@ -105,7 +105,7 @@ public class MessageSend_p {
 	        // we don't have permission or other peer does not exist
 	        //body += "<p>You cannot send a message to '" + peerName + "'. The peer does not respond. It was now removed from the peer-list.</p>";
 	        if (targetPeer != null) {
-	            yacyCore.peerActions.disconnectPeer(targetPeer);
+	            yacyCore.peerActions.peerDeparture(targetPeer);
 	        }
 	    } else {
             prop.put("mode_permission",1);
