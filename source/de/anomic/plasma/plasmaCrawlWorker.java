@@ -331,7 +331,7 @@ public final class plasmaCrawlWorker extends Thread {
         try {
             // create a request header
             httpHeader requestHeader = new httpHeader();
-            requestHeader.put(httpHeader.USER_AGENT, httpdProxyHandler.userAgent);
+            requestHeader.put(httpHeader.USER_AGENT, httpdProxyHandler.crawlerUserAgent);
             requestHeader.put(httpHeader.REFERER, referer);
             requestHeader.put(httpHeader.ACCEPT_LANGUAGE, sb.getConfig("crawler.acceptLanguage","en-us,en;q=0.5"));
             requestHeader.put(httpHeader.ACCEPT_CHARSET, sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"));

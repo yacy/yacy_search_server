@@ -127,7 +127,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 //    private static final HashSet remoteProxyDisallowProxySet = new HashSet();    
 
     private static htmlFilterTransformer transformer = null;
-    public static final String userAgent = "yacy (" + httpc.systemOST +") yacy.net";
+    public static final String proxyUserAgent = "yacy (" + httpc.systemOST +") yacy.net";
+    public static final String crawlerUserAgent = "yacybot (" + httpc.systemOST +") yacy.net";
     private File   htRootPath = null;
 
     private static boolean doAccessLogging = false; 
@@ -1489,7 +1490,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     private String generateUserAgent(httpHeader requestHeaders) {
         this.userAgentStr.setLength(0);
         
-        String browserUserAgent = (String) requestHeaders.get(httpHeader.USER_AGENT, userAgent);
+        String browserUserAgent = (String) requestHeaders.get(httpHeader.USER_AGENT, proxyUserAgent);
         int pos = browserUserAgent.lastIndexOf(')');
         if (pos >= 0) {
             this.userAgentStr

@@ -301,7 +301,7 @@ public class yacyPeerActions {
              * yacyCore.shortFormatter.format(new Date(ctime))); }
              */
 
-            if (Math.abs(nowUTC0Time - ctimeUTC0) > 3600000) {
+            if (Math.abs(nowUTC0Time - ctimeUTC0) > 60 * 60 * 24 * 1000) {
                 // the new connection is out-of-age, we reject the connection
                 yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + serverDate.intervalToString(Math.abs(nowUTC0Time - ctimeUTC0)));
                 return false;

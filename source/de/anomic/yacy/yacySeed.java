@@ -325,9 +325,9 @@ public class yacySeed {
         try {
             final long t = yacyCore.shortFormatter.parse(get(LASTSEEN, "20040101000000")).getTime();
             // the problem here is: getTime applies a time shift according to local time zone:
-            // it substracts the local UTF offset, but it should substract the remote UTC offset
-            // so we correct it by first adding the local UTF offset and then subtractibg the remote
-            // but the time zone was originally the seeds time zone
+            // it substracts the local UTF offset, but it should subtract the remote UTC offset
+            // so we correct it by first adding the local UTF offset and then subtracting the remote
+            // the time zone was originally the seeds time zone
             // we correct this here
             return t - getUTCDiff() + serverDate.UTCDiff();
         } catch (java.text.ParseException e) {
