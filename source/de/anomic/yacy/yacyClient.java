@@ -163,7 +163,7 @@ public final class yacyClient {
         final yacySeed mySeedBkp = (yacySeed) yacyCore.seedDB.mySeed.clone();
 
         // we overwrite our own IP number only, if we do not portForwarding
-        if (serverCore.portForwardingEnabled) {
+        if (serverCore.portForwardingEnabled || serverCore.useStaticIP) {
             yacyCore.seedDB.mySeed.put(yacySeed.IP, serverCore.publicIP());
         } else {
             yacyCore.seedDB.mySeed.put(yacySeed.IP, (String) result.get(yacySeed.YOURIP));

@@ -336,6 +336,11 @@ public class SettingsAck_p {
             // check if peer name already exists
             String peerName = (String) post.get("peername");
             String staticIP =  (String)post.get("staticIP");
+            if(staticIP.equals("")){
+                serverCore.useStaticIP=false;
+            }else{
+                serverCore.useStaticIP=true;
+            }
             env.setConfig("staticIP", staticIP);
             if (staticIP.length() > 0) yacyCore.seedDB.mySeed.put(yacySeed.IP, staticIP);
             yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);

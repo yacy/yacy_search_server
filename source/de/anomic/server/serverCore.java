@@ -94,6 +94,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public boolean forceRestart = false;     // specifies if the server should try to do a restart
     
     public static boolean portForwardingEnabled = false;
+    public static boolean useStaticIP = false;
     public static serverPortForwarding portForwarding = null;
     
     private ServerSocket socket;           // listener
@@ -353,12 +354,16 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 this.switchboard.setConfig("portForwardingEnabled", "false");
                 throw e;                
             }
+
         } else {
             serverCore.portForwardingEnabled = false;
             serverCore.portForwarding = null;
             yacyCore.seedDB.mySeed.put(yacySeed.IP,publicIP());
             yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(serverCore.getPortNr(this.switchboard.getConfig("port", "8080"))));             
         }
+        if(! this.switchboard.getConfig("staticIP", "").equals(""))
+            serverCore.useStaticIP=true;
+
     }
 
     public GenericObjectPool.Config getPoolConfig() {
