@@ -3,7 +3,7 @@
 <p>You can use a remote server running a ssh demon to forward your server/proxy port.
 This is useful if you want to tunnel throug a NAT/router.
 Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.</p>
-<p><font color="red">You need to install libx to use this feature</font></p>
+#(portForwardingAvailable)#<p><font color="red">You need to install libx to use this feature</font></p>::#(/portForwardingAvailable)#
 <table border="0" cellspacing="5">
   <tr valign="top">
     <td>Enable&nbsp;port&nbsp;forwarding:</td>
