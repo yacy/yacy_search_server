@@ -108,7 +108,7 @@ public final class hello {
         // the request came from
         if (urls < 0) {                        
             boolean isLocalIP = false;
-            if (serverCore.portForwardingEnabled) {
+            if (serverCore.portForwardingEnabled || serverCore.useStaticIP) {
                 try {
                     final InetAddress clientAddress = httpc.dnsResolve(clientip);   
                     if (clientAddress != null) {                        
@@ -128,7 +128,7 @@ public final class hello {
             }
 
             // we are only allowed to connect to the client IP address if it's not our own address
-            if (!isLocalIP) {
+            if (!isLocalIP && ! serverCore.useStaticIP) {
                 serverCore.checkInterruption();
                 
                 prop.put(yacySeed.YOURIP, clientip);
