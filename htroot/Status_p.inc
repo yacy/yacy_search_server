@@ -71,11 +71,9 @@
 		<tr>
 			<td width="70">#[indexingQueueSize]#&nbsp;|&nbsp;#[indexingQueueMax]#&nbsp;</td>
 			<td>
-				<table border="0" cellpadding="0" cellspacing="0" width="150" height="10" bgcolor="#FFFFFF" style="border-style:solid; border-width:1px; border-color:#CAD5E3">
-				<tr>
-					<td align="left"><img src="env/grafics/green_bar.gif" width="#[indexingQueuePercent]#%" height="10" alt=""></td>
-				</tr>
-				</table>
+				<div width="150" height="10" style="border-style:solid; border-width:1px; border-color:#CAD5E3">
+				<img src="env/grafics/green_bar.gif" width="#[indexingQueuePercent]#%" height="10" alt="">
+				</div>
 			</td>
 		</tr>
 		</table>	
@@ -89,11 +87,9 @@
 		<tr>
 			<td width="70">#[loaderQueueSize]#&nbsp;|&nbsp;#[loaderQueueMax]#&nbsp;</td>
 			<td>
-				<table border="0" cellpadding="0" cellspacing="0" width="150" height="10" bgcolor="#FFFFFF" style="border-style:solid; border-width:1px; border-color:#CAD5E3">
-				<tr>
-					<td align="left"><img src="env/grafics/green_bar.gif" width="#[loaderQueuePercent]#%" height="10" alt=""></td>
-				</tr>
-				</table>
+				<div width="150" height="10" style="border-style:solid; border-width:1px; border-color:#CAD5E3">
+				<img src="env/grafics/green_bar.gif" width="#[loaderQueuePercent]#%" height="10" alt="">
+				</div>
 			</td>
 		</tr>
 		</table>		 

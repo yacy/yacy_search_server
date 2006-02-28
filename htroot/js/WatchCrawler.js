@@ -1,6 +1,6 @@
 DELETE_STRING="delete";
-BAR_IMG1="/env/grafics/green-bar.png";
-BAR_IMG2="/env/grafics/red-bar.png";
+BAR_IMG1="/env/grafics/green-block.png";
+BAR_IMG2="/env/grafics/red-block.png";
 WORDCACHEBAR_LENGTH=1/4;
 
 
