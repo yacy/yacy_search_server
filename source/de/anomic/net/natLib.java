@@ -130,6 +130,10 @@ public class natLib {
 	if(yacyDebugMode.equals("true")){
 		return true;
 	}
+    //support for staticIP
+    if(sb.getConfig("staticIP", "").equals(ip)){
+        return true;
+    }
 	if (ip == null) return false;
 	if (ip.indexOf(":") >= 0) return false; // ipv6...
 		return ( isNotLocal(ip)) && (isIP(ip) );
