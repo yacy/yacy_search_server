@@ -353,6 +353,11 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 this.switchboard.setConfig("portForwardingEnabled", "false");
                 throw e;                
             }
+        } else {
+            serverCore.portForwardingEnabled = false;
+            serverCore.portForwarding = null;
+            yacyCore.seedDB.mySeed.put(yacySeed.IP,publicIP());
+            yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(serverCore.getPortNr(this.switchboard.getConfig("port", "8080"))));             
         }
     }
 

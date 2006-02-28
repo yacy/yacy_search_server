@@ -119,6 +119,14 @@ public final class Settings_p {
         prop.put("proxy.sendViaHeader", env.getConfig("proxy.sendViaHeader", "false").equals("true") ? 1 : 0);
         
         // remote port forwarding settings
+        boolean portForwardingAvailable = false;
+        try {
+            Class.forName("de.anomic.server.serverPortForwardingSch"); 
+            portForwardingAvailable = true;
+        } catch (Exception e) {
+        } catch (Error e) {}
+        
+        prop.put("portForwardingAvailable",portForwardingAvailable? 1:0);
         prop.put("portForwardingEnabled",env.getConfig("portForwardingEnabled","false").equals("true")? 1 : 0);
         prop.put("portForwardingUseProxy",env.getConfig("portForwardingUseProxy", "false").equals("true")? 1 : 0);
         prop.put("portForwardingPort",env.getConfig("portForwardingPort", ""));

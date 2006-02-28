@@ -3,10 +3,11 @@
 <p>You can use a remote server running a ssh demon to forward your server/proxy port.
 This is useful if you want to tunnel throug a NAT/router.
 Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.</p>
+<p><font color="red">You need to install libx to use this feature</font></p>
 <table border="0" cellspacing="5">
   <tr valign="top">
     <td>Enable&nbsp;port&nbsp;forwarding:</td>
-    <td><input type="checkbox" name="portForwardingEnabled" align="top" #(portForwardingEnabled)#::checked#(/portForwardingEnabled)#></td>
+    <td><input type="checkbox" name="portForwardingEnabled" align="top" #(portForwardingEnabled)#::checked#(/portForwardingEnabled)##(portForwardingAvailable)# disabled="disabled"::#(/portForwardingAvailable)#></td>
     <td>Enabling disabling port forwarding via secure channel.</td>
   </tr>
   <tr valign="top">
@@ -41,7 +42,7 @@ Alternatively, you can simply set a virtual server port on your NAT/Server to en
     <td>&nbsp;</td>
   </tr> 
   <tr valign="top"> 
-    <td colspan="3"><input type="submit" name="portForwarding" value="Submit">&nbsp;<i>Changes will take effect immediately.</i></td>
+    <td colspan="3"><input type="submit" name="portForwarding" value="Submit"#(portForwardingAvailable)# disabled="disabled"::#(/portForwardingAvailable)#>&nbsp;<i>Changes will take effect immediately.</i></td>
   </tr>  
 </table>
 </fieldset>

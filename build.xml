@@ -172,7 +172,10 @@
   <filter token="REPL_DATE" value="${DSTAMP}"/>
   <filter token="REPL_RELEASE" value="${releaseFile}"/>
   <filter token="REPL_VERSION" value="${releaseVersion}" />
-  <copy file="${src}/yacy.java" tofile="${build}/yacy.java" filtering="true" />
+
+  <!-- deleting old file -->
+  <delete file="${build}/yacy.java" failonerror="false"/>
+  <copy file="${src}/yacy.java" tofile="${build}/yacy.java" overwrite="true" filtering="true" />
   <copy file="${doc}/Download.html" tofile="${doc}/Download.html.up" filtering="true" />
 </target>
   	
@@ -527,6 +530,7 @@
 <target name="clean" description="make clean"> 
   <delete dir="${release_main}" failonerror="false"/>
   <delete dir="${release_ext}" failonerror="false"/>
+  <delete file="${build}/yacy.java" failonerror="false"/>
   <delete failonerror="false">    
     <fileset dir="${src}" includes="**/*.class" />
     <fileset dir="${build}" includes="**/*.class" />
