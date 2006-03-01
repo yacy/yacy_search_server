@@ -25,7 +25,7 @@ Your YaCy Peer needs some basic information to operate properly
 <ol>
  <li>#(statusName)#<img src="/env/grafics/warning.png">Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="32px" width="32px">You have a nice peer name#(/statusName)#<br>
      Peer Name: <input type="text" name="peername" value="#[defaultName]#" size="16" maxlength="32"><br></li>
- <li>#(statusPassword)#<img src="/env/grafics/warning.png">Please set a password for your peer to protect your settings::<img src="/env/grafics/ok.png" height="32px" width="32px">Password is set#(/statusPassword)#<br>
+ <li>#(statusPassword)#<img src="/env/grafics/warning.png">Please set a password for your peer to protect your settings (> 3 characters); if this is successful you will be asked to log in with these values immediately::<img src="/env/grafics/ok.png" height="32px" width="32px">Password is set#(/statusPassword)#<br>
      Peer User: <input type="text" name="adminuser" value="#[defaultUser]#" size="16" maxlength="32"><br>
      Peer Password: <input type="text" name="adminpw1" value="" size="16" maxlength="32"><br>
      Peer Password: <input type="text" name="adminpw2" value="" size="16" maxlength="32">(repeat same password)<br></li>
@@ -35,9 +35,16 @@ Your YaCy Peer needs some basic information to operate properly
 <br>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration">
 </form>
 
-<b>What You should do next:</b>
+<p><b>What You should do next:</b><br>
 #(nextStep)#
-Your basic configuration is complete, you can start searching, start your own crawl, or just monitor at the network page what the other peers are doing.::
+Your basic configuration is complete! You can now (for example):
+<ul>
+ <li><a href="index.html">start searching the web without censoring</a>,</li>
+ <li><a href="IndexCreate_p.html">start your own crawl and contribute to the global index</a>,</li>
+ <li><a href="ConfigProfile.html">set a personal peer profile (optional settings)</a>, or</li>
+ <li>just <a href="Network.html">monitor at the network page what the other peers are doing</a>;</li>
+ <li>to shut down your peer, please go to the <a href="Status.html">Status Page</a> and click on the Shutdown button.</li>
+</ul>::
 Your Peer name is a default name; please set another peer name. If this does not work, the name is probably taken by someone else. Please try to choose another one.::
 You did not set a user name and/or a password. Some pages are protected by passwords. You should set a password here to secure your yacy peer.::
 You did not open a port in your firewall or your router does not forward the server port to your peer. This is needed if you want to fully participate in the YaCy network. You can also use your peer without opening your peer, but this is not recomended.

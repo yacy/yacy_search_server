@@ -107,8 +107,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // combine all threads
         
         if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
-            int fetchpeers = (int) (query.maximumTime / 1000L); // number of target peers; means 10 peers in 10 seconds
-            if (fetchpeers > 10) fetchpeers = 10;
+            int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
+            if (fetchpeers > 50) fetchpeers = 50;
+            if (fetchpeers < 30) fetchpeers = 30;
             
             // remember time
             long start = System.currentTimeMillis();

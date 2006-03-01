@@ -86,10 +86,13 @@ public class ConfigBasic {
         String port = (post == null) ? env.getConfig("port", "8080") : (String) post.get("port", "8080");
         
         // admin password
-        if ((user.length() > 0) && (pw1.equals(pw2))) {
+        if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
             // check passed. set account:
             env.setConfig("adminAccountBase64MD5", serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("adminAccount", "");
+            // authenticate immediately
+            //prop.put("AUTHENTICATE", "admin log-in"); 
+            //return prop;
         }
 
         // check if peer name already exists
