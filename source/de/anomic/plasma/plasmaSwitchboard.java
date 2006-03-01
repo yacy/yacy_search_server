@@ -1966,13 +1966,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
     public int adminAuthenticated(httpHeader header) {
         String adminAccountBase64MD5 = getConfig("adminAccountBase64MD5", "");
-        if (adminAccountBase64MD5.length() == 0) return 2; // not necessary
+        if (adminAccountBase64MD5.length() == 0) return 2; // no passwrd stored
         String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
         if (authorization.length() == 0) return 1; // no authentication information given
         if ((((String) header.get("CLIENTIP", "")).equals("localhost")) && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
         if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
-        if(userDB.hasAdminRight((String)header.get(httpHeader.AUTHORIZATION, "xxxxxx")))
-            return 4;
+        if (userDB.hasAdminRight((String)header.get(httpHeader.AUTHORIZATION, "xxxxxx"))) return 4;
         return 0; // wrong password
     }
     

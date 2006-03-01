@@ -59,7 +59,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyCore;
 
-public class EditProfile_p {
+public class ConfigProfile_p {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         //listManager.switchboard = (plasmaSwitchboard) env;

@@ -49,8 +49,10 @@
 
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -60,9 +62,17 @@ public class ConfigBasic {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
 
-        //yacyCore.peerPing();
+        int authentication = sb.adminAuthenticated(header);
+        if (authentication < 2) {
+            // must authenticate
+            prop.put("AUTHENTICATE", "admin log-in"); 
+            return prop;
+        }
+        
+        serverInstantThread.oneTimeJob(sb.yc, "peerPing", null, 0);
         
         // password settings
         String user   = (post == null) ? "" : (String) post.get("adminuser", "");
@@ -70,13 +80,13 @@ public class ConfigBasic {
         String pw2    = (post == null) ? "" : (String) post.get("adminpw2", "");
         
         // peer name settings
-        String peerName = (post == null) ? "" : (String) post.get("peername", "");
+        String peerName = (post == null) ? env.getConfig("peerName","") : (String) post.get("peername", "");
         
         // port settings
-        String port = (post == null) ? "8080" : (String) post.get("port", "8080");
+        String port = (post == null) ? env.getConfig("port", "8080") : (String) post.get("port", "8080");
         
         // admin password
-        if ((user.length() > 0) && (!(pw1.equals(pw2)))) {
+        if ((user.length() > 0) && (pw1.equals(pw2))) {
             // check passed. set account:
             env.setConfig("adminAccountBase64MD5", serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("adminAccount", "");
