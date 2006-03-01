@@ -87,6 +87,7 @@ public class PerformanceMemory_p {
                 env.setConfig("ramCacheDHT", Long.parseLong(post.get("ramCacheDHT", "0")) * KB);
                 env.setConfig("ramCacheMessage", Long.parseLong(post.get("ramCacheMessage", "0")) * KB);
                 env.setConfig("ramCacheWiki", Long.parseLong(post.get("ramCacheWiki", "0")) * KB);
+                env.setConfig("ramCacheBlog", Long.parseLong(post.get("ramCacheBlog", "0")) * KB);
                 env.setConfig("ramCacheNews", Long.parseLong(post.get("ramCacheNews", "0")) * KB);
                 env.setConfig("ramCacheRobots", Long.parseLong(post.get("ramCacheRobots", "0")) * KB);
                 env.setConfig("ramCacheProfiles", Long.parseLong(post.get("ramCacheProfiles", "0")) * KB);
@@ -100,6 +101,7 @@ public class PerformanceMemory_p {
                 env.setConfig("ramCacheDHT", Long.parseLong((String) defaultSettings.get("ramCacheDHT")));
                 env.setConfig("ramCacheMessage", Long.parseLong((String) defaultSettings.get("ramCacheMessage")));
                 env.setConfig("ramCacheWiki", Long.parseLong((String) defaultSettings.get("ramCacheWiki")));
+                env.setConfig("ramCacheWiki", Long.parseLong((String) defaultSettings.get("ramCacheBlog")));
                 env.setConfig("ramCacheNews", Long.parseLong((String) defaultSettings.get("ramCacheNews")));
                 env.setConfig("ramCacheRobots", Long.parseLong((String) defaultSettings.get("ramCacheRobots")));
                 env.setConfig("ramCacheProfiles", Long.parseLong((String) defaultSettings.get("ramCacheProfiles")));
@@ -191,6 +193,11 @@ public class PerformanceMemory_p {
         chk = sb.wikiDB.dbCacheChunkSize();
         slt = sb.wikiDB.dbCacheFillStatus();
         putprop(prop, env, "Wiki", set);
+        
+        req = sb.blogDB.size();
+        chk = sb.blogDB.dbCacheChunkSize();
+        slt = sb.blogDB.dbCacheFillStatus();
+        putprop(prop, env, "Blog", set);
         
         req = yacyCore.newsPool.dbSize();
         chk = yacyCore.newsPool.dbCacheChunkSize();

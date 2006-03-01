@@ -38,6 +38,8 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
+// Contains contributions from Jan Sandbrink [JS]
+
 package de.anomic.data;
 
 import java.io.File;
@@ -54,9 +56,8 @@ import java.util.TimeZone;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroRecords;
 
-public class wikiBoard {
+public class blogBoard {
     
     public  static final int keyLength = 64;
     private static final String dateFormat = "yyyyMMddHHmmss";
@@ -66,10 +67,8 @@ public class wikiBoard {
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
 
     private kelondroMap datbase = null;
-    private kelondroMap bkpbase = null;
-    private static HashMap authors = new HashMap();
     
-    public wikiBoard(File actpath, File bkppath, int bufferkb) {
+    public blogBoard(File actpath, int bufferkb) {
     		new File(actpath.getParent()).mkdir();
         if (datbase == null) {
             if (actpath.exists()) try {
@@ -80,20 +79,6 @@ public class wikiBoard {
                 datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, '_', true));
             }
         }
-        new File(bkppath.getParent()).mkdir();
-        if (bkpbase == null) {
-            if (bkppath.exists()) try {
-                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, '_'));
-            } catch (IOException e) {
-                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, keyLength + dateFormat.length(), recordSize, '_', true));
-            } else {
-                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, keyLength + dateFormat.length(), recordSize, '_', true));
-            }
-        }
-    }
-
-    public int sizeOfTwo() {
-        return datbase.size() + bkpbase.size();
     }
     
     public int size() {
@@ -101,24 +86,15 @@ public class wikiBoard {
     }
     
     public int[] dbCacheChunkSize() {
-        int[] db = datbase.cacheChunkSize();
-        int[] bk = bkpbase.cacheChunkSize();
-        int[] i = new int[3];
-        i[kelondroRecords.CP_LOW] = (db[kelondroRecords.CP_LOW] + bk[kelondroRecords.CP_LOW]) / 2;
-        i[kelondroRecords.CP_MEDIUM] = (db[kelondroRecords.CP_MEDIUM] + bk[kelondroRecords.CP_MEDIUM]) / 2;
-        i[kelondroRecords.CP_HIGH] = (db[kelondroRecords.CP_HIGH] + bk[kelondroRecords.CP_HIGH]) / 2;
-        return i;
+        return datbase.cacheChunkSize();
     }
     
     public int[] dbCacheFillStatus() {
-        int[] a = datbase.cacheFillStatus();
-        int[] b = bkpbase.cacheFillStatus();
-        return new int[]{a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]};
+        return datbase.cacheFillStatus();
     }
     
     public void close() {
         try {datbase.close();} catch (IOException e) {}
-        try {bkpbase.close();} catch (IOException e) {}
     }
     
     private static String dateString() {
@@ -143,18 +119,12 @@ public class wikiBoard {
         return key;
     }
     
-    public static String guessAuthor(String ip) {
-        String author = (String) authors.get(ip);
-        //yacyCore.log.logDebug("DEBUG: guessing author for ip = " + ip + " is '" + author + "', authors = " + authors.toString());
-        return author;
-    }
-    
-    public static void setAuthor(String ip, String author) {
-        authors.put(ip,author);
+    public String guessAuthor(String ip) {
+        return wikiBoard.guessAuthor(ip);
     }
 
-    public entry newEntry(String subject, String author, String ip, String reason, byte[] page) throws IOException {
-	return new entry(normalize(subject), author, ip, reason, page);
+    public entry newEntry(String key, String subject, String author, String ip, byte[] page) throws IOException {
+	return new entry(normalize(key), subject, author, ip, page);
     }
 
     public class entry {
@@ -162,32 +132,41 @@ public class wikiBoard {
 	String key;
         Map record;
 
-	public entry(String subject, String author, String ip, String reason, byte[] page) throws IOException {
+    public entry(String nkey, String subject, String author, String ip, byte[] page) throws IOException {
 	    record = new HashMap();
-	    key = subject;
+	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
 	    record.put("date", dateString());
+	    if ((subject == null) || (subject.length() == 0)) subject = "";
+	    record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject.getBytes("UTF-8")));
 	    if ((author == null) || (author.length() == 0)) author = "anonymous";
 	    record.put("author", kelondroBase64Order.enhancedCoder.encode(author.getBytes("UTF-8")));
 	    if ((ip == null) || (ip.length() == 0)) ip = "";
 	    record.put("ip", ip);
-	    if ((reason == null) || (reason.length() == 0)) reason = "";
-	    record.put("reason", kelondroBase64Order.enhancedCoder.encode(reason.getBytes("UTF-8")));
 	    if (page == null)
 		record.put("page", "");
 	    else
 		record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
-            authors.put(ip, author);
-            //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
+	    
+        wikiBoard.setAuthor(ip, author);
+        //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
 	}
 
 	private entry(String key, Map record) {
 	    this.key = key;
 	    this.record = record;
 	}
+	
+	public String key() {
+		return key;
+	}
 
 	public String subject() {
-	    return key;
+		String a = (String) record.get("subject");
+	    if (a == null) return "";
+	    byte[] b = kelondroBase64Order.enhancedCoder.decode(a);
+	    if (b == null) return "";
+	    return new String(b);
 	}
 
 	public Date date() {
@@ -198,20 +177,12 @@ public class wikiBoard {
 		return new Date();
 	    }
 	}
-
+	
 	public String author() {
 	    String a = (String) record.get("author");
 	    if (a == null) return "anonymous";
 	    byte[] b = kelondroBase64Order.enhancedCoder.decode(a);
 	    if (b == null) return "anonymous";
-	    return new String(b);
-	}
-
-	public String reason() {
-	    String r = (String) record.get("reason");
-	    if (r == null) return "";
-	    byte[] b = kelondroBase64Order.enhancedCoder.decode(r);
-	    if (b == null) return "unknown";
 	    return new String(b);
 	}
 
@@ -221,81 +192,13 @@ public class wikiBoard {
 	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m);
 	    if (b == null) return "".getBytes();
 	    return b;
-	}
-        
-	private void setAncestorDate(Date date) {
-	    record.put("bkp", dateString(date));
-	}
+	}        
 
-	private Date getAncestorDate() {
-	    try {
-		String c = (String) record.get("date");
-		if (c == null) return null;
-		return SimpleFormatter.parse(c);
-	    } catch (ParseException e) {
-		return null;
-	    }
-	}
-
-        /*
-	public boolean hasAncestor() {
-	    Date ancDate = getAncestorDate();
-	    if (ancDate == null) return false;
-	    try {
-		return bkpbase.has(key + dateString(ancDate));
-	    } catch (IOException e) {
-		return false;
-	    }
-	}
-        */
-        
-	public entry getAncestor() {
-	    Date ancDate = getAncestorDate();
-	    if (ancDate == null) return null;
-	    return read(key + dateString(ancDate), bkpbase);
-	}
-
- 	private void setChild(String subject) {
-	    record.put("child", kelondroBase64Order.enhancedCoder.encode(subject.getBytes()));
-	}
-        
-        private String getChildName() {
-            String c = (String) record.get("child");
-	    if (c == null) return null;
-	    byte[] subject = kelondroBase64Order.enhancedCoder.decode(c);
-            if (subject == null) return null;
-            return new String(subject);
-	}
-        
-        public boolean hasChild() {
-            String c = (String) record.get("child");
-	    if (c == null) return false;
-	    byte[] subject = kelondroBase64Order.enhancedCoder.decode(c);
-            return (subject != null);
-	}
-
-        public entry getChild() {
-	    String childName = getChildName();
-	    if (childName == null) return null;
-	    return read(childName, datbase);
-	}
     }
 
     public String write(entry page) {
 	// writes a new page and returns key
 	try {
-	    // first load the old page
-	    entry oldEntry = read(page.key);
-	    // set the bkp date of the new page to the date of the old page
-	    Date oldDate = oldEntry.date();
-	    page.setAncestorDate(oldDate);
-            oldEntry.setChild(page.subject());
-	    // write the backup
-            //System.out.println("key = " + page.key);
-            //System.out.println("oldDate = " + oldDate);
-            //System.out.println("record = " + oldEntry.record.toString());
-	    bkpbase.set(page.key + dateString(oldDate), oldEntry.record);
-	    // write the new page
 	    datbase.set(page.key, page.record);
 	    return page.key;
 	} catch (IOException e) {
@@ -308,26 +211,16 @@ public class wikiBoard {
     }
 
     private entry read(String key, kelondroMap base) {
-	try {
+    	try {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);
-	    Map record = base.get(key);
-	    if (record == null) return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
-        return new entry(key, record);
-	} catch (IOException e) {
-	    return null;
-	}
+            Map record = base.get(key);
+            if (record == null) return newEntry(key, "", "anonymous", "127.0.0.1", "".getBytes());
+            return new entry(key, record);
+    	} catch (IOException e) {
+    		return null;
+    	}
     }
-
-    /*
-    public boolean has(String key) {
-	try {
-	    return datbase.has(normalize(key));
-	} catch (IOException e) {
-	    return false;
-	}
-    }
-    */
     
     public Iterator keys(boolean up) throws IOException {
 	return datbase.keys(up, false);

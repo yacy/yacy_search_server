@@ -120,6 +120,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
+import de.anomic.data.blogBoard;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
@@ -186,6 +187,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaCrawlStacker          sbStackCrawlThread;
     public  messageBoard                messageDB;
     public  wikiBoard                   wikiDB;
+    public	blogBoard					blogDB;
     public  static plasmaCrawlRobotsTxt robots;
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
@@ -332,6 +334,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int ramProfiles= (int) getConfigLong("ramCacheProfiles",1024) / 1024;
         int ramPreNURL = (int) getConfigLong("ramCachePreNURL", 1024) / 1024;
         int ramWiki    = (int) getConfigLong("ramCacheWiki", 1024) / 1024;
+        int ramBlog    = (int) getConfigLong("ramCacheBlog", 1024) / 1024;
         this.log.logConfig("LURL     Cache memory = " + ppRamString(ramLURL));
         this.log.logConfig("NURL     Cache memory = " + ppRamString(ramNURL));
         this.log.logConfig("EURL     Cache memory = " + ppRamString(ramEURL));
@@ -339,6 +342,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("HTTP     Cache memory = " + ppRamString(ramHTTP));
         this.log.logConfig("Message  Cache memory = " + ppRamString(ramMessage));
         this.log.logConfig("Wiki     Cache memory = " + ppRamString(ramWiki));
+        this.log.logConfig("Blog     Cache memory = " + ppRamString(ramBlog));
         this.log.logConfig("Robots   Cache memory = " + ppRamString(ramRobots));
         this.log.logConfig("Profiles Cache memory = " + ppRamString(ramProfiles));
         this.log.logConfig("PreNURL  Cache memory = " + ppRamString(ramPreNURL));
@@ -456,6 +460,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // starting wiki
         initWiki(ramWiki);
+        
+        //starting blog
+        initBlog(ramBlog);
         
         // Init User DB
         this.log.logConfig("Loading User DB");
@@ -622,6 +629,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("Loaded Wiki Board DB from file " + wikiDbFile.getName() +
         ", " + this.wikiDB.size() + " entries" +
         ", " + ppRamString(wikiDbFile.length()/1024));
+    }
+    public void initBlog(int ramBlog) {
+        this.log.logConfig("Starting Blog");
+        File blogDbFile = new File(workPath, "blog.db");
+        this.blogDB = new blogBoard(blogDbFile, ramBlog);
+        this.log.logConfig("Loaded Blog DB from file " + blogDbFile.getName() +
+        ", " + this.blogDB.size() + " entries" +
+        ", " + ppRamString(blogDbFile.length()/1024));
     }
     public void initBookmarks(){
         this.log.logConfig("Loading Bookmarks DB");
@@ -816,6 +831,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.dbImportManager.close();
         cacheLoader.close();
         wikiDB.close();
+        blogDB.close();
         userDB.close();
         bookmarksDB.close();
         messageDB.close();

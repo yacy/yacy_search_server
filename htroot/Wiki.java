@@ -85,7 +85,7 @@ public class Wiki {
         String ip = post.get("CLIENTIP", "127.0.0.1");
         String author = post.get("author", "anonymous");
         if (author.equals("anonymous")) {
-            author = switchboard.wikiDB.guessAuthor(ip);
+            author = wikiBoard.guessAuthor(ip);
             if (author == null) {
                 if (de.anomic.yacy.yacyCore.seedDB.mySeed == null) author = "anonymous";
                 else author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous");

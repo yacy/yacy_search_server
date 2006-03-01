@@ -487,6 +487,9 @@ ramCacheMessage =     8192
 # ram cache for wiki.db
 ramCacheWiki    =     8192
 
+# ram cache for blog.db
+ramCacheBlog    =     2048
+
 # ram cache for news1.db
 ramCacheNews    =     8192
 
