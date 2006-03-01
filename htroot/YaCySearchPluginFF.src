@@ -1,8 +1,8 @@
 # Mozilla/YACY plug-in
 
 <search 
-   name="YACY"
-   description="Anomic YACY Search"
+   name="YaCy"
+   description="YaCy P2P Websearch"
    method="GET"
    action="http://#[host]#:#[port]#/index.html"
    queryEncoding="utf-8"

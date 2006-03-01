@@ -22,9 +22,9 @@ InstType "Full"
 ComponentText "This will install YaCy v0.43(Build 20060210) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old Version was installed into another locAtion(eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
-DirText "Choose a directory to install in to:"
+DirText "Choose a directory to install into:"
 
-LicenseText "You must agree the License to install YaCy"
+LicenseText "You must agree the license to install YaCy"
 LicenseData "gpl.txt"
 
 Section "Binaries (required)"
@@ -182,10 +182,10 @@ SectionEnd
 #	CreateShortCut "$DESKTOP\start YACY.lnk" ""
 #SectionEnd
 
-Section "YACY-Console on the Desktop"
+Section "YaCy-Console on the Desktop"
 	SectionIn 1 2 3
 	SetOutPath "$INSTDIR"
-	CreateShortCut "$DESKTOP\YACY-Console.pif" "$INSTDIR\startYACY.bat"
+	CreateShortCut "$DESKTOP\YaCy-Console.pif" "$INSTDIR\startYACY.bat"
 SectionEnd
 
 Section "Searchpage in the Quicklaunch"
@@ -218,7 +218,7 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\addon"
 	Delete "$INSTDIR\*.*"
 
-	MessageBox MB_YESNO|MB_ICONQUESTION "Do you want to keep the Data?" IDYES keepdata
+	MessageBox MB_YESNO|MB_ICONQUESTION "Do you want to keep the Data (i.e. if you want to reinstall later)?" IDYES keepdata
 	
 	#delete all
 	RMDir /r "$INSTDIR"

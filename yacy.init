@@ -47,7 +47,7 @@ htDocsPath = DATA/HTDOCS
 # the first one is priorized
 defaultFiles = index.html,default.html,search.html,console.html,control.html,welcome.html,wiki.html,forum.html,blog.html,email.html,content.html,monitor.html,share.html,dir.html,readme.txt
 
-# locale-options: yacy supports localization.
+# locale-options: YaCy supports localization.
 # Web pages for special languages are located in the htLocalePath
 # The htLocaleLang defines a list of language options as <dir>/<named-language>
 # the <dir> must exist as sub-path to htLocalePath

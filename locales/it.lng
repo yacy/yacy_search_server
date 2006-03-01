@@ -173,52 +173,51 @@ Instead we encourage you to enhance the search result by submitting more search 
 Result Order Options==Opzioni di ordinamento del risultato
 The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Il motore di ricerca fornisce un sistema di 'ranking' della qualit&agrave; sperimentale. In contrasto con gli altri motori conosciuti noi forniamo anche
 a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==l'ordine dei risultati per data. Se cambi l'ordine a 'Date-Quality' saranno mostrate per prime le pagine aggiornate pi&ugrave; recentemente.
+For pages that have the same date the second order, 'Quality' is applied.==Le pagine che hanno la stessa data sono ordinate per 'Qualit&agrave;'.
+This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==Questo motore di ricerca &egrave; costruito per ricercare le pagine che passano attraverso il proxy. Ma l'indice di ricerca viene distribuito agli altri 'pari',
+so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==in questo modo puoi comunque ricercare globalmente: questa funzione &egrave; ancora rudimentale, ma pu&ograve; essere scelta per i casi di test. I rilasci futuri distribuiranno
+automatically distribute index information <i>before</i> a search happends to form a performant distributed hash table -- a very fast global search.==automaticamente le informazioni dell'indice <i>prima</i> che la ricerca avvenga per costituire una hash table distribuita e performante -- un ricerca globale veramente veloce.
+Maximum Search Time==Massimo Tempo di Ricerca
+Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Le ricerche sull'indice locale sono estremamente veloci, dell'ordine dei millisecondi, perfino per un grande numero di /(milioni/) di pagine. Ma la ricerca
+global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==sull'indice globale richiede pi&ugrave; tempo poich&egrave; deve trovare il 'pari' giusto che contenga i migliori risultati per la ricerca. Questo &egrave; vero specialmente nel caso
+distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==che l'indice distribuito sia in test mode. I risultati delle ricerche saranno pi&ugrave; stabili /(ripetute ricerche globali produrrano risultati più simili/) pi&ugrave; lungo
+the search time is.==sar&agrave; il tempo di ricerca.
+You may want to use accesskeys to navigate through the YaCy webinterface:==Tu puoi voler usare le accesskeys per navigare attraverso l'interfaccia web di YaCy:
+Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows e Internet Explorer: Alt + Accesskey + Enter
+Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows e Mozilla/Firefox/Netscape: Alt + Accesskey
+Windows and Opera: Shift \+ Esc \+ Accesskey==Windows e Opera: Shift + Esc + Accesskey
+Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter=Macintosh e Internet Explorer: Str + Accesskey + Enter
+Macintosh and Safari: Strg \+ Accesskey==Macintosh e Safari: Strg + Accesskey
+Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh e Mozilla/Firefox/Netscape: Strg + Accesskey
+Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh e Opera: Shift + Esc + Accesskey
+Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Linux Mandrake e Galeon/Mozilla: Alt + Accesskey
+All OS and Amaya: Strg \+ Accesskey==Tutti gli OS e Amaya: Strg + Accesskey
+
+Search Page==Pagina di ricerca
+Network==Network
+Status==Stato
+
+YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy in alcune funzioni usa le expressioni regolari, per esempio nelle blaklist.
+There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Esistono diversi standard per le regexps, YaCy usa la sintassi del Perl 5.
+Here ist a short overview about the functions, which should fir for most cases\:<==Qui c'&egrave; una breve descrizione di queste funzioni, sufficiente per la maggior parte dei casi:<
+
+arbitrary character==caratteri arbitrari
+character x==carattere x
+not x==non x
+0 or more times x==0 o pi&ugrave; volte x
+0 or 1 time x==0 o 1 volta x
+1 or more times x==1 o pi&ugrave; volte x
+concatenation of x and y==Concatenazione di x e y
+x or y==x o y
+String "foo" or string "bar"==Stringa "foo" o Stringa "bar"
+a or b or c \(same as a\|b\|c\)==a o b o c \(uguale ad a\|b\|c\)
+a or b or c \(same as above\)==a o b o c \(come sopra\)
+exactly n appearances of x==esattamente n ricorrenze di  x
+at least n appearances of x==almeno n ricorrenze di x
+at least n, maximum m appearanches of x==almeno n, massimo m ricorrenze di x
+Modify priority of instructions==Modifica la priorit&agrave; delle istruzioni
 #axa
-For pages that have the same date the second order, 'Quality' is applied.==F&uuml;r Seiten die das gleiche Datum haben, wird dann nach der 'Qualit&auml;t' geordnet.
-Resource Domain==Quelle der Suche
-This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==Diese Suchmaschine ist so aufgebaut, dass sie die Seiten durchsucht, die mit dem Proxy besucht wurden. Aber der Suchindex ist auch auf andere Peers verteilt,
-so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==so dass Sie auch global suchen k&ouml;nnen: diese Funktion ist veraltet, aber Sie k&ouml;nnen sie zum testen benutzen. Neue Versionen werden
-automatically distribute index information <i>before</i> a search happends to form a performant distributed hash table -- a very fast global search.==automatisch einen verteilten Index erstellen <i>bevor</i> es geschieht, dass eine Suche, eine verteilte Hash-Tabelle erstellt --  eine sehr schnelle globale Suche.
-Maximum Search Time==Maximale Zeit zum Suchen
-Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Den lokalen Index zu durchsuchen, geht extrem schnell. Es geschieht innerhalb von Millisekunden auch bei einer gro&szlig;en Anzahl (ein paar Millionen) von Seiten.
-global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==Im Gegensatz dazu braucht es mehr Zeit den globalen Index zu durchsuchen, da erst der richtige Peer, der die besten Ergbnisse liefern kann, gefunden werden muss. Dies ist vermutlich auch der Grund warum
-distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==diese Art von Suchmaschine noch in der Testphase ist. Die Suchergebnisse werden immer besser (eine wiederholte globale Suche bringt mehr gleiche Ergebnisse), je l&auml;nger
-the search time is.==die Zeit zum Suchen ist.
-You may want to use accesskeys to navigate through the YaCy webinterface:==Sie k&ouml;nnen durch das YaCy Web Interface auch mit Hilfe von Tastenkombinationen navigieren. Dr&uuml;cken Sie dazu eine der folgenden Kombinationen ('Taste' steht f&uuml;r einen der drei unten genannten Buchstaben):
-Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows und Internet Explorer: Alt + Taste + Enter
-Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows und Mozilla/Firefox/Netscape: Alt + Taste
-Windows and Opera: Shift \+ Esc \+ Accesskey==Windows und Opera: Shift + Esc + Taste
-Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter=Macintosh und Internet Explorer: Str + Taste + Enter
-Macintosh and Safari: Strg \+ Accesskey==Macintosh und Safari: Strg + Taste
-Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh und Mozilla/Firefox/Netscape: Strg + Taste
-Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh und Opera: Shift + Esc + Taste
-Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Linux Mandrake und Galeon/Mozilla: Alt + Taste
-All OS and Amaya: Strg \+ Accesskey==Alle OS Versionen und Amaya: Strg + Taste
 
-Search Page==Suchseite
-Network==Netzwerk
-Status==Status
-
-YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy benutzt regul&auml;re Ausdr&uuml;cke f&uuml;r einige Funktionen, z.B. die Blacklist.
-There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Es gibt einige Standards f&uuml;r diese Ausdr&uuml;cke, YaCy orientiert sich an der Syntax von Perl 5.
-Here ist a short overview about the functions, which should fir for most cases\:<==Hier finden Sie einen kurzen &Uuml;berblick &uuml;ber die Funktionen, der die meisten Anwenungsf&auml;lle abdecken sollte:<
-
-
-arbitrary character==beliebiges Zeichen
-character x==Zeichen x
-not x==nicht x
-0 or more times x==0 oder mehr Vorkommen von x
-0 or 1 time x==0 oder 1 Vorkommen von x
-1 or more times x==1 oder mehr Vorkommen von x
-concatenation of x and y==Verkettung von x und y
-x or y==x oder y
-String "foo" or string "bar"==String "foo" oder String "bar"
-a or b or c \(same as a\|b\|c\)==a oder b oder c (dasselbe wie a|b|c)
-a or b or c \(same as above\)==a oder b oder c (dasselbe wie oben)
-exactly n appearances of x==genau n Vorkommen von x
-at least n appearances of x==mindestens n Vorkommen von x
-at least n, maximum m appearanches of x==mindestens n, maximal m Vorkommen von m
-Modify priority of instructions==Priorit&auml;t der Befehle &auml;ndern
 Escape-Character, used to escape special characters \(for example "\[" or "\*"\), so that they loose their special meaning==Escape-Zeichen, das benutzt wird, um Zeichen mit Sonderbedeutung (z.B. "[" oder "*"),  zu "escapen", d.h. ihre Sonderbedeutung verlieren.
 Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==Regex folgen Priorit&auml;ten (absteigend): Verkettung, un&auml;re Operatore (*,+,^,{}), bin&auml;re Operatoren (|). Die Reihenfolge kann durch setzen von Klammern ge&auml;ndert werden.
 Example:==Beispiel:

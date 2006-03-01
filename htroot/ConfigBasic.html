@@ -23,13 +23,13 @@ Your YaCy Peer needs some basic information to operate properly
 
 <form action="ConfigBasic.html" method="post" enctype="multipart/form-data">
 <ol>
- <li>#(statusName)#<img src="/env/grafics/excl.png">Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/check.png">You have a nice peer name#(/statusName)#<br>
+ <li>#(statusName)#<img src="/env/grafics/warning.png">Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="32px" width="32px">You have a nice peer name#(/statusName)#<br>
      Peer Name: <input type="text" name="peername" value="#[defaultName]#" size="16" maxlength="32"><br></li>
- <li>#(statusPassword)#<img src="/env/grafics/excl.png">Please set a password for your peer to protect your settings::<img src="/env/grafics/check.png">Password is set#(/statusPassword)#<br>
+ <li>#(statusPassword)#<img src="/env/grafics/warning.png">Please set a password for your peer to protect your settings::<img src="/env/grafics/ok.png" height="32px" width="32px">Password is set#(/statusPassword)#<br>
      Peer User: <input type="text" name="adminuser" value="#[defaultUser]#" size="16" maxlength="32"><br>
      Peer Password: <input type="text" name="adminpw1" value="" size="16" maxlength="32"><br>
      Peer Password: <input type="text" name="adminpw2" value="" size="16" maxlength="32"><br></li>
- <li>#(statusPort)#<img src="/env/grafics/excl.png">Your peer cannot be reached from outside; please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port::<img src="/env/grafics/check.png">Your peer can be reached by other peers#(/statusPort)#<br>
+ <li>#(statusPort)#<img src="/env/grafics/warning.png">Your peer cannot be reached from outside; please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port::<img src="/env/grafics/check.png">Your peer can be reached by other peers#(/statusPort)#<br>
      Peer Port: <input type="text" name="port" value="#[defaultPort]#" size="5" maxlength="5"><br></li>
  </ol>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration">
