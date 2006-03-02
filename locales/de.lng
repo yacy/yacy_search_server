@@ -113,6 +113,49 @@ For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in de
 "Save"==Speichern
 
 #-----------------------------------------------------------
+#File: ConfigBasic.html
+
+YaCy \'\#\[clientname\]\#\': Advanced Config==YaCy '#[clientname]#': Grundeinstellungen 
+#wrong translation, but correct sense...
+Basic Configuration==Grundeinstellungen
+Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer ben&ouml;tigt einige Grundinformationen um korrekt zu funktionieren
+Your peer name has not been customized==Ihr Peername wurde noch nicht angepasst
+please set your own peer name==bitte setzen Sie einen eigenen Peernamen ein
+You have a nice peer name==Sie haben einen schönen Peernamen
+Peer Name:==Peer-Name:
+Please set a password for your peer to protect your settings==Bitte setzen Sie ein Passwort f&uuml;r Ihren Peer um Ihre Einstellungen zu sch&uuml;tzen
+> 3 characters==mehr als 3 Zeichen
+if this is successful you will be asked to log in with these values immediately==Falls dies erfolgreich ist werden Sie sofort gebeten sich mit diesen Angaben einzuloggen
+Password is set==Passwort wurde gesetzt
+Peer User:==Peer-Nutzer:
+Peer Password:==Peer-Passwort:
+repeat same password==selbes Passwort wiederholen
+Your peer cannot be reached from outside==Ihr Peer kann nicht von au&szlig;en erreicht werden
+please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Bitte &ouml;ffnen Sie Ihre Firewall auf diesem Port und/oder stellen Sie einen virtuellen Server in Ihrem Router ein um Verbindungen auf diesem Port zu erlauben
+Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreicht werden
+Peer Port:==Peer-Port:
+Set Configuration==Konfiguration speichern
+What you should do next:==Was Sie als n&auml;chstes tun k&ouml;nnen:
+Your basic configuration is complete! You can now \(for example\)==Ihre Grundeinstellungen sind vollst&auml;ndig! Sie k&ouml;nnen jetzt (beispielsweise)
+start searching the web without censoring==Beginnen das Web zensurfrei zu durchsuchen
+start your own crawl and contribute to the global index==Ihren eigenen Crawl starten und zum globalen Index beitragen
+set a personal peer profile \(optional settings\)==Ein pers&ouml;nliches Peer-Profil einstellen
+just <==Einfach <
+monitor at the network page what the other peers are doing==auf der Netzwerkseite schauen was die anderen Peers tun
+to shut down your peer, please go to the==Um Ihren Peer herunterzufahren gehen Sie bitte auf die
+Status Page==Status-Seite
+and click on the Shutdown button.==und klicken auf den "Herunterfahren"-Button
+Your Peer name is a default name; please set another peer name.==Ihr Peer-Name ist ein Standardname; bitte nutzen Sie einen anderen.
+If this does not work, the name is probably taken by someone else.==Falls das nicht funktioniert wird der Name wahrscheinlich bereits von jemand anderem verwendet.
+Please try to choose another one.==Bitte versuchen Sie einen anderen.
+You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und/oder kein Passwort gesetzt.
+Some pages are protected by passwords.==Einige Seiten sind passwortgesch&uuml;tzt.
+You should set a password here to secure your YaCy peer.==Sie sollten hier ein Passwort einstellen um Ihren YaCy-Peer zu sichern.
+You did not open a port in your firewall or your router does not forward the server port to your peer.==Sie haben keinen Port in Ihrer Firewall ge&ouml;ffnet oder Ihr Router leitet den Server-Port nicht zu Ihrem Peer weiter.
+This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich wenn Sie vollst&auml;ndig am YaCy-Netzwerk teilhaben m&ouml;chten.
+You can also use your peer without opening it, but this is not recomended.==Sie k&ouml;nnen Ihren Peer auch nutzen ohne ihn zu &ouml;ffnen, dies wird jedoch nicht empfohlen.
+
+#-----------------------------------------------------------
 #File: Connections_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
@@ -432,11 +475,8 @@ Pages Per Minute \(minimum is 1, low system load usually at PPM <= 30\)==Seiten 
 Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Akzeptiere keine Remote-Crawling Anfragen (bitte aktivieren Sie dies nur, wenn Sie nicht eine Seite pro Minute crawlen k&ouml;nnen; siehe Option oben)
 "set"=="Speichern"
 Error:==Fehler:
-Error with profile management. Please stop yacy, delete the File DATA/PLASMADB/crawlProfiles0.db and restart.==Fehler im Profil Management. Bitte stoppen Sie YaCy, l&ouml;schen Sie die Datei DATA/PLASMADB/crawlProfiles0.db und starten Sie YaCy neu.
 Application not yet initialized. Sorry. Please wait some seconds and repeat the request.==Nicht richtig initialisiert. Sorry. Bitte warten Sie einige Sekunden und wiederholen Sie die Anfrage.
-<b>ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</b> Please try again with different filter==
 Crawling of "\#\[crawlingURL\]\#" failed. Reason:==Crawling von "#[crawlingURL]#" fehlgeschlagen. Grund:
-Error with url input==Fehler mit der eigegebenen URL
 Error with file input==Fehler mit der eingegebenen Datei
 Set new prefetch depth to==Neue Crawl Tiefe gesetzt auf
 Crawling of "\#\[crawlingURL\]\#" started.==Crawling von "#[crawlingURL]#" gestartet.
@@ -447,8 +487,6 @@ You can monitor the crawling progress either by watching the URL queues==Sie k&o
 <a href="/IndexCreateLoaderQueue_p.html">indexing queue</a>\)==<a href="/IndexCreateLoaderQueue_p.html">Indexier Warteschlange</a>)
 or see the fill/process count of all queues on the==Oder sehen sehen Sie sich den F&uuml;ll-Prozess von allen Warteschlangen auf der
 <a href="/Performance_p.html">performance page</a>.==<a href="/Performance_p.html">Performance Seite</a> an.
-<b>Please wait some seconds, because the request is enqueued and delayed until the http server is idle for a certain time.</b>==<b>Bitte warten Sie einige Sekunden, da Ihre Anfrage wartet und sich verz&ouml;gert bis der http Server einige Zeit nichts zu tun hat.</b>
-The indexing result is presented on the==Die Indexier Resulatet werden auf der
 <a href="IndexMonitor.html">Index Monitor</a>-page.==<a href="IndexMonitor.html">Index Monitor</a>-Seite angezeigt.
 <b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>==<b>Es dauert in der Regel mind. 30 Sekunden bis das Sie dort die ersten Ergebnisse sehen k&ouml;nnen. Bitte beachten Sie, dass das Crawling jedesmal, wenn Sie den Proxy oder den Web-Sever benutzen, pausiert wird, um maximale Verf&uuml;gbarkeit zu garantieren.</b>
 If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Sie Seiten crawlen, die Sie nicht crawlen wollen, k&ouml;nnen Sie diese <a href="IndexControl_p.html">hier</a> l&ouml;schen.
@@ -463,7 +501,6 @@ Crawl Thread==Crawl Art
 Start URL==Start URL
 Depth</b>==Tiefe</b>
 Filter</b>==Maske</b>
-Accept \'?\' URLs</b>==Akzeptiere '?' URLs</b>
 Fill Proxy Cache==F&uuml;lle Proxy Cache
 Local Indexing</b>==Lokales Indexieren</b>
 Remote Indexing</b>==Indexieren auf anderen Peers</b>
@@ -749,7 +786,6 @@ Advanced <a href="/Config_p.html">Configuration</a>==erweiterte <a href="/Config
 #File: Messages_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Messages==YaCy Nachrichtenverwaltung
 >Messages==>Nachrichten
 >Date==>Datum
 >From==>Von
@@ -799,7 +835,6 @@ Offset==Versatz
 Uptime==Uptime
 Links==Links
 RWIs==RWIs
-accept<br><b>Crawl</b>/<br><b>Index==Akzeptiert<br><b>Crawl</b>/<br><b>Index</b>
 Sent<br>Words==Gesendete<br>W&ouml;rter
 
 Sent<br>URLs==Gesendete<br>URLs
@@ -845,7 +880,6 @@ this peer==Ihr Peer
 You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
 You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online-Modus oder Sie benutzen nicht die Proxy-Option.
 
-To get connection to the YACY network, you must use the proxy by setting your browsers settings==Um sich mit dem YaCy-Netzwerk zu verbinden, m&uuml;ssen Sie den Proxy benutzen, indem Sie die Browser-Einstellungen auf
 \('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>==('on-demand - Modus', siehe <a href="http://www.yacy.net/yacy/Installation.html#wininst">hier</a>
 for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den \"Permanent Online\" Modus aktivieren.
 To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Knopf:
@@ -1519,16 +1553,12 @@ Idle:==Wartend:
 Indexing Queue==Indexier Warteschlange
 Loader Queue==Lade Warteschlange
 paused==angehalten
-pause crawling::continue crawling==crawling anhalten::crawling fortsetzen
 Crawler Queues==Crawler Warteschlangen
 Local Crawl==Lokales Crawlen
 Remote triggered Crawl==eingehende Remote-Crawls
 Global Crawl Trigger==ausgehende Remote-Crawls
 #Pre-Queueing==
-Enqueued from:==Eingef&uuml;gt von:
  local== lokal
-Pending:==Wartend:
-Remote Crawl Trigger Queue==Remote-Crawl-Trigger Warteschlange
 
 #-------------------------------------------------------
 #File: Steering.html
@@ -1657,12 +1687,12 @@ Proxy Indexing==Proxy Indexierung
 File&nbsp;Share==Dateifreigabe
 #Wiki==Wiki
 >Messages==>Nachrichten
-Personal Profile==Pers&ouml;nliches Profil
+Basic Configuration==Grund-<br>einstellungen
+Advanced Settings==erweiterte Einstellungen
 #Status==Status
 >Network==>Netzwerk
 #News==News
 #Log==Log
->Settings==>Einstellungen
 #Performance==Performance
 >Connections==>Verbindungen
 >Language==>Sprache
