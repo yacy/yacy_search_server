@@ -115,7 +115,7 @@ For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in de
 #-----------------------------------------------------------
 #File: ConfigBasic.html
 
-YaCy \'\#\[clientname\]\#\': Advanced Config==YaCy '#[clientname]#': Grundeinstellungen 
+YaCy \'\#\[clientname\]\#\': Advanced Config==YaCy '#[clientname]#': Grundeinstellungen
 #wrong translation, but correct sense...
 Basic Configuration==Grundeinstellungen
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer ben&ouml;tigt einige Grundinformationen um korrekt zu funktionieren
@@ -155,6 +155,23 @@ You did not open a port in your firewall or your router does not forward the ser
 This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich wenn Sie vollst&auml;ndig am YaCy-Netzwerk teilhaben m&ouml;chten.
 You can also use your peer without opening it, but this is not recomended.==Sie k&ouml;nnen Ihren Peer auch nutzen ohne ihn zu &ouml;ffnen, dies wird jedoch nicht empfohlen.
 
+#-------------------------------------------------------
+#File: ConfigProfile_p.html
+
+Your Personal Profile==Ihr pers&ouml;nliches Profil
+You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten. Andere YaCy-Benutzer k&ouml;nnen dieses Profil &uuml;ber einen Link auf ihrer Netzwerkseite ansehen.
+You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie m&uuml;ssen hier keine pers&ouml;nlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen m&ouml;chten, k&ouml;nnen Sie das hier machen.
+#Name==Name
+#Nick Name==Nick Name
+#Homepage==Homepage
+#eMail==eMail
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN=MSN
+Comment==Kommentar
+"Save"==Speichern
+
 #-----------------------------------------------------------
 #File: Connections_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
@@ -193,23 +210,6 @@ This is a list of Cookies that a browser using the YaCy Proxy has sent to a web 
 Showing==Angezeigt werden
 entries from a total of==Eintr&auml;ge von insgesamt
 Cookies==Cookies
-
-#-------------------------------------------------------
-#File: EditProfile_p.html
-
-Your Personal Profile==Ihr pers&ouml;nliches Profil
-You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten. Andere YaCy-Benutzer k&ouml;nnen dieses Profil &uuml;ber einen Link auf ihrer Netzwerkseite ansehen.
-You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie m&uuml;ssen hier keine pers&ouml;nlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen m&ouml;chten, k&ouml;nnen Sie das hier machen.
-#Name==Name
-#Nick Name==Nick Name
-#Homepage==Homepage
-#eMail==eMail
-#ICQ==ICQ
-#Jabber==Jabber
-#Yahoo!==Yahoo!
-#MSN=MSN
-Comment==Kommentar
-"Save"==Speichern
 
 #-----------------------------------------------------------
 #File: Help.html
@@ -1110,6 +1110,11 @@ embedded URLs, but since embedded image links are loaded by the browser==die auf
 this means that only embedded href-anchors are prefetched additionally.==trifft dies nur auf eingebettet HREF-Anker zu.
 Store to Cache==Speicher im Cache
 It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Es wird empfohlen diese Option immer zu aktivieren. Einzige Ausnahme: Sie haben einen zweiten Proxy als Cache laufen und Yacy soll im "Proxy-zu-Proxy"-Modus laufen.
+Do Remote Indexing==Remote Indexierung
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler andere Peers anfragen und als remote Indexierer f&uuml;r Ihren Crawl nutzen.
+If you need your crawling results locally, you should switch this off.==Sollten Sie Ihre Crawling Ergebnisse lokal ben&ouml;tigen, dann deaktivieren Sie diese Funktion.
+Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl starten oder empfangen.
+Please note that this setting only take effect for a prefetch depth greater than 0.==Bitte ber&uuml;cksichtigen Sie, dass diese Einstellung nur wirkt, wenn Ihre Indizier Tiefe gr&ouml;sser als 0 ist.
 Proxy generally==Proxy Allgemein
 Path==Verzeichnis
 The path where the pages are stored \(max. length 300\)==Verzeichnis in dem der Cache sein soll (max. 300 Zeichen)
@@ -1123,11 +1128,13 @@ Caching is now \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cac
 Cachepath is now set to \'\#\[return\]\#\'.</b> Please move the old data in the new directory.==Der Cache ist nun im Verzeichnis '#[return]#'.</b> Bitte verschieben Sie Ihre alten Daten in das neue Verzeichnis.
 Cachesize is now set to \#\[return\]\#MB.==Die Cache Gr&ouml;sse ist nun auf #[return]#MB gesetzt.
 Changes will take effect after restart only.==&Auml;nderungen werden erst nach einem Neustart von YaCy wirksam.
+Remote Indexing is now \#\(crawlOrder\)\#off::on==Die Remote Indexung ist nun #(crawlOrder)#aus::an
 An error has occurred:==Es trat ein Fehler auf:
 You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransichten von frisch indexierten Seiten
 on the==auf der
 <a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a><a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a>
 Page.==Seite ansehen.
+
 
 #-------------------------------------------------------
 #File: QuickCrawlLink_p.html

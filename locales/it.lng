@@ -62,9 +62,9 @@ was added to the blacklist==&egrave; stato aggiunto alla blacklist
 File:==File:
 
 #-----------------------------------------------------------
-#File: Bookmarks_p.html
+#File: Bookmarks.html
 
-YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
+YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Bookmarks
 <h2>Bookmarks==<h2>Bookmarks
 Add Bookmark==Aggiunti Bookmark
 Edit Bookmark==Modifica Bookmark
@@ -99,6 +99,23 @@ Here are all configuration options from YaCy.==Qui ci sono tutte le opzioni di c
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Puoi cambiare tutto, ma alcune opzioni richiedono il restart, e altre opzioni possono far crashare YaCy, se sono utilizzati valori sbagliati.
 For explanation please look into yacy.init==Per spiegazioni per favore guarda in yacy.init
 "Save"=="Save"
+
+#-------------------------------------------------------
+#File: ConfigProfile_p.html
+
+Your Personal Profile==Il tuo profilo personale
+You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Qui puoi create il tuo profilo personale. Gli altri utenti YaCy vedranno queste informazioni usando il link nella pagina 'Network'.
+You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Non c'&egrave; bisogno di fornire dati personali, ma se vuoi distribuire le informazioni per contattarti, lo puoi fare qui.
+#Name==Nome
+#Nick Name==Nick Name
+#Homepage==Homepage
+#eMail==eMail
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN=MSN
+Comment==Commento
+"Save"==Salva
 
 #-----------------------------------------------------------
 #File: Connections_p.html
@@ -135,23 +152,6 @@ This is a list of Cookies that a browser using the YaCy Proxy has sent to a web 
 Showing==Mostra
 entries from a total of=le entrate per un totale di
 Cookies==Cookies
-
-#-------------------------------------------------------
-#File: EditProfile_p.html
-
-Your Personal Profile==Il tuo profilo personale
-You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Qui puoi create il tuo profilo personale. Gli altri utenti YaCy vedranno queste informazioni usando il link nella pagina 'Network'.
-You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Non c'&egrave; bisogno di fornire dati personali, ma se vuoi distribuire le informazioni per contattarti, lo puoi fare qui.
-#Name==Nome
-#Nick Name==Nick Name
-#Homepage==Homepage
-#eMail==eMail
-#ICQ==ICQ
-#Jabber==Jabber
-#Yahoo!==Yahoo!
-#MSN=MSN
-Comment==Commento
-"Save"==Salva
 
 #-----------------------------------------------------------
 #File: Help.html
