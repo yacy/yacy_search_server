@@ -76,6 +76,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverSystem;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 
@@ -185,6 +186,19 @@ public class yacySeed {
         this.available = 0;
     }
 
+    public static String makeDefaultPeerName() {
+        // generate a default peer name
+        String name = serverCore.publicIP() + "-" + yacyCore.speedKey  + "dpn" + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
+        name = name.replace('.', '-');
+        name = name.replace('_', '-');
+        return name;
+    }
+    
+    public static boolean isDefaultPeerName(String name) {
+        return ((name != null) && (name.length() > 10) && (name.charAt(0) <= '9') && (name.charAt(name.length() - 1) <= '9') && (name.indexOf("dpn") > 0));
+    }
+    
+    
     /**
      * try to get the IP<br>
      * @return the IP or null

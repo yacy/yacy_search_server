@@ -47,6 +47,9 @@
 // javac -classpath .:../classes ConfigBasic_p.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
+
+import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -64,7 +67,9 @@ public class ConfigBasic {
         // return variable that accumulates replacements
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-
+        String langPath = new File(env.getRootPath(), env.getConfig("langPath", "DATA/LOCALE")).toString();
+        String lang = env.getConfig("htLocaleSelection", "default");
+        
         int authentication = sb.adminAuthenticated(header);
         if (authentication < 2) {
             // must authenticate
@@ -72,7 +77,15 @@ public class ConfigBasic {
             return prop;
         }
         
-        serverInstantThread.oneTimeJob(sb.yc, "peerPing", null, 0);
+        if ((yacyCore.seedDB.mySeed.isVirgin()) || (yacyCore.seedDB.mySeed.isJunior())) {
+            serverInstantThread.oneTimeJob(sb.yc, "peerPing", null, 0);
+            try {Thread.sleep(3000);} catch (InterruptedException e) {} // wait a little bit for success of ping
+        }
+        
+        // language settings
+        if ((post != null) && (!(post.get("language", "default").equals(lang)))) {
+            translator.changeLang(env, langPath, post.get("language", "default") + ".lng");
+        }
         
         // password settings
         String user   = (post == null) ? "" : (String) post.get("adminuser", "");
@@ -97,17 +110,14 @@ public class ConfigBasic {
 
         // check if peer name already exists
         yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
-        if ((oldSeed == null) || (env.getConfig("peerName", "").equals(peerName))) {
+        if ((peerName.length() >= 3) && (oldSeed == null) && (!(env.getConfig("peerName", "").equals(peerName)))) {
             // the name is new
             boolean nameOK = (peerName.length() <= 80);
             for (int i = 0; i < peerName.length(); i++) {
                 if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_".indexOf(peerName.charAt(i)) < 0)
                     nameOK = false;
             }
-            if (nameOK) {
-                // set values
-                env.setConfig("peerName", peerName);
-            }
+            if (nameOK) env.setConfig("peerName", peerName);
         }
  
         // check port
@@ -119,15 +129,15 @@ public class ConfigBasic {
         }
         
         // check if values are proper
-        boolean properName = (env.getConfig("peerName","").length() > 0) && (env.getConfig("peerName","0").charAt(0) > '9');
         boolean properPW = (env.getConfig("adminAccount", "").length() == 0) && (env.getConfig("adminAccountBase64MD5", "").length() > 0);
-        boolean properPort = yacyCore.seedDB.mySeed.isSenior();
+        boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
+        boolean properPort = (yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal());
         
         prop.put("statusName", (properName) ? 1 : 0);
         prop.put("statusPassword", (properPW) ? 1 : 0);
         prop.put("statusPort", (properPort) ? 1 : 0);
-        if (properName) {
-            if (properPW) {
+        if (properPW) {
+            if (properName) {
                 if (properPort) {
                     prop.put("nextStep", 0);
                 } else {
@@ -144,7 +154,17 @@ public class ConfigBasic {
         prop.put("defaultName", env.getConfig("peerName", ""));
         prop.put("defaultUser", "admin");
         prop.put("defaultPort", env.getConfig("port", "8080"));
-
+        lang = env.getConfig("htLocaleSelection", "default"); // re-assign lang, may have changed
+        if (lang.equals("default")) {
+            prop.put("langDeutsch", 0);
+            prop.put("langEnglish", 1);
+        } else if (lang.equals("de")) {
+            prop.put("langDeutsch", 1);
+            prop.put("langEnglish", 0);
+        } else {
+            prop.put("langDeutsch", 0);
+            prop.put("langEnglish", 0);
+        }
         return prop;
     }
     

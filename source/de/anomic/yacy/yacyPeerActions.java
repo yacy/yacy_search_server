@@ -59,7 +59,6 @@ import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
-import de.anomic.server.serverSystem;
 import de.anomic.tools.disorderSet;
 import de.anomic.yacy.yacySeed;
 
@@ -97,10 +96,7 @@ public class yacyPeerActions {
     public void updateMySeed() {
         if (sb.getConfig("peerName", "anomic").equals("anomic")) {
             // generate new peer name
-            String newPeerName = serverCore.publicIP() + yacyCore.speedKey + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
-            newPeerName = newPeerName.replace('.', '-');
-            newPeerName = newPeerName.replace('_', '-');
-            sb.setConfig("peerName", newPeerName);
+            sb.setConfig("peerName", yacySeed.makeDefaultPeerName());
         }
         seedDB.mySeed.put(yacySeed.NAME, sb.getConfig("peerName", "nameless"));
         if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {

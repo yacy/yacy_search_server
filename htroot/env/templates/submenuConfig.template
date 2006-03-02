@@ -1,14 +1,17 @@
 <table width="100%" border="0" cellpadding="0" cellspacing="0" class="SubMenu">
-<tr height="10"><td colspan="5" class="MenuHeader">&nbsp;Peer Configuration Menu</td></tr>
-<tr height="2"><td colspan="5"></td></tr>
+<tr height="10"><td colspan="7" class="MenuHeader">&nbsp;Peer Configuration Menu</td></tr>
+<tr height="2"><td colspan="7"></td></tr>
 <tr class="TableHeader">
-<td width="40%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
-<a href="/ConfigBasic.html" class="MenuItemLink">Basic Configuraion</a>&nbsp;</td>
+<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<a href="/ConfigBasic.html" class="MenuItemLink">Basic Settings</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="40%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
-<a href="/ConfigProfile_p.html" class="MenuItemLink">Profile Configuraion</a>&nbsp;</td>
+<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<a href="/ConfigLanguage_p.html" class="MenuItemLink">Language</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="20%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
-<a href="/ConfigAdvanced_p.html" class="MenuItemLink">Advanced Configuration</a>&nbsp;</td>
+<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<a href="/ConfigProfile_p.html" class="MenuItemLink">Profile</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<a href="/ConfigAdvanced_p.html" class="MenuItemLink">Advanced</a>&nbsp;</td>
 </tr>
 </table>

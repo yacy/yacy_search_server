@@ -51,8 +51,10 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
@@ -60,6 +62,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.lang.IndexOutOfBoundsException;
 
+import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.data.listManager;
 
@@ -228,4 +231,44 @@ public class translator {
         return true;
     }
 
+    public static HashMap langMap(serverSwitch env) {
+        String[] ms = env.getConfig("htLocaleLang", "").split(",");
+        HashMap map = new HashMap();
+        int p;
+        for (int i = 0; i < ms.length; i++) {
+            p = ms[i].indexOf("/");
+            if (p > 0)
+                map.put(ms[i].substring(0, p), ms[i].substring(p + 1));
+        }
+        return map;
+    }
+        
+    public static boolean changeLang(serverSwitch env, String langPath, String lang) {
+        if ((lang.equals("default")) || (lang.equals("default.lng"))) {
+            env.setConfig("htLocaleSelection", "default");
+            return true;
+        }
+        String htRootPath = env.getConfig("htRootPath", "htroot");
+        File sourceDir = new File(env.getRootPath(), htRootPath);
+        File destDir = new File(env.getConfig("htLocalePath","DATA/HTDOCS/locale"), lang.substring(0, lang.length() - 4));// cut
+        // .lng
+        //File destDir = new File(env.getRootPath(), htRootPath + "/locale/" + lang.substring(0, lang.length() - 4));// cut
+        // .lng
+        File translationFile = new File(langPath, lang);
+
+        //if (translator.translateFiles(sourceDir, destDir, translationFile, "html")) {
+        if(translator.translateFilesRecursive(sourceDir, destDir,
+        translationFile, "html,template,inc", "locale")){
+            env.setConfig("htLocaleSelection", lang.substring(0, lang.length() - 4));
+            try {
+                BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+                bw.write(env.getConfig("svnRevision", "Error getting Version"));
+                bw.close();
+            } catch (IOException e) {
+                // Error
+            }
+            return true;
+        }
+        return false;
+    }
 }

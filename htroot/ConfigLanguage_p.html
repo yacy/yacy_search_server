@@ -6,7 +6,8 @@
 	</head>
 	<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 	#%env/templates/header.template%#
-	<br><br>
+	#%env/templates/submenuConfig.template%#
+	<br>
 		<h2>Language selection</h2>
 	<p>
 	You can change the language of the YaCy-webinterface with translation files. 
@@ -41,7 +42,7 @@
 				Available Languages:
 				</td>
 				<td valign="top" class="TableCellLight">
-<form action="Language_p.html">
+<form action="ConfigLanguage_p.html">
 <select size="10" name="lang">
 #{langlist}#
 <option value="#[file]#">#[name]#</option>
@@ -54,7 +55,7 @@
 </tr>
 <tr>
 <td valign="top" class="TableCellDark">
-<form action="Language_p.html">
+<form action="ConfigLanguage_p.html">
 Install new language from URL:
 </td>
 <td valign="top" class="TableCellLight">
