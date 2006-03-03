@@ -243,7 +243,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         // 0 = fail, 1 = block, 2= grow        
         this.sessionPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
         this.sessionPoolConfig.minEvictableIdleTimeMillis = this.thresholdSleep; 
-        this.sessionPoolConfig.timeBetweenEvictionRunsMillis = 30000;
+        //this.sessionPoolConfig.timeBetweenEvictionRunsMillis = 30000;
         this.sessionPoolConfig.testOnReturn = true;
         
         this.theSessionPool = new SessionPool(new SessionFactory(this.theSessionThreadGroup),this.sessionPoolConfig);        

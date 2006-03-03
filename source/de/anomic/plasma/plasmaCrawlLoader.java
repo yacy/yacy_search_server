@@ -99,7 +99,7 @@ public final class plasmaCrawlLoader extends Thread {
         // 0 = fail, 1 = block, 2= grow        
         this.crawlerPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
         this.crawlerPoolConfig.minEvictableIdleTimeMillis = 30000; 
-        this.crawlerPoolConfig.timeBetweenEvictionRunsMillis = 30000;
+        //this.crawlerPoolConfig.timeBetweenEvictionRunsMillis = 30000;
 //        config.testOnReturn = true;
 
         CrawlerFactory theFactory = new CrawlerFactory(
