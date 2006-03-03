@@ -394,7 +394,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             if(sb != null){
                 String staticIP=sb.getConfig("staticIP", "");
-                if( (!staticIP.equals("")) && sb.getConfig("yacyDebugMode", "false").equals("true") ){
+                if( (!staticIP.equals("")) ){
                     return staticIP;
                 }
             }
