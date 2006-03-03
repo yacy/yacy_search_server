@@ -13,7 +13,7 @@
 <table width="80%" border="1" cellpadding="0" cellspacing="0">
 <tr class="TableHeader"><td align="left">#[date]#</td><td>by #[author]#</td></tr>
 <tr class="WikiBackground"><td colspan=2 align="left"><h2>#[subject]#</h2><br>#[page]#</td><td></td></tr>
-<tr class="TableHeader"><td colspan=2 align="left"><a href="Blog.html?page=#[pageid]#">link</a>#(admin)#:: - <a href="Blog.html?page=#[pageid]#&edit=true">edit</a>#(/admin)#</td><td></td></tr>
+<tr class="TableHeader"><td colspan=2 align="left"><a href="Blog.html?page=#[pageid]#">link</a>#(admin)#:: - <a href="Blog.html?page=#[pageid]#&edit=true">edit</a> - <a href="Blog.html?page=#[pageid]#&delete=try">delete</a>#(/admin)#</td><td></td></tr>
 </table>
 <br>
 #{/entries}#
@@ -27,7 +27,6 @@
 <p>Subject:<br><input name="subject" type="text" size="20" maxlength="80" value="#[subject]#"></p>
 <p>Text:<br><textarea name="content" cols="80" rows="24">#[page-code]#</textarea></p>
 <input type="hidden" name="page" value="#[pageid]#">
-<input type="hidden" name="reason" value="edit">
 <input type="submit" name="submit" value="Submit">
 <input type="submit" name="preview" value="Preview">
 <input type="submit" name="view" value="Discard">
@@ -46,7 +45,6 @@
 <p>Subject:<br><input name="subject" type="text" size="20" maxlength="80" value="#[subject]#"></p>
 <p>Text:<br><textarea name="content" cols="80" rows="24">#[page-code]#</textarea></p>
 <input type="hidden" name="page" value="#[pageid]#">
-<input type="hidden" name="reason" value="edit">
 <input type="submit" name="submit" value="Submit">
 <input type="submit" name="preview" value="Preview">
 <input type="submit" name="view" value="Discard">
@@ -55,6 +53,18 @@
 <!-- 3: Access Denied (no rights) -->
 <h3>Access denied</h3>
 To edit or create blog-entries you need to be logged in as Admin or User that has Blog rights.
+::
+<!-- 4: Delete Confirmation -->
+<h3>Are you sure...</h3>
+... that you want to delete <b>#[subject]#</b> by #[author]#?<br><br>
+<form action="Blog.html" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+<input type="hidden" name="delete" value="sure">
+<input type="hidden" name="page" value="#[pageid]#">
+<input type="submit" value="Yes, delete it.">
+</form><br>
+<form action="Blog.html" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+<input type="submit" value="No, leave it.">
+</form>
 #(/mode)#
 #%env/templates/footer.template%#
 </body>

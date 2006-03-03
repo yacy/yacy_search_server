@@ -53,6 +53,10 @@ public class Blog {
 	        		author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous");
 	        }
 	    }
+		
+		if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
+			switchboard.blogDB.delete(pagename);
+		}
 	        
 		if (post.containsKey("submit") && (hasRights)) {
 			// store a new/edited blog-entry
@@ -100,6 +104,15 @@ public class Blog {
 	            prop.put("mode_date", dateString(new Date()));
 	            prop.put("mode_page", wikiTransformer.transform(post.get("content", "")));
 	            prop.put("mode_page-code", post.get("content", "").replaceAll("<","&lt;").replaceAll(">","&gt;"));
+			}
+			else prop.put("mode",3); //access denied (no rights)
+		}
+		else if(post.containsKey("delete") && post.get("delete").equals("try")) {
+			if(hasRights) {
+				prop.put("mode",4);
+				prop.put("mode_pageid",pagename);
+				prop.put("mode_author",page.author());
+				prop.put("mode_subject",page.subject());
 			}
 			else prop.put("mode",3); //access denied (no rights)
 		}
@@ -155,6 +168,10 @@ public class Blog {
 	        	prop.put("mode_entries_0_author", page.author());
 	        	prop.put("mode_entries_0_date", dateString(page.date()));
 	        	prop.put("mode_entries_0_page", wikiTransformer.transform(page.page()));
+	        	if(hasRights) {
+    				prop.put("mode_entries_0_admin", 1);
+    				prop.put("mode_entries_0_admin_pageid",page.key());
+    			}
 	        }
 		}
 

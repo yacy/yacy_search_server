@@ -222,6 +222,13 @@ public class blogBoard {
     	}
     }
     
+    public void delete(String key) {
+    	key = normalize(key);
+    	try {
+			datbase.remove(key);
+		} catch (IOException e) { }
+    }
+    
     public Iterator keys(boolean up) throws IOException {
 	return datbase.keys(up, false);
     }
