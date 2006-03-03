@@ -43,7 +43,7 @@
 //javac -classpath .:../classes PerformanceMemory_p.java
 //if the shell's current path is HTROOT
 
-import java.util.Iterator;
+//import java.util.Iterator;
 import java.util.Map;
 import java.io.File;
 
@@ -55,7 +55,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyCore;
-import de.anomic.kelondro.kelondroObjectSpace;
+//import de.anomic.kelondro.kelondroObjectSpace;
 
 public class PerformanceMemory_p {
     
@@ -226,6 +226,7 @@ public class PerformanceMemory_p {
         String Xms = env.getConfig("javastart_Xms", "Xms10m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
 
+        /*
         // create statistics about write cache object space
         int chunksizes = ((kelondroObjectSpace.statAlive().size() > 0) &&
                           (kelondroObjectSpace.statHeap().size() > 0)) ?
@@ -259,6 +260,7 @@ public class PerformanceMemory_p {
         prop.put("sizes", Integer.toString(c));
         prop.put("alive", Integer.toString(c));
         prop.put("heap" , Integer.toString(c));
+        */
         
         // other caching structures
         long amount = sb.urlPool.errorURL.existsIndexSize();
