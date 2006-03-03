@@ -87,6 +87,19 @@ public class ConfigProfile_p {
 
             profile.setProperty("comment", (String)post.get("comment"));
 
+
+            prop.put("name", profile.getProperty("name", ""));
+            prop.put("nickname", profile.getProperty("nickname", ""));
+            prop.put("homepage", profile.getProperty("homepage", ""));
+            prop.put("email", profile.getProperty("email", ""));
+
+            prop.put("icq", profile.getProperty("icq", ""));
+            prop.put("jabber", profile.getProperty("jabber", ""));
+            prop.put("yahoo", profile.getProperty("yahoo", ""));
+            prop.put("msn", profile.getProperty("msn", ""));
+
+            prop.put("comment", profile.getProperty("comment", ""));
+
             // write new values
             FileOutputStream fileOut = null;
             try {
@@ -104,17 +117,19 @@ public class ConfigProfile_p {
             }
         }
 
-        prop.put("name", profile.getProperty("name", ""));
-        prop.put("nickname", profile.getProperty("nickname", ""));
-        prop.put("homepage", profile.getProperty("homepage", ""));
-        prop.put("email", profile.getProperty("email", ""));
+        else{
+            prop.put("name", profile.getProperty("name", ""));
+            prop.put("nickname", profile.getProperty("nickname", ""));
+            prop.put("homepage", profile.getProperty("homepage", ""));
+            prop.put("email", profile.getProperty("email", ""));
 
-        prop.put("icq", profile.getProperty("icq", ""));
-        prop.put("jabber", profile.getProperty("jabber", ""));
-        prop.put("yahoo", profile.getProperty("yahoo", ""));
-        prop.put("msn", profile.getProperty("msn", ""));
+            prop.put("icq", profile.getProperty("icq", ""));
+            prop.put("jabber", profile.getProperty("jabber", ""));
+            prop.put("yahoo", profile.getProperty("yahoo", ""));
+            prop.put("msn", profile.getProperty("msn", ""));
 
-        prop.put("comment", profile.getProperty("comment", ""));
+            prop.put("comment", profile.getProperty("comment", ""));
+        }
 
         return prop;
     }
