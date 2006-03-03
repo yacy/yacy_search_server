@@ -128,14 +128,11 @@ public final class hello {
             }
 
             // we are only allowed to connect to the client IP address if it's not our own address
-            if (!isLocalIP) {
+            if (!isLocalIP && ! serverCore.useStaticIP) {
                 serverCore.checkInterruption();
                 
                 prop.put(yacySeed.YOURIP, clientip);
-                if(reportedip!=null && !reportedip.equals(""))
-                    remoteSeed.put(yacySeed.IP, reportedip);
-                else
-                    remoteSeed.put(yacySeed.IP, clientip);
+                remoteSeed.put(yacySeed.IP, clientip);
                 urls = yacyClient.queryUrlCount(remoteSeed);
             }
         }
