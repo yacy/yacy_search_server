@@ -23,6 +23,7 @@
 <td class="small" >Transfered Words</td>
 <td class="small" >Delete<br>Index</td>
 <td class="small" >Remote<br>Peer</td>
+<td class="small" >Overwrite IP<br />(blank for defaultip)</td>
 <td class="small" >Start/Stop Transfer</td>
 </tr>
 #(running)#
@@ -44,6 +45,9 @@
 		<option value="#[hosthash]#">#[hostname]#</option>
 	#{/hosts}#
 	</select>
+</td>
+<td class="small">
+	<input type="text" name="overwriteIP">
 </td>
 <td class="small">
 	<input type="submit" name="startIndexTransfer" value="Start Index Transfer">

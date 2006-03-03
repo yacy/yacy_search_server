@@ -73,7 +73,10 @@ public final class IndexTransfer_p {
                 if (seed == null) {
                     prop.put("running_status","Disconnected peer");
                 } else {                    
-                    boolean deleteIndex = post.get("deleteIndex", "0").equals("1");                    
+                    boolean deleteIndex = post.get("deleteIndex", "0").equals("1");
+                    if(prop.containsKey("overwriteIP") && ! ((String)prop.get("overwriteIP")).equals("")){
+                        seed.setIP((String) prop.get("overwriteIP"));
+                    }
                     switchboard.startTransferWholeIndex(seed,deleteIndex);
                     prop.put("LOCATION","");
                     return prop;
