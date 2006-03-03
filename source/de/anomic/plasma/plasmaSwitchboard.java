@@ -743,19 +743,22 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     synchronized public boolean htEntryStoreProcess(plasmaHTCache.Entry entry) throws IOException {
         
         if (entry == null) return false;
+
+        /* =========================================================================
+         * PARSER SUPPORT
+         * 
+         * Testing if the content type is supported by the available parsers
+         * ========================================================================= */
+        boolean isSupportedContent = (entry.responseHeader != null) &&
+                                     plasmaParser.supportedContent(entry.url,entry.responseHeader.mime());
         
-        // store response header
-        if (entry.responseHeader != null) {
-            this.cacheManager.storeHeader(entry.nomalizedURLHash, entry.responseHeader);
-            this.log.logInfo("WROTE HEADER for " + entry.cacheFile);
-        }
-        
-        /*
-         * Evaluating request header:
+        /* =========================================================================
+         * INDEX CONTROL HEADER
+         * 
          * With the X-YACY-Index-Control header set to "no-index" a client could disallow
          * yacy to index the response returned as answer to a request
-         */
-        boolean doIndexing = true;
+         * ========================================================================= */
+        boolean doIndexing = true;        
         if (entry.requestHeader != null) {
             if (
             (entry.requestHeader.containsKey(httpHeader.X_YACY_INDEX_CONTROL)) &&
@@ -763,9 +766,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             ) {
                 doIndexing = false;
             }
-        }
+        }        
         
-        // check if ip is local ip address
+        /* =========================================================================
+         * LOCAL IP ADDRESS CHECK
+         * 
+         * check if ip is local ip address
+         * ========================================================================= */
         InetAddress hostAddress = httpc.dnsResolve(entry.url.getHost());
         if (hostAddress == null) {
             this.log.logFine("Unknown host in URL '" + entry.url + "'. Will not be indexed.");
@@ -778,20 +785,41 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             doIndexing = false;                  
         }
         
-        // work off unwritten files
-        if (entry.cacheArray == null)  {
-            this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
-        } else {
-            String error = entry.shallStoreCacheForProxy();
-            if (error == null) {
-                this.cacheManager.writeFile(entry.url, entry.cacheArray);
-                this.log.logFine("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
+        /* =========================================================================
+         * STORING DATA
+         * 
+         * Now we store the response header and response content if 
+         * a) the user has configured to use the htcache or
+         * b) the content should be indexed
+         * ========================================================================= */        
+        if (
+                (entry.profile.storeHTCache()) ||
+                (doIndexing && isSupportedContent)
+        ) {
+            // store response header
+            if (entry.responseHeader != null) {
+                this.cacheManager.storeHeader(entry.nomalizedURLHash, entry.responseHeader);
+                this.log.logInfo("WROTE HEADER for " + entry.cacheFile);
+            }        
+            
+            // work off unwritten files
+            if (entry.cacheArray == null)  {
+                this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
             } else {
-                this.log.logFine("WRITE OF FILE " + entry.cacheFile + " FORBIDDEN: " + error);
+                String error = entry.shallStoreCacheForProxy();
+                if (error == null) {
+                    this.cacheManager.writeFile(entry.url, entry.cacheArray);
+                    this.log.logFine("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
+                } else {
+                    this.log.logFine("WRITE OF FILE " + entry.cacheFile + " FORBIDDEN: " + error);
+                }
             }
         }
         
-        if ((doIndexing) && plasmaParser.supportedContent(entry.url,entry.responseHeader.mime())){
+        /* =========================================================================
+         * INDEXING
+         * ========================================================================= */          
+        if (doIndexing && isSupportedContent){
             
             // registering the cachefile as in use
             if (entry.cacheFile.exists()) {
@@ -804,6 +832,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             entry.initiator(), entry.depth, entry.profile.handle(),
             entry.name()
             ));
+        } else {
+            if (!entry.profile.storeHTCache() && entry.cacheFile.exists()) {
+                this.cacheManager.deleteFile(entry.url);                
+            }
         }
         
         return true;

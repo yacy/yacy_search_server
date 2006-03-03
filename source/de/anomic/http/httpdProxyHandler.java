@@ -625,8 +625,21 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     res.statusText, 
                     res.responseHeader);
             
-            String storeError;
-            if ((storeError = cacheEntry.shallStoreCacheForProxy()) == null) {
+            String storeError = cacheEntry.shallStoreCacheForProxy();
+            boolean storeHTCache = cacheEntry.profile.storeHTCache();
+            boolean isSupportedContent = plasmaParser.supportedContent(plasmaParser.PARSER_MODE_PROXY,cacheEntry.url,cacheEntry.responseHeader.mime());
+            if (
+                    /*
+                     * Now we store the response into the htcache directory if 
+                     * a) the response is cacheable AND 
+                     */
+                    (storeError == null) &&
+                    /*  
+                     * b) the user has configured to use the htcache OR
+                     * c) the content should be indexed
+                     */
+                    ((storeHTCache) || (isSupportedContent))
+            ) {
                 // we write a new cache entry
                 if ((contentLength > 0) && (contentLength < 1048576)) // if the length is known and < 1 MB
                 {
@@ -684,7 +697,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 }
             } else {
                 // no caching
-                this.theLogger.logFine(cacheFile.toString() + " not cached: " + storeError);
+                this.theLogger.logFine(cacheFile.toString() + " not cached." +
+                        " StoreError=" + ((storeError==null)?"None":storeError) + 
+                        " StoreHTCache=" + storeHTCache + 
+                        " SupportetContent=" + isSupportedContent);
+                
                 res.writeContent(hfos, null);
                 if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
                 if (sizeBeforeDelete == -1) {

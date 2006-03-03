@@ -785,8 +785,8 @@ public final class plasmaHTCache {
         // returns NULL if the answer is TRUE
         // in case of FALSE, the reason as String is returned
 
-        // check profile
-        if (!this.profile.storeHTCache()) { return "storage_not_wanted"; }
+        // check profile (disabled: we will check this in the plasmaSwitchboard)
+        //if (!this.profile.storeHTCache()) { return "storage_not_wanted"; }
 
         // decide upon header information if a specific file should be stored to the cache or not
         // if the storage was requested by prefetching, the request map is null
