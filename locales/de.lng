@@ -63,6 +63,29 @@ was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
 File:==Datei:
 
 #-----------------------------------------------------------
+#File: Blog.html
+
+>by==>von
+>edit==>editieren
+>delete==>l&ouml;schen
+show more entries==zeige weitere Eintr&auml;ge
+new entry==Neuer Eintrag
+Blog-Home==Blog-Startseite
+Author:==Autor:
+Subject:==Titel:
+"Submit">=="Absenden">
+"Preview">=="Vorschau">
+"Discard">=="Verwerfen">
+>Preview==>Vorschau
+No changes have been submitted so far!==Es wurden noch keine &Auml;nderungen &uuml;bertragen!
+Access denied==Zugriff verweigert
+To edit or create blog-entries you need to be logged in as Admin or User that has Blog rights.==Um Blogeintr&auml;ge zu ver&auml;ndern oder zu erstellen m&uuml;ssen Sie als Admin oder User mit Blog-Rechten eingeloggt sein.
+Are you sure==Sind Sie sicher
+that you want to delete <b>\#\[subject\]\#</b> by \#\[author\]\#?==dass Sie <b>#[subject]#</b> von #[author]# l&ouml;schen wollen?
+Yes, delete it.==Ja, l&ouml;schen.
+No, leave it.==Nein, belassen.
+
+#-----------------------------------------------------------
 #File: Bookmarks.html
 
 YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
@@ -116,12 +139,12 @@ For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in de
 #File: ConfigBasic.html
 
 YaCy \'\#\[clientname\]\#\': Advanced Config==YaCy '#[clientname]#': Grundeinstellungen
-#wrong translation, but correct sense...
+Select a language for the interface==Wählen Sie eine Sprache für das Interface
 Basic Configuration==Grundeinstellungen
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer ben&ouml;tigt einige Grundinformationen um korrekt zu funktionieren
 Your peer name has not been customized==Ihr Peername wurde noch nicht angepasst
 please set your own peer name==bitte setzen Sie einen eigenen Peernamen ein
-You have a nice peer name==Sie haben einen schönen Peernamen
+You have a nice peer name==Sie haben einen sch&ouml;nen Peernamen
 Peer Name:==Peer-Name:
 Please set a password for your peer to protect your settings==Bitte setzen Sie ein Passwort f&uuml;r Ihren Peer um Ihre Einstellungen zu sch&uuml;tzen
 > 3 characters==mehr als 3 Zeichen
@@ -144,6 +167,10 @@ just <==Einfach <
 monitor at the network page what the other peers are doing==auf der Netzwerkseite schauen was die anderen Peers tun
 to shut down your peer, please go to the==Um Ihren Peer herunterzufahren gehen Sie bitte auf die
 Status Page==Status-Seite
+start an uncensored search==unzensiert Suchen
+start your own crawl</a> and contribute to the global index, or create your own private web index==einen eigenen Crawl starten</a> und zum globalen Index beitragen, oder einen eigenen privaten Webindex aufbauen
+set a personal peer profile</a> (optional settings);==ein eigenes Peer-Profil angeben</a> (freiwillige Angabe);
+monitor at the network page</a> what the other peers are doing==auf der Netzwerkseite beobachten</a> was andere Peers gerade machen
 and click on the Shutdown button.==und klicken auf den "Herunterfahren"-Button
 Your Peer name is a default name; please set another peer name.==Ihr Peer-Name ist ein Standardname; bitte nutzen Sie einen anderen.
 If this does not work, the name is probably taken by someone else.==Falls das nicht funktioniert wird der Name wahrscheinlich bereits von jemand anderem verwendet.
@@ -1128,7 +1155,7 @@ Caching is now \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cac
 Cachepath is now set to \'\#\[return\]\#\'.</b> Please move the old data in the new directory.==Der Cache ist nun im Verzeichnis '#[return]#'.</b> Bitte verschieben Sie Ihre alten Daten in das neue Verzeichnis.
 Cachesize is now set to \#\[return\]\#MB.==Die Cache Gr&ouml;sse ist nun auf #[return]#MB gesetzt.
 Changes will take effect after restart only.==&Auml;nderungen werden erst nach einem Neustart von YaCy wirksam.
-Remote Indexing is now \#\(crawlOrder\)\#off::on==Die Remote Indexung ist nun #(crawlOrder)#aus::an
+Remote Indexing is now \#\(crawlOrder\)\#off::on==Remote-Indexieren ist nun #(crawlOrder)#aus::an
 An error has occurred:==Es trat ein Fehler auf:
 You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransichten von frisch indexierten Seiten
 on the==auf der

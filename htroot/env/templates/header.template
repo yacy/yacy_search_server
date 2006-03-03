@@ -54,9 +54,9 @@
   <tr><td class="MenuSpacer"></td></tr>
 
   <tr><td class="MenuHeader">&nbsp;Peer&nbsp;Control</td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/Status.html" accesskey="t" class="MenuItemLink">Status &amp; Shutdown</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/ConfigBasic.html" class="MenuItemLink">Basic Configuration</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/Settings_p.html" class="MenuItemLink">Advanced Settings</a></td></tr>
-  <tr><td class="MenuItem">&nbsp;<a href="/Status.html" accesskey="t" class="MenuItemLink">Status &amp; Shutdown</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/Network.html" accesskey="w" class="MenuItemLink">Network Monitor</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/News.html" accesskey="n" class="MenuItemLink">News System</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;<a href="/ViewLog_p.html" class="MenuItemLink">Log</a></td></tr>
