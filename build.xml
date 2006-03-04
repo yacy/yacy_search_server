@@ -65,6 +65,7 @@
 <property name="build" location="classes"/>
 <property name="htroot" location="htroot"/>
 <property name="locales" location="locales"/>
+<property name="ranking" location="ranking"/>
 <property name="release" location="RELEASE"/>
 <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
 <property name="release_main" location="${release}/MAIN"/>
@@ -459,6 +460,13 @@
 	  <!-- copy add-on's -->
 	<copy todir="${release_main}/addon">
 	  <fileset dir="${addon}">
+	     <include name="**/*"/>
+	  </fileset>
+	</copy>
+
+	  <!-- copy ranking files -->
+	<copy todir="${release_main}/ranking">
+	  <fileset dir="${ranking}">
 	     <include name="**/*"/>
 	  </fileset>
 	</copy>
