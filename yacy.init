@@ -45,7 +45,7 @@ htDocsPath = DATA/HTDOCS
 # The complete path to this file is created by combination with the rootPath
 # you can set a list of defaults, separated by comma
 # the first one is priorized
-defaultFiles = index.html,default.html,search.html,console.html,control.html,welcome.html,wiki.html,forum.html,blog.html,email.html,content.html,monitor.html,share.html,dir.html,readme.txt
+defaultFiles = ConfigBasic.html,index.html,default.html,search.html,console.html,control.html,welcome.html,wiki.html,forum.html,blog.html,email.html,content.html,monitor.html,share.html,dir.html,readme.txt
 
 # locale-options: YaCy supports localization.
 # Web pages for special languages are located in the htLocalePath

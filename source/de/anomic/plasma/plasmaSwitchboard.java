@@ -1858,7 +1858,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
                             // suppress line: there is no match in that resource
                         } else {
-                            prop.put("results_" + i + "_delete", "/index.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
+                            prop.put("results_" + i + "_delete", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
                             prop.put("results_" + i + "_description", descr);
                             prop.put("results_" + i + "_url", urlstring);
                             prop.put("results_" + i + "_urlhash", urlhash);

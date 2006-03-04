@@ -133,6 +133,10 @@ public class ConfigBasic {
         boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
         boolean properPort = (yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal());
         
+        if ((properPW) && (env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
+        		env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
+        }
+        
         prop.put("statusName", (properName) ? 1 : 0);
         prop.put("statusPassword", (properPW) ? 1 : 0);
         prop.put("statusPort", (properPort) ? 1 : 0);

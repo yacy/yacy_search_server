@@ -4,7 +4,7 @@
    name="YaCy"
    description="YaCy P2P Websearch"
    method="GET"
-   action="http://#[host]#:#[port]#/index.html"
+   action="http://#[host]#:#[port]#/yacysearch.html"
    queryEncoding="utf-8"
    queryCharset="utf-8"   
 >

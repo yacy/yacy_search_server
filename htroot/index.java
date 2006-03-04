@@ -106,7 +106,7 @@ public class index {
             prop.put("excluded", 0);
             prop.put("combine", 0);
             prop.put("resultbottomline", 0);
-            prop.put("count-10", 0);
+            prop.put("count-10", 1);
             prop.put("count-50", 0);
             prop.put("count-100", 0);
             prop.put("count-1000", 0);

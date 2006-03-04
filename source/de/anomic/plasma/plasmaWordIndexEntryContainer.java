@@ -52,6 +52,7 @@
 
 package de.anomic.plasma;
 
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
@@ -121,7 +122,9 @@ public final class plasmaWordIndexEntryContainer {
         Iterator i = c.entries();
         int x = 0;
         while (i.hasNext()) {
-            if (addi((plasmaWordIndexEntry) i.next())) x++;
+            try {
+                if (addi((plasmaWordIndexEntry) i.next())) x++;
+            } catch (ConcurrentModificationException e) {}
         }
         this.updateTime = java.lang.Math.max(this.updateTime, c.updateTime);
         return x;
