@@ -299,8 +299,6 @@ public final class yacy {
             yacyCore.latestVersion = version;
 
             // read environment
-            //new
-            final String port = sb.getConfig("port", "8080");
             int timeout       = Integer.parseInt(sb.getConfig("httpdTimeout", "60000"));
             if (timeout < 60000) timeout = 60000;
 
@@ -359,6 +357,7 @@ public final class yacy {
             migration.migrate(sb, oldRev, newRev);
             
             // start main threads
+            final String port = sb.getConfig("port", "8080");
             try {
                 final httpd protocolHandler = new httpd(sb, new httpdFileHandler(sb), new httpdProxyHandler(sb));
                 final serverCore server = new serverCore(
@@ -562,7 +561,7 @@ public final class yacy {
         Properties config = configuration("REMOTE-SHUTDOWN", homePath);
 
         // read port
-        int port = Integer.parseInt((String) config.get("port"));
+        int port = serverCore.getPortNr(config.getProperty("port", "8080"));
 
         // read password
         String encodedPassword = (String) config.get("adminAccountBase64MD5");
