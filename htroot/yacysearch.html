@@ -13,17 +13,16 @@
  <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
 
-  <SCRIPT LANGUAGE="JavaScript">
+<SCRIPT LANGUAGE="JavaScript">
 picEmpty = new Image(11, 11);
 picEmpty.src = "/env/grafics/empty.gif";
 picMinus = new Image(11, 11);
 picMinus.src = "/env/grafics/minus.gif";
 picPlus = new Image(11, 11);
 picPlus.src = "/env/grafics/plus.gif";
-  </SCRIPT>
+</SCRIPT>
 
- <form action="yacysearch.html" method="get">
-  <center>
+ <form name="searchform" action="yacysearch.html" method="get">
   <p>
   <table border="0" cellspacing="0" cellpadding="0">
    <tr>
@@ -38,14 +37,13 @@ picPlus.src = "/env/grafics/plus.gif";
 	</tr>
 	<tr>
 	<td>
-     <input name="search" type="text" size="52" maxlength="80" value="#[former]#">
+     <input name="search" type="text" size="52" maxlength="80" value="#[former]#" onMouseOver='document.searchform.Enter.value = "search"' >
     </td>
 	<td>
      <input type="submit" name="Enter" value="Search">
     </td>
 	</tr>
    </table>
-  </center>
   <input type="hidden" name="former" value="#[former]#">
   <input type="hidden" name="count" value="#[count]#">
   <input type="hidden" name="order" value="#[order]#">
@@ -54,6 +52,10 @@ picPlus.src = "/env/grafics/plus.gif";
   <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#">
   </form>
 </p><hr>
+
+<SCRIPT LANGUAGE="JavaScript">
+document.searchform.Enter.value = "search again - catch up more links";
+</SCRIPT>
 
 <p>
 #(excluded)#
@@ -85,12 +87,10 @@ then please run your own peer and start a crawl of your wanted information to ma
 available for everyone. Then stay online to support crawls from other peers. Thank you!</p>
 ::
 <b>#[linkcount]#</b> results from <b>#[orderedcount]#</b> ordered links of a total number of <b>#[totalcount]#</b> known.
-&rarr; <a href="/yacysearch.html?search=#[former]#&Enter=Search&count=#[count]#&order=#[order]#&resource=#[resource]#&time=#[time]#&urlmaskfilter=.*">Catch up more links</a>
-from 'late' peers.
 #(/num-results)#
 #(combine)#
 ::
-<br><br><b>Topwords</b> (to refine search):
+<br><br><b>Refine your search with these topwords</b>:<br>
 #{words}#
 <a href="yacysearch.html?search=#[newsearch]#&Enter=Search&count=#[count]#&order=#[order]#&resource=#[resource]#&time=#[time]#">#[word]#</a>
 #{/words}#
@@ -143,9 +143,7 @@ Architecture (C) by Michael Peter Christen,
 #%env/templates/footer.template%#
 
 <script language="JavaScript">
-
 AllSnippets();
-
 </script> 
 
 </body>
