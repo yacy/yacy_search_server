@@ -121,7 +121,7 @@ Bookmarks per page.==Lesezeichen pro Seite.
 #File: CacheAdmin_p.html
 
 Local Cache Management==Lokale Cache Verwaltung
-Local Cache==Lokaler Cache
+>Local Cache==>Lokaler Cache
 The current cache size is==Die aktuelle Gr&ouml;&szlig;e des Caches betr&auml;gt
 The maximum cache size is==Die maximale Gr&ouml;&szlig;e betr&auml;gt
 
@@ -138,8 +138,7 @@ For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in de
 #-----------------------------------------------------------
 #File: ConfigBasic.html
 
-YaCy \'\#\[clientname\]\#\': Advanced Config==YaCy '#[clientname]#': Grundeinstellungen
-Select a language for the interface==Wählen Sie eine Sprache für das Interface
+Select a language for the interface==W&auml;hlen Sie eine Sprache f&uuml;r das Interface
 Basic Configuration==Grundeinstellungen
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer ben&ouml;tigt einige Grundinformationen um korrekt zu funktionieren
 Your peer name has not been customized==Ihr Peername wurde noch nicht angepasst
@@ -160,18 +159,11 @@ Peer Port:==Peer-Port:
 Set Configuration==Konfiguration speichern
 What you should do next:==Was Sie als n&auml;chstes tun k&ouml;nnen:
 Your basic configuration is complete! You can now \(for example\)==Ihre Grundeinstellungen sind vollst&auml;ndig! Sie k&ouml;nnen jetzt (beispielsweise)
-start searching the web without censoring==Beginnen das Web zensurfrei zu durchsuchen
-start your own crawl and contribute to the global index==Ihren eigenen Crawl starten und zum globalen Index beitragen
-set a personal peer profile \(optional settings\)==Ein pers&ouml;nliches Peer-Profil einstellen
 just <==Einfach <
-monitor at the network page what the other peers are doing==auf der Netzwerkseite schauen was die anderen Peers tun
-to shut down your peer, please go to the==Um Ihren Peer herunterzufahren gehen Sie bitte auf die
-Status Page==Status-Seite
-start an uncensored search==unzensiert Suchen
+start an uncensored search==eine unzensierte Suche beginnen
 start your own crawl</a> and contribute to the global index, or create your own private web index==einen eigenen Crawl starten</a> und zum globalen Index beitragen, oder einen eigenen privaten Webindex aufbauen
-set a personal peer profile</a> (optional settings);==ein eigenes Peer-Profil angeben</a> (freiwillige Angabe);
+set a personal peer profile</a> \(optional settings\)==ein eigenes Peer-Profil angeben</a> (freiwillige Angabe)
 monitor at the network page</a> what the other peers are doing==auf der Netzwerkseite beobachten</a> was andere Peers gerade machen
-and click on the Shutdown button.==und klicken auf den "Herunterfahren"-Button
 Your Peer name is a default name; please set another peer name.==Ihr Peer-Name ist ein Standardname; bitte nutzen Sie einen anderen.
 If this does not work, the name is probably taken by someone else.==Falls das nicht funktioniert wird der Name wahrscheinlich bereits von jemand anderem verwendet.
 Please try to choose another one.==Bitte versuchen Sie einen anderen.
@@ -203,7 +195,6 @@ Comment==Kommentar
 #File: Connections_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy \'\#\[clientname\]\#\': Connection Tracking==YaCy '#[clientname]#': Verbindungsstatus
 Connection Tracking==Verbindungsstatus
 Incoming Connections==Eingehende Verbindungen
 Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt..
@@ -242,7 +233,7 @@ Cookies==Cookies
 #File: Help.html
 
 YaCy: Help==YaCy: Hilfeseiten
-Help==Hilfe
+>Help==>Hilfe
 This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==YaCy ist eine Suchmaschine,  die &auml;hnlich dem Prinzip des verteilten Rechnens (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und Indexieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <i>online-Interface</i> von YaCy. Sie k&ouml;nnen dieses Interface auch zum Konfigurieren Ihrer pers&ouml;nlichen Einstellungen, Proxy-Einstellungen, der Zugriffs-Kontrolle und den Crawl-Einstellungen benutzen. Sie k&ouml;nnen das Interface auch zum Starten von Crawls, Nachrichtenversand an andere YaCy-Nutzer und zur &Uuml;berwachung Ihres Index, Cache-Status und des Crawl-Prozesses benutzen. Besonders wichtig ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <i>globalen</i> Index zu durchsuchen.
 For more detailed information, visit the <a href="http://www.yacy.net/yacy">YaCy homepage</a>==F&uuml;r weitergehende Informationen besuchen Sie bitte die <a href="http://www.yacy.net/yacy">YaCy Homepage</a>
 Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
@@ -428,7 +419,7 @@ To transfer the whole index to an other peer, click==Um den kompletten Index an 
 >here<==>hier<
 To import an index from a file or a foreign peer click==Um einen Index aus einer Datei oder von einem fremden Peer zu importieren, klicken Sie
 Word==Wort
-value="Show URL Entries for Wort:">==value="URL Eintr&auml;ge f&uuml;r Wort zeigen">
+value="Show URL Entries for Word:">==value="URL Eintr&auml;ge f&uuml;r Wort zeigen">
 "Generate List"=="Liste erstellen"
 value="Show URL Entries for Wort:-Hash">==value="Eintr&auml;ge f&uuml;r Wort-Hash zeigen">
 "Transfer to other peer"=="An anderen Peer senden"
@@ -513,7 +504,7 @@ You can monitor the crawling progress either by watching the URL queues==Sie k&o
 <a href="/IndexCreateLoaderQueue_p.html">loader queue</a>,==<a href="/IndexCreateLoaderQueue_p.html">Lade Warteschlange</a>,
 <a href="/IndexCreateLoaderQueue_p.html">indexing queue</a>\)==<a href="/IndexCreateLoaderQueue_p.html">Indexier Warteschlange</a>)
 or see the fill/process count of all queues on the==Oder sehen sehen Sie sich den F&uuml;ll-Prozess von allen Warteschlangen auf der
-<a href="/Performance_p.html">performance page</a>.==<a href="/Performance_p.html">Performance Seite</a> an.
+>performance page</a>.==>Performance-Seite</a> an.
 <a href="IndexMonitor.html">Index Monitor</a>-page.==<a href="IndexMonitor.html">Index Monitor</a>-Seite angezeigt.
 <b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>==<b>Es dauert in der Regel mind. 30 Sekunden bis das Sie dort die ersten Ergebnisse sehen k&ouml;nnen. Bitte beachten Sie, dass das Crawling jedesmal, wenn Sie den Proxy oder den Web-Sever benutzen, pausiert wird, um maximale Verf&uuml;gbarkeit zu garantieren.</b>
 If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Sie Seiten crawlen, die Sie nicht crawlen wollen, k&ouml;nnen Sie diese <a href="IndexControl_p.html">hier</a> l&ouml;schen.
@@ -592,7 +583,7 @@ Depth==Tiefe
 #File: IndexCreateWWWGlobalQueue_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy '\#\[clientname\]\#': Index Creation / Global Crawl Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Globale WWW Warteschlange
+YaCy '\#\[clientname\]\#': Index Creation / WWW Global Crawl Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Globale WWW Warteschlange
 Index Creation: WWW Global Crawl Queue==Index Erzeugung: Globale WWW Warteschlange
 This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Diese Warteschlange enth&auml;t URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuf&uuml;hren.
 If there is no peer for remote crawling available, the links are crawled locally.==Wenn kein Peer zum Remote Crawl vorhanden ist, werden die Links lokal gecrawlt.
@@ -655,15 +646,10 @@ Job Type==Job-Typ
 Status==Status
 Elapsed<br>Time==Verstrichene Zeit
 Time<br>Left==verbl.<br>Zeit
-Word Hash==Wort Hash
-Word<br>Entities==Wort<br>Entities
-Word<br>Entries==Wort<br>Eintr&auml;ge
 Abort Import==Import abbrechen
 Pause Import==Import pausieren
 Finished::Running::Paused==Fertig::Laufend::Pausiert
-"Abort Import"=="Import abbrechen"
-"Pause Import"=="Import pausieren"
-"Continue Import"=="Import fortsetzen"
+Continue Import==Import fortsetzen
 Finished jobs==Fertige Importierungen
 "Clear List"=="Liste l&ouml;schen"
 Last Refresh:==Letzte Aktualisierung:
@@ -770,8 +756,7 @@ Delete<br>Index==Index<br>l&ouml;schen
 true==ja
 false==nein
 Selection==Auswahl
-words==Worte
-words/s==Worte/s
+words<==Worte<
 Last Refresh:==Letzte Aktualisierung:
 Start/Stop Transfer==Starte/Stoppe Transfer
 "Start Index Transfer"=="Starte Index-Transfer"
@@ -801,7 +786,8 @@ Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdat
 #-------------------------------------------------------
 #File: Lab.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-YaCy: Lab==YaCy: Labor
+
+YaCy \'\#\[clientname\]\#\': Lab==YaCy '#[clientname]#': Labor
 The YACY Lab==Das YaCy Labor
 This is the place where we try new functions of the YaCy search engine.==Dies ist ein Platz, an dem wir neue Funktionen der YaCy Suchmaschine testen.
 All these things here are to be considered as probably unstable, and/or experimental.==Alle neuen Funktionen hier sind wahrscheinlich noch unstabil und in einer Experementierphase.
@@ -904,9 +890,8 @@ turquoise font==t&uuml;rkise Schrift
 junior peers==Junior Peers
 red point==roter Punkt
 this peer==Ihr Peer
-You are in online mode, but probably no internet resource is available. Please check you internet connection.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
+You are in online mode, but probably no internet resource is available. Please check your internet connection.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
 You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online-Modus oder Sie benutzen nicht die Proxy-Option.
-
 \('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>==('on-demand - Modus', siehe <a href="http://www.yacy.net/yacy/Installation.html#wininst">hier</a>
 for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den \"Permanent Online\" Modus aktivieren.
 To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Knopf:
@@ -1729,7 +1714,6 @@ Advanced Settings==erweiterte Einstellungen
 #Log==Log
 #Performance==Performance
 >Connections==>Verbindungen
->Language==>Sprache
 #Skins==Skins
 Project Home==Projektseite
 Project News==Neuigkeiten
@@ -1739,6 +1723,15 @@ English Forum==Englisches Forum
 Download YaCy==YaCy herunterladen
 #YaCy Wiki==YaCy Wiki
 >Contact==>Kontakt
+
+#--------------------------------------------------------
+#File: env/templates/submenuConfig.template
+
+Peer Configuration Menu==Peerkonfigurationsmen&uuml;
+Basic Settings==Grundeinstellungen
+>Language==>Sprache
+>Profile==>Profil
+>Advanced==>Erweitert
 
 #--------------------------------------------------------
 #File: env/templates/submenuCookie.template
@@ -1787,7 +1780,7 @@ Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequen
 #--------------------------------------------------------
 #File: htdocsdefault/dir.html
 
-YACY: Public Files==YaCy: &Ouml;ffentliche Dateien
+YaCy: Public Files==YaCy: &Ouml;ffentliche Dateien
 Public&nbsp;File&nbsp;Directory==&Ouml;ffentliches Datei Verzeichnis
 value="\#\[peername\]\#'s Console"==value="#[peername]#s Konsole"
 Welcome! You are identified and authorized as==Willkommen! Sie sind identifiziert und authorisiert als
