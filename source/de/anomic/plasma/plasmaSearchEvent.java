@@ -254,8 +254,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         
         // apply filter
         profileLocal.startTimer();
-        acc.removeDoubleDom();
         //acc.removeRedundant();
+        acc.removeDoubleDom();
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_FILTER);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_FILTER, acc.sizeOrdered());
         

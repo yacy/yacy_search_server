@@ -172,6 +172,7 @@ public final class plasmaSearchResult {
         String dom;
         
         while (i.hasNext()) {
+        		if (pageAcc.size() <= query.wantedResults) return;
             entry = (Map.Entry) i.next();
             dom = ((plasmaCrawlLURL.Entry) entry.getValue()).url().getHost();
             if (doms.contains(dom)) i.remove(); else doms.add(dom);
