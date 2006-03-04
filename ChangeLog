@@ -6,6 +6,11 @@ version 0.44svn
 	* FIXED: /xml/bookmarks/* now uses one file for private/public entries. private only with password.
 	* ADDED: possibility to get the ranking for a url. (Allo)
 	* ADDED: yacy.badwords list to filter the topwords. (Borg-0300)
+	* ADDED: new simplified yacysearch search page, accessed by the normal search interface from index.html (Orbiter)
+	* ADDED: 1-2-3 Config for simple set-up, good for new YaCy users (Orbiter)
+	* UPDATED: index write access (dht transmission, indexing, dht deletion) now completely synchronized (Orbiter)
+	* FIXED: conjunctive search was broken because of wrong data structures, fixed (Orbiter)
+	* UPDATED: more ranking attributes (Orbiter)
 	
 version 0.43
 	* UPDATED: new database handling of index entry objects, less IO overhead (Orbiter)
