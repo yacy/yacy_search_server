@@ -41,7 +41,7 @@ public class httpdSoapService
     /**
      * Constant: template for searching
      */
-    private static final String TEMPLATE_SEARCH = "index.soap";
+    private static final String TEMPLATE_SEARCH = "yacysearch.soap";
     /**
      * Constant: template for the network status page
      */    
