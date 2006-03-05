@@ -94,6 +94,7 @@ import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.data.listManager;
 
 /**
 * This is the main class of YaCy. Several threads are started from here:
@@ -106,7 +107,7 @@ import de.anomic.yacy.yacySeedDB;
 * loaded.
 * <li>one serverCore - thread is started, which implements a multi-threaded
 * server. The process may start itself many more processes that handle
-* connections.
+* connections.lo
 * <li>finally, all idle-dependent processes are written in a queue in
 * plasmaSwitchboard which are worked off inside an idle-sensitive loop of the
 * main process. (here)
@@ -388,7 +389,9 @@ public final class yacy {
 
                     //Copy the shipped locales into DATA
                     final File localesPath = new File(homePath, sb.getConfig("localesPath", "DATA/LOCALE"));
+                    final File skinsPath = new File(homePath, sb.getConfig("skinsPath", "DATA/SKINS"));
                     final File defaultLocalesPath = new File(homePath, "locales");
+                    final File defaultSkinsPath = new File(homePath, "skins");
 
                     try{
                         final File[] defaultLocales = defaultLocalesPath.listFiles();
@@ -400,6 +403,13 @@ public final class yacy {
                         serverLog.logInfo("STARTUP", "Copied the default locales to DATA/LOCALE");
                     }catch(NullPointerException e){
                         serverLog.logSevere("STARTUP", "Nullpointer Exception while copying the default Locales");
+                    }
+                    final String[] skinFiles = listManager.getDirListing(defaultSkinsPath.getAbsolutePath());
+                    skinsPath.mkdirs();
+                    for(int i=0;i<skinFiles.length;i++){
+                        if(skinFiles[i].endsWith(".css")){
+                            serverFileUtils.copy(new File(defaultSkinsPath, skinFiles[i]), new File(skinsPath, skinFiles[i]));
+                        }
                     }
 
                     //regenerate Locales from Translationlist, if needed
