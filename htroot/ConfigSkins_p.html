@@ -6,8 +6,9 @@
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
-<br><br>
-<h2>Skin selection</h2>
+#%env/templates/submenuConfig.template%#
+<br>
+<h2>Skin Selection</h2>
 <p>
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.</p>
 <p>
@@ -28,7 +29,7 @@ Available Skins:
 				</td>
 				<td valign="top" class="TableCellLight">
 
-<form action="Skins_p.html">
+<form action="ConfigSkins_p.html">
 <select size="10" name="skin">
 #{skinlist}#
 <option value="#[file]#">#[name]#</option>
@@ -42,7 +43,7 @@ Available Skins:
 </tr>
 <tr>
 <td valign="top" class="TableCellDark">
-<form action="Skins_p.html">
+<form action="ConfigSkins_p.html">
 Install new skin from URL:
 </td>
 <td valign="top" class="TableCellLight">

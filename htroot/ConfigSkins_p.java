@@ -1,4 +1,4 @@
-// Skins_p.java 
+// ConfigSkins_p.java 
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -62,7 +62,7 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class Skins_p {
+public class ConfigSkins_p {
 
 	private static boolean copyFile(File from, File to){
 			if(from == null || to == null){
