@@ -1,0 +1,169 @@
+body {
+  background-color:#000000;
+}
+
+h1 {
+	font-family:Helvetica, sans-serif;
+	font-size:16pt;
+	font-style:normal;
+	line-height:14pt;
+	margin-top:0pt;
+    margin-bottom:0pt;
+    color: #00ff51;
+}
+
+h2 {
+	font-family:Helvetica, sans-serif;
+	font-size:14pt;
+	font-style:normal;
+	line-height:14pt;
+	margin-top:0pt;
+    margin-bottom:0pt;
+    color: #00ff51;
+}
+
+h3 {
+	font-family:Helvetica, sans-serif;
+	font-size:12pt;
+	font-style:normal;
+	line-height:14pt;
+	margin-top:0pt;
+    margin-bottom:0pt;
+    color: #00ff51;
+}
+
+h4 {
+	font-family:Helvetica, sans-serif;
+	font-size:10pt;
+	font-style:normal;
+	line-height:14pt;
+	margin-top:0pt;
+    margin-bottom:0pt;
+    color: #00ff51;
+}
+
+a {
+  color: #00ff00;
+}
+
+
+body, div, li, ol, span, table, td, tr, ul {
+	color:#00ff00;
+	font-family:Helvetica, sans-serif;
+	font-size:10pt;
+	font-style:normal;
+	line-height:14px;
+	margin-top:0px;
+	margin-bottom:0px;
+    color:#00ff00;
+}
+
+*.small {
+	font-family:Helvetica, sans-serif;
+	font-size:8pt;
+	font-style:normal;
+	line-height:9px;
+	margin-top:0px;
+	margin-bottom:0px;
+    color:#00ff00;
+}
+
+body, div, li, ol, span, table, td, tr, ul {
+      	text-decoration:none;
+}
+
+a:hover {
+	color:#ff0000;
+}
+
+a.unknown {
+	color:#ff0000;
+}
+
+a.known {
+	color:#ff0000;
+}
+
+a.extern {
+	color:#ff0000;
+}
+
+*.tt {
+	font-family:Courier,Terminal,sans-serif;
+	font-size:8pt;
+	line-height:9px;
+}
+
+
+.Menu {
+	width: 100;
+}
+.MenuHeader {
+	background-color: #787878;
+	font-size: 1;
+	font-weight:bold;
+}
+.MenuItem {
+	background-color: #555555;
+	color:white;
+	font-weight:bold;
+	text-decoration:none;
+	font-size:11px;
+	padding-top: 2;
+	padding-bottom: 2;
+}
+.MenuItemLink {
+	color: 00ff00;
+	font-weight:bold;
+	text-decoration:none;
+	font-size:11px;
+}
+a.MenuItemLink:hover {
+	color:#ff0000;
+	font-weight:bold;
+	text-decoration:none;
+}
+.MenuSpacer {
+	height: 6;
+}
+.Headline {
+	font-weight: bold;
+	font-size: 160%;
+	font-family: Helvetica, Arial;
+	text-align: center;
+    color: #aaaaaa;
+}
+.Heading {
+	background-color: #343434;
+	height: 36px;
+}
+
+.TableHeader {
+	background-color: #8c8c8c;
+}
+.TableCellDark {
+	background-color: #767676;
+}
+.TableCellLight {
+	background-color: #8c8c8c;
+}
+.TableCellSummary {
+	background-color: #383838;
+}
+
+.WikiBackground {
+	background-color: #fefefe;
+}
+
+.MessageBackground {
+	background-color: #ffffff;
+}
+input, select{
+	background-color: #000000;
+	color: #00ff00;
+	border: 1px solid #00ff00; 
+}
+option{
+	background-color: #000000;
+	color: #00ff00;
+}
