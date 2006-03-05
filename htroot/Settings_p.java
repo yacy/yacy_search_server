@@ -273,6 +273,8 @@ public final class Settings_p {
         
         // loop through the mimeTypes and add it to the properties
         boolean[] allParsersEnabled = new boolean[configList.size()];
+        for (int i=0; i<configArray.length; i++)
+        	allParsersEnabled[i] = true;
         int parserIdx = 0;
         
         Iterator availableParserIter = parserInfos.iterator();

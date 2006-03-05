@@ -3,6 +3,21 @@
 <head>
 <title>YaCy '#[clientname]#': Settings</title>
 #%env/templates/metas.template%#
+
+<script language="JavaScript">
+
+function ParserCheckboxes(reference)
+{
+	var mode = reference.name.substring(0,reference.name.indexOf("."));
+	for(i=0; i<document.parsersettings.elements.length; i++)
+	{
+		if(document.parsersettings.elements[i].type=="checkbox" && document.parsersettings.elements[i].name.indexOf(mode) >= 0)
+		{
+			document.parsersettings.elements[i].checked=reference.checked;
+		}
+	}
+}
+</script>
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#

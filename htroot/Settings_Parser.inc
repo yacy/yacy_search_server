@@ -1,4 +1,4 @@
-<p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<p><form name="parsersettings" action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <fieldset><legend id="parser">Content Parser Settings</legend>
 <p>With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.<br>
 For a detailed description of the various MIME-types take a look at <a href="http://www.iana.org/assignments/media-types/">http://www.iana.org/assignments/media-types/</a></p>
@@ -29,15 +29,13 @@ For a detailed description of the various MIME-types take a look at <a href="htt
 </tr>
 #{/mime}#
 #{/parser}#
-<!--
   <tr class="TableCellDark">
 #{parserMode}#  
-    <td class="small" align="center"><input type="checkbox" name="#[name]#.allParserEnabled" align="top" #(allParserEnabled)#::checked#(/allParserEnabled)#>
+    <td class="small" align="center"><input type="checkbox" name="#[name]#.allParserEnabled" align="top" onclick="javascript: ParserCheckboxes(this);" #(allParserEnabled)#::checked#(/allParserEnabled)#>
 #{/parserMode}#	    
     <td colspan="2" class="small" >Enable all parsers</td>
     <td class="small">&nbsp;</td>
   </tr>
--->  
   <tr class="TableCellDark">
     <td colspan="#[parser.colspan]#" class="small" ><input type="submit" name="parserSettings" value="submit">&nbsp;Changes take effect immediately</td>
   </tr>
