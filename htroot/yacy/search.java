@@ -137,13 +137,13 @@ public final class search {
             while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
                 urlentry = acc.nextElement();
                 snippet = sb.snippetCache.retrieve(urlentry.url(), squery.queryHashes, false, 260);
-                if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
+                if (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH) {
                     // suppress line: there is no match in that resource
                 } else {
-                    if (snippet.line == null) {
-                        resource = urlentry.toString();
+                    if (snippet.exists()) {
+                        resource = urlentry.toString(snippet.getLineRaw());
                     } else {
-                        resource = urlentry.toString(snippet.line);
+                        resource = urlentry.toString();
                     }
                     if (resource != null) {
                         links.append("resource").append(i).append("=").append(resource).append(serverCore.crlfString);

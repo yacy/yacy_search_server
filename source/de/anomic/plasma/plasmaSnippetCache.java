@@ -95,16 +95,48 @@ public class plasmaSnippetCache {
     }
     
     public class result {
-        public String line;
-        public String error;
-        public int source;
+        private String line;
+        private String error;
+        private int source;
         public result(String line, int source, String errortext) {
             this.line = line;
             this.source = source;
             this.error = errortext;
         }
+        public boolean exists() {
+            return line != null;
+        }
         public String toString() {
-            return line;
+            return (line == null) ? "" : line;
+        }
+        public String getLineRaw() {
+            return (line == null) ? "" : line;
+        }
+        public String getError() {
+            return (error == null) ? "" : error.trim();
+        }
+        public String getLineMarked(Set queryHashes) {
+            if (line == null) return "";
+            if ((queryHashes == null) || (queryHashes.size() == 0)) return line.trim();
+            if (line.endsWith(".")) line = line.substring(0, line.length() - 1);
+            Iterator i = queryHashes.iterator();
+            String h;
+            String[] w = line.split(" ");
+            while (i.hasNext()) {
+                h = (String) i.next();
+                for (int j = 0; j < w.length; j++) {
+                    if (plasmaWordIndexEntry.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
+                }
+            }
+            StringBuffer l = new StringBuffer(line.length() + queryHashes.size() * 8);
+            for (int j = 0; j < w.length; j++) {
+                l.append(w[j]);
+                l.append(' ');
+            }
+            return l.toString().trim();
+        }
+        public int getSource() {
+            return source;
         }
     }
     

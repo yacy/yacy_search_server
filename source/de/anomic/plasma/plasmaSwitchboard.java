@@ -1855,7 +1855,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     //addScoreForked(ref, gs, urlstring.split("/"));
                     if (urlstring.matches(query.urlMask)) { //.* is default
                         snippet = snippetCache.retrieve(url, query.queryHashes, false, 260);
-                        if (snippet.source == plasmaSnippetCache.ERROR_NO_MATCH) {
+                        if (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH) {
                             // suppress line: there is no match in that resource
                         } else {
                             prop.put("results_" + i + "_delete", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
@@ -1869,12 +1869,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
                             prop.put("results_" + i + "_words",URLEncoder.encode(query.queryWords.toString(),"UTF-8"));
                             // adding snippet if available
-                            if (snippet.line == null) {
+                            if (snippet.exists()) {
+                                prop.put("results_" + i + "_snippet", 1);
+                                prop.put("results_" + i + "_snippet_text", snippet.getLineMarked(query.queryHashes));
+                            } else {
                                 prop.put("results_" + i + "_snippet", 0);
                                 prop.put("results_" + i + "_snippet_text", "");
-                            } else {
-                                prop.put("results_" + i + "_snippet", 1);
-                                prop.put("results_" + i + "_snippet_text", snippet.line.trim());
                             }
                             i++;
                         }

@@ -40,11 +40,11 @@ public class snippet {
         Set queryHashes = plasmaSearchQuery.words2hashes(query);
         
         plasmaSnippetCache.result snippet = switchboard.snippetCache.retrieve(url, queryHashes, true, 260);
-        prop.put("status",snippet.source);
-        if (snippet.source < 11) {
-            prop.put("text", (snippet.line != null)?snippet.line.trim():"unknown");
+        prop.put("status",snippet.getSource());
+        if (snippet.getSource() < 11) {
+            prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
         } else {
-            prop.put("text", (snippet.error != null)?snippet.error.trim():"unkown");
+            prop.put("text", snippet.getError());
         }
         prop.put("urlHash",plasmaURL.urlHash(url));
         
