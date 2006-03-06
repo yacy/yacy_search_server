@@ -135,6 +135,17 @@ You can change anything, but some options need a restart, and some options can c
 For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in der Datei yacy.init
 "Save"==Speichern
 
+
+#-----------------------------------------------------------
+#File: ConfigAdvanced_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+Advanced Config==Erweiterte Einstellungen
+Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie k&ouml;nnen alles &auml;ndern, bedenken Sie aber, dass einige &Auml;nderungen einen Neustart von YaCy erfordern und andere &Auml;nderungen YaCy ganz zum Absturz bringen k&ouml;nnen.
+For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in der Datei yacy.init
+"Save"==Speichern
+
 #-----------------------------------------------------------
 #File: ConfigBasic.html
 
@@ -190,6 +201,22 @@ You do not need to provide any personal data here, but if you want to distribute
 #MSN=MSN
 Comment==Kommentar
 "Save"==Speichern
+
+#-------------------------------------------------------
+#File: ConfigSkins_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+Skin selection==Skinauswahl
+You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie k&ouml;nnen hier das Aussehen von YaCy mit Skins &auml;ndern. W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
+Current skin:==Verwendeter Skin:
+Available Skins:==Verf&uuml;gbare Skins:
+"Use"=="Benutzen"
+"Delete"=="L&ouml;schen"
+Install new skin from URL:==Installiere einen neuen Skin von folgender URL:
+Use this skin==Benutze diesen Skin
+"install"=="Installieren"
+Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
+Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
 
 #-----------------------------------------------------------
 #File: Connections_p.html
@@ -325,51 +352,6 @@ Max. search time==Max. Suchdauer
 URL mask:==URL-Filter:
 restrict on==beschr&auml;nken auf
 show all==alle zeigen
-The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
-No Results.==Keine Ergebnisse.
-length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
-If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Wenn Sie das f&uuml;r unzureichend halten, sollten Sie &uuml;berlegen, den globalen Index durch das Betreiben eines eigenen Proxies/Peers zu unterst&uuml;tzen.
-If everybody contributes, the results will get better.==Wenn jeder etwas beitr&auml;gt, werden die Ergebnisse besser.
-Other possible reasons for no result:==Andere m&ouml;gliche Gr&uuml;nde daf&uuml;r, dass Sie keine Ergebnisse erhalten haben:
-The search time was too short. Search again with same query to catch up 'late peers'==Die Zeit zum suchen war zu kurz. Suchen Sie erneut mit erh&ouml;hter max. Suchdauer nach dem gleichen Begriff, um so auch Ergebnisse von langsameren Peers zu erhalten.
-There is currently no support for german umlaute. Please use ae/oe/ue instead==Zur Zeit gibt es keine Unterst&uuml;tzung der deutschen Umlaute. Bitte benutzen Sie stattdessen ae/oe/ue.
-Words of length < 3 are not indexed. Please omit such words==W&ouml;rter mit weniger als drei Buchstaben werden nicht indiziert.
-YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indiziert nur den Singular eines Wortes. Bitte suchen Sie daher auch nur nach dem Singular.
-Only complete words are indexed, not parts of words==Nur komplette W&ouml;rter sind indiziert, keine Teile eines Wortes.
-Don't use stopwords as search words==Benutzen Sie bitte keine Stopwords in der Suche.
-During this test phase the reaction time of remote peers is unknown.==W&auml;hrend dieser Testphase ist die Reaktionszeit von anderen Peers unbekannt.
-Please repeat your search to see if there are late-responses from remote peers==Bitte wiederholen Sie Ihre Suche, um zu sehen ob es Antworten von sp&auml;t reagierenden Peers gibt
-If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
-then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen Crawl nach der gesuchten Information, um sie
-available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um Crawls von anderen Peers zu erlauben. Danke!
-results from==Resultate aus
-ordered links of a total number of==gefunden Links von insgesamt
-known.==bekannten Links.
-Catch up more links==Sammel mehr Links
-from 'late' peers.==von sp&auml;t antwortenden Peers.
-<b>Topwords</b> \(to refine search\):==<b>Topw&ouml;rter</b> (um Suche zu verfeinern):
-You can enrich the search results by using the 'global' option==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen
-This will search also other YaCy peers==So werden auch andere YaCy Peers zum Suchen benutzt.
-You cannot get global search results because you are not connected to another YaCy peer.==Sie k&ouml;nnen keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
-To connect you must first use the proxy.==Um sich zu verbinden, m&uuml;ssen Sie erst den Proxy benutzen.
-See here for an==Sehen Sie hier
-installation guide==f&uuml;r eine Installations-Anleitung
-Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativ k&ouml;nnen Sie auch den Proxy im permanent online Modus laufen lassen. Dies garantiert eine globale Suche.
-To do this, press this button:==Um dies zu tun, klicken Sie bitte auf folgenden Button:
-"go online"=="gehe online"
-you must also switch to online mode==Sie m&uuml;ssen aber erst in den online Modus wechseln
-\(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
-The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;t #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
-YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
-with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
-Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
-
-#-----------------------------------------------------------
-#File: websearch.html
-Result Page==Ergebnisseite
-P2P WEB SEARCH==P2P Internet Suche
-"Search"=="Suchen"
-"delete"=="l&ouml;schen"
 The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
 length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
@@ -1460,22 +1442,6 @@ catch up more links==mehr Links zu sammeln
 from 'late' peers to enrich this search result.==um mehr Treffer zu erzielen.
 
 #-------------------------------------------------------
-#File: Skins_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
-Skin selection==Skinauswahl
-You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie k&ouml;nnen hier das Aussehen von YaCy mit Skins &auml;ndern. W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
-Current skin:==Verwendeter Skin:
-Available Skins:==Verf&uuml;gbare Skins:
-"Use"=="Benutzen"
-"Delete"=="L&ouml;schen"
-Install new skin from URL:==Installiere einen neuen Skin von folgender URL:
-Use this skin==Benutze diesen Skin
-"install"=="Installieren"
-Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
-Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
-
-#-------------------------------------------------------
 #File: Status.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
@@ -1680,6 +1646,50 @@ Comment==Kommentar
 yacyWiki==YaCyWiki
 Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &uuml;ber den YaCy News Service bekannt gegeben.
 
+#-----------------------------------------------------------
+#File: yacysearch.html
+Result Page==Ergebnisseite
+P2P WEB SEARCH==P2P Internet Suche
+"Search"=="Suchen"
+"delete"=="l&ouml;schen"
+The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
+No Results.==Keine Ergebnisse.
+length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
+If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Wenn Sie das f&uuml;r unzureichend halten, sollten Sie &uuml;berlegen, den globalen Index durch das Betreiben eines eigenen Proxies/Peers zu unterst&uuml;tzen.
+If everybody contributes, the results will get better.==Wenn jeder etwas beitr&auml;gt, werden die Ergebnisse besser.
+Other possible reasons for no result:==Andere m&ouml;gliche Gr&uuml;nde daf&uuml;r, dass Sie keine Ergebnisse erhalten haben:
+The search time was too short. Search again with same query to catch up 'late peers'==Die Zeit zum suchen war zu kurz. Suchen Sie erneut mit erh&ouml;hter max. Suchdauer nach dem gleichen Begriff, um so auch Ergebnisse von langsameren Peers zu erhalten.
+There is currently no support for german umlaute. Please use ae/oe/ue instead==Zur Zeit gibt es keine Unterst&uuml;tzung der deutschen Umlaute. Bitte benutzen Sie stattdessen ae/oe/ue.
+Words of length < 3 are not indexed. Please omit such words==W&ouml;rter mit weniger als drei Buchstaben werden nicht indiziert.
+YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indiziert nur den Singular eines Wortes. Bitte suchen Sie daher auch nur nach dem Singular.
+Only complete words are indexed, not parts of words==Nur komplette W&ouml;rter sind indiziert, keine Teile eines Wortes.
+Don't use stopwords as search words==Benutzen Sie bitte keine Stopwords in der Suche.
+During this test phase the reaction time of remote peers is unknown.==W&auml;hrend dieser Testphase ist die Reaktionszeit von anderen Peers unbekannt.
+Please repeat your search to see if there are late-responses from remote peers==Bitte wiederholen Sie Ihre Suche, um zu sehen ob es Antworten von sp&auml;t reagierenden Peers gibt
+If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
+then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen Crawl nach der gesuchten Information, um sie
+available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um Crawls von anderen Peers zu erlauben. Danke!
+results from==Resultate aus
+ordered links of a total number of==gefunden Links von insgesamt
+known.==bekannten Links.
+Catch up more links==Sammel mehr Links
+from 'late' peers.==von sp&auml;t antwortenden Peers.
+<b>Topwords</b> \(to refine search\):==<b>Topw&ouml;rter</b> (um Suche zu verfeinern):
+You can enrich the search results by using the 'global' option==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen
+This will search also other YaCy peers==So werden auch andere YaCy Peers zum Suchen benutzt.
+You cannot get global search results because you are not connected to another YaCy peer.==Sie k&ouml;nnen keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
+To connect you must first use the proxy.==Um sich zu verbinden, m&uuml;ssen Sie erst den Proxy benutzen.
+See here for an==Sehen Sie hier
+installation guide==f&uuml;r eine Installations-Anleitung
+Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativ k&ouml;nnen Sie auch den Proxy im permanent online Modus laufen lassen. Dies garantiert eine globale Suche.
+To do this, press this button:==Um dies zu tun, klicken Sie bitte auf folgenden Button:
+"go online"=="gehe online"
+you must also switch to online mode==Sie m&uuml;ssen aber erst in den online Modus wechseln
+\(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
+The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;t #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
+YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
+with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
+Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
 #--------------------------------------------------------
 #File: env/templates/header.template
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
@@ -1728,9 +1738,10 @@ Download YaCy==YaCy herunterladen
 #File: env/templates/submenuConfig.template
 
 Peer Configuration Menu==Peerkonfigurationsmen&uuml;
-Basic Settings==Grundeinstellungen
+Basic Configuraton==Grundeinstellungen
 >Language==>Sprache
->Profile==>Profil
+Peer Profile==Profil
+Interface Skins==Skin Auswahl
 >Advanced==>Erweitert
 
 #--------------------------------------------------------
