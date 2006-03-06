@@ -14,7 +14,7 @@
 #English=German
 
 #-------------------------------------------------------
-#File: Language_p.html
+#File: ConfigLanguage_p.html
 #Only part 1.
 #Contributors are in chronological ordern, not how much they did absolutely.
 #Thank you for your help!
@@ -185,6 +185,25 @@ You did not open a port in your firewall or your router does not forward the ser
 This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich wenn Sie vollst&auml;ndig am YaCy-Netzwerk teilhaben m&ouml;chten.
 You can also use your peer without opening it, but this is not recomended.==Sie k&ouml;nnen Ihren Peer auch nutzen ohne ihn zu &ouml;ffnen, dies wird jedoch nicht empfohlen.
 
+#-------------------------------------------------------
+#File: ConfigLanguage_p.html
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+Language selection==Sprachauswahl
+Language selection==Sprachauswahl
+You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
+Current language:==Aktuelle Sprache
+default\(english\)==Deutsch
+Languagefile Author(s) (chronological):==Autor(en) der Sprachdatei (chronologisch):
+Send additions to maintainer:==Schicken Sie Erg&auml;nzungen bitte an:
+Available Languages:==Verf&uuml;gbare Sprachen:
+Install new language from URL:==Neue Sprachdatei herunterladen:
+Use this language==Diese Sprachdatei sofort benutzen
+"Use"==Benutzen
+"Delete"==L&ouml;schen
+"Install"==Installieren
+Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
+Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
 #-------------------------------------------------------
 #File: ConfigProfile_p.html
 
