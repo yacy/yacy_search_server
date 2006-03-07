@@ -184,8 +184,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     if (isAborted()) break;
                     
                     // importing entity container to home db
-					if (newContainer.size() == 0) continue;
-                    this.homeWordIndex.addEntries(newContainer, System.currentTimeMillis(), false);
+                    if (newContainer.size() > 0) { this.homeWordIndex.addEntries(newContainer, System.currentTimeMillis(), false); }
                                         
                     // delete complete index entity file
                     this.importWordIndex.deleteIndex(this.wordHash);                 
