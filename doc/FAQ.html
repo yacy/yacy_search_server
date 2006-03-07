@@ -52,26 +52,14 @@ globalheader();
 <p>YaCy is not only a distributed search engine, but also a caching HTTP proxy.
 Both application parts benefit from each other.</p>
 
-
-<h3>Why is this Search Engine also a Proxy?</h3>
-<p>
-We wanted to avoid that you start a search service ony for that very time when you submit a search query. This would give the Search Engine too little online time. So we looked for a cause the you would like to run the Search Engine during all the time that you are online. By giving you the additional value of a caching proxy, the reason was found. The built-in blacklist (url filter, useful i.e. to block ads) for the proxy is another increase in value.
-</p>
-
-<h3>Why is this Proxy also a Search Engine?</h3>
-<p>YaCy has a built-in <i>caching</i> proxy, which means that YaCy has a lot of indexing information
-'for free' without crawling. This may not be a very usual function of a proxy, but a very useful one:
-you see a lot of information when you browse the internet and maybe you would like to search exactly
-only what you have seen. Beside this interesting feature, you can use YaCy to index an intranet
-simply by using the proxy; you don't need to additionally set up another search/indexing process or databases.
-YaCy gives you an 'instant' database and an 'instant' search service.</p>
-
 <h3>Can I Crawl The Web With YaCy?</h3>
-<p>Yes! You can start your own crawl and you may also trigger distributed crawling, which means that your own YaCy peer asks other peers to perform specific crawl tasks. You can specify many parameters that focus your crawl to a limited set of web pages.</p>
+<p>Yes! You can start your own crawl and you may also trigger distributed crawling,
+which means that your own YaCy peer asks other peers to perform specific crawl tasks.
+You can specify many parameters that focus your crawl to a limited set of web pages.</p>
 
 <h3>What do you mean with 'Global Search Engine'?</h3>
 <p>The integrated indexing and search service can not only be used locally, but also <i>globally</i>.
-Each proxy distributes some contact information to all other proxies that can be reached in the internet,
+Each YaCy peer distributes some contact information to all other proxies that can be reached in the internet,
 and proxies exchange <i>but do not copy</i> their indexes to each other.
 This is done in such a way, that each <i>peer</i> knows how to address the correct other
 <i>peer</i> to retrieve a special search index.
@@ -104,39 +92,60 @@ In fact, the global space for the index may reach the space of Terabytes, but no
 <p>No. They <i>can</i> do, but we collect information by simply using the information that passes the proxy.
 If you <i>want</i> to crawl, you can do so and start your own crawl job with a certain search depth.</p>
 
-<h3>Does this proxy with search engine create much traffic?</h3>
-<p>No, it may create <i>less</i>. Because it does not need to do crawling, you don't have additional traffic.
-In contrast, the proxy does <i>caching</i> which means that repeated loading of known pages is avoided and this possibly
-speeds up your internet connection. Index sharing creates some traffic, but is only performed during idle time of the proxy and of your internet usage.</p>
-
-<h3>Full-text indexing threads on my machine? This will slow down my internet browsing too much.</h3>
-<p>No, it won't, because indexing is only performed when the proxy is idle. This shifts the computing time to the moment when you read pages and you don't need computing time. Indexing is stopped automatically the next time you retrieve web pages through the proxy.</p>
-
 <h3>Do I need a fast machine? Search Engines need big server farms, don't they?</h3>
-<p>You don't need a fast machine to run YaCy. You also don't need a lot of space. You can configure the amount of Megabytes that you want to spend for the cache and the index. Any time-critical task is delayed automatically and takes place when you are idle surfing. Whenever internet pages pass the proxy, any indexing (or if wanted: prefetch-crawling) is interrupted and delayed. The root server runs on a simple 500 MHz/20 GB Linux system. You don't need more.</p>
-
-<h3>Does the caching procedure slow down or delay my internet usage?</h3>
-<p>No. Any file that passes the proxy is <i>streamed</i> through the filter and caching process. At a certain point the information stream is duplicated; one copy is streamed to your browser, the other one to the cache. The files that pass the proxy are not delayed because they are <i>not</i> first stored and then passed to you, but streamed at the same time as they are streamed to the cache. Therefore your browser can do layout while loading as it would do without the proxy.</p>
-
-<h3>How can you ensure that search results are up-to-date?</h3>
-<p>Nobody can. How can a 'normal' search engine ensure this? By doing 'brute force crawling'?
-We have a better solution to be up-to-date: browsing results of all people who run YaCy.
-Many people prefer to look at news pages every day, and by passing through the proxy the latest news also arrive in the distributed search engine. This may take place possibly faster than it happens with a normal/crawling search engine.</p>
+<p>You don't need a fast machine to run YaCy. You also don't need a lot of space.
+You can configure the amount of Megabytes that you want to spend for the cache.
+Any time-critical task is delayed automatically and takes place
+when you are idle surfing (which works only if you use YaCy as http proxy).
+Whenever internet pages pass YaCy in proxy-mode,
+any indexing (or if wanted: prefetch-crawling) is interrupted and delayed.
+</p>
 
 <h3>I don't want to wait for search results very long. How long does a search take?</h3>
-<p>Our architecture does not do peer-hopping, we also don't have a TTL (time to live). We expect that search results are <i>instantly</i> responded to the requester. This can be done by asking the index-owning peer <i>directly</i> which is in fact possible by using DHT's (distributed hash tables). Because we need some redundancy to compensate for missing peers, we ask several peers simultanously. To collect their response, we wait a little time of at most 10 seconds. The user may configure a search time different than 10 seconds, but this is our target of <i>maximum</i> search time.</p>
+<p>Our architecture does not do peer-hopping, we also don't have a TTL (time to live).
+We expect that search results are <i>instantly</i> responded to the requester.
+This can be done by asking the index-owning peer <i>directly</i> which is
+in fact possible by using DHT's (distributed hash tables).
+Because we need some redundancy to compensate for missing peers, we ask
+several peers simultanously. To collect their response, we wait a little time
+of at most 6 seconds. If this is not enough, the user may start a re-search
+to catch up 'late' responses from other peers.</p>
 
-<h3>I am scared about the fact that the browsing results are distributed. What about privacy?</h3>
-<p>Don't be scared. We have an architecture that hides your private browsing profile from others. For example: none of the words that are indexed from the pages you have seen is stored in clear text on your computer. Instead, a hash is used which can not be computed back into the original word. Because index files travel among peers, you cannot state if a specific link was visited by you or another peer-user, so this frees you from being responsible about the index files on your machine.</p>
+<h3>I am scared about the fact that the browsing results are distributed.
+What about privacy?</h3>
+<p>None of the words that are indexed from the
+pages you have crawled or seen is stored in clear text on your computer.
+Instead, a hash is used which can not be computed back into the original word.
+Because index files travel among peers, you cannot state if a specific link was
+visited by you or another peer-user, so this frees you from being responsible about
+the index files on your machine.</p>
 
 <h3>Do I need to set up and run a separate database?</h3>
-<p>No. YaCy contains it's own database engine, which does not need any extra set-up or configuration.</p>
+<p>No. YaCy contains it's own database engine, which does not need any extra set-up
+or configuration.</p>
 
 <h3>What kind of database do you use? Is it fast enough?</h3>
-<p>The database stores either tables or property-lists in files with the structure of AVL-Trees (which are height-regulated binary trees). Such a search tree ensures a logarithmic order of computation time. For example a search within an AVL tree with one million entries needs an average of 20 comparisons, and at most 24 in the worst case. This database is therefore extremely fast. It lacks an API like SQL or the LDAP protocol, but it does not need one because it provides a highly specialized database structure. The missing interface pays off with a very small organization overhead, which improves the speed further in comparison to other databases with SQL or LDAP api's. This database is fast enough for millions of indexed web pages, maybe also for billions.</p>
+<p>The database stores tables in files with the
+structure of AVL-Trees (which are height-regulated binary trees).
+Such a search tree ensures a logarithmic order of computation time.
+We compared the YaCy database engine ('kelondro') with mysql and yacy
+was as fast as mysql with up to millions of entries in one table.</p>
 
 <h3>Why do you use your own database? Why not use mySQL or openLDAP?</h3>
-<p>The database structure we need is very special. One demand is that the entries can be retrieved in logarithmic time <i>and</i> can be enumerated in any order. Enumeration in a specific order is needed to create conjunctions of tables very fast. This is needed when someone searches for several words. We implement the search word conjunction by pairwise and simultanous enumeration/comparisment of index trees/sequences. This forces us to use binary trees as data structure. Another demand is that we need the ability to have many index tables, maybe <i>millions of tables</i>. The size of the tables may be not big in average, but we need many of them. This is in contrast of the organization of relational databases, where the focus is on management of very large tables, but not of many of them. A third demand is the ease of installation and maintenance: the user shall not be forced to install a RBMS first, care about tablespaces and such. The integrated database is completely service-free.</p>
+<p>The database structure we need is very special.
+One demand is that the entries can be retrieved in logarithmic time <i>and</i>
+can be enumerated in any order. Enumeration in a specific order is needed to
+create conjunctions of tables very fast. This is needed when someone searches
+for several words. We implement the search word conjunction by pairwise and
+simultanous enumeration/comparisment of index trees/sequences.
+This forces us to use binary trees as data structure. Another demand is that we
+need the ability to have many index tables, maybe <i>millions of tables</i>.
+The size of the tables may be not big in average, but we need many of them.
+This is in contrast of the organization of relational databases, where the focus
+is on management of very large tables, but not of many of them. A third demand is
+the ease of installation and maintenance: the user shall not be forced to install
+a RBMS first, care about tablespaces and such.
+The integrated database is completely service-free.</p>
 
 <h3>What does Senior Mode mean? What is Junior Mode?</h3>
 <p><i>Junior</i> peers are such peers that cannot be reached from other peers, while <i>Senior</i> peers can be contacted.
@@ -144,13 +153,26 @@ If your peer has global access, it runs in Senior Mode. If it is hidden from oth
 If your peer is in Senior Mode, it is an access point for index sharing and distribution. It can be contacted for search requests and it collects index files from other peers. If your peer is in Junior Mode, it collects index files from your browsing and distributes them only to other Senior peers, but does not collect index files.
 </p>
 
-<h3>Why should I run my proxy in Senior Mode?</h3>
+<h3>Why should I run my YaCy peer in Senior Mode?</h3>
 <p>Some p2p-based file sharing software assign non-contributing peers very low priority. We think that that this is not always fair since sometimes the operator does not have the choice of opening the firewall or configuring the router accordingly. Our idea of 'information wares' and their exchange can also be applied to junior peers: they must contribute to the global index by submitting their index <i>actively</i>, while senior peers contribute <i>passively</i>.
 Therefore we don't need to give junior peers low priority: they contribute equally, so they may participate equally.
 But enough senior peers are needed to make this architecture functional. Since any peer contributes almost equally, either actively or passively, you should decide to run in Senior Mode if you can.
 </p>
 
-<h3>My proxy says it runs in 'Junior Mode'. How can I run it in Senior Mode?</h3>
+<h3>Why is this Search Engine also a Proxy?</h3>
+<p>
+We wanted to avoid that you start a search service ony for that very time when you submit a search query. This would give the Search Engine too little online time. So we looked for a cause the you would like to run the Search Engine during all the time that you are online. By giving you the additional value of a caching proxy, the reason was found. The built-in blacklist (url filter, useful i.e. to block ads) for the proxy is another increase in value.
+</p>
+
+<h3>Why is this Proxy also a Search Engine?</h3>
+<p>YaCy has a built-in <i>caching</i> proxy, which means that YaCy has a lot of indexing information
+'for free' without crawling. This may not be a very usual function of a proxy, but a very useful one:
+you see a lot of information when you browse the internet and maybe you would like to search exactly
+only what you have seen. Beside this interesting feature, you can use YaCy to index an intranet
+simply by using the proxy; you don't need to additionally set up another search/indexing process or databases.
+YaCy gives you an 'instant' database and an 'instant' search service.</p>
+
+<h3>My YaCy says it runs in 'Junior Mode'. How can I run it in Senior Mode?</h3>
 <p>Open your firewall for port 8080 (or the port you configured) or program your router to act as a <i>virtual server</i>.</p>
 
 <h3>How can I help?</h3>
