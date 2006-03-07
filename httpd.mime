@@ -26,6 +26,7 @@ gz      = application/gzip
 hqx     = application/mac-binhex40
 htm     = text/html
 html    = text/html
+jar     = application/java-archive
 java    = text/plain
 jpe     = image/jpeg
 jpeg    = image/jpeg

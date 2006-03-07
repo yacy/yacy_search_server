@@ -1228,7 +1228,12 @@ public final class httpd implements serverHandler {
             if (httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_1_1)) headers.put(httpHeader.CACHE_CONTROL, "no-cache");
             else headers.put(httpHeader.PRAGMA, "no-cache");
         }
-        headers.put(httpHeader.CONTENT_TYPE,  (contentType == null)? "text/html; charset=UTF-8" : contentType+"; charset=UTF-8");  
+        
+        if (contentType == null) 
+            contentType = "text/html; charset=UTF-8";
+        else if (contentType.startsWith("text/") && contentType.toLowerCase().indexOf("charset=")==-1)
+            contentType +="; charset=UTF-8";
+        headers.put(httpHeader.CONTENT_TYPE, contentType);  
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_LENGTH, Long.toString(contentLength));
         //if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
         if (expires != null)     headers.put(httpHeader.EXPIRES, httpc.dateString(expires));
