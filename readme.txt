@@ -49,6 +49,9 @@ If you like to use YaCy not as proxy but only as distributed
 crawling/search engine, you can do so.
 Start crawling at the 'Index Creation' menu point.
 
+You can add a YaCy toolbar to your Firefox web browser.
+Please install the yacybar.xpi Firefox extension
+
 If you have any questions, please do not hesitate to contact the author:
 Send an email to Michael Christen (mc@anomic.de) with a meaningful subject
 including the word 'yacy' to prevent that your email gets stuck
@@ -59,5 +62,5 @@ feel free to ask the author for a business proposal to customize YaCy
 according to your needs. We also provide integration solutions if the
 software is about to be integrated into your enterprise application.
 
-Germany, Frankfurt a.M., 22.07.2005
+Germany, Frankfurt a.M., 07.03.2006
 Michael Peter Christen

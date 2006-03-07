@@ -54,6 +54,67 @@ globalheader();
 
 <p>Release list in reverse order:
 
+<!--
+<br><p>
+<ul>
+<li></li>
+  <ul>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  </ul>
+<li></li>
+  <ul>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  </ul>
+<li></li>
+  <ul>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  </ul>
+</ul>
+-->
+
+<br><p>
+<ul>
+<li>New Features</li>
+  <ul>
+  <li>New simplified search page</li>
+  <li>ajax-driven search result enrichment with snippet post-fetch. Snippets that are not available on page load time will be fetched using ajax requests.</li>
+  <li>New 1-2-3(-4) configuration menu makes it easier to configure YaCy for first-time-users</li>
+  <li>New yacy.badwords filters bad topwords</li>
+  <li>Show public Bookmarks in Bookmarks.html, private ones, if the user is logged in.</li>
+  <li>Added a yacybar.xpi to the release</li>
+  </ul>
+<li>Bugfixes</li>
+  <ul>
+  <li>fixed conjunctive search; was broken because of wrong data structures</li>
+  <li>special chars (like german umlauts) are now allowed in bookmark tagNames</li>
+  <li>/xml/bookmarks/* now uses one file for private/public entries. private only with password</li>
+  <li>disabled write cache to avoid database corruption in case of crash</li>
+  <li>bugfixes to HTTP/0.9 header handling</li>
+  <li>fixed re-search bug</li>
+  </ul>
+<li>Enhancements</li>
+  <ul>
+  <li>index write access (dht transmission, indexing, dht deletion) is now completely synchronized, which increases speed and reduces IO</li>
+  <li>there is now a real streaming support for lage files</li>
+  <li>support of chunked transfer-encoding for http/1.1 clients</li>
+  <li>support of gzip content-encoding suitable clients</li>
+  <li>automatic TOC generation for pages in wiki</li>
+  <li>changed user-agent string for yacy crawl access to 'yacybot'</li>
+  </ul>
+</ul>
+
 <br><p>v0.43_20060210_1593
 <ul>
 <li>New Features</li>

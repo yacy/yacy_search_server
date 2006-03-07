@@ -1,6 +1,6 @@
 YaCy: The Search Engine with the friendly whale
 
-version 0.44svn
+version 0.44
 	* FIXED: special chars(like german umlauts) in tagNames allowed. (Allo)
 	* ADDED: Show public Bookmarks in Bookmarks.html, private ones, if the user is logged in. (Allo)
 	* FIXED: /xml/bookmarks/* now uses one file for private/public entries. private only with password.
@@ -11,7 +11,11 @@ version 0.44svn
 	* UPDATED: index write access (dht transmission, indexing, dht deletion) now completely synchronized (Orbiter)
 	* FIXED: conjunctive search was broken because of wrong data structures, fixed (Orbiter)
 	* UPDATED: more ranking attributes (Orbiter)
-	
+	* ADDED: adding real streaming support for lage files (theli)
+	* ADDED: support of chunked transfer-encoding for http/1.1 clients (theli)
+	* ADDED: support of gzip content-encoding suitable clients (theli)
+	* ADDED: added TOC for pages in wiki (low012)
+
 version 0.43
 	* UPDATED: new database handling of index entry objects, less IO overhead (Orbiter)
 	* ADDED: many new ranking attributes and handling routines (Orbiter)
