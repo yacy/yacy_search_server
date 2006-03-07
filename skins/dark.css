@@ -1,0 +1,53 @@
+.number{
+	color: darkblue;
+}
+table.warning{
+	border: 0;
+	background-color: red;
+}
+td.warning{
+	background-color: white;
+}
+a{
+	text-decoration: none;
+}
+a:hover{
+	text-decoration: underline;
+}
+a:visited{
+	text-decoration: underline;
+}
+a.extern{
+	color: darkblue;
+}
+a.extern:visited{
+}
+a.faq{
+	color: green;
+}
+a.faq-entry:hover{
+	text-decoration: none;
+}
+.ui_element{
+	#background-color: white;
+	color: darkblue;
+	font-family: Serif;
+}
+.img_title{
+	font-size: 75%;
+}
+table.example{
+	border: 0;
+	background-color: darkgreen;
+}
+th.example{
+	background-color: white;
+	color: darkblue;
+}
+td.example{
+	background-color: #eeeeee;
+	color: black;
+}
+.string{
+	color: darkblue;
+}

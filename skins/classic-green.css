@@ -1,0 +1,148 @@
+body {
+  background-color:#EEEEEF;
+}
+
+h1 {
+	font-family:Helvetica, sans-serif;
+	font-size:16pt;
+	font-style:normal;
+	line-height:14pt;
+	margin-top:0pt;
+    margin-bottom:0pt;
+}
+
+h2 {
+	font-family:Helvetica, sans-serif;
+	font-size:14pt;
+	font-style:normal;
+	line-height:14pt;
+	margin-top:0pt;
+    margin-bottom:0pt;
+}
+
+h3 {
+	font-family:Helvetica, sans-serif;
+	font-size:12pt;
+	font-style:normal;
+	line-height:14pt;
+	margin-top:0pt;
+    margin-bottom:0pt;
+}
+
+h4 {
+	font-family:Helvetica, sans-serif;
+	font-size:10pt;
+	font-style:normal;
+	line-height:14pt;
+	margin-top:0pt;
+    margin-bottom:0pt;
+}
+
+a, body, div, li, ol, span, table, td, tr, ul {
+	color:#000000;
+	font-family:Helvetica, sans-serif;
+	font-size:10pt;
+	font-style:normal;
+	line-height:14px;
+	margin-top:0px;
+	margin-bottom:0px;
+}
+
+*.small {
+	font-family:Helvetica, sans-serif;
+	font-size:8pt;
+	font-style:normal;
+	line-height:9px;
+	margin-top:0px;
+	margin-bottom:0px;
+}
+
+body, div, li, ol, span, table, td, tr, ul {
+      	text-decoration:none;
+}
+
+a:hover {
+	color:#0000FF;
+}
+
+a.unknown {
+	color:#990000;
+}
+
+a.known {
+	color:#009900;
+}
+
+a.extern {
+	color:#000099;
+}
+
+*.tt {
+	font-family:Courier,Terminal,sans-serif;
+	font-size:8pt;
+	line-height:9px;
+}
+
+
+.Menu {
+	width: 100;
+}
+.MenuHeader {
+	background-color: #aabbaa;
+	font-size: 1;
+	font-weight:bold;
+}
+.MenuItem {
+	background-color: #889988;
+	color:white;
+	font-weight:bold;
+	text-decoration:none;
+	font-size:11px;
+	padding-top: 2;
+	padding-bottom: 2;
+}
+.MenuItemLink {
+	color: white;
+	font-weight:bold;
+	text-decoration:none;
+	font-size:11px;
+}
+a.MenuItemLink:hover {
+	color:#EEFF00;
+	font-weight:bold;
+	text-decoration:none;
+}
+.MenuSpacer {
+	height: 6;
+}
+.Headline {
+	font-weight: bold;
+	font-size: 160%;
+	font-family: Helvetica, Arial;
+	text-align: center;
+}
+.Heading {
+	background-color: #ccddcc;
+	height: 36px;
+}
+
+.TableHeader {
+	background-color: #aabbaa;
+}
+.TableCellDark {
+	background-color: #ccddcc;
+}
+.TableCellLight {
+	background-color: #ddeedd;
+}
+.TableCellSummary {
+	background-color: #ffbbaa;
+}
+
+.WikiBackground {
+	background-color: #fefefe;
+}
+
+.MessageBackground {
+	background-color: #ffffff;
+}
