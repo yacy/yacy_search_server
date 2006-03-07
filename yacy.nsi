@@ -6,7 +6,7 @@
 ;last major change: 22.07.2005
 Name "YaCy"
 
-OutFile "yacy_v0.43_20060210_1593.exe"
+OutFile "yacy_v0.44_20060307_1842.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -19,7 +19,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.43(Build 20060210) on your computer. Select which optional things you want to be installed."
+ComponentText "This will install YaCy v0.44(Build 20060307) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old Version was installed into another locAtion(eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install into:"
@@ -52,6 +52,8 @@ Section "Binaries (required)"
 	File "yacy.stopwords"
 	File "yacy.logging"
 	File "ChangeLog"
+	File "COPYRIGHT"
+	File "yacy.stopwords.de"
 	
 	#lib
 	SetOutPath "$INSTDIR\lib"
@@ -65,6 +67,14 @@ Section "Binaries (required)"
 	SetOutPath "$INSTDIR\locales"
 	File /r "locales\*"
 
+	#skins
+	SetOutPath "$INSTDIR\skins"
+	File /r "skins\*"
+
+	#ranking
+	SetOutPath "$INSTDIR\ranking"
+	File /r "ranking\*"
+
 	#htroot non devel
 	SetOutPath "$INSTDIR\htroot"
 	File "htroot\*.html"
@@ -77,6 +87,8 @@ Section "Binaries (required)"
 	File "htroot\*.class"
 	File "htroot\*.ico"
     File "htroot\*.bmp"
+    File "htroot\*.png"
+    File "htroot\*.src" #firefox plugin
 	#File "htroot\*.gif"
 	File "htroot\*.pac" #proxy autoconfig
 
