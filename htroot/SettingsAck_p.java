@@ -54,6 +54,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
@@ -156,7 +159,7 @@ public class SettingsAck_p {
             }
             
             // read and process data
-            String filter = (String) post.get("proxyfilter");
+            String filter = ((String) post.get("proxyfilter")).trim();
 			String use_proxyAccounts="";
 			if(post.containsKey("use_proxyaccounts")){
 				//needed? or set to true by default?
@@ -177,7 +180,29 @@ public class SettingsAck_p {
                 prop.put("info", 3);//pw check failed
                 return prop;
             }*/
+                        
             if (filter.length() == 0) filter = "*";
+            else if (!filter.equals("*")){
+                // testing proxy filter 
+                int patternCount = 0;
+                String patternStr = null;
+                try {
+                    StringTokenizer st = new StringTokenizer(filter,",");                
+                    while (st.hasMoreTokens()) {
+                        patternCount++;
+                        patternStr = st.nextToken();
+                        Pattern.compile(patternStr);
+                    }
+                } catch (PatternSyntaxException e) {
+                    prop.put("info", 27);
+                    prop.put("info_filter", filter);
+                    prop.put("info_nr", Integer.toString(patternCount));
+                    prop.put("info_error", e.getMessage());
+                    prop.put("info_pattern", patternStr);
+                    return prop;
+                }
+            }
+            
             // check passed. set account:
             env.setConfig("proxyClient", filter);
             env.setConfig("use_proxyAccounts", use_proxyAccounts);//"true" or "false"
@@ -258,7 +283,7 @@ public class SettingsAck_p {
         // server password
         if (post.containsKey("serveraccount")) {
             // read and process data
-            String filter = (String) post.get("serverfilter");
+            String filter = ((String) post.get("serverfilter")).trim();
             String user   = (String) post.get("serveruser");
             String pw1    = (String) post.get("serverpw1");
             String pw2    = (String) post.get("serverpw2");
@@ -277,6 +302,27 @@ public class SettingsAck_p {
                 return prop;
             }
             if (filter.length() == 0) filter = "*";
+            else if (!filter.equals("*")){
+                // testing proxy filter 
+                int patternCount = 0;
+                String patternStr = null;
+                try {
+                    StringTokenizer st = new StringTokenizer(filter,",");                
+                    while (st.hasMoreTokens()) {
+                        patternCount++;
+                        patternStr = st.nextToken();
+                        Pattern.compile(patternStr);
+                    }
+                } catch (PatternSyntaxException e) {
+                    prop.put("info", 27);
+                    prop.put("info_filter", filter);
+                    prop.put("info_nr", Integer.toString(patternCount));
+                    prop.put("info_error", e.getMessage());
+                    prop.put("info_pattern", patternStr);
+                    return prop;
+                }
+            }            
+            
             // check passed. set account:
             env.setConfig("serverClient", filter);
             env.setConfig("serverAccountBase64MD5", serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
