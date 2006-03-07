@@ -91,8 +91,10 @@ public class plasmaCrawlBalancer {
     
     private int sizeDomainStacks() {
         int sum = 0;
-        Iterator i = domainStacks.values().iterator();
-        while (i.hasNext()) sum += ((ArrayList) i.next()).size();
+        if (domainStacks != null) synchronized (domainStacks) {
+            Iterator i = domainStacks.values().iterator();
+            while (i.hasNext()) sum += ((ArrayList) i.next()).size();
+        }
         return sum;
     }
     
