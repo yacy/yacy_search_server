@@ -50,7 +50,8 @@ crawling/search engine, you can do so.
 Start crawling at the 'Index Creation' menu point.
 
 You can add a YaCy toolbar to your Firefox web browser.
-Please install the yacybar.xpi Firefox extension
+This release contains the yacybar.xpi file from Alexander Schier and Martin Thelian.
+Please install this file as a Firefox extension.
 
 If you have any questions, please do not hesitate to contact the author:
 Send an email to Michael Christen (mc@anomic.de) with a meaningful subject
