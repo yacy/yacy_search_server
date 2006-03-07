@@ -1695,6 +1695,7 @@ do upload
                     } else {
                         serverLog.logSevere("HTTPC", "RESPONSE PARSE ERROR: HOST='" + httpc.this.host + "', PATH='" + httpc.this.requestPath + "', STATUS='" + this.status + "'");
                         serverLog.logSevere("HTTPC", "..............BUFFER: " + buffer);
+                        throw new IOException(this.status);
                     }
                 }
             }
