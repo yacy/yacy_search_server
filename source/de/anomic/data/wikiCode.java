@@ -6,7 +6,7 @@
 // Frankfurt, Germany, 2004
 //
 // This file ist contributed by Alexander Schier
-// last major change: 09.08.2004
+// last major change: 08.03.2006
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -121,8 +121,8 @@ public class wikiCode {
       * special characters in non UTF-8 capable browsers.
       * @param text a string that possibly contains HTML
       * @return the string with all special characters encoded
-      * @author Marc Nause, replaces code by Alexander Schier
       */
+      //[MN]
     public static String replaceHTML(String text) {
         text = replace(text, htmlentities);
         text = replace(text, characters);
@@ -133,8 +133,8 @@ public class wikiCode {
       * special characters in non UTF-8 capable browsers.
       * @param text a string that possibly contains special characters
       * @return the string with all special characters encoded
-      * @author Marc Nause, replaces code by Alexander Schier
       */
+      //[MN]
     public static String replaceCharacters(String text) {
         text = replace(text, characters);
         return text;
@@ -143,8 +143,8 @@ public class wikiCode {
     /** Replaces special characters from a string. Avoids XSS attacks.
       * @param text a string that possibly contains HTML
       * @return the string without any HTML-tags that can be used for XSS
-      * @author Marc Nause, replaces code by Alexander Schier
       */
+      //[MN]
     public static String replaceHTMLonly(String text) {
         text = replace(text, htmlentities);
         return text;
@@ -154,8 +154,8 @@ public class wikiCode {
       * @param text a string that possibly contains special characters
       * @param entities array that contains characters to be replaced and characters it will be replaced by
       * @return the string with all characters replaced by the corresponding character from array
-      * @author Franz Brausse, few changes by Marc Nause, replaces code by Alexander Schier
       */
+      //[FB], changes by [MN]
     public static String replace(String text, String[] entities) {
         if (text==null) { return null; }
         for (int x=0;x<=entities.length-1;x=x+2) {
@@ -285,8 +285,8 @@ public class wikiCode {
     /** This method processes tables in the wiki code.
       * @param a string that might contain parts of a table
       * @return a string with wiki code of parts of table replaced by HTML code for table
-      * @author Franz Brausse, changes by Marc Nause
       */
+      //[FB], changes by [MN]
     private String processTable(String result, plasmaSwitchboard switchboard){
         String line="";
         if ((result.startsWith("{|")) && (!table)) {
@@ -507,19 +507,34 @@ public class wikiCode {
         int level1 = 0;
         int level2 = 0;
         int level3 = 0;
+        int doubles = 0;
+        String anchorext = "";
         if((s=dirElements.size())>2){
             for(int i=0;i<s;i++){
                 element = dirElements.get(i).toString();
-                if (element.startsWith("###")){
+                //counting double headlines
+                doubles = 0;
+                for(int j=0;j<i;j++){
+                    if(dirElements.get(j).toString().substring(1).equals(element.substring(1))){
+                        doubles++;
+                    }
+                }
+                //if there are doubles, create anchorextension
+                if(doubles>0){
+                    anchorext = "_" + (doubles+1);
+                }
+
+                if (element.startsWith("3")){
                     if(level<3){
                         level = 3;
                         level3 = 0;
                     }
                     level3++;
-                    element=level1+"."+level2+"."+level3+" "+element.substring(3);
-                    directory = directory + "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#"+i+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                    String temp = element.substring(1);
+                    element=level1+"."+level2+"."+level3+" "+temp;
+                    directory = directory + "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#"+replaceHTML(temp.replaceAll(" ","_"))+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
                 }
-                else if (element.startsWith("##")){
+                else if (element.startsWith("2")){
                     if(level==1){
                         level2 = 0;
                         level = 2;
@@ -528,19 +543,22 @@ public class wikiCode {
                         level = 2;
                     }
                     level2++;
-                    element=level1+"."+level2+" "+element.substring(2);
-                    directory = directory + "&nbsp;&nbsp;<a href=\"#"+i+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                    String temp = element.substring(1);
+                    element=level1+"."+level2+" "+temp;
+                    directory = directory + "&nbsp;&nbsp;<a href=\"#"+replaceHTML(temp.replaceAll(" ","_"))+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
                 }
-                else if (element.startsWith("#")) {
+                else if (element.startsWith("1")) {
                     if (level>1) {
                         level = 1;
                         level2 = 0;
                         level3 = 0;
                     }
                     level1++;
-                    element=level1+" "+element.substring(1);
-                    directory = directory + "<a href=\"#"+i+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                    String temp = element.substring(1);
+                    element=level1+". "+temp;
+                    directory = directory + "<a href=\"#"+replaceHTML(temp.replaceAll(" ","_"))+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
                 }
+                anchorext="";
             }
             directory = "<table><tr><td><div class=\"WikiTOCBox\">\n" + directory + "</div></td></tr></table>\n";
         }
@@ -550,12 +568,14 @@ public class wikiCode {
     /** Replaces two occurences of a substring in a string by a pair of strings if 
       * that substring occurs twice in the string. This method is not greedy! You'll
       * have to run it in a loop if you want to replace all occurences of the substring.
+      * This method provides special treatment for headlines.
       * @param input the string that something is to be replaced in
       * @param pat substring to be replaced
       * @param repl1 string substring gets replaced by on uneven occurences
       * @param repl2 string substring gets replaced by on even occurences
       */
-    public String pairReplace(String input, String pat, String repl1, String repl2){
+      //[MN]
+    private String pairReplace(String input, String pat, String repl1, String repl2){
         String direlem = "";    //string to keep headlines until they get added to List dirElements
         int p0 = 0;
         int p1 = 0;
@@ -563,14 +583,28 @@ public class wikiCode {
         if ((p0 = input.indexOf(pat)) >= 0) {
             p1 = input.indexOf(pat, p0 + l);
             if (p1 >= 0) {
+                //extra treatment for headlines
                 if((pat.equals("===="))||(pat.equals("==="))||(pat.equals("=="))){
-                    input = input.substring(0, p0) + "<a name=\""+headlines+"\">" + repl1 +
-                    (direlem = input.substring(p0 + l, p1)) + repl2 + "</a>" +
-                    input.substring(p1 + l);
-
-                    if(pat.equals("===="))     dirElements.add("###"+direlem);
-                    else if(pat.equals("===")) dirElements.add("##"+direlem);
-                    else if(pat.equals("=="))  dirElements.add("#"+direlem);
+                    //add anchor and create headline
+                    direlem = input.substring(p0 + l, p1);
+                    //counting double headlines
+                    int doubles = 0;
+                    for(int i=0;i<headlines;i++){
+                        if(dirElements.get(i).toString().substring(1).equals(direlem)){
+                            doubles++;
+                        }
+                    }
+                    String anchor = replaceHTML(direlem.replaceAll(" ","_")); //replace blanks with underscores
+                    //if there are doubles, add underscore and number of doubles plus one
+                    if(doubles>0){
+                        anchor = anchor + "_" + (doubles+1);
+                    }
+                    input = input.substring(0, p0) + "<a name=\""+anchor+"\"></a>" + repl1 +
+                    direlem + repl2 + input.substring(p1 + l);
+                    //add headlines to list of headlines (so TOC can be created)
+                    if(pat.equals("===="))     dirElements.add("3"+direlem);
+                    else if(pat.equals("===")) dirElements.add("2"+direlem);
+                    else if(pat.equals("=="))  dirElements.add("1"+direlem);
                     headlines++;
                 }
                 else{
