@@ -19,6 +19,8 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     
     protected long globalStart = System.currentTimeMillis();
     protected long globalEnd;
+    protected long globalPauseLast;
+    protected long globalPauseDuration;
     protected String error;
     
     public AbstractImporter(plasmaSwitchboard theSb) {
@@ -54,6 +56,7 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     
     public void pauseIt() {
         synchronized(this) {
+        	this.globalPauseLast = System.currentTimeMillis();
             this.paused = true;
         }
     }
@@ -61,6 +64,7 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     public void continueIt() {
         synchronized(this) {
             if (this.paused) {
+            	this.globalPauseDuration += System.currentTimeMillis()-this.globalPauseLast;
                 this.paused = false;
                 this.notifyAll();
             }
@@ -95,11 +99,15 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     }
     
     public long getTotalRuntime() {
-        return (this.globalEnd == 0)?System.currentTimeMillis()-this.globalStart:this.globalEnd-this.globalStart;
+        return (this.globalEnd == 0)?System.currentTimeMillis()-(this.globalStart+this.globalPauseDuration):this.globalEnd-(this.globalStart+this.globalPauseDuration);
     }    
     
     public long getElapsedTime() {
-        return isStopped()?this.globalEnd-this.globalStart:System.currentTimeMillis()-this.globalStart;
+    	if(this.paused) {
+    		this.globalPauseDuration += System.currentTimeMillis()-this.globalPauseLast;
+        	this.globalPauseLast = System.currentTimeMillis();
+    	}
+        return isStopped()?this.globalEnd-(this.globalStart+this.globalPauseDuration):System.currentTimeMillis()-(this.globalStart+this.globalPauseDuration);
     }
 
     public String getJobType() {
