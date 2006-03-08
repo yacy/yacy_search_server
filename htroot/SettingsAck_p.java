@@ -284,23 +284,23 @@ public class SettingsAck_p {
         if (post.containsKey("serveraccount")) {
             // read and process data
             String filter = ((String) post.get("serverfilter")).trim();
-            String user   = (String) post.get("serveruser");
+            /*String user   = (String) post.get("serveruser");
             String pw1    = (String) post.get("serverpw1");
-            String pw2    = (String) post.get("serverpw2");
+            String pw2    = (String) post.get("serverpw2");*/
             // do checks
             if (filter == null) {
                 //if ((filter == null) || (user == null) || (pw1 == null) || (pw2 == null)) {
                 prop.put("info", 1);//error with submitted information
                 return prop;
             }
-            if (user.length() == 0) {
+           /* if (user.length() == 0) {
                 prop.put("info", 2);//username must be given
                 return prop;
             }
             if (!(pw1.equals(pw2))) {
                 prop.put("info", 3);//pw check failed
                 return prop;
-            }
+            }*/
             if (filter.length() == 0) filter = "*";
             else if (!filter.equals("*")){
                 // testing proxy filter 
@@ -325,11 +325,11 @@ public class SettingsAck_p {
             
             // check passed. set account:
             env.setConfig("serverClient", filter);
-            env.setConfig("serverAccountBase64MD5", serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
+            //env.setConfig("serverAccountBase64MD5", serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("serverAccount", "");
             
             prop.put("info", 8);//server access filter updated
-            prop.put("info_user", user);
+            //prop.put("info_user", user);
             prop.put("info_filter", filter);
             return prop;
         }
