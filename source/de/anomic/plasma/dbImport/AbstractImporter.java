@@ -96,10 +96,6 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     
     public int getJobID() {
         return this.jobID;
-    }
-    
-    public long getTotalRuntime() {
-        return (this.globalEnd == 0)?System.currentTimeMillis()-(this.globalStart+this.globalPauseDuration):this.globalEnd-(this.globalStart+this.globalPauseDuration);
     }    
     
     public long getElapsedTime() {
