@@ -613,8 +613,7 @@ public class yacySeed {
         final String ip = (String) this.dna.get(IP);
         if (ip == null) { return "IP is null"; }
         if (ip.length() < 8) { return "IP is too short: " + ip; }
-        //if (!natLib.isProper(ip)) { return "IP is not proper: " + ip; } //this does not work with staticIP
-		//TODO: try to resolv it, if its a hostname
+        if (!natLib.isProper(ip)) { return "IP is not proper: " + ip; } //this does not work with staticIP
         return null;
     }
 
