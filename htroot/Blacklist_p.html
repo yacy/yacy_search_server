@@ -93,10 +93,16 @@ collect blacklist entries from other peers.</p>
 				</td>
 				</tr>
 				<tr>
-				<td  class="TableCellDark">
-				Enter new domain name / path pattern in the form:<br>
-				"<i>&lt;domain&gt;/&lt;path-regexpr&gt;</i>":
-				</td>
+                <td class="TableCellDark">
+                Enter new domain name / path pattern in the form:
+                <ul type="square">
+                <li>domain/fullpath</li>
+                <li>domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+                <li>*.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+                <li>domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+                <li>*.sub.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+                <li>sub.domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li></ul>
+                </td>
 				</tr>
 				<tr>
 				<td  class="TableCellLight">
