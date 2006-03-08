@@ -66,6 +66,7 @@ import de.anomic.yacy.yacySeedUploader;
 public class yacySeedUploadScp implements yacySeedUploader {
     
     public static final String CONFIG_SCP_SERVER = "seedScpServer";
+    public static final String CONFIG_SCP_SERVER_PORT = "seedScpServerPort";
     public static final String CONFIG_SCP_ACCOUNT = "seedScpAccount";
     public static final String CONFIG_SCP_PASSWORD = "seedScpPassword";
     public static final String CONFIG_SCP_PATH = "seedScpPath";
@@ -77,23 +78,36 @@ public class yacySeedUploadScp implements yacySeedUploader {
             if ((seedFile == null)||(!seedFile.exists())) throw new Exception("Seed file does not exist.");
             
             String  seedScpServer   = sb.getConfig(CONFIG_SCP_SERVER,null);
+            String  seedScpServerPort =  sb.getConfig(CONFIG_SCP_SERVER_PORT,"22");
             String  seedScpAccount  = sb.getConfig(CONFIG_SCP_ACCOUNT,null);
             String  seedScpPassword = sb.getConfig(CONFIG_SCP_PASSWORD,null);
             String  seedScpPath = sb.getConfig(CONFIG_SCP_PATH,null);       
             
-            if ((seedScpServer != null) && (seedScpAccount != null) && (seedScpPassword != null) && (seedScpPath != null)) {
-                return sshc.put(seedScpServer, seedFile, seedScpPath, seedScpAccount, seedScpPassword);
-            } 
-            return "Seed upload settings not configured properly. password-len=" +
-            seedScpPassword.length() + ", filePath=" +
-            seedScpPath;
+            if (seedScpServer == null || seedScpServer.length() == 0)
+                throw new Exception("Seed SCP upload settings not configured properly. Servername must not be null or empty.");
+            else if (seedScpAccount == null || seedScpAccount.length() == 0)
+                throw new Exception("Seed SCP upload settings not configured properly. Username must not be null or empty.");            
+            else if (seedScpPassword == null || seedScpPassword.length() == 0)
+                throw new Exception("Seed SCP upload settings not configured properly. Password must not be null or empty.");            
+            else if (seedScpPath == null || seedScpPath.length() == 0)
+                throw new Exception("Seed SCP upload settings not configured properly. File path must not be null or empty.");
+            else if (seedScpServerPort == null || seedScpServerPort.length() == 0)
+            throw new Exception("Seed SCP upload settings not configured properly. Server port must not be null or empty.");
+            int port = 22;
+            try {
+                port = Integer.valueOf(seedScpServerPort).intValue();
+            } catch (NumberFormatException ex) {
+                throw new Exception("Seed SCP upload settings not configured properly. Server port is not a vaild integer.");
+            }
+            
+            return sshc.put(seedScpServer, port, seedFile, seedScpPath, seedScpAccount, seedScpPassword);
         } catch (Exception e) {
             throw e;
         }
     }
     
     public String[] getConfigurationOptions() {
-        return new String[] {CONFIG_SCP_SERVER,CONFIG_SCP_ACCOUNT,CONFIG_SCP_PASSWORD,CONFIG_SCP_PATH};
+        return new String[] {CONFIG_SCP_SERVER,CONFIG_SCP_SERVER_PORT,CONFIG_SCP_ACCOUNT,CONFIG_SCP_PASSWORD,CONFIG_SCP_PATH};
     }
     
     public String[] getLibxDependencies() {
@@ -103,9 +117,14 @@ public class yacySeedUploadScp implements yacySeedUploader {
 }
 
 class sshc {
-    public static String put(String host,
-            File localFile, String remoteName,
-            String account, String password) throws Exception {
+    public static String put(
+            String host,
+            int port,
+            File localFile, 
+            String remoteName,
+            String account, 
+            String password
+    ) throws Exception {
         
         Session session = null;
         try {    
@@ -113,7 +132,7 @@ class sshc {
             JSch jsch=new JSch();
             
             // setting hostname, username, userpassword
-            session = jsch.getSession(account, host, 22);
+            session = jsch.getSession(account, host, port);
             session.setPassword(password);        
             
             /*

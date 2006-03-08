@@ -280,6 +280,7 @@ seedFilePath=
 # Please note that this upload method can only be used if you have installed
 # this optional upload method.
 seedScpServer=
+seedScpServerPort=
 seedScpAccount=
 seedScpPassword=
 seedScpPath=
