@@ -515,7 +515,7 @@ public class wikiCode {
                 //counting double headlines
                 doubles = 0;
                 for(int j=0;j<i;j++){
-                    if(dirElements.get(j).toString().substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-1_]","").equals(element.substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-1_]",""))){
+                    if(dirElements.get(j).toString().substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","").equals(element.substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]",""))){
                         doubles++;
                     }
                 }
@@ -532,7 +532,7 @@ public class wikiCode {
                     level3++;
                     String temp = element.substring(1);
                     element=level1+"."+level2+"."+level3+" "+temp;
-                    directory = directory + "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-1_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                    directory = directory + "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
                 }
                 else if (element.startsWith("2")){
                     if(level==1){
@@ -545,7 +545,7 @@ public class wikiCode {
                     level2++;
                     String temp = element.substring(1);
                     element=level1+"."+level2+" "+temp;
-                    directory = directory + "&nbsp;&nbsp;<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-1_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                    directory = directory + "&nbsp;&nbsp;<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
                 }
                 else if (element.startsWith("1")) {
                     if (level>1) {
@@ -556,7 +556,7 @@ public class wikiCode {
                     level1++;
                     String temp = element.substring(1);
                     element=level1+". "+temp;
-                    directory = directory + "<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-1_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                    directory = directory + "<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
                 }
                 anchorext="";
             }
@@ -594,7 +594,7 @@ public class wikiCode {
                             doubles++;
                         }
                     }
-                    String anchor = direlem.replaceAll(" ","_").replaceAll("[^a-zA-Z0-1_]",""); //replace blanks with underscores and delete everything thats not a regular character, a number or _
+                    String anchor = direlem.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]",""); //replace blanks with underscores and delete everything thats not a regular character, a number or _
                     //if there are doubles, add underscore and number of doubles plus one
                     if(doubles>0){
                         anchor = anchor + "_" + (doubles+1);
