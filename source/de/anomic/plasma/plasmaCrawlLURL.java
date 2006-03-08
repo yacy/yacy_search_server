@@ -729,6 +729,96 @@ public final class plasmaCrawlLURL extends plasmaURL {
         return new kiter(up, rotating);
     }
 
+    //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
+    //  see http://www.yacy-forum.de/viewtopic.php?p=18093#18093
+    public Cleaner makeCleaner() {
+        return new Cleaner();
+    }
+    
+    public class Cleaner extends Thread {
+
+        private boolean run = true;
+        private boolean pause = false;    
+        public int blacklistedUrls = 0;
+        public int totalSearchedUrls = 1;
+        public String lastBlacklistedUrl = "";
+        public String lastBlacklistedHash = "";
+        public String lastUrl = "";
+        public String lastHash = "";
+        
+        public Cleaner() {
+        }
+        
+        public void run() {
+            try {
+                serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
+                Iterator eiter = entries(true,false);
+                while (eiter.hasNext() && run) {
+                    synchronized(this) {
+                        if (this.pause) {
+                            try {
+                                this.wait();
+                            } catch (InterruptedException e) {
+                                this.run = false;
+                                return;
+                            }
+                        }
+                    }
+                    
+                    plasmaCrawlLURL.Entry entry = (plasmaCrawlLURL.Entry) eiter.next();
+                    totalSearchedUrls++;
+                    if (plasmaSwitchboard.urlBlacklist.isListed(entry.url().getHost().toLowerCase(),entry.url().getPath())==true) {
+                        lastBlacklistedUrl = entry.url().toString();
+                        lastBlacklistedHash = entry.hash();                        
+                        serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " " + entry.url());
+                        remove(entry.hash());
+                    }
+                    lastUrl = entry.url().toString();
+                    lastHash = entry.hash();                        
+                }
+            } catch (RuntimeException e) {
+                if (e.getMessage().indexOf("not found in LURL") != -1) {
+                    e.printStackTrace();
+                }
+                else {
+                    e.printStackTrace();
+                    run = false;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                run = false;
+            }
+            serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread stopped");
+        }
+        
+        public void abort() {
+            synchronized(this) {
+                run = false;
+                this.notifyAll();
+            }
+        }
+
+        public void pause() {
+            synchronized(this) {
+                if(pause == false) {
+                    pause = true;
+                    serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread paused");
+                }
+            }
+        }
+
+        public void endPause() {
+            synchronized(this) {
+                if (pause == true) {
+                    pause = false;
+                    this.notifyAll();
+                    serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread resumed");
+                }
+            }
+        }
+    }
+    
+    
     public static void main(String[] args) {
         // test-generation of url hashes for debugging
         // one argument requires, will be treated as url

@@ -530,6 +530,110 @@ public final class plasmaWordIndex {
         }
     }
 
+    //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
+    //  see http://www.yacy-forum.de/viewtopic.php?p=18093#18093
+    public Cleaner makeCleaner(plasmaCrawlLURL lurl, String startHash) {
+        return new Cleaner(lurl, startHash);
+    }
+    
+    public class Cleaner extends Thread {
+        
+        private String startHash;
+        private boolean run = true;
+        private boolean pause = false;
+        public int rwiCountAtStart = 0;
+        public String wordHashNow = "";
+        public String lastWordHash = "";
+        public int lastDeletionCounter = 0;
+        private plasmaCrawlLURL lurl;
+        
+        public Cleaner(plasmaCrawlLURL lurl, String startHash) {
+            this.lurl = lurl;
+            this.startHash = startHash;
+            this.rwiCountAtStart = size();
+        }
+        
+        public void run() {
+            serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread stopped");
+            String wordHash = "";
+            plasmaWordIndexEntryContainer wordContainer = null;
+            plasmaWordIndexEntry entry = null;
+            URL url = null;
+            HashSet urlHashs = new HashSet();
+            Iterator wordHashIterator = wordHashes(startHash, plasmaWordIndex.RL_WORDFILES, false);
+            while (wordHashIterator.hasNext() && run) {
+                waiter();
+                wordHash = (String) wordHashIterator.next();
+                wordContainer = getContainer(wordHash, true, -1);
+                Iterator containerIterator = wordContainer.entries();
+                wordHashNow = wordHash;
+                while (containerIterator.hasNext() && run) {
+                    waiter();
+                    entry = (plasmaWordIndexEntry) containerIterator.next();
+                    //System.out.println("Wordhash: "+wordHash+" UrlHash: "+entry.getUrlHash());
+                    try {
+                        url = lurl.getEntry(entry.getUrlHash(), null).url();
+                        if ((url == null) ||
+                            (plasmaSwitchboard.urlBlacklist.isListed(url.getHost().toLowerCase(),url.getPath())==true)) {
+                            urlHashs.add(entry.getUrlHash());
+                        }
+                    } catch (IOException e) {
+                        urlHashs.add(entry.getUrlHash());
+                    }
+                }
+                if (urlHashs.size()>0) {
+                    String [] urlArray;
+                    urlArray = (String[]) urlHashs.toArray(new String[0]);
+                    int removed = removeEntries(wordHash, urlArray, true);
+                    serverLog.logFine("INDEXCLEANER", wordHash + ": " + removed + " of " + wordContainer.size() + " URL-entries deleted");
+                    lastWordHash = wordHash;
+                    lastDeletionCounter = urlHashs.size(); 
+                    urlHashs.clear();
+                }
+            }
+            serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread stopped");
+        }
+        
+        public void abort() {
+            synchronized(this) {
+                run = false;
+                this.notifyAll();
+            }
+        }
+
+        public void pause() {
+            synchronized(this) {
+                if(pause == false)  {
+                    pause = true;
+                    serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread paused");                
+                }
+            }
+        }
+
+        public void endPause() {
+            synchronized(this) {
+                if (pause == true) {
+                    pause = false;
+                    this.notifyAll();
+                    serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread resumed");
+                }
+            }
+        }
+        
+        public void waiter() {
+            synchronized(this) {
+                if (this.pause) {
+                    try {
+                        this.wait();
+                    } catch (InterruptedException e) {
+                        this.run = false;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    
     public static void main(String[] args) {
         // System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
         // System.out.println(new Date(reverseMicroDateDays(microDateDays(System.currentTimeMillis()))));
