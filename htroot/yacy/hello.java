@@ -177,15 +177,22 @@ public final class hello {
         if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected() > 0)) {
             if (count > yacyCore.seedDB.sizeConnected()) { count = yacyCore.seedDB.sizeConnected(); }
             if (count > 100) { count = 100; }
-            final yacySeed[] ySeeds = yacyCore.seedDB.seedsByAge(true, count); // latest seeds
-            seeds.ensureCapacity((ySeeds.length + 1) * 768);
+            
+            // latest seeds
+            final yacySeed[] ySeeds = yacyCore.seedDB.seedsByAge(true, count);          
+            
             // attach also my own seed
             seeds.append("seed0=").append(yacyCore.seedDB.mySeed.genSeedStr(key)).append(serverCore.crlfString);
-            count = 1;
-            for (i = 1; i < ySeeds.length; i++) {
-                if ((ySeeds[i] != null) && (ySeeds[i].isProper() == null)) {
-                    seeds.append(yacySeed.SEED).append(count).append(yacySeed.EQUAL).append(ySeeds[i].genSeedStr(key)).append(serverCore.crlfString);
-                    count++;
+            count = 1;            
+            
+            // attach other seeds
+            if (ySeeds != null) {
+                seeds.ensureCapacity((ySeeds.length + 1) * 768);
+                for (i = 0; i < ySeeds.length; i++) {
+                    if ((ySeeds[i] != null) && (ySeeds[i].isProper() == null)) {
+                        seeds.append(yacySeed.SEED).append(count).append(yacySeed.EQUAL).append(ySeeds[i].genSeedStr(key)).append(serverCore.crlfString);
+                        count++;
+                    }
                 }
             }
         } else {
