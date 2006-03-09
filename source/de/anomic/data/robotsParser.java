@@ -95,59 +95,61 @@ public final class robotsParser{
     }
     
     public static ArrayList parse(BufferedReader reader) throws IOException{
-        ArrayList deny = new ArrayList();
+        ArrayList deny4AllAgents = new ArrayList();
+        ArrayList deny4YaCyAgent = new ArrayList();
         
         int pos;
         String line = null, lineUpper = null;
-        boolean rule4Yacy = false, inBlock = false;        
+        boolean isRuleBlock4AllAgents = false,
+                isRuleBlock4YaCyAgent = false,
+                rule4YaCyFound = false,
+                inBlock = false;        
         
         while ((line = reader.readLine()) != null) {
             line = line.trim();
             lineUpper = line.toUpperCase();
             
             if (line.length() == 0) {
-                // we have reached the end of the rule block
-                rule4Yacy = false; inBlock = false;
+                // OLD: we have reached the end of the rule block
+                // rule4Yacy = false; inBlock = false;
+                
+                // NEW: just ignore it
             } else if (line.startsWith("#")) {
                 // we can ignore this. Just a comment line
             } else if (lineUpper.startsWith("User-agent:".toUpperCase())) {
                 
                 if (inBlock) {
+                    // we have detected the start of a new block
                     inBlock = false;
-                    rule4Yacy = false;
+                    isRuleBlock4AllAgents = false;
+                    isRuleBlock4YaCyAgent = false;
                 }
                 
-                if (!rule4Yacy) {
-                    // cutting off comments at the line end
-                    pos = line.indexOf("#");
-                    if (pos != -1) {
-                        line = line.substring(0,pos).trim();
-                    }
-                    
-                    // replacing all tabs with spaces
-                    line = line.replaceAll("\t"," ");
-                    
-                    // getting out the robots name
-                    pos = line.indexOf(" ");
-                    if (pos != -1) {
-                        String userAgent = line.substring(pos).trim();
-                        rule4Yacy = (userAgent.equals("*") || (userAgent.toLowerCase().indexOf("yacy") >=0));
-                    }
+                // cutting off comments at the line end
+                pos = line.indexOf("#");
+                if (pos != -1) line = line.substring(0,pos).trim();
+                
+                // replacing all tabs with spaces
+                line = line.replaceAll("\t"," ");
+                
+                // getting out the robots name
+                pos = line.indexOf(" ");
+                if (pos != -1) {
+                    String userAgent = line.substring(pos).trim();
+                    isRuleBlock4AllAgents |= userAgent.equals("*");
+                    isRuleBlock4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
+                    if (isRuleBlock4YaCyAgent) rule4YaCyFound = true;
                 }
             } else if (lineUpper.startsWith("Disallow:".toUpperCase())) {
                 inBlock = true;
                 
-                if (rule4Yacy) {
+                if (isRuleBlock4YaCyAgent || isRuleBlock4AllAgents) {
                     // cutting off comments at the line end
                     pos = line.indexOf("#");
-                    if (pos != -1) {
-                        line = line.substring(0,pos).trim();
-                    }
+                    if (pos != -1) line = line.substring(0,pos).trim();
                                        
                     // cutting of tailing *
-                    if (line.endsWith("*")) {
-                        line = line.substring(0,line.length()-1);
-                    }
+                    if (line.endsWith("*")) line = line.substring(0,line.length()-1);
                     
                     // replacing all tabs with spaces
                     line = line.replaceAll("\t"," ");
@@ -172,13 +174,14 @@ public final class robotsParser{
                         path = path.replaceAll(";","%3B");                    
                         
                         // adding it to the pathlist
-                        deny.add(path);
+                        if (isRuleBlock4AllAgents) deny4AllAgents.add(path);
+                        if (isRuleBlock4YaCyAgent) deny4YaCyAgent.add(path);
                     }
                 }
             }
         }
         
-        return deny;
+        return (rule4YaCyFound)?deny4YaCyAgent:deny4AllAgents;
     }        
     
     public static boolean isDisallowed(URL nexturl) {
@@ -293,11 +296,16 @@ public final class robotsParser{
             
             // if we previously have downloaded this robots.txt then we can set the if-modified-since header
             httpHeader reqHeaders = new httpHeader();
+            
+            // adding referer
+            reqHeaders.put(httpHeader.REFERER, (new URL(robotsURL,"/")).toString());
+            
             if (entry != null) {
                 oldEtag = entry.getETag();
                 reqHeaders = new httpHeader();
                 Date modDate = entry.getModDate();
                 if (modDate != null) reqHeaders.put(httpHeader.IF_MODIFIED_SINCE,httpc.dateString(entry.getModDate()));
+                
             }
             
             httpc.response res = con.GET(robotsURL.getFile(), reqHeaders);
