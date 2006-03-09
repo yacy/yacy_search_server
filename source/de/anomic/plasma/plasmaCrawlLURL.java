@@ -776,7 +776,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                     }
                     lastUrl = entry.url().toString();
                     lastHash = entry.hash();
-                    if (blacklistedUrls % 100 == 0) {
+                    if (blacklistedUrls % 100 == 0 && blacklistedUrls != 0) {
                         serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
                     }
                 }
