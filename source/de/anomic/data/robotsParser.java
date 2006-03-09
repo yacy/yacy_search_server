@@ -67,6 +67,11 @@ import de.anomic.server.logging.serverLog;
  * It only parses the Deny Part, yet.
  *  *
  * http://www.robotstxt.org/wc/norobots-rfc.html
+ * 
+ * TODO:
+ *      - On the request attempt resulted in temporary failure a robot
+ *      should defer visits to the site until such time as the resource
+ *      can be retrieved.
  */
 public final class robotsParser{
     
@@ -263,7 +268,7 @@ public final class robotsParser{
             }
         }
         
-        if (robotsTxt4Host.isDisallowed(nexturl.getPath())) {
+        if (robotsTxt4Host.isDisallowed(nexturl.getFile())) {
             return true;        
         }        
         return false;
