@@ -281,7 +281,8 @@ Cookies==Cookies
 YaCy: Help==YaCy: Hilfeseiten
 >Help==>Hilfe
 This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==YaCy ist eine Suchmaschine,  die &auml;hnlich dem Prinzip des verteilten Rechnens (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und Indexieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <i>online-Interface</i> von YaCy. Sie k&ouml;nnen dieses Interface auch zum Konfigurieren Ihrer pers&ouml;nlichen Einstellungen, Proxy-Einstellungen, der Zugriffs-Kontrolle und den Crawl-Einstellungen benutzen. Sie k&ouml;nnen das Interface auch zum Starten von Crawls, Nachrichtenversand an andere YaCy-Nutzer und zur &Uuml;berwachung Ihres Index, Cache-Status und des Crawl-Prozesses benutzen. Besonders wichtig ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <i>globalen</i> Index zu durchsuchen.
-For more detailed information, visit the <a href="http://www.yacy.net/yacy">YaCy homepage</a>==F&uuml;r weitergehende Informationen besuchen Sie bitte die <a href="http://www.yacy.net/yacy">YaCy Homepage</a>
+For more detailed information, visit the====F&uuml;r weitergehende Informationen besuchen Sie bitte die
+YaCy homepage==YaCy-Homepage
 Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
 The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Weseiten zusammensetzt, die Sie mit dem Proxy besuchen.
 The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie k&ouml;nnen aber auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
@@ -500,15 +501,16 @@ Error with file input==Fehler mit der eingegebenen Datei
 Set new prefetch depth to==Neue Crawl Tiefe gesetzt auf
 Crawling of "\#\[crawlingURL\]\#" started.==Crawling von "#[crawlingURL]#" gestartet.
 You can monitor the crawling progress either by watching the URL queues==Sie k&ouml;nnen den Crawling Prozess auch sehen, indem Sie auf einer der folgenden URLs nachsehen:
-\(<a href="/IndexCreateWWWLocalQueue_p.html">local queue</a>,==(<a href="/IndexCreateWWWLocalQueue_p.html">lokale Warteschlange</a>,
-<a href="/IndexCreateWWWGlobalQueue_p.html">global queue</a>,==<a href="/IndexCreateWWWGlobalQueue_p.html">globale Warteschlange</a>,
-<a href="/IndexCreateLoaderQueue_p.html">loader queue</a>,==<a href="/IndexCreateLoaderQueue_p.html">Lade Warteschlange</a>,
-<a href="/IndexCreateLoaderQueue_p.html">indexing queue</a>\)==<a href="/IndexCreateLoaderQueue_p.html">Indexier Warteschlange</a>)
-or see the fill/process count of all queues on the==Oder sehen sehen Sie sich den F&uuml;ll-Prozess von allen Warteschlangen auf der
+local queue</a>==lokale Warteschlange</a>
+global queue</a>==globale Warteschlange</a>
+loader queue</a>==Lade-Warteschlange</a>
+indexing queue</a>==Indexier-Warteschlange</a>
+or see the fill/process count of all queues on the==Oder sehen Sie sich den F&uuml;ll-Prozess von allen Warteschlangen auf der
 >performance page</a>.==>Performance-Seite</a> an.
-<a href="IndexMonitor.html">Index Monitor</a>-page.==<a href="IndexMonitor.html">Index Monitor</a>-Seite angezeigt.
+Index Monitor</a>-page.==Index Monitor</a>-Seite angezeigt.
 <b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>==<b>Es dauert in der Regel mind. 30 Sekunden bis das Sie dort die ersten Ergebnisse sehen k&ouml;nnen. Bitte beachten Sie, dass das Crawling jedesmal, wenn Sie den Proxy oder den Web-Sever benutzen, pausiert wird, um maximale Verf&uuml;gbarkeit zu garantieren.</b>
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Sie Seiten crawlen, die Sie nicht crawlen wollen, k&ouml;nnen Sie diese <a href="IndexControl_p.html">hier</a> l&ouml;schen.
+If you crawl any un-wanted pages, you can delete them==Wenn Sie Seiten crawlen, die Sie nicht crawlen wollen, k&ouml;nnen Sie diese
+here</a>.==hier</a> l&ouml;schen.
 Removed \#\[numEntries\]\# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty==#[numEntries]# Eintr&auml;ge wurden aus der Crawl Warteschlange entfernt. Diese Warteschlange wird sich erneut f&uuml;llen, wenn noch Eintr&auml;ge in der Lade- und Indexier Warteschlange stehen.
 Crawling paused successfully.==Crawling wurde erfolgreich unterbrochen (Pause).
 Continue crawling.==Crawling wird fortgesetzt.
@@ -759,6 +761,8 @@ false==nein
 Selection==Auswahl
 words<==Worte<
 Last Refresh:==Letzte Aktualisierung:
+Overwrite IP==IP &uuml;berschreiben
+blank for defaultip==leer f&uuml;r Standard-IP
 Start/Stop Transfer==Starte/Stoppe Transfer
 "Start Index Transfer"=="Starte Index-Transfer"
 "Stop Index Transfer"=="Stoppe Index-Transfer"
@@ -793,8 +797,9 @@ The YACY Lab==Das YaCy Labor
 This is the place where we try new functions of the YaCy search engine.==Dies ist ein Platz, an dem wir neue Funktionen der YaCy Suchmaschine testen.
 All these things here are to be considered as probably unstable, and/or experimental.==Alle neuen Funktionen hier sind wahrscheinlich noch unstabil und in einer Experementierphase.
 You may try out these things but please do not care about bugs.==Sie k&ouml;nnen die neuen Funktionen gerne ausprobieren. K&uuml;mmern Sie sich bitte nicht um die Fehler.
-The <a href="Wiki.html">Wiki</a>==Das <a href="Wiki.html">Wiki</a>
-Advanced <a href="/Config_p.html">Configuration</a>==erweiterte <a href="/Config_p.html">Einstellungen</a>
+The <a==Das <a
+Advanced <a==erweiterte <a
+Configuration</a>Einstellungen</a>
 
 #-------------------------------------------------------
 #File: Messages_p.html
@@ -893,7 +898,8 @@ red point==roter Punkt
 this peer==Ihr Peer
 You are in online mode, but probably no internet resource is available. Please check your internet connection.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
 You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online-Modus oder Sie benutzen nicht die Proxy-Option.
-\('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>==('on-demand - Modus', siehe <a href="http://www.yacy.net/yacy/Installation.html#wininst">hier</a>
+'on-demand - mode', see=='on-demand - Modus', siehe
+here</a>==hier</a>
 for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den \"Permanent Online\" Modus aktivieren.
 To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Knopf:
 "go online"=="online gehen"
@@ -913,7 +919,7 @@ This is the YaCyNews system \(currently under testing\).==Dies ist das YaCy News
 The news service is controlled by several entry points:==Dieser News Service wird von folgenden Punkten initiert:
 A crawl start with remote indexing will automatically create a news entry.==Wird ein Crawl von einem anderen Peer initiert, dann wird automatisch ein News-Eintrag erstellt.
 Other peers may use this information to prevent double-crawls from the same start point.==Andere Peers k&ouml;nnen diese Informationen benutzen, um einen doppelten Crawl vom selben Startpunkt zu vermeiden.
-A table with recently started crawls is presented on the Index Create - page==Eine Tabelle mit gerade gestarteten Crawls wird auf der Index Create Seite angezeigt.
+A table with recently started crawls is presented on the Index Create - page==Eine Tabelle mit gerade gestarteten Crawls wird auf der "Index erzeugen"-Seite angezeigt.
 A change in the personal profile will create a news entry. You can see recently made changes of==Durch eine &Auml;nderung im Profil, wird auch ein News-Eintrag erstellt.
 profile entries on the Network page, where that profile change is visualized with a '\*' beside the 'P' \(profile\) - selector.==Profil Eintr&auml;ge auf der Netzwerk Seite werden nach einer &Auml;nderung mit einem '*' neben dem 'P' (Profil) gekennzeichnet.
 More news services will follow.==Mehr News Services werden folgen.
@@ -967,6 +973,10 @@ The maximum of this cache can be set below.==Die Maximalgr&ouml;&szlig;e dieses 
 Maximum URLs currently assigned<br>to one cached word:==h&ouml;chste Anzahl URLs die derzeit einem Wort im Zwischenspeicher zugewiesen wurde:
 This is the maximum size of URLs assigned to a single word cache entry.==Dies ist die maximale Menge an URLs, die einem einzelnen Wort-Cache Eintrag zugewiesen wurden.
 If this is a big number, it shows that the caching works efficiently.==Wenn diese Zahl hoch ist, hei&szlig;t das, dass der Wort-Cache effizient arbeitet.
+Maximum Age of Word in cache:==h&ouml;chstes Alter eines Wortes im Cache:
+This is the maximum age of a word index that is in the RAM cache in minutes.==Dies ist das maximale Alter eines Wortes im RAM-Cache (in Minuten)
+Minimum Age of Word in cache:==kleinstes Alter eines Wortes im Cache:
+This is the minimum age of a word index that is in the RAM cache in minutes.==Dies ist das minimale Alter eines Wortes im RAM-Cache (in Minuten)
 Maximum number of Word Caches, low limit:==Maximale Wortzahl im Cache, niedrige Grenze
 Maximum number of Word Caches, high limit:==Maximale Wortzahl im Cache, hohe Grenze
 This is is the number of word indexes that shall be held in the==Dies ist die Anzahl der Wort-indexe die w&auml;hrend des Indexierens im
@@ -1145,7 +1155,6 @@ Remote Indexing is now \#\(crawlOrder\)\#off::on==Remote-Indexieren ist nun #(cr
 An error has occurred:==Es trat ein Fehler auf:
 You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransichten von frisch indexierten Seiten
 on the==auf der
-<a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a><a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a>
 Page.==Seite ansehen.
 
 
@@ -1227,7 +1236,7 @@ You probably don't want to share the proxy to the internet, so you should set th
 The default setting should be right in most cases.==Die Standardwerte sollten in den meisten F&auml;llen richtig sein.
 If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.==Wenn Sie wollen k&ouml;nnen Sie auch Proxyaccounts erstellen, sodass sich jeder Proxynutzer zuerst anmelden muss, aber das ist eher un&uuml;blich.
 IP-Number filter:==IP-Adressen Filter:
-Use <a href="User_p.html">Proxy Accounts</a>==Nutze <a href="User_p.html">Proxy Accounts</a>
+Use <a==Nutze <a
 
 #-------------------------------------------------------
 #File: Settings_Http.inc
@@ -1370,8 +1379,10 @@ If you open any public web page through the proxy, you must log-in then.==
 Your server access filter is now set to #[filter]#
 Auto pop-up of the Status page is now <b>disabled</b>==Automatisches Pop-Up auf der Status Seite ist nun <b>deaktiviert.</b>
 Auto pop-up of the Status page is now <b>enabled</b>==Automatisches Pop-Up auf der Status Seite ist nun <b>aktiviert.</b>
-You are now permanently <b>online</b>. After a short while you should see the effect on the <a href="Status.html">status</a> page.==Sie sind nun im <b>permanenten Online Modus</b>. Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der <a href="Status.html">Status</a> Seite sehen.
-The Peer Name is:==Der Name dieses peers ist:
+You are now permanently <b>online</b>.==Sie sind nun im <b>permanenten Online Modus</b>.
+After a short while you should see the effect on the====Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
+status</a> page.==Status-Seite</a> sehen.
+The Peer Name is:==Der Name dieses Peers ist:
 Your static Ip\(or DynDns\) is:==Ihre statische IP(oder DynDns) ist:
 Seed Settings changed.\#\(success\)\#::You are now a principal peer.==Seed Einstellungen wurden ge&auml;ndert.#(success)#::Sie sind nun ein Principal Peer.
 Seed Settings changed, but something is wrong.==Seed Einstellungen wurden ge&auml;ndert, aber etwas war falsch.
@@ -1404,9 +1415,13 @@ Port Forwarding uses proxy:
 Port Forwarding Settings changed, but something is wrong.
 Port Forwarding was deactivated automatically.
 Please return to the settings page and modify the data.==Bitte kehren Sie auf die Einstellungen Seite zur&uuml;ck und modifizieren Sie die Daten.
-You are now <b>event-based online</b>. After a short while you should see the effect on the <a href="Status.html">status</a> page.==Sie sind nun im  <b>aktivit&auml;tsbasierten Modus</b>. Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der <a href="Status.html">Status</a> Seite sehen.
-You are now in <b>Cache Mode</b>. Only Proxy-cache ist available in this mode. After a short while you should see the effect on the <a href="Status.html">status</a> page.==Sie sind nun im <b>Cache Modus</b>. Nur der Proxy Cache ist in diesem Modus verf&uuml;gbar. Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der <a href="Status.html">Status</a> Seite sehen.
-You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie k&ouml;nnen nun zur&uuml;ck auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, um weitere &Auml;nderungen vorzunehmen.
+You are now <b>event-based online</b>.==Sie sind nun im  <b>aktivit&auml;tsbasierten Modus</b>.
+After a short while you should see the effect on the==Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
+You are now in <b>Cache Mode</b>.==Sie sind nun im <b>Cache Modus</b>.
+Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem Modus verf&uuml;gbar.
+After a short while you should see the effect on the==Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
+You can now go back to the==Sie k&ouml;nnen nun zur&uuml;ck auf die
+Settings</a> page if you want to make more changes.==Einstellungen-Seite</a> gehen, um weitere &Auml;nderungen vorzunehmen.
 
 #-------------------------------------------------------
 #File: Settings_Admin.inc
@@ -1471,7 +1486,8 @@ Welcome to YaCy!==Willkommen bei YaCy!
 Public System Properties==Allgemeine Systemangaben
 System version==Systemversion
 the latest public version is==Die neueste stabile Version ist
-Click here to <a href="http://www.yacy.net/yacy/Download.html">download</a> it.==Klicken Sie <a href="http://www.yacy.net/yacy/Download.html">hier</a>, um sie herunterzuladen.
+Click here to==Klicken Sie
+download</a> it.==hier</a>, um sie herunterzuladen.
 This&nbsp;peer's&nbsp;address==Adresse dieses Peers
 #Not assigned==nicht zugewiesen
 Not assigned. The peer must go online to get an address.==Nicht zugewiesen. Ihr Peer muss online gehen, um eine Adresse zu bekommen.
@@ -1480,7 +1496,8 @@ The peer does not go online until you use the proxy to surf the internet,==Ihr P
 thus proving that you <i>want</i> to go online.==wodurch Sie signalisieren, online gehen zu <i>wollen</i>.
 #---
 If you don't know how to configure your system to use a proxy,==Wenn Sie nicht wissen, wie Sie Ihr System konfigurieren, sodass es einen Proxy benutzt,
-see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.==lesen Sie die <a href="http://www.yacy.net/yacy/Installation.html#wininst">Installationsanleitung</a>.
+see the <a==lesen Sie die <a
+installation instructions</a>.==Installationsanleitung</a>.
 #---
 Your '.yacy' home at==Ihre YaCy-Domain ist
 This peer's name==Name dieses Peers
@@ -1490,7 +1507,10 @@ Uptime==Online seit
 Connects ==Verbindungen
 peers/hour==Peers/Stunde
 This peer's status==Status dieses Peers
-Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings \(see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>\), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben (Anleitung online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">Browser konfigurieren</a>) laden Sie eine beliebige Seite &uuml;ber den Proxy, um zu beweisen, dass es funktioniert. Mit diesem Status k&ouml;nnen Sie keine anderen Peers durchsuchen!
+Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben
+see online: <a==Anleitung online: <a
+configure your browser's proxy settings==Browser konfigurieren
+you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!==laden Sie eine beliebige Seite &uuml;ber den Proxy, um zu beweisen, dass es funktioniert. Mit diesem Status k&ouml;nnen Sie keine anderen Peers durchsuchen!
 Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured \(usually: 8080\), or to set up a 'virtual server' in your router settings \(often called DMZ\). Please be fair, contribute your own index to the global index.==Junior - Ihr Peer kann nicht von au&szlig;en erreicht werden. Ein m&ouml;glicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem k&ouml;nnen Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Peers von Ihrer Suchseite aus benutzen. Wir m&ouml;chten Sie ermutigen den Port, den Sie f&uuml;r YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu &ouml;ffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
 Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!==Senior - Sie lassen YaCy bei sich laufen und unterst&uuml;tzen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> k&ouml;nnen. Danke!
 Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zus&auml;tzlich Ihre Seed-Liste auf einen &ouml;ffentlich zug&auml;nglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
@@ -1499,7 +1519,8 @@ Other peers==Andere Peers
 other peers online.==andere Peers online.
 not online==nicht online
 Seed server==Seed Server
-Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html#seed">Settings page</a>.==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten f&uuml;r den FTP-Account k&ouml;nnen Sie in den <a href="Settings_p.html#seed">Einstellungen</a> konfigurieren.
+Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten f&uuml;r den FTP-Account k&ouml;nnen Sie in den
+Settings page</a>.==Einstellungen</a> konfigurieren.
 Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
 Enabled: Updating periodically to file==Aktiv: Periodisches Update in Datei
 Last upload:==Letzter Upload:
