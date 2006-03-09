@@ -759,6 +759,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                             try {
                                 this.wait();
                             } catch (InterruptedException e) {
+                                serverLog.logWarning("URLDBCLEANER", "InterruptedException", e);
                                 this.run = false;
                                 return;
                             }
@@ -774,14 +775,17 @@ public final class plasmaCrawlLURL extends plasmaURL {
                         remove(entry.hash());
                     }
                     lastUrl = entry.url().toString();
-                    lastHash = entry.hash();                        
+                    lastHash = entry.hash();
+                    if (blacklistedUrls % 100 == 0) {
+                        serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
+                    }
                 }
             } catch (RuntimeException e) {
                 if (e.getMessage().indexOf("not found in LURL") != -1) {
-                    e.printStackTrace();
+                    serverLog.logWarning("URLDBCLEANER", "urlHash not found in LURL", e);
                 }
                 else {
-                    e.printStackTrace();
+                    serverLog.logWarning("URLDBCLEANER", "RuntimeException", e);
                     run = false;
                 }
             } catch (IOException e) {

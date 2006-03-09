@@ -566,7 +566,7 @@ public final class plasmaWordIndex {
         }
         
         public void run() {
-            serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread stopped");
+            serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             String wordHash = "";
             plasmaWordIndexEntryContainer wordContainer = null;
             plasmaWordIndexEntry entry = null;
