@@ -61,8 +61,9 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
     public static final int  ramCacheReferenceLimit = 50;
-    public static final long ramCacheAgeLimit       = 60 * 60 * 2 * 1000; // milliseconds; 2 Hours
-
+    public static final long ramCacheMaxAge         = 1000 * 60 * 60 * 2; // milliseconds; 2 Hours
+    public static final long ramCacheMinAge         = 1000 * 60 * 2; // milliseconds; 2 Minutes (Karenz for DHT Receive)
+    
     // class variables
     private final File databaseRoot;
     private final TreeMap cache;
@@ -257,12 +258,13 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 String hash = null;
                 int count = hashScore.getMaxScore();
                 if ((count > ramCacheReferenceLimit) &&
-                    ((hash = (String) hashScore.getMaxObject()) != null)) {
-                    // flush high-score entries
+                    ((hash = (String) hashScore.getMaxObject()) != null) &&
+                    (System.currentTimeMillis() - longEmit(hashDate.getScore(hash)) > ramCacheMinAge)) {
+                    // flush high-score entries, but not if they are too 'young'
                     return hash;
                 }
                 long oldestTime = longEmit(hashDate.getMinScore());
-                if (((System.currentTimeMillis() - oldestTime) > ramCacheAgeLimit) &&
+                if (((System.currentTimeMillis() - oldestTime) > ramCacheMaxAge) &&
                     ((hash = (String) hashDate.getMinObject()) != null)) {
                     // flush out-dated entries
                     return hash;
@@ -271,6 +273,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 if (Runtime.getRuntime().freeMemory() < 10000000) {
                     // low-memory case
                     hash = (String) hashScore.getMaxObject(); // flush high-score entries (saves RAM)
+                    if (System.currentTimeMillis() - longEmit(hashDate.getScore(hash)) < ramCacheMinAge) {
+                        // to young, take it from the oldest entries
+                        hash = (String) hashDate.getMinObject();
+                    }
                 } else {
                     // not-efficient-so-far case
                     hash = (String) hashDate.getMinObject(); // flush oldest entries (makes indexing faster)
@@ -335,6 +341,30 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return count;
     }
 
+    public synchronized int tryRemoveURLs(String urlHash) {
+        // this tries to delete an index from the cache that has this
+        // urlHash assigned. This can only work if the entry is really fresh
+        // Such entries must be searched in the latest entries
+        Iterator i = hashDate.scores(false);
+        String wordHash;
+        long t;
+        plasmaWordIndexEntryContainer c;
+        int delCount = 0;
+        while (i.hasNext()) {
+            wordHash = (String) i.next();
+            // check time
+            t = longEmit(hashDate.getScore(wordHash));
+            if (System.currentTimeMillis() - t > ramCacheMinAge) return delCount;
+            // get container
+            c = (plasmaWordIndexEntryContainer) cache.get(wordHash);
+            if (c.remove(urlHash) != null) {
+                cache.put(wordHash, c);
+                delCount++;
+            }
+        }
+        return delCount;
+    }
+    
     public int addEntries(plasmaWordIndexEntryContainer container, long updateTime, boolean highPriority) {
         // this puts the entries into the cache, not into the assortment directly
 

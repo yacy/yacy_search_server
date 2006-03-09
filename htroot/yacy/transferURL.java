@@ -95,16 +95,17 @@ public final class transferURL {
                 } else {
                     lEntry = sb.urlPool.loadedURL.newEntry(urls, true);
                     if ((lEntry != null) && (lEntry.url() != null)) {
-                        if (
-                                (blockBlacklist) &&
-                                (plasmaSwitchboard.urlBlacklist.isListed(lEntry.url().getHost().toLowerCase(), lEntry.url().getPath()))
-                        ){
-                            yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName);
+                        if ((blockBlacklist) &&
+                            (plasmaSwitchboard.urlBlacklist.isListed( lEntry.url().getHost().toLowerCase(), lEntry.url().getPath()))) {
+                            int deleted = sb.wordIndex.tryRemoveURLs(lEntry.hash());
+                            yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
                             lEntry = null;
                         } else {
                             sb.urlPool.loadedURL.addEntry(lEntry, iam, iam, 3);
-                            yacyCore.log.logFine("transferURL: received URL '" + lEntry.url() + "' from peer " + otherPeerName);
-                            received++;                            
+                            yacyCore.log.logFine("transferURL: received URL '"
+                                    + lEntry.url() + "' from peer "
+                                    + otherPeerName);
+                            received++;
                         }
                     } else {
                         yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + 

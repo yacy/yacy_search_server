@@ -358,6 +358,14 @@ public final class plasmaWordIndex {
         return removed;
     }
     
+    public synchronized int tryRemoveURLs(String urlHash) {
+        // this tries to delete an index from the cache that has this
+        // urlHash assigned. This can only work if the entry is really fresh
+        // and can be found in the RAM cache
+        // this returns the number of deletion that had been possible
+        return ramCache.tryRemoveURLs(urlHash);
+    }
+    
     public static final int RL_RAMCACHE    = 0;
     public static final int RL_FILECACHE   = 1;
     public static final int RL_ASSORTMENTS = 2;

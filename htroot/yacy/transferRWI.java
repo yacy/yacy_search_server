@@ -126,19 +126,18 @@ public final class transferRWI {
                     wordhashes[received] = wordHash;
                     entry = new plasmaWordIndexEntry(estring.substring(p));
                     sb.wordIndex.addEntry(wordHash, entry, System.currentTimeMillis(), true);
-                    //sb.wordIndex.addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), entry), System.currentTimeMillis(), true);
                     serverCore.checkInterruption();
                     
                     urlHash = entry.getUrlHash();
                     try {
-                        if (
-                                (!(unknownURL.contains(urlHash))) &&
-                                (!(sb.urlPool.loadedURL.exists(urlHash)))
-                        ) {
+                        if ((!(unknownURL.contains(urlHash))) &&
+                            (!(sb.urlPool.loadedURL.exists(urlHash)))) {
                             unknownURL.add(urlHash);
                         }
                     } catch (Exception ex) {
-                        sb.getLog().logWarning("transferRWI: DB-Error while trying to determine if URL with hash '" + urlHash + "' is known.",ex);
+                        sb.getLog().logWarning(
+                          "transferRWI: DB-Error while trying to determine if URL with hash '" +
+                          urlHash + "' is known.", ex);
                         unknownURL.add(urlHash);
                     }
                     received++;
