@@ -348,7 +348,7 @@ public final class robotsParser{
                         "\nRedirecting request to: " + redirectionUrl);
                 return downloadRobotsTxt(redirectionUrl,redirectionCount,entry);
                 
-            } else if (res.status.startsWith("401")/* || res.status.startsWith("403") */) {
+            } else if (res.status.startsWith("401") || res.status.startsWith("403")) {
                 accessCompletelyRestricted = true;
                 serverLog.logFinest("ROBOTS","Access to Robots.txt not allowed on URL '" + robotsURL + "'.");
             } else {
