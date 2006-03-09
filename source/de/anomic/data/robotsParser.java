@@ -75,6 +75,11 @@ import de.anomic.server.logging.serverLog;
  */
 public final class robotsParser{
     
+    public static final String ROBOTS_USER_AGENT = "User-agent:".toUpperCase();
+    public static final String ROBOTS_DISALLOW = "Disallow:".toUpperCase();
+    public static final String ROBOTS_ALLOW = "Allow:".toUpperCase();
+    public static final String ROBOTS_COMMENT = "#";
+    
     /*public robotsParser(URL robotsUrl){
      }*/
     /*
@@ -119,9 +124,9 @@ public final class robotsParser{
                 // rule4Yacy = false; inBlock = false;
                 
                 // NEW: just ignore it
-            } else if (line.startsWith("#")) {
+            } else if (line.startsWith(ROBOTS_COMMENT)) {
                 // we can ignore this. Just a comment line
-            } else if (lineUpper.startsWith("User-agent:".toUpperCase())) {
+            } else if (lineUpper.startsWith(ROBOTS_USER_AGENT)) {
                 
                 if (inBlock) {
                     // we have detected the start of a new block
@@ -131,7 +136,7 @@ public final class robotsParser{
                 }
                 
                 // cutting off comments at the line end
-                pos = line.indexOf("#");
+                pos = line.indexOf(ROBOTS_COMMENT);
                 if (pos != -1) line = line.substring(0,pos).trim();
                 
                 // replacing all tabs with spaces
@@ -145,12 +150,14 @@ public final class robotsParser{
                     isRuleBlock4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
                     if (isRuleBlock4YaCyAgent) rule4YaCyFound = true;
                 }
-            } else if (lineUpper.startsWith("Disallow:".toUpperCase())) {
+            } else if (lineUpper.startsWith(ROBOTS_DISALLOW) || 
+                       lineUpper.startsWith(ROBOTS_ALLOW)) {
                 inBlock = true;
+                boolean isDisallowRule = lineUpper.startsWith(ROBOTS_DISALLOW);
                 
                 if (isRuleBlock4YaCyAgent || isRuleBlock4AllAgents) {
                     // cutting off comments at the line end
-                    pos = line.indexOf("#");
+                    pos = line.indexOf(ROBOTS_COMMENT);
                     if (pos != -1) line = line.substring(0,pos).trim();
                                        
                     // cutting of tailing *
@@ -176,9 +183,10 @@ public final class robotsParser{
                         }
                         
                         // escaping all occurences of ; because this char is used as special char in the Robots DB
-                        path = path.replaceAll(";","%3B");                    
+                        path = path.replaceAll(plasmaCrawlRobotsTxt.ROBOTS_DB_PATH_SEPARATOR,"%3B");                    
                         
                         // adding it to the pathlist
+                        if (!isDisallowRule) path = "!" + path;
                         if (isRuleBlock4AllAgents) deny4AllAgents.add(path);
                         if (isRuleBlock4YaCyAgent) deny4YaCyAgent.add(path);
                     }

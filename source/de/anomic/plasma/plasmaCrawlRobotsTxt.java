@@ -59,6 +59,9 @@ import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroException;
 
 public class plasmaCrawlRobotsTxt {
+    
+    public static final String ROBOTS_DB_PATH_SEPARATOR = ";";    
+    
     kelondroMap robotsTable;
     private final File robotsTableFile;
     private int bufferkb;
@@ -168,7 +171,7 @@ public class plasmaCrawlRobotsTxt {
                 this.disallowPathList = new LinkedList();
                 String csPl = (String) this.mem.get(DISALLOW_PATH_LIST);
                 if (csPl.length() > 0){
-                    String[] pathArray = csPl.split(";");
+                    String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
                     if ((pathArray != null)&&(pathArray.length > 0)) {
                         this.disallowPathList.addAll(Arrays.asList(pathArray));
                     }
@@ -200,7 +203,7 @@ public class plasmaCrawlRobotsTxt {
                 StringBuffer pathListStr = new StringBuffer();
                 for (int i=0; i<disallowPathList.size();i++) {
                     pathListStr.append(disallowPathList.get(i))
-                               .append(";");
+                               .append(ROBOTS_DB_PATH_SEPARATOR);
                 }
                 this.mem.put(DISALLOW_PATH_LIST,pathListStr.substring(0,pathListStr.length()-1));
             }
@@ -246,13 +249,26 @@ public class plasmaCrawlRobotsTxt {
         }          
         
         public boolean isDisallowed(String path) {
-            if ((this.mem == null) || (this.disallowPathList.size() == 0)) return false;            
-            if ((path == null) || (path.length() == 0)) path = "/";
+            if ((this.mem == null) || (this.disallowPathList.size() == 0)) return false;   
+            
+            // if the path is null or empty we set it to /
+            if ((path == null) || (path.length() == 0)) path = "/";            
+            // escaping all occurences of ; because this char is used as special char in the Robots DB
+            else  path = path.replaceAll(ROBOTS_DB_PATH_SEPARATOR,"%3B");
+            
             
             Iterator pathIter = this.disallowPathList.iterator();
             while (pathIter.hasNext()) {
                 String nextPath = (String) pathIter.next();
-                if (path.startsWith(nextPath)) return true;
+                // allow rule
+                if (nextPath.startsWith("!") && nextPath.length() > 1 && path.startsWith(nextPath.substring(1))) {
+                    return false;
+                }
+                    
+                // disallow rule
+                if (path.startsWith(nextPath)) {
+                    return true;
+                }
             }
             return false;
         }
