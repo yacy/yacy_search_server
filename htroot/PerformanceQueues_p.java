@@ -254,6 +254,7 @@ public class PerformanceQueues_p {
         prop.put("wordCacheRAMSize", switchboard.wordIndex.wordCacheRAMSize());
         prop.put("maxURLinWordCache", "" + switchboard.wordIndex.maxURLinWordCache());
         prop.put("maxAgeOfWordCache", "" + (switchboard.wordIndex.maxAgeOfWordCache() / 1000 / 60)); // minutes
+        prop.put("minAgeOfWordCache", "" + (switchboard.wordIndex.minAgeOfWordCache() / 1000 / 60)); // minutes
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
         prop.put("wordCacheMaxLow", switchboard.getConfig("wordCacheMaxLow", "10000"));
         prop.put("wordCacheMaxHigh", switchboard.getConfig("wordCacheMaxHigh", "10000"));

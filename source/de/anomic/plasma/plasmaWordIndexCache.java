@@ -210,6 +210,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return hashScore.getMaxScore();
     }
 
+    public long minAgeOfWordCache() {
+        return System.currentTimeMillis() - longEmit(hashDate.getMaxScore());
+    }
+
     public long maxAgeOfWordCache() {
         return System.currentTimeMillis() - longEmit(hashDate.getMinScore());
     }

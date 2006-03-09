@@ -94,6 +94,10 @@ public final class plasmaWordIndex {
         return ramCache.maxURLinWordCache();
     }
 
+    public long minAgeOfWordCache() {
+        return ramCache.minAgeOfWordCache();
+    }
+
     public long maxAgeOfWordCache() {
         return ramCache.maxAgeOfWordCache();
     }
