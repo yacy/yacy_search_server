@@ -107,6 +107,7 @@ public class natLib {
 	if ((ip.equals("localhost")) ||
 	    (ip.startsWith("127")) ||
 	    (ip.startsWith("192.168")) ||
+        (ip.startsWith("172.16")) ||
 	    (ip.startsWith("10."))
 	    ) return false;
 	return true;
