@@ -413,7 +413,25 @@ public final class plasmaWordIndexEntry implements Cloneable {
     public String getLanguage() { return new String(language); }
     public char getType() { return doctype; }
     public boolean isLocal() { return localflag == LT_LOCAL; }
-    
+
+    public boolean isNewer(plasmaWordIndexEntry other) {
+        if (other == null) return true;
+        if (this.lastModified > other.lastModified) return true;
+        if (this.lastModified == other.getLastModified()) {
+            if (this.quality > other.quality) return true;
+        }
+        return false;
+    }
+ 
+    public boolean isOlder(plasmaWordIndexEntry other) {
+        if (other == null) return false;
+        if (this.lastModified < other.getLastModified()) return true;
+        if (this.lastModified == other.getLastModified()) {
+            if (this.quality < other.quality) return true;
+        }
+        return false;
+    }
+
     public int domlengthNormalized() {
         return 255 * plasmaURL.domLengthEstimation(this.urlHash) / 30;
     }

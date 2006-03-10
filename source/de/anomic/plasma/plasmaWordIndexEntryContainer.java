@@ -132,6 +132,10 @@ public final class plasmaWordIndexEntryContainer {
 
     private boolean addi(plasmaWordIndexEntry entry) {
         // returns true if the new entry was added, false if it already existet
+        plasmaWordIndexEntry oldEntry = (plasmaWordIndexEntry) container.get(entry.getUrlHash());
+        if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this container
+            return false;
+        }
         return (container.put(entry.getUrlHash(), entry) == null);
     }
 

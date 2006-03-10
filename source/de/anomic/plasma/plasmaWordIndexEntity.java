@@ -149,6 +149,10 @@ public final class plasmaWordIndexEntity {
     
     public boolean addEntry(plasmaWordIndexEntry entry) throws IOException {
         if (entry == null) return false;
+        plasmaWordIndexEntry oldEntry = getEntry(entry.getUrlHash());
+        if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this entity
+            return false;
+        }
         return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm().getBytes()) == null);
     }
     
