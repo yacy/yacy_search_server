@@ -97,7 +97,7 @@ public final class kelondroMScoreCluster {
             }
             // fix out-of-ranges
             if (l > Integer.MAX_VALUE) return Integer.MAX_VALUE;
-            if (l < Integer.MIN_VALUE) return Integer.MIN_VALUE;
+            if (l < 0) return 0;
             return (int) l;
         } catch (Exception e) {
             // try it lex
@@ -109,6 +109,8 @@ public final class kelondroMScoreCluster {
                 c += plainByteArray[(byte) s.charAt(i)];
             }
             for (int i = len; i < 5; i++) c <<= 6;
+            if (c > Integer.MAX_VALUE) return Integer.MAX_VALUE;
+            if (c < 0) return 0;
             return c;
         }
     }
