@@ -138,14 +138,23 @@ public final class kelondroMScoreCluster {
         addScore(objs, 1);
     }
     
+    public synchronized void decScore(Object[] objs) {
+        addScore(objs, -1);
+    }
+    
     public synchronized void incScore(Object obj) {
         addScore(obj, 1);
+    }
+    
+    public synchronized void decScore(Object obj) {
+        addScore(obj, -1);
     }
     
     public synchronized void setScore(Object obj, int newScore) {
         if (obj == null) return;
         //System.out.println("setScore " + obj.getClass().getName());
         Long usk = (Long) refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
+        if (newScore < 0) throw new kelondroOutOfLimitsException(newScore);
         
         if (usk == null) {
             // set new value
@@ -182,6 +191,7 @@ public final class kelondroMScoreCluster {
         
         if (usk == null) {
             // set new value
+            if (incrementScore < 0) throw new kelondroOutOfLimitsException(incrementScore);
             usk = new Long(scoreKey(encnt++, incrementScore));
             
             // put new value into cluster
@@ -198,7 +208,9 @@ public final class kelondroMScoreCluster {
             int oldHandle = (int) (c & 0xFFFFFFFFL);
             
             // set new value
-            usk = new Long(scoreKey(oldHandle, oldScore + incrementScore)); // generates an unique key for a specific score
+            int newValue = oldScore + incrementScore;
+            if (newValue < 0) throw new kelondroOutOfLimitsException(newValue);
+            usk = new Long(scoreKey(oldHandle, newValue)); // generates an unique key for a specific score
             refkeyDB.put(obj, usk);
             keyrefDB.put(usk, obj);
             

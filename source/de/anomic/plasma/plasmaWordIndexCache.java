@@ -207,14 +207,17 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     // cache settings
 
     public int maxURLinWordCache() {
+        if (hashScore.size() == 0) return 0;
         return hashScore.getMaxScore();
     }
 
     public long minAgeOfWordCache() {
+        if (hashDate.size() == 0) return 0;
         return System.currentTimeMillis() - longEmit(hashDate.getMaxScore());
     }
 
     public long maxAgeOfWordCache() {
+        if (hashDate.size() == 0) return 0;
         return System.currentTimeMillis() - longEmit(hashDate.getMinScore());
     }
 
@@ -345,25 +348,28 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return count;
     }
 
-    public synchronized int tryRemoveURLs(String urlHash) {
+    public int tryRemoveURLs(String urlHash) {
         // this tries to delete an index from the cache that has this
         // urlHash assigned. This can only work if the entry is really fresh
         // Such entries must be searched in the latest entries
-        Iterator i = hashDate.scores(false);
-        String wordHash;
-        long t;
-        plasmaWordIndexEntryContainer c;
         int delCount = 0;
-        while (i.hasNext()) {
-            wordHash = (String) i.next();
-            // check time
-            t = longEmit(hashDate.getScore(wordHash));
-            if (System.currentTimeMillis() - t > ramCacheMinAge) return delCount;
-            // get container
-            c = (plasmaWordIndexEntryContainer) cache.get(wordHash);
-            if (c.remove(urlHash) != null) {
-                cache.put(wordHash, c);
-                delCount++;
+        synchronized (cache) {
+            Iterator i = hashDate.scores(false);
+            String wordHash;
+            long t;
+            plasmaWordIndexEntryContainer c;
+            while (i.hasNext()) {
+                wordHash = (String) i.next();
+                // check time
+                t = longEmit(hashDate.getScore(wordHash));
+                if (System.currentTimeMillis() - t > ramCacheMinAge) return delCount;
+                // get container
+                c = (plasmaWordIndexEntryContainer) cache.get(wordHash);
+                if (c.remove(urlHash) != null) {
+                    cache.put(wordHash, c);
+                    hashScore.decScore(wordHash);
+                    delCount++;
+                }
             }
         }
         return delCount;
