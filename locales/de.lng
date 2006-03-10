@@ -48,7 +48,6 @@ These are the domain name / path patterns in this blacklist:==Dies sind die Doma
 You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
 Delete URL pattern==URL aus der Liste l&ouml;schen
 Enter new domain name / path pattern in the form:==Geben Sie eine neue Domain/einen neuen Pfad in dieser Form ein:
-path-regexpr==Pfad
 Add URL pattern==F&uuml;ge URL hinzu
 Import blacklist items from other YaCy peers:==Importiere Blacklist von anderen YaCy Peers:
 Host:==Host:
@@ -109,8 +108,7 @@ import as Public==als &ouml;ffentlich importieren
 Tagged with==Stichworte:
 Edit==Bearbeiten
 Delete==L&ouml;schen
-
-Bookmark List==Lesezeichenliste
+Bookmark List==Liste der Lesezeichen
 previous page==vorherige Seite
 next page==n&auml;chste Seite
 All==Alle
@@ -225,7 +223,7 @@ Comment==Kommentar
 #File: ConfigSkins_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Skin selection==Skinauswahl
+Skin Selection==Skinauswahl
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie k&ouml;nnen hier das Aussehen von YaCy mit Skins &auml;ndern. W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
 Current skin:==Verwendeter Skin:
 Available Skins:==Verf&uuml;gbare Skins:
@@ -418,12 +416,9 @@ Index Control==Index Kontrolle
 Index Administration==Index Administration
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Der lokale Index besteht im Moment aus #[wcount]# W&ouml;rtern und #[ucount]# URL-Links.
 To transfer the whole index to an other peer, click==Um den kompletten Index an einen anderen Peer zu &uuml;bertragen, klicken Sie
->here<==>hier<
 To import an index from a file or a foreign peer click==Um einen Index aus einer Datei oder von einem fremden Peer zu importieren, klicken Sie
-Word==Wort
 value="Show URL Entries for Word:">==value="URL Eintr&auml;ge f&uuml;r Wort zeigen">
 "Generate List"=="Liste erstellen"
-value="Show URL Entries for Wort:-Hash">==value="Eintr&auml;ge f&uuml;r Wort-Hash zeigen">
 "Transfer to other peer"=="An anderen Peer senden"
 URL==URL
 "Show Details for URL"=="Details f&uuml;r URL zeigen"
@@ -441,6 +436,8 @@ The DHT-rules do not work without this function.==Die DHT-Regeln funktionieren n
 If checked, your peer silently ignores transmitted URLs that match your blacklist==Wenn aktiviert, ignoriert Ihr Peer stillschweigend eingehende URLs, die auf Ihrer Blacklist stehen.
 "set"=="Speichern"
 Changes will take effect immediately==&Auml;nderungen sind sofort aktiv
+#Let this translation here to avoid errors.
+Word==Wort
 
 #-------------------------------------------------------
 #File: IndexCreate_p.html
@@ -935,7 +932,7 @@ you can stop the broadcast if you want.==Sie k&ouml;nnen die Weiterverteilung st
 Originator==Initiator
 Created==Geschaffen
 Category==Kategorie
-Received==Erhalten
+Received==Empfangen
 Distributed==Verteilt
 Attributes==Attribute
 "\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Gew&auml;hlte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Gew&auml;hlte&nbsp;News&nbsp;l&ouml;schen::Verbreitung&nbsp;gew&auml;hlter&nbsp;News&nbsp;abbrechen::Gew&auml;hlte&nbsp;News&nbsp;l&ouml;schen#(/page)#
@@ -975,7 +972,7 @@ This is the maximum size of URLs assigned to a single word cache entry.==Dies is
 If this is a big number, it shows that the caching works efficiently.==Wenn diese Zahl hoch ist, hei&szlig;t das, dass der Wort-Cache effizient arbeitet.
 Maximum Age of Word in cache:==h&ouml;chstes Alter eines Wortes im Cache:
 This is the maximum age of a word index that is in the RAM cache in minutes.==Dies ist das maximale Alter eines Wortes im RAM-Cache (in Minuten)
-Minimum Age of Word in cache:==kleinstes Alter eines Wortes im Cache:
+Minimum Age of Word in cache:==geringstes Alter eines Wortes im Cache:
 This is the minimum age of a word index that is in the RAM cache in minutes.==Dies ist das minimale Alter eines Wortes im RAM-Cache (in Minuten)
 Maximum number of Word Caches, low limit:==Maximale Wortzahl im Cache, niedrige Grenze
 Maximum number of Word Caches, high limit:==Maximale Wortzahl im Cache, hohe Grenze
@@ -994,13 +991,13 @@ current Idle==derzeit inaktiv
 Enter new Threadpool Configuration==neue Threadpoolkonfiguration eintragen
 Proxy Performance Settings:==Proxy Performance Einstellungen
 #Online Caution Delay==
-milliseconds==Millisekunden
 This is the time that the crawler idles when the proxy is accessed.==Dies ist die Zeit die der Crawler pausiert wenn auf den Proxy zugegriffen wird.
 The delay is extended by this time==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert,
 each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.==wenn auf den Proxy zugegriffen wird. Dies soll die Performance des Proxydurchsatzes erh&ouml;hen.
 current delta is==Seit dem letzten Zugriff auf den Proxy sind
 since last proxy access.==vergangen.
 Enter New Parameters==Neue Parameter eintragen
+milliseconds==Millisekunden
 
 #-------------------------------------------------------
 #File: PerformanceMemory_p.html
@@ -1212,7 +1209,6 @@ peer is behind a firewall or proxy.</b>==hinter einer Firewall oder einem Proxy 
 #File: Settings_ProxyAccess.inc
 Server Access Settings==Serverzugangseinstellungen
 These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP-Proxy und -Server.
-All traffic is routed through one single port, for both proxy and server.==Der gesamte Traffic f&uuml;r Proxy und Server wird durch einen einzigen Port geleitet.
 Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
 The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
 You have four possibilities to specify the address:==Sie haben vier M&ouml;glichkeiten die Adresse anzugeben:
@@ -1734,7 +1730,7 @@ Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter 
 #File: env/templates/header.template
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy&nbsp;-&nbsp;Distributed&nbsp;Web&nbsp;Indexing&nbsp;-&nbsp;Administration==YaCy - Verteilte Internet-Indexierung - Administration
+YaCy&nbsp;-&nbsp;Distributed&nbsp;Web&nbsp;Indexing&nbsp;-&nbsp;Administration==YaCy - Verteiltes Internet-Indexieren - Administration
 Global&nbsp;Index==Globaler Index
 Distributed Crawler==Verteilter Crawler
 Local Proxy==Lokaler Proxy
