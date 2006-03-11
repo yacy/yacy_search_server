@@ -167,7 +167,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             synchronized (cache) {
                 int i = dumpArray.size();
                 String wordHash;
-                long creationTime;
+                //long creationTime;
                 plasmaWordIndexEntry wordEntry;
                 byte[][] row;
                 //Runtime rt = Runtime.getRuntime();
@@ -176,10 +176,10 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     row = dumpArray.get(i);
                     if ((row[0] == null) || (row[1] == null) || (row[2] == null) || (row[3] == null) || (row[4] == null)) continue;
                     wordHash = new String(row[0], "UTF-8");
-                    creationTime = kelondroRecords.bytes2long(row[2]);
+                    //creationTime = kelondroRecords.bytes2long(row[2]);
                     wordEntry = new plasmaWordIndexEntry(new String(row[3], "UTF-8"), new String(row[4], "UTF-8"));
                     // store to cache
-                    addEntry(wordHash, wordEntry, creationTime);
+                    addEntry(wordHash, wordEntry, startTime);
                     urlCount++;
                     // protect against memory shortage
                     //while (rt.freeMemory() < 1000000) {flushFromMem(); java.lang.System.gc();}
