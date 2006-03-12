@@ -81,7 +81,7 @@ public class plasmaURLPattern {
 
     public void add(String host, String path) {
         if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
-        hostpaths.put(host, path);
+        hostpaths.put(host.toLowerCase(), path);
     }
 
     public boolean isListed(String hostlow, String path) {

@@ -816,12 +816,12 @@ public final class plasmaCrawlLURL extends plasmaURL {
                         lastBlacklistedHash = entry.hash();                        
                         serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " " + entry.url());
                         remove(entry.hash());
+                        if (blacklistedUrls % 100 == 0) {
+                            serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
+                        }
                     }
                     lastUrl = entry.url().toString();
                     lastHash = entry.hash();
-                    if (blacklistedUrls % 100 == 0 && blacklistedUrls != 0) {
-                        serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
-                    }
                 }
             } catch (RuntimeException e) {
                 if (e.getMessage().indexOf("not found in LURL") != -1) {
