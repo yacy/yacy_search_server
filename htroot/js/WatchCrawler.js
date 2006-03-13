@@ -63,7 +63,7 @@ function handleStatus(){
 		return;
 	}
 	var statusResponse = statusRPC.responseXML;
-	statusTag=getFirstChild(getFirstChild(statusResponse, ""), "status")
+	statusTag=getFirstChild(statusResponse, "status")
 	
 	ppm=getValue(getFirstChild(statusTag, "ppm"))
 	var ppmSpan = document.getElementById("ppm");
@@ -76,7 +76,7 @@ function handleStatus(){
 		ppmSpan.appendChild(img);
 	}
 	
-	var wordCache=getValue(getFirstChild(statusTag, "wordCacheSize"));
+	var wordCache=getValue(getFirstChild(statusTag, "wordCacheWSize"));
 	var wordCacheMax=getValue(getFirstChild(statusTag, "wordCacheMaxCount"));
 
 	var percent=Math.round(wordCache/wordCacheMax*100);

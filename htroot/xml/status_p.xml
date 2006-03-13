@@ -1,7 +1,8 @@
-<xml version="1.0">
+<?xml version="1.0"?>
 <status>
   <ppm>#[ppm]#</ppm>
   <wordCacheSize>#[wordCacheSize]#</wordCacheSize>
+  <wordCacheWSize>#[wordCacheWSize]#</wordCacheWSize>
+  <wordCacheKSize>#[wordCacheKSize]#</wordCacheKSize>
   <wordCacheMaxCount>#[wordCacheMaxCount]#</wordCacheMaxCount>
 </status>
-</xml>
