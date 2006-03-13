@@ -2,7 +2,6 @@
 <status>
   <ppm>#[ppm]#</ppm>
   <wordCacheSize>#[wordCacheSize]#</wordCacheSize>
-  <wordCacheMaxLow>#[wordCacheMaxLow]#</wordCacheMaxLow>
-  <wordCacheMaxHigh>#[wordCacheMaxHigh]#</wordCacheMaxHigh>
+  <wordCacheMaxCount>#[wordCacheMaxCount]#</wordCacheMaxCount>
 </status>
 </xml>

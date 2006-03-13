@@ -77,13 +77,8 @@ function handleStatus(){
 	}
 	
 	var wordCache=getValue(getFirstChild(statusTag, "wordCacheSize"));
-	var wordCacheMaxLow=getValue(getFirstChild(statusTag, "wordCacheMaxLow"));
-	var wordCacheMaxHigh=getValue(getFirstChild(statusTag, "wordCacheMaxHigh"));
-	//use Low as default, but High if there are more wordcaches
-	var wordCacheMax=wordCacheMaxLow;
-	if(wordCache>wordCacheMax){
-		wordCacheMax=wordCacheMaxHigh;
-	}
+	var wordCacheMax=getValue(getFirstChild(statusTag, "wordCacheMaxCount"));
+
 	var percent=Math.round(wordCache/wordCacheMax*100);
 
 	

@@ -65,8 +65,7 @@ public class status_p {
         yacyCore.peerActions.updateMySeed();
         prop.put("ppm", yacyCore.seedDB.mySeed.get(yacySeed.ISPEED, "unknown"));
         prop.put("wordCacheSize", switchboard.wordIndex.wSize() + switchboard.wordIndex.kSize());
-        prop.put("wordCacheMaxLow", switchboard.getConfig("wordCacheMaxLow", "10000"));
-        prop.put("wordCacheMaxHigh", switchboard.getConfig("wordCacheMaxHigh", "10000"));
+        prop.put("wordCacheMaxCount", switchboard.getConfig("wordCacheMaxCount", "10000"));
 
         // return rewrite properties
         return prop;
