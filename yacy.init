@@ -310,18 +310,6 @@ yacyDebugMode=false
 #staticIP if you have a static IP, you can use this setting
 staticIP=
 
-# if the process is running behind a NAT or ROUTER, we cannot easily identify
-# the public IP of the process. We can ask a public IP responder, but cannot
-# rely on it. Therefore, AnomicHTTPProxy includes it's own responder.
-# But for the first running peer this is not an option.
-# The author uses a DI-604 router, which can be
-# asked for the public IP. If you own a DI-604 as well, please set the
-# DI604use to true and put in your router password, it will not be used for any
-# other purpose of asking for the IP
-#DI604use=true
-DI604use=false
-DI604pw=
-
 # each time the proxy starts up, it can trigger the local browser to show the
 # status page. This is active by default, to make it easier for first-time
 # users to understand what this application does. You can disable browser
@@ -513,7 +501,6 @@ javastart_Xmx=Xmx64m
 # -Xms<size> set initial Java heap size
 javastart_Xms=Xms10m
 
-
 # performance properties for the word index cache
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
 # ram cache during indexing. When YaCy is shut down, this cache must be
@@ -522,9 +509,7 @@ javastart_Xms=Xms10m
 # remote index transmissions and search requests
 # maxWaitingWordFlush gives the number of seconds that the shutdown
 # may last for the word flush
-wordCacheMaxLow  = 12000
-wordCacheMaxHigh = 16000
-maxWaitingWordFlush = 180
+wordCacheMaxCount = 12000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 

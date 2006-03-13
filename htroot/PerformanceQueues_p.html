@@ -69,53 +69,59 @@ Changes take effect immediately</td>
 <div class=small><b>Indexing Cache Settings:</b></div>
 <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
 <table border="0" cellpadding="5" cellspacing="1" width="100%">
+  <tr valign="top" class="TableHeader">
+    <td class=small>Cache Type</td>
+    <td class=small>Indexing</td>
+    <td class=small>DHT</td>
+    <td class=small>Description</td>
+  </tr>
   <tr valign="top" class="TableCellDark">
-    <td class=small>Words in RAM Cache:</td>
-    <td class=small>#[wordCacheRAMSize]#</td>
+    <td class=small>Words in RAM cache:</td>
+    <td class=small>#[wordCacheWSize]#</td>
+    <td class=small>#[wordCacheKSize]#</td>
     <td class=small>
-    This is the current size of the word cache.
-    The smaller this number, the faster the shut-down procedure will be.
-    The maximum of this cache can be set below.
+    This is the current size of the word caches.
+    The indexing cache speeds up the indexing process, the DHT cache holds indexes temporary for approval.
+    The maximum of this caches can be set below.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Maximum URLs currently assigned<br>to one cached word:</td>
-    <td class=small>#[maxURLinWordCache]#</td>
+    <td class=small>#[maxURLinWCache]#</td>
+    <td class=small>not controlled<br>for DHT cache</td>
     <td class=small>
     This is the maximum size of URLs assigned to a single word cache entry.
     If this is a big number, it shows that the caching works efficiently.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
-    <td class=small>Maximum Age of Word in cache:</td>
-    <td class=small>#[maxAgeOfWordCache]#</td>
+    <td class=small>Maximum age of a word:</td>
+    <td class=small>#[maxAgeOfWCache]#</td>
+    <td class=small>#[maxAgeOfKCache]#</td>
     <td class=small>
-    This is the maximum age of a word index that is in the RAM cache in minutes.
+    This is the maximum age of a word in an index in minutes.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
-    <td class=small>Minimum Age of Word in cache:</td>
-    <td class=small>#[minAgeOfWordCache]#</td>
+    <td class=small>Minimum age of a word:</td>
+    <td class=small>#[minAgeOfWCache]#</td>
+    <td class=small>#[minAgeOfKCache]#</td>
     <td class=small>
-    This is the minimum age of a word index that is in the RAM cache in minutes.
+    This is the minimum age of a word in an index in minutes.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
-    <td class=small>Maximum number of Word Caches, low limit:</td>
-    <td class=small><input name="wordCacheMaxLow" type="text" size="20" maxlength="100" value="#[wordCacheMaxLow]#"></td>
+    <td class=small>Maximum number of words in cache:</td>
+    <td class=small><input name="wordCacheMaxCount" type="text" size="20" maxlength="100" value="#[wordCacheMaxCount]#"></td>
+    <td class=small>cannot be set for DHT</td>
     <td class=small rowspan="2">
     This is is the number of word indexes that shall be held in the
     ram cache during indexing. When YaCy is shut down, this cache must be
-    flushed to disc; this may last some minutes. The low limit is valid for crawling tasks, the high limit is valid
-    for search and DHT transmission tasks.
+    flushed to disc; this may last some minutes.
     </td>
   </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Maximum number of Word Caches, high limit:</td>
-    <td class=small><input name="wordCacheMaxHigh" type="text" size="20" maxlength="100" value="#[wordCacheMaxHigh]#"></td>
-  </tr>
   <tr valign="top" class="TableCellLight">
-    <td class=small colspan="3">
+    <td class=small colspan="4">
     <input type="submit" name="cacheSizeSubmit" value="Enter New Cache Size">
     Changes take effect immediately</td>
   </tr>

@@ -90,20 +90,32 @@ public final class plasmaWordIndex {
         return databaseRoot;
     }
 
-    public int maxURLinWordCache() {
-        return ramCache.maxURLinWordCache();
+    public int maxURLinWCache() {
+        return ramCache.maxURLinWCache();
     }
 
-    public long minAgeOfWordCache() {
-        return ramCache.minAgeOfWordCache();
+    public long minAgeOfWCache() {
+        return ramCache.minAgeOfWCache();
     }
 
-    public long maxAgeOfWordCache() {
-        return ramCache.maxAgeOfWordCache();
+    public long maxAgeOfWCache() {
+        return ramCache.maxAgeOfWCache();
     }
 
-    public int wordCacheRAMSize() {
-        return ramCache.wordCacheRAMSize();
+    public long minAgeOfKCache() {
+        return ramCache.minAgeOfKCache();
+    }
+
+    public long maxAgeOfKCache() {
+        return ramCache.maxAgeOfKCache();
+    }
+
+    public int wSize() {
+        return ramCache.wSize();
+    }
+
+    public int kSize() {
+        return ramCache.kSize();
     }
 
     public int[] assortmentsSizes() {
@@ -118,48 +130,49 @@ public final class plasmaWordIndex {
         return assortmentCluster.cacheFillStatusCml();
     }
     
-    public void setMaxWords(int maxWordsLow, int maxWordsHigh) {
-        ramCache.setMaxWords(maxWordsLow, maxWordsHigh);
+    public void setMaxWordCount(int maxWords) {
+        ramCache.setMaxWordCount(maxWords);
     }
 
-    public void flushControl(boolean highPriority) {
+    public void flushControl(boolean dhtCase) {
         // check for forced flush
-        if (highPriority) {
-            if (ramCache.size() > ramCache.getMaxWordsHigh()) {
-                while (ramCache.size() + 500 > ramCache.getMaxWordsHigh()) {
+        ramCache.shiftK2W();
+        if (dhtCase) {
+            if (ramCache.wSize() > ramCache.getMaxWordCount()) {
+                while (ramCache.wSize() + 500 > ramCache.getMaxWordCount()) {
                     flushCache(1);
                 }
             }
         } else {
-            while (ramCache.maxURLinWordCache() > plasmaWordIndexCache.ramCacheReferenceLimit) {
+            while (ramCache.maxURLinWCache() > plasmaWordIndexCache.wCacheReferenceLimit) {
                 flushCache(1);
             }
-            if (ramCache.size() > ramCache.getMaxWordsLow()) {
-                while (ramCache.size() + 500 > ramCache.getMaxWordsLow()) {
+            if (ramCache.wSize() > ramCache.getMaxWordCount()) {
+                while (ramCache.wSize() + 500 > ramCache.getMaxWordCount()) {
                     flushCache(1);
                 }
             }
         }
     }
 
-    public boolean addEntry(String wordHash, plasmaWordIndexEntry entry, long updateTime, boolean highPriority) {
-        if (ramCache.addEntry(wordHash, entry, updateTime)) {
-            flushControl(highPriority);
+    public boolean addEntry(String wordHash, plasmaWordIndexEntry entry, long updateTime, boolean dhtCase) {
+        if (ramCache.addEntry(wordHash, entry, updateTime, dhtCase)) {
+            flushControl(dhtCase);
             return true;
         }
         return false;
     }
     
-    public int addEntries(plasmaWordIndexEntryContainer entries, long updateTime, boolean highPriority) {
-        int added = ramCache.addEntries(entries, updateTime, highPriority);
+    public int addEntries(plasmaWordIndexEntryContainer entries, long updateTime, boolean dhtCase) {
+        int added = ramCache.addEntries(entries, updateTime, dhtCase);
 
         // force flush
-        flushControl(highPriority);
+        flushControl(dhtCase);
         return added;
     }
 
     public synchronized void flushCacheSome() {
-        int flushCount = ramCache.size() / 1000;
+        int flushCount = ramCache.wSize() / 1000;
         if (flushCount > 50) flushCount = 50;
         if (flushCount < 3) flushCount = 3;
         flushCache(flushCount);
@@ -167,7 +180,7 @@ public final class plasmaWordIndex {
     
     public synchronized void flushCache(int count) {
         for (int i = 0; i < count; i++) {
-            if (ramCache.size() == 0) break;
+            if (ramCache.wSize() == 0) break;
             flushCache(ramCache.bestFlushWordHash());
             try {Thread.sleep(10);} catch (InterruptedException e) {}
         }
@@ -316,7 +329,7 @@ public final class plasmaWordIndex {
 
     public int size() {
         return java.lang.Math.max(assortmentCluster.sizeTotal(),
-                        java.lang.Math.max(backend.size(), ramCache.size()));
+                        java.lang.Math.max(backend.size(), ramCache.wSize() + ramCache.kSize()));
     }
 
     public int indexSize(String wordHash) {

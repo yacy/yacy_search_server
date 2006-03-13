@@ -56,21 +56,24 @@ import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
+public final class plasmaWordIndexCache /*implements plasmaWordIndexInterface*/ {
 
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
-    public static final int  ramCacheReferenceLimit = 50;
-    public static final long ramCacheMaxAge         = 1000 * 60 * 60 * 2; // milliseconds; 2 Hours
-    public static final long ramCacheMinAge         = 1000 * 60 * 2; // milliseconds; 2 Minutes (Karenz for DHT Receive)
+    public static final int  wCacheReferenceLimit = 50;
+    public static final long wCacheMaxAge         = 1000 * 60 * 60 * 2; // milliseconds; 2 hours
+    public static final long wCacheMinAge         = 1000;               // milliseconds; 1 second
+    public static final long kCacheMaxAge         = 1000 * 60 * 2;      // milliseconds; 2 minutes
     
     // class variables
     private final File databaseRoot;
-    private final TreeMap cache;
+    private final TreeMap wCache; // wordhash-container
+    private final TreeMap kCache; // time-container; for karenz/DHT caching (set with high priority)
     private final kelondroMScoreCluster hashScore;
     private final kelondroMScoreCluster hashDate;
+    private long  kCacheInc = 0;
     private long  startTime;
-    private int   maxWordsLow, maxWordsHigh; // we have 2 cache limits for different priorities
+    private int   wCacheMaxCount;
     private final serverLog log;
 
     // calculated constants
@@ -85,12 +88,13 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
         this.databaseRoot = databaseRoot;
-        this.cache = new TreeMap();
+        this.wCache = new TreeMap();
+        this.kCache = new TreeMap();
         this.hashScore = new kelondroMScoreCluster();
         this.hashDate  = new kelondroMScoreCluster();
+        this.kCacheInc = 0;
         this.startTime = System.currentTimeMillis();
-        this.maxWordsLow  =  8000;
-        this.maxWordsHigh = 10000;
+        this.wCacheMaxCount = 10000;
         this.log = log;
         
         // read in dump of last session
@@ -102,7 +106,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
 
     private void dump(int waitingSeconds) throws IOException {
-        log.logConfig("creating dump for index cache, " + cache.size() + " words (and much more urls)");
+        log.logConfig("creating dump for index cache, " + wCache.size() + " words (and much more urls)");
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
         kelondroArray dumpArray = null;
@@ -110,14 +114,41 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             long startTime = System.currentTimeMillis();
             long messageTime = System.currentTimeMillis() + 5000;
             long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
-            synchronized (cache) {
-                Iterator i = cache.entrySet().iterator();
-                Map.Entry entry;
-                String wordHash;
-                plasmaWordIndexEntryContainer container;
-                long updateTime;
-                plasmaWordIndexEntry wordEntry;
-                byte[][] row = new byte[5][];
+            Map.Entry entry;
+            String wordHash;
+            plasmaWordIndexEntryContainer container;
+            long updateTime;
+            plasmaWordIndexEntry wordEntry;
+            byte[][] row = new byte[5][];
+            
+            // write kCache, this will be melted with the wCache upon load
+            synchronized (kCache) {
+                Iterator i = kCache.values().iterator();
+                while (i.hasNext()) {
+                    container = (plasmaWordIndexEntryContainer) i.next();
+
+                    // put entries on stack
+                    if (container != null) {
+                        Iterator ci = container.entries();
+                        while (ci.hasNext()) {
+                            wordEntry = (plasmaWordIndexEntry) ci.next();
+                            row[0] = container.wordHash().getBytes();
+                            row[1] = kelondroRecords.long2bytes(container.size(), 4);
+                            row[2] = kelondroRecords.long2bytes(container.updated(), 8);
+                            row[3] = wordEntry.getUrlHash().getBytes();
+                            row[4] = wordEntry.toEncodedForm().getBytes();
+                            dumpArray.set((int) urlcount++, row);
+                        }
+                    }
+                    wordcount++;
+                    i.remove(); // free some mem
+                    
+                }
+            }
+            
+            // write wCache
+            synchronized (wCache) {
+                Iterator i = wCache.entrySet().iterator();
                 while (i.hasNext()) {
                     // get entries
                     entry = (Map.Entry) i.next();
@@ -145,7 +176,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     if (System.currentTimeMillis() > messageTime) {
                         // System.gc(); // for better statistic
                         wordsPerSecond = wordcount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                        log.logInfo("dumping status: " + wordcount + " words done, " + (cache.size() / (wordsPerSecond + 1)) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
+                        log.logInfo("dumping status: " + wordcount + " words done, " + (wCache.size() / (wordsPerSecond + 1)) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
                         messageTime = System.currentTimeMillis() + 5000;
                     }
                 }
@@ -164,7 +195,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         long messageTime = System.currentTimeMillis() + 5000;
         long urlCount = 0, urlsPerSecond = 0;
         try {
-            synchronized (cache) {
+            synchronized (wCache) {
                 int i = dumpArray.size();
                 String wordHash;
                 //long creationTime;
@@ -179,7 +210,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     //creationTime = kelondroRecords.bytes2long(row[2]);
                     wordEntry = new plasmaWordIndexEntry(new String(row[3], "UTF-8"), new String(row[4], "UTF-8"));
                     // store to cache
-                    addEntry(wordHash, wordEntry, startTime);
+                    addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;
                     // protect against memory shortage
                     //while (rt.freeMemory() < 1000000) {flushFromMem(); java.lang.System.gc();}
@@ -194,7 +225,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             }
 
             dumpArray.close();
-            log.logConfig("restored " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+            log.logConfig("restored " + wCache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         } catch (kelondroException e) {
             // restore failed
             log.logSevere("restore of indexCache array dump failed: " + e.getMessage(), e);
@@ -206,72 +237,94 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     // cache settings
 
-    public int maxURLinWordCache() {
+    public int maxURLinWCache() {
         if (hashScore.size() == 0) return 0;
         return hashScore.getMaxScore();
     }
 
-    public long minAgeOfWordCache() {
+    public long minAgeOfWCache() {
         if (hashDate.size() == 0) return 0;
         return System.currentTimeMillis() - longEmit(hashDate.getMaxScore());
     }
 
-    public long maxAgeOfWordCache() {
+    public long maxAgeOfWCache() {
         if (hashDate.size() == 0) return 0;
         return System.currentTimeMillis() - longEmit(hashDate.getMinScore());
     }
 
-    public int wordCacheRAMSize() {
-        return cache.size();
+    public long minAgeOfKCache() {
+        if (kCache.size() == 0) return 0;
+        return System.currentTimeMillis() - ((Long) kCache.lastKey()).longValue();
     }
 
-    public void setMaxWords(int maxWordsLow, int maxWordsHigh) {
-        this.maxWordsLow = maxWordsLow;
-        this.maxWordsHigh = maxWordsHigh;
-    }
-    
-    public int getMaxWordsLow() {
-        return this.maxWordsLow;
+    public long maxAgeOfKCache() {
+        if (kCache.size() == 0) return 0;
+        return System.currentTimeMillis() - ((Long) kCache.firstKey()).longValue();
     }
 
-    public int getMaxWordsHigh() {
-        return this.maxWordsHigh;
+    public void setMaxWordCount(int maxWords) {
+        this.wCacheMaxCount = maxWords;
     }
     
-    public int size() {
-        return cache.size();
+    public int getMaxWordCount() {
+        return this.wCacheMaxCount;
+    }
+    
+    public int wSize() {
+        return wCache.size();
+    }
+
+    public int kSize() {
+        return kCache.size();
     }
 
     public int indexSize(String wordHash) {
         int size = 0;
-        plasmaWordIndexEntryContainer cacheIndex = (plasmaWordIndexEntryContainer) cache.get(wordHash);
+        plasmaWordIndexEntryContainer cacheIndex = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
         if (cacheIndex != null) size += cacheIndex.size();
         return size;
     }
     
     public Iterator wordHashes(String startWordHash, boolean rot) {
         if (rot) throw new UnsupportedOperationException("plasmaWordIndexCache cannot rotate");
-        return cache.tailMap(startWordHash).keySet().iterator();
+        return wCache.tailMap(startWordHash).keySet().iterator();
     }
 
+    public void shiftK2W() {
+        // find entries in kCache that are too old for that place and shift them to the wCache
+        long time;
+        Long l;
+        plasmaWordIndexEntryContainer container;
+        synchronized (kCache) {
+            while (kCache.size() > 0) {
+                l = (Long) kCache.firstKey();
+                time = l.longValue();
+                if (System.currentTimeMillis() - time < kCacheMaxAge) return;
+                container = (plasmaWordIndexEntryContainer) kCache.remove(l);
+                addEntries(container, container.updated(), false);
+            }
+        }
+    }
+    
     public String bestFlushWordHash() {
         // select appropriate hash
         // we have 2 different methods to find a good hash:
         // - the oldest entry in the cache
         // - the entry with maximum count
-        if (cache.size() == 0) return null;
+        shiftK2W();
+        if (wCache.size() == 0) return null;
         try {
-            synchronized (cache) {
+            synchronized (wCache) {
                 String hash = null;
                 int count = hashScore.getMaxScore();
-                if ((count > ramCacheReferenceLimit) &&
+                if ((count > wCacheReferenceLimit) &&
                     ((hash = (String) hashScore.getMaxObject()) != null) &&
-                    (System.currentTimeMillis() - longEmit(hashDate.getScore(hash)) > ramCacheMinAge)) {
+                    (System.currentTimeMillis() - longEmit(hashDate.getScore(hash)) > wCacheMinAge)) {
                     // flush high-score entries, but not if they are too 'young'
                     return hash;
                 }
                 long oldestTime = longEmit(hashDate.getMinScore());
-                if (((System.currentTimeMillis() - oldestTime) > ramCacheMaxAge) &&
+                if (((System.currentTimeMillis() - oldestTime) > wCacheMaxAge) &&
                     ((hash = (String) hashDate.getMinObject()) != null)) {
                     // flush out-dated entries
                     return hash;
@@ -280,7 +333,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 if (Runtime.getRuntime().freeMemory() < 10000000) {
                     // low-memory case
                     hash = (String) hashScore.getMaxObject(); // flush high-score entries (saves RAM)
-                    if (System.currentTimeMillis() - longEmit(hashDate.getScore(hash)) < ramCacheMinAge) {
+                    if (System.currentTimeMillis() - longEmit(hashDate.getScore(hash)) < wCacheMinAge) {
                         // to young, take it from the oldest entries
                         hash = (String) hashDate.getMinObject();
                     }
@@ -297,25 +350,19 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     }
 
     private int intTime(long longTime) {
-        return (int) ((longTime - startTime) / 1000);
+        return (int) Math.max(0, ((longTime - startTime) / 1000));
     }
 
     private long longEmit(int intTime) {
         return (((long) intTime) * (long) 1000) + startTime;
     }
     
-    /*
-    private long longTime(int intTime) {
-        return ((long) intTime) * ((long) 1000) + startTime;
-    }
-    */
-    
     public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty) {
-        return (plasmaWordIndexEntryContainer) cache.get(wordHash);
+        return (plasmaWordIndexEntryContainer) wCache.get(wordHash);
     }
 
     public long getUpdateTime(String wordHash) {
-        plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) cache.get(wordHash);
+        plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
         if (entries == null) return 0;
         return entries.updated();
         /*
@@ -327,8 +374,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     public plasmaWordIndexEntryContainer deleteContainer(String wordHash) {
         // returns the index that had been deleted
-        synchronized (cache) {
-            plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) cache.remove(wordHash);
+        synchronized (wCache) {
+            plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) wCache.remove(wordHash);
             hashScore.deleteScore(wordHash);
             hashDate.deleteScore(wordHash);
             return container;
@@ -338,7 +385,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
         if (urlHashes.length == 0) return 0;
         int count = 0;
-        synchronized (cache) {
+        synchronized (wCache) {
             plasmaWordIndexEntryContainer c = (plasmaWordIndexEntryContainer) deleteContainer(wordHash);
             if (c != null) {
                 count = c.removeEntries(wordHash, urlHashes, deleteComplete);
@@ -348,12 +395,13 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return count;
     }
 
+    /*
     public int tryRemoveURLs(String urlHash) {
         // this tries to delete an index from the cache that has this
         // urlHash assigned. This can only work if the entry is really fresh
         // Such entries must be searched in the latest entries
         int delCount = 0;
-        synchronized (cache) {
+        synchronized (wCache) {
             Iterator i = hashDate.scores(false);
             String wordHash;
             long t;
@@ -362,11 +410,11 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 wordHash = (String) i.next();
                 // check time
                 t = longEmit(hashDate.getScore(wordHash));
-                if (System.currentTimeMillis() - t > ramCacheMinAge) return delCount;
+                if (System.currentTimeMillis() - t > wCacheMinAge) return delCount;
                 // get container
-                c = (plasmaWordIndexEntryContainer) cache.get(wordHash);
+                c = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
                 if (c.remove(urlHash) != null) {
-                    cache.put(wordHash, c);
+                    wCache.put(wordHash, c);
                     hashScore.decScore(wordHash);
                     delCount++;
                 }
@@ -374,50 +422,87 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
         return delCount;
     }
+    */
     
-    public int addEntries(plasmaWordIndexEntryContainer container, long updateTime, boolean highPriority) {
+    public int tryRemoveURLs(String urlHash) {
+        // this tries to delete an index from the cache that has this
+        // urlHash assigned. This can only work if the entry is really fresh
+        // Such entries must be searched in the latest entries
+        int delCount = 0;
+        synchronized (kCache) {
+            Iterator i = kCache.entrySet().iterator();
+            Map.Entry entry;
+            Long l;
+            plasmaWordIndexEntryContainer c;
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                l = (Long) entry.getKey();
+            
+                // get container
+                c = (plasmaWordIndexEntryContainer) entry.getValue();
+                if (c.remove(urlHash) != null) {
+                    if (c.size() == 0) {
+                        i.remove();
+                    } else {
+                        kCache.put(l, c); // superfluous?
+                    }
+                    delCount++;
+                }
+            }
+        }
+        return delCount;
+    }
+    
+    public int addEntries(plasmaWordIndexEntryContainer container, long updateTime, boolean dhtCase) {
         // this puts the entries into the cache, not into the assortment directly
-
         int added = 0;
-        // check cache space
-
-        //serverLog.logDebug("PLASMA INDEXING", "addEntryToIndexMem: cache.size=" + cache.size() + "; hashScore.size=" + hashScore.size());
 
         // put new words into cache
-        String wordHash = container.wordHash();
-        plasmaWordIndexEntryContainer entries = null;
-        synchronized (cache) {
-            // put container into cache
-            entries = (plasmaWordIndexEntryContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+        if (dhtCase) synchronized (kCache) {
+            // put container into kCache
+            kCache.put(new Long(updateTime + kCacheInc), container);
+            kCacheInc++;
+            if (kCacheInc > 10000) kCacheInc = 0;
+            added = container.size();
+        } else synchronized (wCache) {
+            // put container into wCache
+            String wordHash = container.wordHash();
+            plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) wCache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
             if (entries == null) entries = new plasmaWordIndexEntryContainer(wordHash);
             added = entries.add(container);
             if (added > 0) {
-                cache.put(wordHash, entries);
+                wCache.put(wordHash, entries);
                 hashScore.addScore(wordHash, added);
                 hashDate.setScore(wordHash, intTime(updateTime));
             }
+            entries = null;
         }
-        entries = null;
         return added;
     }
 
-    public boolean addEntry(String wordHash, plasmaWordIndexEntry newEntry, long updateTime) {
-        plasmaWordIndexEntryContainer container = null;
-        plasmaWordIndexEntry[] entries = null;
-        synchronized (cache) {
-            container = (plasmaWordIndexEntryContainer) cache.get(wordHash);
+    public boolean addEntry(String wordHash, plasmaWordIndexEntry newEntry, long updateTime, boolean dhtCase) {
+        if (dhtCase) synchronized (kCache) {
+            // put container into kCache
+            plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
+            container.add(newEntry);
+            kCache.put(new Long(updateTime + kCacheInc), container);
+            kCacheInc++;
+            if (kCacheInc > 10000) kCacheInc = 0;
+            return true;
+        } else synchronized (wCache) {
+            plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
             if (container == null) container = new plasmaWordIndexEntryContainer(wordHash);
-            entries = new plasmaWordIndexEntry[] { newEntry };
+            plasmaWordIndexEntry[] entries = new plasmaWordIndexEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
-                cache.put(wordHash, container);
+                wCache.put(wordHash, container);
                 hashScore.incScore(wordHash);
                 hashDate.setScore(wordHash, intTime(updateTime));
                 return true;
             }
+            container = null;
+            entries = null;
+            return false;
         }
-        container = null;
-        entries = null;
-        return false;
     }
 
     public void close(int waitingSeconds) {

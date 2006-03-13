@@ -369,9 +369,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         urlPool = new plasmaURLPool(plasmaPath, ramLURL, ramNURL, ramEURL);
         
         wordIndex = new plasmaWordIndex(plasmaPath, ramRWI, log);
-        int wordCacheMaxLow = (int) getConfigLong("wordCacheMaxLow", 8000);
-        int wordCacheMaxHigh = (int) getConfigLong("wordCacheMaxHigh", 10000);
-        wordIndex.setMaxWords(wordCacheMaxLow, wordCacheMaxHigh);
+        int wordCacheMaxCount = (int) getConfigLong("wordCacheMaxCount", 10000);
+        wordIndex.setMaxWordCount(wordCacheMaxCount);
         
         // start a cache manager
         log.logConfig("Starting HT Cache Manager");

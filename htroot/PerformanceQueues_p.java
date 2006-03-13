@@ -142,15 +142,14 @@ public class PerformanceQueues_p {
                 idlesleep = Long.parseLong(d((String) defaultSettings.get(threadName + "_idlesleep"), "1000"));
                 busysleep = Long.parseLong(d((String) defaultSettings.get(threadName + "_busysleep"),  "100"));
                 memprereq = Long.parseLong(d((String) defaultSettings.get(threadName + "_memprereq"),    "0"));
-                
+
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
                 if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
                 if ((threadName.equals("50_localcrawl")) && (busysleep < 100)) busysleep = 100;
                 if ((threadName.equals("61_globalcrawltrigger")) && (busysleep < 100)) busysleep = 100;
                 if ((threadName.equals("62_remotetriggeredcrawl")) && (busysleep < 100)) busysleep = 100;
-                
-                
+
                 // on-the-fly re-configuration
                 switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
                 switchboard.setConfig(threadName + "_idlesleep", idlesleep);
@@ -171,12 +170,9 @@ public class PerformanceQueues_p {
         prop.put("table", c);
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
-            int wordCacheMaxLow = post.getInt("wordCacheMaxLow", 8000);
-            int wordCacheMaxHigh = post.getInt("wordCacheMaxHigh", 10000);
-            if (wordCacheMaxLow > wordCacheMaxHigh) wordCacheMaxLow = wordCacheMaxHigh;
-            switchboard.setConfig("wordCacheMaxLow", Integer.toString(wordCacheMaxLow));
-            switchboard.setConfig("wordCacheMaxHigh", Integer.toString(wordCacheMaxHigh));
-            switchboard.wordIndex.setMaxWords(wordCacheMaxLow, wordCacheMaxHigh);
+            int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 10000);
+            switchboard.setConfig("wordCacheMaxCount", Integer.toString(wordCacheMaxCount));
+            switchboard.wordIndex.setMaxWordCount(wordCacheMaxCount);
             int maxWaitingWordFlush = post.getInt("maxWaitingWordFlush", 180);
             switchboard.setConfig("maxWaitingWordFlush", Integer.toString(maxWaitingWordFlush));
         }
@@ -251,13 +247,15 @@ public class PerformanceQueues_p {
         }
         
         // table cache settings
-        prop.put("wordCacheRAMSize", switchboard.wordIndex.wordCacheRAMSize());
-        prop.put("maxURLinWordCache", "" + switchboard.wordIndex.maxURLinWordCache());
-        prop.put("maxAgeOfWordCache", "" + (switchboard.wordIndex.maxAgeOfWordCache() / 1000 / 60)); // minutes
-        prop.put("minAgeOfWordCache", "" + (switchboard.wordIndex.minAgeOfWordCache() / 1000 / 60)); // minutes
+        prop.put("wordCacheWSize", switchboard.wordIndex.wSize());
+        prop.put("wordCacheKSize", switchboard.wordIndex.kSize());
+        prop.put("maxURLinWCache", "" + switchboard.wordIndex.maxURLinWCache());
+        prop.put("maxAgeOfWCache", "" + (switchboard.wordIndex.maxAgeOfWCache() / 1000 / 60)); // minutes
+        prop.put("minAgeOfWCache", "" + (switchboard.wordIndex.minAgeOfWCache() / 1000 / 60)); // minutes
+        prop.put("maxAgeOfKCache", "" + (switchboard.wordIndex.maxAgeOfKCache() / 1000 / 60)); // minutes
+        prop.put("minAgeOfKCache", "" + (switchboard.wordIndex.minAgeOfKCache() / 1000 / 60)); // minutes
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
-        prop.put("wordCacheMaxLow", switchboard.getConfig("wordCacheMaxLow", "10000"));
-        prop.put("wordCacheMaxHigh", switchboard.getConfig("wordCacheMaxHigh", "10000"));
+        prop.put("wordCacheMaxCount", switchboard.getConfig("wordCacheMaxCount", "10000"));
         prop.put("onlineCautionDelay", switchboard.getConfig("onlineCautionDelay", "30000"));
         prop.put("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
         

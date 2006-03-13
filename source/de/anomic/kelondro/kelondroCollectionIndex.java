@@ -27,7 +27,6 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 
 public class kelondroCollectionIndex {
 

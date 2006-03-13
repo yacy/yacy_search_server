@@ -64,7 +64,7 @@ public class status_p {
         prop.put("rejected", 0);
         yacyCore.peerActions.updateMySeed();
         prop.put("ppm", yacyCore.seedDB.mySeed.get(yacySeed.ISPEED, "unknown"));
-        prop.put("wordCacheSize", switchboard.wordIndex.wordCacheRAMSize());
+        prop.put("wordCacheSize", switchboard.wordIndex.wSize() + switchboard.wordIndex.kSize());
         prop.put("wordCacheMaxLow", switchboard.getConfig("wordCacheMaxLow", "10000"));
         prop.put("wordCacheMaxHigh", switchboard.getConfig("wordCacheMaxHigh", "10000"));
 

@@ -73,17 +73,9 @@ public final class kelondroMScoreCluster {
         } catch (ParseException e) {}
     }
     
-    /*
-    public static int string2score(String s) {
-        int i = string2scoreX(s);
-        System.out.println("string2core(" + s + ") = " + i);
-        return i;
-    }
-    */
-    
     public static int string2score(String s) {
         // this can be used to calculate a score from a string
-        
+        if ((s == null) || (s.length() == 0) || (s.charAt(0) == '-')) return 0;
         try {
             long l = 0;
             if (s.length() == shortDateFormatString.length()) {
@@ -97,7 +89,10 @@ public final class kelondroMScoreCluster {
             }
             // fix out-of-ranges
             if (l > Integer.MAX_VALUE) return Integer.MAX_VALUE;
-            if (l < 0) return 0;
+            if (l < 0) {
+                System.out.println("string2score: negative score for input " + s);
+                return 0;
+            }
             return (int) l;
         } catch (Exception e) {
             // try it lex
@@ -110,7 +105,10 @@ public final class kelondroMScoreCluster {
             }
             for (int i = len; i < 5; i++) c <<= 6;
             if (c > Integer.MAX_VALUE) return Integer.MAX_VALUE;
-            if (c < 0) return 0;
+            if (c < 0) {
+                System.out.println("string2score: negative score for input " + s);
+                return 0;
+            }
             return c;
         }
     }
@@ -411,14 +409,18 @@ public final class kelondroMScoreCluster {
         
     public static void main(String[] args) {
         
-        if (args.length > 0) System.out.println("score of " + args[0] + ": " + string2score(args[0]));
-        //System.exit(0);
+        String t = "ZZZZZZZZZZ";
+        System.out.println("score of " + t + ": " + string2score(t));
+        if (args.length > 0) {
+            System.out.println("score of " + args[0] + ": " + string2score(args[0]));
+            System.exit(0);
+        }
         
         System.out.println("Test for Score: start");
         kelondroMScoreCluster s = new kelondroMScoreCluster();
-	long c = 0;
+        long c = 0;
 
-	// create cluster
+        // create cluster
         long time = System.currentTimeMillis();
         Random random = new Random(1234);
         int r;
