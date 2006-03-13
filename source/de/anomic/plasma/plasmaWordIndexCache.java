@@ -62,7 +62,6 @@ public final class plasmaWordIndexCache /*implements plasmaWordIndexInterface*/ 
     private static final String indexArrayFileName = "indexDump1.array";
     public static final int  wCacheReferenceLimit = 50;
     public static final long wCacheMaxAge         = 1000 * 60 * 60 * 2; // milliseconds; 2 hours
-    public static final long wCacheMinAge         = 1000;               // milliseconds; 1 second
     public static final long kCacheMaxAge         = 1000 * 60 * 2;      // milliseconds; 2 minutes
     
     // class variables
@@ -318,9 +317,9 @@ public final class plasmaWordIndexCache /*implements plasmaWordIndexInterface*/ 
                 String hash = null;
                 int count = hashScore.getMaxScore();
                 if ((count > wCacheReferenceLimit) &&
-                    ((hash = (String) hashScore.getMaxObject()) != null) &&
-                    (System.currentTimeMillis() - longEmit(hashDate.getScore(hash)) > wCacheMinAge)) {
-                    // flush high-score entries, but not if they are too 'young'
+                    ((hash = (String) hashScore.getMaxObject()) != null)) {
+                    // we MUST flush high-score entries, because a loop deletes entries in cache until this condition fails
+                    // in this cache we MUST NOT check wCacheMinAge
                     return hash;
                 }
                 long oldestTime = longEmit(hashDate.getMinScore());
@@ -329,17 +328,13 @@ public final class plasmaWordIndexCache /*implements plasmaWordIndexInterface*/ 
                     // flush out-dated entries
                     return hash;
                 }
-                // not an urgent case
-                if (Runtime.getRuntime().freeMemory() < 10000000) {
-                    // low-memory case
+                // cases with respect to memory situation
+                if (Runtime.getRuntime().freeMemory() < 1000000) {
+                    // urgent low-memory case
                     hash = (String) hashScore.getMaxObject(); // flush high-score entries (saves RAM)
-                    if (System.currentTimeMillis() - longEmit(hashDate.getScore(hash)) < wCacheMinAge) {
-                        // to young, take it from the oldest entries
-                        hash = (String) hashDate.getMinObject();
-                    }
                 } else {
-                    // not-efficient-so-far case
-                    hash = (String) hashDate.getMinObject(); // flush oldest entries (makes indexing faster)
+                    // not-efficient-so-far case. cleans up unnecessary cache slots
+                    hash = (String) hashDate.getMinObject(); // flush oldest entries
                 }
                 return hash;
             }
