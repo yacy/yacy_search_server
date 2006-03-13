@@ -134,30 +134,22 @@ public final class plasmaWordIndex {
         ramCache.setMaxWordCount(maxWords);
     }
 
-    public void flushControl(boolean dhtCase) {
+    public void flushControl() {
         // check for forced flush
         ramCache.shiftK2W();
-        if (dhtCase) {
-            if (ramCache.wSize() > ramCache.getMaxWordCount()) {
-                while (ramCache.wSize() + 500 > ramCache.getMaxWordCount()) {
-                    flushCache(1);
-                }
-            }
-        } else {
-            while (ramCache.maxURLinWCache() > plasmaWordIndexCache.wCacheReferenceLimit) {
+        while (ramCache.maxURLinWCache() > plasmaWordIndexCache.wCacheReferenceLimit) {
+            flushCache(1);
+        }
+        if (ramCache.wSize() > ramCache.getMaxWordCount()) {
+            while (ramCache.wSize() + 500 > ramCache.getMaxWordCount()) {
                 flushCache(1);
-            }
-            if (ramCache.wSize() > ramCache.getMaxWordCount()) {
-                while (ramCache.wSize() + 500 > ramCache.getMaxWordCount()) {
-                    flushCache(1);
-                }
             }
         }
     }
 
     public boolean addEntry(String wordHash, plasmaWordIndexEntry entry, long updateTime, boolean dhtCase) {
         if (ramCache.addEntry(wordHash, entry, updateTime, dhtCase)) {
-            flushControl(dhtCase);
+            if (!dhtCase) flushControl();
             return true;
         }
         return false;
@@ -167,7 +159,7 @@ public final class plasmaWordIndex {
         int added = ramCache.addEntries(entries, updateTime, dhtCase);
 
         // force flush
-        flushControl(dhtCase);
+        if (!dhtCase) flushControl();
         return added;
     }
 
