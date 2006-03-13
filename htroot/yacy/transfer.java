@@ -94,7 +94,7 @@ public final class transfer {
         
         if (process.equals("permission")) {
             prop.put("process", 0);
-            if ((purpose.equals("crcon")) && (filename.startsWith("CRG")) && (filename.endsWith(".cr.gz"))) {
+            if (((purpose.equals("crcon")) && (filename.startsWith("CRG")) && (filename.endsWith(".cr.gz"))) || ((filename.startsWith("domlist")) && (filename.endsWith(".txt.gz") || filename.endsWith(".zip")))) {
                 // consolidation of cr files
                 //System.out.println("yacy/transfer:post=" + post.toString());
                 //String cansendprotocol = (String) post.get("can-send-protocol", "http");

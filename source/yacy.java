@@ -63,6 +63,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.util.zip.GZIPOutputStream;
 
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
@@ -146,8 +147,8 @@ public final class yacy {
     * FIXME: Why is this so complicated?
     *
     * @param s Combined version string
-    * @return Pretty string where version and svn-Version are separated by a
-    * slash
+    * @return Pretty string where version and SVN-version are separated by a
+    * slash, e.g. "0.435/01818"
     */
     public static String combinedVersionString2PrettyString(String s) {
         long svn;
@@ -196,7 +197,7 @@ public final class yacy {
             try {
                 /*String[] check =*/ "a,b".split(","); // split needs java 1.4
             } catch (NoSuchMethodError e) {
-                System.err.println("STARTUP: Java Version too low. You need at least Java 1.4.2 to run YACY");
+                System.err.println("STARTUP: Java Version too low. You need at least Java 1.4.2 to run YaCy");
                 Thread.sleep(3000);
                 System.exit(-1);
             }
@@ -239,7 +240,7 @@ public final class yacy {
             if (!unzipTest.exists()) {
                 String errorMsg = "The archive file containing YaCy was not unpacked correctly. " +
                                   "Please use 'GNU-Tar' or upgrade to a newer version of your unzip software.\n" +
-                                  "For detailed informations on this bug see: " + 
+                                  "For detailed information on this bug see: " + 
                                   "http://www.yacy-forum.de/viewtopic.php?t=715";
                 System.err.println(errorMsg);
                 serverLog.logSevere("STARTUP", errorMsg);
@@ -426,7 +427,7 @@ public final class yacy {
                             //Error
                         }
 
-                        try{ //seperate try, because we want this, even when the File "version2 does not exist.
+                        try{ //seperate try, because we want this, even if the file "version" does not exist.
                             if(! currentRev.equals(sb.getConfig("svnRevision", "")) ){ //is this another version?!
                                 final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
                                 final File destDir = new File(sb.getConfig("htLocalePath", "DATA/HTDOCS/locale"), lang);
@@ -461,7 +462,7 @@ public final class yacy {
                     try {
                         sb.waitForShutdown();
                     } catch (Exception e) {
-                        serverLog.logSevere("MAIN CONTROL LOOP", "PANIK: " + e.getMessage(),e);
+                        serverLog.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
                     }
                     restart = sb.getConfig("restart", "false");
                     
@@ -1177,9 +1178,14 @@ public final class yacy {
             serverLog.logInfo("TRANSFER-CR", "could not read file " + crfile);
         }
     }
-    
+        /**
+    * Generates a text file containing all domains in this peer's DB.
+    *
+    * @param format String which determines format of the text file. Possible values: "html", "zip", "gzip" or "plain"
+    */
     private static void domlist(String homePath, String format, String targetName) {
-        File root = new File(homePath);
+    	
+    	File root = new File(homePath);
         try {
             plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000);
             Iterator eiter = pool.loadedURL.entries(true, false);
@@ -1190,23 +1196,41 @@ public final class yacy {
                 if ((entry != null) && (entry.url() != null)) doms.add(entry.url().getHost());
             }
             
-            // output file
+            // output file in HTML format
             if (format.equals("html")) {
                 File file = new File(root, targetName + ".html");
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
                 Iterator i = doms.iterator();
                 String key;
+                bos.write(("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">").getBytes());
+                bos.write(serverCore.crlf);
+                bos.write(("<html><head><title>YaCy domainlist</title></head><body>").getBytes());
+                bos.write(serverCore.crlf);
                 while (i.hasNext()) {
                     key = i.next().toString();
                     bos.write(("<a href=\"http://" + key + "\">" + key + "</a><br>").getBytes());
                     bos.write(serverCore.crlf);
                 }
+                bos.write(("</body></html>").getBytes());
                 bos.close();
+            //output file in plain text but compressed with ZIP
             } else if (format.equals("zip")) {
                 ZipEntry zipEntry = new ZipEntry(targetName + ".txt");
                 File file = new File(root, targetName + ".zip");
                 ZipOutputStream bos = new ZipOutputStream(new FileOutputStream(file));
                 bos.putNextEntry(zipEntry);
+                Iterator i = doms.iterator();
+                String key;
+                while (i.hasNext()) {
+                    key = i.next().toString();
+                    bos.write((key).getBytes());
+                    bos.write(serverCore.crlf);
+                }
+                bos.close();
+            //output file in plain text but compressed with GZIP
+            } else if (format.equals("gzip")) {
+                File file = new File(root, targetName + ".txt.gz");
+                GZIPOutputStream bos = new GZIPOutputStream(new FileOutputStream(file));
                 Iterator i = doms.iterator();
                 String key;
                 while (i.hasNext()) {
@@ -1552,6 +1576,7 @@ public final class yacy {
             if (args.length >= 3 && args[1].equals("-format")) {
                 if (args[2].equals("html")) format = args[2];
                 if (args[2].equals("zip")) format = args[2];
+                if (args[2].equals("gzip")) format = args[2];
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= args[1];
