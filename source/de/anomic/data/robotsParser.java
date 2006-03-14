@@ -65,13 +65,20 @@ import de.anomic.server.logging.serverLog;
 /*
  * A class for Parsing robots.txt files.
  * It only parses the Deny Part, yet.
- *  *
+ *  
+ * Robots RFC
  * http://www.robotstxt.org/wc/norobots-rfc.html
  * 
  * TODO:
  *      - On the request attempt resulted in temporary failure a robot
  *      should defer visits to the site until such time as the resource
  *      can be retrieved.
+ *      
+ *      - Extended Standard for Robot Exclusion 
+ *        See: http://www.conman.org/people/spc/robots2.html
+ *        
+ *      - Robot Exclusion Standard Revisited 
+ *        See: http://www.kollar.com/robots.html
  */
 public final class robotsParser{
     
