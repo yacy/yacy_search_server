@@ -380,6 +380,22 @@ public final class plasmaWordIndex {
     public static final int RL_ASSORTMENTS = 2;
     public static final int RL_WORDFILES   = 3;
     
+    public synchronized String[] wordHashes(String startHash, int resourceLevel, boolean rot, int count) {
+        String[] hashes = new String[count];
+        Iterator i = wordHashes(startHash, resourceLevel, rot);
+        int j = 0;
+        while ((count-- > 0) && (i.hasNext())) {
+            hashes[j++] = (String) i.next();
+        }
+        if (count > 0) {
+            String[] s = new String[j];
+            System.arraycopy(hashes, 0, s, 0, j);
+            return s;
+        } else {
+            return hashes;
+        }
+    }
+    
     public Iterator wordHashes(String startHash, int resourceLevel, boolean rot) {
         if (rot) return new rotatingWordIterator(startHash, resourceLevel);
         else return new correctedWordIterator(startHash, resourceLevel, rot); // use correction until bug is found

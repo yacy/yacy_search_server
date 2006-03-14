@@ -172,6 +172,82 @@ public class plasmaDHTChunk {
     private int  selectTransferContainersResource(String hash, int resourceLevel, int maxcount) {
         // the hash is a start hash from where the indexes are picked
         ArrayList tmpContainers = new ArrayList(maxcount);
+        try {
+            String[] wordHashes = wordIndex.wordHashes(hash, resourceLevel, true, maxcount);
+            plasmaWordIndexEntryContainer indexContainer;
+            Iterator urlIter;
+            plasmaWordIndexEntry indexEntry;
+            plasmaCrawlLURL.Entry lurl;
+            int refcount = 0;
+
+            urlCache = new HashMap();
+            while ((maxcount > refcount) && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(wordHashes[refcount], ((plasmaWordIndexEntryContainer) tmpContainers.get(0)).wordHash()) < 0.2))) {
+                // make an on-the-fly entity and insert values
+                indexContainer = wordIndex.getContainer(wordHashes[refcount], true, 10000);
+                int notBoundCounter = 0;
+                try {
+                    urlIter = indexContainer.entries();
+                    // iterate over indexes to fetch url entries and store them in the urlCache
+                    while ((urlIter.hasNext()) && (maxcount > refcount)) {
+                        indexEntry = (plasmaWordIndexEntry) urlIter.next();
+                        try {
+                            lurl = lurls.getEntry(indexEntry.getUrlHash(), indexEntry);
+                            if ((lurl == null) || (lurl.url() == null)) {
+                                notBoundCounter++;
+                                urlIter.remove();
+                                wordIndex.removeEntries(wordHashes[refcount], new String[] { indexEntry.getUrlHash() }, true);
+                            } else {
+                                urlCache.put(indexEntry.getUrlHash(), lurl);
+                                refcount++;
+                            }
+                        } catch (IOException e) {
+                            notBoundCounter++;
+                            urlIter.remove();
+                            wordIndex.removeEntries(wordHashes[refcount], new String[] { indexEntry.getUrlHash() }, true);
+                        }
+                    }
+
+                    // remove all remaining; we have enough
+                    while (urlIter.hasNext()) {
+                        indexEntry = (plasmaWordIndexEntry) urlIter.next();
+                        urlIter.remove();
+                    }
+
+                    // use whats left
+                    log.logFine("Selected partial index (" + indexContainer.size() + " from " + wordIndex.indexSize(wordHashes[refcount-1]) + " URLs, " + notBoundCounter + " not bound) for word " + indexContainer.wordHash());
+                    tmpContainers.add(indexContainer);
+                } catch (kelondroException e) {
+                    log.logSevere("plasmaWordIndexDistribution/2: deleted DB for word " + wordHashes[refcount], e);
+                    wordIndex.deleteIndex(wordHashes[refcount]);
+                }
+            }
+            // create result
+            indexContainers = (plasmaWordIndexEntryContainer[]) tmpContainers.toArray(new plasmaWordIndexEntryContainer[tmpContainers.size()]);
+
+            if ((indexContainers == null) || (indexContainers.length == 0)) {
+                log.logFine("No index available for index transfer, hash start-point " + startPointHash);
+                this.status = chunkStatus_FAILED;
+                return 0;
+            }
+
+            this.status = chunkStatus_FILLED;
+            
+            return refcount;
+        } catch (kelondroException e) {
+            log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
+            indexContainers = new plasmaWordIndexEntryContainer[0];
+            urlCache = new HashMap();
+            
+            this.status = chunkStatus_FAILED;
+            
+            return 0;
+        }
+    }
+
+    /*
+    private int  selectTransferContainersResource(String hash, int resourceLevel, int maxcount) {
+        // the hash is a start hash from where the indexes are picked
+        ArrayList tmpContainers = new ArrayList(maxcount);
         String nexthash = "";
         try {
             Iterator wordHashIterator = wordIndex.wordHashes(hash, resourceLevel, true);
@@ -245,7 +321,8 @@ public class plasmaDHTChunk {
             return 0;
         }
     }
-
+    */
+    
     public int deleteTransferIndexes() {
         Iterator urlIter;
         plasmaWordIndexEntry indexEntry;
