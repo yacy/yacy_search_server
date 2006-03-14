@@ -1,167 +1,193 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
- <head>
-  <title>YaCy '#[clientname]#': Search Page</title>
-         #%env/templates/xhtml-metas.template%#
-   <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#" />
-
-   <script src="/js/ajax.js" type="text/javascript"></script>
-   <script src="/js/xml.js" type="text/javascript"></script>
-   <script src="/js/yacysearch.js" type="text/javascript"></script>
-
- </head>
- <body>
-#%env/templates/xhtml-header.template%#
-
- <h2 class="yacy">
-   P2P WEB SEARCH
- </h2>
- <p>#[promoteSearchPageGreeting]#</p>
-
-
- <form class="search" action="index.html" method="get">
-  <fieldset class="maininput">
-     <input name="search" type="text" size="52" maxlength="80" value="#[former]#" />
-     <input type="submit" name="Enter" value="Search" />
-     <input type="hidden" name="former" value="#[former]#" />
-  </fieldset>
-  <table>
-    <tr>
-      <td>Max. number of results:</td>
-     <td><select name="count">
-     <option #(count-10)#::selected="selected"#(/count-10)#>10</option>
-     <option #(count-50)#::selected="selected"#(/count-50)#>50</option>
-     <option #(count-100)#::selected="selected"#(/count-100)#>100</option>
-     <option #(count-1000)#::selected="selected"#(/count-1000)#>1000</option>
-   </select></td>
-</tr>
-  <tr>
-     <td>order by:</td>
-    <td><select name="order">
-      <option value="YBR-Date-Quality" #(order-ybr-date-quality)#::selected="selected"#(/order-ybr-date-quality)#>YBR-Date-Quality</option>
-      <option value="YBR-Quality-Date" #(order-ybr-quality-date)#::selected="selected"#(/order-ybr-quality-date)#>YBR-Quality-Date</option>
-      <option value="Date-YBR-Quality" #(order-date-ybr-quality)#::selected="selected"#(/order-date-ybr-quality)#>Date-YBR-Quality</option>
-      <option value="Quality-YBR-Date" #(order-quality-ybr-date)#::selected="selected"#(/order-quality-ybr-date)#>Quality-YBR-Date</option>
-      <option value="Date-Quality-YBR" #(order-date-quality-ybr)#::selected="selected"#(/order-date-quality-ybr)#>Date-Quality-YBR</option>
-      <option value="Quality-Date-YBR" #(order-quality-date-ybr)#::selected="selected"#(/order-quality-date-ybr)#>Quality-Date-YBR</option>
-    </select></td>
-  </tr>
-  <tr>
-      <td>Resource:</td>
-          <td><select name="resource">
-            <option value="global" #(resource-global)#::selected="selected"#(/resource-global)#>global</option>
-            <option value="local" #(resource-local)#::selected="selected"#(/resource-local)#>local</option>
-          </select></td>
-  </tr>
-  <tr>
-    <td>Max. search time (seconds):</td>
-      <td><select name="time">
-      <option #(time-1)#::selected="selected"#(/time-1)#>1</option>
-      <option #(time-3)#::selected="selected"#(/time-3)#>3</option>
-      <option #(time-6)#::selected="selected"#(/time-6)#>6</option>
-      <option #(time-10)#::selected="selected"#(/time-10)#>10</option>
-      <option #(time-30)#::selected="selected"#(/time-30)#>30</option>
-      <option #(time-60)#::selected="selected"#(/time-60)#>60</option>
-    </select></td>
-  </tr>
-  <tr>
-    <td>URL mask:</td>
-        <td>#(urlmaskoptions)#
-        <input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#" />
-        ::
-        <input type="radio" name="urlmask" value="yes" checked /> restrict on <input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#" />
-        <input type="radio" name="urlmask" value="no" /> show all
-        #(/urlmaskoptions)#</td>
-    </tr>
-      </table>
-    </form>
-
-     #(excluded)#
-     ::
-     <p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
-     #(/excluded)#
-     #(num-results)#
-     ::
-     <p>No Results.</p>
-     ::
-     <p>No Results. (length of search words must be at least 3 characters)</p>
-     ::
-     <p>No Results. If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer. If everybody contributes, the results will get better.</p>
-     <p>Other possible reasons for no result:</p>
-     <ul>
-       <li>The search time was too short. Search again with same query to catch up 'late peers'</li>
-       <li>There is currently no support for german umlaute. Please use ae/oe/ue instead</li>
-       <li>Words of length &lt; 3 are not indexed. Please omit such words</li>
-       <li>YaCy tries to index singular instead of plural words. Please use the singular form</li>
-       <li>Only complete words are indexed, not parts of words</li>
-       <li>Don't use stopwords as search words</li>
-       <li>During this test phase the reaction time of remote peers is unknown. Please repeat your search to see if there are late-responses from remote peers</li>
-     </ul>
-     <p>If you think the information you searched should exist in the global index, then please run your own peer and start a crawl of your wanted information to make it available for everyone. Then stay online to support crawls from other peers. Thank you!</p>
-     ::
-     <p><strong>#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links of a total number of <strong>#[totalcount]#</strong> known.</p>
-     <p>&rarr; <a href="/index.html?search=#[former]#&amp;Enter=Search&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=.*">Catch up more links</a>
-       from 'late' peers.</p>
-     #(/num-results)#
-     #(combine)#
-     ::
-     <p><strong>Topwords</strong> (to refine search):
-       #{words}#
-       <a href="index.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#time=#[time]#">#[word]#</a>
-       #{/words}#
-     </p>
-     #(/combine)#
-     <!-- linklist begin -->
-
-     #{results}#
-     <!-- link begin -->
-     <div class="searchresults">
-       <div class="urlactions">
-         <a href="/Bookmarks_p.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" class="bookmarkIcon" /></a>
-         <a href="#[delete]#" title="delete" class="deletelink" ><img src="/env/grafics/empty.gif" title="delete" alt="delete" class="deleteIcon" /></a>
-       </div>
-       <h4 class="linktitle"><a href="#[url]#">#[description]#</a></h4>
-       <p class="snippet"><span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span></p>
-       <p class="url"><a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a></p>
-       <p class="urlinfo">#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#">Info</a></p>
-     </div>
-       <!-- link end -->
-       #{/results}#
-
-       <!-- linklist end -->
-       <p>
-         #(resultbottomline)#
-         ::
-         The global search resulted in #[globalresults]# link contributions from other YaCy peers.
-         ::
-         You can enrich the search results by using the 'global' option: This will search also other YaCy peers
-         ::
-         You cannot get global search results because you are not connected to another YaCy peer.
-         To connect you must first use the proxy.
-         See here for an <a href="http://www.anomic.de/AnomicHTTPProxy/Installation.html#wininst">installation guide</a>.
-         Alternatively, you can run the proxy in permanent online mode, which also grants global search.
-         To do this, press this button:
-         <form action="SettingsAck_p.html" method="get">
-           <input type="submit" name="pmode" value="go online">
-           </form>
-           ::
-           You can enrich the search results by using the 'global' option; you must also switch to online mode
-           (by using the proxy) to contribute to the global index.
-           #(/resultbottomline)#
-         </p>
-
-         <p class="info">YaCy is a GPL'ed project
-           with the target of implementing a P2P-based global search engine.<br />
-           Architecture (C) by Michael Peter Christen,
-<img src="/env/grafics/mcemailh.gif" title="Mail-Adresse von Michael Peter Christen" alt="Mail-Adresse von Michael Peter Christen" /></p>
-
-#%env/templates/xhtml-footer.template%#
-
-<script type="text/javascript">
-
-AllSnippets();
-
-</script>
-
-</body>
-</html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>YaCy '#[clientname]#': Search Page</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 2.0  (Linux)">
+	<META NAME="CREATED" CONTENT="20060314;23554900">
+	<META NAME="CHANGED" CONTENT="20060314;23560900">
+</HEAD>
+<BODY LANG="de-DE" DIR="LTR">
+<P>#%env/templates/xhtml-metas.template%#
+<SCRIPT SRC="file:///js/ajax.js">
+file:///home/daburna/YaCy%20SVN/yacy/trunk/htroot/xhtml-index.html
+</SCRIPT>
+<SCRIPT SRC="file:///js/xml.js">
+file:///home/daburna/YaCy%20SVN/yacy/trunk/htroot/xhtml-index.html
+</SCRIPT><SCRIPT SRC="file:///js/yacysearch.js">
+file:///home/daburna/YaCy%20SVN/yacy/trunk/htroot/xhtml-index.html
+</SCRIPT>#%env/templates/xhtml-header.template%#
+</P>
+<H2>P2P WEB SEARCH 
+</H2>
+<P>#[promoteSearchPageGreeting]#</P>
+<FORM ACTION="index.html">
+	<P STYLE="margin-bottom: 0cm"><INPUT TYPE=TEXT NAME="search" VALUE="#[former]#" SIZE=52 MAXLENGTH=80 STYLE="width: 11.78cm; height: 0.61cm">
+	<INPUT TYPE=SUBMIT NAME="Enter" VALUE="Search" STYLE="width: 1.71cm; height: 0.7cm"><INPUT TYPE=HIDDEN NAME="former" VALUE="#[former]#">
+		</P>
+	<TABLE CELLPADDING=2 CELLSPACING=2>
+		<TR>
+			<TD>
+				<P>Max. number of results:</P>
+			</TD>
+			<TD>
+				<P><SELECT NAME="count" STYLE="width: 1.89cm; height: 0.67cm">
+					<OPTION SELECTED>10
+					<OPTION>50
+					<OPTION>100
+					<OPTION>1000</OPTION>
+				</SELECT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>order by:</P>
+			</TD>
+			<TD>
+				<P><SELECT NAME="order" STYLE="width: 4.29cm; height: 0.67cm">
+					<OPTION VALUE="YBR-Date-Quality" SELECTED>YBR-Date-Quality
+					<OPTION VALUE="YBR-Quality-Date">YBR-Quality-Date
+					<OPTION VALUE="Date-YBR-Quality">Date-YBR-Quality
+					<OPTION VALUE="Quality-YBR-Date">Quality-YBR-Date
+					<OPTION VALUE="Date-Quality-YBR">Date-Quality-YBR
+					<OPTION VALUE="Quality-Date-YBR">Quality-Date-YBR</OPTION>
+				</SELECT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>Resource:</P>
+			</TD>
+			<TD>
+				<P><SELECT NAME="resource" STYLE="width: 2.07cm; height: 0.67cm">
+					<OPTION VALUE="global" SELECTED>global
+					<OPTION VALUE="local">local</OPTION>
+				</SELECT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>Max. search time (seconds):</P>
+			</TD>
+			<TD>
+				<P><SELECT NAME="time" STYLE="width: 1.39cm; height: 0.67cm">
+					<OPTION SELECTED>1
+					<OPTION>3
+					<OPTION>6
+					<OPTION>10
+					<OPTION>30
+					<OPTION>60</OPTION>
+				</SELECT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>URL mask:</P>
+			</TD>
+			<TD>
+				<P>#(urlmaskoptions)# <INPUT TYPE=TEXT NAME="urlmaskfilter" VALUE="#[urlmaskfilter]#" SIZE=12 MAXLENGTH=80 STYLE="width: 2.79cm; height: 0.61cm">
+				:: <INPUT TYPE=RADIO NAME="urlmask" VALUE="yes" CHECKED STYLE="width: 0.29cm; height: 0.29cm">
+				restrict on <INPUT TYPE=TEXT NAME="urlmaskfilter" VALUE="#[urlmaskfilter]#" SIZE=12 MAXLENGTH=80 STYLE="width: 2.79cm; height: 0.61cm">
+				<INPUT TYPE=RADIO NAME="urlmask" VALUE="no" STYLE="width: 0.29cm; height: 0.29cm">
+				show all #(/urlmaskoptions)#</P>
+			</TD>
+		</TR>
+	</TABLE>
+</FORM>
+<P>#(excluded)# :: 
+</P>
+<P><STRONG>The following words are stop-words and had been excluded
+from the search: #[stopwords]#.</STRONG></P>
+<P>#(/excluded)# #(num-results)# :: 
+</P>
+<P>No Results.</P>
+<P>:: 
+</P>
+<P>No Results. (length of search words must be at least 3 characters)</P>
+<P>:: 
+</P>
+<P>No Results. If you think this is unsatisfactory then you may
+consider to support the global index by running your own proxy/peer.
+If everybody contributes, the results will get better.</P>
+<P>Other possible reasons for no result:</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm">The search time was too short.
+	Search again with same query to catch up 'late peers' 
+	</P>
+	<LI><P STYLE="margin-bottom: 0cm">There is currently no support for
+	german umlaute. Please use ae/oe/ue instead 
+	</P>
+	<LI><P STYLE="margin-bottom: 0cm">Words of length &lt; 3 are not
+	indexed. Please omit such words 
+	</P>
+	<LI><P STYLE="margin-bottom: 0cm">YaCy tries to index singular
+	instead of plural words. Please use the singular form 
+	</P>
+	<LI><P STYLE="margin-bottom: 0cm">Only complete words are indexed,
+	not parts of words 
+	</P>
+	<LI><P STYLE="margin-bottom: 0cm">Don't use stopwords as search
+	words 
+	</P>
+	<LI><P>During this test phase the reaction time of remote peers is
+	unknown. Please repeat your search to see if there are
+	late-responses from remote peers 
+	</P>
+</UL>
+<P>If you think the information you searched should exist in the
+global index, then please run your own peer and start a crawl of your
+wanted information to make it available for everyone. Then stay
+online to support crawls from other peers. Thank you!</P>
+<P>:: 
+</P>
+<P><STRONG>#[linkcount]#</STRONG> results from <STRONG>#[orderedcount]#</STRONG>
+ordered links of a total number of <STRONG>#[totalcount]#</STRONG>
+known.</P>
+<P>→ <A HREF="/index.html%3Fsearch=#[former]%23&amp;Enter=Search&amp;count=%23[count]%23&amp;order=%23[order]%23&amp;resource=%23[resource]%23&amp;time=%23[time]%23&amp;urlmaskfilter=.*">Catch
+up more links</A> from 'late' peers.</P>
+<P>#(/num-results)# #(combine)# :: 
+</P>
+<P><STRONG>Topwords</STRONG> (to refine search): #{words}# <A HREF="index.html%3Fsearch=#[newsearch]%23&amp;Enter=Search&amp;count=%23[count]%23&amp;order=%23[order]%23&amp;resource=%23[resource]%23time=%23[time]%23">#[word]#</A>
+#{/words}# 
+</P>
+<P STYLE="margin-bottom: 0cm">#(/combine)#<!-- linklist begin -->
+#{results}#<!-- link begin --> 
+</P>
+<P><A HREF="/Bookmarks_p.html%3Fedit=#[urlhash]%23"><FONT COLOR="#000080"><IMG SRC="/env/grafics/empty.gif" NAME="Grafik1" ALT="bookmark" ALIGN=BOTTOM WIDTH=89 HEIGHT=44 BORDER=2></FONT></A>
+<A HREF="#[delete]#"><FONT COLOR="#000080"><IMG SRC="/env/grafics/empty.gif" NAME="Grafik2" ALT="delete" ALIGN=BOTTOM WIDTH=89 HEIGHT=44 BORDER=2></FONT></A>
+</P>
+<H4><A HREF="#[url]#">#[description]#</A></H4>
+<P><A NAME="#[urlhash]#"></A>#(snippet)#loading snippet
+...::#[text]##(/snippet)#</P>
+<P><A NAME="url#[urlhash]#"></A><A HREF="#[url]#">#[urlname]#</A></P>
+<P>#[date]# | YBR-#[ybr]# | <A HREF="ViewFile.html%3FurlHash=#[urlhash]%23&amp;words=%23[words]%23">Info</A></P>
+<P><!-- link end -->#{/results}#<!-- linklist end --> 
+</P>
+<P>#(resultbottomline)# :: The global search resulted in
+#[globalresults]# link contributions from other YaCy peers. :: You
+can enrich the search results by using the 'global' option: This will
+search also other YaCy peers :: You cannot get global search results
+because you are not connected to another YaCy peer. To connect you
+must first use the proxy. See here for an <A HREF="http://www.anomic.de/AnomicHTTPProxy/Installation.html#wininst">installation
+guide</A>. Alternatively, you can run the proxy in permanent online
+mode, which also grants global search. To do this, press this button:
+</P>
+<FORM ACTION="SettingsAck_p.html">
+	<P><INPUT TYPE=SUBMIT NAME="pmode" VALUE="go online" STYLE="width: 2.16cm; height: 0.7cm">
+		</P>
+</FORM>
+<P>:: You can enrich the search results by using the 'global' option;
+you must also switch to online mode (by using the proxy) to
+contribute to the global index. #(/resultbottomline)# 
+</P>
+<P>YaCy is a GPL'ed project with the target of implementing a
+P2P-based global search engine.<BR>Architecture (C) by Michael Peter
+Christen, 
+<IMG SRC="/env/grafics/mcemailh.gif" NAME="Grafik3" ALT="Mail-Adresse von Michael Peter Christen" ALIGN=BOTTOM WIDTH=89 HEIGHT=44 BORDER=0></P>
+<P>#%env/templates/xhtml-footer.template%# 
+<SCRIPT>
+file:///home/daburna/YaCy%20SVN/yacy/trunk/htroot/xhtml-index.html
+</SCRIPT>
+</P>
+</BODY>
+</HTML>
