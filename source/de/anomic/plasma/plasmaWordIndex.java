@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Date;
+import java.util.TreeSet;
 import java.net.URL;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -380,20 +381,15 @@ public final class plasmaWordIndex {
     public static final int RL_ASSORTMENTS = 2;
     public static final int RL_WORDFILES   = 3;
     
-    public synchronized String[] wordHashes(String startHash, int resourceLevel, boolean rot, int count) {
-        String[] hashes = new String[count];
+    public synchronized TreeSet wordHashes(String startHash, int resourceLevel, boolean rot, int count) {
+        TreeSet hashes = new TreeSet();
         Iterator i = wordHashes(startHash, resourceLevel, rot);
-        int j = 0;
-        while ((count-- > 0) && (i.hasNext())) {
-            hashes[j++] = (String) i.next();
+        String hash;
+        while ((hashes.size() < count) && (i.hasNext())) {
+            hash = (String) i.next();
+            if ((hash != null) && (hash.length() > 0)) hashes.add(hash);
         }
-        if (count > 0) {
-            String[] s = new String[j];
-            System.arraycopy(hashes, 0, s, 0, j);
-            return s;
-        } else {
-            return hashes;
-        }
+        return hashes;
     }
     
     public Iterator wordHashes(String startHash, int resourceLevel, boolean rot) {

@@ -56,7 +56,7 @@ import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public final class plasmaWordIndexCache /*implements plasmaWordIndexInterface*/ {
+public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
@@ -275,6 +275,10 @@ public final class plasmaWordIndexCache /*implements plasmaWordIndexInterface*/ 
 
     public int kSize() {
         return kCache.size();
+    }
+
+    public int size() {
+        return wCache.size() + kCache.size();
     }
 
     public int indexSize(String wordHash) {
