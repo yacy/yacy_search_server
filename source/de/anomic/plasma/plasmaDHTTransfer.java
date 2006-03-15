@@ -60,6 +60,8 @@ public class plasmaDHTTransfer extends Thread {
     private String transferStatusMessage = "";
 
     // delivery destination
+    private static yacySeed [] seeds = null;
+    private static int seedcount = 0;
     yacySeed seed = null;
 
     // word chunk
@@ -74,13 +76,25 @@ public class plasmaDHTTransfer extends Thread {
         this.log = log;
         this.gzipBody4Transfer = gzipBody;
         this.timeout4Transfer = timeout;
-        this.seed = seed;
         this.dhtChunk = dhtChunk;
         this.maxRetry = retries;
+        seeds = new yacySeed[1];
+        seeds[0] = seed;
+    }
+    
+    public plasmaDHTTransfer(serverLog log, yacySeed [] seeds, plasmaDHTChunk dhtChunk, boolean gzipBody, int timeout, int retries) {
+        super(new ThreadGroup("TransferIndexThreadGroup"), "TransferIndexWorker_" + seedcount);
+        this.log = log;
+        this.gzipBody4Transfer = gzipBody;
+        this.timeout4Transfer = timeout;
+        this.dhtChunk = dhtChunk;
+        this.maxRetry = retries;
+        setSeeds(seeds);
     }
 
     public void run() {
-        try {
+        while (getStatus() != plasmaDHTChunk.chunkStatus_COMPLETE && seedcount < seeds.length)try {
+            seed = seeds[seedcount++];
             uploadIndex();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
@@ -89,7 +103,7 @@ public class plasmaDHTTransfer extends Thread {
 
         }
     }
-
+    
     private boolean isAborted() {
         if (stopped || Thread.currentThread().isInterrupted()) {
             return true;
@@ -185,5 +199,16 @@ public class plasmaDHTTransfer extends Thread {
             }
         }
     }
-    
+
+    private static void setSeeds(yacySeed [] seeds) {
+        plasmaDHTTransfer.seeds = seeds;
+    }
+
+    public static void setSeedcount(int seedcount) {
+        plasmaDHTTransfer.seedcount = seedcount;
+    }
+
+    public static int getSeedcount() {
+        return seedcount;
+    }
 }
