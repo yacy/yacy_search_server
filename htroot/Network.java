@@ -415,7 +415,7 @@ public class Network {
                     prop.put("table_list", conCount);
                     prop.put("table", 1);
                     prop.put("table_num", conCount);
-                    prop.put("table_total", (maxCount > conCount) ? conCount : maxCount);
+                    prop.put("table_total", ((page == 1) && (iAmActive)) ? (size + 1) : size );
                     prop.put("table_complete", ((complete)? 1 : 0) );
                     
                     if( (!post.containsKey("order") && !post.containsKey("sort")) && page==1){
