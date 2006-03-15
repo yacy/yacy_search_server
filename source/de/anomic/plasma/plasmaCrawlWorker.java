@@ -366,7 +366,14 @@ public final class plasmaCrawlWorker extends Thread {
                                 cacheManager.cachePath.getAbsolutePath() + "').");
                     return null;                    
                 }
-                
+
+                if (htCache.cacheFile.getAbsolutePath().length() > 255) {
+                    remote.close();
+                    log.logInfo("REJECTED URL " + url.toString() + " because path too long '" +
+                                cacheManager.cachePath.getAbsolutePath() + "'");                    
+                    return (htCache = null);
+                }
+
                 // request has been placed and result has been returned. work off response
                 File cacheFile = cacheManager.getCachePath(url);
                 try {
