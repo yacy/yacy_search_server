@@ -222,66 +222,69 @@ public class kelondroMSetTools {
         // comparators must be equal
         if (map == null) return null;
         if (set == null) return map;
-	if (map.comparator() != set.comparator()) return null;
         if ((map.size() == 0) || (set.size() == 0)) return map;
-        
+        if (map.comparator() != set.comparator()) return excludeConstructiveByTestMapInSet(map, set);
         return excludeConstructiveByTestMapInSet(map, set);
-        //return excludeConstructiveByEnumeration(map, set);
+        // return excludeConstructiveByEnumeration(map, set);
     }
     
     private static TreeMap excludeConstructiveByTestMapInSet(TreeMap map, TreeSet set) {
-	Iterator mi = map.keySet().iterator();
-	TreeMap result = new TreeMap(map.comparator());
-	Object o;
-	while (mi.hasNext()) {
-	    o = mi.next();
-	    if (!(set.contains(o))) result.put(o, map.get(o));
-	}
-	return result;
+        Iterator mi = map.keySet().iterator();
+        TreeMap result = new TreeMap(map.comparator());
+        Object o;
+        while (mi.hasNext()) {
+            o = mi.next();
+            if (!(set.contains(o))) result.put(o, map.get(o));
+        }
+        return result;
     }
 
-    private static TreeMap excludeConstructiveByEnumeration(TreeMap map, TreeSet set) {
-	// returns map without the elements in set
-	// enumerates objects
-	Comparator comp = map.comparator();
-	Iterator mi = map.keySet().iterator();
-	Iterator si = set.iterator();
-	TreeMap result = new TreeMap(map.comparator());
-	int c;
-	if ((mi.hasNext()) && (si.hasNext())) {
-	    Object mobj = mi.next();
-	    Object sobj = si.next();
-	    while (true) {
-		c = compare(mobj, sobj, comp);
-		if (c < 0) {
-		    result.put(mobj, map.get(mobj));
-		    if (mi.hasNext()) mobj = mi.next(); else break;
-		} else if (c > 0) {
-		    if (si.hasNext()) sobj = si.next(); else break;
-		} else {
-		    if (mi.hasNext()) mobj = mi.next(); else break;
-		    if (si.hasNext()) sobj = si.next(); else {
-			// final flush
-			result.put(mobj, map.get(mobj));
-			while (mi.hasNext()) {
-			    mobj = mi.next(); 
-			    result.put(mobj, map.get(mobj));
-			}
-			break;
-		    }
-		}
-	    }
-	}
-	return result;
+    private static TreeMap excludeConstructiveByEnumeration(TreeMap map,  TreeSet set) {
+        // returns map without the elements in set
+        // enumerates objects
+        Comparator comp = map.comparator();
+        Iterator mi = map.keySet().iterator();
+        Iterator si = set.iterator();
+        TreeMap result = new TreeMap(map.comparator());
+        int c;
+        if ((mi.hasNext()) && (si.hasNext())) {
+            Object mobj = mi.next();
+            Object sobj = si.next();
+            while (true) {
+                c = compare(mobj, sobj, comp);
+                if (c < 0) {
+                    result.put(mobj, map.get(mobj));
+                    if (mi.hasNext()) mobj = mi.next();
+                    else break;
+                } else if (c > 0) {
+                    if (si.hasNext()) sobj = si.next();
+                    else break;
+                } else {
+                    if (mi.hasNext()) mobj = mi.next();
+                    else break;
+                    if (si.hasNext()) sobj = si.next();
+                    else {
+                        // final flush
+                        result.put(mobj, map.get(mobj));
+                        while (mi.hasNext()) {
+                            mobj = mi.next();
+                            result.put(mobj, map.get(mobj));
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
     }
     
     public static void excludeDestructive(TreeMap map, TreeSet set) {
         // comparators must be equal
         if (map == null) return;
         if (set == null) return;
-	if (map.comparator() != set.comparator()) return;
+        if (map.comparator() != set.comparator()) return;
         if ((map.size() == 0) || (set.size() == 0)) return;
-        
+
         if (map.size() < set.size())
             excludeDestructiveByTestMapInSet(map, set);
         else
@@ -289,13 +292,13 @@ public class kelondroMSetTools {
     }
     
     private static void excludeDestructiveByTestMapInSet(TreeMap map, TreeSet set) {
-	Iterator mi = map.keySet().iterator();
-	while (mi.hasNext()) if (set.contains(mi.next())) mi.remove();
+        Iterator mi = map.keySet().iterator();
+        while (mi.hasNext()) if (set.contains(mi.next())) mi.remove();
     }
     
     private static void excludeDestructiveByTestSetInMap(TreeMap map, TreeSet set) {
-	Iterator si = set.iterator();
-	while (si.hasNext()) map.remove(si.next());
+        Iterator si = set.iterator();
+        while (si.hasNext()) map.remove(si.next());
     }
     
     // and the same again with set-set
@@ -303,7 +306,7 @@ public class kelondroMSetTools {
         // comparators must be equal
         if (set1 == null) return;
         if (set2 == null) return;
-	if (set1.comparator() != set2.comparator()) return;
+        if (set1.comparator() != set2.comparator()) return;
         if ((set1.size() == 0) || (set2.size() == 0)) return;
         
         if (set1.size() < set2.size())
@@ -313,13 +316,13 @@ public class kelondroMSetTools {
     }
     
     private static void excludeDestructiveByTestSmallInLarge(TreeSet small, TreeSet large) {
-	Iterator mi = small.iterator();
-	while (mi.hasNext()) if (large.contains(mi.next())) mi.remove();
+        Iterator mi = small.iterator();
+        while (mi.hasNext()) if (large.contains(mi.next())) mi.remove();
     }
     
     private static void excludeDestructiveByTestLargeInSmall(TreeSet large, TreeSet small) {
-	Iterator si = small.iterator();
-	while (si.hasNext()) large.remove(si.next());
+        Iterator si = small.iterator();
+        while (si.hasNext()) large.remove(si.next());
     }
     
     // ------------------------------------------------------------------------------------------------
