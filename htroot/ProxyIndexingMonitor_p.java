@@ -99,7 +99,7 @@ public class ProxyIndexingMonitor_p {
                 newProxyCachePath = post.get("proxyCache", "DATA/HTCACHE");
                 newProxyCachePath = newProxyCachePath.replace('\\', '/');
                 if (newProxyCachePath.endsWith("/")) {
-                    newProxyCachePath.substring(0, newProxyCachePath.length() - 1);
+                    newProxyCachePath = newProxyCachePath.substring(0, newProxyCachePath.length() - 1);
                 }
                 final File cache = new File(newProxyCachePath);
                 if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
