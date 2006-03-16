@@ -47,22 +47,49 @@ package de.anomic.kelondro;
 
 import de.anomic.kelondro.kelondroRecords.Node;
 
-public abstract class kelondroAbstractOrder implements kelondroOrder {
+public abstract class kelondroAbstractOrder implements kelondroOrder, Cloneable {
 
+    protected byte[] zero = null;
+    
+    public Object clone() {
+        Object theClone = this.clone();
+        ((kelondroOrder) theClone).rotate(this.zero);
+        return theClone;
+    }
+    
     public long partition(byte[] key, int forks) {
         final long d = (Long.MAX_VALUE / forks) + ((Long.MAX_VALUE % forks) + 1) / forks;
         return cardinal(key) / d;
     }
     
+    public int compareI(byte[] a, byte[] b) {
+        if (zero == null) return compare(a, b);
+        // we have an artificial start point. check all combinations
+        int az = compare(a, zero); // -1 if a < z; 0 if a == z; 1 if a > z
+        int bz = compare(b, zero); // -1 if b < z; 0 if b == z; 1 if b > z
+        if ((az ==  0) && (bz ==  0)) return 0;
+        if  (az ==  0) return -1;
+        if  (bz ==  0) return  1;
+        if  (az == bz) return compare(a, b);
+        return bz;
+    }
+
     public int compare(Object a, Object b) {
         if ((a instanceof byte[]) && (b instanceof byte[])) {
-            return compare((byte[]) a, (byte[]) b);
+            return compareI((byte[]) a, (byte[]) b);
         } else if ((a instanceof Node) && (b instanceof Node)) {
-            return compare(((Node) a).getKey(), ((Node) b).getKey());
+            return compareI(((Node) a).getKey(), ((Node) b).getKey());
         } else if ((a instanceof String) && (b instanceof String)) {
-            return compare(((String) a).getBytes(), ((String) b).getBytes());
+            return compareI(((String) a).getBytes(), ((String) b).getBytes());
         } else
             throw new IllegalArgumentException("Object type or Object type combination not supported: a=" + a + ", b=" + b);
     }
 
+    public byte[] zero() {
+        return zero;
+    }
+    
+    public void rotate(byte[] zero) {
+        this.zero = zero;
+    }
 }

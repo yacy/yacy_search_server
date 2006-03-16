@@ -62,6 +62,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroOrder;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndex {
@@ -74,7 +75,8 @@ public final class plasmaWordIndex {
     private final plasmaWordIndexAssortmentCluster assortmentCluster;
     private int assortmentBufferSize; //kb
     private final plasmaWordIndexClassicDB backend;    
-
+    private final kelondroOrder indexOrder = new kelondroNaturalOrder(true);
+    
     public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) {
         this.databaseRoot = databaseRoot;
         this.backend = new plasmaWordIndexClassicDB(databaseRoot, log);
@@ -382,7 +384,9 @@ public final class plasmaWordIndex {
     public static final int RL_WORDFILES   = 3;
     
     public synchronized TreeSet wordHashes(String startHash, int resourceLevel, boolean rot, int count) {
-        TreeSet hashes = new TreeSet();
+        kelondroOrder hashOrder = (kelondroOrder) indexOrder.clone();
+        if (rot) hashOrder.rotate(startHash.getBytes()); else hashOrder.rotate(null);
+        TreeSet hashes = new TreeSet(hashOrder);
         Iterator i = wordHashes(startHash, resourceLevel, rot);
         String hash;
         while ((hashes.size() < count) && (i.hasNext())) {

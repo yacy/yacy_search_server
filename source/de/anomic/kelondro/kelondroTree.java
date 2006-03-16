@@ -167,6 +167,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         return oo;
     }
     
+    public kelondroOrder getOrder() {
+        // returns the order of this tree
+        return this.objectOrder;
+    }
+    
     public void clear() throws IOException {
         super.clear();
         setHandle(root, null); // reset the root value

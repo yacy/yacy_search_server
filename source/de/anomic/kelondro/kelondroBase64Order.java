@@ -222,7 +222,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         }
     }
 
-    public long cardinal(byte[] key) {
+    private long cardinalI(byte[] key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
         int p = 0;
@@ -230,6 +230,14 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         while (p++ < 10) c = (c << 6);
         c = c << 3;
         return c;
+    }
+
+    public long cardinal(byte[] key) {
+        if (this.zero == null) return cardinalI(key);
+        long zeroCardinal = cardinalI(this.zero);
+        long keyCardinal = cardinalI(key);
+        if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
+        return Long.MAX_VALUE - keyCardinal + zeroCardinal + 1;
     }
 
     public int compare(byte[] a, byte[] b) {

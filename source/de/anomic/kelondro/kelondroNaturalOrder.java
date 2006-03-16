@@ -69,7 +69,7 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         return null;
     }
     
-    public long cardinal(byte[] key) {
+    private static long cardinalI(byte[] key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
         int p = 0;
@@ -77,6 +77,14 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         while (p++ < 8) c = (c << 8);
         c = c >>> 1;
         return c;
+    }
+    
+    public long cardinal(byte[] key) {
+        if (this.zero == null) return cardinalI(key);
+        long zeroCardinal = cardinalI(this.zero);
+        long keyCardinal = cardinalI(key);
+        if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
+        return Long.MAX_VALUE - keyCardinal + zeroCardinal + 1;
     }
 
     public static byte[] encodeLong(long c, int length) {

@@ -49,6 +49,8 @@ import java.util.Comparator;
 
 public interface kelondroOrder extends Comparator {
 
+    public Object clone();
+    
     public String signature(); // returns a signature String so that different orderings have different signatures
     
     public long partition(byte[] key, int forkes);
@@ -57,4 +59,7 @@ public interface kelondroOrder extends Comparator {
 
     public int compare(byte[] a, byte[] b);
 
+    public byte[] zero(); // returns the zero point of the Ordering; null if not defined
+
+    public void rotate(byte[] zero); // defines that the ordering rotates, and sets the zero point for the rotation
 }
