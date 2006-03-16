@@ -47,15 +47,11 @@ package de.anomic.kelondro;
 
 import de.anomic.kelondro.kelondroRecords.Node;
 
-public abstract class kelondroAbstractOrder implements kelondroOrder, Cloneable {
+public abstract class kelondroAbstractOrder implements kelondroOrder {
 
     protected byte[] zero = null;
     
-    public Object clone() {
-        Object theClone = this.clone();
-        ((kelondroOrder) theClone).rotate(this.zero);
-        return theClone;
-    }
+    public abstract Object clone();
     
     public long partition(byte[] key, int forks) {
         final long d = (Long.MAX_VALUE / forks) + ((Long.MAX_VALUE % forks) + 1) / forks;

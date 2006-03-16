@@ -61,8 +61,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
     public static final int  wCacheReferenceLimit = 50;
-    public static final long wCacheMaxAge         = 1000 * 60 * 60 * 2; // milliseconds; 2 hours
-    public static final long kCacheMaxAge         = 1000 * 60 * 2;      // milliseconds; 2 minutes
+    public static final long wCacheMaxAge         = 1000 * 60 * 30; // milliseconds; 30 minutes
+    public static final long kCacheMaxAge         = 1000 * 60 * 2;  // milliseconds; 2 minutes
     
     // class variables
     private final File databaseRoot;
@@ -393,35 +393,6 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         }
         return count;
     }
-
-    /*
-    public int tryRemoveURLs(String urlHash) {
-        // this tries to delete an index from the cache that has this
-        // urlHash assigned. This can only work if the entry is really fresh
-        // Such entries must be searched in the latest entries
-        int delCount = 0;
-        synchronized (wCache) {
-            Iterator i = hashDate.scores(false);
-            String wordHash;
-            long t;
-            plasmaWordIndexEntryContainer c;
-            while (i.hasNext()) {
-                wordHash = (String) i.next();
-                // check time
-                t = longEmit(hashDate.getScore(wordHash));
-                if (System.currentTimeMillis() - t > wCacheMinAge) return delCount;
-                // get container
-                c = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
-                if (c.remove(urlHash) != null) {
-                    wCache.put(wordHash, c);
-                    hashScore.decScore(wordHash);
-                    delCount++;
-                }
-            }
-        }
-        return delCount;
-    }
-    */
     
     public int tryRemoveURLs(String urlHash) {
         // this tries to delete an index from the cache that has this

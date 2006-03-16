@@ -47,7 +47,7 @@ package de.anomic.kelondro;
 
 import java.util.Comparator;
 
-public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelondroOrder, Comparator {
+public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelondroOrder, Comparator, Cloneable {
     
     boolean asc;
     
@@ -55,6 +55,13 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
     
     public kelondroNaturalOrder(boolean ascending) {
         this.asc = ascending;
+        this.zero = null;
+    }
+    
+    public Object clone() {
+        kelondroNaturalOrder o = new kelondroNaturalOrder(this.asc);
+        o.rotate(this.zero);
+        return o;
     }
     
     public static kelondroOrder bySignature(String signature) {

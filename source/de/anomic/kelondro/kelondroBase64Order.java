@@ -83,6 +83,12 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         ahpla = (rfc1113compliant) ? ahpla_standard : ahpla_enhanced;
     }
 
+    public Object clone() {
+        kelondroBase64Order o = new kelondroBase64Order(this.asc, this.rfc1113compliant);
+        o.rotate(this.zero);
+        return o;
+    }
+    
     public static kelondroOrder bySignature(String signature) {
         if (signature.equals("Bd")) return new kelondroBase64Order(false, false);
         if (signature.equals("bd")) return new kelondroBase64Order(false, true);
