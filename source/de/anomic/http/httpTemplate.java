@@ -5,6 +5,10 @@
 // Frankfurt, Germany, 2004
 // last major change: 16.01.2005
 //
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
 // extended for multi- and alternatives-templates by Alexander Schier
 //
 // This program is free software; you can redistribute it and/or modify
@@ -370,7 +374,7 @@ public final class httpTemplate {
 			if(filename.startsWith( Character.toString((char)lbr) ) && filename.endsWith( Character.toString((char)rbr) )){ //simple pattern for filename
 				filename= new String(replacePattern( prefix + filename.substring(1, filename.length()-1), pattern, dflt));
 			}
-            if ((!filename.equals("")) && (!filename.equals(dflt))) {
+            if (!filename.equals("") && !java.util.Arrays.equals(filename.getBytes(), dflt)) {
                 BufferedReader br = null;
 				try{
 					//br = new BufferedReader(new InputStreamReader(new FileInputStream( filename ))); //Simple Include
