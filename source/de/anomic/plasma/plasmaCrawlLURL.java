@@ -410,7 +410,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         private int wordCount;
         private String snippet;
         private plasmaWordIndexEntry word; // this is only used if the url is transported via remote search requests
-        private boolean stored = false;
+        private boolean stored;
         
         // more needed attributes:
         // - author / copyright owner
@@ -452,7 +452,6 @@ public final class plasmaCrawlLURL extends plasmaURL {
             this.urlHash = urlHash;
             byte[][] entry = plasmaCrawlLURL.this.urlHashCache.get(urlHash.getBytes());
             if (entry == null) throw new IOException("url hash " + urlHash + " not found in LURL");
-            this.stored = true;
             try {
                 if (entry != null) {
                     this.url = new URL(new String(entry[1], "UTF-8").trim());
@@ -469,6 +468,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                     this.wordCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[12], "UTF-8"));
                     this.snippet = null;
                     this.word = searchedWord;
+                    this.stored = false;
                     return;
                 }
             } catch (Exception e) {
@@ -566,6 +566,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                     kelondroBase64Order.enhancedCoder.encodeLong(wordCount, urlWordCountLength).getBytes(),
                 };
                 urlHashCache.put(entry);
+                serverLog.logFinest("PLASMA","STORED new LURL " + url.toString());
                 this.stored = true;
             } catch (Exception e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString(), e);
