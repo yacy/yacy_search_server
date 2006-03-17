@@ -305,11 +305,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     }
                 }
             }
-            // System.out.println("DEBUG: search for " + new String(key) + "
-            // ended with status=" + ((found) ? "found" : "not-found") + ",
-            // node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ",
-            // parent=" + ((parentnode == null) ? "NULL" :
-            // parentnode.toString()));
+            // System.out.println("DEBUG: search for " + new String(key) + " ended with status=" + ((found) ? "found" : "not-found") + ", node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ", parent=" + ((parentnode == null) ? "NULL" : parentnode.toString()));
             // we reached a node where we must insert the new value
             // the parent of this new value can be obtained by getParent()
             // all values are set, just return
@@ -812,114 +808,90 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     }
     
     public synchronized Iterator nodeIterator(boolean up, boolean rotating) {
-	// iterates the elements in a sorted way. returns Node - type Objects
-	try {
-	    return new nodeIterator(up, rotating);
-	} catch (IOException e) {
-	    throw new RuntimeException("error creating an iteration: " + e.getMessage());
-	}
+        // iterates the elements in a sorted way. returns Node - type Objects
+        try {
+            return new nodeIterator(up, rotating);
+        } catch (IOException e) {
+            throw new RuntimeException("error creating an iteration: " + e.getMessage());
+        }
     }
 
     public synchronized Iterator nodeIterator(boolean up, boolean rotating, byte[] firstKey) {
-	// iterates the elements in a sorted way. returns Node - type Objects
-	try {
-            Search search = new Search();
-            search.process(firstKey);
-            if (search.found()) {
-                Node matcher = search.getMatcher();
-                return new nodeIterator(up, rotating, matcher);
-            } else {
-                Node nn = search.getParent();
-                if (nn == null) {
-                    return (new HashSet()).iterator(); // an empty iterator
-                } else {
-                    // the node nn may be greater or smaller than the firstKey
-                    // depending on the ordering direction,
-                    // we must find the next smaller or greater node
-                    return new correctedNodeIterator(up, rotating, nn, firstKey);
-                }
-            }
-	} catch (IOException e) {
-	    throw new RuntimeException("error creating an iteration: " + e.getMessage());
-	}
-    }
-    
-    private class correctedNodeIterator implements Iterator {
-	
-        Iterator ii;
-        Node nextNode;
-        boolean asc, rot;
-
-        public correctedNodeIterator(boolean up, boolean rotating, Node start, byte[] firstKey) throws IOException {
-            this.asc = up;
-            this.rot = rotating;
-            ii = new nodeIterator(asc, rot, start);
-            nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
-            if ((nextNode != null) && (nextNode.getKey() != null)) {
-                int c = objectOrder.compare(firstKey, nextNode.getKey());
-                if ((c > 0) && (asc)) {
-                    // firstKey > nextNode.getKey()
-                    logFine("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
-                    nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
-                }
-                if ((c < 0) && (!(asc))) {
-                    logFine("CORRECTING ITERATOR: firstKey=" + new String(firstKey) + ", nextNode=" + new String(nextNode.getKey()));
-                    nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
-                }
-            }
-        }
-        
-        public void finalize() {
-            ii = null;
-            nextNode = null;
-        }
-            
-        public boolean hasNext() {
-            return nextNode != null;
-        }
-
-        public Object next() {
-            Node r = nextNode;
-            nextNode = (ii.hasNext()) ? (Node) ii.next() : null;
-            if ((nextNode != null) && (asc == (objectOrder.compare(r, nextNode) == 1))) {
-                // correct wrong order (this should not happen)
-                logWarning("STOPPING ITERATOR: currentNode=" + new String(r.getKey()) + ", nextNode=" + new String(nextNode.getKey()));
-                if (rot) {
-                    try {
-                        ii = new nodeIterator(asc, rot);
-                    } catch (IOException e) {
-                        nextNode = null;
-                    }
-                } else {
-                    nextNode = null;
-                }
-            }
-            return r;
-        }
-        
-        public void remove() {
-            throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro Tables not yet supported");
+        // iterates the elements in a sorted way. returns Node - type Objects
+        try {
+            return new nodeIterator(up, rotating, firstKey, true);
+        } catch (IOException e) {
+            throw new RuntimeException("error creating an iteration: " + e.getMessage());
         }
     }
     
     private class nodeIterator implements Iterator {
-	// we implement an iteration! (not a recursive function as the structure would suggest...)
-	// the iterator iterates Node objects
-	Node nextNode = null;
+        // we implement an iteration! (not a recursive function as the structure would suggest...)
+        // the iterator iterates Node objects
+        Node nextNode = null;
         boolean up, rot;
         LinkedList nodeStack;
-	int count;
+        int count;
         
-	public nodeIterator(boolean up, boolean rotating) throws IOException {
-            this(up, rotating, (up) ? firstNode() : lastNode());
-	}
-        
-	public nodeIterator(boolean up, boolean rotating, Node start) throws IOException {
-	    this.count = 0;
+        public nodeIterator(boolean up, boolean rotating) throws IOException {
+            this.count = 0;
             this.up = up;
             this.rot = rotating;
-            init(start);
-	}
+            
+            // initialize iterator
+            init((up) ? firstNode() : lastNode());
+        }
+        
+        public nodeIterator(boolean up, boolean rotating, byte[] firstKey, boolean including) throws IOException {
+            this.count = 0;
+            this.up = up;
+            this.rot = rotating;
+
+            Search search = new Search();
+            search.process(firstKey);
+            if (search.found()) {
+                init(search.getMatcher());
+            } else {
+                Node nn = search.getParent();
+                if (nn == null) {
+                    this.nextNode = null;
+                } else {
+                    // the node nn may be greater or smaller than the firstKey
+                    // depending on the ordering direction,
+                    // we must find the next smaller or greater node
+                    // this is corrected in the initializer of nodeIterator
+                    init(nn);
+                }
+            }
+            
+            // correct nextNode upon start
+            // this happens, if the start node was not proper, or could not be found
+            while ((nextNode != null) && (nextNode.getKey() != null)) {
+                int c = objectOrder.compare(firstKey, nextNode.getKey());
+                if (c == 0) {
+                    if (including) {
+                        break; // correct + finished
+                    } else {
+                        if (hasNext()) next(); else nextNode = null;
+                        break; // corrected + finished
+                    }
+                } else if (c < 0) {
+                    if (up) {
+                        break; // correct + finished
+                    } else {
+                        // firstKey < nextNode.getKey(): correct once
+                        if (hasNext()) next(); else nextNode = null;
+                    }
+                } else if (c > 0) {
+                    if (up) {
+                        // firstKey > nextNode.getKey(): correct once
+                        if (hasNext()) next(); else nextNode = null;
+                    } else {
+                        break; // correct + finished
+                    }
+                }
+            }
+        }
         
         private void init(Node start) throws IOException {
             this.nextNode = start;
@@ -952,23 +924,22 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             nodeStack = null;
         }
             
-	public boolean hasNext() {
+        public boolean hasNext() {
             return (rot && (size() > 0)) || (nextNode != null);
-	}
+        }
 
         public Object next() {
-	    count++;
+            count++;
             if ((rot) && (nextNode == null)) try {
                 init((up) ? firstNode() : lastNode());
             } catch (IOException e) {
                 throw new kelondroException(filename, "io-error while rot");
             }
             if (nextNode == null) throw new kelondroException(filename, "nodeIterator.next: no more entries available");
-	    if ((count > size()) && (!(rot))) throw new kelondroException(filename, "nodeIterator.next: internal loopback; database corrupted");
+            if ((count > size()) && (!(rot))) throw new kelondroException(filename, "nodeIterator.next: internal loopback; database corrupted");
             Object ret = nextNode;
             
             // middle-case
-            
             try {
                 int childtype = (up) ? rightchild : leftchild;
                 Handle childHandle = nextNode.getOHHandle(childtype);
@@ -1033,7 +1004,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         
         public void remove() {
             throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro Tables not yet supported");
-	}
+        }
     }
 
     public synchronized Iterator rows(boolean up, boolean rotating) throws IOException {
