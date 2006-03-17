@@ -694,3 +694,5 @@ httpc.nameCacheNoCachingPatterns = .*.dyndns.org, .*.dynalias.org
 externalRedirector=
 
 svnRevision=0
+
+currentSkin=
