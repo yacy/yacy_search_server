@@ -390,9 +390,8 @@ public final class yacy {
 
                     //Copy the shipped locales into DATA
                     final File localesPath = new File(homePath, sb.getConfig("localesPath", "DATA/LOCALE"));
-                    final File skinsPath = new File(homePath, sb.getConfig("skinsPath", "DATA/SKINS"));
                     final File defaultLocalesPath = new File(homePath, "locales");
-                    final File defaultSkinsPath = new File(homePath, "skins");
+                    
 
                     try{
                         final File[] defaultLocales = defaultLocalesPath.listFiles();
@@ -405,15 +404,6 @@ public final class yacy {
                     }catch(NullPointerException e){
                         serverLog.logSevere("STARTUP", "Nullpointer Exception while copying the default Locales");
                     }
-					if(defaultSkinsPath.exists()){
-	                    final String[] skinFiles = listManager.getDirListing(defaultSkinsPath.getAbsolutePath());
-		                skinsPath.mkdirs();
-			            for(int i=0;i<skinFiles.length;i++){
-				            if(skinFiles[i].endsWith(".css")){
-					            serverFileUtils.copy(new File(defaultSkinsPath, skinFiles[i]), new File(skinsPath, skinFiles[i]));
-						    }
-	                    }
-					}
 
                     //regenerate Locales from Translationlist, if needed
                     final String lang = sb.getConfig("htLocaleSelection", "");

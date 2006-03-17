@@ -46,6 +46,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
+import de.anomic.data.listManager;
 
 public class migration {
     //SVN constants
@@ -65,11 +66,24 @@ public class migration {
                 migrateBookmarkTagsDB(sb);
             }
     		serverLog.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
-            installSkin(sb);
+            installSkins(sb);
     		migrate(sb);
     	}
     }
-    public static void installSkin(plasmaSwitchboard sb){
+    public static void installSkins(plasmaSwitchboard sb){
+        final File skinsPath = new File(sb.getRootPath(), sb.getConfig("skinsPath", "DATA/SKINS"));
+        final File defaultSkinsPath = new File(sb.getRootPath(), "skins");
+        if(defaultSkinsPath.exists()){
+            final String[] skinFiles = listManager.getDirListing(defaultSkinsPath.getAbsolutePath());
+            skinsPath.mkdirs();
+            for(int i=0;i<skinFiles.length;i++){
+                if(skinFiles[i].endsWith(".css")){
+                    try{
+                        serverFileUtils.copy(new File(defaultSkinsPath, skinFiles[i]), new File(skinsPath, skinFiles[i]));
+                    }catch(IOException e){}
+                }
+            }
+        }
         String skin=sb.getConfig("currentSkin", "default");
         if(skin.equals("")){
             skin="default";
