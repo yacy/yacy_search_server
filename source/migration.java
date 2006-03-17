@@ -65,8 +65,34 @@ public class migration {
                 migrateBookmarkTagsDB(sb);
             }
     		serverLog.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
+            installSkin(sb);
     		migrate(sb);
     	}
+    }
+    public static void installSkin(plasmaSwitchboard sb){
+        String skin=sb.getConfig("currentSkin", "default");
+        if(skin.equals("")){
+            skin="default";
+        }
+        File skinsDir=new File(sb.getRootPath(), sb.getConfig("skinsPath", "DATA/SKINS"));
+        File skinFile=new File(skinsDir, skin+".css");
+        File htdocsPath=new File(sb.getRootPath(), sb.getConfig("htdocsPath", "DATA/HTDOCS")+"/env");
+        File styleFile=new File(htdocsPath, "style.css");
+        if(!skinFile.exists()){
+            if(styleFile.exists()){
+                serverLog.logInfo("MIGRATION", "Skin "+skin+" not found. Keeping old skin.");
+            }else{
+                serverLog.logSevere("MIGRATION", "Skin "+skin+" and no existing Skin found.");
+            }
+        }else{
+            try {
+                styleFile.getParentFile().mkdirs();
+                serverFileUtils.copy(skinFile, styleFile);
+                serverLog.logInfo("MIGRATION", "copied new Skinfile");
+            } catch (IOException e) {
+                serverLog.logSevere("MIGRATION", "Cannot copy skinfile.");
+            }
+        }
     }
     public static void migrateBookmarkTagsDB(plasmaSwitchboard sb){
         sb.bookmarksDB.close();

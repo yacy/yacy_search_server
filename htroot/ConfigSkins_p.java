@@ -76,22 +76,23 @@ public class ConfigSkins_p {
 		}
 	}
 
-	private static boolean changeSkin(serverSwitch env, String skinPath, String skin){
-		File styleFile = new File(env.getRootPath(), "htroot/env/style.css");
+	private static boolean changeSkin(plasmaSwitchboard sb, String skinPath, String skin){
+        File htdocsDir  = new File(sb.getRootPath(), sb.getConfig("htDocsPath", "DATA/HTDOCS")+"/env");
+		File styleFile = new File(htdocsDir, "style.css");
 		File skinFile  = new File(skinPath, skin);
 
+        styleFile.getParentFile().mkdirs();
 		if(copyFile(skinFile, styleFile)){
-			env.setConfig("currentSkin", skin.substring(0,skin.length()-4));
+			sb.setConfig("currentSkin", skin.substring(0,skin.length()-4));
 			return true;
 		}
 		return false;
 	}
 
 	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	//listManager.switchboard = (plasmaSwitchboard) env;
 	serverObjects prop = new serverObjects();
 	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	String skinPath = new File(env.getRootPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();
+	String skinPath = new File(env.getRootPath(), env.getConfig("skinsPath", "DATA/SKINS")).toString();
 
 	//Fallback
 	prop.put("currentskin", "");
@@ -112,7 +113,7 @@ public class ConfigSkins_p {
 	if (post != null){
 		//change skin
 		if(post.containsKey("use_button")){
-			changeSkin(env, skinPath, (String)post.get("skin"));
+			changeSkin(switchboard, skinPath, (String)post.get("skin"));
 			
 		//delete skin
 		}else if(post.containsKey("delete")){
@@ -144,7 +145,7 @@ public class ConfigSkins_p {
 				return prop;
 			}
 			if(post.containsKey("use_skin") && ((String)post.get("use_skin")).equals("on")){
-				changeSkin(env, skinPath, url.substring(url.lastIndexOf("/"), url.length()));
+				changeSkin(switchboard, skinPath, url.substring(url.lastIndexOf("/"), url.length()));
 			}
 		}
 	}
