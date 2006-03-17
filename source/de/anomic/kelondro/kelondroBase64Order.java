@@ -70,7 +70,6 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
     public static final kelondroBase64Order enhancedCoder = new kelondroBase64Order(true, false);
 
     private boolean rfc1113compliant;
-    private boolean asc;
     private final char[] alpha;
     private final byte[] ahpla;
 

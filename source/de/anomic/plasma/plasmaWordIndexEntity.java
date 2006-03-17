@@ -214,7 +214,7 @@ public final class plasmaWordIndexEntity {
             if (theIndex == null) {
                 i = null;
             } else try {
-                i = theIndex.rows(up, false);
+                i = theIndex.rows(up, false, null);
             } catch (kelondroException e) {
                 e.printStackTrace();
                 theIndex.file().delete();

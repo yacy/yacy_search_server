@@ -189,7 +189,7 @@ public class kelondroDyn extends kelondroTree {
     public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating) throws IOException {
         // iterates only the keys of the Nodes
         // enumerated objects are of type String
-        return new dynKeyIterator(super.rows(up, rotating));
+        return new dynKeyIterator(super.rows(up, rotating, null));
     }
 
     public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating, byte[] firstKey) throws IOException {

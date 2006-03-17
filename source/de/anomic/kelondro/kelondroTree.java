@@ -54,9 +54,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.logging.Logger;
+import java.util.Map;
 
 public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	
@@ -807,26 +809,6 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	return node;
     }
     
-    /*
-    private synchronized Iterator nodeIterator(boolean up, boolean rotating) {
-        // iterates the elements in a sorted way. returns Node - type Objects
-        try {
-            return new nodeIterator(up, rotating);
-        } catch (IOException e) {
-            throw new RuntimeException("error creating an iteration: " + e.getMessage());
-        }
-    }
-
-    private synchronized Iterator nodeIterator(boolean up, boolean rotating, byte[] firstKey) {
-        // iterates the elements in a sorted way. returns Node - type Objects
-        try {
-            return new nodeIterator(up, rotating, firstKey, true);
-        } catch (IOException e) {
-            throw new RuntimeException("error creating an iteration: " + e.getMessage());
-        }
-    }
-    */
-    
     private class nodeIterator implements Iterator {
         // we implement an iteration! (not a recursive function as the structure would suggest...)
         // the iterator iterates Node objects
@@ -1009,78 +991,165 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
     }
 
-    public synchronized Iterator rows(boolean up, boolean rotating) throws IOException {
-	// iterates the rows of the Nodes
-	// enumerated objects are of type byte[][]
-        // iterates the elements in a sorted way.
-	return new rowIterator(new nodeIterator(up, rotating));
+    public TreeMap rows(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
+        // returns an ordered map of keys/row relations; key objects are of type String, value objects are of type byte[][]
+        kelondroOrder setOrder = (kelondroOrder) objectOrder.clone();
+        setOrder.direction(up);
+        setOrder.rotate(firstKey);
+        TreeMap rows = new TreeMap(setOrder);
+        Node n;
+        synchronized (this) {
+            Iterator i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
+            while ((rows.size() < count) && (i.hasNext())) {
+                n = (Node) i.next();
+                if (n != null) rows.put(new String(n.getKey()), n.getValues());
+            }
+        }
+        return rows;
     }
     
-    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        return new rowIterator((firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, true));
+    public TreeSet keys(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
+        // returns an ordered set of keys; objects are of type String
+        kelondroOrder setOrder = (kelondroOrder) objectOrder.clone();
+        setOrder.direction(up);
+        setOrder.rotate(firstKey);
+        TreeSet set = new TreeSet(setOrder);
+        Node n;
+        synchronized (this) {
+            Iterator i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
+            while ((set.size() < count) && (i.hasNext())) {
+                n = (Node) i.next();
+                if (n != null) set.add(new String(n.getKey()));
+            }
+        }
+        return set;
+    }
+    
+    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        // iterates the rows of the Nodes
+        // enumerated objects are of type byte[][]
+        // iterates the elements in a sorted way.
+        // if iteration should start at smallest element, set firstKey to null
+        return new rowIterator(up, rotating, firstKey, this.size());
+    }
+    
+    public Iterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        // iterates only the keys of the Nodes
+        // enumerated objects are of type String
+        // iterates the elements in a sorted way.
+        // if iteration should start at smallest element, set firstKey to null
+        return new keyIterator(up, rotating, firstKey, this.size());
     }
     
     public class rowIterator implements Iterator {
         
-        Iterator nodeIterator;
+        int chunkSize;
+        byte[] start;
+        boolean inc, rot;
+        long count;
+        byte[] lastKey;
+        TreeMap rowBuffer;
+        Iterator bufferIterator;
         
-        public rowIterator(Iterator nodeIterator) {
-            this.nodeIterator = nodeIterator;
+        public rowIterator(boolean up, boolean rotating, byte[] firstKey, long guessedCountLimit) throws IOException {
+            start = firstKey;
+            inc = up;
+            rot = rotating;
+            count = 0;
+            lastKey = null;
+            chunkSize = (int) Math.min(100, guessedCountLimit);
+            rowBuffer = rows(inc, rot, start, true, chunkSize);
+            bufferIterator = rowBuffer.entrySet().iterator();
         }
         
         public boolean hasNext() {
-            return (nodeIterator.hasNext());
+            return ((bufferIterator != null) && (bufferIterator.hasNext()) && ((rot) || (count < size())));
         }
         
         public Object next() {
-            try {
-		Node nextNode = (Node) nodeIterator.next();
-		if (nextNode == null) throw new kelondroException(filename, "no more elements available");
-                return nextNode.getValues();
-            } catch (IOException e) {
-                throw new kelondroException(filename, "io-error: " + e.getMessage());
+            if (!(bufferIterator.hasNext())) return null;
+            Map.Entry entry = (Map.Entry) bufferIterator.next();
+            lastKey = ((String) entry.getKey()).getBytes();
+            
+            // check if this was the last entry in the rowBuffer
+            if (!(bufferIterator.hasNext())) {
+                // assign next buffer chunk
+                try {
+                    rowBuffer = rows(inc, rot, lastKey, false, chunkSize);
+                    bufferIterator = rowBuffer.entrySet().iterator();
+                } catch (IOException e) {
+                    rowBuffer = null;
+                    bufferIterator = null;
+                }
             }
+            
+            // return the row
+            count++;
+            return entry.getValue();
         }
         
         public void remove() {
+            if (lastKey != null) try {
+                kelondroTree.this.remove(lastKey);
+            } catch (IOException e) {
+                // do nothing
+            }
         }
         
-    }
-
-    public synchronized keyIterator keys(boolean up, boolean rotating) throws IOException {
-        // iterates only the keys of the Nodes
-        // enumerated objects are of type String
-        // iterates the elements in a sorted way.
-        return new keyIterator(new nodeIterator(up, rotating));
-    }
-    
-    public Iterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        return new keyIterator(new nodeIterator(up, rotating, firstKey, true));
     }
     
     public class keyIterator implements Iterator {
         
-        Iterator nodeIterator;
+        int chunkSize;
+        byte[] start;
+        boolean inc, rot;
+        long count;
+        String lastKey;
+        TreeSet keyBuffer;
+        Iterator bufferIterator;
         
-        public keyIterator(Iterator nodeIterator) {
-            this.nodeIterator = nodeIterator;
-        }
-        
-        public void finalize() {
-            nodeIterator = null;
+        public keyIterator(boolean up, boolean rotating, byte[] firstKey, long guessedCountLimit) throws IOException {
+            start = firstKey;
+            inc = up;
+            rot = rotating;
+            count = 0;
+            lastKey = null;
+            chunkSize = (int) Math.min(100, guessedCountLimit);
+            keyBuffer = keys(inc, rot, start, true, chunkSize);
+            bufferIterator = keyBuffer.iterator();
         }
                 
         public boolean hasNext() {
-            return (nodeIterator.hasNext());
+            return ((bufferIterator != null) && (bufferIterator.hasNext()) && ((rot) || (count < size())));
         }
         
         public Object next() {
-            Node nextNode = (Node) nodeIterator.next();
-            if (nextNode == null) throw new kelondroException(filename, "no more elements available");
-            return new String(nextNode.getKey());
+            if (!(bufferIterator.hasNext())) return null;
+            lastKey = (String) bufferIterator.next();
+            
+            // check if this was the last entry in the rowBuffer
+            if (!(bufferIterator.hasNext())) {
+                // assign next buffer chunk
+                try {
+                    keyBuffer = keys(inc, rot, lastKey.getBytes(), false, chunkSize);
+                    bufferIterator = keyBuffer.iterator();
+                } catch (IOException e) {
+                    keyBuffer = null;
+                    bufferIterator = null;
+                }
+            }
+            
+            // return the row
+            count++;
+            return lastKey;
         }
         
         public void remove() {
+            if (lastKey != null) try {
+                kelondroTree.this.remove(lastKey.getBytes());
+            } catch (IOException e) {
+                // do nothing
+            }
         }
         
     }
@@ -1469,7 +1538,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             for (int i = 0; i < 100; i++) {
                 b = ("T" + i).getBytes(); tt.put(b, b);
             }
-            Iterator i = tt.keys(true, false);
+            Iterator i = tt.keys(true, false, null);
             while (i.hasNext()) System.out.print((String) i.next() + ", ");
             System.out.println();
 
@@ -1558,7 +1627,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     public static int countElements(kelondroTree t) {
         int count = 0;
         try {
-            Iterator iter = t.rows(true, false);
+            Iterator iter = t.rows(true, false, null);
             byte[][] row;
             while (iter.hasNext()) {
                 count++;

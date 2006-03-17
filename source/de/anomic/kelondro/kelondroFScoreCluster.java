@@ -135,7 +135,7 @@ public class kelondroFScoreCluster {
         Iterator iterator;
         
         public scoreIterator(boolean up, boolean rotating) throws IOException {
-            iterator = countrefDB.rows(up, rotating);
+            iterator = countrefDB.rows(up, rotating, null);
         }
        
         public boolean hasNext() {

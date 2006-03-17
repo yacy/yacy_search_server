@@ -380,7 +380,7 @@ public final class plasmaWordIndex {
     
     public synchronized TreeSet wordHashes(String startHash, int resourceLevel, boolean rot, int count) throws IOException {
         kelondroOrder hashOrder = (kelondroOrder) indexOrder.clone();
-        if (rot) hashOrder.rotate(startHash.getBytes()); else hashOrder.rotate(null);
+        hashOrder.rotate(startHash.getBytes());
         TreeSet hashes = new TreeSet(hashOrder);
         Iterator i = wordHashes(startHash, resourceLevel, rot);
         String hash;

@@ -95,7 +95,6 @@ import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.data.listManager;
 
 /**
 * This is the main class of YaCy. Several threads are started from here:

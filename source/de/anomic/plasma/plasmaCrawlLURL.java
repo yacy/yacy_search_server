@@ -755,7 +755,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         boolean error = false;
         
         public kiter(boolean up, boolean rotating) throws IOException {
-            i = urlHashCache.rows(up, rotating);
+            i = urlHashCache.rows(up, rotating, null);
             error = false;
         }
 

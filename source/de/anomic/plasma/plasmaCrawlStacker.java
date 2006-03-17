@@ -542,7 +542,7 @@ public final class plasmaCrawlStacker {
                 }
                 try {
                     // loop through the list and fill the messageList with url hashs
-                    Iterator iter = this.urlEntryCache.keys(true, false);
+                    Iterator iter = this.urlEntryCache.keys(true, false, null);
                     String urlHash;
                     while (iter.hasNext()) {
                         urlHash = (String) iter.next();

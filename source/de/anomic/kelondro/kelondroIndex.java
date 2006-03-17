@@ -61,5 +61,5 @@ public interface kelondroIndex {
     public byte[][] get(byte[] key) throws IOException;
     public byte[][] put(byte[][] row) throws IOException;
     public byte[][] remove(byte[] key) throws IOException;
-    public Iterator rows(boolean up, boolean rotating) throws IOException; // Objects are of type byte[][]
+    public Iterator rows(boolean up, boolean rotating, byte[] startKey) throws IOException; // Objects are of type byte[][]
 }

@@ -137,18 +137,18 @@ public class yacyNewsDB {
 
     public class recordIterator implements Iterator {
 
-        Iterator nodeIterator;
+        Iterator rowIterator;
 
         public recordIterator() throws IOException {
-            nodeIterator = news.rows(true, false);
+            rowIterator = news.rows(true, false, null);
         }
 
         public boolean hasNext() {
-            return nodeIterator.hasNext();
+            return rowIterator.hasNext();
         }
 
         public Object next() {
-            return b2r((byte[][]) nodeIterator.next());
+            return b2r((byte[][]) rowIterator.next());
         }
 
         public void remove() {

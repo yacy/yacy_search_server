@@ -51,6 +51,8 @@ public interface kelondroOrder extends Comparator {
 
     public Object clone();
     
+    public void direction(boolean ascending); // the ordering direction can be changed at any time
+    
     public String signature(); // returns a signature String so that different orderings have different signatures
     
     public long partition(byte[] key, int forkes);

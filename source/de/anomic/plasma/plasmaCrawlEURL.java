@@ -261,7 +261,7 @@ public class plasmaCrawlEURL extends plasmaURL {
         // enumerates entry elements
         Iterator i;
         public kenum(boolean up, boolean rotating) throws IOException {
-            i = urlHashCache.rows(up, rotating);
+            i = urlHashCache.rows(up, rotating, null);
         }
         public boolean hasMoreElements() {
             return i.hasNext();

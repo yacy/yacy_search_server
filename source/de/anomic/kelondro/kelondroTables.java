@@ -164,15 +164,9 @@ public class kelondroTables {
     }
     
     public synchronized Iterator /* of byte[][]-Elements */ rows(String tablename, boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        kelondroTree tree = (kelondroTree) tTables.get(tablename);
+       kelondroTree tree = (kelondroTree) tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.bytes: tree table '" + tablename + "' does not exist.");
         return tree.rows(up, rotating, firstKey);
-    }
-    
-    public synchronized Iterator /* of byte[][]-Elements */ rows(String tablename, boolean up, boolean rotating) throws IOException {
-        kelondroTree tree = (kelondroTree) tTables.get(tablename);
-        if (tree == null) throw new RuntimeException("kelondroTables.selectOrderBy: tree table '" + tablename + "' does not exist.");
-        return tree.rows(up, rotating);
     }
     
     // if you need the long-values from a row-iteration, please use kelondroRecords.bytes2long to convert from byte[] to long

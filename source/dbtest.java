@@ -213,7 +213,7 @@ public class dbtest {
             }
             
             if (command.equals("list")) {
-                Iterator i = table.rows(true, false);
+                Iterator i = table.rows(true, false, null);
                 byte[][] row;
                 while (i.hasNext()) {
                     row = (byte[][]) i.next();
@@ -377,7 +377,7 @@ final class dbTable implements kelondroIndex {
         return null;
     }
     
-    public Iterator rows(boolean up, boolean rotating) throws IOException {
+    public Iterator rows(boolean up, boolean rotating, byte[] startKey) throws IOException {
         // Objects are of type byte[][]
         return null;
     }

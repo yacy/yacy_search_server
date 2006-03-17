@@ -818,11 +818,6 @@ public final class yacySeedDB {
             if ((it == null) || (!(it.hasNext()))) return null;
             Map dna = (Map) it.next();
             String hash = (String) dna.remove("key");
-            /* Users of SVN 1498 and 1499 might have extries with shortened hashes in their DBs.
-             * Those are no problem since they should be eliminated from the active DB quickly.
-             * They might stay in the passive and potential DB indefinatly, but are not affecting
-             * normal operations there.
-             */
             //while (hash.length() < commonHashLength) { hash = hash + "_"; }
             return new yacySeed(hash, dna);
         }

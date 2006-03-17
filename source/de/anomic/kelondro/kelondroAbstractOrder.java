@@ -50,8 +50,13 @@ import de.anomic.kelondro.kelondroRecords.Node;
 public abstract class kelondroAbstractOrder implements kelondroOrder {
 
     protected byte[] zero = null;
+    protected boolean asc = true;
     
     public abstract Object clone();
+
+    public void direction(boolean ascending) {
+        asc = ascending;
+    }
     
     public long partition(byte[] key, int forks) {
         final long d = (Long.MAX_VALUE / forks) + ((Long.MAX_VALUE % forks) + 1) / forks;

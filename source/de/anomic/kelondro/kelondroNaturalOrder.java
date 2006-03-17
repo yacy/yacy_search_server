@@ -49,8 +49,6 @@ import java.util.Comparator;
 
 public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelondroOrder, Comparator, Cloneable {
     
-    boolean asc;
-    
     public static final kelondroOrder naturalOrder = new kelondroNaturalOrder(true);
     
     public kelondroNaturalOrder(boolean ascending) {
