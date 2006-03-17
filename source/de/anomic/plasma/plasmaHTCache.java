@@ -99,13 +99,12 @@ public final class plasmaHTCache {
 
         this.log = new serverLog("HTCACHE");
         this.cachePath = htCachePath;
-        this.maxCacheSize = maxCacheSize;
 
         // reset old HTCache ?
         final String[] list = cachePath.list();
         if (list != null) {
             File object;
-            for (int i = list.length - 1; i >= 0 ; i--) {
+            for (int i = list.length - 1; i >= 0; i--) {
                 object = new File(cachePath, list[i]);
                 if (object.isDirectory()) {
                     if (!object.getName().equals("http")  &&
@@ -129,7 +128,7 @@ public final class plasmaHTCache {
             this.log.logSevere("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
             System.exit(0);
         }
-        
+
         // open the response header database
         File dbfile = new File(this.cachePath, "responseHeader.db");
         try {
@@ -174,21 +173,21 @@ public final class plasmaHTCache {
     public int size() {
         synchronized (this.cacheStack) {
             return this.cacheStack.size();
-        }        
+        }
     }
 
     public int dbSize() {
-        return this.responseHeaderDB.size();      
+        return this.responseHeaderDB.size();
     }
 
     public int[] dbCacheChunkSize() {
         return this.responseHeaderDB.cacheChunkSize();
     }
-    
+
     public int[] dbCacheFillStatus() {
         return this.responseHeaderDB.cacheFillStatus();
     }
-    
+
     public void push(Entry entry) {
         synchronized (this.cacheStack) {
             this.cacheStack.add(entry);
@@ -254,11 +253,11 @@ public final class plasmaHTCache {
         }
     }
 
-    public boolean deleteFile(URL url) {     
-        return deleteURLfromCache(url, "FROM");      
+    public boolean deleteFile(URL url) {
+        return deleteURLfromCache(url, "FROM");
     }
-    
-    private boolean deleteURLfromCache (URL url, String msg) {
+
+    private boolean deleteURLfromCache(URL url, String msg) {
         if (deleteFileandDirs(getCachePath(url), msg)) {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
@@ -270,8 +269,8 @@ public final class plasmaHTCache {
            return true;
        }
         return false;
-    }    
-    
+    }
+
     private boolean deleteFile(File obj) {
         if (obj.exists() && !filesInUse.contains(obj)) {
             long size = obj.length();
@@ -375,7 +374,7 @@ public final class plasmaHTCache {
         cleanup();
 
         log.logConfig("STARTING DNS PREFETCH");
-        // start to prefetch IPs from DNS                       
+        // start to prefetch IPs from DNS
         String dom;
         long start = System.currentTimeMillis();
         String result = "";
@@ -520,7 +519,7 @@ public final class plasmaHTCache {
      * it will also be ensured, that the complete path exists; if necessary
      * that path will be generated
      * @return new File
-     */    
+     */
     public File getCachePath(URL url) {
 //      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
         String path = url.getPath();
@@ -534,6 +533,15 @@ public final class plasmaHTCache {
             path = matcher.replaceAll("/!!/");
             matcher.reset(path);
         }
+        if (path != null) {
+            // yes this is not reversible, but that is not needed
+            searchPattern = Pattern.compile("(\"|\\\\|\\*|\\?|:|<|>|\\|)");
+            matcher = searchPattern.matcher(path);
+            while (matcher.find()) {
+                path = matcher.replaceAll("_");
+                matcher.reset(path);
+            }
+        }
         if (query != null) {
             // yes this is not reversible, but that is not needed
             searchPattern = Pattern.compile("(\"|\\\\|\\*|\\?|/|:|<|>|\\|)");
@@ -541,7 +549,7 @@ public final class plasmaHTCache {
             while (matcher.find()) {
                 query = matcher.replaceAll("_");
                 matcher.reset(query);
-            }            
+            }
             path = path.concat("_").concat(query);
         }
         // only set NO default ports
@@ -664,6 +672,8 @@ public final class plasmaHTCache {
 
     public final class Entry {
 
+    public static final int MAXLENGTH = 255;
+
     // the class objects
     public Date                     initDate;       // the date when the request happened; will be used as a key
     public int                      depth;          // the depth of prefetching
@@ -696,7 +706,7 @@ public final class plasmaHTCache {
                 this.profile
         );
     }
-    
+
     public Entry(Date initDate, int depth, URL url, String name,
                  httpHeader requestHeader,
                  String responseStatus, httpHeader responseHeader,
@@ -724,7 +734,7 @@ public final class plasmaHTCache {
         this.responseStatus = responseStatus;
         this.responseHeader = responseHeader;
         this.profile        = profile;
-        this.initiator      = (initiator == null) ? null : ((initiator.length() == 0) ? null: initiator);
+        this.initiator      = (initiator == null) ? null : ((initiator.length() == 0) ? null : initiator);
 
         // calculated:
         if (responseHeader == null) {
@@ -748,10 +758,10 @@ public final class plasmaHTCache {
         // to be defined later:
         this.cacheArray     = null;
     }
-    
+
     public String name() {
         return this.name;
-    }        
+    }
     public String initiator() {
         return this.initiator;
     }
@@ -801,7 +811,7 @@ public final class plasmaHTCache {
         // we cannot match that here in the cache file path and therefore omit writing into the cache
         if (this.cacheFile.getParentFile().isFile() || this.cacheFile.isDirectory()) { return "path_ambiguous"; }
         if (this.cacheFile.toString().indexOf("..") >= 0) { return "path_dangerous"; }
-        if (this.cacheFile.getAbsolutePath().length() > 250) { return "path too long"; }
+        if (this.cacheFile.getAbsolutePath().length() > MAXLENGTH) { return "path too long"; }
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches
@@ -948,7 +958,7 @@ public final class plasmaHTCache {
         if (expires != null) {
 //          System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
             if (expires.before(new Date(serverDate.correctedUTCTime()))) { return false; }
-        }        
+        }
         Date lastModified = this.responseHeader.lastModified();
         cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
         if (cacheControl == null && lastModified == null && expires == null) { return false; }
@@ -980,7 +990,7 @@ public final class plasmaHTCache {
                 // easy case
                 return false;
 //          } else if (cacheControl.startsWith("PUBLIC")) {
-//              // ok, do nothing                
+//              // ok, do nothing
             } else if (cacheControl.startsWith("MAX-AGE=")) {
                 // we need also the load date
                 if (date == null) { return false; }
