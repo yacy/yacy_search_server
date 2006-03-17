@@ -47,7 +47,6 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
@@ -215,8 +214,12 @@ public final class plasmaWordIndexEntity {
             if (theIndex == null) {
                 i = null;
             } else try {
-                i = theIndex.nodeIterator(up, false);
+                i = theIndex.rows(up, false);
             } catch (kelondroException e) {
+                e.printStackTrace();
+                theIndex.file().delete();
+                i = null;
+            } catch (IOException e) {
                 e.printStackTrace();
                 theIndex.file().delete();
                 i = null;
@@ -227,13 +230,8 @@ public final class plasmaWordIndexEntity {
         }
         public Object next() {
             if (i == null) return null;
-            try {
-                byte[][] n = ((kelondroRecords.Node) i.next()).getValues();
-                return new plasmaWordIndexEntry(new String(n[0]), new String(n[1]));
-            } catch (IOException e) {
-                i = null;
-                throw new RuntimeException("dbenum: " + e.getMessage());
-            }
+            byte[][] n = (byte[][]) i.next();
+            return new plasmaWordIndexEntry(new String(n[0]), new String(n[1]));
         }
         public void remove() {
             throw new UnsupportedOperationException();

@@ -62,7 +62,6 @@ import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.kelondro.kelondroRecords.Node;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
@@ -543,15 +542,14 @@ public final class plasmaCrawlStacker {
                 }
                 try {
                     // loop through the list and fill the messageList with url hashs
-                    Iterator iter = this.urlEntryCache.nodeIterator(true,false);
-                    Node n;
+                    Iterator iter = this.urlEntryCache.keys(true, false);
+                    String urlHash;
                     while (iter.hasNext()) {
-                        n = (Node) iter.next();
-                        if (n == null) {
+                        urlHash = (String) iter.next();
+                        if (urlHash == null) {
                             System.out.println("ERROR! null element found");
                             continue;
                         }
-                        String urlHash = new String(n.getKey());
                         this.urlEntryHashCache.add(urlHash);
                         this.readSync.V();
                     }

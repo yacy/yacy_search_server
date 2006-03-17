@@ -807,7 +807,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	return node;
     }
     
-    public synchronized Iterator nodeIterator(boolean up, boolean rotating) {
+    private synchronized Iterator nodeIterator(boolean up, boolean rotating) {
         // iterates the elements in a sorted way. returns Node - type Objects
         try {
             return new nodeIterator(up, rotating);
@@ -816,7 +816,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
     }
 
-    public synchronized Iterator nodeIterator(boolean up, boolean rotating, byte[] firstKey) {
+    private synchronized Iterator nodeIterator(boolean up, boolean rotating, byte[] firstKey) {
         // iterates the elements in a sorted way. returns Node - type Objects
         try {
             return new nodeIterator(up, rotating, firstKey, true);
@@ -1203,7 +1203,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	System.out.println();
     }
     
-    private static void cmd(String[] args) {
+    public static void cmd(String[] args) {
 	System.out.print("kelondroTree ");
 	for (int i = 0; i < args.length; i++) System.out.print(args[i] + " ");
 	System.out.println("");
@@ -1228,7 +1228,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     fm.put("def2".getBytes(), dummy); fm.put("bab2".getBytes(), dummy);
                     fm.put("abc3".getBytes(), dummy); fm.put("bcd3".getBytes(), dummy);
                     fm.put("def3".getBytes(), dummy); fm.put("bab3".getBytes(), dummy);
-		    fm.print();
+                    fm.print();
                     fm.remove("def1".getBytes()); fm.remove("bab1".getBytes());
                     fm.remove("abc2".getBytes()); fm.remove("bcd2".getBytes());
                     fm.remove("def2".getBytes()); fm.remove("bab2".getBytes());
@@ -1318,7 +1318,8 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     }
 
     public static void main(String[] args) {
-	cmd(args);
+        //cmd(args);
+        iterationtest();
         //bigtest(Integer.parseInt(args[0]));
         //randomtest(Integer.parseInt(args[0]));
         //smalltest();
@@ -1452,6 +1453,37 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 System.out.println("Node " + j + ": " + new String(((Node) i.next()).getKey()));
             }
             System.out.println("TERMINATED");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void iterationtest() {
+        File f = new File("test.db");
+        if (f.exists()) f.delete();
+        try {
+            kelondroTree tt = new kelondroTree(f, 0, 4, 4, true);
+            byte[] b;
+            for (int i = 0; i < 100; i++) {
+                b = ("T" + i).getBytes(); tt.put(b, b);
+            }
+            Iterator i = tt.keys(true, false);
+            while (i.hasNext()) System.out.print((String) i.next() + ", ");
+            System.out.println();
+
+            i = tt.keys(true, false, "T80".getBytes());
+            while (i.hasNext()) System.out.print((String) i.next() + ", ");
+            System.out.println();
+            
+            i = tt.keys(true, true, "T80".getBytes());
+            for (int j = 0; j < 40; j++) System.out.print((String) i.next() + ", ");
+            System.out.println();
+            
+            i = tt.keys(false, true, "T20".getBytes());
+            for (int j = 0; j < 40; j++) System.out.print((String) i.next() + ", ");
+            System.out.println();
+            
+            tt.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
