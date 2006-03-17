@@ -466,10 +466,11 @@ public final class yacyClient {
                 // get one single search result
                 urlEntry = urlManager.newEntry((String) result.get("resource" + n), true);
                 if (urlEntry != null && blacklist.isListed(urlEntry.url().getHost().toLowerCase(), urlEntry.url().getPath())) { continue; } // block with backlist
+                urlEntry.store();
                 int urlLength = urlEntry.url().toString().length();
                 int urlComps = htmlFilterContentScraper.urlComps(urlEntry.url().toString()).length;
                 
-                urlManager.addEntry(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
+                urlManager.stackEntry(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
                 // save the url entry
                 final plasmaWordIndexEntry entry;
                 if (urlEntry.word() == null) {

@@ -883,7 +883,8 @@ public final class yacy {
                             // importing the new url
                             plasmaCrawlLURL.Entry urlEntry = importUrlDB.getEntry(urlHash, null);                       
                             urlCounter++;
-                            homeUrlDB.newEntry(urlEntry);
+                            plasmaCrawlLURL.Entry homeEntry = homeUrlDB.newEntry(urlEntry);
+                            homeEntry.store();
                             
                             if (urlCounter % 500 == 0) {
                                 log.logFine(urlCounter + " URLs processed so far.");
@@ -985,7 +986,8 @@ public final class yacy {
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
                             plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash, null);                       
                             urlCounter++;
-                            /*plasmaCrawlLURL.Entry newEntry =*/ minimizedUrlDB.newEntry(urlEntry);
+                            plasmaCrawlLURL.Entry newEntry = minimizedUrlDB.newEntry(urlEntry);
+                            newEntry.store();
                             if (urlCounter % 500 == 0) {
                                 log.logInfo(urlCounter + " URLs found so far.");
                             }

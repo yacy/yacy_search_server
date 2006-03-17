@@ -131,6 +131,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         gcrawlResultStack = new LinkedList();
     }
 
+    /*
     public synchronized Entry addEntry(URL url, String descr, Date moddate, Date loaddate,
                                        String initiatorHash, String executorHash,
                                        String referrerHash, int copyCount, boolean localNeed,
@@ -150,8 +151,9 @@ public final class plasmaCrawlLURL extends plasmaURL {
         }
         return e;
     }
-
-    public synchronized void addEntry(Entry e, String initiatorHash, String executorHash, int stackType) {
+    */
+    
+    public synchronized void stackEntry(Entry e, String initiatorHash, String executorHash, int stackType) {
         if (e == null) { return; }
         try {
             if (initiatorHash == null) { initiatorHash = dummyHash; }
@@ -205,6 +207,14 @@ public final class plasmaCrawlLURL extends plasmaURL {
         }
     }
 
+    public synchronized Entry newEntry(URL url, String descr, Date moddate, Date loaddate,
+            String referrerHash, int copyCount, boolean localNeed,
+            int quality, String language, char doctype,
+            int size, int wordCount) {
+        Entry e = new Entry(url, descr, moddate, loaddate, referrerHash, copyCount, localNeed, quality, language, doctype, size, wordCount);
+        return e;
+    }
+    
     public int getStackSize(int stack) {
         switch (stack) {
             case 1: return externResultStack.size();
@@ -400,7 +410,8 @@ public final class plasmaCrawlLURL extends plasmaURL {
         private int wordCount;
         private String snippet;
         private plasmaWordIndexEntry word; // this is only used if the url is transported via remote search requests
-
+        private boolean stored = false;
+        
         // more needed attributes:
         // - author / copyright owner
         // - keywords
@@ -427,7 +438,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             this.wordCount = wordCount;
             this.snippet = null;
             this.word = null;
-            store();
+            this.stored = false;
         }
 
         public Entry(String urlHash, plasmaWordIndexEntry searchedWord) throws IOException {
@@ -441,6 +452,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             this.urlHash = urlHash;
             byte[][] entry = plasmaCrawlLURL.this.urlHashCache.get(urlHash.getBytes());
             if (entry == null) throw new IOException("url hash " + urlHash + " not found in LURL");
+            this.stored = true;
             try {
                 if (entry != null) {
                     this.url = new URL(new String(entry[1], "UTF-8").trim());
@@ -491,15 +503,16 @@ public final class plasmaCrawlLURL extends plasmaURL {
                 this.snippet = prop.getProperty("snippet", "");
                 if (snippet.length() == 0) snippet = null; else snippet = crypt.simpleDecode(snippet, null);
                 this.word = (prop.containsKey("word")) ? new plasmaWordIndexEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word",""))) : null;
-                store();
+                this.stored = false;
                 //}
             } catch (Exception e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/2: " + e.toString(), e);
             }
         }
 
-        private void store() {
+        public void store() {
             // Check if there is a more recent Entry already in the DB
+            if (this.stored) return;
             Entry oldEntry;
             try {
                 if (exists(urlHash)) {
@@ -553,6 +566,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                     kelondroBase64Order.enhancedCoder.encodeLong(wordCount, urlWordCountLength).getBytes(),
                 };
                 urlHashCache.put(entry);
+                this.stored = true;
             } catch (Exception e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString(), e);
             }

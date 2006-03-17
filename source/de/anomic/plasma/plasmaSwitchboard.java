@@ -1402,20 +1402,23 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     //log.logDebug("Create LURL-Entry for '" + entry.normalizedURLString() + "', " +
                     //             "responseHeader=" + entry.responseHeader().toString());
                     
-                    plasmaCrawlLURL.Entry newEntry = urlPool.loadedURL.addEntry(
+                    plasmaCrawlLURL.Entry newEntry = urlPool.loadedURL.newEntry(
                             entry.url(), descr, docDate, new Date(),
-                            initiatorHash,
-                            yacyCore.seedDB.mySeed.hash,
                             referrerHash,
                             0, true,
                             condenser.RESULT_WORD_ENTROPHY,
                             plasmaWordIndexEntry.language(entry.url()),
                             plasmaWordIndexEntry.docType(document.getMimeType()),
                             (int) entry.size(),
-                            condenser.RESULT_NUMB_WORDS,
+                            condenser.RESULT_NUMB_WORDS
+                    );
+                    newEntry.store();
+                    urlPool.loadedURL.stackEntry(
+                            newEntry,
+                            initiatorHash,
+                            yacyCore.seedDB.mySeed.hash,
                             processCase
                     );
-                    
                     String urlHash = newEntry.hash();
                     
                     if (((processCase == 4) || (processCase == 5) || (processCase == 6)) && (entry.profile().localIndexing())) {
@@ -1729,7 +1732,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if ((lurl != null) && (lurl.length() != 0)) {
                             String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
                             plasmaCrawlLURL.Entry entry = urlPool.loadedURL.newEntry(propStr, true);
-                            urlPool.loadedURL.addEntry(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
+                            entry.store();
+                            urlPool.loadedURL.stackEntry(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
                             urlPool.noticeURL.remove(entry.hash());
                             log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
                             return true;
@@ -1763,7 +1767,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                          plasmaSearchTimingProfile  remoteTiming) {
         
         // tell all threads to do nothing for a specific time
-        wordIndex.intermission(2 * query.maximumTime);
         intermissionAllThreads(2 * query.maximumTime);
         
         serverObjects prop = new serverObjects();

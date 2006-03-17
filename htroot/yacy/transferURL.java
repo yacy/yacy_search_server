@@ -97,12 +97,12 @@ public final class transferURL {
                     if ((lEntry != null) && (lEntry.url() != null)) {
                         if ((blockBlacklist) &&
                             (plasmaSwitchboard.urlBlacklist.isListed( lEntry.url().getHost().toLowerCase(), lEntry.url().getPath()))) {
-                            sb.urlPool.loadedURL.remove(lEntry.hash());
                             int deleted = sb.wordIndex.tryRemoveURLs(lEntry.hash());
                             yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
                             lEntry = null;
                         } else {
-                            sb.urlPool.loadedURL.addEntry(lEntry, iam, iam, 3);
+                            lEntry.store();
+                            sb.urlPool.loadedURL.stackEntry(lEntry, iam, iam, 3);
                             yacyCore.log.logFine("transferURL: received URL '"
                                     + lEntry.url() + "' from peer "
                                     + otherPeerName);

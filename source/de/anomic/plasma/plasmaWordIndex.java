@@ -261,7 +261,6 @@ public final class plasmaWordIndex {
                                              outlinksSame, outlinksOther,
                                              true);
             addEntry(wordHash, ientry, System.currentTimeMillis(), false);
-            //addEntries(plasmaWordIndexEntryContainer.instantContainer(wordHash, System.currentTimeMillis(), ientry), System.currentTimeMillis(), false);
         }
         // System.out.println("DEBUG: plasmaSearch.addPageIndex: added " +
         // condenser.getWords().size() + " words, flushed " + c + " entries");
@@ -324,7 +323,7 @@ public final class plasmaWordIndex {
 
     public int size() {
         return java.lang.Math.max(assortmentCluster.sizeTotal(),
-                        java.lang.Math.max(backend.size(), ramCache.wSize() + ramCache.kSize()));
+                        java.lang.Math.max(backend.size(), ramCache.size()));
     }
 
     public int indexSize(String wordHash) {
@@ -339,10 +338,6 @@ public final class plasmaWordIndex {
         size += assortmentCluster.indexSize(wordHash);
         size += ramCache.indexSize(wordHash);
         return size;
-    }
-
-    public void intermission(long pause) {
-        //this.ramCache.intermission(pause);
     }
 
     public void close(int waitingBoundSeconds) {

@@ -88,7 +88,6 @@ public final class search {
 
         
         // tell all threads to do nothing for a specific time
-        sb.wordIndex.intermission(2 * duetime);
         sb.intermissionAllThreads(2 * duetime);
 
         // store accessing peer

@@ -129,7 +129,8 @@ public final class crawlReceipt {
                               "\n\tURL properties: "+ propStr);
             } else {
                 // put new entry into database
-                switchboard.urlPool.loadedURL.addEntry(entry, youare, iam, 1);
+                entry.store();
+                switchboard.urlPool.loadedURL.stackEntry(entry, youare, iam, 1);
                 
                 // generating url hash
                 String newUrlHash = plasmaURL.urlHash(entry.url());

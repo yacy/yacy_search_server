@@ -456,10 +456,8 @@ public class dir {
         try {
             final URL url = new URL(urlstring);
             final plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()));
-            final plasmaCrawlLURL.Entry newEntry = switchboard.urlPool.loadedURL.addEntry(
+            final plasmaCrawlLURL.Entry newEntry = switchboard.urlPool.loadedURL.newEntry(
                 url, "YaCyShare: " + descr, new Date(), new Date(),
-                "____________", /*initiator*/
-                yacyCore.seedDB.mySeed.hash, /*executor*/
                 "AAAAAAAAAAAA", /*referrer*/
                 0, /*copycount*/
                 false, /*localneed*/
@@ -467,10 +465,16 @@ public class dir {
                 "**", /*language*/
                 plasmaWordIndexEntry.DT_SHARE, /*doctype*/
                 phrase.length(), /*size*/
-                condenser.RESULT_NUMB_WORDS,
-                5 /*process case*/
+                condenser.RESULT_NUMB_WORDS
             );
-
+            newEntry.store();
+            switchboard.urlPool.loadedURL.stackEntry(
+                    newEntry,
+                    "____________", /*initiator*/
+                    yacyCore.seedDB.mySeed.hash, /*executor*/
+                    5 /*process case*/
+                );
+            
             final String urlHash = newEntry.hash();
             /*final int words =*/ switchboard.wordIndex.addPageIndex(url, urlHash, new Date(), phrase.length() + descr.length() + 13, null, condenser, "**", plasmaWordIndexEntry.DT_SHARE, 0, 0);
         } catch (IOException e) {}
