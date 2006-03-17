@@ -187,13 +187,13 @@ public class kelondroDyn extends kelondroTree {
     }
 
     public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating) throws IOException {
-	// iterates only the keys of the Nodes
-	// enumerated objects are of type String
-	return new dynKeyIterator(super.rows(up, rotating));
+        // iterates only the keys of the Nodes
+        // enumerated objects are of type String
+        return new dynKeyIterator(super.rows(up, rotating));
     }
 
-    public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating, byte[] firstKey) {
-	return new dynKeyIterator(super.rows(up, rotating, firstKey));
+    public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        return new dynKeyIterator(super.rows(up, rotating, firstKey));
     }
     
     private byte[] getValueCached(byte[] key) throws IOException {

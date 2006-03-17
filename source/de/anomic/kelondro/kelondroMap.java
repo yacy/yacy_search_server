@@ -287,7 +287,7 @@ public class kelondroMap {
         return dyn.dynKeys(up, rotating);
     }
 
-    public synchronized kelondroDyn.dynKeyIterator keys(final boolean up, final boolean rotating, final byte[] firstKey) {
+    public synchronized kelondroDyn.dynKeyIterator keys(final boolean up, final boolean rotating, final byte[] firstKey) throws IOException {
         // simple enumeration of key names without special ordering
         return dyn.dynKeys(up, rotating, firstKey);
     }
@@ -305,7 +305,7 @@ public class kelondroMap {
         return new mapIterator(keys(up, rotating));
     }
 
-    public synchronized mapIterator maps(final boolean up, final boolean rotating, final byte[] firstKey) {
+    public synchronized mapIterator maps(final boolean up, final boolean rotating, final byte[] firstKey) throws IOException {
         return new mapIterator(keys(up, rotating, firstKey));
     }
 

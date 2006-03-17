@@ -807,6 +807,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	return node;
     }
     
+    /*
     private synchronized Iterator nodeIterator(boolean up, boolean rotating) {
         // iterates the elements in a sorted way. returns Node - type Objects
         try {
@@ -824,6 +825,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             throw new RuntimeException("error creating an iteration: " + e.getMessage());
         }
     }
+    */
     
     private class nodeIterator implements Iterator {
         // we implement an iteration! (not a recursive function as the structure would suggest...)
@@ -1011,11 +1013,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	// iterates the rows of the Nodes
 	// enumerated objects are of type byte[][]
         // iterates the elements in a sorted way.
-	return new rowIterator(nodeIterator(up, rotating));
+	return new rowIterator(new nodeIterator(up, rotating));
     }
     
-    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) {
-        return new rowIterator((firstKey == null) ? nodeIterator(up, rotating) : nodeIterator(up, rotating, firstKey));
+    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        return new rowIterator((firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, true));
     }
     
     public class rowIterator implements Iterator {
@@ -1045,15 +1047,15 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         
     }
 
-    public synchronized keyIterator keys(boolean up, boolean rotating) {
-	// iterates only the keys of the Nodes
-	// enumerated objects are of type String
+    public synchronized keyIterator keys(boolean up, boolean rotating) throws IOException {
+        // iterates only the keys of the Nodes
+        // enumerated objects are of type String
         // iterates the elements in a sorted way.
-	return new keyIterator(nodeIterator(up, rotating));
+        return new keyIterator(new nodeIterator(up, rotating));
     }
     
-    public Iterator keys(boolean up, boolean rotating, byte[] firstKey) {
-        return new keyIterator(nodeIterator(up, rotating, firstKey));
+    public Iterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        return new keyIterator(new nodeIterator(up, rotating, firstKey, true));
     }
     
     public class keyIterator implements Iterator {
@@ -1448,9 +1450,9 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             b = testWord('L'); tt.put(b, b);
             int c = countElements(tt);
             System.out.println("elements: " + c);
-            Iterator i = tt.nodeIterator(true, true, testWord('G'));
+            Iterator i = tt.rows(true, true, testWord('G'));
             for (int j = 0; j < c; j++) {
-                System.out.println("Node " + j + ": " + new String(((Node) i.next()).getKey()));
+                System.out.println("Row " + j + ": " + new String(((byte[][]) i.next())[0]));
             }
             System.out.println("TERMINATED");
         } catch (IOException e) {
@@ -1555,13 +1557,17 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     
     public static int countElements(kelondroTree t) {
         int count = 0;
-        Iterator iter = t.nodeIterator(true, false);
-        Node n;
-        while (iter.hasNext()) {
-            count++;
-            n = (Node) iter.next();
-            if (n == null) System.out.println("ERROR! null element found");
-            //else System.out.println("counted element: " + new String(n.getKey()));
+        try {
+            Iterator iter = t.rows(true, false);
+            byte[][] row;
+            while (iter.hasNext()) {
+                count++;
+                row = (byte[][]) iter.next();
+                if (row == null) System.out.println("ERROR! null element found");
+                // else System.out.println("counted element: " + new
+                // String(n.getKey()));
+            }
+        } catch (IOException e) {
         }
         return count;
     }

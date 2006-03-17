@@ -284,19 +284,21 @@ public class IndexControl_p {
 
         // generate list
         if (post.containsKey("keyhashsimilar")) {
+            try {
             final Iterator hashIt = switchboard.wordIndex.wordHashes(keyhash, plasmaWordIndex.RL_WORDFILES, true, 256).iterator();
-            StringBuffer result = new StringBuffer("Sequential List of Word-Hashes:<br>");
-            String hash;
-            int i = 0;
-            while (hashIt.hasNext() && i < 256) {
-                hash = (String) hashIt.next();
-                result.append("<a href=\"/IndexControl_p.html?")
-                      .append("keyhash=").append(hash).append("&keyhashsearch=")
-                      .append("\" class=\"tt\">").append(hash).append("</a> ")
-                      .append(((i + 1) % 8 == 0) ? "<br>" : "");
-                i++;
+                StringBuffer result = new StringBuffer("Sequential List of Word-Hashes:<br>");
+                String hash;
+                int i = 0;
+                while (hashIt.hasNext() && i < 256) {
+                    hash = (String) hashIt.next();
+                    result.append("<a href=\"/IndexControl_p.html?").append("keyhash=").append(hash).append("&keyhashsearch=")
+                            .append("\" class=\"tt\">").append(hash).append("</a> ").append(((i + 1) % 8 == 0) ? "<br>" : "");
+                    i++;
+                }
+                prop.put("result", result);
+            } catch (IOException e) {
+                prop.put("result", "unknown keys: " + e.getMessage());
             }
-            prop.put("result", result);
         }
 
         if (post.containsKey("urlstringsearch")) {
@@ -329,19 +331,23 @@ public class IndexControl_p {
 
         // generate list
         if (post.containsKey("urlhashsimilar")) {
-            final Iterator hashIt = switchboard.urlPool.loadedURL.urlHashes(urlhash, true);
-            StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br>");
-            String hash;
-            int i = 0;
-            while (hashIt.hasNext() && i < 256) {
-                hash = (String) hashIt.next();
-                result.append("<a href=\"/IndexControl_p.html?")
-                .append("urlhash=").append(hash).append("&urlhashsearch=")
-                .append("\" class=\"tt\">").append(hash).append("</a> ")
-                .append(((i + 1) % 8 == 0) ? "<br>" : "");
-                i++;
+            try {
+                final Iterator hashIt = switchboard.urlPool.loadedURL.urlHashes(urlhash, true);
+
+                StringBuffer result = new StringBuffer(
+                        "Sequential List of URL-Hashes:<br>");
+                String hash;
+                int i = 0;
+                while (hashIt.hasNext() && i < 256) {
+                    hash = (String) hashIt.next();
+                    result.append("<a href=\"/IndexControl_p.html?").append("urlhash=").append(hash).append("&urlhashsearch=")
+                            .append("\" class=\"tt\">").append(hash).append("</a> ").append(((i + 1) % 8 == 0) ? "<br>" : "");
+                    i++;
+                }
+                prop.put("result", result.toString());
+            } catch (IOException e) {
+                prop.put("result", "No Entries for URL hash " + urlhash);
             }
-            prop.put("result", result.toString());
         }
 
         // list known hosts

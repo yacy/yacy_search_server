@@ -555,7 +555,15 @@ public final class plasmaCrawlStacker {
                     }
                 } catch (kelondroException e) {
                     /* if we have an error, we start with a fresh database */
-                    plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue. Reseting DB.\n",e);
+                    plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, kelondroException:" + e.getMessage() + ". Reseting DB.\n",e);
+                    
+                    // deleting old db and creating a new db
+                    try {this.urlEntryCache.close();}catch(Exception ex){}
+                    cacheFile.delete();
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, plasmaCrawlNURL.ce, true);
+                } catch (IOException e) {
+                    /* if we have an error, we start with a fresh database */
+                    plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, IOException:" + e.getMessage() + ". Reseting DB.\n",e);
                     
                     // deleting old db and creating a new db
                     try {this.urlEntryCache.close();}catch(Exception ex){}

@@ -243,7 +243,7 @@ public final class plasmaWordIndexAssortment {
         assortments = new kelondroTree(assortmentFile, bufferSize, bufferStructure(assortmentLength), true);
     }
     
-    public Iterator hashes(String startWordHash, boolean up, boolean rot) {
+    public Iterator hashes(String startWordHash, boolean up, boolean rot) throws IOException {
         try {
             return assortments.keys(up, rot, startWordHash.getBytes());
         } catch (kelondroException e) {

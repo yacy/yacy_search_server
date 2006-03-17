@@ -378,7 +378,7 @@ public final class plasmaWordIndex {
     public static final int RL_ASSORTMENTS = 2;
     public static final int RL_WORDFILES   = 3;
     
-    public synchronized TreeSet wordHashes(String startHash, int resourceLevel, boolean rot, int count) {
+    public synchronized TreeSet wordHashes(String startHash, int resourceLevel, boolean rot, int count) throws IOException {
         kelondroOrder hashOrder = (kelondroOrder) indexOrder.clone();
         if (rot) hashOrder.rotate(startHash.getBytes()); else hashOrder.rotate(null);
         TreeSet hashes = new TreeSet(hashOrder);
@@ -391,12 +391,12 @@ public final class plasmaWordIndex {
         return hashes;
     }
     
-    public Iterator wordHashes(String startHash, int resourceLevel, boolean rot) {
+    public Iterator wordHashes(String startHash, int resourceLevel, boolean rot) throws IOException {
         if (rot) return new rotatingWordIterator(startHash, resourceLevel);
         else return new correctedWordIterator(startHash, resourceLevel, rot); // use correction until bug is found
     }
 
-    private Iterator wordHashesX(String startWordHash, int resourceLevel, boolean rot) {
+    private Iterator wordHashesX(String startWordHash, int resourceLevel, boolean rot) throws IOException {
         if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) {
             return ramCache.wordHashes(startWordHash, rot);
         }
@@ -431,7 +431,7 @@ public final class plasmaWordIndex {
         Iterator iter;
         String nextWord;
 
-        public correctedWordIterator(String firstWord, int resourceLevel, boolean rotating) {
+        public correctedWordIterator(String firstWord, int resourceLevel, boolean rotating) throws IOException {
             iter = wordHashesX(firstWord, resourceLevel, rotating);
             try {
             nextWord = (iter.hasNext()) ? (String) iter.next() : null;
@@ -481,7 +481,7 @@ public final class plasmaWordIndex {
         Iterator i;
         int resourceLevel;
 
-        public rotatingWordIterator(String startWordHash, int resourceLevel) {
+        public rotatingWordIterator(String startWordHash, int resourceLevel) throws IOException {
             this.resourceLevel = resourceLevel;
             i = new correctedWordIterator(startWordHash, resourceLevel, false);
         }
@@ -492,9 +492,11 @@ public final class plasmaWordIndex {
 
         public boolean hasNext() {
             if (i.hasNext()) return true;
-            else {
+            else try {
                 i = new correctedWordIterator("------------", resourceLevel, false);
                 return i.hasNext();
+            } catch (IOException e) {
+                return false;
             }
         }
 
@@ -588,36 +590,42 @@ public final class plasmaWordIndex {
             plasmaWordIndexEntry entry = null;
             URL url = null;
             HashSet urlHashs = new HashSet();
-            Iterator wordHashIterator = wordHashes(startHash, plasmaWordIndex.RL_WORDFILES, false);
-            while (wordHashIterator.hasNext() && run) {
-                waiter();
-                wordHash = (String) wordHashIterator.next();
-                wordContainer = getContainer(wordHash, true, -1);
-                Iterator containerIterator = wordContainer.entries();
-                wordHashNow = wordHash;
-                while (containerIterator.hasNext() && run) {
+            try {
+                Iterator wordHashIterator = wordHashes(startHash, plasmaWordIndex.RL_WORDFILES, false);
+                while (wordHashIterator.hasNext() && run) {
                     waiter();
-                    entry = (plasmaWordIndexEntry) containerIterator.next();
-                    //System.out.println("Wordhash: "+wordHash+" UrlHash: "+entry.getUrlHash());
-                    try {
-                        url = lurl.getEntry(entry.getUrlHash(), null).url();
-                        if ((url == null) ||
-                            (plasmaSwitchboard.urlBlacklist.isListed(url.getHost().toLowerCase(),url.getPath())==true)) {
+                    wordHash = (String) wordHashIterator.next();
+                    wordContainer = getContainer(wordHash, true, -1);
+                    Iterator containerIterator = wordContainer.entries();
+                    wordHashNow = wordHash;
+                    while (containerIterator.hasNext() && run) {
+                        waiter();
+                        entry = (plasmaWordIndexEntry) containerIterator.next();
+                        // System.out.println("Wordhash: "+wordHash+" UrlHash:
+                        // "+entry.getUrlHash());
+                        try {
+                            url = lurl.getEntry(entry.getUrlHash(), null).url();
+                            if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(url.getHost().toLowerCase(), url.getPath()) == true)) {
+                                urlHashs.add(entry.getUrlHash());
+                            }
+                        } catch (IOException e) {
                             urlHashs.add(entry.getUrlHash());
                         }
-                    } catch (IOException e) {
-                        urlHashs.add(entry.getUrlHash());
+                    }
+                    if (urlHashs.size() > 0) {
+                        String[] urlArray;
+                        urlArray = (String[]) urlHashs.toArray(new String[0]);
+                        int removed = removeEntries(wordHash, urlArray, true);
+                        serverLog.logFine("INDEXCLEANER", wordHash + ": " + removed + " of " + wordContainer.size() + " URL-entries deleted");
+                        lastWordHash = wordHash;
+                        lastDeletionCounter = urlHashs.size();
+                        urlHashs.clear();
                     }
                 }
-                if (urlHashs.size()>0) {
-                    String [] urlArray;
-                    urlArray = (String[]) urlHashs.toArray(new String[0]);
-                    int removed = removeEntries(wordHash, urlArray, true);
-                    serverLog.logFine("INDEXCLEANER", wordHash + ": " + removed + " of " + wordContainer.size() + " URL-entries deleted");
-                    lastWordHash = wordHash;
-                    lastDeletionCounter = urlHashs.size(); 
-                    urlHashs.clear();
-                }
+            } catch (IOException e) {
+                serverLog.logSevere("INDEXCLEANER",
+                        "IndexCleaner-Thread: unable to start: "
+                                + e.getMessage());
             }
             serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread stopped");
         }
@@ -667,9 +675,13 @@ public final class plasmaWordIndex {
         // System.out.println(new Date(reverseMicroDateDays(microDateDays(System.currentTimeMillis()))));
         
         plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, new serverLog("TESTAPP"));
-        Iterator iter = index.wordHashes("5A8yhZMh_Kmv", plasmaWordIndex.RL_WORDFILES, true);
-        while (iter.hasNext()) {
-            System.out.println("File: " + (String) iter.next());
+        try {
+            Iterator iter = index.wordHashes("5A8yhZMh_Kmv", plasmaWordIndex.RL_WORDFILES, true);
+            while (iter.hasNext()) {
+                System.out.println("File: " + (String) iter.next());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         
     }

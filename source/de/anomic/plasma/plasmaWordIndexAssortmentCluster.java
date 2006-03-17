@@ -47,6 +47,7 @@
 package de.anomic.plasma;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -235,7 +236,7 @@ public final class plasmaWordIndexAssortmentCluster {
         return size;
     }
     
-    public Iterator hashConjunction(String startWordHash, boolean up, boolean rot) {
+    public Iterator hashConjunction(String startWordHash, boolean up, boolean rot) throws IOException {
         HashSet iterators = new HashSet();
         //if (rot) System.out.println("WARNING: kelondroMergeIterator does not work correctly when individual iterators rotate on their own!");
         for (int i = 0; i < clusterCount; i++) iterators.add(assortments[i].hashes(startWordHash, up, rot));

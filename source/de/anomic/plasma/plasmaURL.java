@@ -564,7 +564,7 @@ public class plasmaURL {
         return hash;
     }
     
-    public Iterator urlHashes(String urlHash, boolean up) {
+    public Iterator urlHashes(String urlHash, boolean up) throws IOException {
         return urlHashCache.keys(up, false, urlHash.getBytes());
     }
 

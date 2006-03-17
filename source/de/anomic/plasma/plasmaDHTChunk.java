@@ -239,9 +239,13 @@ public class plasmaDHTChunk {
             log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
             indexContainers = new plasmaWordIndexEntryContainer[0];
             urlCache = new HashMap();
-            
             this.status = chunkStatus_FAILED;
-            
+            return 0;
+        } catch (IOException e) {
+            log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
+            indexContainers = new plasmaWordIndexEntryContainer[0];
+            urlCache = new HashMap();
+            this.status = chunkStatus_FAILED;
             return 0;
         }
     }
