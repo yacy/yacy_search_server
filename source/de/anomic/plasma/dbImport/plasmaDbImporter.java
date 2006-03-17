@@ -114,7 +114,8 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
             HashSet importedUrlBuffer = new HashSet();
 			
             // iterate over all words from import db
-            Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
+            //Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
+            Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false, 100).iterator();
             while (!isAborted() && importWordHashIterator.hasNext()) {
                 
                 TreeSet entityUrls = new TreeSet(new kelondroNaturalOrder(true));
@@ -123,8 +124,6 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     this.wordCounter++;
                     this.wordHash = (String) importWordHashIterator.next();
                     newContainer = this.importWordIndex.getContainer(this.wordHash, true, -1);
-                    
-                    if (newContainer.size() == 0) continue;
                     
                     // loop throug the entities of the container and get the
                     // urlhash
@@ -175,7 +174,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                                 continue;
                             }
                         }
-                    this.entryCounter++;
+                        this.entryCounter++;
                     }
 					
                     // testing if import process was aborted
@@ -212,6 +211,16 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     this.log.logSevere("Import of word entity '" + this.wordHash + "' failed.",e);
                 } finally {
                     if (newContainer != null) newContainer.clear();
+                }
+
+                if (!importWordHashIterator.hasNext()) {
+                    // We may not be finished yet, try to get the next chunk of wordHashes
+                    TreeSet wordHashes = this.importWordIndex.wordHashes(this.wordHash, plasmaWordIndex.RL_WORDFILES, false, 100);
+                    importWordHashIterator = wordHashes.iterator();
+                    // Make sure we don't get the same wordhash twice, but don't skip a word
+                    if ((importWordHashIterator.hasNext())&&(!this.wordHash.equals(importWordHashIterator.next()))) {
+                        importWordHashIterator = wordHashes.iterator();
+                    }
                 }
             }
             

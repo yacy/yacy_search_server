@@ -591,7 +591,7 @@ public final class plasmaWordIndex {
             URL url = null;
             HashSet urlHashs = new HashSet();
             try {
-                Iterator wordHashIterator = wordHashes(startHash, plasmaWordIndex.RL_WORDFILES, false);
+                Iterator wordHashIterator = wordHashes(startHash, plasmaWordIndex.RL_WORDFILES, false, 100).iterator();
                 while (wordHashIterator.hasNext() && run) {
                     waiter();
                     wordHash = (String) wordHashIterator.next();
@@ -620,6 +620,15 @@ public final class plasmaWordIndex {
                         lastWordHash = wordHash;
                         lastDeletionCounter = urlHashs.size();
                         urlHashs.clear();
+                    }
+                    if (!wordHashIterator.hasNext()) {
+                        // We may not be finished yet, try to get the next chunk of wordHashes
+                        TreeSet wordHashes = wordHashes(wordHash, plasmaWordIndex.RL_WORDFILES, false, 100);
+                        wordHashIterator = wordHashes.iterator();
+                        // Make sure we don't get the same wordhash twice, but don't skip a word
+                        if ((wordHashIterator.hasNext())&&(!wordHash.equals(wordHashIterator.next()))) {
+                            wordHashIterator = wordHashes.iterator();
+                        }
                     }
                 }
             } catch (IOException e) {
