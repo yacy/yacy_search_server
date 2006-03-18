@@ -383,10 +383,14 @@ public final class plasmaWordIndex {
         hashOrder.rotate(startHash.getBytes());
         TreeSet hashes = new TreeSet(hashOrder);
         Iterator i = wordHashes(startHash, resourceLevel, rot);
+        if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) count = Math.min(ramCache.wSize(), count);
         String hash;
-        while ((hashes.size() < count) && (i.hasNext())) {
+        while ((count > 0) && (i.hasNext())) {
             hash = (String) i.next();
-            if ((hash != null) && (hash.length() > 0)) hashes.add(hash);
+            if ((hash != null) && (hash.length() > 0)) {
+                hashes.add(hash);
+                count--;
+            }
         }
         return hashes;
     }
