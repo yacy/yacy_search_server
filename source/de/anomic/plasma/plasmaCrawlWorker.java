@@ -58,6 +58,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.http.httpdProxyHandler;
+import de.anomic.plasma.plasmaHTCache.Entry;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
@@ -356,7 +357,8 @@ public final class plasmaCrawlWorker extends Thread {
                 // TODO: aborting download if content is to long ...
                 //long contentLength = res.responseHeader.contentLength();
 
-                if (htCache.cacheFile.getAbsolutePath().length() > htCache.MAXPATHLENGTH) {
+                htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);
+                if (htCache.cacheFile.getAbsolutePath().length() > Entry.MAXPATHLENGTH) {
                     remote.close();
                     log.logInfo("REJECTED URL " + url.toString() + " because path too long '" +
                                 cacheManager.cachePath.getAbsolutePath() + "'");
@@ -364,7 +366,6 @@ public final class plasmaCrawlWorker extends Thread {
                 }
 
                 // reserve cache entry
-                htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);
                 if (!htCache.cacheFile.getCanonicalPath().startsWith(cacheManager.cachePath.getCanonicalPath())) {
                     // if the response has not the right file type then reject file
                     remote.close();
