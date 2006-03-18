@@ -82,17 +82,17 @@ import de.anomic.tools.enumerateFiles;
 
 public final class plasmaHTCache {
 
-    private static final int stackLimit = 150;  // if we exceed that limit, we do not check idle
+    private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
 
     private kelondroMap responseHeaderDB = null;
     private final LinkedList cacheStack;
     private final TreeMap cacheAge; // a <date+hash, cache-path> - relation
-    public  long currCacheSize;
-    public  long maxCacheSize;
-    public  final File cachePath;
-    public  final serverLog log;
-    public  static final HashSet filesInUse = new HashSet(); // can we delete this file
+    public long currCacheSize;
+    public long maxCacheSize;
+    public final File cachePath;
+    public final serverLog log;
+    public static final HashSet filesInUse = new HashSet(); // can we delete this file
 
     public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb) {
         // this.switchboard = switchboard;
@@ -158,7 +158,7 @@ public final class plasmaHTCache {
         String[] list = directory.list();
         if (list != null) {
             File object;
-            for (int i = list.length - 1; i >= 0 ; i--) {
+            for (int i = list.length - 1; i >= 0; i--) {
                 object = new File(directory, list[i]);
                 if (object.isFile()) {
                     object.delete();
@@ -210,7 +210,7 @@ public final class plasmaHTCache {
      * This method changes the HTCache size.<br>
      * @param new cache size in bytes
      */
-    public final void setCacheSize(long newCacheSize) {
+    public void setCacheSize(long newCacheSize) {
         this.maxCacheSize = newCacheSize;
     }
 
@@ -457,60 +457,20 @@ public final class plasmaHTCache {
         return plasmaParser.mediaExtContains(urlString);
     }
 
-/*    public File getCachePath(URL url) {
-//      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
-        String remotePath = url.getFile();
-        if (!remotePath.startsWith("/")) { remotePath = "/" + remotePath; }
-        if (remotePath.endsWith("/")) { remotePath = remotePath + "ndx"; }
-        remotePath = remotePath.replaceAll("[?&:]", "_"); // yes this is not reversible, but that is not needed
-        int port = url.getPort();
-        if (port < 0) {
-            if (url.getProtocol().equalsIgnoreCase("http"))       port = 80;
-            else if (url.getProtocol().equalsIgnoreCase("https")) port = 443;
-            else if (url.getProtocol().equalsIgnoreCase("ftp"))   port = 21;
-        }
-        if (port == 80) {
-            return new File(this.cachePath, url.getHost() + remotePath);
-        } else {
-            return new File(this.cachePath, url.getHost() + "!" + port + remotePath);
-        }
-    } */
-
-/*    public static URL getURL(File cachePath, File f) {
-//      this.log.logFinest("plasmaHTCache: getURL:  IN: Path=[" + cachePath + "]");
-//      this.log.logFinest("plasmaHTCache: getURL:  IN: File=[" + f + "]");
-        String s = f.toString().replace('\\', '/');
-        final String c = cachePath.toString().replace('\\', '/');
-        
-        String protocol = "http://";
-        int pos = s.lastIndexOf(c);
-        if (pos >= 0) {
-            s = s.substring(pos + c.length());
-            while (s.startsWith("/")) s = s.substring(1);
-            
-            pos = s.indexOf("!");
-            if (pos >= 0) {
-                String temp = s.substring(pos + 1);
-                if (temp.startsWith("443/")) {
-                    protocol = "https://";
-                } else if (temp.startsWith("21/")) {
-                    protocol = "ftp://";
-                }
-                
-                s = s.substring(0, pos) + ":" + s.substring(pos + 1);
-            }
-            if (s.endsWith("ndx")) { s = s.substring(0, s.length() - 3); }
-//          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);    
-            try {
-                return new URL(protocol + s);
-            } catch (Exception e) {
-                return null;
+    private String replaceRegex(String input, String regex, String replacement) {
+        if (input == null) { return ""; }
+        if (input.length() > 0) {
+            final Pattern searchPattern = Pattern.compile(regex);
+            final Matcher matcher = searchPattern.matcher(input);
+            while (matcher.find()) {
+                input = matcher.replaceAll(replacement);
+                matcher.reset(input);
             }
         }
-        return null;
-    }*/
+        return input;
+    }
 
-    /** 
+    /**
      * this method creates from a given host and path a cache path
      * from a given host (which may also be an IPv4 - number, but not IPv6 or
      * a domain; all without leading 'http://') and a path (which must start
@@ -527,38 +487,18 @@ public final class plasmaHTCache {
         if (!path.startsWith("/")) { path = "/" + path; }
         if (path.endsWith("/") && query == null) { path = path + "ndx"; }
 
-        Pattern searchPattern = Pattern.compile("/\\.\\./");
-        Matcher matcher = searchPattern.matcher(path);
-        while (matcher.find()) {
-            path = matcher.replaceAll("/!!/");
-            matcher.reset(path);
-        }
-        if (path != null) {
-            // yes this is not reversible, but that is not needed
-            searchPattern = Pattern.compile("(\"|\\\\|\\*|\\?|:|<|>|\\|)");
-            matcher = searchPattern.matcher(path);
-            while (matcher.find()) {
-                path = matcher.replaceAll("_");
-                matcher.reset(path);
-            }
-        }
-        if (query != null) {
-            // yes this is not reversible, but that is not needed
-            searchPattern = Pattern.compile("(\"|\\\\|\\*|\\?|/|:|<|>|\\|)");
-            matcher = searchPattern.matcher(query);
-            while (matcher.find()) {
-                query = matcher.replaceAll("_");
-                matcher.reset(query);
-            }
-            path = path.concat("_").concat(query);
-        }
+        // yes this is not reversible, but that is not needed
+        path = replaceRegex(path, "/\\.\\./", "/!!/");
+        path = replaceRegex(path, "(\"|\\\\|\\*|\\?|:|<|>|\\|)", "_"); // hier wird kein '/' gefiltert
+        path = path.concat(replaceRegex(query, "(\"|\\\\|\\*|\\?|/|:|<|>|\\|)", "_"));
+
         // only set NO default ports
         int port = url.getPort();
         String protocol = url.getProtocol();
         if (port >= 0) {
-            if ((port ==  80 && protocol.equalsIgnoreCase("http" )) ||
-                (port == 443 && protocol.equalsIgnoreCase("https")) ||
-                (port ==  21 && protocol.equalsIgnoreCase("ftp"  ))) {
+            if ((port ==  80 && protocol.equals("http" )) ||
+                (port == 443 && protocol.equals("https")) ||
+                (port ==  21 && protocol.equals("ftp"  ))) {
                  port = -1;
             }
         }
@@ -570,14 +510,6 @@ public final class plasmaHTCache {
         } else {
             return new File(this.cachePath, protocol + "/" + url.getHost() + "!" + port + path);
         }
-/*      File path;
-        if (port < 0) {
-            path = new File(this.cachePath, url.getHost() + remotePath);
-        } else {
-            path = new File(this.cachePath, url.getHost() + "!" + port + remotePath);
-        }
-        this.log.logFinest("plasmaHTCache: getCachePath: OUT=" + path.toString());
-        return path; */
     }
 
     /**
@@ -672,7 +604,7 @@ public final class plasmaHTCache {
 
     public final class Entry {
 
-    public static final int MAXLENGTH = 255;
+    public static final int MAXPATHLENGTH = 255;
 
     // the class objects
     public Date                     initDate;       // the date when the request happened; will be used as a key
@@ -811,7 +743,7 @@ public final class plasmaHTCache {
         // we cannot match that here in the cache file path and therefore omit writing into the cache
         if (this.cacheFile.getParentFile().isFile() || this.cacheFile.isDirectory()) { return "path_ambiguous"; }
         if (this.cacheFile.toString().indexOf("..") >= 0) { return "path_dangerous"; }
-        if (this.cacheFile.getAbsolutePath().length() > MAXLENGTH) { return "path too long"; }
+        if (this.cacheFile.getAbsolutePath().length() > MAXPATHLENGTH) { return "path too long"; }
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches
