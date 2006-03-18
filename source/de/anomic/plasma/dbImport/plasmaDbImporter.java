@@ -115,7 +115,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
 			
             // iterate over all words from import db
             //Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
-            Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false, 100).iterator();
+            Iterator importWordHashIterator = this.importWordIndex.wordHashSet(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false, 100).iterator();
             while (!isAborted() && importWordHashIterator.hasNext()) {
                 
                 TreeSet entityUrls = new TreeSet(new kelondroNaturalOrder(true));
@@ -215,7 +215,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
 
                 if (!importWordHashIterator.hasNext()) {
                     // We may not be finished yet, try to get the next chunk of wordHashes
-                    TreeSet wordHashes = this.importWordIndex.wordHashes(this.wordHash, plasmaWordIndex.RL_WORDFILES, false, 100);
+                    TreeSet wordHashes = this.importWordIndex.wordHashSet(this.wordHash, plasmaWordIndex.RL_WORDFILES, false, 100);
                     importWordHashIterator = wordHashes.iterator();
                     // Make sure we don't get the same wordhash twice, but don't skip a word
                     if ((importWordHashIterator.hasNext())&&(!this.wordHash.equals(importWordHashIterator.next()))) {

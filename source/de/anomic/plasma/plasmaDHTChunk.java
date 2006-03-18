@@ -174,7 +174,7 @@ public class plasmaDHTChunk {
         ArrayList tmpContainers = new ArrayList(maxcount);
         String nexthash = "";
         try {
-            Iterator wordHashIterator = wordIndex.wordHashes(hash, resourceLevel, true, maxcount).iterator();
+            Iterator wordHashIterator = wordIndex.wordHashSet(hash, resourceLevel, true, maxcount).iterator();
             plasmaWordIndexEntryContainer indexContainer;
             Iterator urlIter;
             plasmaWordIndexEntry indexEntry;

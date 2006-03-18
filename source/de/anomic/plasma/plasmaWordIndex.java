@@ -378,7 +378,7 @@ public final class plasmaWordIndex {
     public static final int RL_ASSORTMENTS = 2;
     public static final int RL_WORDFILES   = 3;
     
-    public synchronized TreeSet wordHashes(String startHash, int resourceLevel, boolean rot, int count) throws IOException {
+    public synchronized TreeSet wordHashSet(String startHash, int resourceLevel, boolean rot, int count) throws IOException {
         kelondroOrder hashOrder = (kelondroOrder) indexOrder.clone();
         hashOrder.rotate(startHash.getBytes());
         TreeSet hashes = new TreeSet(hashOrder);
@@ -540,7 +540,7 @@ public final class plasmaWordIndex {
             URL url = null;
             HashSet urlHashs = new HashSet();
             try {
-                Iterator wordHashIterator = wordHashes(startHash, plasmaWordIndex.RL_WORDFILES, false, 100).iterator();
+                Iterator wordHashIterator = wordHashSet(startHash, plasmaWordIndex.RL_WORDFILES, false, 100).iterator();
                 while (wordHashIterator.hasNext() && run) {
                     waiter();
                     wordHash = (String) wordHashIterator.next();
@@ -572,7 +572,7 @@ public final class plasmaWordIndex {
                     }
                     if (!wordHashIterator.hasNext()) {
                         // We may not be finished yet, try to get the next chunk of wordHashes
-                        TreeSet wordHashes = wordHashes(wordHash, plasmaWordIndex.RL_WORDFILES, false, 100);
+                        TreeSet wordHashes = wordHashSet(wordHash, plasmaWordIndex.RL_WORDFILES, false, 100);
                         wordHashIterator = wordHashes.iterator();
                         // Make sure we don't get the same wordhash twice, but don't skip a word
                         if ((wordHashIterator.hasNext())&&(!wordHash.equals(wordHashIterator.next()))) {

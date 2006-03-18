@@ -285,7 +285,7 @@ public class IndexControl_p {
         // generate list
         if (post.containsKey("keyhashsimilar")) {
             try {
-            final Iterator hashIt = switchboard.wordIndex.wordHashes(keyhash, plasmaWordIndex.RL_WORDFILES, true, 256).iterator();
+            final Iterator hashIt = switchboard.wordIndex.wordHashSet(keyhash, plasmaWordIndex.RL_WORDFILES, true, 256).iterator();
                 StringBuffer result = new StringBuffer("Sequential List of Word-Hashes:<br>");
                 String hash;
                 int i = 0;
