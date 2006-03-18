@@ -57,7 +57,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
-
 import de.anomic.server.serverByteBuffer;
 
 public class kelondroDyn extends kelondroTree {
@@ -166,24 +165,28 @@ public class kelondroDyn extends kelondroTree {
 	public void remove() {
 	    throw new UnsupportedOperationException("no remove in RawKeyIterator");
 	}
-	private String n() {
-	    byte[] g;
-	    String k;
-	    String v;
-	    int c;
-	    byte[][] nt;
-	    while (ri.hasNext()) {
-		nt = (byte[][]) ri.next();
-		if (nt == null) throw new kelondroException(filename, "no more elements available");
-		g = nt[0];
-		if (g == null) return null;
-		k = new String(g, 0, keylen);
-		v = new String(g, keylen, counterlen);
-		try {c = Integer.parseInt(v, 16);} catch (NumberFormatException e) {c = -1;}
-		if (c == 0) return k;
-	    }
-	    return null;
-	}
+        private String n() {
+            byte[] g;
+            String k;
+            String v;
+            int c;
+            byte[][] nt;
+            while (ri.hasNext()) {
+                nt = (byte[][]) ri.next();
+                if (nt == null) throw new kelondroException(filename, "no more elements available");
+                g = nt[0];
+                if (g == null) return null;
+                k = new String(g, 0, keylen);
+                v = new String(g, keylen, counterlen);
+                try {
+                    c = Integer.parseInt(v, 16);
+                } catch (NumberFormatException e) {
+                    c = -1;
+                }
+                if (c == 0) return k;
+            }
+            return null;
+        }
     }
 
     public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating) throws IOException {

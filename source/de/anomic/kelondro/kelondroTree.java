@@ -81,7 +81,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     private static int root       = 0; // pointer for FHandles-array: pointer to root node
 
     private Search writeSearchObj = new Search();
-    private kelondroOrder objectOrder = new kelondroNaturalOrder(true);
+    protected kelondroOrder objectOrder = new kelondroNaturalOrder(true);
     private final kelondroOrder loopDetectionOrder = new kelondroNaturalOrder(true);
     
     public kelondroTree(File file, long buffersize, int key, int value, boolean exitOnFail) {
@@ -987,11 +987,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
         
         public void remove() {
-            throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro Tables not yet supported");
+            throw new java.lang.UnsupportedOperationException("kelondroTree: remove in kelondro node iterator not yet supported");
         }
     }
 
-    public TreeMap rows(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
+    public TreeMap rowMap(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
         // returns an ordered map of keys/row relations; key objects are of type String, value objects are of type byte[][]
         kelondroOrder setOrder = (kelondroOrder) objectOrder.clone();
         setOrder.direction(up);
@@ -1008,7 +1008,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         return rows;
     }
     
-    public TreeSet keys(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
+    public TreeSet keySet(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
         // returns an ordered set of keys; objects are of type String
         kelondroOrder setOrder = (kelondroOrder) objectOrder.clone();
         setOrder.direction(up);
@@ -1058,7 +1058,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             count = 0;
             lastKey = null;
             chunkSize = (int) Math.min(100, guessedCountLimit);
-            rowBuffer = rows(inc, rot, start, true, chunkSize);
+            rowBuffer = rowMap(inc, rot, start, true, chunkSize);
             bufferIterator = rowBuffer.entrySet().iterator();
         }
         
@@ -1075,7 +1075,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             if (!(bufferIterator.hasNext())) {
                 // assign next buffer chunk
                 try {
-                    rowBuffer = rows(inc, rot, lastKey, false, chunkSize);
+                    rowBuffer = rowMap(inc, rot, lastKey, false, chunkSize);
                     bufferIterator = rowBuffer.entrySet().iterator();
                 } catch (IOException e) {
                     rowBuffer = null;
@@ -1115,7 +1115,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             count = 0;
             lastKey = null;
             chunkSize = (int) Math.min(100, guessedCountLimit);
-            keyBuffer = keys(inc, rot, start, true, chunkSize);
+            keyBuffer = keySet(inc, rot, start, true, chunkSize);
             bufferIterator = keyBuffer.iterator();
         }
                 
@@ -1131,7 +1131,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             if (!(bufferIterator.hasNext())) {
                 // assign next buffer chunk
                 try {
-                    keyBuffer = keys(inc, rot, lastKey.getBytes(), false, chunkSize);
+                    keyBuffer = keySet(inc, rot, lastKey.getBytes(), false, chunkSize);
                     bufferIterator = keyBuffer.iterator();
                 } catch (IOException e) {
                     keyBuffer = null;

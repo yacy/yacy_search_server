@@ -153,8 +153,8 @@ public class kelondroSplittedTree implements kelondroIndex {
         return ktfs[partition(key)].remove(key);
     }
 
-    public Iterator rows(boolean up, boolean rotating, byte[] startKey) throws IOException {
-        return new ktfsIterator(up, rotating, startKey);
+    public Iterator rows(boolean up, boolean rotating) throws IOException {
+        return new ktfsIterator(up, rotating);
     }
     
     public class ktfsIterator implements Iterator {
@@ -162,12 +162,10 @@ public class kelondroSplittedTree implements kelondroIndex {
         int c = 0;
         Iterator ktfsI;
         boolean up, rot;
-        byte[] start;
         
-        public ktfsIterator(boolean up, boolean rotating, byte[] startKey) throws IOException {
+        public ktfsIterator(boolean up, boolean rotating) throws IOException {
             this.up = up;
             this.rot = rotating;
-            this.start = startKey;
             c = (up) ? 0 : (ff - 1);
             ktfsI = ktfs[c].rows(up, false, null);
         }
@@ -185,7 +183,7 @@ public class kelondroSplittedTree implements kelondroIndex {
                 if (c < (ff - 1)) {
                     c++;
                     try {
-                        ktfsI = ktfs[c].rows(true, false, start);
+                        ktfsI = ktfs[c].rows(true, false, null);
                     } catch (IOException e) {
                         return null;
                     }
@@ -194,7 +192,7 @@ public class kelondroSplittedTree implements kelondroIndex {
                     if (rot) {
                         c = 0;
                         try {
-                            ktfsI = ktfs[c].rows(true, false, start);
+                            ktfsI = ktfs[c].rows(true, false, null);
                         } catch (IOException e) {
                             return null;
                         }
@@ -206,7 +204,7 @@ public class kelondroSplittedTree implements kelondroIndex {
                 if (c > 0) {
                     c--;
                     try {
-                        ktfsI = ktfs[c].rows(false, false, start);
+                        ktfsI = ktfs[c].rows(false, false, null);
                     } catch (IOException e) {
                         return null;
                     }
@@ -215,7 +213,7 @@ public class kelondroSplittedTree implements kelondroIndex {
                     if (rot) {
                         c = ff - 1;
                         try {
-                            ktfsI = ktfs[c].rows(false, false, start);
+                            ktfsI = ktfs[c].rows(false, false, null);
                         } catch (IOException e) {
                             return null;
                         }

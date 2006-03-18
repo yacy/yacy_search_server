@@ -213,7 +213,10 @@ public class dbtest {
             }
             
             if (command.equals("list")) {
-                Iterator i = table.rows(true, false, null);
+                Iterator i = null;
+                if (table instanceof kelondroSplittedTree) i = ((kelondroSplittedTree) table).rows(true, false);
+                if (table instanceof kelondroTree) i = ((kelondroTree) table).rows(true, false, null);
+                if (table instanceof dbTable) i = ((dbTable) table).rows(true, false, null);
                 byte[][] row;
                 while (i.hasNext()) {
                     row = (byte[][]) i.next();
@@ -379,6 +382,11 @@ final class dbTable implements kelondroIndex {
     
     public Iterator rows(boolean up, boolean rotating, byte[] startKey) throws IOException {
         // Objects are of type byte[][]
+        return null;
+    }
+
+    public Iterator keys(boolean up, boolean rotating, byte[] startKey) throws IOException {
+        // Objects are of type String
         return null;
     }
 
